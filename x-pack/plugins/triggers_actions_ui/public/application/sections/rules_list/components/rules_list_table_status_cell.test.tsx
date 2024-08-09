@@ -121,7 +121,7 @@ describe('RulesListTableStatusCell', () => {
   });
 
   it('should render loading indicator for new rules', async () => {
-    const { getByText } = render(
+    const { getByLabelText } = render(
       <ComponentWithLocale
         rule={
           {
@@ -137,7 +137,7 @@ describe('RulesListTableStatusCell', () => {
       />
     );
 
-    expect(getByText('Statistic is loading')).not.toBe(null);
+    expect(getByLabelText('Statistic is loading')).not.toBe(null);
   });
 
   it('should render rule with no last run', async () => {

@@ -28,7 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Building a new dashboard', function () {
     before(async () => {
-      await PageObjects.svlCommonPage.loginWithRole('admin');
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(

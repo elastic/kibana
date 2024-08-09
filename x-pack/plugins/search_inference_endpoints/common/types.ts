@@ -15,3 +15,10 @@ export interface SearchInferenceEndpointsConfigType {
     enabled: boolean;
   };
 }
+
+export enum TaskTypes {
+  completion = 'completion',
+  rerank = 'rerank',
+  sparse_embedding = 'sparse_embedding',
+  text_embedding = 'text_embedding',
+}

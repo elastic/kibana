@@ -245,7 +245,7 @@ export const Expressions: React.FC<Props> = (props) => {
       setRuleParams('alertOnNoData', true);
     }
     if (typeof ruleParams.alertOnGroupDisappear === 'undefined') {
-      setRuleParams('alertOnGroupDisappear', true);
+      setRuleParams('alertOnGroupDisappear', false);
     }
   }, [metadata, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -462,7 +462,7 @@ export const Expressions: React.FC<Props> = (props) => {
           </>
         }
         disabled={!hasGroupBy}
-        checked={Boolean(hasGroupBy && ruleParams.alertOnGroupDisappear)}
+        checked={Boolean(ruleParams.alertOnGroupDisappear)}
         onChange={(e) => setRuleParams('alertOnGroupDisappear', e.target.checked)}
       />
       <EuiSpacer size="m" />

@@ -41,7 +41,7 @@ export const HistoryViewer = ({
     const formattedData = req.data ? formatRequestBodyDoc([req.data], indent).data : '';
     renderedHistoryRequest = req.method + ' ' + req.endpoint + '\n' + formattedData;
   } else {
-    renderedHistoryRequest = i18n.translate('console.historyPage.noHistoryTextMessage', {
+    renderedHistoryRequest = i18n.translate('console.historyPage.monaco.noHistoryTextMessage', {
       defaultMessage: 'No history available',
     });
   }

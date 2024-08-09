@@ -48,7 +48,7 @@ export const DeleteParam = ({
     if (!isDeleting) {
       return;
     }
-    const { core, toasts } = kibanaService;
+    const { coreStart, toasts } = kibanaService;
 
     if (status === FETCH_STATUS.FAILURE) {
       toasts.addDanger(
@@ -61,7 +61,7 @@ export const DeleteParam = ({
                 values: { name },
               })}
             </p>,
-            core
+            coreStart
           ),
         },
         { toastLifeTimeMs: 3000 }
@@ -76,7 +76,7 @@ export const DeleteParam = ({
                 values: { name },
               })}
             </p>,
-            core
+            coreStart
           ),
         },
         { toastLifeTimeMs: 3000 }

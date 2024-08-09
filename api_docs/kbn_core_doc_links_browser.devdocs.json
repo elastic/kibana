@@ -3,26 +3,10 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-doc-links-browser",
-        "id": "def-common.DocLinksStart",
+        "id": "def-public.DocLinksStart",
         "type": "Interface",
         "tags": [],
         "label": "DocLinksStart",
@@ -33,7 +17,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-doc-links-browser",
-            "id": "def-common.DocLinksStart.DOC_LINK_VERSION",
+            "id": "def-public.DocLinksStart.DOC_LINK_VERSION",
             "type": "string",
             "tags": [],
             "label": "DOC_LINK_VERSION",
@@ -44,7 +28,7 @@
           },
           {
             "parentPluginId": "@kbn/core-doc-links-browser",
-            "id": "def-common.DocLinksStart.ELASTIC_WEBSITE_URL",
+            "id": "def-public.DocLinksStart.ELASTIC_WEBSITE_URL",
             "type": "string",
             "tags": [],
             "label": "ELASTIC_WEBSITE_URL",
@@ -55,7 +39,7 @@
           },
           {
             "parentPluginId": "@kbn/core-doc-links-browser",
-            "id": "def-common.DocLinksStart.links",
+            "id": "def-public.DocLinksStart.links",
             "type": "Object",
             "tags": [],
             "label": "links",
@@ -77,6 +61,22 @@
         "initialIsOpen": false
       }
     ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

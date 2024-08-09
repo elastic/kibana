@@ -76,6 +76,36 @@ describe('FileActionsPopoverButton', () => {
     expect(await screen.queryByTestId('cases-files-copy-hash-button')).not.toBeInTheDocument();
   });
 
+  it('only renders menu items for the enabled hashes', async () => {
+    appMockRender.render(
+      <FileActionsPopoverButton
+        caseId={basicCaseId}
+        theFile={{ ...basicFileMock, hash: { sha1: 'sha1' } }}
+      />
+    );
+
+    const popoverButton = await screen.findByTestId(
+      `cases-files-actions-popover-button-${basicFileMock.id}`
+    );
+
+    expect(popoverButton).toBeInTheDocument();
+    userEvent.click(popoverButton);
+
+    expect(
+      await screen.findByTestId(`cases-files-popover-${basicFileMock.id}`)
+    ).toBeInTheDocument();
+
+    const copyFileHashButton = await screen.findByTestId('cases-files-copy-hash-button');
+
+    expect(copyFileHashButton).toBeInTheDocument();
+
+    userEvent.click(copyFileHashButton);
+
+    expect(await screen.findByTestId(`cases-files-copy-sha1-hash-button`)).toBeInTheDocument();
+    expect(screen.queryByTestId('cases-files-copy-md5-hash-button')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('cases-files-copy-sha256-hash-button')).not.toBeInTheDocument();
+  });
+
   it('clicking the copy file hash button rerenders the popover correctly', async () => {
     appMockRender.render(<FileActionsPopoverButton caseId={basicCaseId} theFile={basicFileMock} />);
 

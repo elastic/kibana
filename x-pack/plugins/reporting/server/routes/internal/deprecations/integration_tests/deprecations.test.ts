@@ -80,6 +80,7 @@ describe(`GET ${INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS}`, () => {
     it('increments the download api counter', async () => {
       const core = await createReportingCore({});
       const usageCounter = {
+        domainId: 'abc123',
         incrementCounter: jest.fn(),
       };
       core.getUsageCounter = jest.fn().mockReturnValue(usageCounter);

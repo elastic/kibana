@@ -22,8 +22,10 @@
 }
 
 .rangeSliderAnchor__fieldNumber {
+  min-width: auto !important;
   font-weight: $euiFontWeightMedium;
   height: calc($euiButtonHeight - 3px) !important;
+  background-color: transparent !important;
 
   &.rangeSliderAnchor__fieldNumber--valid:invalid:not(:focus) {
     background-image: none; // override the red underline for values between steps

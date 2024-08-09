@@ -56,6 +56,7 @@ import { memoize, noop } from 'lodash';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
@@ -128,6 +129,7 @@ export interface DiscoverServices {
   noDataPage?: NoDataPagePluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   profilesManager: ProfilesManager;
+  fieldsMetadata?: FieldsMetadataPublicStart;
 }
 
 export const buildServices = memoize(
@@ -214,6 +216,7 @@ export const buildServices = memoize(
       noDataPage: plugins.noDataPage,
       observabilityAIAssistant: plugins.observabilityAIAssistant,
       profilesManager,
+      fieldsMetadata: plugins.fieldsMetadata,
     };
   }
 );

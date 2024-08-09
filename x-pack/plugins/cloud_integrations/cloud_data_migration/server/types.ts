@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 export interface Dependencies {
   features: FeaturesPluginSetup;

@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'x-pack/test/functional/es_archives/observability_logs_explorer/data_streams'
       );
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await PageObjects.svlCommonPage.loginWithRole('viewer');
+      await PageObjects.svlCommonPage.loginAsViewer();
       await PageObjects.observabilityLogsExplorer.navigateTo();
       await PageObjects.header.waitUntilLoadingHasFinished();
     });

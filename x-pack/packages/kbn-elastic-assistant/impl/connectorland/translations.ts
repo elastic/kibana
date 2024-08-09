@@ -52,7 +52,7 @@ export const ADD_CONNECTOR = i18n.translate(
 export const INLINE_CONNECTOR_PLACEHOLDER = i18n.translate(
   'xpack.elasticAssistant.assistant.connectors.connectorSelectorInline.connectorPlaceholder',
   {
-    defaultMessage: 'Select a Connector',
+    defaultMessage: 'Select a connector',
   }
 );
 

@@ -27,13 +27,13 @@ export interface CommonlyUsedDateRange {
 export interface SyntheticsAppProps {
   basePath: string;
   canSave: boolean;
-  core: CoreStart;
+  coreStart: CoreStart;
   darkMode: boolean;
   i18n: I18nStart;
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
   isLogsAvailable: boolean;
-  plugins: ClientPluginsSetup;
+  setupPlugins: ClientPluginsSetup;
   startPlugins: ClientPluginsStart;
   setBadge: (badge?: ChromeBadge) => void;
   renderGlobalHelpControls(): void;

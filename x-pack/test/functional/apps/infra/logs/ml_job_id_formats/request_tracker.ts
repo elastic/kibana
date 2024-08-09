@@ -6,7 +6,7 @@
  */
 
 import type { Browser } from '@kbn/ftr-common-functional-ui-services';
-import { CommonPageObject } from '../../../../../../../test/functional/page_objects/common_page';
+import { CommonPageObject } from '@kbn/test-suites-src/functional/page_objects/common_page';
 
 type PerformanceResourceTimingWithHttpStatus = PerformanceResourceTiming & {
   responseStatus: number;

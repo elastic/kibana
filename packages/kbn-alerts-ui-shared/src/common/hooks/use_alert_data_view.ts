@@ -13,8 +13,8 @@ import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
 import type { ToastsStart, HttpStart } from '@kbn/core/public';
 
 import { useQuery } from '@tanstack/react-query';
+import { useFetchAlertsFieldsQuery } from './use_fetch_alerts_fields_query';
 import { fetchAlertIndexNames } from '../apis/fetch_alert_index_names';
-import { fetchAlertFields } from '../apis/fetch_alert_fields';
 
 export interface UseAlertDataViewResult {
   dataViews?: DataView[];
@@ -45,10 +45,6 @@ export function useAlertDataView(props: UseAlertDataViewProps): UseAlertDataView
     return fetchAlertIndexNames({ http, features });
   };
 
-  const queryAlertFieldsFn = () => {
-    return fetchAlertFields({ http, featureIds });
-  };
-
   const onErrorFn = () => {
     toasts.addDanger(
       i18n.translate('alertsUIShared.hooks.useAlertDataView.useAlertDataMessage', {
@@ -72,18 +68,19 @@ export function useAlertDataView(props: UseAlertDataViewProps): UseAlertDataView
   });
 
   const {
-    data: alertFields,
+    data: { fields: alertFields },
     isSuccess: isAlertFieldsSuccess,
     isInitialLoading: isAlertFieldsInitialLoading,
     isLoading: isAlertFieldsLoading,
-  } = useQuery({
-    queryKey: ['loadAlertFields', features],
-    queryFn: queryAlertFieldsFn,
-    onError: onErrorFn,
-    refetchOnWindowFocus: false,
-    staleTime: 60 * 1000,
-    enabled: hasNoSecuritySolution,
-  });
+  } = useFetchAlertsFieldsQuery(
+    { http, featureIds },
+    {
+      onError: onErrorFn,
+      refetchOnWindowFocus: false,
+      staleTime: 60 * 1000,
+      enabled: hasNoSecuritySolution,
+    }
+  );
 
   useEffect(() => {
     return () => {

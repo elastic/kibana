@@ -17,7 +17,8 @@ const mockConversations = {
   [alertConvo.title]: alertConvo,
   [welcomeConvo.title]: welcomeConvo,
 };
-const conversationsLoaded = true;
+const conversationsLoaded = false;
+const promptsLoaded = false;
 
 const mockHttp = {
   fetch: jest.fn(),
@@ -47,8 +48,6 @@ const mockValues = {
   allSystemPrompts: mockSystemPrompts,
   allQuickPrompts: mockQuickPrompts,
   knowledgeBase: {
-    isEnabledRAGAlerts: true,
-    isEnabledKnowledgeBase: true,
     latestAlerts: DEFAULT_LATEST_ALERTS,
   },
   baseConversations: {},
@@ -81,9 +80,7 @@ const updatedValues = {
     ],
   },
   knowledgeBase: {
-    isEnabledRAGAlerts: false,
-    isEnabledKnowledgeBase: false,
-    latestAlerts: DEFAULT_LATEST_ALERTS,
+    latestAlerts: DEFAULT_LATEST_ALERTS + 10,
   },
   assistantStreamingEnabled: false,
 };
@@ -112,6 +109,7 @@ describe('useSettingsUpdater', () => {
             total: 10,
           },
           conversationsLoaded,
+          promptsLoaded,
           anonymizationFields
         )
       );
@@ -168,6 +166,7 @@ describe('useSettingsUpdater', () => {
             total: 10,
           },
           conversationsLoaded,
+          promptsLoaded,
           anonymizationFields
         )
       );
@@ -203,7 +202,7 @@ describe('useSettingsUpdater', () => {
       expect(setKnowledgeBaseMock).toHaveBeenCalledWith(updatedValues.knowledgeBase);
     });
   });
-  it('should track which toggles have been updated when saveSettings is called', async () => {
+  it('should track when alerts count is updated', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
         useSettingsUpdater(
@@ -215,33 +214,7 @@ describe('useSettingsUpdater', () => {
             total: 10,
           },
           conversationsLoaded,
-          anonymizationFields
-        )
-      );
-      await waitForNextUpdate();
-      const { setUpdatedKnowledgeBaseSettings } = result.current;
-
-      setUpdatedKnowledgeBaseSettings(updatedValues.knowledgeBase);
-
-      await result.current.saveSettings();
-      expect(reportAssistantSettingToggled).toHaveBeenCalledWith({
-        isEnabledKnowledgeBase: false,
-        isEnabledRAGAlerts: false,
-      });
-    });
-  });
-  it('should track only toggles that updated', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useSettingsUpdater(
-          mockConversations,
-          {
-            data: mockSystemPrompts,
-            page: 1,
-            perPage: 100,
-            total: 10,
-          },
-          conversationsLoaded,
+          promptsLoaded,
           anonymizationFields
         )
       );
@@ -250,15 +223,12 @@ describe('useSettingsUpdater', () => {
 
       setUpdatedKnowledgeBaseSettings({
         ...updatedValues.knowledgeBase,
-        isEnabledKnowledgeBase: true,
       });
       await result.current.saveSettings();
-      expect(reportAssistantSettingToggled).toHaveBeenCalledWith({
-        isEnabledRAGAlerts: false,
-      });
+      expect(reportAssistantSettingToggled).toHaveBeenCalledWith({ alertsCountUpdated: true });
     });
   });
-  it('if no toggles update, do not track anything', async () => {
+  it('should track when streaming is updated', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
         useSettingsUpdater(
@@ -270,6 +240,33 @@ describe('useSettingsUpdater', () => {
             total: 10,
           },
           conversationsLoaded,
+          promptsLoaded,
+          anonymizationFields
+        )
+      );
+      await waitForNextUpdate();
+      const { setUpdatedAssistantStreamingEnabled } = result.current;
+
+      setUpdatedAssistantStreamingEnabled(false);
+      await result.current.saveSettings();
+      expect(reportAssistantSettingToggled).toHaveBeenCalledWith({
+        assistantStreamingEnabled: false,
+      });
+    });
+  });
+  it('if no settings update, do not track anything', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useSettingsUpdater(
+          mockConversations,
+          {
+            data: mockSystemPrompts,
+            page: 1,
+            perPage: 100,
+            total: 10,
+          },
+          conversationsLoaded,
+          promptsLoaded,
           anonymizationFields
         )
       );

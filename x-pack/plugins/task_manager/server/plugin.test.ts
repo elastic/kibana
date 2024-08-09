@@ -11,6 +11,7 @@ import { TaskManagerConfig } from './config';
 import { Subject } from 'rxjs';
 import { bufferCount, take } from 'rxjs';
 import { CoreStatus, ServiceStatusLevels } from '@kbn/core/server';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import type { TaskPollingLifecycle as TaskPollingLifecycleClass } from './polling_lifecycle';
@@ -38,7 +39,6 @@ jest.mock('./ephemeral_task_lifecycle', () => {
 
 const coreStart = coreMock.createStart();
 const pluginInitializerContextParams = {
-  max_workers: 10,
   max_attempts: 9,
   poll_interval: 3000,
   version_conflict_threshold: 80,
@@ -148,7 +148,9 @@ describe('TaskManagerPlugin', () => {
       pluginInitializerContext.node.roles.backgroundTasks = true;
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
       taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
-      taskManagerPlugin.start(coreStart);
+      taskManagerPlugin.start(coreStart, {
+        cloud: cloudMock.createStart(),
+      });
 
       expect(TaskPollingLifecycle as jest.Mock<TaskPollingLifecycleClass>).toHaveBeenCalledTimes(1);
       expect(
@@ -163,7 +165,9 @@ describe('TaskManagerPlugin', () => {
       pluginInitializerContext.node.roles.backgroundTasks = false;
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
       taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
-      taskManagerPlugin.start(coreStart);
+      taskManagerPlugin.start(coreStart, {
+        cloud: cloudMock.createStart(),
+      });
 
       expect(TaskPollingLifecycle as jest.Mock<TaskPollingLifecycleClass>).not.toHaveBeenCalled();
       expect(

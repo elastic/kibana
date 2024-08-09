@@ -5,8 +5,9 @@ info:
 paths:
   /internal/elastic_assistant/actions/connector/{connectorId}/_execute:
     post:
-      operationId: ExecuteConnector
       x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: ExecuteConnector
       description: Execute Elastic Assistant connector by id
       summary: Execute Elastic Assistant connector
       tags:
@@ -53,10 +54,6 @@ paths:
                   type: array
                   items:
                     type: string
-                isEnabledKnowledgeBase:
-                  type: boolean
-                isEnabledRAGAlerts:
-                  type: boolean
                 replacements:
                   $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
                 size:

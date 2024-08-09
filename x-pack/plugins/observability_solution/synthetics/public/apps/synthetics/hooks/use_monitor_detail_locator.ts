@@ -7,7 +7,8 @@
 
 import { useEffect, useState } from 'react';
 import { syntheticsMonitorDetailLocatorID } from '@kbn/observability-plugin/common';
-import { useSyntheticsStartPlugins } from '../contexts';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ClientPluginsStart } from '../../../plugin';
 
 export function useMonitorDetailLocator({
   configId,
@@ -17,7 +18,7 @@ export function useMonitorDetailLocator({
   locationId?: string;
 }) {
   const [monitorUrl, setMonitorUrl] = useState<string | undefined>(undefined);
-  const locator = useSyntheticsStartPlugins()?.share?.url.locators.get(
+  const locator = useKibana<ClientPluginsStart>().services?.share?.url.locators.get(
     syntheticsMonitorDetailLocatorID
   );
 

@@ -10,6 +10,7 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { Draggable } from '@kbn/dom-drag-drop';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { SearchMode } from '../../types';
@@ -119,6 +120,7 @@ export interface UnifiedFieldListItemProps {
    */
   services: UnifiedFieldListItemStatsProps['services'] & {
     uiActions?: FieldPopoverFooterProps['uiActions'];
+    fieldsMetadata?: FieldsMetadataPublicStart;
   };
   /**
    * Current search mode
@@ -367,6 +369,7 @@ function UnifiedFieldListItemComponent({
       data-test-subj={stateService.creationOptions.dataTestSubj?.fieldListItemPopoverDataTestSubj}
       renderHeader={() => (
         <FieldPopoverHeader
+          services={services}
           field={field}
           closePopover={closePopover}
           onAddFieldToWorkspace={!isSelected ? toggleDisplay : undefined}

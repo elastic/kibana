@@ -4,7 +4,7 @@
 <titleabbrev>Delete data view</titleabbrev>
 ++++
 
-experimental[] Delete data views.
+Delete data views.
 
 WARNING: Once you delete a data view, _it cannot be recovered_.
 

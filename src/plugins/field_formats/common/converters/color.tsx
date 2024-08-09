@@ -46,6 +46,7 @@ export class ColorFormat extends FieldFormat {
         return findLast(this.param('colors'), ({ range }) => {
           if (!range) return;
           const [start, end] = range.split(':');
+          // @ts-expect-error upgrade typescript v5.1.6
           return val >= Number(start) && val <= Number(end);
         });
 

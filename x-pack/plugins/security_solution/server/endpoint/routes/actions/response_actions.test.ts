@@ -42,7 +42,6 @@ import type {
   HostMetadata,
   LogsEndpointAction,
   ResponseActionApiResponse,
-  ResponseActionRequestBody,
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
@@ -63,7 +62,10 @@ import * as ActionDetailsService from '../../services/actions/action_details_by_
 import { CaseStatuses } from '@kbn/cases-components';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 import { getResponseActionsClient as _getResponseActionsClient } from '../../services';
-import type { UploadActionApiRequestBody } from '../../../../common/api/endpoint';
+import type {
+  ResponseActionsRequestBody,
+  UploadActionApiRequestBody,
+} from '../../../../common/api/endpoint';
 import type { FleetToHostFileClientInterface } from '@kbn/fleet-plugin/server';
 import type { HapiReadableStream, SecuritySolutionRequestHandlerContext } from '../../../types';
 import { createHapiReadableStreamMock } from '../../services/actions/mocks';
@@ -92,7 +94,7 @@ jest.mock('../../services', () => {
 const getResponseActionsClientMock = _getResponseActionsClient;
 
 interface CallRouteInterface {
-  body?: ResponseActionRequestBody;
+  body?: ResponseActionsRequestBody;
   indexErrorResponse?: any;
   searchResponse?: HostMetadata;
   mockUser?: any;

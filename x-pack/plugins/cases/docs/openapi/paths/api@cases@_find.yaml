@@ -1,5 +1,5 @@
 get:
-  summary: Retrieves a paginated subset of cases in the default space.
+  summary: Search cases
   operationId: findCasesDefaultSpace
   description: >
     You must have `read` privileges for the **Cases** feature in the

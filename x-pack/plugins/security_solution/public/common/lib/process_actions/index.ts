@@ -6,10 +6,10 @@
  */
 
 import type {
-  ResponseActionApiResponse,
   KillProcessRequestBody,
   SuspendProcessRequestBody,
-} from '../../../../common/endpoint/types';
+} from '../../../../common/api/endpoint';
+import type { ResponseActionApiResponse } from '../../../../common/endpoint/types';
 import { KibanaServices } from '../kibana';
 import { KILL_PROCESS_ROUTE, SUSPEND_PROCESS_ROUTE } from '../../../../common/endpoint/constants';
 

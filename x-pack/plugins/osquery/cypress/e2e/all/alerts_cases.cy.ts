@@ -66,7 +66,7 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
     it('runs osquery against alert and creates a new case', () => {
       const [caseName, caseDescription] = generateRandomStringName(2);
       cy.getBySel('expand-event').first().click();
-      cy.getBySel('take-action-dropdown-btn').click();
+      cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click();
       cy.getBySel('osquery-action-item').click();
       cy.contains(/^\d+ agen(t|ts) selected/);
       cy.getBySel('globalLoadingIndicator').should('not.exist');

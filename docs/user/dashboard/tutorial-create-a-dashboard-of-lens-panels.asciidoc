@@ -376,4 +376,6 @@ Now that you have a complete overview of your web server data, save the dashboar
 
 . Select *Store time with dashboard*.
 
-. Click *Save*.
+. Click *Save*. You will be identified as the **creator** of the dashboard. If you or another user edit the dashboard, you can also view the **last editor** when checking the dashboard information.
+
+image::images/dashboard-creator-editor.png[Information panel of a dashboard showing its creator and last editor]

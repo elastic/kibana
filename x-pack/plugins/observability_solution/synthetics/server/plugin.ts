@@ -23,9 +23,8 @@ import {
 import { TelemetryEventsSender } from './telemetry/sender';
 import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { initSyntheticsServer } from './server';
-import { uptimeFeature } from './feature';
-
-import { registerUptimeSavedObjects } from './saved_objects/saved_objects';
+import { syntheticsFeature } from './feature';
+import { registerSyntheticsSavedObjects } from './saved_objects/saved_objects';
 import { UptimeConfig } from '../common/config';
 import { SyntheticsService } from './synthetics_service/synthetics_service';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
@@ -83,11 +82,11 @@ export class Plugin implements PluginType {
 
     this.telemetryEventsSender.setup(plugins.telemetry);
 
-    plugins.features.registerKibanaFeature(uptimeFeature);
+    plugins.features.registerKibanaFeature(syntheticsFeature);
 
     initSyntheticsServer(this.server, this.syntheticsMonitorClient, plugins, ruleDataClient);
 
-    registerUptimeSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
+    registerSyntheticsSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
 
     return {};
   }

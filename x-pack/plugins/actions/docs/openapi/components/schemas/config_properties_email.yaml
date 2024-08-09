@@ -23,7 +23,7 @@ properties:
     description: >
       The host name of the service provider.
       If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored.
-      If `service` is `other`, this property must be defined. 
+      If `service` is `other`, this property must be defined.
     type: string
   oauthTokenUrl:
     # description: TBD
@@ -33,7 +33,7 @@ properties:
     description: >
       The port to connect to on the service provider.
       If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored.
-      If `service` is `other`, this property must be defined. 
+      If `service` is `other`, this property must be defined.
     type: integer
   secure:
     description: >

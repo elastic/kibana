@@ -7,4 +7,4 @@
 
 export * from './create_signals_migration/create_signals_migration_route.mock';
 export * from './finalize_signals_migration/finalize_signals_migration_route.mock';
-export * from './get_signals_migration_status/get_signals_migration_status_route.mock';
+export * from './read_signals_migration_status/read_signals_migration_status_route.mock';

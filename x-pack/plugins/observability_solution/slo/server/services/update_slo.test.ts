@@ -313,10 +313,10 @@ describe('UpdateSLO', () => {
       ).rejects.toThrowError('Transform install error');
 
       expect(mockRepository.save).toHaveBeenCalledWith(originalSlo);
+      expect(mockEsClient.ingest.deletePipeline).toHaveBeenCalledTimes(1); // for the sli only
 
       expect(mockSummaryTransformManager.stop).not.toHaveBeenCalled();
       expect(mockSummaryTransformManager.uninstall).not.toHaveBeenCalled();
-      expect(mockEsClient.ingest.deletePipeline).not.toHaveBeenCalled();
       expect(mockTransformManager.stop).not.toHaveBeenCalled();
       expect(mockTransformManager.uninstall).not.toHaveBeenCalled();
     });

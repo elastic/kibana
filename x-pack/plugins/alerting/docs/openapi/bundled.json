@@ -1,9 +1,9 @@
 {
-  "openapi": "3.1.0",
+  "openapi": "3.0.1",
   "info": {
     "title": "Alerting",
     "description": "OpenAPI schema for alerting endpoints",
-    "version": "0.2",
+    "version": "0.1",
     "contact": {
       "name": "Alerting Team"
     },
@@ -17,14 +17,6 @@
       "url": "/"
     }
   ],
-  "security": [
-    {
-      "basicAuth": []
-    },
-    {
-      "apiKeyAuth": []
-    }
-  ],
   "tags": [
     {
       "name": "alerting",
@@ -32,9 +24,9 @@
     }
   ],
   "paths": {
-    "/s/{spaceId}/api/alerting/rule": {
+    "/api/alerting/rule": {
       "post": {
-        "summary": "Creates a rule with a randomly generated rule identifier.",
+        "summary": "Create a rule with a random identifier",
         "operationId": "createRule",
         "description": "To create a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're creating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. This API supports both key- and token-based authentication. To use key-based authentication, create an API key in Kibana and use it in the header of the API call. To use token-based authentication, provide a username and password; an API key that matches the current privileges of the user is created automatically. In both cases, the API key is subsequently used for authorization when the rule runs.\n",
         "tags": [
@@ -43,9 +35,6 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
           }
         ],
         "requestBody": {
@@ -126,9 +115,9 @@
         }
       }
     },
-    "/s/{spaceId}/api/alerting/rule/{ruleId}": {
+    "/api/alerting/rule/{ruleId}": {
       "get": {
-        "summary": "Retrieves a rule by its identifier.",
+        "summary": "Get rule details",
         "operationId": "getRule",
         "description": "You must have `read` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rules you're seeking. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. To get rules associated with the **Stack Monitoring** feature, use the `monitoring_user` built-in role.\n",
         "tags": [
@@ -137,9 +126,6 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/rule_id"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
           }
         ],
         "responses": {
@@ -181,7 +167,7 @@
         }
       },
       "delete": {
-        "summary": "Deletes a rule.",
+        "summary": "Delete a rule",
         "operationId": "deleteRule",
         "description": "To delete a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're deleting. For example, the **Management** > **Stack Rules** feature, **Analytics** > **Discover** or **Machine Learning** features, **Observability**, or **Security** features. WARNING: After you delete a rule, you cannot recover it. If the API key that is used by the rule was created automatically, it is deleted.\n",
         "tags": [
@@ -193,9 +179,6 @@
           },
           {
             "$ref": "#/components/parameters/rule_id"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
           }
         ],
         "responses": {
@@ -225,9 +208,9 @@
         }
       },
       "post": {
-        "summary": "Creates a rule with a specific rule identifier.",
+        "summary": "Create a rule",
         "operationId": "createRuleId",
-        "description": "To create a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're creating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. This API supports both key- and token-based authentication. To use key-based authentication, create an API key in Kibana and use it in the header of the API call. To use token-based authentication, provide a username and password; an API key that matches the current privileges of the user is created automatically. In both cases, the API key is subsequently used for authorization when the rule runs.\n",
+        "description": "This API creates a rule with a specific rule identifier. If you omit the identifer, it is automatically generated. To create a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're creating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. This API supports both key- and token-based authentication. To use key-based authentication, create an API key in Kibana and use it in the header of the API call. To use token-based authentication, provide a username and password; an API key that matches the current privileges of the user is created automatically. In both cases, the API key is subsequently used for authorization when the rule runs.\n",
         "tags": [
           "alerting"
         ],
@@ -236,18 +219,13 @@
             "$ref": "#/components/parameters/kbn_xsrf"
           },
           {
-            "$ref": "#/components/parameters/space_id"
-          },
-          {
             "in": "path",
             "name": "ruleId",
             "description": "An UUID v1 or v4 identifier for the rule. If you omit this parameter, an identifier is randomly generated.\n",
             "required": true,
             "schema": {
               "type": "string",
-              "examples": [
-                "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
-              ]
+              "example": "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
             }
           }
         ],
@@ -323,7 +301,7 @@
         }
       },
       "put": {
-        "summary": "Updates the attributes for a rule.",
+        "summary": "Update a rule",
         "operationId": "updateRule",
         "description": "To update a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're updating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. This API supports both key- and token-based authentication. To use key-based authentication, create an API key in Kibana and use it in the header of the API call. To use token-based authentication, provide a username and password; an API key that matches the current privileges of the user is created automatically. In both cases, the API key is subsequently used for authorization when the rule runs. NOTE: If the API key has different privileges than the key that created or most recently updated the rule, the rule behavior might change. Though some properties are optional, when you update the rule the existing property values are overwritten with default values. Therefore, it is recommended to explicitly set all property values.\n",
         "tags": [
@@ -335,9 +313,6 @@
           },
           {
             "$ref": "#/components/parameters/rule_id"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
           }
         ],
         "requestBody": {
@@ -394,9 +369,9 @@
         }
       }
     },
-    "/s/{spaceId}/api/alerting/rule/{ruleId}/_disable": {
+    "/api/alerting/rule/{ruleId}/_disable": {
       "post": {
-        "summary": "Disables a rule.",
+        "summary": "Disable a rule",
         "operationId": "disableRule",
         "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features.\n",
         "tags": [
@@ -408,9 +383,6 @@
           },
           {
             "$ref": "#/components/parameters/rule_id"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
           }
         ],
         "responses": {
@@ -440,9 +412,9 @@
         }
       }
     },
-    "/s/{spaceId}/api/alerting/rule/{ruleId}/_enable": {
+    "/api/alerting/rule/{ruleId}/_enable": {
       "post": {
-        "summary": "Enables a rule.",
+        "summary": "Enable a rule",
         "operationId": "enableRule",
         "description": "To enable a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. This API supports both key- and token-based authentication. To use key-based authentication, create an API key in Kibana and use it in the header of the API call. To use token-based authentication, provide a username and password; an API key that matches the current privileges of the user is created automatically. In both cases, the API key is subsequently used for authorization when the rule runs.\n",
         "tags": [
@@ -454,9 +426,6 @@
           },
           {
             "$ref": "#/components/parameters/rule_id"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
           }
         ],
         "responses": {
@@ -486,9 +455,9 @@
         }
       }
     },
-    "/s/{spaceId}/api/alerting/rules/_find": {
+    "/api/alerting/rules/_find": {
       "get": {
-        "summary": "Retrieves information about rules.",
+        "summary": "Find rule information",
         "operationId": "findRules",
         "description": "You must have `read` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rules you're seeking. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. To find rules associated with the **Stack Monitoring** feature, use the `monitoring_user` built-in role.\n",
         "tags": [
@@ -496,19 +465,14 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/space_id"
-          },
-          {
             "name": "default_search_operator",
             "in": "query",
             "description": "The default operator to use for the simple_query_string.",
             "schema": {
               "type": "string",
-              "default": "OR",
-              "examples": [
-                "AND"
-              ]
-            }
+              "default": "OR"
+            },
+            "example": "OR"
           },
           {
             "name": "fields",
@@ -551,11 +515,9 @@
             "description": "The page number to return.",
             "schema": {
               "type": "integer",
-              "default": 1,
-              "examples": [
-                1
-              ]
-            }
+              "default": 1
+            },
+            "example": 1
           },
           {
             "name": "per_page",
@@ -563,11 +525,9 @@
             "description": "The number of rules to return per page.",
             "schema": {
               "type": "integer",
-              "default": 20,
-              "examples": [
-                20
-              ]
-            }
+              "default": 20
+            },
+            "example": 20
           },
           {
             "name": "search",
@@ -575,9 +535,7 @@
             "description": "An Elasticsearch simple_query_string query that filters the objects in the response.",
             "schema": {
               "type": "string",
-              "examples": [
-                "threshold +-test*"
-              ]
+              "example": "threshold +-test*"
             }
           },
           {
@@ -588,9 +546,7 @@
               "oneOf": [
                 {
                   "type": "string",
-                  "examples": [
-                    "name"
-                  ]
+                  "example": "name"
                 },
                 {
                   "type": "array",
@@ -619,11 +575,9 @@
                 "asc",
                 "desc"
               ],
-              "default": "desc",
-              "examples": [
-                "asc"
-              ]
-            }
+              "default": "desc"
+            },
+            "example": "asc"
           }
         ],
         "responses": {
@@ -675,18 +629,13 @@
         }
       }
     },
-    "/s/{spaceId}/api/alerting/_health": {
+    "/api/alerting/_health": {
       "get": {
-        "summary": "Retrieves the health status of the alerting framework.",
+        "summary": "Get the alerting framework health",
         "operationId": "getAlertingHealth",
         "description": "You must have `read` privileges for the **Management > Stack Rules** feature or for at least one of the **Analytics > Discover**, **Analytics > Machine Learning**, **Observability**, or **Security** features.\n",
         "tags": [
           "alerting"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/space_id"
-          }
         ],
         "responses": {
           "200": {
@@ -706,9 +655,7 @@
                           "properties": {
                             "status": {
                               "type": "string",
-                              "examples": [
-                                "ok"
-                              ],
+                              "example": "ok",
                               "enum": [
                                 "error",
                                 "ok",
@@ -718,9 +665,7 @@
                             "timestamp": {
                               "type": "string",
                               "format": "date-time",
-                              "examples": [
-                                "2023-01-13T01:28:00.280Z"
-                              ]
+                              "example": "2023-01-13T01:28:00.280Z"
                             }
                           }
                         },
@@ -730,9 +675,7 @@
                           "properties": {
                             "status": {
                               "type": "string",
-                              "examples": [
-                                "ok"
-                              ],
+                              "example": "ok",
                               "enum": [
                                 "error",
                                 "ok",
@@ -742,9 +685,7 @@
                             "timestamp": {
                               "type": "string",
                               "format": "date-time",
-                              "examples": [
-                                "2023-01-13T01:28:00.280Z"
-                              ]
+                              "example": "2023-01-13T01:28:00.280Z"
                             }
                           }
                         },
@@ -754,9 +695,7 @@
                           "properties": {
                             "status": {
                               "type": "string",
-                              "examples": [
-                                "ok"
-                              ],
+                              "example": "ok",
                               "enum": [
                                 "error",
                                 "ok",
@@ -766,9 +705,7 @@
                             "timestamp": {
                               "type": "string",
                               "format": "date-time",
-                              "examples": [
-                                "2023-01-13T01:28:00.280Z"
-                              ]
+                              "example": "2023-01-13T01:28:00.280Z"
                             }
                           }
                         }
@@ -777,16 +714,12 @@
                     "has_permanent_encryption_key": {
                       "type": "boolean",
                       "description": "If `false`, the encrypted saved object plugin does not have a permanent encryption key.",
-                      "examples": [
-                        true
-                      ]
+                      "example": true
                     },
                     "is_sufficiently_secure": {
                       "type": "boolean",
                       "description": "If `false`, security is enabled but TLS is not.",
-                      "examples": [
-                        true
-                      ]
+                      "example": true
                     }
                   }
                 },
@@ -811,18 +744,13 @@
         }
       }
     },
-    "/s/{spaceId}/api/alerting/rule_types": {
+    "/api/alerting/rule_types": {
       "get": {
-        "summary": "Retrieves a list of rule types.",
+        "summary": "Get the rule types",
         "operationId": "getRuleTypes",
         "description": "If you have `read` privileges for one or more Kibana features, the API response contains information about the appropriate rule types. For example, there are rule types associated with the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, and **Security** features. To get rule types associated with the **Stack Monitoring** feature, use the `monitoring_user` built-in role.\n",
         "tags": [
           "alerting"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/space_id"
-          }
         ],
         "responses": {
           "200": {
@@ -1130,9 +1058,7 @@
                       "minimum_license_required": {
                         "description": "The subscriptions required to use the rule type.",
                         "type": "string",
-                        "examples": [
-                          "basic"
-                        ]
+                        "example": "basic"
                       },
                       "name": {
                         "description": "The descriptive name of the rule type.",
@@ -1141,9 +1067,7 @@
                       "producer": {
                         "description": "An identifier for the application that produces this rule type.",
                         "type": "string",
-                        "examples": [
-                          "stackAlerts"
-                        ]
+                        "example": "stackAlerts"
                       },
                       "recovery_action_group": {
                         "description": "An action group to use when an alert goes from an active state to an inactive one.",
@@ -1159,9 +1083,7 @@
                       },
                       "rule_task_timeout": {
                         "type": "string",
-                        "examples": [
-                          "5m"
-                        ]
+                        "example": "5m"
                       }
                     }
                   }
@@ -1187,9 +1109,9 @@
         }
       }
     },
-    "/s/{spaceId}/api/alerting/rule/{ruleId}/_mute_all": {
+    "/api/alerting/rule/{ruleId}/_mute_all": {
       "post": {
-        "summary": "Mutes all alerts.",
+        "summary": "Mute all alerts",
         "operationId": "muteAllAlerts",
         "description": "This API snoozes the notifications for the rule indefinitely. The rule checks continue to occur but alerts will not trigger any actions. You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.\n",
         "tags": [
@@ -1201,9 +1123,6 @@
           },
           {
             "$ref": "#/components/parameters/rule_id"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
           }
         ],
         "responses": {
@@ -1223,9 +1142,9 @@
         }
       }
     },
-    "/s/{spaceId}/api/alerting/rule/{ruleId}/_unmute_all": {
+    "/api/alerting/rule/{ruleId}/_unmute_all": {
       "post": {
-        "summary": "Unmutes all alerts.",
+        "summary": "Unmute all alerts",
         "operationId": "unmuteAllAlerts",
         "description": "If the rule has its notifications snoozed indefinitely, this API cancels the snooze. You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.\n",
         "tags": [
@@ -1237,9 +1156,6 @@
           },
           {
             "$ref": "#/components/parameters/rule_id"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
           }
         ],
         "responses": {
@@ -1259,9 +1175,9 @@
         }
       }
     },
-    "/s/{spaceId}/api/alerting/rule/{ruleId}/_update_api_key": {
+    "/api/alerting/rule/{ruleId}/_update_api_key": {
       "post": {
-        "summary": "Updates the API key for a rule.",
+        "summary": "Update the API key for a rule",
         "operationId": "updateRuleAPIKey",
         "description": "The new API key has the credentials of the user that submits the request.",
         "tags": [
@@ -1273,9 +1189,6 @@
           },
           {
             "$ref": "#/components/parameters/rule_id"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
           }
         ],
         "responses": {
@@ -1295,9 +1208,9 @@
         }
       }
     },
-    "/s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_mute": {
+    "/api/alerting/rule/{ruleId}/alert/{alertId}/_mute": {
       "post": {
-        "summary": "Mutes an alert.",
+        "summary": "Mute an alert",
         "operationId": "muteAlert",
         "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.\n",
         "tags": [
@@ -1312,9 +1225,6 @@
           },
           {
             "$ref": "#/components/parameters/rule_id"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
           }
         ],
         "responses": {
@@ -1334,9 +1244,9 @@
         }
       }
     },
-    "/s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_unmute": {
+    "/api/alerting/rule/{ruleId}/alert/{alertId}/_unmute": {
       "post": {
-        "summary": "Unmutes an alert.",
+        "summary": "Unmute an alert",
         "operationId": "unmuteAlert",
         "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.\n",
         "tags": [
@@ -1351,9 +1261,6 @@
           },
           {
             "$ref": "#/components/parameters/rule_id"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
           }
         ],
         "responses": {
@@ -1373,9 +1280,9 @@
         }
       }
     },
-    "/s/{spaceId}/api/alerts/alert/{alertId}": {
+    "/api/alerts/alert/{alertId}": {
       "delete": {
-        "summary": "Permanently removes an alert.",
+        "summary": "Delete an alert",
         "operationId": "legaryDeleteAlert",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the delete rule API instead. WARNING: After you delete an alert, you cannot recover it.\n",
@@ -1387,18 +1294,13 @@
             "$ref": "#/components/parameters/kbn_xsrf"
           },
           {
-            "$ref": "#/components/parameters/space_id"
-          },
-          {
             "in": "path",
             "name": "alertId",
             "description": "The identifier for the alert.",
             "required": true,
             "schema": {
               "type": "string",
-              "examples": [
-                "41893910-6bca-11eb-9e0d-85d233e3ee35"
-              ]
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
             }
           }
         ],
@@ -1419,7 +1321,7 @@
         }
       },
       "get": {
-        "summary": "Retrieves an alert by its identifier.",
+        "summary": "Get an alert by identifier",
         "operationId": "legacyGetAlert",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the get rule API instead.",
@@ -1428,18 +1330,13 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/space_id"
-          },
-          {
             "in": "path",
             "name": "alertId",
             "description": "The identifier for the alert.",
             "required": true,
             "schema": {
               "type": "string",
-              "examples": [
-                "41893910-6bca-11eb-9e0d-85d233e3ee35"
-              ]
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
             }
           }
         ],
@@ -1467,7 +1364,7 @@
         }
       },
       "post": {
-        "summary": "Create an alert.",
+        "summary": "Create an alert",
         "operationId": "legacyCreateAlert",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the create rule API instead.",
@@ -1485,13 +1382,8 @@
             "required": true,
             "schema": {
               "type": "string",
-              "examples": [
-                "41893910-6bca-11eb-9e0d-85d233e3ee35"
-              ]
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
             }
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
           }
         ],
         "requestBody": {
@@ -1531,7 +1423,7 @@
                         },
                         "id": {
                           "type": "string",
-                          "description": "The ID of the action saved object to execute."
+                          "description": "The ID of the action saved object."
                         },
                         "params": {
                           "type": "object",
@@ -1575,10 +1467,8 @@
                     "properties": {
                       "interval": {
                         "type": "string",
-                        "description": "The interval format specifies the interval in seconds, minutes, hours or days at which the alert should execute.",
-                        "examples": [
-                          "10s"
-                        ]
+                        "description": "The interval format specifies the interval in seconds, minutes, hours or days at which the alert should run.",
+                        "example": "10s"
                       }
                     }
                   },
@@ -1622,7 +1512,7 @@
         }
       },
       "put": {
-        "summary": "Updates the attributes for an alert.",
+        "summary": "Update an alert",
         "operationId": "legacyUpdateAlert",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the update rule API instead.",
@@ -1634,18 +1524,13 @@
             "$ref": "#/components/parameters/kbn_xsrf"
           },
           {
-            "$ref": "#/components/parameters/space_id"
-          },
-          {
             "in": "path",
             "name": "alertId",
             "description": "The identifier for the alert.",
             "required": true,
             "schema": {
               "type": "string",
-              "examples": [
-                "41893910-6bca-11eb-9e0d-85d233e3ee35"
-              ]
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
             }
           }
         ],
@@ -1684,7 +1569,7 @@
                         },
                         "id": {
                           "type": "string",
-                          "description": "The ID of the action saved object to execute."
+                          "description": "The ID of the action saved object."
                         },
                         "params": {
                           "type": "object",
@@ -1716,10 +1601,8 @@
                     "properties": {
                       "interval": {
                         "type": "string",
-                        "description": "The interval format specifies the interval in seconds, minutes, hours or days at which the alert should execute.",
-                        "examples": [
-                          "1d"
-                        ]
+                        "description": "The interval format specifies the interval in seconds, minutes, hours or days at which the alert should run.",
+                        "example": "1d"
                       }
                     }
                   },
@@ -1763,9 +1646,9 @@
         }
       }
     },
-    "/s/{spaceId}/api/alerts/alert/{alertId}/_disable": {
+    "/api/alerts/alert/{alertId}/_disable": {
       "post": {
-        "summary": "Disables an alert.",
+        "summary": "Disable an alert",
         "operationId": "legacyDisableAlert",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the disable rule API instead.",
@@ -1777,18 +1660,13 @@
             "$ref": "#/components/parameters/kbn_xsrf"
           },
           {
-            "$ref": "#/components/parameters/space_id"
-          },
-          {
             "in": "path",
             "name": "alertId",
             "description": "The identifier for the alert.",
             "required": true,
             "schema": {
               "type": "string",
-              "examples": [
-                "41893910-6bca-11eb-9e0d-85d233e3ee35"
-              ]
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
             }
           }
         ],
@@ -1809,9 +1687,9 @@
         }
       }
     },
-    "/s/{spaceId}/api/alerts/alert/{alertId}/_enable": {
+    "/api/alerts/alert/{alertId}/_enable": {
       "post": {
-        "summary": "Enables an alert.",
+        "summary": "Enable an alert",
         "operationId": "legacyEnableAlert",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the enable rule API instead.",
@@ -1823,18 +1701,13 @@
             "$ref": "#/components/parameters/kbn_xsrf"
           },
           {
-            "$ref": "#/components/parameters/space_id"
-          },
-          {
             "in": "path",
             "name": "alertId",
             "description": "The identifier for the alert.",
             "required": true,
             "schema": {
               "type": "string",
-              "examples": [
-                "41893910-6bca-11eb-9e0d-85d233e3ee35"
-              ]
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
             }
           }
         ],
@@ -1855,9 +1728,9 @@
         }
       }
     },
-    "/s/{spaceId}/api/alerts/alert/{alertId}/_mute_all": {
+    "/api/alerts/alert/{alertId}/_mute_all": {
       "post": {
-        "summary": "Mutes all alert instances.",
+        "summary": "Mute all alert instances",
         "operationId": "legacyMuteAllAlertInstances",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the mute all alerts API instead.",
@@ -1869,18 +1742,13 @@
             "$ref": "#/components/parameters/kbn_xsrf"
           },
           {
-            "$ref": "#/components/parameters/space_id"
-          },
-          {
             "in": "path",
             "name": "alertId",
             "description": "The identifier for the alert.",
             "required": true,
             "schema": {
               "type": "string",
-              "examples": [
-                "41893910-6bca-11eb-9e0d-85d233e3ee35"
-              ]
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
             }
           }
         ],
@@ -1901,9 +1769,9 @@
         }
       }
     },
-    "/s/{spaceId}/api/alerts/alert/{alertId}/_unmute_all": {
+    "/api/alerts/alert/{alertId}/_unmute_all": {
       "post": {
-        "summary": "Unmutes all alert instances.",
+        "summary": "Unmute all alert instances",
         "operationId": "legacyUnmuteAllAlertInstances",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the unmute all alerts API instead.",
@@ -1915,18 +1783,13 @@
             "$ref": "#/components/parameters/kbn_xsrf"
           },
           {
-            "$ref": "#/components/parameters/space_id"
-          },
-          {
             "in": "path",
             "name": "alertId",
             "description": "The identifier for the alert.",
             "required": true,
             "schema": {
               "type": "string",
-              "examples": [
-                "41893910-6bca-11eb-9e0d-85d233e3ee35"
-              ]
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
             }
           }
         ],
@@ -1947,9 +1810,9 @@
         }
       }
     },
-    "/s/{spaceId}/api/alerts/alerts/_find": {
+    "/api/alerts/alerts/_find": {
       "get": {
-        "summary": "Retrieves a paginated set of alerts.",
+        "summary": "Get a paginated set of alerts",
         "operationId": "legacyFindAlerts",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the find rules API instead. NOTE: Alert `params` are stored as a flattened field type and analyzed as keywords. As alerts change in Kibana, the results on each page of the response also change. Use the find API for traditional paginated results, but avoid using it to export large amounts of data.\n",
@@ -1958,19 +1821,14 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/space_id"
-          },
-          {
             "name": "default_search_operator",
             "in": "query",
             "description": "The default operator to use for the `simple_query_string`.",
             "schema": {
               "type": "string",
-              "default": "OR",
-              "examples": [
-                "OR"
-              ]
-            }
+              "default": "OR"
+            },
+            "example": "OR"
           },
           {
             "name": "fields",
@@ -2013,11 +1871,9 @@
             "description": "The page number to return.",
             "schema": {
               "type": "integer",
-              "default": 1,
-              "examples": [
-                1
-              ]
-            }
+              "default": 1
+            },
+            "example": 1
           },
           {
             "name": "per_page",
@@ -2025,11 +1881,9 @@
             "description": "The number of alerts to return per page.",
             "schema": {
               "type": "integer",
-              "default": 20,
-              "examples": [
-                20
-              ]
-            }
+              "default": 20
+            },
+            "example": 20
           },
           {
             "name": "search",
@@ -2075,11 +1929,9 @@
                 "asc",
                 "desc"
               ],
-              "default": "desc",
-              "examples": [
-                "asc"
-              ]
-            }
+              "default": "desc"
+            },
+            "example": "asc"
           }
         ],
         "responses": {
@@ -2123,19 +1975,14 @@
         }
       }
     },
-    "/s/{spaceId}/api/alerts/alerts/_health": {
+    "/api/alerts/alerts/_health": {
       "get": {
-        "summary": "Retrieves the health status of the alerting framework.",
+        "summary": "Get the alerting framework health",
         "operationId": "legacyGetAlertingHealth",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the get alerting framework health API instead.",
         "tags": [
           "alerting"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/space_id"
-          }
         ],
         "responses": {
           "200": {
@@ -2155,9 +2002,7 @@
                           "properties": {
                             "status": {
                               "type": "string",
-                              "examples": [
-                                "ok"
-                              ],
+                              "example": "ok",
                               "enum": [
                                 "error",
                                 "ok",
@@ -2167,9 +2012,7 @@
                             "timestamp": {
                               "type": "string",
                               "format": "date-time",
-                              "examples": [
-                                "2023-01-13T01:28:00.280Z"
-                              ]
+                              "example": "2023-01-13T01:28:00.280Z"
                             }
                           }
                         },
@@ -2179,9 +2022,7 @@
                           "properties": {
                             "status": {
                               "type": "string",
-                              "examples": [
-                                "ok"
-                              ],
+                              "example": "ok",
                               "enum": [
                                 "error",
                                 "ok",
@@ -2191,9 +2032,7 @@
                             "timestamp": {
                               "type": "string",
                               "format": "date-time",
-                              "examples": [
-                                "2023-01-13T01:28:00.280Z"
-                              ]
+                              "example": "2023-01-13T01:28:00.280Z"
                             }
                           }
                         },
@@ -2203,9 +2042,7 @@
                           "properties": {
                             "status": {
                               "type": "string",
-                              "examples": [
-                                "ok"
-                              ],
+                              "example": "ok",
                               "enum": [
                                 "error",
                                 "ok",
@@ -2215,9 +2052,7 @@
                             "timestamp": {
                               "type": "string",
                               "format": "date-time",
-                              "examples": [
-                                "2023-01-13T01:28:00.280Z"
-                              ]
+                              "example": "2023-01-13T01:28:00.280Z"
                             }
                           }
                         }
@@ -2226,16 +2061,12 @@
                     "hasPermanentEncryptionKey": {
                       "type": "boolean",
                       "description": "If `false`, the encrypted saved object plugin does not have a permanent encryption key.",
-                      "examples": [
-                        true
-                      ]
+                      "example": true
                     },
                     "isSufficientlySecure": {
                       "type": "boolean",
                       "description": "If `false`, security is enabled but TLS is not.",
-                      "examples": [
-                        true
-                      ]
+                      "example": true
                     }
                   }
                 }
@@ -2255,19 +2086,14 @@
         }
       }
     },
-    "/s/{spaceId}/api/alerts/alerts/list_alert_types": {
+    "/api/alerts/alerts/list_alert_types": {
       "get": {
-        "summary": "Retrieves a list of alert types.",
+        "summary": "Get the alert types",
         "operationId": "legacyGetAlertTypes",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the get rule types API instead.",
         "tags": [
           "alerting"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/space_id"
-          }
         ],
         "responses": {
           "200": {
@@ -2405,9 +2231,9 @@
         }
       }
     },
-    "/s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute": {
+    "/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute": {
       "post": {
-        "summary": "Mutes an alert instance.",
+        "summary": "Mute an alert instance",
         "operationId": "legacyMuteAlertInstance",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the mute alert API instead.",
@@ -2419,18 +2245,13 @@
             "$ref": "#/components/parameters/kbn_xsrf"
           },
           {
-            "$ref": "#/components/parameters/space_id"
-          },
-          {
             "in": "path",
             "name": "alertId",
             "description": "An identifier for the alert.",
             "required": true,
             "schema": {
               "type": "string",
-              "examples": [
-                "41893910-6bca-11eb-9e0d-85d233e3ee35"
-              ]
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
             }
           },
           {
@@ -2440,9 +2261,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "examples": [
-                "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2"
-              ]
+              "example": "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2"
             }
           }
         ],
@@ -2463,9 +2282,9 @@
         }
       }
     },
-    "/s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute": {
+    "/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute": {
       "post": {
-        "summary": "Unmutes an alert instance.",
+        "summary": "Unmute an alert instance",
         "operationId": "legacyUnmuteAlertInstance",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the unmute alert API instead.",
@@ -2477,18 +2296,13 @@
             "$ref": "#/components/parameters/kbn_xsrf"
           },
           {
-            "$ref": "#/components/parameters/space_id"
-          },
-          {
             "in": "path",
             "name": "alertId",
             "description": "An identifier for the alert.",
             "required": true,
             "schema": {
               "type": "string",
-              "examples": [
-                "41893910-6bca-11eb-9e0d-85d233e3ee35"
-              ]
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
             }
           },
           {
@@ -2498,9 +2312,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "examples": [
-                "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2"
-              ]
+              "example": "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2"
             }
           }
         ],
@@ -2523,18 +2335,6 @@
     }
   },
   "components": {
-    "securitySchemes": {
-      "basicAuth": {
-        "type": "http",
-        "scheme": "basic"
-      },
-      "apiKeyAuth": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "Authorization",
-        "description": "e.g. Authorization: ApiKey base64AccessApiKey"
-      }
-    },
     "parameters": {
       "kbn_xsrf": {
         "schema": {
@@ -2545,18 +2345,6 @@
         "description": "Cross-site request forgery protection",
         "required": true
       },
-      "space_id": {
-        "in": "path",
-        "name": "spaceId",
-        "description": "An identifier for the space. If `/s/` and the identifier are omitted from the path, the default space is used.",
-        "required": true,
-        "schema": {
-          "type": "string",
-          "examples": [
-            "default"
-          ]
-        }
-      },
       "rule_id": {
         "in": "path",
         "name": "ruleId",
@@ -2564,9 +2352,7 @@
         "required": true,
         "schema": {
           "type": "string",
-          "examples": [
-            "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
-          ]
+          "example": "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
         }
       },
       "alert_id": {
@@ -2576,9 +2362,7 @@
         "required": true,
         "schema": {
           "type": "string",
-          "examples": [
-            "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
-          ]
+          "example": "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
         }
       }
     },
@@ -4721,10 +4505,8 @@
             "type": "object",
             "properties": {
               "alias": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": "string",
+                "nullable": true
               },
               "controlledBy": {
                 "type": "string"
@@ -4777,27 +4559,19 @@
           "onActiveAlert",
           "onThrottleInterval"
         ],
-        "examples": [
-          "onActiveAlert"
-        ]
+        "example": "onActiveAlert"
       },
       "throttle_action": {
-        "type": [
-          "string",
-          "null"
-        ],
+        "type": "string",
+        "nullable": true,
         "description": "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if `notify_when` is set to `onThrottleInterval`. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.\n",
         "default": null,
-        "examples": [
-          "10m"
-        ]
+        "example": "10m"
       },
       "actions": {
-        "type": [
-          "array",
-          "null"
-        ],
+        "type": "array",
         "default": [],
+        "nullable": true,
         "items": {
           "type": "object",
           "required": [
@@ -4837,14 +4611,12 @@
                       "items": {
                         "type": "integer"
                       },
-                      "examples": [
-                        [
-                          1,
-                          2,
-                          3,
-                          4,
-                          5
-                        ]
+                      "example": [
+                        1,
+                        2,
+                        3,
+                        4,
+                        5
                       ]
                     },
                     "hours": {
@@ -4854,25 +4626,19 @@
                         "end": {
                           "type": "string",
                           "description": "The end of the time frame in 24-hour notation (`hh:mm`).",
-                          "examples": [
-                            "17:00"
-                          ]
+                          "example": "17:00"
                         },
                         "start": {
                           "type": "string",
                           "description": "The start of the time frame in 24-hour notation (`hh:mm`).",
-                          "examples": [
-                            "08:00"
-                          ]
+                          "example": "08:00"
                         }
                       }
                     },
                     "timezone": {
                       "type": "string",
                       "description": "The ISO time zone for the `hours` values. Values such as `UTC` and `UTC+1` also work but lack built-in daylight savings time support and are not recommended.\n",
-                      "examples": [
-                        "Europe/Madrid"
-                      ]
+                      "example": "Europe/Madrid"
                     }
                   }
                 }
@@ -4881,9 +4647,7 @@
             "connector_type_id": {
               "type": "string",
               "description": "The type of connector. This property appears in responses but cannot be set in requests.",
-              "examples": [
-                ".server-log"
-              ],
+              "example": ".server-log",
               "readOnly": true
             },
             "frequency": {
@@ -4909,16 +4673,12 @@
             "group": {
               "type": "string",
               "description": "The group name, which affects when the action runs (for example, when the threshold is met or when the alert is recovered). Each rule type has a list of valid action group names. If you don't need to group actions, set to `default`.\n",
-              "examples": [
-                "default"
-              ]
+              "example": "default"
             },
             "id": {
               "type": "string",
               "description": "The identifier for the connector saved object.",
-              "examples": [
-                "9dca3e00-74f5-11ed-9801-35303b735aef"
-              ]
+              "example": "9dca3e00-74f5-11ed-9801-35303b735aef"
             },
             "params": {
               "type": "object",
@@ -4928,9 +4688,7 @@
             "uuid": {
               "type": "string",
               "description": "A universally unique identifier (UUID) for the action.",
-              "examples": [
-                "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61"
-              ]
+              "example": "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61"
             }
           }
         }
@@ -4970,9 +4728,7 @@
           "onThrottleInterval"
         ],
         "deprecated": true,
-        "examples": [
-          "onActiveAlert"
-        ]
+        "example": "onActiveAlert"
       },
       "schedule": {
         "type": "object",
@@ -4980,9 +4736,7 @@
         "properties": {
           "interval": {
             "type": "string",
-            "examples": [
-              "1m"
-            ]
+            "example": "1m"
           }
         }
       },
@@ -4995,16 +4749,12 @@
         "default": []
       },
       "throttle": {
-        "type": [
-          "string",
-          "null"
-        ],
+        "type": "string",
         "description": "Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.\n",
+        "nullable": true,
         "default": null,
         "deprecated": true,
-        "examples": [
-          "10m"
-        ]
+        "example": "10m"
       },
       "params_property_apm_anomaly": {
         "required": [
@@ -5280,9 +5030,7 @@
       "timewindowsize": {
         "description": "The size of the time window (in `timeWindowUnit` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.\n",
         "type": "integer",
-        "examples": [
-          5
-        ]
+        "example": 5
       },
       "timewindowunit": {
         "description": "The type of units for the time window: seconds, minutes, hours, or days.\n",
@@ -5293,9 +5041,7 @@
           "h",
           "d"
         ],
-        "examples": [
-          "m"
-        ]
+        "example": "m"
       },
       "size": {
         "description": "The number of documents to pass to the configured actions when the threshold condition is met.\n",
@@ -5321,9 +5067,7 @@
         "type": "array",
         "items": {
           "type": "integer",
-          "examples": [
-            4000
-          ]
+          "example": 4000
         }
       },
       "thresholdcomparator": {
@@ -5337,9 +5081,7 @@
           "between",
           "notBetween"
         ],
-        "examples": [
-          ">"
-        ]
+        "example": ">"
       },
       "params_es_query_rule": {
         "oneOf": [
@@ -5387,16 +5129,12 @@
                 "enum": [
                   "esqlQuery"
                 ],
-                "examples": [
-                  "esqlQuery"
-                ]
+                "example": "esqlQuery"
               },
               "size": {
                 "type": "integer",
                 "description": "When `searchType` is `esqlQuery`, this property is required but it does not affect the rule behavior.\n",
-                "examples": [
-                  0
-                ]
+                "example": 0
               },
               "termSize": {
                 "$ref": "#/components/schemas/termsize"
@@ -5416,9 +5154,7 @@
                 "enum": [
                   ">"
                 ],
-                "examples": [
-                  ">"
-                ]
+                "example": ">"
               },
               "timeField": {
                 "$ref": "#/components/schemas/timefield"
@@ -5484,9 +5220,7 @@
                     "properties": {
                       "language": {
                         "type": "string",
-                        "examples": [
-                          "kuery"
-                        ]
+                        "example": "kuery"
                       },
                       "query": {
                         "type": "string"
@@ -5501,9 +5235,7 @@
                 "enum": [
                   "searchSource"
                 ],
-                "examples": [
-                  "searchSource"
-                ]
+                "example": "searchSource"
               },
               "size": {
                 "$ref": "#/components/schemas/size"
@@ -5581,9 +5313,7 @@
                   "esQuery"
                 ],
                 "default": "esQuery",
-                "examples": [
-                  "esQuery"
-                ]
+                "example": "esQuery"
               },
               "size": {
                 "$ref": "#/components/schemas/size"
@@ -6674,82 +6404,58 @@
           "api_key_created_by_user": {
             "type": "boolean",
             "description": "Indicates whether the API key that is associated with the rule was created by the user.",
-            "examples": [
-              false
-            ]
+            "example": false
           },
           "api_key_owner": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "description": "The owner of the API key that is associated with the rule and used to run background tasks.\n",
-            "examples": [
-              "elastic"
-            ]
+            "nullable": true,
+            "example": "elastic"
           },
           "consumer": {
             "type": "string",
             "description": "The application or feature that owns the rule. For example, `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.",
-            "examples": [
-              "alerts"
-            ]
+            "example": "alerts"
           },
           "created_at": {
             "type": "string",
             "description": "The date and time that the rule was created.",
             "format": "date-time",
-            "examples": [
-              "2022-12-05T23:36:58.284Z"
-            ]
+            "example": "2022-12-05T23:36:58.284Z"
           },
           "created_by": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "description": "The identifier for the user that created the rule.",
-            "examples": [
-              "elastic"
-            ]
+            "nullable": true,
+            "example": "elastic"
           },
           "enabled": {
             "type": "boolean",
             "description": "Indicates whether the rule is currently enabled.",
-            "examples": [
-              true
-            ]
+            "example": true
           },
           "execution_status": {
             "type": "object",
             "properties": {
               "last_duration": {
                 "type": "integer",
-                "examples": [
-                  55
-                ]
+                "example": 55
               },
               "last_execution_date": {
                 "type": "string",
                 "format": "date-time",
-                "examples": [
-                  "2022-12-06T00:13:43.890Z"
-                ]
+                "example": "2022-12-06T00:13:43.890Z"
               },
               "status": {
                 "type": "string",
-                "examples": [
-                  "ok"
-                ]
+                "example": "ok"
               }
             }
           },
           "id": {
             "type": "string",
             "description": "The identifier for the rule.",
-            "examples": [
-              "b530fed0-74f5-11ed-9801-35303b735aef"
-            ]
+            "example": "b530fed0-74f5-11ed-9801-35303b735aef"
           },
           "last_run": {
             "type": "object",
@@ -6773,71 +6479,51 @@
               },
               "outcome": {
                 "type": "string",
-                "examples": [
-                  "succeeded"
-                ]
+                "example": "succeeded"
               },
               "outcome_msg": {
-                "type": [
-                  "array",
-                  "null"
-                ],
+                "type": "array",
                 "items": {
                   "type": "string"
-                }
+                },
+                "nullable": true
               },
               "outcome_order": {
                 "type": "integer"
               },
               "warning": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "examples": [
-                  null
-                ]
+                "type": "string",
+                "nullable": true,
+                "example": null
               }
             }
           },
           "muted_alert_ids": {
-            "type": [
-              "array",
-              "null"
-            ],
+            "type": "array",
+            "nullable": true,
             "items": {
               "type": "string"
             }
           },
           "mute_all": {
             "type": "boolean",
-            "examples": [
-              false
-            ]
+            "example": false
           },
           "name": {
             "type": "string",
             "description": "The name of the rule.",
-            "examples": [
-              "cluster_health_rule"
-            ]
+            "example": "cluster_health_rule"
           },
           "next_run": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "date-time",
-            "examples": [
-              "2022-12-06T00:14:43.818Z"
-            ]
+            "nullable": true,
+            "example": "2022-12-06T00:14:43.818Z"
           },
           "notify_when": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "Indicates how often alerts generate actions."
+            "type": "string",
+            "description": "Indicates how often alerts generate actions.",
+            "nullable": true
           },
           "params": {
             "type": "object",
@@ -6851,9 +6537,7 @@
           "rule_type_id": {
             "type": "string",
             "description": "The identifier for the type of rule. For example, `.es-query`, `.index-threshold`, `logs.alert.document.count`, `monitoring_alert_cluster_health`, `siem.thresholdRule`, or `xpack.ml.anomaly_detection_alert`.\n",
-            "examples": [
-              "monitoring_alert_cluster_health"
-            ]
+            "example": "monitoring_alert_cluster_health"
           },
           "running": {
             "type": "boolean",
@@ -6864,9 +6548,7 @@
           },
           "scheduled_task_id": {
             "type": "string",
-            "examples": [
-              "b530fed0-74f5-11ed-9801-35303b735aef"
-            ]
+            "example": "b530fed0-74f5-11ed-9801-35303b735aef"
           },
           "tags": {
             "$ref": "#/components/schemas/tags"
@@ -6877,19 +6559,13 @@
           "updated_at": {
             "type": "string",
             "description": "The date and time that the rule was updated most recently.",
-            "examples": [
-              "2022-12-05T23:36:58.284Z"
-            ]
+            "example": "2022-12-05T23:36:58.284Z"
           },
           "updated_by": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "description": "The identifier for the user that updated this rule most recently.",
-            "examples": [
-              "elastic"
-            ]
+            "nullable": true,
+            "example": "elastic"
           }
         }
       },
@@ -6899,9 +6575,7 @@
         "properties": {
           "error": {
             "type": "string",
-            "examples": [
-              "Unauthorized"
-            ],
+            "example": "Unauthorized",
             "enum": [
               "Unauthorized"
             ]
@@ -6911,9 +6585,7 @@
           },
           "statusCode": {
             "type": "integer",
-            "examples": [
-              401
-            ],
+            "example": 401,
             "enum": [
               401
             ]
@@ -6925,24 +6597,18 @@
         "properties": {
           "error": {
             "type": "string",
-            "examples": [
-              "Not Found"
-            ],
+            "example": "Not Found",
             "enum": [
               "Not Found"
             ]
           },
           "message": {
             "type": "string",
-            "examples": [
-              "Saved object [alert/caaad6d0-920c-11ed-b36a-874bd1548a00] not found"
-            ]
+            "example": "Saved object [alert/caaad6d0-920c-11ed-b36a-874bd1548a00] not found"
           },
           "statusCode": {
             "type": "integer",
-            "examples": [
-              404
-            ],
+            "example": 404,
             "enum": [
               404
             ]
@@ -6968,9 +6634,7 @@
           "name": {
             "type": "string",
             "description": "The name of the rule.",
-            "examples": [
-              "cluster_health_rule"
-            ]
+            "example": "cluster_health_rule"
           },
           "notify_when": {
             "$ref": "#/components/schemas/notify_when"
@@ -7085,40 +6749,28 @@
           },
           "alertTypeId": {
             "type": "string",
-            "examples": [
-              ".index-threshold"
-            ]
+            "example": ".index-threshold"
           },
           "apiKeyOwner": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "examples": [
-              "elastic"
-            ]
+            "type": "string",
+            "nullable": true,
+            "example": "elastic"
           },
           "createdAt": {
             "type": "string",
             "description": "The date and time that the alert was created.",
             "format": "date-time",
-            "examples": [
-              "2022-12-05T23:36:58.284Z"
-            ]
+            "example": "2022-12-05T23:36:58.284Z"
           },
           "createdBy": {
             "type": "string",
             "description": "The identifier for the user that created the alert.",
-            "examples": [
-              "elastic"
-            ]
+            "example": "elastic"
           },
           "enabled": {
             "type": "boolean",
             "description": "Indicates whether the alert is currently enabled.",
-            "examples": [
-              true
-            ]
+            "example": true
           },
           "executionStatus": {
             "type": "object",
@@ -7126,36 +6778,26 @@
               "lastExecutionDate": {
                 "type": "string",
                 "format": "date-time",
-                "examples": [
-                  "2022-12-06T00:13:43.890Z"
-                ]
+                "example": "2022-12-06T00:13:43.890Z"
               },
               "status": {
                 "type": "string",
-                "examples": [
-                  "ok"
-                ]
+                "example": "ok"
               }
             }
           },
           "id": {
             "type": "string",
             "description": "The identifier for the alert.",
-            "examples": [
-              "b530fed0-74f5-11ed-9801-35303b735aef"
-            ]
+            "example": "b530fed0-74f5-11ed-9801-35303b735aef"
           },
           "muteAll": {
             "type": "boolean",
-            "examples": [
-              false
-            ]
+            "example": false
           },
           "mutedInstanceIds": {
-            "type": [
-              "array",
-              "null"
-            ],
+            "type": "array",
+            "nullable": true,
             "items": {
               "type": "string"
             }
@@ -7163,15 +6805,11 @@
           "name": {
             "type": "string",
             "description": "The name of the alert.",
-            "examples": [
-              "my alert"
-            ]
+            "example": "my alert"
           },
           "notifyWhen": {
             "type": "string",
-            "examples": [
-              "onActionGroupChange"
-            ]
+            "example": "onActionGroupChange"
           },
           "params": {
             "type": "object",
@@ -7187,9 +6825,7 @@
           },
           "scheduledTaskId": {
             "type": "string",
-            "examples": [
-              "b530fed0-74f5-11ed-9801-35303b735aef"
-            ]
+            "example": "b530fed0-74f5-11ed-9801-35303b735aef"
           },
           "tags": {
             "type": "array",
@@ -7198,26 +6834,18 @@
             }
           },
           "throttle": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": "string",
+            "nullable": true
           },
           "updatedAt": {
             "type": "string",
-            "examples": [
-              "2022-12-05T23:36:58.284Z"
-            ]
+            "example": "2022-12-05T23:36:58.284Z"
           },
           "updatedBy": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "description": "The identifier for the user that updated this alert most recently.",
-            "examples": [
-              "elastic"
-            ]
+            "nullable": true,
+            "example": "elastic"
           }
         }
       }

@@ -6,6 +6,42 @@ info:
 paths: {}
 components:
   schemas:
+    EntityAnalyticsPrivileges:
+      type: object
+      properties:
+        has_all_required:
+          type: boolean
+        has_read_permissions:
+          type: boolean
+        has_write_permissions:
+          type: boolean
+        privileges:
+          type: object
+          properties:
+            elasticsearch:
+              type: object
+              properties:
+                cluster:
+                  type: object
+                  properties:
+                    manage_index_templates:
+                      type: boolean
+                    manage_transform:
+                      type: boolean
+                index:
+                  type: object
+                  additionalProperties:
+                    type: object
+                    properties:
+                      read:
+                        type: boolean
+                      write:
+                        type: boolean
+          required:
+            - elasticsearch
+      required:
+        - has_all_required
+        - privileges
     EntityAfterKey:
       type: object
       additionalProperties:

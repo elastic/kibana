@@ -90,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         getLogsForDataset({ to, count: 10, dataset: bitbucketDatasetName }),
       ]);
 
-      await PageObjects.svlCommonPage.loginWithRole('admin');
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
 
       await PageObjects.datasetQuality.navigateTo();
     });

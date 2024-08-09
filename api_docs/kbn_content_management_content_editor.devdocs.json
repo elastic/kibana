@@ -2,26 +2,10 @@
   "id": "@kbn/content-management-content-editor",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/content-management-content-editor",
-        "id": "def-common.ContentEditorKibanaProvider",
+        "id": "def-public.ContentEditorKibanaProvider",
         "type": "Function",
         "tags": [],
         "label": "ContentEditorKibanaProvider",
@@ -39,7 +23,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/content-management-content-editor",
-            "id": "def-common.ContentEditorKibanaProvider.$1",
+            "id": "def-public.ContentEditorKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{ children, ...services }",
@@ -60,7 +44,7 @@
       },
       {
         "parentPluginId": "@kbn/content-management-content-editor",
-        "id": "def-common.ContentEditorProvider",
+        "id": "def-public.ContentEditorProvider",
         "type": "Function",
         "tags": [],
         "label": "ContentEditorProvider",
@@ -78,7 +62,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/content-management-content-editor",
-            "id": "def-common.ContentEditorProvider.$1",
+            "id": "def-public.ContentEditorProvider.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{\n  children,\n  ...services\n}",
@@ -99,7 +83,7 @@
       },
       {
         "parentPluginId": "@kbn/content-management-content-editor",
-        "id": "def-common.useOpenContentEditor",
+        "id": "def-public.useOpenContentEditor",
         "type": "Function",
         "tags": [],
         "label": "useOpenContentEditor",
@@ -108,9 +92,9 @@
           "() => (args: ",
           {
             "pluginId": "@kbn/content-management-content-editor",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnContentManagementContentEditorPluginApi",
-            "section": "def-common.OpenContentEditorParams",
+            "section": "def-public.OpenContentEditorParams",
             "text": "OpenContentEditorParams"
           },
           ") => () => void"
@@ -126,7 +110,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/content-management-content-editor",
-        "id": "def-common.SavedObjectsReference",
+        "id": "def-public.SavedObjectsReference",
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsReference",
@@ -137,7 +121,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/content-management-content-editor",
-            "id": "def-common.SavedObjectsReference.id",
+            "id": "def-public.SavedObjectsReference.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -148,7 +132,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-content-editor",
-            "id": "def-common.SavedObjectsReference.name",
+            "id": "def-public.SavedObjectsReference.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -159,7 +143,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-content-editor",
-            "id": "def-common.SavedObjectsReference.type",
+            "id": "def-public.SavedObjectsReference.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -176,7 +160,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/content-management-content-editor",
-        "id": "def-common.OpenContentEditorParams",
+        "id": "def-public.OpenContentEditorParams",
         "type": "Type",
         "tags": [],
         "label": "OpenContentEditorParams",
@@ -194,6 +178,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

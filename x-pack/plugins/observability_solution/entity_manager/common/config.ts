@@ -22,7 +22,7 @@ export type EntityManagerConfig = TypeOf<typeof configSchema>;
 export const exposeToBrowserConfig = {} as const;
 
 type ValidKeys = keyof {
-  [K in keyof typeof exposeToBrowserConfig as typeof exposeToBrowserConfig[K] extends true
+  [K in keyof typeof exposeToBrowserConfig as (typeof exposeToBrowserConfig)[K] extends true
     ? K
     : never]: true;
 };

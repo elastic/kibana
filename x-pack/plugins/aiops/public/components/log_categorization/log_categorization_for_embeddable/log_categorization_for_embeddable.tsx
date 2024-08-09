@@ -247,6 +247,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
       from: earliest,
       to: latest,
     };
+    const runtimeMappings = dataView.getRuntimeMappings();
 
     try {
       const timeRange = await getMinimumTimeRange(
@@ -254,7 +255,8 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
         timeField,
         additionalFilter,
         minimumTimeRangeOption,
-        searchQuery
+        searchQuery,
+        runtimeMappings
       );
 
       if (mounted.current !== true) {
@@ -262,15 +264,24 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
       }
 
       const [validationResult, categorizationResult] = await Promise.all([
-        runValidateFieldRequest(index, selectedField.name, timeField, timeRange, searchQuery, {
-          [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
-        }),
+        runValidateFieldRequest(
+          index,
+          selectedField.name,
+          timeField,
+          timeRange,
+          searchQuery,
+          runtimeMappings,
+          {
+            [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
+          }
+        ),
         runCategorizeRequest(
           index,
           selectedField.name,
           timeField,
           { to: timeRange.to, from: timeRange.from },
           searchQuery,
+          runtimeMappings,
           intervalMs,
           timeRange.useSubAgg ? additionalFilter : undefined
         ),

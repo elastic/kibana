@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { Stream } from 'stream';
 import type {
   CustomHttpResponseOptions,
   HttpResponseOptions,
@@ -139,7 +138,7 @@ export interface KibanaErrorResponseFactory {
    * Creates an error response with defined status code and payload.
    * @param options - {@link CustomHttpResponseOptions} configures HTTP response headers, error message and other error details to pass to the client
    */
-  customError(options: CustomHttpResponseOptions<ResponseError | Buffer | Stream>): IKibanaResponse;
+  customError(options: CustomHttpResponseOptions<ResponseError>): IKibanaResponse;
 }
 
 /**

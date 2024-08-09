@@ -10,19 +10,19 @@ import { indexTemplates } from '../data_sources';
 import { Config } from '../types';
 
 export async function deleteIndexTemplate(config: Config, client: Client, logger: ToolingLog) {
-  const namespace = config.indexing.dataset;
-  const templates = indexTemplates[namespace];
-  const templateNames = templates.map((templateDef) => templateDef.namespace).join(',');
+  const dataset = config.indexing.dataset;
+  const templates = indexTemplates[dataset];
+  const templateNames = templates.map((templateDef) => templateDef.name).join(',');
   logger.info(`Deleteing index templates (${templateNames})`);
 
   try {
     for (const indexTemplateDef of templates) {
-      logger.info(`Deleteing index template (${indexTemplateDef.namespace})`);
+      logger.info(`Deleteing index template (${indexTemplateDef.name})`);
       await client.indices.deleteIndexTemplate({
-        name: indexTemplateDef.namespace,
+        name: indexTemplateDef.name,
       });
       const componentNames = indexTemplateDef.components.map(({ name }) => name);
-      logger.info(`Deleteing components for ${indexTemplateDef.namespace} (${componentNames})`);
+      logger.info(`Deleteing components for ${indexTemplateDef.name} (${componentNames})`);
       for (const component of indexTemplateDef.components) {
         await client.cluster.deleteComponentTemplate({ name: component.name });
       }

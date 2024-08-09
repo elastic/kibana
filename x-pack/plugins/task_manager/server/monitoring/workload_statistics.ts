@@ -16,7 +16,9 @@ import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import { parseIntervalAsSecond, asInterval, parseIntervalAsMillisecond } from '../lib/intervals';
 import { HealthStatus } from './monitoring_stats_stream';
 import { TaskStore } from '../task_store';
-import { createRunningAveragedStat } from './task_run_calcultors';
+import { createRunningAveragedStat } from './task_run_calculators';
+import { TaskTypeDictionary } from '../task_type_dictionary';
+import { TaskCost } from '../task';
 
 interface StatusStat extends JsonObject {
   [status: string]: number;
@@ -24,16 +26,20 @@ interface StatusStat extends JsonObject {
 interface TaskTypeStat extends JsonObject {
   [taskType: string]: {
     count: number;
+    cost: number;
     status: StatusStat;
   };
 }
 
 interface RawWorkloadStat extends JsonObject {
   count: number;
+  cost: number;
   task_types: TaskTypeStat;
   schedule: Array<[string, number]>;
   non_recurring: number;
+  non_recurring_cost: number;
   overdue: number;
+  overdue_cost: number;
   overdue_non_recurring: number;
   estimated_schedule_density: number[];
   capacity_requirements: CapacityRequirements;
@@ -109,22 +115,34 @@ type ScheduleDensityResult = AggregationResultOf<
 type ScheduledIntervals = ScheduleDensityResult['histogram']['buckets'][0];
 
 // Set an upper bound just in case a customer sets a really high refresh rate
-const MAX_SHCEDULE_DENSITY_BUCKETS = 50;
+const MAX_SCHEDULE_DENSITY_BUCKETS = 50;
 
-export function createWorkloadAggregator(
-  taskStore: TaskStore,
-  elasticsearchAndSOAvailability$: Observable<boolean>,
-  refreshInterval: number,
-  pollInterval: number,
-  logger: Logger
-): AggregatedStatProvider<WorkloadStat> {
+interface CreateWorkloadAggregatorOpts {
+  taskStore: TaskStore;
+  elasticsearchAndSOAvailability$: Observable<boolean>;
+  refreshInterval: number;
+  pollInterval: number;
+  logger: Logger;
+  taskDefinitions: TaskTypeDictionary;
+}
+
+export function createWorkloadAggregator({
+  taskStore,
+  elasticsearchAndSOAvailability$,
+  refreshInterval,
+  pollInterval,
+  logger,
+  taskDefinitions,
+}: CreateWorkloadAggregatorOpts): AggregatedStatProvider<WorkloadStat> {
   // calculate scheduleDensity going two refreshIntervals or 1 minute into into the future
   // (the longer of the two)
   const scheduleDensityBuckets = Math.min(
     Math.max(Math.round(60000 / pollInterval), Math.round((refreshInterval * 2) / pollInterval)),
-    MAX_SHCEDULE_DENSITY_BUCKETS
+    MAX_SCHEDULE_DENSITY_BUCKETS
   );
 
+  const totalNumTaskDefinitions = taskDefinitions.getAllTypes().length;
+  const taskTypeTermAggSize = Math.min(totalNumTaskDefinitions, 10000);
   const ownerIdsQueue = createRunningAveragedStat<number>(scheduleDensityBuckets);
 
   return combineLatest([timer(0, refreshInterval), elasticsearchAndSOAvailability$]).pipe(
@@ -133,39 +151,24 @@ export function createWorkloadAggregator(
       taskStore.aggregate({
         aggs: {
           taskType: {
-            terms: { size: 100, field: 'task.taskType' },
-            aggs: {
-              status: {
-                terms: { field: 'task.status' },
-              },
-            },
+            terms: { size: taskTypeTermAggSize, field: 'task.taskType' },
+            aggs: { status: { terms: { field: 'task.status' } } },
           },
           schedule: {
             terms: { field: 'task.schedule.interval', size: 100 },
           },
           nonRecurringTasks: {
-            missing: { field: 'task.schedule' },
+            missing: { field: 'task.schedule.interval' },
+            aggs: {
+              taskType: { terms: { size: taskTypeTermAggSize, field: 'task.taskType' } },
+            },
           },
           ownerIds: {
-            filter: {
-              range: {
-                'task.startedAt': {
-                  gte: 'now-1w/w',
-                },
-              },
-            },
-            aggs: {
-              ownerIds: {
-                cardinality: {
-                  field: 'task.ownerId',
-                },
-              },
-            },
+            filter: { range: { 'task.startedAt': { gte: 'now-1w/w' } } },
+            aggs: { ownerIds: { cardinality: { field: 'task.ownerId' } } },
           },
           idleTasks: {
-            filter: {
-              term: { 'task.status': 'idle' },
-            },
+            filter: { term: { 'task.status': 'idle' } },
             aggs: {
               scheduleDensity: {
                 // create a window of upcoming tasks
@@ -187,7 +190,7 @@ export function createWorkloadAggregator(
                       field: 'task.runAt',
                       fixed_interval: asInterval(pollInterval),
                     },
-                    // break down each bucket in the historgram by schedule
+                    // break down each bucket in the histogram by schedule
                     aggs: {
                       interval: {
                         terms: { field: 'task.schedule.interval' },
@@ -197,15 +200,10 @@ export function createWorkloadAggregator(
                 },
               },
               overdue: {
-                filter: {
-                  range: {
-                    'task.runAt': { lt: 'now' },
-                  },
-                },
+                filter: { range: { 'task.runAt': { lt: 'now' } } },
                 aggs: {
-                  nonRecurring: {
-                    missing: { field: 'task.schedule' },
-                  },
+                  taskTypes: { terms: { size: taskTypeTermAggSize, field: 'task.taskType' } },
+                  nonRecurring: { missing: { field: 'task.schedule.interval' } },
                 },
               },
             },
@@ -226,11 +224,13 @@ export function createWorkloadAggregator(
 
       const taskTypes = aggregations.taskType.buckets;
       const nonRecurring = aggregations.nonRecurringTasks.doc_count;
+      const nonRecurringTaskTypes = aggregations.nonRecurringTasks.taskType.buckets;
       const ownerIds = aggregations.ownerIds.ownerIds.value;
 
       const {
         overdue: {
           doc_count: overdue,
+          taskTypes: { buckets: taskTypesOverdue = [] } = {},
           nonRecurring: { doc_count: overdueNonRecurring },
         },
         scheduleDensity: { buckets: [scheduleDensity] = [] } = {},
@@ -243,6 +243,7 @@ export function createWorkloadAggregator(
             asSeconds: parseIntervalAsSecond(schedule.key as string),
             count: schedule.doc_count,
           };
+
           accm.schedules.push(parsedSchedule);
           if (parsedSchedule.asSeconds <= 60) {
             accm.cadence.perMinute +=
@@ -257,11 +258,7 @@ export function createWorkloadAggregator(
           return accm;
         },
         {
-          cadence: {
-            perMinute: 0,
-            perHour: 0,
-            perDay: 0,
-          },
+          cadence: { perMinute: 0, perHour: 0, perDay: 0 },
           schedules: [] as Array<{
             interval: string;
             asSeconds: number;
@@ -270,20 +267,42 @@ export function createWorkloadAggregator(
         }
       );
 
+      const totalNonRecurringCost = getTotalCost(nonRecurringTaskTypes, taskDefinitions);
+      const totalOverdueCost = getTotalCost(taskTypesOverdue, taskDefinitions);
+
+      let totalCost = 0;
+      const taskTypeSummary = taskTypes.reduce((acc, bucket) => {
+        const value = bucket as TaskTypeWithStatusBucket;
+        const taskDef = taskDefinitions.get(value.key as string);
+        if (taskDef) {
+          const cost = value.doc_count * taskDef?.cost ?? TaskCost.Normal;
+
+          totalCost += cost;
+          return Object.assign(acc, {
+            [value.key as string]: {
+              count: value.doc_count,
+              cost,
+              status: mapValues(keyBy(value.status.buckets, 'key'), 'doc_count'),
+            },
+          });
+        } else {
+          // task type is not registered with dictionary, do not add to summary
+          return acc;
+        }
+      }, {});
+
       const summary: WorkloadStat = {
         count,
-        task_types: mapValues(keyBy(taskTypes, 'key'), ({ doc_count: docCount, status }) => {
-          return {
-            count: docCount,
-            status: mapValues(keyBy(status.buckets, 'key'), 'doc_count'),
-          };
-        }),
+        cost: totalCost,
+        task_types: taskTypeSummary,
         non_recurring: nonRecurring,
+        non_recurring_cost: totalNonRecurringCost,
         owner_ids: ownerIdsQueue(ownerIds),
         schedule: schedules
           .sort((scheduleLeft, scheduleRight) => scheduleLeft.asSeconds - scheduleRight.asSeconds)
           .map((schedule) => [schedule.interval, schedule.count]),
         overdue,
+        overdue_cost: totalOverdueCost,
         overdue_non_recurring: overdueNonRecurring,
         estimated_schedule_density: padBuckets(
           scheduleDensityBuckets,
@@ -457,40 +476,37 @@ export interface WorkloadAggregationResponse {
   taskType: TaskTypeAggregation;
   schedule: ScheduleAggregation;
   idleTasks: IdleTasksAggregation;
-  nonRecurringTasks: {
-    doc_count: number;
-  };
-  ownerIds: {
-    ownerIds: {
-      value: number;
-    };
-  };
+  nonRecurringTasks: { doc_count: number; taskType: TaskTypeAggregation };
+  ownerIds: { ownerIds: { value: number } };
   [otherAggs: string]: estypes.AggregationsAggregate;
 }
+
+export type TaskTypeWithStatusBucket = TaskTypeBucket & {
+  status: {
+    buckets: Array<{
+      doc_count: number;
+      key: string | number;
+    }>;
+    doc_count_error_upper_bound?: number | undefined;
+    sum_other_doc_count?: number | undefined;
+  };
+};
+
+export interface TaskTypeBucket {
+  doc_count: number;
+  key: string | number;
+}
+
 // @ts-expect-error key doesn't accept a string
 export interface TaskTypeAggregation extends estypes.AggregationsFiltersAggregate {
-  buckets: Array<{
-    doc_count: number;
-    key: string | number;
-    status: {
-      buckets: Array<{
-        doc_count: number;
-        key: string | number;
-      }>;
-      doc_count_error_upper_bound?: number | undefined;
-      sum_other_doc_count?: number | undefined;
-    };
-  }>;
+  buckets: Array<TaskTypeBucket | TaskTypeWithStatusBucket>;
   doc_count_error_upper_bound?: number | undefined;
   sum_other_doc_count?: number | undefined;
 }
 
 // @ts-expect-error key doesn't accept a string
 export interface ScheduleAggregation extends estypes.AggregationsFiltersAggregate {
-  buckets: Array<{
-    doc_count: number;
-    key: string | number;
-  }>;
+  buckets: Array<{ doc_count: number; key: string | number }>;
   doc_count_error_upper_bound?: number | undefined;
   sum_other_doc_count?: number | undefined;
 }
@@ -518,9 +534,8 @@ export interface IdleTasksAggregation extends estypes.AggregationsFiltersAggrega
   };
   overdue: {
     doc_count: number;
-    nonRecurring: {
-      doc_count: number;
-    };
+    nonRecurring: { doc_count: number };
+    taskTypes: TaskTypeAggregation;
   };
 }
 
@@ -536,4 +551,17 @@ interface DateRangeBucket {
   to_as_string?: string;
   from_as_string?: string;
   doc_count: number;
+}
+
+function getTotalCost(taskTypeBuckets: TaskTypeBucket[], definitions: TaskTypeDictionary): number {
+  let cost = 0;
+  for (const bucket of taskTypeBuckets) {
+    const taskDef = definitions.get(bucket.key as string);
+    if (taskDef) {
+      cost += bucket.doc_count * taskDef?.cost ?? TaskCost.Normal;
+    } else {
+      // task type is not registered with dictionary, do not add to cost
+    }
+  }
+  return cost;
 }

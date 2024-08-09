@@ -13,5 +13,4 @@ oneOf:
       type: string
     maxItems: 1000
 x-technical-preview: true
-examples:
-  - 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
+example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42

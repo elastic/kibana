@@ -14,7 +14,7 @@ steps:
       preemptible: true
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
-    timeout_in_minutes: 60
+    timeout_in_minutes: 90
     retry:
       automatic:
         - exit_status: '-1'

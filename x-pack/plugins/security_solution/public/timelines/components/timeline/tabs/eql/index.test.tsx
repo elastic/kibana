@@ -8,6 +8,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
+import type { Dispatch } from 'redux';
 
 import { defaultRowRenderers } from '../../body/renderers';
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
@@ -85,18 +86,16 @@ describe('Timeline', () => {
     );
 
     props = {
+      dispatch: {} as Dispatch,
       activeTab: TimelineTabs.eql,
       columns: defaultHeaders,
       end: endDate,
       eqlOptions: {},
-      expandedDetail: {},
       isLive: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
-      onEventClosed: jest.fn(),
       renderCellValue: DefaultCellRenderer,
       rowRenderers: defaultRowRenderers,
-      showExpandedDetails: false,
       start: startDate,
       timelineId: TimelineId.test,
       timerangeKind: 'absolute',

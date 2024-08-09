@@ -5,6 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { v4 as uuidv4 } from 'uuid';
 import { omitBy } from 'lodash';
 
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
@@ -132,6 +133,52 @@ export default function ({ getService }: FtrProviderContext) {
             ...monitor,
             locations: [localLoc],
             name: 'https://www.google.com',
+          })
+        );
+      });
+
+      it('can enable retries', async () => {
+        const name = `test name ${uuidv4()}`;
+        const monitor = {
+          type: 'http',
+          locations: ['dev'],
+          url: 'https://www.google.com',
+          name,
+          retest_on_failure: true,
+        };
+        const { body: result } = await addMonitorAPI(monitor);
+
+        expect(result).eql(
+          omitMonitorKeys({
+            ...defaultFields,
+            ...monitor,
+            locations: [localLoc],
+            name,
+            max_attempts: 2,
+            retest_on_failure: undefined, // this key is not part of the SO and should not be defined
+          })
+        );
+      });
+
+      it('can disable retries', async () => {
+        const name = `test name ${uuidv4()}`;
+        const monitor = {
+          type: 'http',
+          locations: ['dev'],
+          url: 'https://www.google.com',
+          name,
+          retest_on_failure: false,
+        };
+        const { body: result } = await addMonitorAPI(monitor);
+
+        expect(result).eql(
+          omitMonitorKeys({
+            ...defaultFields,
+            ...monitor,
+            locations: [localLoc],
+            name,
+            max_attempts: 1,
+            retest_on_failure: undefined, // this key is not part of the SO and should not be defined
           })
         );
       });

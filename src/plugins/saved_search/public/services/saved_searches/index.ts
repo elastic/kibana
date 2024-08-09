@@ -14,16 +14,9 @@ export {
 export type { SaveSavedSearchOptions } from './save_saved_searches';
 export { saveSavedSearch } from './save_saved_searches';
 export { SAVED_SEARCH_TYPE } from './constants';
-export type {
-  SavedSearch,
-  SearchByReferenceInput,
-  SearchByValueInput,
-  SavedSearchByValueAttributes,
-} from './types';
+export type { SavedSearch, SavedSearchByValueAttributes } from './types';
 export {
-  getSavedSearchAttributeService,
-  toSavedSearch,
-  type SavedSearchAttributeService,
+  byValueToSavedSearch,
   type SavedSearchUnwrapMetaInfo,
   type SavedSearchUnwrapResult,
-} from './saved_search_attribute_service';
+} from './to_saved_search';

@@ -16,6 +16,7 @@ import { ConcreteTaskInstance } from '../task';
 import { claimAvailableTasksDefault } from './strategy_default';
 import { claimAvailableTasksMget } from './strategy_mget';
 import { CLAIM_STRATEGY_DEFAULT, CLAIM_STRATEGY_MGET } from '../config';
+import { TaskPartitioner } from '../lib/task_partitioner';
 
 export interface TaskClaimerOpts {
   getCapacity: (taskType?: string | undefined) => number;
@@ -28,6 +29,7 @@ export interface TaskClaimerOpts {
   excludedTaskTypes: string[];
   taskMaxAttempts: Record<string, number>;
   logger: Logger;
+  taskPartitioner: TaskPartitioner;
 }
 
 export interface ClaimOwnershipResult {
@@ -35,6 +37,7 @@ export interface ClaimOwnershipResult {
     tasksUpdated: number;
     tasksConflicted: number;
     tasksClaimed: number;
+    tasksLeftUnclaimed?: number;
   };
   docs: ConcreteTaskInstance[];
   timing?: TaskTiming;
@@ -59,13 +62,12 @@ export function getTaskClaimer(logger: Logger, strategy: string): TaskClaimerFn 
   return claimAvailableTasksDefault;
 }
 
-export function getEmptyClaimOwnershipResult() {
+export function getEmptyClaimOwnershipResult(): ClaimOwnershipResult {
   return {
     stats: {
       tasksUpdated: 0,
       tasksConflicted: 0,
       tasksClaimed: 0,
-      tasksRejected: 0,
     },
     docs: [],
   };

@@ -11,7 +11,7 @@ import type {
   ReturnOf,
   RouteRepositoryClient,
 } from '@kbn/server-route-repository';
-import { formatRequest } from '@kbn/server-route-repository';
+import { formatRequest } from '@kbn/server-route-repository-utils';
 import { FetchOptions } from '../../../common/fetch_options';
 import type {
   APIEndpoint,

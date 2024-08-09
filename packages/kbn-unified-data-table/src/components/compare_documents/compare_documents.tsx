@@ -42,13 +42,13 @@ export interface CompareDocumentsProps {
   dataView: DataView;
   isPlainRecord: boolean;
   selectedFieldNames: string[];
-  selectedDocs: string[];
+  selectedDocIds: string[];
   schemaDetectors: EuiDataGridSchemaDetector[];
   forceShowAllFields: boolean;
   showFullScreenButton?: boolean;
   fieldFormats: FieldFormatsStart;
   getDocById: (id: string) => DataTableRecord | undefined;
-  setSelectedDocs: (selectedDocs: string[]) => void;
+  replaceSelectedDocs: (docIds: string[]) => void;
   setIsCompareActive: (isCompareActive: boolean) => void;
   additionalFieldGroups?: AdditionalFieldGroups;
 }
@@ -69,13 +69,13 @@ const CompareDocuments = ({
   isPlainRecord,
   selectedFieldNames,
   additionalFieldGroups,
-  selectedDocs,
+  selectedDocIds,
   schemaDetectors,
   forceShowAllFields,
   showFullScreenButton,
   fieldFormats,
   getDocById,
-  setSelectedDocs,
+  replaceSelectedDocs,
   setIsCompareActive,
 }: CompareDocumentsProps) => {
   // Memoize getDocById to ensure we don't lose access to the comparison docs if, for example,
@@ -104,7 +104,7 @@ const CompareDocuments = ({
     dataView,
     selectedFieldNames,
     additionalFieldGroups,
-    selectedDocs,
+    selectedDocIds,
     showAllFields: Boolean(forceShowAllFields || showAllFields),
     showMatchingValues: Boolean(showMatchingValues),
     getDocById: memoizedGetDocById,
@@ -113,25 +113,25 @@ const CompareDocuments = ({
     wrapper,
     isPlainRecord,
     fieldColumnId,
-    selectedDocs,
+    selectedDocIds,
     getDocById: memoizedGetDocById,
-    setSelectedDocs,
+    replaceSelectedDocs,
   });
   const comparisonColumnVisibility = useMemo<EuiDataGridColumnVisibility>(
     () => ({
       visibleColumns: comparisonColumns.map(({ id: columnId }) => columnId),
       setVisibleColumns: (visibleColumns) => {
         const [_fieldColumnId, ...newSelectedDocs] = visibleColumns;
-        setSelectedDocs(newSelectedDocs);
+        replaceSelectedDocs(newSelectedDocs);
       },
     }),
-    [comparisonColumns, setSelectedDocs]
+    [comparisonColumns, replaceSelectedDocs]
   );
   const additionalControls = useMemo(
     () => (
       <ComparisonControls
         isPlainRecord={isPlainRecord}
-        selectedDocs={selectedDocs}
+        selectedDocIds={selectedDocIds}
         showDiff={showDiff}
         diffMode={diffMode}
         showDiffDecorations={showDiffDecorations}
@@ -150,7 +150,7 @@ const CompareDocuments = ({
       diffMode,
       forceShowAllFields,
       isPlainRecord,
-      selectedDocs,
+      selectedDocIds,
       setDiffMode,
       setIsCompareActive,
       setShowAllFields,
@@ -184,7 +184,7 @@ const CompareDocuments = ({
     dataView,
     comparisonFields,
     fieldColumnId,
-    selectedDocs,
+    selectedDocIds,
     diffMode: showDiff ? diffMode : undefined,
     fieldFormats,
     getDocById: memoizedGetDocById,

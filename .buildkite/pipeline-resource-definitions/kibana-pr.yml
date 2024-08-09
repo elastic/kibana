@@ -19,10 +19,10 @@ spec:
       description: Runs manually for pull requests
     spec:
       env:
-        ELASTIC_PR_COMMENTS_ENABLED: 'true'
-        ELASTIC_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
-        ELASTIC_GITHUB_STEP_COMMIT_STATUS_ENABLED: 'true'
+        PR_COMMENTS_ENABLED: 'true'
+        GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
         GITHUB_BUILD_COMMIT_STATUS_CONTEXT: kibana-ci
+        GITHUB_STEP_COMMIT_STATUS_ENABLED: 'true'
       allow_rebuilds: true
       branch_configuration: ''
       cancel_intermediate_builds: true

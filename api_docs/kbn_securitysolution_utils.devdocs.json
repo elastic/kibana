@@ -253,6 +253,53 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.isAggregatingQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "isAggregatingQuery",
+        "description": [],
+        "signature": [
+          "(ast: ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAst",
+            "text": "ESQLAst"
+          },
+          ") => boolean"
+        ],
+        "path": "packages/kbn-securitysolution-utils/src/esql/compute_if_esql_query_aggregating.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-utils",
+            "id": "def-common.isAggregatingQuery.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "ast",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLAst",
+                "text": "ESQLAst"
+              }
+            ],
+            "path": "packages/kbn-securitysolution-utils/src/esql/compute_if_esql_query_aggregating.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
         "id": "def-common.isPathValid",
         "type": "Function",
         "tags": [],

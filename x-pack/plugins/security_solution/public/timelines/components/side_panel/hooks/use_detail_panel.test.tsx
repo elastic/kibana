@@ -10,7 +10,7 @@ import type { UseDetailPanelConfig } from './use_detail_panel';
 import { useDetailPanel } from './use_detail_panel';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
-import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
+import { TimelineId } from '../../../../../common/types/timeline';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import { TestProviders } from '../../../../common/mock';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
@@ -74,34 +74,6 @@ describe('useDetailPanel', () => {
       await waitForNextUpdate();
 
       expect(result.current.openEventDetailsPanel).toBeDefined();
-      expect(result.current.shouldShowDetailsPanel).toBe(false);
-      expect(result.current.DetailsPanel).toBeNull();
-    });
-  });
-
-  test('should show the details panel', async () => {
-    mockGetExpandedDetail.mockImplementation(() => ({
-      [TimelineTabs.session]: {
-        panelView: 'somePanel',
-      },
-    }));
-    const updatedProps = {
-      ...defaultProps,
-      tabType: TimelineTabs.session,
-    };
-
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderUseDetailPanel(updatedProps);
-      await waitForNextUpdate();
-
-      expect(result.current.DetailsPanel).toMatchInlineSnapshot(`
-        <Memo(DetailsPanel)
-          browserFields={Object {}}
-          handleOnPanelClosed={[Function]}
-          scopeId="timeline-test"
-          tabType="session"
-        />
-      `);
     });
   });
 });

@@ -47,6 +47,23 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   }
 
   /**
+   * Returns whether setup of the Knowledge Base can be performed (essentially an ML features check)
+   *
+   */
+  public isSetupAvailable = async () => {
+    // ML plugin requires request to retrieve capabilities, which are in turn scoped to the user from the request,
+    // so we just test the API for a 404 instead to determine if ML is 'available'
+    // TODO: expand to include memory check, see https://github.com/elastic/ml-team/issues/1208#issuecomment-2115770318
+    try {
+      const esClient = await this.options.elasticsearchClientPromise;
+      await esClient.ml.getMemoryStats({ human: true });
+    } catch (error) {
+      return false;
+    }
+    return true;
+  };
+
+  /**
    * Downloads and installs ELSER model if not already installed
    *
    * @param soClient SavedObjectsClientContract for installing ELSER so that ML SO's are in sync
@@ -104,10 +121,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         wait_for: 'fully_allocated',
       });
     } catch (error) {
-      if (!isModelAlreadyExistsError(error)) {
-        this.options.logger.error(`Error deploying ELSER model '${elserId}':\n${error}`);
-      }
-      this.options.logger.debug(`Error deploying ELSER model '${elserId}', model already deployed`);
+      this.options.logger.error(`Error deploying ELSER model '${elserId}':\n${error}`);
+      throw new Error(`Error deploying ELSER model '${elserId}':\n${error}`);
     }
   };
 
@@ -214,7 +229,9 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         this.options.logger.debug(`Knowledge Base docs already loaded!`);
       }
     } catch (e) {
+      this.options.setIsKBSetupInProgress(false);
       this.options.logger.error(`Error setting up Knowledge Base: ${e.message}`);
+      throw new Error(`Error setting up Knowledge Base: ${e.message}`);
     }
     this.options.setIsKBSetupInProgress(false);
   };

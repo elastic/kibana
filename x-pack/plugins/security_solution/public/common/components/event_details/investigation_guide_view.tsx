@@ -43,6 +43,7 @@ interface InvestigationGuideViewProps {
 /**
  * Investigation guide that shows the markdown text of rule.note
  */
+// TODO: MOVE TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
 const InvestigationGuideViewComponent: React.FC<InvestigationGuideViewProps> = ({
   basicData,
   ruleNote,

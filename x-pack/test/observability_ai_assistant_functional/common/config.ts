@@ -9,13 +9,13 @@ import { FtrConfigProviderContext } from '@kbn/test';
 import { merge } from 'lodash';
 import { UrlObject } from 'url';
 import {
+  KibanaEBTServerProvider,
+  KibanaEBTUIProvider,
+} from '@kbn/test-suites-src/analytics/services/kibana_ebt';
+import {
   editorUser,
   viewerUser,
 } from '../../observability_ai_assistant_api_integration/common/users/users';
-import {
-  KibanaEBTServerProvider,
-  KibanaEBTUIProvider,
-} from '../../../../test/analytics/services/kibana_ebt';
 import {
   ObservabilityAIAssistantFtrConfig,
   createObservabilityAIAssistantAPIConfig,

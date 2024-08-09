@@ -19,7 +19,7 @@ class FeatureFlag<T extends string = string> {
 }
 
 export const createFeatureFlagService = <T extends string>(featureFlags: T[]) => {
-  return new FeatureFlag<typeof featureFlags[number]>(featureFlags);
+  return new FeatureFlag<(typeof featureFlags)[number]>(featureFlags);
 };
 
 export type FeatureFlagService<T extends string = string> = InstanceType<typeof FeatureFlag<T>>;

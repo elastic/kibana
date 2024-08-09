@@ -7,7 +7,7 @@
 
 import { from, takeUntil } from 'rxjs';
 
-import { IStaticAssets } from '@kbn/core-http-browser';
+import type { IStaticAssets } from '@kbn/core-http-browser';
 import {
   GlobalSearchProviderResult,
   GlobalSearchResultProvider,
@@ -36,9 +36,10 @@ export function getIndicesSearchResultProvider(
             const score = calculateScore(term, indexName);
 
             return {
-              id: indexName,
-              title: indexName,
               icon: staticAssets.getPluginAssetHref('images/index.svg'),
+              id: indexName,
+              score,
+              title: indexName,
               type: i18n.translate('xpack.enterpriseSearch.searchIndexProvider.type.name', {
                 defaultMessage: 'Index',
               }),
@@ -46,7 +47,6 @@ export function getIndicesSearchResultProvider(
                 path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/search_indices/${indexName}`,
                 prependBasePath: true,
               },
-              score,
             };
           })
           .filter(({ score }) => score > 0)

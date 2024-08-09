@@ -218,7 +218,6 @@ const ExportContentUi = ({
   return (
     <>
       <EuiForm>
-        <EuiSpacer size="l" />
         <>{helpText}</>
         <EuiSpacer size="m" />
         <>{renderRadioOptions()}</>

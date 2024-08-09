@@ -9,18 +9,10 @@
     "objects": []
   },
   "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-user-profile-server-internal",
-        "id": "def-common.CoreUserProfileRouteHandlerContext",
+        "id": "def-server.CoreUserProfileRouteHandlerContext",
         "type": "Class",
         "tags": [],
         "label": "CoreUserProfileRouteHandlerContext",
@@ -28,17 +20,17 @@
         "signature": [
           {
             "pluginId": "@kbn/core-user-profile-server-internal",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreUserProfileServerInternalPluginApi",
-            "section": "def-common.CoreUserProfileRouteHandlerContext",
+            "section": "def-server.CoreUserProfileRouteHandlerContext",
             "text": "CoreUserProfileRouteHandlerContext"
           },
           " implements ",
           {
             "pluginId": "@kbn/core-user-profile-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreUserProfileServerPluginApi",
-            "section": "def-common.UserProfileRequestHandlerContext",
+            "section": "def-server.UserProfileRequestHandlerContext",
             "text": "UserProfileRequestHandlerContext"
           }
         ],
@@ -48,7 +40,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-user-profile-server-internal",
-            "id": "def-common.CoreUserProfileRouteHandlerContext.Unnamed",
+            "id": "def-server.CoreUserProfileRouteHandlerContext.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -62,7 +54,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-user-profile-server-internal",
-                "id": "def-common.CoreUserProfileRouteHandlerContext.Unnamed.$1",
+                "id": "def-server.CoreUserProfileRouteHandlerContext.Unnamed.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "userProfileStart",
@@ -70,9 +62,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-user-profile-server-internal",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreUserProfileServerInternalPluginApi",
-                    "section": "def-common.InternalUserProfileServiceStart",
+                    "section": "def-server.InternalUserProfileServiceStart",
                     "text": "InternalUserProfileServiceStart"
                   }
                 ],
@@ -83,7 +75,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-user-profile-server-internal",
-                "id": "def-common.CoreUserProfileRouteHandlerContext.Unnamed.$2",
+                "id": "def-server.CoreUserProfileRouteHandlerContext.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
@@ -91,9 +83,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -108,7 +100,7 @@
           },
           {
             "parentPluginId": "@kbn/core-user-profile-server-internal",
-            "id": "def-common.CoreUserProfileRouteHandlerContext.getCurrent",
+            "id": "def-server.CoreUserProfileRouteHandlerContext.getCurrent",
             "type": "Function",
             "tags": [],
             "label": "getCurrent",
@@ -146,7 +138,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-user-profile-server-internal",
-                "id": "def-common.CoreUserProfileRouteHandlerContext.getCurrent.$1",
+                "id": "def-server.CoreUserProfileRouteHandlerContext.getCurrent.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{\n    dataPath,\n  }",
@@ -157,7 +149,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/core-user-profile-server-internal",
-                    "id": "def-common.CoreUserProfileRouteHandlerContext.getCurrent.$1.dataPath",
+                    "id": "def-server.CoreUserProfileRouteHandlerContext.getCurrent.$1.dataPath",
                     "type": "string",
                     "tags": [],
                     "label": "dataPath",
@@ -179,7 +171,7 @@
       },
       {
         "parentPluginId": "@kbn/core-user-profile-server-internal",
-        "id": "def-common.UserProfileService",
+        "id": "def-server.UserProfileService",
         "type": "Class",
         "tags": [],
         "label": "UserProfileService",
@@ -187,9 +179,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-user-profile-server-internal",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreUserProfileServerInternalPluginApi",
-            "section": "def-common.UserProfileService",
+            "section": "def-server.UserProfileService",
             "text": "UserProfileService"
           },
           " implements ",
@@ -197,17 +189,17 @@
           "<",
           {
             "pluginId": "@kbn/core-user-profile-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreUserProfileServerPluginApi",
-            "section": "def-common.UserProfileServiceSetup",
+            "section": "def-server.UserProfileServiceSetup",
             "text": "UserProfileServiceSetup"
           },
           ", ",
           {
             "pluginId": "@kbn/core-user-profile-server-internal",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreUserProfileServerInternalPluginApi",
-            "section": "def-common.InternalUserProfileServiceStart",
+            "section": "def-server.InternalUserProfileServiceStart",
             "text": "InternalUserProfileServiceStart"
           },
           ">"
@@ -218,7 +210,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-user-profile-server-internal",
-            "id": "def-common.UserProfileService.Unnamed",
+            "id": "def-server.UserProfileService.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -232,7 +224,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-user-profile-server-internal",
-                "id": "def-common.UserProfileService.Unnamed.$1",
+                "id": "def-server.UserProfileService.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "coreContext",
@@ -250,7 +242,7 @@
           },
           {
             "parentPluginId": "@kbn/core-user-profile-server-internal",
-            "id": "def-common.UserProfileService.setup",
+            "id": "def-server.UserProfileService.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
@@ -259,9 +251,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-user-profile-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreUserProfileServerPluginApi",
-                "section": "def-common.UserProfileServiceSetup",
+                "section": "def-server.UserProfileServiceSetup",
                 "text": "UserProfileServiceSetup"
               }
             ],
@@ -273,7 +265,7 @@
           },
           {
             "parentPluginId": "@kbn/core-user-profile-server-internal",
-            "id": "def-common.UserProfileService.start",
+            "id": "def-server.UserProfileService.start",
             "type": "Function",
             "tags": [],
             "label": "start",
@@ -282,9 +274,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-user-profile-server-internal",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreUserProfileServerInternalPluginApi",
-                "section": "def-common.InternalUserProfileServiceStart",
+                "section": "def-server.InternalUserProfileServiceStart",
                 "text": "InternalUserProfileServiceStart"
               }
             ],
@@ -296,7 +288,7 @@
           },
           {
             "parentPluginId": "@kbn/core-user-profile-server-internal",
-            "id": "def-common.UserProfileService.stop",
+            "id": "def-server.UserProfileService.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
@@ -320,7 +312,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-user-profile-server-internal",
-        "id": "def-common.InternalUserProfileServiceSetup",
+        "id": "def-server.InternalUserProfileServiceSetup",
         "type": "Type",
         "tags": [],
         "label": "InternalUserProfileServiceSetup",
@@ -328,9 +320,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-user-profile-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreUserProfileServerPluginApi",
-            "section": "def-common.UserProfileServiceSetup",
+            "section": "def-server.UserProfileServiceSetup",
             "text": "UserProfileServiceSetup"
           }
         ],
@@ -341,7 +333,7 @@
       },
       {
         "parentPluginId": "@kbn/core-user-profile-server-internal",
-        "id": "def-common.InternalUserProfileServiceStart",
+        "id": "def-server.InternalUserProfileServiceStart",
         "type": "Type",
         "tags": [],
         "label": "InternalUserProfileServiceStart",
@@ -349,17 +341,17 @@
         "signature": [
           {
             "pluginId": "@kbn/core-user-profile-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreUserProfileServerPluginApi",
-            "section": "def-common.UserProfileService",
+            "section": "def-server.UserProfileService",
             "text": "UserProfileService"
           },
           " & Pick<",
           {
             "pluginId": "@kbn/core-user-profile-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreUserProfileServerPluginApi",
-            "section": "def-common.CoreUserProfileDelegateContract",
+            "section": "def-server.CoreUserProfileDelegateContract",
             "text": "CoreUserProfileDelegateContract"
           },
           ", \"update\">"
@@ -370,6 +362,14 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

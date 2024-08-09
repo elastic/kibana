@@ -17,24 +17,26 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  const SOURCE_API_URL = '/api/metrics/source/default';
+  const SOURCE_API_URL = '/api/metrics/source';
+  const SOURCE_ID = 'default';
   const kibanaServer = getService('kibanaServer');
-  const patchRequest = async (
-    body: PartialMetricsSourceConfigurationProperties
-  ): Promise<MetricsSourceConfigurationResponse | undefined> => {
-    const response = await supertest
-      .patch(SOURCE_API_URL)
-      .set('kbn-xsrf', 'xxx')
-      .send(body)
-      .expect(200);
-    return response.body;
-  };
 
   describe('sources', () => {
     before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
     after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
     before(() => kibanaServer.savedObjects.cleanStandardList());
     after(() => kibanaServer.savedObjects.cleanStandardList());
+
+    const patchRequest = async (
+      body: PartialMetricsSourceConfigurationProperties
+    ): Promise<MetricsSourceConfigurationResponse | undefined> => {
+      const response = await supertest
+        .patch(`${SOURCE_API_URL}/${SOURCE_ID}`)
+        .set('kbn-xsrf', 'xxx')
+        .send(body)
+        .expect(200);
+      return response.body;
+    };
 
     describe('patch request', () => {
       it('applies all top-level field updates to an existing source', async () => {
@@ -103,27 +105,64 @@ export default function ({ getService }: FtrProviderContext) {
       it('validates anomalyThreshold is between range 1-100', async () => {
         // create config with bad request
         await supertest
-          .patch(SOURCE_API_URL)
+          .patch(`${SOURCE_API_URL}/${SOURCE_ID}`)
           .set('kbn-xsrf', 'xxx')
           .send({ name: 'NAME', anomalyThreshold: -20 })
           .expect(400);
         // create config with good request
         await supertest
-          .patch(SOURCE_API_URL)
+          .patch(`${SOURCE_API_URL}/${SOURCE_ID}`)
           .set('kbn-xsrf', 'xxx')
           .send({ name: 'NAME', anomalyThreshold: 20 })
           .expect(200);
 
         await supertest
-          .patch(SOURCE_API_URL)
+          .patch(`${SOURCE_API_URL}/${SOURCE_ID}`)
           .set('kbn-xsrf', 'xxx')
           .send({ anomalyThreshold: -2 })
           .expect(400);
         await supertest
-          .patch(SOURCE_API_URL)
+          .patch(`${SOURCE_API_URL}/${SOURCE_ID}`)
           .set('kbn-xsrf', 'xxx')
           .send({ anomalyThreshold: 101 })
           .expect(400);
+      });
+    });
+
+    describe('has data', () => {
+      const makeRequest = async (params?: {
+        modules?: string[];
+        expectedHttpStatusCode?: number;
+      }) => {
+        const { modules, expectedHttpStatusCode = 200 } = params ?? {};
+        return supertest
+          .get(`${SOURCE_API_URL}/hasData`)
+          .query(modules ? { modules } : '')
+          .set('kbn-xsrf', 'xxx')
+          .expect(expectedHttpStatusCode);
+      };
+
+      before(() => patchRequest({ name: 'default', metricAlias: 'metrics-*,metricbeat-*' }));
+
+      it('should return "hasData" true when modules is "system"', async () => {
+        const response = await makeRequest({ modules: ['system'] });
+        expect(response.body.hasData).to.be(true);
+      });
+      it('should return "hasData" false when modules is "nginx"', async () => {
+        const response = await makeRequest({ modules: ['nginx'] });
+        expect(response.body.hasData).to.be(true);
+      });
+
+      it('should return "hasData" true when modules is not passed', async () => {
+        const response = await makeRequest();
+        expect(response.body.hasData).to.be(true);
+      });
+
+      it('should fail when "modules" size is greater than 5', async () => {
+        await makeRequest({
+          modules: ['system', 'nginx', 'kubernetes', 'aws', 'kafka', 'azure'],
+          expectedHttpStatusCode: 400,
+        });
       });
     });
   });

@@ -14,18 +14,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-plugins-server-mocks",
-        "id": "def-common.pluginServiceMock",
+        "id": "def-server.pluginServiceMock",
         "type": "Object",
         "tags": [],
         "label": "pluginServiceMock",
@@ -36,7 +28,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-plugins-server-mocks",
-            "id": "def-common.pluginServiceMock.create",
+            "id": "def-server.pluginServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -52,7 +44,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server-mocks",
-            "id": "def-common.pluginServiceMock.createSetupContract",
+            "id": "def-server.pluginServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -61,9 +53,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-plugins-contracts-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCorePluginsContractsServerPluginApi",
-                "section": "def-common.PluginsServiceSetup",
+                "section": "def-server.PluginsServiceSetup",
                 "text": "PluginsServiceSetup"
               },
               ">"
@@ -76,7 +68,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server-mocks",
-            "id": "def-common.pluginServiceMock.createStartContract",
+            "id": "def-server.pluginServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
@@ -85,9 +77,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-plugins-contracts-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCorePluginsContractsServerPluginApi",
-                "section": "def-common.PluginsServiceStart",
+                "section": "def-server.PluginsServiceStart",
                 "text": "PluginsServiceStart"
               },
               ">"
@@ -100,7 +92,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server-mocks",
-            "id": "def-common.pluginServiceMock.createInternalSetupContract",
+            "id": "def-server.pluginServiceMock.createInternalSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalSetupContract",
@@ -117,7 +109,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server-mocks",
-            "id": "def-common.pluginServiceMock.createInternalStartContract",
+            "id": "def-server.pluginServiceMock.createInternalStartContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalStartContract",
@@ -134,7 +126,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server-mocks",
-            "id": "def-common.pluginServiceMock.createUiPlugins",
+            "id": "def-server.pluginServiceMock.createUiPlugins",
             "type": "Function",
             "tags": [],
             "label": "createUiPlugins",
@@ -152,5 +144,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

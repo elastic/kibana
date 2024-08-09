@@ -4,7 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiConfirmModal, useGeneratedHtmlId, EuiHealth } from '@elastic/eui';
+import {
+  EuiHealth,
+  EuiButton,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiCheckbox,
+  EuiButtonEmpty,
+  EuiModal,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  useGeneratedHtmlId,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiBadge,
+} from '@elastic/eui';
 import React from 'react';
 
 import { EuiLink } from '@elastic/eui';
@@ -17,8 +33,10 @@ import { useMappingsState } from '../../../../components/mappings_editor/mapping
 import { useAppContext } from '../../../../app_context';
 
 export interface TrainedModelsDeploymentModalProps {
-  fetchData: () => void;
   errorsInTrainedModelDeployment: Record<string, string | undefined>;
+  forceSaveMappings: () => void;
+  saveMappings: () => void;
+  saveMappingsLoading: boolean;
   setErrorsInTrainedModelDeployment: React.Dispatch<
     React.SetStateAction<Record<string, string | undefined>>
   >;
@@ -29,18 +47,21 @@ const TRAINED_MODELS_MANAGE = 'trained_models';
 
 export function TrainedModelsDeploymentModal({
   errorsInTrainedModelDeployment = {},
-  fetchData,
+  forceSaveMappings,
+  saveMappings,
+  saveMappingsLoading,
   setErrorsInTrainedModelDeployment,
 }: TrainedModelsDeploymentModalProps) {
+  const modalTitleId = useGeneratedHtmlId();
   const { fields, inferenceToModelIdMap } = useMappingsState();
   const {
     plugins: { ml },
     url,
   } = useAppContext();
-  const modalTitleId = useGeneratedHtmlId();
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const closeModal = () => setIsModalVisible(false);
   const [mlManagementPageUrl, setMlManagementPageUrl] = useState<string>('');
+  const [allowForceSaveMappings, setAllowForceSaveMappings] = useState<boolean>(false);
   const { showErrorToasts } = useMLModelNotificationToasts();
 
   useEffect(() => {
@@ -80,9 +101,14 @@ export function TrainedModelsDeploymentModal({
   useEffect(() => {
     const models = inferenceIdsInPendingList.map(
       (inferenceId) => inferenceToModelIdMap?.[inferenceId]
-    );
+    ); // filter out third-party models
     for (const model of models) {
-      if (model && !model.isDownloading && !model.isDeployed) {
+      if (
+        model?.trainedModelId &&
+        model.isDeployable &&
+        !model.isDownloading &&
+        !model.isDeployed
+      ) {
         // Sometimes the model gets stuck in a ready to deploy state, so we need to trigger deployment manually
         startModelAllocation(model.trainedModelId);
       }
@@ -109,74 +135,143 @@ export function TrainedModelsDeploymentModal({
     }
   }, [erroredDeployments.length, pendingDeployments.length]);
   return isModalVisible ? (
-    <EuiConfirmModal
-      aria-labelledby={modalTitleId}
+    <EuiModal
       style={{ width: 600 }}
-      title={
-        erroredDeployments.length > 0
-          ? i18n.translate(
-              'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.deploymentErrorTitle',
-              {
-                defaultMessage: 'Models could not be deployed',
-              }
-            )
-          : i18n.translate('xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.titleLabel', {
-              defaultMessage: 'Models still deploying',
-            })
-      }
-      titleProps={{ id: modalTitleId }}
-      onCancel={closeModal}
-      onConfirm={fetchData}
-      cancelButtonText={i18n.translate(
-        'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.closeButtonLabel',
-        {
-          defaultMessage: 'Close',
-        }
-      )}
-      confirmButtonText={i18n.translate(
-        'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.refreshButtonLabel',
-        {
-          defaultMessage: 'Refresh',
-        }
-      )}
-      defaultFocusedButton="confirm"
+      aria-labelledby={modalTitleId}
+      onClose={closeModal}
       data-test-subj="trainedModelsDeploymentModal"
+      initialFocus="[data-test-subj=tryAgainModalButton]"
     >
-      <p data-test-subj="trainedModelsDeploymentModalText">
-        {erroredDeployments.length > 0
-          ? i18n.translate(
-              'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.deploymentErrorText',
-              {
-                defaultMessage: 'There was an error when trying to deploy the following models.',
-              }
+      <EuiModalHeader>
+        <EuiModalHeaderTitle title={modalTitleId}>
+          {erroredDeployments.length > 0
+            ? i18n.translate(
+                'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.deploymentErrorTitle',
+                {
+                  defaultMessage: 'Models could not be deployed',
+                }
+              )
+            : i18n.translate('xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.titleLabel', {
+                defaultMessage: 'Models still deploying',
+              })}
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <p data-test-subj="trainedModelsDeploymentModalText">
+          {erroredDeployments.length > 0
+            ? i18n.translate(
+                'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.deploymentErrorText',
+                {
+                  defaultMessage: 'There was an error when trying to deploy the following models.',
+                }
+              )
+            : i18n.translate(
+                'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.textAboutDeploymentsNotCompleted',
+                {
+                  defaultMessage:
+                    'Some fields are referencing models that have not yet completed deployment. Deployment may take a few minutes to complete.',
+                }
+              )}
+        </p>
+        <EuiSpacer size="s" />
+        <EuiLink href={mlManagementPageUrl} target="_blank">
+          {i18n.translate(
+            'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.textTrainedModelManagementLink',
+            {
+              defaultMessage: 'Go to Trained Model Management',
+            }
+          )}
+        </EuiLink>
+        <EuiSpacer />
+        <ul style={{ listStyleType: 'none' }}>
+          {(erroredDeployments.length > 0 ? erroredDeployments : pendingDeployments).map(
+            (deployment) => (
+              <li key={deployment}>
+                <EuiBadge color="hollow">
+                  <EuiHealth color="danger">{deployment}</EuiHealth>
+                </EuiBadge>
+              </li>
             )
-          : i18n.translate(
-              'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.textAboutDeploymentsNotCompleted',
+          )}
+        </ul>
+        <EuiSpacer />
+        <EuiCallOut
+          iconType="warning"
+          color="warning"
+          title={i18n.translate(
+            'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.forceSaveMappingsConfirmLabel',
+            {
+              defaultMessage: 'Saving mappings without a deployed model may cause errors',
+            }
+          )}
+        >
+          {i18n.translate(
+            'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.forceSaveMappingsDescription',
+            {
+              defaultMessage:
+                'Saving a semantic text field referencing a model that is not running will break ingesting documents and searching over documents using or referencing that field.',
+            }
+          )}
+
+          <EuiSpacer size="s" />
+          <EuiCheckbox
+            data-test-subj="allowForceSaveMappingsCheckbox"
+            id="allowForceSaveMappings"
+            checked={allowForceSaveMappings}
+            onChange={() => setAllowForceSaveMappings(!allowForceSaveMappings)}
+            label={i18n.translate(
+              'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.allowForceSaveMappingsLabel',
               {
-                defaultMessage:
-                  'Some fields are referencing models that have not yet completed deployment. Deployment may take a few minutes to complete.',
+                defaultMessage: 'Allow semantic text mapping updates without a deployed model',
               }
             )}
-      </p>
-      <ul style={{ listStyleType: 'none' }}>
-        {(erroredDeployments.length > 0 ? erroredDeployments : pendingDeployments).map(
-          (deployment) => (
-            <li key={deployment}>
-              <EuiHealth textSize="xs" color="danger">
-                {deployment}
-              </EuiHealth>
-            </li>
-          )
-        )}
-      </ul>
-      <EuiLink href={mlManagementPageUrl} target="_blank">
-        {i18n.translate(
-          'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.textTrainedModelManagementLink',
-          {
-            defaultMessage: 'Go to Trained Model Management',
-          }
-        )}
-      </EuiLink>
-    </EuiConfirmModal>
+          />
+        </EuiCallOut>
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={closeModal}>
+              {i18n.translate(
+                'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.cancelButtonLabel',
+                {
+                  defaultMessage: 'Cancel',
+                }
+              )}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={saveMappings}
+              data-test-subj="tryAgainModalButton"
+              isLoading={saveMappingsLoading}
+            >
+              {i18n.translate(
+                'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.tryAgainButtonLabel',
+                {
+                  defaultMessage: 'Try again',
+                }
+              )}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              onClick={forceSaveMappings}
+              disabled={!allowForceSaveMappings}
+              isLoading={saveMappingsLoading}
+              data-test-subj="forceSaveMappingsButton"
+            >
+              {i18n.translate(
+                'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.forceSaveMappingsLabel',
+                {
+                  defaultMessage: 'Force save mappings',
+                }
+              )}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiModalFooter>
+    </EuiModal>
   ) : null;
 }

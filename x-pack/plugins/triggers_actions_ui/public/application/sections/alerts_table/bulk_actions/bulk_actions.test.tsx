@@ -25,7 +25,8 @@ import { createAppMockRenderer } from '../../test_utils';
 import { getCasesMockMap } from '../cases/index.mock';
 import { getMaintenanceWindowMockMap } from '../maintenance_windows/index.mock';
 import { createCasesServiceMock } from '../index.mock';
-import { AlertsTableContext, AlertsTableQueryContext } from '../contexts/alerts_table_context';
+import { AlertsTableContext } from '../contexts/alerts_table_context';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 
 jest.mock('@kbn/data-plugin/public');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -132,6 +133,10 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 });
 
 const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
+
+type AlertsTableWithBulkActionsContextProps = AlertsTableProps & {
+  initialBulkActionsState?: BulkActionsState;
+};
 
 describe('AlertsTable.BulkActions', () => {
   beforeAll(() => {
@@ -240,23 +245,25 @@ describe('AlertsTable.BulkActions', () => {
     onChangeVisibleColumns: () => {},
     browserFields: {},
     query: {},
-    pagination: { pageIndex: 0, pageSize: 1 },
+    pageIndex: 0,
+    pageSize: 1,
     sort: [],
     isLoading: false,
     alerts,
     oldAlertsData,
     ecsAlertsData,
-    getInspectQuery: () => ({ request: [], response: [] }),
-    refetch: refreshMockFn,
+    querySnapshot: { request: [], response: [] },
+    refetchAlerts: refreshMockFn,
     alertsCount: alerts.length,
     onSortChange: () => {},
     onPageChange: () => {},
     fieldFormats: mockFieldFormatsRegistry,
   };
 
-  const tablePropsWithBulkActions = {
+  const tablePropsWithBulkActions: AlertsTableWithBulkActionsContextProps = {
     ...tableProps,
-    pagination: { pageIndex: 0, pageSize: 10 },
+    pageIndex: 0,
+    pageSize: 10,
     alertsTableConfiguration: {
       ...alertsTableConfiguration,
 
@@ -317,9 +324,9 @@ describe('AlertsTable.BulkActions', () => {
   };
 
   const AlertsTableWithBulkActionsContext: React.FunctionComponent<
-    AlertsTableProps & { initialBulkActionsState?: BulkActionsState }
+    AlertsTableWithBulkActionsContextProps
   > = (props) => {
-    const renderer = useMemo(() => createAppMockRenderer(AlertsTableQueryContext), []);
+    const renderer = useMemo(() => createAppMockRenderer(AlertsQueryContext), []);
     const AppWrapper = renderer.AppWrapper;
 
     const initialBulkActionsState = useReducer(
@@ -416,9 +423,8 @@ describe('AlertsTable.BulkActions', () => {
         ] as unknown as Alerts,
       };
 
-      const props = {
+      const props: AlertsTableWithBulkActionsContextProps = {
         ...tablePropsWithBulkActions,
-        useFetchAlertsData: () => newAlertsData,
         initialBulkActionsState: {
           ...defaultBulkActionsState,
           isAllSelected: true,
@@ -569,23 +575,17 @@ describe('AlertsTable.BulkActions', () => {
             },
           ] as unknown as Alerts;
           const allAlerts = [...alerts, ...secondPageAlerts];
-          const props = {
+          const props: AlertsTableWithBulkActionsContextProps = {
             ...tablePropsWithBulkActions,
             alerts: allAlerts,
             alertsCount: allAlerts.length,
-            useFetchAlertsData: () => {
-              return {
-                ...alertsData,
-                alertsCount: secondPageAlerts.length,
-                activePage: 1,
-              };
-            },
             initialBulkActionsState: {
               ...defaultBulkActionsState,
               areAllVisibleRowsSelected: true,
               rowSelection: new Map([[0, { isLoading: false }]]),
             },
-            pagination: { pageIndex: 1, pageSize: 2 },
+            pageIndex: 1,
+            pageSize: 2,
           };
           render(<AlertsTableWithBulkActionsContext {...props} />);
 

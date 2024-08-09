@@ -126,7 +126,9 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
   let autoZoomDuration: number | undefined;
   if (selectedJobId !== undefined && selectedJob !== undefined) {
-    autoZoomDuration = timeSeriesExplorerService.getAutoZoomDuration(selectedJob);
+    autoZoomDuration = timeSeriesExplorerService.getAutoZoomDuration(
+      selectedJob.analysis_config.bucket_span
+    );
   }
 
   const appStateHandler = useCallback(

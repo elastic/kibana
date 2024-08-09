@@ -134,7 +134,7 @@ export class DefaultTransformManager implements TransformManager {
     this.esClient.transform
       .scheduleNowTransform({ transform_id: transformId })
       .then(() => {
-        this.logger.info(`SLO transform [${transformId}] scheduled now successfully`);
+        this.logger.debug(`SLO transform [${transformId}] scheduled now successfully`);
       })
       .catch((e) => {
         this.logger.error(`Cannot schedule now SLO transform [${transformId}]`);

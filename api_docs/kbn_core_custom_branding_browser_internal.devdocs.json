@@ -1,26 +1,10 @@
 {
   "id": "@kbn/core-custom-branding-browser-internal",
   "client": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-custom-branding-browser-internal",
-        "id": "def-common.CustomBrandingService",
+        "id": "def-public.CustomBrandingService",
         "type": "Class",
         "tags": [],
         "label": "CustomBrandingService",
@@ -31,7 +15,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-custom-branding-browser-internal",
-            "id": "def-common.CustomBrandingService.setup",
+            "id": "def-public.CustomBrandingService.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
@@ -40,17 +24,17 @@
               "({ injectedMetadata }: ",
               {
                 "pluginId": "@kbn/core-custom-branding-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreCustomBrandingBrowserPluginApi",
-                "section": "def-common.CustomBrandingSetupDeps",
+                "section": "def-public.CustomBrandingSetupDeps",
                 "text": "CustomBrandingSetupDeps"
               },
               ") => ",
               {
                 "pluginId": "@kbn/core-custom-branding-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreCustomBrandingBrowserPluginApi",
-                "section": "def-common.CustomBrandingSetup",
+                "section": "def-public.CustomBrandingSetup",
                 "text": "CustomBrandingSetup"
               }
             ],
@@ -60,7 +44,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-custom-branding-browser-internal",
-                "id": "def-common.CustomBrandingService.setup.$1",
+                "id": "def-public.CustomBrandingService.setup.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{ injectedMetadata }",
@@ -68,9 +52,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-custom-branding-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreCustomBrandingBrowserPluginApi",
-                    "section": "def-common.CustomBrandingSetupDeps",
+                    "section": "def-public.CustomBrandingSetupDeps",
                     "text": "CustomBrandingSetupDeps"
                   }
                 ],
@@ -84,7 +68,7 @@
           },
           {
             "parentPluginId": "@kbn/core-custom-branding-browser-internal",
-            "id": "def-common.CustomBrandingService.start",
+            "id": "def-public.CustomBrandingService.start",
             "type": "Function",
             "tags": [],
             "label": "start",
@@ -93,9 +77,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-custom-branding-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreCustomBrandingBrowserPluginApi",
-                "section": "def-common.CustomBrandingStart",
+                "section": "def-public.CustomBrandingStart",
                 "text": "CustomBrandingStart"
               }
             ],
@@ -107,7 +91,7 @@
           },
           {
             "parentPluginId": "@kbn/core-custom-branding-browser-internal",
-            "id": "def-common.CustomBrandingService.stop",
+            "id": "def-public.CustomBrandingService.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
@@ -125,6 +109,22 @@
         "initialIsOpen": false
       }
     ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [],
     "interfaces": [],
     "enums": [],

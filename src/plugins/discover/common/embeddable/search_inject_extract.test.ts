@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { SavedSearchByValueAttributes } from '@kbn/saved-search-plugin/public';
 import { extract, inject } from './search_inject_extract';
 
 describe('search inject extract', () => {
@@ -65,7 +66,7 @@ describe('search inject extract', () => {
         id: 'id',
         attributes: {
           references: [{ name: 'name', type: 'type', id: '1' }],
-        },
+        } as SavedSearchByValueAttributes,
       };
       expect(extract(state)).toEqual({
         state,

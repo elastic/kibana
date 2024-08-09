@@ -7,7 +7,6 @@
 
 import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
 import type {
   GetEnrollmentAPIKeysRequestSchema,
@@ -25,6 +24,7 @@ import * as APIKeyService from '../../services/api_keys';
 import { agentPolicyService } from '../../services/agent_policy';
 import { defaultFleetErrorHandler, AgentPolicyNotFoundError } from '../../errors';
 import { appContextService } from '../../services';
+import { getCurrentNamespace } from '../../services/spaces/get_current_namespace';
 
 export const getEnrollmentApiKeysHandler: RequestHandler<
   undefined,
@@ -40,9 +40,7 @@ export const getEnrollmentApiKeysHandler: RequestHandler<
       page: request.query.page,
       perPage: request.query.perPage,
       kuery: request.query.kuery,
-      spaceId: useSpaceAwareness
-        ? soClient.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING
-        : undefined,
+      spaceId: useSpaceAwareness ? getCurrentNamespace(soClient) : undefined,
     });
     const body: GetEnrollmentAPIKeysResponse = {
       list: items, // deprecated
@@ -96,8 +94,7 @@ export const deleteEnrollmentApiKeyHandler: RequestHandler<
     const { useSpaceAwareness } = appContextService.getExperimentalFeatures();
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
-    const currentNamespace =
-      coreContext.savedObjects.client.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING;
+    const currentNamespace = getCurrentNamespace(coreContext.savedObjects.client);
     await APIKeyService.deleteEnrollmentApiKey(
       esClient,
       request.params.keyId,
@@ -126,8 +123,7 @@ export const getOneEnrollmentApiKeyHandler: RequestHandler<
   try {
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
-    const currentNamespace =
-      coreContext.savedObjects.client.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING;
+    const currentNamespace = getCurrentNamespace(coreContext.savedObjects.client);
     const { useSpaceAwareness } = appContextService.getExperimentalFeatures();
 
     const apiKey = await APIKeyService.getEnrollmentAPIKey(

@@ -10,6 +10,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export const CSP_BECNHMARK_TABLE = 'csp_benchmarks_table';
@@ -43,32 +44,66 @@ export function BenchmarkPagePageProvider({ getService, getPageObjects }: FtrPro
 
     getBenchmarkTableRows: async () => {
       const benchmarkTable = await testSubjects.find(CSP_BECNHMARK_TABLE);
-      return await benchmarkTable.findAllByXpath(`//tbody//tr`);
+      const tableRows = await benchmarkTable.findAllByXpath(`//tbody//tr`);
+      return tableRows;
     },
 
-    getCellData: async (row: any, cellDataTestSubj: string) => {
+    getCellData: async (row: WebElementWrapper, cellDataTestSubj: string) => {
       const cell = await row.findByTestSubject(cellDataTestSubj);
       return await cell.getVisibleText();
     },
 
-    getEvaluatedCellData: async (row: any) => {
+    getEvaluatedCellData: async (row: WebElementWrapper) => {
       return await benchmarkPage.getCellData(row, 'benchmark-table-column-evaluated');
     },
 
-    getComplianceCellData: async (row: any) => {
+    getComplianceCellData: async (row: WebElementWrapper) => {
       return await benchmarkPage.getCellData(row, 'benchmark-table-column-compliance');
     },
 
-    getCisNameCellData: async (row: any) => {
+    getCisNameCellData: async (row: WebElementWrapper) => {
       return await benchmarkPage.getCellData(row, 'benchmark-table-column-cis-name');
+    },
+
+    isEvaluationEmpty: async (row: WebElementWrapper) => {
+      try {
+        const notEvaluated = await row.findAllByTestSubject('benchmark-not-evaluated-account', 200);
+        return notEvaluated.length > 0;
+      } catch (error) {
+        if (error.name === 'StaleElementReferenceError' || error.name === 'NoSuchElementError') {
+          return false;
+        }
+        throw error;
+      }
+    },
+
+    isComplianceEmpty: async (row: WebElementWrapper) => {
+      try {
+        const noCompliance = await row.findAllByTestSubject('benchmark-score-no-findings', 200);
+        return noCompliance.length > 0;
+      } catch (error) {
+        if (error.name === 'StaleElementReferenceError' || error.name === 'NoSuchElementError') {
+          return false;
+        }
+        throw error;
+      }
     },
   };
 
-  const navigateToBenchnmarkPage = async () => {
+  const navigateToBenchnmarkPage = async (space?: string) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
+
     await PageObjects.common.navigateToUrl(
       'securitySolution', // Defined in Security Solution plugin
       `cloud_security_posture/benchmarks/`,
-      { shouldUseHashForSubUrl: false }
+      options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
   };

@@ -7,7 +7,7 @@
 
 import { handleStreamResponse } from './handle_stream_response';
 
-jest.mock('@kbn/ml-response-stream/server', () => ({
+jest.mock('./stream_factory', () => ({
   streamFactory: jest.fn().mockReturnValue({
     end: jest.fn(),
     push: jest.fn(),

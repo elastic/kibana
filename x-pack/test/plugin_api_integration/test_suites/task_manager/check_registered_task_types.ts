@@ -75,6 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.slack_api',
         'actions:.swimlane',
         'actions:.teams',
+        'actions:.thehive',
         'actions:.tines',
         'actions:.torq',
         'actions:.webhook',
@@ -158,6 +159,7 @@ export default function ({ getService }: FtrProviderContext) {
         'security:telemetry-prebuilt-rule-alerts',
         'security:telemetry-timelines',
         'session_cleanup',
+        'task_manager:delete_inactive_background_task_nodes',
       ]);
     });
   });

@@ -97,6 +97,13 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     icon: 'wrench',
   },
 
+  [AppIds.SPACES]: {
+    category: appCategories.CONTENT,
+    description: i18n.translate('management.landing.withCardNavigation.spacesDescription', {
+      defaultMessage: 'Organize your saved objects into meaningful categories.',
+    }),
+    icon: 'spaces',
+  },
   [AppIds.SAVED_OBJECTS]: {
     category: appCategories.CONTENT,
     description: i18n.translate('management.landing.withCardNavigation.objectsDescription', {

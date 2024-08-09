@@ -42,6 +42,11 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       query: '',
     },
   };
+  const esQueryConfig = {
+    allowLeadingWildcards: false,
+    queryStringOptions: {},
+    ignoreFilterIfFieldNotInIndex: false,
+  };
 
   const groupBy = 'host.doggoname';
   const timeFieldName = 'mockedTimeFieldName';
@@ -58,6 +63,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       100,
       true,
       searchConfiguration,
+      esQueryConfig,
       void 0,
       groupBy
     );
@@ -114,6 +120,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       100,
       true,
       currentSearchConfiguration,
+      esQueryConfig,
       void 0,
       groupBy
     );
@@ -225,6 +232,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       100,
       true,
       currentSearchConfiguration,
+      esQueryConfig,
       void 0,
       groupBy
     );

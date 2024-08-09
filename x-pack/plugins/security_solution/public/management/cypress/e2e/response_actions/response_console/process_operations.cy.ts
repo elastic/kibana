@@ -76,7 +76,7 @@ describe('Response console', { tags: ['@ess', '@serverless', '@skipInServerlessM
       cy.contains('Action pending.').should('exist');
 
       // on success
-      cy.getByTestSubj('getProcessListTable', { timeout: 120000 }).within(() => {
+      cy.getByTestSubj('processesOutput-processListTable', { timeout: 120000 }).within(() => {
         ['USER', 'PID', 'ENTITY ID', 'COMMAND'].forEach((header) => {
           cy.contains(header);
         });

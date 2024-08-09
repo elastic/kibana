@@ -22,7 +22,6 @@ import {
   PageSizeOrUndefined,
   SortOrUndefined,
   SortOrderOrUndefined,
-  Id,
 } from '../model/schema/common_attributes.gen';
 
 export type GetLiveQueryResultsRequestQuery = z.infer<typeof GetLiveQueryResultsRequestQuery>;
@@ -32,10 +31,4 @@ export const GetLiveQueryResultsRequestQuery = z.object({
   pageSize: PageSizeOrUndefined.optional(),
   sort: SortOrUndefined.optional(),
   sortOrder: SortOrderOrUndefined.optional(),
-});
-
-export type GetLiveQueryResultsRequestParams = z.infer<typeof GetLiveQueryResultsRequestParams>;
-export const GetLiveQueryResultsRequestParams = z.object({
-  id: Id.optional(),
-  actionId: Id.optional(),
 });

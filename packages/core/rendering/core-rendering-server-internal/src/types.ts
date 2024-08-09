@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import type { InjectedMetadata } from '@kbn/core-injected-metadata-common-internal';
 import type { KibanaRequest, ICspConfig } from '@kbn/core-http-server';
@@ -30,7 +29,6 @@ export interface RenderingMetadata {
   strictCsp: ICspConfig['strict'];
   uiPublicUrl: string;
   bootstrapScriptUrl: string;
-  i18n: typeof i18n.translate;
   locale: string;
   themeVersion: ThemeVersion;
   darkMode: DarkModeValue;
@@ -65,13 +63,6 @@ export interface IRenderOptions {
    * `false` by default.
    */
   isAnonymousPage?: boolean;
-
-  /**
-   * Inject custom vars into the page metadata.
-   * @deprecated for legacy use only. Can be removed when https://github.com/elastic/kibana/issues/127733 is done.
-   * @internal
-   */
-  vars?: Record<string, any>;
 
   /**
    * @internal

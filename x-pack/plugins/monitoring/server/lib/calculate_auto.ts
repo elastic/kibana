@@ -73,6 +73,7 @@ const revRoundingRules = roundingRules.slice(0).reverse();
  * 15 minutes: 10 seconds
  */
 export const calculateAuto = find(revRoundingRules, (bound, interval, target) => {
+  // @ts-expect-error upgrade typescript v5.1.6
   if (bound > target) {
     return interval;
   }

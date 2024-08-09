@@ -61,6 +61,7 @@ export const DOWNLOAD_PLATFORMS = [
   new Platform('darwin', 'x64', 'darwin-x86_64', null),
   new Platform('darwin', 'arm64', 'darwin-aarch64', null),
   new Platform('win32', 'x64', 'windows-x86_64', null),
+  new Platform('win32', 'arm64', 'windows-arm64', null),
 ];
 
 export const SERVERLESS_PLATFORMS = [

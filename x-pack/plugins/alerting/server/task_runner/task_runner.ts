@@ -18,7 +18,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { getErrorSource, isUserError } from '@kbn/task-manager-plugin/server/task_running';
-import { ExecutionHandler, RunResult } from './execution_handler';
+import { ActionScheduler, type RunResult } from './action_scheduler';
 import {
   RuleRunnerErrorStackTraceLog,
   RuleTaskInstance,
@@ -381,7 +381,7 @@ export class TaskRunner<
       throw error;
     }
 
-    const executionHandler = new ExecutionHandler({
+    const actionScheduler = new ActionScheduler({
       rule,
       ruleType: this.ruleType,
       logger: this.logger,
@@ -398,7 +398,7 @@ export class TaskRunner<
       alertsClient,
     });
 
-    let executionHandlerRunResult: RunResult = { throttledSummaryActions: {} };
+    let actionSchedulerResult: RunResult = { throttledSummaryActions: {} };
 
     await withAlertingSpan('alerting:schedule-actions', () =>
       this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
@@ -410,7 +410,7 @@ export class TaskRunner<
           );
           this.countUsageOfActionExecutionAfterRuleCancellation();
         } else {
-          executionHandlerRunResult = await executionHandler.run({
+          actionSchedulerResult = await actionScheduler.run({
             ...alertsClient.getProcessedAlerts('activeCurrent'),
             ...alertsClient.getProcessedAlerts('recoveredCurrent'),
           });
@@ -435,7 +435,7 @@ export class TaskRunner<
       alertTypeState: updatedRuleTypeState || undefined,
       alertInstances: alertsToReturn,
       alertRecoveredInstances: recoveredAlertsToReturn,
-      summaryActions: executionHandlerRunResult.throttledSummaryActions,
+      summaryActions: actionSchedulerResult.throttledSummaryActions,
     };
   }
 

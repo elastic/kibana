@@ -8,7 +8,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { EuiFlyout } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutResizable } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
@@ -102,11 +102,26 @@ export class FlyoutService {
           }
         };
 
+        const getWrapper = (children: JSX.Element) => {
+          return options?.isResizable ? (
+            <EuiFlyoutResizable
+              {...options}
+              onClose={onCloseFlyout}
+              ref={React.createRef()}
+              maxWidth={Number(options?.maxWidth)}
+            >
+              {children}
+            </EuiFlyoutResizable>
+          ) : (
+            <EuiFlyout {...options} onClose={onCloseFlyout}>
+              {children}
+            </EuiFlyout>
+          );
+        };
+
         render(
           <KibanaRenderContextProvider analytics={analytics} i18n={i18n} theme={theme}>
-            <EuiFlyout {...options} onClose={onCloseFlyout}>
-              <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
-            </EuiFlyout>
+            {getWrapper(<MountWrapper mount={mount} className="kbnOverlayMountWrapper" />)}
           </KibanaRenderContextProvider>,
           this.targetDomElement
         );

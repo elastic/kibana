@@ -8,7 +8,8 @@
 import { useEffect, useState } from 'react';
 import { LocatorClient } from '@kbn/share-plugin/common/url_service/locators';
 import { syntheticsEditMonitorLocatorID } from '@kbn/observability-plugin/common';
-import { useSyntheticsStartPlugins } from '../contexts';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ClientPluginsStart } from '../../../plugin';
 
 export function useEditMonitorLocator({
   configId,
@@ -18,7 +19,7 @@ export function useEditMonitorLocator({
   locators?: LocatorClient;
 }) {
   const [editUrl, setEditUrl] = useState<string | undefined>(undefined);
-  const syntheticsLocators = useSyntheticsStartPlugins()?.share?.url.locators;
+  const syntheticsLocators = useKibana<ClientPluginsStart>().services.share?.url.locators;
   const locator = (locators || syntheticsLocators)?.get(syntheticsEditMonitorLocatorID);
 
   useEffect(() => {

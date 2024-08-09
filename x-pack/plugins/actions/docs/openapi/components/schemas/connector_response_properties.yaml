@@ -1,5 +1,5 @@
 title: Connector response properties
-description: The properties vary depending on the connector type.        
+description: The properties vary depending on the connector type.
 oneOf:
   - $ref: 'connector_response_properties_bedrock.yaml'
   - $ref: 'connector_response_properties_gemini.yaml'

@@ -107,7 +107,7 @@ export const MessageList = ({
       closePopover={closePopover}
     >
       <ul className="lnsWorkspaceWarningList">
-        {messages.map((message, index) => (
+        {messages.map(({ hidePopoverIcon = false, ...message }, index) => (
           <li
             key={index}
             className="lnsWorkspaceWarningList__item"
@@ -121,13 +121,15 @@ export const MessageList = ({
                 responsive={false}
                 className="lnsWorkspaceWarningList__textItem"
               >
-                <EuiFlexItem grow={false}>
-                  {message.severity === 'error' ? (
-                    <EuiIcon type="error" color="danger" />
-                  ) : (
-                    <EuiIcon type="alert" color="warning" />
-                  )}
-                </EuiFlexItem>
+                {!hidePopoverIcon && (
+                  <EuiFlexItem grow={false}>
+                    {message.severity === 'error' ? (
+                      <EuiIcon type="error" color="danger" />
+                    ) : (
+                      <EuiIcon type="alert" color="warning" />
+                    )}
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem grow={1} className="lnsWorkspaceWarningList__description">
                   <EuiText size="s">{message.longMessage}</EuiText>
                 </EuiFlexItem>

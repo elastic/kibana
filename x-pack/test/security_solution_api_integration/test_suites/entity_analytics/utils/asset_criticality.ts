@@ -23,12 +23,13 @@ import {
 import type {
   AssetCriticalityRecord,
   CreateAssetCriticalityRecord,
-  ListAssetCriticalityQueryParams,
+  FindAssetCriticalityRecordsRequestQuery,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import querystring from 'querystring';
 import { KbnClient } from '@kbn/test';
+import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { routeWithNamespace, waitFor } from '../../../../common/utils/security_solution';
 
 export const getAssetCriticalityIndex = (namespace?: string) =>
@@ -187,7 +188,7 @@ export const assetCriticalityRouteHelpersFactory = (
       .expect(expectStatusCode);
   },
   list: async (
-    opts: ListAssetCriticalityQueryParams = {},
+    opts: FindAssetCriticalityRecordsRequestQuery = {},
     { expectStatusCode }: { expectStatusCode: number } = { expectStatusCode: 200 }
   ) => {
     const qs = querystring.stringify(opts);
@@ -202,7 +203,7 @@ export const assetCriticalityRouteHelpersFactory = (
 });
 
 export const assetCriticalityRouteHelpersFactoryNoAuth = (
-  supertestWithoutAuth: SuperTest.Agent,
+  supertestWithoutAuth: SupertestWithoutAuthProviderType,
   namespace?: string
 ) => ({
   privilegesForUser: async ({ username, password }: { username: string; password: string }) =>

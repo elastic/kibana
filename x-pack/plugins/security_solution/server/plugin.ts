@@ -19,18 +19,13 @@ import type { ILicense } from '@kbn/licensing-plugin/server';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
-import { i18n } from '@kbn/i18n';
 import { CompleteExternalResponseActionsTask } from './endpoint/lib/response_actions';
 import { registerAgentRoutes } from './endpoint/routes/agent';
 import { endpointPackagePoliciesStatsSearchStrategyProvider } from './search_strategy/endpoint_package_policies_stats';
 import { turnOffPolicyProtectionsIfNotSupported } from './endpoint/migrations/turn_off_policy_protections';
 import { endpointSearchStrategyProvider } from './search_strategy/endpoint';
 import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
-import {
-  siemGuideId,
-  getSiemGuideConfig,
-  defaultGuideTranslations,
-} from '../common/guided_onboarding/siem_guide_config';
+import { siemGuideId, getSiemGuideConfig } from '../common/guided_onboarding/siem_guide_config';
 import {
   createEqlAlertType,
   createEsqlAlertType,
@@ -202,7 +197,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     initUiSettings(core.uiSettings, experimentalFeatures, config.enableUiSettingsValidations);
     productFeaturesService.init(plugins.features);
 
-    events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
+    events.forEach((eventConfig) => {
+      core.analytics.registerEventType(eventConfig);
+    });
 
     this.ruleMonitoringService.setup(core, plugins);
 
@@ -227,6 +224,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       ruleMonitoringService: this.ruleMonitoringService,
       kibanaVersion: pluginContext.env.packageInfo.version,
       kibanaBranch: pluginContext.env.packageInfo.branch,
+      buildFlavor: pluginContext.env.packageInfo.buildFlavor,
     });
 
     productFeaturesService.registerApiAccessControl(core.http);
@@ -310,6 +308,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       version: pluginContext.env.packageInfo.version,
       experimentalFeatures: config.experimentalFeatures,
       alerting: plugins.alerting,
+      analytics: core.analytics,
     };
 
     const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
@@ -419,6 +418,7 @@ export class Plugin implements ISecuritySolutionPlugin {
           config,
           kibanaVersion: pluginContext.env.packageInfo.version,
           kibanaBranch: pluginContext.env.packageInfo.branch,
+          buildFlavor: pluginContext.env.packageInfo.buildFlavor,
         });
 
         const endpointFieldsStrategy = endpointFieldsProvider(
@@ -461,28 +461,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         /**
          * Register a config for the security guide
          */
-        if (depsStart.cloudExperiments && i18n.getLocale() === 'en') {
-          try {
-            const variation = await depsStart.cloudExperiments.getVariation(
-              'security-solutions.guided-onboarding-content',
-              defaultGuideTranslations
-            );
-            plugins.guidedOnboarding?.registerGuideConfig(
-              siemGuideId,
-              getSiemGuideConfig(variation)
-            );
-          } catch {
-            plugins.guidedOnboarding?.registerGuideConfig(
-              siemGuideId,
-              getSiemGuideConfig(defaultGuideTranslations)
-            );
-          }
-        } else {
-          plugins.guidedOnboarding?.registerGuideConfig(
-            siemGuideId,
-            getSiemGuideConfig(defaultGuideTranslations)
-          );
-        }
+        plugins.guidedOnboarding?.registerGuideConfig(siemGuideId, getSiemGuideConfig());
       })
       .catch(() => {}); // it shouldn't reject, but just in case
 
@@ -567,6 +546,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     // Assistant Tool and Feature Registration
     plugins.elasticAssistant.registerTools(APP_UI_ID, getAssistantTools());
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, {
+      assistantBedrockChat: config.experimentalFeatures.assistantBedrockChat,
       assistantKnowledgeBaseByDefault: config.experimentalFeatures.assistantKnowledgeBaseByDefault,
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
     });

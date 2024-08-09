@@ -11,16 +11,16 @@ import {
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import * as http from 'http';
-import { RoleCredentials } from '../../../../../shared/services';
-import { getMockFindings, getMockDefendForContainersHeartbeats } from './mock_data'; // eslint-disable-line @kbn/imports/no_boundary_crossing
-import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   deleteIndex,
   addIndex,
   createPackagePolicy,
   createCloudDefendPackagePolicy,
-} from '../../../../../../test/api_integration/apis/cloud_security_posture/helper'; // eslint-disable-line @kbn/imports/no_boundary_crossing
-import { UsageRecord, getInterceptedRequestPayload, setupMockServer } from './mock_usage_server'; // eslint-disable-line @kbn/imports/no_boundary_crossing
+} from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/helper';
+import { RoleCredentials } from '../../../../../shared/services';
+import { getMockFindings, getMockDefendForContainersHeartbeats } from './mock_data';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import { UsageRecord, getInterceptedRequestPayload, setupMockServer } from './mock_usage_server';
 
 const CLOUD_DEFEND_HEARTBEAT_INDEX_DEFAULT_NS = 'metrics-cloud_defend.heartbeat-default';
 
@@ -40,7 +40,8 @@ export default function (providerContext: FtrProviderContext) {
   The task manager is running by default in security serverless project in the background and sending usage API requests to the usage API.
    This test mocks the usage API server and intercepts the usage API request sent by the metering background task manager.
   */
-  describe('Intercept the usage API request sent by the metering background task manager', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/188660
+  describe.skip('Intercept the usage API request sent by the metering background task manager', function () {
     this.tags(['skipMKI']);
 
     let mockUsageApiServer: http.Server;

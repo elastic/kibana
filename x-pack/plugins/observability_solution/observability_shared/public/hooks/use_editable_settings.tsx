@@ -80,6 +80,10 @@ export function useEditableSettings(settingsKeys: string[]) {
 
   async function saveAll() {
     if (settings && !isEmpty(unsavedChanges)) {
+      let updateErrorOccurred = false;
+      const subscription = settings.client.getUpdateErrors$().subscribe((error) => {
+        updateErrorOccurred = true;
+      });
       try {
         setIsSaving(true);
         const arr = Object.entries(unsavedChanges).map(([key, value]) =>
@@ -88,8 +92,16 @@ export function useEditableSettings(settingsKeys: string[]) {
         await Promise.all(arr);
         setForceReloadSettings((state) => ++state);
         cleanUnsavedChanges();
+        if (updateErrorOccurred) {
+          throw new Error('One or more settings updates failed');
+        }
+      } catch (e) {
+        throw e;
       } finally {
         setIsSaving(false);
+        if (subscription) {
+          subscription.unsubscribe();
+        }
       }
     }
   }

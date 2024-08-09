@@ -22,6 +22,7 @@ import {
   logViewSavedObjectName,
 } from '../../saved_objects/log_view';
 import { LogViewsClient } from './log_views_client';
+import { createLogSourcesServiceMock } from '@kbn/logs-data-access-plugin/common/services/log_sources_service/log_sources_service.mocks';
 
 describe('LogViewsClient class', () => {
   it('getLogView resolves the default id to a real saved object id if it exists', async () => {
@@ -341,6 +342,7 @@ describe('LogViewsClient class', () => {
 const createLogViewsClient = () => {
   const logger = loggerMock.create();
   const dataViews = dataViewsServiceMock;
+  const logSourcesService = createLogSourcesServiceMock();
   const savedObjectsClient = savedObjectsClientMock.create();
   const logViewFallbackHandler = jest.fn();
   const internalLogViews = new Map<string, LogView>();
@@ -351,6 +353,7 @@ const createLogViewsClient = () => {
   const logViewsClient = new LogViewsClient(
     logger,
     Promise.resolve(dataViews),
+    Promise.resolve(logSourcesService),
     savedObjectsClient,
     logViewFallbackHandler,
     internalLogViews,

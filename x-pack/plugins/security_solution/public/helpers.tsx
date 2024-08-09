@@ -313,14 +313,6 @@ export const getScopedActions = (scopeId: string) => {
   }
 };
 
-export const getScopedSelectors = (scopeId: string) => {
-  if (isTimelineScope(scopeId)) {
-    return timelineActions;
-  } else if (isInTableScope(scopeId)) {
-    return dataTableActions;
-  }
-};
-
 export const isActiveTimeline = (timelineId: string) => timelineId === TimelineId.active;
 
 export const getSourcererScopeId = (scopeId: string): SourcererScopeName => {

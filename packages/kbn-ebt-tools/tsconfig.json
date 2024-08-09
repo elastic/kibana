@@ -6,8 +6,7 @@
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "kbn_references": [
-    "@kbn/logging-mocks",
-    "@kbn/ebt",
+    "@kbn/logging-mocks"
   ],
   "exclude": ["target/**/*"]
 }

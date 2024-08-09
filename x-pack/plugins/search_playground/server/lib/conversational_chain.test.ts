@@ -305,6 +305,45 @@ describe('conversational chain', () => {
     });
   }, 10000);
 
+  it('should omit the system messages in chat', async () => {
+    await createTestChain({
+      responses: ['the final answer'],
+      chat: [
+        {
+          id: '1',
+          role: MessageRole.user,
+          content: 'what is the work from home policy?',
+        },
+        {
+          id: '2',
+          role: MessageRole.system,
+          content: 'Error occurred. Please try again.',
+        },
+      ],
+      expectedFinalAnswer: 'the final answer',
+      expectedDocs: [
+        {
+          documents: [
+            { metadata: { _id: '1', _index: 'index' }, pageContent: 'value' },
+            { metadata: { _id: '1', _index: 'website' }, pageContent: 'value2' },
+          ],
+          type: 'retrieved_docs',
+        },
+      ],
+      expectedTokens: [
+        { type: 'context_token_count', count: 15 },
+        { type: 'prompt_token_count', count: 28 },
+      ],
+      expectedSearchRequest: [
+        {
+          method: 'POST',
+          path: '/index,website/_search',
+          body: { query: { match: { field: 'what is the work from home policy?' } }, size: 3 },
+        },
+      ],
+    });
+  }, 10000);
+
   it('should cope with quotes in the query', async () => {
     await createTestChain({
       responses: ['rewrite "the" question', 'the final answer'],
@@ -435,7 +474,10 @@ describe('conversational chain', () => {
       expectedDocs: [
         {
           documents: [
-            { metadata: { _id: '1', _index: 'index' } },
+            {
+              metadata: { _id: '1', _index: 'index' },
+              pageContent: expect.any(String),
+            },
             {
               metadata: { _id: '1', _index: 'website' },
               pageContent: expect.any(String),
@@ -446,8 +488,8 @@ describe('conversational chain', () => {
       ],
       // Even with body_content of 1000, the token count should be below or equal to model limit of 100
       expectedTokens: [
-        { type: 'context_token_count', count: 65 },
-        { type: 'prompt_token_count', count: 99 },
+        { type: 'context_token_count', count: 63 },
+        { type: 'prompt_token_count', count: 97 },
       ],
       expectedHasClipped: true,
       expectedSearchRequest: [

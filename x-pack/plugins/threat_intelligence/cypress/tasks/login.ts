@@ -15,7 +15,7 @@ import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/security-solution-plugin/co
 import {
   LOADING_INDICATOR,
   LOADING_INDICATOR_HIDDEN,
-} from '../../../../test/security_solution_cypress/cypress/screens/security_header';
+} from '@kbn/test-suites-xpack/security_solution_cypress/cypress/screens/security_header';
 import type { ROLES } from './privileges';
 
 const LOGIN_API_ENDPOINT = '/internal/security/login';

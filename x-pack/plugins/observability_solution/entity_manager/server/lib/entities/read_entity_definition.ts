@@ -30,7 +30,7 @@ export async function readEntityDefinition(
   try {
     return entityDefinitionSchema.parse(response.saved_objects[0].attributes);
   } catch (e) {
-    logger.error(`Unable to parse entity definition with [${id}]`);
+    logger.error(`Unable to parse entity definition with [${id}]: ${e}`);
     throw e;
   }
 }

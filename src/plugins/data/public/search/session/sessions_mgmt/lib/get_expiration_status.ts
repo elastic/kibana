@@ -43,7 +43,7 @@ export const getExpirationStatus = (config: SearchSessionsConfigSchema, expires:
     });
   }
 
-  if (durationToExpire.valueOf() > 0 && expiresInDays <= sufficientDays) {
+  if (durationToExpire.asMilliseconds() > 0 && expiresInDays <= sufficientDays) {
     return { toolTipContent, statusContent };
   }
 };

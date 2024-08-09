@@ -36,6 +36,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   ruleDetailsNavigation,
   showAlertDetails,
   useFetchAlertData,
+  onAlertsTableLoaded,
   refreshRef,
   timelineIntegration,
 }) => {
@@ -84,6 +85,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
               ruleDetailsNavigation={ruleDetailsNavigation}
               showAlertDetails={showAlertDetails}
               useFetchAlertData={useFetchAlertData}
+              onAlertsTableLoaded={onAlertsTableLoaded}
               refreshRef={refreshRef}
               timelineIntegration={timelineIntegration}
             />

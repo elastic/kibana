@@ -40,7 +40,7 @@ export const AISearchGuide: React.FC = () => {
       bottomBorder={false}
       pageHeader={{
         pageTitle: i18n.translate('xpack.enterpriseSearch.aiSearch.guide.pageTitle', {
-          defaultMessage: 'Enhance your search with AI',
+          defaultMessage: 'Improve search revelance with AI',
         }),
       }}
     >
@@ -81,11 +81,11 @@ export const AISearchGuide: React.FC = () => {
           </EuiFlexItem>
           <EuiHorizontalRule />
           <EuiFlexItem grow>
-            <MeasurePerformanceSection />
+            <SetAISearchChromeSearchDocsSection />
           </EuiFlexItem>
           <EuiHorizontalRule />
           <EuiFlexItem grow>
-            <SetAISearchChromeSearchDocsSection />
+            <MeasurePerformanceSection />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

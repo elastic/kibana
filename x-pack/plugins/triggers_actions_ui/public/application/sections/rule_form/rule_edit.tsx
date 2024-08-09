@@ -270,7 +270,7 @@ export const RuleEdit = <
                   <EuiCallOut
                     size="s"
                     color="danger"
-                    iconType="rule"
+                    iconType="error"
                     data-test-subj="hasActionsDisabled"
                     title={i18n.translate(
                       'xpack.triggersActionsUI.sections.ruleEdit.disabledActionsWarningTitle',

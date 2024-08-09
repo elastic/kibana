@@ -36,7 +36,7 @@ logging.loggers:
 ----
 WARNING: Kibana's `file` appender is configured to produce logs in {ecs-ref}/ecs-reference.html[ECS JSON] format. It's the only format that includes the meta information necessary for {apm-node-ref}/log-correlation.html[log correlation] out-of-the-box.
 
-The next step is to define what https://www.elastic.co/observability[observability tools] are available. 
+The next step is to define what https://www.elastic.co/observability[observability tools] are available.
 For a better experience, set up an https://www.elastic.co/guide/en/apm/get-started/current/observability-integrations.html[Observability integration] provided by Elastic to debug your application with the <<debugging-logs-apm-ui, APM UI.>>
 To debug something quickly without setting up additional tooling, you can work with <<plain-kibana-logs, the plain {kib} logs.>>
 
@@ -47,7 +47,7 @@ To debug something quickly without setting up additional tooling, you can work w
 To debug {kib} with the APM UI, you must set up the APM infrastructure. You can find instructions for the setup process
 https://www.elastic.co/guide/en/apm/get-started/current/observability-integrations.html[on the Observability integrations page].
 
-Once you set up the APM infrastructure, you can enable the APM agent and put {kib} under load to collect APM events. To analyze the collected metrics and logs, use the APM UI as demonstrated {kibana-ref}/transactions.html#transaction-trace-sample[in the docs].
+Once you set up the APM infrastructure, you can enable the APM agent and put {kib} under load to collect APM events. To analyze the collected metrics and logs, use the APM UI as demonstrated {observability-guide}/apm-transactions.html#transaction-trace-sample[in the docs].
 
 [[plain-kibana-logs]]
 ==== Plain {kib} logs

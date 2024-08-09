@@ -38,16 +38,30 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
 }
 
 function liftIdentityFieldsToDocumentRoot(definition: EntityDefinition) {
-  return definition.identityFields.map((identityField) => {
-    const optionalFieldPath = identityField.field.replaceAll('.', '?.');
-    const assignValue = `ctx.${identityField.field} = ctx.entity.identity.${identityField.field}.keySet().toArray()[0];`;
-    return {
-      script: {
-        if: `ctx.entity.identity.${optionalFieldPath} != null && ctx.entity.identity.${identityField.field}.size() != 0`,
-        source: cleanScript(`${initializePathScript(identityField.field)}\n${assignValue}`),
-      },
-    };
-  });
+  return definition.identityFields
+    .map((identityField) => {
+      const setProcessor = {
+        set: {
+          field: identityField.field,
+          value: `{{entity.identity.${identityField.field}.top_metric.${identityField.field}}}`,
+        },
+      };
+
+      if (!identityField.field.includes('.')) {
+        return [setProcessor];
+      }
+
+      return [
+        {
+          dot_expander: {
+            field: identityField.field,
+            path: `entity.identity.${identityField.field}.top_metric`,
+          },
+        },
+        setProcessor,
+      ];
+    })
+    .flat();
 }
 
 export function generateLatestProcessors(definition: EntityDefinition) {
@@ -120,6 +134,31 @@ export function generateLatestProcessors(definition: EntityDefinition) {
       set: {
         field: '_index',
         value: `${generateLatestIndexName(definition)}`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}@platform`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}-latest@platform`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}@custom`,
+      },
+    },
+
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}-latest@custom`,
       },
     },
   ];

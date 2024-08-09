@@ -3,5 +3,4 @@ description: The type of comment.
 enum:
   - alert
   - user
-examples:
-  - user
+example: user

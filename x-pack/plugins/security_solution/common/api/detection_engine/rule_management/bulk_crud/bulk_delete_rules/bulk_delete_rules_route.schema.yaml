@@ -9,7 +9,8 @@ paths:
       x-codegen-enabled: true
       operationId: BulkDeleteRules
       deprecated: true
-      description: Deletes multiple rules.
+      summary: Delete multiple detection rules
+      description: Delete detection rules in bulk.
       tags:
         - Bulk API
       requestBody:
@@ -39,20 +40,20 @@ paths:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
-                  - $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+                  - $ref: '../../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
-                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                $ref: '../../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
         500:
           description: Internal server error response
           content:
             application/json:
               schema:
-                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+                $ref: '../../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
 
     post:
       x-labels: [ess]
@@ -89,17 +90,17 @@ paths:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
-                  - $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+                  - $ref: '../../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
-                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                $ref: '../../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
         500:
           description: Internal server error response
           content:
             application/json:
               schema:
-                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+                $ref: '../../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'

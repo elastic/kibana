@@ -19,24 +19,34 @@ const MaxLogsSampleRows = 10;
  * Parse the logs sample file content (json or ndjson) and return the parsed logs sample
  */
 const parseLogsContent = (
-  fileContent: string | undefined,
-  fileType: string
+  fileContent: string | undefined
 ): { error?: string; isTruncated?: boolean; logsSampleParsed?: string[] } => {
   if (fileContent == null) {
     return { error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_READ };
   }
   let parsedContent;
   try {
-    if (fileType === 'application/json') {
-      parsedContent = JSON.parse(fileContent);
-    } else if (fileType === 'application/x-ndjson') {
-      parsedContent = fileContent
-        .split('\n')
-        .filter((line) => line.trim() !== '')
-        .map((line) => JSON.parse(line));
+    parsedContent = fileContent
+      .split('\n')
+      .filter((line) => line.trim() !== '')
+      .map((line) => JSON.parse(line));
+
+    // Special case for files that can be parsed as both JSON and NDJSON:
+    //   for a one-line array [] -> extract its contents
+    //   for a one-line object {} -> do nothing
+    if (
+      Array.isArray(parsedContent) &&
+      parsedContent.length === 1 &&
+      Array.isArray(parsedContent[0])
+    ) {
+      parsedContent = parsedContent[0];
     }
-  } catch (_) {
-    return { error: i18n.LOGS_SAMPLE_ERROR.FORMAT(fileType) };
+  } catch (parseNDJSONError) {
+    try {
+      parsedContent = JSON.parse(fileContent);
+    } catch (parseJSONError) {
+      return { error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_PARSE };
+    }
   }
 
   if (!Array.isArray(parsedContent)) {
@@ -81,10 +91,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
       const reader = new FileReader();
       reader.onload = function (e) {
         const fileContent = e.target?.result as string | undefined; // We can safely cast to string since we call `readAsText` to load the file.
-        const { error, isTruncated, logsSampleParsed } = parseLogsContent(
-          fileContent,
-          logsSampleFile.type
-        );
+        const { error, isTruncated, logsSampleParsed } = parseLogsContent(fileContent);
         setIsParsing(false);
         setSampleFileError(error);
         if (error) {
@@ -137,7 +144,6 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
           onChange={onChangeLogsSample}
           display="large"
           aria-label="Upload logs sample file"
-          accept="application/json,application/x-ndjson"
           isLoading={isParsing}
           data-test-subj="logsSampleFilePicker"
           data-loading={isParsing}

@@ -15,10 +15,6 @@ import {
 } from '../../../common/constants';
 import { CspRouter } from '../../types';
 
-export interface VulnerabilitiesStatisticsQueryResult {
-  total: number;
-}
-
 const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts-default' as const;
 
 export const getDetectionEngineAlertsCountByRuleTags = async (

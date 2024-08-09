@@ -12,9 +12,9 @@ import xpackRootTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/sch
 import ossPluginsTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_plugins.json';
 import xpackPluginsTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_plugins.json';
 import { assertTelemetryPayload } from '@kbn/telemetry-tools';
+import type { UsageStatsPayloadTestFriendly } from '@kbn/test-suites-xpack/api_integration/services/usage_api';
 import type { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import type { UsageStatsPayloadTestFriendly } from '../../../../../test/api_integration/services/usage_api';
 
 export default function ({ getService }: FtrProviderContext) {
   const usageApi = getService('usageAPI');

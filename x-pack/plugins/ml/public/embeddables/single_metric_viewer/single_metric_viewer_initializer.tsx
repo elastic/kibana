@@ -150,29 +150,31 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
             }}
             {...(errorMessage && { errors: [errorMessage] })}
           />
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.ml.singleMetricViewerEmbeddable.panelTitleLabel"
-                defaultMessage="Panel title"
-              />
-            }
-            isInvalid={!isPanelTitleValid}
-            fullWidth
-          >
-            <EuiFieldText
-              data-test-subj="panelTitleInput"
-              id="panelTitle"
-              name="panelTitle"
-              value={panelTitle}
-              onChange={(e) => {
-                titleManuallyChanged.current = true;
-                setPanelTitle(e.target.value);
-              }}
+          {job?.job_id && jobId && jobId === job.job_id ? (
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.ml.singleMetricViewerEmbeddable.panelTitleLabel"
+                  defaultMessage="Panel title"
+                />
+              }
               isInvalid={!isPanelTitleValid}
               fullWidth
-            />
-          </EuiFormRow>
+            >
+              <EuiFieldText
+                data-test-subj="panelTitleInput"
+                id="panelTitle"
+                name="panelTitle"
+                value={panelTitle}
+                onChange={(e) => {
+                  titleManuallyChanged.current = true;
+                  setPanelTitle(e.target.value);
+                }}
+                isInvalid={!isPanelTitleValid}
+                fullWidth
+              />
+            </EuiFormRow>
+          ) : null}
           <EuiSpacer />
           {job?.job_id && jobId && jobId === job.job_id ? (
             <SeriesControls

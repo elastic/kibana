@@ -26,7 +26,7 @@ import { timelineActions } from '../../../../timelines/store';
 import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
 import { INVESTIGATE_BULK_IN_TIMELINE } from '../translations';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { sendBulkEventsToTimelineAction } from '../actions';
 import type { CreateTimelineProps } from '../types';
 import type { SourcererScopeName } from '../../../../sourcerer/store/model';
@@ -138,7 +138,7 @@ export const useAddBulkToTimelineAction = ({
 
   const clearActiveTimeline = useCreateTimeline({
     timelineId: TimelineId.active,
-    timelineType: TimelineType.default,
+    timelineType: TimelineTypeEnum.default,
   });
 
   const updateTimelineIsLoading = useCallback(

@@ -37,6 +37,7 @@ export const registerCreateRoute = (
         summary: `Create a saved object`,
         tags: ['oas-tag:saved objects'],
         access,
+        deprecated: true,
       },
       validate: {
         params: schema.object({

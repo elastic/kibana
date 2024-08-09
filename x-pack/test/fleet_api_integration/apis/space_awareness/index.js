@@ -14,5 +14,6 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./enrollment_settings'));
     loadTestFile(require.resolve('./package_install'));
     loadTestFile(require.resolve('./space_settings'));
+    loadTestFile(require.resolve('./actions'));
   });
 }

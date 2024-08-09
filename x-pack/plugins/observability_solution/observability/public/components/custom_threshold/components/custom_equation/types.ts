@@ -17,6 +17,7 @@ export interface AggregationTypes {
 export interface NormalizedField {
   name: string;
   normalizedType: string;
+  esTypes?: string[];
 }
 
 export type NormalizedFields = NormalizedField[];

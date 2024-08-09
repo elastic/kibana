@@ -104,7 +104,7 @@ const headerStrings = {
     }),
   },
   nav: {
-    closeNavAriaLabel: i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
+    closeNavAriaLabel: i18n.translate('core.ui.primaryNav.project.toggleNavAriaLabel', {
       defaultMessage: 'Toggle primary navigation',
     }),
   },

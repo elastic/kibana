@@ -72,7 +72,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
 
   const defaultControlsObj = useMemo(
     () =>
-      defaultControls.reduce<Record<string, typeof defaultControls[0]>>((prev, current) => {
+      defaultControls.reduce<Record<string, (typeof defaultControls)[0]>>((prev, current) => {
         prev[current.fieldName] = current;
         return prev;
       }, {}),

@@ -27,11 +27,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('keyboard shortcuts', () => {
-      let tabCount = 1;
-
-      after(async () => {
-        if (tabCount > 1) {
+      let tabOpened = false;
+      afterEach(async () => {
+        if (tabOpened) {
           await browser.closeCurrentWindow();
+          tabOpened = false;
           await browser.switchTab(0);
         }
       });
@@ -91,22 +91,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.console.monaco.getCurrentLineNumber()).to.be(4);
       });
 
-      // flaky
-      it.skip('should open documentation when Ctrl+/ is pressed', async () => {
-        await PageObjects.console.monaco.enterText('GET _search');
-        await PageObjects.console.monaco.pressEscape();
-        await PageObjects.console.monaco.pressCtrlSlash();
-        await retry.tryForTime(10000, async () => {
-          await browser.switchTab(1);
-          tabCount++;
-        });
+      describe('open documentation', () => {
+        const requests = ['GET _search', 'GET test_index/_search', 'GET /_search'];
+        requests.forEach((request) => {
+          it('should open documentation when Ctrl+/ is pressed', async () => {
+            await PageObjects.console.monaco.enterText(request);
+            await PageObjects.console.monaco.pressEscape();
+            await PageObjects.console.monaco.pressCtrlSlash();
+            await retry.tryForTime(10000, async () => {
+              await browser.switchTab(1);
+              tabOpened = true;
+            });
 
-        // Retry until the documentation is loaded
-        await retry.try(async () => {
-          const url = await browser.getCurrentUrl();
-          expect(url).to.contain('search-search.html');
+            // Retry until the documentation is loaded
+            await retry.try(async () => {
+              const url = await browser.getCurrentUrl();
+              expect(url).to.contain('search-search.html');
+            });
+          });
         });
       });
+    });
+
+    it('can toggle keyboard shortcuts', async () => {
+      // Enter a sample command
+      await PageObjects.console.monaco.enterText('GET _search');
+
+      // Disable keyboard shorcuts
+      await PageObjects.console.toggleKeyboardShortcuts(false);
+
+      // Upon clicking ctrl enter a newline character should be added to the editor
+      await PageObjects.console.monaco.pressCtrlEnter();
+      await retry.waitFor('shortcut shouldnt have generated any request', async () => {
+        const response = await PageObjects.console.monaco.getOutputText();
+        return response === '';
+      });
+
+      // Restore setting
+      await PageObjects.console.toggleKeyboardShortcuts(true);
     });
 
     describe('customizable font size', () => {

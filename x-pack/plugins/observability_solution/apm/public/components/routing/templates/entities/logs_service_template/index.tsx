@@ -15,7 +15,6 @@ import { ServiceAnomalyTimeseriesContextProvider } from '../../../../../context/
 import { useApmParams } from '../../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
-import { MobileSearchBar } from '../../../../app/mobile/search_bar';
 import { SearchBar } from '../../../../shared/search_bar/search_bar';
 import { ServiceIcons } from '../../../../shared/service_icons';
 import { TechnicalPreviewBadge } from '../../../../shared/technical_preview_badge';
@@ -30,7 +29,7 @@ interface Props {
   title: string;
   children: React.ReactChild;
   selectedTabKey: Tab['key'];
-  searchBarOptions?: React.ComponentProps<typeof MobileSearchBar>;
+  searchBarOptions?: React.ComponentProps<typeof SearchBar>;
 }
 
 export function LogsServiceTemplate(props: Props) {

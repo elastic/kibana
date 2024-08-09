@@ -28,7 +28,7 @@ export const isRESTApiError = (res: AppInfo | RESTApiError | undefined): res is 
 export const isFieldInvalid = (
   field: string | undefined | null,
   error: string | IErrorObject | string[]
-): boolean => error !== undefined && error.length > 0 && field !== undefined;
+): boolean => error !== undefined && Number(error.length) > 0 && field !== undefined;
 
 export const getConnectorDescriptiveTitle = (connector: ActionConnector) => {
   let title = connector.name;

@@ -18,6 +18,7 @@ import {
   EuiFormRow,
   EuiButton,
 } from '@elastic/eui';
+import { EuiProvider } from '@elastic/eui';
 
 import type { CoreStart } from '@kbn/core/public';
 
@@ -42,48 +43,50 @@ export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
   };
 
   return (
-    <EuiPage>
-      <EuiPageBody style={{ maxWidth: 800, margin: '0 auto' }}>
-        <EuiPageHeader paddingSize="s" bottomBorder={true} pageTitle="ES|QL AST Inspector" />
-        <EuiPageSection paddingSize="s">
-          <p>This app gives you the AST for a particular ES|QL query.</p>
+    <EuiProvider>
+      <EuiPage>
+        <EuiPageBody style={{ maxWidth: 800, margin: '0 auto' }}>
+          <EuiPageHeader paddingSize="s" bottomBorder={true} pageTitle="ES|QL AST Inspector" />
+          <EuiPageSection paddingSize="s">
+            <p>This app gives you the AST for a particular ES|QL query.</p>
 
-          <EuiSpacer />
+            <EuiSpacer />
 
-          <EuiForm>
-            <EuiFormRow
-              fullWidth
-              label="Query"
-              isInvalid={Boolean(currentErrors.length)}
-              error={currentErrors.map((error) => error.message)}
-            >
-              <EuiTextArea
-                inputRef={(node) => {
-                  inputRef.current = node;
-                }}
-                isInvalid={Boolean(currentErrors.length)}
+            <EuiForm>
+              <EuiFormRow
                 fullWidth
-                value={currentQuery}
-                onChange={(e) => setQuery(e.target.value)}
-                css={{
-                  height: '5em',
-                }}
-              />
-            </EuiFormRow>
-            <EuiFormRow fullWidth>
-              <EuiButton fullWidth onClick={() => parseQuery(inputRef.current?.value ?? '')}>
-                Parse
-              </EuiButton>
-            </EuiFormRow>
-          </EuiForm>
-          <EuiSpacer />
-          <CodeEditor
-            allowFullScreen={true}
-            languageId={'json'}
-            value={JSON.stringify(ast, null, 2)}
-          />
-        </EuiPageSection>
-      </EuiPageBody>
-    </EuiPage>
+                label="Query"
+                isInvalid={Boolean(currentErrors.length)}
+                error={currentErrors.map((error) => error.message)}
+              >
+                <EuiTextArea
+                  inputRef={(node) => {
+                    inputRef.current = node;
+                  }}
+                  isInvalid={Boolean(currentErrors.length)}
+                  fullWidth
+                  value={currentQuery}
+                  onChange={(e) => setQuery(e.target.value)}
+                  css={{
+                    height: '5em',
+                  }}
+                />
+              </EuiFormRow>
+              <EuiFormRow fullWidth>
+                <EuiButton fullWidth onClick={() => parseQuery(inputRef.current?.value ?? '')}>
+                  Parse
+                </EuiButton>
+              </EuiFormRow>
+            </EuiForm>
+            <EuiSpacer />
+            <CodeEditor
+              allowFullScreen={true}
+              languageId={'json'}
+              value={JSON.stringify(ast, null, 2)}
+            />
+          </EuiPageSection>
+        </EuiPageBody>
+      </EuiPage>
+    </EuiProvider>
   );
 };

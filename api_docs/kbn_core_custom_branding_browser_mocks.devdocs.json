@@ -6,26 +6,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-custom-branding-browser-mocks",
-        "id": "def-common.customBrandingServiceMock",
+        "id": "def-public.customBrandingServiceMock",
         "type": "Object",
         "tags": [],
         "label": "customBrandingServiceMock",
@@ -36,7 +20,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-custom-branding-browser-mocks",
-            "id": "def-common.customBrandingServiceMock.create",
+            "id": "def-public.customBrandingServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -52,7 +36,7 @@
           },
           {
             "parentPluginId": "@kbn/core-custom-branding-browser-mocks",
-            "id": "def-common.customBrandingServiceMock.createSetupContract",
+            "id": "def-public.customBrandingServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -80,7 +64,7 @@
           },
           {
             "parentPluginId": "@kbn/core-custom-branding-browser-mocks",
-            "id": "def-common.customBrandingServiceMock.createStartContract",
+            "id": "def-public.customBrandingServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
@@ -110,5 +94,21 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

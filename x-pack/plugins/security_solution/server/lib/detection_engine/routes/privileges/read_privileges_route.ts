@@ -12,7 +12,7 @@ import type { IKibanaResponse } from '@kbn/core/server';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_PRIVILEGES_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
-import type { GetPrivilegesResponse } from '../../../../../common/api/detection_engine';
+import type { ReadPrivilegesResponse } from '../../../../../common/api/detection_engine';
 
 export const readPrivilegesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -31,7 +31,7 @@ export const readPrivilegesRoute = (
         version: '2023-10-31',
         validate: false,
       },
-      async (context, request, response): Promise<IKibanaResponse<GetPrivilegesResponse>> => {
+      async (context, request, response): Promise<IKibanaResponse<ReadPrivilegesResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {

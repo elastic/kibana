@@ -15,7 +15,7 @@ import type {
   OpenTimelineResult,
 } from '../../../timelines/components/open_timeline/types';
 import { HoverPopover } from '../../../common/components/hover_popover';
-import { TimelineType } from '../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../common/api/timeline';
 
 import { RecentTimelineCounts } from './counts';
 import * as i18n from './translations';
@@ -53,14 +53,14 @@ const RecentTimelinesItem = React.memo<RecentTimelinesItemProps>(
           hoverContent={
             <EuiToolTip
               content={
-                timeline.timelineType === TimelineType.default
+                timeline.timelineType === TimelineTypeEnum.default
                   ? i18n.OPEN_AS_DUPLICATE
                   : i18n.OPEN_AS_DUPLICATE_TEMPLATE
               }
             >
               <EuiButtonIcon
                 aria-label={
-                  timeline.timelineType === TimelineType.default
+                  timeline.timelineType === TimelineTypeEnum.default
                     ? i18n.OPEN_AS_DUPLICATE
                     : i18n.OPEN_AS_DUPLICATE_TEMPLATE
                 }

@@ -13,6 +13,10 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useInspector } from '../../hooks/use_inspector';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
+import {
+  useSavedSearch,
+  useSavedSearchHasChanged,
+} from '../../state_management/discover_state_provider';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { getTopNavBadges } from './get_top_nav_badges';
 import { getTopNavLinks } from './get_top_nav_links';
@@ -39,7 +43,9 @@ export const useDiscoverTopNav = ({
       }),
     [stateContainer, services, hasUnsavedChanges, topNavCustomization]
   );
-
+  const savedSearchId = useSavedSearch().id;
+  const savedSearchHasChanged = useSavedSearchHasChanged();
+  const shouldShowESQLToDataViewTransitionModal = !savedSearchId || savedSearchHasChanged;
   const dataView = useInternalStateSelector((state) => state.dataView);
   const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
   const isEsqlMode = useIsEsqlMode();
@@ -58,6 +64,7 @@ export const useDiscoverTopNav = ({
         isEsqlMode,
         adHocDataViews,
         topNavCustomization,
+        shouldShowESQLToDataViewTransitionModal,
       }),
     [
       adHocDataViews,
@@ -67,6 +74,7 @@ export const useDiscoverTopNav = ({
       services,
       stateContainer,
       topNavCustomization,
+      shouldShowESQLToDataViewTransitionModal,
     ]
   );
 

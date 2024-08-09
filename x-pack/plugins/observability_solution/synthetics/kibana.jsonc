@@ -17,6 +17,7 @@
       "embeddable",
       "discover",
       "dataViews",
+      "dashboard",
       "encryptedSavedObjects",
       "exploratoryView",
       "features",
@@ -31,12 +32,15 @@
       "triggersActionsUi",
       "usageCollection",
       "bfetch",
-      "unifiedSearch"
+      "uiActions",
+      "unifiedSearch",
+      "presentationUtil"
     ],
     "optionalPlugins": [
       "cloud",
       "data",
       "fleet",
+      "slo",
       "home",
       "ml",
       "serverless",
@@ -53,7 +57,7 @@
       "observability",
       "spaces",
       "indexLifecycleManagement",
-      "unifiedDocViewer"
+      "unifiedDocViewer",
     ]
   }
 }

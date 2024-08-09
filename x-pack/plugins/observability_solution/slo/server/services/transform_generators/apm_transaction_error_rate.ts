@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import {
   ALL_VALUE,
   apmTransactionErrorRateIndicatorSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
-import { estypes } from '@elastic/elasticsearch';
-import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
 import {
+  getSLOPipelineId,
   getSLOTransformId,
   SLO_DESTINATION_INDEX_NAME,
-  SLO_INGEST_PIPELINE_NAME,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { APMTransactionErrorRateIndicator, SLODefinition } from '../../domain/models';
 import { InvalidTransformError } from '../../errors';
-import { parseIndex, getTimesliceTargetComparator, getFilterRange } from './common';
+import { getFilterRange, getTimesliceTargetComparator, parseIndex } from './common';
 
 export class ApmTransactionErrorRateTransformGenerator extends TransformGenerator {
   public async getTransformParams(
@@ -38,7 +38,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
       this.buildTransformId(slo),
       this.buildDescription(slo),
       await this.buildSource(slo, slo.indicator, dataViewService),
-      this.buildDestination(),
+      this.buildDestination(slo),
       this.buildGroupBy(slo, slo.indicator),
       this.buildAggregations(slo),
       this.buildSettings(slo),
@@ -136,9 +136,9 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
     };
   }
 
-  private buildDestination() {
+  private buildDestination(slo: SLODefinition) {
     return {
-      pipeline: SLO_INGEST_PIPELINE_NAME,
+      pipeline: getSLOPipelineId(slo.id, slo.revision),
       index: SLO_DESTINATION_INDEX_NAME,
     };
   }

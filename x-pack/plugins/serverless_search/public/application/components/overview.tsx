@@ -192,6 +192,9 @@ export const ElasticsearchOverview = () => {
               assetBasePath={assetBasePath}
               application={application}
               sharePlugin={share}
+              consoleTitle={i18n.translate('xpack.serverlessSearch.configureClient.title', {
+                defaultMessage: 'Configure your client',
+              })}
             />
           }
           links={[
@@ -238,6 +241,9 @@ export const ElasticsearchOverview = () => {
               assetBasePath={assetBasePath}
               application={application}
               sharePlugin={share}
+              consoleTitle={i18n.translate('xpack.serverlessSearch.testConnection.title', {
+                defaultMessage: 'Test your connection',
+              })}
             />
           }
           links={[]}
@@ -349,6 +355,9 @@ export const ElasticsearchOverview = () => {
               application={application}
               consolePlugin={consolePlugin}
               sharePlugin={share}
+              consoleTitle={i18n.translate('xpack.serverlessSearch.searchQuery.title', {
+                defaultMessage: 'Build your first search query',
+              })}
             />
           }
           links={[]}

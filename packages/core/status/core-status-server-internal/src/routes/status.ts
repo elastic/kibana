@@ -86,7 +86,7 @@ export const registerStatusRoute = ({
         // The `api` tag ensures that unauthenticated calls receive a 401 rather than a 302 redirect to login page.
         // The `security:acceptJWT` tag allows route to be accessed with JWT credentials. It points to
         // ROUTE_TAG_ACCEPT_JWT from '@kbn/security-plugin/server' that cannot be imported here directly.
-        tags: ['api', 'security:acceptJWT'],
+        tags: ['api', 'security:acceptJWT', 'oas-tag:system'],
         access: 'public', // needs to be public to allow access from "system" users like k8s readiness probes.
         summary: `Get Kibana's current status`,
       },
@@ -119,9 +119,11 @@ export const registerStatusRoute = ({
         },
         response: {
           200: {
+            description: 'Overall status is OK and Kibana should be functioning normally.',
             body: statusResponse,
           },
           503: {
+            description: `Kibana or some of it's essential services are unavailable. Kibana may be degraded or unavailable.`,
             body: statusResponse,
           },
         },

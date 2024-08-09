@@ -107,6 +107,7 @@ import { getFullAgentPolicy, validateOutputForPolicy } from './agent_policies';
 import { auditLoggingService } from './audit_logging';
 import { licenseService } from './license';
 import { createSoFindIterable } from './utils/create_so_find_iterable';
+import { isAgentlessEnabled } from './utils/agentless';
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
@@ -743,13 +744,23 @@ class AgentPolicyService {
       );
     }
 
+    const policyNeedsBump = baseAgentPolicy.package_policies || baseAgentPolicy.is_protected;
+
+    // bump revision if agent policy is updated after creation
+    if (policyNeedsBump) {
+      await this.bumpRevision(soClient, esClient, newAgentPolicy.id, {
+        user: options?.user,
+      });
+    } else {
+      await this.deployPolicy(soClient, newAgentPolicy.id);
+    }
+
     // Get updated agent policy with package policies and adjusted tamper protection
     const updatedAgentPolicy = await this.get(soClient, newAgentPolicy.id, true);
     if (!updatedAgentPolicy) {
       throw new AgentPolicyNotFoundError('Copied agent policy not found');
     }
 
-    await this.deployPolicy(soClient, newAgentPolicy.id);
     logger.debug(`Completed copy of agent policy ${id}`);
     return updatedAgentPolicy;
   }
@@ -998,7 +1009,7 @@ class AgentPolicyService {
       showInactive: true,
       perPage: 0,
       page: 1,
-      kuery: `${AGENTS_PREFIX}.policy_id:${id} and not status: unenrolled`,
+      kuery: `${AGENTS_PREFIX}.policy_id:${id}`,
     });
 
     if (total > 0) {
@@ -1126,6 +1137,7 @@ class AgentPolicyService {
         '@timestamp': new Date().toISOString(),
         revision_idx: fullPolicy.revision,
         coordinator_idx: 0,
+        namespaces: fullPolicy.namespaces,
         data: fullPolicy as unknown as FleetServerPolicy['data'],
         policy_id: fullPolicy.id,
         default_fleet_server: policy.is_default_fleet_server === true,
@@ -1578,12 +1590,7 @@ class AgentPolicyService {
     }
   }
   private checkAgentless(agentPolicy: Partial<NewAgentPolicy>) {
-    const cloudSetup = appContextService.getCloud();
-    if (
-      (!cloudSetup?.isServerlessEnabled || !cloudSetup?.isCloudEnabled) &&
-      !appContextService.getExperimentalFeatures().agentless &&
-      agentPolicy?.supports_agentless
-    ) {
+    if (!isAgentlessEnabled() && agentPolicy?.supports_agentless) {
       throw new AgentPolicyInvalidError(
         'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
       );

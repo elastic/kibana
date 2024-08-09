@@ -163,7 +163,10 @@ export const guideCards: GuideCardConstants[] = [
         defaultMessage: 'Monitor Kubernetes clusters',
       }
     ),
-    guideId: 'kubernetes',
+    navigateTo: {
+      appId: 'observabilityOnboarding',
+      path: '/kubernetes',
+    },
     telemetryId: 'onboarding--observability--kubernetes',
     order: 11,
   },

@@ -27,7 +27,7 @@ export const CATEGORIZATION_TYPE = {
   RARE: ML_JOB_AGGREGATION.RARE,
 } as const;
 
-export type CategorizationType = typeof CATEGORIZATION_TYPE[keyof typeof CATEGORIZATION_TYPE];
+export type CategorizationType = (typeof CATEGORIZATION_TYPE)[keyof typeof CATEGORIZATION_TYPE];
 
 export class QuickCategorizationJobCreator extends QuickJobCreatorBase {
   constructor(

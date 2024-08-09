@@ -7,11 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-plugin/common';
-import {
-  getESQLAdHocDataview,
-  getIndexPatternFromESQLQuery,
-  getESQLQueryColumnsRaw,
-} from '@kbn/esql-utils';
+import { getESQLAdHocDataview, getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import type { ESQLColumn } from '@kbn/es-types';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import { getData, getIndexPatternService } from '../../../kibana_services';
@@ -53,14 +49,12 @@ export function verifyGeometryColumn(columns: ESQLColumn[]) {
 }
 
 export async function getESQLMeta(esql: string) {
-  const adhocDataView = await getESQLAdHocDataview(
-    getIndexPatternFromESQLQuery(esql),
-    getIndexPatternService()
-  );
+  const adhocDataView = await getESQLAdHocDataview(esql, getIndexPatternService());
   return {
     columns: await getESQLQueryColumnsRaw({
       esqlQuery: esql,
       search: getData().search.search,
+      timeRange: getData().query.timefilter.timefilter.getAbsoluteTime(),
     }),
     adhocDataViewId: adhocDataView.id!,
     ...getFields(adhocDataView),

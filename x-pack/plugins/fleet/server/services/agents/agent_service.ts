@@ -19,13 +19,13 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-
 import type { AgentStatus, ListWithKuery } from '../../types';
 import type { Agent, GetAgentStatusResponse } from '../../../common/types';
 import { getAuthzFromRequest } from '../security';
 import { appContextService } from '../app_context';
 import { FleetUnauthorizedError } from '../../errors';
+
+import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
 import { getAgentsByKuery, getAgentById } from './crud';
 import { getAgentStatusById, getAgentStatusForAgentPolicy } from './status';
@@ -183,7 +183,7 @@ export class AgentServiceImpl implements AgentService {
       this.internalEsClient,
       soClient,
       preflightCheck,
-      soClient.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING
+      getCurrentNamespace(soClient)
     );
   }
 

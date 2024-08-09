@@ -66,6 +66,7 @@ const openInlineLensConfigEditor = (
       'data-test-subj': 'customizeLens',
       className: 'lnsConfigPanel__overlay',
       hideCloseButton: true,
+      isResizable: true,
       onClose: (overlayRef) => {
         overlayTracker?.clearOverlays();
         overlayRef.close();

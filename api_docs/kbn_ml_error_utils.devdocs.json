@@ -520,9 +520,9 @@
           "<T> extends ",
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.IHttpFetchError",
+            "section": "def-public.IHttpFetchError",
             "text": "IHttpFetchError"
           },
           "<T>"

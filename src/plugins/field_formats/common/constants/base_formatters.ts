@@ -42,6 +42,7 @@ export const baseFormatters: FieldFormatInstanceType[] = [
   StaticLookupFormat,
   StringFormat,
   TruncateFormat,
+  // @ts-expect-error upgrade typescript v5.1.6
   UrlFormat,
   HistogramFormat,
 ];

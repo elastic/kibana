@@ -36,5 +36,4 @@ properties:
       The version of the connector.
       To retrieve the version value, use the get configuration API.
     type: string
-    examples:
-      - WzIwMiwxXQ==
+    example: WzIwMiwxXQ==

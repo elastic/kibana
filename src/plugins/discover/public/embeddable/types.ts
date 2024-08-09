@@ -6,58 +6,101 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { Embeddable, EmbeddableOutput, IEmbeddable } from '@kbn/embeddable-plugin/public';
-import type {
+import { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddableApiContext,
+  HasEditCapabilities,
+  HasInPlaceLibraryTransforms,
+  PublishesBlockingError,
+  PublishesDataLoading,
+  PublishesDataViews,
+  PublishesSavedObjectId,
+  PublishesUnifiedSearch,
+  PublishesWritablePanelTitle,
+  PublishingSubject,
+  SerializedTimeRange,
+  SerializedTitles,
+} from '@kbn/presentation-publishing';
+import {
   SavedSearch,
-  SearchByReferenceInput,
-  SearchByValueInput,
-} from '@kbn/saved-search-plugin/public';
+  SavedSearchAttributes,
+  SerializableSavedSearch,
+} from '@kbn/saved-search-plugin/common/types';
+import { DataTableColumnsMeta } from '@kbn/unified-data-table';
+import { BehaviorSubject } from 'rxjs';
+import { EDITABLE_SAVED_SEARCH_KEYS } from './constants';
 
-import type { Adapters } from '@kbn/embeddable-plugin/public';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+export type SearchEmbeddableState = Pick<
+  SerializableSavedSearch,
+  | 'rowHeight'
+  | 'rowsPerPage'
+  | 'headerRowHeight'
+  | 'columns'
+  | 'sort'
+  | 'sampleSize'
+  | 'viewMode'
+  | 'grid'
+> & {
+  rows: DataTableRecord[];
+  columnsMeta: DataTableColumnsMeta | undefined;
+  totalHitCount: number | undefined;
+};
 
-import type { DiscoverServices } from '../build_services';
-import type { DocTableEmbeddableSearchProps } from '../components/doc_table/doc_table_embeddable';
-import type { DiscoverGridEmbeddableSearchProps } from './saved_search_grid';
+export type SearchEmbeddableStateManager = {
+  [key in keyof Required<SearchEmbeddableState>]: BehaviorSubject<SearchEmbeddableState[key]>;
+};
 
-export type SearchInput = SearchByValueInput | SearchByReferenceInput;
+export type SearchEmbeddableSerializedAttributes = Omit<
+  SearchEmbeddableState,
+  'rows' | 'columnsMeta' | 'totalHitCount' | 'searchSource'
+> &
+  Pick<SerializableSavedSearch, 'serializedSearchSource'>;
 
-export interface SearchOutput extends EmbeddableOutput {
-  indexPatterns?: DataView[];
-  editable: boolean;
+export type SearchEmbeddableSerializedState = SerializedTitles &
+  SerializedTimeRange &
+  Partial<Pick<SavedSearchAttributes, (typeof EDITABLE_SAVED_SEARCH_KEYS)[number]>> & {
+    // by value
+    attributes?: SavedSearchAttributes & { references: SavedSearch['references'] };
+    // by reference
+    savedObjectId?: string;
+  };
+
+export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes &
+  SerializedTitles &
+  SerializedTimeRange & {
+    savedObjectTitle?: string;
+    savedObjectId?: string;
+    savedObjectDescription?: string;
+  };
+
+export type SearchEmbeddableApi = DefaultEmbeddableApi<
+  SearchEmbeddableSerializedState,
+  SearchEmbeddableRuntimeState
+> &
+  PublishesDataViews &
+  PublishesSavedObjectId &
+  PublishesDataLoading &
+  PublishesBlockingError &
+  PublishesWritablePanelTitle &
+  PublishesSavedSearch &
+  PublishesDataViews &
+  PublishesUnifiedSearch &
+  HasInPlaceLibraryTransforms &
+  HasTimeRange &
+  Partial<HasEditCapabilities & PublishesSavedObjectId>;
+
+export interface PublishesSavedSearch {
+  savedSearch$: PublishingSubject<SavedSearch>;
 }
 
-export type ISearchEmbeddable = IEmbeddable<SearchInput, SearchOutput> &
-  HasSavedSearch &
-  HasTimeRange;
-
-export interface SearchEmbeddable extends Embeddable<SearchInput, SearchOutput> {
-  type: string;
-}
-
-export interface HasSavedSearch {
-  getSavedSearch: () => SavedSearch | undefined;
-}
-
-export const apiHasSavedSearch = (
+export const apiPublishesSavedSearch = (
   api: EmbeddableApiContext['embeddable']
-): api is HasSavedSearch => {
-  const embeddable = api as HasSavedSearch;
-  return Boolean(embeddable.getSavedSearch) && typeof embeddable.getSavedSearch === 'function';
+): api is PublishesSavedSearch => {
+  const embeddable = api as PublishesSavedSearch;
+  return Boolean(embeddable.savedSearch$);
 };
 
 export interface HasTimeRange {
   hasTimeRange(): boolean;
 }
-
-export type EmbeddableComponentSearchProps = DiscoverGridEmbeddableSearchProps &
-  DocTableEmbeddableSearchProps;
-
-export type SearchProps = EmbeddableComponentSearchProps & {
-  sampleSizeState: number | undefined;
-  description?: string;
-  sharedItemTitle?: string;
-  inspectorAdapters?: Adapters;
-  services: DiscoverServices;
-};

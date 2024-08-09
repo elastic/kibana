@@ -62,24 +62,16 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
 
     after(async () => {
       await svlCases.api.deleteAllCaseItems();
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     beforeEach(async () => {
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 
     it('cases list screenshot', async () => {
       await navigateToCasesApp(getPageObject, getService, owner);
       await pageObjects.header.waitUntilLoadingHasFinished();
       await svlCommonScreenshots.takeScreenshot('cases-home-page', screenshotDirectories);
-    });
-
-    it('case settings screenshot', async () => {
-      await navigateToCasesApp(getPageObject, getService, owner);
-      await testSubjects.click('configure-case-button');
-      await pageObjects.header.waitUntilLoadingHasFinished();
-      await svlCommonScreenshots.takeScreenshot('case-settings', screenshotDirectories);
     });
 
     it('case detail screenshot', async () => {

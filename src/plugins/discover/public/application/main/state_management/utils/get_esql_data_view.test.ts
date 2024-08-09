@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { getEsqlDataView } from './get_esql_data_view';
 import { dataViewAdHoc } from '../../../../__mocks__/data_view_complex';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
@@ -18,21 +18,33 @@ describe('getEsqlDataView', () => {
     id: 'ad-hoc-id',
     title: 'test',
   });
+
+  const dataViewAdHocNoAtTimestamp = {
+    ...dataViewAdHoc,
+    timeFieldName: undefined,
+  } as DataView;
   const services = discoverServiceMock;
-  it('returns the current dataview if is adhoc and query has not changed', async () => {
+
+  it('returns the current dataview if it is adhoc with no named params and query index pattern is the same as the dataview index pattern', async () => {
     const query = { esql: 'from data-view-ad-hoc-title' };
-    const dataView = await getEsqlDataView(query, dataViewAdHoc, services);
-    expect(dataView).toStrictEqual(dataViewAdHoc);
+    const dataView = await getEsqlDataView(query, dataViewAdHocNoAtTimestamp, services);
+    expect(dataView).toStrictEqual(dataViewAdHocNoAtTimestamp);
   });
 
-  it('creates an adhoc dataview if the current dataview is persistent and query has not changed', async () => {
+  it('returns an adhoc dataview if it is adhoc with named params and query index pattern is the same as the dataview index pattern', async () => {
+    const query = { esql: 'from data-view-ad-hoc-title | where time >= ?start' };
+    const dataView = await getEsqlDataView(query, dataViewAdHocNoAtTimestamp, services);
+    expect(dataView.timeFieldName).toBe('time');
+  });
+
+  it('creates an adhoc dataview if the current dataview is persistent and query index pattern is the same as the dataview index pattern', async () => {
     const query = { esql: 'from the-data-view-title' };
     const dataView = await getEsqlDataView(query, dataViewMock, services);
     expect(dataView.isPersisted()).toEqual(false);
     expect(dataView.timeFieldName).toBe('@timestamp');
   });
 
-  it('creates an adhoc dataview if the current dataview is ad hoc and query has changed', async () => {
+  it('creates an adhoc dataview if the current dataview is ad hoc and query index pattern is different from the dataview index pattern', async () => {
     discoverServiceMock.dataViews.create = jest.fn().mockReturnValue({
       ...dataViewAdHoc,
       isPersisted: () => false,

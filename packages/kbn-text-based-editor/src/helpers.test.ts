@@ -9,7 +9,6 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import {
   parseErrors,
   parseWarning,
-  getInlineEditorText,
   getWrappedInPipesCode,
   getIndicesList,
   getRemoteIndicesList,
@@ -206,33 +205,6 @@ describe('helpers', function () {
           startLineNumber: 1,
         },
       ]);
-    });
-  });
-
-  describe('getInlineEditorText', function () {
-    it('should return the entire query if it is one liner', function () {
-      const text = getInlineEditorText('FROM index1 | keep field1, field2 | order field1', false);
-      expect(text).toEqual(text);
-    });
-
-    it('should return the query on one line with extra space if is multiliner', function () {
-      const text = getInlineEditorText(
-        'FROM index1 | keep field1, field2\n| keep field1, field2 | order field1',
-        true
-      );
-      expect(text).toEqual(
-        'FROM index1 | keep field1, field2 | keep field1, field2 | order field1'
-      );
-    });
-
-    it('should return the query on one line with extra spaces removed if is multiliner', function () {
-      const text = getInlineEditorText(
-        'FROM index1 | keep field1, field2\n| keep field1, field2 \n  | order field1',
-        true
-      );
-      expect(text).toEqual(
-        'FROM index1 | keep field1, field2 | keep field1, field2 | order field1'
-      );
     });
   });
 

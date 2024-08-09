@@ -12,4 +12,4 @@ export const adHocRunStatus = {
   ERROR: 'error',
   TIMEOUT: 'timeout',
 } as const;
-export type AdHocRunStatus = typeof adHocRunStatus[keyof typeof adHocRunStatus];
+export type AdHocRunStatus = (typeof adHocRunStatus)[keyof typeof adHocRunStatus];

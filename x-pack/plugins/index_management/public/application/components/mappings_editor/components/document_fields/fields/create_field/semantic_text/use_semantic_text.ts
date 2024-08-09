@@ -54,7 +54,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
       const defaultName = getFieldByPathName(allFields, 'semantic_text') ? '' : 'semantic_text';
       const referenceField =
         Object.values(allFields.byId)
-          .find((field) => field.source.type === 'text')
+          .find((field) => field.source.type === 'text' && !field.isMultiField)
           ?.path.join('.') || '';
       if (!form.getFormData().name) {
         form.setFieldValue('name', defaultName);
@@ -110,6 +110,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
       throw new Error(
         i18n.translate('xpack.idxMgmt.mappingsEditor.semanticText.inferenceError', {
           defaultMessage: 'No inference model found for inference ID {inferenceId}',
+          values: { inferenceId },
         })
       );
     }

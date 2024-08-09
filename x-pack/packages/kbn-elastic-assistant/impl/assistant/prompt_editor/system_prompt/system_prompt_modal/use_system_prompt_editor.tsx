@@ -52,14 +52,17 @@ export const useSystemPromptEditor = ({
         });
 
         if (isNew) {
-          setPromptsBulkActions({
-            ...promptsBulkActions,
-            create: [
-              ...(promptsBulkActions.create ?? []),
-              {
-                ...newSelectedSystemPrompt,
-              },
-            ],
+          setPromptsBulkActions((prev) => {
+            const newBulkActions = {
+              ...prev,
+              create: [
+                ...(promptsBulkActions.create ?? []),
+                {
+                  ...newSelectedSystemPrompt,
+                },
+              ],
+            };
+            return newBulkActions;
           });
         }
       }

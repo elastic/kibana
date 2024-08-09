@@ -5,16 +5,4 @@
  * 2.0.
  */
 
-export interface UserAgent {
-  device?: {
-    name: string;
-  };
-  name?: string;
-  original: string;
-  os?: {
-    name: string;
-    version?: string;
-    full?: string;
-  };
-  version?: string;
-}
+export type { UserAgent } from '@kbn/apm-types/es_schemas_raw';

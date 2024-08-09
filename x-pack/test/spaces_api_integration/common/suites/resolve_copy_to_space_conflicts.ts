@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { SavedObject } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import { CopyResponse } from '@kbn/spaces-plugin/server/lib/copy_to_spaces';
+import { SuperTest } from 'supertest';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 import type { FtrProviderContext } from '../ftr_provider_context';
@@ -69,7 +70,9 @@ const getDestinationSpace = (originSpaceId?: string) => {
 export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
   const testDataLoader = getTestDataLoader(context);
   const supertestWithAuth = context.getService('supertest');
-  const supertestWithoutAuth = context.getService('supertestWithoutAuth');
+  const supertestWithoutAuth = context.getService(
+    'supertestWithoutAuth'
+  ) as unknown as SuperTest<any>;
 
   const getVisualizationAtSpace = async (spaceId: string): Promise<SavedObject<any>> => {
     return supertestWithAuth

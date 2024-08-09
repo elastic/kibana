@@ -67,6 +67,7 @@ export function NavControl({}: {}) {
 
   useEffect(() => {
     const conversationSubscription = service.conversations.predefinedConversation$.subscribe(() => {
+      keyRef.current = v4();
       setHasBeenOpened(true);
       setIsOpen(true);
     });

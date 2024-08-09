@@ -19,11 +19,6 @@ export const IS_ONE_OF_OPERATOR = 'includes';
 /** The operator applied to a field */
 export type QueryOperator = typeof IS_OPERATOR | typeof EXISTS_OPERATOR | typeof IS_ONE_OF_OPERATOR;
 
-export enum DataProviderType {
-  default = 'default',
-  template = 'template',
-}
-
 export interface QueryMatch {
   field: string;
   displayField?: string;
@@ -62,7 +57,7 @@ export interface DataProvider {
   /**
    * Returns a DataProviderType
    */
-  type?: DataProviderType.default | DataProviderType.template;
+  type?: 'default' | 'template';
 }
 
 export type DataProvidersAnd = Pick<DataProvider, Exclude<keyof DataProvider, 'and'>>;

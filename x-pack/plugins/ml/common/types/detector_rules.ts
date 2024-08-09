@@ -25,8 +25,17 @@ export interface DetectorRuleCondition {
   value: number;
 }
 
+export interface DetectorRuleParamsForceTimeShift {
+  time_shift_amount: number;
+}
+
+export interface DetectorRuleParams {
+  force_time_shift?: DetectorRuleParamsForceTimeShift;
+}
+
 export interface DetectorRule {
   actions: ML_DETECTOR_RULE_ACTION[];
   scope?: DetectorRuleScope;
   conditions?: DetectorRuleCondition[];
+  params?: DetectorRuleParams[];
 }

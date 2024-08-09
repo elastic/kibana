@@ -10,11 +10,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { lastValueFrom } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
 import type { IEsSearchResponse } from '@kbn/search-types';
-import {
-  ES_SEARCH_STRATEGY,
-  type ISearchSource,
-  type SearchRequest,
-} from '@kbn/data-plugin/common';
+import { ES_SEARCH_STRATEGY, type ISearchSource } from '@kbn/data-plugin/common';
 import { SearchCursor, type SearchCursorClients, type SearchCursorSettings } from './search_cursor';
 import { i18nTexts } from './i18n_texts';
 
@@ -32,7 +28,7 @@ export class SearchCursorScroll extends SearchCursor {
   // The first search query begins the scroll context in ES
   public async initialize() {}
 
-  private async scan(searchBody: SearchRequest) {
+  private async scan(searchBody: estypes.SearchRequest) {
     const { includeFrozen, maxConcurrentShardRequests, scroll, taskInstanceFields } = this.settings;
 
     // maxConcurrentShardRequests=0 is not supported

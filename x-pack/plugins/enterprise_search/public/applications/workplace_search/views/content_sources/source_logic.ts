@@ -116,11 +116,14 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     contentSource: [
       {} as ContentSourceFullData,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setContentSource: (_, contentSource) => contentSource,
+        // @ts-expect-error upgrade typescript v5.1.6
         onUpdateSourceName: (contentSource, name) => ({
           ...contentSource,
           name,
         }),
+        // @ts-expect-error upgrade typescript v5.1.6
         onUpdateSummary: (contentSource, summary) => ({
           ...contentSource,
           summary,
@@ -160,20 +163,25 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     contentItems: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setSearchResults: (_, { results }) => results,
       },
     ],
     contentMeta: [
       DEFAULT_META,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setActivePage: (state, activePage) => setPage(state, activePage),
+        // @ts-expect-error upgrade typescript v5.1.6
         setContentFilterValue: (state) => setPage(state, DEFAULT_META.page.current),
+        // @ts-expect-error upgrade typescript v5.1.6
         setSearchResults: (_, { meta }) => meta,
       },
     ],
     contentFilterValue: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setContentFilterValue: (_, contentFilterValue) => contentFilterValue,
         resetSourceState: () => '',
       },
@@ -181,6 +189,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     stagedPrivateKey: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setStagedPrivateKey: (_, stagedPrivateKey) => stagedPrivateKey,
         setContentSource: () => null,
       },

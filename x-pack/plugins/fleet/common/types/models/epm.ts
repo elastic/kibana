@@ -533,6 +533,10 @@ export type PackageInfo =
   | Installable<Merge<RegistryPackage, EpmPackageAdditions>>
   | Installable<Merge<ArchivePackage, EpmPackageAdditions>>;
 
+export interface PackageMetadata {
+  has_policies: true;
+}
+
 export type IntegrationCardReleaseLabel = 'beta' | 'preview' | 'ga' | 'rc';
 
 export type PackageVerificationStatus = 'verified' | 'unverified' | 'unknown';
@@ -574,7 +578,7 @@ export enum INSTALL_STATES {
   UPDATE_SO = 'update_so',
 }
 type StatesKeys = keyof typeof INSTALL_STATES;
-export type StateNames = typeof INSTALL_STATES[StatesKeys];
+export type StateNames = (typeof INSTALL_STATES)[StatesKeys];
 
 export interface LatestExecutedState<T> {
   name: T;

@@ -124,8 +124,11 @@ const getAlertConfig = (monitor: ProjectMonitor) => {
 
 const ONLY_ONE_ATTEMPT = 1;
 
-export const getMaxAttempts = (retestOnFailure?: boolean) => {
+export const getMaxAttempts = (retestOnFailure?: boolean, maxAttempts?: number) => {
   const defaultFields = DEFAULT_COMMON_FIELDS;
+  if (!retestOnFailure && maxAttempts) {
+    return maxAttempts;
+  }
   if (retestOnFailure) {
     return defaultFields[ConfigKey.MAX_ATTEMPTS];
   } else if (retestOnFailure === false) {

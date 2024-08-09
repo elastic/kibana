@@ -6,26 +6,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-base-browser-mocks",
-        "id": "def-common.coreContextMock",
+        "id": "def-public.coreContextMock",
         "type": "Object",
         "tags": [],
         "label": "coreContextMock",
@@ -36,7 +20,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-base-browser-mocks",
-            "id": "def-common.coreContextMock.create",
+            "id": "def-public.coreContextMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -61,7 +45,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-base-browser-mocks",
-                "id": "def-common.coreContextMock.create.$1",
+                "id": "def-public.coreContextMock.create.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -79,5 +63,21 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

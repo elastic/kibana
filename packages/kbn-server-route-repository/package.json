@@ -2,6 +2,5 @@
   "name": "@kbn/server-route-repository",
   "version": "1.0.0",
   "license": "SSPL-1.0 OR Elastic License 2.0",
-  "private": true,
-  "browser": "./browser_index"
+  "private": true
 }

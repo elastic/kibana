@@ -55,12 +55,14 @@ export const EmailParamsFields = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultMessage]);
-  const isToInvalid: boolean = to !== undefined && errors.to !== undefined && errors.to.length > 0;
+  const isToInvalid: boolean =
+    to !== undefined && errors.to !== undefined && Number(errors.to.length) > 0;
   const isSubjectInvalid: boolean =
-    subject !== undefined && errors.subject !== undefined && errors.subject.length > 0;
-  const isCCInvalid: boolean = errors.cc !== undefined && errors.cc.length > 0 && cc !== undefined;
+    subject !== undefined && errors.subject !== undefined && Number(errors.subject.length) > 0;
+  const isCCInvalid: boolean =
+    errors.cc !== undefined && Number(errors.cc.length) > 0 && cc !== undefined;
   const isBCCInvalid: boolean =
-    errors.bcc !== undefined && errors.bcc.length > 0 && bcc !== undefined;
+    errors.bcc !== undefined && Number(errors.bcc.length) > 0 && bcc !== undefined;
 
   return (
     <>

@@ -17,7 +17,7 @@ import {
   ServiceStatus,
   ServiceStatusLevels,
 } from '@kbn/core/server';
-import { CollectorSet } from '../../collector';
+import { ICollectorSet } from '../../collector';
 import { Stats } from '../../../common/types';
 const SNAPSHOT_REGEX = /-snapshot/i;
 
@@ -40,7 +40,7 @@ export function registerStatsRoute({
       port: number;
     };
   };
-  collectorSet: CollectorSet;
+  collectorSet: ICollectorSet;
   metrics: MetricsServiceSetup;
   overallStatus$: Observable<ServiceStatus>;
 }) {

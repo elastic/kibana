@@ -11,6 +11,7 @@ import { safeLoad } from 'js-yaml';
 
 import { isEqual } from 'lodash';
 
+import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
 import type {
   AgentPolicy,
   NewPackagePolicy,
@@ -152,6 +153,7 @@ export function useOnSubmit({
 }) {
   const { notifications } = useStartServices();
   const confirmForceInstall = useConfirmForceInstall();
+  const spaceSettings = useSpaceSettingsContext();
   // only used to store the resulting package policy once saved
   const [savedPackagePolicy, setSavedPackagePolicy] = useState<PackagePolicy>();
   // Form state
@@ -204,7 +206,8 @@ export function useOnSubmit({
         const newValidationResult = validatePackagePolicy(
           newPackagePolicy || packagePolicy,
           packageInfo,
-          safeLoad
+          safeLoad,
+          spaceSettings
         );
         setValidationResults(newValidationResult);
         // eslint-disable-next-line no-console
@@ -213,7 +216,7 @@ export function useOnSubmit({
         return newValidationResult;
       }
     },
-    [packagePolicy, packageInfo]
+    [packagePolicy, packageInfo, spaceSettings]
   );
   // Update package policy method
   const updatePackagePolicy = useCallback(

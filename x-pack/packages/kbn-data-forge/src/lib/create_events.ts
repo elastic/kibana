@@ -117,6 +117,7 @@ export async function createEvents(
         .flat();
     }
     await queue.push(events);
+    await queue.drain();
   } else {
     logger.info({ took: 0, latency: 0, indexed: 0 }, 'Indexing 0 documents.');
   }

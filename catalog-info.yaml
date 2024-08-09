@@ -113,6 +113,9 @@ spec:
     metadata:
       name: kibana / sonarqube
     spec:
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       repository: elastic/kibana
       provider_settings:
         trigger_mode: none

@@ -24,7 +24,7 @@ import { getDataStreamAdapter } from './lib/data_stream_adapter';
 
 jest.mock('../alerts_client');
 
-let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
+let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
 const SimulateTemplateResponse = {

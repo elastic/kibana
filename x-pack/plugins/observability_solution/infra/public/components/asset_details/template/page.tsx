@@ -9,6 +9,8 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { SYSTEM_INTEGRATION } from '../../../../common/constants';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useParentBreadcrumbResolver } from '../../../hooks/use_parent_breadcrumb_resolver';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
@@ -21,6 +23,12 @@ import { usePageHeader } from '../hooks/use_page_header';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 import { ContentTemplateProps } from '../types';
 import { getIntegrationsAvailable } from '../utils';
+import { InfraPageTemplate } from '../../shared/templates/infra_page_template';
+import { OnboardingFlow } from '../../shared/templates/no_data_config';
+
+const DATA_AVAILABILITY_PER_TYPE: Partial<Record<InventoryItemType, string[]>> = {
+  host: [SYSTEM_INTEGRATION],
+};
 
 export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   const { loading } = useAssetDetailsRenderPropsContext();
@@ -31,12 +39,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
 
   const { activeTabId } = useTabSwitcherContext();
   const {
-    services: {
-      telemetry,
-      observabilityShared: {
-        navigation: { PageTemplate },
-      },
-    },
+    services: { telemetry },
   } = useKibanaContextForPlugin();
 
   const parentBreadcrumbResolver = useParentBreadcrumbResolver();
@@ -79,7 +82,9 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   }, [activeTabId, asset.type, metadata, metadataLoading, telemetry]);
 
   return (
-    <PageTemplate
+    <InfraPageTemplate
+      onboardingFlow={asset.type === 'host' ? OnboardingFlow.Hosts : OnboardingFlow.Infra}
+      dataAvailabilityModules={DATA_AVAILABILITY_PER_TYPE[asset.type] || undefined}
       pageHeader={{
         pageTitle: asset.name,
         tabs: tabEntries,
@@ -107,6 +112,6 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
       ) : (
         <Content />
       )}
-    </PageTemplate>
+    </InfraPageTemplate>
   );
 };

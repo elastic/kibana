@@ -24,12 +24,12 @@ import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { isEmpty } from 'lodash';
-import { GetInspectQuery } from '../../../../../../types';
+import { EsQuerySnapshot } from '@kbn/alerts-ui-shared';
 import * as i18n from './translations';
 
 export interface ModalInspectProps {
   closeModal: () => void;
-  getInspectQuery: GetInspectQuery;
+  querySnapshot: EsQuerySnapshot;
   title: string;
 }
 
@@ -77,8 +77,8 @@ const stringify = (object: Request | Response): string => {
   }
 };
 
-const ModalInspectQueryComponent = ({ closeModal, getInspectQuery, title }: ModalInspectProps) => {
-  const { request, response } = getInspectQuery();
+const ModalInspectQueryComponent = ({ closeModal, querySnapshot, title }: ModalInspectProps) => {
+  const { request, response } = querySnapshot;
   // using index 0 as there will be only one request and response for now
   const parsedRequest: Request = parse(request[0]);
   const parsedResponse: Response = parse(response[0]);

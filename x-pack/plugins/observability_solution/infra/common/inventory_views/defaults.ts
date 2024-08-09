@@ -18,7 +18,7 @@ export const staticInventoryViewAttributes: InventoryViewAttributes = {
   isDefault: false,
   isStatic: true,
   metric: {
-    type: 'cpu',
+    type: 'cpuTotal',
   },
   groupBy: [],
   nodeType: 'host',

@@ -73,9 +73,15 @@ to the {es} {ref}/index-lifecycle-management.html[{ilm-init} documentation].
 
 [float]
 [[csv-limitations]]
-=== CSV reports limitations
+=== CSV report limitations
 
 include::reporting-csv-limitations.asciidoc[]
+
+[float]
+[[pdf-limitations]]
+=== PNG/PDF report limitations
+
+include::reporting-pdf-limitations.asciidoc[]
 
 [float]
 [[share-a-direct-link]]

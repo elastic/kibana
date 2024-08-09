@@ -50,6 +50,7 @@ export function AlertsOverview() {
       },
     },
     uiSettings,
+    observability: { observabilityRuleTypeRegistry },
   } = services;
 
   const useToasts = () => notifications!.toasts;
@@ -109,6 +110,7 @@ export function AlertsOverview() {
               featureIds={[AlertConsumers.APM, AlertConsumers.OBSERVABILITY]}
               query={esQuery}
               showAlertStatusWithFlapping
+              cellContext={{ observabilityRuleTypeRegistry }}
             />
           )}
         </EuiFlexItem>

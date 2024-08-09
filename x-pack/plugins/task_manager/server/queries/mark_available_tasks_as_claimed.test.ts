@@ -17,6 +17,7 @@ import {
   InactiveTasks,
   RecognizedTask,
   OneOfTaskTypes,
+  tasksWithPartitions,
 } from './mark_available_tasks_as_claimed';
 
 import { TaskTypeDictionary } from '../task_type_dictionary';
@@ -258,6 +259,43 @@ if (doc['task.runAt'].size()!=0) {
                 "field-name": Array [
                   "type-a",
                   "type-b",
+                ],
+              },
+            },
+          ],
+        },
+      }
+    `);
+  });
+
+  test('generates tasksWithPartitions clause as expected', () => {
+    expect(tasksWithPartitions([1, 2, 3])).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "bool": Object {
+                "should": Array [
+                  Object {
+                    "terms": Object {
+                      "task.partition": Array [
+                        1,
+                        2,
+                        3,
+                      ],
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "must_not": Array [
+                        Object {
+                          "exists": Object {
+                            "field": "task.partition",
+                          },
+                        },
+                      ],
+                    },
+                  },
                 ],
               },
             },

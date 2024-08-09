@@ -135,7 +135,6 @@ export const esqlExecutor = async ({
       const isAlertSuppressionActive = await getIsAlertSuppressionActive({
         alertSuppression: completeRule.ruleParams.alertSuppression,
         licensing,
-        isFeatureDisabled: !experimentalFeatures?.alertSuppressionForEsqlRuleEnabled,
       });
 
       const wrapHits = (events: Array<estypes.SearchHit<SignalSource>>) =>
@@ -197,7 +196,6 @@ export const esqlExecutor = async ({
           maxNumberOfAlertsMultiplier: 1,
         });
 
-        addToSearchAfterReturn({ current: result, next: bulkCreateResult });
         ruleExecutionLogger.debug(
           `Created ${bulkCreateResult.createdItemsCount} alerts. Suppressed ${bulkCreateResult.suppressedItemsCount} alerts`
         );

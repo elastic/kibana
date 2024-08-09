@@ -42,7 +42,7 @@ export function SloDetailsAlerts({ slo }: Props) {
               },
             }}
             showAlertStatusWithFlapping
-            pageSize={100}
+            initialPageSize={100}
             cellContext={{ observabilityRuleTypeRegistry }}
           />
         </EuiFlexItem>

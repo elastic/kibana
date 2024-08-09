@@ -246,7 +246,6 @@ export const EmbedContent = ({
   return (
     <>
       <EuiForm>
-        <EuiSpacer size="m" />
         <EuiText size="s">{helpText}</EuiText>
         <EuiSpacer />
         {renderUrlParamExtensions()}

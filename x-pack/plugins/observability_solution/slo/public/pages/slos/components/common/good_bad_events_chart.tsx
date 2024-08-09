@@ -89,7 +89,7 @@ export function GoodBadEventsChart({
         to: moment(datum.x).add(intervalInMilliseconds, 'ms').toISOString(),
         mode: 'absolute' as const,
       };
-      openInDiscover(discover, slo, isBad, !isBad, timeRange);
+      openInDiscover(slo, isBad, !isBad, timeRange, discover);
     }
   };
 

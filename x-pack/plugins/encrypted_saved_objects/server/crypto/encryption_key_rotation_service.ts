@@ -205,7 +205,7 @@ export class EncryptionKeyRotationService {
     }
 
     this.options.logger.info(
-      `Encryption key rotation is completed. ${result.successful} objects out ouf ${result.total} were successfully re-encrypted with the primary encryption key and ${result.failed} objects failed.`
+      `Encryption key rotation is completed. ${result.successful} objects out of ${result.total} were successfully re-encrypted with the primary encryption key and ${result.failed} objects failed.`
     );
 
     return result;

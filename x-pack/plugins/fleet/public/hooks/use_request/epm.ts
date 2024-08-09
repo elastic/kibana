@@ -123,6 +123,7 @@ export const useGetPackageInfoByKeyQuery = (
     ignoreUnverified?: boolean;
     prerelease?: boolean;
     full?: boolean;
+    withMetadata?: boolean;
   },
   // Additional options for the useQuery hook
   queryOptions: {

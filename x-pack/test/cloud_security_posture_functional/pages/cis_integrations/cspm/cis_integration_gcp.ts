@@ -24,8 +24,7 @@ export default function (providerContext: FtrProviderContext) {
   const { getPageObjects } = providerContext;
   const pageObjects = getPageObjects(['cloudPostureDashboard', 'cisAddIntegration', 'header']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/186440
-  describe.skip('Test adding Cloud Security Posture Integrations CSPM GCP', function () {
+  describe('Test adding Cloud Security Posture Integrations CSPM GCP', function () {
     this.tags(['cloud_security_posture_cis_integration_cspm_gcp']);
     let cisIntegrationGcp: typeof pageObjects.cisAddIntegration.cisGcp;
     let cisIntegration: typeof pageObjects.cisAddIntegration;
@@ -125,8 +124,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(
           (
             await cisIntegration.clickLaunchAndGetCurrentUrl(
-              'confirmGoogleCloudShellModalConfirmButton',
-              3
+              'confirmGoogleCloudShellModalConfirmButton'
             )
           ).includes('shell.cloud.google.com%2Fcloudshell')
         ).to.be(true);
@@ -251,10 +249,11 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.fillInTextField(CREDENTIALS_JSON_TEST_ID, credentialJsonName);
         await cisIntegration.clickSaveIntegrationButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
-        await cisIntegration.navigateToIntegrationCspList();
+        await cisIntegration.clickFirstElementOnIntegrationTable();
         expect(
-          (await cisIntegration.getFieldValueInEditPage(CREDENTIALS_JSON_TEST_ID)) ===
-            credentialJsonName
+          (await cisIntegration.getSecretComponentReplaceButton(
+            'button-replace-credentials-json'
+          )) !== undefined
         ).to.be(true);
       });
       it('Users are able to add CIS_GCP Integration with Manual settings using Credentials JSON', async () => {

@@ -45,7 +45,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await Promise.all([
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
       ]);
-      await pageObjects.svlCommonPage.loginWithRole('viewer');
+      await pageObjects.svlCommonPage.loginAsViewer();
       await browser.setWindowSize(1600, 1200);
     });
 

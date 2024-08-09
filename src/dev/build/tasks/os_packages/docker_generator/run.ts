@@ -43,11 +43,12 @@ export async function runDockerGenerator(
   if (flags.baseImage === 'ubuntu') baseImageName = 'ubuntu:20.04';
   if (flags.baseImage === 'ubi') baseImageName = 'docker.elastic.co/ubi9/ubi-minimal:latest';
   if (flags.baseImage === 'wolfi')
-    baseImageName = 'docker.elastic.co/wolfi/chainguard-base:20230214';
+    baseImageName =
+      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:082266206be6e559baea1c8b2eeb4fb86ea1318a0cf99cbf0e612dd2c611e80b';
 
   let imageFlavor = '';
   if (flags.baseImage === 'ubi') imageFlavor += `-ubi`;
-  if (flags.baseImage === 'wolfi') imageFlavor += `-wolfi`;
+  if (flags.baseImage === 'wolfi' && !flags.serverless) imageFlavor += `-wolfi`;
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
   if (flags.serverless) imageFlavor += '-serverless';

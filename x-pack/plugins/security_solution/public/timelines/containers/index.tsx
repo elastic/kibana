@@ -46,6 +46,7 @@ import type {
 } from '../../../common/search_strategy/timeline/events/eql';
 import { useTrackHttpRequest } from '../../common/lib/apm/use_track_http_request';
 import { APP_UI_ID } from '../../../common/constants';
+import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -95,6 +96,7 @@ export interface UseTimelineEventsProps {
   sort?: TimelineRequestSortField[];
   startDate?: string;
   timerangeKind?: 'absolute' | 'relative';
+  fetchNotes?: boolean;
 }
 
 const getTimelineEvents = (timelineEdges: TimelineEdges[]): TimelineItem[] =>
@@ -285,11 +287,10 @@ export const useTimelineEventsHandler = ({
 
         if (request.language === 'eql') {
           prevTimelineRequest.current = activeTimeline.getEqlRequest();
-          refetch.current = asyncSearch.bind(null, activeTimeline.getEqlRequest());
         } else {
           prevTimelineRequest.current = activeTimeline.getRequest();
-          refetch.current = asyncSearch.bind(null, activeTimeline.getRequest());
         }
+        refetch.current = asyncSearch;
 
         setTimelineResponse((prevResp) => {
           const resp =
@@ -482,6 +483,7 @@ export const useTimelineEvents = ({
   sort = initSortDefault,
   skip = false,
   timerangeKind,
+  fetchNotes = true,
 }: UseTimelineEventsProps): [DataLoadingState, TimelineArgs] => {
   const [dataLoadingState, timelineResponse, timelineSearchHandler] = useTimelineEventsHandler({
     dataViewId,
@@ -499,11 +501,19 @@ export const useTimelineEvents = ({
     skip,
     timerangeKind,
   });
+  const { onLoad } = useFetchNotes();
+
+  const onTimelineSearchComplete: OnNextResponseHandler = useCallback(
+    (response) => {
+      if (fetchNotes) onLoad(response.events);
+    },
+    [fetchNotes, onLoad]
+  );
 
   useEffect(() => {
     if (!timelineSearchHandler) return;
-    timelineSearchHandler();
-  }, [timelineSearchHandler]);
+    timelineSearchHandler(onTimelineSearchComplete);
+  }, [timelineSearchHandler, onTimelineSearchComplete]);
 
   return [dataLoadingState, timelineResponse];
 };

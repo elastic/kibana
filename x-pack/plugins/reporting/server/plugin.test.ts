@@ -25,7 +25,7 @@ import { ReportingPlugin } from './plugin';
 import { createMockPluginSetup, createMockPluginStart } from './test_helpers';
 import type { ReportingSetupDeps } from './types';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
-import { PluginSetupContract as FeaturesPluginSetupContract } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
 
@@ -38,7 +38,7 @@ describe('Reporting Plugin', () => {
   let pluginStart: ReportingInternalStart;
   let logger: jest.Mocked<Logger>;
   let plugin: ReportingPlugin;
-  let featuresSetup: jest.Mocked<FeaturesPluginSetupContract>;
+  let featuresSetup: jest.Mocked<FeaturesPluginSetup>;
 
   beforeEach(async () => {
     jest.clearAllMocks();

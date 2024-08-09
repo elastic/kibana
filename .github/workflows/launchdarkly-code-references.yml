@@ -1,0 +1,26 @@
+name: Find LaunchDarkly flag code references
+
+on:
+  push:
+    branches:
+      - 'main'
+
+# cancel in-flight workflow run if another push was triggered
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  launchDarklyCodeReferences:
+    name: LaunchDarkly Code References
+    if: github.event.repository.fork == false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 11 # This value must be set if the lookback configuration option is not disabled for find-code-references. Read more: https://github.com/launchdarkly/ld-find-code-refs#searching-for-unused-flags-extinctions
+      - name: LaunchDarkly Code References
+        uses: launchdarkly/find-code-references@v2.12.0
+        with:
+          accessToken: ${{ secrets.LD_ACCESS_TOKEN }}
+          projKey: ${{ secrets.LD_PROJECT_KEY }}

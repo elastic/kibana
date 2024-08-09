@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
@@ -13,9 +12,9 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-public';
 
+import { EventTracker, registerAnalyticsContext, registerSpacesEventTypes } from './analytics';
 import type { ConfigType } from './config';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
-import { isSolutionNavEnabled } from './experiments';
 import { ManagementService } from './management';
 import { initSpacesNavControl } from './nav_control';
 import { spaceSelectorApp } from './space_selector';
@@ -33,7 +32,6 @@ export interface PluginsStart {
   features: FeaturesPluginStart;
   management?: ManagementStart;
   cloud?: CloudStart;
-  cloudExperiments?: CloudExperimentsPluginStart;
 }
 
 /**
@@ -49,11 +47,11 @@ export type SpacesPluginStart = ReturnType<SpacesPlugin['start']>;
 export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart> {
   private spacesManager!: SpacesManager;
   private spacesApi!: SpacesApi;
+  private eventTracker!: EventTracker;
 
   private managementService?: ManagementService;
-  private readonly config: ConfigType;
+  private config: ConfigType;
   private readonly isServerless: boolean;
-  private solutionNavExperiment = Promise.resolve(false);
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ConfigType>();
@@ -73,14 +71,15 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       hasOnlyDefaultSpace,
     };
 
-    this.solutionNavExperiment = core
-      .getStartServices()
-      .then(([, { cloud, cloudExperiments }]) => isSolutionNavEnabled(cloud, cloudExperiments))
-      .catch((err) => {
-        this.initializerContext.logger.get().error(`Failed to retrieve cloud experiment: ${err}`);
-
-        return false;
-      });
+    const onCloud = plugins.cloud !== undefined && plugins.cloud.isCloudEnabled;
+    if (!onCloud) {
+      this.config = {
+        ...this.config,
+        allowSolutionVisibility: false,
+      };
+    }
+    registerSpacesEventTypes(core);
+    this.eventTracker = new EventTracker(core.analytics);
 
     // Only skip setup of space selector and management service if serverless and only one space is allowed
     if (!(this.isServerless && hasOnlyDefaultSpace)) {
@@ -108,7 +107,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
           spacesManager: this.spacesManager,
           config: this.config,
           getRolesAPIClient,
-          solutionNavExperiment: this.solutionNavExperiment,
+          eventTracker: this.eventTracker,
         });
       }
 
@@ -119,13 +118,15 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       });
     }
 
+    registerAnalyticsContext(core.analytics, this.spacesManager.onActiveSpaceChange$);
+
     return { hasOnlyDefaultSpace };
   }
 
   public start(core: CoreStart) {
     // Only skip spaces navigation if serverless and only one space is allowed
     if (!(this.isServerless && this.config.maxSpaces === 1)) {
-      initSpacesNavControl(this.spacesManager, core, this.solutionNavExperiment);
+      initSpacesNavControl(this.spacesManager, core, this.config, this.eventTracker);
     }
 
     return this.spacesApi;

@@ -8,12 +8,12 @@
 import expect from '@kbn/expect';
 import type { Agent as SuperTestAgent } from 'supertest';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import type { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   data as telemetryMockData,
   MockTelemetryFindings,
-} from '../../../../../test/cloud_security_posture_api/telemetry/data'; // eslint-disable-line @kbn/imports/no_boundary_crossing
-import { createPackagePolicy } from '../../../../../test/api_integration/apis/cloud_security_posture/helper'; // eslint-disable-line @kbn/imports/no_boundary_crossing
+} from '@kbn/test-suites-xpack/cloud_security_posture_api/telemetry/data';
+import { createPackagePolicy } from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/helper';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../shared/services';
 
 const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';

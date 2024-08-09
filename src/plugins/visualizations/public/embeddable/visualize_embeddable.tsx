@@ -527,20 +527,27 @@ export class VisualizeEmbeddable
   }
 
   private renderError(error: ErrorLike | string) {
+    const { core } = this.deps.start();
     if (isFallbackDataView(this.vis.data.indexPattern)) {
       return (
-        <VisualizationMissedSavedObjectError
-          renderMode={this.input.renderMode ?? 'view'}
-          savedObjectMeta={{
-            savedObjectType: this.vis.data.savedSearchId ? 'search' : DATA_VIEW_SAVED_OBJECT_TYPE,
-          }}
-          application={getApplication()}
-          message={typeof error === 'string' ? error : error.message}
-        />
+        <KibanaRenderContextProvider {...core}>
+          <VisualizationMissedSavedObjectError
+            renderMode={this.input.renderMode ?? 'view'}
+            savedObjectMeta={{
+              savedObjectType: this.vis.data.savedSearchId ? 'search' : DATA_VIEW_SAVED_OBJECT_TYPE,
+            }}
+            application={getApplication()}
+            message={typeof error === 'string' ? error : error.message}
+          />
+        </KibanaRenderContextProvider>
       );
     }
 
-    return <VisualizationError error={error} />;
+    return (
+      <KibanaRenderContextProvider {...core}>
+        <VisualizationError error={error} />
+      </KibanaRenderContextProvider>
+    );
   }
 
   public destroy() {

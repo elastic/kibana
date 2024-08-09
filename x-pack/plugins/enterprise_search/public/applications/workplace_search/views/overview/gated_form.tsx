@@ -274,14 +274,15 @@ const EducationPanel: React.FC<{ featureContent: string }> = ({ featureContent }
               </EuiLink>
             </EuiFlexItem>
 
-            {feature.addOnLearnMoreLabel !== undefined && feature.addOnLearnMoreUrl !== undefined && (
-              <EuiFlexItem grow={false}>
-                <EuiLink type="button" href={feature.addOnLearnMoreUrl} target="_blank" external>
-                  <EuiSpacer />
-                  {feature.addOnLearnMoreLabel}
-                </EuiLink>
-              </EuiFlexItem>
-            )}
+            {feature.addOnLearnMoreLabel !== undefined &&
+              feature.addOnLearnMoreUrl !== undefined && (
+                <EuiFlexItem grow={false}>
+                  <EuiLink type="button" href={feature.addOnLearnMoreUrl} target="_blank" external>
+                    <EuiSpacer />
+                    {feature.addOnLearnMoreLabel}
+                  </EuiLink>
+                </EuiFlexItem>
+              )}
           </EuiFlexGroup>
         </EuiCallOut>
       </EuiPanel>

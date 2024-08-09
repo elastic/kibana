@@ -2,19 +2,8 @@ openapi: 3.0.0
 info:
   title: Assets Status Schema
   version: '1'
-paths: { }
+paths: {}
 components:
-  parameters:
-    AssetsStatusRequestQueryParameter:
-      name: query
-      in: path
-      required: true
-      schema:
-        $ref: '#/components/schemas/AssetsRequestQuery'
   schemas:
     AssetsRequestQuery:
       type: object
-    SuccessResponse:
-      type: object
-      properties: {}
-      # Define properties for the success response if needed

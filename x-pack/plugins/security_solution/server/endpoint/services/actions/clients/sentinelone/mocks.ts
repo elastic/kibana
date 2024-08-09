@@ -17,6 +17,7 @@ import {
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import { merge } from 'lodash';
+import { SentinelOneDataGenerator } from '../../../../../../common/endpoint/data_generators/sentinelone_data_generator';
 import type { NormalizedExternalConnectorClient } from '../../..';
 import type { ResponseActionsClientOptionsMock } from '../mocks';
 import { responseActionsClientMock } from '../mocks';
@@ -286,6 +287,13 @@ const createConnectorActionsClientMock = (): ActionsClientMock => {
                 parentTaskId: 'task-789',
               },
             },
+          });
+
+        case SUB_ACTION.GET_REMOTE_SCRIPT_STATUS:
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: new SentinelOneDataGenerator(
+              'seed'
+            ).generateSentinelOneApiRemoteScriptStatusResponse({ status: 'completed' }),
           });
 
         default:

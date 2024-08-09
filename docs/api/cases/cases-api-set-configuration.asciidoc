@@ -29,7 +29,7 @@ You must have `all` privileges for the *Cases* feature in the *Management*,
 === {api-description-title}
 
 Connectors are used to interface with external systems. You must create a
-connector before you can use it in your cases. Refer to <<add-case-connectors>>.
+connector before you can use it in your cases. Refer to <<case-connectors>>.
 
 If you set a default connector, it is automatically selected when you create
 cases in {kib}. If you use the <<cases-api-create,create case API>>, however,

@@ -882,6 +882,282 @@ describe('es_query executor', () => {
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
       expect(mockSetLimitReached).toHaveBeenCalledWith(false);
     });
+
+    it('should log messages for hits with out-of-range dates for search source', async () => {
+      const epoch = Date.now();
+      const oneYear = 1000 * 60 * 60 * 24 * 365;
+      const dateEarly = new Date(epoch - oneYear).toISOString();
+      const dateStart = new Date(epoch - 1000).toISOString();
+      const dateMiddle = new Date(epoch - 500).toISOString();
+      const dateEnd = new Date(epoch).toISOString();
+      const dateLate = new Date(epoch + oneYear).toISOString();
+
+      function getTimeRange() {
+        return { dateStart, dateEnd };
+      }
+
+      mockFetchSearchSourceQuery.mockResolvedValueOnce({
+        parsedResults: {
+          results: [
+            {
+              group: 'all documents',
+              count: 3,
+              hits: [
+                { _source: { '@timestamp': dateEarly, value: 1 } },
+                { _source: { '@timestamp': dateMiddle, value: 2 } },
+                { _source: { '@timestamp': dateLate, value: 3 } },
+              ],
+            },
+          ],
+        },
+        truncated: false,
+        query: 'the query would go here',
+      });
+
+      const executorOptions: ExecutorOptions<EsQueryRuleParams> = {
+        ...defaultExecutorOptions,
+        getTimeRange,
+        params: {
+          ...defaultProps,
+          searchType: 'searchSource',
+          timeField: '@timestamp',
+        },
+      };
+      await executor(coreMock, executorOptions);
+
+      const allLogCalls = loggerMock.collect(logger);
+      const messages: string[] = [];
+      for (const parms of allLogCalls.error) {
+        const message = parms.shift();
+        messages.push(`${message}`);
+      }
+
+      expect(messages).toEqual([
+        `For rule 'test-rule-id', the hit with date '${dateEarly}' from field '@timestamp' is outside the query time range. Query: <\"the query would go here\">. Document: <{\"_source\":{\"@timestamp\":\"${dateEarly}\",\"value\":1}}>`,
+        `For rule 'test-rule-id', the hit with date '${dateLate}' from field '@timestamp' is outside the query time range. Query: <\"the query would go here\">. Document: <{\"_source\":{\"@timestamp\":\"${dateLate}\",\"value\":3}}>`,
+      ]);
+      expect(allLogCalls).toMatchInlineSnapshot(`
+        Object {
+          "debug": Array [],
+          "error": Array [
+            Array [
+              Object {
+                "tags": Array [
+                  "query-result-out-of-time-range",
+                ],
+              },
+            ],
+            Array [
+              Object {
+                "tags": Array [
+                  "query-result-out-of-time-range",
+                ],
+              },
+            ],
+          ],
+          "fatal": Array [],
+          "info": Array [],
+          "log": Array [],
+          "trace": Array [],
+          "warn": Array [],
+        }
+      `);
+    });
+
+    it('should log messages for bad start / end dates for search source', async () => {
+      function getTimeRange() {
+        return { dateStart: 'x', dateEnd: 'y' };
+      }
+
+      mockFetchSearchSourceQuery.mockResolvedValueOnce({
+        parsedResults: {
+          results: [
+            {
+              group: 'all documents',
+              count: 1,
+              hits: [{ _source: { '@timestamp': new Date().toISOString() } }],
+            },
+          ],
+        },
+        truncated: false,
+        query: 'the query would go here',
+      });
+
+      const executorOptions: ExecutorOptions<EsQueryRuleParams> = {
+        ...defaultExecutorOptions,
+        getTimeRange,
+        params: {
+          ...defaultProps,
+          searchType: 'searchSource',
+          timeField: '@timestamp',
+        },
+      };
+      await executor(coreMock, executorOptions);
+
+      const allLogCalls = loggerMock.collect(logger);
+      const messages: string[] = [];
+      for (const parms of allLogCalls.error) {
+        const message = parms.shift();
+        messages.push(`${message}`);
+      }
+
+      expect(messages).toEqual([
+        `For rule 'test-rule-id', hits were returned with invalid time range start date 'x' from field '@timestamp' using query <"the query would go here">`,
+        `For rule 'test-rule-id', hits were returned with invalid time range end date 'y' from field '@timestamp' using query <"the query would go here">`,
+      ]);
+      expect(allLogCalls.error).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "tags": Array [
+                "query-result-out-of-time-range",
+              ],
+            },
+          ],
+          Array [
+            Object {
+              "tags": Array [
+                "query-result-out-of-time-range",
+              ],
+            },
+          ],
+        ]
+      `);
+    });
+
+    it('should log messages for hits with out-of-range dates for query dsl', async () => {
+      const epoch = Date.now();
+      const oneYear = 1000 * 60 * 60 * 24 * 365;
+      const dateEarly = new Date(epoch - oneYear).toISOString();
+      const dateStart = new Date(epoch - 1000).toISOString();
+      const dateMiddle = new Date(epoch - 500).toISOString();
+      const dateEnd = new Date(epoch).toISOString();
+      const dateLate = new Date(epoch + oneYear).toISOString();
+
+      function getTimeRange() {
+        return { dateStart, dateEnd };
+      }
+
+      mockFetchEsQuery.mockResolvedValueOnce({
+        parsedResults: {
+          results: [
+            {
+              group: 'all documents',
+              count: 3,
+              hits: [
+                { _source: { '@timestamp': dateEarly, value: 1 } },
+                { _source: { '@timestamp': dateMiddle, value: 2 } },
+                { _source: { '@timestamp': dateLate, value: 3 } },
+              ],
+            },
+          ],
+        },
+        truncated: false,
+        query: 'the query would go here',
+      });
+
+      const executorOptions: ExecutorOptions<EsQueryRuleParams> = {
+        ...defaultExecutorOptions,
+        getTimeRange,
+        params: {
+          ...defaultProps,
+          searchType: 'esQuery',
+          timeField: '@timestamp',
+        },
+      };
+      await executor(coreMock, executorOptions);
+
+      const allLogCalls = loggerMock.collect(logger);
+      const messages: string[] = [];
+      for (const parms of allLogCalls.error) {
+        const message = parms.shift();
+        messages.push(`${message}`);
+      }
+
+      expect(messages).toEqual([
+        `For rule 'test-rule-id', the hit with date '${dateEarly}' from field '@timestamp' is outside the query time range. Query: <\"the query would go here\">. Document: <{\"_source\":{\"@timestamp\":\"${dateEarly}\",\"value\":1}}>`,
+        `For rule 'test-rule-id', the hit with date '${dateLate}' from field '@timestamp' is outside the query time range. Query: <\"the query would go here\">. Document: <{\"_source\":{\"@timestamp\":\"${dateLate}\",\"value\":3}}>`,
+      ]);
+      expect(allLogCalls.error).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "tags": Array [
+                "query-result-out-of-time-range",
+              ],
+            },
+          ],
+          Array [
+            Object {
+              "tags": Array [
+                "query-result-out-of-time-range",
+              ],
+            },
+          ],
+        ]
+      `);
+    });
+
+    it('should log messages for bad start / end dates for query dsl', async () => {
+      function getTimeRange() {
+        return { dateStart: 'x', dateEnd: 'y' };
+      }
+
+      mockFetchEsQuery.mockResolvedValueOnce({
+        parsedResults: {
+          results: [
+            {
+              group: 'all documents',
+              count: 1,
+              hits: [{ _source: { '@timestamp': new Date().toISOString() } }],
+            },
+          ],
+        },
+        truncated: false,
+        query: 'the query would go here',
+      });
+
+      const executorOptions: ExecutorOptions<EsQueryRuleParams> = {
+        ...defaultExecutorOptions,
+        getTimeRange,
+        params: {
+          ...defaultProps,
+          searchType: 'esQuery',
+          timeField: '@timestamp',
+        },
+      };
+      await executor(coreMock, executorOptions);
+
+      const allLogCalls = loggerMock.collect(logger);
+      const messages: string[] = [];
+      for (const parms of allLogCalls.error) {
+        const message = parms.shift();
+        messages.push(`${message}`);
+      }
+
+      expect(messages).toEqual([
+        `For rule 'test-rule-id', hits were returned with invalid time range start date 'x' from field '@timestamp' using query <"the query would go here">`,
+        `For rule 'test-rule-id', hits were returned with invalid time range end date 'y' from field '@timestamp' using query <"the query would go here">`,
+      ]);
+      expect(allLogCalls.error).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "tags": Array [
+                "query-result-out-of-time-range",
+              ],
+            },
+          ],
+          Array [
+            Object {
+              "tags": Array [
+                "query-result-out-of-time-range",
+              ],
+            },
+          ],
+        ]
+      `);
+    });
   });
 
   describe('tryToParseAsDate', () => {

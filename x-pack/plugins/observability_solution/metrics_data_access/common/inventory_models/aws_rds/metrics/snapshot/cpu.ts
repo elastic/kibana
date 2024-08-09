@@ -19,7 +19,7 @@ export const cpu: MetricsUIAggregation = {
         cpu: 'cpu_avg',
       },
       script: {
-        source: 'params.cpu / 100',
+        source: 'params.cpu',
         lang: 'painless',
       },
       gap_policy: 'skip',

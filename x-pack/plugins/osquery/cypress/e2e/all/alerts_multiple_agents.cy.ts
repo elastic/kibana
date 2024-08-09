@@ -82,7 +82,7 @@ describe(
 
       it('should be able to run take action query against all enrolled agents', () => {
         cy.getBySel('expand-event').first().click();
-        cy.getBySel('take-action-dropdown-btn').click();
+        cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click();
         cy.getBySel('osquery-action-item').click();
         cy.getBySel('agentSelection').within(() => {
           cy.getBySel('comboBoxClearButton').click();

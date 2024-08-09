@@ -6,9 +6,10 @@
  */
 
 import type {
-  HostIsolationRequestBody,
-  ResponseActionApiResponse,
-} from '../../../../../common/endpoint/types';
+  IsolationRouteRequestBody,
+  UnisolationRouteRequestBody,
+} from '../../../../../common/api/endpoint';
+import type { ResponseActionApiResponse } from '../../../../../common/endpoint/types';
 import { KibanaServices } from '../../kibana';
 import {
   ISOLATE_HOST_ROUTE_V2,
@@ -19,7 +20,7 @@ import {
 
 /** Isolates a Host running either elastic endpoint or fleet agent */
 export const isolateHost = async (
-  params: HostIsolationRequestBody
+  params: IsolationRouteRequestBody
 ): Promise<ResponseActionApiResponse> => {
   return KibanaServices.get().http.post<ResponseActionApiResponse>(ISOLATE_HOST_ROUTE_V2, {
     body: JSON.stringify(params),
@@ -29,7 +30,7 @@ export const isolateHost = async (
 
 /** Un-isolates a Host running either elastic endpoint or fleet agent */
 export const unIsolateHost = async (
-  params: HostIsolationRequestBody
+  params: UnisolationRouteRequestBody
 ): Promise<ResponseActionApiResponse> => {
   return KibanaServices.get().http.post<ResponseActionApiResponse>(UNISOLATE_HOST_ROUTE_V2, {
     body: JSON.stringify(params),

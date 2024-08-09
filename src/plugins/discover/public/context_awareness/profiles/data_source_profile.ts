@@ -10,7 +10,8 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DiscoverDataSource } from '../../../common/data_sources';
 import { AsyncProfileProvider, AsyncProfileService } from '../profile_service';
-import { Profile } from '../types';
+import type { Profile } from '../types';
+import type { RootContext } from './root_profile';
 
 export enum DataSourceCategory {
   Logs = 'logs',
@@ -20,6 +21,7 @@ export enum DataSourceCategory {
 export type DataSourceProfile = Profile;
 
 export interface DataSourceProfileProviderParams {
+  rootContext: RootContext;
   dataSource?: DiscoverDataSource;
   dataView?: DataView;
   query?: Query | AggregateQuery;

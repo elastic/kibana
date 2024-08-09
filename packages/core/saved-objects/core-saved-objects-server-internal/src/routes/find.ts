@@ -41,6 +41,7 @@ export const registerFindRoute = (
         summary: `Search for saved objects`,
         tags: ['oas-tag:saved objects'],
         access,
+        deprecated: true,
       },
       validate: {
         query: schema.object({

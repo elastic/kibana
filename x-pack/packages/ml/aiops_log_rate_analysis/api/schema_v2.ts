@@ -8,7 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-const significantItem = schema.object({
+export const significantItem = schema.object({
   key: schema.string(),
   type: schema.oneOf([schema.literal('keyword'), schema.literal('log_pattern')]),
   fieldName: schema.string(),
@@ -33,7 +33,14 @@ const significantItem = schema.object({
   unique: schema.maybe(schema.boolean()),
 });
 
-export const aiopsLogRateAnalysisSchemaV2 = schema.object({
+const overridesV2 = schema.object({
+  loaded: schema.maybe(schema.number()),
+  remainingFieldCandidates: schema.maybe(schema.arrayOf(schema.string())),
+  significantItems: schema.maybe(schema.arrayOf(significantItem)),
+  regroupOnly: schema.maybe(schema.boolean()),
+});
+
+export const aiopsLogRateAnalysisBase = schema.object({
   start: schema.number(),
   end: schema.number(),
   searchQuery: schema.string(),
@@ -50,18 +57,15 @@ export const aiopsLogRateAnalysisSchemaV2 = schema.object({
   /** Settings to override headers derived compression and flush fix */
   compressResponse: schema.maybe(schema.boolean()),
   flushFix: schema.maybe(schema.boolean()),
-  /** Overrides to skip steps of the analysis with existing data */
-  overrides: schema.maybe(
-    schema.object({
-      loaded: schema.maybe(schema.number()),
-      remainingFieldCandidates: schema.maybe(schema.arrayOf(schema.string())),
-      significantItems: schema.maybe(schema.arrayOf(significantItem)),
-      regroupOnly: schema.maybe(schema.boolean()),
-    })
-  ),
   /** Probability used for the random sampler aggregations */
   sampleProbability: schema.maybe(schema.number()),
 });
+
+export const aiopsLogRateAnalysisSchemaV2 = schema.intersection([
+  aiopsLogRateAnalysisBase,
+  /** Overrides to skip steps of the analysis with existing data */
+  schema.object({ overrides: schema.maybe(overridesV2) }),
+]);
 
 export type AiopsLogRateAnalysisSchemaV2 = TypeOf<typeof aiopsLogRateAnalysisSchemaV2>;
 export type AiopsLogRateAnalysisSchemaSignificantItem = TypeOf<typeof significantItem>;

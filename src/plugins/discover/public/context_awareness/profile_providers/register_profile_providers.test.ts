@@ -62,10 +62,13 @@ describe('registerProfileProviders', () => {
     });
     const rootContext = await rootProfileServiceMock.resolve({ solutionNavId: null });
     const dataSourceContext = await dataSourceProfileServiceMock.resolve({
+      rootContext,
       dataSource: createEsqlDataSource(),
       query: { esql: 'from my-example-logs' },
     });
     const documentContext = documentProfileServiceMock.resolve({
+      rootContext,
+      dataSourceContext,
       record: {
         id: 'test',
         flattened: { 'data_stream.type': 'example' },
@@ -94,10 +97,13 @@ describe('registerProfileProviders', () => {
     });
     const rootContext = await rootProfileServiceMock.resolve({ solutionNavId: null });
     const dataSourceContext = await dataSourceProfileServiceMock.resolve({
+      rootContext,
       dataSource: createEsqlDataSource(),
       query: { esql: 'from my-example-logs' },
     });
     const documentContext = documentProfileServiceMock.resolve({
+      rootContext,
+      dataSourceContext,
       record: {
         id: 'test',
         flattened: { 'data_stream.type': 'example' },

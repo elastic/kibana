@@ -78,7 +78,10 @@ When you create a dashboard, you are automatically in edit mode and can make cha
 
 * To open an existing dashboard, click the dashboard *Title* you want to open.
 +
+TIP: When looking for a specific dashboard, you can filter them by tag or by creator, or search the list based on their name and description. Note that the creator information is only available for dashboards created on or after version 8.14.
++
 When you open an existing dashboard, you are in view mode. To make changes to the dashboard, click *Edit* in the toolbar. 
+
 
 [float]
 [[create-panels-with-lens]]
@@ -449,5 +452,7 @@ include::lens-advanced.asciidoc[]
 include::create-panels-with-editors.asciidoc[]
 
 include::make-dashboards-interactive.asciidoc[]
+
+include::find-dashboards.asciidoc[]
 
 include::dashboard-troubleshooting.asciidoc[]

@@ -7,13 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 import { mapValues } from 'lodash';
-import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 
 // Lowercase versions of all metrics, for when they need to be used in the middle of a sentence;
 // these may need to be translated differently depending on language, e.g. still capitalizing "CPU"
 const TranslationsLowercase = {
-  CPUUsage: i18n.translate('xpack.infra.waffle.metricOptions.cpuUsageText', {
+  CPUUsageTotal: i18n.translate('xpack.infra.waffle.metricOptions.cpuUsageTotalText', {
     defaultMessage: 'CPU usage',
+  }),
+
+  CPUUsageLegacy: i18n.translate('xpack.infra.waffle.metricOptions.cpuUsageLegacyText', {
+    defaultMessage: 'CPU usage (legacy)',
   }),
 
   MemoryUsage: i18n.translate('xpack.infra.waffle.metricOptions.memoryUsageText', {
@@ -26,6 +30,14 @@ const TranslationsLowercase = {
 
   OutboundTraffic: i18n.translate('xpack.infra.waffle.metricOptions.outboundTrafficText', {
     defaultMessage: 'outbound traffic',
+  }),
+
+  InboundTrafficLegacy: i18n.translate('xpack.infra.waffle.metricOptions.inboundTrafficText', {
+    defaultMessage: 'inbound traffic (Legacy)',
+  }),
+
+  OutboundTrafficLegacy: i18n.translate('xpack.infra.waffle.metricOptions.outboundTrafficText', {
+    defaultMessage: 'outbound traffic (Legacy)',
   }),
 
   LogRate: i18n.translate('xpack.infra.waffle.metricOptions.hostLogRateText', {
@@ -94,14 +106,23 @@ const Translations = mapValues(
   (translation) => `${translation[0].toUpperCase()}${translation.slice(1)}`
 );
 
+const showLegacyLabel = (nodeType?: InventoryItemType) => nodeType === 'host';
+
 export const toMetricOpt = (
-  metric: SnapshotMetricType
+  metric: SnapshotMetricType,
+  nodeType?: InventoryItemType
 ): { text: string; textLC: string; value: SnapshotMetricType } | undefined => {
   switch (metric) {
+    case 'cpuTotal':
+      return {
+        text: Translations.CPUUsageTotal,
+        textLC: TranslationsLowercase.CPUUsageTotal,
+        value: 'cpuTotal',
+      };
     case 'cpu':
       return {
-        text: Translations.CPUUsage,
-        textLC: TranslationsLowercase.CPUUsage,
+        text: Translations.CPUUsageLegacy,
+        textLC: TranslationsLowercase.CPUUsageLegacy,
         value: 'cpu',
       };
     case 'memory':
@@ -112,15 +133,35 @@ export const toMetricOpt = (
       };
     case 'rx':
       return {
-        text: Translations.InboundTraffic,
-        textLC: TranslationsLowercase.InboundTraffic,
+        text: showLegacyLabel(nodeType)
+          ? Translations.InboundTrafficLegacy
+          : Translations.InboundTraffic,
+        textLC: showLegacyLabel(nodeType)
+          ? TranslationsLowercase.InboundTrafficLegacy
+          : TranslationsLowercase.InboundTraffic,
         value: 'rx',
       };
     case 'tx':
       return {
+        text: showLegacyLabel(nodeType)
+          ? Translations.OutboundTrafficLegacy
+          : Translations.OutboundTraffic,
+        textLC: showLegacyLabel(nodeType)
+          ? TranslationsLowercase.OutboundTrafficLegacy
+          : TranslationsLowercase.OutboundTraffic,
+        value: 'tx',
+      };
+    case 'rxV2':
+      return {
+        text: Translations.InboundTraffic,
+        textLC: TranslationsLowercase.InboundTraffic,
+        value: 'rxV2',
+      };
+    case 'txV2':
+      return {
         text: Translations.OutboundTraffic,
         textLC: TranslationsLowercase.OutboundTraffic,
-        value: 'tx',
+        value: 'txV2',
       };
     case 'logRate':
       return {

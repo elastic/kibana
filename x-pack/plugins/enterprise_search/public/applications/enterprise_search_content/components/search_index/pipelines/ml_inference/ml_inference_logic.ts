@@ -357,6 +357,7 @@ export const MLInferenceLogic = kea<
         step: AddInferencePipelineSteps.Configuration,
       },
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         addSelectedFieldsToMapping: (modal, { isTextExpansionModelSelected }) => {
           const {
             configuration: { fieldMappings, targetField },
@@ -399,6 +400,7 @@ export const MLInferenceLogic = kea<
           indexName: '',
           step: AddInferencePipelineSteps.Configuration,
         }),
+        // @ts-expect-error upgrade typescript v5.1.6
         removeFieldFromMapping: (modal, { fieldName }) => {
           const {
             configuration: { fieldMappings },
@@ -412,10 +414,12 @@ export const MLInferenceLogic = kea<
             ...modal,
             configuration: {
               ...modal.configuration,
+              // @ts-expect-error upgrade typescript v5.1.6
               fieldMappings: fieldMappings?.filter(({ sourceField }) => sourceField !== fieldName),
             },
           };
         },
+        // @ts-expect-error upgrade typescript v5.1.6
         selectFields: (modal, { fieldNames }) => ({
           ...modal,
           configuration: {
@@ -423,12 +427,16 @@ export const MLInferenceLogic = kea<
           },
           selectedSourceFields: fieldNames,
         }),
+        // @ts-expect-error upgrade typescript v5.1.6
         setAddInferencePipelineStep: (modal, { step }) => ({ ...modal, step }),
+        // @ts-expect-error upgrade typescript v5.1.6
         setIndexName: (modal, { indexName }) => ({ ...modal, indexName }),
+        // @ts-expect-error upgrade typescript v5.1.6
         setInferencePipelineConfiguration: (modal, { configuration }) => ({
           ...modal,
           configuration,
         }),
+        // @ts-expect-error upgrade typescript v5.1.6
         setTargetField: (modal, { targetFieldName }) => ({
           ...modal,
           configuration: {
@@ -441,7 +449,9 @@ export const MLInferenceLogic = kea<
     createErrors: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         attachApiError: (_, error) => getErrorsFromHttpResponse(error),
+        // @ts-expect-error upgrade typescript v5.1.6
         createApiError: (_, error) => getErrorsFromHttpResponse(error),
         makeAttachPipelineRequest: () => [],
         makeCreatePipelineRequest: () => [],

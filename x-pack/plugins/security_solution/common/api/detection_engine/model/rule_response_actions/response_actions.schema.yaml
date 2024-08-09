@@ -34,7 +34,7 @@ components:
           description: Query ID
         query:
           type: string
-          description: Query to execute
+          description: Query to run
         ecs_mapping:
           $ref: '#/components/schemas/EcsMapping'
         version:

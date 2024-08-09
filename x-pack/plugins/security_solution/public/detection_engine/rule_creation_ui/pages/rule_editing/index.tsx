@@ -84,7 +84,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
-  const { data: dataServices, application } = useKibana().services;
+  const { data: dataServices, application, triggersActionsUi } = useKibana().services;
   const { navigateToApp } = application;
 
   const { detailName: ruleId } = useParams<{ detailName: string }>();
@@ -405,6 +405,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
           aboutStepData,
           scheduleStepData,
           actionsStepData,
+          triggersActionsUi.actionTypeRegistry,
           rule?.exceptions_list
         ),
         ...(ruleId ? { id: ruleId } : {}),
@@ -431,6 +432,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     ruleId,
     dispatchToaster,
     navigateToApp,
+    triggersActionsUi.actionTypeRegistry,
   ]);
 
   const onTabClick = useCallback(async (tab: EuiTabbedContentTab) => {

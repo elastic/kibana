@@ -7,7 +7,6 @@
 
 import { RequestHandlerContext } from '@kbn/core/server';
 import { SetupRouteOptions } from './types';
-import { pingRoute } from './ping';
 import { createEntityDefinitionRoute } from './entities/create';
 import { deleteEntityDefinitionRoute } from './entities/delete';
 import { resetEntityDefinitionRoute } from './entities/reset';
@@ -17,7 +16,6 @@ import { enableEntityDiscoveryRoute } from './enablement/enable';
 import { disableEntityDiscoveryRoute } from './enablement/disable';
 
 export function setupRoutes<T extends RequestHandlerContext>(dependencies: SetupRouteOptions<T>) {
-  pingRoute<T>(dependencies);
   createEntityDefinitionRoute<T>(dependencies);
   deleteEntityDefinitionRoute<T>(dependencies);
   resetEntityDefinitionRoute<T>(dependencies);

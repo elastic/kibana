@@ -41,6 +41,7 @@ export interface ListingPageUrlState {
   sortField: string;
   sortDirection: string;
   queryText?: string;
+  showAll?: boolean;
 }
 
 export type AppPageState<T> = {

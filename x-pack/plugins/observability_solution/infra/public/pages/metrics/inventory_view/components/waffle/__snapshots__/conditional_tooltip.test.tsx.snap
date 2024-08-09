@@ -33,6 +33,22 @@ exports[`ConditionalToolTip renders correctly 1`] = `
       class="euiFlexItem eui-textTruncate eui-displayBlock emotion-euiFlexItem-grow-1"
       data-test-subj="conditionalTooltipContent-metric"
     >
+      CPU usage (legacy)
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+      data-test-subj="conditionalTooltipContent-value"
+    >
+      10%
+    </div>
+  </div>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
+  >
+    <div
+      class="euiFlexItem eui-textTruncate eui-displayBlock emotion-euiFlexItem-grow-1"
+      data-test-subj="conditionalTooltipContent-metric"
+    >
       Memory usage
     </div>
     <div

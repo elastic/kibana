@@ -39,7 +39,7 @@ export const SetupPage: React.FC = () => {
         <h2>
           <FormattedMessage
             id="xpack.searchPlayground.setupPage.title"
-            defaultMessage="Setup a chat experience"
+            defaultMessage="Set up a chat experience"
           />
         </h2>
       }

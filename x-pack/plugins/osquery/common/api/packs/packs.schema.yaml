@@ -8,9 +8,7 @@ paths:
       summary: Find packs
       operationId: OsqueryFindPacks
       x-codegen-enabled: true
-      x-labels:
-        - ess
-        - serverless
+      x-labels: [serverless, ess]
       parameters:
         - name: query
           in: query
@@ -28,9 +26,7 @@ paths:
       summary: Create a packs
       operationId: OsqueryCreatePacks
       x-codegen-enabled: true
-      x-labels:
-        - ess
-        - serverless
+      x-labels: [serverless, ess]
       requestBody:
         required: true
         content:
@@ -49,15 +45,13 @@ paths:
       summary: Get packs details
       operationId: OsqueryGetPacksDetails
       x-codegen-enabled: true
-      x-labels:
-        - ess
-        - serverless
+      x-labels: [serverless, ess]
       parameters:
-        - name: query
+        - name: id
           in: path
           required: true
           schema:
-            $ref: './read_packs.schema.yaml#/components/schemas/ReadPacksRequestQuery'
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackId'
       responses:
         '200':
           description: OK
@@ -69,15 +63,13 @@ paths:
       summary: Delete packs
       operationId: OsqueryDeletePacks
       x-codegen-enabled: true
-      x-labels:
-        - ess
-        - serverless
+      x-labels: [serverless, ess]
       parameters:
-        - name: query
+        - name: id
           in: path
           required: true
           schema:
-            $ref: './delete_packs.schema.yaml#/components/schemas/DeletePacksRequestQuery'
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackId'
       responses:
         '200':
           description: OK
@@ -89,21 +81,19 @@ paths:
       summary: Update packs
       operationId: OsqueryUpdatePacks
       x-codegen-enabled: true
-      x-labels:
-        - ess
-        - serverless
+      x-labels: [serverless, ess]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackId'
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: './update_packs.schema.yaml#/components/schemas/UpdatePacksRequestBody'
-      parameters:
-        - name: query
-          in: path
-          required: true
-          schema:
-            $ref: './update_packs.schema.yaml#/components/schemas/UpdatePacksRequestParams'
       responses:
         '200':
           description: OK

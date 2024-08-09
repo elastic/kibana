@@ -10,7 +10,7 @@ import { getProtectionUpdatesNoteHandler, postProtectionUpdatesNoteHandler } fro
 import {
   GetProtectionUpdatesNoteSchema,
   CreateUpdateProtectionUpdatesNoteSchema,
-} from '../../../../common/api/endpoint/protection_updates_note/protection_updates_note_schema';
+} from '../../../../common/api/endpoint/protection_updates_note';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { PROTECTION_UPDATES_NOTE_ROUTE } from '../../../../common/endpoint/constants';
 import type { EndpointAppContext } from '../../types';

@@ -23,8 +23,7 @@ import { CREATE_RULE_URL } from '../../../../urls/navigation';
 describe(
   'Detection rules, Alert Suppression for Essentials tier',
   {
-    // skipped in MKI as it depends on feature flag alertSuppressionForEsqlRuleEnabled, alertSuppressionForMachineLearningRuleEnabled
-    tags: ['@serverless', '@skipInServerlessMKI'],
+    tags: ['@serverless'],
     env: {
       ftrConfig: {
         productTypes: [
@@ -32,13 +31,6 @@ describe(
           { product_line: 'endpoint', product_tier: 'essentials' },
         ],
       },
-      // alertSuppressionForEsqlRuleEnabled feature flag is also enabled in a global config
-      kbnServerArgs: [
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'alertSuppressionForEsqlRuleEnabled',
-          'alertSuppressionForMachineLearningRuleEnabled',
-        ])}`,
-      ],
     },
   },
   () => {

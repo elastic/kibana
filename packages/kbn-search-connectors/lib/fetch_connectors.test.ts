@@ -8,7 +8,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { fetchConnectorById, fetchConnectorByIndexName, fetchConnectors } from './fetch_connectors';
 

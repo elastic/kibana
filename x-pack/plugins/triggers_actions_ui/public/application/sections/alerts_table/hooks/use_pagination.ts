@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import type { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { AlertsTableContext } from '../contexts/alerts_table_context';
 import { BulkActionsVerbs } from '../../../../types';
 

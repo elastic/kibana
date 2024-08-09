@@ -14,18 +14,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-user-profile-server-mocks",
-        "id": "def-common.userProfileServiceMock",
+        "id": "def-server.userProfileServiceMock",
         "type": "Object",
         "tags": [],
         "label": "userProfileServiceMock",
@@ -36,7 +28,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-user-profile-server-mocks",
-            "id": "def-common.userProfileServiceMock.create",
+            "id": "def-server.userProfileServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -52,7 +44,7 @@
           },
           {
             "parentPluginId": "@kbn/core-user-profile-server-mocks",
-            "id": "def-common.userProfileServiceMock.createSetup",
+            "id": "def-server.userProfileServiceMock.createSetup",
             "type": "Function",
             "tags": [],
             "label": "createSetup",
@@ -61,9 +53,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-user-profile-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreUserProfileServerPluginApi",
-                "section": "def-common.UserProfileServiceSetup",
+                "section": "def-server.UserProfileServiceSetup",
                 "text": "UserProfileServiceSetup"
               },
               ">"
@@ -76,7 +68,7 @@
           },
           {
             "parentPluginId": "@kbn/core-user-profile-server-mocks",
-            "id": "def-common.userProfileServiceMock.createStart",
+            "id": "def-server.userProfileServiceMock.createStart",
             "type": "Function",
             "tags": [],
             "label": "createStart",
@@ -85,9 +77,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-user-profile-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreUserProfileServerPluginApi",
-                "section": "def-common.UserProfileService",
+                "section": "def-server.UserProfileService",
                 "text": "UserProfileService"
               },
               ">"
@@ -100,7 +92,7 @@
           },
           {
             "parentPluginId": "@kbn/core-user-profile-server-mocks",
-            "id": "def-common.userProfileServiceMock.createInternalSetup",
+            "id": "def-server.userProfileServiceMock.createInternalSetup",
             "type": "Function",
             "tags": [],
             "label": "createInternalSetup",
@@ -109,9 +101,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-user-profile-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreUserProfileServerPluginApi",
-                "section": "def-common.UserProfileServiceSetup",
+                "section": "def-server.UserProfileServiceSetup",
                 "text": "UserProfileServiceSetup"
               },
               ">"
@@ -124,7 +116,7 @@
           },
           {
             "parentPluginId": "@kbn/core-user-profile-server-mocks",
-            "id": "def-common.userProfileServiceMock.createInternalStart",
+            "id": "def-server.userProfileServiceMock.createInternalStart",
             "type": "Function",
             "tags": [],
             "label": "createInternalStart",
@@ -133,9 +125,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-user-profile-server-internal",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreUserProfileServerInternalPluginApi",
-                "section": "def-common.InternalUserProfileServiceStart",
+                "section": "def-server.InternalUserProfileServiceStart",
                 "text": "InternalUserProfileServiceStart"
               },
               ">"
@@ -148,7 +140,7 @@
           },
           {
             "parentPluginId": "@kbn/core-user-profile-server-mocks",
-            "id": "def-common.userProfileServiceMock.createRequestHandlerContext",
+            "id": "def-server.userProfileServiceMock.createRequestHandlerContext",
             "type": "Function",
             "tags": [],
             "label": "createRequestHandlerContext",
@@ -157,9 +149,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-user-profile-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreUserProfileServerPluginApi",
-                "section": "def-common.UserProfileRequestHandlerContext",
+                "section": "def-server.UserProfileRequestHandlerContext",
                 "text": "UserProfileRequestHandlerContext"
               },
               ">"
@@ -174,5 +166,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

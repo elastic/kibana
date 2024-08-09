@@ -7,6 +7,7 @@
     "alertingTypes": "packages/kbn-alerting-types",
     "apmOss": "src/plugins/apm_oss",
     "autocomplete": "packages/kbn-securitysolution-autocomplete/src",
+    "avcBanner": "packages/kbn-avc-banner/src",
     "bfetch": "src/plugins/bfetch",
     "bfetchError": "packages/kbn-bfetch-error",
     "cases": ["packages/kbn-cases-components"],

@@ -6,23 +6,24 @@
  */
 
 import { OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID } from '@kbn/management-settings-ids';
-import { LogSource } from '../../../common/types';
+import { LogSource, LogSourcesService } from '../../../common/services/log_sources_service/types';
 import { RegisterServicesParams } from '../register_services';
 
-export function createLogSourcesService(params: RegisterServicesParams) {
+export function createLogSourcesService(params: RegisterServicesParams): LogSourcesService {
   const { uiSettings } = params.deps;
   return {
-    getLogSources: (): LogSource[] => {
+    getLogSources: async () => {
       const logSources = uiSettings.get<string[]>(OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID);
       return logSources.map((logSource) => ({
         indexPattern: logSource,
       }));
     },
     setLogSources: async (sources: LogSource[]) => {
-      return await uiSettings.set(
+      await uiSettings.set(
         OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID,
         sources.map((source) => source.indexPattern)
       );
+      return;
     },
   };
 }

@@ -10,18 +10,10 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/cli-dev-mode",
-        "id": "def-common.bootstrapDevMode",
+        "id": "def-server.bootstrapDevMode",
         "type": "Function",
         "tags": [],
         "label": "bootstrapDevMode",
@@ -35,7 +27,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/cli-dev-mode",
-            "id": "def-common.bootstrapDevMode.$1",
+            "id": "def-server.bootstrapDevMode.$1",
             "type": "Object",
             "tags": [],
             "label": "{ configs, cliArgs, applyConfigOverrides }",
@@ -53,6 +45,14 @@
         "initialIsOpen": false
       }
     ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

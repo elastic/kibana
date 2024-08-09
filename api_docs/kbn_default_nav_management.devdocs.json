@@ -32,9 +32,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-chrome-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-common.NodeDefinition",
+            "section": "def-public.NodeDefinition",
             "text": "NodeDefinition"
           },
           "<",
@@ -64,9 +64,9 @@
           "> & { children: ",
           {
             "pluginId": "@kbn/core-chrome-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-common.NodeDefinition",
+            "section": "def-public.NodeDefinition",
             "text": "NodeDefinition"
           },
           "<",

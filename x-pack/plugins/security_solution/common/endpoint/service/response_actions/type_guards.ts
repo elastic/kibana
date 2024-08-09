@@ -14,6 +14,7 @@ import type {
   ResponseActionsExecuteParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
+  GetProcessesActionOutputContent,
 } from '../../types';
 import { RESPONSE_ACTION_AGENT_TYPE, RESPONSE_ACTION_TYPE } from './constants';
 
@@ -40,9 +41,15 @@ export const isGetFileAction = (
   return action.command === 'get-file';
 };
 
-// type guards to ensure only the matching string values are attached to the types filter type
-export const isAgentType = (type: string): type is typeof RESPONSE_ACTION_AGENT_TYPE[number] =>
-  RESPONSE_ACTION_AGENT_TYPE.includes(type as typeof RESPONSE_ACTION_AGENT_TYPE[number]);
+export const isProcessesAction = (
+  action: MaybeImmutable<SomeObjectWithCommand>
+): action is ActionDetails<GetProcessesActionOutputContent> => {
+  return action.command === 'running-processes';
+};
 
-export const isActionType = (type: string): type is typeof RESPONSE_ACTION_TYPE[number] =>
-  RESPONSE_ACTION_TYPE.includes(type as typeof RESPONSE_ACTION_TYPE[number]);
+// type guards to ensure only the matching string values are attached to the types filter type
+export const isAgentType = (type: string): type is (typeof RESPONSE_ACTION_AGENT_TYPE)[number] =>
+  RESPONSE_ACTION_AGENT_TYPE.includes(type as (typeof RESPONSE_ACTION_AGENT_TYPE)[number]);
+
+export const isActionType = (type: string): type is (typeof RESPONSE_ACTION_TYPE)[number] =>
+  RESPONSE_ACTION_TYPE.includes(type as (typeof RESPONSE_ACTION_TYPE)[number]);

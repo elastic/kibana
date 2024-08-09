@@ -7,10 +7,22 @@
  */
 
 /* eslint-disable dot-notation */
-import { UsageCountersService } from './usage_counters_service';
-import { loggingSystemMock, coreMock } from '@kbn/core/server/mocks';
 import * as rxOp from 'rxjs';
 import moment from 'moment';
+import { loggingSystemMock, coreMock } from '@kbn/core/server/mocks';
+import { UsageCountersService } from './usage_counters_service';
+
+jest.mock('./rollups', () => ({
+  ...jest.requireActual('./rollups'),
+  // used by `rollUsageCountersIndices` to determine if a counter is beyond the retention period
+  registerUsageCountersRollups: jest.fn(),
+}));
+
+import { registerUsageCountersRollups } from './rollups';
+
+const registerUsageCountersRollupsMock = registerUsageCountersRollups as jest.MockedFunction<
+  typeof registerUsageCountersRollups
+>;
 
 const tick = () => {
   jest.useRealTimers();
@@ -42,7 +54,9 @@ describe('UsageCountersService', () => {
     usageCounter.incrementCounter({ counterName: 'counterA' });
     usageCounter.incrementCounter({ counterName: 'counterA', namespace: 'second', source: 'ui' });
 
-    const dataInSourcePromise = usageCountersService['source$'].pipe(rxOp.toArray()).toPromise();
+    const dataInSourcePromise = rxOp.firstValueFrom(
+      usageCountersService['source$'].pipe(rxOp.toArray())
+    );
     usageCountersService['flushCache$'].next();
     usageCountersService['source$'].complete();
     await expect(dataInSourcePromise).resolves.toHaveLength(2);
@@ -52,6 +66,20 @@ describe('UsageCountersService', () => {
     const usageCountersService = new UsageCountersService({ logger, retryCount, bufferDurationMs });
     usageCountersService.setup(coreSetup);
     expect(coreSetup.savedObjects.registerType).toBeCalledTimes(2);
+  });
+
+  it('triggers regular cleanup of old counters on start', () => {
+    const usageCountersService = new UsageCountersService({ logger, retryCount, bufferDurationMs });
+    usageCountersService.start(coreStart);
+
+    expect(registerUsageCountersRollupsMock).toHaveBeenCalledTimes(1);
+    expect(registerUsageCountersRollupsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        logger: expect.any(Object),
+        getRegisteredUsageCounters: expect.any(Function),
+        internalRepository: expect.any(Object),
+      })
+    );
   });
 
   it('flushes cached data on start', async () => {
@@ -69,7 +97,9 @@ describe('UsageCountersService', () => {
     usageCounter.incrementCounter({ counterName: 'counterA' });
     usageCounter.incrementCounter({ counterName: 'counterA', namespace: 'second', source: 'ui' });
 
-    const dataInSourcePromise = usageCountersService['source$'].pipe(rxOp.toArray()).toPromise();
+    const dataInSourcePromise = rxOp.firstValueFrom(
+      usageCountersService['source$'].pipe(rxOp.toArray())
+    );
     usageCountersService.start(coreStart);
     usageCountersService['source$'].complete();
 

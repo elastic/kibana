@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getApmConfigMock } from './http_resources_service.test.mocks';
-
 import type { RouteConfig } from '@kbn/core-http-server';
-
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-server-mocks';
@@ -29,11 +26,6 @@ describe('HttpResources service', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
   const kibanaRequest = httpServerMock.createKibanaRequest();
   const context = createCoreRequestHandlerContextMock();
-  const apmConfig = { mockApmConfig: true };
-
-  beforeEach(() => {
-    getApmConfigMock.mockReturnValue(apmConfig);
-  });
 
   describe('#createRegistrar', () => {
     beforeEach(() => {
@@ -93,9 +85,6 @@ describe('HttpResources service', () => {
               },
               {
                 isAnonymousPage: false,
-                vars: {
-                  apmConfig,
-                },
               }
             );
           });
@@ -118,9 +107,6 @@ describe('HttpResources service', () => {
               },
               {
                 isAnonymousPage: true,
-                vars: {
-                  apmConfig,
-                },
               }
             );
           });

@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
+import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 
-import { ControlOutput } from '../types';
+import { OptionsListSelection } from '../../common/options_list/options_list_selections';
 import {
-  OptionsListSuggestions,
   OptionsListEmbeddableInput,
+  OptionsListSuggestions,
 } from '../../common/options_list/types';
+import { ControlOutput } from '../types';
 
 export const MIN_OPTIONS_LIST_REQUEST_SIZE = 10;
 export const MAX_OPTIONS_LIST_REQUEST_SIZE = 1000;
@@ -26,10 +27,11 @@ interface SearchString {
 // Component state is only used by public components.
 export interface OptionsListComponentState {
   availableOptions?: OptionsListSuggestions;
+  invalidSelections?: OptionsListSelection[];
+  validSelections?: OptionsListSelection[];
+
   allowExpensiveQueries: boolean;
-  invalidSelections?: string[];
   searchString: SearchString;
-  validSelections?: string[];
   totalCardinality?: number;
   popoverOpen: boolean;
   field?: FieldSpec;

@@ -18,8 +18,6 @@ export type CspBenchmarkRuleMetadata = TypeOf<typeof cspBenchmarkRuleMetadataSch
 
 export type CspBenchmarkRule = TypeOf<typeof cspBenchmarkRuleSchema>;
 
-export type PageUrlParams = Record<'policyId' | 'packagePolicyId', string>;
-
 export const cspBenchmarkRuleMetadataSchema = schema.object({
   audit: schema.string(),
   benchmark: schema.object({

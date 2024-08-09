@@ -12,6 +12,22 @@ import { DataStreamStep } from './data_stream_step';
 import { ActionsProvider } from '../../state';
 import { mockActions, mockState } from '../../mocks/state';
 
+jest.mock('@elastic/eui', () => {
+  return {
+    ...jest.requireActual('@elastic/eui'),
+    // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
+    // which does not produce a valid component wrapper
+    EuiComboBox: (props: { onChange: (options: unknown) => void; 'data-test-subj': string }) => (
+      <input
+        data-test-subj={props['data-test-subj']}
+        onChange={(syntheticEvent) => {
+          props.onChange([{ value: syntheticEvent.target.value }]);
+        }}
+      />
+    ),
+  };
+});
+
 jest.mock('./generation_modal', () => ({
   GenerationModal: jest.fn(() => <div data-test-subj="generationModal" />),
 }));
@@ -204,7 +220,7 @@ describe('DataStreamStep', () => {
 
       it('should call setIntegrationSettings', () => {
         expect(mockActions.setIntegrationSettings).toHaveBeenCalledWith({
-          inputType: dataCollectionMethod,
+          inputTypes: [dataCollectionMethod],
         });
       });
     });

@@ -10,10 +10,10 @@ import type { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-se
 import type * as InternalUtils from '../utils/internal_utils';
 
 export const mockGetSavedObjectFromSource = jest.fn() as jest.MockedFunction<
-  typeof InternalUtils['getSavedObjectFromSource']
+  (typeof InternalUtils)['getSavedObjectFromSource']
 >;
 export const mockRawDocExistsInNamespace = jest.fn() as jest.MockedFunction<
-  typeof InternalUtils['rawDocExistsInNamespace']
+  (typeof InternalUtils)['rawDocExistsInNamespace']
 >;
 
 jest.mock('../utils/internal_utils', () => {

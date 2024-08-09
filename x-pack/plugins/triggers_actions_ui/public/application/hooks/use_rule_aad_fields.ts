@@ -7,29 +7,13 @@
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
-import { HttpSetup } from '@kbn/core/public';
 import { useQuery } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
+import { fetchRuleTypeAadTemplateFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_rule_type_aad_template_fields';
 import { TriggersAndActionsUiServices } from '../..';
 
 const EMPTY_AAD_FIELDS: DataViewField[] = [];
-
-async function fetchAadFields({
-  http,
-  ruleTypeId,
-}: {
-  http: HttpSetup;
-  ruleTypeId?: string;
-}): Promise<DataViewField[]> {
-  if (!ruleTypeId) return EMPTY_AAD_FIELDS;
-  const fields = await http.get<DataViewField[]>(`${BASE_RAC_ALERTS_API_PATH}/aad_fields`, {
-    query: { ruleTypeId },
-  });
-
-  return fields;
-}
 
 export function useRuleAADFields(ruleTypeId?: string): {
   aadFields: DataViewField[];
@@ -41,7 +25,7 @@ export function useRuleAADFields(ruleTypeId?: string): {
   } = useKibana<TriggersAndActionsUiServices>().services;
 
   const queryAadFieldsFn = () => {
-    return fetchAadFields({ http, ruleTypeId });
+    return fetchRuleTypeAadTemplateFields({ http, ruleTypeId });
   };
 
   const onErrorFn = () => {

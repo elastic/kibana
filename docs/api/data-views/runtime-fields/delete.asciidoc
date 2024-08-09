@@ -4,7 +4,7 @@
 <titleabbrev>Delete runtime field</titleabbrev>
 ++++
 
-experimental[] Delete a runtime field from a data view.
+Delete a runtime field from a data view.
 
 [[data-views-runtime-field-api-delete-request]]
 ==== Request

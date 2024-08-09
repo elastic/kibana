@@ -77,6 +77,7 @@ export const IndexPipelinesConfigurationsLogic = kea<
     selectedPipelineId: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         selectPipeline: (_, { pipeline }) => pipeline,
       },
     ],

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IStaticAssets } from '@kbn/core-http-browser';
+import type { IStaticAssets } from '@kbn/core-http-browser';
 import { ConnectorServerSideDefinition, CONNECTOR_DEFINITIONS } from '../connectors';
 import { getConnectorsDict } from '../constants';
 

@@ -39,7 +39,6 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { EuiButtonIconProps } from '@elastic/eui';
-import { SearchRequest } from '@kbn/data-plugin/public';
 import { estypes } from '@elastic/elasticsearch';
 import React from 'react';
 import { CellValueContext } from '@kbn/embeddable-plugin/public';
@@ -301,6 +300,7 @@ export type UserMessagesDisplayLocationId = UserMessageDisplayLocation['id'];
 export interface UserMessage {
   uniqueId: string;
   severity: 'error' | 'warning' | 'info';
+  hidePopoverIcon?: boolean;
   shortMessage: string;
   longMessage: string | React.ReactNode | ((closePopover: () => void) => React.ReactNode);
   fixableInEditor: boolean;
@@ -483,7 +483,7 @@ export interface Datasource<T = unknown, P = unknown> {
   getSearchWarningMessages?: (
     state: P,
     warning: SearchResponseWarning,
-    request: SearchRequest,
+    request: estypes.SearchRequest,
     response: estypes.SearchResponse
   ) => UserMessage[];
 

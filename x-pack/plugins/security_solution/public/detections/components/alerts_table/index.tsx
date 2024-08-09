@@ -11,7 +11,7 @@ import type { Filter } from '@kbn/es-query';
 import type { FC } from 'react';
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
-import type { Alert, Alerts } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { Alert } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { ALERT_BUILDING_BLOCK_TYPE } from '@kbn/rule-data-utils';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
@@ -22,7 +22,6 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
-import { fetchNotesByDocumentIds } from '../../../notes/store/notes.slice';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useLicense } from '../../../common/hooks/use_license';
 import { VIEW_SELECTION } from '../../../../common/constants';
@@ -49,6 +48,7 @@ import type { State } from '../../../common/store';
 import * as i18n from './translations';
 import { eventRenderedViewColumns } from '../../configurations/security_solution_detections/columns';
 import { getAlertsDefaultModel } from './default_config';
+import { useFetchNotes } from '../../../notes/hooks/use_fetch_notes';
 
 const { updateIsLoading, updateTotalCount } = dataTableActions;
 
@@ -266,13 +266,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     };
   }, []);
 
-  const onLoaded = useCallback(
-    (alerts: Alerts) => {
-      const alertIds = alerts.map((alert: Alert) => alert._id);
-      dispatch(fetchNotesByDocumentIds({ documentIds: alertIds }));
-    },
-    [dispatch]
-  );
+  const { onLoad } = useFetchNotes();
 
   const alertStateProps: AlertsTableStateProps = useMemo(
     () => ({
@@ -289,7 +283,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       browserFields: finalBrowserFields,
       onUpdate: onAlertTableUpdate,
       cellContext,
-      onLoaded,
+      onLoaded: onLoad,
       runtimeMappings,
       toolbarVisibility: {
         showColumnSelector: !isEventRenderedView,
@@ -310,7 +304,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       runtimeMappings,
       isEventRenderedView,
       cellContext,
-      onLoaded,
+      onLoad,
     ]
   );
 
@@ -337,8 +331,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     scopeId: tableId,
   });
 
-  const { DetailsPanel, SessionView } = useSessionView({
-    entityType: 'events',
+  const { SessionView } = useSessionView({
     scopeId: tableId,
   });
 
@@ -362,7 +355,6 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
           <EuiDataGridContainer hideLastPage={false}>{AlertTable}</EuiDataGridContainer>
         </StatefulEventContext.Provider>
       </FullWidthFlexGroupTable>
-      {DetailsPanel}
     </div>
   );
 };

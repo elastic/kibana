@@ -8,12 +8,10 @@
 import { type BoolQuery, buildEsQuery } from '@kbn/es-query';
 import type { GlobalWidgetParameters } from '../../common/types';
 
-export function getEsFilterFromGlobalParameters({
-  query,
-  filters,
-  timeRange,
-}: Partial<GlobalWidgetParameters>): { bool: BoolQuery } {
-  const esFilter = buildEsQuery(undefined, query ?? [], filters ?? []);
+export function getEsFilterFromGlobalParameters({ timeRange }: Partial<GlobalWidgetParameters>): {
+  bool: BoolQuery;
+} {
+  const esFilter = buildEsQuery(undefined, [], []);
 
   if (timeRange) {
     esFilter.bool.filter.push({

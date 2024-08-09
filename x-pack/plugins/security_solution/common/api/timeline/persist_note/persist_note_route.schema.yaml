@@ -1,0 +1,75 @@
+openapi: 3.0.0
+info:
+  title: Elastic Security - Timeline - Notes API
+  version: '2023-10-31'
+externalDocs:
+  url: https://www.elastic.co/guide/en/security/current/timeline-api-update.html
+  description: Documentation
+servers:
+  - url: 'http://{kibana_host}:{port}'
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+paths:
+  /api/note:
+    patch:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: PersistNoteRoute
+      summary: Persists a note to a timeline.
+      tags:
+        - access:securitySolution
+      requestBody:
+        description: The note to persist or update along with additional metadata.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [note]
+              properties:
+                note:
+                  $ref: '../model/components.schema.yaml#/components/schemas/BareNote'
+                overrideOwner:
+                  type: boolean
+                  nullable: true
+                noteId:
+                  type: string
+                  nullable: true
+                version:
+                  type: string
+                  nullable: true
+                eventIngested:
+                  type: string
+                  nullable: true
+                eventTimestamp:
+                  type: string
+                  nullable: true
+                eventDataView:
+                  type: string
+                  nullable: true
+      responses:
+        '200':
+          description: Indicates the note was successfully created.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    required: [persistNote]
+                    properties:
+                      persistNote:
+                        type: object
+                        required: [code, message, note]
+                        properties:
+                          code:
+                            type: number
+                          message:
+                            type: string
+                          note:
+                            $ref: '../model/components.schema.yaml#/components/schemas/Note'

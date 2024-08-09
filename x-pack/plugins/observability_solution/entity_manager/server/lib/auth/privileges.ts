@@ -7,10 +7,55 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { ENTITY_INDICES_PATTERN } from '../../../common/constants_entities';
+import { SO_ENTITY_DEFINITION_TYPE, SO_ENTITY_DISCOVERY_API_KEY_TYPE } from '../../saved_objects';
 import { BUILT_IN_ALLOWED_INDICES } from '../entities/built_in/constants';
 
-export const requiredRunTimePrivileges = {
-  // all of
+export const canManageEntityDefinition = async (client: ElasticsearchClient) => {
+  const { has_all_requested: hasAllRequested } = await client.security.hasPrivileges({
+    body: entityDefinitionRuntimePrivileges,
+  });
+
+  return hasAllRequested;
+};
+
+const canDeleteEntityDefinition = async (client: ElasticsearchClient) => {
+  const { has_all_requested: hasAllRequested } = await client.security.hasPrivileges({
+    body: entityDefinitionDeletionPrivileges,
+  });
+
+  return hasAllRequested;
+};
+
+const canManageAPIKey = async (client: ElasticsearchClient) => {
+  const { has_all_requested: hasAllRequested } = await client.security.hasPrivileges({
+    body: apiKeyCreationPrivileges,
+  });
+
+  return hasAllRequested;
+};
+
+const canDeleteAPIKey = async (client: ElasticsearchClient) => {
+  const { has_all_requested: hasAllRequested } = await client.security.hasPrivileges({
+    body: apiKeyDeletionPrivileges,
+  });
+
+  return hasAllRequested;
+};
+
+export const canEnableEntityDiscovery = async (client: ElasticsearchClient) => {
+  return Promise.all([canManageAPIKey(client), canManageEntityDefinition(client)]).then((results) =>
+    results.every(Boolean)
+  );
+};
+
+export const canDisableEntityDiscovery = async (client: ElasticsearchClient) => {
+  return Promise.all([canDeleteAPIKey(client), canDeleteEntityDefinition(client)]).then((results) =>
+    results.every(Boolean)
+  );
+};
+
+export const entityDefinitionRuntimePrivileges = {
+  cluster: ['manage_transform', 'manage_ingest_pipelines', 'manage_index_templates'],
   index: [
     {
       names: [ENTITY_INDICES_PATTERN],
@@ -21,44 +66,48 @@ export const requiredRunTimePrivileges = {
       privileges: ['read', 'view_index_metadata'],
     },
   ],
-  cluster: ['manage_transform', 'monitor_transform', 'manage_ingest_pipelines', 'monitor'],
   application: [
     {
       application: 'kibana-.kibana',
-      privileges: ['saved_object:entity-definition/*'],
+      privileges: [`saved_object:${SO_ENTITY_DEFINITION_TYPE}/*`],
       resources: ['*'],
     },
   ],
 };
 
-export const requiredEnablementPrivileges = {
-  // any one of
-  cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'],
-};
-
-export const canRunEntityDiscovery = async (client: ElasticsearchClient) => {
-  const { has_all_requested: hasAllRequested } = await client.security.hasPrivileges({
-    body: {
-      cluster: requiredRunTimePrivileges.cluster,
-      index: requiredRunTimePrivileges.index,
-      application: requiredRunTimePrivileges.application,
+export const entityDefinitionDeletionPrivileges = {
+  cluster: ['manage_transform', 'manage_ingest_pipelines', 'manage_index_templates'],
+  index: [
+    {
+      names: [ENTITY_INDICES_PATTERN],
+      privileges: ['delete_index'],
     },
-  });
-
-  return hasAllRequested;
+  ],
+  application: [
+    {
+      application: 'kibana-.kibana',
+      privileges: [`saved_object:${SO_ENTITY_DEFINITION_TYPE}/delete`],
+      resources: ['*'],
+    },
+  ],
 };
 
-export const canEnableEntityDiscovery = async (client: ElasticsearchClient) => {
-  const [canRun, { cluster: grantedClusterPrivileges }] = await Promise.all([
-    canRunEntityDiscovery(client),
-    client.security.hasPrivileges({
-      body: {
-        cluster: requiredEnablementPrivileges.cluster,
-      },
-    }),
-  ]);
+export const apiKeyCreationPrivileges = {
+  application: [
+    {
+      application: 'kibana-.kibana',
+      privileges: [`saved_object:${SO_ENTITY_DISCOVERY_API_KEY_TYPE}/*`],
+      resources: ['*'],
+    },
+  ],
+};
 
-  return (
-    canRun && requiredEnablementPrivileges.cluster.some((k) => grantedClusterPrivileges[k] === true)
-  );
+const apiKeyDeletionPrivileges = {
+  application: [
+    {
+      application: 'kibana-.kibana',
+      privileges: [`saved_object:${SO_ENTITY_DISCOVERY_API_KEY_TYPE}/delete`],
+      resources: ['*'],
+    },
+  ],
 };

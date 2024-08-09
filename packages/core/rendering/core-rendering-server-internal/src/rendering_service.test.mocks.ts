@@ -28,3 +28,10 @@ jest.doMock('./render_utils', () => ({
   getScriptPaths: getScriptPathsMock,
   getBrowserLoggingConfig: getBrowserLoggingConfigMock,
 }));
+
+export const getApmConfigMock = jest.fn();
+jest.doMock('./get_apm_config', () => {
+  return {
+    getApmConfig: getApmConfigMock,
+  };
+});

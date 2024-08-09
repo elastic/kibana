@@ -16,7 +16,7 @@
 
 import { z } from 'zod';
 
-export type AssetCriticalityStatusResponse = z.infer<typeof AssetCriticalityStatusResponse>;
-export const AssetCriticalityStatusResponse = z.object({
+export type GetAssetCriticalityStatusResponse = z.infer<typeof GetAssetCriticalityStatusResponse>;
+export const GetAssetCriticalityStatusResponse = z.object({
   asset_criticality_resources_installed: z.boolean().optional(),
 });

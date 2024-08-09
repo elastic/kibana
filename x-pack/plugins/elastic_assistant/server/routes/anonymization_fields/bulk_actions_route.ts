@@ -16,9 +16,9 @@ import {
 
 import {
   AnonymizationFieldResponse,
-  BulkActionSkipResult,
-  BulkCrudActionResponse,
-  BulkCrudActionResults,
+  AnonymizationFieldsBulkActionSkipResult,
+  AnonymizationFieldsBulkCrudActionResponse,
+  AnonymizationFieldsBulkCrudActionResults,
   BulkCrudActionSummary,
   PerformBulkActionRequestBody,
   PerformBulkActionResponse,
@@ -63,9 +63,9 @@ const buildBulkResponse = (
     updated?: AnonymizationFieldResponse[];
     created?: AnonymizationFieldResponse[];
     deleted?: string[];
-    skipped?: BulkActionSkipResult[];
+    skipped?: AnonymizationFieldsBulkActionSkipResult[];
   }
-): IKibanaResponse<BulkCrudActionResponse> => {
+): IKibanaResponse<AnonymizationFieldsBulkCrudActionResponse> => {
   const numSucceeded = updated.length + created.length + deleted.length;
   const numSkipped = skipped.length;
   const numFailed = errors.length;
@@ -77,7 +77,7 @@ const buildBulkResponse = (
     total: numSucceeded + numFailed + numSkipped,
   };
 
-  const results: BulkCrudActionResults = {
+  const results: AnonymizationFieldsBulkCrudActionResults = {
     updated,
     created,
     deleted,
@@ -85,7 +85,7 @@ const buildBulkResponse = (
   };
 
   if (numFailed > 0) {
-    return response.custom<BulkCrudActionResponse>({
+    return response.custom<AnonymizationFieldsBulkCrudActionResponse>({
       headers: { 'content-type': 'application/json' },
       body: {
         message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
@@ -103,7 +103,7 @@ const buildBulkResponse = (
     });
   }
 
-  const responseBody: BulkCrudActionResponse = {
+  const responseBody: AnonymizationFieldsBulkCrudActionResponse = {
     success: true,
     anonymization_fields_count: summary.total,
     attributes: { results, summary },

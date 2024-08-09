@@ -47,3 +47,4 @@ export type {
 } from './inventory_models/types';
 
 export { networkTraffic } from './inventory_models/shared/metrics/snapshot/network_traffic';
+export { METRICS_EXPLORER_API_MAX_METRICS } from './constants';

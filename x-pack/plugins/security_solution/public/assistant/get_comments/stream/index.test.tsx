@@ -22,12 +22,10 @@ const content = 'Test Content';
 const mockAbortStream = jest.fn();
 const testProps = {
   abortStream: mockAbortStream,
-  actionTypeId: '.gen-ai',
   connectorId: 'test',
   content,
   index: 1,
   isControlsEnabled: true,
-  isEnabledLangChain: true,
   refetchCurrentConversation: jest.fn(),
   regenerateMessage: jest.fn(),
   setIsStreaming: jest.fn(),

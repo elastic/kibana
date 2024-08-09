@@ -431,7 +431,7 @@ export type MonitorDefaults = t.TypeOf<typeof MonitorDefaultsCodec>;
 export type MonitorManagementListResult = t.TypeOf<typeof MonitorManagementListResultCodec>;
 export type MonitorOverviewItem = t.TypeOf<typeof MonitorOverviewItemCodec>;
 export type MonitorOverviewResult = t.TypeOf<typeof MonitorOverviewResultCodec>;
-export type Secret = typeof secretKeys[number];
+export type Secret = (typeof secretKeys)[number];
 export type SyntheticsMonitorWithSecrets = Omit<
   t.TypeOf<typeof SyntheticsMonitorWithSecretsCodec>,
   Secret

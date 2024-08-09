@@ -83,7 +83,13 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
       const req = requests.shift()!;
       const path = req.url;
       const method = req.method;
-      let data = collapseLiteralStrings(req.data.join('\n'));
+
+      // If the request data contains multiple data objects (e.g. bulk request)
+      // ES only accepts it if each object is on a single line
+      // Therefore, we need to remove all new line characters from each data object
+      const unformattedData = req.data.map((body) => body.replaceAll('\n', ''));
+
+      let data = collapseLiteralStrings(unformattedData.join('\n'));
       if (data) {
         data += '\n';
       } // append a new line for bulk requests.

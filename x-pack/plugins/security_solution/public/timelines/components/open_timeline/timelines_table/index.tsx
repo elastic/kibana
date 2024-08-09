@@ -27,8 +27,11 @@ import { getActionsColumns } from './actions_columns';
 import { getCommonColumns } from './common_columns';
 import { getExtendedColumns } from './extended_columns';
 import { getIconHeaderColumns } from './icon_header_columns';
-import type { TimelineTypeLiteralWithNull } from '../../../../../common/api/timeline';
-import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
+import {
+  TimelineStatusEnum,
+  type TimelineType,
+  TimelineTypeEnum,
+} from '../../../../../common/api/timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 /**
@@ -63,7 +66,7 @@ export const getTimelinesTableColumns = ({
   onSelectionChange: OnSelectionChange;
   onToggleShowNotes: OnToggleShowNotes;
   showExtendedColumns: boolean;
-  timelineType: TimelineTypeLiteralWithNull;
+  timelineType: TimelineType | null;
   hasCrudAccess: boolean;
 }): Array<EuiBasicTableColumn<object>> => {
   return [
@@ -110,7 +113,7 @@ export interface TimelinesTableProps {
   showExtendedColumns: boolean;
   sortDirection: 'asc' | 'desc';
   sortField: string;
-  timelineType: TimelineTypeLiteralWithNull;
+  timelineType: TimelineType | null;
   tableRef: React.MutableRefObject<EuiBasicTable<OpenTimelineResult> | null>;
   totalSearchResultsCount: number;
 }
@@ -171,7 +174,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
       return {
         selectable: (timelineResult: OpenTimelineResult) =>
           timelineResult.savedObjectId != null &&
-          timelineResult.status !== TimelineStatus.immutable,
+          timelineResult.status !== TimelineStatusEnum.immutable,
         selectableMessage: (selectable: boolean) =>
           !selectable ? i18n.MISSING_SAVED_OBJECT_ID : '',
         onSelectionChange,
@@ -215,7 +218,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     const noItemsMessage =
       isLoading || searchResults == null
         ? i18n.LOADING
-        : timelineType === TimelineType.template
+        : timelineType === TimelineTypeEnum.template
         ? i18n.ZERO_TIMELINE_TEMPLATES_MATCH
         : i18n.ZERO_TIMELINES_MATCH;
 

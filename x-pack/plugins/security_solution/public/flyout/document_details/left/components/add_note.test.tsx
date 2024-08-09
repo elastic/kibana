@@ -16,11 +16,12 @@ import {
   ATTACH_TO_TIMELINE_CHECKBOX_TEST_ID,
 } from './test_ids';
 import { ReqStatus } from '../../../../notes/store/notes.slice';
-import { useIsTimelineFlyoutOpen } from '../../shared/hooks/use_is_timeline_flyout_open';
 import { TimelineId } from '../../../../../common/types';
 import userEvent from '@testing-library/user-event';
+import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
+import { Flyouts } from '../../shared/constants/flyouts';
 
-jest.mock('../../shared/hooks/use_is_timeline_flyout_open');
+jest.mock('../../shared/hooks/use_which_flyout');
 
 const mockAddError = jest.fn();
 jest.mock('../../../../common/hooks/use_app_toasts', () => ({
@@ -124,7 +125,7 @@ describe('AddNote', () => {
   });
 
   it('should disable attach to timeline checkbox if flyout is not open from timeline', () => {
-    (useIsTimelineFlyoutOpen as jest.Mock).mockReturnValue(false);
+    (useWhichFlyout as jest.Mock).mockReturnValue(Flyouts.securitySolution);
 
     const { getByTestId } = renderAddNote();
 
@@ -132,7 +133,7 @@ describe('AddNote', () => {
   });
 
   it('should disable attach to timeline checkbox if active timeline is not saved', () => {
-    (useIsTimelineFlyoutOpen as jest.Mock).mockReturnValue(true);
+    (useWhichFlyout as jest.Mock).mockReturnValue(Flyouts.timeline);
 
     const store = createMockStore({
       ...mockGlobalState,
@@ -157,7 +158,7 @@ describe('AddNote', () => {
   });
 
   it('should have attach to timeline checkbox enabled', () => {
-    (useIsTimelineFlyoutOpen as jest.Mock).mockReturnValue(true);
+    (useWhichFlyout as jest.Mock).mockReturnValue(Flyouts.timeline);
 
     const store = createMockStore({
       ...mockGlobalState,

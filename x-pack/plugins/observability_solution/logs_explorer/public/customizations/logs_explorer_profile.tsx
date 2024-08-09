@@ -82,8 +82,8 @@ export const createLogsExplorerProfileCustomizations =
     customizations.set({
       id: 'data_table',
       logsEnabled: true,
-      customControlColumnsConfiguration: await import('./custom_control_column').then((module) =>
-        module.createCustomControlColumnsConfiguration(service)
+      rowAdditionalLeadingControls: await import('./custom_control_column').then((module) =>
+        module.getRowAdditionalControlColumns()
       ),
     });
 

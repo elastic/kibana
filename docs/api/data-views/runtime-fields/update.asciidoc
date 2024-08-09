@@ -4,7 +4,7 @@
 <titleabbrev>Update runtime field</titleabbrev>
 ++++
 
-experimental[] Update an existing runtime field
+Update an existing runtime field
 
 
 [[data-views-runtime-field-update-request]]

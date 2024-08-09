@@ -21,6 +21,127 @@
     "functions": [
       {
         "parentPluginId": "@kbn/aiops-log-rate-analysis",
+        "id": "def-common.getBaselineAndDeviationRates",
+        "type": "Function",
+        "tags": [],
+        "label": "getBaselineAndDeviationRates",
+        "description": [
+          "\nCalculates the baseline and deviation rates for log rate analysis based on the specified analysis type.\n\nThis function computes the rates by dividing the document count (docCount) and background count (bgCount)\nby the number of buckets allocated for baseline and deviation periods, respectively. The calculation\nmethod varies depending on whether the analysis type is a \"spike\" or a \"dip\". For a \"spike\", the baseline\nrate is derived from the background count and the deviation rate from the document count. For a \"dip\",\nthe roles are reversed.\n"
+        ],
+        "signature": [
+          "(analysisType: ",
+          {
+            "pluginId": "@kbn/aiops-log-rate-analysis",
+            "scope": "common",
+            "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
+            "section": "def-common.LogRateAnalysisType",
+            "text": "LogRateAnalysisType"
+          },
+          ", baselineBuckets: number, deviationBuckets: number, docCount: number, bgCount: number) => { baselineBucketRate: number; deviationBucketRate: number; }"
+        ],
+        "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_baseline_and_deviation_rates.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getBaselineAndDeviationRates.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "analysisType",
+            "description": [
+              "The type of analysis to perform, can be either \"spike\" or \"dip\"."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/aiops-log-rate-analysis",
+                "scope": "common",
+                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
+                "section": "def-common.LogRateAnalysisType",
+                "text": "LogRateAnalysisType"
+              }
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_baseline_and_deviation_rates.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getBaselineAndDeviationRates.$2",
+            "type": "number",
+            "tags": [],
+            "label": "baselineBuckets",
+            "description": [
+              "The number of buckets into which the baseline period is divided."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_baseline_and_deviation_rates.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getBaselineAndDeviationRates.$3",
+            "type": "number",
+            "tags": [],
+            "label": "deviationBuckets",
+            "description": [
+              "The number of buckets into which the deviation period is divided."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_baseline_and_deviation_rates.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getBaselineAndDeviationRates.$4",
+            "type": "number",
+            "tags": [],
+            "label": "docCount",
+            "description": [
+              "The total document count observed in the deviation period."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_baseline_and_deviation_rates.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getBaselineAndDeviationRates.$5",
+            "type": "number",
+            "tags": [],
+            "label": "bgCount",
+            "description": [
+              "The total background count observed in the baseline period."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_baseline_and_deviation_rates.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "An object containing the calculated baseline and deviation bucket rates."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-log-rate-analysis",
         "id": "def-common.getExtendedChangePoint",
         "type": "Function",
         "tags": [],
@@ -77,10 +198,10 @@
       },
       {
         "parentPluginId": "@kbn/aiops-log-rate-analysis",
-        "id": "def-common.getLogRateAnalysisType",
+        "id": "def-common.getLogRateAnalysisTypeForHistogram",
         "type": "Function",
         "tags": [],
-        "label": "getLogRateAnalysisType",
+        "label": "getLogRateAnalysisTypeForHistogram",
         "description": [
           "\nIdentify the log rate analysis type based on the baseline/deviation\ntime ranges on a given log rate histogram.\n"
         ],
@@ -110,13 +231,13 @@
             "text": "LogRateAnalysisType"
           }
         ],
-        "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_log_rate_analysis_type.ts",
+        "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_log_rate_analysis_type_for_histogram.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/aiops-log-rate-analysis",
-            "id": "def-common.getLogRateAnalysisType.$1",
+            "id": "def-common.getLogRateAnalysisTypeForHistogram.$1",
             "type": "Array",
             "tags": [],
             "label": "logRateHistogram",
@@ -133,14 +254,14 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_log_rate_analysis_type.ts",
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_log_rate_analysis_type_for_histogram.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/aiops-log-rate-analysis",
-            "id": "def-common.getLogRateAnalysisType.$2",
+            "id": "def-common.getLogRateAnalysisTypeForHistogram.$2",
             "type": "Object",
             "tags": [],
             "label": "windowParameters",
@@ -156,7 +277,7 @@
                 "text": "WindowParameters"
               }
             ],
-            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_log_rate_analysis_type.ts",
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_log_rate_analysis_type_for_histogram.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -164,6 +285,93 @@
         ],
         "returnComment": [
           "The log rate analysis type."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-log-rate-analysis",
+        "id": "def-common.getLogRateChange",
+        "type": "Function",
+        "tags": [],
+        "label": "getLogRateChange",
+        "description": [
+          "\nCalculates the change in log rate between two time periods and generates a descriptive message.\nIt return the factor as a number as well as a human readable message.\n"
+        ],
+        "signature": [
+          "(analysisType: ",
+          {
+            "pluginId": "@kbn/aiops-log-rate-analysis",
+            "scope": "common",
+            "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
+            "section": "def-common.LogRateAnalysisType",
+            "text": "LogRateAnalysisType"
+          },
+          ", baselineBucketRate: number, deviationBucketRate: number) => { message: string; factor?: number | undefined; }"
+        ],
+        "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_log_rate_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getLogRateChange.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "analysisType",
+            "description": [
+              "The type of log rate analysis (spike or dip)."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/aiops-log-rate-analysis",
+                "scope": "common",
+                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
+                "section": "def-common.LogRateAnalysisType",
+                "text": "LogRateAnalysisType"
+              }
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_log_rate_change.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getLogRateChange.$2",
+            "type": "number",
+            "tags": [],
+            "label": "baselineBucketRate",
+            "description": [
+              "The log rate (document count per unit time) during the baseline period."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_log_rate_change.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getLogRateChange.$3",
+            "type": "number",
+            "tags": [],
+            "label": "deviationBucketRate",
+            "description": [
+              "The log rate (document count per unit time) during the deviation period."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_log_rate_change.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "An object containing the message describing the rate change and the factor of change if applicable."
         ],
         "initialIsOpen": false
       },
@@ -314,6 +522,66 @@
         ],
         "returnComment": [
           "WindowParameters"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-log-rate-analysis",
+        "id": "def-common.getSwappedWindowParameters",
+        "type": "Function",
+        "tags": [],
+        "label": "getSwappedWindowParameters",
+        "description": [
+          "\nSwaps the baseline and deviation window parameters. To be used when we identify the type of analysis to be 'dip'.\n"
+        ],
+        "signature": [
+          "(windowParameters: ",
+          {
+            "pluginId": "@kbn/aiops-log-rate-analysis",
+            "scope": "common",
+            "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
+            "section": "def-common.WindowParameters",
+            "text": "WindowParameters"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/aiops-log-rate-analysis",
+            "scope": "common",
+            "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
+            "section": "def-common.WindowParameters",
+            "text": "WindowParameters"
+          }
+        ],
+        "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_swapped_window_parameters.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getSwappedWindowParameters.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "windowParameters",
+            "description": [
+              "An object containing the window parameters for baseline and deviation periods."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/aiops-log-rate-analysis",
+                "scope": "common",
+                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
+                "section": "def-common.WindowParameters",
+                "text": "WindowParameters"
+              }
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_swapped_window_parameters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "A new `WindowParameters` object with the baseline and deviation parameters swapped."
         ],
         "initialIsOpen": false
       },
@@ -881,14 +1149,11 @@
           {
             "parentPluginId": "@kbn/aiops-log-rate-analysis",
             "id": "def-common.LogRateHistogramItem.time",
-            "type": "CompoundType",
+            "type": "number",
             "tags": [],
             "label": "time",
             "description": [
               "\nTime of bucket"
-            ],
-            "signature": [
-              "string | number"
             ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/log_rate_histogram_item.ts",
             "deprecated": false,

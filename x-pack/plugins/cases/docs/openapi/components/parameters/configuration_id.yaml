@@ -4,5 +4,4 @@ description: An identifier for the configuration.
 required: true
 schema:
   type: string
-  examples:
-    - 3297a0f0-b5ec-11ec-b141-0fdb20a7f9a9
+  example: 3297a0f0-b5ec-11ec-b141-0fdb20a7f9a9

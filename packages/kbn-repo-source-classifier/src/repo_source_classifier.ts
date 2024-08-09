@@ -189,6 +189,7 @@ export class RepoSourceClassifier {
           return 'static';
         case 'shared-common':
           return 'common package';
+        case 'core':
         case 'plugin':
           // classification in plugins is more complicated, fall through to remaining logic
           break;
@@ -200,7 +201,7 @@ export class RepoSourceClassifier {
 
     const [root, ...dirs] = rel.split('/');
 
-    if (pkgId === '@kbn/core' && root === 'types') {
+    if (root === 'types') {
       return 'common package';
     }
 

@@ -30,7 +30,7 @@ import { Summary } from './summary';
 
 export function StorageExplorerView() {
   const { query } = useProfilingParams('/storage-explorer');
-  const { rangeFrom, rangeTo, kuery, indexLifecyclePhase } = query;
+  const { rangeFrom, rangeTo, indexLifecyclePhase } = query;
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
 
   const [selectedTab, setSelectedTab] = useState<'host_breakdown' | 'data_breakdown'>(
@@ -47,7 +47,7 @@ export function StorageExplorerView() {
         http,
         timeFrom: timeRange.inSeconds.start,
         timeTo: timeRange.inSeconds.end,
-        kuery,
+        kuery: '',
         indexLifecyclePhase,
       });
     },
@@ -55,7 +55,6 @@ export function StorageExplorerView() {
       fetchStorageExplorerSummary,
       timeRange.inSeconds.start,
       timeRange.inSeconds.end,
-      kuery,
       indexLifecyclePhase,
     ]
   );

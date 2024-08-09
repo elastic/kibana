@@ -44,6 +44,7 @@ export const commonFormatters: CommonFormatMap = {
     ),
   [ConfigKey.TAGS]: arrayToJsonFormatter,
   [ConfigKey.TIMEOUT]: secondsToCronFormatter,
+  // @ts-expect-error upgrade typescript v5.1.6
   [ConfigKey.MONITOR_SOURCE_TYPE]: (fields) =>
     fields[ConfigKey.MONITOR_SOURCE_TYPE] || SourceType.UI,
 };

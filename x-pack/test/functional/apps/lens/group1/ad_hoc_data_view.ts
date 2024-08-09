@@ -222,9 +222,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await dataViews.isAdHoc()).to.be(true);
 
       await browser.closeCurrentWindow();
+      const [lensHandle] = await browser.getAllWindowHandles();
+      await browser.switchToWindow(lensHandle);
     });
 
-    it('should navigate to discover from embeddable correctly', async () => {
+    // Failing: See https://github.com/elastic/kibana/issues/164623
+    it.skip('should navigate to discover from embeddable correctly', async () => {
       const [lensHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(lensHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();

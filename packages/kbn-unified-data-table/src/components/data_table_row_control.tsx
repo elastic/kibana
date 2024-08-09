@@ -7,7 +7,16 @@
  */
 
 import React from 'react';
+import classnames from 'classnames';
 
-export const DataTableRowControl = ({ children }: { children: React.ReactNode }) => {
-  return <span className="unifiedDataTable__rowControl">{children}</span>;
+export enum Size {
+  normal = 'normal',
+}
+
+export const DataTableRowControl: React.FC<{ size?: Size }> = ({ size, children }) => {
+  const classes = classnames('unifiedDataTable__rowControl', {
+    // normalize the size of the control
+    [`unifiedDataTable__rowControl--size-${size}`]: size,
+  });
+  return <span className={classes}>{children}</span>;
 };

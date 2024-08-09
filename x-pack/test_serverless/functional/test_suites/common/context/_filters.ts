@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({
         'discover:rowHeightOption': 0, // to have more grid rows visible at once
       });
-      await PageObjects.svlCommonPage.loginWithRole('viewer');
+      await PageObjects.svlCommonPage.loginAsViewer();
       await PageObjects.common.navigateToApp('discover');
     });
 

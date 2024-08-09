@@ -41,7 +41,7 @@ const patternRollups: Record<string, PatternRollup> = {
 };
 
 describe('helpers', () => {
-  let originalFetch: typeof global['fetch'];
+  let originalFetch: (typeof global)['fetch'];
 
   beforeAll(() => {
     originalFetch = global.fetch;

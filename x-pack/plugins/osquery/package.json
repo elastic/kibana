@@ -16,6 +16,7 @@
     "nyc": "../../../node_modules/.bin/nyc report --reporter=text-summary",
     "junit:merge": "../../../node_modules/.bin/mochawesome-merge ../../../target/kibana-osquery/cypress/results/mochawesome*.json > ../../../target/kibana-osquery/cypress/results/output.json && ../../../node_modules/.bin/marge ../../../target/kibana-osquery/cypress/results/output.json --reportDir ../../../target/kibana-osquery/cypress/results && yarn junit:transform && mkdir -p ../../../target/junit && cp ../../../target/kibana-osquery/cypress/results/*.xml ../../../target/junit/",
     "junit:transform": "node ../security_solution/scripts/junit_transformer --pathPattern '../../../target/kibana-osquery/cypress/results/*.xml' --rootDirectory ../../../ --reportName 'Osquery Cypress' --writeInPlace",
-    "openapi:generate": "node scripts/openapi/generate"
+    "openapi:generate": "node scripts/openapi/generate",
+    "openapi:bundle": "node scripts/openapi/bundle"
   }
 }

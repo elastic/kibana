@@ -126,9 +126,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-user-profile-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-            "section": "def-common.GetUserProfileResponse",
+            "section": "def-public.GetUserProfileResponse",
             "text": "GetUserProfileResponse"
           },
           "<D> extends ",
@@ -690,9 +690,9 @@
               "Omit<",
               {
                 "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-common.UserProfileService",
+                "section": "def-public.UserProfileService",
                 "text": "UserProfileService"
               },
               ", \"getUserProfile$\"> & { userProfile$: ",
@@ -1066,9 +1066,9 @@
           "Omit<",
           {
             "pluginId": "@kbn/core-user-profile-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-            "section": "def-common.UserProfileService",
+            "section": "def-public.UserProfileService",
             "text": "UserProfileService"
           },
           ", \"getUserProfile$\"> & { userProfile$: ",

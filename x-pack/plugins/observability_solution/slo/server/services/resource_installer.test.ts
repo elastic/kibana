@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME,
   SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
   SLO_INDEX_TEMPLATE_NAME,
-  SLO_INGEST_PIPELINE_NAME,
+  SLO_RESOURCES_VERSION,
   SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
   SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
   SLO_SUMMARY_INDEX_TEMPLATE_NAME,
-  SLO_RESOURCES_VERSION,
 } from '../../common/constants';
 import { DefaultResourceInstaller } from './resource_installer';
 
@@ -52,13 +50,7 @@ describe('resourceInstaller', () => {
         },
       ],
     });
-    mockClusterClient.ingest.getPipeline.mockResponse({
-      [SLO_INGEST_PIPELINE_NAME]: {
-        _meta: {
-          version: 2,
-        },
-      } as IngestPipeline,
-    });
+
     const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create());
 
     await installer.ensureCommonResourcesInstalled();
@@ -88,12 +80,6 @@ describe('resourceInstaller', () => {
     expect(mockClusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({ name: SLO_SUMMARY_INDEX_TEMPLATE_NAME })
-    );
-
-    expect(mockClusterClient.ingest.putPipeline).toHaveBeenCalledTimes(1);
-    expect(mockClusterClient.ingest.putPipeline).toHaveBeenNthCalledWith(
-      1,
-      expect.objectContaining({ id: SLO_INGEST_PIPELINE_NAME })
     );
   });
 
@@ -128,20 +114,12 @@ describe('resourceInstaller', () => {
         },
       ],
     });
-    mockClusterClient.ingest.getPipeline.mockResponse({
-      [SLO_INGEST_PIPELINE_NAME]: {
-        _meta: {
-          version: SLO_RESOURCES_VERSION,
-        },
-      } as IngestPipeline,
-    });
+
     const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create());
 
     await installer.ensureCommonResourcesInstalled();
 
     expect(mockClusterClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
     expect(mockClusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
-
-    expect(mockClusterClient.ingest.putPipeline).not.toHaveBeenCalled();
   });
 });

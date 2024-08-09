@@ -131,7 +131,7 @@ function MaximumEditor({ setState, state, idPrefix }: SubProps) {
 }
 
 function SecondaryMetricEditor({ accessor, idPrefix, frame, layerId, setState, state }: SubProps) {
-  const columnName = getColumnByAccessor(accessor, frame.activeData?.[layerId].columns)?.name;
+  const columnName = getColumnByAccessor(accessor, frame.activeData?.[layerId]?.columns)?.name;
   const defaultPrefix = columnName || '';
 
   return (

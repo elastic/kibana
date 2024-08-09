@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 import { noop } from 'lodash/fp';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { QueryObserverResult } from '@tanstack/react-query';
 import { Conversation } from '../../../..';
 import * as i18n from './translations';
 import * as i18nModel from '../../../connectorland/models/model_selector/translations';
@@ -36,6 +37,8 @@ export interface ConversationSettingsEditorProps {
   setConversationsSettingsBulkActions: React.Dispatch<
     React.SetStateAction<ConversationsBulkActions>
   >;
+  onSelectedConversationChange: (conversation?: Conversation) => void;
+  refetchConversations?: () => Promise<QueryObserverResult<Record<string, Conversation>, unknown>>;
 }
 
 /**
@@ -51,11 +54,12 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
     setConversationSettings,
     conversationsSettingsBulkActions,
     setConversationsSettingsBulkActions,
+    onSelectedConversationChange,
+    refetchConversations,
   }) => {
     const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({
       http,
     });
-
     const selectedSystemPrompt = useMemo(() => {
       return getDefaultSystemPrompt({ allSystemPrompts, conversation: selectedConversation });
     }, [allSystemPrompts, selectedConversation]);
@@ -95,13 +99,14 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
               },
             });
           } else {
-            setConversationsSettingsBulkActions({
+            const createdConversation = {
               ...conversationsSettingsBulkActions,
               create: {
                 ...(conversationsSettingsBulkActions.create ?? {}),
                 [updatedConversation.title]: updatedConversation,
               },
-            });
+            };
+            setConversationsSettingsBulkActions(createdConversation);
           }
         }
       },
@@ -177,13 +182,14 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
               },
             });
           } else {
-            setConversationsSettingsBulkActions({
+            const createdConversation = {
               ...conversationsSettingsBulkActions,
               create: {
                 ...(conversationsSettingsBulkActions.create ?? {}),
                 [updatedConversation.title || updatedConversation.id]: updatedConversation,
               },
-            });
+            };
+            setConversationsSettingsBulkActions(createdConversation);
           }
         }
       },
@@ -239,13 +245,14 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
               },
             });
           } else {
-            setConversationsSettingsBulkActions({
+            const createdConversation = {
               ...conversationsSettingsBulkActions,
               create: {
                 ...(conversationsSettingsBulkActions.create ?? {}),
                 [updatedConversation.id || updatedConversation.title]: updatedConversation,
               },
-            });
+            };
+            setConversationsSettingsBulkActions(createdConversation);
           }
         }
       },
@@ -272,9 +279,13 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
             conversation={selectedConversation}
             isDisabled={isDisabled}
             onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
+            refetchConversations={refetchConversations}
             selectedPrompt={selectedSystemPrompt}
             isSettingsModalVisible={true}
             setIsSettingsModalVisible={noop} // noop, already in settings
+            onSelectedConversationChange={onSelectedConversationChange}
+            setConversationSettings={setConversationSettings}
+            setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
           />
         </EuiFormRow>
 
@@ -290,7 +301,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
             >
               <FormattedMessage
                 id="xpack.elasticAssistant.assistant.settings.connectorHelpTextTitle"
-                defaultMessage="Kibana Connector to make requests with"
+                defaultMessage="The default LLM connector for this conversation type."
               />
             </EuiLink>
           }

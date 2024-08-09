@@ -114,15 +114,10 @@ describe('Discover documents layout', () => {
   });
 
   test('should render customisations', async () => {
-    const customControlColumnsConfiguration = () => ({
-      leadingControlColumns: [],
-      trailingControlColumns: [],
-    });
-
     const customization: DiscoverCustomization = {
       id: 'data_table',
       logsEnabled: true,
-      customControlColumnsConfiguration,
+      rowAdditionalLeadingControls: [],
     };
 
     customisationService.set(customization);
@@ -130,8 +125,8 @@ describe('Discover documents layout', () => {
     const discoverGridComponent = component.find(DiscoverGrid);
     expect(discoverGridComponent.exists()).toBeTruthy();
 
-    expect(discoverGridComponent.prop('customControlColumnsConfiguration')).toEqual(
-      customControlColumnsConfiguration
+    expect(discoverGridComponent.prop('rowAdditionalLeadingControls')).toBe(
+      customization.rowAdditionalLeadingControls
     );
     expect(discoverGridComponent.prop('externalCustomRenderers')).toBeDefined();
     expect(discoverGridComponent.prop('customGridColumnsConfiguration')).toBeDefined();

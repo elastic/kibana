@@ -22,18 +22,19 @@ describe('calculateAverageMetrics', () => {
             failedTransactionRate: 5,
             latency: 5,
             logErrorRate: 5,
-            logRatePerMinute: 5,
+            logRate: 5,
             throughput: 5,
           },
           {
             failedTransactionRate: 10,
             latency: 10,
             logErrorRate: 10,
-            logRatePerMinute: 10,
+            logRate: 10,
             throughput: 10,
           },
         ],
         serviceName: 'service-1',
+        hasLogMetrics: true,
       },
       {
         agentName: 'java' as AgentName,
@@ -45,18 +46,19 @@ describe('calculateAverageMetrics', () => {
             failedTransactionRate: 15,
             latency: 15,
             logErrorRate: 15,
-            logRatePerMinute: 15,
+            logRate: 15,
             throughput: 15,
           },
           {
             failedTransactionRate: 5,
             latency: 5,
             logErrorRate: 5,
-            logRatePerMinute: 5,
+            logRate: 5,
             throughput: 5,
           },
         ],
         serviceName: 'service-2',
+        hasLogMetrics: true,
       },
     ];
 
@@ -72,10 +74,11 @@ describe('calculateAverageMetrics', () => {
           failedTransactionRate: 7.5,
           latency: 7.5,
           logErrorRate: 7.5,
-          logRatePerMinute: 7.5,
+          logRate: 7.5,
           throughput: 7.5,
         },
         serviceName: 'service-1',
+        hasLogMetrics: true,
       },
       {
         agentName: 'java' as AgentName,
@@ -86,10 +89,11 @@ describe('calculateAverageMetrics', () => {
           failedTransactionRate: 10,
           latency: 10,
           logErrorRate: 10,
-          logRatePerMinute: 10,
+          logRate: 10,
           throughput: 10,
         },
         serviceName: 'service-2',
+        hasLogMetrics: true,
       },
     ]);
   });
@@ -105,18 +109,19 @@ describe('calculateAverageMetrics', () => {
             failedTransactionRate: 5,
             latency: null,
             logErrorRate: 5,
-            logRatePerMinute: 5,
+            logRate: 5,
             throughput: 5,
           },
           {
             failedTransactionRate: 10,
             latency: null,
             logErrorRate: 10,
-            logRatePerMinute: 10,
+            logRate: 10,
             throughput: 10,
           },
         ],
         serviceName: 'service-1',
+        hasLogMetrics: true,
       },
     ];
 
@@ -131,10 +136,11 @@ describe('calculateAverageMetrics', () => {
         metrics: {
           failedTransactionRate: 7.5,
           logErrorRate: 7.5,
-          logRatePerMinute: 7.5,
+          logRate: 7.5,
           throughput: 7.5,
         },
         serviceName: 'service-1',
+        hasLogMetrics: true,
       },
     ]);
   });
@@ -147,14 +153,14 @@ describe('mergeMetrics', () => {
         failedTransactionRate: 5,
         latency: 5,
         logErrorRate: 5,
-        logRatePerMinute: 5,
+        logRate: 5,
         throughput: 5,
       },
       {
         failedTransactionRate: 10,
         latency: 10,
         logErrorRate: 10,
-        logRatePerMinute: 10,
+        logRate: 10,
         throughput: 10,
       },
     ];
@@ -165,7 +171,7 @@ describe('mergeMetrics', () => {
       failedTransactionRate: [5, 10],
       latency: [5, 10],
       logErrorRate: [5, 10],
-      logRatePerMinute: [5, 10],
+      logRate: [5, 10],
       throughput: [5, 10],
     });
   });
@@ -176,5 +182,55 @@ describe('mergeMetrics', () => {
     const result = mergeMetrics(metrics);
 
     expect(result).toEqual({});
+  });
+
+  it('returns metrics with zero value', () => {
+    const metrics = [
+      {
+        failedTransactionRate: 0,
+        latency: 4,
+        logErrorRate: 5,
+        logRate: 5,
+        throughput: 5,
+      },
+    ];
+
+    const result = mergeMetrics(metrics);
+
+    expect(result).toEqual({
+      failedTransactionRate: [0],
+      latency: [4],
+      logErrorRate: [5],
+      logRate: [5],
+      throughput: [5],
+    });
+  });
+
+  it('does not return metrics with null', () => {
+    const metrics = [
+      {
+        failedTransactionRate: null,
+        latency: null,
+        logErrorRate: 5,
+        logRate: 5,
+        throughput: 5,
+      },
+      {
+        failedTransactionRate: 5,
+        latency: null,
+        logErrorRate: 5,
+        logRate: 5,
+        throughput: 5,
+      },
+    ];
+
+    const result = mergeMetrics(metrics);
+
+    expect(result).toEqual({
+      failedTransactionRate: [5],
+      logErrorRate: [5, 5],
+      logRate: [5, 5],
+      throughput: [5, 5],
+    });
   });
 });

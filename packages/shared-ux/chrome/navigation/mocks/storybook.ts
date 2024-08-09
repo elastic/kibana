@@ -9,6 +9,7 @@
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import { action } from '@storybook/addon-actions';
 import { BehaviorSubject } from 'rxjs';
+import { EventTracker } from '../src/analytics';
 import { NavigationServices } from '../src/types';
 
 type Arguments = NavigationServices;
@@ -35,11 +36,12 @@ export class StorybookMock extends AbstractStorybookMock<{}, NavigationServices>
 
     return {
       ...params,
-      basePath: { prepend: (suffix: string) => `/basepath${suffix}` },
+      basePath: { prepend: (suffix: string) => `/basepath${suffix}`, remove: () => '' },
       navigateToUrl,
       recentlyAccessed$: params.recentlyAccessed$ ?? new BehaviorSubject([]),
       activeNodes$: params.activeNodes$ ?? new BehaviorSubject([]),
       isSideNavCollapsed: true,
+      eventTracker: new EventTracker({ reportEvent: action('Report event') }),
     };
   }
 

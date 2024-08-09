@@ -6,7 +6,8 @@
  */
 
 import moment from 'moment';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { EsQueryConfig } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
 import {
@@ -43,6 +44,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
   alertOnGroupDisappear: boolean,
   logger: Logger,
   timeframe: { start: string; end: string },
+  esQueryConfig: EsQueryConfig,
   lastPeriodEnd?: number,
   missingGroups: MissingGroupsRecord[] = []
 ): Promise<Array<Record<string, Evaluation>>> => {
@@ -70,6 +72,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         timeFieldName,
         groupBy,
         searchConfiguration,
+        esQueryConfig,
         compositeSize,
         alertOnGroupDisappear,
         calculatedTimerange,
@@ -86,6 +89,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         searchConfiguration,
         logger,
         calculatedTimerange,
+        esQueryConfig,
         missingGroups
       );
 

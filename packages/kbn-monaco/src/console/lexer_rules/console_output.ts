@@ -35,8 +35,10 @@ export const consoleOutputLexerRules: monaco.languages.IMonarchLanguage = {
       matchTokensWithEOL('status.success', /\b2\d{2}(?: \w+)*$/, 'root'),
       // Redirection messages (status codes 300 – 399)
       matchTokensWithEOL('status.redirect', /\b3\d{2}(?: \w+)*$/, 'root'),
-      // Client and server error responses (status codes 400 – 599)
-      matchTokensWithEOL('status.error', /\b[4-5]\d{2}(?: \w+)*$/, 'root'),
+      // Client error responses (status codes 400 – 499)
+      matchTokensWithEOL('status.warning', /\b4\d{2}(?: \w+)*$/, 'root'),
+      // Server error responses (status codes 500 – 599)
+      matchTokensWithEOL('status.error', /\b5\d{2}(?: \w+)*$/, 'root'),
     ],
   },
 };

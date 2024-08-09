@@ -38,6 +38,7 @@ import type { ThreeVersionsOf } from '../../../../../../../common/api/detection_
 import { MissingVersion } from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
 import { calculateFieldsDiffFor } from './diff_calculation_helpers';
 import {
+  multiLineStringDiffAlgorithm,
   numberDiffAlgorithm,
   scalarArrayDiffAlgorithm,
   simpleDiffAlgorithm,
@@ -176,7 +177,7 @@ const commonFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCommonFields> 
   version: numberDiffAlgorithm,
   name: singleLineStringDiffAlgorithm,
   tags: scalarArrayDiffAlgorithm,
-  description: simpleDiffAlgorithm,
+  description: multiLineStringDiffAlgorithm,
   severity: singleLineStringDiffAlgorithm,
   severity_mapping: simpleDiffAlgorithm,
   risk_score: numberDiffAlgorithm,
@@ -184,8 +185,8 @@ const commonFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCommonFields> 
   references: scalarArrayDiffAlgorithm,
   false_positives: simpleDiffAlgorithm,
   threat: simpleDiffAlgorithm,
-  note: simpleDiffAlgorithm,
-  setup: simpleDiffAlgorithm,
+  note: multiLineStringDiffAlgorithm,
+  setup: multiLineStringDiffAlgorithm,
   related_integrations: simpleDiffAlgorithm,
   required_fields: simpleDiffAlgorithm,
   author: scalarArrayDiffAlgorithm,

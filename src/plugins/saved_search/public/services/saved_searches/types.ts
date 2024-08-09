@@ -6,13 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { EmbeddableInput, SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/public';
-import type { Filter, TimeRange, Query } from '@kbn/es-query';
-import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import type { Reference } from '@kbn/content-management-utils';
-import type { SortOrder } from '../..';
-import type { SavedSearchAttributes } from '../../../common';
-import type { SavedSearch as SavedSearchCommon } from '../../../common';
+import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
+import type { SavedSearch as SavedSearchCommon, SavedSearchAttributes } from '../../../common';
 
 /** @public **/
 export interface SavedSearch extends SavedSearchCommon {
@@ -24,27 +20,7 @@ export interface SavedSearch extends SavedSearchCommon {
   };
 }
 
-interface SearchBaseInput extends EmbeddableInput {
-  timeRange: TimeRange;
-  timeslice?: [number, number];
-  query?: Query;
-  filters?: Filter[];
-  hidePanelTitles?: boolean;
-  columns?: string[];
-  sort?: SortOrder[];
-  rowHeight?: number;
-  headerRowHeight?: number;
-  rowsPerPage?: number;
-  sampleSize?: number;
-}
-
 export type SavedSearchByValueAttributes = Omit<SavedSearchAttributes, 'description'> & {
   description?: string;
   references: Reference[];
 };
-
-export type SearchByValueInput = {
-  attributes: SavedSearchByValueAttributes;
-} & SearchBaseInput;
-
-export type SearchByReferenceInput = SavedObjectEmbeddableInput & SearchBaseInput;

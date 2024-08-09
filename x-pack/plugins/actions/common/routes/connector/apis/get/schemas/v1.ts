@@ -8,5 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 export const getConnectorParamsSchema = schema.object({
-  id: schema.string(),
+  id: schema.string({
+    meta: { description: 'An identifier for the connector.' },
+  }),
 });

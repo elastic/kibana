@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Dataset quality summary', () => {
     before(async () => {
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
-      await PageObjects.svlCommonPage.loginWithRole('admin');
+      await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.datasetQuality.navigateTo();
     });
 

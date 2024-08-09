@@ -14,8 +14,8 @@ import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
 import * as t from 'io-ts';
 import { merge, pick } from 'lodash';
+import { parseEndpoint } from '@kbn/server-route-repository-utils';
 import { decodeRequestParams } from './decode_request_params';
-import { parseEndpoint } from './parse_endpoint';
 import { routeValidationObject } from './route_validation_object';
 import type { ServerRoute, ServerRouteCreateOptions } from './typings';
 

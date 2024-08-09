@@ -122,7 +122,6 @@ export const LinkContent = ({
   return (
     <>
       <EuiForm>
-        <EuiSpacer size="m" />
         <EuiText size="s">
           <FormattedMessage
             id="share.link.helpText"

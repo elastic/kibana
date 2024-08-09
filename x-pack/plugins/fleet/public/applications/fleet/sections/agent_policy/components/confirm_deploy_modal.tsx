@@ -80,9 +80,6 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
           iconType="iInCircle"
           title={i18n.translate('xpack.fleet.agentPolicy.confirmModalPoliciesCalloutTitle', {
             defaultMessage: 'This action will update the selected agent policies',
-            values: {
-              agentCount,
-            },
           })}
         >
           {agentPoliciesToAdd.length > 0 && (

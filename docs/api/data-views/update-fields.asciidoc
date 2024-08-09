@@ -4,7 +4,7 @@
 <titleabbrev>Update data view fields metadata</titleabbrev>
 ++++
 
-experimental[] Update fields presentation metadata, such as `count`,
+Update fields presentation metadata, such as `count`,
 `customLabel`, `customDescription`, and `format`. You can update multiple fields in one request. Updates
 are merged with persisted metadata. To remove existing metadata, specify `null` as the value.
 

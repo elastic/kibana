@@ -73,7 +73,7 @@ export interface ChatForm {
   [ChatFormFields.citations]: boolean;
   [ChatFormFields.indices]: string[];
   [ChatFormFields.summarizationModel]: LLMModel;
-  [ChatFormFields.elasticsearchQuery]: { retriever: unknown }; // RetrieverContainer leads to "Type instantiation is excessively deep and possibly infinite" error
+  [ChatFormFields.elasticsearchQuery]: { retriever: any }; // RetrieverContainer leads to "Type instantiation is excessively deep and possibly infinite" error
   [ChatFormFields.sourceFields]: { [index: string]: string[] };
   [ChatFormFields.docSize]: number;
   [ChatFormFields.queryFields]: { [index: string]: string[] };
@@ -100,8 +100,9 @@ export interface AnnotationDoc {
 }
 
 export interface AnnotationTokens {
-  type: 'prompt_token_count' | 'context_token_count' | 'context_clipped';
+  type: 'prompt_token_count' | 'context_token_count' | 'context_clipped' | 'search_query';
   count: number;
+  question?: string;
 }
 
 export interface Doc {
@@ -117,6 +118,7 @@ export interface AIMessage extends Message {
     context: number;
     total: number;
     contextClipped?: number;
+    searchQuery: string;
   };
 }
 
@@ -203,6 +205,7 @@ export interface UseChatHelpers {
 }
 
 export interface LLMModel {
+  id: string;
   name: string;
   value?: string;
   showConnectorName?: boolean;

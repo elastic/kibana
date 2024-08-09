@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-export interface Host {
-  architecture?: string;
-  hostname?: string;
-  name?: string;
-  ip?: string;
-  os?: {
-    platform?: string;
-  };
-}
+export type { Host } from '@kbn/apm-types/es_schemas_raw';

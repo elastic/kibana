@@ -83,6 +83,9 @@ beforeEach(() => {
     cors: {
       enabled: false,
     },
+    csp: {
+      disableEmbedding: true,
+    },
     cdn: {},
     shutdownTimeout: moment.duration(500, 'ms'),
   } as any;

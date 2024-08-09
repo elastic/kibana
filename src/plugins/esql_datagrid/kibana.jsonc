@@ -9,7 +9,8 @@
     "requiredPlugins": [
       "data",
       "uiActions",
-      "fieldFormats"
+      "fieldFormats",
+      "share",
     ],
     "requiredBundles": [
       "kibanaReact",

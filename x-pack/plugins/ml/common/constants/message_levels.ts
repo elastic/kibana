@@ -12,4 +12,4 @@ export const MESSAGE_LEVEL = {
   WARNING: 'warning',
 } as const;
 
-export type MessageLevel = typeof MESSAGE_LEVEL[keyof typeof MESSAGE_LEVEL];
+export type MessageLevel = (typeof MESSAGE_LEVEL)[keyof typeof MESSAGE_LEVEL];

@@ -9,6 +9,7 @@ import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useMemo } from 'react';
 import { find, some } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
+import { getHostPlatform } from '../../lib/endpoint/utils/get_host_platform';
 import { getAlertDetailsFieldValue } from '../../lib/endpoint/utils/get_event_details_field_values';
 import { isAgentTypeAndActionSupported } from '../../lib/endpoint';
 import type {
@@ -176,16 +177,8 @@ export const useAlertResponseActionsSupport = (
   }, [eventData]);
 
   const platform = useMemo(() => {
-    // TODO:TC I couldn't find host.os.family in the example data, thus using host.os.type and host.os.platform which are present one at a time in different type of events
-    if (agentType === 'crowdstrike') {
-      return (
-        getAlertDetailsFieldValue({ category: 'host', field: 'host.os.type' }, eventData) ||
-        getAlertDetailsFieldValue({ category: 'host', field: 'host.os.platform' }, eventData)
-      );
-    }
-
-    return getAlertDetailsFieldValue({ category: 'host', field: 'host.os.type' }, eventData);
-  }, [agentType, eventData]);
+    return getHostPlatform(eventData ?? []);
+  }, [eventData]);
 
   const unsupportedReason = useMemo(() => {
     if (!doesHostSupportResponseActions) {

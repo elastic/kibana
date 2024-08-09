@@ -6,11 +6,13 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiText } from '@elastic/eui';
+import { css } from '@emotion/css';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
 
 import { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { some } from 'lodash';
 import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { AttackDiscoveryStatusIndicator } from './attack_discovery_status_indicator';
@@ -22,6 +24,13 @@ import { getActionTypeTitle, getGenAiConfig } from '../helpers';
 import { AddConnectorModal } from '../add_connector_modal';
 
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
+
+const placeholderCss = css`
+  .euiSuperSelectControl__placeholder {
+    color: ${euiThemeVars.euiColorPrimary};
+    margin-right: ${euiThemeVars.euiSizeXS};
+  }
+`;
 
 interface Props {
   isDisabled?: boolean;
@@ -187,6 +196,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
         ) : (
           <EuiSuperSelect
             aria-label={i18n.CONNECTOR_SELECTOR_TITLE}
+            className={placeholderCss}
             compressed={true}
             data-test-subj="connector-selector"
             disabled={localIsDisabled}
@@ -195,6 +205,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
             onChange={onChange}
             options={allConnectorOptions}
             valueOfSelected={selectedConnectorId}
+            placeholder={i18n.INLINE_CONNECTOR_PLACEHOLDER}
             popoverProps={{ panelMinWidth: 400, anchorPosition: 'downRight' }}
           />
         )}

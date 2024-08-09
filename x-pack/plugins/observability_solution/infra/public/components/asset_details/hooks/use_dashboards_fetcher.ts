@@ -9,14 +9,9 @@ import { useState, useEffect } from 'react';
 import type { SearchDashboardsResponse } from '@kbn/dashboard-plugin/public/services/dashboard_content_management/lib/find_dashboards';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-
-export enum FETCH_STATUS {
-  LOADING = 'loading',
-  SUCCESS = 'success',
-  FAILURE = 'failure',
-  NOT_INITIATED = 'not_initiated',
-}
+import { useTabSwitcherContext } from './use_tab_switcher';
 
 export interface SearchDashboardsResult {
   data: SearchDashboardsResponse['hits'];
@@ -32,6 +27,7 @@ export function useDashboardFetcher(query = ''): SearchDashboardsResult {
     data: [],
     status: FETCH_STATUS.NOT_INITIATED,
   });
+  const { isActiveTab } = useTabSwitcherContext();
 
   useEffect(() => {
     const getDashboards = async () => {
@@ -63,7 +59,9 @@ export function useDashboardFetcher(query = ''): SearchDashboardsResult {
         });
       }
     };
-    getDashboards();
-  }, [dashboard, notifications.toasts, query]);
+    if (isActiveTab('dashboards')) {
+      getDashboards();
+    }
+  }, [dashboard, notifications.toasts, query, isActiveTab]);
   return result;
 }

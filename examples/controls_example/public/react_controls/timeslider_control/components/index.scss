@@ -1,5 +1,8 @@
-.timeSlider-playToggle:enabled {
-  background-color: $euiColorPrimary !important;
+.timeSlider-playToggle {
+  height: 100%;
+  &:enabled {
+    background-color: $euiColorPrimary !important;
+  }
 }
 
 .timeSlider-prependButton {

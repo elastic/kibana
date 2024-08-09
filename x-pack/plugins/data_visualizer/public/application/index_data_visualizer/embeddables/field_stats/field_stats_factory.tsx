@@ -43,7 +43,7 @@ import { css } from '@emotion/react';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
-import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { DataVisualizerPluginStart } from '../../../../plugin';
@@ -54,6 +54,7 @@ import { initializeFieldStatsControls } from './initialize_field_stats_controls'
 import type { DataVisualizerStartDependencies } from '../../../common/types/data_visualizer_plugin';
 import type { FieldStatisticsTableEmbeddableApi } from './types';
 import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
+import { FieldStatsComponentType } from '../../constants/field_stats_component_type';
 
 export interface EmbeddableFieldStatsChartStartServices {
   data: DataPublicPluginStart;
@@ -163,10 +164,7 @@ export const getFieldStatsChartEmbeddableFactory = (
       let initialDataView: DataView[] | undefined;
       try {
         const dataView = isESQLQuery(state.query)
-          ? await getESQLAdHocDataview(
-              getIndexPatternFromESQLQuery(state.query.esql),
-              deps.data.dataViews
-            )
+          ? await getESQLAdHocDataview(state.query.esql, deps.data.dataViews)
           : await deps.data.dataViews.get(validDataViewId);
         initialDataView = [dataView];
       } catch (error) {
@@ -367,6 +365,7 @@ export const getFieldStatsChartEmbeddableFactory = (
           return (
             <EuiFlexItem css={statsTableCss} data-test-subj="dashboardFieldStatsEmbeddedContent">
               <FieldStatisticsWrapper
+                id={FieldStatsComponentType.DashboardEmbeddable}
                 shouldGetSubfields={false}
                 dataView={dataView}
                 esqlQuery={esqlQuery}

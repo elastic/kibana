@@ -17,7 +17,7 @@ export default function (providerContext: FtrProviderContext) {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
     before(async () => {
-      await pageObjects.svlCommonPage.loginWithRole('admin');
+      await pageObjects.svlCommonPage.loginAsAdmin();
     });
 
     beforeEach(async () => {

@@ -49,7 +49,7 @@ interface IntegrationAssistantCompleteData {
   integrationName: string;
   integrationDescription: string;
   dataStreamName: string;
-  inputType: string;
+  inputTypes: string[];
   actionTypeId: string;
   model: string;
   provider: string;

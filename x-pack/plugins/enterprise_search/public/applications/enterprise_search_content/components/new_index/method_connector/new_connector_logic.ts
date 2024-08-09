@@ -64,12 +64,14 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
     languageSelectValue: [
       UNIVERSAL_LANGUAGE_VALUE,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setLanguageSelectValue: (_, { language }) => language ?? null,
       },
     ],
     rawName: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setRawName: (_, { rawName }) => rawName,
       },
     ],

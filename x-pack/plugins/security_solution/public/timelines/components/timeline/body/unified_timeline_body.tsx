@@ -33,9 +33,6 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
     refetch,
     dataLoadingState,
     totalCount,
-    onEventClosed,
-    expandedDetail,
-    showExpandedDetails,
     onChangePage,
     activeTab,
     updatedAt,
@@ -80,9 +77,6 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
             refetch={refetch}
             dataLoadingState={dataLoadingState}
             totalCount={totalCount}
-            onEventClosed={onEventClosed}
-            expandedDetail={expandedDetail}
-            showExpandedDetails={showExpandedDetails}
             onChangePage={onChangePage}
             activeTab={activeTab}
             updatedAt={updatedAt}

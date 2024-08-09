@@ -20,9 +20,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-common.Plugin",
+            "section": "def-public.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -75,9 +75,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-plugins-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCorePluginsBrowserPluginApi",
-                    "section": "def-common.PluginInitializerContext",
+                    "section": "def-public.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<object>"
@@ -101,9 +101,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
               "<",
@@ -141,9 +141,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreSetup",
+                    "section": "def-public.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<",
@@ -192,9 +192,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
               ", plugins: ",
@@ -222,9 +222,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreStart",
+                    "section": "def-public.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
@@ -1541,9 +1541,9 @@
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsOpenPointInTimeResponse",
+                "section": "def-server.SavedObjectsOpenPointInTimeResponse",
                 "text": "SavedObjectsOpenPointInTimeResponse"
               },
               ">"
@@ -1587,9 +1587,9 @@
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsClosePointInTimeResponse",
+                "section": "def-server.SavedObjectsClosePointInTimeResponse",
                 "text": "SavedObjectsClosePointInTimeResponse"
               },
               ">"
@@ -4293,9 +4293,9 @@
             "(savedObjectsClient: ",
             {
               "pluginId": "@kbn/core-saved-objects-api-server",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-              "section": "def-common.SavedObjectsClientContract",
+              "section": "def-server.SavedObjectsClientContract",
               "text": "SavedObjectsClientContract"
             },
             ", user: string, enableServerExtensionPoints?: boolean | undefined) => ",
@@ -4322,9 +4322,9 @@
               "signature": [
                 {
                   "pluginId": "@kbn/core-saved-objects-api-server",
-                  "scope": "common",
+                  "scope": "server",
                   "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                  "section": "def-common.SavedObjectsClientContract",
+                  "section": "def-server.SavedObjectsClientContract",
                   "text": "SavedObjectsClientContract"
                 }
               ],
@@ -4370,9 +4370,9 @@
             "(esClient: ",
             {
               "pluginId": "@kbn/core-elasticsearch-server",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibKbnCoreElasticsearchServerPluginApi",
-              "section": "def-common.ElasticsearchClient",
+              "section": "def-server.ElasticsearchClient",
               "text": "ElasticsearchClient"
             },
             ", spaceId: string, user: string) => ",

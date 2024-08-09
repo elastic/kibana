@@ -66,7 +66,6 @@ export const SLO_INDEX_TEMPLATE_PATTERN = `.slo-observability.sli-*`;
 export const SLO_DESTINATION_INDEX_NAME = `.slo-observability.sli-v${SLO_RESOURCES_VERSION}`;
 export const SLO_DESTINATION_INDEX_PATTERN = `.slo-observability.sli-v${SLO_RESOURCES_VERSION_MAJOR}*`;
 
-export const SLO_INGEST_PIPELINE_NAME = `.slo-observability.sli.pipeline-v${SLO_RESOURCES_VERSION}`;
 export const SLO_INGEST_PIPELINE_INDEX_NAME_PREFIX = `.slo-observability.sli-v${SLO_RESOURCES_VERSION}.`;
 
 export const SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME = '.slo-observability.summary-mappings';
@@ -86,6 +85,9 @@ export const DEFAULT_SLO_GROUPS_PAGE_SIZE = 25;
 
 export const getSLOSummaryTransformId = (sloId: string, sloRevision: number) =>
   `slo-summary-${sloId}-${sloRevision}`;
+
+export const getSLOPipelineId = (sloId: string, sloRevision: number) =>
+  `.slo-observability.sli.pipeline-${sloId}-${sloRevision}`;
 
 export const getSLOSummaryPipelineId = (sloId: string, sloRevision: number) =>
   `.slo-observability.summary.pipeline-${sloId}-${sloRevision}`;

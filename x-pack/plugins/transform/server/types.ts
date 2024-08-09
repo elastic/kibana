@@ -8,7 +8,7 @@
 import type { IRouter, CoreStart } from '@kbn/core/server';
 import type { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { AlertingPlugin } from '@kbn/alerting-plugin/server';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
