@@ -36,7 +36,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
    * responsible for managing
    */
   editorStateManager: ControlStateManager<EditorState>,
-  controlGroup: ControlGroupApi,
+  controlGroupApi: ControlGroupApi,
   services: {
     core: CoreStart;
     dataViews: DataViewsPublicPluginStart;
@@ -167,16 +167,16 @@ export const initializeDataControl = <EditorState extends object = {}>(
           );
         } else {
           // replace the control with a new one of the updated type
-          controlGroup.replacePanel(controlId, { panelType: newType, initialState: newState });
+          controlGroupApi.replacePanel(controlId, { panelType: newType, initialState: newState });
         }
       },
       initialState: {
         ...initialState,
-        controlType,
-        controlId,
-        defaultPanelTitle: defaultPanelTitle.getValue(),
       },
-      controlGroupApi: controlGroup,
+      controlType,
+      controlId,
+      initialDefaultPanelTitle: defaultPanelTitle.getValue(),
+      controlGroupApi,
     });
   };
 
