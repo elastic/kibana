@@ -9,8 +9,38 @@
 import type { OpenAPIV3 } from 'openapi-types';
 import { isReferenceObject } from '../../../common';
 
-export const processEnum = (schema: OpenAPIV3.SchemaObject) => {
-  if (!schema.anyOf) return;
+/** Identify special case output of schema.nullable() */
+const isNullableOutput = (schema: OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject) => {
+  return (
+    !isReferenceObject(schema) &&
+    Object.keys(schema).length === 3 &&
+    schema.enum?.length === 0 &&
+    schema.nullable === true &&
+    schema.type === undefined
+  );
+};
+
+/**
+ * Handle special case output of schema.nullable()
+ *
+ * We go from:
+ * { anyOf: [ { type: 'string' }, { nullable: true, enum: [] } ] }
+ *
+ * To:
+ * { type: 'string', nullable: true }
+ */
+const processNullableOutput = (schema: OpenAPIV3.SchemaObject) => {
+  if (schema.anyOf!.length !== 2) return false;
+  const idx = schema.anyOf!.findIndex((item) => isNullableOutput(item));
+  if (idx === -1) return false;
+  const anyOf = schema.anyOf!;
+  delete schema.anyOf;
+  schema.nullable = true;
+  Object.assign(schema, anyOf[1 - idx]);
+  return true;
+};
+
+const prettifyEnum = (schema: OpenAPIV3.SchemaObject) => {
   const result: unknown[] = [];
   let type: OpenAPIV3.SchemaObject['type'];
   for (const item of schema.anyOf!) {
@@ -23,4 +53,10 @@ export const processEnum = (schema: OpenAPIV3.SchemaObject) => {
   schema.type = type;
   schema.enum = result;
   delete schema.anyOf;
+};
+
+export const processEnum = (schema: OpenAPIV3.SchemaObject) => {
+  if (!schema.anyOf) return;
+  if (processNullableOutput(schema)) return;
+  prettifyEnum(schema);
 };
