@@ -440,7 +440,7 @@
       "description": "Update Wolfi base image",
       "customType": "regex",
       "fileMatch": [
-        "^src/dev/build/tasks/os_packages/docker_generator/run\\.ts$"
+        "\\.ts$"
       ],
       "matchStrings": [
         "docker\\.elastic\\.co/wolfi/chainguard-base:(?<currentValue>[-a-zA-Z0-9.]+)?(?:@(?<currentDigest>sha256:[a-fA-F0-9]+))?"
