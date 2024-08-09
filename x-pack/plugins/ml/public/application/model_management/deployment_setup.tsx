@@ -48,7 +48,12 @@ import { useEnabledFeatures } from '../contexts/ml';
 interface DeploymentSetupProps {
   config: ThreadingParams;
   onConfigChange: (config: ThreadingParams) => void;
-  errors: Partial<Record<keyof ThreadingParams, Record<string, unknown>>>;
+  errors: Partial<
+    Record<
+      keyof ThreadingParams | 'min_number_of_allocations' | 'max_number_of_allocations',
+      Record<string, unknown>
+    >
+  >;
   isUpdate?: boolean;
   deploymentsParams?: Record<string, ThreadingParams>;
   cloudInfo: CloudInfo;
@@ -408,8 +413,18 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
                         defaultMessage="Min"
                       />
                     }
+                    isInvalid={!!errors.min_number_of_allocations}
+                    error={
+                      errors?.min_number_of_allocations?.min ? (
+                        <FormattedMessage
+                          id="xpack.ml.trainedModels.modelsList.startDeployment.numbersOfAllocationsMinError"
+                          defaultMessage="At least one allocation is required."
+                        />
+                      ) : null
+                    }
                   >
                     <EuiFieldNumber
+                      isInvalid={!!errors.min_number_of_allocations}
                       min={1}
                       value={config.adaptive_allocations?.min_number_of_allocations}
                       onChange={(event) => {
@@ -433,8 +448,10 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
                         defaultMessage="Max"
                       />
                     }
+                    isInvalid={!!errors.max_number_of_allocations}
                   >
                     <EuiFieldNumber
+                      isInvalid={!!errors.max_number_of_allocations}
                       min={(config.adaptive_allocations?.min_number_of_allocations ?? 1) + 1}
                       value={config.adaptive_allocations?.max_number_of_allocations}
                       onChange={(event) => {
@@ -645,17 +662,38 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
     ]);
   }, [modelAndDeploymentIds, model.deployment_ids, model.model_id, isUpdate]);
 
-  const numOfAllocationsValidator = composeValidators(
-    requiredValidator(),
-    numberValidator({ min: 1, max: totalMlProcessors, integerOnly: true })
-  );
+  const numOfAllocationsValidator = useMemo(() => {
+    const adaptiveAllocationsEnabled = config.adaptive_allocations?.enabled;
+    return composeValidators(
+      adaptiveAllocationsEnabled ? () => null : requiredValidator(),
+      numberValidator({ min: 1, max: totalMlProcessors, integerOnly: true })
+    );
+  }, [totalMlProcessors, config.adaptive_allocations?.enabled]);
+
+  const minNumberOfAllocationsValidator = numberValidator({ min: 1, integerOnly: true });
+  const maxNumberOfAllocationsValidator = numberValidator({
+    min: (config.adaptive_allocations?.min_number_of_allocations ?? 1) + 1,
+    integerOnly: true,
+  });
 
   const numOfAllocationsErrors = numOfAllocationsValidator(config.numOfAllocations);
   const deploymentIdErrors = deploymentIdValidator(config.deploymentId ?? '');
+  const minNumberOfAllocationsErrors = minNumberOfAllocationsValidator(
+    config.adaptive_allocations?.min_number_of_allocations ?? 1
+  );
+  const maxNumberOfAllocationsErrors = maxNumberOfAllocationsValidator(
+    config.adaptive_allocations?.max_number_of_allocations ?? 0
+  );
 
-  const errors = {
+  const errors: DeploymentSetupProps['errors'] = {
     ...(numOfAllocationsErrors ? { numOfAllocations: numOfAllocationsErrors } : {}),
     ...(deploymentIdErrors ? { deploymentId: deploymentIdErrors } : {}),
+    ...(minNumberOfAllocationsErrors
+      ? { min_number_of_allocations: minNumberOfAllocationsErrors }
+      : {}),
+    ...(maxNumberOfAllocationsErrors
+      ? { max_number_of_allocations: maxNumberOfAllocationsErrors }
+      : {}),
   };
 
   return (

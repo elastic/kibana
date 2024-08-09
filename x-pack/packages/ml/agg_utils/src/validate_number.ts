@@ -12,16 +12,16 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
  * Represents the result of number validation.
  * @interface
  */
-export interface NumberValidationResult {
+export type NumberValidationResult = { [key: string]: boolean } & {
   /** The minimum allowed value. */
-  min: boolean;
+  min?: boolean;
 
   /** The maximum allowed value. */
-  max: boolean;
+  max?: boolean;
 
   /** Boolean flag to allow integer values only. */
-  integerOnly: boolean;
-}
+  integerOnly?: boolean;
+};
 
 /**
  * An interface describing conditions for validating numbers.
