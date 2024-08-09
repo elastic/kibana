@@ -53,7 +53,9 @@
     "@kbn/ebt-tools",
     "@kbn/fields-metadata-plugin",
     "@kbn/server-route-repository-utils",
-    "@kbn/core-analytics-browser"
+    "@kbn/core-analytics-browser",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/core-notifications-browser"
   ],
   "exclude": [
     "target/**/*"
