@@ -30,7 +30,7 @@ export const AddDataControlButton = ({ closePopover, controlGroupApi, ...rest }:
       data-test-subj="controls-create-button"
       aria-label={getAddControlButtonTitle()}
       onClick={() => {
-        controlGroup.openAddDataControlFlyout({ onSave });
+        controlGroupApi.openAddDataControlFlyout({ onSave });
         closePopover();
       }}
     >

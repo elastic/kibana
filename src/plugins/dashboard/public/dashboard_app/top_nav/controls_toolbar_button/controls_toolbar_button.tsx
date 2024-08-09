@@ -41,11 +41,11 @@ export function ControlsToolbarButton({
       {({ closePopover }: { closePopover: () => void }) => (
         <EuiContextMenuPanel
           items={[
-            /*<AddDataControlButton
+            <AddDataControlButton
               key="addControl"
               controlGroupApi={controlGroupApi}
               closePopover={closePopover}
-            />,*/
+            />,
             <AddTimeSliderControlButton
               key="addTimeSliderControl"
               controlGroupApi={controlGroupApi}

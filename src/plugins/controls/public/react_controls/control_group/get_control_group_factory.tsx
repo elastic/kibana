@@ -163,10 +163,7 @@ export const getControlGroupEmbeddableFactory = (services: {
           i18n.translate('controls.controlGroup.displayName', {
             defaultMessage: 'Controls',
           }),
-        openAddDataControlFlyout: (settings) => {
-          const { controlInputTransform } = settings ?? {
-            controlInputTransform: (state) => state,
-          };
+        openAddDataControlFlyout: (options) => {
           openDataControlEditor({
             initialState: {
               grow: api.grow.getValue(),
@@ -175,11 +172,14 @@ export const getControlGroupEmbeddableFactory = (services: {
             onSave: ({ type: controlType, state: initialState }) => {
               api.addNewPanel({
                 panelType: controlType,
-                initialState: controlInputTransform!(
-                  initialState as Partial<ControlGroupSerializedState>,
-                  controlType
-                ),
+                initialState: options?.controlInputTransform
+                  ? options.controlInputTransform(
+                    initialState as Partial<ControlGroupSerializedState>,
+                    controlType
+                  )
+                  : initialState,
               });
+              options?.onSave?.();
             },
             controlGroupApi: api,
             services,
