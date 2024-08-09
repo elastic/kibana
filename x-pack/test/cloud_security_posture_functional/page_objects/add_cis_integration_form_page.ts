@@ -380,7 +380,6 @@ export function AddCisIntegrationFormPageProvider({
     return secretComponentReplaceButton;
   };
 
-<<<<<<< HEAD
   const getElementText = async (selector: string) => {
     const element = await testSubjects.find(selector);
     const text = await element.getVisibleText();
@@ -472,7 +471,7 @@ export function AddCisIntegrationFormPageProvider({
 
     await navigateToEditIntegrationPage();
     await PageObjects.header.waitUntilLoadingHasFinished();
-=======
+  }
   const getFirstCspmIntegrationPageIntegration = async () => {
     const integration = await testSubjects.find('integrationNameLink');
     return await integration.getVisibleText();
@@ -487,7 +486,6 @@ export function AddCisIntegrationFormPageProvider({
   const getAgentBasedPolicyValue = async () => {
     const agentName = await testSubjects.find('createAgentPolicyNameField');
     return await agentName.getAttribute('value');
->>>>>>> upstream/main
   };
 
   return {
@@ -528,17 +526,14 @@ export function AddCisIntegrationFormPageProvider({
     getReplaceSecretButton,
     getSecretComponentReplaceButton,
     inputUniqueIntegrationName,
-<<<<<<< HEAD
     getFieldAttributeValue,
     getElementText,
     createAgentlessIntegration,
     editAgentlessIntegration,
     testSubjectIds,
-=======
     inputIntegrationName,
     getFirstCspmIntegrationPageIntegration,
     getFirstCspmIntegrationPageAgent,
     getAgentBasedPolicyValue,
->>>>>>> upstream/main
   };
 }
