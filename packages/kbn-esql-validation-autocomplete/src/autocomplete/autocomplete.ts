@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uniqBy from 'lodash/uniqBy';
+import { uniqBy } from 'lodash';
 import type {
   AstProviderFn,
   ESQLAstItem,
@@ -93,6 +93,8 @@ import {
   getSourcesFromCommands,
   getSupportedTypesForBinaryOperators,
   isAggFunctionUsedAlready,
+  narrowDownCompatibleTypesToSuggestNext,
+  narrowDownRelevantFunctionSignatures,
   removeQuoteForSuggestedSources,
 } from './helper';
 import { FunctionParameter, FunctionReturnType, SupportedDataType } from '../definitions/types';
@@ -1186,6 +1188,18 @@ async function getFunctionArgsSuggestions(
     return [];
   }
   const fieldsMap: Map<string, ESQLRealField> = await getFieldsMap();
+  const anyVariables = collectVariables(commands, fieldsMap, innerText);
+
+  const references = {
+    fields: fieldsMap,
+    variables: anyVariables,
+  };
+
+  const enrichedArgs = node.args.map((nodeArg) => {
+    const esType = extractFinalTypeFromArg(nodeArg, references);
+    return { ...nodeArg, esType } as ESQLAstItem & { esType: string };
+  });
+
   const variablesExcludingCurrentCommandOnes = excludeVariablesFromCurrentCommand(
     commands,
     command,
@@ -1199,13 +1213,28 @@ async function getFunctionArgsSuggestions(
     argIndex -= 1;
   }
 
-  const arg = node.args[argIndex];
+  const arg: ESQLAstItem = enrichedArgs[argIndex];
+
+  // Retrieve unique of types that are compatiable for the current arg
+  const relevantFuncSignatures = narrowDownRelevantFunctionSignatures(
+    fnDefinition,
+    enrichedArgs,
+    argIndex
+  );
+  const compatibleTypesToSuggestForArg = uniqBy(
+    relevantFuncSignatures.map((f) => f.params[argIndex]).filter((d) => d),
+    (o) => `${o.type}-${o.constantOnly}`
+  );
+  // @TODO: remove
+  console.log(`--@@compatibleTypesToSuggestForArg`, compatibleTypesToSuggestForArg);
+  // @TODO: remove
+  // console.log(`--@@compatibleTypesToSuggestForArg`, compatibleTypesToSuggestForArg);
 
   // the first signature is used as reference
   // TODO - take into consideration all signatures that match the current args
   const refSignature = fnDefinition.signatures[0];
 
-  const hasMoreMandatoryArgs =
+  const old_hasMoreMandatoryArgs =
     (refSignature.params.length >= argIndex &&
       refSignature.params.filter(({ optional }, index) => !optional && index > argIndex).length >
         0) ||
@@ -1213,6 +1242,18 @@ async function getFunctionArgsSuggestions(
       ? refSignature.minParams - 1 > argIndex
       : false);
 
+  const needMoreArgsChecks = relevantFuncSignatures.map((signature) => {
+    return (
+      (signature.params.length >= argIndex &&
+        signature.params.filter(({ optional }, index) => !optional && index > argIndex).length >
+          0) ||
+      ('minParams' in signature && signature.minParams ? signature.minParams - 1 > argIndex : false)
+    );
+  });
+  const hasMoreMandatoryArgs =
+    needMoreArgsChecks.length === 0 ? false : needMoreArgsChecks.some((d) => d === false) === false;
+
+  const canHaveMoreArgs = compatibleTypesToSuggestForArg.length > 0;
   const shouldAddComma = hasMoreMandatoryArgs && fnDefinition.type !== 'builtin';
 
   const suggestedConstants = Array.from(
@@ -1296,7 +1337,9 @@ async function getFunctionArgsSuggestions(
       .filter((signature) => {
         if (existingTypes.length) {
           return existingTypes.every((type, index) =>
-            compareTypesWithLiterals(signature.params[index].type, type)
+            signature.params[index]
+              ? compareTypesWithLiterals(signature.params[index].type, type)
+              : false
           );
         }
         return true;
@@ -1390,7 +1433,7 @@ async function getFunctionArgsSuggestions(
       }
     }
 
-    if (hasMoreMandatoryArgs) {
+    if (hasMoreMandatoryArgs || canHaveMoreArgs) {
       // suggest a comma if there's another argument for the function
       suggestions.push(commaCompleteItem);
     }

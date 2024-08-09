@@ -17,14 +17,14 @@ import {
   TRIGGER_SUGGESTION_COMMAND,
 } from './factories';
 import { camelCase, partition } from 'lodash';
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { ESQLAstItem, getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import {
   FunctionParameter,
   isFieldType,
   isSupportedDataType,
   SupportedDataType,
 } from '../definitions/types';
-import { getParamAtPosition } from './helper';
+import { getParamAtPosition, narrowDownCompatibleTypesToSuggestNext } from './helper';
 import { nonNullable } from '../shared/helpers';
 import {
   policies,
@@ -40,6 +40,7 @@ import {
 } from './__tests__/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
 import { ESQL_COMMON_NUMERIC_TYPES, ESQL_STRING_TYPES } from '../shared/esql_types';
+import { fieldNameFromType } from '../validation/validation.test';
 
 const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
 const powParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
@@ -465,7 +466,8 @@ describe('autocomplete', () => {
     }
   });
 
-  describe('eval', () => {
+  // @todo:
+  describe.only('eval', () => {
     testSuggestions('from a | eval ', [
       'var0 = ',
       ...getFieldNamesByType('any'),
@@ -786,17 +788,83 @@ describe('autocomplete', () => {
 
     // Test suggestions for each possible param, within each signature variation, for each function
     for (const fn of evalFunctionDefinitions) {
-      // skip this fn for the moment as it's quite hard to test
+      const testedCases = new Set();
+      // skip bucket and case fn for the moment as it's quite hard to test
+      // if (!['bucket', 'date_extract', 'date_diff', 'case'].includes(fn.name)) {
+
       if (!['bucket', 'date_extract', 'date_diff', 'case'].includes(fn.name)) {
-        for (const signature of fn.signatures) {
+        // 1. Empty expression
+        // i.e. eval pow( ), round ( )
+        // const allParamDefs = fn.signatures.map((s) => getParamAtPosition(s, 0)).filter(nonNullable);
+        // // get all possible types for this param
+        // const [constantOnlyParamDefs, acceptsFieldParamDefs] = partition(
+        //   allParamDefs,
+        //   (p) => p.constantOnly || /_literal/.test(p.type as string)
+        // );
+        // const getTypesFromParamDefs = (paramDefs: FunctionParameter[]): SupportedDataType[] =>
+        //   Array.from(new Set(paramDefs.map((p) => p.type))).filter(isSupportedDataType);
+        // const addCommaIfRequired = (s: string | PartialSuggestionWithText) => {
+        //   // don't add commas to the empty string or if there are no more required args
+        //   if (s === '' || (typeof s === 'object' && s.text === '')) {
+        //     return s;
+        //   }
+        //   return typeof s === 'string' ? `${s}, ` : { ...s, text: `${s.text},` };
+        // };
+
+        // testSuggestions(
+        //   `from a | eval ${fn.name}( `,
+        //   [
+        //     ...getDateLiteralsByFieldType(
+        //       getTypesFromParamDefs(acceptsFieldParamDefs).filter(isFieldType)
+        //     ),
+        //     ...getFieldNamesByType(
+        //       getTypesFromParamDefs(acceptsFieldParamDefs).filter(isFieldType)
+        //     ),
+        //     ...getFunctionSignaturesByReturnType(
+        //       'eval',
+        //       getTypesFromParamDefs(acceptsFieldParamDefs),
+        //       { scalar: true },
+        //       undefined,
+        //       [fn.name]
+        //     ),
+        //     ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)),
+        //   ].map(addCommaIfRequired)
+        // );
+
+        for (let signatureIndex = 0; signatureIndex < fn.signatures.length; signatureIndex++) {
+          const signature = fn.signatures[signatureIndex];
+          // @ts-ignore Partial
+          const enrichedArgs: Array<
+            ESQLAstItem & {
+              esType: string;
+            }
+          > = signature.params.map(({ type }) => ({
+            type: 'column',
+            esType: type,
+          }));
+
+          // @todo: add for empty case
           signature.params.forEach((param, i) => {
+            // Generate all possible cases from the signature param
+            // E.g. eval st_distance( ) | st_distance(cartesianPointField, ) | eval st_distance(geoPointField, ) | st_distance(geoPointField, )
+            const testCase = `${fn.name}(${signature.params
+              .slice(0, i + 1)
+              .map((p) => fieldNameFromType(p.type))
+              .join(',')}${i === 0 ? ',' : ''} )`;
+
+            // Avoid repeated testing of expressions we have previously seen
+            if (testedCases.has(testCase)) {
+              return;
+            } else {
+              testedCases.add(testCase);
+            }
             if (i < signature.params.length) {
-              // This ref signature thing is probably wrong in a few cases, but it matches
-              // the logic in getFunctionArgsSuggestions. They should both be updated
-              const refSignature = fn.signatures[0];
-              const requiresMoreArgs =
-                i + 1 < (refSignature.minParams ?? 0) ||
-                refSignature.params.filter(({ optional }, j) => !optional && j > i).length > 0;
+              const typesToSuggestNext = narrowDownCompatibleTypesToSuggestNext(
+                fn,
+                enrichedArgs,
+                i + 1
+              );
+              const requiresMoreArgs = typesToSuggestNext.length - 1 > 0;
 
               const allParamDefs = fn.signatures
                 .map((s) => getParamAtPosition(s, i))
@@ -814,27 +882,41 @@ describe('autocomplete', () => {
               const suggestedConstants = param.literalSuggestions || param.literalOptions;
 
               const addCommaIfRequired = (s: string | PartialSuggestionWithText) => {
-                // don't add commas to the empty string or if there are no more required args
                 if (!requiresMoreArgs || s === '' || (typeof s === 'object' && s.text === '')) {
                   return s;
                 }
                 return typeof s === 'string' ? `${s}, ` : { ...s, text: `${s.text},` };
               };
 
+              // @TODO: remove
+              console.log(`\n--@@from a | eval ${testCase}`);
+              // @TODO: remove
+              console.log(
+                `--@@typesToSuggestNext`,
+                JSON.stringify(
+                  typesToSuggestNext.map((d) => `${d.type}-${d.optional ? 'optional' : 'required'}`)
+                )
+              );
+
+              // @TODO: remove
+              console.log(`--@@requiresMoreArgs`, requiresMoreArgs);
+
+              // Compose eval expression that matches what params suggest
+              // E.g. from a | eval round()
               testSuggestions(
-                `from a | eval ${fn.name}(${Array(i).fill('field').join(', ')}${i ? ',' : ''} )`,
+                `from a | eval ${testCase}`,
                 suggestedConstants?.length
                   ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ', ' : ''}`)
                   : [
                       ...getDateLiteralsByFieldType(
-                        getTypesFromParamDefs(acceptsFieldParamDefs).filter(isFieldType)
+                        getTypesFromParamDefs(typesToSuggestNext).filter(isFieldType)
                       ),
                       ...getFieldNamesByType(
-                        getTypesFromParamDefs(acceptsFieldParamDefs).filter(isFieldType)
+                        getTypesFromParamDefs(typesToSuggestNext).filter(isFieldType)
                       ),
                       ...getFunctionSignaturesByReturnType(
                         'eval',
-                        getTypesFromParamDefs(acceptsFieldParamDefs),
+                        getTypesFromParamDefs(typesToSuggestNext),
                         { scalar: true },
                         undefined,
                         [fn.name]
@@ -844,21 +926,19 @@ describe('autocomplete', () => {
                 ' '
               );
               testSuggestions(
-                `from a | eval var0 = ${fn.name}(${Array(i).fill('field').join(', ')}${
-                  i ? ',' : ''
-                } )`,
+                `from a | eval var0 = ${testCase}`,
                 suggestedConstants?.length
                   ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ', ' : ''}`)
                   : [
                       ...getDateLiteralsByFieldType(
-                        getTypesFromParamDefs(acceptsFieldParamDefs).filter(isFieldType)
+                        getTypesFromParamDefs(typesToSuggestNext).filter(isFieldType)
                       ),
                       ...getFieldNamesByType(
-                        getTypesFromParamDefs(acceptsFieldParamDefs).filter(isFieldType)
+                        getTypesFromParamDefs(typesToSuggestNext).filter(isFieldType)
                       ),
                       ...getFunctionSignaturesByReturnType(
                         'eval',
-                        getTypesFromParamDefs(acceptsFieldParamDefs),
+                        getTypesFromParamDefs(typesToSuggestNext),
                         { scalar: true },
                         undefined,
                         [fn.name]

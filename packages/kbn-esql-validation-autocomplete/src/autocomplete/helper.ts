@@ -7,9 +7,11 @@
  */
 
 import type { ESQLAstItem, ESQLCommand, ESQLFunction, ESQLSource } from '@kbn/esql-ast';
+import { uniqBy } from 'lodash';
 import type { FunctionDefinition } from '../definitions/types';
 import { getFunctionDefinition, isAssignment, isFunctionItem } from '../shared/helpers';
 import type { SuggestionRawDefinition } from './types';
+import { compareTypesWithLiterals } from '../shared/esql_types';
 
 function extractFunctionArgs(args: ESQLAstItem[]): ESQLFunction[] {
   return args.flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg)).filter(isFunctionItem);
@@ -91,4 +93,60 @@ export function getSupportedTypesForBinaryOperators(
         .filter(({ params }) => params.find((p) => p.name === 'left' && p.type === previousType))
         .map(({ params }) => params[1].type)
     : [previousType];
+}
+
+// @TODO:
+// Filter down to signatures that match every params up to the current argIndex
+// e.g. BUCKET(longField, /) => all signatures with first param as long column type
+// or BUCKET(longField, 2, /) => all signatures with (longField, integer, ...)
+
+export function narrowDownRelevantFunctionSignatures(
+  fnDefinition: FunctionDefinition,
+  enrichedArgs: Array<
+    ESQLAstItem & {
+      esType: string;
+    }
+  >,
+  argIndex: number
+) {
+  const relevantFuncSignatures = fnDefinition.signatures.filter(
+    (s) =>
+      s.params?.length >= argIndex &&
+      s.params
+        .slice(0, argIndex)
+        .every(
+          ({ type: esType }, idx) =>
+            esType === enrichedArgs[idx].esType ||
+            compareTypesWithLiterals(esType, enrichedArgs[idx].esType)
+        )
+  );
+  return relevantFuncSignatures;
+}
+
+/**
+ *
+ * @param fnDefinition
+ * @param enrichedArgs
+ * @param argIndex
+ * @returns
+ */
+export function narrowDownCompatibleTypesToSuggestNext(
+  fnDefinition: FunctionDefinition,
+  enrichedArgs: Array<
+    ESQLAstItem & {
+      esType: string;
+    }
+  >,
+  argIndex: number
+) {
+  const relevantFuncSignatures = narrowDownRelevantFunctionSignatures(
+    fnDefinition,
+    enrichedArgs,
+    argIndex
+  );
+  const compatibleTypesToSuggestForArg = uniqBy(
+    relevantFuncSignatures.map((f) => f.params[argIndex]).filter((d) => d),
+    (o) => `${o.type}-${o.constantOnly}`
+  );
+  return compatibleTypesToSuggestForArg;
 }
