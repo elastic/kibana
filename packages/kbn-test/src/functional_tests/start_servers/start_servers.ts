@@ -30,12 +30,24 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     const extendedSettingsOverrides = (vars: any) => {
       if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true') {
         vars.esTestCluster.license = 'trial';
-        vars.suiteTags.exclude = ['skipFIPS'];
-        vars.esTestCluster.serverArgs = ['xpack.security.enabled=true'];
+
+        const skipTags = vars.suiteTags?.exclude ?? [];
+        skipTags.push('skipFIPS');
+        vars.suiteTags = {
+          ...vars.suiteTags,
+          exclude: skipTags,
+        };
+
         vars.security = {
           ...vars.security,
           defaultRoles: ['superuser', 'kibana_admin', 'system_indices_superuser'],
         };
+
+        const newServerArgs = vars.esTestCluster.serverArgs.filter(
+          (arg) => arg !== 'xpack.security.enabled=false'
+        );
+        newServerArgs.push('xpack.security.enabled=true');
+        vars.esTestCluster.serverArgs = newServerArgs;
       }
 
       return vars;
