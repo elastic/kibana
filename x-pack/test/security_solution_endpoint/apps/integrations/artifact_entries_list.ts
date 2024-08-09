@@ -204,7 +204,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       let successes = 0;
       let fails = 0;
 
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 100; i++) {
         // Opens add flyout
         if (options?.createButton) {
           await testSubjects.click(`${actions.pagePrefix}-${options.createButton}`);
