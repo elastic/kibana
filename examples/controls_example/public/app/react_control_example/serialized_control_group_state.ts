@@ -8,7 +8,6 @@
 
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { ControlGroupSerializedState } from '@kbn/controls-plugin/public';
-import { SEARCH_CONTROL_TYPE } from '../../search_control/types';
 import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL, TIME_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
 
 const SERIALIZED_STATE_SESSION_STORAGE_KEY =
@@ -35,20 +34,6 @@ const searchControlId = 'searchControl1';
 const rangeSliderControlId = 'rangeSliderControl1';
 const timesliderControlId = 'timesliderControl1';
 const controlGroupPanels = {
-  [searchControlId]: {
-    type: SEARCH_CONTROL_TYPE,
-    order: 3,
-    grow: true,
-    width: 'medium',
-    explicitInput: {
-      id: searchControlId,
-      fieldName: 'message',
-      title: 'Message',
-      grow: true,
-      width: 'medium',
-      enhancements: {},
-    },
-  },
   [rangeSliderControlId]: {
     type: RANGE_SLIDER_CONTROL,
     order: 1,
@@ -100,11 +85,6 @@ const initialSerializedControlGroupState = {
       '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
   } as object,
   references: [
-    {
-      name: `controlGroup_${searchControlId}:${SEARCH_CONTROL_TYPE}DataView`,
-      type: 'index-pattern',
-      id: WEB_LOGS_DATA_VIEW_ID,
-    },
     {
       name: `controlGroup_${rangeSliderControlId}:${RANGE_SLIDER_CONTROL}DataView`,
       type: 'index-pattern',

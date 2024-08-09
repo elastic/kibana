@@ -9,18 +9,13 @@
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ControlsPluginSetup } from '@kbn/controls-plugin/public/types';
 import { PLUGIN_ID } from './constants';
 import img from './control_group_image.png';
-import { SEARCH_CONTROL_TYPE } from './search_control/types';
 
 interface SetupDeps {
-  controls: ControlsPluginSetup;
   developerExamples: DeveloperExamplesSetup;
-  embeddable: EmbeddableSetup;
 }
 
 export interface ControlsExampleStartDeps {
@@ -34,22 +29,8 @@ export class ControlsExamplePlugin
 {
   public setup(
     core: CoreSetup<ControlsExampleStartDeps>,
-    { controls, developerExamples, embeddable }: SetupDeps
+    { developerExamples }: SetupDeps
   ) {
-    controls.registerControlFactory(SEARCH_CONTROL_TYPE, async () => {
-      const [{ getSearchControlFactory: getSearchEmbeddableFactory }, [coreStart, depsStart]] =
-        await Promise.all([
-          import('./search_control/get_search_control_factory'),
-          core.getStartServices(),
-        ]);
-
-      return getSearchEmbeddableFactory({
-        core: coreStart,
-        data: depsStart.data,
-        dataViews: depsStart.data.dataViews,
-      });
-    });
-
     core.application.register({
       id: PLUGIN_ID,
       title: 'Controls examples',
