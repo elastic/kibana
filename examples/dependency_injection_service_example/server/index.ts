@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { inject, injectable } from 'inversify';
-import { RequestToken } from '@kbn/core-http-server';
-import type { EchoRequest } from './route';
+import { ContainerModule, type interfaces } from 'inversify';
+import { Global } from '@kbn/core-di-common';
+import { Echo } from './echo';
 
-@injectable()
-export class EchoService {
-  constructor(@inject(RequestToken) private readonly request: EchoRequest) {}
+export type { Echo };
+export const EchoService = Symbol.for('EchoService') as interfaces.ServiceIdentifier<Echo>;
 
-  echo() {
-    return this.request.body;
-  }
-}
+export const module = new ContainerModule((bind) => {
+  bind(EchoService).to(Echo).inRequestScope();
+  bind(Global).toConstantValue(EchoService);
+});
