@@ -9,7 +9,11 @@ import { DATA_VIEW_PATH, INITIAL_REST_VERSION } from '@kbn/data-views-plugin/ser
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { AllConnectorsResponse } from '@kbn/actions-plugin/common/routes/connector/response';
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '@kbn/security-solution-plugin/common/constants';
-import { ELASTICSEARCH_PASSWORD, ELASTICSEARCH_USERNAME } from '../../env_var_names_constants';
+import {
+  CLOUD_SERVERLESS,
+  ELASTICSEARCH_PASSWORD,
+  ELASTICSEARCH_USERNAME,
+} from '../../env_var_names_constants';
 import { deleteAllDocuments } from './elasticsearch';
 import { DEFAULT_ALERTS_INDEX_PATTERN } from './alerts';
 import { getSpaceUrl } from '../space';
@@ -32,7 +36,8 @@ export const rootRequest = <T = unknown>({
   ...restOptions
 }: Partial<Cypress.RequestOptions>): Cypress.Chainable<Cypress.Response<T>> => {
   if (Cypress.env('IS_SERVERLESS')) {
-    return cy.task('getApiKeyForRole', 'admin').then((response) => {
+    const role = Cypress.env(CLOUD_SERVERLESS) ? 'system_indices_superuser' : 'admin';
+    return cy.task('getApiKeyForRole', role).then((response) => {
       return cy.request<T>({
         headers: {
           ...API_HEADERS,
