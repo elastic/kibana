@@ -56,4 +56,5 @@ export type OptionsListComponentApi = OptionsListControlApi &
     deselectOption: (key: string | undefined) => void;
     makeSelection: (key: string | undefined, showOnlySelected: boolean) => void;
     loadMoreSubject: BehaviorSubject<null>;
+    setExclude: (next: boolean | undefined) => void;
   };
