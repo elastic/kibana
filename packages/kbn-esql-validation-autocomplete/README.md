@@ -264,7 +264,13 @@ testErrorsAndWarnings(`ROW var = NOT 5 LIKE "?a"`, [
 
 and are found in `packages/kbn-esql-validation-autocomplete/src/validation/validation.test.ts`.
 
-`testErrorsAndWarnings` supports `skip` and `only` modifiers e.g. `testErrorsAndWarnings.only('...')`
+`testErrorsAndWarnings` supports `skip` and `only` modifiers e.g. `testErrorsAndWarnings.only('...')`.
+
+It accepts
+
+1. a query
+2. a list of expected errors (can be empty)
+3. a list of expected warnings (can be empty or omitted)
 
 The bulk of the validation tests are auto-generated from function definitions. All the generated function tests are found within the following describe block
 
@@ -280,4 +286,69 @@ The generator can be run locally using the `cd packages/kbn-esql-validation-auto
 
 It is not perfect and occasionally creates a test case that is invalid for a particular function. So, humans are allowed to edit the expected assertions for any test case—those edits will not be overwritten by the generator script. However, if a human deletes a test case, it will be added back next time the generator runs. So, we should edit the test cases to make them valid, not delete them.
 
-Running the tests in `validation.test.ts` populates `packages/kbn-esql-validation-autocomplete/src/validation/esql_validation_meta_tests.json` which is then used in `test/api_integration/apis/esql/errors.ts` to make sure our validator isn't giving users false positives.
+Running the tests in `validation.test.ts` populates `packages/kbn-esql-validation-autocomplete/src/validation/esql_validation_meta_tests.json` which is then used in `test/api_integration/apis/esql/errors.ts` to make sure our validator isn't giving users false positives. Therefore, the validation test suite should always be run after any changes have been made to it so that the JSON file stays in sync.
+
+#### Autocomplete
+
+##### The new way
+
+The new tests are found in `packages/kbn-esql-validation-autocomplete/src/autocomplete/__tests__`.
+
+They look like this.
+
+```ts
+test('lists possible aggregations on space after command', async () => {
+  const { assertSuggestions } = await setup();
+  const expected = ['var0 = ', ...allAggFunctions, ...allEvaFunctions];
+
+  await assertSuggestions('from a | stats /', expected);
+  await assertSuggestions('FROM a | STATS /', expected);
+});
+```
+
+`assertSuggestions` is created by the `setup` factory. It does not set up a Jest test case internally, so it needs to be wrapped in `test` or `it`.
+
+The suggestion position is calculated from the placement of `/` in the query.
+
+The arguments are as follows
+
+1. the query
+2. the expected suggestions (`Array<string | PartialSuggestionWithText>`)
+3. options
+
+Options is
+
+```ts
+export interface SuggestOptions {
+  ctx?: EditorContext;
+  callbacks?: ESQLCallbacks;
+}
+```
+
+So, that allows you to customize the [trigger kind](https://microsoft.github.io/monaco-editor/typedoc/enums/languages.CompletionTriggerKind.html) in the `ctx` object and the field list and other callback results in `callbacks`.
+
+##### The old way
+
+All the legacy autocomplete tests are found in `packages/kbn-esql-validation-autocomplete/src/autocomplete/autocomplete.test.ts`.
+
+They look like this
+
+```ts
+testSuggestions('from a | eval a = 1 year ', [
+  ',',
+  '| ',
+  ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
+    'time_interval',
+  ]),
+]);
+```
+
+Similarly to `testErrorsAndWarnings`, `testSuggestions` is an all-in-one utility that sets up a Jest test case internally.
+
+Its parameters are as follows
+
+1. the query
+2. the expected suggestions (can be strings or `Partial<SuggestionRawDefinition>`)
+3. the trigger character. This should only be included if the test is intended to validate a "Trigger Character" trigger kind from Monaco ([ref](https://microsoft.github.io/monaco-editor/typedoc/enums/languages.CompletionTriggerKind.html#TriggerCharacter))
+4. the position. This should be included if the test is validating an "Invoke" trigger kind from Monaco ([ref](https://microsoft.github.io/monaco-editor/typedoc/enums/languages.CompletionTriggerKind.html#Invoke)), or if the test is validating a trigger character entered prior to the final occurance of that trigger character in the given query.
+5. custom callback data such as a list of indicies or a field list
