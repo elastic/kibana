@@ -39,6 +39,17 @@ actions:
     update:
       x-beta: true
   # Add some tag descriptions and displayNames
+  - target: '$.tags[?(@.name=="alerting")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Alerting enables you to define rules, which detect complex conditions within your data.
+        When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule. 
+        Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
+      externalDocs:
+        description: Alerting documentation
+        url: https://www.elastic.co/docs/current/serverless/rules
+      x-displayName: "Alerting"
   - target: '$.tags[?(@.name=="connectors")]'
     description: Change tag description and displayName
     update:
