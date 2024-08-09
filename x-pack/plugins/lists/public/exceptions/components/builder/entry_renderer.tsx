@@ -130,7 +130,6 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
       const { updatedEntry, index } = getEntryOnFieldChange(entry, newField);
       onChange(updatedEntry, index);
       // actually changes when you select a new field without updating the builder entry value
-      console.log('handlefieldchange', entry, 'newfield', newField, 'updatedentry', updatedEntry);
     },
     [onChange, entry]
   );
@@ -208,7 +207,6 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   const renderFieldInput = useCallback(
     (isFirst: boolean): JSX.Element => {
       const filteredIndexPatterns = getFilteredIndexPatterns(indexPattern, entry);
-      console.log('entry.field', entry.field);
       const comboBox = (
         <FieldComponent
           placeholder={

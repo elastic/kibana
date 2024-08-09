@@ -353,7 +353,6 @@ export const getEntryOnFieldChange = (
   item: FormattedBuilderEntry,
   newField: DataViewFieldBase
 ): { index: number; updatedEntry: BuilderEntry } => {
-  console.log('getentryonfieldchange', item, 'newfield', newField);
   const { parent, entryIndex, nested } = item;
   const newChildFieldValue = newField != null ? newField.name.split('.').slice(-1)[0] : '';
 
