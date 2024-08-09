@@ -75,7 +75,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
+                $ref: '#/components/schemas/ActionStatusSuccessResponse'
           description: OK
       summary: Get Actions status schema
       tags:
@@ -278,7 +278,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
+                $ref: '#/components/schemas/ActionStateSuccessResponse'
           description: OK
       summary: Get Action State schema
       tags:
@@ -623,6 +623,30 @@ components:
           $ref: '#/components/schemas/PageSize'
         start_date:
           $ref: '#/components/schemas/StartDate'
+    ActionStateSuccessResponse:
+      type: object
+      properties:
+        body:
+          type: object
+          properties:
+            data:
+              type: object
+              properties:
+                canEncrypt:
+                  type: boolean
+    ActionStatusSuccessResponse:
+      type: object
+      properties:
+        body:
+          type: object
+          properties:
+            data:
+              type: object
+              properties:
+                agent_id:
+                  $ref: '#/components/schemas/AgentId'
+                pending_actions:
+                  $ref: '#/components/schemas/PendingActionsSchema'
     AgentId:
       description: Agent ID
       type: string
@@ -900,6 +924,27 @@ components:
     Parameters:
       description: Optional parameters object
       type: object
+    PendingActionsSchema:
+      type: object
+      properties:
+        execute:
+          type: integer
+        get-file:
+          type: integer
+        isolate:
+          type: integer
+        kill-process:
+          type: integer
+        running-processes:
+          type: integer
+        scan:
+          type: integer
+        suspend-process:
+          type: integer
+        unisolate:
+          type: integer
+        upload:
+          type: integer
     ProtectionUpdatesNoteResponse:
       type: object
       properties:
