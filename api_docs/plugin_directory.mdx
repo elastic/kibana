@@ -7,7 +7,7 @@ id: kibDevDocsPluginDirectory
 slug: /kibana-dev-docs/api-meta/plugin-api-directory
 title: Directory
 description: Directory of public APIs available through plugins or packages.
-date: 2024-08-08
+date: 2024-08-09
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 ---
 
@@ -21,7 +21,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 
 | API Count | Any Count | Missing comments | Missing exports |
 |--------------|----------|-----------------|--------|
-| 51991 | 241 | 38932 | 1909 |
+| 51995 | 241 | 38936 | 1911 |
 
 ## Plugin Directory
 
@@ -34,7 +34,6 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibAlertingPluginApi" text="alerting"/> | [@elastic/response-ops](https://github.com/orgs/elastic/teams/response-ops) | - | 871 | 1 | 839 | 52 |
 | <DocLink id="kibApmPluginApi" text="apm"/> | [@elastic/obs-ux-infra_services-team](https://github.com/orgs/elastic/teams/obs-ux-infra_services-team) | The user interface for Elastic APM | 29 | 0 | 29 | 119 |
 | <DocLink id="kibApmDataAccessPluginApi" text="apmDataAccess"/> | [@elastic/obs-knowledge-team](https://github.com/orgs/elastic/teams/obs-knowledge-team) | - | 74 | 0 | 74 | 1 |
-| <DocLink id="kibAssetsDataAccessPluginApi" text="assetsDataAccess"/> | [@elastic/obs-knowledge-team](https://github.com/orgs/elastic/teams/obs-knowledge-team) | - | 2 | 0 | 2 | 0 |
 | <DocLink id="kibBannersPluginApi" text="banners"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 9 | 0 | 9 | 0 |
 | <DocLink id="kibBfetchPluginApi" text="bfetch"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | Considering using bfetch capabilities when fetching large amounts of data. This services supports batching HTTP requests and streaming responses back. | 83 | 1 | 73 | 2 |
 | <DocLink id="kibCanvasPluginApi" text="canvas"/> | [@elastic/kibana-presentation](https://github.com/orgs/elastic/teams/kibana-presentation) | Adds Canvas application to Kibana | 9 | 0 | 8 | 3 |
@@ -74,6 +73,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibEmbeddableEnhancedPluginApi" text="embeddableEnhanced"/> | [@elastic/kibana-presentation](https://github.com/orgs/elastic/teams/kibana-presentation) | Extends embeddable plugin with more functionality | 19 | 0 | 19 | 2 |
 | <DocLink id="kibEncryptedSavedObjectsPluginApi" text="encryptedSavedObjects"/> | [@elastic/kibana-security](https://github.com/orgs/elastic/teams/kibana-security) | This plugin provides encryption and decryption utilities for saved objects containing sensitive information. | 53 | 0 | 46 | 1 |
 | <DocLink id="kibEnterpriseSearchPluginApi" text="enterpriseSearch"/> | [@elastic/search-kibana](https://github.com/orgs/elastic/teams/search-kibana) | Adds dashboards for discovering and managing Enterprise Search products. | 5 | 0 | 5 | 0 |
+| <DocLink id="kibEntitiesDataAccessPluginApi" text="entitiesDataAccess"/> | [@elastic/obs-entities](https://github.com/orgs/elastic/teams/obs-entities) | - | 2 | 0 | 2 | 0 |
 | <DocLink id="kibEntityManagerPluginApi" text="entityManager"/> | [@elastic/obs-entities](https://github.com/orgs/elastic/teams/obs-entities) | Entity manager plugin for entity assets (inventory, topology, etc) | 16 | 0 | 16 | 1 |
 | <DocLink id="kibEsUiSharedPluginApi" text="esUiShared"/> | [@elastic/kibana-management](https://github.com/orgs/elastic/teams/kibana-management) | - | 99 | 3 | 97 | 3 |
 | <DocLink id="kibEsqlPluginApi" text="esql"/> | [@elastic/kibana-esql](https://github.com/orgs/elastic/teams/kibana-esql) | - | 24 | 0 | 9 | 0 |
@@ -122,7 +122,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibIntegrationAssistantPluginApi" text="integrationAssistant"/> | [@elastic/security-scalability](https://github.com/orgs/elastic/teams/security-scalability) | Plugin implementing the Integration Assistant API and UI | 47 | 0 | 40 | 3 |
 | <DocLink id="kibInteractiveSetupPluginApi" text="interactiveSetup"/> | [@elastic/kibana-security](https://github.com/orgs/elastic/teams/kibana-security) | This plugin provides UI and APIs for the interactive setup mode. | 28 | 0 | 18 | 0 |
 | <DocLink id="kibInvestigatePluginApi" text="investigate"/> | [@elastic/obs-ux-management-team](https://github.com/orgs/elastic/teams/obs-ux-management-team) | - | 105 | 0 | 105 | 6 |
-| <DocLink id="kibInvestigateAppPluginApi" text="investigateApp"/> | [@elastic/obs-ux-management-team](https://github.com/orgs/elastic/teams/obs-ux-management-team) | - | 5 | 0 | 5 | 0 |
+| <DocLink id="kibInvestigateAppPluginApi" text="investigateApp"/> | [@elastic/obs-ux-management-team](https://github.com/orgs/elastic/teams/obs-ux-management-team) | - | 5 | 0 | 5 | 2 |
 | <DocLink id="kibKibanaOverviewPluginApi" text="kibanaOverview"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 6 | 0 | 6 | 0 |
 | <DocLink id="kibKibanaReactPluginApi" text="kibanaReact"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 153 | 0 | 121 | 3 |
 | kibanaUsageCollection | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 0 | 0 | 0 | 0 |
@@ -550,7 +550,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnManagementSettingsComponentsFieldRowPluginApi" text="@kbn/management-settings-components-field-row"/> | [@elastic/kibana-management](https://github.com/orgs/elastic/teams/kibana-management) | - | 23 | 0 | 7 | 0 |
 | <DocLink id="kibKbnManagementSettingsComponentsFormPluginApi" text="@kbn/management-settings-components-form"/> | [@elastic/kibana-management](https://github.com/orgs/elastic/teams/kibana-management) | - | 8 | 0 | 2 | 3 |
 | <DocLink id="kibKbnManagementSettingsFieldDefinitionPluginApi" text="@kbn/management-settings-field-definition"/> | [@elastic/kibana-management](https://github.com/orgs/elastic/teams/kibana-management) | - | 45 | 0 | 0 | 0 |
-| <DocLink id="kibKbnManagementSettingsIdsPluginApi" text="@kbn/management-settings-ids"/> | [@elastic/appex-sharedux @elastic/kibana-management](https://github.com/orgs/elastic/teams/appex-sharedux ) | - | 139 | 0 | 137 | 0 |
+| <DocLink id="kibKbnManagementSettingsIdsPluginApi" text="@kbn/management-settings-ids"/> | [@elastic/appex-sharedux @elastic/kibana-management](https://github.com/orgs/elastic/teams/appex-sharedux ) | - | 143 | 0 | 141 | 0 |
 | <DocLink id="kibKbnManagementSettingsSectionRegistryPluginApi" text="@kbn/management-settings-section-registry"/> | [@elastic/appex-sharedux @elastic/kibana-management](https://github.com/orgs/elastic/teams/appex-sharedux ) | - | 20 | 0 | 11 | 0 |
 | <DocLink id="kibKbnManagementSettingsTypesPluginApi" text="@kbn/management-settings-types"/> | [@elastic/kibana-management](https://github.com/orgs/elastic/teams/kibana-management) | - | 88 | 0 | 10 | 0 |
 | <DocLink id="kibKbnManagementSettingsUtilitiesPluginApi" text="@kbn/management-settings-utilities"/> | [@elastic/kibana-management](https://github.com/orgs/elastic/teams/kibana-management) | - | 56 | 0 | 6 | 0 |
