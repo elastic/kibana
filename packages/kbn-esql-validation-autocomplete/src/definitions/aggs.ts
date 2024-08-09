@@ -31,7 +31,7 @@ function createNumericAggDefinition({
     name,
     type: 'agg',
     description,
-    supportedCommands: ['stats', 'metrics'],
+    supportedCommands: ['stats', 'inlinestats', 'metrics'],
     signatures: [
       ...ESQL_NUMBER_TYPES.map((numericType) => ({
         params: [
@@ -105,7 +105,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         }
       ),
       type: 'agg',
-      supportedCommands: ['stats', 'metrics'],
+      supportedCommands: ['stats', 'inlinestats', 'metrics'],
       signatures: [
         ...ESQL_COMMON_NUMERIC_TYPES.map((numericType: FunctionParameterType) => {
           return ESQL_COMMON_NUMERIC_TYPES.map((weightType: FunctionParameterType) => ({
@@ -133,7 +133,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         defaultMessage: 'Returns the maximum value in a field.',
       }),
       type: 'agg',
-      supportedCommands: ['stats', 'metrics'],
+      supportedCommands: ['stats', 'inlinestats', 'metrics'],
       signatures: [
         ...ESQL_COMMON_NUMERIC_TYPES.map((type) => ({
           params: [{ name: 'column', type, noNestingFunctions: true }],
@@ -164,7 +164,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         defaultMessage: 'Returns the minimum value in a field.',
       }),
       type: 'agg',
-      supportedCommands: ['stats', 'metrics'],
+      supportedCommands: ['stats', 'inlinestats', 'metrics'],
       signatures: [
         ...ESQL_COMMON_NUMERIC_TYPES.map((type) => ({
           params: [{ name: 'column', type, noNestingFunctions: true }],
@@ -197,7 +197,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
       description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.countDoc', {
         defaultMessage: 'Returns the count of the values in a field.',
       }),
-      supportedCommands: ['stats', 'metrics'],
+      supportedCommands: ['stats', 'inlinestats', 'metrics'],
       signatures: [
         {
           params: [
@@ -223,7 +223,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
           defaultMessage: 'Returns the count of distinct values in a field.',
         }
       ),
-      supportedCommands: ['stats', 'metrics'],
+      supportedCommands: ['stats', 'inlinestats', 'metrics'],
       signatures: [
         {
           params: [
@@ -252,7 +252,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
           defaultMessage: 'Returns the count of distinct values in a field.',
         }
       ),
-      supportedCommands: ['stats', 'metrics'],
+      supportedCommands: ['stats', 'inlinestats', 'metrics'],
       signatures: [
         {
           params: [{ name: 'column', type: 'cartesian_point', noNestingFunctions: true }],
@@ -338,7 +338,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
             'An aggregation that computes the weighted average of numeric values that are extracted from the aggregated documents.',
         }
       ),
-      supportedCommands: ['stats', 'metrics'],
+      supportedCommands: ['stats', 'inlinestats', 'metrics'],
       signatures: [
         ...ESQL_COMMON_NUMERIC_TYPES.map((numericType: FunctionParameterType) => {
           return ESQL_COMMON_NUMERIC_TYPES.map((weightType: FunctionParameterType) => ({
