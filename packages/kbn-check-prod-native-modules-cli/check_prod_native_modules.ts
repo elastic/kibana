@@ -14,23 +14,25 @@ import { findProductionDependencies, readYarnLock } from '@kbn/yarn-lock-validat
 
 // Checks if a given path contains a native module or not recursively
 const isNativeModule = async (modulePath: string, log: ToolingLog): Promise<boolean> => {
-  const stack = [modulePath];
+  const stack: string[] = [modulePath];
 
   while (stack.length > 0) {
-    const currentPath: string = stack.pop() as string;
+    const currentPath = stack.pop() as string;
 
+    // Skip processing if the current directory is a node_modules folder
     if (path.basename(currentPath) === 'node_modules') {
       continue;
     }
 
     try {
-      const files = await fs.readdir(currentPath);
-      for (const file of files) {
-        const filePath = path.join(currentPath, file);
-        const stat = await fs.lstat(filePath);
-        if (stat.isDirectory()) {
-          stack.push(filePath);
-        } else if (file === 'binding.gyp' || file.endsWith('.node')) {
+      const entries = await fs.readdir(currentPath, { withFileTypes: true });
+
+      for (const entry of entries) {
+        const entryPath = path.join(currentPath, entry.name);
+
+        if (entry.isDirectory()) {
+          stack.push(entryPath);
+        } else if (entry.name === 'binding.gyp' || entry.name.endsWith('.node')) {
           return true;
         }
       }
@@ -41,51 +43,57 @@ const isNativeModule = async (modulePath: string, log: ToolingLog): Promise<bool
   return false;
 };
 
+// Searches through node_modules and for each module which is a prod dep (or a direct result of one) checks recursively for native modules
 async function checkDependencies(
   rootNodeModulesDir: string,
   productionDependencies: Map<string, boolean>,
   prodNativeModulesFound: Array<{ name: string; version: string; path: string }>,
   log: ToolingLog
 ) {
-  const stack = [rootNodeModulesDir];
+  const stack: string[] = [rootNodeModulesDir];
 
   while (stack.length > 0) {
-    const currentDir: string = stack.pop() as string;
-    const files = await fs.readdir(currentDir, { withFileTypes: true });
+    const currentDir = stack.pop() as string;
 
-    for (const file of files) {
-      if (file.isDirectory()) {
-        const filePath = path.join(currentDir, file.name);
+    try {
+      const entries = await fs.readdir(currentDir, { withFileTypes: true });
 
-        if (file.name.startsWith('@')) {
-          // Handle scoped packages
-          stack.push(filePath);
-        } else {
-          const packageJsonPath = path.join(filePath, 'package.json');
+      for (const entry of entries) {
+        if (!entry.isDirectory()) continue;
 
-          if (existsSync(packageJsonPath)) {
-            // eslint-disable-next-line @typescript-eslint/no-var-requires
-            const packageJson = require(packageJsonPath);
-            const key = `${packageJson.name}@${packageJson.version}`;
+        const entryPath = path.join(currentDir, entry.name);
+        if (entry.name.startsWith('@')) {
+          // Handle scoped packages (e.g., @scope/package)
+          stack.push(entryPath);
+          continue;
+        }
 
-            if (productionDependencies.has(key)) {
-              if (await isNativeModule(filePath, log)) {
-                prodNativeModulesFound.push({
-                  name: packageJson.name,
-                  version: packageJson.version,
-                  path: filePath,
-                });
-              }
+        const packageJsonPath = path.join(entryPath, 'package.json');
+        if (existsSync(packageJsonPath)) {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          const packageJson = require(packageJsonPath);
+          const dependencyKey = `${packageJson.name}@${packageJson.version}`;
+
+          if (productionDependencies.has(dependencyKey)) {
+            const isNative = await isNativeModule(entryPath, log);
+            if (isNative) {
+              prodNativeModulesFound.push({
+                name: packageJson.name,
+                version: packageJson.version,
+                path: entryPath,
+              });
             }
           }
+        }
 
-          // Add nested node_modules to the stack
-          const nestedNodeModulesPath = path.join(filePath, 'node_modules');
-          if (existsSync(nestedNodeModulesPath)) {
-            stack.push(nestedNodeModulesPath);
-          }
+        // Adds nested node_modules to the stack to check for further dependencies
+        const nestedNodeModulesPath = path.join(entryPath, 'node_modules');
+        if (existsSync(nestedNodeModulesPath)) {
+          stack.push(nestedNodeModulesPath);
         }
       }
+    } catch (err) {
+      throw new Error(`Error processing directory ${currentDir}: ${err.message}`);
     }
   }
 }
@@ -99,6 +107,8 @@ const checkProdNativeModules = async (log: ToolingLog) => {
   try {
     // Gets all production dependencies based on package.json and then searches across transient dependencies using lock file
     const rawProductionDependencies = findProductionDependencies(log, await readYarnLock());
+
+    // Converts rawProductionDependencies into a simple Map of production dependencies
     const productionDependencies: Map<string, boolean> = new Map();
     rawProductionDependencies.forEach((depInfo, depKey) => {
       productionDependencies.set(`${depInfo.name}@${depInfo.version}`, true);
