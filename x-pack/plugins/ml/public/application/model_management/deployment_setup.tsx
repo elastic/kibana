@@ -90,28 +90,58 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const threadsPerAllocationsValues = useMemo(() => {
+    return new Array(THREADS_MAX_EXPONENT)
+      .fill(null)
+      .map((v, i) => Math.pow(2, i))
+      .filter(maxSingleMlNodeProcessors ? (v) => v <= maxSingleMlNodeProcessors : (v) => true);
+  }, [maxSingleMlNodeProcessors]);
+
   const threadsPerAllocationsOptions = useMemo(
     () =>
-      new Array(THREADS_MAX_EXPONENT)
-        .fill(null)
-        .map((v, i) => Math.pow(2, i))
-        .filter(maxSingleMlNodeProcessors ? (v) => v <= maxSingleMlNodeProcessors : (v) => true)
-        .map((value) => {
-          const id = value.toString();
+      threadsPerAllocationsValues.map((value) => {
+        const id = value.toString();
 
-          return {
-            id,
-            label: id,
-            value,
-            'data-test-subj': `mlModelsStartDeploymentModalThreadsPerAllocation_${id}`,
-          };
-        }),
-    [maxSingleMlNodeProcessors]
+        return {
+          id,
+          label: id,
+          value,
+          'data-test-subj': `mlModelsStartDeploymentModalThreadsPerAllocation_${id}`,
+        };
+      }),
+    [threadsPerAllocationsValues]
   );
+
+  const threadsPerAllocationsHumanOptions = [
+    {
+      id: 'optimizedForIngest',
+      label: (
+        <FormattedMessage
+          id="xpack.ml.trainedModels.modelsList.startDeployment.optimizedForIngestLabel"
+          defaultMessage="Ingest / throughput"
+        />
+      ),
+      value: 1,
+      'data-test-subj': `mlModelsStartDeploymentModalThreadsOptimizedForIngest`,
+    },
+    {
+      id: 'optimizedForSearch',
+      label: (
+        <FormattedMessage
+          id="xpack.ml.trainedModels.modelsList.startDeployment.optimizedForSearchLabel"
+          defaultMessage="Search / latency"
+        />
+      ),
+      value: Math.max(...threadsPerAllocationsValues),
+      'data-test-subj': `mlModelsStartDeploymentModalThreadsOptimizedForSearch`,
+    },
+  ];
 
   const disableThreadingControls = config.priority === 'low';
 
   const adaptiveAllocationsAvailable = cloudInfo.isCloud;
+
+  const advancedSettingsAvailable = config.priority || config.threadsPerAllocations;
 
   return (
     <EuiForm component={'form'} id={'startDeploymentForm'}>
@@ -178,6 +208,63 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
           )}
         </EuiFormRow>
       </EuiDescribedFormGroup>
+
+      {threadsPerAllocations !== undefined ? (
+        <EuiDescribedFormGroup
+          titleSize={'xxs'}
+          title={
+            <h3>
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationLabel"
+                defaultMessage="Threads per allocation"
+              />
+            </h3>
+          }
+          description={
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationBasicHelp"
+              defaultMessage="Threads used by each model allocation during inference."
+            />
+          }
+        >
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.startDeployment.optimizeThreadsPerAllocationLabel"
+                defaultMessage="Optimized for"
+              />
+            }
+            hasChildLabel={false}
+            isDisabled={disableThreadingControls}
+          >
+            <EuiButtonGroup
+              isDisabled={disableThreadingControls}
+              legend={i18n.translate(
+                'xpack.ml.trainedModels.modelsList.startDeployment.simpleThreadsPerAllocationLegend',
+                {
+                  defaultMessage: 'Simple threads per allocation selector',
+                }
+              )}
+              isFullWidth
+              idSelected={
+                disableThreadingControls
+                  ? 'optimizedForIngest'
+                  : threadsPerAllocationsHumanOptions.find(
+                      (v) => v.value === threadsPerAllocations
+                    )!.id
+              }
+              onChange={(optionId) => {
+                const value = threadsPerAllocationsHumanOptions.find(
+                  (v) => v.id === optionId
+                )!.value;
+                onConfigChange({ ...config, threadsPerAllocations: value });
+              }}
+              options={threadsPerAllocationsHumanOptions}
+              data-test-subj={'mlModelsStartDeploymentModalThreadsPerAllocationHuman'}
+            />
+          </EuiFormRow>
+        </EuiDescribedFormGroup>
+      ) : null}
 
       {adaptiveAllocationsAvailable ? (
         <EuiDescribedFormGroup
@@ -279,142 +366,148 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
         </EuiDescribedFormGroup>
       ) : null}
 
-      <EuiAccordion
-        id={'modelDeploymentAdvancedSettings'}
-        buttonContent={
-          <FormattedMessage
-            id="xpack.ml.trainedModels.modelsList.startDeployment.advancedSettingsLabel"
-            defaultMessage="Advanced settings"
-          />
-        }
-      >
-        <EuiSpacer size={'m'} />
+      {advancedSettingsAvailable ? (
+        <EuiAccordion
+          id={'modelDeploymentAdvancedSettings'}
+          buttonContent={
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.startDeployment.advancedSettingsLabel"
+              defaultMessage="Advanced settings"
+            />
+          }
+        >
+          <EuiSpacer size={'m'} />
 
-        {config.priority !== undefined ? (
-          <EuiDescribedFormGroup
-            titleSize={'xxs'}
-            title={
-              <h3>
+          {config.priority !== undefined ? (
+            <EuiDescribedFormGroup
+              titleSize={'xxs'}
+              title={
+                <h3>
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.modelsList.startDeployment.priorityLabel"
+                    defaultMessage="Priority"
+                  />
+                </h3>
+              }
+              description={
                 <FormattedMessage
-                  id="xpack.ml.trainedModels.modelsList.startDeployment.priorityLabel"
-                  defaultMessage="Priority"
-                />
-              </h3>
-            }
-            description={
-              <FormattedMessage
-                id="xpack.ml.trainedModels.modelsList.startDeployment.priorityHelp"
-                defaultMessage="Select low priority for demonstrations where each model will be very lightly used."
-              />
-            }
-          >
-            <EuiFormRow
-              label={
-                <FormattedMessage
-                  id="xpack.ml.trainedModels.modelsList.startDeployment.priorityLabel"
-                  defaultMessage="Priority"
+                  id="xpack.ml.trainedModels.modelsList.startDeployment.priorityHelp"
+                  defaultMessage="Select low priority for demonstrations where each model will be very lightly used."
                 />
               }
-              hasChildLabel={false}
             >
-              <EuiButtonGroup
-                legend={i18n.translate(
-                  'xpack.ml.trainedModels.modelsList.startDeployment.priorityLegend',
-                  {
-                    defaultMessage: 'Priority selector',
-                  }
-                )}
-                name={'priority'}
-                isFullWidth
-                idSelected={config.priority}
-                onChange={(optionId: string) => {
-                  onConfigChange({ ...config, priority: optionId as ThreadingParams['priority'] });
-                }}
-                options={[
-                  {
-                    id: 'low',
-                    value: 'low',
-                    label: i18n.translate(
-                      'xpack.ml.trainedModels.modelsList.startDeployment.lowPriorityLabel',
-                      {
-                        defaultMessage: 'low',
-                      }
-                    ),
-                    'data-test-subj': 'mlModelsStartDeploymentModalLowPriority',
-                  },
-                  {
-                    id: 'normal',
-                    value: 'normal',
-                    label: i18n.translate(
-                      'xpack.ml.trainedModels.modelsList.startDeployment.normalPriorityLabel',
-                      {
-                        defaultMessage: 'normal',
-                      }
-                    ),
-                    'data-test-subj': 'mlModelsStartDeploymentModalNormalPriority',
-                  },
-                ]}
-                data-test-subj={'mlModelsStartDeploymentModalPriority'}
-              />
-            </EuiFormRow>
-          </EuiDescribedFormGroup>
-        ) : null}
-
-        {threadsPerAllocations !== undefined ? (
-          <EuiDescribedFormGroup
-            titleSize={'xxs'}
-            title={
-              <h3>
-                <FormattedMessage
-                  id="xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationLabel"
-                  defaultMessage="Threads per allocation"
-                />
-              </h3>
-            }
-            description={
-              <FormattedMessage
-                id="xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationHelp"
-                defaultMessage="Increase to improve inference latency."
-              />
-            }
-          >
-            <EuiFormRow
-              label={
-                <FormattedMessage
-                  id="xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationLabel"
-                  defaultMessage="Threads per allocation"
-                />
-              }
-              hasChildLabel={false}
-              isDisabled={disableThreadingControls}
-            >
-              <EuiButtonGroup
-                isDisabled={disableThreadingControls}
-                legend={i18n.translate(
-                  'xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationLegend',
-                  {
-                    defaultMessage: 'Threads per allocation selector',
-                  }
-                )}
-                name={'threadsPerAllocation'}
-                isFullWidth
-                idSelected={
-                  disableThreadingControls
-                    ? '1'
-                    : threadsPerAllocationsOptions.find((v) => v.value === threadsPerAllocations)!
-                        .id
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.modelsList.startDeployment.priorityLabel"
+                    defaultMessage="Priority"
+                  />
                 }
-                onChange={(optionId) => {
-                  const value = threadsPerAllocationsOptions.find((v) => v.id === optionId)!.value;
-                  onConfigChange({ ...config, threadsPerAllocations: value });
-                }}
-                options={threadsPerAllocationsOptions}
-                data-test-subj={'mlModelsStartDeploymentModalThreadsPerAllocation'}
-              />
-            </EuiFormRow>
-          </EuiDescribedFormGroup>
-        ) : null}
-      </EuiAccordion>
+                hasChildLabel={false}
+              >
+                <EuiButtonGroup
+                  legend={i18n.translate(
+                    'xpack.ml.trainedModels.modelsList.startDeployment.priorityLegend',
+                    {
+                      defaultMessage: 'Priority selector',
+                    }
+                  )}
+                  isFullWidth
+                  idSelected={config.priority}
+                  onChange={(optionId: string) => {
+                    onConfigChange({
+                      ...config,
+                      priority: optionId as ThreadingParams['priority'],
+                    });
+                  }}
+                  options={[
+                    {
+                      id: 'low',
+                      value: 'low',
+                      label: i18n.translate(
+                        'xpack.ml.trainedModels.modelsList.startDeployment.lowPriorityLabel',
+                        {
+                          defaultMessage: 'low',
+                        }
+                      ),
+                      'data-test-subj': 'mlModelsStartDeploymentModalLowPriority',
+                    },
+                    {
+                      id: 'normal',
+                      value: 'normal',
+                      label: i18n.translate(
+                        'xpack.ml.trainedModels.modelsList.startDeployment.normalPriorityLabel',
+                        {
+                          defaultMessage: 'normal',
+                        }
+                      ),
+                      'data-test-subj': 'mlModelsStartDeploymentModalNormalPriority',
+                    },
+                  ]}
+                  data-test-subj={'mlModelsStartDeploymentModalPriority'}
+                />
+              </EuiFormRow>
+            </EuiDescribedFormGroup>
+          ) : null}
+
+          {threadsPerAllocations !== undefined ? (
+            <EuiDescribedFormGroup
+              titleSize={'xxs'}
+              title={
+                <h3>
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationLabel"
+                    defaultMessage="Threads per allocation"
+                  />
+                </h3>
+              }
+              description={
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationHelp"
+                  defaultMessage="Increase to improve inference latency."
+                />
+              }
+            >
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationLabel"
+                    defaultMessage="Threads per allocation"
+                  />
+                }
+                hasChildLabel={false}
+                isDisabled={disableThreadingControls}
+              >
+                <EuiButtonGroup
+                  isDisabled={disableThreadingControls}
+                  legend={i18n.translate(
+                    'xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationLegend',
+                    {
+                      defaultMessage: 'Threads per allocation selector',
+                    }
+                  )}
+                  name={'threadsPerAllocation'}
+                  isFullWidth
+                  idSelected={
+                    disableThreadingControls
+                      ? '1'
+                      : threadsPerAllocationsOptions.find((v) => v.value === threadsPerAllocations)!
+                          .id
+                  }
+                  onChange={(optionId) => {
+                    const value = threadsPerAllocationsOptions.find(
+                      (v) => v.id === optionId
+                    )!.value;
+                    onConfigChange({ ...config, threadsPerAllocations: value });
+                  }}
+                  options={threadsPerAllocationsOptions}
+                  data-test-subj={'mlModelsStartDeploymentModalThreadsPerAllocation'}
+                />
+              </EuiFormRow>
+            </EuiDescribedFormGroup>
+          ) : null}
+        </EuiAccordion>
+      ) : null}
     </EuiForm>
   );
 };
