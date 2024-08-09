@@ -12,12 +12,12 @@ import { GridPanelData, GridLayoutStateManager } from './types';
 
 export const getScrollAmount = () => ({
   scrollLeft:
-    window.pageXOffset !== undefined
-      ? window.pageXOffset
+    window.scrollX !== undefined
+      ? window.scrollX
       : (document.documentElement || document.body.parentNode || document.body).scrollLeft,
   scrollTop:
-    window.pageYOffset !== undefined
-      ? window.pageYOffset
+    window.scrollY !== undefined
+      ? window.scrollY
       : (document.documentElement || document.body.parentNode || document.body).scrollTop,
 });
 
