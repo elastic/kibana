@@ -146,6 +146,11 @@ export const ContextMenu = ({
     closePopover();
     const documentation = await getDocumentation();
     if (!documentation) {
+      notifications.toasts.addWarning({
+        title: i18n.translate('console.consoleMenu.missingDocumentationPage', {
+          defaultMessage: 'Documentation page is not yet available for this API.',
+        }),
+      });
       return;
     }
     window.open(documentation, '_blank');
