@@ -100,8 +100,9 @@ export interface AnnotationDoc {
 }
 
 export interface AnnotationTokens {
-  type: 'prompt_token_count' | 'context_token_count' | 'context_clipped';
+  type: 'prompt_token_count' | 'context_token_count' | 'context_clipped' | 'search_query';
   count: number;
+  question?: string;
 }
 
 export interface Doc {
@@ -117,6 +118,7 @@ export interface AIMessage extends Message {
     context: number;
     total: number;
     contextClipped?: number;
+    searchQuery: string;
   };
 }
 

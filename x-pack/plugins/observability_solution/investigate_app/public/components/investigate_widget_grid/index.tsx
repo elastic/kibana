@@ -12,9 +12,9 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import { ItemCallback, Layout, Responsive, WidthProvider } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-import { EuiBreakpoint, EUI_BREAKPOINTS, useBreakpoints } from '../../hooks/use_breakpoints';
+import { EUI_BREAKPOINTS, EuiBreakpoint, useBreakpoints } from '../../hooks/use_breakpoints';
 import { useTheme } from '../../hooks/use_theme';
-import { GridItem, GRID_ITEM_HEADER_HEIGHT } from '../grid_item';
+import { GRID_ITEM_HEADER_HEIGHT, GridItem } from '../grid_item';
 import './styles.scss';
 
 const gridContainerClassName = css`
@@ -36,11 +36,6 @@ interface GridSection {
 
 type Section = SingleComponentSection | GridSection;
 
-export interface InvestigateWidgetGridItemOverride {
-  id: string;
-  label: React.ReactNode;
-}
-
 export interface InvestigateWidgetGridItem {
   title: string;
   description: string;
@@ -48,10 +43,8 @@ export interface InvestigateWidgetGridItem {
   id: string;
   columns: number;
   rows: number;
-  locked: boolean;
   chrome?: ChromeOption;
   loading: boolean;
-  overrides: InvestigateWidgetGridItemOverride[];
 }
 
 interface InvestigateWidgetGridProps {
@@ -59,14 +52,6 @@ interface InvestigateWidgetGridProps {
   onItemsChange: (items: InvestigateWidgetGridItem[]) => Promise<void>;
   onItemCopy: (item: InvestigateWidgetGridItem) => Promise<void>;
   onItemDelete: (item: InvestigateWidgetGridItem) => Promise<void>;
-  onItemLockToggle: (item: InvestigateWidgetGridItem) => Promise<void>;
-  onItemOverrideRemove: (
-    item: InvestigateWidgetGridItem,
-    override: InvestigateWidgetGridItemOverride
-  ) => Promise<void>;
-  onItemTitleChange: (item: InvestigateWidgetGridItem, title: string) => Promise<void>;
-  onItemEditClick: (item: InvestigateWidgetGridItem) => void;
-  fadeLockedItems: boolean;
 }
 
 const ROW_HEIGHT = 32;
@@ -130,11 +115,6 @@ function GridSectionRenderer({
   onItemsChange,
   onItemDelete,
   onItemCopy,
-  onItemLockToggle,
-  onItemOverrideRemove,
-  onItemTitleChange,
-  onItemEditClick,
-  fadeLockedItems,
 }: InvestigateWidgetGridProps) {
   const WithFixedWidth = useMemo(() => WidthProvider(Responsive), []);
 
@@ -144,14 +124,9 @@ function GridSectionRenderer({
     onItemsChange,
     onItemCopy,
     onItemDelete,
-    onItemLockToggle,
-    onItemOverrideRemove,
-    onItemTitleChange,
-    onItemEditClick,
   };
 
   const itemCallbacksRef = useRef(callbacks);
-
   itemCallbacksRef.current = callbacks;
 
   const { currentBreakpoint } = useBreakpoints();
@@ -167,34 +142,19 @@ function GridSectionRenderer({
           id={item.id}
           title={item.title}
           description={item.description}
-          onTitleChange={(title) => {
-            return itemCallbacksRef.current.onItemTitleChange(item, title);
-          }}
           onCopy={() => {
             return itemCallbacksRef.current.onItemCopy(item);
           }}
           onDelete={() => {
             return itemCallbacksRef.current.onItemDelete(item);
           }}
-          locked={item.locked}
-          onLockToggle={() => {
-            itemCallbacksRef.current.onItemLockToggle(item);
-          }}
-          onOverrideRemove={(override) => {
-            return itemCallbacksRef.current.onItemOverrideRemove(item, override);
-          }}
-          onEditClick={() => {
-            return itemCallbacksRef.current.onItemEditClick(item);
-          }}
-          overrides={item.overrides}
           loading={item.loading}
-          faded={fadeLockedItems && item.locked}
         >
           {item.element}
         </GridItem>
       </div>
     ));
-  }, [items, fadeLockedItems]);
+  }, [items]);
 
   // react-grid calls `onLayoutChange` every time
   // `layouts` changes, except when on mount. So...
@@ -273,11 +233,6 @@ export function InvestigateWidgetGrid({
   onItemsChange,
   onItemDelete,
   onItemCopy,
-  onItemLockToggle,
-  fadeLockedItems,
-  onItemOverrideRemove,
-  onItemTitleChange,
-  onItemEditClick,
 }: InvestigateWidgetGridProps) {
   const sections = useMemo<Section[]>(() => {
     let currentGrid: GridSection = { items: [] };
@@ -317,9 +272,6 @@ export function InvestigateWidgetGrid({
                 onItemDelete={(deletedItem) => {
                   return onItemDelete(deletedItem);
                 }}
-                onItemLockToggle={(toggledItem) => {
-                  return onItemLockToggle(toggledItem);
-                }}
                 onItemsChange={(itemsInSection) => {
                   const nextItems = sections.flatMap((sectionAtIndex) => {
                     if ('item' in sectionAtIndex) {
@@ -333,16 +285,6 @@ export function InvestigateWidgetGrid({
 
                   return onItemsChange(nextItems);
                 }}
-                onItemOverrideRemove={(item, override) => {
-                  return onItemOverrideRemove(item, override);
-                }}
-                onItemTitleChange={(item, title) => {
-                  return onItemTitleChange(item, title);
-                }}
-                onItemEditClick={(item) => {
-                  return onItemEditClick(item);
-                }}
-                fadeLockedItems={fadeLockedItems}
               />
             </EuiFlexItem>
           );
@@ -356,27 +298,12 @@ export function InvestigateWidgetGrid({
                 id={section.item.id}
                 title={section.item.title}
                 description={section.item.description}
-                faded={section.item.locked && fadeLockedItems}
                 loading={section.item.loading}
-                locked={section.item.locked}
-                overrides={section.item.overrides}
                 onCopy={() => {
                   return onItemCopy(section.item);
                 }}
                 onDelete={() => {
                   return onItemDelete(section.item);
-                }}
-                onOverrideRemove={(override) => {
-                  return onItemOverrideRemove(section.item, override);
-                }}
-                onTitleChange={(nextTitle) => {
-                  return onItemTitleChange(section.item, nextTitle);
-                }}
-                onLockToggle={() => {
-                  return onItemLockToggle(section.item);
-                }}
-                onEditClick={() => {
-                  return onItemEditClick(section.item);
                 }}
               >
                 {section.item.element}
