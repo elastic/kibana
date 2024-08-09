@@ -11,6 +11,7 @@ import { debounce, range } from 'lodash';
 import { ConsoleParsedRequestsProvider, getParsedRequestsProvider, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { isQuotaExceededError } from '../../../../services/history';
 import { DEFAULT_VARIABLES } from '../../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../../services';
@@ -40,6 +41,7 @@ import {
 import type { AdjustedParsedRequest } from './types';
 import { StorageQuotaError } from '../../../components/storage_quota_error';
 import { ContextValue } from '../../../contexts';
+import { containsComments, indentData } from './utils/requests_utils';
 
 const AUTO_INDENTATION_ACTION_LABEL = 'Apply indentations';
 const TRIGGER_SUGGESTIONS_ACTION_LABEL = 'Trigger suggestions';
@@ -48,6 +50,7 @@ const DEBOUNCE_HIGHLIGHT_WAIT_MS = 200;
 const DEBOUNCE_AUTOCOMPLETE_WAIT_MS = 500;
 const INSPECT_TOKENS_LABEL = 'Inspect tokens';
 const INSPECT_TOKENS_HANDLER_ID = 'editor.action.inspectTokens';
+const { collapseLiteralStrings } = XJson;
 
 export class MonacoEditorActionsProvider {
   private parsedRequestsProvider: ConsoleParsedRequestsProvider;
@@ -206,7 +209,16 @@ export class MonacoEditorActionsProvider {
     const parsedRequests = await this.getSelectedParsedRequests();
     const stringifiedRequests = parsedRequests.map((parsedRequest) => {
       const { startLineNumber, endLineNumber } = parsedRequest;
-      return getRequestFromEditor(model, startLineNumber, endLineNumber);
+      const requestTextFromEditor = getRequestFromEditor(model, startLineNumber, endLineNumber);
+      if (requestTextFromEditor && requestTextFromEditor.data.length > 0) {
+        requestTextFromEditor.data = requestTextFromEditor.data.map((dataString) => {
+          if (containsComments(dataString)) {
+            // parse and stringify to remove comments
+            dataString = indentData(dataString);
+          }
+          return collapseLiteralStrings(dataString);
+        });
+      }
     });
     // get variables values
     const variables = getStorage().get(StorageKeys.VARIABLES, DEFAULT_VARIABLES);

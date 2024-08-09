@@ -8,7 +8,6 @@
 
 import { monaco, ParsedRequest } from '@kbn/monaco';
 import { parse } from 'hjson';
-import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { constructUrl } from '../../../../../lib/es';
 import type { MetricsTracker } from '../../../../../types';
 import type { DevToolsVariable } from '../../../../components';
@@ -19,8 +18,6 @@ import {
   startsWithMethodRegex,
 } from './constants';
 import { parseLine } from './tokens_utils';
-
-const { collapseLiteralStrings } = XJson;
 
 /*
  * This function replaces any variables with its values stored in localStorage.
@@ -48,26 +45,12 @@ export const getCurlRequest = (
   let curlRequest = `curl -X${method} "${curlUrl}" -H "kbn-xsrf: reporting"`;
   if (data && data.length) {
     const joinedData = data.join('\n');
-    let dataAsString: string;
 
-    try {
-      curlRequest += ` -H "Content-Type: application/json" -d'\n`;
+    curlRequest += ` -H "Content-Type: application/json" -d'\n`;
 
-      if (containsComments(joinedData)) {
-        // if there are comments in the data, we need to strip them out
-        const dataWithoutComments = splitDataIntoJsonObjects(joinedData).map((jsonObject) =>
-          parse(jsonObject)
-        );
-        dataAsString = collapseLiteralStrings(JSON.stringify(dataWithoutComments, null, 2));
-      } else {
-        dataAsString = collapseLiteralStrings(joinedData);
-      }
-      // We escape single quoted strings that are wrapped in single quoted strings
-      curlRequest += dataAsString.replace(/'/g, "'\\''");
-      curlRequest += "'";
-    } catch (e) {
-      throw new Error(`Error parsing data: ${e.message}`);
-    }
+    // We escape single quoted strings that are wrapped in single quoted strings
+    curlRequest += joinedData.replace(/'/g, "'\\''");
+    curlRequest += "'";
   }
   return curlRequest;
 };
@@ -235,6 +218,24 @@ export const getRequestFromEditor = (
   return { method: upperCaseMethod, url, data };
 };
 
+export const containsComments = (text: string) => {
+  return text.indexOf('//') >= 0 || text.indexOf('/*') >= 0;
+};
+
+const cleanUpWhitespaces = (line: string): string => {
+  return line.trim().replaceAll(/\s+/g, ' ');
+};
+
+export const indentData = (dataString: string): string => {
+  try {
+    const parsedData = parse(dataString);
+
+    return JSON.stringify(parsedData, null, 2);
+  } catch (e) {
+    return dataString;
+  }
+};
+
 // ---------------------------------- Internal helpers ----------------------------------
 
 const isJsonString = (str: string) => {
@@ -266,24 +267,6 @@ const replaceVariables = (
     });
   }
   return text;
-};
-
-const containsComments = (text: string) => {
-  return text.indexOf('//') >= 0 || text.indexOf('/*') >= 0;
-};
-
-const cleanUpWhitespaces = (line: string): string => {
-  return line.trim().replaceAll(/\s+/g, ' ');
-};
-
-const indentData = (dataString: string): string => {
-  try {
-    const parsedData = parse(dataString);
-
-    return JSON.stringify(parsedData, null, 2);
-  } catch (e) {
-    return dataString;
-  }
 };
 
 const splitDataIntoJsonObjects = (dataString: string): string[] => {
