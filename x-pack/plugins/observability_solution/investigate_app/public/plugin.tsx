@@ -6,9 +6,9 @@
  */
 import { css } from '@emotion/css';
 import {
+  APP_WRAPPER_CLASS,
   AppMountParameters,
   AppStatus,
-  APP_WRAPPER_CLASS,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -56,7 +56,7 @@ export class InvestigateAppPlugin
     coreSetup.application.register({
       id: INVESTIGATE_APP_ID,
       title: i18n.translate('xpack.investigateApp.appTitle', {
-        defaultMessage: 'Observability Investigations',
+        defaultMessage: 'Investigations',
       }),
       euiIconType: 'logoObservability',
       appRoute: '/app/investigations',
@@ -65,7 +65,14 @@ export class InvestigateAppPlugin
       visibleIn: [],
       deepLinks: [
         {
-          id: 'investigate',
+          id: 'investigations',
+          title: i18n.translate('xpack.investigateApp.investigationsDeepLinkTitle', {
+            defaultMessage: 'All investigations',
+          }),
+          path: '/',
+        },
+        {
+          id: 'investigationDetails',
           title: i18n.translate('xpack.investigateApp.newInvestigateDeepLinkTitle', {
             defaultMessage: 'New investigation',
           }),

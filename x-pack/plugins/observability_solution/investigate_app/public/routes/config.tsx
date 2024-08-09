@@ -7,8 +7,8 @@
 import { createRouter } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { InvestigationDetailsPage } from '../pages/details';
-import { InvestigationListPage } from '../pages/list';
+import { InvestigationDetailsPage } from '../pages/details/investigation_details_page';
+import { InvestigationListPage } from '../pages/list/investigation_list_page';
 
 /**
  * The array of route definitions to be used when the application
