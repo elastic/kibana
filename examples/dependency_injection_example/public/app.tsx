@@ -16,6 +16,7 @@ import {
   EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
+  EuiProvider,
   EuiText,
   EuiTextArea,
   EuiTitle,
@@ -38,26 +39,28 @@ export function App() {
   }, []);
 
   return (
-    <EuiPage>
-      <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>
-        <EuiPageHeader>
-          <EuiPageHeaderSection>
-            <EuiTitle size="l">
-              <h1>Dependency Injection Demo</h1>
-            </EuiTitle>
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
-        <EuiPageSection>
-          <EuiTextArea
-            placeholder="Message"
-            fullWidth
-            onChange={handleChange}
-            data-test-subj="input"
-          />
-          <EuiHorizontalRule />
-          <EuiText data-test-subj="output">{output}</EuiText>
-        </EuiPageSection>
-      </EuiPageBody>
-    </EuiPage>
+    <EuiProvider>
+      <EuiPage>
+        <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <EuiPageHeader>
+            <EuiPageHeaderSection>
+              <EuiTitle size="l">
+                <h1>Dependency Injection Demo</h1>
+              </EuiTitle>
+            </EuiPageHeaderSection>
+          </EuiPageHeader>
+          <EuiPageSection>
+            <EuiTextArea
+              placeholder="Message"
+              fullWidth
+              onChange={handleChange}
+              data-test-subj="input"
+            />
+            <EuiHorizontalRule />
+            <EuiText data-test-subj="output">{output}</EuiText>
+          </EuiPageSection>
+        </EuiPageBody>
+      </EuiPage>
+    </EuiProvider>
   );
 }
