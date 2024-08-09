@@ -15,7 +15,7 @@ import { DataSourceType } from '../../../../../../../common/api/detection_engine
 export const extractRuleDataSource = (
   indexPatterns: IndexPatternArray | undefined,
   dataViewId: DataViewId | undefined
-): RuleDataSource | undefined => {
+): RuleDataSource => {
   if (indexPatterns != null) {
     return {
       type: DataSourceType.index_patterns,
@@ -30,5 +30,9 @@ export const extractRuleDataSource = (
     };
   }
 
-  return undefined;
+  // Should not be possible, default to empty array
+  return {
+    type: DataSourceType.index_patterns,
+    index_patterns: [],
+  };
 };

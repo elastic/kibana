@@ -19,6 +19,7 @@ import {
   DataSourceType,
   ThreeWayDiffConflict,
   determineDiffOutcomeForDataSource,
+  isIndexPatternDataSourceType,
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
 import { getDedupedDataSourceVersion, mergeDedupedArrays } from './helpers';
 
@@ -103,13 +104,12 @@ const mergeVersions = ({
 
     case ThreeWayDiffOutcome.CustomizedValueCanUpdate: {
       if (
-        dedupedCurrentVersion.type === DataSourceType.index_patterns &&
-        dedupedTargetVersion.type === DataSourceType.index_patterns
+        isIndexPatternDataSourceType(dedupedCurrentVersion) &&
+        isIndexPatternDataSourceType(dedupedTargetVersion)
       ) {
-        const baseVersionToMerge =
-          dedupedBaseVersion && dedupedBaseVersion.type === DataSourceType.index_patterns
-            ? dedupedBaseVersion.index_patterns
-            : [];
+        const baseVersionToMerge = isIndexPatternDataSourceType(dedupedBaseVersion)
+          ? dedupedBaseVersion.index_patterns
+          : [];
 
         return {
           conflict: ThreeWayDiffConflict.SOLVABLE,
