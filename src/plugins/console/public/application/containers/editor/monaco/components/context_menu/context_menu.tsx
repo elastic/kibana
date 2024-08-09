@@ -67,8 +67,7 @@ export const ContextMenu = ({
   };
 
   // This function will convert all the selected requests to the language by
-  // calling convertRequestToLanguage for each request and then copy the data
-  // to clipboard.
+  // calling convertRequestToLanguage and then copy the data to clipboard.
   const copyAs = async (language?: string) => {
     // Get the language we want to convert the requests to
     const withLanguage = language || currentLanguage;
@@ -104,9 +103,7 @@ export const ContextMenu = ({
     await copyText(requestsAsCode);
   };
 
-  // when changing from language selector modal, it comes with language in key format (lowercase)
   const onCopyAsSubmit = async (language?: string) => {
-    // current language alreayud in key format (lowercase)
     const withLanguage = language || currentLanguage;
 
     // Close language selector modal
@@ -128,9 +125,7 @@ export const ContextMenu = ({
       });
   };
 
-  // This is called by the language selector modal and comes with language already in key format (lowercase)
   const changeDefaultLanguage = (language: string) => {
-    // If default language has changed, update local storage
     if (currentLanguage !== language) {
       storage.set(StorageKeys.DEFAULT_LANGUAGE, language);
     }
