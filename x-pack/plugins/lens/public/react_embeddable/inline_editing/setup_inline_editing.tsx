@@ -17,6 +17,7 @@ import {
   LensEmbeddableStartServices,
   LensInspectorAdapters,
   LensRuntimeState,
+  TypedLensSerializedState,
 } from '../types';
 import { PanelManagementApi } from './panel_management';
 import { getStateManagementForInlineEditing } from './state_management';
@@ -41,7 +42,7 @@ export function prepareInlineEditPanel(
     | 'uiSettings'
     | 'attributeService'
   >,
-  renderComplete$: BehaviorSubject<boolean>,
+  renderComplete$: BehaviorSubject<boolean> | undefined,
   panelManagementApi: PanelManagementApi,
   inspectorApi: LensInspectorAdapters,
   navigateToLensEditor?: (
@@ -62,14 +63,14 @@ export function prepareInlineEditPanel(
     const datasourceMap = getDatasourceMap();
 
     const currentState = getState();
-    const attributes = currentState.attributes;
+    const attributes = currentState.attributes as TypedLensSerializedState['attributes'];
     const activeDatasourceId = (getActiveDatasourceIdFromDoc(attributes) ||
       'formBased') as EditLensConfigurationProps['datasourceId'];
 
     const { updatePanelState, updateSuggestion } = getStateManagementForInlineEditing(
       activeDatasourceId,
-      () => getState().attributes,
-      (attrs: LensRuntimeState['attributes'], resetId: boolean = false) =>
+      () => getState().attributes as TypedLensSerializedState['attributes'],
+      (attrs: TypedLensSerializedState['attributes'], resetId: boolean = false) =>
         updateState({
           ...getState(),
           attributes: attrs,

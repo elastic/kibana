@@ -89,7 +89,7 @@ export function getLocatorParams(
   const serializableDatasourceStates = datasourceStates as LensAppState['datasourceStates'] &
     SerializableRecord;
 
-  const snapshotParams = {
+  const snapshotParams: LensAppLocatorParams = {
     filters,
     query,
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),

@@ -125,7 +125,6 @@ import { visualizeFieldAction } from './trigger_actions/visualize_field_actions'
 import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 
 import { LensEmbeddableStartServices, LensSerializedState } from './react_embeddable/types';
-import { EmbeddableComponent, getEmbeddableComponent } from './embeddable/embeddable_component';
 import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
 import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
 
@@ -146,6 +145,7 @@ import { ChartType } from './lens_suggestions_api';
 // import { savedObjectToEmbeddableAttributes } from './lens_attribute_service';
 // import { EmbeddableFactory } from './embeddable/embeddable_factory';
 import { convertToLensActionFactory } from './trigger_actions/convert_to_lens_action';
+import { LensRenderer } from './react_embeddable/lens_renderer';
 // import { ConfigureInLensPanelAction } from './trigger_actions/open_lens_config/edit_action';
 
 export type { SaveProps } from './app_plugin';
@@ -230,7 +230,7 @@ export interface LensPublicStart {
    *
    * @experimental
    */
-  EmbeddableComponent: EmbeddableComponent;
+  EmbeddableComponent: typeof LensRenderer;
   /**
    * React component which can be used to embed a Lens Visualization Save Modal Component.
    * See `x-pack/examples/embedded_lens_example` for exemplary usage.
@@ -717,7 +717,7 @@ export class LensPlugin {
     }
 
     return {
-      EmbeddableComponent: getEmbeddableComponent(core, startDependencies),
+      EmbeddableComponent: LensRenderer,
       SaveModalComponent: getSaveModalComponent(core, startDependencies),
       navigateToPrefilledEditor: (
         input,

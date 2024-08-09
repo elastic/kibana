@@ -37,23 +37,27 @@ import {
 } from '@kbn/core/public';
 import { TimefilterContract, FilterManager } from '@kbn/data-plugin/public';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
-// import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
 import { RecursiveReadonly } from '@kbn/utility-types';
-// import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import { AllowedGaugeOverrides } from '@kbn/expression-gauge-plugin/common';
 import { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-plugin/common';
 import { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
 import { Action } from '@kbn/ui-actions-plugin/public';
+import { LegacyMetricState } from '../../common';
 import { LensDocument } from '../persistence';
 import { LensInspector } from '../lens_inspector_service';
 import { LensAttributesService } from '../lens_attribute_service';
-import { DocumentToExpressionReturnType } from '../async_services';
+import {
+  DatatableVisualizationState,
+  DocumentToExpressionReturnType,
+  HeatmapVisualizationState,
+  XYState,
+} from '../async_services';
 import {
   AddUserMessages,
   Datasource,
@@ -68,6 +72,11 @@ import {
 } from '../types';
 import { LensPluginStartDependencies } from '../plugin';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
+import { PieVisualizationState } from '../../common/types';
+import { FormBasedPersistedState } from '..';
+import { TextBasedPersistedState } from '../datasources/text_based/types';
+import { GaugeVisualizationState } from '../visualizations/gauge/constants';
+import { MetricVisualizationState } from '../visualizations/metric/types';
 
 export type LensSavedObjectAttributes = Omit<LensDocument, 'savedObjectId' | 'type'>;
 
@@ -113,20 +122,7 @@ export type LensEmbeddableStartServices = Simplify<
   }
 >;
 
-// type SelectCommon<T, V> = {
-//   [K in keyof T]: T[K] extends V[K & keyof V]
-//     ? V[K & keyof V] extends T[K]
-//       ? T[K]
-//       : never
-//     : never;
-// };
-
-// type RemoveNeverType<T> = { [K in keyof T as T[K] extends never ? never : K]: T[K] };
-
-// type A = RemoveNeverType<SelectCommon<LensPluginStartDependencies, LensEmbeddableStartServices>>;
-// type D = keyof Omit<LensEmbeddableStartServices, keyof LensPluginStartDependencies>;
-
-interface PreventableEvent {
+export interface PreventableEvent {
   preventDefault(): void;
 }
 
@@ -201,6 +197,7 @@ type LensKibanaContextProps = LensUnifiedSearchContext & {
 };
 
 interface LensPanelStyleProps {
+  id?: string;
   renderMode?: ViewMode;
   style?: React.CSSProperties;
   className?: string;
@@ -293,6 +290,43 @@ export interface ExpressionWrapperProps {
 export type GetStateType = () => LensRuntimeState;
 
 /**
+ * Custom Lens component exported by the plugin
+ * For better DX of Lens component consumers, expose a typed version of the serialized state
+ */
+
+/** Utility function to build typed version for each chart */
+type TypedLensAttributes<TVisType, TVisState> = Simplify<
+  Omit<LensDocument, 'savedObjectId' | 'type' | 'state' | 'visualizationType'> & {
+    visualizationType: TVisType;
+    state: Omit<LensDocument['state'], 'datasourceStates' | 'visualization'> & {
+      datasourceStates: {
+        formBased?: FormBasedPersistedState;
+        textBased?: TextBasedPersistedState;
+      };
+      visualization: TVisState;
+    };
+  }
+>;
+
+/**
+ * Type-safe variant of by value embeddable input for Lens.
+ * This can be used to hardcode certain Lens chart configurations within another app.
+ */
+export type TypedLensSerializedState = Simplify<
+  Omit<LensSerializedState, 'attributes'> & {
+    attributes:
+      | TypedLensAttributes<'lnsXY', XYState>
+      | TypedLensAttributes<'lnsPie', PieVisualizationState>
+      | TypedLensAttributes<'lnsHeatmap', HeatmapVisualizationState>
+      | TypedLensAttributes<'lnsGauge', GaugeVisualizationState>
+      | TypedLensAttributes<'lnsDatatable', DatatableVisualizationState>
+      | TypedLensAttributes<'lnsLegacyMetric', LegacyMetricState>
+      | TypedLensAttributes<'lnsMetric', MetricVisualizationState>
+      | TypedLensAttributes<string, unknown>;
+  }
+>;
+
+/**
  * Custom props exposed on the Lens exported component
  */
 export interface LensCustomCallbacks {
@@ -314,4 +348,4 @@ export interface LensCustomCallbacks {
   abortController?: AbortController;
 }
 
-export type LensRendererProps = Simplify<LensSerializedState & LensCustomCallbacks & LensApi>;
+export type LensRendererProps = Simplify<TypedLensSerializedState & LensCustomCallbacks & LensApi>;

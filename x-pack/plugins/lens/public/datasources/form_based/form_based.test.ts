@@ -51,6 +51,7 @@ import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 import { createMockFramePublicAPI } from '../../mocks';
 import { createMockDataViewsState } from '../../data_views_service/mocks';
+import { Query } from '@kbn/es-query';
 
 jest.mock('./loader');
 jest.mock('../../id_generator');
@@ -193,7 +194,7 @@ const dateRange = {
 
 describe('IndexPattern Data Source', () => {
   let baseState: FormBasedPrivateState;
-  let FormBasedDatasource: Datasource<FormBasedPrivateState, FormBasedPersistedState>;
+  let FormBasedDatasource: Datasource<FormBasedPrivateState, FormBasedPersistedState, Query>;
 
   beforeEach(() => {
     const data = dataPluginMock.createStartContract();

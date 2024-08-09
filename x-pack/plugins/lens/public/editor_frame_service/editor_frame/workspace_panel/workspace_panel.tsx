@@ -192,6 +192,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   // NOTE: initialRenderTime is only set once when the component mounts
   const visualizationRenderStartTime = useRef<number>(NaN);
   const dataReceivedTime = useRef<number>(NaN);
+  const esTime = useRef<number>(0);
 
   const onRender$ = useCallback(() => {
     if (renderDeps.current) {
@@ -203,9 +204,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           eventName: 'lensVisualizationRenderTime',
           duration: currentTime - visualizationRenderStartTime.current,
           key1: 'time_to_data',
-          value1: dataReceivedTime.current - visualizationRenderStartTime.current,
+          value1: dataReceivedTime.current - visualizationRenderStartTime.current - esTime.current,
           key2: 'time_to_render',
           value2: currentTime - dataReceivedTime.current,
+          key3: 'es_time',
+          value3: esTime.current,
         });
       }
       const datasourceEvents = Object.values(renderDeps.current.datasourceMap).reduce<string[]>(
@@ -244,7 +247,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const removeExpressionBuildErrorsRef = useRef<() => void>();
 
   const onData$ = useCallback(
-    (_data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
+    (_data: unknown, adapters?: DefaultInspectorAdapters) => {
       if (renderDeps.current) {
         dataReceivedTime.current = performance.now();
 
@@ -713,7 +716,7 @@ export const VisualizationWrapper = ({
   ExpressionRendererComponent: ReactExpressionRendererType;
   core: CoreStart;
   onRender$: () => void;
-  onData$: (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => void;
+  onData$: (data: unknown, adapters?: DefaultInspectorAdapters) => void;
   onComponentRendered: () => void;
   displayOptions: VisualizationDisplayOptions | undefined;
 }) => {
@@ -775,6 +778,8 @@ export const VisualizationWrapper = ({
         searchSessionId={searchSessionId}
         onEvent={onEvent}
         hasCompatibleActions={hasCompatibleActions}
+        // @TODO: fix this before merging
+        // @ts-expect-error
         onData$={onData$}
         onRender$={onRenderHandler}
         inspectorAdapters={lensInspector.getInspectorAdapters()}

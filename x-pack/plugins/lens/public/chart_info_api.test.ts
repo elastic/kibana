@@ -8,7 +8,7 @@
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { EditorFrameService } from './editor_frame_service';
 import { createChartInfoApi } from './chart_info_api';
-import type { LensSavedObjectAttributes } from '.';
+import { LensDocument } from './persistence';
 
 const mockGetVisualizationInfo = jest.fn().mockReturnValue({
   layers: [
@@ -69,7 +69,7 @@ describe('createChartInfoApi', () => {
         query: '',
       },
       references: [],
-    } as LensSavedObjectAttributes;
+    } as LensDocument;
 
     const chartInfo = await chartInfoApi.getChartInfo(vis);
 

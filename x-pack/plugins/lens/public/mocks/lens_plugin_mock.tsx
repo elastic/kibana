@@ -16,7 +16,7 @@ type Start = jest.Mocked<LensPublicStart>;
 export const lensPluginMock = {
   createStartContract: (): Start => {
     const startContract: Start = {
-      EmbeddableComponent: jest.fn(() => {
+      EmbeddableComponent: jest.fn((props) => {
         return <span>Lens Embeddable Component</span>;
       }),
       SaveModalComponent: jest.fn(() => {

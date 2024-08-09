@@ -6,7 +6,7 @@
  */
 import type { BehaviorSubject } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
-import { LensRuntimeState } from '../../../react_embeddable/types';
+import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type {
   DatasourceMap,
@@ -36,16 +36,16 @@ export interface EditConfigPanelProps {
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
   /** The attributes of the Lens embeddable */
-  attributes: LensRuntimeState['attributes'];
+  attributes: TypedLensSerializedState['attributes'];
   /** Callback for updating the visualization and datasources state.*/
   updatePanelState: (
     datasourceState: unknown,
     visualizationState: unknown,
     visualizationType?: string
   ) => void;
-  updateSuggestion?: (attrs: LensRuntimeState['attributes']) => void;
+  updateSuggestion?: (attrs: TypedLensSerializedState['attributes']) => void;
   /** Set the attributes state */
-  setCurrentAttributes?: (attrs: LensRuntimeState['attributes']) => void;
+  setCurrentAttributes?: (attrs: TypedLensSerializedState['attributes']) => void;
   /** Lens visualizations can be either created from ESQL (textBased) or from dataviews (formBased) */
   datasourceId: 'formBased' | 'textBased';
   /** Embeddable output observable, useful for dashboard flyout  */
@@ -80,7 +80,7 @@ export interface EditConfigPanelProps {
   /** If set to true the layout changes to accordion and the text based query (i.e. ES|QL) can be edited */
   hidesSuggestions?: boolean;
   /** Apply button handler */
-  onApply: (attrs: LensRuntimeState['attributes']) => void;
+  onApply: (attrs: TypedLensSerializedState['attributes']) => void;
   /** Cancel button handler */
   onCancel: () => void;
   // in cases where the embeddable is not filtered by time
@@ -89,7 +89,7 @@ export interface EditConfigPanelProps {
 }
 
 export interface LayerConfigurationProps {
-  attributes: LensRuntimeState['attributes'];
+  attributes: TypedLensSerializedState['attributes'];
   coreStart: CoreStart;
   startDependencies: LensPluginStartDependencies;
   visualizationMap: VisualizationMap;

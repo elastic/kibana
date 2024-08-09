@@ -10,7 +10,7 @@ import type { CoreStart, SavedObjectReference, ResolvedSimpleSavedObject } from 
 import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { MutableRefObject, ReactElement } from 'react';
-import type { Filter, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
 import type {
   ExpressionAstExpression,
   IInterpreterRenderHandlers,
@@ -139,8 +139,8 @@ export interface EditorFrameInstance {
 
 export interface EditorFrameSetup {
   // generic type on the API functions to pull the "unknown vs. specific type" error into the implementation
-  registerDatasource: <T, P>(
-    datasource: Datasource<T, P> | (() => Promise<Datasource<T, P>>)
+  registerDatasource: <T, P, Q>(
+    datasource: Datasource<T, P, Q> | (() => Promise<Datasource<T, P, Q>>)
   ) => void;
   registerVisualization: <T, P, ExtraAppendLayerArg>(
     visualization:
@@ -321,8 +321,11 @@ export type AddUserMessages = (messages: UserMessage[]) => () => void;
 
 /**
  * Interface for the datasource registry
+ * T type: runtime Lens state
+ * P type: persisted Lens state
+ * Q type: Query type (useful to filter form vs text based queries)
  */
-export interface Datasource<T = unknown, P = unknown> {
+export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery> {
   id: string;
   alias?: string[];
 
@@ -381,7 +384,7 @@ export interface Datasource<T = unknown, P = unknown> {
   LayerSettingsComponent?: (
     props: DatasourceLayerSettingsProps<T>
   ) => React.ReactElement<DatasourceLayerSettingsProps<T>> | null;
-  DataPanelComponent: (props: DatasourceDataPanelProps<T>) => JSX.Element | null;
+  DataPanelComponent: (props: DatasourceDataPanelProps<T, Q>) => JSX.Element | null;
   DimensionTriggerComponent: (props: DatasourceDimensionTriggerProps<T>) => JSX.Element | null;
   DimensionEditorComponent: (
     props: DatasourceDimensionEditorProps<T>
@@ -578,7 +581,7 @@ export interface DatasourceLayerSettingsProps<T = unknown> {
   setState: StateSetter<T>;
 }
 
-export interface DatasourceDataPanelProps<T = unknown> {
+export interface DatasourceDataPanelProps<T = unknown, Q = Query | AggregateQuery> {
   state: T;
   setState: StateSetter<T, { applyImmediately?: boolean }>;
   showNoDataPopover: () => void;
@@ -586,7 +589,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
     CoreStart,
     'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme' | 'application' | 'docLinks'
   >;
-  query: Query;
+  query: Q;
   dateRange: DateRange;
   filters: Filter[];
   dropOntoWorkspace: (field: DragDropIdentifier) => void;
@@ -945,7 +948,7 @@ export interface VisualizationSuggestion<T = unknown> {
 export type DatasourceLayers = Partial<Record<string, DatasourcePublicAPI>>;
 
 export interface FramePublicAPI {
-  query: Query;
+  query: Query | AggregateQuery;
   filters: Filter[];
   datasourceLayers: DatasourceLayers;
   dateRange: DateRange;
@@ -1452,7 +1455,7 @@ export type LensTopNavMenuEntryGenerator = (props: {
   visualizationId: string;
   datasourceStates: Record<string, { state: unknown }>;
   visualizationState: unknown;
-  query: Query;
+  query: Query | AggregateQuery;
   filters: Filter[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   currentDoc: LensDocument | undefined;

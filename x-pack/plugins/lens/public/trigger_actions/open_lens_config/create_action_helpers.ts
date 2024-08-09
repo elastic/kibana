@@ -20,8 +20,8 @@ import type { Datasource, Visualization } from '../../types';
 import type { LensPluginStartDependencies } from '../../plugin';
 import { suggestionsApi } from '../../lens_suggestions_api';
 import { generateId } from '../../id_generator';
-import { Embeddable } from '../../embeddable';
 import type { EditorFrameService } from '../../editor_frame_service';
+import { LensApi } from '../..';
 
 // datasourceMap and visualizationMap setters/getters
 export const [getVisualizationMap, setVisualizationMap] = createGetterSetter<
@@ -120,7 +120,7 @@ export async function executeCreateAction({
     dataView,
   });
 
-  const embeddable = await api.addNewPanel<object, Embeddable>({
+  const embeddable = await api.addNewPanel<object, LensApi>({
     panelType: 'lens',
     initialState: {
       attributes: attrs,
@@ -128,5 +128,5 @@ export async function executeCreateAction({
     },
   });
   // open the flyout if embeddable has been created successfully
-  embeddable?.onEdit();
+  embeddable?.onEdit?.();
 }

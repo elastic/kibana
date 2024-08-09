@@ -16,7 +16,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { isEqual } from 'lodash';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
-import { LensRuntimeState } from '../../../react_embeddable/types';
+import { TypedLensSerializedState } from '../../../react_embeddable/types';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import {
   makeConfigureStore,
@@ -160,7 +160,7 @@ export async function getEditLensConfiguration(
       return <LoadingSpinnerWithOverlay />;
     }
     const [currentAttributes, setCurrentAttributes] =
-      useState<LensRuntimeState['attributes']>(attributes);
+      useState<TypedLensSerializedState['attributes']>(attributes);
     /**
      * During inline editing of a by reference panel, the panel is converted to a by value one.
      * When the user applies the changes we save them to the Lens SO

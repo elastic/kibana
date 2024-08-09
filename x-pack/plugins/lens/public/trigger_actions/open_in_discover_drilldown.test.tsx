@@ -17,7 +17,7 @@ import {
   OpenInDiscoverDrilldown,
 } from './open_in_discover_drilldown';
 import { DataViewsService } from '@kbn/data-views-plugin/public';
-import { LensApi } from '../embeddable';
+import { LensApi } from '../react_embeddable/types';
 
 jest.mock('./open_in_discover_helpers', () => ({
   isCompatible: jest.fn(() => true),

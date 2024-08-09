@@ -18,7 +18,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { getTime } from '@kbn/data-plugin/common';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
+import { TypedLensSerializedState } from '../../../react_embeddable/types';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import { suggestionsApi } from '../../../lens_suggestions_api';
@@ -123,7 +123,7 @@ export const getSuggestions = async (
       query,
       suggestion: firstSuggestion,
       dataView,
-    }) as TypedLensByValueInput['attributes'];
+    }) as TypedLensSerializedState['attributes'];
     return attrs;
   } catch (e) {
     setErrors([e]);

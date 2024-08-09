@@ -12,7 +12,7 @@ import { act } from 'react-dom/test-utils';
 import { App } from './app';
 import { LensAppProps, LensAppServices } from './types';
 import { EditorFrameInstance, EditorFrameProps } from '../types';
-import { Document, SavedObjectIndexStore } from '../persistence';
+import { LensDocument, SavedObjectIndexStore } from '../persistence';
 import {
   visualizationMap,
   datasourceMap,
@@ -30,7 +30,6 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { buildExistsFilter, FilterStateStore } from '@kbn/es-query';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import { LensByValueInput } from '../embeddable/embeddable';
 import { SavedObjectReference } from '@kbn/core/types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { serverlessMock } from '@kbn/serverless/public/mocks';
@@ -38,6 +37,7 @@ import moment from 'moment';
 
 import { setState, LensAppState } from '../state_management';
 import { coreMock } from '@kbn/core/public/mocks';
+import { LensSerializedState } from '..';
 jest.mock('../editor_frame_service/editor_frame/expression_helpers');
 jest.mock('@kbn/core/public');
 jest.mock('../persistence/saved_objects_utils/check_for_duplicate_title', () => ({
@@ -58,7 +58,7 @@ jest.mock('lodash', () => {
 const sessionIdSubject = new Subject<string>();
 
 describe('Lens App', () => {
-  let defaultDoc: Document;
+  let defaultDoc: LensDocument;
   let defaultSavedObjectId: string;
 
   function createMockFrame(): jest.Mocked<EditorFrameInstance> {
@@ -142,7 +142,7 @@ describe('Lens App', () => {
         filters: [{ query: { match_phrase: { src: 'test' } }, meta: { index: 'index-pattern-0' } }],
       },
       references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
-    } as unknown as Document;
+    } as unknown as LensDocument;
   });
 
   it('renders the editor frame', async () => {
@@ -287,7 +287,7 @@ describe('Lens App', () => {
         filters: [],
       },
       references: [],
-    } as unknown as Document;
+    } as unknown as LensDocument;
 
     it('sets breadcrumbs when the document title changes', async () => {
       const { instance, services, lensStore } = await mountWith({});
@@ -450,7 +450,7 @@ describe('Lens App', () => {
           filters: [{ query: { match_phrase: { src: 'test' } } }],
         },
         references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
-      } as unknown as Document;
+      } as unknown as LensDocument;
 
       act(() => {
         lensStore.dispatch(
@@ -485,7 +485,7 @@ describe('Lens App', () => {
           filters: [{ query: { match_phrase: { src: 'test' } } }],
         },
         references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
-      } as unknown as Document;
+      } as unknown as LensDocument;
 
       act(() => {
         lensStore.dispatch(
@@ -568,12 +568,12 @@ describe('Lens App', () => {
         };
 
         const services = makeDefaultServicesForApp();
-        services.attributeService.wrapAttributes = jest
+        services.attributeService.saveToLibrary = jest
           .fn()
           .mockImplementation(async ({ savedObjectId }) => ({
             savedObjectId: savedObjectId || 'aaa',
           }));
-        services.attributeService.unwrapAttributes = jest.fn().mockResolvedValue({
+        services.attributeService.loadFromLibrary = jest.fn().mockResolvedValue({
           metaInfo: {
             sharingSavedObjectProps: {
               outcome: 'exactMatch',
@@ -668,7 +668,7 @@ describe('Lens App', () => {
                 'whatcha gonna do with all these references? All these references in your value Input',
               references: [] as SavedObjectReference[],
             },
-          } as LensByValueInput,
+          } as unknown as LensSerializedState,
         };
 
         const { instance } = await mountWith({
@@ -731,7 +731,7 @@ describe('Lens App', () => {
           newCopyOnSave: false,
           newTitle: 'hello there',
         });
-        expect(services.attributeService.wrapAttributes).toHaveBeenCalledWith(
+        expect(services.attributeService.saveToLibrary).toHaveBeenCalledWith(
           expect.objectContaining({
             savedObjectId: undefined,
             title: 'hello there',
@@ -777,7 +777,7 @@ describe('Lens App', () => {
           newTitle: 'hello there',
           preloadedState: { persistedDoc: defaultDoc },
         });
-        expect(services.attributeService.wrapAttributes).toHaveBeenCalledWith(
+        expect(services.attributeService.saveToLibrary).toHaveBeenCalledWith(
           expect.objectContaining({
             title: 'hello there',
           }),
@@ -788,7 +788,7 @@ describe('Lens App', () => {
         await act(async () => {
           instance.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
         });
-        expect(services.attributeService.wrapAttributes).toHaveBeenCalledTimes(1);
+        expect(services.attributeService.saveToLibrary).toHaveBeenCalledTimes(1);
         expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
           "Saved 'hello there'"
         );
@@ -801,7 +801,7 @@ describe('Lens App', () => {
           newTitle: 'hello there',
           preloadedState: { persistedDoc: defaultDoc },
         });
-        expect(services.attributeService.wrapAttributes).toHaveBeenCalledWith(
+        expect(services.attributeService.saveToLibrary).toHaveBeenCalledWith(
           expect.objectContaining({
             savedObjectId: defaultSavedObjectId,
             title: 'hello there',
@@ -829,7 +829,7 @@ describe('Lens App', () => {
         };
 
         const services = makeDefaultServicesForApp();
-        services.attributeService.wrapAttributes = jest
+        services.attributeService.saveToLibrary = jest
           .fn()
           .mockRejectedValue({ message: 'failed' });
         const { instance } = await mountWith({
@@ -858,7 +858,7 @@ describe('Lens App', () => {
           newCopyOnSave: false,
           newTitle: 'hello there',
         });
-        expect(services.attributeService.wrapAttributes).toHaveBeenCalledWith(
+        expect(services.attributeService.saveToLibrary).toHaveBeenCalledWith(
           expect.objectContaining({
             savedObjectId: undefined,
             title: 'hello there',
@@ -893,7 +893,7 @@ describe('Lens App', () => {
 
         const { state: expectedFilters } = services.data.query.filterManager.extract([unpinned]);
 
-        expect(services.attributeService.wrapAttributes).toHaveBeenCalledWith(
+        expect(services.attributeService.saveToLibrary).toHaveBeenCalledWith(
           expect.objectContaining({
             savedObjectId: defaultSavedObjectId,
             title: 'hello there2',
@@ -908,7 +908,7 @@ describe('Lens App', () => {
         const props = makeDefaultProps();
         props.incomingState = { originatingApp: 'coolContainer' };
         const services = makeDefaultServicesForApp();
-        services.attributeService.wrapAttributes = jest
+        services.attributeService.saveToLibrary = jest
           .fn()
           .mockReturnValue(Promise.resolve({ savedObjectId: '123' }));
         const { instance } = await mountWith({
@@ -916,7 +916,7 @@ describe('Lens App', () => {
           services,
           preloadedState: {
             isSaveable: true,
-            persistedDoc: { savedObjectId: '123' } as unknown as Document,
+            persistedDoc: { savedObjectId: '123' } as unknown as LensDocument,
             isLinkedToOriginatingApp: true,
           },
         });

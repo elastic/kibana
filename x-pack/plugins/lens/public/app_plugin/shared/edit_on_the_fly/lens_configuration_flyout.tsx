@@ -28,7 +28,7 @@ import {
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { TextBasedLangEditor } from '@kbn/esql/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import { LensRuntimeState } from '../../../react_embeddable/types';
+import { LensRuntimeState, TypedLensSerializedState } from '../../../react_embeddable/types';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
 import {
@@ -37,7 +37,6 @@ import {
   onActiveDataChange,
   useLensDispatch,
 } from '../../../state_management';
-import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import {
   EXPRESSION_BUILD_ERROR_ID,
   extractReferencesFromState,
@@ -78,7 +77,7 @@ export function LensEditConfigurationFlyout({
   hideTimeFilterInfo,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
-  const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
+  const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
   const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
   const prevQuery = useRef<AggregateQuery | Query>(attributes.state.query);
   const [query, setQuery] = useState<AggregateQuery | Query>(attributes.state.query);
@@ -280,6 +279,8 @@ export function LensEditConfigurationFlyout({
       trackUiCounterEvents(telemetryEvents);
     }
 
+    // @TODO: fix this later
+    // @ts-expect-error
     onApplyCallback?.(attrs);
     closeFlyout?.();
   }, [

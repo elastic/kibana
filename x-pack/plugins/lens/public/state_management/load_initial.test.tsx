@@ -11,11 +11,9 @@ import {
   createMockVisualization,
   createMockDatasource,
   mockStoreDeps,
-  exactMatchDoc,
 } from '../mocks';
 import { Location, History } from 'history';
 import { act } from 'react-dom/test-utils';
-import { LensEmbeddableInput } from '../embeddable';
 import { loadInitial } from './lens_slice';
 import { Filter } from '@kbn/es-query';
 import faker from 'faker';
@@ -37,7 +35,7 @@ const preloadedState = {
 
 const defaultProps = {
   redirectCallback: jest.fn(),
-  initialInput: { savedObjectId: defaultSavedObjectId } as unknown as LensEmbeddableInput,
+  initialInput: { savedObjectId: defaultSavedObjectId },
   history,
 };
 
@@ -65,23 +63,23 @@ describe('Initializing the store', () => {
     const datasource1State = { datasource1: '' };
     const datasource2State = { datasource2: '' };
     const services = makeDefaultServices();
-    services.attributeService.unwrapAttributes = jest.fn().mockResolvedValue({
-      attributes: {
-        exactMatchDoc,
-        visualizationType: 'testVis',
-        title: '',
-        state: {
-          datasourceStates: {
-            testDatasource: datasource1State,
-            testDatasource2: datasource2State,
-          },
-          visualization: {},
-          query: { query: '', language: 'lucene' },
-          filters: [],
-        },
-        references: [],
-      },
-    });
+    // services.attributeService. = jest.fn().mockResolvedValue({
+    //   attributes: {
+    //     exactMatchDoc,
+    //     visualizationType: 'testVis',
+    //     title: '',
+    //     state: {
+    //       datasourceStates: {
+    //         testDatasource: datasource1State,
+    //         testDatasource2: datasource2State,
+    //       },
+    //       visualization: {},
+    //       query: { query: '', language: 'lucene' },
+    //       filters: [],
+    //     },
+    //     references: [],
+    //   },
+    // });
 
     const storeDeps = mockStoreDeps({
       lensServices: services,
@@ -146,7 +144,7 @@ describe('Initializing the store', () => {
           })
         );
       });
-      expect(deps.lensServices.attributeService.unwrapAttributes).not.toHaveBeenCalled();
+      expect(deps.lensServices.attributeService.loadFromLibrary).not.toHaveBeenCalled();
     });
 
     it('starts new searchSessionId', async () => {
@@ -226,7 +224,7 @@ describe('Initializing the store', () => {
         store.dispatch(loadInitial(defaultProps));
       });
 
-      expect(deps.lensServices.attributeService.unwrapAttributes).toHaveBeenCalledWith({
+      expect(deps.lensServices.attributeService.loadFromLibrary).toHaveBeenCalledWith({
         savedObjectId: defaultSavedObjectId,
       });
 
@@ -256,24 +254,24 @@ describe('Initializing the store', () => {
         await store.dispatch(loadInitial(defaultProps));
       });
 
-      expect(deps.lensServices.attributeService.unwrapAttributes).toHaveBeenCalledTimes(1);
+      expect(deps.lensServices.attributeService.loadFromLibrary).toHaveBeenCalledTimes(1);
 
       await act(async () => {
         await store.dispatch(
           loadInitial({
             ...defaultProps,
-            initialInput: { savedObjectId: '5678' } as unknown as LensEmbeddableInput,
+            initialInput: { savedObjectId: '5678' },
           })
         );
       });
 
-      expect(deps.lensServices.attributeService.unwrapAttributes).toHaveBeenCalledTimes(2);
+      expect(deps.lensServices.attributeService.loadFromLibrary).toHaveBeenCalledTimes(2);
     });
 
     it('handles document load errors', async () => {
       const { store, deps } = makeLensStore({ preloadedState });
 
-      deps.lensServices.attributeService.unwrapAttributes = jest
+      deps.lensServices.attributeService.loadFromLibrary = jest
         .fn()
         .mockRejectedValue('failed to load');
       const redirectCallback = jest.fn();
@@ -281,7 +279,7 @@ describe('Initializing the store', () => {
         await store.dispatch(loadInitial({ ...defaultProps, redirectCallback }));
       });
 
-      expect(deps.lensServices.attributeService.unwrapAttributes).toHaveBeenCalledWith({
+      expect(deps.lensServices.attributeService.loadFromLibrary).toHaveBeenCalledWith({
         savedObjectId: defaultSavedObjectId,
       });
       expect(deps.lensServices.notifications.toasts.addDanger).toHaveBeenCalled();
@@ -290,7 +288,7 @@ describe('Initializing the store', () => {
 
     it('redirects if saved object is an aliasMatch', async () => {
       const { store, deps } = makeLensStore({ preloadedState });
-      deps.lensServices.attributeService.unwrapAttributes = jest.fn().mockResolvedValue({
+      deps.lensServices.attributeService.loadFromLibrary = jest.fn().mockResolvedValue({
         attributes: {
           ...defaultDoc,
         },
@@ -307,7 +305,7 @@ describe('Initializing the store', () => {
         await store.dispatch(loadInitial(defaultProps));
       });
 
-      expect(deps.lensServices.attributeService.unwrapAttributes).toHaveBeenCalledWith({
+      expect(deps.lensServices.attributeService.loadFromLibrary).toHaveBeenCalledWith({
         savedObjectId: defaultSavedObjectId,
       });
       expect(deps.lensServices.spaces?.ui.redirectLegacyUrl).toHaveBeenCalledWith({

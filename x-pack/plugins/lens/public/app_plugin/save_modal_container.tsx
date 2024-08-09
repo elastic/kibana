@@ -16,7 +16,6 @@ import { SaveModal } from './save_modal';
 import type { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
 import { checkForDuplicateTitle, SavedObjectIndexStore, LensDocument } from '../persistence';
-import type { LensByReferenceInput } from '../embeddable';
 import { APP_ID, getFullPath } from '../../common/constants';
 import type { LensAppState } from '../state_management';
 import { getFromPreloaded } from '../state_management/init_middleware/load_initial';
@@ -307,7 +306,7 @@ export const runSaveLensVisualization = async (
   }
 
   const originalInput = saveProps.newCopyOnSave ? undefined : initialInput;
-  const originalSavedObjectId = (originalInput as LensByReferenceInput)?.savedObjectId;
+  const originalSavedObjectId = originalInput?.savedObjectId;
   if (options.saveToLibrary) {
     try {
       await checkForDuplicateTitle(

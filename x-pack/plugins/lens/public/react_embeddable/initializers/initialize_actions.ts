@@ -12,6 +12,7 @@ import {
   EsQueryConfig,
   ExecutionContextSearch,
   Filter,
+  isOfAggregateQueryType,
   isOfQueryType,
   Query,
   TimeRange,
@@ -75,6 +76,9 @@ function getViewUnderlyingDataArgs({
   );
 
   if (error || !meta) {
+    return;
+  }
+  if (isOfAggregateQueryType(query)) {
     return;
   }
   const luceneOrKuery: Query[] = [];

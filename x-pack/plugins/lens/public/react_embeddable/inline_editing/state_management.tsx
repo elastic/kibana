@@ -7,12 +7,15 @@
 
 import type { VisualizationMap, DatasourceMap } from '../../types';
 import { getActiveVisualizationIdFromDoc, extractReferencesFromState } from '../../utils';
-import type { LensRuntimeState } from '../types';
+import type { TypedLensSerializedState } from '../types';
 
 export function getStateManagementForInlineEditing(
   activeDatasourceId: string,
-  getAttributes: () => LensRuntimeState['attributes'],
-  updateAttributes: (newAttributes: LensRuntimeState['attributes'], resetId?: boolean) => void,
+  getAttributes: () => TypedLensSerializedState['attributes'],
+  updateAttributes: (
+    newAttributes: TypedLensSerializedState['attributes'],
+    resetId?: boolean
+  ) => void,
   visualizationMap: VisualizationMap,
   datasourceMap: DatasourceMap
 ) {

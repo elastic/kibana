@@ -5,14 +5,14 @@
  * 2.0.
  */
 import { makeDefaultServices } from '../mocks';
-import type { LensEmbeddableInput } from '../embeddable';
 import type { LensAppServices } from './types';
 import { redirectToDashboard } from './save_modal_container_helpers';
+import { LensSerializedState } from '..';
 
 describe('redirectToDashboard', () => {
   const embeddableInput = {
     test: 'test',
-  } as unknown as LensEmbeddableInput;
+  } as unknown as LensSerializedState;
   const mockServices = makeDefaultServices();
 
   it('should call the navigateToWithEmbeddablePackage with the correct args if originatingApp is given', () => {

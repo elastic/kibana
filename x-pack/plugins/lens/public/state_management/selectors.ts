@@ -9,6 +9,7 @@ import { createSelector } from '@reduxjs/toolkit';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { SavedObjectReference } from '@kbn/core/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { LensState } from './types';
 import { Datasource, DatasourceMap, VisualizationMap } from '../types';
 import { getDatasourceLayers } from './utils';
@@ -60,7 +61,7 @@ export const selectExecutionContext = createSelector(
 
 export const selectExecutionContextSearch = createSelector(selectExecutionContext, (res) => ({
   now: res.now,
-  query: res.query,
+  query: isOfAggregateQueryType(res.query) ? undefined : res.query,
   timeRange: {
     from: res.dateRange.fromDate,
     to: res.dateRange.toDate,

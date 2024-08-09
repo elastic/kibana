@@ -7,9 +7,6 @@
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { BehaviorSubject } from 'rxjs';
 import type { LensRuntimeState } from '../../../react_embeddable/types';
-// import type { EmbeddableOutput } from '@kbn/embeddable-plugin/public';
-// import type { Observable } from 'rxjs';
-// import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 
 export interface LensChartLoadEvent {
   /**
@@ -19,7 +16,7 @@ export interface LensChartLoadEvent {
   /**
    * Observable of the lens embeddable output
    */
-  renderComplete$: BehaviorSubject<boolean>;
+  renderComplete$?: BehaviorSubject<boolean>;
 }
 
 export interface InlineEditLensEmbeddableContext {

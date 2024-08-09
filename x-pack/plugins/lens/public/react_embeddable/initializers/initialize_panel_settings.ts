@@ -23,6 +23,7 @@ export function initializePanelSettings(state: LensRuntimeState) {
     },
     comparators: {
       ...title.titleComparators,
+      id: getUnchangingComparator<LensRuntimeState, 'id'>(),
       style: getUnchangingComparator<LensRuntimeState, 'style'>(),
       className: getUnchangingComparator<LensRuntimeState, 'className'>(),
       noPadding: getUnchangingComparator<LensRuntimeState, 'noPadding'>(),
