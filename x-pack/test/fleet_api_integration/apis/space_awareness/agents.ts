@@ -59,7 +59,7 @@ export default function (providerContext: FtrProviderContext) {
       const [_defaultSpaceAgent1, _defaultSpaceAgent2, _testSpaceAgent1, _testSpaceAgent2] =
         await Promise.all([
           createFleetAgent(esClient, defaultSpacePolicy1.item.id, 'default'),
-          createFleetAgent(esClient, defaultSpacePolicy1.item.id),
+          createFleetAgent(esClient, defaultSpacePolicy2.item.id),
           createFleetAgent(esClient, spaceTest1Policy1.item.id, TEST_SPACE_1),
           createFleetAgent(esClient, spaceTest1Policy2.item.id, TEST_SPACE_1),
         ]);
@@ -259,7 +259,7 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({ version: '8.15.0' })
           .expect(404);
-        expect(res.body.message).to.eql(`${testSpaceAgent1} not found in namespace`);
+        expect(res.body.message).to.eql(`Agent ${testSpaceAgent1} not found`);
       });
     });
 
@@ -471,7 +471,7 @@ export default function (providerContext: FtrProviderContext) {
 
         await apiClient.bulkReassignAgents(
           {
-            agents: 'status:online',
+            agents: '*',
             policy_id: spaceTest1Policy2.item.id,
           },
           TEST_SPACE_1

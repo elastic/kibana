@@ -218,16 +218,14 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({ action: { type: 'UNENROLL' } })
           .expect(404);
-        expect(resInDefaultSpace.body.message).to.eql(`${testSpaceAgent1} not found in namespace`);
+        expect(resInDefaultSpace.body.message).to.eql(`Agent ${testSpaceAgent1} not found`);
 
         const resInCustomSpace = await supertest
           .post(`/s/${TEST_SPACE_1}/api/fleet/agents/${defaultSpaceAgent1}/actions`)
           .set('kbn-xsrf', 'xxxx')
           .send({ action: { type: 'UNENROLL' } })
           .expect(404);
-        expect(resInCustomSpace.body.message).to.eql(
-          `${defaultSpaceAgent1} not found in namespace`
-        );
+        expect(resInCustomSpace.body.message).to.eql(`Agent ${defaultSpaceAgent1} not found`);
       });
 
       it('should create an action with set namespace in the default space', async () => {
