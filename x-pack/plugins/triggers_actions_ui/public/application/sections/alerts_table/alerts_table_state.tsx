@@ -30,7 +30,7 @@ import type {
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks';
+import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query';
 import { DEFAULT_ALERTS_PAGE_SIZE } from '@kbn/alerts-ui-shared/src/common/constants';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import deepEqual from 'fast-deep-equal';
@@ -296,7 +296,7 @@ const AlertsTableStateWithQueryProvider = memo(
       storage,
       id,
       defaultColumns: columnConfigByClient,
-      browserFields: propBrowserFields,
+      alertsFields: propBrowserFields,
     });
 
     const [queryParams, setQueryParams] = useState({
