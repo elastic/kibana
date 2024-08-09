@@ -24,9 +24,7 @@
     "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
     "@kbn/ui-actions-plugin",
-    "@kbn/i18n",
     "@kbn/react-kibana-mount",
-    "@kbn/ui-theme",
     "@kbn/react-kibana-context-render",
   ]
 }
