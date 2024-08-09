@@ -57,6 +57,6 @@ const getIndices = getFieldValues('_index');
 
 const hasFieldsWithPrefix = (prefix: string) => (record: DataTableRecord) => {
   return Object.keys(record.flattened).some(
-    (field) => field.startsWith(prefix) && record.flattened[field]
+    (field) => field.startsWith(prefix) && record.flattened[field] != null
   );
 };
