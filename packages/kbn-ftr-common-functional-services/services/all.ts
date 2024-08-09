@@ -11,6 +11,7 @@ import { EsProvider } from './es';
 import { KibanaServerProvider } from './kibana_server';
 import { RetryService } from './retry';
 import { SupertestWithoutAuthProvider } from './supertest_without_auth';
+import { SamlAuthProvider } from './saml_auth';
 
 export const services = {
   es: EsProvider,
@@ -18,4 +19,5 @@ export const services = {
   esArchiver: EsArchiverProvider,
   retry: RetryService,
   supertestWithoutAuth: SupertestWithoutAuthProvider,
+  samlAuth: SamlAuthProvider,
 };

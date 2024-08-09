@@ -9,17 +9,24 @@ import React from 'react';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useApplication } from '../../../common/lib/kibana/use_application';
-import { useAlertDataViews } from '../hooks/use_alert_data_view';
-import { CasesParamsFields } from './cases_params';
 import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
+import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
+import { useApplication } from '../../../common/lib/kibana/use_application';
+import { CasesParamsFields } from './cases_params';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view');
 jest.mock('../../../common/lib/kibana/use_application');
-jest.mock('../hooks/use_alert_data_view');
+jest.mock('../../../common/lib/kibana/kibana_react');
 
-const useAlertDataViewsMock = useAlertDataViews as jest.Mock;
+const useKibanaMock = jest.mocked(useKibana);
+const useAlertsDataViewMock = jest.mocked(useAlertsDataView);
 const useApplicationMock = useApplication as jest.Mock;
+
+useKibanaMock.mockReturnValue({
+  services: { ...createStartServicesMock(), data: { dataViews: {} } },
+} as unknown as ReturnType<typeof useKibana>);
 
 const actionParams = {
   subAction: 'run',
@@ -52,24 +59,25 @@ describe('CasesParamsFields renders', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useApplicationMock.mockReturnValueOnce({ appId: 'management' });
-    useAlertDataViewsMock.mockReturnValue({
-      loading: false,
-      dataViews: [
-        {
-          title: '.alerts-test',
-          fields: [
-            {
-              name: 'host.ip',
-              type: 'ip',
-              aggregatable: true,
-            },
-            {
-              name: 'host.geo.location',
-              type: 'geo_point',
-            },
-          ],
-        },
-      ],
+    useAlertsDataViewMock.mockReturnValue({
+      isLoading: false,
+      dataView: {
+        title: '.alerts-test',
+        fields: [
+          {
+            name: 'host.ip',
+            type: 'ip',
+            aggregatable: true,
+            searchable: true,
+          },
+          {
+            name: 'host.geo.location',
+            type: 'geo_point',
+            aggregatable: false,
+            searchable: true,
+          },
+        ],
+      },
     });
   });
 
@@ -83,14 +91,14 @@ describe('CasesParamsFields renders', () => {
   });
 
   it('renders loading state of grouping by fields correctly', async () => {
-    useAlertDataViewsMock.mockReturnValue({ loading: true });
+    useAlertsDataViewMock.mockReturnValue({ isLoading: true });
     render(<CasesParamsFields {...defaultProps} />);
 
     expect(await screen.findByRole('progressbar')).toBeInTheDocument();
   });
 
   it('disables dropdown when loading grouping by fields', async () => {
-    useAlertDataViewsMock.mockReturnValue({ loading: true });
+    useAlertsDataViewMock.mockReturnValue({ isLoading: true });
     render(<CasesParamsFields {...defaultProps} />);
 
     expect(await screen.findByRole('progressbar')).toBeInTheDocument();
@@ -161,29 +169,31 @@ describe('CasesParamsFields renders', () => {
     });
 
     it('updates grouping by field by search', async () => {
-      useAlertDataViewsMock.mockReturnValue({
-        loading: false,
-        dataViews: [
-          {
-            title: '.alerts-test',
-            fields: [
-              {
-                name: 'host.ip',
-                type: 'ip',
-                aggregatable: true,
-              },
-              {
-                name: 'host.geo.location',
-                type: 'geo_point',
-              },
-              {
-                name: 'alert.name',
-                type: 'string',
-                aggregatable: true,
-              },
-            ],
-          },
-        ],
+      useAlertsDataViewMock.mockReturnValue({
+        isLoading: false,
+        dataView: {
+          title: '.alerts-test',
+          fields: [
+            {
+              name: 'host.ip',
+              type: 'ip',
+              aggregatable: true,
+              searchable: true,
+            },
+            {
+              name: 'host.geo.location',
+              type: 'geo_point',
+              aggregatable: false,
+              searchable: true,
+            },
+            {
+              name: 'alert.name',
+              type: 'string',
+              aggregatable: true,
+              searchable: true,
+            },
+          ],
+        },
       });
 
       render(<CasesParamsFields {...defaultProps} />);
