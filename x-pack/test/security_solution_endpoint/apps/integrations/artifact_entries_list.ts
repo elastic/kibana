@@ -39,6 +39,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const toasts = getService('toasts');
   const policyTestResources = getService('policyTestResources');
   const unzipPromisify = promisify(unzip);
+  const log = getService('log');
 
   const removeAllArtifacts = async () => {
     for (const listId of ENDPOINT_ARTIFACT_LIST_IDS) {
@@ -238,7 +239,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         } else {
           successes++;
         }
-        console.log(
+        log.info(
           '🧀 🥭 IN PROGRESS',
           JSON.stringify(
             { byText: options?.byText, waitABit: options?.waitABit, hasFailed, fails, successes },
@@ -250,7 +251,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click(`${actions.pagePrefix}-flyout-cancelButton`);
       }
 
-      console.log(
+      log.info(
         '🧀 🥭 RESULTS ARE IN',
         JSON.stringify(
           { byText: options?.byText, waitABit: options?.waitABit, fails, successes },
@@ -295,12 +296,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           }
         });
 
+        // eslint-disable-next-line ban/ban
         it.only('flaky test for clicking by css selector', async () => {
           await createArtifact(testData, { policyId: policyInfo.packagePolicy.id });
         });
+        // eslint-disable-next-line ban/ban
         it.only('flaky test for clicking by text', async () => {
           await createArtifact(testData, { policyId: policyInfo.packagePolicy.id, byText: true });
         });
+        // eslint-disable-next-line ban/ban
         it.only('flaky test for some wait', async () => {
           await createArtifact(testData, { policyId: policyInfo.packagePolicy.id, waitABit: true });
         });
