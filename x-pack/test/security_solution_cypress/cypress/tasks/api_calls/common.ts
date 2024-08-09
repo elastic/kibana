@@ -23,6 +23,7 @@ export const API_HEADERS = Object.freeze({
   'kbn-xsrf': 'cypress-creds',
   'x-elastic-internal-origin': 'security-solution',
   [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION].join(','), // Convertir array a string
+  Authorization: '',
 });
 
 export const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
@@ -44,14 +45,14 @@ export const rootRequest = <T = unknown>({
   };
 
   if (authMethod === 'cookie') {
-    return cy.task('getApiCredentialsForRole', 'admin').then((response) => {
-      if (response && typeof response === 'object' && 'Cookie' in response) {
-        // headers["Cookie"] = (response as { Cookie: string }).Cookie;
-      } else {
-        throw new Error('Unexpected response format from cy.task');
-      }
+    return cy.task('getApiKeyForRole', 'admin').then((response) => {
       return cy.request<T>({
-        headers,
+        headers: {
+          'kbn-xsrf': 'cypress-creds',
+          'x-elastic-internal-origin': 'security-solution',
+          [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION],
+          Authorization: `ApiKey ${response}`,
+        },
         ...restOptions,
       });
     });
