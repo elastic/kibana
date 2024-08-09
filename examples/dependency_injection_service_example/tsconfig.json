@@ -4,16 +4,15 @@
     "outDir": "target/types",
   },
   "include": [
-    "public/**/*",
     "server/**/*",
   ],
   "exclude": [
     "target/**/*",
   ],
   "kbn_references": [
-    "@kbn/core-di-server",
     "@kbn/config-schema",
+    "@kbn/core-di-server",
     "@kbn/core-http-server",
-    "@kbn/dependency-injection-service-example-plugin",
+    "@kbn/core-di",
   ]
 }
