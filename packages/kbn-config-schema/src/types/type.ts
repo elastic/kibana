@@ -255,7 +255,10 @@ function getSpecialType(
   optional = false,
   path: string[] = []
 ): string | string[] {
-  if (!isSchema(schema)) return `${schema ?? 'unknown'}${optional ? '?' : ''}`;
+  if (!isSchema(schema)) {
+    if (schema === null) return 'null';
+    return `${schema ?? 'unknown'}${optional ? '?' : ''}`;
+  }
 
   const isOptionalType = optional || schema._flags?.presence === 'optional';
   // For explicit custom schema.never
