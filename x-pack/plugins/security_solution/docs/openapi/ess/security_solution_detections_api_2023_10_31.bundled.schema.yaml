@@ -2967,6 +2967,8 @@ components:
       properties:
         is_customized:
           $ref: '#/components/schemas/IsExternalRuleCustomized'
+        source_updated_at:
+          $ref: '#/components/schemas/ExternalSourceUpdatedAt'
         type:
           enum:
             - external
@@ -2974,6 +2976,13 @@ components:
       required:
         - type
         - is_customized
+    ExternalSourceUpdatedAt:
+      description: >-
+        The date and time that the external/prebuilt rule was last updated in
+        its source repository.
+      example: '2021-08-31T00:00:00Z'
+      format: date-time
+      type: string
     FindRulesSortField:
       enum:
         - created_at
@@ -3085,8 +3094,8 @@ components:
     IsRuleImmutable:
       deprecated: true
       description: >-
-        This field determines whether the rule is a prebuilt Elastic rule. It
-        will be replaced with the `rule_source` field.
+        [DEPRECATION WARNING TODO] - This field determines whether the rule is a
+        prebuilt Elastic rule. It will be replaced with the `rule_source` field.
       type: boolean
     ItemsPerSearch:
       minimum: 1
@@ -4868,6 +4877,7 @@ components:
         - id
         - rule_id
         - immutable
+        - rule_source
         - updated_at
         - updated_by
         - created_at
