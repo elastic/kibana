@@ -10,6 +10,7 @@ import { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/public';
 import { DatasetQualityDetailsController } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import {
   getDatasetQualityDetailsStateFromUrl,
   updateUrlFromDatasetQualityDetailsState,
@@ -33,6 +34,7 @@ export function DatasetQualityDetailsContextProvider({
   datasetQuality,
 }: ContextProps) {
   const [controller, setController] = useState<DatasetQualityDetailsController>();
+  const history = useHistory();
 
   useEffect(() => {
     async function getDatasetQualityDetailsController() {
@@ -41,7 +43,14 @@ export function DatasetQualityDetailsContextProvider({
         toastsService,
       });
 
-      if (!initialState) {
+      // state initialization is under progress
+      if (initialState === undefined) {
+        return;
+      }
+
+      // state initialized but empty
+      if (initialState === null) {
+        history.push('/');
         return;
       }
 

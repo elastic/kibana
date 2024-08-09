@@ -35,13 +35,17 @@ export const updateUrlFromDatasetQualityDetailsState = ({
   });
 };
 
+/*
+ * This function is used to get the dataset quality details state from the URL.
+ * It will return `null` if the URL state is not present or `undefined` if the URL state is present but invalid.
+ */
 export const getDatasetQualityDetailsStateFromUrl = ({
   toastsService,
   urlStateStorageContainer,
 }: {
   toastsService: IToasts;
   urlStateStorageContainer: IKbnUrlStateStorage;
-}): DatasetQualityDetailsPublicStateUpdate | undefined => {
+}): DatasetQualityDetailsPublicStateUpdate | undefined | null => {
   const urlStateValues =
     urlStateStorageContainer.get<unknown>(DATA_QUALITY_URL_STATE_KEY) ?? undefined;
 
@@ -53,6 +57,6 @@ export const getDatasetQualityDetailsStateFromUrl = ({
     withNotifyOnErrors(toastsService).onGetError(createPlainError(formatErrors(stateValuesE.left)));
     return undefined;
   } else {
-    return stateValuesE.right;
+    return stateValuesE.right ?? null;
   }
 };
