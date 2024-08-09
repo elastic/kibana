@@ -89,6 +89,7 @@ export const getAlertDetailsContextHandler = (
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
     const alertStartedAt = query.alert_started_at;
+    const alertEndedAt = query.alert_ended_at;
     const serviceEnvironment = query['service.environment'];
     const hostName = query['host.name'];
     const kubernetesPodName = query['kubernetes.pod.name'];
@@ -163,11 +164,12 @@ export const getAlertDetailsContextHandler = (
 
     // log rate analysis
     dataFetchers.push(async () => {
-      const logRateAnalysis = await getLogRateAnalysisForAlert({
+      const { logRateAnalysisType, significantItems } = await getLogRateAnalysisForAlert({
         esClient,
         coreContext,
         arguments: {
           alertStartedAt: moment(alertStartedAt).toISOString(),
+          alertEndedAt: alertEndedAt ? moment(alertEndedAt).toISOString() : undefined,
           alertRuleParameterTimeSize: query.alert_rule_parameter_time_size
             ? parseInt(query.alert_rule_parameter_time_size, 10)
             : undefined,
@@ -183,8 +185,11 @@ export const getAlertDetailsContextHandler = (
 
       return {
         key: 'logRateAnalysis',
-        description: `Significant field/value pairs in log data that contributed to changes in the log rate when the alert is active as compared to the time range before the alert.`,
-        data: logRateAnalysis,
+        description:
+          logRateAnalysisType === 'spike'
+            ? 'Statistically significant log metadata and log patterns that happened DURING the spike in logs.'
+            : 'Statistically significant log metadata and log patterns that happened BEFORE the dip in logs.',
+        data: significantItems,
       };
     });
 
@@ -211,7 +216,7 @@ export const getAlertDetailsContextHandler = (
 
       return {
         key: 'logCategories',
-        description: `Log events occurring up to 15 minutes before the alert was triggered. Filtered by the entities: ${entitiesAsString}`,
+        description: `Log events occurring up to 15 minutes BEFORE the alert was triggered. Filtered by the entities: ${entitiesAsString}`,
         data: logCategoriesWithDownstreamServiceName(logCategories, downstreamDependencies),
       };
     });

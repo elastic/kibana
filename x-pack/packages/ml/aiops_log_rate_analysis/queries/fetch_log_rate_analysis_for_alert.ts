@@ -60,16 +60,18 @@ export async function fetchLogRateAnalysisForAlert({
   arguments: {
     index: string;
     alertStartedAt: string;
+    alertEndedAt?: string;
     alertRuleParameterTimeSize?: number;
     alertRuleParameterTimeUnit?: string;
     timefield?: string;
     searchQuery?: estypes.QueryDslQueryContainer;
   };
 }) {
-  const { alertStartedAt, timefield = '@timestamp' } = args;
+  const { alertStartedAt, alertEndedAt, timefield = '@timestamp' } = args;
 
   const { timeRange, windowParameters } = getLogRateAnalysisParametersFromAlert({
     alertStartedAt,
+    alertEndedAt,
     timeSize: args.alertRuleParameterTimeSize,
     timeUnit: args.alertRuleParameterTimeUnit as any,
   });
@@ -183,35 +185,40 @@ export async function fetchLogRateAnalysisForAlert({
 
   // RETURN DATA
   // Adapt the raw significant items data for contextual insights.
-  const significantItemsForContextualInsights = significantItems
-    .map(({ fieldName, fieldValue, type, doc_count: docCount, bg_count: bgCount }) => {
-      const { baselineBucketRate, deviationBucketRate } = getBaselineAndDeviationRates(
-        logRateAnalysisType,
-        // Normalize the amount of baseline buckets based on treating the
-        // devation duration as 1 bucket.
-        (windowParameters.baselineMax - windowParameters.baselineMin) /
-          (windowParameters.deviationMax - windowParameters.deviationMin),
-        1,
-        docCount,
-        bgCount
-      );
+  return {
+    logRateAnalysisType,
+    significantItems: significantItems
+      .map(({ fieldName, fieldValue, type, doc_count: docCount, bg_count: bgCount }) => {
+        const { baselineBucketRate, deviationBucketRate } = getBaselineAndDeviationRates(
+          logRateAnalysisType,
+          // Normalize the amount of baseline buckets based on treating the
+          // devation duration as 1 bucket.
+          (windowParameters.baselineMax - windowParameters.baselineMin) /
+            (windowParameters.deviationMax - windowParameters.deviationMin),
+          1,
+          docCount,
+          bgCount
+        );
 
-      const fieldType = type === 'keyword' ? 'metadata' : 'log message pattern';
+        const fieldType = type === 'keyword' ? 'metadata' : 'log message pattern';
 
-      const description = `${fieldType}: field: "${fieldName}" - value: "${String(
-        fieldValue
-      ).substring(0, 140)}" - ${
-        getLogRateChange(logRateAnalysisType, baselineBucketRate, deviationBucketRate).message
-      }`;
+        const data = {
+          fieldType,
+          fieldName,
+          fieldValue: String(fieldValue).substring(0, 140),
+          logRateChange: getLogRateChange(
+            logRateAnalysisType,
+            baselineBucketRate,
+            deviationBucketRate
+          ).message,
+        };
 
-      return {
-        logRateChangeSort: bgCount > 0 ? docCount / bgCount : docCount,
-        description,
-      };
-    })
-    .sort((a, b) => b.logRateChangeSort - a.logRateChangeSort)
-    .map((d) => d.description)
-    .join('\n');
-
-  return significantItemsForContextualInsights;
+        return {
+          logRateChangeSort: bgCount > 0 ? docCount / bgCount : docCount,
+          data,
+        };
+      })
+      .sort((a, b) => b.logRateChangeSort - a.logRateChangeSort)
+      .map((d) => d.data),
+  };
 }
