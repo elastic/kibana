@@ -126,7 +126,7 @@ describe('enableSpaceAwarenessMigration', () => {
           type: 'fleet-agent-policies',
         }),
       ],
-      { overwrite: true }
+      { overwrite: true, refresh: 'wait_for' }
     );
     expect(soClient.bulkCreate).toBeCalledWith(
       [
@@ -139,7 +139,7 @@ describe('enableSpaceAwarenessMigration', () => {
           type: 'fleet-package-policies',
         }),
       ],
-      { overwrite: true }
+      { overwrite: true, refresh: 'wait_for' }
     );
 
     expect(saveSettings).toBeCalledWith(
