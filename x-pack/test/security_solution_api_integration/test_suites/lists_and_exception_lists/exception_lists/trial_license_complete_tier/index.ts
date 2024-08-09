@@ -7,7 +7,7 @@
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Detection Engine - Exception List Items APIs', function () {
-    loadTestFile(require.resolve('./items'));
+  describe('Detection Engine - Exception Lists APIs', function () {
+    loadTestFile(require.resolve('./lists'));
   });
 }
