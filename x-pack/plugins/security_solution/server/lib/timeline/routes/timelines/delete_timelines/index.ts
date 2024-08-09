@@ -8,7 +8,6 @@
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { ConfigType } from '../../../../..';
 import {
   DeleteTimelinesRequestBody,
   type DeleteTimelinesResponse,
@@ -20,7 +19,7 @@ import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../../utils/common';
 import { deleteTimeline } from '../../../saved_object/timelines';
 
-export const deleteTimelinesRoute = (router: SecuritySolutionPluginRouter, config: ConfigType) => {
+export const deleteTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .delete({
       path: TIMELINE_URL,

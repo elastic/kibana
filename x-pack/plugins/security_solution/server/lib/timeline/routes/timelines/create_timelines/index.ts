@@ -12,8 +12,6 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_URL } from '../../../../../../common/constants';
 
-import type { ConfigType } from '../../../../..';
-
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import {
@@ -30,7 +28,7 @@ import {
 
 export * from './helpers';
 
-export const createTimelinesRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
+export const createTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .post({
       path: TIMELINE_URL,

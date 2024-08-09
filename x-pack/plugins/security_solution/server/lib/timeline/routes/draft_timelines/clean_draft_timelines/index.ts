@@ -9,7 +9,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import type { ConfigType } from '../../../../..';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { TIMELINE_DRAFT_URL } from '../../../../../../common/constants';
@@ -26,7 +25,7 @@ import {
   TimelineTypeEnum,
 } from '../../../../../../common/api/timeline';
 
-export const cleanDraftTimelinesRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
+export const cleanDraftTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .post({
       path: TIMELINE_DRAFT_URL,

@@ -12,15 +12,13 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { NOTE_URL } from '../../../../../common/constants';
 
-import type { ConfigType } from '../../../..';
-
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../utils/common';
 import { getAllSavedNote, MAX_UNASSOCIATED_NOTES } from '../../saved_object/notes';
 import { noteSavedObjectType } from '../../saved_object_mappings/notes';
 import { GetNotesRequestQuery, type GetNotesResponse } from '../../../../../common/api/timeline';
 
-export const getNotesRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
+export const getNotesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .get({
       path: NOTE_URL,

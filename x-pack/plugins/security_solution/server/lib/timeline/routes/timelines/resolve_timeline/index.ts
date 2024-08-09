@@ -13,8 +13,6 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_RESOLVE_URL } from '../../../../../../common/constants';
 
-import type { ConfigType } from '../../../../..';
-
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
@@ -28,7 +26,7 @@ import type {
   ResolvedTimelineWithOutcomeSavedObject,
 } from '../../../../../../common/api/timeline';
 
-export const resolveTimelineRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
+export const resolveTimelineRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .get({
       path: TIMELINE_RESOLVE_URL,

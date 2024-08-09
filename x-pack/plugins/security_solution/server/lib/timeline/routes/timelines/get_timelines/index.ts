@@ -12,8 +12,6 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { TIMELINES_URL } from '../../../../../../common/constants';
 
-import type { ConfigType } from '../../../../..';
-
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
@@ -23,7 +21,7 @@ import {
   type GetTimelinesResponse,
 } from '../../../../../../common/api/timeline';
 
-export const getTimelinesRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
+export const getTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .get({
       path: TIMELINES_URL,

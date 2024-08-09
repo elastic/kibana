@@ -9,7 +9,6 @@ import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import type { ConfigType } from '../../../../..';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { TIMELINE_DRAFT_URL } from '../../../../../../common/constants';
@@ -21,7 +20,7 @@ import {
   type GetDraftTimelinesResponse,
 } from '../../../../../../common/api/timeline';
 
-export const getDraftTimelinesRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
+export const getDraftTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .get({
       path: TIMELINE_DRAFT_URL,

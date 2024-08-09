@@ -12,8 +12,6 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_URL } from '../../../../../../common/constants';
 
-import type { ConfigType } from '../../../../..';
-
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import {
@@ -24,7 +22,7 @@ import { buildFrameworkRequest, TimelineStatusActions } from '../../../utils/com
 import { createTimelines } from '../create_timelines';
 import { CompareTimelinesStatus } from '../../../utils/compare_timelines_status';
 
-export const patchTimelinesRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
+export const patchTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .patch({
       path: TIMELINE_URL,

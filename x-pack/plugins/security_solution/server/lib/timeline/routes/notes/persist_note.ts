@@ -12,8 +12,6 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import { NOTE_URL } from '../../../../../common/constants';
 
-import type { ConfigType } from '../../../..';
-
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../utils/common';
@@ -23,7 +21,7 @@ import {
 } from '../../../../../common/api/timeline';
 import { persistNote } from '../../saved_object/notes';
 
-export const persistNoteRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
+export const persistNoteRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .patch({
       path: NOTE_URL,

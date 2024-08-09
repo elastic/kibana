@@ -8,7 +8,6 @@
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { ConfigType } from '../../../../..';
 import {
   CopyTimelineRequestBody,
   type CopyTimelineResponse,
@@ -20,7 +19,7 @@ import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
 
-export const copyTimelineRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
+export const copyTimelineRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .post({
       path: TIMELINE_COPY_URL,
