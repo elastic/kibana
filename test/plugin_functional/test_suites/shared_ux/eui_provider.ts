@@ -18,6 +18,7 @@ export default function ({ getPageObjects, getService }: PluginFunctionalProvide
   describe('EUI Provider Dev Warning', () => {
     after(async () => {
       // check sessionStorage for trace of EuiProvider dev error thrown
+      // TODO move this check to take place after every test suite, before the test browser is closed
       const [errorMessage, errorStack, pageHref, pageTitle] = await Promise.all([
         browser.getSessionStorageItem('dev.euiProviderWarning.message'),
         browser.getSessionStorageItem('dev.euiProviderWarning.stack'),
