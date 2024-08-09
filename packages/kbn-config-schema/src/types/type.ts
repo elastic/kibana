@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { AnySchema, CustomValidator, ErrorReport } from 'joi';
+import {
+  isSchema,
+  type CustomValidator,
+  type ErrorReport,
+  type Schema,
+  type SchemaLike,
+  type WhenOptions,
+  CustomHelpers,
+} from 'joi';
 import { META_FIELD_X_OAS_DEPRECATED } from '../oas_meta_fields';
 import { SchemaTypeError, ValidationError } from '../errors';
 import { Reference } from '../references';
@@ -91,9 +99,9 @@ export abstract class Type<V> {
    * Internal "schema" backed by Joi.
    * @type {Schema}
    */
-  protected readonly internalSchema: AnySchema;
+  protected readonly internalSchema: Schema;
 
-  protected constructor(schema: AnySchema, options: TypeOptions<V> = {}) {
+  protected constructor(schema: Schema, options: TypeOptions<V> = {}) {
     if (options.defaultValue !== undefined) {
       schema = schema.optional();
 
@@ -214,7 +222,7 @@ export abstract class Type<V> {
   }
 }
 
-function recursiveGetSchemaStructure(internalSchema: AnySchema, path: string[] = []) {
+function recursiveGetSchemaStructure(internalSchema: Schema, path: string[] = []) {
   const array: SchemaStructureEntry[] = [];
   // Note: we are relying on Joi internals to obtain the schema structure (recursive keys).
   // This is not ideal, but it works for now and we only need it for some integration test assertions.
@@ -222,8 +230,51 @@ function recursiveGetSchemaStructure(internalSchema: AnySchema, path: string[] =
   for (const [key, val] of (internalSchema as any)._ids._byKey.entries()) {
     array.push(...recursiveGetSchemaStructure(val.schema, [...path, key]));
   }
+
   if (!array.length) {
-    array.push({ path, type: internalSchema.type ?? 'unknown' });
+    let type: string;
+    try {
+      type = [...new Set([getSpecialType(internalSchema, false, path)].flat())]
+        .filter(Boolean)
+        .join('|');
+    } catch (error) {
+      // failed to find special type, might need to update for new joi versions or type usages
+      type = internalSchema.type || 'unknown';
+    }
+
+    array.push({
+      path,
+      type,
+    });
   }
   return array;
+}
+
+function getSpecialType(
+  schema?: SchemaLike,
+  optional = false,
+  path: string[] = []
+): string | string[] {
+  if (!isSchema(schema)) return `${schema ?? 'unknown'}${optional ? '?' : ''}`;
+
+  const isOptionalType = optional || schema._flags?.presence === 'optional';
+  // For explicit custom schema.never
+  if (schema._flags?.presence === 'forbidden') return 'never';
+  // For offeringBasedSchema, schema.when, schema.conditional
+  if (schema.$_terms?.whens?.length > 0)
+    return (schema.$_terms.whens as WhenOptions[]).flatMap((when) =>
+      [when?.then, when?.otherwise].flatMap((s) => getSpecialType(s, isOptionalType, path))
+    );
+  // schema.oneOf, schema.allOf, etc.
+  if (schema.$_terms?.matches?.length > 0)
+    return (schema.$_terms.matches as CustomHelpers[]).flatMap((s) =>
+      getSpecialType(s.schema, isOptionalType, path)
+    );
+  // schema.literal
+  if (schema._flags?.only && (schema as any)._valids?._values?.size > 0)
+    return [...(schema as any)._valids._values.keys()].flatMap((v) =>
+      getSpecialType(v, isOptionalType, path)
+    );
+
+  return `${schema?.type || 'unknown'}${isOptionalType ? '?' : ''}`;
 }
