@@ -8,6 +8,7 @@
 import { appContextService } from '../app_context';
 import { getSettingsOrUndefined } from '../settings';
 
+export const PENDING_MIGRATION_TIMEOUT = 60 * 60 * 1000;
 /**
  * Return true if user optin for the space awareness feature.
  */
@@ -35,7 +36,7 @@ export async function isSpaceAwarenessMigrationPending(): Promise<boolean> {
     settings?.use_space_awareness_migration_status === 'pending' &&
     settings?.use_space_awareness_migration_started_at &&
     new Date(settings?.use_space_awareness_migration_started_at).getTime() >
-      Date.now() - 60 * 60 * 100
+      Date.now() - PENDING_MIGRATION_TIMEOUT
   ) {
     return true;
   }

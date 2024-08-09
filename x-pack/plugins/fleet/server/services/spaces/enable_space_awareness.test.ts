@@ -38,6 +38,8 @@ describe('enableSpaceAwarenessMigration', () => {
       .mockReturnValue(soClient);
     jest.mocked(getSettingsOrUndefined).mockReset();
     jest.mocked(saveSettings).mockReset();
+
+    jest.mocked(saveSettings).mockResolvedValue({} as any);
   });
   it('should do nothing if migration is already done', async () => {
     mockGetSettingsOrUndefined({

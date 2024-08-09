@@ -19,7 +19,6 @@ import type { VersionedRouteConfig } from '@kbn/core-http-server';
 import { PUBLIC_API_ACCESS } from '../../../common/constants';
 import type { FleetRequestHandlerContext } from '../..';
 import { getRequestStore } from '../request_store';
-import { isSpaceAwarenessMigrationPending } from '../spaces/helpers';
 
 import type { FleetVersionedRouteConfig } from './types';
 
@@ -80,17 +79,6 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
     if (doesNotHaveRequiredFleetAuthz(requestedAuthz, hasRequiredAuthz)) {
       logger.info(`User does not have required fleet authz to access path: ${request.route.path}`);
       return response.forbidden();
-    }
-
-    // No need to check for EPM requests
-    if (request.route.path.includes('api/fleet')) {
-      if (await isSpaceAwarenessMigrationPending()) {
-        return response.conflict({
-          body: {
-            message: 'Space awareness migration pending',
-          },
-        });
-      }
     }
 
     return handler(context, request, response);

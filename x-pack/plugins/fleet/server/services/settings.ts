@@ -72,12 +72,13 @@ export async function settingsSetup(soClient: SavedObjectsClientContract) {
 export async function saveSettings(
   soClient: SavedObjectsClientContract,
   newData: Partial<Omit<Settings, 'id'>>,
-  options?: SavedObjectsUpdateOptions<SettingsSOAttributes>
+  options?: SavedObjectsUpdateOptions<SettingsSOAttributes> & { createWithOverwrite?: boolean }
 ): Promise<Partial<Settings> & Pick<Settings, 'id'>> {
   const data = { ...newData };
   if (data.fleet_server_hosts) {
     data.fleet_server_hosts = data.fleet_server_hosts.map(normalizeHostsForAgents);
   }
+  const { createWithOverwrite, ...updateOptions } = options ?? {};
 
   try {
     const settings = await getSettings(soClient);
@@ -92,7 +93,7 @@ export async function saveSettings(
       GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
       settings.id,
       data,
-      options
+      updateOptions
     );
 
     return {
@@ -117,7 +118,8 @@ export async function saveSettings(
         },
         {
           id: GLOBAL_SETTINGS_ID,
-          overwrite: true,
+          // Do not overwrite if version is passed
+          overwrite: typeof createWithOverwrite === 'undefined' ? true : createWithOverwrite,
         }
       );
 

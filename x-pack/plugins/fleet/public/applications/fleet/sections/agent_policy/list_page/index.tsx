@@ -26,6 +26,7 @@ import { useHistory } from 'react-router-dom';
 import type { AgentPolicy } from '../../../types';
 import { getRootIntegrations } from '../../../../../../common/services';
 import {
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   INGEST_SAVED_OBJECT_INDEX,
 } from '../../../constants';
@@ -38,6 +39,7 @@ import {
   useUrlParams,
   useBreadcrumbs,
   useGetAgentPoliciesQuery,
+  useFleetStatus,
 } from '../../../hooks';
 import { SearchBar } from '../../../components';
 import { AgentPolicySummaryLine } from '../../../../../components';
@@ -46,6 +48,7 @@ import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
 import { CreateAgentPolicyFlyout } from './components';
 
 export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
+  const { isSpaceAwarenessEnabled } = useFleetStatus();
   useBreadcrumbs('policies_list');
   const { getPath } = useLink();
   const hasFleetAllAgentPoliciesPrivileges = useAuthz().fleet.allAgentPolicies;
@@ -324,7 +327,11 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
           <SearchBar
             value={search}
             indexPattern={INGEST_SAVED_OBJECT_INDEX}
-            fieldPrefix={LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}
+            fieldPrefix={
+              isSpaceAwarenessEnabled
+                ? AGENT_POLICY_SAVED_OBJECT_TYPE
+                : LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE
+            }
             onChange={(newSearch) => {
               setPagination({
                 ...pagination,
@@ -345,7 +352,6 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{createAgentPolicyButton}</EuiFlexItem>
       </EuiFlexGroup>
-
       <EuiSpacer size="m" />
       <EuiBasicTable<AgentPolicy>
         loading={isLoading}
