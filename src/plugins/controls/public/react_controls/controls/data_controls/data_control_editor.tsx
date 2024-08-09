@@ -213,7 +213,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
         data-test-subj="control-editor-custom-settings"
       >
         <CustomSettings
-          initialState={initialState as DefaultDataControlState}
+          initialState={initialState}
           field={fieldRegistry[editorState.fieldName].field}
           updateState={(newState) => setEditorState({ ...editorState, ...newState })}
           setControlEditorValid={setControlOptionsValid}
