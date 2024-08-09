@@ -21,7 +21,7 @@ export const DatasetQualityRoute = () => {
     services: { chrome, datasetQuality, notifications, appParams },
   } = useKibanaContextForPlugin();
 
-  useBreadcrumbs(PLUGIN_NAME, appParams, chrome);
+  useBreadcrumbs([{ text: PLUGIN_NAME }], appParams, chrome);
 
   return (
     <DatasetQualityContextProvider

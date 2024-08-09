@@ -5,21 +5,30 @@
  * 2.0.
  */
 
-import type { ChromeStart } from '@kbn/core-chrome-browser';
+import type { ChromeBreadcrumb, ChromeStart } from '@kbn/core-chrome-browser';
 
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { useEffect } from 'react';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { Integration } from '@kbn/dataset-quality-plugin/common/data_streams_stats/integration';
 
 export const useBreadcrumbs = (
-  breadcrumb: string,
+  breadcrumb: ChromeBreadcrumb[],
   params: ManagementAppMountParams,
   chromeService: ChromeStart
 ) => {
   const { docTitle } = chromeService;
+  const isMultiple = breadcrumb.length > 1;
 
-  docTitle.change(breadcrumb);
+  const docTitleValue = isMultiple ? breadcrumb[breadcrumb.length - 1].text : breadcrumb[0].text;
+
+  docTitle.change(docTitleValue as string);
 
   useEffect(() => {
-    params.setBreadcrumbs([{ text: breadcrumb }]);
+    params.setBreadcrumbs(breadcrumb);
   }, [breadcrumb, params]);
+};
+
+export const getBreadcrumbValue = (dataStream: string, integration?: Integration) => {
+  const dataset = dataStream.split('-')[1];
+  return integration?.datasets?.[dataset] || dataset;
 };

@@ -39,9 +39,10 @@ export interface WithDefaultControllerState {
   dataStream: string;
   degradedFields: DegradedFieldsTableConfig;
   timeRange: TimeRangeConfig;
-  isIndexNotFoundError: boolean;
-  isBreakdownFieldEcs?: boolean;
   breakdownField?: string;
+  isBreakdownFieldEcs?: boolean;
+  isIndexNotFoundError?: boolean;
+  integration?: Integration;
 }
 
 export interface WithDataStreamDetails {

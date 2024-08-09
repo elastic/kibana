@@ -35,7 +35,6 @@ export async function getDataStreamSettings({
     dataStreamService.getMatchingDataStreams(esClient, dataStream),
     datasetQualityPrivileges.getDatasetPrivileges(esClient, dataStream),
   ]);
-  console.log('Vaayu', dataStreamInfo);
   const integration = dataStreamInfo?._meta?.package?.name;
 
   return {

@@ -9,12 +9,16 @@ import { IToasts } from '@kbn/core-notifications-browser';
 import { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/public';
 import { DatasetQualityDetailsController } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
+import { useKibanaContextForPlugin } from '../../utils/use_kibana';
+import { getBreadcrumbValue, useBreadcrumbs } from '../../utils/use_breadcrumbs';
 import {
   getDatasetQualityDetailsStateFromUrl,
   updateUrlFromDatasetQualityDetailsState,
 } from './url_state_storage_service';
+import { PLUGIN_ID, PLUGIN_NAME } from '../../../common';
 
 const DatasetQualityDetailsContext = createContext<{
   controller?: DatasetQualityDetailsController;
@@ -35,6 +39,21 @@ export function DatasetQualityDetailsContextProvider({
 }: ContextProps) {
   const [controller, setController] = useState<DatasetQualityDetailsController>();
   const history = useHistory();
+  const {
+    services: {
+      chrome,
+      appParams,
+      application: { navigateToApp },
+    },
+  } = useKibanaContextForPlugin();
+  const rootBreadCrumb = useMemo(
+    () => ({
+      text: PLUGIN_NAME,
+      onClick: () => navigateToApp('management', { path: `/data/${PLUGIN_ID}` }),
+    }),
+    [navigateToApp]
+  );
+  const [breadcrumb, setBreadcrumb] = useState<ChromeBreadcrumb[]>([rootBreadCrumb]);
 
   useEffect(() => {
     async function getDatasetQualityDetailsController() {
@@ -68,6 +87,8 @@ export function DatasetQualityDetailsContextProvider({
             urlStateStorageContainer,
             datasetQualityDetailsState: state,
           });
+          const breadcrumbValue = getBreadcrumbValue(state.dataStream, state.integration);
+          setBreadcrumb([rootBreadCrumb, { text: breadcrumbValue }]);
         }
       );
 
@@ -78,7 +99,9 @@ export function DatasetQualityDetailsContextProvider({
     }
 
     getDatasetQualityDetailsController();
-  }, [datasetQuality, toastsService, urlStateStorageContainer]);
+  }, [datasetQuality, history, rootBreadCrumb, toastsService, urlStateStorageContainer]);
+
+  useBreadcrumbs(breadcrumb, appParams, chrome);
 
   return (
     <DatasetQualityDetailsContext.Provider value={{ controller }}>

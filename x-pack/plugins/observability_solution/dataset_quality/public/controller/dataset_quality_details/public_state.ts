@@ -16,10 +16,11 @@ export const getPublicStateFromContext = (
   context: DatasetQualityDetailsControllerContext
 ): DatasetQualityDetailsPublicState => {
   return {
-    degradedFields: context.degradedFields,
     dataStream: context.dataStream,
+    degradedFields: context.degradedFields,
     timeRange: context.timeRange,
     breakdownField: context.breakdownField,
+    integration: context.integration,
   };
 };
 

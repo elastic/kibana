@@ -9,19 +9,15 @@ import React from 'react';
 import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import type { DatasetQualityDetailsController } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PLUGIN_NAME } from '../../../common';
 import { useKbnUrlStateStorageFromRouterContext } from '../../utils/kbn_url_state_context';
-import { useBreadcrumbs } from '../../utils/use_breadcrumbs';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 import { DatasetQualityDetailsContextProvider, useDatasetQualityDetailsContext } from './context';
 
 export const DatasetQualityDetailsRoute = () => {
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
   const {
-    services: { chrome, datasetQuality, notifications, appParams },
+    services: { datasetQuality, notifications },
   } = useKibanaContextForPlugin();
-
-  useBreadcrumbs(PLUGIN_NAME, appParams, chrome);
 
   return (
     <DatasetQualityDetailsContextProvider
