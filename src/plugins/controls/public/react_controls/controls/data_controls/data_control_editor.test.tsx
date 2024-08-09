@@ -57,7 +57,6 @@ mockDataViews.get = jest.fn().mockResolvedValue(mockDataView);
 
 const dashboardApi = {
   timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
-  lastUsedDataViewId$: new BehaviorSubject<string>(mockDataView.id!),
 };
 const controlGroupApi = {
   parentApi: dashboardApi,
@@ -80,7 +79,7 @@ describe('Data control editor', () => {
           onSave={() => {}}
           parentApi={controlGroupApi}
           initialState={{
-            dataViewId: dashboardApi.lastUsedDataViewId$.getValue(),
+            dataViewId: mockDataView.id,
             ...initialState,
           }}
           services={{ dataViews: mockDataViews }}

@@ -141,7 +141,6 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
   const [defaultGrow, defaultWidth] = useBatchedPublishingSubjects(
     controlGroup.grow,
     controlGroup.width
-    // controlGroup.parentApi?.lastUsedDataViewId, // TODO: Make this work
   );
   const [editorState, setEditorState] = useState<State>(initialState);
   const [defaultPanelTitle, setDefaultPanelTitle] = useState<string>(

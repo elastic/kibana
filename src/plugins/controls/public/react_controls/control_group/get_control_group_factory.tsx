@@ -72,7 +72,7 @@ export const getControlGroupEmbeddableFactory = (services: {
       } = initialRuntimeState;
 
       const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
-      const controlsManager = initControlsManager(initialChildControlState);
+      const controlsManager = initControlsManager(initialChildControlState, await services.dataViews.getDefaultId());
       const selectionsManager = initSelectionsManager({
         ...controlsManager.api,
         autoApplySelections$,
@@ -171,6 +171,7 @@ export const getControlGroupEmbeddableFactory = (services: {
             initialState: {
               grow: api.grow.getValue(),
               width: api.width.getValue(),
+              dataViewId: controlsManager.api.lastUsedDataViewId$.value
             },
             onSave: ({ type: controlType, state: initialState }) => {
               api.addNewPanel({

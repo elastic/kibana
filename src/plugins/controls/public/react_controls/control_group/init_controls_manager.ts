@@ -18,9 +18,10 @@ import { BehaviorSubject, first, merge } from 'rxjs';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
 import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
-import { ControlPanelsState, ControlPanelState } from './types';
+import { ControlGroupApi, ControlPanelsState, ControlPanelState } from './types';
 import { DefaultControlApi, DefaultControlState } from '../controls/types';
 import { ControlGroupComparatorState } from './control_group_unsaved_changes_api';
+import { DefaultDataControlState } from '../controls/data_controls/types';
 
 export type ControlsInOrder = Array<{ id: string; type: string }>;
 
@@ -35,7 +36,10 @@ export function getControlsInOrder(initialControlPanelsState: ControlPanelsState
     .map(({ id, type }) => ({ id, type })); // filter out `order`
 }
 
-export function initControlsManager(initialControlPanelsState: ControlPanelsState) {
+export function initControlsManager(initialControlPanelsState: ControlPanelsState, defaultDataviewId: string | null) {
+  const lastUsedDataViewId$ = new BehaviorSubject<string | undefined>(
+    getLastDataViewId(initialControlPanelsState) ?? defaultDataviewId ?? undefined
+  );
   const lastSavedControlsPanelState$ = new BehaviorSubject(initialControlPanelsState);
   const initialControlIds = Object.keys(initialControlPanelsState);
   const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
@@ -79,6 +83,9 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
     { panelType, initialState }: PanelPackage<DefaultControlState>,
     index: number
   ) {
+    if ((initialState as DefaultDataControlState)?.dataViewId) {
+      lastUsedDataViewId$.next((initialState as DefaultDataControlState).dataViewId);
+    }
     const id = generateId();
     const nextControlsInOrder = [...controlsInOrder$.value];
     nextControlsInOrder.splice(index, 0, {
@@ -156,6 +163,7 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
       return controlsRuntimeState;
     },
     api: {
+      lastUsedDataViewId$: lastUsedDataViewId$ as PublishingSubject<string | undefined>,
       getSerializedStateForChild: (childId: string) => {
         const controlPanelState = controlsPanelState[childId];
         return controlPanelState ? { rawState: controlPanelState } : undefined;
@@ -196,7 +204,7 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
         });
       },
     } as PresentationContainer &
-      HasSerializedChildState<ControlPanelState> & { untilInitialized: () => Promise<void> },
+      HasSerializedChildState<ControlPanelState> & Pick<ControlGroupApi, 'untilInitialized' | 'lastUsedDataViewId$'>,
     comparators: {
       controlsInOrder: [
         controlsInOrder$,
@@ -221,4 +229,14 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
       Pick<ControlGroupComparatorState, 'controlsInOrder' | 'initialChildControlState'>
     >,
   };
+}
+
+function getLastDataViewId(initialControlPanelsState: ControlPanelsState) {
+  let dataViewId: string | undefined;
+  Object.values(initialControlPanelsState).forEach(panelState => {
+    if ((panelState as unknown as DefaultDataControlState).dataViewId) {
+      dataViewId = (panelState as unknown as DefaultDataControlState).dataViewId;
+    }
+  });
+  return dataViewId;
 }
