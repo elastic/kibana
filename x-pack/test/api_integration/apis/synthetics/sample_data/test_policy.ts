@@ -554,18 +554,7 @@ export const comparePolicies = (aPolicy: PackagePolicy, bPolicy: PackagePolicy) 
   delete a.inputs;
   delete b.inputs;
 
-  omitNamespace(a, b);
-
   expect(a).toEqual(b);
-};
-
-export const omitNamespace = (aPolicy: PackagePolicy, bPolicy: PackagePolicy) => {
-  if (aPolicy.namespace === undefined) {
-    omit(aPolicy, 'namespace');
-  }
-  if (bPolicy.namespace === undefined) {
-    omit(bPolicy, 'namespace');
-  }
 };
 
 export const ignoreTestFields = [

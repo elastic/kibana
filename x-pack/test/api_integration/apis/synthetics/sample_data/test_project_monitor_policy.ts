@@ -42,7 +42,6 @@ export const getTestProjectSyntheticsPolicyLightweight = (
     id: '',
     locationId: 'fleet_managed',
     locationName: 'Fleet Managed',
-    namespace: boolean,
   }
 ): PackagePolicy => ({
   id: `4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
