@@ -15,7 +15,7 @@ import {
   type KibanaResponseFactory,
   ResponseToken,
 } from '@kbn/core-http-server';
-import { EchoService } from './service';
+import { EchoService, type Echo } from '@kbn/dependency-injection-service-example-plugin/server';
 
 export type EchoRequest = KibanaRequest<never, never, TypeOf<typeof EchoRoute.validate.body>>;
 
@@ -31,7 +31,7 @@ export class EchoRoute implements IRouteHandler {
   };
 
   constructor(
-    @inject(EchoService) private readonly service: EchoService,
+    @inject(EchoService) private readonly service: Echo,
     @inject(ResponseToken) private readonly response: KibanaResponseFactory
   ) {}
 
