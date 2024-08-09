@@ -388,8 +388,9 @@ export function useOnSubmit({
 
         const promptForAgentEnrollment =
           !(agentCount && agentPolicies.length > 0) &&
-          !isAgentlessAgentPolicy(createdPolicy) &&
+          !isAgentlessPackagePolicy(data!.item) &&
           hasFleetAddAgentsPrivileges;
+
         if (promptForAgentEnrollment && hasAzureArmTemplate) {
           setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
           return;
