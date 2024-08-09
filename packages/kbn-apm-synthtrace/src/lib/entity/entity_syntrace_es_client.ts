@@ -7,12 +7,14 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { Readable, Transform, pipeline } from 'stream';
+import { PassThrough, Readable, Transform, pipeline } from 'stream';
 import { ESDocumentWithOperation } from '@kbn/apm-synthtrace-client';
 import { SynthtraceEsClient } from '../shared/base_client';
 import { Logger } from '../utils/create_logger';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
 import { getDedotTransform } from '../shared/get_dedot_transform';
+import { createEntityLatestAggregator } from './aggregators/create_entity_aggregator';
+import { fork } from '../utils/stream_utils';
 
 export class EntitySynthtraceEsClient extends SynthtraceEsClient<any> {
   constructor(options: { client: Client; logger: Logger } & any) {
@@ -20,24 +22,22 @@ export class EntitySynthtraceEsClient extends SynthtraceEsClient<any> {
       ...options,
       pipeline: entityPipeline(),
     });
-    this.dataStreams = ['.entities.v1.history*', '.entities.v1.latest*'];
+    this.indices = [
+      '.entities.v1.history.builtin_services',
+      '.entities.v1.latest.builtin_services',
+    ];
   }
 }
 
 function entityPipeline() {
   return (base: Readable) => {
-    const aggregators = [
-      // createTracesServiceAssetsAggregator(),
-      // createLogsServiceAssetsAggregator(),
-    ];
+    const aggregators = [createEntityLatestAggregator('5m')];
     return pipeline(
       base,
       getSerializeTransform(),
-      // fork(new PassThrough({ objectMode: true }), ...aggregators),
-      // getAssetsFilterTransform(),
-      // getMergeAssetsTransform(),
       firstSeenTimestampTransform(),
       lastSeenTimestampTransform(),
+      fork(new PassThrough({ objectMode: true }), ...aggregators),
       getRoutingTransform(),
       getDedotTransform(),
       (err: unknown) => {
@@ -70,7 +70,9 @@ function lastSeenTimestampTransform() {
     objectMode: true,
     transform(document: ESDocumentWithOperation<any>, encoding, callback) {
       const timestamp = document['@timestamp'];
-      document['entity.lastSeenTimestamp'] = new Date(timestamp).toISOString();
+      const isoString = new Date(timestamp).toISOString();
+      document['entity.lastSeenTimestamp'] = isoString;
+      document['event.ingested'] = isoString;
       callback(null, document);
     },
   });
@@ -80,20 +82,22 @@ function getRoutingTransform() {
   return new Transform({
     objectMode: true,
     transform(document: ESDocumentWithOperation<any>, encoding, callback) {
-      console.log('### caue  transform  document:', document);
-      let index: string | undefined;
       const entityType: string | undefined = document['entity.type'];
       if (entityType === undefined) {
         throw new Error(`entity.type was not defined: ${JSON.stringify(document)}`);
       }
       const entityIndexName = entityType === 'service' ? 'services' : entityType;
-      if ('@timestamp' in document) {
-        index = `.entities.v1.history.builtin_${entityIndexName}`;
-      } else {
-        index = `.entities.v1.latest.builtin_${entityIndexName}`;
+      if (document['entity.definitionId'] === 'history') {
+        document._index = `.entities.v1.history.builtin_${entityIndexName}`;
+      } else if (document['entity.definitionId'] === 'latest') {
+        // There should be a single latest document per entity.id
+        document._action = {
+          index: {
+            _index: `.entities.v1.latest.builtin_${entityIndexName}`,
+            _id: document['entity.id'],
+          },
+        };
       }
-
-      document._index = index;
 
       callback(null, document);
     },

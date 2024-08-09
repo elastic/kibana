@@ -8,16 +8,7 @@
 
 import { EntityDataStreamType } from '.';
 import { Serializable } from '../serializable';
-import { HistoryEntityDocument } from './history_entity';
-
-interface ServiceEntityDocument extends HistoryEntityDocument {
-  'service.environment': string;
-  'service.name': string;
-  'service.runtime.name': string[];
-  'service.runtime.version': string[];
-  'service.language.name': string[];
-  'service.version': string[];
-}
+import { EntityFields } from './entity_fields';
 
 interface ServiceMetrics {
   latency?: number;
@@ -27,9 +18,13 @@ interface ServiceMetrics {
   failedTransactionRate?: number;
 }
 
-class ServiceEntity extends Serializable<Partial<ServiceEntityDocument>> {
-  constructor(fields: Partial<ServiceEntityDocument>) {
-    super({ ...fields, 'entity.type': 'service', 'entity.definitionId': 'builtin_services' });
+class ServiceEntity extends Serializable<EntityFields> {
+  constructor(fields: EntityFields) {
+    super({
+      ...fields,
+      'entity.type': 'service',
+      'entity.definitionId': 'history',
+    });
   }
 
   metrics(metrics: ServiceMetrics) {
@@ -43,10 +38,12 @@ export function serviceEntity({
   dataStreamType,
   serviceName,
   environment,
+  entityId,
 }: {
   serviceName: string;
   agentName: string;
   dataStreamType: EntityDataStreamType[];
+  entityId: string;
   environment?: string;
 }) {
   return new ServiceEntity({
@@ -54,5 +51,6 @@ export function serviceEntity({
     'service.environment': environment,
     'data_stream.type': dataStreamType,
     'agent.name': [agentName],
+    'entity.id': entityId,
   });
 }
