@@ -33,7 +33,7 @@ import {
   withOption,
   appendSeparatorOption,
 } from '../definitions/options';
-import type {
+import {
   CommandDefinition,
   CommandOptionsDefinition,
   FunctionParameter,
@@ -43,7 +43,7 @@ import type {
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
-import { esqlToKibanaType } from './esql_to_kibana_type';
+import { isNumericDecimalType } from './esql_types';
 import type { ReasonTypes } from './types';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -127,7 +127,7 @@ export function isComma(char: string) {
 }
 
 export function isSourceCommand({ label }: { label: string }) {
-  return ['FROM', 'ROW', 'SHOW'].includes(label);
+  return ['FROM', 'ROW', 'SHOW', 'METRICS'].includes(label);
 }
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
@@ -226,6 +226,14 @@ function compareLiteralType(argType: string, item: ESQLLiteral) {
     return true;
   }
 
+  if (item.literalType === 'decimal' && isNumericDecimalType(argType)) {
+    return true;
+  }
+
+  if (item.literalType === 'string' && (argType === 'text' || argType === 'keyword')) {
+    return true;
+  }
+
   if (item.literalType !== 'string') {
     if (argType === item.literalType) {
       return true;
@@ -234,7 +242,7 @@ function compareLiteralType(argType: string, item: ESQLLiteral) {
   }
 
   // date-type parameters accept string literals because of ES auto-casting
-  return ['string', 'date'].includes(argType);
+  return ['string', 'date', 'date', 'date_period'].includes(argType);
 }
 
 /**
@@ -245,7 +253,14 @@ export function lookupColumn(
   { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
 ): ESQLRealField | ESQLVariable | undefined {
   const columnName = getQuotedColumnName(column);
-  return fields.get(columnName) || variables.get(columnName)?.[0];
+  return (
+    fields.get(columnName) ||
+    variables.get(columnName)?.[0] ||
+    // It's possible columnName has backticks "`fieldName`"
+    // so we need to access the original name as well
+    fields.get(column.name) ||
+    variables.get(column.name)?.[0]
+  );
 }
 
 const ARRAY_REGEXP = /\[\]$/;
@@ -255,10 +270,18 @@ export function isArrayType(type: string) {
 }
 
 const arrayToSingularMap: Map<FunctionParameterType, FunctionParameterType> = new Map([
-  ['number[]', 'number'],
-  ['date[]', 'date'],
+  ['double[]', 'double'],
+  ['unsigned_long[]', 'unsigned_long'],
+  ['long[]', 'long'],
+  ['integer[]', 'integer'],
+  ['counter_integer[]', 'counter_integer'],
+  ['counter_long[]', 'counter_long'],
+  ['counter_double[]', 'counter_double'],
+  ['keyword[]', 'keyword'],
+  ['text[]', 'text'],
+  ['datetime[]', 'date'],
+  ['date_period[]', 'date_period'],
   ['boolean[]', 'boolean'],
-  ['string[]', 'string'],
   ['any[]', 'any'],
 ]);
 
@@ -407,7 +430,8 @@ export function checkFunctionArgMatchesDefinition(
     return true;
   }
   if (arg.type === 'literal') {
-    return compareLiteralType(argType, arg);
+    const matched = compareLiteralType(argType as string, arg);
+    return matched;
   }
   if (arg.type === 'function') {
     if (isSupportedFunction(arg.name, parentCommand).supported) {
@@ -428,11 +452,21 @@ export function checkFunctionArgMatchesDefinition(
     }
     const wrappedTypes = Array.isArray(validHit.type) ? validHit.type : [validHit.type];
     // if final type is of type any make it pass for now
-    return wrappedTypes.some((ct) => ['any', 'null'].includes(ct) || argType === ct);
+    return wrappedTypes.some(
+      (ct) =>
+        ['any', 'null'].includes(ct) ||
+        argType === ct ||
+        (ct === 'string' && ['text', 'keyword'].includes(argType as string))
+    );
   }
   if (arg.type === 'inlineCast') {
-    // TODO - remove with https://github.com/elastic/kibana/issues/174710
-    return argType === esqlToKibanaType(arg.castType);
+    const lowerArgType = argType?.toLowerCase();
+    const lowerArgCastType = arg.castType?.toLowerCase();
+    return (
+      lowerArgType === lowerArgCastType ||
+      // for valid shorthand casts like 321.12::int or "false"::bool
+      (['int', 'bool'].includes(lowerArgCastType) && argType.startsWith(lowerArgCastType))
+    );
   }
 }
 
@@ -610,3 +644,8 @@ export const isParam = (x: unknown): x is ESQLParamLiteral =>
   typeof x === 'object' &&
   (x as ESQLParamLiteral).type === 'literal' &&
   (x as ESQLParamLiteral).literalType === 'param';
+
+/**
+ * Compares two strings in a case-insensitive manner
+ */
+export const noCaseCompare = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();

@@ -29,6 +29,11 @@ export const muteAllAlertRoute = (
       validate: {
         params: paramSchema,
       },
+      options: {
+        summary: 'Mute all alert instances',
+        tags: ['oas-tag:alerting'],
+        deprecated: true,
+      },
     },
     router.handleLegacyErrors(async function (context, req, res) {
       verifyApiAccess(licenseState);

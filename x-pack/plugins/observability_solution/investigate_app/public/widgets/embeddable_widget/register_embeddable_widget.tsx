@@ -28,25 +28,16 @@ type Props = EmbeddableWidgetParameters & GlobalWidgetParameters;
 
 type ParentApi = ReturnType<React.ComponentProps<typeof ReactEmbeddableRenderer>['getParentApi']>;
 
-function ReactEmbeddable({
-  type,
-  config,
-  query,
-  filters,
-  timeRange: { from, to },
-  savedObjectId,
-}: Props) {
+function ReactEmbeddable({ type, config, timeRange: { from, to }, savedObjectId }: Props) {
   const configWithOverrides = useMemo(() => {
     return {
       ...config,
-      query,
-      filters,
       timeRange: {
         from,
         to,
       },
     };
-  }, [config, query, filters, from, to]);
+  }, [config, from, to]);
 
   const configWithOverridesRef = useRef(configWithOverrides);
 
@@ -74,14 +65,7 @@ function ReactEmbeddable({
   );
 }
 
-function LegacyEmbeddable({
-  type,
-  config,
-  query,
-  filters,
-  timeRange: { from, to },
-  savedObjectId,
-}: Props) {
+function LegacyEmbeddable({ type, config, timeRange: { from, to }, savedObjectId }: Props) {
   const {
     dependencies: {
       start: { embeddable },
@@ -104,8 +88,6 @@ function LegacyEmbeddable({
 
     const configWithOverrides = {
       ...configWithId,
-      query,
-      filters,
       timeRange: {
         from,
         to,
@@ -119,7 +101,7 @@ function LegacyEmbeddable({
     const instance = await factory.create(configWithOverrides);
 
     return instance;
-  }, [type, savedObjectId, config, from, to, embeddable, filters, query]);
+  }, [type, savedObjectId, config, from, to, embeddable]);
 
   const embeddableInstance = embeddableInstanceAsync.value;
 
@@ -203,7 +185,6 @@ export function registerEmbeddableWidget({ registerWidget }: RegisterWidgetOptio
         config: widget.parameters.config,
         savedObjectId: widget.parameters.savedObjectId,
         timeRange: widget.parameters.timeRange,
-        filters: widget.parameters.filters,
         query: widget.parameters.query,
       };
 

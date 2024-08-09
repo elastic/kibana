@@ -127,9 +127,8 @@ export class TaskTypeDictionary {
     return this.definitions.size;
   }
 
-  public get(type: string): TaskDefinition {
-    this.ensureHas(type);
-    return this.definitions.get(type)!;
+  public get(type: string): TaskDefinition | undefined {
+    return this.definitions.get(type);
   }
 
   public ensureHas(type: string) {

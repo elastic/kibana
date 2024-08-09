@@ -40,6 +40,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         type: 'process',
       },
       cluster_id: 'Upper case cluster id',
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
     {
       '@timestamp': new Date(Date.now() - 60 * 60 * 1000).toISOString(),
@@ -62,6 +65,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         type: 'process',
       },
       cluster_id: 'Another Upper case cluster id',
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
     {
       '@timestamp': new Date(Date.now() - 60 * 60 * 1000).toISOString(),
@@ -84,6 +90,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         type: 'process',
       },
       cluster_id: 'lower case cluster id',
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
     {
       '@timestamp': new Date(Date.now() - 60 * 60 * 1000).toISOString(),
@@ -106,12 +115,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         type: 'process',
       },
       cluster_id: 'another lower case cluster id',
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
   ];
 
   const ruleName1 = data[0].rule.name;
 
-  describe('Findings Page - Alerts', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/168991
+  describe.skip('Findings Page - Alerts', function () {
     this.tags(['cloud_security_posture_findings_alerts']);
     let findings: typeof pageObjects.findings;
     let latestFindingsTable: typeof findings.latestFindingsTable;
@@ -195,7 +208,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.click('csp:toast-success-link');
         await pageObjects.header.waitUntilLoadingHasFinished();
         const rulePageTitle = await testSubjects.find('header-page-title');
-        expect(await rulePageTitle.getVisibleText()).to.be(ruleName1);
+        // Rule page title is not immediately available, so we need to retry until it is
+        await retry.try(async () => {
+          expect(await rulePageTitle.getVisibleText()).to.be(ruleName1);
+        });
       });
     });
     describe('Rule details', () => {

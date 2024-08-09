@@ -11,6 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 export let core: CoreStart;
 
@@ -19,6 +20,7 @@ interface ServiceDeps {
   data: DataPublicPluginStart;
   uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;
+  share?: SharePluginStart;
 }
 
 const servicesReady$ = new BehaviorSubject<ServiceDeps | undefined>(undefined);
@@ -38,7 +40,8 @@ export const setKibanaServices = (
   kibanaCore: CoreStart,
   data: DataPublicPluginStart,
   uiActions: UiActionsStart,
-  fieldFormats: FieldFormatsStart
+  fieldFormats: FieldFormatsStart,
+  share?: SharePluginStart
 ) => {
   core = kibanaCore;
   servicesReady$.next({
@@ -46,5 +49,6 @@ export const setKibanaServices = (
     data,
     uiActions,
     fieldFormats,
+    share,
   });
 };

@@ -1,26 +1,10 @@
 {
   "id": "@kbn/core-ui-settings-browser-internal",
   "client": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-        "id": "def-common.UiSettingsClient",
+        "id": "def-public.UiSettingsClient",
         "type": "Class",
         "tags": [],
         "label": "UiSettingsClient",
@@ -28,9 +12,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-ui-settings-browser-internal",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreUiSettingsBrowserInternalPluginApi",
-            "section": "def-common.UiSettingsClient",
+            "section": "def-public.UiSettingsClient",
             "text": "UiSettingsClient"
           },
           " extends ",
@@ -42,7 +26,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-            "id": "def-common.UiSettingsClient.Unnamed",
+            "id": "def-public.UiSettingsClient.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -56,7 +40,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-                "id": "def-common.UiSettingsClient.Unnamed.$1",
+                "id": "def-public.UiSettingsClient.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -74,7 +58,7 @@
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-            "id": "def-common.UiSettingsClient.update",
+            "id": "def-public.UiSettingsClient.update",
             "type": "Function",
             "tags": [],
             "label": "update",
@@ -88,7 +72,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-                "id": "def-common.UiSettingsClient.update.$1",
+                "id": "def-public.UiSettingsClient.update.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
@@ -103,7 +87,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-                "id": "def-common.UiSettingsClient.update.$2",
+                "id": "def-public.UiSettingsClient.update.$2",
                 "type": "Any",
                 "tags": [],
                 "label": "newVal",
@@ -124,7 +108,7 @@
       },
       {
         "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-        "id": "def-common.UiSettingsService",
+        "id": "def-public.UiSettingsService",
         "type": "Class",
         "tags": [
           "Internal",
@@ -138,7 +122,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-            "id": "def-common.UiSettingsService.setup",
+            "id": "def-public.UiSettingsService.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
@@ -149,9 +133,9 @@
               ") => ",
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               }
             ],
@@ -161,7 +145,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-                "id": "def-common.UiSettingsService.setup.$1",
+                "id": "def-public.UiSettingsService.setup.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{ http, injectedMetadata }",
@@ -179,7 +163,7 @@
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-            "id": "def-common.UiSettingsService.start",
+            "id": "def-public.UiSettingsService.start",
             "type": "Function",
             "tags": [],
             "label": "start",
@@ -188,9 +172,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               }
             ],
@@ -202,7 +186,7 @@
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-            "id": "def-common.UiSettingsService.stop",
+            "id": "def-public.UiSettingsService.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
@@ -220,6 +204,22 @@
         "initialIsOpen": false
       }
     ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [],
     "interfaces": [],
     "enums": [],

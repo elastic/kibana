@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EuiFlyoutProps } from '@elastic/eui';
+import type { EuiFlyoutProps, EuiFlyoutResizableProps } from '@elastic/eui';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 
 /**
@@ -28,10 +28,11 @@ export interface OverlayFlyoutStart {
 /**
  * @public
  */
-export type OverlayFlyoutOpenOptions = Omit<EuiFlyoutProps, 'onClose'> & {
+export type OverlayFlyoutOpenOptions = Omit<EuiFlyoutProps | EuiFlyoutResizableProps, 'onClose'> & {
   /**
    * EuiFlyout onClose handler.
    * If provided the consumer is responsible for calling flyout.close() to close the flyout;
    */
   onClose?: (flyout: OverlayRef) => void;
+  isResizable?: boolean;
 };

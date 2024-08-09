@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
+export { formatRequest, parseEndpoint } from '@kbn/server-route-repository-utils';
 export { createServerRouteFactory } from './src/create_server_route_factory';
-export { formatRequest } from './src/format_request';
-export { parseEndpoint } from './src/parse_endpoint';
 export { decodeRequestParams } from './src/decode_request_params';
 export { routeValidationObject } from './src/route_validation_object';
 export { registerRoutes } from './src/register_routes';
@@ -23,4 +22,6 @@ export type {
   ServerRoute,
   RouteParamsRT,
   RouteState,
-} from './src/typings';
+  DefaultRouteCreateOptions,
+  DefaultRouteHandlerResources,
+} from '@kbn/server-route-repository-utils';

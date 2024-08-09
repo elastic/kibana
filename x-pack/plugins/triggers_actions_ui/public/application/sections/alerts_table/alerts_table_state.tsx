@@ -22,17 +22,15 @@ import {
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
-import type {
-  BrowserFields,
-  RuleRegistrySearchRequestPagination,
-} from '@kbn/rule-registry-plugin/common';
+import type { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import type { BrowserFields } from '@kbn/alerting-types';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type {
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks';
+import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query';
 import { DEFAULT_ALERTS_PAGE_SIZE } from '@kbn/alerts-ui-shared/src/common/constants';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import deepEqual from 'fast-deep-equal';
@@ -298,7 +296,7 @@ const AlertsTableStateWithQueryProvider = memo(
       storage,
       id,
       defaultColumns: columnConfigByClient,
-      initialBrowserFields: propBrowserFields,
+      alertsFields: propBrowserFields,
     });
 
     const [queryParams, setQueryParams] = useState({

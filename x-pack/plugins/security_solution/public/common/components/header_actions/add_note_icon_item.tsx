@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { NotesButton } from '../../../timelines/components/timeline/properties/helpers';
-import { TimelineType } from '../../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '../../../../common/api/timeline';
 import { useUserPrivileges } from '../user_privileges';
 import * as i18n from './translations';
 import { ActionIconItem } from './action_icon_item';
@@ -46,7 +46,7 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
         timelineType={timelineType}
         toggleShowNotes={toggleShowNotes}
         toolTip={
-          timelineType === TimelineType.template ? i18n.NOTES_DISABLE_TOOLTIP : NOTES_TOOLTIP
+          timelineType === TimelineTypeEnum.template ? i18n.NOTES_DISABLE_TOOLTIP : NOTES_TOOLTIP
         }
         eventId={eventId}
         notesCount={notesCount}
