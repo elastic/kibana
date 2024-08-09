@@ -471,7 +471,8 @@ export function AddCisIntegrationFormPageProvider({
 
     await navigateToEditIntegrationPage();
     await PageObjects.header.waitUntilLoadingHasFinished();
-  }
+  };
+
   const getFirstCspmIntegrationPageIntegration = async () => {
     const integration = await testSubjects.find('integrationNameLink');
     return await integration.getVisibleText();
