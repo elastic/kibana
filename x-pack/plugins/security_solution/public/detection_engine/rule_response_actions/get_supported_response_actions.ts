@@ -24,12 +24,10 @@ interface EnabledFeatures {
 
 export const getSupportedResponseActions = (
   actionTypes: ResponseActionType[],
-  enabledFeatures: EnabledFeatures,
   userPermissions: EnabledFeatures
 ): ResponseActionType[] =>
   actionTypes.reduce((acc: ResponseActionType[], actionType) => {
     const isEndpointAction = actionType.id === ResponseActionTypesEnum['.endpoint'];
-    if (!enabledFeatures.endpoint && isEndpointAction) return acc;
     if (ResponseActionTypes.options.includes(actionType.id))
       return [
         ...acc,
