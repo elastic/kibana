@@ -560,7 +560,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"immutable: Invalid literal value, expected false"`
+      `"immutable: Expected boolean, received number"`
     );
   });
 
@@ -574,18 +574,14 @@ describe('RuleToImport', () => {
     expectParseSuccess(result);
   });
 
-  test('You cannot set the immutable to be true', () => {
+  test('You can optionally set the immutable to be true', () => {
     const payload = getImportRulesSchemaMock({
-      // @ts-expect-error assign unsupported value
       immutable: true,
     });
 
     const result = RuleToImport.safeParse(payload);
-    expectParseError(result);
 
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"immutable: Invalid literal value, expected false"`
-    );
+    expectParseSuccess(result);
   });
 
   test('You cannot set the immutable to be a number', () => {
@@ -598,7 +594,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"immutable: Invalid literal value, expected false"`
+      `"immutable: Expected boolean, received number"`
     );
   });
 
