@@ -54,6 +54,7 @@ export type Result = 'ready';
   if (serverless) {
     // Satisfy spaces config for serverless:
     set(settings, 'xpack.spaces.allowFeatureVisibility', false);
+    set(settings, 'xpack.spaces.allowSolutionVisibility', false);
     const { startKibana } = createTestServerlessInstances({
       kibana: { settings, cliArgs },
     });

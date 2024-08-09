@@ -48,7 +48,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
 
     // source commands
     ...buildRuleGroup(
-      ['from', 'row', 'show', 'meta'],
+      ['from', 'row', 'show'],
       euiThemeVars.euiColorPrimaryText,
       true // isBold
     ),
@@ -60,6 +60,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'metadata',
         'mv_expand',
         'stats',
+        'inlinestats',
         'dissect',
         'grok',
         'project',

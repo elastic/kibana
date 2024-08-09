@@ -145,6 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
               'trusted_applications_read',
               'file_operations_all',
               'execute_operations_all',
+              'scan_operations_all',
             ],
             uptime: [
               'all',

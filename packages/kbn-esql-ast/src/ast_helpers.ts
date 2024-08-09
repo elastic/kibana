@@ -35,6 +35,9 @@ import type {
   ESQLCommandMode,
   ESQLInlineCast,
   ESQLUnknownItem,
+  ESQLNumericLiteralType,
+  FunctionSubtype,
+  ESQLNumericLiteral,
 } from './types';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -86,11 +89,14 @@ export function createList(ctx: ParserRuleContext, values: ESQLLiteral[]): ESQLL
   };
 }
 
-export function createNumericLiteral(ctx: DecimalValueContext | IntegerValueContext): ESQLLiteral {
+export function createNumericLiteral(
+  ctx: DecimalValueContext | IntegerValueContext,
+  literalType: ESQLNumericLiteralType
+): ESQLLiteral {
   const text = ctx.getText();
   return {
     type: 'literal',
-    literalType: 'number',
+    literalType,
     text,
     name: text,
     value: Number(text),
@@ -99,10 +105,13 @@ export function createNumericLiteral(ctx: DecimalValueContext | IntegerValueCont
   };
 }
 
-export function createFakeMultiplyLiteral(ctx: ArithmeticUnaryContext): ESQLLiteral {
+export function createFakeMultiplyLiteral(
+  ctx: ArithmeticUnaryContext,
+  literalType: ESQLNumericLiteralType
+): ESQLLiteral {
   return {
     type: 'literal',
-    literalType: 'number',
+    literalType,
     text: ctx.getText(),
     name: ctx.getText(),
     value: ctx.PLUS() ? 1 : -1,
@@ -157,12 +166,13 @@ export function createLiteral(
     location: getPosition(node.symbol),
     incomplete: isMissingText(text),
   };
-  if (type === 'number') {
+  if (type === 'decimal' || type === 'integer') {
     return {
       ...partialLiteral,
       literalType: type,
       value: Number(text),
-    };
+      paramType: 'number',
+    } as ESQLNumericLiteral<'decimal'> | ESQLNumericLiteral<'integer'>;
   } else if (type === 'param') {
     throw new Error('Should never happen');
   }
@@ -170,7 +180,7 @@ export function createLiteral(
     ...partialLiteral,
     literalType: type,
     value: text,
-  };
+  } as ESQLLiteral;
 }
 
 export function createTimeUnit(ctx: QualifiedIntegerLiteralContext): ESQLTimeInterval {
@@ -187,12 +197,13 @@ export function createTimeUnit(ctx: QualifiedIntegerLiteralContext): ESQLTimeInt
   };
 }
 
-export function createFunction(
+export function createFunction<Subtype extends FunctionSubtype>(
   name: string,
   ctx: ParserRuleContext,
-  customPosition?: ESQLLocation
-): ESQLFunction {
-  return {
+  customPosition?: ESQLLocation,
+  subtype?: Subtype
+): ESQLFunction<Subtype> {
+  const node: ESQLFunction<Subtype> = {
     type: 'function',
     name,
     text: ctx.getText(),
@@ -200,6 +211,10 @@ export function createFunction(
     args: [],
     incomplete: Boolean(ctx.exception),
   };
+  if (subtype) {
+    node.subtype = subtype;
+  }
+  return node;
 }
 
 function walkFunctionStructure(

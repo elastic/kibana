@@ -30,7 +30,7 @@ const NODE: InfraWaffleMapNode = {
   id: 'host-01',
   name: 'host-01',
   path: [{ value: 'host-01', label: 'host-01' }],
-  metrics: [{ name: 'cpu' }],
+  metrics: [{ name: 'cpuTotal' }],
 };
 
 export const nextTick = () => new Promise((res) => process.nextTick(res));
@@ -45,10 +45,11 @@ describe('ConditionalToolTip', () => {
           name: 'host-01',
           path: [{ label: 'host-01', value: 'host-01', ip: '192.168.1.10' }],
           metrics: [
+            { name: 'cpuTotal', value: 0.1, avg: 0.4, max: 0.7 },
             { name: 'cpu', value: 0.1, avg: 0.4, max: 0.7 },
             { name: 'memory', value: 0.8, avg: 0.8, max: 1 },
-            { name: 'tx', value: 1000000, avg: 1000000, max: 1000000 },
-            { name: 'rx', value: 1000000, avg: 1000000, max: 1000000 },
+            { name: 'txV2', value: 1000000, avg: 1000000, max: 1000000 },
+            { name: 'rxV2', value: 1000000, avg: 1000000, max: 1000000 },
             {
               name: 'cedd6ca0-5775-11eb-a86f-adb714b6c486',
               max: 0.34164999922116596,
@@ -78,13 +79,14 @@ describe('ConditionalToolTip', () => {
       },
     });
     const expectedMetrics = [
+      { type: 'cpuTotal' },
       { type: 'cpu' },
       { type: 'memory' },
-      { type: 'tx' },
-      { type: 'rx' },
+      { type: 'txV2' },
+      { type: 'rxV2' },
       {
         aggregation: 'avg',
-        field: 'host.cpu.pct',
+        field: 'host.cpuTotal.pct',
         id: 'cedd6ca0-5775-11eb-a86f-adb714b6c486',
         label: 'My Custom Label',
         type: 'custom',
@@ -139,11 +141,11 @@ const mockedUseWaffleOptionsContexReturnValue: ReturnType<typeof useWaffleOption
   nodeType: 'host',
   customOptions: [],
   view: 'map',
-  metric: { type: 'cpu' },
+  metric: { type: 'cpuTotal' },
   customMetrics: [
     {
       aggregation: 'avg',
-      field: 'host.cpu.pct',
+      field: 'host.cpuTotal.pct',
       id: 'cedd6ca0-5775-11eb-a86f-adb714b6c486',
       label: 'My Custom Label',
       type: 'custom',

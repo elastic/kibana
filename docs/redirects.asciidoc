@@ -111,10 +111,10 @@ This page was deleted. See <<development-visualize-index>>.
 
 deprecated::[7.9.0]
 
-Watcher error reports have been removed and replaced with Kibana's <<apm-alerts,alerting and actions>> feature.
-To create error alerts with new tool, select **Alerts** - **Create threshold alert** - **Error rate**.
+// Watcher error reports have been removed and replaced with Kibana's <<apm-alerts,alerting and actions>> feature.
+// To create error alerts with new tool, select **Alerts** - **Create threshold alert** - **Error rate**.
 
-More information on this new feature is available in <<apm-alerts>>.
+// More information on this new feature is available in <<apm-alerts>>.
 
 [role="exclude",id="development-security-rbac"]
 == Role-based access control
@@ -438,3 +438,330 @@ For the most up-to-date API details, refer to the
 == Add connectors to cases
 
 This content has moved. Refer to <<manage-cases-settings>>.
+
+////
+APM redirects
+////
+
+:apm-docs-move-notice: This documentation has moved to the {observability-guide}/apm.html[Observability guide] as of version 8.14.
+
+[role="exclude",id="xpack-apm"]
+== APM
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-ui.html[the APM UI documentation].
+
+[role="exclude",id="apm-ui"]
+== Set up
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-ui.html[the APM UI documentation].
+
+[role="exclude",id="apm-getting-started"]
+== Get started
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm.html[the APM UI documentation].
+
+[role="exclude",id="services"]
+== Services
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-services.html[Services].
+
+[role="exclude",id="traces"]
+== Traces
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-traces.html[Traces].
+
+[role="exclude",id="dependencies"]
+== Dependencies
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-dependencies.html[Dependencies].
+
+[role="exclude",id="service-maps"]
+== Service Map
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-service-maps.html[Service Map].
+
+[float]
+[[service-maps-supported]]
+=== Supported APM agents
+
+Refer to {observability-guide}/apm-service-maps.html#service-maps-supported[Supported APM agents].
+
+[role="exclude",id="service-overview"]
+== Service overview
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-service-overview.html[Service overview].
+
+[float]
+[[service-span-duration]]
+=== Span types average duration and dependencies
+
+Refer to {observability-guide}/apm-service-overview.html#service-span-duration[Service overview].
+
+[role="exclude",id="mobile-service-overview"]
+== Mobile service overview
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-mobile-service-overview.html[Mobile service overview].
+
+[role="exclude",id="transactions"]
+== Transactions
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-transactions.html[Transactions].
+
+[role="exclude",id="spans"]
+== Trace sample timeline
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-spans.html[Trace sample timeline].
+
+[role="exclude",id="errors"]
+== Errors
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-errors.html[Errors].
+
+[role="exclude",id="metrics"]
+== Metrics
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-metrics.html[Metrics].
+
+[role="exclude",id="infrastructure"]
+== Infrastructure
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-infrastructure.html[Infrastructure].
+
+[role="exclude",id="logs"]
+== Logs
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-logs.html[Logs].
+
+[role="exclude",id="apm-how-to"]
+== How-to guides
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-how-to-guides.html[How-to guides].
+
+[role="exclude",id="agent-configuration"]
+== Configure APM agents with central config
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-agent-configuration.html[Configure APM agents with central config].
+
+[role="exclude",id="apm-spaces"]
+== Control access to APM data
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-spaces.html[Control access to APM data].
+
+[role="exclude",id="apm-alerts"]
+== Create an alert
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-alerts.html[Create an alert].
+
+[role="exclude",id="custom-links"]
+== Create custom links
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-custom-links.html[Create custom links].
+
+[role="exclude",id="filters"]
+== Filter data
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-filters.html[Filter data].
+
+[float]
+[[environment-selector]]
+=== Service environment filter
+
+Refer to {observability-guide}/apm-filters.html#environment-selector[Filter data].
+
+[role="exclude",id="correlations"]
+== Find transaction latency and failure correlations
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-correlations.html[Find transaction latency and failure correlations].
+
+[role="exclude",id="agent-explorer"]
+== Identify deployment details for APM agents
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-agent-explorer.html[Identify deployment details for APM agents].
+
+[role="exclude",id="machine-learning-integration"]
+== Integrate with machine learning
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-machine-learning-integration.html[Integrate with machine learning].
+
+[role="exclude",id="mobile-session-explorer"]
+== Exploring mobile sessions with Discover
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-mobile-session-explorer.html[Exploring mobile sessions with Discover].
+
+[role="exclude",id="_viewing_sessions_with_discover"]
+== Viewing sessions with Discover
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-mobile-session-explorer.html#viewing-sessions-with-discover[Viewing sessions with Discover].
+
+[role="exclude",id="apm-lambda"]
+== Observe Lambda functions
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-lambda.html[Observe Lambda functions].
+
+[role="exclude",id="advanced-queries"]
+== Query your data
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-advanced-queries.html[Query your data].
+
+[role="exclude",id="storage-explorer"]
+== Storage Explorer
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-storage-explorer.html[Storage Explorer].
+
+[role="exclude",id="transactions-annotations"]
+== Track deployments with annotations
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-transactions-annotations.html[Track deployments with annotations].
+
+[role="exclude",id="apm-app-users"]
+== Users and privileges
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-app-users.html[Users and privileges].
+
+[role="exclude",id="apm-app-reader"]
+== Create an APM reader user
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-app-reader.html[Create an APM reader user].
+
+[role="exclude",id="apm-app-annotation-user-create"]
+== Create an annotation user
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-app-annotation-user-create.html[Create an annotation user].
+
+[role="exclude",id="apm-app-central-config-user"]
+== Create a central config user
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-app-central-config-user.html[Create a central config user].
+
+[role="exclude",id="apm-app-storage-explorer-user-create"]
+== Create a storage explorer user
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-app-storage-explorer-user-create.html[Create a storage explorer user].
+
+[role="exclude",id="apm-app-api-user"]
+== Create an API user
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-app-api-user.html[Create an API user].
+
+[role="exclude",id="apm-settings-in-kibana"]
+== Settings
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-settings-in-kibana.html[Settings].
+
+[role="exclude",id="apm-api"]
+== REST API
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-api.html[REST API].
+
+[role="exclude",id="agent-config-api"]
+== Agent Configuration API
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-agent-config-api.html[Agent Configuration API].
+
+[role="exclude",id="apm-annotation-api"]
+== Annotation API
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-annotation-api.html[Annotation API].
+
+[role="exclude",id="rum-sourcemap-api"]
+== RUM source map API
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-rum-sourcemap-api.html[RUM source map API].
+
+[role="exclude",id="agent-key-api"]
+== APM agent Key API
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-agent-key-api.html[APM agent Key API].
+
+[role="exclude",id="troubleshooting"]
+== Troubleshooting
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-app-troubleshooting.html[Troubleshooting].
+
+:!apm-docs-move-notice:

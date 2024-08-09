@@ -41,8 +41,7 @@ interface GetDefaultAssistantGraphParams {
   agentRunnable: AgentRunnableSequence;
   dataClients?: AssistantDataClients;
   conversationId?: string;
-  getLlmInstance: () => BaseChatModel;
-  llm: BaseChatModel;
+  createLlmInstance: () => BaseChatModel;
   logger: Logger;
   tools: StructuredTool[];
   responseLanguage: string;
@@ -61,8 +60,7 @@ export const getDefaultAssistantGraph = ({
   agentRunnable,
   conversationId,
   dataClients,
-  getLlmInstance,
-  llm,
+  createLlmInstance,
   logger,
   responseLanguage,
   tools,
@@ -90,7 +88,7 @@ export const getDefaultAssistantGraph = ({
         default: () => undefined,
       },
       messages: {
-        value: (x: BaseMessage[], y: BaseMessage[]) => x.concat(y),
+        value: (x: BaseMessage[], y: BaseMessage[]) => y ?? x,
         default: () => [],
       },
       chatTitle: {
@@ -106,7 +104,6 @@ export const getDefaultAssistantGraph = ({
 
     // Default node parameters
     const nodeParams: NodeParamsBase = {
-      model: llm,
       logger,
     };
 
@@ -131,6 +128,7 @@ export const getDefaultAssistantGraph = ({
     const generateChatTitleNode = (state: AgentState) =>
       generateChatTitle({
         ...nodeParams,
+        model: createLlmInstance(),
         state,
         responseLanguage,
       });
@@ -154,7 +152,7 @@ export const getDefaultAssistantGraph = ({
     const respondNode = (state: AgentState) =>
       respond({
         ...nodeParams,
-        llm: getLlmInstance(),
+        model: createLlmInstance(),
         state,
       });
     const shouldContinueEdge = (state: AgentState) => shouldContinue({ ...nodeParams, state });
