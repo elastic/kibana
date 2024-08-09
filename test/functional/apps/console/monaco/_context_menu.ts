@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // By default should be copy as cURL
         let copyAsButton = await testSubjects.find('consoleMenuCopyAsButton');
         let buttonLabel = await copyAsButton.getVisibleText();
-        expect(buttonLabel).to.contain('cURL');
+        expect(buttonLabel).to.contain('curl');
 
         // Select python as default language
         await PageObjects.console.changeDefaultLanguage('python');
