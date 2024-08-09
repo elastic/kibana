@@ -27,7 +27,7 @@ export const API_HEADERS = Object.freeze({
 
 export const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
 
-const requestWithApiKey = <T>(
+const serverlessRequest = <T>(
   response: string,
   restOptions: Partial<Cypress.RequestOptions>
 ): Cypress.Chainable<Cypress.Response<T>> => {
@@ -40,7 +40,7 @@ const requestWithApiKey = <T>(
   });
 };
 
-const requestWithoutApiKey = <T>(
+const essRequest = <T>(
   restOptions: Partial<Cypress.RequestOptions>
 ): Cypress.Chainable<Cypress.Response<T>> => {
   return cy.request<T>({
@@ -56,10 +56,10 @@ export const rootRequest = <T = unknown>({
 }: Partial<Cypress.RequestOptions>): Cypress.Chainable<Cypress.Response<T>> => {
   if (Cypress.env('IS_SERVERLESS')) {
     return cy.task('getApiKeyForRole', 'admin').then((response) => {
-      return requestWithApiKey<T>(response as string, restOptions);
+      return serverlessRequest<T>(response as string, restOptions);
     });
   } else {
-    return requestWithoutApiKey<T>(restOptions);
+    return essRequest<T>(restOptions);
   }
 };
 

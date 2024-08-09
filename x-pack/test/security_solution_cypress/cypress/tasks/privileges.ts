@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { API_AUTH } from './api_calls/common';
+import { ESS_API_AUTH } from './api_calls/common';
 
 interface User {
   username: string;
@@ -189,7 +189,7 @@ export const createUsersAndRoles = (users: User[], roles: Role[]) => {
       body: role.privileges,
       headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
       method: 'PUT',
-      auth: API_AUTH,
+      auth: ESS_API_AUTH,
       url: `/api/security/role/${role.name}`,
     })
       .its('status')
@@ -209,7 +209,7 @@ export const createUsersAndRoles = (users: User[], roles: Role[]) => {
       },
       headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
       method: 'POST',
-      auth: API_AUTH,
+      auth: ESS_API_AUTH,
       url: `/internal/security/users/${user.username}`,
     })
       .its('status')
@@ -223,7 +223,7 @@ export const deleteUsersAndRoles = (users: User[], roles: Role[]) => {
     cy.request({
       headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
       method: 'DELETE',
-      auth: API_AUTH,
+      auth: ESS_API_AUTH,
       url: `/internal/security/users/${user.username}`,
       failOnStatusCode: false,
     })
@@ -236,7 +236,7 @@ export const deleteUsersAndRoles = (users: User[], roles: Role[]) => {
     cy.request({
       headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
       method: 'DELETE',
-      auth: API_AUTH,
+      auth: ESS_API_AUTH,
       url: `/api/security/role/${role.name}`,
       failOnStatusCode: false,
     })
