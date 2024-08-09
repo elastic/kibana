@@ -14,11 +14,11 @@ import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLColumn, ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
 
-export const hasStartEndParams = (query: string) => /\?t_start|\?t_end/i.test(query);
+export const hasStartEndParams = (query: string) => /\?_t_start|\?_t_end/i.test(query);
 
 export const getStartEndParams = (query: string, time?: TimeRange) => {
-  const startNamedParams = /\?t_start/i.test(query);
-  const endNamedParams = /\?t_end/i.test(query);
+  const startNamedParams = /\?_t_start/i.test(query);
+  const endNamedParams = /\?_t_end/i.test(query);
   if (time && (startNamedParams || endNamedParams)) {
     const timeParams = {
       start: startNamedParams ? dateMath.parse(time.from)?.toISOString() : undefined,
@@ -26,10 +26,10 @@ export const getStartEndParams = (query: string, time?: TimeRange) => {
     };
     const namedParams = [];
     if (timeParams?.start) {
-      namedParams.push({ t_start: timeParams.start });
+      namedParams.push({ _t_start: timeParams.start });
     }
     if (timeParams?.end) {
-      namedParams.push({ t_end: timeParams.end });
+      namedParams.push({ _t_end: timeParams.end });
     }
     return namedParams;
   }
