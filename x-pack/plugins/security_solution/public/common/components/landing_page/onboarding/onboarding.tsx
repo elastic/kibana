@@ -43,15 +43,14 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
   const {
     onCardClicked,
     toggleTaskCompleteStatus,
-    state: { activeSections, finishedCards, expandedCards },
+    state: { activeSections, finishedCardIds, expandedCards },
   } = useTogglePanel({ onboardingSteps, spaceId });
   const productTier = useMemo(
     () =>
       productTypes?.find((product) => product.product_line === ProductLine.security)?.product_tier,
     [productTypes]
   );
-  const { wrapperStyles, progressSectionStyles, stepsSectionStyles, bannerStyles } =
-    useOnboardingStyles();
+  const { wrapperStyles, stepsSectionStyles, bannerStyles } = useOnboardingStyles();
   const { telemetry, storage } = useKibana().services;
   const onStepLinkClicked = useCallback(
     (params: OnboardingHubStepLinkClickedParams) => {
@@ -100,7 +99,7 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
       >
         <StepContextProvider
           expandedCards={expandedCards}
-          finishedCards={finishedCards}
+          finishedCardIds={finishedCardIds}
           indicesExist={!!indicesExist}
           onCardClicked={onCardClicked}
           onStepLinkClicked={onStepLinkClicked}

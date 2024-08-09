@@ -22,7 +22,7 @@ import { fetchRuleManagementFilters } from '../apis';
 import { createProjectSteps, enablePrebuildRuleSteps, overviewVideoSteps } from '../sections';
 
 jest.mock('./step_content', () => ({
-  StepContent: () => <div data-test-subj="mock-step-content" />,
+  CardContent: () => <div data-test-subj="mock-step-content" />,
 }));
 
 jest.mock('../context/step_context');
@@ -38,17 +38,17 @@ jest.mock('@kbn/security-solution-navigation', () => ({
 }));
 
 describe('CardStepComponent', () => {
-  const onStepClicked = jest.fn();
+  const onCardClicked = jest.fn();
   const toggleTaskCompleteStatus = jest.fn();
-  const expandedSteps = new Set([]);
+  const expandedCards = new Set([]);
 
   const props = {
-    cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
-    expandedSteps,
-    finishedSteps: new Set<StepId>(),
+    cardId: CardId.watchTheOverviewVideo,
+    expandedCards,
+    finishedCards: new Set<StepId>(),
     isExpandedCard: true,
     toggleTaskCompleteStatus,
-    onStepClicked,
+    onCardClicked,
     sectionId: SectionId.quickStart,
     step: overviewVideoSteps[0],
   };
@@ -61,14 +61,14 @@ describe('CardStepComponent', () => {
   it('should toggle step expansion on click', () => {
     const { getByText } = render(<CardStep {...props} />);
 
-    const stepTitle = getByText(testStepTitle);
-    fireEvent.click(stepTitle);
+    const cardTitle = getByText(testStepTitle);
+    fireEvent.click(cardTitle);
 
-    expect(onStepClicked).toHaveBeenCalledTimes(1);
-    expect(onStepClicked).toHaveBeenCalledWith({
+    expect(onCardClicked).toHaveBeenCalledTimes(1);
+    expect(onCardClicked).toHaveBeenCalledWith({
       sectionId: SectionId.quickStart,
       stepId: OverviewSteps.getToKnowElasticSecurity,
-      cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
+      cardId: CardId.watchTheOverviewVideo,
       isExpanded: true,
       trigger: 'click',
     });
@@ -77,8 +77,8 @@ describe('CardStepComponent', () => {
   it('should render step content when expanded', () => {
     const mockProps = {
       ...props,
-      expandedSteps: new Set([
-        QuickStartSectionCardsId.watchTheOverviewVideo,
+      expandedCards: new Set([
+        CardId.watchTheOverviewVideo,
       ]) as unknown as Set<StepId>,
     };
     const { getByTestId } = render(<CardStep {...mockProps} />);
@@ -93,15 +93,15 @@ describe('CardStepComponent', () => {
       ...props,
       stepId: CreateProjectSteps.createFirstProject,
       cardId: QuickStartSectionCardsId.createFirstProject,
-      finishedSteps: new Set<StepId>([CreateProjectSteps.createFirstProject]),
+      finishedCards: new Set<StepId>([CreateProjectSteps.createFirstProject]),
       step: { ...createProjectSteps[0], description: undefined, splitPanel: undefined },
     };
     const { getByText } = render(<CardStep {...mockProps} />);
 
-    const stepTitle = getByText('Create your first project');
-    fireEvent.click(stepTitle);
+    const cardTitle = getByText('Create your first project');
+    fireEvent.click(cardTitle);
 
-    expect(onStepClicked).toHaveBeenCalledTimes(0);
+    expect(onCardClicked).toHaveBeenCalledTimes(0);
   });
 
   it('should not show the step as completed when it is not', () => {
@@ -118,7 +118,7 @@ describe('CardStepComponent', () => {
     const mockProps = {
       ...props,
       cardId: GetStartedWithAlertsCardsId.enablePrebuiltRules,
-      finishedSteps: new Set<StepId>([EnablePrebuiltRulesSteps.enablePrebuiltRules]),
+      finishedCards: new Set<StepId>([EnablePrebuiltRulesSteps.enablePrebuiltRules]),
       sectionId: SectionId.getStartedWithAlerts,
       step: enablePrebuildRuleSteps[0],
     };

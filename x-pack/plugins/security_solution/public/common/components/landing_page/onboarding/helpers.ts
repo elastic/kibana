@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import type { Card, Section, SectionId } from './data_ingestion_hub/body/types';
-
 import { getSections, getCards } from './sections';
 import { CardId } from './types';
-import type { ActiveSections } from './types';
+import type { ActiveSections, Card, Section } from './types';
 
 export const CONTENT_WIDTH = 1150;
 
@@ -20,23 +18,6 @@ export const isDefaultFinishedCard = (cardId: CardId, onboardingSteps: CardId[])
 
 export const getActiveCards = (cards: Card[] | undefined, onboardingSteps: CardId[]) =>
   cards?.filter((card) => onboardingSteps.includes(card.id));
-
-const getfinishedActiveCards = (
-  finishedCardIds: CardId[] | undefined,
-  activeCardIds: CardId[] | undefined
-) => {
-  const finishedActiveSteps = finishedCardIds?.reduce((acc, finishedCardId) => {
-    const activeFinishedCardId = activeCardIds?.find(
-      (activeCardId) => activeCardId === finishedCardId
-    );
-    if (activeFinishedCardId) {
-      acc.push(activeFinishedCardId);
-    }
-    return acc;
-  }, [] as CardId[]);
-
-  return new Set(finishedActiveSteps);
-};
 
 export const findCardSectionByCardId = (
   cardId: string
@@ -52,21 +33,12 @@ export const findCardSectionByCardId = (
   return { matchedCard, matchedSection };
 };
 
-export const getCard = ({ cardId, sectionId }: { cardId: CardId; sectionId: SectionId }) => {
-  const sections = getSections();
-  const section = sections.find(({ id }) => id === sectionId);
-  const cards = section?.cards;
-  const card = cards?.find(({ id }) => id === cardId);
-
-  return card;
-};
-
 export const setupActiveSections = (finishedCardsId: Set<CardId>, onboardingSteps: CardId[]) =>
   getSections().reduce<ActiveSections>((acc, section) => {
     const activeCards = getActiveCards(section.cards, onboardingSteps);
 
     if (activeCards && Object.keys(activeCards).length > 0) {
-      acc[section.id] = activeCards.reduce((accCards, card) => {
+      acc[section.id] = activeCards.reduce<Partial<Record<CardId, Card>>>((accCards, card) => {
         const isCompleted = finishedCardsId.has(card.id);
         accCards[card.id] = {
           ...card,
@@ -76,7 +48,7 @@ export const setupActiveSections = (finishedCardsId: Set<CardId>, onboardingStep
       }, {});
     }
     return acc;
-  }, {} as ActiveSections);
+  }, {});
 
 export const updateActiveSections = ({
   finishedCardIds,

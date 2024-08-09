@@ -18,7 +18,7 @@ const TogglePanelComponent: React.FC<{
 }> = ({ activeSections }) => {
   const { euiTheme } = useEuiTheme();
 
-  const { expandedCards, finishedCards, toggleTaskCompleteStatus, onCardClicked } =
+  const { expandedCards, finishedCardIds, toggleTaskCompleteStatus, onCardClicked } =
     useStepContext();
 
   const { setUpSections } = useSetUpSections({ euiTheme });
@@ -27,14 +27,14 @@ const TogglePanelComponent: React.FC<{
       setUpSections({
         activeSections,
         expandedCards,
-        finishedCards,
+        finishedCardIds,
         toggleTaskCompleteStatus,
         onCardClicked,
       }),
     [
       activeSections,
       expandedCards,
-      finishedCards,
+      finishedCardIds,
       onCardClicked,
       setUpSections,
       toggleTaskCompleteStatus,

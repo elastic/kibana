@@ -7,31 +7,23 @@
 
 import { useEffect, useRef } from 'react';
 import { useKibana } from '../../../../lib/kibana';
-import type {
-  StepId,
-  CardId,
-  SectionId,
-  CheckIfStepCompleted,
-  ToggleTaskCompleteStatus,
-} from '../types';
+import type { CardId, SectionId, CheckIfStepCompleted, ToggleTaskCompleteStatus } from '../types';
 
 interface Props {
-  autoCheckIfStepCompleted?: CheckIfStepCompleted;
+  autoCheckIfCardCompleted?: CheckIfStepCompleted;
   cardId: CardId;
+  cardTitle?: string;
   indicesExist: boolean;
   sectionId: SectionId;
-  stepId: StepId;
-  stepTitle?: string;
   toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
 }
 
 export const useCheckStepCompleted = ({
-  autoCheckIfStepCompleted,
+  autoCheckIfCardCompleted,
   cardId,
+  cardTitle,
   indicesExist,
   sectionId,
-  stepId,
-  stepTitle,
   toggleTaskCompleteStatus,
 }: Props) => {
   const {
@@ -41,24 +33,23 @@ export const useCheckStepCompleted = ({
   const addError = useRef(toasts.addError.bind(toasts)).current;
 
   useEffect(() => {
-    if (!autoCheckIfStepCompleted) {
+    if (!autoCheckIfCardCompleted) {
       return;
     }
 
     const abortSignal = new AbortController();
     const autoCheckStepCompleted = async () => {
-      const isDone = await autoCheckIfStepCompleted({
+      const isDone = await autoCheckIfCardCompleted({
         indicesExist,
         abortSignal,
         kibanaServicesHttp,
         onError: (error: Error) => {
-          addError(error, { title: `Failed to check ${stepTitle ?? stepId} completion.` });
+          addError(error, { title: `Failed to check ${cardTitle ?? cardId} completion.` });
         },
       });
 
       if (!abortSignal.signal.aborted) {
         toggleTaskCompleteStatus({
-          stepId,
           cardId,
           sectionId,
           undo: !isDone,
@@ -71,14 +62,13 @@ export const useCheckStepCompleted = ({
       abortSignal.abort();
     };
   }, [
-    autoCheckIfStepCompleted,
-    stepId,
+    autoCheckIfCardCompleted,
     cardId,
     sectionId,
     toggleTaskCompleteStatus,
     kibanaServicesHttp,
     indicesExist,
     addError,
-    stepTitle,
+    cardTitle,
   ]);
 };

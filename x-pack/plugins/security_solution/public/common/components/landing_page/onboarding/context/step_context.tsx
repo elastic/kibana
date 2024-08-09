@@ -12,7 +12,7 @@ import type { ToggleTaskCompleteStatus, CardId, ExpandedCards, OnCardClicked } f
 
 export interface StepContextType {
   expandedCards: ExpandedCards;
-  finishedCards: Set<CardId>;
+  finishedCardIds: Set<CardId>;
   indicesExist: boolean;
   onCardClicked: OnCardClicked;
   onStepLinkClicked: (params: OnboardingHubStepLinkClickedParams) => void;

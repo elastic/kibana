@@ -18,66 +18,59 @@ import React, { useCallback } from 'react';
 import classnames from 'classnames';
 import { useNavigateTo, SecurityPageName } from '@kbn/security-solution-navigation';
 
-import type {
-  CardId,
-  OnStepClicked,
-  ToggleTaskCompleteStatus,
-  SectionId,
-  StepId,
-  Step,
-} from '../types';
+import type { CardId, OnCardClicked, ToggleTaskCompleteStatus, SectionId, Card } from '../types';
 import { ALL_DONE_TEXT, EXPAND_STEP_BUTTON_LABEL } from '../translations';
 
-import { StepContent } from './step_content';
+import { CardContent } from './step_content';
 import { useCheckStepCompleted } from '../hooks/use_check_step_completed';
 import { useStepContext } from '../context/step_context';
 import { useCardStepStyles } from '../styles/card_step.styles';
+import { useCardItemStyles } from '../styles/card_item.styles';
 
 const CardStepComponent: React.FC<{
-  cardId: CardId;
-  expandedSteps: Set<StepId>;
-  finishedSteps: Set<StepId>;
+  card: Card;
+  expandedCards: Set<CardId>;
+  finishedCardIds: Set<CardId>;
   toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
-  onStepClicked: OnStepClicked;
+  onCardClicked: OnCardClicked;
   sectionId: SectionId;
-  step: Step;
 }> = ({
-  cardId,
-  expandedSteps,
-  finishedSteps = new Set(),
+  card,
+  expandedCards,
+  finishedCardIds = new Set(),
   toggleTaskCompleteStatus,
-  onStepClicked,
+  onCardClicked,
   sectionId,
-  step,
 }) => {
   const { navigateTo } = useNavigateTo();
 
-  const isExpandedStep = expandedSteps.has(step.id);
+  const isExpandedStep = expandedCards.has(card.id);
 
-  const { id: stepId, title, description, splitPanel, icon, autoCheckIfStepCompleted } = step;
-  const hasStepContent = description != null || splitPanel != null;
+  const cardItemPanelStyle = useCardItemStyles();
+
+  const { id: stepId, title, description, splitPanel, icon, autoCheckIfCardCompleted } = card;
+  const hasCardContent = description != null || splitPanel != null;
   const { indicesExist } = useStepContext();
 
   useCheckStepCompleted({
-    autoCheckIfStepCompleted,
-    cardId,
+    autoCheckIfCardCompleted,
+    cardId: card.id,
     indicesExist,
     sectionId,
-    stepId,
-    stepTitle: title,
+    cardTitle: title,
     toggleTaskCompleteStatus,
   });
 
-  const isDone = finishedSteps.has(stepId);
+  const isDone = finishedCardIds.has(stepId);
 
   const toggleStep = useCallback(
     (e) => {
       e.preventDefault();
       const newStatus = !isExpandedStep;
 
-      if (hasStepContent) {
+      if (hasCardContent) {
         // Toggle step and sync the expanded card step to storage & reducer
-        onStepClicked({ stepId, cardId, sectionId, isExpanded: newStatus, trigger: 'click' });
+        onCardClicked({ cardId: card.id, sectionId, isExpanded: newStatus, trigger: 'click' });
 
         navigateTo({
           deepLinkId: SecurityPageName.landing,
@@ -85,7 +78,7 @@ const CardStepComponent: React.FC<{
         });
       }
     },
-    [isExpandedStep, hasStepContent, onStepClicked, stepId, cardId, sectionId, navigateTo]
+    [isExpandedStep, hasCardContent, onCardClicked, card.id, sectionId, navigateTo, stepId]
   );
 
   const {
@@ -94,17 +87,10 @@ const CardStepComponent: React.FC<{
     stepTitleStyles,
     allDoneTextStyles,
     toggleButtonStyles,
-    getStepGroundStyles,
+    getCardGroundStyles,
     stepItemStyles,
   } = useCardStepStyles();
-  const stepGroundStyles = getStepGroundStyles({ hasStepContent });
-
-  const panelClassNames = classnames(
-    {
-      'step-panel-collapsed': !isExpandedStep,
-    },
-    stepPanelStyles
-  );
+  const stepGroundStyles = getCardGroundStyles({ hasCardContent });
 
   const stepIconClassNames = classnames('step-icon', {
     'step-icon-done': isDone,
@@ -114,14 +100,30 @@ const CardStepComponent: React.FC<{
   const stepTitleClassNames = classnames('step-title', stepTitleStyles);
   const allDoneTextNames = classnames('all-done-badge', allDoneTextStyles);
 
+  const panelClassNames = classnames(
+    {
+      'card-panel-collapsed': !isExpandedStep,
+    },
+    stepPanelStyles
+  );
+
+  const cardClassNames = classnames(
+    'card-item',
+    {
+      'card-expanded': isExpandedStep,
+    },
+    cardItemPanelStyle,
+    panelClassNames
+  );
+
   return (
     <EuiPanel
+      className={cardClassNames}
       color="plain"
       grow={false}
       hasShadow={false}
       borderRadius="none"
       paddingSize="none"
-      className={panelClassNames}
       id={stepId}
     >
       <EuiFlexGroup gutterSize="none" className={stepGroundStyles}>
@@ -149,20 +151,19 @@ const CardStepComponent: React.FC<{
               aria-expanded={isExpandedStep}
               size="xs"
               css={toggleButtonStyles}
-              isDisabled={!hasStepContent}
+              isDisabled={!hasCardContent}
             />
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {hasStepContent && (
-        <div className="stepContentWrapper">
-          <div className="stepContent">
-            <StepContent
-              autoCheckIfStepCompleted={isExpandedStep ? autoCheckIfStepCompleted : undefined}
-              cardId={cardId}
+      {expandedCards.has(card.id) && hasCardContent && (
+        <div className="cardContentWrapper">
+          <div className="cardContent">
+            <CardContent
+              autoCheckIfCardCompleted={isExpandedStep ? autoCheckIfCardCompleted : undefined}
+              card={card}
               indicesExist={indicesExist}
               sectionId={sectionId}
-              step={step}
               toggleTaskCompleteStatus={toggleTaskCompleteStatus}
             />
           </div>

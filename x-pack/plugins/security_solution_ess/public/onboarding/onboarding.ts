@@ -5,23 +5,17 @@
  * 2.0.
  */
 
-import {
-  AddIntegrationsSteps,
-  EnablePrebuiltRulesSteps,
-  OverviewSteps,
-  ViewAlertsSteps,
-  ViewDashboardSteps,
-} from '@kbn/security-solution-plugin/public';
+import { CardId } from '@kbn/security-solution-plugin/public';
 import type { Services } from '../common/services';
 
 export const setOnboardingSettings = (services: Services) => {
   const { securitySolution } = services;
 
   securitySolution.setOnboardingPageSettings.setAvailableSteps([
-    OverviewSteps.getToKnowElasticSecurity,
-    AddIntegrationsSteps.connectToDataSources,
-    ViewDashboardSteps.analyzeData,
-    EnablePrebuiltRulesSteps.enablePrebuiltRules,
-    ViewAlertsSteps.viewAlerts,
+    CardId.watchTheOverviewVideo,
+    CardId.addIntegrations,
+    CardId.viewDashboards,
+    CardId.enablePrebuiltRules,
+    CardId.viewAlerts,
   ]);
 };

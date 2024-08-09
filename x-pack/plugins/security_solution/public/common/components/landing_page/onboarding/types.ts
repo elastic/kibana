@@ -49,22 +49,21 @@ export type CheckIfStepCompleted<T = CardId> = T extends CardId.enablePrebuiltRu
   ? AutoCheckAddIntegrationsSteps
   : undefined;
 
-export interface Card {
+export interface Card<T = CardId> {
   id: CardId;
   hideSteps?: boolean;
-  autoCheckIfStepCompleted?: CheckIfStepCompleted<T>;
+  autoCheckIfCardCompleted?: CheckIfStepCompleted<T>;
   description?: Array<React.ReactNode | string>;
   splitPanel?: React.ReactNode;
   title?: string;
   icon?: EuiIconProps;
-  timeInMinutes?: number;
   isExpanded?: boolean;
   isCompleted?: boolean;
 }
 
 export type ExpandedCards = Set<CardId>;
 
-export type ActiveSections = Record<SectionId, Record<CardId, Card>>;
+export type ActiveSections = Partial<Record<SectionId, Partial<Record<CardId, Card>>>>;
 
 export enum SectionId {
   quickStart = 'quick_start',
@@ -84,7 +83,7 @@ export enum CardId {
 export interface TogglePanelReducer {
   activeSections: ActiveSections | null;
   expandedCards: Set<CardId>;
-  finishedCards: Set<CardId>;
+  finishedCardIds: Set<CardId>;
   onboardingSteps: CardId[];
 }
 

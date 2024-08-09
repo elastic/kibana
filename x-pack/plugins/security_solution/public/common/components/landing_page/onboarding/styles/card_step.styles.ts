@@ -18,17 +18,17 @@ export const useCardStepStyles = () => {
   const customStyles = useMemo(
     () => ({
       stepPanelStyles: css({
-        '.stepContentWrapper': {
+        '.cardContentWrapper': {
           display: 'grid',
           gridTemplateRows: '1fr',
           visibility: 'visible',
           transition: `
-            grid-template-rows ${HEIGHT_ANIMATION_DURATION}ms ease-in, 
+            grid-template-rows ${HEIGHT_ANIMATION_DURATION}ms ease-in,
             visibility ${euiTheme.animation.normal} ${euiTheme.animation.resistance}
           `,
         },
 
-        '&.step-panel-collapsed .stepContentWrapper': {
+        '&.card-panel-collapsed .cardContentWrapper': {
           visibility: 'collapse',
           gridTemplateRows: '0fr',
         },
@@ -37,9 +37,9 @@ export const useCardStepStyles = () => {
           overflow: 'hidden',
         },
       }),
-      getStepGroundStyles: ({ hasStepContent }: { hasStepContent: boolean }) =>
+      getCardGroundStyles: ({ hasCardContent }: { hasCardContent: boolean }) =>
         css({
-          cursor: hasStepContent ? 'pointer' : 'default',
+          cursor: hasCardContent ? 'pointer' : 'default',
           gap: euiTheme.size.base,
         }),
       stepItemStyles: css({ alignSelf: 'center' }),

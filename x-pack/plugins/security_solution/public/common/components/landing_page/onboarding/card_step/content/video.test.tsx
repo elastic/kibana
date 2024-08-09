@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { Video } from './video';
-import { OverviewSteps, QuickStartSectionCardsId, SectionId } from '../../types';
+import { CardId, SectionId } from '../../types';
 import type { EuiFlexGroupProps } from '@elastic/eui';
 import { useStepContext } from '../../context/step_context';
 import { WATCH_VIDEO_BUTTON_TITLE } from '../../translations';
@@ -49,8 +49,8 @@ describe('Video Component', () => {
     const overlay = getByTestId('watch-video-overlay');
     fireEvent.click(overlay);
     expect(toggleTaskCompleteStatus).toHaveBeenCalledWith({
-      stepId: OverviewSteps.getToKnowElasticSecurity,
-      cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
+      stepId: CardId.watchTheOverviewVideo,
+      cardId: CardId.watchTheOverviewVideo,
       sectionId: SectionId.quickStart,
       undo: false,
       trigger: 'click',
@@ -65,13 +65,11 @@ describe('Video Component', () => {
 
   it('renders video if step is completed', () => {
     (useStepContext as jest.Mock).mockReturnValue({
-      expandedSteps: defaultExpandedCards,
-      finishedSteps: {
-        [QuickStartSectionCardsId.watchTheOverviewVideo]: new Set([
-          OverviewSteps.getToKnowElasticSecurity,
-        ]),
+      expandedCards: defaultExpandedCards,
+      finishedCards: {
+        [CardId.watchTheOverviewVideo]: new Set([CardId.watchTheOverviewVideo]),
       },
-      onStepClicked: jest.fn(),
+      onCardClicked: jest.fn(),
       toggleTaskCompleteStatus: jest.fn(),
     });
     const { getByTitle, queryByTestId } = render(<Video />);

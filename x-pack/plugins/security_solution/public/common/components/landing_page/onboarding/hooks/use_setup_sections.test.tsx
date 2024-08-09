@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { useSetUpSections } from './use_setup_sections';
-import type { ActiveSections, CardId, ExpandedSteps, StepId } from '../types';
+import type { ActiveSections, CardId, ExpandedCards, StepId } from '../types';
 import { CreateProjectSteps, QuickStartSectionCardsId, SectionId } from '../types';
 
 const mockEuiTheme: EuiThemeComputed = {
@@ -19,13 +19,13 @@ const mockEuiTheme: EuiThemeComputed = {
   colors: {},
   font: { weight: { bold: 700 } },
 } as EuiThemeComputed;
-const finishedSteps = {
+const finishedCards = {
   [QuickStartSectionCardsId.createFirstProject]: new Set<StepId>([
     CreateProjectSteps.createFirstProject,
   ]),
 } as Record<CardId, Set<StepId>>;
 describe('useSetUpSections', () => {
-  const onStepClicked = jest.fn();
+  const onCardClicked = jest.fn();
   const toggleTaskCompleteStatus = jest.fn();
 
   it('should return the sections', () => {
@@ -43,10 +43,10 @@ describe('useSetUpSections', () => {
 
     const sections = result.current.setUpSections({
       activeSections,
-      expandedSteps: {} as ExpandedSteps,
-      onStepClicked,
+      expandedCards: {} as ExpandedCards,
+      onCardClicked,
       toggleTaskCompleteStatus,
-      finishedSteps,
+      finishedCards,
     });
 
     expect(sections).toHaveLength(1);
@@ -59,10 +59,10 @@ describe('useSetUpSections', () => {
 
     const sections = result.current.setUpSections({
       activeSections,
-      expandedSteps: {} as ExpandedSteps,
-      onStepClicked,
+      expandedCards: {} as ExpandedCards,
+      onCardClicked,
       toggleTaskCompleteStatus,
-      finishedSteps,
+      finishedCards,
     });
 
     expect(sections.length).toEqual(0);

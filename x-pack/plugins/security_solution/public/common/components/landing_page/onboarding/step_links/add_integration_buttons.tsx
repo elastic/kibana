@@ -11,7 +11,7 @@ import { LinkButton } from '@kbn/security-solution-navigation/links';
 import type { IconType } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import { useKibana } from '../../../../lib/kibana/kibana_react';
-import { AddIntegrationsSteps } from '../types';
+import { CardId } from '../types';
 import { useStepContext } from '../context/step_context';
 import { IntegrationsPageName } from './types';
 
@@ -124,7 +124,7 @@ const AddIntegrationPanel: React.FC<{
   const { onStepLinkClicked } = useStepContext();
   const onClick = useCallback(() => {
     onStepLinkClicked({
-      originStepId: AddIntegrationsSteps.connectToDataSources,
+      originStepId: CardId.addIntegrations,
       stepLinkId: buttonId,
     });
   }, [onStepLinkClicked, buttonId]);

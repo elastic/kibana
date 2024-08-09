@@ -10,31 +10,22 @@ import { SecurityPageName } from '@kbn/security-solution-navigation';
 
 import React, { useCallback } from 'react';
 import { useStepContext } from '../context/step_context';
-import {
-  AddAndValidateYourDataCardsId,
-  AddIntegrationsSteps,
-  GetStartedWithAlertsCardsId,
-  SectionId,
-  ViewAlertsSteps,
-} from '../types';
+import { CardId, SectionId } from '../types';
 import { AddIntegrationCallout } from './add_integration_callout';
 import { VIEW_ALERTS, VIEW_ALERTS_CALLOUT_TITLE } from './translations';
 
 const AlertsButtonComponent = () => {
-  const { toggleTaskCompleteStatus, onStepLinkClicked, finishedSteps } = useStepContext();
-  const isIntegrationsStepComplete = finishedSteps[
-    AddAndValidateYourDataCardsId.addIntegrations
-  ]?.has(AddIntegrationsSteps.connectToDataSources);
+  const { toggleTaskCompleteStatus, onStepLinkClicked, finishedCardIds } = useStepContext();
+  const isIntegrationsStepComplete = finishedCardIds?.has(CardId.addIntegrations);
 
   const onClick = useCallback(() => {
     onStepLinkClicked({
-      originStepId: ViewAlertsSteps.viewAlerts,
+      originStepId: CardId.viewAlerts,
       stepLinkId: SecurityPageName.alerts,
     });
     toggleTaskCompleteStatus({
-      stepId: ViewAlertsSteps.viewAlerts,
       stepLinkId: SecurityPageName.alerts,
-      cardId: GetStartedWithAlertsCardsId.viewAlerts,
+      cardId: CardId.viewAlerts,
       sectionId: SectionId.getStartedWithAlerts,
       undo: false,
       trigger: 'click',
@@ -44,10 +35,7 @@ const AlertsButtonComponent = () => {
   return (
     <>
       {!isIntegrationsStepComplete && (
-        <AddIntegrationCallout
-          stepName={VIEW_ALERTS_CALLOUT_TITLE}
-          stepId={ViewAlertsSteps.viewAlerts}
-        />
+        <AddIntegrationCallout stepName={VIEW_ALERTS_CALLOUT_TITLE} cardId={CardId.viewAlerts} />
       )}
       <LinkButton
         className="step-paragraph"

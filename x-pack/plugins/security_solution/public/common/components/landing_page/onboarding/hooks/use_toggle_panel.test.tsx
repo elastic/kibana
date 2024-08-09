@@ -104,7 +104,7 @@ describe('useTogglePanel', () => {
     const { state } = result.current;
 
     expect(state.activeProducts).toEqual(new Set([ProductLine.security, ProductLine.endpoint]));
-    expect(state.finishedSteps).toEqual({
+    expect(state.finishedCards).toEqual({
       [QuickStartSectionCardsId.createFirstProject]: new Set([
         CreateProjectSteps.createFirstProject,
       ]),
@@ -119,8 +119,8 @@ describe('useTogglePanel', () => {
             stepsLeft: 0,
             activeStepIds: [CreateProjectSteps.createFirstProject],
           },
-          [QuickStartSectionCardsId.watchTheOverviewVideo]: {
-            id: QuickStartSectionCardsId.watchTheOverviewVideo,
+          [CardId.watchTheOverviewVideo]: {
+            id: CardId.watchTheOverviewVideo,
             timeInMins: 0,
             stepsLeft: 1,
             activeStepIds: [OverviewSteps.getToKnowElasticSecurity],
@@ -166,7 +166,7 @@ describe('useTogglePanel', () => {
     expect(state.activeProducts).toEqual(
       new Set([ProductLine.security, ProductLine.cloud, ProductLine.endpoint])
     );
-    expect(state.finishedSteps).toEqual({
+    expect(state.finishedCards).toEqual({
       [QuickStartSectionCardsId.createFirstProject]: new Set([
         CreateProjectSteps.createFirstProject,
       ]),
@@ -181,8 +181,8 @@ describe('useTogglePanel', () => {
             stepsLeft: 0,
             activeStepIds: [CreateProjectSteps.createFirstProject],
           },
-          [QuickStartSectionCardsId.watchTheOverviewVideo]: {
-            id: QuickStartSectionCardsId.watchTheOverviewVideo,
+          [CardId.watchTheOverviewVideo]: {
+            id: CardId.watchTheOverviewVideo,
             timeInMins: 0,
             stepsLeft: 1,
             activeStepIds: [OverviewSteps.getToKnowElasticSecurity],
@@ -229,7 +229,7 @@ describe('useTogglePanel', () => {
     const { state } = result.current;
 
     expect(state.activeProducts).toEqual(new Set([ProductLine.security]));
-    expect(state.finishedSteps).toEqual({
+    expect(state.finishedCards).toEqual({
       [QuickStartSectionCardsId.createFirstProject]: new Set([
         CreateProjectSteps.createFirstProject,
       ]),
@@ -244,8 +244,8 @@ describe('useTogglePanel', () => {
             stepsLeft: 0,
             activeStepIds: [CreateProjectSteps.createFirstProject],
           },
-          [QuickStartSectionCardsId.watchTheOverviewVideo]: {
-            id: QuickStartSectionCardsId.watchTheOverviewVideo,
+          [CardId.watchTheOverviewVideo]: {
+            id: CardId.watchTheOverviewVideo,
             timeInMins: 0,
             stepsLeft: 1,
             activeStepIds: [OverviewSteps.getToKnowElasticSecurity],
@@ -286,12 +286,12 @@ describe('useTogglePanel', () => {
   test('should reset all the card steps in storage when a step is expanded. (As it allows only one step open at a time)', () => {
     const { result } = renderHook(() => useTogglePanel({ productTypes, onboardingSteps, spaceId }));
 
-    const { onStepClicked } = result.current;
+    const { onCardClicked } = result.current;
 
     act(() => {
-      onStepClicked({
+      onCardClicked({
         stepId: OverviewSteps.getToKnowElasticSecurity,
-        cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
+        cardId: CardId.watchTheOverviewVideo,
         sectionId: SectionId.quickStart,
         isExpanded: true,
         trigger: 'click',
@@ -306,12 +306,12 @@ describe('useTogglePanel', () => {
       useTogglePanel({ productTypes, onboardingSteps, spaceId: 'testSpaceId' })
     );
 
-    const { onStepClicked } = result.current;
+    const { onCardClicked } = result.current;
 
     act(() => {
-      onStepClicked({
+      onCardClicked({
         stepId: OverviewSteps.getToKnowElasticSecurity,
-        cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
+        cardId: CardId.watchTheOverviewVideo,
         sectionId: SectionId.quickStart,
         isExpanded: true,
         trigger: 'click',
@@ -320,7 +320,7 @@ describe('useTogglePanel', () => {
 
     expect(mockStorage.mockAddExpandedCardStepToStorage).toHaveBeenCalledTimes(1);
     expect(mockStorage.mockAddExpandedCardStepToStorage).toHaveBeenCalledWith(
-      QuickStartSectionCardsId.watchTheOverviewVideo,
+      CardId.watchTheOverviewVideo,
       OverviewSteps.getToKnowElasticSecurity
     );
   });
@@ -328,12 +328,12 @@ describe('useTogglePanel', () => {
   test('should remove the current step from storage when it is collapsed', () => {
     const { result } = renderHook(() => useTogglePanel({ productTypes, onboardingSteps, spaceId }));
 
-    const { onStepClicked } = result.current;
+    const { onCardClicked } = result.current;
 
     act(() => {
-      onStepClicked({
+      onCardClicked({
         stepId: OverviewSteps.getToKnowElasticSecurity,
-        cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
+        cardId: CardId.watchTheOverviewVideo,
         sectionId: SectionId.quickStart,
         isExpanded: false,
         trigger: 'click',
@@ -342,7 +342,7 @@ describe('useTogglePanel', () => {
 
     expect(mockStorage.mockRemoveExpandedCardStepFromStorage).toHaveBeenCalledTimes(1);
     expect(mockStorage.mockRemoveExpandedCardStepFromStorage).toHaveBeenCalledWith(
-      QuickStartSectionCardsId.watchTheOverviewVideo,
+      CardId.watchTheOverviewVideo,
       OverviewSteps.getToKnowElasticSecurity
     );
   });
@@ -355,7 +355,7 @@ describe('useTogglePanel', () => {
     act(() => {
       toggleTaskCompleteStatus({
         stepId: OverviewSteps.getToKnowElasticSecurity,
-        cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
+        cardId: CardId.watchTheOverviewVideo,
         sectionId: SectionId.quickStart,
         trigger: 'click',
       });
@@ -363,7 +363,7 @@ describe('useTogglePanel', () => {
 
     expect(mockStorage.mockAddFinishedStepToStorage).toHaveBeenCalledTimes(1);
     expect(mockStorage.mockAddFinishedStepToStorage).toHaveBeenCalledWith(
-      QuickStartSectionCardsId.watchTheOverviewVideo,
+      CardId.watchTheOverviewVideo,
       OverviewSteps.getToKnowElasticSecurity
     );
   });
@@ -376,7 +376,7 @@ describe('useTogglePanel', () => {
     act(() => {
       toggleTaskCompleteStatus({
         stepId: OverviewSteps.getToKnowElasticSecurity,
-        cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
+        cardId: CardId.watchTheOverviewVideo,
         sectionId: SectionId.quickStart,
         undo: true,
         trigger: 'click',
@@ -385,7 +385,7 @@ describe('useTogglePanel', () => {
 
     expect(mockStorage.mockRemoveFinishedStepFromStorage).toHaveBeenCalledTimes(1);
     expect(mockStorage.mockRemoveFinishedStepFromStorage).toHaveBeenCalledWith(
-      QuickStartSectionCardsId.watchTheOverviewVideo,
+      CardId.watchTheOverviewVideo,
       OverviewSteps.getToKnowElasticSecurity,
       onboardingSteps
     );

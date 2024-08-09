@@ -13,17 +13,16 @@ import { SecurityPageName, useNavigateTo } from '@kbn/security-solution-navigati
 import classnames from 'classnames';
 import { useAddIntegrationsCalloutStyles } from '../styles/add_integrations_callout.styles';
 import { ADD_INTEGRATIONS_STEP } from './translations';
-import type { StepId } from '../types';
-import { AddIntegrationsSteps } from '../types';
+import { CardId } from '../types';
 import { useStepContext } from '../context/step_context';
 import { AddIntegrationCalloutStepLinkId } from './types';
 
 const AddIntegrationsCalloutComponent = ({
   stepName,
-  stepId,
+  cardId,
 }: {
   stepName?: string;
-  stepId: StepId;
+  cardId: CardId;
 }) => {
   const { calloutWrapperStyles, calloutTitleStyles, calloutAnchorStyles } =
     useAddIntegrationsCalloutStyles();
@@ -34,13 +33,13 @@ const AddIntegrationsCalloutComponent = ({
   const onClick = useCallback(() => {
     navigateTo({
       deepLinkId: SecurityPageName.landing,
-      path: `#${AddIntegrationsSteps.connectToDataSources}`,
+      path: `#${CardId.addIntegrations}`,
     });
     onStepLinkClicked({
-      originStepId: stepId,
+      originStepId: cardId,
       stepLinkId: AddIntegrationCalloutStepLinkId,
     });
-  }, [navigateTo, onStepLinkClicked, stepId]);
+  }, [navigateTo, onStepLinkClicked, cardId]);
 
   const classNames = classnames('add-integrations-callout', calloutWrapperStyles);
 

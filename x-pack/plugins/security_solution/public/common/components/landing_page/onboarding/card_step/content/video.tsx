@@ -11,26 +11,24 @@ import React, { useCallback, useMemo } from 'react';
 import { VIDEO_SOURCE } from '../../../../empty_prompt/constants';
 import { useStepContext } from '../../context/step_context';
 import { WATCH_VIDEO_BUTTON_TITLE } from '../../translations';
-import { OverviewSteps, QuickStartSectionCardsId, SectionId } from '../../types';
+import { CardId, SectionId } from '../../types';
 import { ContentWrapper } from './content_wrapper';
 
 const VIDEO_CONTENT_HEIGHT = 320;
 
 const VideoComponent: React.FC = () => {
-  const { toggleTaskCompleteStatus, finishedSteps } = useStepContext();
+  const { toggleTaskCompleteStatus, finishedCardIds } = useStepContext();
   const ref = React.useRef<HTMLIFrameElement>(null);
   const [isVideoPlaying, setIsVideoPlaying] = React.useState(false);
   const { euiTheme } = useEuiTheme();
-  const cardId = QuickStartSectionCardsId.watchTheOverviewVideo;
   const isFinishedStep = useMemo(
-    () => finishedSteps[cardId]?.has(OverviewSteps.getToKnowElasticSecurity),
-    [finishedSteps, cardId]
+    () => finishedCardIds?.has(CardId.watchTheOverviewVideo),
+    [finishedCardIds]
   );
 
   const onVideoClicked = useCallback(() => {
     toggleTaskCompleteStatus({
-      stepId: OverviewSteps.getToKnowElasticSecurity,
-      cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
+      cardId: CardId.watchTheOverviewVideo,
       sectionId: SectionId.quickStart,
       undo: false,
       trigger: 'click',

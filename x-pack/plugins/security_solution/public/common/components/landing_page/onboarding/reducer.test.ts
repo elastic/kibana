@@ -16,7 +16,7 @@ import {
 import type {
   AddFinishedStepAction,
   CardId,
-  ExpandedSteps,
+  ExpandedCards,
   StepId,
   ToggleProductAction,
 } from './types';
@@ -45,23 +45,23 @@ const onboardingSteps = [
 describe('reducer', () => {
   it('should toggle section correctly', () => {
     const activeProducts = new Set([ProductLine.security]);
-    const finishedSteps = {
+    const finishedCards = {
       [QuickStartSectionCardsId.createFirstProject]: new Set([
         CreateProjectSteps.createFirstProject,
       ]),
     } as Record<CardId, Set<StepId>>;
     const { activeSections, totalStepsLeft, totalActiveSteps } = setupActiveSections(
-      finishedSteps,
+      finishedCards,
       activeProducts,
       [OverviewSteps.getToKnowElasticSecurity]
     );
     const initialState = {
       activeProducts: new Set([ProductLine.security]),
-      finishedSteps,
+      finishedCards,
       activeSections,
       totalStepsLeft,
       totalActiveSteps,
-      expandedSteps: {} as ExpandedSteps,
+      expandedCards: {} as ExpandedCards,
       onboardingSteps,
     };
 
@@ -78,30 +78,30 @@ describe('reducer', () => {
 
   it('should add a finished step correctly', () => {
     const activeProducts = new Set([ProductLine.security]);
-    const finishedSteps = {
+    const finishedCards = {
       [QuickStartSectionCardsId.createFirstProject]: new Set([
         CreateProjectSteps.createFirstProject,
       ]),
     } as Record<CardId, Set<StepId>>;
     const { activeSections, totalStepsLeft, totalActiveSteps } = setupActiveSections(
-      finishedSteps,
+      finishedCards,
       activeProducts,
       onboardingSteps
     );
     const initialState = {
       activeProducts: new Set([ProductLine.security]),
-      finishedSteps,
+      finishedCards,
       activeSections,
       totalStepsLeft,
       totalActiveSteps,
-      expandedSteps: {} as ExpandedSteps,
+      expandedCards: {} as ExpandedCards,
       onboardingSteps,
     };
 
     const action: AddFinishedStepAction = {
       type: OnboardingActions.AddFinishedStep,
       payload: {
-        cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
+        cardId: CardId.watchTheOverviewVideo,
         stepId: OverviewSteps.getToKnowElasticSecurity,
         sectionId: SectionId.quickStart,
       },
@@ -109,7 +109,7 @@ describe('reducer', () => {
 
     const nextState = reducer(initialState, action);
 
-    expect(nextState.finishedSteps[QuickStartSectionCardsId.watchTheOverviewVideo]).toEqual(
+    expect(nextState.finishedCards[CardId.watchTheOverviewVideo]).toEqual(
       new Set([OverviewSteps.getToKnowElasticSecurity])
     );
     expect(nextState.activeSections).toEqual({
@@ -120,8 +120,8 @@ describe('reducer', () => {
           stepsLeft: 0,
           activeStepIds: [CreateProjectSteps.createFirstProject],
         },
-        [QuickStartSectionCardsId.watchTheOverviewVideo]: {
-          id: QuickStartSectionCardsId.watchTheOverviewVideo,
+        [CardId.watchTheOverviewVideo]: {
+          id: CardId.watchTheOverviewVideo,
           timeInMins: 0,
           stepsLeft: 0,
           activeStepIds: [OverviewSteps.getToKnowElasticSecurity],
@@ -161,17 +161,17 @@ describe('reducer', () => {
 
 describe('getFinishedStepsInitialStates', () => {
   it('should return the initial states of finished steps correctly', () => {
-    const finishedSteps = {
+    const finishedCards = {
       [QuickStartSectionCardsId.createFirstProject]: [CreateProjectSteps.createFirstProject],
-      [QuickStartSectionCardsId.watchTheOverviewVideo]: [],
+      [CardId.watchTheOverviewVideo]: [],
     } as unknown as Record<CardId, StepId[]>;
 
-    const initialStates = getFinishedStepsInitialStates({ finishedSteps });
+    const initialStates = getFinishedStepsInitialStates({ finishedCards });
 
     expect(initialStates[QuickStartSectionCardsId.createFirstProject]).toEqual(
       new Set([CreateProjectSteps.createFirstProject])
     );
-    expect(initialStates[QuickStartSectionCardsId.watchTheOverviewVideo]).toEqual(new Set([]));
+    expect(initialStates[CardId.watchTheOverviewVideo]).toEqual(new Set([]));
   });
 });
 
@@ -188,7 +188,7 @@ describe('getActiveProductsInitialStates', () => {
 describe('getActiveSectionsInitialStates', () => {
   it('should return the initial states of active cards correctly', () => {
     const activeProducts = new Set([ProductLine.security]);
-    const finishedSteps = {
+    const finishedCards = {
       [QuickStartSectionCardsId.createFirstProject]: new Set([
         CreateProjectSteps.createFirstProject,
       ]),
@@ -200,7 +200,7 @@ describe('getActiveSectionsInitialStates', () => {
       totalStepsLeft,
     } = getActiveSectionsInitialStates({
       activeProducts,
-      finishedSteps,
+      finishedCards,
       onboardingSteps,
     });
 
@@ -212,8 +212,8 @@ describe('getActiveSectionsInitialStates', () => {
           stepsLeft: 0,
           activeStepIds: [CreateProjectSteps.createFirstProject],
         },
-        [QuickStartSectionCardsId.watchTheOverviewVideo]: {
-          id: QuickStartSectionCardsId.watchTheOverviewVideo,
+        [CardId.watchTheOverviewVideo]: {
+          id: CardId.watchTheOverviewVideo,
           timeInMins: 0,
           stepsLeft: 1,
           activeStepIds: [OverviewSteps.getToKnowElasticSecurity],

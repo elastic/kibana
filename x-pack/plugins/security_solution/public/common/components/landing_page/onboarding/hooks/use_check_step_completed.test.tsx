@@ -20,12 +20,12 @@ describe('useCheckStepCompleted', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  it('does nothing when autoCheckIfStepCompleted is not provided', () => {
+  it('does nothing when autoCheckIfCardCompleted is not provided', () => {
     const { result } = renderHook(() =>
       useCheckStepCompleted({
         indicesExist: true,
         stepId: OverviewSteps.getToKnowElasticSecurity,
-        cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
+        cardId: CardId.watchTheOverviewVideo,
         sectionId: SectionId.quickStart,
         toggleTaskCompleteStatus: jest.fn(),
       })
@@ -33,13 +33,13 @@ describe('useCheckStepCompleted', () => {
     expect(result.current).toBeUndefined();
   });
 
-  it('calls autoCheckIfStepCompleted and toggleTaskCompleteStatus', async () => {
+  it('calls autoCheckIfCardCompleted and toggleTaskCompleteStatus', async () => {
     const mockAutoCheck = jest.fn().mockResolvedValue(true);
     const mockToggleTask = jest.fn();
 
     const { waitFor } = renderHook(() =>
       useCheckStepCompleted({
-        autoCheckIfStepCompleted: mockAutoCheck,
+        autoCheckIfCardCompleted: mockAutoCheck,
         cardId: GetStartedWithAlertsCardsId.enablePrebuiltRules,
         indicesExist: true,
         sectionId: SectionId.getStartedWithAlerts,
@@ -69,7 +69,7 @@ describe('useCheckStepCompleted', () => {
 
     const { waitFor } = renderHook(() =>
       useCheckStepCompleted({
-        autoCheckIfStepCompleted: mockAutoCheck,
+        autoCheckIfCardCompleted: mockAutoCheck,
         cardId: GetStartedWithAlertsCardsId.enablePrebuiltRules,
         indicesExist: true,
         sectionId: SectionId.getStartedWithAlerts,

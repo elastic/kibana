@@ -58,7 +58,7 @@ export const sections: Section[] = [
         title: i18n.ADD_INTEGRATIONS_TITLE,
         description: [i18n.ADD_INTEGRATIONS_DESCRIPTION, <AddIntegrationButtons />],
         splitPanel: <AddIntegrationsImage />,
-        autoCheckIfStepCompleted: autoCheckAddIntegrationsStepCompleted,
+        autoCheckIfCardCompleted: autoCheckAddIntegrationsStepCompleted,
       },
       {
         id: CardId.viewDashboards,
@@ -79,7 +79,7 @@ export const sections: Section[] = [
         icon: { type: 'advancedSettingsApp', size: 'xl' as const },
         description: [i18n.ENABLE_RULES_DESCRIPTION, <AddElasticRulesButton />],
         splitPanel: <EnableRuleImage />,
-        autoCheckIfStepCompleted: autoCheckPrebuildRuleStepCompleted,
+        autoCheckIfCardCompleted: autoCheckPrebuildRuleStepCompleted,
       },
       {
         id: CardId.viewAlerts,
@@ -93,6 +93,10 @@ export const sections: Section[] = [
 ];
 
 export const getSections = () => sections;
+
+export const getSectionById = (sectionId: SectionId) => {
+  return sections.find((s) => s.id === sectionId);
+};
 
 export const getCards = () => sections.flatMap((s) => s.cards);
 

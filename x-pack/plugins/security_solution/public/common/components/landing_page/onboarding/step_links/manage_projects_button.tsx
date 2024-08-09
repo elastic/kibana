@@ -11,7 +11,7 @@ import { MANAGE_PROJECTS } from './translations';
 import { useProjectsUrl } from '../hooks/use_projects_url';
 import { LinkButton } from '../../../links';
 import { useStepContext } from '../context/step_context';
-import { CreateProjectSteps } from '../types';
+import { CardId } from '../types';
 import { ManageProjectsStepLinkId } from './types';
 
 const ManageProjectsButtonComponent = () => {
@@ -19,7 +19,7 @@ const ManageProjectsButtonComponent = () => {
   const { onStepLinkClicked } = useStepContext();
   const onClick = useCallback(() => {
     onStepLinkClicked({
-      originStepId: CreateProjectSteps.createFirstProject,
+      originStepId: CardId.createFirstProject,
       stepLinkId: ManageProjectsStepLinkId,
     });
   }, [onStepLinkClicked]);

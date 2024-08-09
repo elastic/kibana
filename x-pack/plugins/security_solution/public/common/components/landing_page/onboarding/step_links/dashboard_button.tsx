@@ -8,31 +8,23 @@
 import React, { useCallback } from 'react';
 import { LinkButton } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import {
-  AddAndValidateYourDataCardsId,
-  AddIntegrationsSteps,
-  SectionId,
-  ViewDashboardSteps,
-} from '../types';
+import { SectionId, CardId } from '../types';
 import { useStepContext } from '../context/step_context';
 import { AddIntegrationCallout } from './add_integration_callout';
 import { GO_TO_DASHBOARDS, VIEW_DASHBOARDS_CALLOUT_TITLE } from './translations';
 
 const DashboardButtonComponent = () => {
-  const { toggleTaskCompleteStatus, finishedSteps, onStepLinkClicked } = useStepContext();
-  const isIntegrationsStepComplete = finishedSteps[
-    AddAndValidateYourDataCardsId.addIntegrations
-  ]?.has(AddIntegrationsSteps.connectToDataSources);
+  const { toggleTaskCompleteStatus, finishedCardIds, onStepLinkClicked } = useStepContext();
+  const isIntegrationsStepComplete = finishedCardIds?.has(CardId.addIntegrations);
 
   const onClick = useCallback(() => {
     onStepLinkClicked({
-      originStepId: ViewDashboardSteps.analyzeData,
+      originStepId: CardId.viewDashboards,
       stepLinkId: SecurityPageName.dashboards,
     });
     toggleTaskCompleteStatus({
-      stepId: ViewDashboardSteps.analyzeData,
+      cardId: CardId.viewDashboards,
       stepLinkId: SecurityPageName.dashboards,
-      cardId: AddAndValidateYourDataCardsId.viewDashboards,
       sectionId: SectionId.addAndValidateYourData,
       undo: false,
       trigger: 'click',
@@ -43,7 +35,7 @@ const DashboardButtonComponent = () => {
       {!isIntegrationsStepComplete && (
         <AddIntegrationCallout
           stepName={VIEW_DASHBOARDS_CALLOUT_TITLE}
-          stepId={ViewDashboardSteps.analyzeData}
+          cardId={CardId.viewDashboards}
         />
       )}
 

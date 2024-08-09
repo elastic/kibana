@@ -35,8 +35,8 @@ describe('TogglePanel', () => {
         timeInMins: 3,
         stepsLeft: 1,
       },
-      [QuickStartSectionCardsId.watchTheOverviewVideo]: {
-        id: QuickStartSectionCardsId.watchTheOverviewVideo,
+      [CardId.watchTheOverviewVideo]: {
+        id: CardId.watchTheOverviewVideo,
         timeInMins: 0,
         stepsLeft: 0,
       },

@@ -12,45 +12,42 @@ import { css } from '@emotion/css';
 import type {
   ActiveSections,
   CardId,
-  ExpandedSteps,
+  ExpandedCards,
   ToggleTaskCompleteStatus,
-  OnStepClicked,
+  OnCardClicked,
   SectionId,
-  StepId,
 } from '../types';
 
-import { CardItem } from '../card_item';
 import { getSections } from '../sections';
+import { CardStep } from '../card_step';
 
 export const useSetUpSections = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => {
   const setUpCards = useCallback(
     ({
       activeSections,
-      expandedSteps,
-      finishedCards,
+      expandedCards,
+      finishedCardIds,
       toggleTaskCompleteStatus,
-      onStepClicked,
+      onCardClicked,
       sectionId,
     }: {
       activeSections: ActiveSections | null;
-      expandedSteps: ExpandedSteps;
-      finishedCards: Set<CardId>;
+      expandedCards: ExpandedCards;
+      finishedCardIds: Set<CardId>;
       toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
-      onStepClicked: OnStepClicked;
+      onCardClicked: OnCardClicked;
       sectionId: SectionId;
     }) => {
       const section = activeSections?.[sectionId];
       return section
         ? Object.values(section)?.map<React.ReactNode>((cardItem) => (
             <EuiFlexItem key={cardItem.id}>
-              <CardItem
-                activeCardIds={cardItem.activeCardIds}
-                cardId={cardItem.id}
-                data-test-subj={cardItem.id}
-                expandedSteps={expandedSteps}
-                finishedCards={finishedCards[cardItem.id]}
+              <CardStep
+                card={cardItem}
+                expandedCards={expandedCards}
+                finishedCardIds={finishedCardIds}
                 toggleTaskCompleteStatus={toggleTaskCompleteStatus}
-                onStepClicked={onStepClicked}
+                onCardClicked={onCardClicked}
                 sectionId={sectionId}
               />
             </EuiFlexItem>
@@ -63,24 +60,24 @@ export const useSetUpSections = ({ euiTheme }: { euiTheme: EuiThemeComputed }) =
   const setUpSections = useCallback(
     ({
       activeSections,
-      expandedSteps,
-      finishedCards,
+      expandedCards,
+      finishedCardIds,
       toggleTaskCompleteStatus,
-      onStepClicked,
+      onCardClicked,
     }: {
       activeSections: ActiveSections | null;
-      expandedSteps: ExpandedSteps;
-      finishedCards: Record<CardId, Set<StepId>>;
+      expandedCards: ExpandedCards;
+      finishedCardIds: Set<CardId>;
       toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
-      onStepClicked: OnStepClicked;
+      onCardClicked: OnCardClicked;
     }) =>
       getSections().reduce<React.ReactNode[]>((acc, currentSection) => {
         const cardNodes = setUpCards({
           activeSections,
-          expandedSteps,
-          finishedCards,
+          expandedCards,
+          finishedCardIds,
           toggleTaskCompleteStatus,
-          onStepClicked,
+          onCardClicked,
           sectionId: currentSection.id,
         });
         if (cardNodes && cardNodes.length > 0) {

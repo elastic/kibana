@@ -139,9 +139,9 @@ describe('setupActiveSections', () => {
   };
 
   it('should set up active steps based on active products', () => {
-    const finishedSteps = {} as unknown as Record<CardId, Set<StepId>>;
+    const finishedCards = {} as unknown as Record<CardId, Set<StepId>>;
     const activeProducts = new Set([ProductLine.cloud]);
-    const { activeSections } = setupActiveSections(finishedSteps, activeProducts, onboardingSteps);
+    const { activeSections } = setupActiveSections(finishedCards, activeProducts, onboardingSteps);
 
     expect(
       getCard(QuickStartSectionCardsId.createFirstProject, SectionId.quickStart, activeSections)
@@ -149,7 +149,7 @@ describe('setupActiveSections', () => {
     ).toEqual([CreateProjectSteps.createFirstProject]);
 
     expect(
-      getCard(QuickStartSectionCardsId.watchTheOverviewVideo, SectionId.quickStart, activeSections)
+      getCard(CardId.watchTheOverviewVideo, SectionId.quickStart, activeSections)
         .activeStepIds
     ).toEqual([OverviewSteps.getToKnowElasticSecurity]);
 
@@ -187,14 +187,14 @@ describe('setupActiveSections', () => {
   });
 
   it('should set up active cards based on finished steps', () => {
-    const finishedSteps = {
+    const finishedCards = {
       [QuickStartSectionCardsId.createFirstProject]: new Set([
         CreateProjectSteps.createFirstProject,
       ]),
     } as unknown as Record<CardId, Set<StepId>>;
     const activeProducts = new Set([ProductLine.security]);
 
-    const { activeSections } = setupActiveSections(finishedSteps, activeProducts, onboardingSteps);
+    const { activeSections } = setupActiveSections(finishedCards, activeProducts, onboardingSteps);
 
     expect(
       getCard(QuickStartSectionCardsId.createFirstProject, SectionId.quickStart, activeSections)
@@ -207,11 +207,11 @@ describe('setupActiveSections', () => {
   });
 
   it('should return null if there are no active products', () => {
-    const finishedSteps = {} as unknown as Record<CardId, Set<StepId>>;
+    const finishedCards = {} as unknown as Record<CardId, Set<StepId>>;
 
     const activeProducts: Set<ProductLine> = new Set();
 
-    const activeSections = setupActiveSections(finishedSteps, activeProducts, onboardingSteps);
+    const activeSections = setupActiveSections(finishedCards, activeProducts, onboardingSteps);
 
     expect(activeSections).toEqual({
       activeSections: null,
@@ -227,14 +227,14 @@ describe('setupActiveSections', () => {
       } as unknown as Section,
     ]);
 
-    const finishedSteps = {
+    const finishedCards = {
       [QuickStartSectionCardsId.createFirstProject]: new Set([
         CreateProjectSteps.createFirstProject,
       ]),
     } as unknown as Record<CardId, Set<StepId>>;
     const activeProducts: Set<ProductLine> = new Set([ProductLine.security]);
 
-    const activeSections = setupActiveSections(finishedSteps, activeProducts, onboardingSteps);
+    const activeSections = setupActiveSections(finishedCards, activeProducts, onboardingSteps);
 
     expect(activeSections).toEqual({
       activeSections: {},
@@ -247,7 +247,7 @@ describe('setupActiveSections', () => {
 });
 
 describe('updateActiveSections', () => {
-  const finishedSteps = {
+  const finishedCards = {
     [QuickStartSectionCardsId.createFirstProject]: new Set([CreateProjectSteps.createFirstProject]),
   } as unknown as Record<CardId, Set<StepId>>;
 
@@ -257,8 +257,8 @@ describe('updateActiveSections', () => {
         id: QuickStartSectionCardsId.createFirstProject,
         stepsLeft: 0,
       },
-      [QuickStartSectionCardsId.watchTheOverviewVideo]: {
-        id: QuickStartSectionCardsId.watchTheOverviewVideo,
+      [CardId.watchTheOverviewVideo]: {
+        id: CardId.watchTheOverviewVideo,
         stepsLeft: 1,
       },
     },
@@ -282,7 +282,7 @@ describe('updateActiveSections', () => {
       activeProducts,
       activeSections: testActiveSections,
       cardId,
-      finishedSteps,
+      finishedCards,
       onboardingSteps,
       sectionId,
     });
@@ -312,7 +312,7 @@ describe('updateActiveSections', () => {
 
     const updatedSections = updateActiveSections({
       activeProducts,
-      finishedSteps,
+      finishedCards,
       onboardingSteps,
       activeSections: null,
       sectionId,
@@ -333,7 +333,7 @@ describe('updateActiveSections', () => {
 
     const updatedSections = updateActiveSections({
       activeProducts,
-      finishedSteps,
+      finishedCards,
       onboardingSteps,
       activeSections,
       sectionId,

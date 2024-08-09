@@ -11,7 +11,7 @@ import { TelemetryEventTypes } from '../../constants';
 export const onboardingHubStepOpenEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.OnboardingHubStepOpen,
   schema: {
-    stepId: {
+    cardId: {
       type: 'keyword',
       _meta: {
         description: 'Active step ID',
@@ -51,10 +51,10 @@ export const onboardingHubStepLinkClickedEvent: TelemetryEvent = {
 export const onboardingHubStepFinishedEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.OnboardingHubStepFinished,
   schema: {
-    stepId: {
+    cardId: {
       type: 'keyword',
       _meta: {
-        description: 'Finished step ID',
+        description: 'Finished card ID',
         optional: false,
       },
     },

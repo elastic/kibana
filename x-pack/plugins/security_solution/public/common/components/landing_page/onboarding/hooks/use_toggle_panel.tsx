@@ -22,7 +22,6 @@ import type {
 } from '../types';
 import { OnboardingActions } from '../types';
 import { findCardSectionByCardId } from '../helpers';
-import type { SecurityProductTypes } from '../configs';
 import { useKibana } from '../../../../lib/kibana';
 
 const syncExpandedCardStepsToStorageFromURL = (
@@ -72,7 +71,7 @@ export const useTogglePanel = ({
     getAllExpandedCardsFromStorage,
   } = onboardingStorage;
 
-  const finishedCardsInitialStates: Set<CardId> = useMemo(
+  const finishedCardIdsInitialStates: Set<CardId> = useMemo(
     () => new Set(getAllFinishedCardsFromStorage()),
     [getAllFinishedCardsFromStorage]
   );
@@ -80,10 +79,10 @@ export const useTogglePanel = ({
   const activeSectionsInitialStates = useMemo(
     () =>
       getActiveSectionsInitialStates({
-        finishedCards: finishedCardsInitialStates,
+        finishedCardIds: finishedCardIdsInitialStates,
         onboardingSteps,
       }),
-    [finishedCardsInitialStates, onboardingSteps]
+    [finishedCardIdsInitialStates, onboardingSteps]
   );
 
   const expandedCardsInitialStates: ExpandedCards = useMemo(() => {
@@ -98,7 +97,7 @@ export const useTogglePanel = ({
   const [state, dispatch] = useReducer(reducer, {
     activeSections: activeSectionsInitialStates,
     expandedCards: expandedCardsInitialStates,
-    finishedCards: finishedCardsInitialStates,
+    finishedCardIds: finishedCardIdsInitialStates,
     onboardingSteps,
   });
 

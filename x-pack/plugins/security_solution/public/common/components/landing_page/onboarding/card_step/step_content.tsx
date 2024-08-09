@@ -11,30 +11,22 @@ import React from 'react';
 
 import { useCheckStepCompleted } from '../hooks/use_check_step_completed';
 import { useStepContentStyles } from '../styles/step_content.styles';
-import type {
-  CardId,
-  CheckIfStepCompleted,
-  SectionId,
-  Step,
-  ToggleTaskCompleteStatus,
-} from '../types';
+import type { Card, CheckIfStepCompleted, SectionId, ToggleTaskCompleteStatus } from '../types';
 
-const StepContentComponent = ({
-  autoCheckIfStepCompleted,
-  cardId,
+const CardContentComponent = ({
+  autoCheckIfCardCompleted,
+  card,
   indicesExist,
   sectionId,
-  step,
   toggleTaskCompleteStatus,
 }: {
-  autoCheckIfStepCompleted?: CheckIfStepCompleted;
-  cardId: CardId;
+  autoCheckIfCardCompleted?: CheckIfStepCompleted;
+  card: Card;
   indicesExist: boolean;
   sectionId: SectionId;
-  step: Step;
   toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
 }) => {
-  const { id: stepId, splitPanel } = step;
+  const { id: cardId, splitPanel } = card;
   const {
     stepContentGroupStyles,
     leftContentStyles,
@@ -44,12 +36,11 @@ const StepContentComponent = ({
   } = useStepContentStyles();
 
   useCheckStepCompleted({
-    autoCheckIfStepCompleted,
+    autoCheckIfCardCompleted,
     cardId,
     indicesExist,
     sectionId,
-    stepId,
-    stepTitle: step.title,
+    cardTitle: card.title,
     toggleTaskCompleteStatus,
   });
 
@@ -69,17 +60,17 @@ const StepContentComponent = ({
     <EuiFlexGroup
       color="plain"
       className={stepContentGroupClassName}
-      data-test-subj={`${stepId}-content`}
+      data-test-subj={`${cardId}-content`}
       direction="row"
       gutterSize="none"
     >
-      {step.description && (
+      {card.description && (
         <EuiFlexItem grow={false} className={leftContentClassNames}>
           <EuiText size="s">
-            {step.description.map((desc, index) => (
+            {card.description.map((desc, index) => (
               <div
-                data-test-subj={`${stepId}-description-${index}`}
-                key={`${stepId}-description-${index}`}
+                data-test-subj={`${card.id}-description-${index}`}
+                key={`${card.id}-description-${index}`}
                 className={descriptionClassNames}
               >
                 {desc}
@@ -96,4 +87,4 @@ const StepContentComponent = ({
     </EuiFlexGroup>
   );
 };
-export const StepContent = React.memo(StepContentComponent);
+export const CardContent = React.memo(CardContentComponent);

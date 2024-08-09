@@ -104,14 +104,14 @@ describe.each([['test'], [undefined]])('useStorage - spaceId: %s', (spaceId) => 
         CreateProjectSteps.createFirstProject,
         'step2',
       ],
-      [QuickStartSectionCardsId.watchTheOverviewVideo]: ['step3'],
+      [CardId.watchTheOverviewVideo]: ['step3'],
     });
     expect(onboardingStorage.getAllFinishedStepsFromStorage()).toEqual({
       [QuickStartSectionCardsId.createFirstProject]: [
         CreateProjectSteps.createFirstProject,
         'step2',
       ],
-      [QuickStartSectionCardsId.watchTheOverviewVideo]: ['step3'],
+      [CardId.watchTheOverviewVideo]: ['step3'],
     });
   });
 
@@ -149,7 +149,7 @@ describe.each([['test'], [undefined]])('useStorage - spaceId: %s', (spaceId) => 
         CreateProjectSteps.createFirstProject,
         'step2',
       ],
-      [QuickStartSectionCardsId.watchTheOverviewVideo]: ['step3'],
+      [CardId.watchTheOverviewVideo]: ['step3'],
     });
 
     expect(
@@ -160,7 +160,7 @@ describe.each([['test'], [undefined]])('useStorage - spaceId: %s', (spaceId) => 
 
     expect(
       onboardingStorage.getFinishedStepsFromStorageByCardId(
-        QuickStartSectionCardsId.watchTheOverviewVideo
+        CardId.watchTheOverviewVideo
       )
     ).toEqual(['step3']);
   });
@@ -173,7 +173,7 @@ describe.each([['test'], [undefined]])('useStorage - spaceId: %s', (spaceId) => 
         CreateProjectSteps.createFirstProject,
         'step2',
       ],
-      [QuickStartSectionCardsId.watchTheOverviewVideo]: ['step3'],
+      [CardId.watchTheOverviewVideo]: ['step3'],
       card3: ['step4'],
     });
 
@@ -182,7 +182,7 @@ describe.each([['test'], [undefined]])('useStorage - spaceId: %s', (spaceId) => 
         CreateProjectSteps.createFirstProject,
         'step2',
       ],
-      [QuickStartSectionCardsId.watchTheOverviewVideo]: ['step3'],
+      [CardId.watchTheOverviewVideo]: ['step3'],
       card3: ['step4'],
     });
 
@@ -232,7 +232,7 @@ describe.each([['test'], [undefined]])('useStorage - spaceId: %s', (spaceId) => 
     (mockStorage.get as jest.Mock).mockReturnValueOnce({
       [QuickStartSectionCardsId.createFirstProject]: {
         isExpanded: true,
-        expandedSteps: [CreateProjectSteps.createFirstProject],
+        expandedCards: [CreateProjectSteps.createFirstProject],
       },
     });
     const result = onboardingStorage.getAllExpandedStepsFromStorage();
@@ -240,7 +240,7 @@ describe.each([['test'], [undefined]])('useStorage - spaceId: %s', (spaceId) => 
     expect(result).toEqual({
       [QuickStartSectionCardsId.createFirstProject]: {
         isExpanded: true,
-        expandedSteps: [CreateProjectSteps.createFirstProject],
+        expandedCards: [CreateProjectSteps.createFirstProject],
       },
     });
   });
@@ -258,16 +258,16 @@ describe.each([['test'], [undefined]])('useStorage - spaceId: %s', (spaceId) => 
     const expandedCardsStorageKey = getStorageKeyBySpace(EXPANDED_CARDS_STORAGE_KEY, spaceId);
 
     (mockStorage.get as jest.Mock).mockReturnValueOnce({
-      [QuickStartSectionCardsId.watchTheOverviewVideo]: {
+      [CardId.watchTheOverviewVideo]: {
         isExpanded: false,
-        expandedSteps: [OverviewSteps.getToKnowElasticSecurity],
+        expandedCards: [OverviewSteps.getToKnowElasticSecurity],
       },
     });
     onboardingStorage.resetAllExpandedCardStepsToStorage();
     expect(mockStorage.get(expandedCardsStorageKey)).toEqual({
-      [QuickStartSectionCardsId.watchTheOverviewVideo]: {
+      [CardId.watchTheOverviewVideo]: {
         isExpanded: false,
-        expandedSteps: [],
+        expandedCards: [],
       },
     });
   });
@@ -278,25 +278,25 @@ describe.each([['test'], [undefined]])('useStorage - spaceId: %s', (spaceId) => 
     mockStorage.set(expandedCardsStorageKey, {
       [QuickStartSectionCardsId.createFirstProject]: {
         isExpanded: false,
-        expandedSteps: [],
+        expandedCards: [],
       },
-      [QuickStartSectionCardsId.watchTheOverviewVideo]: {
+      [CardId.watchTheOverviewVideo]: {
         isExpanded: false,
-        expandedSteps: [OverviewSteps.getToKnowElasticSecurity],
+        expandedCards: [OverviewSteps.getToKnowElasticSecurity],
       },
     });
     onboardingStorage.addExpandedCardStepToStorage(
-      QuickStartSectionCardsId.watchTheOverviewVideo,
+      CardId.watchTheOverviewVideo,
       OverviewSteps.getToKnowElasticSecurity
     );
     expect(mockStorage.get(expandedCardsStorageKey)).toEqual({
       [QuickStartSectionCardsId.createFirstProject]: {
         isExpanded: false,
-        expandedSteps: [],
+        expandedCards: [],
       },
-      [QuickStartSectionCardsId.watchTheOverviewVideo]: {
+      [CardId.watchTheOverviewVideo]: {
         isExpanded: true,
-        expandedSteps: [OverviewSteps.getToKnowElasticSecurity],
+        expandedCards: [OverviewSteps.getToKnowElasticSecurity],
       },
     });
   });
@@ -305,19 +305,19 @@ describe.each([['test'], [undefined]])('useStorage - spaceId: %s', (spaceId) => 
     const expandedCardsStorageKey = getStorageKeyBySpace(EXPANDED_CARDS_STORAGE_KEY, spaceId);
 
     mockStorage.set(expandedCardsStorageKey, {
-      [QuickStartSectionCardsId.watchTheOverviewVideo]: {
+      [CardId.watchTheOverviewVideo]: {
         isExpanded: true,
-        expandedSteps: [OverviewSteps.getToKnowElasticSecurity],
+        expandedCards: [OverviewSteps.getToKnowElasticSecurity],
       },
     });
     onboardingStorage.removeExpandedCardStepFromStorage(
-      QuickStartSectionCardsId.watchTheOverviewVideo,
+      CardId.watchTheOverviewVideo,
       OverviewSteps.getToKnowElasticSecurity
     );
     expect(mockStorage.get(expandedCardsStorageKey)).toEqual({
-      [QuickStartSectionCardsId.watchTheOverviewVideo]: {
+      [CardId.watchTheOverviewVideo]: {
         isExpanded: false,
-        expandedSteps: [],
+        expandedCards: [],
       },
     });
   });
@@ -328,7 +328,7 @@ describe.each([['test'], [undefined]])('useStorage - spaceId: %s', (spaceId) => 
     (mockStorage.get as jest.Mock).mockReturnValueOnce({
       [QuickStartSectionCardsId.createFirstProject]: {
         isExpanded: true,
-        expandedSteps: [CreateProjectSteps.createFirstProject],
+        expandedCards: [CreateProjectSteps.createFirstProject],
       },
     });
     onboardingStorage.removeExpandedCardStepFromStorage(
@@ -337,7 +337,7 @@ describe.each([['test'], [undefined]])('useStorage - spaceId: %s', (spaceId) => 
     expect(mockStorage.set).toHaveBeenCalledWith(expandedCardsStorageKey, {
       [QuickStartSectionCardsId.createFirstProject]: {
         isExpanded: false,
-        expandedSteps: [CreateProjectSteps.createFirstProject],
+        expandedCards: [CreateProjectSteps.createFirstProject],
       },
     });
   });

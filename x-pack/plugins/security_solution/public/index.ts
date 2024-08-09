@@ -17,11 +17,4 @@ export const plugin = (context: PluginInitializerContext): Plugin => new Plugin(
 export type { PluginSetup, PluginStart };
 export { Plugin };
 
-export {
-  CreateProjectSteps,
-  OverviewSteps,
-  AddIntegrationsSteps,
-  ViewDashboardSteps,
-  EnablePrebuiltRulesSteps,
-  ViewAlertsSteps,
-} from './common/components/landing_page/onboarding/types';
+export { CardId } from './common/components/landing_page/onboarding/types';
