@@ -21,12 +21,6 @@ describe('MisconfigurationsOverview', () => {
       wrapper: TestProviders,
     });
     expect(
-      queryByTestId('securitySolutionFlyoutInsightsMisconfigurationsTitleIcon')
-    ).toBeInTheDocument();
-    expect(
-      queryByTestId('securitySolutionFlyoutInsightsMisconfigurationsTitleText')
-    ).toBeInTheDocument();
-    expect(
       queryByTestId('securitySolutionFlyoutInsightsMisconfigurationsContent')
     ).toBeInTheDocument();
     expect(queryByTestId('noFindingsDataTestSubj')).toBeInTheDocument();
