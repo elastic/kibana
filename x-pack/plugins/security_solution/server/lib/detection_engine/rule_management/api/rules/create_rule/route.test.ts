@@ -172,10 +172,6 @@ describe('Create rule route', () => {
     });
   });
   describe('rule containing response actions', () => {
-    beforeEach(() => {
-      // @ts-expect-error We're writting to a read only property just for the purpose of the test
-      clients.config.experimentalFeatures.endpointResponseActionsEnabled = true;
-    });
     const getResponseAction = (command: string = 'isolate', config?: object) => ({
       action_type_id: '.endpoint',
       params: {

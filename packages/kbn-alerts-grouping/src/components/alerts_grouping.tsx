@@ -20,7 +20,7 @@ import type { Filter } from '@kbn/es-query';
 import { isNoneGroup, useGrouping } from '@kbn/grouping';
 import { isEqual } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
-import { useAlertDataView } from '@kbn/alerts-ui-shared';
+import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { AlertsGroupingLevel, AlertsGroupingLevelProps } from './alerts_grouping_level';
 import { AlertsGroupingProps } from '../types';
@@ -72,13 +72,12 @@ const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
   const { dataViews, notifications, http } = services;
   const { grouping, updateGrouping } = useAlertsGroupingState(groupingId);
 
-  const { dataViews: alertDataViews } = useAlertDataView({
+  const { dataView } = useAlertsDataView({
     featureIds,
     dataViewsService: dataViews,
     http,
     toasts: notifications.toasts,
   });
-  const dataView = useMemo(() => alertDataViews?.[0], [alertDataViews]);
   const [pageSize, setPageSize] = useLocalStorage<number[]>(
     `grouping-table-${groupingId}`,
     Array(MAX_GROUPING_LEVELS).fill(DEFAULT_PAGE_SIZE)
