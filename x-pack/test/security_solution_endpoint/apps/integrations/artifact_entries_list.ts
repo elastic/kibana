@@ -147,11 +147,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       actions:
         | ArtifactActionsType['create']['formFields']
         | ArtifactActionsType['update']['formFields'],
-      suffix?: string
+      suffix?: string,
+      byText?: boolean,
+      waitABit?: boolean
     ) => {
       for (const formAction of actions) {
         if (formAction.type === 'customClick') {
-          await find.clickByCssSelector(formAction.selector, testSubjects.FIND_TIME);
+          if (waitABit) {
+            await new Promise((resolve) => setTimeout(resolve, 500));
+          }
+
+          if (byText) {
+            await find.clickByButtonText(formAction.selector, undefined, testSubjects.FIND_TIME);
+          } else {
+            await find.clickByCssSelector(
+              `button[title="${formAction.selector}"]`,
+              testSubjects.FIND_TIME
+            );
+          }
         } else if (formAction.type === 'click') {
           await testSubjects.click(formAction.selector);
         } else if (formAction.type === 'input') {
@@ -179,24 +192,72 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     const createArtifact = async (
       actions: ArtifactActionsType | MultipleArtifactActionsType,
-      options?: { policyId?: string; suffix?: string; createButton?: string }
+      options?: {
+        policyId?: string;
+        suffix?: string;
+        createButton?: string;
+        byText?: boolean;
+        waitABit?: boolean;
+      }
     ) => {
-      // Opens add flyout
-      if (options?.createButton) {
-        await testSubjects.click(`${actions.pagePrefix}-${options.createButton}`);
-      } else {
-        await testSubjects.click(`${actions.pagePrefix}-emptyState-addButton`);
+      let successes = 0;
+      let fails = 0;
+
+      for (let i = 0; i < 3; i++) {
+        // Opens add flyout
+        if (options?.createButton) {
+          await testSubjects.click(`${actions.pagePrefix}-${options.createButton}`);
+        } else {
+          await testSubjects.click(`${actions.pagePrefix}-emptyState-addButton`);
+        }
+
+        await performActions(
+          actions.create.formFields,
+          options?.suffix,
+          options?.byText,
+          options?.waitABit
+        );
+
+        if (options?.policyId) {
+          await testSubjects.click(`${actions.pageObject}-form-effectedPolicies-perPolicy`);
+          await testSubjects.click(`policy-${options.policyId}-checkbox`);
+        }
+
+        let hasFailed = false;
+        try {
+          await find.byCssSelector(
+            ':not([disabled])[data-test-subj="EventFiltersListPage-flyout-submitButton"]',
+            2000
+          );
+        } catch (e) {
+          hasFailed = true;
+        }
+
+        if (hasFailed) {
+          fails++;
+        } else {
+          successes++;
+        }
+        console.log(
+          '🧀 🥭 IN PROGRESS',
+          JSON.stringify(
+            { byText: options?.byText, waitABit: options?.waitABit, hasFailed, fails, successes },
+            null,
+            ' '
+          )
+        );
+
+        await testSubjects.click(`${actions.pagePrefix}-flyout-cancelButton`);
       }
 
-      await performActions(actions.create.formFields, options?.suffix);
-
-      if (options?.policyId) {
-        await testSubjects.click(`${actions.pageObject}-form-effectedPolicies-perPolicy`);
-        await testSubjects.click(`policy-${options.policyId}-checkbox`);
-      }
-
-      // Submit create artifact form
-      await testSubjects.click(`${actions.pagePrefix}-flyout-submitButton`);
+      console.log(
+        '🧀 🥭 RESULTS ARE IN',
+        JSON.stringify(
+          { byText: options?.byText, waitABit: options?.waitABit, fails, successes },
+          null,
+          ' '
+        )
+      );
     };
 
     const updateArtifact = async (
@@ -218,7 +279,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click(`${actions.pagePrefix}-flyout-submitButton`);
     };
 
-    for (const testData of getArtifactsListTestsData()) {
+    for (const testData of [[...getArtifactsListTestsData()][1]]) {
       describe(`When on the ${testData.title} entries list`, function () {
         beforeEach(async () => {
           policyInfo = await policyTestResources.createPolicy();
@@ -232,6 +293,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           if (policyInfo) {
             await policyInfo.cleanup();
           }
+        });
+
+        it.only('flaky test for clicking by css selector', async () => {
+          await createArtifact(testData, { policyId: policyInfo.packagePolicy.id });
+        });
+        it.only('flaky test for clicking by text', async () => {
+          await createArtifact(testData, { policyId: policyInfo.packagePolicy.id, byText: true });
+        });
+        it.only('flaky test for some wait', async () => {
+          await createArtifact(testData, { policyId: policyInfo.packagePolicy.id, waitABit: true });
         });
 
         it(`should not show page title if there is no ${testData.title} entry`, async () => {

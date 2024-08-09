@@ -223,7 +223,7 @@ export const getArtifactsListTestsData = () => [
         },
         {
           type: 'customClick',
-          selector: 'button[title="agent.ephemeral_id"]',
+          selector: 'agent.ephemeral_id',
         },
         {
           type: 'click',
