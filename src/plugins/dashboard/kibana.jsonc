@@ -42,7 +42,7 @@
       "kibanaUtils",
       "presentationUtil",
       "presentationPanel",
-      "savedObjects",
+      "savedObjects"
     ]
   }
 }
