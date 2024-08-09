@@ -305,19 +305,13 @@ function useInvestigationWithoutContext({
     [loadInvestigation, startNewInvestigation, setInvestigations, investigation?.id]
   );
 
-  const addNote = useCallback(
-    async (note: string) => {
-      await investigationStore.addNote(note);
-    },
-    [investigationStore]
-  );
+  const addNote = async (note: string) => {
+    await investigationStore.addNote(note);
+  };
 
-  const deleteNote = useCallback(
-    async (id: string) => {
-      await investigationStore.deleteNote(id);
-    },
-    [investigationStore]
-  );
+  const deleteNote = async (id: string) => {
+    await investigationStore.deleteNote(id);
+  };
 
   return {
     addNote,
