@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ContainerModule } from 'inversify';
-import { Route } from '@kbn/core-http-server';
-import { EchoRoute } from './route';
+import { inject, injectable } from 'inversify';
+import type { Type } from '@kbn/config-schema';
+import { type KibanaRequest, RequestToken } from '@kbn/core-http-server';
 
-export const module = new ContainerModule((bind) => {
-  bind(EchoRoute).toSelf().inRequestScope();
+export type EchoRequest = KibanaRequest<never, never, Type<string>>;
 
-  bind(Route).toConstantValue(EchoRoute);
-});
+@injectable()
+export class Echo {
+  constructor(@inject(RequestToken) private readonly request: EchoRequest) {}
+
+  echo() {
+    return this.request.body;
+  }
+}
