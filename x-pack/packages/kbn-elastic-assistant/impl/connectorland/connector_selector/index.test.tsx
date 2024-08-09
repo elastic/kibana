@@ -7,9 +7,10 @@
 
 import React from 'react';
 import { ConnectorSelector } from '.';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { mockActionTypes, mockConnectors } from '../../mock/connectors';
+import * as i18n from '../translations';
 
 const onConnectorSelectionChange = jest.fn();
 const setIsOpen = jest.fn();
@@ -106,5 +107,29 @@ describe('Connector selector', () => {
     expect(onConnectorSelectionChange).toHaveBeenCalledWith(newConnector);
     expect(mockRefetchConnectors).toHaveBeenCalled();
     expect(setIsOpen).toHaveBeenCalledWith(false);
+  });
+
+  it('renders the expected placeholder when selectedConnectorId is undefined', () => {
+    render(
+      <TestProviders>
+        <ConnectorSelector {...defaultProps} selectedConnectorId={undefined} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('connector-selector')).toHaveTextContent(
+      i18n.INLINE_CONNECTOR_PLACEHOLDER
+    );
+  });
+
+  it('does NOT render the placeholder when selectedConnectorId is defined', () => {
+    render(
+      <TestProviders>
+        <ConnectorSelector {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('connector-selector')).not.toHaveTextContent(
+      i18n.INLINE_CONNECTOR_PLACEHOLDER
+    );
   });
 });

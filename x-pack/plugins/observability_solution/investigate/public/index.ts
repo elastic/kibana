@@ -20,14 +20,14 @@ import type {
 export type { InvestigatePublicSetup, InvestigatePublicStart, OnWidgetAdd, WidgetRenderAPI };
 
 export {
-  type InvestigateTimeline,
+  type Investigation,
   type InvestigateWidget,
   type InvestigateWidgetCreate,
   InvestigateWidgetColumnSpan,
   type GlobalWidgetParameters,
-  type InvestigateUser,
-  type WorkflowBlock,
 } from '../common/types';
+
+export { mergePlainObjects } from '../common/utils/merge_plain_objects';
 
 export { ChromeOption } from './types';
 

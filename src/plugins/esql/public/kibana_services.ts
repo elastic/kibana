@@ -10,16 +10,17 @@ import { BehaviorSubject } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { IndexManagementPluginSetup } from '@kbn/index-management';
+import type { IndexManagementPluginSetup } from '@kbn/index-management';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 export let core: CoreStart;
 
 interface ServiceDeps {
   core: CoreStart;
-  darkMode: boolean;
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
+  fieldsMetadata?: FieldsMetadataPublicStart;
 }
 
 const servicesReady$ = new BehaviorSubject<ServiceDeps | undefined>(undefined);
@@ -39,16 +40,15 @@ export const setKibanaServices = (
   kibanaCore: CoreStart,
   dataViews: DataViewsPublicPluginStart,
   expressions: ExpressionsStart,
-  indexManagement?: IndexManagementPluginSetup
+  indexManagement?: IndexManagementPluginSetup,
+  fieldsMetadata?: FieldsMetadataPublicStart
 ) => {
   core = kibanaCore;
-  core.theme.theme$.subscribe(({ darkMode }) => {
-    servicesReady$.next({
-      core,
-      darkMode,
-      dataViews,
-      expressions,
-      indexManagementApiService: indexManagement?.apiService,
-    });
+  servicesReady$.next({
+    core,
+    dataViews,
+    expressions,
+    indexManagementApiService: indexManagement?.apiService,
+    fieldsMetadata,
   });
 };

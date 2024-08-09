@@ -1,0 +1,78 @@
+{
+  "id": "@kbn/avc-banner",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/avc-banner",
+        "id": "def-public.AVCResultsBanner2024",
+        "type": "Function",
+        "tags": [],
+        "label": "AVCResultsBanner2024",
+        "description": [],
+        "signature": [
+          "({ onDismiss }: React.PropsWithChildren<{ onDismiss: () => void; }>) => JSX.Element"
+        ],
+        "path": "packages/kbn-avc-banner/src/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/avc-banner",
+            "id": "def-public.AVCResultsBanner2024.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ onDismiss }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<{ onDismiss: () => void; }>"
+            ],
+            "path": "packages/kbn-avc-banner/src/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/avc-banner",
+        "id": "def-public.useIsStillYear2024",
+        "type": "Function",
+        "tags": [],
+        "label": "useIsStillYear2024",
+        "description": [],
+        "signature": [
+          "() => boolean"
+        ],
+        "path": "packages/kbn-avc-banner/src/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

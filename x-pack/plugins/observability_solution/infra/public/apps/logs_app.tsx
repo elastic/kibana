@@ -18,7 +18,7 @@ import { LogsPage } from '../pages/logs';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { CommonInfraProviders, CoreProviders } from './common_providers';
 import { prepareMountElement } from './common_styles';
-import { KbnUrlStateStorageFromRouterProvider } from '../utils/kbn_url_state_context';
+import { KbnUrlStateStorageFromRouterProvider } from '../containers/kbn_url_state_context';
 
 export const renderApp = (
   core: CoreStart,

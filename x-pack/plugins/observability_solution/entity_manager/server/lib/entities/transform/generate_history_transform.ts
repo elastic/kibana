@@ -21,7 +21,9 @@ import {
   generateHistoryTransformId,
   generateHistoryIngestPipelineId,
   generateHistoryIndexName,
+  generateHistoryBackfillTransformId,
 } from '../helpers/generate_component_id';
+import { isBackfillEnabled } from '../helpers/is_backfill_enabled';
 
 export function generateHistoryTransform(
   definition: EntityDefinition
@@ -32,8 +34,88 @@ export function generateHistoryTransform(
     filter.push(getElasticsearchQueryOrThrow(definition.filter));
   }
 
+  if (definition.identityFields.some(({ optional }) => !optional)) {
+    definition.identityFields
+      .filter(({ optional }) => !optional)
+      .forEach(({ field }) => {
+        filter.push({ exists: { field } });
+      });
+  }
+
+  filter.push({
+    range: {
+      [definition.history.timestampField]: {
+        gte: `now-${definition.history.settings.lookbackPeriod}`,
+      },
+    },
+  });
+
+  return generateTransformPutRequest({
+    definition,
+    filter,
+    transformId: generateHistoryTransformId(definition),
+    frequency: definition.history.settings.frequency,
+    syncDelay: definition.history.settings.syncDelay,
+  });
+}
+
+export function generateBackfillHistoryTransform(
+  definition: EntityDefinition
+): TransformPutTransformRequest {
+  if (!isBackfillEnabled(definition)) {
+    throw new Error(
+      'generateBackfillHistoryTransform called without history.settings.backfillSyncDelay set'
+    );
+  }
+
+  const filter: QueryDslQueryContainer[] = [];
+
+  if (definition.filter) {
+    filter.push(getElasticsearchQueryOrThrow(definition.filter));
+  }
+
+  if (definition.history.settings.backfillLookbackPeriod) {
+    filter.push({
+      range: {
+        [definition.history.timestampField]: {
+          gte: `now-${definition.history.settings.backfillLookbackPeriod}`,
+        },
+      },
+    });
+  }
+
+  if (definition.identityFields.some(({ optional }) => !optional)) {
+    definition.identityFields
+      .filter(({ optional }) => !optional)
+      .forEach(({ field }) => {
+        filter.push({ exists: { field } });
+      });
+  }
+
+  return generateTransformPutRequest({
+    definition,
+    filter,
+    transformId: generateHistoryBackfillTransformId(definition),
+    frequency: definition.history.settings.backfillFrequency,
+    syncDelay: definition.history.settings.backfillSyncDelay,
+  });
+}
+
+const generateTransformPutRequest = ({
+  definition,
+  filter,
+  transformId,
+  frequency,
+  syncDelay,
+}: {
+  definition: EntityDefinition;
+  transformId: string;
+  filter: QueryDslQueryContainer[];
+  frequency?: string;
+  syncDelay?: string;
+}) => {
   return {
-    transform_id: generateHistoryTransformId(definition),
+    transform_id: transformId,
     _meta: {
       definitionVersion: definition.version,
       managed: definition.managed,
@@ -53,11 +135,11 @@ export function generateHistoryTransform(
       index: `${generateHistoryIndexName({ id: 'noop' } as EntityDefinition)}`,
       pipeline: generateHistoryIngestPipelineId(definition),
     },
-    frequency: definition.history.settings?.frequency ?? ENTITY_DEFAULT_HISTORY_FREQUENCY,
+    frequency: frequency || ENTITY_DEFAULT_HISTORY_FREQUENCY,
     sync: {
       time: {
-        field: definition.history.settings?.syncField ?? definition.history.timestampField,
-        delay: definition.history.settings?.syncDelay ?? ENTITY_DEFAULT_HISTORY_SYNC_DELAY,
+        field: definition.history.settings.syncField || definition.history.timestampField,
+        delay: syncDelay || ENTITY_DEFAULT_HISTORY_SYNC_DELAY,
       },
     },
     settings: {
@@ -78,7 +160,7 @@ export function generateHistoryTransform(
         ['@timestamp']: {
           date_histogram: {
             field: definition.history.timestampField,
-            fixed_interval: definition.history.interval.toJSON(),
+            fixed_interval: definition.history.interval,
           },
         },
       },
@@ -93,4 +175,4 @@ export function generateHistoryTransform(
       },
     },
   };
-}
+};

@@ -16,6 +16,7 @@ import {
 } from '@kbn/elastic-assistant';
 import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
 import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/assistant/api';
+import { useKibana } from '../../common/lib/kibana';
 
 const defaultSelectedConversationId = WELCOME_CONVERSATION_TITLE;
 
@@ -26,16 +27,21 @@ export const ManagementSettings = React.memo(() => {
     assistantAvailability: { isAssistantEnabled },
   } = useAssistantContext();
 
+  const {
+    application: {
+      navigateToApp,
+      capabilities: {
+        securitySolutionAssistant: { 'ai-assistant': securityAIAssistantEnabled },
+      },
+    },
+  } = useKibana().services;
+
   const onFetchedConversations = useCallback(
     (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
       mergeBaseWithPersistedConversations(baseConversations, conversationsData),
     [baseConversations]
   );
-  const {
-    data: conversations,
-    isFetched: conversationsLoaded,
-    refetch: refetchConversations,
-  } = useFetchCurrentUserConversations({
+  const { data: conversations } = useFetchCurrentUserConversations({
     http,
     onFetch: onFetchedConversations,
     isAssistantEnabled,
@@ -50,15 +56,12 @@ export const ManagementSettings = React.memo(() => {
     [conversations, getDefaultConversation]
   );
 
+  if (!securityAIAssistantEnabled) {
+    navigateToApp('home');
+  }
+
   if (conversations) {
-    return (
-      <AssistantSettingsManagement
-        conversations={conversations}
-        conversationsLoaded={conversationsLoaded}
-        refetchConversations={refetchConversations}
-        selectedConversation={currentConversation}
-      />
-    );
+    return <AssistantSettingsManagement selectedConversation={currentConversation} />;
   }
 
   return <></>;

@@ -6,7 +6,6 @@
  */
 
 import React, { useState, Fragment, useEffect, useCallback } from 'react';
-import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFieldNumber,
@@ -19,7 +18,7 @@ import {
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextBasedLangEditor } from '@kbn/esql/public';
 import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
@@ -39,7 +38,7 @@ import { rowToDocument, toEsQueryHits, transformDatatableToEsqlTable } from '../
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
 > = ({ ruleParams, setRuleParams, setRuleProperty, errors }) => {
-  const { expressions, http, fieldFormats, isServerless } = useTriggerUiActionServices();
+  const { expressions, http, fieldFormats, isServerless, dataViews } = useTriggerUiActionServices();
   const { esqlQuery, timeWindowSize, timeWindowUnit, timeField } = ruleParams;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<
@@ -63,7 +62,7 @@ export const EsqlQueryExpression: React.FC<
   });
   const [query, setQuery] = useState<AggregateQuery>({ esql: '' });
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
-  const [detectTimestamp, setDetectTimestamp] = useState<boolean>(false);
+  const [detectedTimestamp, setDetectedTimestamp] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const setParam = useCallback(
@@ -161,19 +160,18 @@ export const EsqlQueryExpression: React.FC<
   ]);
 
   const refreshTimeFields = async (q: AggregateQuery) => {
-    let hasTimestamp = false;
-    const indexPattern: string = getIndexPatternFromESQLQuery(get(q, 'esql'));
+    const esqlDataView = await getESQLAdHocDataview(q.esql, dataViews);
+    const indexPattern: string = esqlDataView.getIndexPattern();
     const currentEsFields = await getFields(http, [indexPattern]);
 
     const timeFields = getTimeFieldOptions(currentEsFields);
     setTimeFieldOptions([firstFieldOption, ...timeFields]);
 
-    const timestampField = timeFields.find((field) => field.value === '@timestamp');
+    const timestampField = esqlDataView.timeFieldName;
     if (timestampField) {
-      setParam('timeField', timestampField.value);
-      hasTimestamp = true;
+      setParam('timeField', timestampField);
     }
-    setDetectTimestamp(hasTimestamp);
+    setDetectedTimestamp(timestampField);
   };
 
   return (
@@ -196,19 +194,18 @@ export const EsqlQueryExpression: React.FC<
             setParam('esqlQuery', q);
             refreshTimeFields(q);
           }}
-          expandCodeEditor={() => true}
-          isCodeEditorExpanded={true}
           onTextLangQuerySubmit={async () => {}}
-          detectTimestamp={detectTimestamp}
-          hideMinimizeButton={true}
+          detectedTimestamp={detectedTimestamp}
           hideRunQueryText={true}
           isLoading={isLoading}
+          hasOutline
         />
       </EuiFormRow>
       <EuiSpacer />
       <EuiFormRow
         id="timeField"
         fullWidth
+        // @ts-expect-error upgrade typescript v5.1.6
         isInvalid={errors.timeField.length > 0 && timeField !== undefined}
         error={errors.timeField}
         label={
@@ -220,6 +217,7 @@ export const EsqlQueryExpression: React.FC<
       >
         <EuiSelect
           options={timeFieldOptions}
+          // @ts-expect-error upgrade typescript v5.1.6
           isInvalid={errors.timeField.length > 0 && timeField !== undefined}
           fullWidth
           name="timeField"
@@ -235,6 +233,7 @@ export const EsqlQueryExpression: React.FC<
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id="timeWindowSize"
+            // @ts-expect-error upgrade typescript v5.1.6
             isInvalid={errors.timeWindowSize.length > 0}
             error={errors.timeWindowSize}
             label={
@@ -247,6 +246,7 @@ export const EsqlQueryExpression: React.FC<
             <EuiFieldNumber
               name="timeWindowSize"
               data-test-subj="timeWindowSizeNumber"
+              // @ts-expect-error upgrade typescript v5.1.6
               isInvalid={errors.timeWindowSize.length > 0}
               min={0}
               value={timeWindowSize || ''}

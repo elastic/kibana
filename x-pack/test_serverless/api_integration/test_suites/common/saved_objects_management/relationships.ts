@@ -49,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('relationships', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
 
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -62,7 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
       await kibanaServer.savedObjects.cleanStandardList();
 
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     const baseApiUrl = `/api/kibana/management/saved_objects/relationships`;

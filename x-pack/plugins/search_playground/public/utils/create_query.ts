@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RetrieverContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IndicesQuerySourceFields, QuerySourceFields } from '../types';
 
 export type IndexFields = Record<string, string[]>;
@@ -51,7 +52,7 @@ export function createQuery(
   rerankOptions: ReRankOptions = {
     rrf: true,
   }
-) {
+): { retriever: RetrieverContainer } {
   const indices = Object.keys(fieldDescriptors);
   const boolMatches = Object.keys(fields).reduce<Matches>(
     (acc, index) => {

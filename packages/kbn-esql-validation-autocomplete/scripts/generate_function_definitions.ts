@@ -12,7 +12,6 @@ import { join } from 'path';
 import _ from 'lodash';
 import type { RecursivePartial } from '@kbn/utility-types';
 import { FunctionDefinition } from '../src/definitions/types';
-import { esqlToKibanaType } from '../src/shared/esql_to_kibana_type';
 
 const aliasTable: Record<string, string[]> = {
   to_version: ['to_ver'],
@@ -26,7 +25,7 @@ const aliasTable: Record<string, string[]> = {
 const aliases = new Set(Object.values(aliasTable).flat());
 
 const evalSupportedCommandsAndOptions = {
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
 };
 
@@ -62,7 +61,7 @@ const validateLogFunctions = `(fnDef: ESQLFunction) => {
   // do not really care here about the base and field
   // just need to check both values are not negative
   for (const arg of fnDef.args) {
-    if (isLiteralItem(arg) && arg.value < 0) {
+    if (isLiteralItem(arg) && Number(arg.value) < 0) {
       messages.push({
         type: 'warning' as const,
         code: 'logOfNegativeValue',
@@ -214,11 +213,13 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
     ],
   },
   mv_sort: {
-    signatures: new Array(6).fill({
+    signatures: new Array(9).fill({
       params: [{}, { literalOptions: ['asc', 'desc'] }],
     }),
   },
 };
+
+const convertDateTime = (s: string) => (s === 'datetime' ? 'date' : s);
 
 /**
  * Builds a function definition object from a row of the "meta functions" table
@@ -240,10 +241,10 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
         ...signature,
         params: signature.params.map((param: any) => ({
           ...param,
-          type: esqlToKibanaType(param.type),
+          type: convertDateTime(param.type),
           description: undefined,
         })),
-        returnType: esqlToKibanaType(signature.returnType),
+        returnType: convertDateTime(signature.returnType),
         variadic: undefined, // we don't support variadic property
         minParams: signature.variadic
           ? signature.params.filter((param: any) => !param.optional).length

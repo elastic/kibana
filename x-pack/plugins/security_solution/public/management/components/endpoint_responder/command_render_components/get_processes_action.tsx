@@ -6,59 +6,31 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import styled from 'styled-components';
-import { EuiBasicTable } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import type { GetProcessesRequestBody } from '../../../../../common/api/endpoint';
+import { RunningProcessesActionResults } from '../../running_processes_action_results';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
-import type {
-  GetProcessesActionOutputContent,
-  ProcessesRequestBody,
-} from '../../../../../common/endpoint/types';
+import type { GetProcessesActionOutputContent } from '../../../../../common/endpoint/types';
 import { useSendGetEndpointProcessesRequest } from '../../../hooks/response_actions/use_send_get_endpoint_processes_request';
 import type { ActionRequestComponentProps } from '../types';
 
-// @ts-expect-error TS2769
-const StyledEuiBasicTable = styled(EuiBasicTable)`
-  table {
-    background-color: transparent;
-  }
-
-  .euiTableHeaderCell {
-    border-bottom: ${(props) => props.theme.eui.euiBorderThin};
-
-    .euiTableCellContent__text {
-      font-weight: ${(props) => props.theme.eui.euiFontWeightRegular};
-    }
-  }
-
-  .euiTableRow {
-    &:hover {
-      background-color: ${({ theme: { eui } }) => eui.euiColorEmptyShade} !important;
-    }
-
-    .euiTableRowCell {
-      border-top: none !important;
-      border-bottom: none !important;
-    }
-  }
-`;
-
 export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
   ({ command, setStore, store, status, setStatus, ResultComponent }) => {
-    const endpointId = command.commandDefinition?.meta?.endpointId;
+    const { endpointId, agentType } = command.commandDefinition?.meta ?? {};
+    const comment = command.args.args?.comment?.[0];
     const actionCreator = useSendGetEndpointProcessesRequest();
 
     const actionRequestBody = useMemo(() => {
       return endpointId
         ? {
             endpoint_ids: [endpointId],
-            comment: command.args.args?.comment?.[0],
+            comment,
+            agent_type: agentType,
           }
         : undefined;
-    }, [endpointId, command.args.args?.comment]);
+    }, [endpointId, comment, agentType]);
 
     const { result, actionDetails: completedActionDetails } = useConsoleActionSubmitter<
-      ProcessesRequestBody,
+      GetProcessesRequestBody,
       GetProcessesActionOutputContent
     >({
       ResultComponent,
@@ -71,56 +43,6 @@ export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
       dataTestSubj: 'getProcesses',
     });
 
-    const columns = useMemo(
-      () => [
-        {
-          field: 'user',
-          'data-test-subj': 'process_list_user',
-          name: i18n.translate(
-            'xpack.securitySolution.endpointResponseActions.getProcesses.table.header.user',
-            { defaultMessage: 'USER' }
-          ),
-          width: '10%',
-        },
-        {
-          field: 'pid',
-          'data-test-subj': 'process_list_pid',
-          name: i18n.translate(
-            'xpack.securitySolution.endpointResponseActions.getProcesses.table.header.pid',
-            { defaultMessage: 'PID' }
-          ),
-          width: '5%',
-        },
-        {
-          field: 'entity_id',
-          'data-test-subj': 'process_list_entity_id',
-          name: i18n.translate(
-            'xpack.securitySolution.endpointResponseActions.getProcesses.table.header.enityId',
-            { defaultMessage: 'ENTITY ID' }
-          ),
-          width: '30%',
-        },
-
-        {
-          field: 'command',
-          'data-test-subj': 'process_list_command',
-          name: i18n.translate(
-            'xpack.securitySolution.endpointResponseActions.getProcesses.table.header.command',
-            { defaultMessage: 'COMMAND' }
-          ),
-          width: '55%',
-        },
-      ],
-      []
-    );
-
-    const tableEntries = useMemo(() => {
-      if (endpointId) {
-        return completedActionDetails?.outputs?.[endpointId]?.content.entries ?? [];
-      }
-      return [];
-    }, [completedActionDetails?.outputs, endpointId]);
-
     if (!completedActionDetails || !completedActionDetails.wasSuccessful) {
       return result;
     }
@@ -128,10 +50,9 @@ export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
     // Show results
     return (
       <ResultComponent data-test-subj="getProcessesSuccessCallout" showTitle={false}>
-        <StyledEuiBasicTable
-          data-test-subj={'getProcessListTable'}
-          items={[...tableEntries]}
-          columns={columns}
+        <RunningProcessesActionResults
+          action={completedActionDetails}
+          data-test-subj="processesOutput"
         />
       </ResultComponent>
     );

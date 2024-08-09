@@ -27,6 +27,7 @@ const previouslyRegisteredTypes = [
   'application_usage_totals',
   'application_usage_transactional',
   'background-session',
+  'background-task-node',
   'canvas-element',
   'canvas-workpad',
   'canvas-workpad-template',
@@ -46,6 +47,7 @@ const previouslyRegisteredTypes = [
   'csp-rule-template',
   'csp_rule',
   'dashboard',
+  'dynamic-config-overrides', // Added in 8.16 to persist the dynamic config overrides and share it with other nodes
   'event-annotation-group',
   'endpoint:user-artifact',
   'endpoint:user-artifact-manifest',
@@ -72,6 +74,7 @@ const previouslyRegisteredTypes = [
   'fleet-proxy',
   'fleet-uninstall-tokens',
   'fleet-setup-lock',
+  'fleet-space-settings',
   'graph-workspace',
   'guided-setup-state',
   'guided-onboarding-guide-state',

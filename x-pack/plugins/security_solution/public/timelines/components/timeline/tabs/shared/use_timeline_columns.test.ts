@@ -55,7 +55,7 @@ describe('useTimelineColumns', () => {
       const { result } = renderHook(() => useTimelineColumns([]), {
         wrapper: TestProviders,
       });
-      expect(result.current.localColumns).toEqual(defaultHeaders);
+      expect(result.current.localColumns).toEqual([]);
     });
 
     it('should return the default unified data table (udt) columns', () => {
@@ -63,7 +63,7 @@ describe('useTimelineColumns', () => {
       const { result } = renderHook(() => useTimelineColumns([]), {
         wrapper: TestProviders,
       });
-      expect(result.current.localColumns).toEqual(defaultUdtHeaders);
+      expect(result.current.localColumns).toEqual([]);
     });
 
     it('should return the provided columns', () => {

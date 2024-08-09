@@ -68,7 +68,7 @@ import {
   useSourceContext,
   withSourceProvider,
 } from '../../../containers/metrics_source';
-import { InfraWaffleMapOptions } from '../../../lib/lib';
+import type { InfraWaffleMapOptions } from '../../../common/inventory/types';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { ExpressionChart } from './expression_chart';
@@ -577,7 +577,7 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
         myMetrics = containerSnapshotMetricTypes;
         break;
     }
-    return myMetrics.map(toMetricOpt);
+    return myMetrics.map((myMetric) => toMetricOpt(myMetric, props.nodeType));
   }, [props.nodeType]);
 
   return (
@@ -772,9 +772,12 @@ export const nodeTypes: { [key: string]: any } = {
 const metricUnit: Record<string, { label: string }> = {
   count: { label: '' },
   cpu: { label: '%' },
+  cpuTotal: { label: '%' },
   memory: { label: '%' },
   rx: { label: 'bits/s' },
   tx: { label: 'bits/s' },
+  rxV2: { label: 'bits/s' },
+  txV2: { label: 'bits/s' },
   logRate: { label: '/s' },
   diskIOReadBytes: { label: 'bytes/s' },
   diskIOWriteBytes: { label: 'bytes/s' },

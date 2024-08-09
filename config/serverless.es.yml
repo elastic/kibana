@@ -46,7 +46,7 @@ telemetry.labels.serverless: search
 
 # Alerts and LLM config
 xpack.actions.enabledActionTypes:
-  ['.email', '.index', '.slack', '.jira', '.webhook', '.teams', '.gen-ai', '.bedrock']
+  ['.email', '.index', '.slack', '.jira', '.webhook', '.teams', '.gen-ai', '.bedrock', '.gemini']
 
 # Customize empty page state for analytics apps
 no_data_page.analyticsNoDataPageFlavor: 'serverless_search'
@@ -72,3 +72,6 @@ xpack.search.notebooks.catalog.url: https://elastic-enterprise-search.s3.us-east
 
 # Search Homepage
 xpack.search.homepage.ui.enabled: true
+
+# Semantic text UI
+xpack.index_management.dev.enableSemanticText: false

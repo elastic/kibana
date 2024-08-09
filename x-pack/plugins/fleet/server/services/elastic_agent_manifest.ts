@@ -42,7 +42,7 @@ spec:
       #      - -c
       #      - >-
       #        mkdir -p /usr/share/elastic-agent/state/inputs.d &&
-      #        curl -sL https://github.com/elastic/elastic-agent/archive/8.16.tar.gz | tar xz -C /usr/share/elastic-agent/state/inputs.d --strip=5 "elastic-agent-8.16/deploy/kubernetes/elastic-agent/templates.d"
+      #        curl -sL https://github.com/elastic/elastic-agent/archive/8.16.tar.gz | tar xz -C /usr/share/elastic-agent/state/inputs.d --strip=5 "elastic-agent-8.16/deploy/kubernetes/elastic-agent-standalone/templates.d"
       #    securityContext:
       #      runAsUser: 0
       #    volumeMounts:
@@ -70,7 +70,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-            # The following ELASTIC_NETINFO:false variable will disable the netinfo.enabled option of add-host-metadata processor. This will remove fields host.ip and host.mac.  
+            # The following ELASTIC_NETINFO:false variable will disable the netinfo.enabled option of add-host-metadata processor. This will remove fields host.ip and host.mac.
             # For more info: https://www.elastic.co/guide/en/beats/metricbeat/current/add-host-metadata.html
             - name: ELASTIC_NETINFO
               value: "false"
@@ -131,7 +131,7 @@ spec:
       volumes:
         - name: datastreams
           configMap:
-            defaultMode: 0640
+            defaultMode: 0644
             name: agent-node-datastreams
         - name: proc
           hostPath:

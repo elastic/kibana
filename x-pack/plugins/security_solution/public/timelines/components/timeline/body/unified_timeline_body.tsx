@@ -8,7 +8,6 @@
 import type { ComponentProps, ReactElement } from 'react';
 import React, { useEffect, useState, useMemo } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
-import { isEmpty } from 'lodash';
 import { StyledTableFlexGroup, StyledUnifiedTableFlexItem } from '../unified_components/styles';
 import { UnifiedTimeline } from '../unified_components';
 import { defaultUdtHeaders } from '../unified_components/default_headers';
@@ -34,9 +33,6 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
     refetch,
     dataLoadingState,
     totalCount,
-    onEventClosed,
-    expandedDetail,
-    showExpandedDetails,
     onChangePage,
     activeTab,
     updatedAt,
@@ -59,9 +55,7 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
     });
   }, [events, pageInfo.activePage]);
 
-  const columnsHeader = useMemo(() => {
-    return isEmpty(columns) ? defaultUdtHeaders : columns;
-  }, [columns]);
+  const columnsHeader = useMemo(() => columns ?? defaultUdtHeaders, [columns]);
 
   return (
     <StyledTableFlexGroup direction="column" gutterSize="s">
@@ -83,9 +77,6 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
             refetch={refetch}
             dataLoadingState={dataLoadingState}
             totalCount={totalCount}
-            onEventClosed={onEventClosed}
-            expandedDetail={expandedDetail}
-            showExpandedDetails={showExpandedDetails}
             onChangePage={onChangePage}
             activeTab={activeTab}
             updatedAt={updatedAt}

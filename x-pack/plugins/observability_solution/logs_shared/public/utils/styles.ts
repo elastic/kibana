@@ -19,13 +19,14 @@ const asPropReader = (reader: string | string[] | PropReader) =>
       ) => get(props, reader as Prop, defaultValue);
 
 export const switchProp = Object.assign(
-  (propName: string | string[] | PropReader, options: Map<any, any> | object) => (props: object) => {
-    const propValue = asPropReader(propName)(props, switchProp.default);
-    if (typeof propValue === 'undefined') {
-      return;
-    }
-    return options instanceof Map ? options.get(propValue) : get(options, propValue);
-  },
+  (propName: string | string[] | PropReader, options: Map<any, any> | object) =>
+    (props: object) => {
+      const propValue = asPropReader(propName)(props, switchProp.default);
+      if (typeof propValue === 'undefined') {
+        return;
+      }
+      return options instanceof Map ? options.get(propValue) : get(options, propValue);
+    },
   {
     default: Symbol('default'),
   }

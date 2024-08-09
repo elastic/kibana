@@ -7,10 +7,10 @@
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { AggregationOptionsByType, AggregationResultOf } from '@kbn/es-types';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { existsQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { estypes } from '@elastic/elasticsearch';
 import { getBucketSizeFromTimeRangeAndBucketCount } from '../../utils';
 import { LOG_LEVEL } from '../../es_fields';
+import { existsQuery, kqlQuery } from '../../utils/es_queries';
 
 export interface LogsRateTimeseries {
   esClient: ElasticsearchClient;
@@ -50,6 +50,8 @@ export function createGetLogsRateTimeseries() {
     serviceEnvironmentQuery = [],
   }: LogsRateTimeseries): Promise<LogsRateTimeseriesReturnType> => {
     const intervalString = getBucketSizeFromTimeRangeAndBucketCount(timeFrom, timeTo, 50);
+
+    // Note: Please keep the formula in `metricsFormulasMap` up to date with the query!
 
     const esResponse = await esClient.search({
       index: 'logs-*-*',

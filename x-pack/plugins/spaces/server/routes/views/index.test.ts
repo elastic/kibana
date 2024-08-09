@@ -107,72 +107,63 @@ describe('Enter Space view routes', () => {
     });
   });
 
-  it('correctly enters space default route.', async () => {
-    const request = httpServerMock.createKibanaRequest();
-    const responseFactory = httpResourcesMock.createResponseFactory();
-    const contextMock = coreMock.createRequestHandlerContext();
+  const testCase = (
+    description: string,
+    {
+      query,
+      defaultRoute,
+      expectedLocation,
+    }: { query?: Record<string, string>; defaultRoute?: string; expectedLocation: string }
+  ) => {
+    it(description, async () => {
+      const request = httpServerMock.createKibanaRequest({
+        query,
+      });
 
-    contextMock.uiSettings.client.get.mockResolvedValue('/home');
+      const responseFactory = httpResourcesMock.createResponseFactory();
+      const contextMock = coreMock.createRequestHandlerContext();
+      contextMock.uiSettings.client.get.mockResolvedValue(defaultRoute);
 
-    await routeHandler(
-      { core: contextMock } as unknown as RequestHandlerContext,
-      request,
-      responseFactory
-    );
+      await routeHandler(
+        { core: contextMock } as unknown as RequestHandlerContext,
+        request,
+        responseFactory
+      );
 
-    expect(responseFactory.redirected).toHaveBeenCalledWith({
-      headers: { location: '/mock-server-basepath/home' },
+      expect(responseFactory.redirected).toHaveBeenCalledWith({
+        headers: { location: expectedLocation },
+      });
     });
+  };
+
+  testCase('correctly enters space default route.', {
+    defaultRoute: '/home',
+    expectedLocation: '/mock-server-basepath/home',
   });
 
-  it('correctly enters space with specified route.', async () => {
-    const nextRoute = '/app/management/kibana/objects';
-    const request = httpServerMock.createKibanaRequest({
-      query: {
-        next: nextRoute,
-      },
-    });
-
-    const responseFactory = httpResourcesMock.createResponseFactory();
-    const contextMock = coreMock.createRequestHandlerContext();
-
-    await routeHandler(
-      { core: contextMock } as unknown as RequestHandlerContext,
-      request,
-      responseFactory
-    );
-
-    expect(responseFactory.redirected).toHaveBeenCalledWith({
-      headers: { location: `/mock-server-basepath${nextRoute}` },
-    });
+  testCase('correctly enters space with specified route.', {
+    query: {
+      next: '/app/management/kibana/objects',
+    },
+    expectedLocation: '/mock-server-basepath/app/management/kibana/objects',
   });
 
-  it('correctly enters space with specified route without leading slash.', async () => {
-    const nextRoute = 'app/management/kibana/objects';
-    const request = httpServerMock.createKibanaRequest({
-      query: {
-        next: nextRoute,
-      },
-    });
-
-    const responseFactory = httpResourcesMock.createResponseFactory();
-    const contextMock = coreMock.createRequestHandlerContext();
-
-    await routeHandler(
-      { core: contextMock } as unknown as RequestHandlerContext,
-      request,
-      responseFactory
-    );
-
-    expect(responseFactory.redirected).toHaveBeenCalledWith({
-      headers: { location: `/mock-server-basepath/${nextRoute}` },
-    });
+  testCase('correctly enters space with specified route without leading slash.', {
+    query: {
+      next: 'app/management/kibana/objects',
+    },
+    expectedLocation: '/mock-server-basepath/app/management/kibana/objects',
   });
 
-  it('correctly enters space and normalizes specified route.', async () => {
-    const responseFactory = httpResourcesMock.createResponseFactory();
-    const contextMock = coreMock.createRequestHandlerContext();
+  testCase('correctly enters space with default route if specified route is not relative.', {
+    query: {
+      next: 'http://evil.com/mock-server-basepath/app/kibana',
+    },
+    defaultRoute: '/home',
+    expectedLocation: '/mock-server-basepath/home',
+  });
 
+  describe('specified route normalization', () => {
     for (const { query, expectedLocation } of [
       {
         query: {
@@ -206,42 +197,46 @@ describe('Enter Space view routes', () => {
           '/mock-server-basepath/app/management/kibana/objects?initialQuery=type:(visualization)',
       },
     ]) {
-      const request = httpServerMock.createKibanaRequest({
-        query,
-      });
-      await routeHandler(
-        { core: contextMock } as unknown as RequestHandlerContext,
-        request,
-        responseFactory
-      );
-
-      expect(responseFactory.redirected).toHaveBeenCalledWith({
-        headers: { location: expectedLocation },
-      });
-
-      responseFactory.redirected.mockClear();
+      testCase(`url ${query.next}`, { query, expectedLocation });
     }
   });
 
-  it('correctly enters space with default route if specificed route is not relative.', async () => {
-    const request = httpServerMock.createKibanaRequest({
-      query: {
-        next: 'http://evil.com/mock-server-basepath/app/kibana',
+  describe('default route', () => {
+    for (const { defaultRoute, expectedLocation, query, testCaseName } of [
+      {
+        defaultRoute: '/home',
+        expectedLocation: '/mock-server-basepath/home',
+        testCaseName: 'correctly enters space with default route.',
       },
-    });
-
-    const responseFactory = httpResourcesMock.createResponseFactory();
-    const contextMock = coreMock.createRequestHandlerContext();
-    contextMock.uiSettings.client.get.mockResolvedValue('/home');
-
-    await routeHandler(
-      { core: contextMock } as unknown as RequestHandlerContext,
-      request,
-      responseFactory
-    );
-
-    expect(responseFactory.redirected).toHaveBeenCalledWith({
-      headers: { location: '/mock-server-basepath/home' },
-    });
+      {
+        defaultRoute: '/home',
+        expectedLocation: '/mock-server-basepath/home',
+        testCaseName: 'correctly enters space with default route if specified url is empty string.',
+        query: { next: '' },
+      },
+      {
+        defaultRoute: '/home/#view',
+        expectedLocation: '/mock-server-basepath/home/#view',
+        testCaseName: 'correctly enters space with default route preserving url hash.',
+      },
+      {
+        defaultRoute: '/home?initialQuery=type:(visualization)',
+        expectedLocation: '/mock-server-basepath/home?initialQuery=type:(visualization)',
+        testCaseName: 'correctly enters space with default route preserving url search.',
+      },
+      {
+        defaultRoute: '/app/discover?initialQuery=type:(visualization)#/view/uuid',
+        expectedLocation:
+          '/mock-server-basepath/app/discover?initialQuery=type:(visualization)#/view/uuid',
+        testCaseName: 'correctly enters space with default route preserving url search and hash.',
+      },
+      {
+        defaultRoute: '../../app/../app/management/kibana/objects',
+        expectedLocation: '/mock-server-basepath/app/management/kibana/objects',
+        testCaseName: 'correctly enters space with default route normalizing url.',
+      },
+    ]) {
+      testCase(testCaseName, { query, defaultRoute, expectedLocation });
+    }
   });
 });

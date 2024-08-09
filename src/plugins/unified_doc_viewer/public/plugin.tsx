@@ -17,7 +17,6 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UnifiedDocViewerServices } from './types';
@@ -31,9 +30,6 @@ const fallback = (
   </EuiDelayRender>
 );
 
-const LazyDocViewerLogsOverview = dynamic(() => import('./components/doc_viewer_logs_overview'), {
-  fallback,
-});
 const LazyDocViewerLegacyTable = dynamic(() => import('./components/doc_viewer_table/legacy'), {
   fallback,
 });
@@ -50,7 +46,6 @@ export interface UnifiedDocViewerStart {
 
 export interface UnifiedDocViewerStartDeps {
   data: DataPublicPluginStart;
-  discoverShared: DiscoverSharedPublicStart;
   fieldFormats: FieldFormatsStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   share: SharePluginStart;
@@ -62,18 +57,6 @@ export class UnifiedDocViewerPublicPlugin
   private docViewsRegistry = new DocViewsRegistry();
 
   public setup(core: CoreSetup<UnifiedDocViewerStartDeps, UnifiedDocViewerStart>) {
-    this.docViewsRegistry.add({
-      id: 'doc_view_logs_overview',
-      title: i18n.translate('unifiedDocViewer.docViews.logsOverview.title', {
-        defaultMessage: 'Overview',
-      }),
-      order: 0,
-      enabled: false, // Disabled doc view by default, can be programmatically enabled using the DocViewsRegistry.prototype.enableById method.
-      component: (props) => {
-        return <LazyDocViewerLogsOverview {...props} />;
-      },
-    });
-
     this.docViewsRegistry.add({
       id: 'doc_view_table',
       title: i18n.translate('unifiedDocViewer.docViews.table.tableTitle', {
@@ -123,7 +106,7 @@ export class UnifiedDocViewerPublicPlugin
 
   public start(core: CoreStart, deps: UnifiedDocViewerStartDeps) {
     const { analytics, uiSettings } = core;
-    const { data, discoverShared, fieldFormats, fieldsMetadata, share } = deps;
+    const { data, fieldFormats, fieldsMetadata, share } = deps;
     const storage = new Storage(localStorage);
     const unifiedDocViewer = {
       registry: this.docViewsRegistry,
@@ -131,7 +114,6 @@ export class UnifiedDocViewerPublicPlugin
     const services = {
       analytics,
       data,
-      discoverShared,
       fieldFormats,
       fieldsMetadata,
       storage,

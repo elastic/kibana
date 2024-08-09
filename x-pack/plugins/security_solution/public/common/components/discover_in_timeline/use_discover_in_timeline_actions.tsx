@@ -28,6 +28,20 @@ import {
   DISCOVER_SEARCH_SAVE_ERROR_UNKNOWN,
 } from './translations';
 
+function defaultDiscoverAppState(): DiscoverAppState {
+  return {
+    query: {
+      esql: '',
+    },
+    sort: [['@timestamp', 'desc']],
+    columns: [],
+    interval: 'auto',
+    filters: [],
+    hideChart: true,
+    grid: {},
+  };
+}
+
 export const defaultDiscoverTimeRange: TimeRange = {
   from: 'now-15m',
   to: 'now',
@@ -80,20 +94,6 @@ export const useDiscoverInTimelineActions = (
     mutationKey: [version],
   });
 
-  const defaultDiscoverAppState: DiscoverAppState = useMemo(() => {
-    return {
-      query: {
-        esql: '',
-      },
-      sort: [['@timestamp', 'desc']],
-      columns: [],
-      interval: 'auto',
-      filters: [],
-      hideChart: true,
-      grid: {},
-    };
-  }, []);
-
   /*
    * generates Appstate from a given saved Search object
    *
@@ -125,11 +125,11 @@ export const useDiscoverInTimelineActions = (
             newSavedSearchId
           );
           const savedSearchState = savedSearch ? getAppStateFromSavedSearch(savedSearch) : null;
-          discoverStateContainer.current?.appState.initAndSync(savedSearch);
+          discoverStateContainer.current?.appState.initAndSync();
           await discoverStateContainer.current?.appState.replaceUrlState(
             savedSearchState?.appState ?? {}
           );
-          setDiscoverAppState(savedSearchState?.appState ?? defaultDiscoverAppState);
+          setDiscoverAppState(savedSearchState?.appState ?? defaultDiscoverAppState());
           discoverStateContainer.current?.globalState.set({
             ...discoverStateContainer.current?.globalState.get(),
             time: savedSearch.timeRange ?? defaultDiscoverTimeRange,
@@ -138,21 +138,17 @@ export const useDiscoverInTimelineActions = (
           /* empty */
         }
       } else {
-        discoverStateContainer.current?.appState.resetToState(defaultDiscoverAppState);
+        const defaultState = defaultDiscoverAppState();
+        discoverStateContainer.current?.appState.resetToState(defaultState);
         await discoverStateContainer.current?.appState.replaceUrlState({});
-        setDiscoverAppState(defaultDiscoverAppState);
+        setDiscoverAppState(defaultState);
         discoverStateContainer.current?.globalState.set({
           ...discoverStateContainer.current?.globalState.get(),
           time: defaultDiscoverTimeRange,
         });
       }
     },
-    [
-      defaultDiscoverAppState,
-      discoverStateContainer,
-      getAppStateFromSavedSearch,
-      setDiscoverAppState,
-    ]
+    [discoverStateContainer, getAppStateFromSavedSearch, setDiscoverAppState]
   );
 
   const persistSavedSearch = useCallback(
@@ -276,14 +272,13 @@ export const useDiscoverInTimelineActions = (
       updateSavedSearch,
       initializeLocalSavedSearch,
       getAppStateFromSavedSearch,
-      defaultDiscoverAppState,
+      defaultDiscoverAppState: defaultDiscoverAppState(),
     }),
     [
       resetDiscoverAppState,
       updateSavedSearch,
       initializeLocalSavedSearch,
       getAppStateFromSavedSearch,
-      defaultDiscoverAppState,
     ]
   );
 

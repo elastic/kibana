@@ -6,12 +6,12 @@
  */
 
 import { useState } from 'react';
-import { HOST_FIELD } from '../../../../common/constants';
+import { HOST_NAME_FIELD } from '../../../../common/constants';
 import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
 import { useAssetDetailsUrlState } from './use_asset_details_url_state';
 
 function buildFullProfilingKuery(assetName: string, profilingSearch?: string) {
-  const defaultKuery = `${HOST_FIELD} : "${assetName}"`;
+  const defaultKuery = `${HOST_NAME_FIELD} : "${assetName}"`;
   const customKuery = profilingSearch?.trim() ?? '';
 
   return customKuery !== '' ? `${defaultKuery} and ${customKuery}` : defaultKuery;

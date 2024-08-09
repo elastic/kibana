@@ -6,9 +6,7 @@
  */
 
 import { RequestHandlerContext } from '@kbn/core/server';
-import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
 import { SetupRouteOptions } from '../types';
-import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
 import { checkIfEntityDiscoveryAPIKeyIsValid, readEntityDiscoveryAPIKey } from '../../lib/auth';
 import {
   ERROR_API_KEY_NOT_FOUND,
@@ -18,6 +16,7 @@ import {
 } from '../../../common/errors';
 import { findEntityDefinitions } from '../../lib/entities/find_entity_definition';
 import { builtInDefinitions } from '../../lib/entities/built_in';
+import { getClientsFromAPIKey } from '../../lib/utils';
 
 export function checkEntityDiscoveryEnabledRoute<T extends RequestHandlerContext>({
   router,
@@ -26,7 +25,7 @@ export function checkEntityDiscoveryEnabledRoute<T extends RequestHandlerContext
 }: SetupRouteOptions<T>) {
   router.get<unknown, unknown, unknown>(
     {
-      path: `${ENTITY_INTERNAL_API_PREFIX}/managed/enablement`,
+      path: '/internal/entities/managed/enablement',
       validate: false,
     },
     async (context, req, res) => {
@@ -45,9 +44,7 @@ export function checkEntityDiscoveryEnabledRoute<T extends RequestHandlerContext
           return res.ok({ body: { enabled: false, reason: ERROR_API_KEY_NOT_VALID } });
         }
 
-        const fakeRequest = getFakeKibanaRequest({ id: apiKey.id, api_key: apiKey.apiKey });
-        const soClient = server.core.savedObjects.getScopedClient(fakeRequest);
-        const esClient = server.core.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
+        const { esClient, soClient } = getClientsFromAPIKey({ apiKey, server });
 
         const entityDiscoveryState = await Promise.all(
           builtInDefinitions.map(async (builtInDefinition) => {

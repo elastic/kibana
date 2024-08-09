@@ -6,9 +6,20 @@
  */
 
 import React, { FunctionComponent } from 'react';
+import { DeleteSearchableSnapshotField } from './delete_searchable_snapshot_field';
 import { Phase } from '../phase';
 import { SnapshotPoliciesField } from '../shared_fields';
 
 export const DeletePhase: FunctionComponent = () => {
-  return <Phase phase="delete" topLevelSettings={<SnapshotPoliciesField />} />;
+  return (
+    <Phase
+      phase="delete"
+      topLevelSettings={
+        <>
+          <SnapshotPoliciesField />
+          <DeleteSearchableSnapshotField />
+        </>
+      }
+    />
+  );
 };

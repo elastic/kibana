@@ -14,15 +14,25 @@ import * as ReactHookForm from 'react-hook-form';
 jest.mock('./use_kibana', () => ({
   useKibana: jest.fn(),
 }));
+jest.mock('react-router-dom-v5-compat', () => ({
+  useSearchParams: jest.fn(() => [{ get: jest.fn() }]),
+}));
 
 let formHookSpy: jest.SpyInstance;
 
-import { getIndicesWithNoSourceFields, useSourceIndicesFields } from './use_source_indices_field';
+import { useSourceIndicesFields } from './use_source_indices_field';
 import { IndicesQuerySourceFields } from '../types';
 
-// FLAKY: https://github.com/elastic/kibana/issues/181102
+// Failing: See https://github.com/elastic/kibana/issues/188840
 describe.skip('useSourceIndicesFields Hook', () => {
   let postMock: jest.Mock;
+
+  beforeEach(() => {
+    // Playground Provider has the formProvider which
+    // persists the form state into local storage
+    // We need to clear the local storage before each test
+    localStorage.clear();
+  });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <PlaygroundProvider>{children}</PlaygroundProvider>
@@ -53,6 +63,9 @@ describe.skip('useSourceIndicesFields Hook', () => {
       services: {
         http: {
           post: postMock,
+          get: jest.fn(() => {
+            return [];
+          }),
         },
       },
     }));
@@ -62,25 +75,7 @@ describe.skip('useSourceIndicesFields Hook', () => {
     jest.clearAllMocks();
   });
 
-  describe('getIndicesWithNoSourceFields', () => {
-    it('should return undefined if all indices have source fields', () => {
-      const defaultSourceFields = {
-        index1: ['field1'],
-        index2: ['field2'],
-      };
-      expect(getIndicesWithNoSourceFields(defaultSourceFields)).toBeUndefined();
-    });
-
-    it('should return indices with no source fields', () => {
-      const defaultSourceFields = {
-        index1: ['field1'],
-        index2: [],
-      };
-      expect(getIndicesWithNoSourceFields(defaultSourceFields)).toBe('index2');
-    });
-  });
-
-  it('should handle addIndex correctly changing indices and updating loading state', async () => {
+  it('should handle addIndex correctly changing indices', async () => {
     const { result, waitForNextUpdate } = renderHook(() => useSourceIndicesFields(), { wrapper });
     const { getValues } = formHookSpy.mock.results[0].value;
 
@@ -89,10 +84,20 @@ describe.skip('useSourceIndicesFields Hook', () => {
       expect(getValues()).toMatchInlineSnapshot(`
         Object {
           "doc_size": 3,
-          "elasticsearch_query": Object {},
+          "elasticsearch_query": Object {
+            "retriever": Object {
+              "standard": Object {
+                "query": Object {
+                  "match_all": Object {},
+                },
+              },
+            },
+          },
           "indices": Array [],
           "prompt": "You are an assistant for question-answering tasks.",
+          "query_fields": Object {},
           "source_fields": Object {},
+          "summarization_model": undefined,
         }
       `);
       result.current.addIndex('newIndex');
@@ -101,13 +106,11 @@ describe.skip('useSourceIndicesFields Hook', () => {
     await act(async () => {
       await waitForNextUpdate();
       expect(result.current.indices).toEqual(['newIndex']);
-      expect(result.current.loading).toBe(true);
     });
 
     expect(postMock).toHaveBeenCalled();
 
     await act(async () => {
-      expect(result.current.loading).toBe(false);
       expect(getValues()).toMatchInlineSnapshot(`
         Object {
           "doc_size": 3,
@@ -128,115 +131,17 @@ describe.skip('useSourceIndicesFields Hook', () => {
             "newIndex",
           ],
           "prompt": "You are an assistant for question-answering tasks.",
+          "query_fields": Object {
+            "newIndex": Array [
+              "field1",
+            ],
+          },
           "source_fields": Object {
             "newIndex": Array [
               "field1",
             ],
           },
-        }
-      `);
-    });
-  });
-
-  it('should provide warning message for adding an index without any fields', async () => {
-    const querySourceFields: IndicesQuerySourceFields = {
-      missing_fields_index: {
-        elser_query_fields: [],
-        dense_vector_query_fields: [],
-        bm25_query_fields: [],
-        source_fields: [],
-        skipped_fields: 0,
-        semantic_fields: [],
-      },
-    };
-
-    postMock.mockResolvedValue(querySourceFields);
-
-    const { result, waitForNextUpdate } = renderHook(() => useSourceIndicesFields(), { wrapper });
-    const { getValues } = formHookSpy.mock.results[0].value;
-
-    await act(async () => {
-      result.current.addIndex('missing_fields_index');
-    });
-
-    await act(async () => {
-      await waitForNextUpdate();
-    });
-
-    expect(postMock).toHaveBeenCalled();
-
-    await act(async () => {
-      expect(result.current.loading).toBe(false);
-      expect(getValues()).toMatchInlineSnapshot(`
-        Object {
-          "doc_size": 3,
-          "elasticsearch_query": Object {
-            "retriever": Object {
-              "standard": Object {
-                "query": Object {
-                  "match_all": Object {},
-                },
-              },
-            },
-          },
-          "indices": Array [
-            "missing_fields_index",
-          ],
-          "prompt": "You are an assistant for question-answering tasks.",
-          "source_fields": Object {
-            "missing_fields_index": Array [],
-          },
-        }
-      `);
-    });
-  });
-
-  it('should not provide any warning message for adding and then removing an index without any fields', async () => {
-    const querySourceFields: IndicesQuerySourceFields = {
-      missing_fields_index: {
-        elser_query_fields: [],
-        dense_vector_query_fields: [],
-        bm25_query_fields: [],
-        source_fields: [],
-        skipped_fields: 0,
-        semantic_fields: [],
-      },
-    };
-
-    postMock.mockResolvedValue(querySourceFields);
-
-    const { result } = renderHook(() => useSourceIndicesFields(), { wrapper });
-    const { getValues } = formHookSpy.mock.results[0].value;
-
-    await act(async () => {
-      result.current.addIndex('missing_fields_index');
-    });
-
-    await act(async () => {
-      result.current.removeIndex('missing_fields_index');
-    });
-
-    expect(postMock).toHaveBeenCalled();
-
-    await act(async () => {
-      expect(result.current.loading).toBe(false);
-      expect(getValues()).toMatchInlineSnapshot(`
-        Object {
-          "doc_size": 3,
-          "elasticsearch_query": Object {
-            "retriever": Object {
-              "standard": Object {
-                "query": Object {
-                  "match_all": Object {},
-                },
-              },
-            },
-          },
-          "indices": Array [],
-          "prompt": "You are an assistant for question-answering tasks.",
-          "source_fields": Object {
-            "missing_fields_index": Array [],
-          },
+          "summarization_model": undefined,
         }
       `);
     });

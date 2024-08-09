@@ -18,11 +18,11 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
     let roleAuthc: RoleCredentials;
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     const baseConfig = {
@@ -68,6 +68,21 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
             journeyName: 'my-ftr-test',
           },
         });
+
+      // Sends "null" to remove the label
+      await supertestWithoutAuth
+        .put('/internal/core/_settings')
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
+        .set('elastic-api-version', '1')
+        .send({ 'telemetry.labels.journeyName': null })
+        .expect(200, { ok: true });
+
+      await supertestWithoutAuth
+        .get('/api/telemetry/v2/config')
+        .set(svlCommonApi.getCommonRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
+        .expect(200, initialConfig);
     });
   });
 }
