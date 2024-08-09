@@ -8,10 +8,11 @@
     ]
   },
   "include": [
-    "src/**/*.ts"
+    "**/*.ts"
   ],
   "exclude": [
-    "target/**/*"
+    "target/**/*",
+    "node_modules",
   ],
   "kbn_references": [
   ]
