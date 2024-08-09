@@ -538,8 +538,6 @@ export class LensVisService {
 
     if (hasLogLevelField) {
       logLevelPipe = getLogLevelVariableCommand();
-      // logLevelPipe =
-      //   '| EVAL log_level = CASE(to_lower(log.level) LIKE "trace*" , "trace",    to_lower(log.level) LIKE "deb*" , "debug", to_lower(log.level) LIKE "info*" , "info", to_lower(log.level) LIKE "not*" , "notice",  to_lower(log.level) LIKE "warn*" , "warning",  to_lower(log.level) LIKE "err*" , "error",  to_lower(log.level) LIKE "sev*" OR to_lower(log.level) LIKE "cri*" , "critical",  to_lower(log.level) LIKE "ale*" , "alert",  to_lower(log.level) LIKE "emer*" , "emergency",  to_lower(log.level) LIKE "fatal*" , "fatal", "Other")';
     }
 
     return appendToESQLQuery(
