@@ -340,6 +340,7 @@ export class ProjectMonitorFormatter {
           search: monitorFilter,
           type: syntheticsMonitorType,
           perPage: 500,
+          namespaces: [this.spaceId],
         }
       );
 
@@ -381,27 +382,28 @@ export class ProjectMonitorFormatter {
 
       const monitorsToUpdate = [];
 
-      for (let i = 0; i < decryptedPreviousMonitors.length; i++) {
-        const decryptedPreviousMonitor = decryptedPreviousMonitors[i];
-        const previousMonitor = monitors[i].previousMonitor;
-        const normalizedMonitor = monitors[i].monitor;
+      decryptedPreviousMonitors.forEach((decryptedPreviousMonitor) => {
+        const monitor = monitors.find((m) => m.previousMonitor.id === decryptedPreviousMonitor.id);
+        if (monitor) {
+          const normalizedMonitor = monitor?.monitor;
+          const previousMonitor = monitor?.previousMonitor;
+          const {
+            attributes: { [ConfigKey.REVISION]: _, ...normalizedPrevMonitorAttr },
+          } = normalizeSecrets(decryptedPreviousMonitor);
 
-        const {
-          attributes: { [ConfigKey.REVISION]: _, ...normalizedPreviousMonitorAttributes },
-        } = normalizeSecrets(decryptedPreviousMonitor);
-
-        const monitorWithRevision = formatSecrets({
-          ...normalizedPreviousMonitorAttributes,
-          ...normalizedMonitor,
-          revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
-        });
-        monitorsToUpdate.push({
-          normalizedMonitor,
-          previousMonitor,
-          monitorWithRevision,
-          decryptedPreviousMonitor,
-        });
-      }
+          const monitorWithRevision = formatSecrets({
+            ...normalizedPrevMonitorAttr,
+            ...normalizedMonitor,
+            revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
+          });
+          monitorsToUpdate.push({
+            normalizedMonitor,
+            previousMonitor,
+            monitorWithRevision,
+            decryptedPreviousMonitor,
+          });
+        }
+      });
 
       const { editedMonitors, failedConfigs } = await syncEditedMonitorBulk({
         monitorsToUpdate,
