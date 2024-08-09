@@ -16,7 +16,7 @@ import {
   MAX_HOSTS_METRIC_VALUE,
 } from '../../../../common/constants';
 import {
-  flyoutDegradedDocsText,
+  overviewDegradedDocsText,
   flyoutDocsCountTotalText,
   flyoutHostsText,
   flyoutServicesText,
@@ -98,7 +98,7 @@ describe('getSummaryKpis', () => {
         userHasPrivilege: true,
       },
       {
-        title: flyoutDegradedDocsText,
+        title: overviewDegradedDocsText,
         value: '200',
         link: {
           label: flyoutShowAllText,
@@ -158,7 +158,7 @@ describe('getSummaryKpis', () => {
         userHasPrivilege: true,
       },
       {
-        title: flyoutDegradedDocsText,
+        title: overviewDegradedDocsText,
         value: '200',
         link: {
           label: flyoutShowAllText,
