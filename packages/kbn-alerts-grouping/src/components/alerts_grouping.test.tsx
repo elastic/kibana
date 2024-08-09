@@ -33,8 +33,8 @@ jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_alerts_group_aggregati
   useGetAlertsGroupAggregationsQuery: jest.fn(),
 }));
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alert_data_view', () => ({
-  useAlertDataView: jest.fn().mockReturnValue({ dataViews: [{ fields: [] }] }),
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view', () => ({
+  useAlertsDataView: jest.fn().mockReturnValue({ dataView: { fields: [] } }),
 }));
 
 jest.mock('../contexts/alerts_grouping_context', () => {
