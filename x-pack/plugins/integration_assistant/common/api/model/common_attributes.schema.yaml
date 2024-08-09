@@ -17,10 +17,9 @@ components:
       description: DataStream name for the integration to be built.
 
     RawSamples:
-      type: array
-      items:
-        type: string
-      description: String array containing the json raw samples that are used for ecs mapping.
+      type: string
+      format: binary
+      description: Blob containing the RawSamples.
 
     Mapping:
       type: object

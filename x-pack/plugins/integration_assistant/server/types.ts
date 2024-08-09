@@ -6,6 +6,7 @@
  */
 
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { LogType } from './constants';
 
 export interface IntegrationAssistantPluginSetup {
   setIsAvailable: (isAvailable: boolean) => void;
@@ -58,6 +59,17 @@ export interface EcsMappingState {
   invalidEcsFields: string[];
   results: object;
   logFormat: string;
+  ecsVersion: string;
+}
+
+export interface LogTypeDetectionState {
+  lastExecutedChain: string;
+  rawSamples: string[];
+  exAnswer: string;
+  packageName: string;
+  dataStreamName: string;
+  finalized: boolean;
+  logType: LogType;
   ecsVersion: string;
 }
 

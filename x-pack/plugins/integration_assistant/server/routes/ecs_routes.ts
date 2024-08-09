@@ -13,12 +13,14 @@ import {
 } from '@kbn/langchain/server/language_models';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import { isPlainObject } from 'lodash/fp';
 import { ECS_GRAPH_PATH, EcsMappingRequestBody, EcsMappingResponse } from '../../common';
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getEcsGraph } from '../graphs/ecs';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
+import { getLogTypeDetectionGraph } from '../graphs/log_type_detection/graph';
 
 export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   router.versioned
@@ -70,10 +72,15 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
             streaming: false,
           });
 
+          const { isJSON, error, logsSampleParsed } = parseLogsContent(rawSamples);
+          if (error) {
+            return res.customError({ statusCode: 500, body: { message: error } });
+          }
+
           const parameters = {
             packageName,
             dataStreamName,
-            rawSamples,
+            logsSampleParsed,
             ...(mapping && { mapping }),
           };
 
@@ -84,8 +91,25 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
             ],
           };
 
-          const graph = await getEcsGraph(model);
-          const results = await graph.invoke(parameters, options);
+          let graph;
+          let results;
+          if (isJSON) {
+            graph = await getEcsGraph(model);
+            results = await graph.invoke(parameters, options);
+          } else {
+            graph = await getLogTypeDetectionGraph(model);
+            // const { jsonSamples, additionalProcessors } = await graph.invoke(parameters, options);
+            // parameters = {
+            //   packageName,
+            //   dataStreamName,
+            //   logsSampleParsed,
+            //   jsonSamples,
+            //   additionalProcessors,
+            //   ...(mapping && { mapping }),
+            // };
+            // graph = await getEcsGraph(model);
+            results = await graph.invoke(parameters, options);
+          }
 
           return res.ok({ body: EcsMappingResponse.parse(results) });
         } catch (e) {
@@ -93,4 +117,53 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
         }
       })
     );
+}
+
+function parseLogsContent(fileContent: string): {
+  isJSON?: boolean;
+  error?: string;
+  logsSampleParsed?: string[];
+} {
+  let parsedContent: string[];
+  let isJSON = false;
+  const base64encodedContent = fileContent.split('base64,')[1];
+  const decodedFileContent = Buffer.from(base64encodedContent, 'base64').toString('utf-8');
+  try {
+    parsedContent = decodedFileContent
+      .split('\n')
+      .filter((line) => line.trim() !== '')
+      .map((line) => JSON.parse(line));
+
+    // Special case for files that can be parsed as both JSON and NDJSON:
+    //   for a one-line array [] -> extract its contents
+    //   for a one-line object {} -> do nothing
+    if (
+      Array.isArray(parsedContent) &&
+      parsedContent.length === 1 &&
+      Array.isArray(parsedContent[0])
+    ) {
+      parsedContent = parsedContent[0];
+      isJSON = true;
+    }
+  } catch (parseNDJSONError) {
+    try {
+      parsedContent = JSON.parse(decodedFileContent);
+      isJSON = true;
+    } catch (parseJSONError) {
+      parsedContent = decodedFileContent.split('\n').filter((line) => line.trim() !== '');
+    }
+  }
+
+  if (!Array.isArray(parsedContent)) {
+    return { error: 'The logs sample file is not an array' };
+  }
+  if (parsedContent.length === 0) {
+    return { error: 'The logs sample file is empty' };
+  }
+
+  if (parsedContent.some((log) => !isPlainObject(log))) {
+    return { error: 'The logs sample file contains non-object entries' };
+  }
+
+  return { logsSampleParsed: parsedContent, isJSON };
 }

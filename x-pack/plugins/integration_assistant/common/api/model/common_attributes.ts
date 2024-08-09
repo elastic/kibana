@@ -22,10 +22,10 @@ export type DataStreamName = z.infer<typeof DataStreamName>;
 export const DataStreamName = z.string().min(1);
 
 /**
- * String array containing the json raw samples that are used for ecs mapping.
+ * String array containing the json raw samples.
  */
 export type RawSamples = z.infer<typeof RawSamples>;
-export const RawSamples = z.array(z.string());
+export const RawSamples = z.string();
 
 /**
  * mapping object to ECS Mapping Request.
