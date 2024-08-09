@@ -870,7 +870,8 @@ export const ModelsList: FC<Props> = ({
     if (pageState.showAll) {
       return items;
     } else {
-      return items.filter((item) => item.supported !== false);
+      // by default show only deployed models or recommended for download
+      return items.filter((item) => item.create_time || item.recommended);
     }
   }, [items, pageState.showAll]);
 
