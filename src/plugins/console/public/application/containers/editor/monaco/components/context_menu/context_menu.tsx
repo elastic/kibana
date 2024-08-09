@@ -78,10 +78,7 @@ export const ContextMenu = ({
     });
 
     if (requestError) {
-      const error = new Error(requestError.message);
-      error.name = requestError.error;
-
-      notifications.toasts.addError(error, {
+      notifications.toasts.addDanger({
         title: i18n.translate('console.consoleMenu.copyAsFailedMessage', {
           defaultMessage:
             '{requestsCount, plural, one {Request} other {Requests}} could not be copied to clipboard',
@@ -89,7 +86,7 @@ export const ContextMenu = ({
         }),
       });
 
-      return Promise.reject(error);
+      return;
     }
 
     notifications.toasts.addSuccess({
@@ -101,7 +98,6 @@ export const ContextMenu = ({
     });
 
     await copyText(requestsAsCode);
-    return Promise.resolve();
   };
 
   const onCopyAsSubmit = async (language?: string) => {
