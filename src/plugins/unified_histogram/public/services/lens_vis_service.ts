@@ -44,6 +44,7 @@ import { computeInterval } from '../utils/compute_interval';
 import { fieldSupportsBreakdown } from '../utils/field_supports_breakdown';
 import { shouldDisplayHistogram } from '../layout/helpers';
 import { enrichLensAttributesWithTablesData } from '../utils/lens_vis_from_table';
+import { getLogLevelVariableCommand, finalTerms as LOG_LEVEL_TERMS } from './log_level_helpers';
 
 const UNIFIED_HISTOGRAM_LAYER_ID = 'unifiedHistogram';
 
@@ -536,8 +537,9 @@ export class LensVisService {
     let logLevelPipe = '';
 
     if (hasLogLevelField) {
-      logLevelPipe =
-        '| EVAL log_level = CASE(to_lower(log.level) LIKE "trace*" , "trace",    to_lower(log.level) LIKE "deb*" , "debug", to_lower(log.level) LIKE "info*" , "info", to_lower(log.level) LIKE "not*" , "notice",  to_lower(log.level) LIKE "warn*" , "warning",  to_lower(log.level) LIKE "err*" , "error",  to_lower(log.level) LIKE "sev*" OR to_lower(log.level) LIKE "cri*" , "critical",  to_lower(log.level) LIKE "ale*" , "alert",  to_lower(log.level) LIKE "emer*" , "emergency",  to_lower(log.level) LIKE "fatal*" , "fatal", "Other")';
+      logLevelPipe = getLogLevelVariableCommand();
+      // logLevelPipe =
+      //   '| EVAL log_level = CASE(to_lower(log.level) LIKE "trace*" , "trace",    to_lower(log.level) LIKE "deb*" , "debug", to_lower(log.level) LIKE "info*" , "info", to_lower(log.level) LIKE "not*" , "notice",  to_lower(log.level) LIKE "warn*" , "warning",  to_lower(log.level) LIKE "err*" , "error",  to_lower(log.level) LIKE "sev*" OR to_lower(log.level) LIKE "cri*" , "critical",  to_lower(log.level) LIKE "ale*" , "alert",  to_lower(log.level) LIKE "emer*" , "emergency",  to_lower(log.level) LIKE "fatal*" , "fatal", "Other")';
     }
 
     return appendToESQLQuery(
@@ -563,19 +565,7 @@ export class LensVisService {
   };
 
   private getColorMapping = () => {
-    const terms = [
-      'trace',
-      'debug',
-      'info',
-      'notice',
-      'warning',
-      'error',
-      'critical',
-      'alert',
-      'emergency',
-      'fatal',
-    ];
-    const assignments = terms.map((term, index) => {
+    const assignments = LOG_LEVEL_TERMS.map((term) => {
       const logLevelCoalescedValue = getLogLevelCoalescedValue(term);
       return {
         rule: {
