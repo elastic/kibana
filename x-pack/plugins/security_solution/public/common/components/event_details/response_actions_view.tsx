@@ -23,8 +23,6 @@ import { useGetAutomatedActionList } from '../../../management/hooks/response_ac
 import { EventsViewType } from './event_details';
 import * as i18n from './translations';
 
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-
 const TabContentWrapper = styled.div`
   height: 100%;
   position: relative;
@@ -75,14 +73,13 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
     }),
     []
   );
-  const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
   const expandedEventFieldsObject = rawEventData
     ? (expandDottedObject((rawEventData as RawEventData).fields) as ExpandedEventFieldsObject)
     : undefined;
 
   const responseActions =
     expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
-  const shouldEarlyReturn = !rawEventData || !responseActionsEnabled;
+  const shouldEarlyReturn = !rawEventData;
 
   const alertId = rawEventData?._id ?? '';
   const [isLive, setIsLive] = useState(false);

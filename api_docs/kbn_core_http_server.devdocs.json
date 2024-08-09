@@ -6274,6 +6274,10 @@
               },
               {
                 "plugin": "security",
+                "path": "x-pack/plugins/security/server/routes/authorization/roles/post.ts"
+              },
+              {
+                "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/deprecations/kibana_user_role.ts"
               },
               {
@@ -8267,6 +8271,10 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/role_mapping/post.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/routes/authorization/roles/post.test.ts"
               },
               {
                 "plugin": "security",
