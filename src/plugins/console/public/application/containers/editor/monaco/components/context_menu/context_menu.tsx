@@ -22,13 +22,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { LanguageSelectorModal } from './language_selector_modal';
 import { convertRequestToLanguage } from '../../../../../../services';
+import type { EditorRequest } from '../../types';
 
 import { useServicesContext } from '../../../../../contexts';
 import { StorageKeys } from '../../../../../../services';
 import { DEFAULT_LANGUAGE } from '../../../../../../../common/constants';
 
 interface Props {
-  getRequests: () => Promise<any>;
+  getRequests: () => Promise<EditorRequest[]>;
   getDocumentation: () => Promise<string | null>;
   autoIndent: (ev: React.MouseEvent) => void;
   notifications: NotificationsSetup;

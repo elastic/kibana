@@ -26,6 +26,7 @@ import {
   useResizeCheckerUtils,
   useKeyboardCommandsUtils,
 } from './hooks';
+import type { EditorRequest } from './types';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import { getSuggestionProvider } from './monaco_editor_suggestion_provider';
 
@@ -56,7 +57,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
 
   const setInputEditor = useSetInputEditor();
 
-  const getRequestsCallback = useCallback(async (): Promise<any> => {
+  const getRequestsCallback = useCallback(async (): Promise<EditorRequest[]> => {
     const requests = await actionsProvider.current?.getRequests();
     return requests ?? [];
   }, []);
