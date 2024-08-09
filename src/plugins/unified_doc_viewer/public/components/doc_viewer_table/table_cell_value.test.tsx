@@ -90,7 +90,7 @@ describe('TableFieldValue', () => {
 
     expect(screen.getByText(value)).toBeInTheDocument();
 
-    expect(screen.queryByTestId('toggleLongFieldValue-bytes')).toBeNull();
+    expect(screen.queryByTestId('toggleLongFieldValue-message')).toBeNull();
 
     const valueElement = screen.getByTestId('tableDocViewRow-message-value');
     expect(valueElement.getAttribute('css')).toBeNull();
