@@ -1642,8 +1642,7 @@
               "\nReturns a DataProviderType"
             ],
             "signature": [
-              "DataProviderType",
-              " | undefined"
+              "\"default\" | \"template\" | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
@@ -4007,9 +4006,7 @@
         "label": "DataProvidersAnd",
         "description": [],
         "signature": [
-          "{ id: string; type?: ",
-          "DataProviderType",
-          " | undefined; name: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
+          "{ id: string; type?: \"default\" | \"template\" | undefined; name: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
           {
             "pluginId": "timelines",
             "scope": "common",

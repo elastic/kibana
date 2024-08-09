@@ -277,7 +277,7 @@ function DiscoverDocumentsComponent({
     [dataView, onAddColumn, onAddFilter, onRemoveColumn, query, savedSearch.id, setExpandedDoc]
   );
 
-  const { customControlColumnsConfiguration } = useDiscoverCustomization('data_table') || {};
+  const { rowAdditionalLeadingControls } = useDiscoverCustomization('data_table') || {};
   const { customCellRenderer, customGridColumnsConfiguration } =
     useContextualGridCustomisations() || {};
   const additionalFieldGroups = useAdditionalFieldGroups();
@@ -453,7 +453,7 @@ function DiscoverDocumentsComponent({
                 componentsTourSteps={TOUR_STEPS}
                 externalCustomRenderers={cellRenderers}
                 customGridColumnsConfiguration={customGridColumnsConfiguration}
-                customControlColumnsConfiguration={customControlColumnsConfiguration}
+                rowAdditionalLeadingControls={rowAdditionalLeadingControls}
                 additionalFieldGroups={additionalFieldGroups}
                 showDensitySelector={true}
                 dataGridDensityState={density}
