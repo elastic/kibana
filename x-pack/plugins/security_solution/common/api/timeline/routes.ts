@@ -80,3 +80,8 @@ export {
   GetTimelineRequestQuery,
   GetTimelineResponse,
 } from './get_timeline/get_timeline_route.gen';
+
+export {
+  GetTimelinesRequestQuery,
+  GetTimelinesResponse,
+} from './get_timelines/get_timelines_route.gen';

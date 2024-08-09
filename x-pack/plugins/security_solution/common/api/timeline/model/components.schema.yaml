@@ -569,6 +569,11 @@ components:
         - description
         - updated
         - created
+    SortDirection:
+      type: string
+      enum:
+        - asc
+        - desc
     TimelineStatus:
       type: string
       enum:

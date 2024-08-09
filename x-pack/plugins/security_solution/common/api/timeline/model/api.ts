@@ -27,6 +27,7 @@ import {
   RowRendererId,
   RowRendererIdEnum,
   SavedTimeline,
+  SortDirection,
   SortFieldTimeline,
   SortFieldTimelineEnum,
   TemplateTimelineType,
@@ -50,6 +51,7 @@ export {
   RowRendererId,
   RowRendererIdEnum,
   SavedTimeline,
+  SortDirection,
   SortFieldTimeline,
   SortFieldTimelineEnum,
   TemplateTimelineType,
@@ -439,11 +441,13 @@ export const sortFieldTimeline = runtimeTypes.union([
   runtimeTypes.literal(SortFieldTimelineEnum.created),
 ]);
 
+// TODO: remove
 export const direction = runtimeTypes.union([
   runtimeTypes.literal(Direction.asc),
   runtimeTypes.literal(Direction.desc),
 ]);
 
+// TODO: remove
 export const sortTimeline = runtimeTypes.type({
   sortField: sortFieldTimeline,
   sortOrder: direction,
@@ -634,7 +638,7 @@ export interface ResponseTimeline {
 
 export interface SortTimeline {
   sortField: SortFieldTimeline;
-  sortOrder: Direction;
+  sortOrder: SortDirection;
 }
 
 export interface GetAllTimelineVariables {

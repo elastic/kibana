@@ -307,6 +307,11 @@ export const SortFieldTimeline = z.enum(['title', 'description', 'updated', 'cre
 export type SortFieldTimelineEnum = typeof SortFieldTimeline.enum;
 export const SortFieldTimelineEnum = SortFieldTimeline.enum;
 
+export type SortDirection = z.infer<typeof SortDirection>;
+export const SortDirection = z.enum(['asc', 'desc']);
+export type SortDirectionEnum = typeof SortDirection.enum;
+export const SortDirectionEnum = SortDirection.enum;
+
 /**
  * The status of the timeline. Valid values are `active`, `draft`, and `immutable`.
  */
