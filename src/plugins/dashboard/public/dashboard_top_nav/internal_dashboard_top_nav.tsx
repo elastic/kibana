@@ -332,7 +332,7 @@ export function InternalDashboardTopNav({
         const badgeButton = (
           // @ts-ignore - EuiBadge href type issue
           <EuiBadge
-            {...getManagedContentBadge(dashboardManagedBadge.getText(), true)}
+            {...getManagedContentBadge(dashboardManagedBadge.getText(), false)}
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           >
             {managedText}

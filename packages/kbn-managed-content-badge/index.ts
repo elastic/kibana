@@ -22,10 +22,10 @@ export const getManagedContentBadge: (
   }),
   color: 'primary',
   iconType: 'glasses',
-  toolTipProps: disableTooltipProps
-    ? undefined
-    : ({
+  toolTipProps: enableTooltipProps
+    ? ({
         content: tooltipText,
         position: 'bottom',
-      } as EuiToolTipProps),
+      } as EuiToolTipProps)
+    : undefined,
 });
