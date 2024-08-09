@@ -60,3 +60,8 @@ export {
   ImportTimelinesRequestBody,
   ImportTimelinesResponse,
 } from './import_timelines/import_timelines_route.gen';
+
+export {
+  InstallPrepackedTimelinesRequestBody,
+  InstallPrepackedTimelinesResponse,
+} from './install_prepackaged_timelines/install_prepackaged_timelines_route.gen';

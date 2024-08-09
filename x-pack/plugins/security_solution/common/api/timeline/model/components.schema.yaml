@@ -157,9 +157,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/SavedTimeline'
         - type: object
-          required:
-            - savedObjectId
-            - version
+          required: [savedObjectId, version]
           properties:
             eventIdToNoteIds:
               type: array
@@ -192,9 +190,7 @@ components:
               type: string
     FavoriteTimelineResponse:
       type: object
-      required:
-        - savedObjectId
-        - version
+      required: [savedObjectId, version]
       properties:
         savedObjectId:
           type: string
@@ -586,6 +582,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/SavedTimeline'
         - type: object
+          required: [savedObjectId, version, pinnedEventIds, eventNotes, globalNotes]
           properties:
             savedObjectId:
               type: string
@@ -593,21 +590,51 @@ components:
             version:
               type: string
               nullable: true
-            globalNotes:
-              nullable: true
-              type: array
-              items:
-                $ref: '#/components/schemas/BareNote'
-            eventNotes:
-              nullable: true
-              type: array
-              items:
-                $ref: '#/components/schemas/BareNote'
             pinnedEventIds:
+              type: array
               nullable: true
+              items:
+                type: string
+            eventNotes:
+              type: array
+              nullable: true
+              items:
+                $ref: '#/components/schemas/BareNote'
+            globalNotes:
+              type: array
+              nullable: true
+              items:
+                $ref: '#/components/schemas/BareNote'
+    TimelineSavedToReturnObject:
+      allOf:
+        - $ref: '#/components/schemas/SavedTimeline'
+        - type: object
+          required: [savedObjectId, version]
+          properties:
+            savedObjectId:
+              type: string
+            version:
+              type: string
+            eventIdToNoteIds:
+              type: array
+              items:
+                $ref: '#/components/schemas/Note'
+            notes:
+              type: array
+              items:
+                $ref: '#/components/schemas/Note'
+            noteIds:
               type: array
               items:
                 type: string
+            pinnedEventIds:
+              type: array
+              items:
+                type: string
+            pinnedEventsSaveObject:
+              type: array
+              items:
+                $ref: '#/components/schemas/PinnedEvent'
     ImportTimelineResult:
       type: object
       properties:
@@ -650,29 +677,3 @@ components:
               type: array
               items:
                 type: string
-    Readable:
-      type: object
-      properties:
-        _maxListeners:
-          type: object
-          additionalProperties: true
-        _readableState:
-          type: object
-          additionalProperties: true
-        _read:
-          type: object
-          additionalProperties: true
-        readable:
-          type: boolean
-        _events:
-          type: object
-          additionalProperties: true
-        _eventsCount:
-          type: number
-        _data:
-          type: object
-          additionalProperties: true
-        _position:
-          type: number
-        _encoding:
-          type: string

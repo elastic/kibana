@@ -35,31 +35,14 @@ paths:
                   enum:
                     - 'true'
                     - 'false'
-                file:
-                  allOf:
-                    - $ref: '../model/components.schema.yaml#/components/schemas/Readable'
-                    - type: object
-                      required: [hapi]
-                      properties:
-                        hapi:
-                          type: object
-                          required: [filename, headers]
-                          properties:
-                            filename:
-                              type: string
-                            headers:
-                              type: object
+                file: {}
       responses:
         '200':
           description: Indicates the import of timelines was successful.
           content:
             application/json:
               schema:
-                type: object
-                required: [data]
-                properties:
-                  data:
-                    $ref: '../model/components.schema.yaml#/components/schemas/ImportTimelineResult'
+                $ref: '../model/components.schema.yaml#/components/schemas/ImportTimelineResult'
 
         '400':
           description: Indicates the import of timelines was unsuccessful because of an invalid file extension.

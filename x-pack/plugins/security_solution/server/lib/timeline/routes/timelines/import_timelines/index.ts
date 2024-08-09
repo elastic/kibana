@@ -7,6 +7,7 @@
 
 import { extname } from 'path';
 import type { Readable } from 'stream';
+import { get } from 'lodash/fp';
 
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
@@ -58,7 +59,7 @@ export const importTimelinesRoute = (router: SecuritySolutionPluginRouter, confi
           }
 
           const { file, isImmutable } = request.body;
-          const { filename } = file.hapi;
+          const filename = extractFilename(file);
           const fileExtension = extname(filename).toLowerCase();
 
           if (fileExtension !== '.ndjson') {
@@ -91,3 +92,11 @@ export const importTimelinesRoute = (router: SecuritySolutionPluginRouter, confi
       }
     );
 };
+
+function extractFilename(fileObj: unknown) {
+  const filename = get('hapi.filename', fileObj);
+  if (filename && typeof filename === 'string') {
+    return filename;
+  }
+  throw new Error('`filename` missing in file');
+}

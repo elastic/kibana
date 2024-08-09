@@ -40,18 +40,15 @@ paths:
                 prepackagedTimelines:
                   type: array
                   items:
-                    $ref: '../model/components.schema.yaml#/components/schemas/SavedTimeline'
+                    $ref: '../model/components.schema.yaml#/components/schemas/TimelineSavedToReturnObject'
+                    nullable: true
       responses:
         '200':
           description: Indicates the installation of prepackaged timelines was successful.
           content:
             application/json:
               schema:
-                type: object
-                required: [data]
-                properties:
-                  data:
-                    $ref: '../model/components.schema.yaml#/components/schemas/ImportTimelineResult'
+                $ref: '../model/components.schema.yaml#/components/schemas/ImportTimelineResult'
         '500':
           description: Indicates the installation of prepackaged timelines was unsuccessful.
           content:

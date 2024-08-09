@@ -318,11 +318,24 @@ export const TimelineStatusEnum = TimelineStatus.enum;
 export type ImportTimelines = z.infer<typeof ImportTimelines>;
 export const ImportTimelines = SavedTimeline.merge(
   z.object({
-    savedObjectId: z.string().nullable().optional(),
-    version: z.string().nullable().optional(),
-    globalNotes: z.array(BareNote).nullable().optional(),
-    eventNotes: z.array(BareNote).nullable().optional(),
-    pinnedEventIds: z.array(z.string()).nullable().optional(),
+    savedObjectId: z.string().nullable(),
+    version: z.string().nullable(),
+    pinnedEventIds: z.array(z.string()).nullable(),
+    eventNotes: z.array(BareNote).nullable(),
+    globalNotes: z.array(BareNote).nullable(),
+  })
+);
+
+export type TimelineSavedToReturnObject = z.infer<typeof TimelineSavedToReturnObject>;
+export const TimelineSavedToReturnObject = SavedTimeline.merge(
+  z.object({
+    savedObjectId: z.string(),
+    version: z.string(),
+    eventIdToNoteIds: z.array(Note).optional(),
+    notes: z.array(Note).optional(),
+    noteIds: z.array(z.string()).optional(),
+    pinnedEventIds: z.array(z.string()).optional(),
+    pinnedEventsSaveObject: z.array(PinnedEvent).optional(),
   })
 );
 
@@ -355,16 +368,3 @@ export const ExportedTimelines = SavedTimeline.merge(
     pinnedEventIds: z.array(z.string()).optional(),
   })
 );
-
-export type Readable = z.infer<typeof Readable>;
-export const Readable = z.object({
-  _maxListeners: z.object({}).catchall(z.unknown()).optional(),
-  _readableState: z.object({}).catchall(z.unknown()).optional(),
-  _read: z.object({}).catchall(z.unknown()).optional(),
-  readable: z.boolean().optional(),
-  _events: z.object({}).catchall(z.unknown()).optional(),
-  _eventsCount: z.number().optional(),
-  _data: z.object({}).catchall(z.unknown()).optional(),
-  _position: z.number().optional(),
-  _encoding: z.string().optional(),
-});

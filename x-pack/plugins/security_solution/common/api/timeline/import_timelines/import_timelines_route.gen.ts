@@ -16,19 +16,12 @@
 
 import { z } from 'zod';
 
-import { Readable, ImportTimelineResult } from '../model/components.gen';
+import { ImportTimelineResult } from '../model/components.gen';
 
 export type ImportTimelinesRequestBody = z.infer<typeof ImportTimelinesRequestBody>;
 export const ImportTimelinesRequestBody = z.object({
   isImmutable: z.enum(['true', 'false']).optional(),
-  file: Readable.merge(
-    z.object({
-      hapi: z.object({
-        filename: z.string(),
-        headers: z.object({}),
-      }),
-    })
-  ),
+  file: z.unknown(),
 });
 export type ImportTimelinesRequestBodyInput = z.input<typeof ImportTimelinesRequestBody>;
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type * as rt from 'io-ts';
+import type { ZodError, ZodType } from 'zod';
 import type { Transform } from 'stream';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
+import { type Either, fold, left, right } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { createConcatStream, createSplitStream, createMapStream } from '@kbn/utils';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
@@ -19,23 +19,28 @@ import {
 } from '../../../../../utils/read_stream/create_stream_from_ndjson';
 
 import type { ImportTimelineResponse } from './types';
-import { ImportTimelinesSchemaRt } from '../../../../../../common/api/timeline';
+import { ImportTimelines } from '../../../../../../common/api/timeline';
 import { throwErrors } from '../../../utils/common';
 
 type ErrorFactory = (message: string) => Error;
 
-export const createPlainError = (message: string) => new Error(message);
+const createPlainError = (message: string) => new Error(message);
 
-export const decodeOrThrow =
-  <A, O, I>(runtimeType: rt.Type<A, O, I>, createError: ErrorFactory = createPlainError) =>
-  (inputValue: I) =>
-    pipe(runtimeType.decode(inputValue), fold(throwErrors(createError), identity));
+const parseRuntimeType =
+  <T>(zodType: ZodType<T>) =>
+  (v: unknown): Either<ZodError<T>, T> => {
+    const result = zodType.safeParse(v);
+    return result.success ? right(result.data) : left(result.error);
+  };
 
-export const validateTimelines = (): Transform =>
+const decodeOrThrow =
+  (runtimeType: ZodType, createError: ErrorFactory = createPlainError) =>
+  (inputValue: unknown) =>
+    pipe(parseRuntimeType(runtimeType)(inputValue), fold(throwErrors(createError), identity));
+
+const validateTimelines = (): Transform =>
   createMapStream((obj: ImportTimelineResponse) =>
-    obj instanceof Error
-      ? new BadRequestError(obj.message)
-      : decodeOrThrow(ImportTimelinesSchemaRt)(obj)
+    obj instanceof Error ? new BadRequestError(obj.message) : decodeOrThrow(ImportTimelines)(obj)
   );
 export const createTimelinesStreamFromNdJson = (ruleLimit: number) => {
   return [
