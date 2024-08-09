@@ -40,7 +40,7 @@ describe('SampleLogsInput', () => {
   describe('when uploading a json logs sample', () => {
     const type = 'application/json';
 
-    describe('when the file is valid', () => {
+    describe('when the file is valid json', () => {
       const logsSampleRaw = `{"message":"test message 1"},{"message":"test message 2"}`;
       beforeEach(async () => {
         await changeFile(input, new File([`[${logsSampleRaw}]`], 'test.json', { type }));
@@ -73,9 +73,11 @@ describe('SampleLogsInput', () => {
 
     describe('when the file is invalid', () => {
       describe.each([
-        ['[{"message":"test message 1"}', `The logs sample file has not a valid ${type} format`],
+        [
+          '[{"message":"test message 1"}',
+          'Cannot parse the logs sample file as either a JSON or NDJSON file',
+        ],
         ['["test message 1"]', 'The logs sample file contains non-object entries'],
-        ['{"message":"test message 1"}', 'The logs sample file is not an array'],
         ['[]', 'The logs sample file is empty'],
       ])('with logs content %s', (logsSample, errorMessage) => {
         beforeEach(async () => {
@@ -98,7 +100,7 @@ describe('SampleLogsInput', () => {
   describe('when setting a ndjson logs sample', () => {
     const type = 'application/x-ndjson';
 
-    describe('when the file is valid', () => {
+    describe('when the file is valid ndjson', () => {
       const logsSampleRaw = `{"message":"test message 1"}\n{"message":"test message 2"}`;
       beforeEach(async () => {
         await changeFile(input, new File([logsSampleRaw], 'test.json', { type }));
@@ -131,7 +133,10 @@ describe('SampleLogsInput', () => {
 
     describe('when the file is invalid', () => {
       describe.each([
-        ['{"message":"test message 1"]', `The logs sample file has not a valid ${type} format`],
+        [
+          '{"message":"test message 1"}\n{"message": }',
+          'Cannot parse the logs sample file as either a JSON or NDJSON file',
+        ],
         ['"test message 1"', 'The logs sample file contains non-object entries'],
         ['', 'The logs sample file is empty'],
       ])('with logs content %s', (logsSample, errorMessage) => {
