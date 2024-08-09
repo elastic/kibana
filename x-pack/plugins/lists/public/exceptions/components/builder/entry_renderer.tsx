@@ -129,7 +129,6 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     ([newField]: DataViewFieldBase[]): void => {
       const { updatedEntry, index } = getEntryOnFieldChange(entry, newField);
       onChange(updatedEntry, index);
-      // actually changes when you select a new field without updating the builder entry value
     },
     [onChange, entry]
   );
