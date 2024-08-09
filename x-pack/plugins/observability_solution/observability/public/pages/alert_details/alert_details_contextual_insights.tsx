@@ -61,27 +61,29 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
         .map(({ description, data }) => `${description}:\n${JSON.stringify(data, null, 2)}`)
         .join('\n\n');
 
-      const param = {
-        message: `I'm looking at an alert and trying to understand why it was triggered based on contextual information.`,
+      return observabilityAIAssistant.getContextualInsightMessages({
+        message: `Identify the root cause of this alert`,
         instructions: dedent(
-          `I'm an SRE. I am looking at an alert that was triggered. I want to understand why it was triggered, what it means, and what I should do next.
+          `You are an SRE looking at a root cause analysis of an alert. Your task is to provide a root cause analysis with concrete examples. You already know the alert reason so do not include it in your report: ${
+            alert.formatted.reason
+          }. The report must not include alert metadata. If the alert is a false positive, mention that in the first paragraph.
 
-        The following contextual information is available to help you understand the alert:
-
-        ${obsAlertContext}
-
-        Use the contextual information above to provide insights into the alert. The insights should help the user understand why the alert was triggered, what it means, and what they should do next.
-        Be brief and to the point.
-        Do not list the alert details as bullet points.
-        Pay special attention to regressions in downstream dependencies like big increases or decreases in throughput, latency or failure rate.
+        Pay special attention to regressions in downstream dependencies like big increases or decreases in throughput, latency or failure rate
         Suggest reasons why the alert happened and what may have contributed to it.
-        Present the primary insights in a single paragraph at the top in bold text. Add additional paragraphs with more detailed insights if needed but keep them brief.
-        If the alert is a false positive, mention that in the first paragraph.
+        Analyse the contextual information and present the primary insights in a single paragraph at the top in bold text. Add additional paragraphs with more detailed insights and examples if needed but keep them brief. All paragraphs must focus on the data from the root cause anlaysis and ignore alert metadata like duration and thresholds.
+
+        The contextual information to be considered for the root cause analysis report:
+
+        ### DATA BEGIN ###
+
+        ${JSON.stringify({ json_blob: obsAlertContext })}
+
+        ### DATA END ###
+
+        Your root cause analysis report:
         `
         ),
-      };
-
-      return observabilityAIAssistant.getContextualInsightMessages(param);
+      });
     } catch (e) {
       console.error('An error occurred while fetching alert context', e);
       return observabilityAIAssistant.getContextualInsightMessages({
