@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-synthetics-private-location'],
+  roots: ['<rootDir>/x-pack/packages/kbn-synthetics-private-location'],
 };
