@@ -219,6 +219,7 @@ export class MonacoEditorActionsProvider {
           return collapseLiteralStrings(dataString);
         });
       }
+      return requestTextFromEditor;
     });
     // get variables values
     const variables = getStorage().get(StorageKeys.VARIABLES, DEFAULT_VARIABLES);
