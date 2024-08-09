@@ -12,7 +12,7 @@ import { appContextService } from '../../..';
 import { getPackageSavedObjects } from '../../packages/get';
 const INDEX_PATTERN_SAVED_OBJECT_TYPE = 'index-pattern';
 
-export const indexPatternTypes = Object.values(dataTypes);
+export const indexPatternTypes = [dataTypes.Logs, dataTypes.Metrics];
 
 export function getIndexPatternSavedObjects() {
   return indexPatternTypes.map((indexPatternType) => ({
