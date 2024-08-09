@@ -199,6 +199,7 @@ describe('SamlSessionManager', () => {
       });
 
       test('should throw error if TEST_CLOUD_HOST_NAME is not set', async () => {
+        createCloudSAMLSessionMock.mockRestore();
         isValidHostnameMock.mockReturnValueOnce(false);
         const samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
         await expect(
