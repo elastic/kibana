@@ -536,7 +536,6 @@
                                 "type": "object"
                               }
                             },
-                            "required": [],
                             "type": "object"
                           },
                           "connector_type_id": {
@@ -560,21 +559,15 @@
                                 "type": "boolean"
                               },
                               "throttle": {
-                                "anyOf": [
-                                  {
-                                    "description": "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
-                                    "type": "string"
-                                  },
-                                  {
-                                    "enum": [],
-                                    "nullable": true
-                                  }
-                                ]
+                                "description": "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
+                                "nullable": true,
+                                "type": "string"
                               }
                             },
                             "required": [
                               "summary",
-                              "notify_when"
+                              "notify_when",
+                              "throttle"
                             ],
                             "type": "object"
                           },
@@ -631,28 +624,14 @@
                       "type": "object"
                     },
                     "api_key_created_by_user": {
-                      "anyOf": [
-                        {
-                          "description": "Indicates whether the API key that is associated with the rule was created by the user.",
-                          "type": "boolean"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "Indicates whether the API key that is associated with the rule was created by the user.",
+                      "nullable": true,
+                      "type": "boolean"
                     },
                     "api_key_owner": {
-                      "anyOf": [
-                        {
-                          "description": "The owner of the API key that is associated with the rule and used to run background tasks.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "The owner of the API key that is associated with the rule and used to run background tasks.",
+                      "nullable": true,
+                      "type": "string"
                     },
                     "consumer": {
                       "description": "The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.",
@@ -663,16 +642,9 @@
                       "type": "string"
                     },
                     "created_by": {
-                      "anyOf": [
-                        {
-                          "description": "The identifier for the user that created the rule.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "The identifier for the user that created the rule.",
+                      "nullable": true,
+                      "type": "string"
                     },
                     "enabled": {
                       "description": "Indicates whether you want to run the rule on an interval basis after it is created.",
@@ -764,142 +736,85 @@
                       "type": "string"
                     },
                     "is_snoozed_until": {
-                      "anyOf": [
-                        {
-                          "description": "The date when the rule will no longer be snoozed.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "The date when the rule will no longer be snoozed.",
+                      "nullable": true,
+                      "type": "string"
                     },
                     "last_run": {
-                      "anyOf": [
-                        {
+                      "additionalProperties": false,
+                      "nullable": true,
+                      "properties": {
+                        "alerts_count": {
                           "additionalProperties": false,
                           "properties": {
-                            "alerts_count": {
-                              "additionalProperties": false,
-                              "properties": {
-                                "active": {
-                                  "anyOf": [
-                                    {
-                                      "description": "Number of active alerts during last run.",
-                                      "type": "number"
-                                    },
-                                    {
-                                      "enum": [],
-                                      "nullable": true
-                                    }
-                                  ]
-                                },
-                                "ignored": {
-                                  "anyOf": [
-                                    {
-                                      "description": "Number of ignored alerts during last run.",
-                                      "type": "number"
-                                    },
-                                    {
-                                      "enum": [],
-                                      "nullable": true
-                                    }
-                                  ]
-                                },
-                                "new": {
-                                  "anyOf": [
-                                    {
-                                      "description": "Number of new alerts during last run.",
-                                      "type": "number"
-                                    },
-                                    {
-                                      "enum": [],
-                                      "nullable": true
-                                    }
-                                  ]
-                                },
-                                "recovered": {
-                                  "anyOf": [
-                                    {
-                                      "description": "Number of recovered alerts during last run.",
-                                      "type": "number"
-                                    },
-                                    {
-                                      "enum": [],
-                                      "nullable": true
-                                    }
-                                  ]
-                                }
-                              },
-                              "required": [],
-                              "type": "object"
-                            },
-                            "outcome": {
-                              "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
-                              "enum": [
-                                "succeeded",
-                                "warning",
-                                "failed"
-                              ],
-                              "type": "string"
-                            },
-                            "outcome_msg": {
-                              "anyOf": [
-                                {
-                                  "items": {
-                                    "description": "Outcome message generated during last rule run.",
-                                    "type": "string"
-                                  },
-                                  "type": "array"
-                                },
-                                {
-                                  "enum": [],
-                                  "nullable": true
-                                }
-                              ]
-                            },
-                            "outcome_order": {
-                              "description": "Order of the outcome.",
+                            "active": {
+                              "description": "Number of active alerts during last run.",
+                              "nullable": true,
                               "type": "number"
                             },
-                            "warning": {
-                              "anyOf": [
-                                {
-                                  "description": "Warning of last rule execution.",
-                                  "enum": [
-                                    "read",
-                                    "decrypt",
-                                    "execute",
-                                    "unknown",
-                                    "license",
-                                    "timeout",
-                                    "disabled",
-                                    "validate",
-                                    "maxExecutableActions",
-                                    "maxAlerts",
-                                    "maxQueuedActions"
-                                  ],
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": [],
-                                  "nullable": true
-                                }
-                              ]
+                            "ignored": {
+                              "description": "Number of ignored alerts during last run.",
+                              "nullable": true,
+                              "type": "number"
+                            },
+                            "new": {
+                              "description": "Number of new alerts during last run.",
+                              "nullable": true,
+                              "type": "number"
+                            },
+                            "recovered": {
+                              "description": "Number of recovered alerts during last run.",
+                              "nullable": true,
+                              "type": "number"
                             }
                           },
-                          "required": [
-                            "outcome",
-                            "alerts_count"
-                          ],
                           "type": "object"
                         },
-                        {
-                          "enum": [],
-                          "nullable": true
+                        "outcome": {
+                          "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
+                          "enum": [
+                            "succeeded",
+                            "warning",
+                            "failed"
+                          ],
+                          "type": "string"
+                        },
+                        "outcome_msg": {
+                          "items": {
+                            "description": "Outcome message generated during last rule run.",
+                            "type": "string"
+                          },
+                          "nullable": true,
+                          "type": "array"
+                        },
+                        "outcome_order": {
+                          "description": "Order of the outcome.",
+                          "type": "number"
+                        },
+                        "warning": {
+                          "description": "Warning of last rule execution.",
+                          "enum": [
+                            "read",
+                            "decrypt",
+                            "execute",
+                            "unknown",
+                            "license",
+                            "timeout",
+                            "disabled",
+                            "validate",
+                            "maxExecutableActions",
+                            "maxAlerts",
+                            "maxQueuedActions"
+                          ],
+                          "nullable": true,
+                          "type": "string"
                         }
-                      ]
+                      },
+                      "required": [
+                        "outcome",
+                        "alerts_count"
+                      ],
+                      "type": "object"
                     },
                     "mapped_params": {
                       "additionalProperties": {},
@@ -951,55 +866,26 @@
                                         "additionalProperties": false,
                                         "properties": {
                                           "active": {
-                                            "anyOf": [
-                                              {
-                                                "description": "Number of active alerts during last run.",
-                                                "type": "number"
-                                              },
-                                              {
-                                                "enum": [],
-                                                "nullable": true
-                                              }
-                                            ]
+                                            "description": "Number of active alerts during last run.",
+                                            "nullable": true,
+                                            "type": "number"
                                           },
                                           "ignored": {
-                                            "anyOf": [
-                                              {
-                                                "description": "Number of ignored alerts during last run.",
-                                                "type": "number"
-                                              },
-                                              {
-                                                "enum": [],
-                                                "nullable": true
-                                              }
-                                            ]
+                                            "description": "Number of ignored alerts during last run.",
+                                            "nullable": true,
+                                            "type": "number"
                                           },
                                           "new": {
-                                            "anyOf": [
-                                              {
-                                                "description": "Number of new alerts during last run.",
-                                                "type": "number"
-                                              },
-                                              {
-                                                "enum": [],
-                                                "nullable": true
-                                              }
-                                            ]
+                                            "description": "Number of new alerts during last run.",
+                                            "nullable": true,
+                                            "type": "number"
                                           },
                                           "recovered": {
-                                            "anyOf": [
-                                              {
-                                                "description": "Number of recovered alerts during last run.",
-                                                "type": "number"
-                                              },
-                                              {
-                                                "enum": [],
-                                                "nullable": true
-                                              }
-                                            ]
+                                            "description": "Number of recovered alerts during last run.",
+                                            "nullable": true,
+                                            "type": "number"
                                           }
                                         },
-                                        "required": [],
                                         "type": "object"
                                       },
                                       "outcome": {
@@ -1012,48 +898,34 @@
                                         "type": "string"
                                       },
                                       "outcome_msg": {
-                                        "anyOf": [
-                                          {
-                                            "items": {
-                                              "description": "Outcome message generated during last rule run.",
-                                              "type": "string"
-                                            },
-                                            "type": "array"
-                                          },
-                                          {
-                                            "enum": [],
-                                            "nullable": true
-                                          }
-                                        ]
+                                        "items": {
+                                          "description": "Outcome message generated during last rule run.",
+                                          "type": "string"
+                                        },
+                                        "nullable": true,
+                                        "type": "array"
                                       },
                                       "outcome_order": {
                                         "description": "Order of the outcome.",
                                         "type": "number"
                                       },
                                       "warning": {
-                                        "anyOf": [
-                                          {
-                                            "description": "Warning of last rule execution.",
-                                            "enum": [
-                                              "read",
-                                              "decrypt",
-                                              "execute",
-                                              "unknown",
-                                              "license",
-                                              "timeout",
-                                              "disabled",
-                                              "validate",
-                                              "maxExecutableActions",
-                                              "maxAlerts",
-                                              "maxQueuedActions"
-                                            ],
-                                            "type": "string"
-                                          },
-                                          {
-                                            "enum": [],
-                                            "nullable": true
-                                          }
-                                        ]
+                                        "description": "Warning of last rule execution.",
+                                        "enum": [
+                                          "read",
+                                          "decrypt",
+                                          "execute",
+                                          "unknown",
+                                          "license",
+                                          "timeout",
+                                          "disabled",
+                                          "validate",
+                                          "maxExecutableActions",
+                                          "maxAlerts",
+                                          "maxQueuedActions"
+                                        ],
+                                        "nullable": true,
+                                        "type": "string"
                                       }
                                     },
                                     "required": [
@@ -1090,67 +962,31 @@
                                       "type": "number"
                                     },
                                     "gap_duration_s": {
-                                      "anyOf": [
-                                        {
-                                          "description": "Duration in seconds of rule run gap.",
-                                          "type": "number"
-                                        },
-                                        {
-                                          "enum": [],
-                                          "nullable": true
-                                        }
-                                      ]
+                                      "description": "Duration in seconds of rule run gap.",
+                                      "nullable": true,
+                                      "type": "number"
                                     },
                                     "total_alerts_created": {
-                                      "anyOf": [
-                                        {
-                                          "description": "Total number of alerts created during last rule run.",
-                                          "type": "number"
-                                        },
-                                        {
-                                          "enum": [],
-                                          "nullable": true
-                                        }
-                                      ]
+                                      "description": "Total number of alerts created during last rule run.",
+                                      "nullable": true,
+                                      "type": "number"
                                     },
                                     "total_alerts_detected": {
-                                      "anyOf": [
-                                        {
-                                          "description": "Total number of alerts detected during last rule run.",
-                                          "type": "number"
-                                        },
-                                        {
-                                          "enum": [],
-                                          "nullable": true
-                                        }
-                                      ]
+                                      "description": "Total number of alerts detected during last rule run.",
+                                      "nullable": true,
+                                      "type": "number"
                                     },
                                     "total_indexing_duration_ms": {
-                                      "anyOf": [
-                                        {
-                                          "description": "Total time spent indexing documents during last rule run in milliseconds.",
-                                          "type": "number"
-                                        },
-                                        {
-                                          "enum": [],
-                                          "nullable": true
-                                        }
-                                      ]
+                                      "description": "Total time spent indexing documents during last rule run in milliseconds.",
+                                      "nullable": true,
+                                      "type": "number"
                                     },
                                     "total_search_duration_ms": {
-                                      "anyOf": [
-                                        {
-                                          "description": "Total time spent performing Elasticsearch searches as measured by Kibana; includes network latency and time spent serializing or deserializing the request and response.",
-                                          "type": "number"
-                                        },
-                                        {
-                                          "enum": [],
-                                          "nullable": true
-                                        }
-                                      ]
+                                      "description": "Total time spent performing Elasticsearch searches as measured by Kibana; includes network latency and time spent serializing or deserializing the request and response.",
+                                      "nullable": true,
+                                      "type": "number"
                                     }
                                   },
-                                  "required": [],
                                   "type": "object"
                                 },
                                 "timestamp": {
@@ -1194,33 +1030,19 @@
                       "type": "string"
                     },
                     "next_run": {
-                      "anyOf": [
-                        {
-                          "description": "Date and time of the next run of the rule.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "Date and time of the next run of the rule.",
+                      "nullable": true,
+                      "type": "string"
                     },
                     "notify_when": {
-                      "anyOf": [
-                        {
-                          "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
-                          "enum": [
-                            "onActionGroupChange",
-                            "onActiveAlert",
-                            "onThrottleInterval"
-                          ],
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
+                      "enum": [
+                        "onActionGroupChange",
+                        "onActiveAlert",
+                        "onThrottleInterval"
+                      ],
+                      "nullable": true,
+                      "type": "string"
                     },
                     "params": {
                       "additionalProperties": {},
@@ -1236,16 +1058,9 @@
                       "type": "string"
                     },
                     "running": {
-                      "anyOf": [
-                        {
-                          "description": "Indicates whether the rule is running.",
-                          "type": "boolean"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "Indicates whether the rule is running.",
+                      "nullable": true,
+                      "type": "boolean"
                     },
                     "schedule": {
                       "additionalProperties": false,
@@ -1426,45 +1241,24 @@
                       "type": "array"
                     },
                     "throttle": {
-                      "anyOf": [
-                        {
-                          "deprecated": true,
-                          "description": "Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "deprecated": true,
+                      "description": "Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
+                      "nullable": true,
+                      "type": "string"
                     },
                     "updated_at": {
                       "description": "The date and time that the rule was updated most recently.",
                       "type": "string"
                     },
                     "updated_by": {
-                      "anyOf": [
-                        {
-                          "description": "The identifier for the user that updated this rule most recently.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "The identifier for the user that updated this rule most recently.",
+                      "nullable": true,
+                      "type": "string"
                     },
                     "view_in_app_relative_url": {
-                      "anyOf": [
-                        {
-                          "description": "Relative URL to view rule in the app.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "Relative URL to view rule in the app.",
+                      "nullable": true,
+                      "type": "string"
                     }
                   },
                   "required": [
@@ -1477,8 +1271,11 @@
                     "schedule",
                     "actions",
                     "params",
+                    "created_by",
+                    "updated_by",
                     "created_at",
                     "updated_at",
+                    "api_key_owner",
                     "mute_all",
                     "muted_alert_ids",
                     "execution_status",
@@ -1655,7 +1452,6 @@
                               "type": "object"
                             }
                           },
-                          "required": [],
                           "type": "object"
                         },
                         "frequency": {
@@ -1675,21 +1471,15 @@
                               "type": "boolean"
                             },
                             "throttle": {
-                              "anyOf": [
-                                {
-                                  "description": "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if `notify_when` is set to `onThrottleInterval`. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": [],
-                                  "nullable": true
-                                }
-                              ]
+                              "description": "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if `notify_when` is set to `onThrottleInterval`. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
+                              "nullable": true,
+                              "type": "string"
                             }
                           },
                           "required": [
                             "summary",
-                            "notify_when"
+                            "notify_when",
+                            "throttle"
                           ],
                           "type": "object"
                         },
@@ -1751,21 +1541,14 @@
                     "type": "string"
                   },
                   "notify_when": {
-                    "anyOf": [
-                      {
-                        "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
-                        "enum": [
-                          "onActionGroupChange",
-                          "onActiveAlert",
-                          "onThrottleInterval"
-                        ],
-                        "type": "string"
-                      },
-                      {
-                        "enum": [],
-                        "nullable": true
-                      }
-                    ]
+                    "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
+                    "enum": [
+                      "onActionGroupChange",
+                      "onActiveAlert",
+                      "onThrottleInterval"
+                    ],
+                    "nullable": true,
+                    "type": "string"
                   },
                   "params": {
                     "additionalProperties": {},
@@ -1800,16 +1583,9 @@
                     "type": "array"
                   },
                   "throttle": {
-                    "anyOf": [
-                      {
-                        "description": "Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
-                        "type": "string"
-                      },
-                      {
-                        "enum": [],
-                        "nullable": true
-                      }
-                    ]
+                    "description": "Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
+                    "nullable": true,
+                    "type": "string"
                   }
                 },
                 "required": [
@@ -1944,7 +1720,6 @@
                                 "type": "object"
                               }
                             },
-                            "required": [],
                             "type": "object"
                           },
                           "connector_type_id": {
@@ -1968,21 +1743,15 @@
                                 "type": "boolean"
                               },
                               "throttle": {
-                                "anyOf": [
-                                  {
-                                    "description": "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
-                                    "type": "string"
-                                  },
-                                  {
-                                    "enum": [],
-                                    "nullable": true
-                                  }
-                                ]
+                                "description": "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
+                                "nullable": true,
+                                "type": "string"
                               }
                             },
                             "required": [
                               "summary",
-                              "notify_when"
+                              "notify_when",
+                              "throttle"
                             ],
                             "type": "object"
                           },
@@ -2039,28 +1808,14 @@
                       "type": "object"
                     },
                     "api_key_created_by_user": {
-                      "anyOf": [
-                        {
-                          "description": "Indicates whether the API key that is associated with the rule was created by the user.",
-                          "type": "boolean"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "Indicates whether the API key that is associated with the rule was created by the user.",
+                      "nullable": true,
+                      "type": "boolean"
                     },
                     "api_key_owner": {
-                      "anyOf": [
-                        {
-                          "description": "The owner of the API key that is associated with the rule and used to run background tasks.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "The owner of the API key that is associated with the rule and used to run background tasks.",
+                      "nullable": true,
+                      "type": "string"
                     },
                     "consumer": {
                       "description": "The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.",
@@ -2071,16 +1826,9 @@
                       "type": "string"
                     },
                     "created_by": {
-                      "anyOf": [
-                        {
-                          "description": "The identifier for the user that created the rule.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "The identifier for the user that created the rule.",
+                      "nullable": true,
+                      "type": "string"
                     },
                     "enabled": {
                       "description": "Indicates whether you want to run the rule on an interval basis after it is created.",
@@ -2172,142 +1920,85 @@
                       "type": "string"
                     },
                     "is_snoozed_until": {
-                      "anyOf": [
-                        {
-                          "description": "The date when the rule will no longer be snoozed.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "The date when the rule will no longer be snoozed.",
+                      "nullable": true,
+                      "type": "string"
                     },
                     "last_run": {
-                      "anyOf": [
-                        {
+                      "additionalProperties": false,
+                      "nullable": true,
+                      "properties": {
+                        "alerts_count": {
                           "additionalProperties": false,
                           "properties": {
-                            "alerts_count": {
-                              "additionalProperties": false,
-                              "properties": {
-                                "active": {
-                                  "anyOf": [
-                                    {
-                                      "description": "Number of active alerts during last run.",
-                                      "type": "number"
-                                    },
-                                    {
-                                      "enum": [],
-                                      "nullable": true
-                                    }
-                                  ]
-                                },
-                                "ignored": {
-                                  "anyOf": [
-                                    {
-                                      "description": "Number of ignored alerts during last run.",
-                                      "type": "number"
-                                    },
-                                    {
-                                      "enum": [],
-                                      "nullable": true
-                                    }
-                                  ]
-                                },
-                                "new": {
-                                  "anyOf": [
-                                    {
-                                      "description": "Number of new alerts during last run.",
-                                      "type": "number"
-                                    },
-                                    {
-                                      "enum": [],
-                                      "nullable": true
-                                    }
-                                  ]
-                                },
-                                "recovered": {
-                                  "anyOf": [
-                                    {
-                                      "description": "Number of recovered alerts during last run.",
-                                      "type": "number"
-                                    },
-                                    {
-                                      "enum": [],
-                                      "nullable": true
-                                    }
-                                  ]
-                                }
-                              },
-                              "required": [],
-                              "type": "object"
-                            },
-                            "outcome": {
-                              "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
-                              "enum": [
-                                "succeeded",
-                                "warning",
-                                "failed"
-                              ],
-                              "type": "string"
-                            },
-                            "outcome_msg": {
-                              "anyOf": [
-                                {
-                                  "items": {
-                                    "description": "Outcome message generated during last rule run.",
-                                    "type": "string"
-                                  },
-                                  "type": "array"
-                                },
-                                {
-                                  "enum": [],
-                                  "nullable": true
-                                }
-                              ]
-                            },
-                            "outcome_order": {
-                              "description": "Order of the outcome.",
+                            "active": {
+                              "description": "Number of active alerts during last run.",
+                              "nullable": true,
                               "type": "number"
                             },
-                            "warning": {
-                              "anyOf": [
-                                {
-                                  "description": "Warning of last rule execution.",
-                                  "enum": [
-                                    "read",
-                                    "decrypt",
-                                    "execute",
-                                    "unknown",
-                                    "license",
-                                    "timeout",
-                                    "disabled",
-                                    "validate",
-                                    "maxExecutableActions",
-                                    "maxAlerts",
-                                    "maxQueuedActions"
-                                  ],
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": [],
-                                  "nullable": true
-                                }
-                              ]
+                            "ignored": {
+                              "description": "Number of ignored alerts during last run.",
+                              "nullable": true,
+                              "type": "number"
+                            },
+                            "new": {
+                              "description": "Number of new alerts during last run.",
+                              "nullable": true,
+                              "type": "number"
+                            },
+                            "recovered": {
+                              "description": "Number of recovered alerts during last run.",
+                              "nullable": true,
+                              "type": "number"
                             }
                           },
-                          "required": [
-                            "outcome",
-                            "alerts_count"
-                          ],
                           "type": "object"
                         },
-                        {
-                          "enum": [],
-                          "nullable": true
+                        "outcome": {
+                          "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
+                          "enum": [
+                            "succeeded",
+                            "warning",
+                            "failed"
+                          ],
+                          "type": "string"
+                        },
+                        "outcome_msg": {
+                          "items": {
+                            "description": "Outcome message generated during last rule run.",
+                            "type": "string"
+                          },
+                          "nullable": true,
+                          "type": "array"
+                        },
+                        "outcome_order": {
+                          "description": "Order of the outcome.",
+                          "type": "number"
+                        },
+                        "warning": {
+                          "description": "Warning of last rule execution.",
+                          "enum": [
+                            "read",
+                            "decrypt",
+                            "execute",
+                            "unknown",
+                            "license",
+                            "timeout",
+                            "disabled",
+                            "validate",
+                            "maxExecutableActions",
+                            "maxAlerts",
+                            "maxQueuedActions"
+                          ],
+                          "nullable": true,
+                          "type": "string"
                         }
-                      ]
+                      },
+                      "required": [
+                        "outcome",
+                        "alerts_count"
+                      ],
+                      "type": "object"
                     },
                     "mapped_params": {
                       "additionalProperties": {},
@@ -2359,55 +2050,26 @@
                                         "additionalProperties": false,
                                         "properties": {
                                           "active": {
-                                            "anyOf": [
-                                              {
-                                                "description": "Number of active alerts during last run.",
-                                                "type": "number"
-                                              },
-                                              {
-                                                "enum": [],
-                                                "nullable": true
-                                              }
-                                            ]
+                                            "description": "Number of active alerts during last run.",
+                                            "nullable": true,
+                                            "type": "number"
                                           },
                                           "ignored": {
-                                            "anyOf": [
-                                              {
-                                                "description": "Number of ignored alerts during last run.",
-                                                "type": "number"
-                                              },
-                                              {
-                                                "enum": [],
-                                                "nullable": true
-                                              }
-                                            ]
+                                            "description": "Number of ignored alerts during last run.",
+                                            "nullable": true,
+                                            "type": "number"
                                           },
                                           "new": {
-                                            "anyOf": [
-                                              {
-                                                "description": "Number of new alerts during last run.",
-                                                "type": "number"
-                                              },
-                                              {
-                                                "enum": [],
-                                                "nullable": true
-                                              }
-                                            ]
+                                            "description": "Number of new alerts during last run.",
+                                            "nullable": true,
+                                            "type": "number"
                                           },
                                           "recovered": {
-                                            "anyOf": [
-                                              {
-                                                "description": "Number of recovered alerts during last run.",
-                                                "type": "number"
-                                              },
-                                              {
-                                                "enum": [],
-                                                "nullable": true
-                                              }
-                                            ]
+                                            "description": "Number of recovered alerts during last run.",
+                                            "nullable": true,
+                                            "type": "number"
                                           }
                                         },
-                                        "required": [],
                                         "type": "object"
                                       },
                                       "outcome": {
@@ -2420,48 +2082,34 @@
                                         "type": "string"
                                       },
                                       "outcome_msg": {
-                                        "anyOf": [
-                                          {
-                                            "items": {
-                                              "description": "Outcome message generated during last rule run.",
-                                              "type": "string"
-                                            },
-                                            "type": "array"
-                                          },
-                                          {
-                                            "enum": [],
-                                            "nullable": true
-                                          }
-                                        ]
+                                        "items": {
+                                          "description": "Outcome message generated during last rule run.",
+                                          "type": "string"
+                                        },
+                                        "nullable": true,
+                                        "type": "array"
                                       },
                                       "outcome_order": {
                                         "description": "Order of the outcome.",
                                         "type": "number"
                                       },
                                       "warning": {
-                                        "anyOf": [
-                                          {
-                                            "description": "Warning of last rule execution.",
-                                            "enum": [
-                                              "read",
-                                              "decrypt",
-                                              "execute",
-                                              "unknown",
-                                              "license",
-                                              "timeout",
-                                              "disabled",
-                                              "validate",
-                                              "maxExecutableActions",
-                                              "maxAlerts",
-                                              "maxQueuedActions"
-                                            ],
-                                            "type": "string"
-                                          },
-                                          {
-                                            "enum": [],
-                                            "nullable": true
-                                          }
-                                        ]
+                                        "description": "Warning of last rule execution.",
+                                        "enum": [
+                                          "read",
+                                          "decrypt",
+                                          "execute",
+                                          "unknown",
+                                          "license",
+                                          "timeout",
+                                          "disabled",
+                                          "validate",
+                                          "maxExecutableActions",
+                                          "maxAlerts",
+                                          "maxQueuedActions"
+                                        ],
+                                        "nullable": true,
+                                        "type": "string"
                                       }
                                     },
                                     "required": [
@@ -2498,67 +2146,31 @@
                                       "type": "number"
                                     },
                                     "gap_duration_s": {
-                                      "anyOf": [
-                                        {
-                                          "description": "Duration in seconds of rule run gap.",
-                                          "type": "number"
-                                        },
-                                        {
-                                          "enum": [],
-                                          "nullable": true
-                                        }
-                                      ]
+                                      "description": "Duration in seconds of rule run gap.",
+                                      "nullable": true,
+                                      "type": "number"
                                     },
                                     "total_alerts_created": {
-                                      "anyOf": [
-                                        {
-                                          "description": "Total number of alerts created during last rule run.",
-                                          "type": "number"
-                                        },
-                                        {
-                                          "enum": [],
-                                          "nullable": true
-                                        }
-                                      ]
+                                      "description": "Total number of alerts created during last rule run.",
+                                      "nullable": true,
+                                      "type": "number"
                                     },
                                     "total_alerts_detected": {
-                                      "anyOf": [
-                                        {
-                                          "description": "Total number of alerts detected during last rule run.",
-                                          "type": "number"
-                                        },
-                                        {
-                                          "enum": [],
-                                          "nullable": true
-                                        }
-                                      ]
+                                      "description": "Total number of alerts detected during last rule run.",
+                                      "nullable": true,
+                                      "type": "number"
                                     },
                                     "total_indexing_duration_ms": {
-                                      "anyOf": [
-                                        {
-                                          "description": "Total time spent indexing documents during last rule run in milliseconds.",
-                                          "type": "number"
-                                        },
-                                        {
-                                          "enum": [],
-                                          "nullable": true
-                                        }
-                                      ]
+                                      "description": "Total time spent indexing documents during last rule run in milliseconds.",
+                                      "nullable": true,
+                                      "type": "number"
                                     },
                                     "total_search_duration_ms": {
-                                      "anyOf": [
-                                        {
-                                          "description": "Total time spent performing Elasticsearch searches as measured by Kibana; includes network latency and time spent serializing or deserializing the request and response.",
-                                          "type": "number"
-                                        },
-                                        {
-                                          "enum": [],
-                                          "nullable": true
-                                        }
-                                      ]
+                                      "description": "Total time spent performing Elasticsearch searches as measured by Kibana; includes network latency and time spent serializing or deserializing the request and response.",
+                                      "nullable": true,
+                                      "type": "number"
                                     }
                                   },
-                                  "required": [],
                                   "type": "object"
                                 },
                                 "timestamp": {
@@ -2602,33 +2214,19 @@
                       "type": "string"
                     },
                     "next_run": {
-                      "anyOf": [
-                        {
-                          "description": "Date and time of the next run of the rule.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "Date and time of the next run of the rule.",
+                      "nullable": true,
+                      "type": "string"
                     },
                     "notify_when": {
-                      "anyOf": [
-                        {
-                          "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
-                          "enum": [
-                            "onActionGroupChange",
-                            "onActiveAlert",
-                            "onThrottleInterval"
-                          ],
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
+                      "enum": [
+                        "onActionGroupChange",
+                        "onActiveAlert",
+                        "onThrottleInterval"
+                      ],
+                      "nullable": true,
+                      "type": "string"
                     },
                     "params": {
                       "additionalProperties": {},
@@ -2644,16 +2242,9 @@
                       "type": "string"
                     },
                     "running": {
-                      "anyOf": [
-                        {
-                          "description": "Indicates whether the rule is running.",
-                          "type": "boolean"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "Indicates whether the rule is running.",
+                      "nullable": true,
+                      "type": "boolean"
                     },
                     "schedule": {
                       "additionalProperties": false,
@@ -2834,45 +2425,24 @@
                       "type": "array"
                     },
                     "throttle": {
-                      "anyOf": [
-                        {
-                          "deprecated": true,
-                          "description": "Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "deprecated": true,
+                      "description": "Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
+                      "nullable": true,
+                      "type": "string"
                     },
                     "updated_at": {
                       "description": "The date and time that the rule was updated most recently.",
                       "type": "string"
                     },
                     "updated_by": {
-                      "anyOf": [
-                        {
-                          "description": "The identifier for the user that updated this rule most recently.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "The identifier for the user that updated this rule most recently.",
+                      "nullable": true,
+                      "type": "string"
                     },
                     "view_in_app_relative_url": {
-                      "anyOf": [
-                        {
-                          "description": "Relative URL to view rule in the app.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "Relative URL to view rule in the app.",
+                      "nullable": true,
+                      "type": "string"
                     }
                   },
                   "required": [
@@ -2885,8 +2455,11 @@
                     "schedule",
                     "actions",
                     "params",
+                    "created_by",
+                    "updated_by",
                     "created_at",
                     "updated_at",
+                    "api_key_owner",
                     "mute_all",
                     "muted_alert_ids",
                     "execution_status",
@@ -3062,7 +2635,6 @@
                               "type": "object"
                             }
                           },
-                          "required": [],
                           "type": "object"
                         },
                         "frequency": {
@@ -3082,21 +2654,15 @@
                               "type": "boolean"
                             },
                             "throttle": {
-                              "anyOf": [
-                                {
-                                  "description": "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if `notify_when` is set to `onThrottleInterval`. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": [],
-                                  "nullable": true
-                                }
-                              ]
+                              "description": "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if `notify_when` is set to `onThrottleInterval`. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
+                              "nullable": true,
+                              "type": "string"
                             }
                           },
                           "required": [
                             "summary",
-                            "notify_when"
+                            "notify_when",
+                            "throttle"
                           ],
                           "type": "object"
                         },
@@ -3149,21 +2715,14 @@
                     "type": "string"
                   },
                   "notify_when": {
-                    "anyOf": [
-                      {
-                        "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
-                        "enum": [
-                          "onActionGroupChange",
-                          "onActiveAlert",
-                          "onThrottleInterval"
-                        ],
-                        "type": "string"
-                      },
-                      {
-                        "enum": [],
-                        "nullable": true
-                      }
-                    ]
+                    "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
+                    "enum": [
+                      "onActionGroupChange",
+                      "onActiveAlert",
+                      "onThrottleInterval"
+                    ],
+                    "nullable": true,
+                    "type": "string"
                   },
                   "params": {
                     "additionalProperties": {},
@@ -3193,16 +2752,9 @@
                     "type": "array"
                   },
                   "throttle": {
-                    "anyOf": [
-                      {
-                        "description": "Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
-                        "type": "string"
-                      },
-                      {
-                        "enum": [],
-                        "nullable": true
-                      }
-                    ]
+                    "description": "Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
+                    "nullable": true,
+                    "type": "string"
                   }
                 },
                 "required": [
@@ -3335,7 +2887,6 @@
                                 "type": "object"
                               }
                             },
-                            "required": [],
                             "type": "object"
                           },
                           "connector_type_id": {
@@ -3359,21 +2910,15 @@
                                 "type": "boolean"
                               },
                               "throttle": {
-                                "anyOf": [
-                                  {
-                                    "description": "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
-                                    "type": "string"
-                                  },
-                                  {
-                                    "enum": [],
-                                    "nullable": true
-                                  }
-                                ]
+                                "description": "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
+                                "nullable": true,
+                                "type": "string"
                               }
                             },
                             "required": [
                               "summary",
-                              "notify_when"
+                              "notify_when",
+                              "throttle"
                             ],
                             "type": "object"
                           },
@@ -3430,28 +2975,14 @@
                       "type": "object"
                     },
                     "api_key_created_by_user": {
-                      "anyOf": [
-                        {
-                          "description": "Indicates whether the API key that is associated with the rule was created by the user.",
-                          "type": "boolean"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "Indicates whether the API key that is associated with the rule was created by the user.",
+                      "nullable": true,
+                      "type": "boolean"
                     },
                     "api_key_owner": {
-                      "anyOf": [
-                        {
-                          "description": "The owner of the API key that is associated with the rule and used to run background tasks.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "The owner of the API key that is associated with the rule and used to run background tasks.",
+                      "nullable": true,
+                      "type": "string"
                     },
                     "consumer": {
                       "description": "The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.",
@@ -3462,16 +2993,9 @@
                       "type": "string"
                     },
                     "created_by": {
-                      "anyOf": [
-                        {
-                          "description": "The identifier for the user that created the rule.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "The identifier for the user that created the rule.",
+                      "nullable": true,
+                      "type": "string"
                     },
                     "enabled": {
                       "description": "Indicates whether you want to run the rule on an interval basis after it is created.",
@@ -3563,142 +3087,85 @@
                       "type": "string"
                     },
                     "is_snoozed_until": {
-                      "anyOf": [
-                        {
-                          "description": "The date when the rule will no longer be snoozed.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "The date when the rule will no longer be snoozed.",
+                      "nullable": true,
+                      "type": "string"
                     },
                     "last_run": {
-                      "anyOf": [
-                        {
+                      "additionalProperties": false,
+                      "nullable": true,
+                      "properties": {
+                        "alerts_count": {
                           "additionalProperties": false,
                           "properties": {
-                            "alerts_count": {
-                              "additionalProperties": false,
-                              "properties": {
-                                "active": {
-                                  "anyOf": [
-                                    {
-                                      "description": "Number of active alerts during last run.",
-                                      "type": "number"
-                                    },
-                                    {
-                                      "enum": [],
-                                      "nullable": true
-                                    }
-                                  ]
-                                },
-                                "ignored": {
-                                  "anyOf": [
-                                    {
-                                      "description": "Number of ignored alerts during last run.",
-                                      "type": "number"
-                                    },
-                                    {
-                                      "enum": [],
-                                      "nullable": true
-                                    }
-                                  ]
-                                },
-                                "new": {
-                                  "anyOf": [
-                                    {
-                                      "description": "Number of new alerts during last run.",
-                                      "type": "number"
-                                    },
-                                    {
-                                      "enum": [],
-                                      "nullable": true
-                                    }
-                                  ]
-                                },
-                                "recovered": {
-                                  "anyOf": [
-                                    {
-                                      "description": "Number of recovered alerts during last run.",
-                                      "type": "number"
-                                    },
-                                    {
-                                      "enum": [],
-                                      "nullable": true
-                                    }
-                                  ]
-                                }
-                              },
-                              "required": [],
-                              "type": "object"
-                            },
-                            "outcome": {
-                              "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
-                              "enum": [
-                                "succeeded",
-                                "warning",
-                                "failed"
-                              ],
-                              "type": "string"
-                            },
-                            "outcome_msg": {
-                              "anyOf": [
-                                {
-                                  "items": {
-                                    "description": "Outcome message generated during last rule run.",
-                                    "type": "string"
-                                  },
-                                  "type": "array"
-                                },
-                                {
-                                  "enum": [],
-                                  "nullable": true
-                                }
-                              ]
-                            },
-                            "outcome_order": {
-                              "description": "Order of the outcome.",
+                            "active": {
+                              "description": "Number of active alerts during last run.",
+                              "nullable": true,
                               "type": "number"
                             },
-                            "warning": {
-                              "anyOf": [
-                                {
-                                  "description": "Warning of last rule execution.",
-                                  "enum": [
-                                    "read",
-                                    "decrypt",
-                                    "execute",
-                                    "unknown",
-                                    "license",
-                                    "timeout",
-                                    "disabled",
-                                    "validate",
-                                    "maxExecutableActions",
-                                    "maxAlerts",
-                                    "maxQueuedActions"
-                                  ],
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": [],
-                                  "nullable": true
-                                }
-                              ]
+                            "ignored": {
+                              "description": "Number of ignored alerts during last run.",
+                              "nullable": true,
+                              "type": "number"
+                            },
+                            "new": {
+                              "description": "Number of new alerts during last run.",
+                              "nullable": true,
+                              "type": "number"
+                            },
+                            "recovered": {
+                              "description": "Number of recovered alerts during last run.",
+                              "nullable": true,
+                              "type": "number"
                             }
                           },
-                          "required": [
-                            "outcome",
-                            "alerts_count"
-                          ],
                           "type": "object"
                         },
-                        {
-                          "enum": [],
-                          "nullable": true
+                        "outcome": {
+                          "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
+                          "enum": [
+                            "succeeded",
+                            "warning",
+                            "failed"
+                          ],
+                          "type": "string"
+                        },
+                        "outcome_msg": {
+                          "items": {
+                            "description": "Outcome message generated during last rule run.",
+                            "type": "string"
+                          },
+                          "nullable": true,
+                          "type": "array"
+                        },
+                        "outcome_order": {
+                          "description": "Order of the outcome.",
+                          "type": "number"
+                        },
+                        "warning": {
+                          "description": "Warning of last rule execution.",
+                          "enum": [
+                            "read",
+                            "decrypt",
+                            "execute",
+                            "unknown",
+                            "license",
+                            "timeout",
+                            "disabled",
+                            "validate",
+                            "maxExecutableActions",
+                            "maxAlerts",
+                            "maxQueuedActions"
+                          ],
+                          "nullable": true,
+                          "type": "string"
                         }
-                      ]
+                      },
+                      "required": [
+                        "outcome",
+                        "alerts_count"
+                      ],
+                      "type": "object"
                     },
                     "mapped_params": {
                       "additionalProperties": {},
@@ -3750,55 +3217,26 @@
                                         "additionalProperties": false,
                                         "properties": {
                                           "active": {
-                                            "anyOf": [
-                                              {
-                                                "description": "Number of active alerts during last run.",
-                                                "type": "number"
-                                              },
-                                              {
-                                                "enum": [],
-                                                "nullable": true
-                                              }
-                                            ]
+                                            "description": "Number of active alerts during last run.",
+                                            "nullable": true,
+                                            "type": "number"
                                           },
                                           "ignored": {
-                                            "anyOf": [
-                                              {
-                                                "description": "Number of ignored alerts during last run.",
-                                                "type": "number"
-                                              },
-                                              {
-                                                "enum": [],
-                                                "nullable": true
-                                              }
-                                            ]
+                                            "description": "Number of ignored alerts during last run.",
+                                            "nullable": true,
+                                            "type": "number"
                                           },
                                           "new": {
-                                            "anyOf": [
-                                              {
-                                                "description": "Number of new alerts during last run.",
-                                                "type": "number"
-                                              },
-                                              {
-                                                "enum": [],
-                                                "nullable": true
-                                              }
-                                            ]
+                                            "description": "Number of new alerts during last run.",
+                                            "nullable": true,
+                                            "type": "number"
                                           },
                                           "recovered": {
-                                            "anyOf": [
-                                              {
-                                                "description": "Number of recovered alerts during last run.",
-                                                "type": "number"
-                                              },
-                                              {
-                                                "enum": [],
-                                                "nullable": true
-                                              }
-                                            ]
+                                            "description": "Number of recovered alerts during last run.",
+                                            "nullable": true,
+                                            "type": "number"
                                           }
                                         },
-                                        "required": [],
                                         "type": "object"
                                       },
                                       "outcome": {
@@ -3811,48 +3249,34 @@
                                         "type": "string"
                                       },
                                       "outcome_msg": {
-                                        "anyOf": [
-                                          {
-                                            "items": {
-                                              "description": "Outcome message generated during last rule run.",
-                                              "type": "string"
-                                            },
-                                            "type": "array"
-                                          },
-                                          {
-                                            "enum": [],
-                                            "nullable": true
-                                          }
-                                        ]
+                                        "items": {
+                                          "description": "Outcome message generated during last rule run.",
+                                          "type": "string"
+                                        },
+                                        "nullable": true,
+                                        "type": "array"
                                       },
                                       "outcome_order": {
                                         "description": "Order of the outcome.",
                                         "type": "number"
                                       },
                                       "warning": {
-                                        "anyOf": [
-                                          {
-                                            "description": "Warning of last rule execution.",
-                                            "enum": [
-                                              "read",
-                                              "decrypt",
-                                              "execute",
-                                              "unknown",
-                                              "license",
-                                              "timeout",
-                                              "disabled",
-                                              "validate",
-                                              "maxExecutableActions",
-                                              "maxAlerts",
-                                              "maxQueuedActions"
-                                            ],
-                                            "type": "string"
-                                          },
-                                          {
-                                            "enum": [],
-                                            "nullable": true
-                                          }
-                                        ]
+                                        "description": "Warning of last rule execution.",
+                                        "enum": [
+                                          "read",
+                                          "decrypt",
+                                          "execute",
+                                          "unknown",
+                                          "license",
+                                          "timeout",
+                                          "disabled",
+                                          "validate",
+                                          "maxExecutableActions",
+                                          "maxAlerts",
+                                          "maxQueuedActions"
+                                        ],
+                                        "nullable": true,
+                                        "type": "string"
                                       }
                                     },
                                     "required": [
@@ -3889,67 +3313,31 @@
                                       "type": "number"
                                     },
                                     "gap_duration_s": {
-                                      "anyOf": [
-                                        {
-                                          "description": "Duration in seconds of rule run gap.",
-                                          "type": "number"
-                                        },
-                                        {
-                                          "enum": [],
-                                          "nullable": true
-                                        }
-                                      ]
+                                      "description": "Duration in seconds of rule run gap.",
+                                      "nullable": true,
+                                      "type": "number"
                                     },
                                     "total_alerts_created": {
-                                      "anyOf": [
-                                        {
-                                          "description": "Total number of alerts created during last rule run.",
-                                          "type": "number"
-                                        },
-                                        {
-                                          "enum": [],
-                                          "nullable": true
-                                        }
-                                      ]
+                                      "description": "Total number of alerts created during last rule run.",
+                                      "nullable": true,
+                                      "type": "number"
                                     },
                                     "total_alerts_detected": {
-                                      "anyOf": [
-                                        {
-                                          "description": "Total number of alerts detected during last rule run.",
-                                          "type": "number"
-                                        },
-                                        {
-                                          "enum": [],
-                                          "nullable": true
-                                        }
-                                      ]
+                                      "description": "Total number of alerts detected during last rule run.",
+                                      "nullable": true,
+                                      "type": "number"
                                     },
                                     "total_indexing_duration_ms": {
-                                      "anyOf": [
-                                        {
-                                          "description": "Total time spent indexing documents during last rule run in milliseconds.",
-                                          "type": "number"
-                                        },
-                                        {
-                                          "enum": [],
-                                          "nullable": true
-                                        }
-                                      ]
+                                      "description": "Total time spent indexing documents during last rule run in milliseconds.",
+                                      "nullable": true,
+                                      "type": "number"
                                     },
                                     "total_search_duration_ms": {
-                                      "anyOf": [
-                                        {
-                                          "description": "Total time spent performing Elasticsearch searches as measured by Kibana; includes network latency and time spent serializing or deserializing the request and response.",
-                                          "type": "number"
-                                        },
-                                        {
-                                          "enum": [],
-                                          "nullable": true
-                                        }
-                                      ]
+                                      "description": "Total time spent performing Elasticsearch searches as measured by Kibana; includes network latency and time spent serializing or deserializing the request and response.",
+                                      "nullable": true,
+                                      "type": "number"
                                     }
                                   },
-                                  "required": [],
                                   "type": "object"
                                 },
                                 "timestamp": {
@@ -3993,33 +3381,19 @@
                       "type": "string"
                     },
                     "next_run": {
-                      "anyOf": [
-                        {
-                          "description": "Date and time of the next run of the rule.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "Date and time of the next run of the rule.",
+                      "nullable": true,
+                      "type": "string"
                     },
                     "notify_when": {
-                      "anyOf": [
-                        {
-                          "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
-                          "enum": [
-                            "onActionGroupChange",
-                            "onActiveAlert",
-                            "onThrottleInterval"
-                          ],
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
+                      "enum": [
+                        "onActionGroupChange",
+                        "onActiveAlert",
+                        "onThrottleInterval"
+                      ],
+                      "nullable": true,
+                      "type": "string"
                     },
                     "params": {
                       "additionalProperties": {},
@@ -4035,16 +3409,9 @@
                       "type": "string"
                     },
                     "running": {
-                      "anyOf": [
-                        {
-                          "description": "Indicates whether the rule is running.",
-                          "type": "boolean"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "Indicates whether the rule is running.",
+                      "nullable": true,
+                      "type": "boolean"
                     },
                     "schedule": {
                       "additionalProperties": false,
@@ -4225,45 +3592,24 @@
                       "type": "array"
                     },
                     "throttle": {
-                      "anyOf": [
-                        {
-                          "deprecated": true,
-                          "description": "Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "deprecated": true,
+                      "description": "Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
+                      "nullable": true,
+                      "type": "string"
                     },
                     "updated_at": {
                       "description": "The date and time that the rule was updated most recently.",
                       "type": "string"
                     },
                     "updated_by": {
-                      "anyOf": [
-                        {
-                          "description": "The identifier for the user that updated this rule most recently.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "The identifier for the user that updated this rule most recently.",
+                      "nullable": true,
+                      "type": "string"
                     },
                     "view_in_app_relative_url": {
-                      "anyOf": [
-                        {
-                          "description": "Relative URL to view rule in the app.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "Relative URL to view rule in the app.",
+                      "nullable": true,
+                      "type": "string"
                     }
                   },
                   "required": [
@@ -4276,8 +3622,11 @@
                     "schedule",
                     "actions",
                     "params",
+                    "created_by",
+                    "updated_by",
                     "created_at",
                     "updated_at",
+                    "api_key_owner",
                     "mute_all",
                     "muted_alert_ids",
                     "execution_status",
@@ -4336,24 +3685,16 @@
           "content": {
             "application/json; Elastic-Api-Version=2023-10-31": {
               "schema": {
-                "anyOf": [
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "untrack": {
-                        "description": "Defines whether this rule's alerts should be untracked.",
-                        "type": "boolean"
-                      }
-                    },
-                    "required": [],
-                    "type": "object",
-                    "x-oas-optional": true
-                  },
-                  {
-                    "enum": [],
-                    "nullable": true
+                "additionalProperties": false,
+                "nullable": true,
+                "properties": {
+                  "untrack": {
+                    "description": "Defines whether this rule's alerts should be untracked.",
+                    "type": "boolean"
                   }
-                ]
+                },
+                "type": "object",
+                "x-oas-optional": true
               }
             }
           }
@@ -4762,33 +4103,26 @@
             }
           },
           {
+            "description": "Filters the rules that have a relation with the reference objects with a specific type and identifier.",
             "in": "query",
             "name": "has_reference",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "additionalProperties": false,
-                  "description": "Filters the rules that have a relation with the reference objects with a specific type and identifier.",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "type": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "type",
-                    "id"
-                  ],
-                  "type": "object"
+              "additionalProperties": false,
+              "nullable": true,
+              "properties": {
+                "id": {
+                  "type": "string"
                 },
-                {
-                  "enum": [],
-                  "nullable": true
+                "type": {
+                  "type": "string"
                 }
-              ]
+              },
+              "required": [
+                "type",
+                "id"
+              ],
+              "type": "object"
             }
           },
           {
@@ -4946,7 +4280,6 @@
                                 "type": "object"
                               }
                             },
-                            "required": [],
                             "type": "object"
                           },
                           "connector_type_id": {
@@ -4970,21 +4303,15 @@
                                 "type": "boolean"
                               },
                               "throttle": {
-                                "anyOf": [
-                                  {
-                                    "description": "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
-                                    "type": "string"
-                                  },
-                                  {
-                                    "enum": [],
-                                    "nullable": true
-                                  }
-                                ]
+                                "description": "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
+                                "nullable": true,
+                                "type": "string"
                               }
                             },
                             "required": [
                               "summary",
-                              "notify_when"
+                              "notify_when",
+                              "throttle"
                             ],
                             "type": "object"
                           },
@@ -5041,28 +4368,14 @@
                       "type": "object"
                     },
                     "api_key_created_by_user": {
-                      "anyOf": [
-                        {
-                          "description": "Indicates whether the API key that is associated with the rule was created by the user.",
-                          "type": "boolean"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "Indicates whether the API key that is associated with the rule was created by the user.",
+                      "nullable": true,
+                      "type": "boolean"
                     },
                     "api_key_owner": {
-                      "anyOf": [
-                        {
-                          "description": "The owner of the API key that is associated with the rule and used to run background tasks.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "The owner of the API key that is associated with the rule and used to run background tasks.",
+                      "nullable": true,
+                      "type": "string"
                     },
                     "consumer": {
                       "description": "The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.",
@@ -5073,16 +4386,9 @@
                       "type": "string"
                     },
                     "created_by": {
-                      "anyOf": [
-                        {
-                          "description": "The identifier for the user that created the rule.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "The identifier for the user that created the rule.",
+                      "nullable": true,
+                      "type": "string"
                     },
                     "enabled": {
                       "description": "Indicates whether you want to run the rule on an interval basis after it is created.",
@@ -5174,142 +4480,85 @@
                       "type": "string"
                     },
                     "is_snoozed_until": {
-                      "anyOf": [
-                        {
-                          "description": "The date when the rule will no longer be snoozed.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "The date when the rule will no longer be snoozed.",
+                      "nullable": true,
+                      "type": "string"
                     },
                     "last_run": {
-                      "anyOf": [
-                        {
+                      "additionalProperties": false,
+                      "nullable": true,
+                      "properties": {
+                        "alerts_count": {
                           "additionalProperties": false,
                           "properties": {
-                            "alerts_count": {
-                              "additionalProperties": false,
-                              "properties": {
-                                "active": {
-                                  "anyOf": [
-                                    {
-                                      "description": "Number of active alerts during last run.",
-                                      "type": "number"
-                                    },
-                                    {
-                                      "enum": [],
-                                      "nullable": true
-                                    }
-                                  ]
-                                },
-                                "ignored": {
-                                  "anyOf": [
-                                    {
-                                      "description": "Number of ignored alerts during last run.",
-                                      "type": "number"
-                                    },
-                                    {
-                                      "enum": [],
-                                      "nullable": true
-                                    }
-                                  ]
-                                },
-                                "new": {
-                                  "anyOf": [
-                                    {
-                                      "description": "Number of new alerts during last run.",
-                                      "type": "number"
-                                    },
-                                    {
-                                      "enum": [],
-                                      "nullable": true
-                                    }
-                                  ]
-                                },
-                                "recovered": {
-                                  "anyOf": [
-                                    {
-                                      "description": "Number of recovered alerts during last run.",
-                                      "type": "number"
-                                    },
-                                    {
-                                      "enum": [],
-                                      "nullable": true
-                                    }
-                                  ]
-                                }
-                              },
-                              "required": [],
-                              "type": "object"
-                            },
-                            "outcome": {
-                              "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
-                              "enum": [
-                                "succeeded",
-                                "warning",
-                                "failed"
-                              ],
-                              "type": "string"
-                            },
-                            "outcome_msg": {
-                              "anyOf": [
-                                {
-                                  "items": {
-                                    "description": "Outcome message generated during last rule run.",
-                                    "type": "string"
-                                  },
-                                  "type": "array"
-                                },
-                                {
-                                  "enum": [],
-                                  "nullable": true
-                                }
-                              ]
-                            },
-                            "outcome_order": {
-                              "description": "Order of the outcome.",
+                            "active": {
+                              "description": "Number of active alerts during last run.",
+                              "nullable": true,
                               "type": "number"
                             },
-                            "warning": {
-                              "anyOf": [
-                                {
-                                  "description": "Warning of last rule execution.",
-                                  "enum": [
-                                    "read",
-                                    "decrypt",
-                                    "execute",
-                                    "unknown",
-                                    "license",
-                                    "timeout",
-                                    "disabled",
-                                    "validate",
-                                    "maxExecutableActions",
-                                    "maxAlerts",
-                                    "maxQueuedActions"
-                                  ],
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": [],
-                                  "nullable": true
-                                }
-                              ]
+                            "ignored": {
+                              "description": "Number of ignored alerts during last run.",
+                              "nullable": true,
+                              "type": "number"
+                            },
+                            "new": {
+                              "description": "Number of new alerts during last run.",
+                              "nullable": true,
+                              "type": "number"
+                            },
+                            "recovered": {
+                              "description": "Number of recovered alerts during last run.",
+                              "nullable": true,
+                              "type": "number"
                             }
                           },
-                          "required": [
-                            "outcome",
-                            "alerts_count"
-                          ],
                           "type": "object"
                         },
-                        {
-                          "enum": [],
-                          "nullable": true
+                        "outcome": {
+                          "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
+                          "enum": [
+                            "succeeded",
+                            "warning",
+                            "failed"
+                          ],
+                          "type": "string"
+                        },
+                        "outcome_msg": {
+                          "items": {
+                            "description": "Outcome message generated during last rule run.",
+                            "type": "string"
+                          },
+                          "nullable": true,
+                          "type": "array"
+                        },
+                        "outcome_order": {
+                          "description": "Order of the outcome.",
+                          "type": "number"
+                        },
+                        "warning": {
+                          "description": "Warning of last rule execution.",
+                          "enum": [
+                            "read",
+                            "decrypt",
+                            "execute",
+                            "unknown",
+                            "license",
+                            "timeout",
+                            "disabled",
+                            "validate",
+                            "maxExecutableActions",
+                            "maxAlerts",
+                            "maxQueuedActions"
+                          ],
+                          "nullable": true,
+                          "type": "string"
                         }
-                      ]
+                      },
+                      "required": [
+                        "outcome",
+                        "alerts_count"
+                      ],
+                      "type": "object"
                     },
                     "mapped_params": {
                       "additionalProperties": {},
@@ -5361,55 +4610,26 @@
                                         "additionalProperties": false,
                                         "properties": {
                                           "active": {
-                                            "anyOf": [
-                                              {
-                                                "description": "Number of active alerts during last run.",
-                                                "type": "number"
-                                              },
-                                              {
-                                                "enum": [],
-                                                "nullable": true
-                                              }
-                                            ]
+                                            "description": "Number of active alerts during last run.",
+                                            "nullable": true,
+                                            "type": "number"
                                           },
                                           "ignored": {
-                                            "anyOf": [
-                                              {
-                                                "description": "Number of ignored alerts during last run.",
-                                                "type": "number"
-                                              },
-                                              {
-                                                "enum": [],
-                                                "nullable": true
-                                              }
-                                            ]
+                                            "description": "Number of ignored alerts during last run.",
+                                            "nullable": true,
+                                            "type": "number"
                                           },
                                           "new": {
-                                            "anyOf": [
-                                              {
-                                                "description": "Number of new alerts during last run.",
-                                                "type": "number"
-                                              },
-                                              {
-                                                "enum": [],
-                                                "nullable": true
-                                              }
-                                            ]
+                                            "description": "Number of new alerts during last run.",
+                                            "nullable": true,
+                                            "type": "number"
                                           },
                                           "recovered": {
-                                            "anyOf": [
-                                              {
-                                                "description": "Number of recovered alerts during last run.",
-                                                "type": "number"
-                                              },
-                                              {
-                                                "enum": [],
-                                                "nullable": true
-                                              }
-                                            ]
+                                            "description": "Number of recovered alerts during last run.",
+                                            "nullable": true,
+                                            "type": "number"
                                           }
                                         },
-                                        "required": [],
                                         "type": "object"
                                       },
                                       "outcome": {
@@ -5422,48 +4642,34 @@
                                         "type": "string"
                                       },
                                       "outcome_msg": {
-                                        "anyOf": [
-                                          {
-                                            "items": {
-                                              "description": "Outcome message generated during last rule run.",
-                                              "type": "string"
-                                            },
-                                            "type": "array"
-                                          },
-                                          {
-                                            "enum": [],
-                                            "nullable": true
-                                          }
-                                        ]
+                                        "items": {
+                                          "description": "Outcome message generated during last rule run.",
+                                          "type": "string"
+                                        },
+                                        "nullable": true,
+                                        "type": "array"
                                       },
                                       "outcome_order": {
                                         "description": "Order of the outcome.",
                                         "type": "number"
                                       },
                                       "warning": {
-                                        "anyOf": [
-                                          {
-                                            "description": "Warning of last rule execution.",
-                                            "enum": [
-                                              "read",
-                                              "decrypt",
-                                              "execute",
-                                              "unknown",
-                                              "license",
-                                              "timeout",
-                                              "disabled",
-                                              "validate",
-                                              "maxExecutableActions",
-                                              "maxAlerts",
-                                              "maxQueuedActions"
-                                            ],
-                                            "type": "string"
-                                          },
-                                          {
-                                            "enum": [],
-                                            "nullable": true
-                                          }
-                                        ]
+                                        "description": "Warning of last rule execution.",
+                                        "enum": [
+                                          "read",
+                                          "decrypt",
+                                          "execute",
+                                          "unknown",
+                                          "license",
+                                          "timeout",
+                                          "disabled",
+                                          "validate",
+                                          "maxExecutableActions",
+                                          "maxAlerts",
+                                          "maxQueuedActions"
+                                        ],
+                                        "nullable": true,
+                                        "type": "string"
                                       }
                                     },
                                     "required": [
@@ -5500,67 +4706,31 @@
                                       "type": "number"
                                     },
                                     "gap_duration_s": {
-                                      "anyOf": [
-                                        {
-                                          "description": "Duration in seconds of rule run gap.",
-                                          "type": "number"
-                                        },
-                                        {
-                                          "enum": [],
-                                          "nullable": true
-                                        }
-                                      ]
+                                      "description": "Duration in seconds of rule run gap.",
+                                      "nullable": true,
+                                      "type": "number"
                                     },
                                     "total_alerts_created": {
-                                      "anyOf": [
-                                        {
-                                          "description": "Total number of alerts created during last rule run.",
-                                          "type": "number"
-                                        },
-                                        {
-                                          "enum": [],
-                                          "nullable": true
-                                        }
-                                      ]
+                                      "description": "Total number of alerts created during last rule run.",
+                                      "nullable": true,
+                                      "type": "number"
                                     },
                                     "total_alerts_detected": {
-                                      "anyOf": [
-                                        {
-                                          "description": "Total number of alerts detected during last rule run.",
-                                          "type": "number"
-                                        },
-                                        {
-                                          "enum": [],
-                                          "nullable": true
-                                        }
-                                      ]
+                                      "description": "Total number of alerts detected during last rule run.",
+                                      "nullable": true,
+                                      "type": "number"
                                     },
                                     "total_indexing_duration_ms": {
-                                      "anyOf": [
-                                        {
-                                          "description": "Total time spent indexing documents during last rule run in milliseconds.",
-                                          "type": "number"
-                                        },
-                                        {
-                                          "enum": [],
-                                          "nullable": true
-                                        }
-                                      ]
+                                      "description": "Total time spent indexing documents during last rule run in milliseconds.",
+                                      "nullable": true,
+                                      "type": "number"
                                     },
                                     "total_search_duration_ms": {
-                                      "anyOf": [
-                                        {
-                                          "description": "Total time spent performing Elasticsearch searches as measured by Kibana; includes network latency and time spent serializing or deserializing the request and response.",
-                                          "type": "number"
-                                        },
-                                        {
-                                          "enum": [],
-                                          "nullable": true
-                                        }
-                                      ]
+                                      "description": "Total time spent performing Elasticsearch searches as measured by Kibana; includes network latency and time spent serializing or deserializing the request and response.",
+                                      "nullable": true,
+                                      "type": "number"
                                     }
                                   },
-                                  "required": [],
                                   "type": "object"
                                 },
                                 "timestamp": {
@@ -5604,33 +4774,19 @@
                       "type": "string"
                     },
                     "next_run": {
-                      "anyOf": [
-                        {
-                          "description": "Date and time of the next run of the rule.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "Date and time of the next run of the rule.",
+                      "nullable": true,
+                      "type": "string"
                     },
                     "notify_when": {
-                      "anyOf": [
-                        {
-                          "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
-                          "enum": [
-                            "onActionGroupChange",
-                            "onActiveAlert",
-                            "onThrottleInterval"
-                          ],
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
+                      "enum": [
+                        "onActionGroupChange",
+                        "onActiveAlert",
+                        "onThrottleInterval"
+                      ],
+                      "nullable": true,
+                      "type": "string"
                     },
                     "params": {
                       "additionalProperties": {},
@@ -5646,16 +4802,9 @@
                       "type": "string"
                     },
                     "running": {
-                      "anyOf": [
-                        {
-                          "description": "Indicates whether the rule is running.",
-                          "type": "boolean"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "Indicates whether the rule is running.",
+                      "nullable": true,
+                      "type": "boolean"
                     },
                     "schedule": {
                       "additionalProperties": false,
@@ -5836,45 +4985,24 @@
                       "type": "array"
                     },
                     "throttle": {
-                      "anyOf": [
-                        {
-                          "deprecated": true,
-                          "description": "Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "deprecated": true,
+                      "description": "Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
+                      "nullable": true,
+                      "type": "string"
                     },
                     "updated_at": {
                       "description": "The date and time that the rule was updated most recently.",
                       "type": "string"
                     },
                     "updated_by": {
-                      "anyOf": [
-                        {
-                          "description": "The identifier for the user that updated this rule most recently.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "The identifier for the user that updated this rule most recently.",
+                      "nullable": true,
+                      "type": "string"
                     },
                     "view_in_app_relative_url": {
-                      "anyOf": [
-                        {
-                          "description": "Relative URL to view rule in the app.",
-                          "type": "string"
-                        },
-                        {
-                          "enum": [],
-                          "nullable": true
-                        }
-                      ]
+                      "description": "Relative URL to view rule in the app.",
+                      "nullable": true,
+                      "type": "string"
                     }
                   },
                   "required": [
@@ -5887,8 +5015,11 @@
                     "schedule",
                     "actions",
                     "params",
+                    "created_by",
+                    "updated_by",
                     "created_at",
                     "updated_at",
+                    "api_key_owner",
                     "mute_all",
                     "muted_alert_ids",
                     "execution_status",
