@@ -54,7 +54,6 @@ interface PageProps extends ViewSpaceServices {
   history: ScopedHistory;
   selectedTabId?: string;
   capabilities: Capabilities;
-  allowFeatureVisibility: boolean;
   solutionNavExperiment?: Promise<boolean>;
   getFeatures: FeaturesPluginStart['getFeatures'];
   onLoadSpace: (space: Space) => void;
@@ -77,7 +76,6 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     solutionNavExperiment,
     selectedTabId: _selectedTabId,
     capabilities,
-    allowFeatureVisibility,
     getUrlForApp,
     navigateToUrl,
     ...viewSpaceServices
@@ -100,7 +98,6 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     history,
     currentSelectedTabId: selectedTabId,
     isSolutionNavEnabled,
-    allowFeatureVisibility,
   });
 
   useEffect(() => {

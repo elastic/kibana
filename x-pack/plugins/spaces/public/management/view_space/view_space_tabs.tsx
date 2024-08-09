@@ -36,7 +36,6 @@ export interface GetTabsProps {
     roles?: { view: boolean; save: boolean };
   };
   isSolutionNavEnabled: boolean;
-  allowFeatureVisibility: boolean; // FIXME: not for tab
 }
 
 export const getTabs = ({

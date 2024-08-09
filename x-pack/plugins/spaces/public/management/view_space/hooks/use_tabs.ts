@@ -19,7 +19,6 @@ type UseTabsProps = Pick<GetTabsProps, 'roles' | 'capabilities'> & {
   currentSelectedTabId: string;
   history: ScopedHistory;
   isSolutionNavEnabled: boolean;
-  allowFeatureVisibility: boolean;
 };
 
 export const useTabs = ({

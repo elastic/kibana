@@ -136,20 +136,19 @@ export const spacesManagementApp = Object.freeze({
           return (
             <EditSpacePage
               capabilities={application.capabilities}
-              getFeatures={features.getFeatures}
               getUrlForApp={application.getUrlForApp}
               navigateToUrl={application.navigateToUrl}
               serverBasePath={http.basePath.serverBasePath}
+              getFeatures={features.getFeatures}
+              http={http}
+              overlays={overlays}
+              notifications={notifications}
               spacesManager={spacesManager}
-              history={history}
-              allowFeatureVisibility={config.allowFeatureVisibility}
-              onLoadSpace={onLoadSpace}
               spaceId={spaceId}
+              onLoadSpace={onLoadSpace}
+              history={history}
               selectedTabId={selectedTabId}
               getRolesAPIClient={getRolesAPIClient}
-              http={http}
-              notifications={notifications}
-              overlays={overlays}
             />
           );
         };
