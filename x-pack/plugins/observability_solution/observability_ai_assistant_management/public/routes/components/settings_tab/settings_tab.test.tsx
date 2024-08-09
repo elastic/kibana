@@ -83,7 +83,7 @@ describe('SettingsTab', () => {
         }
       );
 
-      fireEvent.click(getByTestId('apmBottomBarActionsButton'));
+      fireEvent.click(getByTestId('observabilityAiAssistantManagementBottomBarActionsButton'));
 
       await waitFor(() => expect(windowLocationReloadMock).toHaveBeenCalledTimes(1));
     });
