@@ -265,7 +265,6 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
-  const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const { force, space_ids: spaceIds, ...data } = request.body;
@@ -273,19 +272,13 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
   let spaceId = fleetContext.spaceId;
 
   try {
-    // Detect space change, will need to updated after multiple space support
-    if (spaceIds?.length && spaceIds[0] !== spaceId) {
-      // TODO validate user access
-      // TODO update space
-      // await agentPolicyService.updateSpace(
-      console.log('TEST', spaceIds, spaceId);
+    // TODO if feature flag enabled Detect space change, will need to updated after multiple space support
+    if (spaceIds?.length) {
       await updateAgentPolicySpaces({
         agentPolicyId: request.params.agentPolicyId,
         currentSpaceId: spaceId,
         newSpaceIds: spaceIds,
       });
-
-      console.log('TATA', spaceIds, spaceId);
 
       spaceId = spaceIds[0];
     }

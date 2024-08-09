@@ -43,7 +43,7 @@ export const AgentPolicyBaseSchema = {
   id: schema.maybe(schema.string()),
   space_ids: schema.maybe(
     schema.arrayOf(schema.string(), {
-      maxSize: 1, // Until support multiple space affinity
+      minSize: 1,
     })
   ),
   name: schema.string({ minLength: 1, validate: validateNonEmptyString }),

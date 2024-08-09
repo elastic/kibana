@@ -5,8 +5,19 @@
  * 2.0.
  */
 
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import deepEqual from 'fast-deep-equal';
+
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+
+import {
+  AGENTS_INDEX,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '../../../common';
 import { appContextService } from '../app_context';
+import { agentPolicyService } from '../agent_policy';
+import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
+import { packagePolicyService } from '../package_policy';
 
 export async function updateAgentPolicySpaces({
   agentPolicyId,
@@ -17,24 +28,64 @@ export async function updateAgentPolicySpaces({
   currentSpaceId: string;
   newSpaceIds: string[];
 }) {
+  if (!appContextService.getExperimentalFeatures()?.useSpaceAwareness) {
+    return;
+  }
+
   const esClient = appContextService.getInternalUserESClient();
   const soClient = appContextService.getInternalUserSOClient();
-  // TODO Saved object need to be "multiple" for updateObjectsSpaces to
-  const res = await soClient
-    .updateObjectsSpaces(
-      [
-        {
-          id: agentPolicyId,
-          type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-          spaces: [currentSpaceId],
-        },
-      ],
-      newSpaceIds,
-      [currentSpaceId],
-      { refresh: 'wait_for' }
-    )
-    .catch(console.log);
-  // Update saved object
 
-  // Update agents
+  const currentSpaceSoClient = appContextService.getInternalUserSOClientForSpaceId(currentSpaceId);
+  const existingPolicy = await agentPolicyService.get(currentSpaceSoClient, agentPolicyId);
+
+  const existingPackagePolicies = await packagePolicyService.findAllForAgentPolicy(
+    currentSpaceSoClient,
+    agentPolicyId
+  );
+
+  if (deepEqual(existingPolicy?.space_ids?.sort() ?? [DEFAULT_SPACE_ID], newSpaceIds.sort())) {
+    return;
+  }
+
+  const spacesToAdd = newSpaceIds.filter(
+    (spaceId) => !existingPolicy?.space_ids?.includes(spaceId) ?? true
+  );
+
+  const spacesToRemove =
+    existingPolicy?.space_ids?.filter((spaceId) => !newSpaceIds.includes(spaceId) ?? true) ?? [];
+
+  // Todo Retrieve package policies
+  const res = await soClient.updateObjectsSpaces(
+    [
+      {
+        id: agentPolicyId,
+        type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      },
+      ...existingPackagePolicies.map(({ id }) => ({
+        id,
+        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      })),
+    ],
+    spacesToAdd,
+    spacesToRemove,
+    { refresh: 'wait_for' }
+  );
+
+  for (const soRes of res.objects) {
+    if (soRes.error) {
+      throw soRes.error;
+    }
+  }
+
+  // Update fleet server index agents, enrollment api keys
+  await esClient.updateByQuery({
+    index: ENROLLMENT_API_KEYS_INDEX,
+    script: `ctx._source.namespaces = [${newSpaceIds.map((spaceId) => `"${spaceId}"`).join(',')}]`,
+    ignore_unavailable: true,
+  });
+  await esClient.updateByQuery({
+    index: AGENTS_INDEX,
+    script: `ctx._source.namespaces = [${newSpaceIds.map((spaceId) => `"${spaceId}"`).join(',')}]`,
+    ignore_unavailable: true,
+  });
 }
