@@ -14,8 +14,8 @@ tags:
 servers:
   - url: /
 paths:
-  '/api/alerting/rule':
-    $ref: 'paths/api@alerting@rule.yaml'
+  # '/api/alerting/rule':
+  #   $ref: 'paths/api@alerting@rule.yaml'
   # '/api/alerting/rule/{ruleId}':
   #   $ref: 'paths/api@alerting@rule@{ruleid}.yaml'
   # '/api/alerting/rule/{ruleId}/_disable':
