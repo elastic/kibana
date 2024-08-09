@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-// Default language used in the language selector modal
+// Default language for the language selector
 export const DEFAULT_LANGUAGE = 'curl';
 // Available languages in the language selector modal
-export const AVAILABLE_LANGUAGES = ['curl', 'JavaScript', 'Python'];
+export const AVAILABLE_LANGUAGES = [
+  { value: 'curl', label: 'curl' },
+  { value: 'javascript', label: 'JavaScript' },
+  { value: 'python', label: 'Python' },
+];

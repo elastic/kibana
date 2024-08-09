@@ -26,7 +26,7 @@ import type { EditorRequest } from '../../types';
 
 import { useServicesContext } from '../../../../../contexts';
 import { StorageKeys } from '../../../../../../services';
-import { DEFAULT_LANGUAGE } from '../../../../../../../common/constants';
+import { DEFAULT_LANGUAGE, AVAILABLE_LANGUAGES } from '../../../../../../../common/constants';
 
 interface Props {
   getRequests: () => Promise<EditorRequest[]>;
@@ -36,6 +36,10 @@ interface Props {
 }
 
 const DELAY_FOR_HIDING_SPINNER = 500;
+
+const getLanguageLabelByValue = (value: string) => {
+  return AVAILABLE_LANGUAGES.find((lang) => lang.value === value)?.label || DEFAULT_LANGUAGE;
+};
 
 export const ContextMenu = ({
   getRequests,
@@ -67,7 +71,7 @@ export const ContextMenu = ({
   // to clipboard.
   const copyAs = async (language?: string) => {
     // Get the language we want to convert the requests to
-    const withLanguage = (language || currentLanguage).toLowerCase();
+    const withLanguage = language || currentLanguage;
     // Get all the selected requests
     const requests = await getRequests();
 
@@ -93,14 +97,16 @@ export const ContextMenu = ({
       title: i18n.translate('console.consoleMenu.copyAsSuccessMessage', {
         defaultMessage:
           '{requestsCount, plural, one {Request} other {Requests}} copied to clipboard as {language}',
-        values: { language: withLanguage, requestsCount: requests.length },
+        values: { language: getLanguageLabelByValue(withLanguage), requestsCount: requests.length },
       }),
     });
 
     await copyText(requestsAsCode);
   };
 
+  // when changing from language selector modal, it comes with language in key format (lowercase)
   const onCopyAsSubmit = async (language?: string) => {
+    // current language alreayud in key format (lowercase)
     const withLanguage = language || currentLanguage;
 
     // Close language selector modal
@@ -122,6 +128,7 @@ export const ContextMenu = ({
       });
   };
 
+  // This is called by the language selector modal and comes with language already in key format (lowercase)
   const changeDefaultLanguage = (language: string) => {
     // If default language has changed, update local storage
     if (currentLanguage !== language) {
@@ -191,7 +198,7 @@ export const ContextMenu = ({
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <strong>{currentLanguage}</strong>
+              <strong>{getLanguageLabelByValue(currentLanguage)}</strong>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

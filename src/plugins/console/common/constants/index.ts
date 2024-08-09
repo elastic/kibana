@@ -16,4 +16,4 @@ export {
   MANUAL_SUBFOLDER,
 } from './autocomplete_definitions';
 export { DEFAULT_INPUT_VALUE } from './editor_input';
-export { AVAILABLE_LANGUAGES, DEFAULT_LANGUAGE } from './copy_as';
+export { DEFAULT_LANGUAGE, AVAILABLE_LANGUAGES } from './copy_as';

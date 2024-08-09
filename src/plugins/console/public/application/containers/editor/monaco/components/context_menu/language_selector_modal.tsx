@@ -53,8 +53,9 @@ export const LanguageSelectorModal = ({
   const [options, setOptions] = useState<EuiSelectableOption[]>(
     AVAILABLE_LANGUAGES.map(
       (lang): EuiSelectableOption => ({
-        label: lang,
-        'data-test-subj': `languageOption-${lang.toLowerCase()}`,
+        label: lang.label,
+        key: lang.value,
+        'data-test-subj': `languageOption-${lang.value}`,
       })
     )
   );
@@ -64,14 +65,14 @@ export const LanguageSelectorModal = ({
   const optionsList = useMemo(() => {
     return options.map((option) => ({
       ...option,
-      ...(noOptionsSelected && option.label === selectedLanguage && { checked: 'on' }),
+      ...(noOptionsSelected && option.key === selectedLanguage && { checked: 'on' }),
       append:
-        option.label === selectedLanguage ? (
+        option.key === selectedLanguage ? (
           DEFAULT_BADGE
         ) : (
           <EuiLink
-            onClick={() => setSelectedLanguage(option.label)}
-            data-test-subj={`changeDefaultLanguageTo-${option.label.toLowerCase()}`}
+            onClick={() => setSelectedLanguage(option.key!)}
+            data-test-subj={`changeDefaultLanguageTo-${option.key}`}
           >
             {i18n.translate('console.requestPanel.contextMenu.defaultSelectedLanguage', {
               defaultMessage: 'Set as default',
@@ -83,7 +84,7 @@ export const LanguageSelectorModal = ({
 
   const onCopyCode = () => {
     const selectedOption = options.find((option) => option.checked);
-    const language = selectedOption?.label || selectedLanguage;
+    const language = selectedOption?.key || selectedLanguage;
 
     // If the default language is changed, update the local storage setting
     if (currentLanguage !== language) {
