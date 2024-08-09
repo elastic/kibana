@@ -18,6 +18,8 @@ import {
   EuiDescribedFormGroup,
   EuiFieldNumber,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiLink,
@@ -377,6 +379,79 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
           }
         >
           <EuiSpacer size={'m'} />
+
+          {adaptiveAllocationsAvailable && config.adaptiveAllocations?.enabled === true ? (
+            <EuiDescribedFormGroup
+              titleSize={'xxs'}
+              title={
+                <h3>
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.modelsList.startDeployment.adaptiveAllocationLimitsLabel"
+                    defaultMessage="Adaptive allocations limits"
+                  />
+                </h3>
+              }
+              description={
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.startDeployment.adaptiveAllocationLimitsHelp"
+                  defaultMessage="Set the minimum and maximum number of allocations."
+                />
+              }
+            >
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiFormRow
+                    label={
+                      <FormattedMessage
+                        id="xpack.ml.trainedModels.modelsList.startDeployment.minAllocationsLabel"
+                        defaultMessage="Min"
+                      />
+                    }
+                  >
+                    <EuiFieldNumber
+                      min={1}
+                      value={config.adaptiveAllocations?.minNumberOfAllocations}
+                      onChange={(event) => {
+                        onConfigChange({
+                          ...config,
+                          adaptiveAllocations: {
+                            enabled: config.adaptiveAllocations?.enabled ?? false,
+                            ...config.adaptiveAllocations,
+                            minNumberOfAllocations: Number(event.target.value),
+                          },
+                        });
+                      }}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFormRow
+                    label={
+                      <FormattedMessage
+                        id="xpack.ml.trainedModels.modelsList.startDeployment.maxAllocationsLabel"
+                        defaultMessage="Max"
+                      />
+                    }
+                  >
+                    <EuiFieldNumber
+                      min={(config.adaptiveAllocations?.minNumberOfAllocations ?? 1) + 1}
+                      value={config.adaptiveAllocations?.maxNumberOfAllocations}
+                      onChange={(event) => {
+                        onConfigChange({
+                          ...config,
+                          adaptiveAllocations: {
+                            enabled: config.adaptiveAllocations?.enabled ?? false,
+                            ...config.adaptiveAllocations,
+                            maxNumberOfAllocations: Number(event.target.value),
+                          },
+                        });
+                      }}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiDescribedFormGroup>
+          ) : null}
 
           {config.priority !== undefined ? (
             <EuiDescribedFormGroup
