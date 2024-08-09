@@ -975,6 +975,10 @@
       }
     }
   },
+  "dynamic-config-overrides": {
+    "dynamic": false,
+    "properties": {}
+  },
   "endpoint:unified-user-artifact-manifest": {
     "dynamic": false,
     "properties": {

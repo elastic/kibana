@@ -96,6 +96,7 @@ export const getControlGroupEmbeddableFactory = (services: {
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
 
       const unsavedChanges = initializeControlGroupUnsavedChanges(
+        selectionsManager.applySelections,
         controlsManager.api.children$,
         {
           ...controlsManager.comparators,

@@ -20,6 +20,7 @@ import {
 import { combineLatest, map } from 'rxjs';
 import { ControlsInOrder, getControlsInOrder } from './init_controls_manager';
 import { ControlGroupRuntimeState, ControlPanelsState } from './types';
+import { apiPublishesAsyncFilters } from '../data_controls/publishes_async_filters';
 
 export type ControlGroupComparatorState = Pick<
   ControlGroupRuntimeState,
@@ -33,6 +34,7 @@ export type ControlGroupComparatorState = Pick<
 };
 
 export function initializeControlGroupUnsavedChanges(
+  applySelections: () => void,
   children$: PresentationContainer['children$'],
   comparators: StateComparators<ControlGroupComparatorState>,
   snapshotControlsRuntimeState: () => ControlPanelsState,
@@ -68,12 +70,25 @@ export function initializeControlGroupUnsavedChanges(
           return Object.keys(unsavedChanges).length ? unsavedChanges : undefined;
         })
       ),
-      resetUnsavedChanges: () => {
+      asyncResetUnsavedChanges: async () => {
         controlGroupUnsavedChanges.api.resetUnsavedChanges();
+
+        const filtersReadyPromises: Array<Promise<void>> = [];
         Object.values(children$.value).forEach((controlApi) => {
           if (apiPublishesUnsavedChanges(controlApi)) controlApi.resetUnsavedChanges();
+          if (apiPublishesAsyncFilters(controlApi)) {
+            filtersReadyPromises.push(controlApi.untilFiltersReady());
+          }
         });
+
+        await Promise.all(filtersReadyPromises);
+
+        if (!comparators.autoApplySelections[0].value) {
+          applySelections();
+        }
       },
-    } as PublishesUnsavedChanges<ControlGroupRuntimeState>,
+    } as Pick<PublishesUnsavedChanges, 'unsavedChanges'> & {
+      asyncResetUnsavedChanges: () => Promise<void>;
+    },
   };
 }

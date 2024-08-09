@@ -27,9 +27,9 @@ export async function installSyntheticsIndexTemplates(server: SyntheticsServerSe
     pkgName: 'synthetics',
   });
 
-  if (!installation) {
+  if (!installation.package) {
     return Promise.reject('No package installation found.');
   }
 
-  return installation;
+  return installation.package;
 }
