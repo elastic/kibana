@@ -29,6 +29,8 @@ import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
+import { ESQLRealField } from '@kbn/esql-validation-autocomplete';
+import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
@@ -322,13 +324,12 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               undefined,
               abortController
             ).result;
-            const columns =
+            const columns: ESQLRealField[] =
               table?.columns.map((c) => {
-                // Casting unsupported as unknown to avoid plethora of warnings
-                // Remove when addressed https://github.com/elastic/kibana/issues/189666
-                if (!c.meta.esType || c.meta.esType === 'unsupported')
-                  return { name: c.name, type: 'unknown' };
-                return { name: c.name, type: c.meta.esType };
+                return {
+                  name: c.name,
+                  type: c.meta.esType as FieldType,
+                };
               }) || [];
             return await getRateLimitedColumnsWithMetadata(columns, fieldsMetadata);
           } catch (e) {
