@@ -1730,6 +1730,7 @@ export default function ({ getService }: FtrProviderContext) {
             monitors: [
               {
                 ...projectMonitors.monitors[0],
+                namespace: 'custom_namespace',
                 privateLocations: ['Test private location 0'],
                 enabled: false,
               },
@@ -1758,6 +1759,7 @@ export default function ({ getService }: FtrProviderContext) {
             projectId: project,
             locationId: testPolicyId,
             locationName: 'Test private location 0',
+            namespace: 'custom_namespace',
           })
         );
       } finally {
