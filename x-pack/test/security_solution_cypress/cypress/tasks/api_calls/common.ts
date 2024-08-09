@@ -22,46 +22,44 @@ export const ESS_API_AUTH = Object.freeze({
 export const API_HEADERS = Object.freeze({
   'kbn-xsrf': 'cypress-creds',
   'x-elastic-internal-origin': 'security-solution',
-  [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION].join(','), // Convertir array a string
-  Authorization: '',
+  [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION].join(','),
 });
 
 export const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
 
-type AuthMethod = 'basic' | 'cookie';
+const requestWithApiKey = <T>(
+  response: string,
+  restOptions: Partial<Cypress.RequestOptions>
+): Cypress.Chainable<Cypress.Response<T>> => {
+  return cy.request<T>({
+    headers: {
+      ...API_HEADERS,
+      Authorization: `ApiKey ${response}`,
+    },
+    ...restOptions,
+  });
+};
 
-interface RootRequestOptions extends Partial<Cypress.RequestOptions> {
-  authMethod?: AuthMethod;
-}
+const requestWithoutApiKey = <T>(
+  restOptions: Partial<Cypress.RequestOptions>
+): Cypress.Chainable<Cypress.Response<T>> => {
+  return cy.request<T>({
+    auth: ESS_API_AUTH,
+    headers: API_HEADERS,
+    ...restOptions,
+  });
+};
 
 export const rootRequest = <T = unknown>({
-  headers: optionHeaders,
-  authMethod = 'cookie',
+  headers: optionHeaders = {},
   ...restOptions
-}: RootRequestOptions): Cypress.Chainable<Cypress.Response<T>> => {
-  const headers: Record<string, string> = {
-    ...API_HEADERS,
-    ...(optionHeaders || {}),
-  };
-
-  if (authMethod === 'cookie') {
+}: Partial<Cypress.RequestOptions>): Cypress.Chainable<Cypress.Response<T>> => {
+  if (Cypress.env('IS_SERVERLESS')) {
     return cy.task('getApiKeyForRole', 'admin').then((response) => {
-      return cy.request<T>({
-        headers: {
-          'kbn-xsrf': 'cypress-creds',
-          'x-elastic-internal-origin': 'security-solution',
-          [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION],
-          Authorization: `ApiKey ${response}`,
-        },
-        ...restOptions,
-      });
+      return requestWithApiKey<T>(response as string, restOptions);
     });
   } else {
-    return cy.request<T>({
-      auth: ESS_API_AUTH,
-      headers,
-      ...restOptions,
-    });
+    return requestWithoutApiKey<T>(restOptions);
   }
 };
 
