@@ -56,7 +56,11 @@ export const AgentPolicyBaseSchema = {
   }),
   monitoring_enabled: schema.maybe(
     schema.arrayOf(
-      schema.oneOf([schema.literal(dataTypes.Logs), schema.literal(dataTypes.Metrics)])
+      schema.oneOf([
+        schema.literal(dataTypes.Logs),
+        schema.literal(dataTypes.Metrics),
+        schema.literal(dataTypes.Traces),
+      ])
     )
   ),
   keep_monitoring_alive: schema.maybe(schema.boolean({ defaultValue: false })),
