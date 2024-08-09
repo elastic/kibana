@@ -1,0 +1,5 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/grid-layout",
+  "owner": "@elastic/kibana-presentation"
+}

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiIcon, EuiPanel, transparentize } from '@elastic/eui';
+import { EuiIcon, EuiPanel, transparentize, useEuiOverflowScroll } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback, useRef } from 'react';
@@ -63,6 +63,7 @@ export const GridPanel = ({
         hasShadow={false}
         hasBorder={true}
         css={css`
+          padding: 0;
           position: relative;
           height: 100%;
           border: ${thisPanelActive
@@ -95,6 +96,7 @@ export const GridPanel = ({
           className="dragHandle"
           css={css`
             opacity: 0;
+            margin-left: ${euiThemeVars.euiSizeS};
             top: -${euiThemeVars.euiSizeL};
             position: absolute;
             z-index: 1000;
@@ -136,7 +138,6 @@ export const GridPanel = ({
           `}
         />
         {/* Contents */}
-        <strong>id:</strong> {gridData.id}
       </EuiPanel>
     </div>
   );

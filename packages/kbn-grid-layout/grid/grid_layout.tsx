@@ -12,14 +12,14 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React from 'react';
 import { GridRow } from './grid_row';
-import { GridLayout, GridSettings } from './types';
+import { GridLayoutData, GridSettings } from './types';
 import { useGridLayoutEvents } from './use_grid_layout_events';
 import { useGridLayoutState } from './use_grid_layout_state';
 
-export const KibanaGridLayout = ({
+export const GridLayout = ({
   getCreationOptions,
 }: {
-  getCreationOptions: () => { initialLayout: GridLayout; gridSettings: GridSettings };
+  getCreationOptions: () => { initialLayout: GridLayoutData; gridSettings: GridSettings };
 }) => {
   const { gridLayoutStateManager, gridSizeRef } = useGridLayoutState({
     getCreationOptions,

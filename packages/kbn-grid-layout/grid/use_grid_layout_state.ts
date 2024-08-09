@@ -11,7 +11,7 @@ import { useMemo, useRef } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 import {
-  GridLayout,
+  GridLayoutData,
   GridLayoutStateManager,
   GridSettings,
   PanelInteractionEvent,
@@ -21,7 +21,7 @@ import {
 export const useGridLayoutState = ({
   getCreationOptions,
 }: {
-  getCreationOptions: () => { initialLayout: GridLayout; gridSettings: GridSettings };
+  getCreationOptions: () => { initialLayout: GridLayoutData; gridSettings: GridSettings };
 }): {
   gridLayoutStateManager: GridLayoutStateManager;
   gridSizeRef: (instance: HTMLDivElement | null) => void;
@@ -31,7 +31,7 @@ export const useGridLayoutState = ({
 
   const { gridLayoutStateManager, onWidthChange } = useMemo(() => {
     const { initialLayout, gridSettings } = getCreationOptions();
-    const gridLayout$ = new BehaviorSubject<GridLayout>(initialLayout);
+    const gridLayout$ = new BehaviorSubject<GridLayoutData>(initialLayout);
     const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
     const runtimeSettings$ = new BehaviorSubject<RuntimeGridSettings>({
       ...gridSettings,

@@ -29,7 +29,7 @@ export interface GridRowData {
   };
 }
 
-export type GridLayout = GridRowData[];
+export type GridLayoutData = GridRowData[];
 
 export interface GridSettings {
   gutterSize: number;
@@ -53,7 +53,7 @@ export interface GridLayoutStateManager {
     right: number;
   }) => void;
 
-  gridLayout$: BehaviorSubject<GridLayout>;
+  gridLayout$: BehaviorSubject<GridLayoutData>;
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
   rowRefs: React.MutableRefObject<Array<HTMLDivElement | null>>;
   dragPreviewRef: React.MutableRefObject<HTMLDivElement | null>;
