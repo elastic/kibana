@@ -1,10 +1,10 @@
-[[aggregation-reference]]
+//[[aggregation-reference]]
 == Create panels with editors
 
 {kib} provides several editors that you can use to create panels of your data. Each editor supports different features and {ref}/search-aggregations.html[{es} aggregations]. To choose the best editor for your data, review the following information.
 
 [float]
-[[chart-types]]
+//[[chart-types]]
 === Supported panel types
 
 [options="header"]
@@ -92,7 +92,7 @@
 |===
 
 [float]
-[[xy-features]]
+//[[xy-features]]
 === Bar, line, and area chart features
 
 [options="header"]
@@ -145,7 +145,7 @@
 |===
 
 [float]
-[[other-features]]
+//[[other-features]]
 === Advanced features
 
 [options="header"]
@@ -204,7 +204,7 @@
 |===
 
 [float]
-[[table-features]]
+//[[table-features]]
 === Table features
 
 [options="header"]
@@ -235,7 +235,7 @@
 |===
 
 [float]
-[[custom-functions]]
+//[[custom-functions]]
 === Functions
 
 [options="header"]
@@ -266,7 +266,7 @@
 |===
 
 [float]
-[[metrics-aggregations]]
+//[[metrics-aggregations]]
 === Metrics aggregations
 
 Metric aggregations are calculated from the values in the aggregated documents. The values are extracted from the document fields.
@@ -341,7 +341,7 @@ Metric aggregations are calculated from the values in the aggregated documents. 
 For information about {es} metrics aggregations, refer to {ref}/search-aggregations-metrics.html[Metrics aggregations].
 
 [float]
-[[bucket-aggregations]]
+//[[bucket-aggregations]]
 === Bucket aggregations
 
 Bucket aggregations group, or bucket, documents based on the aggregation type. To define the document buckets, bucket aggregations compute and return the number of documents for each bucket.
@@ -421,7 +421,7 @@ Bucket aggregations group, or bucket, documents based on the aggregation type. T
 For information about {es} bucket aggregations, refer to {ref}/search-aggregations-bucket.html[Bucket aggregations].
 
 [float]
-[[pipeline-aggregations]]
+//[[pipeline-aggregations]]
 === Pipeline aggregations
 
 Pipeline aggregations are dependent on the outputs calculated from other aggregations. Parent pipeline aggregations are provided with the output of the parent aggregation, and compute new buckets or aggregations that are added to existing buckets. Sibling pipeline aggregations are provided with the output of a sibling aggregation, and compute new aggregations for the same level as the sibling aggregation.

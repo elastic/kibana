@@ -74,6 +74,8 @@ Use one of the editors to create visualizations of your data. Each editor varies
 
 |===
 
+include::chart-types.asciidoc[]
+
 [[manage-panels]]
 == Manage panels
 When creating a panel, you can choose to add it to a dashboard, or to save it to the Visualize Library so it can be added to multiple dashboards later.
