@@ -27,39 +27,30 @@ export const API_HEADERS = Object.freeze({
 
 export const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
 
-const serverlessRequest = <T>(
-  response: string,
-  restOptions: Partial<Cypress.RequestOptions>
-): Cypress.Chainable<Cypress.Response<T>> => {
-  return cy.request<T>({
-    headers: {
-      ...API_HEADERS,
-      Authorization: `ApiKey ${response}`,
-    },
-    ...restOptions,
-  });
-};
-
-const essRequest = <T>(
-  restOptions: Partial<Cypress.RequestOptions>
-): Cypress.Chainable<Cypress.Response<T>> => {
-  return cy.request<T>({
-    auth: ESS_API_AUTH,
-    headers: API_HEADERS,
-    ...restOptions,
-  });
-};
-
 export const rootRequest = <T = unknown>({
   headers: optionHeaders = {},
   ...restOptions
 }: Partial<Cypress.RequestOptions>): Cypress.Chainable<Cypress.Response<T>> => {
   if (Cypress.env('IS_SERVERLESS')) {
     return cy.task('getApiKeyForRole', 'admin').then((response) => {
-      return serverlessRequest<T>(response as string, restOptions);
+      return cy.request<T>({
+        headers: {
+          ...API_HEADERS,
+          ...optionHeaders,
+          Authorization: `ApiKey ${response}`,
+        },
+        ...restOptions,
+      });
     });
   } else {
-    return essRequest<T>(restOptions);
+    return cy.request<T>({
+      auth: ESS_API_AUTH,
+      headers: {
+        ...API_HEADERS,
+        ...optionHeaders,
+      },
+      ...restOptions,
+    });
   }
 };
 
