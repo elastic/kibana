@@ -16,6 +16,7 @@ import {
   EuiPageHeader,
   EuiPageSection,
   EuiPageTemplate,
+  EuiProvider,
   EuiSpacer,
   EuiTab,
   EuiTabs,
@@ -54,47 +55,49 @@ const App = () => {
   }
 
   return (
-    <EuiPage>
-      <EuiPageBody>
-        <EuiPageSection>
-          <EuiPageHeader pageTitle="Embeddables" />
-        </EuiPageSection>
-        <EuiPageTemplate.Section>
+    <EuiProvider>
+      <EuiPage>
+        <EuiPageBody>
           <EuiPageSection>
-            <EuiTabs>
-              <EuiTab
-                onClick={() => onSelectedTabChanged(OVERVIEW_TAB_ID)}
-                isSelected={OVERVIEW_TAB_ID === selectedTabId}
-              >
-                Embeddables overview
-              </EuiTab>
-              <EuiTab
-                onClick={() => onSelectedTabChanged(REGISTER_EMBEDDABLE_TAB_ID)}
-                isSelected={REGISTER_EMBEDDABLE_TAB_ID === selectedTabId}
-              >
-                Register new embeddable type
-              </EuiTab>
-              <EuiTab
-                onClick={() => onSelectedTabChanged(RENDER_TAB_ID)}
-                isSelected={RENDER_TAB_ID === selectedTabId}
-              >
-                Rendering embeddables in your application
-              </EuiTab>
-              <EuiTab
-                onClick={() => onSelectedTabChanged(GRID_TAB_ID)}
-                isSelected={GRID_TAB_ID === selectedTabId}
-              >
-                Grid
-              </EuiTab>
-            </EuiTabs>
-
-            <EuiSpacer />
-
-            {renderTabContent()}
+            <EuiPageHeader pageTitle="Embeddables" />
           </EuiPageSection>
-        </EuiPageTemplate.Section>
-      </EuiPageBody>
-    </EuiPage>
+          <EuiPageTemplate.Section>
+            <EuiPageSection>
+              <EuiTabs>
+                <EuiTab
+                  onClick={() => onSelectedTabChanged(OVERVIEW_TAB_ID)}
+                  isSelected={OVERVIEW_TAB_ID === selectedTabId}
+                >
+                  Embeddables overview
+                </EuiTab>
+                <EuiTab
+                  onClick={() => onSelectedTabChanged(REGISTER_EMBEDDABLE_TAB_ID)}
+                  isSelected={REGISTER_EMBEDDABLE_TAB_ID === selectedTabId}
+                >
+                  Register new embeddable type
+                </EuiTab>
+                <EuiTab
+                  onClick={() => onSelectedTabChanged(RENDER_TAB_ID)}
+                  isSelected={RENDER_TAB_ID === selectedTabId}
+                >
+                  Rendering embeddables in your application
+                </EuiTab>
+                <EuiTab
+                  onClick={() => onSelectedTabChanged(GRID_TAB_ID)}
+                  isSelected={GRID_TAB_ID === selectedTabId}
+                >
+                  Grid
+                </EuiTab>
+              </EuiTabs>
+
+              <EuiSpacer />
+
+              {renderTabContent()}
+            </EuiPageSection>
+          </EuiPageTemplate.Section>
+        </EuiPageBody>
+      </EuiPage>
+    </EuiProvider>
   );
 };
 

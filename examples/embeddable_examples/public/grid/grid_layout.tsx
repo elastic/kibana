@@ -34,15 +34,20 @@ export const KibanaGridLayout = ({
 
   return (
     <div ref={gridSizeRef}>
-      {gridLayout.map((gridRow, rowIndex) => {
+      {gridLayout.map((rowData, rowIndex) => {
         return (
           <GridRow
             key={rowIndex}
-            gridRow={gridRow}
+            rowData={rowData}
             rowIndex={rowIndex}
             runtimeSettings={runtimeSettings}
             activePanelId={interactionEvent?.id}
             targetRowIndex={interactionEvent?.targetRowIndex}
+            toggleIsCollapsed={() => {
+              const currentLayout = gridLayoutStateManager.gridLayout$.value;
+              currentLayout[rowIndex].isCollapsed = !currentLayout[rowIndex].isCollapsed;
+              gridLayoutStateManager.gridLayout$.next(currentLayout);
+            }}
             setInteractionEvent={(nextInteractionEvent) => {
               if (!nextInteractionEvent) {
                 gridLayoutStateManager.hideDragPreview();

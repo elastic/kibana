@@ -58,7 +58,7 @@ export const useGridLayoutEvents = ({
       const currentGridData = (() => {
         if (!interactionEvent) return;
         for (const row of currentLayout) {
-          if (row[interactionEvent.id]) return row[interactionEvent.id];
+          if (row.panels[interactionEvent.id]) return row.panels[interactionEvent.id];
         }
       })();
 
@@ -152,8 +152,8 @@ export const useGridLayoutEvents = ({
 
         // remove the panel from the row it's currently in.
         const nextLayout = currentLayout.map((row, rowIndex) => {
-          const { [interactionEvent.id]: interactingPanel, ...rest } = row;
-          return { ...rest };
+          const { [interactionEvent.id]: interactingPanel, ...otherPanels } = row.panels;
+          return { ...row, panels: { ...otherPanels } };
         });
 
         // resolve destination grid
@@ -172,9 +172,9 @@ export const useGridLayoutEvents = ({
     };
 
     const onDrop = (e: MouseEvent) => {
-      if (!interactionEvent$.value) return;
       e.preventDefault();
       e.stopPropagation();
+      if (!interactionEvent$.value) return;
 
       interactionEvent$.next(undefined);
       gridLayoutStateManager.hideDragPreview();
@@ -182,17 +182,17 @@ export const useGridLayoutEvents = ({
     };
 
     const onDragEnter = (e: MouseEvent) => {
-      if (!interactionEvent$.value) return;
       e.preventDefault();
       e.stopPropagation();
+      if (!interactionEvent$.value) return;
 
       dragEnterCount.current++;
     };
 
     const onDragLeave = (e: MouseEvent) => {
-      if (!interactionEvent$.value) return;
       e.preventDefault();
       e.stopPropagation();
+      if (!interactionEvent$.value) return;
 
       dragEnterCount.current--;
       if (dragEnterCount.current === 0) {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiHorizontalRule, EuiTitle, transparentize } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiSpacer, EuiTitle, transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { forwardRef, useMemo } from 'react';
@@ -28,7 +28,8 @@ export const GridRow = forwardRef<
   HTMLDivElement,
   {
     rowIndex: number;
-    gridRow: GridRowData;
+    rowData: GridRowData;
+    toggleIsCollapsed: () => void;
     activePanelId: string | undefined;
     targetRowIndex: number | undefined;
     runtimeSettings: RuntimeGridSettings;
@@ -36,7 +37,15 @@ export const GridRow = forwardRef<
   }
 >(
   (
-    { rowIndex, gridRow, setInteractionEvent, activePanelId, runtimeSettings, targetRowIndex },
+    {
+      rowData,
+      rowIndex,
+      activePanelId,
+      targetRowIndex,
+      runtimeSettings,
+      toggleIsCollapsed,
+      setInteractionEvent,
+    },
     gridRef
   ) => {
     const { gutterSize, columnCount, rowHeight } = runtimeSettings;
@@ -44,58 +53,65 @@ export const GridRow = forwardRef<
 
     // calculate row count based on the number of rows needed to fit all panels
     const rowCount = useMemo(() => {
-      const maxRow = Object.values(gridRow).reduce((acc, panel) => {
+      const maxRow = Object.values(rowData.panels).reduce((acc, panel) => {
         return Math.max(acc, panel.row + panel.height);
       }, 0);
       return maxRow || 1;
-    }, [gridRow]);
+    }, [rowData]);
 
     return (
       <>
-        <EuiHorizontalRule margin="m" />
-        <EuiTitle>
-          <h2>Section</h2>
-        </EuiTitle>
-        <EuiHorizontalRule margin="m" />
-        <div
-          ref={gridRef}
-          css={css`
-            height: 100%;
-            width: 100%;
-            display: grid;
-            gap: ${gutterSize}px;
-            justify-items: stretch;
-            grid-template-columns: repeat(
-              ${columnCount},
-              calc((100% - ${gutterSize * (columnCount - 1)}px) / ${columnCount})
-            );
-            grid-template-rows: repeat(${rowCount}, ${rowHeight}px);
-            background-color: ${isGridTargeted
-              ? transparentize(euiThemeVars.euiColorSuccess, 0.05)
-              : 'transparent'};
-            transition: background-color 300ms linear;
-            ${isGridTargeted && getGridBackgroundCSS(runtimeSettings)}
-          `}
-        >
-          {Object.values(gridRow).map((gridData) => (
-            <GridPanel
-              key={gridData.id}
-              panelData={gridData}
-              activePanelId={activePanelId}
-              setInteractionEvent={(partialInteractionEvent) => {
-                if (partialInteractionEvent) {
-                  setInteractionEvent({
-                    ...partialInteractionEvent,
-                    targetRowIndex: rowIndex,
-                    originRowIndex: rowIndex,
-                  });
-                  return;
-                }
-                setInteractionEvent();
-              }}
-            />
-          ))}
-        </div>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup gutterSize="s">
+          <EuiButtonIcon
+            color="text"
+            iconType={rowData.isCollapsed ? 'arrowRight' : 'arrowDown'}
+            onClick={toggleIsCollapsed}
+          />
+          <EuiTitle size="s">
+            <h2>{rowData.title}</h2>
+          </EuiTitle>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        {!rowData.isCollapsed && (
+          <div
+            ref={gridRef}
+            css={css`
+              display: grid;
+              gap: ${gutterSize}px;
+              justify-items: stretch;
+              grid-template-columns: repeat(
+                ${columnCount},
+                calc((100% - ${gutterSize * (columnCount - 1)}px) / ${columnCount})
+              );
+              grid-template-rows: repeat(${rowCount}, ${rowHeight}px);
+              background-color: ${isGridTargeted
+                ? transparentize(euiThemeVars.euiColorSuccess, 0.05)
+                : 'transparent'};
+              transition: background-color 300ms linear;
+              ${isGridTargeted && getGridBackgroundCSS(runtimeSettings)}
+            `}
+          >
+            {Object.values(rowData.panels).map((panelData) => (
+              <GridPanel
+                key={panelData.id}
+                panelData={panelData}
+                activePanelId={activePanelId}
+                setInteractionEvent={(partialInteractionEvent) => {
+                  if (partialInteractionEvent) {
+                    setInteractionEvent({
+                      ...partialInteractionEvent,
+                      targetRowIndex: rowIndex,
+                      originRowIndex: rowIndex,
+                    });
+                    return;
+                  }
+                  setInteractionEvent();
+                }}
+              />
+            ))}
+          </div>
+        )}
       </>
     );
   }
