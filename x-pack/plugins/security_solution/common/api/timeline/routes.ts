@@ -70,3 +70,8 @@ export {
   GetDraftTimelinesRequestQuery,
   GetDraftTimelinesResponse,
 } from './get_draft_timelines/get_draft_timelines_route.gen';
+
+export {
+  ResolveTimelineRequestQuery,
+  ResolveTimelineResponse,
+} from './resolve_timeline/resolve_timeline_route.gen';
