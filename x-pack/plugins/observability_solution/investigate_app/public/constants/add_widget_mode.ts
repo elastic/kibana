@@ -7,5 +7,4 @@
 
 export enum AddWidgetMode {
   Esql = 'esql',
-  Note = 'note',
 }

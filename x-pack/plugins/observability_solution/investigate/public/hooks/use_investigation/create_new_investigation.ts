@@ -21,13 +21,14 @@ export function createNewInvestigation({
   globalWidgetParameters: GlobalWidgetParameters;
 }): Investigation {
   return {
-    '@timestamp': new Date().getTime(),
+    createdAt: new Date().getTime(),
     user,
     id: id ?? v4(),
     title: i18n.translate('xpack.investigate.newInvestigationTitle', {
       defaultMessage: 'New investigation',
     }),
     items: [],
+    notes: [],
     parameters: globalWidgetParameters,
   };
 }

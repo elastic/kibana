@@ -11,7 +11,10 @@ import { v4 } from 'uuid';
 import { ChromeOption } from '@kbn/investigate-plugin/public';
 import { InvestigateWidgetGrid as Component, InvestigateWidgetGridItem } from '.';
 import { KibanaReactStorybookDecorator } from '../../../.storybook/storybook_decorator';
-import { TimelineUserPrompt, TimelineAssistantResponse } from '../timeline_message';
+import {
+  TimelineUserPrompt,
+  TimelineAssistantResponse,
+} from '../../pages/details/components/investigation_notes/timeline_message';
 
 const meta: ComponentMeta<typeof Component> = {
   component: Component,

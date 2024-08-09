@@ -42,6 +42,8 @@ export interface UseInvestigationApi {
   setGlobalParameters: (parameters: GlobalWidgetParameters) => Promise<void>;
   setTitle: (title: string) => Promise<void>;
   deleteInvestigation: (id: string) => Promise<void>;
+  addNote: (note: string) => Promise<void>;
+  deleteNote: (id: string) => Promise<void>;
 }
 
 function useInvestigationWithoutContext({
@@ -303,7 +305,23 @@ function useInvestigationWithoutContext({
     [loadInvestigation, startNewInvestigation, setInvestigations, investigation?.id]
   );
 
+  const addNote = useCallback(
+    async (note: string) => {
+      await investigationStore.addNote(note);
+    },
+    [investigationStore]
+  );
+
+  const deleteNote = useCallback(
+    async (id: string) => {
+      await investigationStore.deleteNote(id);
+    },
+    [investigationStore]
+  );
+
   return {
+    addNote,
+    deleteNote,
     addItem,
     copyItem,
     deleteItem,
