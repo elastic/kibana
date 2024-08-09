@@ -78,6 +78,9 @@ export async function reassignAgent(
     policy_revision: null,
   });
 
+  const currentNameSpace = getCurrentNamespace(soClient);
+  const namespaces = currentNameSpace ? { namespaces: [currentNameSpace] } : {};
+
   await createAgentAction(esClient, {
     agents: [agentId],
     created_at: new Date().toISOString(),
@@ -85,6 +88,7 @@ export async function reassignAgent(
     data: {
       policy_id: newAgentPolicyId,
     },
+    ...namespaces,
   });
 }
 
