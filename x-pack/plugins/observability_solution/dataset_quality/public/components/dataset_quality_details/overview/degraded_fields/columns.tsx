@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTableColumn } from '@elastic/eui';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { formatNumber } from '@elastic/eui';
 
 import { DegradedField } from '../../../../../common/api_types';

@@ -17,7 +17,7 @@ import {
   EuiSkeletonRectangle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
+import type { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
 import { Integration } from '../../../../common/data_streams_stats/integration';
 import { Dashboard } from '../../../../common/api_types';
 import { useDatasetQualityDetailsState, useIntegrationActions } from '../../../hooks';

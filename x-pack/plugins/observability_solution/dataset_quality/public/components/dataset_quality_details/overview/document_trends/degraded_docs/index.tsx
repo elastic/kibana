@@ -51,7 +51,9 @@ const degradedDocsTooltip = (
   />
 );
 
-export function DegradedDocs({ lastReloadTime }: { lastReloadTime: number }) {
+// Allow for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default function DegradedDocs({ lastReloadTime }: { lastReloadTime: number }) {
   const { timeRange, updateTimeRange, datasetDetails } = useDatasetQualityDetailsState();
   const { dataView, breakdown, ...chartProps } = useDegradedDocs();
 

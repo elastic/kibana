@@ -19,7 +19,9 @@ import React, { useCallback } from 'react';
 import { useDatasetQualityDetailsState } from '../../../hooks';
 import { overviewHeaderTitle, overviewTitleTooltip } from '../../../../common/translations';
 
-export function OverviewHeader({
+// Allow for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default function OverviewHeader({
   handleRefresh,
 }: {
   handleRefresh: (refreshProps: OnRefreshProps) => void;

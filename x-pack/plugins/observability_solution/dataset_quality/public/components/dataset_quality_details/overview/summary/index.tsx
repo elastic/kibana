@@ -20,7 +20,9 @@ import {
 } from '../../../../../common/translations';
 import { useOverviewSummaryPanel } from '../../../../hooks/use_overview_summary_panel';
 
-export function Summary() {
+// Allow for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default function Summary() {
   const {
     isSummaryPanelLoading,
     totalDocsCount,

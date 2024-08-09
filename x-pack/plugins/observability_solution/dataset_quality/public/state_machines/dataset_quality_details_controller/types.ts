@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DoneInvokeEvent } from 'xstate';
-import { DegradedFieldSortField } from '../../hooks';
+import type { DoneInvokeEvent } from 'xstate';
+import type { DegradedFieldSortField } from '../../hooks';
 import {
   Dashboard,
   DataStreamDetails,

@@ -6,13 +6,15 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { EuiSpacer, OnRefreshProps } from '@elastic/eui';
 import { useDatasetQualityDetailsState } from '../../../hooks';
 import { AggregationNotSupported } from './aggregation_not_supported';
-import { OverviewHeader } from './header';
-import { Summary } from './summary';
-import { DegradedDocs } from './document_trends/degraded_docs';
 import { DegradedFields } from './degraded_fields';
+
+const OverviewHeader = dynamic(() => import('./header'));
+const Summary = dynamic(() => import('./summary'));
+const DegradedDocs = dynamic(() => import('./document_trends/degraded_docs'));
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export

@@ -19,7 +19,9 @@ import { IntegrationActionsMenu } from './integration_actions_menu';
 import { Integration } from '../../../common/data_streams_stats/integration';
 import { Dashboard } from '../../../common/api_types';
 
-export function IntegrationSummary({
+// Allow for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default function IntegrationSummary({
   integration,
   dashboards,
   dashboardsLoading,

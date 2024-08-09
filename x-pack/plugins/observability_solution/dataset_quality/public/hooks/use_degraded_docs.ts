@@ -6,11 +6,11 @@
  */
 
 import { useCallback, useState, useMemo, useEffect } from 'react';
-import { Action } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import { fieldSupportsBreakdown } from '@kbn/unified-histogram-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
-import { type DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { DEFAULT_LOGS_DATA_VIEW } from '../../common/constants';
 import { useCreateDataView } from './use_create_dataview';
 import { useKibanaContextForPlugin } from '../utils';

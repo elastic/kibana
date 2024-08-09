@@ -78,7 +78,9 @@ const nonAggregatableWarningDescription = (dataset: string) => (
   />
 );
 
-export function FlyoutSummary({
+// Allow for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default function FlyoutSummary({
   dataStream,
   dataStreamStat,
   dataStreamDetails,

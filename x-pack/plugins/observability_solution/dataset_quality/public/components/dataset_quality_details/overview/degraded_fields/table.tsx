@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
+import { EuiBasicTable, EuiEmptyPrompt } from '@elastic/eui';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getDegradedFieldsColumns } from './columns';
 import {

@@ -7,14 +7,14 @@
 
 import {
   SINGLE_DATASET_LOCATOR_ID,
-  SingleDatasetLocatorParams,
+  type SingleDatasetLocatorParams,
 } from '@kbn/deeplinks-observability';
-import { DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
-import { Query, AggregateQuery, buildPhraseFilter } from '@kbn/es-query';
+import { type DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
+import { type Query, type AggregateQuery, buildPhraseFilter } from '@kbn/es-query';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { LocatorClient } from '@kbn/shared-ux-prompt-no-data-views-types';
+import type { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { LocatorClient } from '@kbn/shared-ux-prompt-no-data-views-types';
 import { useKibanaContextForPlugin } from '../utils';
 import { BasicDataStream, TimeRangeConfig } from '../../common/types';
 

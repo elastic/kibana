@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { GenericIndexPatternColumn, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { GenericIndexPatternColumn, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 
 import {

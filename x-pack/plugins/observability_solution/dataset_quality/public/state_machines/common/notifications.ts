@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IToasts } from '@kbn/core-notifications-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 
 export const fetchNonAggregatableDatasetsFailedNotifier = (toasts: IToasts, error: Error) => {

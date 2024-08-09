@@ -7,7 +7,7 @@
 
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
 import { getDateISORange } from '@kbn/timerange';
-import { IToasts } from '@kbn/core-notifications-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
 import {
   DatasetQualityDetailsControllerContext,
   DatasetQualityDetailsControllerEvent,
