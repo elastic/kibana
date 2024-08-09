@@ -118,11 +118,10 @@ export class GlobalVisitorContext<
         if (!this.methods.visitStatsCommand) break;
         return this.visitStatsCommand(parent, commandNode, input as any);
       }
-      // TODO: uncomment this when the command is implemented
-      // case 'inline_stats': {
-      //   if (!this.methods.visitInlineStatsCommand) break;
-      //   return this.visitInlineStatsCommand(parent, commandNode, input as any);
-      // }
+      case 'inline_stats': {
+        if (!this.methods.visitInlineStatsCommand) break;
+        return this.visitInlineStatsCommand(parent, commandNode, input as any);
+      }
       case 'lookup': {
         if (!this.methods.visitLookupCommand) break;
         return this.visitLookupCommand(parent, commandNode, input as any);

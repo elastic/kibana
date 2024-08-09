@@ -100,5 +100,6 @@
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/ml-trained-models-utils",
     "@kbn/test-suites-src",
+    "@kbn/console-plugin",
   ]
 }
