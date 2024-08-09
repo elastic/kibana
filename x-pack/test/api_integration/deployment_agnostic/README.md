@@ -7,7 +7,7 @@ A deployment-agnostic API integration test is a test suite that fulfills the fol
 
 **Design**: The test design is clean and does not require additional logic to execute in either stateful or serverless environments.
 
-Deployment-agnostic test should be loaded in stateful and at least 1 serverless FTR config files.
+A deployment-agnostic test should be loaded in stateful and at least 1 serverless FTR config files.
 
 ## Tests Design Requirements
 A deployment-agnostic test is contained within a single test file and always utilizes the [DeploymentAgnosticFtrProviderContext](https://github.com/elastic/kibana/blob/main/x-pack/test/api_integration/deployment_agnostic/ftr_provider_context.d.ts) to load compatible FTR services. A compatible FTR service must support:
