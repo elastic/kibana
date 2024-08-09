@@ -11,7 +11,7 @@ import type { TopNavMenuBadgeProps } from '@kbn/navigation-plugin/public';
 
 export const getManagedContentBadge: (
   tooltipText: string,
-  disableTooltipProps: boolean
+  disableTooltipProps?: boolean
 ) => TopNavMenuBadgeProps = (tooltipText, enableTooltipProps = true) => ({
   'data-test-subj': 'managedContentBadge',
   badgeText: i18n.translate('managedContentBadge.text', {
