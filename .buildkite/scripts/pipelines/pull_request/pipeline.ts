@@ -315,10 +315,6 @@ const getPipeline = (filename: string, removeSteps = true) => {
       );
     }
 
-    if (await doAnyChangesMatch([/^renovate\.json$/])) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml'));
-    }
-
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
     // remove duplicated steps
