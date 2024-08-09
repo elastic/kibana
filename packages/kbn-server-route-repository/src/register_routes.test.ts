@@ -65,6 +65,18 @@ describe('registerRoutes', () => {
     },
   };
 
+  const zodParamsRt = z.object({
+    body: z.object({
+      bodyParam: z.string(),
+    }),
+    query: z.object({
+      queryParam: z.string(),
+    }),
+    path: z.object({
+      pathParam: z.string(),
+    }),
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -83,18 +95,6 @@ describe('registerRoutes', () => {
       }),
       path: t.type({
         pathParam: t.string,
-      }),
-    });
-
-    const zodParamsRt = z.object({
-      body: z.object({
-        bodyParam: z.string(),
-      }),
-      query: z.object({
-        queryParam: z.string(),
-      }),
-      path: z.object({
-        pathParam: z.string(),
       }),
     });
 
@@ -192,9 +192,9 @@ describe('registerRoutes', () => {
 
     expect(internalRoute.validate).not.toEqual(routeValidationObject);
     expect(internalRoute.validate).toEqual({
-      params: expect.any(Function),
-      query: expect.any(Function),
-      body: expect.any(Function),
+      params: zodParamsRt.shape.path,
+      query: zodParamsRt.shape.query,
+      body: zodParamsRt.shape.body,
     });
   });
 

@@ -7,12 +7,11 @@
  */
 
 import { ZodParamsObject } from '@kbn/server-route-repository-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
 export function makeZodValidationObject(params: ZodParamsObject) {
   return {
-    params: params.shape.path ? buildRouteValidationWithZod(params.shape.path) : undefined,
-    query: params.shape.query ? buildRouteValidationWithZod(params.shape.query) : undefined,
-    body: params.shape.body ? buildRouteValidationWithZod(params.shape.body) : undefined,
+    params: params.shape.path ? params.shape.path : undefined,
+    query: params.shape.query ? params.shape.query : undefined,
+    body: params.shape.body ? params.shape.body : undefined,
   };
 }

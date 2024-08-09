@@ -8,26 +8,20 @@
 
 import { z } from '@kbn/zod';
 import { makeZodValidationObject } from './make_zod_validation_object';
-import * as zodHelpers from '@kbn/zod-helpers/src/build_route_validation_with_zod';
 
 describe('makeZodValidationObject', () => {
   it('translate path to params', () => {
-    expect(
-      makeZodValidationObject(
-        z.object({
-          path: z.object({}),
-        })
-      )
-    ).toStrictEqual({
-      params: expect.any(Function),
+    const schema = z.object({
+      path: z.object({}),
+    });
+    expect(makeZodValidationObject(schema)).toStrictEqual({
+      params: schema.shape.path,
       query: undefined,
       body: undefined,
     });
   });
 
   it('creates validator functions for all properties', () => {
-    const buildRouteValidationWithZodSpy = jest.spyOn(zodHelpers, 'buildRouteValidationWithZod');
-
     const schema = z.object({
       path: z.object({}),
       query: z.object({}),
@@ -35,15 +29,10 @@ describe('makeZodValidationObject', () => {
     });
 
     expect(makeZodValidationObject(schema)).toStrictEqual({
-      params: expect.any(Function),
-      query: expect.any(Function),
-      body: expect.any(Function),
+      params: schema.shape.path,
+      query: schema.shape.query,
+      body: schema.shape.body,
     });
-
-    expect(buildRouteValidationWithZodSpy).toHaveBeenCalledTimes(3);
-    expect(buildRouteValidationWithZodSpy).toHaveBeenNthCalledWith(1, schema.shape.path);
-    expect(buildRouteValidationWithZodSpy).toHaveBeenNthCalledWith(2, schema.shape.query);
-    expect(buildRouteValidationWithZodSpy).toHaveBeenNthCalledWith(3, schema.shape.body);
   });
 
   it('sets all to undefined if schema is missing key', () => {
