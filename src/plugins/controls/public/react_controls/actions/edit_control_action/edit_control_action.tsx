@@ -9,34 +9,9 @@
 import React from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import {
-  apiCanAccessViewMode,
-  apiHasParentApi,
-  apiHasType,
-  apiHasUniqueId,
-  apiIsOfType,
-  EmbeddableApiContext,
-  getInheritedViewMode,
-  hasEditCapabilities,
-} from '@kbn/presentation-publishing';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { CONTROL_GROUP_TYPE } from '../../../common';
-
-import { DataControlApi } from '../controls/data_controls/types';
-
-const isApiCompatible = (api: unknown | null): api is DataControlApi =>
-  Boolean(
-    apiHasType(api) &&
-      apiHasUniqueId(api) &&
-      hasEditCapabilities(api) &&
-      apiHasParentApi(api) &&
-      apiCanAccessViewMode(api.parentApi) &&
-      apiIsOfType(api.parentApi, CONTROL_GROUP_TYPE) &&
-      apiIsPresentationContainer(api.parentApi)
-  );
+import type { EmbeddableApiContext, HasUniqueId } from '@kbn/presentation-publishing';
+import { type Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 const ACTION_EDIT_CONTROL = 'editDataControl';
 
@@ -48,11 +23,10 @@ export class EditControlAction implements Action<EmbeddableApiContext> {
   constructor() {}
 
   public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
-    if (!isApiCompatible(context.embeddable)) throw new IncompatibleActionError();
     return (
       <EuiToolTip content={this.getDisplayName(context)}>
         <EuiButtonIcon
-          data-test-subj={`control-action-${context.embeddable.uuid}-edit`}
+          data-test-subj={`control-action-${(context.embeddable as HasUniqueId).uuid}-edit`}
           aria-label={this.getDisplayName(context)}
           iconType={this.getIconType(context)}
           onClick={() => this.execute(context)}
@@ -63,27 +37,23 @@ export class EditControlAction implements Action<EmbeddableApiContext> {
   };
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
-    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     return i18n.translate('controls.controlGroup.floatingActions.editTitle', {
       defaultMessage: 'Edit',
     });
   }
 
   public getIconType({ embeddable }: EmbeddableApiContext) {
-    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     return 'pencil';
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    return (
-      isApiCompatible(embeddable) &&
-      getInheritedViewMode(embeddable.parentApi) === ViewMode.EDIT &&
-      embeddable.isEditingEnabled()
-    );
+    const { isCompatible } = await import('./compatibility_check');
+    return isCompatible(embeddable);
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {
-    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
+    const { compatibilityCheck } = await import('./compatibility_check');
+    if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
     await embeddable.onEdit();
   }
 }

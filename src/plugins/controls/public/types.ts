@@ -23,7 +23,6 @@ import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/publi
 import { ControlInput, ControlWidth, DataControlInput } from '../common/types';
 import { ControlGroupFilterOutput } from './control_group/types';
 import { ControlsServiceType } from './services/controls/types';
-import { registerControlFactory } from './react_controls/control_factory_registry';
 
 export type CommonControlOutput = ControlGroupFilterOutput & {
   dataViewId?: string;
@@ -95,10 +94,6 @@ export interface DataControlEditorChanges {
  * Plugin types
  */
 export interface ControlsPluginSetup {
-  /**
-   * Registers an async {@link ControlFactory} getter.
-   */
-  registerControlFactory: typeof registerControlFactory;
   registerControlType: ControlsServiceType['registerControlType'];
 }
 
