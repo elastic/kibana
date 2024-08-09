@@ -102,7 +102,7 @@ export async function getLogCategories({
           categories: {
             categorize_text: {
               field: 'message',
-              size: 500,
+              size: 10,
             },
             aggs: {
               sample: {
