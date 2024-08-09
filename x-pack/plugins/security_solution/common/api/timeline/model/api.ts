@@ -11,7 +11,6 @@ import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 import { stringEnum, unionWithNullType } from '../../../utility_types';
 
 import type { Maybe } from '../../../search_strategy';
-import { Direction } from '../../../search_strategy';
 import { PinnedEventRuntimeType } from '../pinned_events/pinned_events_route';
 import { ErrorSchema } from './error_schema';
 import type { DataProviderType } from './components.gen';
@@ -434,25 +433,6 @@ export const TimelineErrorResponseType = runtimeTypes.union([
 export type TimelineErrorResponse = runtimeTypes.TypeOf<typeof TimelineErrorResponseType>;
 export type TimelineResponse = runtimeTypes.TypeOf<typeof TimelineResponseType>;
 
-export const sortFieldTimeline = runtimeTypes.union([
-  runtimeTypes.literal(SortFieldTimelineEnum.title),
-  runtimeTypes.literal(SortFieldTimelineEnum.description),
-  runtimeTypes.literal(SortFieldTimelineEnum.updated),
-  runtimeTypes.literal(SortFieldTimelineEnum.created),
-]);
-
-// TODO: remove
-export const direction = runtimeTypes.union([
-  runtimeTypes.literal(Direction.asc),
-  runtimeTypes.literal(Direction.desc),
-]);
-
-// TODO: remove
-export const sortTimeline = runtimeTypes.type({
-  sortField: sortFieldTimeline,
-  sortOrder: direction,
-});
-
 /**
  * Import/export timelines
  */
@@ -496,17 +476,6 @@ export interface PageInfoTimeline {
   pageIndex: number;
   pageSize: number;
 }
-
-export const getTimelinesArgs = runtimeTypes.partial({
-  onlyUserFavorite: unionWithNullType(runtimeTypes.boolean),
-  pageInfo: unionWithNullType(pageInfoTimeline),
-  search: unionWithNullType(runtimeTypes.string),
-  sort: unionWithNullType(sortTimeline),
-  status: unionWithNullType(TimelineStatusLiteralRt),
-  timelineType: unionWithNullType(TimelineTypeLiteralRt),
-});
-
-export type GetTimelinesArgs = runtimeTypes.TypeOf<typeof getTimelinesArgs>;
 
 export interface ColumnHeaderResult {
   aggregatable?: Maybe<boolean>;

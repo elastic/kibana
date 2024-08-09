@@ -20,7 +20,7 @@ import type {
   AllTimelinesResponse,
   SingleTimelineResponse,
   SingleTimelineResolveResponse,
-  GetTimelinesArgs,
+  GetAllTimelineVariables,
 } from '../../../common/api/timeline';
 import {
   TimelineResponseType,
@@ -421,7 +421,7 @@ export const getTimelineTemplate = async (templateTimelineId: string) => {
   return decodeSingleTimelineResponse(response);
 };
 
-export const getAllTimelines = async (args: GetTimelinesArgs, abortSignal: AbortSignal) => {
+export const getAllTimelines = async (args: GetAllTimelineVariables, abortSignal: AbortSignal) => {
   const response = await KibanaServices.get().http.fetch<AllTimelinesResponse>(TIMELINES_URL, {
     method: 'GET',
     query: {
