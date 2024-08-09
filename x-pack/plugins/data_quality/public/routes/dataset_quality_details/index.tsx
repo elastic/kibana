@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
-import type { DatasetQualityDetailsController } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
+import { useHistory } from 'react-router-dom';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import type { DatasetQualityDetailsController } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
 import { PLUGIN_NAME } from '../../../common';
 import { useKbnUrlStateStorageFromRouterContext } from '../../utils/kbn_url_state_context';
 import { useBreadcrumbs } from '../../utils/use_breadcrumbs';
@@ -35,23 +34,15 @@ export const DatasetQualityDetailsRoute = () => {
 };
 
 const ConnectedContent = React.memo(() => {
+  const history = useHistory();
   const { controller } = useDatasetQualityDetailsContext();
 
-  return controller ? (
-    <InitializedContent datasetQualityDetailsController={controller} />
-  ) : (
-    <>
-      <EuiEmptyPrompt
-        icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
-        title={
-          <FormattedMessage
-            id="xpack.dataQuality.Initializing"
-            defaultMessage="Initializing Data Set Quality page"
-          />
-        }
-      />
-    </>
-  );
+  if (!controller) {
+    history.push('/');
+    return null;
+  }
+
+  return <InitializedContent datasetQualityDetailsController={controller} />;
 });
 
 const InitializedContent = React.memo(
