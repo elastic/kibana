@@ -97,10 +97,6 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
       } catch (error) {
         logger.error(error);
 
-        if (isKibanaResponse(error)) {
-          return error;
-        }
-
         const opts = {
           statusCode: 500,
           body: {

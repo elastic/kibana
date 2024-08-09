@@ -44,9 +44,6 @@ describe('registerRoutes', () => {
       kibanaResponseFactory.custom({ statusCode: 201, body: { message: 'public' } })
     );
   const errorHandler = jest.fn().mockRejectedValue(new Error('error'));
-  const errorHandlerWithKibanaResponse = jest
-    .fn()
-    .mockRejectedValue(kibanaResponseFactory.badRequest());
 
   const mockLogger = loggerMock.create();
   const mockService = jest.fn();
@@ -109,12 +106,6 @@ describe('registerRoutes', () => {
           params: paramsRt,
           options: internalOptions,
         },
-        'GET /internal/app/feature/errorWithKibanaResponse': {
-          endpoint: 'GET /internal/app/feature/errorWithKibanaResponse',
-          handler: errorHandlerWithKibanaResponse,
-          params: paramsRt,
-          options: internalOptions,
-        },
       },
       dependencies: {
         aService: mockService,
@@ -126,7 +117,7 @@ describe('registerRoutes', () => {
   it('creates a router and defines the routes', () => {
     expect(createRouter).toHaveBeenCalledTimes(1);
 
-    expect(get).toHaveBeenCalledTimes(3);
+    expect(get).toHaveBeenCalledTimes(2);
 
     const [internalRoute] = get.mock.calls[0];
     expect(internalRoute.path).toEqual('/internal/app/feature');
@@ -207,22 +198,6 @@ describe('registerRoutes', () => {
     expect(errorResult).toEqual({
       status: 500,
       payload: { message: 'error', attributes: { data: {} } },
-      options: {},
-    });
-  });
-
-  it('allows for route handler to throw a response error', async () => {
-    const [_, kibanaErrorRouteHandler] = get.mock.calls[2];
-    const errorResult = await kibanaErrorRouteHandler(
-      mockContext,
-      mockRequest,
-      kibanaResponseFactory
-    );
-
-    expect(errorHandlerWithKibanaResponse).toHaveBeenCalledTimes(1);
-    expect(errorResult).toEqual({
-      status: 400,
-      payload: 'Bad Request',
       options: {},
     });
   });
