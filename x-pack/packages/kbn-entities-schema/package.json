@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "license": "Elastic License 2.0",
   "scripts": {
-    "openapi:generate": "node scripts/generate-oas",
-    "openapi:serve": "node scripts/serve-oas-ui"
+    "openapi:generate": "node scripts/generate_oas",
+    "openapi:serve": "node scripts/serve_oas_ui"
   },
   "dependencies": {
     "swagger-jsdoc": "^6.2.8",
