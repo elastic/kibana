@@ -21,6 +21,7 @@ export interface ApmDataAccessPluginStart {}
 export type ApmDataAccessServices = ReturnType<typeof getServices>;
 export type { ApmDataAccessServicesParams } from './services/get_services';
 export type { DocumentSourcesRequest } from './services/get_document_sources';
+export type { HostNamesRequest } from './services/get_host_names';
 export type {
   APMEventClientConfig,
   APMEventESSearchRequest,

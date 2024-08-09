@@ -30,8 +30,13 @@ jest.mock('react-router-dom', () => {
   };
 });
 jest.mock('@kbn/i18n-react', () => {
+  const { i18n } = jest.requireActual('@kbn/i18n');
+  i18n.init({ locale: 'en' });
+
   const originalModule = jest.requireActual('@kbn/i18n-react');
-  const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
+  const FormattedRelative = jest.fn();
+  FormattedRelative.mockImplementationOnce(() => '2 days ago');
+  FormattedRelative.mockImplementation(() => '20 hours ago');
 
   return {
     ...originalModule,
@@ -43,10 +48,7 @@ jest.mock('../../../detections/containers/detection_engine/lists/use_lists_confi
   useListsConfig: jest.fn().mockReturnValue({ loading: false }),
 }));
 
-// FLAKY: https://github.com/elastic/kibana/issues/177670
-// FLAKY: https://github.com/elastic/kibana/issues/177671
-// FLAKY: https://github.com/elastic/kibana/issues/177672
-describe.skip('SharedLists', () => {
+describe('SharedLists', () => {
   const mockHistory = generateHistoryMock();
   const exceptionList1 = getExceptionListSchemaMock();
   const exceptionList2 = { ...getExceptionListSchemaMock(), list_id: 'not_endpoint_list', id: '2' };

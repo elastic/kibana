@@ -352,7 +352,7 @@
             "section": "def-server.ConfigPath",
             "text": "ConfigPath"
           },
-          ", dynamicConfigPaths: string[]], unknown>; setDynamicConfigOverrides: jest.MockInstance<void, [newOverrides: Record<string, unknown>], unknown>; } & ",
+          ", dynamicConfigPaths: string[]], unknown>; setDynamicConfigOverrides: jest.MockInstance<Record<string, unknown>, [newOverrides: Record<string, unknown>], unknown>; } & ",
           "IConfigService"
         ],
         "path": "packages/kbn-config-mocks/src/config_service.mock.ts",
