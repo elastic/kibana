@@ -57,7 +57,6 @@ export function registerSummarizationFunction({
           'id' as const,
           'text' as const,
           'is_correction' as const,
-          // 'type' as const,
           'confidence' as const,
           'public' as const,
         ],
