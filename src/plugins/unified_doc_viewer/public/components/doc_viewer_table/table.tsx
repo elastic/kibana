@@ -480,6 +480,7 @@ export const DocViewerTable = ({
             `}
           >
             <EuiDataGrid
+              key={`fields-table-${hit.id}`}
               {...GRID_PROPS}
               aria-label={i18n.translate('unifiedDocViewer.fieldsTable.ariaLabel', {
                 defaultMessage: 'Field values',
