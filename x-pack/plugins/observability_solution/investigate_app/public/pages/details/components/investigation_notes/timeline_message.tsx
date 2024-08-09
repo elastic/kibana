@@ -7,21 +7,14 @@
 import { EuiFlexGroup, EuiFlexItem, EuiMarkdownFormat, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { InvestigationNote } from '@kbn/investigate-plugin/common';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { format } from 'date-fns';
 import React from 'react';
 import { InvestigateTextButton } from '../../../../components/investigate_text_button';
+import { useTheme } from '../../../../hooks/use_theme';
 
 const textContainerClassName = css`
   padding-top: 2px;
-`;
-
-const timelineContainerClassName = css`
-  padding-bottom: 16px;
-  border-bottom: 1px solid #d3dae6;
-
-  :last-child {
-    border-bottom: 0px;
-  }
 `;
 
 export function TimelineMessage({
@@ -33,6 +26,14 @@ export function TimelineMessage({
   note: InvestigationNote;
   onDelete: () => void;
 }) {
+  const theme = useTheme();
+  const timelineContainerClassName = css`
+    padding-bottom: 16px;
+    border-bottom: 1px solid ${theme.colors.lightShade};
+    :last-child {
+      border-bottom: 0px;
+    }
+  `;
   return (
     <EuiFlexGroup direction="column" gutterSize="s" className={timelineContainerClassName}>
       <EuiFlexGroup direction="row" alignItems="center" justifyContent="spaceBetween">
