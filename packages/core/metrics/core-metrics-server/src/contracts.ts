@@ -8,6 +8,13 @@
 
 import type { Observable } from 'rxjs';
 import type { OpsMetrics } from './metrics';
+
+interface EluHistory {
+  long: number;
+  medium: number;
+  short: number;
+}
+
 /**
  * APIs to retrieves metrics gathered and exposed by the core platform.
  *
@@ -30,6 +37,8 @@ export interface MetricsServiceSetup {
    * ```
    */
   getOpsMetrics$: () => Observable<OpsMetrics>;
+
+  getEluHistory(): EluHistory;
 }
 /**
  * {@inheritdoc MetricsServiceSetup}
