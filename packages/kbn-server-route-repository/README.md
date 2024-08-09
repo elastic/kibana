@@ -88,6 +88,7 @@ The client can be created either in `setup` or `start`.
 
 > browser/plugin.ts
 ```javascript
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { DefaultClientOptions } from '@kbn/server-route-repository-utils';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import type { MyPluginRouteRepository } from '../server/plugin';
@@ -100,7 +101,16 @@ class MyPlugin implements Plugin {
         const myPluginRepositoryClient =
           createRepositoryClient<MyPluginRouteRepository, DefaultClientOptions>(core);
 
-        myPluginRepositoryClient.fetch('GET /internal/my_plugin/route').then(console.log);
+        myPluginRepositoryClient
+          .fetch('GET /internal/my_plugin/route')
+          .then((response) => console.log(response))
+          .catch((error) => {
+            if (isHttpFetchError(error)) {
+              console.log(error.message);
+            }
+
+            throw error;
+          });
     }
 }
 ```
