@@ -47,9 +47,7 @@ export const LogEntryRatePageProviders: FC<PropsWithChildren<unknown>> = ({ chil
   ) {
     return <SourceLoadingPage />;
   } else if (hasFailedLoadingLogSources || hasFailedLoadingLogAnalysisIdFormats) {
-    return (
-      <LogSourceErrorPage errors={[...(logSourcesError !== undefined ? [logSourcesError] : [])]} />
-    );
+    return <LogSourceErrorPage errors={logSourcesError !== undefined ? [logSourcesError] : []} />;
   } else if (logSources.length > 0) {
     return (
       <LogEntryFlyoutProvider>

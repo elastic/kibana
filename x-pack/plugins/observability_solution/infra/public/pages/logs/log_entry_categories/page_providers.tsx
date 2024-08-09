@@ -37,9 +37,7 @@ export const LogEntryCategoriesPageProviders: FC<PropsWithChildren<unknown>> = (
   if (space == null) {
     return null;
   } else if (hasFailedLoadingLogSources || hasFailedLoadingLogAnalysisIdFormats) {
-    return (
-      <LogSourceErrorPage errors={logSourcesError !== undefined ? [logSourcesError] : []} />
-    );
+    return <LogSourceErrorPage errors={logSourcesError !== undefined ? [logSourcesError] : []} />;
   } else if (
     isLoadingLogSources ||
     isUninitialized ||
