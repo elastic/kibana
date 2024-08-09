@@ -125,7 +125,7 @@ export const BaseRuleParams = z.object({
   from: RuleIntervalFrom,
   ruleId: RuleSignatureId,
   investigationFields: InvestigationFieldsCombined.optional(),
-  immutable: IsRuleImmutable.optional(),
+  immutable: IsRuleImmutable,
   ruleSource: RuleSourceCamelCased.optional(),
   license: RuleLicense.optional(),
   outputIndex: AlertsIndex,
