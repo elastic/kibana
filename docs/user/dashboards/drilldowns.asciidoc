@@ -1,6 +1,7 @@
+[role="xpack"]
 [[drilldowns]]
 [[create-drilldowns]]
-=== Customize interactions with drilldowns
+=== Drilldowns
 
 Panels have built-in interactive capabilities that apply filters to the dashboard data. For example, when you drag a time range or click a pie slice, a filter for the time range or pie slice is applied. Drilldowns let you customize the interactive behavior while keeping the context of the interaction. 
 
@@ -13,6 +14,21 @@ There are three types of drilldowns you can add to dashboards:
 * *Discover* &mdash; Navigates you from a *Lens* dashboard panel to *Discover*. For example, create a drilldown for a *Lens* visualization that opens the visualization data in *Discover* for further exploration. 
 
 Third-party developers can create drilldowns. To learn how to code drilldowns, refer to {kib-repo}blob/{branch}/x-pack/examples/ui_actions_enhanced_examples[this example plugin].
+
+++++
+<script type="text/javascript" async 
+src="https://play.vidyard.com/embed/v4.js"></script>
+<img
+style="width: 100%; margin: auto; display: block;"
+class="vidyard-player-embed"
+src="https://play.vidyard.com/UhGkdJGC32HRn3oS5ZYJL1.jpg"
+data-uuid="UhGkdJGC32HRn3oS5ZYJL1"
+data-v="4"
+data-type="inline"
+/>
+</br>
+++++
+
 
 [float]
 [[dashboard-drilldowns]]

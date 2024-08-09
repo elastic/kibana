@@ -21,13 +21,29 @@ TIP: If you don't have data at hand and still want to explore dashboards, you ca
 +
 When you create a dashboard, you are automatically in edit mode and can make changes to the dashboard. 
 
+[[create-panels-with-lens]]
 . Add content to the dashboard. You have several options covered in more details in the <<panels-editors,Visualizations section>>:
 ** **Create visualization**. This option is a shortcut to create a chart using **Lens**, the default visualization editor in {kib}.
 ** **Add panel**. Choose one of the available editors to add and configure content to your dashboard.
 ** **Add from library**. Select existing content that has already been configured and saved to the **Visualize Library**.
++
+NOTE: When you add search results from *Discover* to dashboards, the results are not aggregated.
 ** **Controls**. Add controls to help filter the content of your dashboard.
 
 . Organize the content of your dashboard.
+[[add-dashboard-settings]]
+. Define the main settings of your dashboard: title, <<managing-tags,tags>>, and design options
+.. In the toolbar, click *Settings*.
+.. Edit the settings that you need. Some advanced options let you define additional display options to unify the look and feel of the dashboard's panels.
+
+*** *Store time with dashboard* &mdash; Saves the specified time filter.
+*** *Use margins between panels* &mdash; Adds a margin of space between each panel.
+*** *Show panel titles* &mdash; Displays the titles in the panel headers.
+*** *Sync color palettes across panels* &mdash; Applies the same color palette to all panels on the dashboard.
+*** *Sync cursor across panels* &mdash; When you hover your cursor over a *Lens*, *TSVB*, aggregation-based, or *Timelion* XY or heatmap chart, the cursor on all other related dashboard charts automatically appears.
+*** *Sync tooltips across panels* &mdash; When you hover your cursor over a *Lens*, *TSVB*, aggregation-based, or *Timelion* XY chart, the tooltips on all other related dashboard charts automatically appears.
+
+.. Click *Apply*. 
 
 . **Save** Save the dashboard.
 
@@ -46,113 +62,30 @@ TIP: When looking for a specific dashboard, you can filter them by tag or by cre
 
 . Make the changes you need to the dashboard.
 
-. **Save** the dashboard.
+[[save-dashboards]]
+. **Save** the dashboard. You can then leave the **Edit** mode and *Switch to view mode*. 
+
+
+[[reset-the-dashboard]]
+=== Reset dashboard changes
+
+To remove any dashboard changes you've made, reset the dashboard to the last saved changes.
+
+. In the toolbar, click *Reset*.
+
+. On the *Reset dashboard* window, click *Reset dashboard*.
 
 include::dashboard-controls.asciidoc[leveloffset=-1]
 
 include::drilldowns.asciidoc[leveloffset=-1]
 
-[[create-panels-with-lens]]
-== Create and add panels
-
-You create panels using the editors, which you can access from the dashboard toolbar or the *Visualize Library*, or add panels that are saved in the *Visualize Library*, or search results from <<save-your-search,*Discover*>>.
-
-To create panels from the dashboard toolbar, use one of the following options:
-
-* *Create visualization* &mdash; Opens the drag-and-drop editor, which is the recommended way to create visualization panels.
-
-* *Select type* &mdash; Opens the menu for all of the editors and panel types. 
-
-To create panels from the *Visualize Library*:
-
-. Open the main menu, then click *Visualize Library*.
-
-. Click *Create visualization*, then select an editor. 
-
-To add existing panels from the *Visualize Library*:
-
-. In the dashboard toolbar, click *Add from library*.
-
-. Click the panel you want to add to the dashboard, then click *X*.
-+
-When a panel contains a saved query, both queries are applied.
-+
-When you add search results from *Discover* to dashboards, the results are not aggregated.
-
-
-[[save-panels]]
-== Save and add panels
-
-Consider where you want to save and add the panel in {kib}.
-
-[float]
-[[save-to-visualize-library]]
-=== Save to the Visualize Library
-
-To use the panel on other dashboards and *Canvas* workpads, save the panel to the *Visualize Library*. When panels are saved in the *Visualize Library*, image:dashboard/images/visualize-library-icon.png[Visualize Library icon] appears in the panel header.
-
-If you created the panel from the dashboard:
-
-. In the editor, click *Save to library*.
-
-. Enter the *Title* and add any applicable <<managing-tags,*Tags*>>.
-
-. Make sure that *Add to Dashboard after saving* is selected.
-
-. Click *Save and return*.
-
-If you created the panel from the *Visualize Library*:
-
-. In the editor, click *Save*.
-
-. On the *Save* window, enter the *Title*.
-
-. Choose one of the following options:
-
-* To save the panel to a dashboard and the *Visualize Library*, select *Add to library*, add any applicable <<managing-tags,*Tags*>>, then click *Save and go to Dashboard*.
-
-* To save the panel only to the *Visualize Library*, select *None*, add any applicable <<managing-tags,*Tags*>>, then click *Save and add to library*.
-
-[float]
-[[save-to-the-dashboard]]
-=== Save to the dashboard
-
-Return to the dashboard and add the panel without specifying the save options or adding the panel to the *Visualize Library*. 
-
-If you created the panel from the dashboard:
-
-. In the editor, click *Save and return*.
-
-. Add an optional title to the panel.
-
-.. In the panel header, click *No Title*.
-
-.. On the *Panel settings* window, select *Show title*.
-
-.. Enter the *Title*, then click *Save*.
-
-If you created the panel from the *Visualize Library*:
-
-. Click *Save*.
-
-. On the *Save* window, enter the *Title*.
-
-. Choose one of the following options:
-
-* If you want to add the panel to an existing dashboard, select *Existing*, select the dashboard from the dropdown, then click *Save and go to Dashboard*.
-
-* If you want to add the panel to a new dashboard, select *New*, then click *Save and go to Dashboard*.
-
-To add unsaved dashboard panels to the *Visualize Library*:
-
-. Open the panel menu, then select *More > Save to library*.
-
-. Enter the panel title, then click *Save*.
 
 [[arrange-panels]]
+== Organize dashboard panels
+
 [[moving-containers]]
 [[resizing-containers]]
-== Arrange panels
+=== Move and resize panels
 
 Compare the data in your panels side-by-side, organize panels by priority, resize the panels so they all appear immediately on the dashboard, and more.
 
@@ -164,40 +97,15 @@ In the toolbar, click *Edit*, then use the following options:
 
 * To maximize to fullscreen, open the panel menu, then click *More > Maximize panel*.
 
-
-[[edit-panels]]
-== Edit panels
-
-To make changes to the panel, use the panel menu options.
-
-. In the toolbar, click *Edit*.
-
-. Open the panel menu, then use the following options:
-
-* *Edit visualization* &mdash; Opens the editor so you can make changes to the panel. 
-+
-To make changes without changing the original version, open the panel menu, then click *More > Unlink from library*.
-
-* *Convert to Lens* &mdash; Opens *TSVB* and aggregation-based visualizations in *Lens*.
-
-* *Panel settings* &mdash; Opens the *Panel settings* window to change the *title*, *description*, and *time range*.
-
-* *More > Replace panel* &mdash; Opens the *Visualize Library* so you can select a new panel to replace the existing panel.
-
-* *More > Delete from dashboard* &mdash; Removes the panel from the dashboard. 
-+
-If you want to use the panel later, make sure that you save the panel to the *Visualize Library*.  
-
-
 [[duplicate-panels]]
-== Duplicate panels
+=== Duplicate panels
 
 To duplicate a panel and the configured functionality, use the clone and copy panel options. Cloned and copied panels replicate all of the functionality from the original panel, 
 including renaming, editing, and cloning. 
 
 [float]
 [[clone-panels]]
-=== Clone panels
+==== Clone panels
 
 Cloned panels appear next to the original panel, and move the other panels to provide a space on the dashboard.
 
@@ -209,58 +117,10 @@ When cloned panels are saved in the *Visualize Library*, image:dashboard/images/
 
 [float]
 [[copy-to-dashboard]]
-=== Copy panels
+==== Copy panels
 
 Copy panels from one dashboard to another dashboard.
 
 . Open the panel menu, then select *More > Copy to dashboard*.
 
 . On the *Copy to dashboard* window, select the dashboard, then click *Copy and go to dashboard*.
-
-
-[[add-dashboard-settings]]
-== Edit dashboard settings
-
-Add the title, tags, design options, and more to the dashboard.
-
-. In the toolbar, click *Settings*.
-
-. On the *Dashboard settings* flyout, enter the *Title* and an optional *Description*.
-
-. Add any applicable <<managing-tags,*Tags*>>. 
-
-. Specify the following settings:
-
-* *Store time with dashboard* &mdash; Saves the specified time filter.
-
-* *Use margins between panels* &mdash; Adds a margin of space between each panel.
-
-* *Show panel titles* &mdash; Displays the titles in the panel headers.
-
-* *Sync color palettes across panels* &mdash; Applies the same color palette to all panels on the dashboard.
-
-* *Sync cursor across panels* &mdash; When you hover your cursor over a *Lens*, *TSVB*, aggregation-based, or *Timelion* XY or heatmap chart, the cursor on all other related dashboard charts automatically appears.
-
-* *Sync tooltips across panels* &mdash; When you hover your cursor over a *Lens*, *TSVB*, aggregation-based, or *Timelion* XY chart, the tooltips on all other related dashboard charts automatically appears.
-
-. Click *Apply*. 
-
-
-[[reset-the-dashboard]]
-== Reset the dashboard
-
-To remove any dashboard changes you've made, reset the dashboard to the last saved changes.
-
-. In the toolbar, click *Reset*.
-
-. On the *Reset dashboard* window, click *Reset dashboard*.
-
-
-[[save-dashboards]]
-== Save dashboards
-
-When you've finished making changes to the dashboard, save it.
-
-. In the toolbar, click *Save*.
-
-. To exit *Edit* mode, click *Switch to view mode*. 
