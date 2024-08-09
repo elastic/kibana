@@ -25,6 +25,8 @@ rules:
   oas3-schema: error
   oas2-schema: error
   array-items: false
+  # Bump.sh handles $ref siblings. Documentation wise it's convenient to have properties like descriptions next to $ref.
+  no-$ref-siblings: off
   # Tags
   openapi-tags: warn
   openapi-tags-alphabetical: info
