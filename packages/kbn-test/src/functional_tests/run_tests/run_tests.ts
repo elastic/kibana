@@ -84,7 +84,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
           };
 
           const newServerArgs = vars.esTestCluster.serverArgs.filter(
-            (arg) => arg !== 'xpack.security.enabled=false'
+            (arg: string) => arg !== 'xpack.security.enabled=false'
           );
           newServerArgs.push('xpack.security.enabled=true');
           vars.esTestCluster.serverArgs = newServerArgs;
