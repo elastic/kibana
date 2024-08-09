@@ -18,7 +18,8 @@ import {
 import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/173451
+describe.skip(
   'Alert Event Details',
   {
     tags: ['@ess', '@serverless'],
@@ -69,7 +70,7 @@ describe(
     it('should be able to run live query and add to timeline', () => {
       const TIMELINE_NAME = 'Untitled timeline';
       cy.getBySel('expand-event').first().click();
-      cy.getBySel('take-action-dropdown-btn').click();
+      cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click();
       cy.getBySel('osquery-action-item').click();
       cy.contains('1 agent selected.');
       selectAllAgents();

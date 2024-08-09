@@ -9679,7 +9679,7 @@
             "section": "def-public.PublishesPhaseEvents",
             "text": "PublishesPhaseEvents"
           },
-          ",",
+          ",Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -9687,7 +9687,7 @@
             "section": "def-public.PublishesUnsavedChanges",
             "text": "PublishesUnsavedChanges"
           },
-          "<object>,",
+          "<object>>,",
           {
             "pluginId": "@kbn/presentation-containers",
             "scope": "public",
