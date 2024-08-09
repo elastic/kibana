@@ -5,10 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { EuiThemeComputed } from '@elastic/eui';
 import { BehaviorSubject, distinctUntilChanged, map, Observable } from 'rxjs';
 import { isEqual } from 'lodash';
 import { removeDropCommandsFromESQLQuery, appendToESQLQuery } from '@kbn/esql-utils';
+import { getLogLevelColor, getLogLevelCoalescedValue, LOG_LEVEL_FIELD } from '@kbn/discover-utils';
+import type { ColorMapping } from '@kbn/coloring';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type {
   CountIndexPatternColumn,
@@ -69,12 +71,14 @@ interface Services {
 interface LensVisServiceParams {
   services: Services;
   lensSuggestionsApi: LensSuggestionsApi;
+  euiTheme: EuiThemeComputed;
 }
 
 export class LensVisService {
   private state$: BehaviorSubject<LensVisServiceState>;
   private services: Services;
   private lensSuggestionsApi: LensSuggestionsApi;
+  private euiTheme: EuiThemeComputed;
   status$: Observable<LensVisServiceState['status']>;
   currentSuggestionContext$: Observable<LensVisServiceState['currentSuggestionContext']>;
   allSuggestions$: Observable<LensVisServiceState['allSuggestions']>;
@@ -95,9 +99,10 @@ export class LensVisService {
       }
     | undefined;
 
-  constructor({ services, lensSuggestionsApi }: LensVisServiceParams) {
+  constructor({ services, lensSuggestionsApi, euiTheme }: LensVisServiceParams) {
     this.services = services;
     this.lensSuggestionsApi = lensSuggestionsApi;
+    this.euiTheme = euiTheme;
 
     this.state$ = new BehaviorSubject<LensVisServiceState>({
       status: LensVisServiceStatus.initial,
@@ -460,7 +465,16 @@ export class LensVisService {
       if (!isOnHistogramMode) return undefined;
 
       const interval = computeInterval(timeRange, this.services.data);
-      const esqlQuery = this.getESQLHistogramQuery({ dataView, query, timeRange, interval });
+      const hasLogLevelField = queryParams?.columns?.some(
+        (column) => column.name === LOG_LEVEL_FIELD
+      );
+      const esqlQuery = this.getESQLHistogramQuery({
+        dataView,
+        query,
+        timeRange,
+        interval,
+        hasLogLevelField,
+      });
       const context = {
         dataViewSpec: dataView?.toSpec(),
         fieldName: '',
@@ -484,6 +498,15 @@ export class LensVisService {
           esql: esqlQuery,
         },
       };
+      if (hasLogLevelField) {
+        context.textBasedColumns.push({
+          id: 'log_level',
+          name: 'log_level',
+          meta: {
+            type: 'string',
+          },
+        });
+      }
       const suggestions = this.lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? [];
       if (suggestions.length) {
         return suggestions[0];
@@ -498,18 +521,28 @@ export class LensVisService {
     timeRange,
     query,
     interval,
+    hasLogLevelField,
   }: {
     dataView: DataView;
     timeRange: TimeRange;
     query: AggregateQuery;
     interval?: string;
+    hasLogLevelField?: boolean;
   }): string => {
     const queryInterval = interval ?? computeInterval(timeRange, this.services.data);
     const language = getAggregateQueryMode(query);
     const safeQuery = removeDropCommandsFromESQLQuery(query[language]);
+
+    let logLevelPipe = '';
+
+    if (hasLogLevelField) {
+      logLevelPipe =
+        '| EVAL log_level = CASE(to_lower(log.level) LIKE "trace*" , "trace",    to_lower(log.level) LIKE "deb*" , "debug", to_lower(log.level) LIKE "info*" , "info", to_lower(log.level) LIKE "not*" , "notice",  to_lower(log.level) LIKE "warn*" , "warning",  to_lower(log.level) LIKE "err*" , "error",  to_lower(log.level) LIKE "sev*" OR to_lower(log.level) LIKE "cri*" , "critical",  to_lower(log.level) LIKE "ale*" , "alert",  to_lower(log.level) LIKE "emer*" , "emergency",  to_lower(log.level) LIKE "fatal*" , "fatal", "Other")';
+    }
+
     return appendToESQLQuery(
       safeQuery,
-      `| EVAL timestamp=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | INLINESTATS results = count(*) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${queryInterval}\``
+      `| EVAL timestamp=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) ${logLevelPipe}| INLINESTATS results = count(*) by timestamp | RENAME timestamp as \`${dataView.timeFieldName} every ${queryInterval}\``
     );
   };
 
@@ -527,6 +560,55 @@ export class LensVisService {
       : [];
 
     return allSuggestions;
+  };
+
+  private getColorMapping = () => {
+    const terms = [
+      'trace',
+      'debug',
+      'info',
+      'notice',
+      'warning',
+      'error',
+      'critical',
+      'alert',
+      'emergency',
+      'fatal',
+    ];
+    const assignments = terms.map((term, index) => {
+      const logLevelCoalescedValue = getLogLevelCoalescedValue(term);
+      return {
+        rule: {
+          type: 'matchExactly',
+          values: [term],
+        },
+        color: {
+          type: 'colorCode',
+          colorCode: logLevelCoalescedValue
+            ? getLogLevelColor(logLevelCoalescedValue, this.euiTheme)
+            : '#ffffff',
+        },
+        touched: true,
+      };
+    });
+    return {
+      assignments,
+      specialAssignments: [
+        {
+          rule: {
+            type: 'other',
+          },
+          color: {
+            type: 'loop',
+          },
+          touched: false,
+        },
+      ],
+      paletteId: 'eui_amsterdam_color_blind',
+      colorMode: {
+        type: 'categorical',
+      },
+    } as ColorMapping.Config;
   };
 
   private getLensAttributesState = ({
@@ -565,10 +647,12 @@ export class LensVisService {
       breakdownField: isTextBased ? undefined : breakdownField?.name,
     };
 
+    const hasLogLevelField = table?.columns.some((column) => column.name === LOG_LEVEL_FIELD);
+
     const currentQuery =
       suggestionType === UnifiedHistogramSuggestionType.histogramForESQL && isTextBased && timeRange
         ? {
-            esql: this.getESQLHistogramQuery({ dataView, query, timeRange }),
+            esql: this.getESQLHistogramQuery({ dataView, query, timeRange, hasLogLevelField }),
           }
         : query;
 
@@ -603,6 +687,7 @@ export class LensVisService {
         filters,
         suggestion,
         dataView,
+        colorMapping: this.getColorMapping(),
       }) as TypedLensByValueInput['attributes'];
 
       if (suggestionType === UnifiedHistogramSuggestionType.histogramForDataView) {
