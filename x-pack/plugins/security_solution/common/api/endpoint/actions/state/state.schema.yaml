@@ -15,5 +15,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: '#/components/schemas/ActionStateSuccessResponse'
+components:
+  schemas:
+    ActionStateSuccessResponse:
+        type:
+          object
+        properties:
+          body:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  canEncrypt:
+                    type: boolean
 
