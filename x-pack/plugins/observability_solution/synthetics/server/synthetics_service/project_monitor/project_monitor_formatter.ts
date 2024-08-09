@@ -19,7 +19,10 @@ import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { getAllLocations } from '../get_all_locations';
 import { syncNewMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/add_monitor_bulk';
 import { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
-import { syncEditedMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
+import {
+  MonitorConfigUpdate,
+  syncEditedMonitorBulk,
+} from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
 import {
   ConfigKey,
   SyntheticsMonitorWithSecretsAttributes,
@@ -380,7 +383,7 @@ export class ProjectMonitorFormatter {
         monitors.map((m) => m.previousMonitor)
       );
 
-      const monitorsToUpdate = [];
+      const monitorsToUpdate: MonitorConfigUpdate[] = [];
 
       decryptedPreviousMonitors.forEach((decryptedPreviousMonitor) => {
         const monitor = monitors.find((m) => m.previousMonitor.id === decryptedPreviousMonitor.id);

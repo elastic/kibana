@@ -25,7 +25,7 @@ import {
 
 // Simplify return promise type and type it with runtime_types
 
-interface MonitorConfigUpdate {
+export interface MonitorConfigUpdate {
   normalizedMonitor: SyntheticsMonitor;
   monitorWithRevision: SyntheticsMonitorWithSecretsAttributes;
   previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes>;
