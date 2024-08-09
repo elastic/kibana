@@ -22,7 +22,7 @@ export const ESS_API_AUTH = Object.freeze({
 export const API_HEADERS = Object.freeze({
   'kbn-xsrf': 'cypress-creds',
   'x-elastic-internal-origin': 'security-solution',
-  [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION].join(','),
+  [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION],
 });
 
 export const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
