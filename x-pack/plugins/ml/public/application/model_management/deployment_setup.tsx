@@ -59,10 +59,10 @@ export interface ThreadingParams {
   threadsPerAllocations?: number;
   priority?: 'low' | 'normal';
   deploymentId?: string;
-  adaptiveAllocations?: {
+  adaptive_allocations?: {
     enabled: boolean;
-    minNumberOfAllocations?: number;
-    maxNumberOfAllocations?: number;
+    min_number_of_allocations?: number;
+    max_number_of_allocations?: number;
   };
 }
 
@@ -143,7 +143,8 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
 
   const adaptiveAllocationsAvailable = cloudInfo.isCloud;
 
-  const advancedSettingsAvailable = config.priority || config.threadsPerAllocations;
+  const advancedSettingsAvailable =
+    config.priority || config.threadsPerAllocations || config.adaptive_allocations;
 
   return (
     <EuiForm component={'form'} id={'startDeploymentForm'}>
@@ -293,12 +294,12 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
                 defaultMessage="Enabled"
               />
             }
-            checked={!!config.adaptiveAllocations?.enabled}
+            checked={!!config.adaptive_allocations?.enabled}
             onChange={(event) => {
               onConfigChange({
                 ...config,
-                adaptiveAllocations: {
-                  ...config.adaptiveAllocations,
+                adaptive_allocations: {
+                  ...config.adaptive_allocations,
                   enabled: event.target.checked,
                 },
               });
@@ -307,7 +308,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
         </EuiDescribedFormGroup>
       ) : null}
 
-      {!config.adaptiveAllocations?.enabled ? (
+      {!config.adaptive_allocations?.enabled ? (
         <EuiDescribedFormGroup
           titleSize={'xxs'}
           title={
@@ -380,7 +381,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
         >
           <EuiSpacer size={'m'} />
 
-          {adaptiveAllocationsAvailable && config.adaptiveAllocations?.enabled === true ? (
+          {adaptiveAllocationsAvailable && config.adaptive_allocations?.enabled === true ? (
             <EuiDescribedFormGroup
               titleSize={'xxs'}
               title={
@@ -410,14 +411,14 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
                   >
                     <EuiFieldNumber
                       min={1}
-                      value={config.adaptiveAllocations?.minNumberOfAllocations}
+                      value={config.adaptive_allocations?.min_number_of_allocations}
                       onChange={(event) => {
                         onConfigChange({
                           ...config,
-                          adaptiveAllocations: {
-                            enabled: config.adaptiveAllocations?.enabled ?? false,
-                            ...config.adaptiveAllocations,
-                            minNumberOfAllocations: Number(event.target.value),
+                          adaptive_allocations: {
+                            enabled: config.adaptive_allocations?.enabled ?? false,
+                            ...config.adaptive_allocations,
+                            min_number_of_allocations: Number(event.target.value),
                           },
                         });
                       }}
@@ -434,15 +435,15 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
                     }
                   >
                     <EuiFieldNumber
-                      min={(config.adaptiveAllocations?.minNumberOfAllocations ?? 1) + 1}
-                      value={config.adaptiveAllocations?.maxNumberOfAllocations}
+                      min={(config.adaptive_allocations?.min_number_of_allocations ?? 1) + 1}
+                      value={config.adaptive_allocations?.max_number_of_allocations}
                       onChange={(event) => {
                         onConfigChange({
                           ...config,
-                          adaptiveAllocations: {
-                            enabled: config.adaptiveAllocations?.enabled ?? false,
-                            ...config.adaptiveAllocations,
-                            maxNumberOfAllocations: Number(event.target.value),
+                          adaptive_allocations: {
+                            enabled: config.adaptive_allocations?.enabled ?? false,
+                            ...config.adaptive_allocations,
+                            max_number_of_allocations: Number(event.target.value),
                           },
                         });
                       }}
@@ -621,7 +622,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
       threadsPerAllocations: 1,
       priority: cloudInfo.isCloudTrial ? 'low' : 'normal',
       deploymentId: model.model_id,
-      adaptiveAllocations: {
+      adaptive_allocations: {
         // Enable adaptive allocations by default when autoscaling is enabled
         enabled: cloudInfo.isCloud,
       },

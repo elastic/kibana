@@ -217,24 +217,24 @@ export function useModelActions({
           try {
             onLoading(true);
             await trainedModelsApiService.startModelAllocation(item.model_id, {
-              ...(modelDeploymentParams.adaptiveAllocations?.enabled
+              ...(modelDeploymentParams.adaptive_allocations?.enabled
                 ? {
                     adaptive_allocations: {
-                      enabled: modelDeploymentParams.adaptiveAllocations?.enabled,
+                      enabled: modelDeploymentParams.adaptive_allocations?.enabled,
                       ...(Number.isInteger(
-                        modelDeploymentParams.adaptiveAllocations?.minNumberOfAllocations
+                        modelDeploymentParams.adaptive_allocations?.min_number_of_allocations
                       )
                         ? {
                             min_number_of_allocations:
-                              modelDeploymentParams.adaptiveAllocations?.minNumberOfAllocations,
+                              modelDeploymentParams.adaptive_allocations?.min_number_of_allocations,
                           }
                         : {}),
                       ...(Number.isInteger(
-                        modelDeploymentParams.adaptiveAllocations?.maxNumberOfAllocations
+                        modelDeploymentParams.adaptive_allocations?.max_number_of_allocations
                       )
                         ? {
                             max_number_of_allocations:
-                              modelDeploymentParams.adaptiveAllocations?.maxNumberOfAllocations,
+                              modelDeploymentParams.adaptive_allocations?.max_number_of_allocations,
                           }
                         : {}),
                     },
@@ -289,13 +289,16 @@ export function useModelActions({
           !isLoading &&
           !!item.stats?.deployment_stats?.some((v) => v.state === DEPLOYMENT_STATE.STARTED),
         onClick: async (item) => {
-          const deploymentToUpdate = item.deployment_ids[0];
+          const deploymentIdToUpdate = item.deployment_ids[0];
+
+          const targetDeployment = item.stats!.deployment_stats.find(
+            (v) => v.deployment_id === deploymentIdToUpdate
+          )!;
 
           const deploymentParams = await getUserInputModelDeploymentParams(item, {
-            deploymentId: deploymentToUpdate,
-            numOfAllocations: item.stats!.deployment_stats.find(
-              (v) => v.deployment_id === deploymentToUpdate
-            )!.number_of_allocations,
+            deploymentId: deploymentIdToUpdate,
+            numOfAllocations: targetDeployment.number_of_allocations,
+            adaptive_allocations: targetDeployment.adaptive_allocations,
           });
 
           if (!deploymentParams) return;
@@ -306,24 +309,24 @@ export function useModelActions({
               item.model_id,
               deploymentParams.deploymentId!,
               {
-                ...(deploymentParams.adaptiveAllocations?.enabled
+                ...(deploymentParams.adaptive_allocations?.enabled
                   ? {
                       adaptive_allocations: {
                         enabled: true,
                         ...(Number.isInteger(
-                          deploymentParams.adaptiveAllocations?.minNumberOfAllocations
+                          deploymentParams.adaptive_allocations?.min_number_of_allocations
                         )
                           ? {
                               min_number_of_allocations:
-                                deploymentParams.adaptiveAllocations?.minNumberOfAllocations,
+                                deploymentParams.adaptive_allocations?.min_number_of_allocations,
                             }
                           : {}),
                         ...(Number.isInteger(
-                          deploymentParams.adaptiveAllocations?.maxNumberOfAllocations
+                          deploymentParams.adaptive_allocations?.max_number_of_allocations
                         )
                           ? {
                               max_number_of_allocations:
-                                deploymentParams.adaptiveAllocations?.maxNumberOfAllocations,
+                                deploymentParams.adaptive_allocations?.max_number_of_allocations,
                             }
                           : {}),
                       },

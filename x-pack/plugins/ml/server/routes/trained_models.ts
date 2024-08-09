@@ -627,14 +627,20 @@ export function trainedModelsRoutes(
           request: { params: modelAndDeploymentIdSchema, body: updateDeploymentParamsSchema },
         },
       },
-      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response, client }) => {
         try {
-          const { modelId, deploymentId } = request.params;
-          const body = await mlClient.updateTrainedModelDeployment({
-            model_id: modelId,
-            deployment_id: deploymentId,
-            ...request.body,
-          });
+          const { deploymentId } = request.params;
+
+          // TODO use mlClient.updateTrainedModelDeployment when esClient is updated
+          const body =
+            await client.asCurrentUser.transport.request<estypes.MlUpdateTrainedModelDeploymentResponse>(
+              {
+                method: 'POST',
+                path: `_ml/trained_models/${deploymentId}/deployment/_update`,
+                body: request.body,
+              }
+            );
+
           return response.ok({
             body,
           });

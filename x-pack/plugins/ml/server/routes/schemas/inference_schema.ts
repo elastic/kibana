@@ -46,7 +46,14 @@ export const threadingParamsSchema = schema.maybe(
 );
 
 export const updateDeploymentParamsSchema = schema.object({
-  number_of_allocations: schema.number(),
+  number_of_allocations: schema.maybe(schema.number()),
+  adaptive_allocations: schema.maybe(
+    schema.object({
+      enabled: schema.boolean(),
+      min_number_of_allocations: schema.maybe(schema.number()),
+      max_number_of_allocations: schema.maybe(schema.number()),
+    })
+  ),
 });
 
 export const optionalModelIdSchema = schema.object({
