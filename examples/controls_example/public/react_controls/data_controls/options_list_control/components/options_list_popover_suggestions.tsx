@@ -196,7 +196,6 @@ export const OptionsListPopoverSuggestions = ({
           )}
           emptyMessage={<OptionsListPopoverEmptyMessage showOnlySelected={showOnlySelected} />}
           onChange={(newSuggestions, _, changedOption) => {
-            setSelectableOptions(newSuggestions);
             api.makeSelection(changedOption.key, showOnlySelected);
           }}
         >

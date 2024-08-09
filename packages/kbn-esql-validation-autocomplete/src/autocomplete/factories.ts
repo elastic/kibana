@@ -102,7 +102,8 @@ export const getCompatibleFunctionDefinition = (
   return fnSupportedByCommand
     .filter((mathDefinition) =>
       mathDefinition.signatures.some(
-        (signature) => returnTypes[0] === 'any' || returnTypes.includes(signature.returnType)
+        (signature) =>
+          returnTypes[0] === 'any' || returnTypes.includes(signature.returnType as string)
       )
     )
     .map(getSuggestionFunctionDefinition);

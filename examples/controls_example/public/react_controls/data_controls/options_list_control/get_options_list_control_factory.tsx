@@ -7,7 +7,6 @@
  */
 
 import React, { useEffect } from 'react';
-import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, combineLatest, debounceTime, filter, skip } from 'rxjs';
 
 import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
@@ -38,6 +37,7 @@ import { fetchAndValidate$ } from './fetch_and_validate';
 import { OptionsListControlContext } from './options_list_context_provider';
 import { OptionsListStrings } from './options_list_strings';
 import { OptionsListControlApi, OptionsListControlState } from './types';
+import { initializeOptionsListSelections } from './options_list_control_selections';
 
 export const getOptionsListControlFactory = (
   services: DataControlServices
@@ -62,14 +62,9 @@ export const getOptionsListControlFactory = (
       );
       const runPastTimeout$ = new BehaviorSubject<boolean | undefined>(initialState.runPastTimeout);
       const singleSelect$ = new BehaviorSubject<boolean | undefined>(initialState.singleSelect);
-      const selections$ = new BehaviorSubject<OptionsListSelection[] | undefined>(
-        initialState.selectedOptions ?? []
-      );
       const sort$ = new BehaviorSubject<OptionsListSortingType | undefined>(
         initialState.sort ?? OPTIONS_LIST_DEFAULT_SORT
       );
-      const existsSelected$ = new BehaviorSubject<boolean | undefined>(initialState.existsSelected);
-      const excludeSelected$ = new BehaviorSubject<boolean | undefined>(initialState.exclude);
 
       /** Creation options state - cannot currently be changed after creation, but need subjects for comparators */
       const placeholder$ = new BehaviorSubject<string | undefined>(initialState.placeholder);
@@ -98,12 +93,17 @@ export const getOptionsListControlFactory = (
         services
       );
 
+      const selections = initializeOptionsListSelections(
+        initialState,
+        dataControl.setters.onSelectionChange
+      );
+
       const stateManager = {
         ...dataControl.stateManager,
-        exclude: excludeSelected$,
-        existsSelected: existsSelected$,
+        exclude: selections.exclude$,
+        existsSelected: selections.existsSelected$,
         searchTechnique: searchTechnique$,
-        selectedOptions: selections$,
+        selectedOptions: selections.selectedOptions$,
         singleSelect: singleSelect$,
         sort: sort$,
         searchString: searchString$,
@@ -150,9 +150,9 @@ export const getOptionsListControlFactory = (
         )
         .subscribe(() => {
           searchString$.next('');
-          selections$.next(undefined);
-          existsSelected$.next(false);
-          excludeSelected$.next(false);
+          selections.setSelectedOptions(undefined);
+          selections.setExistsSelected(false);
+          selections.setExclude(false);
           requestSize$.next(MIN_OPTIONS_LIST_REQUEST_SIZE);
           sort$.next(OPTIONS_LIST_DEFAULT_SORT);
         });
@@ -196,38 +196,40 @@ export const getOptionsListControlFactory = (
       const singleSelectSubscription = singleSelect$
         .pipe(filter((singleSelect) => Boolean(singleSelect)))
         .subscribe(() => {
-          const currentSelections = selections$.getValue() ?? [];
-          if (currentSelections.length > 1) selections$.next([currentSelections[0]]);
+          const currentSelections = selections.selectedOptions$.getValue() ?? [];
+          if (currentSelections.length > 1) selections.setSelectedOptions([currentSelections[0]]);
         });
 
       /** Output filters when selections change */
       const outputFilterSubscription = combineLatest([
         dataControl.api.dataViews,
         dataControl.stateManager.fieldName,
-        selections$,
-        existsSelected$,
-        excludeSelected$,
-      ]).subscribe(([dataViews, fieldName, selections, existsSelected, exclude]) => {
-        const dataView = dataViews?.[0];
-        const field = dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
+        selections.selectedOptions$,
+        selections.existsSelected$,
+        selections.exclude$,
+      ])
+        .pipe(debounceTime(0))
+        .subscribe(([dataViews, fieldName, selectedOptions, existsSelected, exclude]) => {
+          const dataView = dataViews?.[0];
+          const field = dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
 
-        if (!dataView || !field) return;
-
-        let newFilter: Filter | undefined;
-        if (existsSelected) {
-          newFilter = buildExistsFilter(field, dataView);
-        } else if (selections && selections.length > 0) {
-          newFilter =
-            selections.length === 1
-              ? buildPhraseFilter(field, selections[0], dataView)
-              : buildPhrasesFilter(field, selections, dataView);
-        }
-        if (newFilter) {
-          newFilter.meta.key = field?.name;
-          if (exclude) newFilter.meta.negate = true;
-        }
-        api.setOutputFilter(newFilter);
-      });
+          let newFilter: Filter | undefined;
+          if (dataView && field) {
+            if (existsSelected) {
+              newFilter = buildExistsFilter(field, dataView);
+            } else if (selectedOptions && selectedOptions.length > 0) {
+              newFilter =
+                selectedOptions.length === 1
+                  ? buildPhraseFilter(field, selectedOptions[0], dataView)
+                  : buildPhrasesFilter(field, selectedOptions, dataView);
+            }
+          }
+          if (newFilter) {
+            newFilter.meta.key = field?.name;
+            if (exclude) newFilter.meta.negate = true;
+          }
+          dataControl.setters.setOutputFilter(newFilter);
+        });
 
       const api = buildApi(
         {
@@ -241,10 +243,10 @@ export const getOptionsListControlFactory = (
                 searchTechnique: searchTechnique$.getValue(),
                 runPastTimeout: runPastTimeout$.getValue(),
                 singleSelect: singleSelect$.getValue(),
-                selections: selections$.getValue(),
+                selections: selections.selectedOptions$.getValue(),
                 sort: sort$.getValue(),
-                existsSelected: existsSelected$.getValue(),
-                exclude: excludeSelected$.getValue(),
+                existsSelected: selections.existsSelected$.getValue(),
+                exclude: selections.exclude$.getValue(),
 
                 // serialize state that cannot be changed to keep it consistent
                 placeholder: placeholder$.getValue(),
@@ -257,25 +259,19 @@ export const getOptionsListControlFactory = (
             };
           },
           clearSelections: () => {
-            if (selections$.getValue()?.length) selections$.next([]);
-            if (existsSelected$.getValue()) existsSelected$.next(false);
+            if (selections.selectedOptions$.getValue()?.length) selections.setSelectedOptions([]);
+            if (selections.existsSelected$.getValue()) selections.setExistsSelected(false);
             if (invalidSelections$.getValue().size) invalidSelections$.next(new Set([]));
           },
         },
         {
           ...dataControl.comparators,
-          exclude: [excludeSelected$, (selected) => excludeSelected$.next(selected)],
-          existsSelected: [existsSelected$, (selected) => existsSelected$.next(selected)],
+          ...selections.comparators,
           runPastTimeout: [runPastTimeout$, (runPast) => runPastTimeout$.next(runPast)],
           searchTechnique: [
             searchTechnique$,
             (technique) => searchTechnique$.next(technique),
             (a, b) => (a ?? DEFAULT_SEARCH_TECHNIQUE) === (b ?? DEFAULT_SEARCH_TECHNIQUE),
-          ],
-          selectedOptions: [
-            selections$,
-            (selections) => selections$.next(selections),
-            (a, b) => deepEqual(a ?? [], b ?? []),
           ],
           singleSelect: [singleSelect$, (selected) => singleSelect$.next(selected)],
           sort: [
@@ -295,11 +291,11 @@ export const getOptionsListControlFactory = (
 
       const componentApi = {
         ...api,
-        selections$,
         loadMoreSubject,
         totalCardinality$,
         availableOptions$,
         invalidSelections$,
+        setExclude: selections.setExclude,
         deselectOption: (key: string | undefined) => {
           const field = api.field$.getValue();
           if (!key || !field) {
@@ -312,12 +308,12 @@ export const getOptionsListControlFactory = (
           const keyAsType = getSelectionAsFieldType(field, key);
 
           // delete from selections
-          const selectedOptions = selections$.getValue() ?? [];
-          const itemIndex = (selections$.getValue() ?? []).indexOf(keyAsType);
+          const selectedOptions = selections.selectedOptions$.getValue() ?? [];
+          const itemIndex = (selections.selectedOptions$.getValue() ?? []).indexOf(keyAsType);
           if (itemIndex !== -1) {
             const newSelections = [...selectedOptions];
             newSelections.splice(itemIndex, 1);
-            selections$.next(newSelections);
+            selections.setSelectedOptions(newSelections);
           }
           // delete from invalid selections
           const currentInvalid = invalidSelections$.getValue();
@@ -335,37 +331,37 @@ export const getOptionsListControlFactory = (
             return;
           }
 
-          const existsSelected = Boolean(existsSelected$.getValue());
-          const selectedOptions = selections$.getValue() ?? [];
+          const existsSelected = Boolean(selections.existsSelected$.getValue());
+          const selectedOptions = selections.selectedOptions$.getValue() ?? [];
           const singleSelect = singleSelect$.getValue();
 
           // the order of these checks matters, so be careful if rearranging them
           const keyAsType = getSelectionAsFieldType(field, key);
           if (key === 'exists-option') {
             // if selecting exists, then deselect everything else
-            existsSelected$.next(!existsSelected);
+            selections.setExistsSelected(!existsSelected);
             if (!existsSelected) {
-              selections$.next([]);
+              selections.setSelectedOptions([]);
               invalidSelections$.next(new Set([]));
             }
           } else if (showOnlySelected || selectedOptions.includes(keyAsType)) {
             componentApi.deselectOption(key);
           } else if (singleSelect) {
             // replace selection
-            selections$.next([keyAsType]);
-            if (existsSelected) existsSelected$.next(false);
+            selections.setSelectedOptions([keyAsType]);
+            if (existsSelected) selections.setExistsSelected(false);
           } else {
             // select option
-            if (!selectedOptions) selections$.next([]);
-            if (existsSelected) existsSelected$.next(false);
-            selections$.next([...selectedOptions, keyAsType]);
+            if (existsSelected) selections.setExistsSelected(false);
+            selections.setSelectedOptions(
+              selectedOptions ? [...selectedOptions, keyAsType] : [keyAsType]
+            );
           }
         },
       };
 
-      if (initialState.selectedOptions?.length || initialState.existsSelected) {
-        // has selections, so wait for initialization of filters
-        await dataControl.untilFiltersInitialized();
+      if (selections.hasInitialSelections) {
+        await dataControl.api.untilFiltersReady();
       }
 
       return {

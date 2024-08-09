@@ -18,7 +18,9 @@ import {
 
 import { OptionsListSuccessResponse } from '@kbn/controls-plugin/common/options_list/types';
 
+import { PublishingSubject } from '@kbn/presentation-publishing';
 import { isValidSearch } from '../../../../common/options_list/suggestions_searching';
+import { OptionsListSelection } from '../../../../common/options_list/options_list_selections';
 import { ControlFetchContext } from '../../control_group/control_fetch';
 import { ControlStateManager } from '../../types';
 import { DataControlServices } from '../types';
@@ -37,7 +39,11 @@ export function fetchAndValidate$({
       debouncedSearchString: Observable<string>;
     };
   services: DataControlServices;
-  stateManager: ControlStateManager<OptionsListComponentState>;
+  stateManager: ControlStateManager<
+    Pick<OptionsListComponentState, 'requestSize' | 'runPastTimeout' | 'searchTechnique' | 'sort'>
+  > & {
+    selectedOptions: PublishingSubject<OptionsListSelection[] | undefined>;
+  };
 }): Observable<OptionsListSuccessResponse | { error: Error }> {
   const requestCache = new OptionsListFetchCache();
   let abortController: AbortController | undefined;

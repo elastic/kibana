@@ -140,7 +140,12 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
         request_capacity: 1000,
-        max_workers: 10,
+        capacity: {
+          config: 10,
+          as_workers: 10,
+          as_cost: 20,
+        },
+        claim_strategy: 'unsafe_mget',
       });
     });
 

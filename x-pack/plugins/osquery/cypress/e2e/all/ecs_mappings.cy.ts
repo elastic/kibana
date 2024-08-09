@@ -19,7 +19,8 @@ import {
 } from '../../tasks/live_query';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('EcsMapping', { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/182467
+describe.skip('EcsMapping', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     initializeDataViews();
   });

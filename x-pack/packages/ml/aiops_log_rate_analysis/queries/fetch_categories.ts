@@ -84,6 +84,7 @@ export const getCategoryRequest = (
     wrap,
     undefined,
     undefined,
+    false,
     false
   );
 

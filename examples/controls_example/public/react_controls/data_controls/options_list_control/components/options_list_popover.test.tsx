@@ -13,14 +13,9 @@ import { act, render, RenderResult, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { BehaviorSubject } from 'rxjs';
-import { ControlStateManager } from '../../../types';
 import { getOptionsListMocks } from '../../mocks/api_mocks';
-import { OptionsListControlContext } from '../options_list_context_provider';
-import {
-  OptionsListComponentApi,
-  OptionsListComponentState,
-  OptionsListDisplaySettings,
-} from '../types';
+import { ContextStateManager, OptionsListControlContext } from '../options_list_context_provider';
+import { OptionsListComponentApi, OptionsListDisplaySettings } from '../types';
 import { OptionsListPopover } from './options_list_popover';
 
 describe('Options list popover', () => {
@@ -40,7 +35,7 @@ describe('Options list popover', () => {
         value={{
           api: api as unknown as OptionsListComponentApi,
           displaySettings,
-          stateManager: stateManager as unknown as ControlStateManager<OptionsListComponentState>,
+          stateManager: stateManager as unknown as ContextStateManager,
         }}
       >
         <OptionsListPopover />
@@ -83,7 +78,7 @@ describe('Options list popover', () => {
     expect(mocks.api.makeSelection).toBeCalledWith('woof', false);
 
     // simulate `makeSelection`
-    mocks.stateManager.selectedOptions.next(['woof']);
+    mocks.setSelectedOptions(['woof']);
     await waitOneTick();
 
     clickShowOnlySelections(popover);
@@ -102,7 +97,7 @@ describe('Options list popover', () => {
         { value: 'meow', docCount: 12 },
       ]);
       const popover = mountComponent(mocks);
-      mocks.stateManager.selectedOptions.next(selections);
+      mocks.setSelectedOptions(selections);
       await waitOneTick();
 
       clickShowOnlySelections(popover);
@@ -121,7 +116,7 @@ describe('Options list popover', () => {
         { value: 'bark', docCount: 10 },
         { value: 'meow', docCount: 12 },
       ]);
-      mocks.stateManager.selectedOptions.next([]);
+      mocks.setSelectedOptions([]);
       const popover = mountComponent(mocks);
 
       clickShowOnlySelections(popover);
@@ -139,7 +134,7 @@ describe('Options list popover', () => {
         { value: 'bark', docCount: 10 },
         { value: 'meow', docCount: 12 },
       ]);
-      mocks.stateManager.selectedOptions.next(['woof', 'bark']);
+      mocks.setSelectedOptions(['woof', 'bark']);
       const popover = mountComponent(mocks);
 
       let searchBox = popover.getByTestId('optionsList-control-search-input');
@@ -163,7 +158,7 @@ describe('Options list popover', () => {
         { value: 'bark', docCount: 75 },
       ]);
       const popover = mountComponent(mocks);
-      mocks.stateManager.selectedOptions.next(['woof', 'bark']);
+      mocks.setSelectedOptions(['woof', 'bark']);
       mocks.api.invalidSelections$.next(new Set(['woof']));
       await waitOneTick();
 
@@ -185,7 +180,7 @@ describe('Options list popover', () => {
         { value: 'woof', docCount: 5 },
         { value: 'bark', docCount: 75 },
       ]);
-      mocks.stateManager.selectedOptions.next(['bark', 'woof', 'meow']);
+      mocks.setSelectedOptions(['bark', 'woof', 'meow']);
       mocks.api.invalidSelections$.next(new Set(['woof', 'meow']));
       const popover = mountComponent(mocks);
 
@@ -207,7 +202,7 @@ describe('Options list popover', () => {
     test('if exclude = true, select appropriate button in button group', async () => {
       const mocks = getOptionsListMocks();
       const popover = mountComponent(mocks);
-      mocks.stateManager.exclude.next(true);
+      mocks.api.setExclude(true);
       await waitOneTick();
 
       const includeButton = popover.getByTestId('optionsList__includeResults');
@@ -223,7 +218,7 @@ describe('Options list popover', () => {
       mocks.api.availableOptions$.next([]);
       const popover = mountComponent(mocks);
 
-      mocks.stateManager.existsSelected.next(false);
+      mocks.setExistsSelected(false);
       await waitOneTick();
 
       const existsOption = popover.queryByTestId('optionsList-control-selection-exists');
@@ -238,7 +233,7 @@ describe('Options list popover', () => {
       ]);
       const popover = mountComponent(mocks);
 
-      mocks.stateManager.existsSelected.next(true);
+      mocks.setExistsSelected(true);
       await waitOneTick();
       clickShowOnlySelections(popover);
 

@@ -60,6 +60,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'metadata',
         'mv_expand',
         'stats',
+        'inlinestats',
         'dissect',
         'grok',
         'project',
