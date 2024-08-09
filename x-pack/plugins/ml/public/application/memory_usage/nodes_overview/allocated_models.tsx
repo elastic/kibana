@@ -126,7 +126,30 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
         ) {
           return '-';
         }
-        return `${v.node.number_of_allocations} * ${v.node.threads_per_allocation}`;
+
+        let adaptiveAllocations = null;
+        if (v.adaptive_allocations?.enabled) {
+          adaptiveAllocations = (
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.ml.trainedModels.nodesList.modelsList.adaptiveAllocationsTooltip',
+                {
+                  defaultMessage: 'Adaptive allocations enabled',
+                }
+              )}
+            >
+              <EuiIcon size="l" color="warning" type="scale" />
+            </EuiToolTip>
+          );
+        }
+        return (
+          <>
+            <>
+              {v.node.number_of_allocations} * {v.node.threads_per_allocation}
+            </>
+            {adaptiveAllocations}
+          </>
+        );
       },
     },
     {

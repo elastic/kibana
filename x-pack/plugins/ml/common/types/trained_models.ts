@@ -214,6 +214,11 @@ export interface AllocatedModel {
     threads_per_allocation?: number;
     error_count?: number;
   };
+  adaptive_allocations?: {
+    enabled: boolean;
+    min_number_of_allocations?: number;
+    max_number_of_allocations?: number;
+  };
 }
 
 export interface NodeDeploymentStatsResponse {
