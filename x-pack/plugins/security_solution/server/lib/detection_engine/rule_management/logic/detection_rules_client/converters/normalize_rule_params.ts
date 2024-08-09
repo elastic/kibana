@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { BaseRuleParams, RuleSourceCamelCased } from '../../../../rule_schema';
+import { migrateLegacyInvestigationFields } from '../../../utils/utils';
 
 interface NormalizeRuleSourceParams {
   immutable: BaseRuleParams['immutable'];
@@ -37,12 +38,20 @@ export const normalizeRuleSource = ({
 };
 
 export const normalizeRuleParams = (params: BaseRuleParams) => {
+  const investigationFields = migrateLegacyInvestigationFields(params.investigationFields);
+  const ruleSource = normalizeRuleSource({
+    immutable: params.immutable,
+    ruleSource: params.ruleSource,
+  });
+
   return {
     ...params,
+    // These fields are types as optional in the data model, but they are required in our domain
+    setup: params.setup ?? '',
+    relatedIntegrations: params.relatedIntegrations ?? [],
+    requiredFields: params.requiredFields ?? [],
     // Fields to normalize
-    ruleSource: normalizeRuleSource({
-      immutable: params.immutable,
-      ruleSource: params.ruleSource,
-    }),
+    investigationFields,
+    ruleSource,
   };
 };
