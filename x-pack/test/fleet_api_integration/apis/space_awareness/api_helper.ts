@@ -15,6 +15,7 @@ import {
   GetAgentsResponse,
   GetOneAgentPolicyResponse,
   GetOneAgentResponse,
+  GetOnePackagePolicyResponse,
 } from '@kbn/fleet-plugin/common';
 import {
   GetEnrollmentAPIKeysResponse,
@@ -27,6 +28,8 @@ import {
   PutSpaceSettingsRequest,
   GetActionStatusResponse,
   PostNewAgentActionResponse,
+  UpdateAgentPolicyResponse,
+  UpdateAgentPolicyRequest,
 } from '@kbn/fleet-plugin/common/types';
 import {
   GetUninstallTokenResponse,
@@ -79,6 +82,16 @@ export class SpaceTestApiClient {
 
     return res;
   }
+  async getPackagePolicy(
+    packagePolicyId: string,
+    spaceId?: string
+  ): Promise<GetOnePackagePolicyResponse> {
+    const { body: res } = await this.supertest
+      .get(`${this.getBaseUrl(spaceId)}/api/fleet/package_policies/${packagePolicyId}`)
+      .expect(200);
+
+    return res;
+  }
   async createFleetServerPolicy(spaceId?: string): Promise<CreateAgentPolicyResponse> {
     const { body: res } = await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/agent_policies`)
@@ -107,6 +120,21 @@ export class SpaceTestApiClient {
   async getAgentPolicy(policyId: string, spaceId?: string): Promise<GetOneAgentPolicyResponse> {
     const { body: res } = await this.supertest
       .get(`${this.getBaseUrl(spaceId)}/api/fleet/agent_policies/${policyId}`)
+      .expect(200);
+
+    return res;
+  }
+  async putAgentPolicy(
+    policyId: string,
+    data: Partial<UpdateAgentPolicyRequest['body']>,
+    spaceId?: string
+  ): Promise<UpdateAgentPolicyResponse> {
+    const { body: res } = await this.supertest
+      .put(`${this.getBaseUrl(spaceId)}/api/fleet/agent_policies/${policyId}`)
+      .send({
+        ...data,
+      })
+      .set('kbn-xsrf', 'xxxx')
       .expect(200);
 
     return res;

@@ -15,5 +15,6 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./package_install'));
     loadTestFile(require.resolve('./space_settings'));
     loadTestFile(require.resolve('./actions'));
+    loadTestFile(require.resolve('./change_space_agent_policies'));
   });
 }

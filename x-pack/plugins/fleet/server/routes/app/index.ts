@@ -157,9 +157,7 @@ export const getAgentPoliciesSpacesHandler: FleetRequestHandler<
         items: authorizedSpaces,
       },
     });
-  } catch (e) {
-    console.log(e);
-    const error = new GenerateServiceTokenError(e);
+  } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }
 };

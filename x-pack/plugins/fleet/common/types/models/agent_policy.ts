@@ -21,6 +21,7 @@ export interface NewAgentPolicy {
   id?: string;
   name: string;
   namespace: string;
+  space_ids?: string[];
   description?: string;
   is_default?: boolean;
   is_default_fleet_server?: boolean; // Optional when creating a policy

@@ -272,12 +272,23 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
   let spaceId = fleetContext.spaceId;
 
   try {
-    // TODO if feature flag enabled Detect space change, will need to updated after multiple space support
     if (spaceIds?.length) {
+      const security = appContextService.getSecurity();
+      const spaces = await (await context.fleet).getAllSpaces();
+      const allSpaceId = spaces.map((s) => s.id);
+      const res = await security.authz.checkPrivilegesWithRequest(request).atSpaces(allSpaceId, {
+        kibana: [security.authz.actions.api.get(`fleet-agent-policies-all`)],
+      });
+
+      const authorizedSpaces = allSpaceId.filter(
+        (id) =>
+          res.privileges.kibana.find((privilege) => privilege.resource === id)?.authorized ?? false
+      );
       await updateAgentPolicySpaces({
         agentPolicyId: request.params.agentPolicyId,
         currentSpaceId: spaceId,
         newSpaceIds: spaceIds,
+        authorizedSpaces,
       });
 
       spaceId = spaceIds[0];

@@ -1,0 +1,122 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import expect from '@kbn/expect';
+import { CreateAgentPolicyResponse, GetOnePackagePolicyResponse } from '@kbn/fleet-plugin/common';
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { skipIfNoDockerRegistry } from '../../helpers';
+import { SpaceTestApiClient } from './api_helper';
+import { cleanFleetIndices, createFleetAgent, expectToRejectWithNotFound } from './helpers';
+import { setupTestSpaces, TEST_SPACE_1 } from './space_helpers';
+
+export default function (providerContext: FtrProviderContext) {
+  const { getService } = providerContext;
+  const supertest = getService('supertest');
+  const esClient = getService('es');
+  const kibanaServer = getService('kibanaServer');
+
+  describe('change space agent policies', async function () {
+    skipIfNoDockerRegistry(providerContext);
+    const apiClient = new SpaceTestApiClient(supertest);
+
+    before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.cleanStandardList({
+        space: TEST_SPACE_1,
+      });
+      await cleanFleetIndices(esClient);
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.cleanStandardList({
+        space: TEST_SPACE_1,
+      });
+      await cleanFleetIndices(esClient);
+    });
+
+    setupTestSpaces(providerContext);
+    let defaultSpacePolicy1: CreateAgentPolicyResponse;
+    let defaultPackagePolicy1: GetOnePackagePolicyResponse;
+    before(async () => {
+      const _policyRes = await apiClient.createAgentPolicy();
+      defaultSpacePolicy1 = _policyRes;
+      await apiClient.installPackage({
+        pkgName: 'nginx',
+        pkgVersion: '1.20.0',
+        force: true, // To avoid package verification
+      });
+      await createFleetAgent(esClient, defaultSpacePolicy1.item.id);
+      const packagePolicyRes = await apiClient.createPackagePolicy(undefined, {
+        policy_ids: [defaultSpacePolicy1.item.id],
+        name: `test-nginx-${Date.now()}`,
+        description: 'test',
+        package: {
+          name: 'nginx',
+          version: '1.20.0',
+        },
+        inputs: {},
+      });
+      defaultPackagePolicy1 = packagePolicyRes;
+    });
+
+    describe('PUT /agent_policies/{id}', () => {
+      async function assertPolicyAvailableInSpace(spaceId?: string) {
+        await apiClient.getAgentPolicy(defaultSpacePolicy1.item.id, spaceId);
+        await apiClient.getPackagePolicy(defaultPackagePolicy1.item.id, spaceId);
+        const enrollmentApiKeys = await apiClient.getEnrollmentApiKeys(spaceId);
+        expect(
+          enrollmentApiKeys.items.find((item) => item.policy_id === defaultSpacePolicy1.item.id)
+        ).not.to.be(undefined);
+
+        const agents = await apiClient.getAgents(spaceId);
+        expect(agents.total).to.be(1);
+      }
+
+      async function assertPolicyNotAvailableInSpace(spaceId?: string) {
+        await expectToRejectWithNotFound(() =>
+          apiClient.getPackagePolicy(defaultPackagePolicy1.item.id, spaceId)
+        );
+        await expectToRejectWithNotFound(() =>
+          apiClient.getAgentPolicy(defaultSpacePolicy1.item.id, spaceId)
+        );
+
+        const enrollmentApiKeys = await apiClient.getEnrollmentApiKeys(spaceId);
+        expect(
+          enrollmentApiKeys.items.find((item) => item.policy_id === defaultSpacePolicy1.item.id)
+        ).to.be(undefined);
+
+        const agents = await apiClient.getAgents(spaceId);
+        expect(agents.total).to.be(0);
+      }
+
+      it('should allow set policy in multiple space', async () => {
+        await apiClient.putAgentPolicy(defaultSpacePolicy1.item.id, {
+          name: 'tata',
+          namespace: 'default',
+          description: 'tata',
+          space_ids: ['default', TEST_SPACE_1],
+        });
+
+        await assertPolicyAvailableInSpace();
+        await assertPolicyAvailableInSpace(TEST_SPACE_1);
+      });
+
+      it('should allow set policy in test space only', async () => {
+        await apiClient.putAgentPolicy(defaultSpacePolicy1.item.id, {
+          name: 'tata',
+          namespace: 'default',
+          description: 'tata',
+          space_ids: [TEST_SPACE_1],
+        });
+
+        await assertPolicyNotAvailableInSpace();
+        await assertPolicyAvailableInSpace(TEST_SPACE_1);
+      });
+    });
+  });
+}

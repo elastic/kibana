@@ -18,15 +18,18 @@ import { appContextService } from '../app_context';
 import { agentPolicyService } from '../agent_policy';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
 import { packagePolicyService } from '../package_policy';
+import { FleetError } from '../../errors';
 
 export async function updateAgentPolicySpaces({
   agentPolicyId,
   currentSpaceId,
   newSpaceIds,
+  authorizedSpaces,
 }: {
   agentPolicyId: string;
   currentSpaceId: string;
   newSpaceIds: string[];
+  authorizedSpaces: string[];
 }) {
   if (!appContextService.getExperimentalFeatures()?.useSpaceAwareness) {
     return;
@@ -50,11 +53,22 @@ export async function updateAgentPolicySpaces({
   const spacesToAdd = newSpaceIds.filter(
     (spaceId) => !existingPolicy?.space_ids?.includes(spaceId) ?? true
   );
-
   const spacesToRemove =
     existingPolicy?.space_ids?.filter((spaceId) => !newSpaceIds.includes(spaceId) ?? true) ?? [];
 
-  // Todo Retrieve package policies
+  // Privileges check
+  for (const spaceId of spacesToAdd) {
+    if (!authorizedSpaces.includes(spaceId)) {
+      throw new FleetError(`No enough permissions to create policies in space ${spaceId}`);
+    }
+  }
+
+  for (const spaceId of spacesToRemove) {
+    if (!authorizedSpaces.includes(spaceId)) {
+      throw new FleetError(`No enough permissions to remove policies from space ${spaceId}`);
+    }
+  }
+
   const res = await soClient.updateObjectsSpaces(
     [
       {
@@ -82,10 +96,12 @@ export async function updateAgentPolicySpaces({
     index: ENROLLMENT_API_KEYS_INDEX,
     script: `ctx._source.namespaces = [${newSpaceIds.map((spaceId) => `"${spaceId}"`).join(',')}]`,
     ignore_unavailable: true,
+    refresh: true,
   });
   await esClient.updateByQuery({
     index: AGENTS_INDEX,
     script: `ctx._source.namespaces = [${newSpaceIds.map((spaceId) => `"${spaceId}"`).join(',')}]`,
     ignore_unavailable: true,
+    refresh: true,
   });
 }
