@@ -164,28 +164,33 @@ export const useAlertsDataView = ({
     ]
   );
 
-  return useMemo(
-    () => ({
+  return useMemo(() => {
+    let isLoading: boolean;
+    if (!featureIds.length || hasMixedFeatureIds) {
+      isLoading = false;
+    } else {
+      if (isOnlySecurity) {
+        isLoading = isInitialLoadingIndexNames || isLoadingIndexNames || !dataView;
+      } else {
+        isLoading =
+          isInitialLoadingIndexNames ||
+          isLoadingIndexNames ||
+          isInitialLoadingFields ||
+          isLoadingFields;
+      }
+    }
+    return {
       dataView,
-      isLoading:
-        !featureIds.length || hasMixedFeatureIds
-          ? false
-          : isOnlySecurity
-          ? isInitialLoadingIndexNames || isLoadingIndexNames || !dataView
-          : isInitialLoadingIndexNames ||
-            isLoadingIndexNames ||
-            isInitialLoadingFields ||
-            isLoadingFields,
-    }),
-    [
-      dataView,
-      featureIds.length,
-      hasMixedFeatureIds,
-      isInitialLoadingFields,
-      isInitialLoadingIndexNames,
-      isLoadingFields,
-      isLoadingIndexNames,
-      isOnlySecurity,
-    ]
-  );
+      isLoading,
+    };
+  }, [
+    dataView,
+    featureIds.length,
+    hasMixedFeatureIds,
+    isInitialLoadingFields,
+    isInitialLoadingIndexNames,
+    isLoadingFields,
+    isLoadingIndexNames,
+    isOnlySecurity,
+  ]);
 };

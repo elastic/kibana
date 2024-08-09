@@ -94,7 +94,7 @@ export const AlertFilterControls = (props: AlertFilterControlsProps) => {
     ...restFilterItemGroupProps
   } = props;
   const [loadingPageFilters, setLoadingPageFilters] = useState(true);
-  const { dataView, isLoading: isLoadingDataViews } = useAlertsDataView({
+  const { dataView, isLoading: isLoadingDataView } = useAlertsDataView({
     featureIds,
     dataViewsService: dataViews,
     http,
@@ -102,7 +102,7 @@ export const AlertFilterControls = (props: AlertFilterControlsProps) => {
   });
 
   useEffect(() => {
-    if (!isLoadingDataViews) {
+    if (!isLoadingDataView) {
       // If a data view spec is provided, create a new data view
       if (dataViewSpec?.id) {
         (async () => {
@@ -121,7 +121,7 @@ export const AlertFilterControls = (props: AlertFilterControlsProps) => {
     }
 
     return () => dataViews.clearInstanceCache();
-  }, [dataView, dataViewSpec, dataViews, isLoadingDataViews]);
+  }, [dataView, dataViewSpec, dataViews, isLoadingDataView]);
 
   const handleFilterChanges = useCallback(
     (newFilters: Filter[]) => {

@@ -54,15 +54,15 @@ export const AlertsSearchBar = ({
     toasts,
   });
 
-  const indexPatterns = useMemo(
-    () =>
-      ruleTypeId && aadFields?.length
-        ? [{ title: ruleTypeId, fields: aadFields }]
-        : dataView
-        ? [dataView]
-        : null,
-    [aadFields, dataView, ruleTypeId]
-  );
+  const indexPatterns = useMemo(() => {
+    if (ruleTypeId && aadFields?.length) {
+      return [{ title: ruleTypeId, fields: aadFields }];
+    }
+    if (dataView) {
+      return [dataView];
+    }
+    return null;
+  }, [aadFields, dataView, ruleTypeId]);
 
   const ruleType = useLoadRuleTypesQuery({
     filteredRuleTypes: ruleTypeId !== undefined ? [ruleTypeId] : [],
