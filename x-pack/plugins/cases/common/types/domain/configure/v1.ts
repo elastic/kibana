@@ -10,6 +10,7 @@ import { CaseConnectorRt, ConnectorMappingsRt } from '../connector/v1';
 import { UserRt } from '../user/v1';
 import { CustomFieldTextTypeRt, CustomFieldToggleTypeRt } from '../custom_field/v1';
 import { CaseBaseOptionalFieldsRt } from '../case/v1';
+import { CaseObservableTypeRt } from '../observable/v1';
 
 export const ClosureTypeRt = rt.union([
   rt.literal('close-by-user'),
@@ -57,6 +58,8 @@ export const CustomFieldConfigurationRt = rt.union([
 ]);
 
 export const CustomFieldsConfigurationRt = rt.array(CustomFieldConfigurationRt);
+
+export const ObservableTypesConfigurationRt = rt.array(CaseObservableTypeRt);
 
 export const TemplateConfigurationRt = rt.intersection([
   rt.strict({
@@ -106,6 +109,10 @@ export const ConfigurationBasicWithoutOwnerRt = rt.strict({
    * Templates configured for the case
    */
   templates: TemplatesConfigurationRt,
+  /**
+   * Observable types configured for the case
+   */
+  observableTypes: ObservableTypesConfigurationRt,
 });
 
 export const CasesConfigureBasicRt = rt.intersection([
@@ -151,3 +158,5 @@ export type ClosureType = rt.TypeOf<typeof ClosureTypeRt>;
 export type ConfigurationAttributes = rt.TypeOf<typeof ConfigurationAttributesRt>;
 export type Configuration = rt.TypeOf<typeof ConfigurationRt>;
 export type Configurations = rt.TypeOf<typeof ConfigurationsRt>;
+export type ObservableTypesConfiguration = rt.TypeOf<typeof ObservableTypesConfigurationRt>;
+export type ObservableTypeConfiguration = rt.TypeOf<typeof CaseObservableTypeRt>;
