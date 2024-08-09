@@ -178,7 +178,6 @@ export const serializeState: (props: {
   // Serialize ONLY the savedObjectId. This ensures that when this vis is loaded again, it will always fetch the
   // latest revision of the saved object
   if (linkedToLibrary) {
-    console.error('SAVE LINKED');
     return {
       rawState: {
         savedObjectId: id,
