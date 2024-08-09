@@ -71,7 +71,7 @@ const graphState: StateGraphArgs<CategorizationState>['channels'] = {
     value: (x: object, y?: object) => y ?? x,
     default: () => ({}),
   },
-  previousErrors: {
+  previousError: {
     value: (x: string, y?: string) => y ?? x,
     default: () => '',
   },

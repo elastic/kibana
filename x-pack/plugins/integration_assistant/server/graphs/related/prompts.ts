@@ -105,9 +105,9 @@ Here is some context that you can reference for your task, read it carefully as 
 <current_processors>
 {current_processors}
 </current_processors>
-<previous_errors>
-{previous_errors}
-</previous_errors>
+<previous_error>
+{previous_error}
+</previous_error>
 </context>`,
   ],
   [

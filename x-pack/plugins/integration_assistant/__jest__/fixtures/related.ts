@@ -145,7 +145,7 @@ export const relatedTestState = {
   packageName: 'testpackage',
   dataStreamName: 'testDataStream',
   errors: { test: 'testerror' },
-  previousErrors: 'testerror',
+  previousError: 'testerror',
   pipelineResults: [{ test: 'testresult' }],
   finalized: false,
   reviewed: false,

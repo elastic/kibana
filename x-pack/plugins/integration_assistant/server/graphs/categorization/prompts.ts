@@ -81,9 +81,9 @@ Here is some context that you can reference for your task, read it carefully as 
 <compatibility_matrix>
 {compatibility_matrix}
 </compatibility_matrix>
-<previous_errors>
-{previous_errors}
-</previous_errors>
+<previous_error>
+{previous_error}
+</previous_error>
 <previous_invalid_categorization>
 {previous_invalid_categorization}
 </previous_invalid_categorization>

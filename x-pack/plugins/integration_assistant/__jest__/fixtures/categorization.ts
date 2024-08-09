@@ -169,7 +169,8 @@ export const categorizationTestState = {
   packageName: 'testpackage',
   dataStreamName: 'testDataStream',
   errors: { test: 'testerror' },
-  previousErrors: 'testprevious',
+  previousError: 'testprevious',
+  previousInvalidCategorization: 'testinvalid',
   pipelineResults: [{ test: 'testresult' }],
   finalized: false,
   reviewed: false,
@@ -186,7 +187,7 @@ export const categorizationTestState = {
       if: "ctx.mysql_enterprise.audit.general_data.sql_command == 'create_db'",
     },
   ],
-  invalidCategorization: { test: 'testinvalid' },
+  invalidCategorization: [{ test: 'testinvalid' }],
   initialPipeline: categorizationInitialPipeline,
   results: { test: 'testresults' },
 };
