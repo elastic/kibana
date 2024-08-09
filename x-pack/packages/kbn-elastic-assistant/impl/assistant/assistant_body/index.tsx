@@ -30,7 +30,6 @@ interface Props {
   currentConversation: Conversation | undefined;
   currentSystemPromptId: string | undefined;
   handleOnConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => Promise<void>;
-  handleOnSystemPromptSelectionChange: (systemPromptId?: string) => void;
   isAssistantEnabled: boolean;
   isSettingsModalVisible: boolean;
   isWelcomeSetup: boolean;
@@ -38,6 +37,7 @@ interface Props {
     QueryObserverResult<Record<string, Conversation>, unknown>
   >;
   http: HttpSetup;
+  setCurrentSystemPromptId: Dispatch<SetStateAction<string | undefined>>;
   setIsSettingsModalVisible: Dispatch<SetStateAction<boolean>>;
 }
 
@@ -47,7 +47,7 @@ export const AssistantBody: FunctionComponent<Props> = ({
   currentConversation,
   currentSystemPromptId,
   handleOnConversationSelected,
-  handleOnSystemPromptSelectionChange,
+  setCurrentSystemPromptId,
   http,
   isAssistantEnabled,
   isSettingsModalVisible,
@@ -113,9 +113,9 @@ export const AssistantBody: FunctionComponent<Props> = ({
             allSystemPrompts={allSystemPrompts}
             currentConversation={currentConversation}
             currentSystemPromptId={currentSystemPromptId}
-            handleOnSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
             isSettingsModalVisible={isSettingsModalVisible}
             refetchCurrentUserConversations={refetchCurrentUserConversations}
+            setCurrentSystemPromptId={setCurrentSystemPromptId}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
           />
         ) : (

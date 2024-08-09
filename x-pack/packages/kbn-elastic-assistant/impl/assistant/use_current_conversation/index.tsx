@@ -8,8 +8,8 @@
 import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
 import { QueryObserverResult } from '@tanstack/react-query';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
-import deepEqual from 'fast-deep-equal';
 import { find } from 'lodash';
+import deepEqual from 'fast-deep-equal';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { getGenAiConfig } from '../../connectorland/helpers';
 import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
@@ -35,7 +35,6 @@ interface UseCurrentConversation {
   handleCreateConversation: () => Promise<void>;
   handleOnConversationDeleted: (cTitle: string) => Promise<void>;
   handleOnConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => Promise<void>;
-  handleOnSystemPromptSelectionChange: (systemPromptId?: string) => void;
   refetchCurrentConversation: (options?: {
     cId?: string;
     cTitle?: string;
@@ -66,7 +65,12 @@ export const useCurrentConversation = ({
     setApiConfig,
   } = useConversation();
   const [currentConversation, setCurrentConversation] = useState<Conversation | undefined>();
-  const [currentConversationId, setCurrentConversationId] = useState<string>(conversationId);
+  const [currentConversationId, setCurrentConversationId] = useState<string | undefined>(
+    conversationId
+  );
+  useEffect(() => {
+    setCurrentConversationId(conversationId);
+  }, [conversationId]);
   /**
    * START SYSTEM PROMPT
    */
@@ -82,10 +86,10 @@ export const useCurrentConversation = ({
   const [currentSystemPromptId, setCurrentSystemPromptId] = useState<string | undefined>(
     currentSystemPrompt?.id
   );
+  useEffect(() => {
+    setCurrentSystemPromptId(currentSystemPrompt?.id);
+  }, [currentSystemPrompt?.id]);
 
-  const handleOnSystemPromptSelectionChange = useCallback((systemPromptId?: string) => {
-    setCurrentSystemPromptId(systemPromptId);
-  }, []);
   /**
    * END SYSTEM PROMPT
    */
@@ -162,86 +166,66 @@ export const useCurrentConversation = ({
     async ({ cId, cTitle }: { cId: string; cTitle: string }) => {
       const allConversations = await refetchCurrentUserConversations();
 
-      let selectedConversation;
-
       // This is a default conversation that has not yet been initialized
       // add the default connector config
       if (cId === '' && allConversations?.data?.[cTitle]) {
-        // why might this happen??
-        selectedConversation = allConversations.data[cTitle];
-        const updatedConvo = await initializeDefaultConversationWithConnector(selectedConversation);
+        const updatedConvo = await initializeDefaultConversationWithConnector(
+          allConversations.data[cTitle]
+        );
         setCurrentConversationId(updatedConvo.id);
       } else if (allConversations?.data?.[cId]) {
-        selectedConversation = allConversations?.data?.[cId];
+        // selectedConversation = allConversations?.data?.[cId];
         setCurrentConversationId(cId);
       }
-
-      setCurrentSystemPromptId(
-        getDefaultSystemPrompt({
-          allSystemPrompts,
-          conversation: selectedConversation,
-        })?.id
-      );
     },
-    [allSystemPrompts, initializeDefaultConversationWithConnector, refetchCurrentUserConversations]
+    [
+      initializeDefaultConversationWithConnector,
+      refetchCurrentUserConversations,
+      setCurrentConversationId,
+    ]
   );
 
   useEffect(() => {
     if (!mayUpdateConversations) return;
-
     const updateConversation = async () => {
-      const nextConversation =
+      const nextConversation: Conversation =
         (currentConversationId && conversations[currentConversationId]) ||
+        // if currentConversationId is not an id, it should be a title from a
+        // default conversation that has not yet been initialized
         find(conversations, ['title', currentConversationId]) ||
-        find(conversations, ['title', WELCOME_CONVERSATION_TITLE]);
+        find(conversations, ['title', WELCOME_CONVERSATION_TITLE]) ||
+        // if no Welcome convo exists, create one
+        getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE });
 
       if (nextConversation && nextConversation.id === '') {
+        // This is a default conversation that has not yet been initialized
         const conversation = await initializeDefaultConversationWithConnector(nextConversation);
         return setCurrentConversation(conversation);
       }
-
       setCurrentConversation((prev) => {
         if (deepEqual(prev, nextConversation)) return prev;
 
-        const conversationToReturn =
-          (nextConversation &&
-            conversations[
-              nextConversation?.id !== '' ? nextConversation?.id : nextConversation?.title
-            ]) ??
-          conversations[WELCOME_CONVERSATION_TITLE] ??
-          getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE });
-
-        // Update selected system prompt
-        setCurrentSystemPromptId(
-          getDefaultSystemPrompt({
-            allSystemPrompts,
-            conversation: conversationToReturn,
-          })?.id
-        );
-
         if (
           prev &&
-          prev.id === conversationToReturn.id &&
+          prev.id === nextConversation.id &&
           // if the conversation id has not changed and the previous conversation has more messages
           // it is because the local conversation has a readable stream running
           // and it has not yet been persisted to the stored conversation
-          prev.messages.length > conversationToReturn.messages.length
+          prev.messages.length > nextConversation.messages.length
         ) {
           return {
-            ...conversationToReturn,
+            ...nextConversation,
             messages: prev.messages,
           };
         }
 
-        return conversationToReturn;
+        return nextConversation;
       });
     };
-
     updateConversation();
   }, [
-    allSystemPrompts,
-    conversations,
     currentConversationId,
+    conversations,
     getDefaultConversation,
     initializeDefaultConversationWithConnector,
     mayUpdateConversations,
@@ -292,7 +276,6 @@ export const useCurrentConversation = ({
     handleCreateConversation,
     handleOnConversationDeleted,
     handleOnConversationSelected,
-    handleOnSystemPromptSelectionChange,
     refetchCurrentConversation,
     setCurrentConversation,
     setCurrentSystemPromptId,

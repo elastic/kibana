@@ -135,6 +135,7 @@ export const useConversation = (): UseConversation => {
               title: cTitle,
               messages: messages != null ? messages : [],
             };
+
       return newConversation;
     },
     []

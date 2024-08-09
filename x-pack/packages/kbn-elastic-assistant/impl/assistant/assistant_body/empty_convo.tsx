@@ -19,13 +19,12 @@ import * as i18n from '../translations';
 interface Props {
   currentConversation: Conversation | undefined;
   currentSystemPromptId: string | undefined;
-  handleOnSystemPromptSelectionChange: (systemPromptId?: string) => void;
-
   isSettingsModalVisible: boolean;
   refetchCurrentUserConversations: () => Promise<
     QueryObserverResult<Record<string, Conversation>, unknown>
   >;
   setIsSettingsModalVisible: Dispatch<SetStateAction<boolean>>;
+  setCurrentSystemPromptId: Dispatch<SetStateAction<string | undefined>>;
   allSystemPrompts: PromptResponse[];
 }
 
@@ -33,9 +32,9 @@ export const EmptyConvo: React.FC<Props> = ({
   allSystemPrompts,
   currentConversation,
   currentSystemPromptId,
-  handleOnSystemPromptSelectionChange,
   isSettingsModalVisible,
   refetchCurrentUserConversations,
+  setCurrentSystemPromptId,
   setIsSettingsModalVisible,
 }) => {
   return (
@@ -62,7 +61,7 @@ export const EmptyConvo: React.FC<Props> = ({
               <SystemPrompt
                 conversation={currentConversation}
                 currentSystemPromptId={currentSystemPromptId}
-                onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
+                onSystemPromptSelectionChange={setCurrentSystemPromptId}
                 isSettingsModalVisible={isSettingsModalVisible}
                 setIsSettingsModalVisible={setIsSettingsModalVisible}
                 allSystemPrompts={allSystemPrompts}

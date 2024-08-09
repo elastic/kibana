@@ -8,14 +8,12 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useCurrentConversation, Props } from '.';
 import { useConversation } from '../use_conversation';
-import { getDefaultSystemPrompt } from '../use_conversation/helpers';
 import deepEqual from 'fast-deep-equal';
 import { Conversation } from '../../..';
 import { find } from 'lodash';
 
 // Mock dependencies
 jest.mock('../use_conversation');
-jest.mock('../use_conversation/helpers');
 jest.mock('../helpers');
 jest.mock('fast-deep-equal');
 jest.mock('lodash');
@@ -25,7 +23,11 @@ const mockData = {
     title: 'Welcome',
     category: 'assistant',
     messages: [],
-    apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
+    apiConfig: {
+      connectorId: '123',
+      actionTypeId: '.gen-ai',
+      defaultSystemPromptId: 'system-prompt-id',
+    },
     replacements: {},
   },
   electric_sheep_id: {
@@ -54,7 +56,8 @@ describe('useCurrentConversation', () => {
   });
 
   const defaultProps: Props = {
-    allSystemPrompts: [],
+    // @ts-ignore not exact system prompt type, ok for test
+    allSystemPrompts: [{ id: 'system-prompt-id' }, { id: 'something-crazy' }],
     conversationId: '',
     conversations: {},
     mayUpdateConversations: true,
@@ -76,7 +79,7 @@ describe('useCurrentConversation', () => {
     const { result } = setupHook();
 
     act(() => {
-      result.current.handleOnSystemPromptSelectionChange('prompt-id');
+      result.current.setCurrentSystemPromptId('prompt-id');
     });
 
     expect(result.current.currentSystemPromptId).toBe('prompt-id');
@@ -106,16 +109,23 @@ describe('useCurrentConversation', () => {
       ...mockData.welcome_id,
       id: conversationId,
       title: conversationTitle,
+      apiConfig: {
+        ...mockData.welcome_id.apiConfig,
+        defaultSystemPromptId: 'something-crazy',
+      },
     } as Conversation;
     const mockConversations = {
+      ...mockData,
       [conversationId]: conversation,
     };
     (find as jest.Mock).mockReturnValue(conversation);
-    (getDefaultSystemPrompt as jest.Mock).mockReturnValue({ id: 'system-prompt-id' });
 
     const { result } = setupHook({
-      conversationId,
+      conversationId: mockData.welcome_id.id,
       conversations: mockConversations,
+      refetchCurrentUserConversations: jest.fn().mockResolvedValue({
+        data: mockConversations,
+      }),
     });
 
     await act(async () => {
@@ -126,6 +136,39 @@ describe('useCurrentConversation', () => {
     });
 
     expect(result.current.currentConversation).toEqual(conversation);
+    expect(result.current.currentSystemPromptId).toBe('something-crazy');
+  });
+
+  it('should non-existing handle conversation selection', async () => {
+    const conversationId = 'test-id';
+    const conversationTitle = 'Test Conversation';
+    const conversation = {
+      ...mockData.welcome_id,
+      id: conversationId,
+      title: conversationTitle,
+    } as Conversation;
+    const mockConversations = {
+      ...mockData,
+      [conversationId]: conversation,
+    };
+    (find as jest.Mock).mockReturnValue(conversation);
+
+    const { result } = setupHook({
+      conversationId: mockData.welcome_id.id,
+      conversations: mockConversations,
+      refetchCurrentUserConversations: jest.fn().mockResolvedValue({
+        data: mockConversations,
+      }),
+    });
+
+    await act(async () => {
+      await result.current.handleOnConversationSelected({
+        cId: 'bad',
+        cTitle: 'bad',
+      });
+    });
+
+    expect(result.current.currentConversation).toEqual(mockData.welcome_id);
     expect(result.current.currentSystemPromptId).toBe('system-prompt-id');
   });
 

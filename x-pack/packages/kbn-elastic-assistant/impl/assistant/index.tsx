@@ -60,7 +60,7 @@ const CommentContainer = styled('span')`
 
 export interface Props {
   chatHistoryVisible?: boolean;
-  conversationTitle: string;
+  conversationTitle?: string;
   currentUserAvatar?: UserAvatar;
   onCloseFlyout?: () => void;
   promptContextId?: string;
@@ -123,14 +123,12 @@ const AssistantComponent: React.FC<Props> = ({
     http,
   });
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
-
   const {
     currentConversation,
     currentSystemPromptId,
     handleCreateConversation,
     handleOnConversationDeleted,
     handleOnConversationSelected,
-    handleOnSystemPromptSelectionChange,
     refetchCurrentConversation,
     setCurrentConversation,
     setCurrentSystemPromptId,
@@ -252,6 +250,26 @@ const AssistantComponent: React.FC<Props> = ({
   const onToggleShowAnonymizedValues = useCallback(() => {
     setShowAnonymizedValues((prevValue) => !prevValue);
   }, [setShowAnonymizedValues]);
+
+  const {
+    abortStream,
+    handleOnChatCleared,
+    handleChatSend,
+    handleRegenerateResponse,
+    isLoading: isLoadingChatSend,
+    setUserPrompt,
+    userPrompt,
+  } = useChatSend({
+    allSystemPrompts,
+    currentConversation,
+    currentSystemPromptId,
+    http,
+    refetchCurrentUserConversations,
+    selectedPromptContexts,
+    setSelectedPromptContexts,
+    setCurrentConversation,
+  });
+
   useEffect(() => {
     // Adding `conversationTitle !== selectedConversationTitle` to prevent auto-run still executing after changing selected conversation
     if (currentConversation?.messages.length || conversationTitle !== currentConversation?.title) {
@@ -304,6 +322,7 @@ const AssistantComponent: React.FC<Props> = ({
     isErrorAnonymizationFields,
     anonymizationFields,
     isFetchedAnonymizationFields,
+    setUserPrompt,
   ]);
 
   const createCodeBlockPortals = useCallback(
@@ -325,26 +344,6 @@ const AssistantComponent: React.FC<Props> = ({
       }),
     [messageCodeBlocks]
   );
-
-  const {
-    abortStream,
-    handleOnChatCleared,
-    handleChatSend,
-    handleRegenerateResponse,
-    isLoading: isLoadingChatSend,
-    setUserPrompt,
-    userPrompt,
-  } = useChatSend({
-    allSystemPrompts,
-    currentConversation,
-    currentSystemPromptId,
-    http,
-    refetchCurrentUserConversations,
-    setCurrentSystemPromptId,
-    selectedPromptContexts,
-    setSelectedPromptContexts,
-    setCurrentConversation,
-  });
 
   const comments = useMemo(
     () => (
@@ -501,12 +500,12 @@ const AssistantComponent: React.FC<Props> = ({
                   currentConversation={currentConversation}
                   currentSystemPromptId={currentSystemPromptId}
                   handleOnConversationSelected={handleOnConversationSelected}
-                  handleOnSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
                   http={http}
                   isAssistantEnabled={isAssistantEnabled}
                   isSettingsModalVisible={isSettingsModalVisible}
                   isWelcomeSetup={isWelcomeSetup}
                   refetchCurrentUserConversations={refetchCurrentUserConversations}
+                  setCurrentSystemPromptId={setCurrentSystemPromptId}
                   setIsSettingsModalVisible={setIsSettingsModalVisible}
                 />
               </EuiFlyoutBody>

@@ -258,7 +258,6 @@ describe('Assistant', () => {
       expect(persistToLocalStorage).toHaveBeenLastCalledWith(mockData.welcome_id.id);
 
       const previousConversationButton = await screen.findByText(mockData.electric_sheep_id.title);
-
       expect(previousConversationButton).toBeInTheDocument();
       await act(async () => {
         fireEvent.click(previousConversationButton);

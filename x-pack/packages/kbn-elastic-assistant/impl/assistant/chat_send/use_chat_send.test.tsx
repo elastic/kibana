@@ -20,7 +20,6 @@ jest.mock('../use_send_message');
 jest.mock('../use_conversation');
 jest.mock('../../..');
 
-const setCurrentSystemPromptId = jest.fn();
 const setSelectedPromptContexts = jest.fn();
 const sendMessage = jest.fn();
 const removeLastMessage = jest.fn();
@@ -40,7 +39,6 @@ export const testProps: UseChatSendProps = {
     externalUrl: {},
   } as unknown as HttpSetup,
   currentSystemPromptId: defaultSystemPrompt.id,
-  setCurrentSystemPromptId,
   setSelectedPromptContexts,
   setCurrentConversation,
   refetchCurrentUserConversations: jest.fn(),
@@ -79,7 +77,6 @@ describe('use chat send', () => {
       expect(clearConversation).toHaveBeenCalledWith(testProps.currentConversation);
       expect(setCurrentConversation).toHaveBeenCalled();
     });
-    expect(setCurrentSystemPromptId).toHaveBeenCalledWith(defaultSystemPrompt.id);
   });
   it('handleChatSend sends message with context prompt when a valid prompt text is provided', async () => {
     const promptText = 'prompt text';

@@ -18,7 +18,6 @@ import { useConversation } from '../use_conversation';
 import { getCombinedMessage } from '../prompt/helpers';
 import { Conversation, useAssistantContext } from '../../..';
 import { getMessageFromRawResponse } from '../helpers';
-import { getDefaultSystemPrompt, getDefaultNewSystemPrompt } from '../use_conversation/helpers';
 
 export interface UseChatSendProps {
   allSystemPrompts: PromptResponse[];
@@ -27,7 +26,6 @@ export interface UseChatSendProps {
   http: HttpSetup;
   refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
   selectedPromptContexts: Record<string, SelectedPromptContext>;
-  setCurrentSystemPromptId: React.Dispatch<React.SetStateAction<string | undefined>>;
   setSelectedPromptContexts: React.Dispatch<
     React.SetStateAction<Record<string, SelectedPromptContext>>
   >;
@@ -54,7 +52,6 @@ export const useChatSend = ({
   http,
   refetchCurrentUserConversations,
   selectedPromptContexts,
-  setCurrentSystemPromptId,
   setSelectedPromptContexts,
   setCurrentConversation,
 }: UseChatSendProps): UseChatSend => {
@@ -192,12 +189,6 @@ export const useChatSend = ({
   }, [currentConversation, http, removeLastMessage, sendMessage, setCurrentConversation, toasts]);
 
   const onChatCleared = useCallback(async () => {
-    const defaultSystemPromptId =
-      getDefaultSystemPrompt({
-        allSystemPrompts,
-        conversation: currentConversation,
-      })?.id ?? getDefaultNewSystemPrompt(allSystemPrompts)?.id;
-
     setUserPrompt('');
     setSelectedPromptContexts({});
     if (currentConversation) {
@@ -206,13 +197,10 @@ export const useChatSend = ({
         setCurrentConversation(updatedConversation);
       }
     }
-    setCurrentSystemPromptId(defaultSystemPromptId);
   }, [
-    allSystemPrompts,
     clearConversation,
     currentConversation,
     setCurrentConversation,
-    setCurrentSystemPromptId,
     setSelectedPromptContexts,
     setUserPrompt,
   ]);
