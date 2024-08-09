@@ -15,7 +15,7 @@ import { ESQLLineTokens } from './esql_line_tokens';
 import { ESQLState } from './esql_state';
 
 import { ESQL_TOKEN_POSTFIX } from './constants';
-import { addFunctionTokens, addNullsOrder } from './esql_token_helpers';
+import { addFunctionTokens, mergeTokens } from './esql_token_helpers';
 
 const EOF = -1;
 
@@ -37,7 +37,7 @@ export class ESQLTokensProvider implements monaco.languages.TokensProvider {
     const lexer = getLexer(inputStream, errorListener);
 
     let done = false;
-    const myTokens: monaco.languages.IToken[] = [];
+    const myTokens: ESQLToken[] = [];
 
     do {
       let token: Token | null;
@@ -78,7 +78,7 @@ export class ESQLTokensProvider implements monaco.languages.TokensProvider {
     // the previous custom Kibana grammar baked functions directly as tokens, so highlight was easier
     // The ES grammar doesn't have the token concept of "function"
     const tokensWithFunctions = addFunctionTokens(myTokens);
-    addNullsOrder(tokensWithFunctions);
+    mergeTokens(tokensWithFunctions);
 
     return new ESQLLineTokens(tokensWithFunctions, prevState.getLineNumber() + 1);
   }
