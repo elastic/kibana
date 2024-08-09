@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface EntitiesPluginSetupDeps {}
 
-export interface RegisterServicesParams {
-  logger: Logger;
-  deps: {};
-}
-
-export function registerServices(params: RegisterServicesParams) {
-  return {};
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface EntitiesPluginStartDeps {}
