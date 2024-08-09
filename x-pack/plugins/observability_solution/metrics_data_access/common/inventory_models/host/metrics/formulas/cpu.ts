@@ -80,7 +80,7 @@ export const cpuUsageUser: LensBaseLayer = {
 
 export const cpuUsage: LensBaseLayer = {
   label: CPU_USAGE_LABEL,
-  value: '(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)',
+  value: 'average(system.cpu.total.norm.pct)',
   format: 'percent',
   decimals: 0,
 };
