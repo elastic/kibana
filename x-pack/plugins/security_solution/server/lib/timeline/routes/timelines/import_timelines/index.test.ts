@@ -39,7 +39,6 @@ import {
 
 describe('import timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let request: ReturnType<typeof requestMock.create>;
   let securitySetup: SecurityPluginSetup;
   let { context } = requestContextMock.createTools();
   let mockGetTimeline: jest.Mock;

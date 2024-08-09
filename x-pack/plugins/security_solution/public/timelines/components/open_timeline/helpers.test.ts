@@ -24,7 +24,11 @@ import {
 } from './helpers';
 import type { OpenTimelineResult } from './types';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
+import {
+  TimelineTypeEnum,
+  TimelineStatusEnum,
+  type ColumnHeaderResult,
+} from '../../../../common/api/timeline';
 import {
   mockTimeline as mockSelectedTimeline,
   mockTemplate as mockSelectedTemplate,
@@ -378,7 +382,7 @@ describe('helpers', () => {
       );
       const timeline = {
         savedObjectId: 'savedObject-1',
-        columns: columnsWithoutEventAction,
+        columns: columnsWithoutEventAction as ColumnHeaderResult[],
         version: '1',
       };
 
@@ -395,7 +399,7 @@ describe('helpers', () => {
       );
       const timeline = {
         savedObjectId: 'savedObject-1',
-        columns: columnsWithoutEventAction,
+        columns: columnsWithoutEventAction as ColumnHeaderResult[],
         filters: [
           {
             meta: {
@@ -567,7 +571,7 @@ describe('helpers', () => {
         version: '1',
         status: TimelineStatusEnum.active,
         timelineType: TimelineTypeEnum.default,
-        columns: customColumns,
+        columns: customColumns as ColumnHeaderResult[],
       };
 
       const newTimeline = defaultTimelineToTimelineModel(

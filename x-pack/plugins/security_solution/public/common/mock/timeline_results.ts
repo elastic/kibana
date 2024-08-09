@@ -12,6 +12,7 @@ import { VIEW_SELECTION } from '../../../common/constants';
 import type { TimelineResult } from '../../../common/api/timeline';
 import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
 import {
+  type ColumnHeaderResult,
   RowRendererIdEnum,
   TimelineTypeEnum,
   TimelineStatusEnum,
@@ -1988,7 +1989,9 @@ export const mockDataTableModel: DataTableModel = {
 
 export const mockGetOneTimelineResult: TimelineResult = {
   savedObjectId: 'ef579e40-jibber-jabber',
-  columns: timelineDefaults.columns.filter((column) => column.id !== 'event.action'),
+  columns: timelineDefaults.columns.filter(
+    (column) => column.id !== 'event.action'
+  ) as ColumnHeaderResult[],
   dateRange: { start: '2020-03-18T13:46:38.929Z', end: '2020-03-18T13:52:38.929Z' },
   description: 'This is a sample rule description',
   eventType: 'all',
