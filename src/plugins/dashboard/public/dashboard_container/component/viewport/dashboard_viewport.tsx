@@ -18,7 +18,7 @@ import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 import { DashboardGrid } from '../grid';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
-import { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState } from '@kbn/controls-example-plugin/public';
+import { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 
 export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {

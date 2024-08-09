@@ -11,5 +11,3 @@ import { ControlsExamplePlugin } from './plugin';
 export function plugin() {
   return new ControlsExamplePlugin();
 }
-
-export type { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState } from './react_controls/control_group/types';

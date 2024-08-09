@@ -10,7 +10,7 @@ import { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { type Filter } from '@kbn/es-query';
 import { skip } from 'rxjs';
 import { DashboardContainer } from '../../dashboard_container';
-import { ControlGroupApi } from '@kbn/controls-example-plugin/public';
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
 
 export function startSyncingDashboardControlGroup(dashboard: DashboardContainer, controlGroupApi: ControlGroupApi) {
   // when control group outputs filters, force a refresh!

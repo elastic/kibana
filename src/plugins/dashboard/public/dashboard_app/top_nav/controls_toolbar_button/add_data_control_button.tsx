@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { getAddControlButtonTitle } from '../../_dashboard_app_strings';
 import { useDashboardAPI } from '../../dashboard_app';
-import { ControlGroupApi } from '@kbn/controls-example-plugin/public';
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
 
 interface Props {
   closePopover: () => void;

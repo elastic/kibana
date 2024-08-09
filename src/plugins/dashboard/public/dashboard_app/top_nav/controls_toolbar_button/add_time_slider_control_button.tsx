@@ -9,7 +9,7 @@
 import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { EuiContextMenuItem } from '@elastic/eui';
-import type { ControlGroupApi } from '@kbn/controls-example-plugin/public';
+import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { apiHasType } from '@kbn/presentation-publishing';
 import {
   getAddTimeSliderControlButtonTitle,

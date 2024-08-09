@@ -95,7 +95,7 @@ import {
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
-import { ControlGroupApi } from '@kbn/controls-example-plugin/public';
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
 
 export interface InheritedChildInput {
   filters: Filter[];
