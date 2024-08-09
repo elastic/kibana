@@ -65,3 +65,8 @@ export {
   InstallPrepackedTimelinesRequestBody,
   InstallPrepackedTimelinesResponse,
 } from './install_prepackaged_timelines/install_prepackaged_timelines_route.gen';
+
+export {
+  GetDraftTimelinesRequestQuery,
+  GetDraftTimelinesResponse,
+} from './get_draft_timelines/get_draft_timelines_route.gen';
