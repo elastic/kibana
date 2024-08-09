@@ -309,28 +309,12 @@ export function useModelActions({
               item.model_id,
               deploymentParams.deploymentId!,
               {
+                ...(deploymentParams.adaptive_allocations
+                  ? { adaptive_allocations: deploymentParams.adaptive_allocations }
+                  : {}),
+                // Remove number of allocations if adaptive allocations are not enabled
                 ...(deploymentParams.adaptive_allocations?.enabled
-                  ? {
-                      adaptive_allocations: {
-                        enabled: true,
-                        ...(Number.isInteger(
-                          deploymentParams.adaptive_allocations?.min_number_of_allocations
-                        )
-                          ? {
-                              min_number_of_allocations:
-                                deploymentParams.adaptive_allocations?.min_number_of_allocations,
-                            }
-                          : {}),
-                        ...(Number.isInteger(
-                          deploymentParams.adaptive_allocations?.max_number_of_allocations
-                        )
-                          ? {
-                              max_number_of_allocations:
-                                deploymentParams.adaptive_allocations?.max_number_of_allocations,
-                            }
-                          : {}),
-                      },
-                    }
+                  ? {}
                   : { number_of_allocations: deploymentParams.numOfAllocations! }),
               }
             );

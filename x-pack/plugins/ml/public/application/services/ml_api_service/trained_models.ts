@@ -15,7 +15,6 @@ import type {
   GetModelDownloadConfigOptions,
   ModelDefinitionResponse,
 } from '@kbn/ml-trained-models-utils';
-import type { XOR } from '../../../../common/types/common';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type { MlSavedObjectType } from '../../../../common/types/saved_objects';
 import type { HttpService } from '../http_service';
@@ -63,16 +62,14 @@ interface CommonDeploymentParams {
   priority: 'low' | 'normal';
 }
 
-type AllocationsParams = XOR<
-  { number_of_allocations: number },
-  {
-    adaptive_allocations: {
-      enabled: boolean;
-      min_number_of_allocations?: number;
-      max_number_of_allocations?: number;
-    };
-  }
->;
+interface AllocationsParams {
+  number_of_allocations?: number;
+  adaptive_allocations?: {
+    enabled: boolean;
+    min_number_of_allocations?: number;
+    max_number_of_allocations?: number;
+  };
+}
 
 /**
  * Service with APIs calls to perform operations with trained models.

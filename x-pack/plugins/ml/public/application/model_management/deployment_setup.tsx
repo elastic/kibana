@@ -386,7 +386,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
         >
           <EuiSpacer size={'m'} />
 
-          {adaptiveAllocationsAvailable && config.adaptive_allocations?.enabled === true ? (
+          {adaptiveAllocationsAvailable ? (
             <EuiDescribedFormGroup
               titleSize={'xxs'}
               title={
