@@ -35,9 +35,7 @@ describe('isSpaceAwarenessEnabled', () => {
   });
   it('should return false if feature flag is disabled', async () => {
     mockFeatureFlag(false);
-    const res = await isSpaceAwarenessEnabled();
-
-    expect(res).toBe(false);
+    await expect(isSpaceAwarenessEnabled()).resolves.toBe(false);
   });
 
   it('should return false if feature flag is enabled but user did not optin', async () => {
