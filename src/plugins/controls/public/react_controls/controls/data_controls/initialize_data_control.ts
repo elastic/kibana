@@ -159,7 +159,9 @@ export const initializeDataControl = <EditorState extends object = {}>(
           (Object.keys(initialState) as Array<keyof DefaultDataControlState & EditorState>).forEach(
             (key) => {
               if (!isEqual(mergedStateManager[key].getValue(), newState[key])) {
-                mergedStateManager[key].next(newState[key]);
+                mergedStateManager[key].next(
+                  newState[key] as DefaultDataControlState & EditorState[typeof key]
+                );
               }
             }
           );

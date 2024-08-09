@@ -71,9 +71,11 @@ export const OptionsListEditorOptions = ({
   initialState,
   field,
   updateState,
-  parentApi,
+  controlGroupApi,
 }: CustomOptionsComponentProps<OptionsListControlState>) => {
-  const allowExpensiveQueries = useStateFromPublishingSubject(parentApi.allowExpensiveQueries$);
+  const allowExpensiveQueries = useStateFromPublishingSubject(
+    controlGroupApi.allowExpensiveQueries$
+  );
 
   const [singleSelect, setSingleSelect] = useState<boolean>(initialState.singleSelect ?? false);
   const [runPastTimeout, setRunPastTimeout] = useState<boolean>(

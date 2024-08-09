@@ -20,23 +20,22 @@ import { ControlGroupApi } from '../../control_group/types';
 import { DataControlEditor } from './data_control_editor';
 import { DefaultDataControlState } from './types';
 
-export type DataControlEditorState = Partial<DefaultDataControlState> & {
-  fieldName?: string;
-  controlType?: string;
-  controlId?: string;
-  defaultPanelTitle?: string;
-};
-
 export const openDataControlEditor = <
-  State extends DataControlEditorState = DataControlEditorState
+  State extends DefaultDataControlState = DefaultDataControlState
 >({
   initialState,
+  controlType,
+  controlId,
+  initialDefaultPanelTitle,
   onSave,
   controlGroupApi,
   services,
 }: {
-  initialState: State;
-  onSave: ({ type, state }: { type: string; state: State }) => void;
+  initialState: Partial<State>;
+  controlType?: string;
+  controlId?: string;
+  initialDefaultPanelTitle?: string;
+  onSave: ({ type, state }: { type: string; state: Partial<State> }) => void;
   controlGroupApi: ControlGroupApi;
   services: {
     core: CoreStart;
@@ -50,7 +49,7 @@ export const openDataControlEditor = <
     overlayRef.close();
   };
 
-  const onCancel = (newState: State, overlay: OverlayRef) => {
+  const onCancel = (newState: Partial<State>, overlay: OverlayRef) => {
     if (deepEqual(initialState, newState)) {
       closeOverlay(overlay);
       return;
@@ -83,8 +82,11 @@ export const openDataControlEditor = <
   const overlay = services.core.overlays.openFlyout(
     toMountPoint(
       <DataControlEditor<State>
-        parentApi={controlGroupApi}
+        controlGroupApi={controlGroupApi}
         initialState={initialState}
+        controlType={controlType}
+        controlId={controlId}
+        initialDefaultPanelTitle={initialDefaultPanelTitle}
         onCancel={(state) => {
           onCancel(state, overlay);
         }}

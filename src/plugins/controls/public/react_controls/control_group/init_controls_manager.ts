@@ -36,7 +36,10 @@ export function getControlsInOrder(initialControlPanelsState: ControlPanelsState
     .map(({ id, type }) => ({ id, type })); // filter out `order`
 }
 
-export function initControlsManager(initialControlPanelsState: ControlPanelsState, defaultDataviewId: string | null) {
+export function initControlsManager(
+  initialControlPanelsState: ControlPanelsState,
+  defaultDataviewId: string | null
+) {
   const lastUsedDataViewId$ = new BehaviorSubject<string | undefined>(
     getLastDataViewId(initialControlPanelsState) ?? defaultDataviewId ?? undefined
   );
@@ -204,7 +207,8 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
         });
       },
     } as PresentationContainer &
-      HasSerializedChildState<ControlPanelState> & Pick<ControlGroupApi, 'untilInitialized' | 'lastUsedDataViewId$'>,
+      HasSerializedChildState<ControlPanelState> &
+      Pick<ControlGroupApi, 'untilInitialized' | 'lastUsedDataViewId$'>,
     comparators: {
       controlsInOrder: [
         controlsInOrder$,
@@ -233,7 +237,7 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
 
 function getLastDataViewId(initialControlPanelsState: ControlPanelsState) {
   let dataViewId: string | undefined;
-  Object.values(initialControlPanelsState).forEach(panelState => {
+  Object.values(initialControlPanelsState).forEach((panelState) => {
     if ((panelState as unknown as DefaultDataControlState).dataViewId) {
       dataViewId = (panelState as unknown as DefaultDataControlState).dataViewId;
     }

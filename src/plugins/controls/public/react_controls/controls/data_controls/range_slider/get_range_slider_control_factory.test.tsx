@@ -243,7 +243,7 @@ describe('RangesliderControlApi', () => {
           field={{} as DataViewField}
           updateState={jest.fn()}
           setControlEditorValid={jest.fn()}
-          parentApi={controlGroupApi}
+          controlGroupApi={controlGroupApi}
         />
       );
       expect(
@@ -260,7 +260,7 @@ describe('RangesliderControlApi', () => {
           field={{} as DataViewField}
           updateState={jest.fn()}
           setControlEditorValid={setControlEditorValid}
-          parentApi={controlGroupApi}
+          controlGroupApi={controlGroupApi}
         />
       );
 
