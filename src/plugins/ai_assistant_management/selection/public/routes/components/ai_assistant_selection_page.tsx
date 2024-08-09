@@ -72,6 +72,7 @@ export function AiAssistantSelectionPage() {
       <EuiFlexGrid columns={2}>
         <EuiFlexItem grow>
           <EuiCard
+            data-test-subj="aiAssistantSelectionPageObservabilityCard"
             description={
               <div>
                 {!observabilityAIAssistantEnabled ? (
