@@ -61,10 +61,14 @@ export class Timefilter {
   ) {
     this._history = timeHistory;
     this.timeDefaults = config.timeDefaults;
+
+    // Initialize 0ms intervals with pause set to true and min value
     this.refreshIntervalDefaults = {
-      ...config.refreshIntervalDefaults,
+      pause:
+        config.refreshIntervalDefaults.value === 0 ? true : config.refreshIntervalDefaults.pause,
       value: Math.max(config.refreshIntervalDefaults.value, config.minRefreshIntervalDefault),
     };
+
     this._minRefreshInterval = config.minRefreshIntervalDefault;
     this._time = config.timeDefaults;
     this.setRefreshInterval(config.refreshIntervalDefaults);
@@ -165,6 +169,11 @@ export class Timefilter {
   public setRefreshInterval = (refreshInterval: Partial<RefreshInterval>) => {
     const prevRefreshInterval = this.getRefreshInterval();
     const newRefreshInterval = { ...prevRefreshInterval, ...refreshInterval };
+
+    if (newRefreshInterval.value === 0) {
+      // override only when explicitly set to 0
+      newRefreshInterval.pause = true;
+    }
 
     if (newRefreshInterval.value < this._minRefreshInterval) {
       newRefreshInterval.value = this._minRefreshInterval;
