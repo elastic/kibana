@@ -51,11 +51,11 @@ export function ControlsToolbarButton({
               controlGroupApi={controlGroupApi}
               closePopover={closePopover}
             />,
-            /*<EditControlGroupButton
+            <EditControlGroupButton
               key="manageControls"
               controlGroupApi={controlGroupApi}
               closePopover={closePopover}
-            />,*/
+            />,
           ]}
         />
       )}

@@ -8,15 +8,15 @@
 
 import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { ControlGroupContainer } from '@kbn/controls-plugin/public';
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { getEditControlGroupButtonTitle } from '../../_dashboard_app_strings';
 
 interface Props {
   closePopover: () => void;
-  controlGroup: ControlGroupContainer;
+  controlGroupApi: ControlGroupApi;
 }
 
-export const EditControlGroupButton = ({ closePopover, controlGroup, ...rest }: Props) => {
+export const EditControlGroupButton = ({ closePopover, controlGroupApi, ...rest }: Props) => {
   return (
     <EuiContextMenuItem
       {...rest}
@@ -24,7 +24,7 @@ export const EditControlGroupButton = ({ closePopover, controlGroup, ...rest }: 
       data-test-subj="controls-settings-button"
       aria-label={getEditControlGroupButtonTitle()}
       onClick={() => {
-        controlGroup.openEditControlGroupFlyout();
+        controlGroupApi.onEdit();
         closePopover();
       }}
     >
