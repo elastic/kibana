@@ -50,3 +50,7 @@ When you download visualization panels with multiple layers, each layer produces
 .. From the dropdown, select the requests you want to view.
 
 .. To view the requests in *Console*, click *Request*, then click *Open in Console*.
+
+== Full screen mode
+
+Full screen mode is awesome, it should be documented.

@@ -124,3 +124,7 @@ Copy panels from one dashboard to another dashboard.
 . Open the panel menu, then select *More > Copy to dashboard*.
 
 . On the *Copy to dashboard* window, select the dashboard, then click *Copy and go to dashboard*.
+
+== Import dashboards
+
+You can import dashboards from the **Saved Objects** page under **Stack Management**
