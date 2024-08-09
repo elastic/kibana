@@ -32,6 +32,9 @@ info:
     url: https://www.elastic.co/licensing/elastic-license
   contact: 
     name: Kibana Team
+  # Add alerting tag to temporarily fix sorting order
+tags:
+  - name: alerting
 # servers:
 #   - url: https://{kibana_url}
 #     variables:
