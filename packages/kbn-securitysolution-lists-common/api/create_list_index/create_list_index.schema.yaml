@@ -9,8 +9,6 @@ paths:
       operationId: CreateListIndex
       x-codegen-enabled: true
       summary: Creates necessary list data streams
-      tags:
-        - List API
       responses:
         200:
           description: Successful response

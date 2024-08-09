@@ -6,7 +6,7 @@
  */
 /* eslint-disable max-classes-per-file */
 
-import { omit, partition, isEqual, cloneDeep } from 'lodash';
+import { omit, partition, isEqual, cloneDeep, without } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import { getFlattenedObject } from '@kbn/std';
@@ -67,6 +67,7 @@ import type {
   DeletePackagePoliciesResponse,
   PolicySecretReference,
   AssetsMap,
+  AgentPolicy,
 } from '../../common/types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
@@ -1044,6 +1045,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       error: Error | SavedObjectError;
     }> = [];
 
+    const secretStorageEnabled = await isSecretStorageEnabled(esClient, soClient);
+
     await pMap(packagePolicyUpdates, async (packagePolicyUpdate) => {
       try {
         const id = packagePolicyUpdate.id;
@@ -1075,7 +1078,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           if (pkgInfoAndAsset) {
             const { pkgInfo, assetsMap } = pkgInfoAndAsset;
             validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
-            if (await isSecretStorageEnabled(esClient, soClient)) {
+            if (secretStorageEnabled) {
               const secretsRes = await extractAndUpdateSecrets({
                 oldPackagePolicy,
                 packagePolicyUpdate: { ...restOfPackagePolicy, inputs },
@@ -1248,15 +1251,20 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     ];
 
     const hostedAgentPolicies: string[] = [];
+    const agentlessAgentPolicies = [];
 
     for (const agentPolicyId of uniqueAgentPolicyIds) {
       try {
-        await validateIsNotHostedPolicy(
+        const agentPolicy = await validateIsNotHostedPolicy(
           soClient,
           agentPolicyId,
           options?.force,
           'Cannot remove integrations of hosted agent policy'
         );
+        // collect agentless agent policies to delete
+        if (agentPolicy.supports_agentless) {
+          agentlessAgentPolicies.push(agentPolicyId);
+        }
       } catch (e) {
         hostedAgentPolicies.push(agentPolicyId);
       }
@@ -1331,14 +1339,21 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       });
     }
 
+    if (agentlessAgentPolicies.length > 0) {
+      for (const agentPolicyId of agentlessAgentPolicies) {
+        await agentPolicyService.delete(soClient, esClient, agentPolicyId, { force: true });
+      }
+    }
+
     if (!options?.skipUnassignFromAgentPolicies) {
-      const uniquePolicyIdsR = [
+      let uniquePolicyIdsR = [
         ...new Set(
           result
             .filter((r) => r.success && r.policy_ids && r.policy_ids.length > 0)
             .flatMap((r) => r.policy_ids!)
         ),
       ];
+      uniquePolicyIdsR = without(uniquePolicyIdsR, ...agentlessAgentPolicies);
 
       const agentPoliciesWithEndpointPackagePolicies = result.reduce((acc, cur) => {
         if (cur.success && cur.policy_ids && cur.package?.name === 'endpoint') {
@@ -2754,7 +2769,7 @@ async function validateIsNotHostedPolicy(
   id: string,
   force = false,
   errorMessage?: string
-) {
+): Promise<AgentPolicy> {
   const agentPolicy = await agentPolicyService.get(soClient, id, false);
 
   if (!agentPolicy) {
@@ -2769,6 +2784,8 @@ async function validateIsNotHostedPolicy(
       errorMessage ?? `Cannot update integrations of hosted agent policy ${id}`
     );
   }
+
+  return agentPolicy;
 }
 
 export function sendUpdatePackagePolicyTelemetryEvent(

@@ -7,6 +7,8 @@
 
 import { isEqual } from 'lodash';
 import { MissingVersion } from './three_way_diff';
+import type { RuleDataSource } from '../diffable_rule/diffable_field_types';
+import { DataSourceType } from '../diffable_rule/diffable_field_types';
 
 /**
  * Result of comparing three versions of a value against each other.
@@ -75,6 +77,33 @@ export const determineOrderAgnosticDiffOutcome = <TValue>(
   });
 };
 
+/**
+ * Determines diff outcome for `data_source` field
+ *
+ * NOTE: uses order agnostic comparison for nested array fields (e.g. `index`)
+ */
+export const determineDiffOutcomeForDataSource = (
+  baseVersion: RuleDataSource | undefined | MissingVersion,
+  currentVersion: RuleDataSource | undefined,
+  targetVersion: RuleDataSource | undefined
+): ThreeWayDiffOutcome => {
+  const isBaseVersionMissing = baseVersion === MissingVersion;
+
+  if (
+    (isBaseVersionMissing || isIndexPatternDataSourceType(baseVersion)) &&
+    isIndexPatternDataSourceType(currentVersion) &&
+    isIndexPatternDataSourceType(targetVersion)
+  ) {
+    return determineOrderAgnosticDiffOutcome(
+      isBaseVersionMissing ? MissingVersion : baseVersion.index_patterns,
+      currentVersion.index_patterns,
+      targetVersion.index_patterns
+    );
+  }
+
+  return determineDiffOutcome(baseVersion, currentVersion, targetVersion);
+};
+
 interface DetermineDiffOutcomeProps {
   baseEqlCurrent: boolean;
   baseEqlTarget: boolean;
@@ -121,3 +150,8 @@ export const determineIfValueCanUpdate = (diffCase: ThreeWayDiffOutcome): boolea
     diffCase === ThreeWayDiffOutcome.MissingBaseCanUpdate
   );
 };
+
+export const isIndexPatternDataSourceType = (
+  version: RuleDataSource | undefined
+): version is Extract<RuleDataSource, { type: DataSourceType.index_patterns }> =>
+  version !== undefined && version.type === DataSourceType.index_patterns;

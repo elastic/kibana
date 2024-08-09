@@ -21,27 +21,15 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
     ...buildRuleGroup(
       [
         'explain',
-        'row',
-        'limit',
         'ws',
         'assign',
         'comma',
         'dot',
-        'first',
-        'last',
         'opening_bracket',
         'closing_bracket',
         'quoted_identifier',
-        'src_ws',
         'unquoted_identifier',
         'pipe',
-        'not',
-        'percent',
-        'integer_literal',
-        'decimal_literal',
-        'src_unquoted_identifier',
-        'src_quoted_identifier',
-        'string',
       ],
       euiThemeVars.euiTextColor
     ),
@@ -57,12 +45,14 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
     ...buildRuleGroup(
       [
         'metrics',
+        'meta',
         'metadata',
+        'match',
         'mv_expand',
         'stats',
+        'inlinestats',
         'dissect',
         'grok',
-        'project',
         'keep',
         'rename',
         'drop',
@@ -76,8 +66,8 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'rlike',
         'in',
         'as',
-        'expr_ws',
         'limit',
+        'lookup',
         'null',
         'enrich',
         'on',
@@ -112,26 +102,27 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'asterisk', // '*'
         'slash', // '/'
         'percent', // '%'
+        'cast_op', // '::'
       ],
       euiThemeVars.euiColorPrimaryText
     ),
 
     // comments
     ...buildRuleGroup(
-      [
-        'line_comment',
-        'multiline_comment',
-        'expr_line_comment',
-        'expr_multiline_comment',
-        'src_line_comment',
-        'src_multiline_comment',
-      ],
+      ['line_comment', 'multiline_comment', 'expr_line_comment', 'expr_multiline_comment'],
       euiThemeVars.euiColorDisabledText
     ),
 
     // values
     ...buildRuleGroup(
-      ['quoted_string', 'integer_literal', 'decimal_literal', 'named_or_positional_param'],
+      [
+        'quoted_string',
+        'integer_literal',
+        'decimal_literal',
+        'named_or_positional_param',
+        'param',
+        'timespan_literal',
+      ],
       euiThemeVars.euiColorSuccessText
     ),
   ],

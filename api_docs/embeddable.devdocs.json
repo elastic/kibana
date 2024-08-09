@@ -9679,7 +9679,7 @@
             "section": "def-public.PublishesPhaseEvents",
             "text": "PublishesPhaseEvents"
           },
-          ",",
+          ",Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -9687,7 +9687,7 @@
             "section": "def-public.PublishesUnsavedChanges",
             "text": "PublishesUnsavedChanges"
           },
-          ",",
+          "<object>>,",
           {
             "pluginId": "@kbn/presentation-containers",
             "scope": "public",
@@ -12892,7 +12892,7 @@
               "\nA required async function that builds your embeddable component and a linked API instance. The API\nand component will be combined together by the ReactEmbeddableRenderer. Initial state will contain the result of\nthe deserialize function.\n\nThe returned API must extend {@link HasSerializableState} which does the opposite of the deserializeState\nfunction."
             ],
             "signature": [
-              "(initialState: RuntimeState, buildApi: (apiRegistration: ",
+              "(initialRuntimeState: RuntimeState, buildApi: (apiRegistration: ",
               "BuildReactEmbeddableApiRegistration",
               "<SerializedState, RuntimeState, Api>, comparators: ",
               {
@@ -12912,7 +12912,7 @@
               },
               "<RuntimeState>, uuid: string, parentApi: unknown, setApi: (api: ",
               "SetReactEmbeddableApiRegistration",
-              "<SerializedState, RuntimeState, Api>) => Api) => Promise<{ Component: React.FC<{}>; api: Api; }>"
+              "<SerializedState, RuntimeState, Api>) => Api, lastSavedRuntimeState: RuntimeState) => Promise<{ Component: React.FC<{}>; api: Api; }>"
             ],
             "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
             "deprecated": false,
@@ -12923,7 +12923,7 @@
                 "id": "def-public.ReactEmbeddableFactory.buildEmbeddable.$1",
                 "type": "Uncategorized",
                 "tags": [],
-                "label": "initialState",
+                "label": "initialRuntimeState",
                 "description": [],
                 "signature": [
                   "RuntimeState"
@@ -13007,6 +13007,21 @@
                   "(api: ",
                   "SetReactEmbeddableApiRegistration",
                   "<SerializedState, RuntimeState, Api>) => Api"
+                ],
+                "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.ReactEmbeddableFactory.buildEmbeddable.$6",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "lastSavedRuntimeState",
+                "description": [],
+                "signature": [
+                  "RuntimeState"
                 ],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
                 "deprecated": false,

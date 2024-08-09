@@ -135,6 +135,7 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
     </EuiFlexItem>
   ) : null;
 };
+
 AddFileComponent.displayName = 'AddFile';
 
 export const AddFile = React.memo(AddFileComponent);
