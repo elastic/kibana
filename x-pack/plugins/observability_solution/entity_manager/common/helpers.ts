@@ -7,10 +7,10 @@
 
 import {
   ENTITY_BASE_PREFIX,
+  ENTITY_SCHEMA_VERSION_V1,
   ENTITY_HISTORY,
   ENTITY_LATEST,
-  ENTITY_SCHEMA_VERSION_V1,
-} from './constants_entities';
+} from '@kbn/entities-schema';
 
 export const getEntityHistoryIndexTemplateV1 = (definitionId: string) =>
   `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_HISTORY}_${definitionId}_index_template` as const;

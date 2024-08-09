@@ -6,19 +6,25 @@
  */
 
 import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import {
+  ENTITY_LATEST,
+  ENTITY_SCHEMA_VERSION_V1,
+  EntityDefinition,
+  entitiesIndexPattern,
+  entitiesAliasPattern,
+} from '@kbn/entities-schema';
 import { getEntityLatestIndexTemplateV1 } from '../../../../common/helpers';
 import {
   ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
   ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
   ENTITY_LATEST_BASE_COMPONENT_TEMPLATE_V1,
-  ENTITY_LATEST_INDEX_PREFIX_V1,
 } from '../../../../common/constants_entities';
 import { getCustomLatestTemplateComponents } from '../../../templates/components/helpers';
 
 export const getEntitiesLatestIndexTemplateConfig = (
-  definitionId: string
+  definition: EntityDefinition
 ): IndicesPutIndexTemplateRequest => ({
-  name: getEntityLatestIndexTemplateV1(definitionId),
+  name: getEntityLatestIndexTemplateV1(definition.id),
   _meta: {
     description:
       "Index template for indices managed by the Elastic Entity Model's entity discovery framework for the latest dataset",
@@ -26,16 +32,25 @@ export const getEntitiesLatestIndexTemplateConfig = (
     managed: true,
     managed_by: 'elastic_entity_model',
   },
-  ignore_missing_component_templates: getCustomLatestTemplateComponents(definitionId),
+  ignore_missing_component_templates: getCustomLatestTemplateComponents(definition.id),
   composed_of: [
     ENTITY_LATEST_BASE_COMPONENT_TEMPLATE_V1,
     ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
     ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
-    ...getCustomLatestTemplateComponents(definitionId),
+    ...getCustomLatestTemplateComponents(definition.id),
   ],
-  index_patterns: [`${ENTITY_LATEST_INDEX_PREFIX_V1}.${definitionId}`],
+  index_patterns: [
+    entitiesIndexPattern({
+      schemaVersion: ENTITY_SCHEMA_VERSION_V1,
+      dataset: ENTITY_LATEST,
+      definitionId: definition.id,
+    }),
+  ],
   priority: 200,
   template: {
+    aliases: {
+      [entitiesAliasPattern({ type: definition.type, dataset: ENTITY_LATEST })]: {},
+    },
     mappings: {
       _meta: {
         version: '1.6.0',
