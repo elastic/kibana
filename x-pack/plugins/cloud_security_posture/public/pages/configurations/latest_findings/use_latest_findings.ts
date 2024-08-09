@@ -8,7 +8,6 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { number } from 'io-ts';
 import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
-import type { Pagination } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { EsHitRecord } from '@kbn/discover-utils/types';
@@ -30,11 +29,6 @@ interface UseFindingsOptions extends FindingsBaseEsQuery {
   sort: string[][];
   enabled: boolean;
   pageSize: number;
-}
-
-export interface FindingsGroupByNoneQuery {
-  pageIndex: Pagination['pageIndex'];
-  sort: any;
 }
 
 type LatestFindingsRequest = IKibanaSearchRequest<estypes.SearchRequest>;

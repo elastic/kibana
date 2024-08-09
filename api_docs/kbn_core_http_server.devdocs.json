@@ -4435,6 +4435,10 @@
                 "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/snapshot_repositories/register_fetch_route.ts"
               },
               {
+                "plugin": "inference",
+                "path": "x-pack/plugins/inference/server/routes/connectors.ts"
+              },
+              {
                 "plugin": "ingestPipelines",
                 "path": "x-pack/plugins/ingest_pipelines/server/routes/api/get.ts"
               },
@@ -4831,8 +4835,8 @@
                 "path": "x-pack/plugins/spaces/server/lib/request_interceptors/on_request_interceptor.test.ts"
               },
               {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/server/lib/helpers/create_es_client/create_apm_event_client/index.test.ts"
+                "plugin": "apmDataAccess",
+                "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.test.ts"
               },
               {
                 "plugin": "console",
@@ -6270,6 +6274,10 @@
               },
               {
                 "plugin": "security",
+                "path": "x-pack/plugins/security/server/routes/authorization/roles/post.ts"
+              },
+              {
+                "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/deprecations/kibana_user_role.ts"
               },
               {
@@ -7027,6 +7035,10 @@
               {
                 "plugin": "indexLifecycleManagement",
                 "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/templates/register_add_policy_route.ts"
+              },
+              {
+                "plugin": "inference",
+                "path": "x-pack/plugins/inference/server/routes/chat_complete.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -8259,6 +8271,10 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/role_mapping/post.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/routes/authorization/roles/post.test.ts"
               },
               {
                 "plugin": "security",
@@ -14940,10 +14956,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/get.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/privileges.ts"
               },
               {
@@ -16254,6 +16266,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/api/create_legacy_notification/route.ts"
               },
               {
@@ -16359,14 +16375,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/upsert.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/upsert.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/upload_csv.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16953,10 +16961,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/notes/delete_note.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/delete.ts"
               },
               {
                 "plugin": "securitySolution",

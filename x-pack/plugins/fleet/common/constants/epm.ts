@@ -93,6 +93,7 @@ export const agentAssetTypes = {
 export const dataTypes = {
   Logs: 'logs',
   Metrics: 'metrics',
+  Traces: 'traces',
 } as const;
 
 // currently identical but may be a subset or otherwise different some day
