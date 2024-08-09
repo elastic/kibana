@@ -8,7 +8,10 @@
 
 // Default language for the language selector
 export const DEFAULT_LANGUAGE = 'curl';
-// Available languages in the language selector modal
+// These values are the ones that should match the available languages from the
+// `@elastic/request-converter` package but since it cannot run on client side,
+// we hardcode the available languages in order to avoid having to make an extra
+// request to fetch them.
 export const AVAILABLE_LANGUAGES = [
   { value: 'curl', label: 'curl' },
   { value: 'javascript', label: 'JavaScript' },
