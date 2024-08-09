@@ -23,12 +23,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show the show API request button and click it', async () => {
       await testSubjects.click('btnViewRequest');
+    });
 
-      expect(
-        await retry.waitFor('Wait for flyout to open', async () => {
-          return testSubjects.isDisplayed('flyoutDefaultHeader');
-        })
-      ).to.be(true);
+    it('flyout should appear in page', async () => {
+      const flyoutHeader = await testSubjects.find('flyoutHeader');
+
+      expect(await flyoutHeader.isDisplayed()).to.be(true);
     });
   });
 }
