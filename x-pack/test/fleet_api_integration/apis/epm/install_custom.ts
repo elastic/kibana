@@ -26,7 +26,7 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
-  describe('TESTME Installing custom integrations', async () => {
+  describe('Installing custom integrations', async () => {
     afterEach(async () => {
       await uninstallPackage();
     });
@@ -192,7 +192,7 @@ export default function (providerContext: FtrProviderContext) {
                 index: false,
                 type: 'keyword',
               },
-              path_match: 'event.original',
+              path_match: '*event.original',
             },
           },
           {
@@ -262,9 +262,9 @@ export default function (providerContext: FtrProviderContext) {
                 '*file.path',
                 '*file.target_path',
                 '*os.full',
-                'email.subject',
-                'vulnerability.description',
-                'user_agent.original',
+                '*email.subject',
+                '*vulnerability.description',
+                '*user_agent.original',
               ],
               unmatch_mapping_type: 'object',
               mapping: {
