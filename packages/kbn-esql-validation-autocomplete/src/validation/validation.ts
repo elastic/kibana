@@ -464,7 +464,7 @@ function validateFunction(
           allMatchingArgDefinitionsAreConstantOnly || forceConstantOnly,
           // use the nesting flag for now just for stats and metrics
           // TODO: revisit this part later on to make it more generic
-          parentCommand === 'stats' || parentCommand === 'metrics'
+          ['stats', 'inlinestats', 'metrics'].includes(parentCommand)
             ? isNested || !isAssignment(astFunction)
             : false
         );
@@ -1010,7 +1010,7 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
             );
           }
           if (isColumnItem(arg)) {
-            if (command.name === 'stats') {
+            if (command.name === 'stats' || command.name === 'inlinestats') {
               messages.push(errors.unknownAggFunction(arg));
             } else {
               messages.push(...validateColumnForCommand(arg, command.name, references));

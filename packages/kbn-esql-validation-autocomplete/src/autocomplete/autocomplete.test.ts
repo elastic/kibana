@@ -9,7 +9,7 @@
 import { suggest } from './autocomplete';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { timeUnitsToSuggest } from '../definitions/literals';
-import { commandDefinitions } from '../definitions/commands';
+import { commandDefinitions as unmodifiedCommandDefinitions } from '../definitions/commands';
 import {
   getSafeInsertText,
   getUnitDuration,
@@ -45,6 +45,7 @@ const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as co
 const powParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
 const log10ParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
 
+const commandDefinitions = unmodifiedCommandDefinitions.filter(({ hidden }) => !hidden);
 describe('autocomplete', () => {
   type TestArgs = [
     string,
@@ -115,7 +116,7 @@ describe('autocomplete', () => {
     },
   });
 
-  const sourceCommands = ['row', 'from', 'show'];
+  const sourceCommands = ['row', 'from', 'show', 'metrics'];
 
   describe('New command', () => {
     testSuggestions(
@@ -1277,7 +1278,7 @@ describe('autocomplete', () => {
     // Source command
     testSuggestions(
       'F',
-      ['FROM $0', 'ROW $0', 'SHOW $0'].map(attachTriggerCommand).map(attachAsSnippet),
+      ['FROM $0', 'ROW $0', 'SHOW $0', 'METRICS $0'].map(attachTriggerCommand).map(attachAsSnippet),
       undefined,
       1
     );
