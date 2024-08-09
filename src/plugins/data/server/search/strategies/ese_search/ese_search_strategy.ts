@@ -67,7 +67,7 @@ export const enhancedEsSearchStrategyProvider = (
   async function getAsyncSearch(
     { id, ...request }: IEsSearchRequest<IAsyncSearchRequestParams>,
     options: IAsyncSearchOptions,
-    { esClient }: SearchStrategyDependencies
+    { esClient, diagnostics }: SearchStrategyDependencies
   ) {
     if (!options.retrieveResults) {
       // First, request the status of the async search, and return the status if incomplete
@@ -89,13 +89,18 @@ export const enhancedEsSearchStrategyProvider = (
       { ...options.transport, signal: options.abortSignal, meta: true }
     );
     const response = shimHitsTotal(body.response, options);
-    return toAsyncKibanaSearchResponse({ ...body, response }, headers?.warning);
+    return toAsyncKibanaSearchResponse(
+      { ...body, response },
+      headers?.warning,
+      undefined,
+      diagnostics.getTimings(id!)
+    );
   }
 
   async function submitAsyncSearch(
     request: IEsSearchRequest<IAsyncSearchRequestParams>,
     options: IAsyncSearchOptions,
-    { esClient, uiSettingsClient }: SearchStrategyDependencies
+    { esClient, uiSettingsClient, diagnostics }: SearchStrategyDependencies
   ) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     const params = {
@@ -107,11 +112,16 @@ export const enhancedEsSearchStrategyProvider = (
       signal: options.abortSignal,
       meta: true,
     });
+    // Let diagnostic know about the async id to map it with the raw client id
+    if (body.id) {
+      diagnostics.registerRequestId(body.id, meta.request.id);
+    }
     const response = shimHitsTotal(body.response, options);
     return toAsyncKibanaSearchResponse(
       { ...body, response },
       headers?.warning,
-      meta?.request?.params
+      meta?.request?.params,
+      body.id ? diagnostics.getTimings(body.id) : undefined
     );
   }
 
@@ -154,7 +164,7 @@ export const enhancedEsSearchStrategyProvider = (
   async function rollupSearch(
     request: IEsSearchRequest,
     options: ISearchOptions,
-    { esClient, uiSettingsClient }: SearchStrategyDependencies
+    { esClient, uiSettingsClient, diagnostics }: SearchStrategyDependencies
   ): Promise<IEsSearchResponse> {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     const legacyConfig = await firstValueFrom(legacyConfig$);
@@ -183,12 +193,20 @@ export const enhancedEsSearchStrategyProvider = (
       );
 
       const response = esResponse.body as estypes.SearchResponse<any>;
+      // Let diagnostic know about the async id to map it with the raw client id
+      if (esResponse.body) {
+        diagnostics.registerRequestId(
+          esResponse.body.id || esResponse.meta.request.id,
+          esResponse.meta.request.id
+        );
+      }
       return {
         rawResponse: shimHitsTotal(response, options),
         ...(esResponse.meta?.request?.params
           ? { requestParams: sanitizeRequestParams(esResponse.meta?.request?.params) }
           : {}),
         ...getTotalLoaded(response),
+        esTiming: diagnostics.getTimings(esResponse.body.id || esResponse.meta?.request?.id),
       };
     } catch (e) {
       throw getKbnSearchError(e);

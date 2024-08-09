@@ -192,6 +192,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   // NOTE: initialRenderTime is only set once when the component mounts
   const visualizationRenderStartTime = useRef<number>(NaN);
   const dataReceivedTime = useRef<number>(NaN);
+  const esTime = useRef<number>(0);
+  const networkTime = useRef<number>(0);
+  const serializeTime = useRef<number>(0);
 
   const onRender$ = useCallback(() => {
     if (renderDeps.current) {
@@ -199,14 +202,23 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         initialVisualizationRenderComplete.current = true;
         // NOTE: this metric is only reported for an initial editor load of a pre-existing visualization
         const currentTime = performance.now();
-        reportPerformanceMetricEvent(core.analytics, {
+
+        const stats = {
           eventName: 'lensVisualizationRenderTime',
           duration: currentTime - visualizationRenderStartTime.current,
           key1: 'time_to_data',
-          value1: dataReceivedTime.current - visualizationRenderStartTime.current,
+          value1: dataReceivedTime.current - visualizationRenderStartTime.current - esTime.current,
           key2: 'time_to_render',
           value2: currentTime - dataReceivedTime.current,
-        });
+          key3: 'es_time',
+          value3: esTime.current,
+          key4: 'es_network_time',
+          value4: networkTime.current,
+          key5: 'kibana_serialize_time',
+          value5: serializeTime.current,
+        };
+        reportPerformanceMetricEvent(core.analytics, stats);
+        console.log(stats);
       }
       const datasourceEvents = Object.values(renderDeps.current.datasourceMap).reduce<string[]>(
         (acc, datasource) => {
@@ -262,6 +274,21 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
             {
               searchService: plugins.data.search,
             }
+          );
+
+          const requests = adapters.requests.getRequests();
+          if (requests.every((request) => request.response?.json?.rawResponse.took)) {
+            // TODO: improve this and workout concurrent timings
+            esTime.current = requests.reduce(
+              (acc, request) => acc + (request.response!.json!.rawResponse!.took || 0),
+              0
+            );
+          }
+          networkTime.current =
+            requests.reduce((acc, request) => acc + (request.esTime || 0), 0) - esTime.current;
+          serializeTime.current = requests.reduce(
+            (acc, request) => acc + (request.serializeTime || 0),
+            0
           );
         }
 

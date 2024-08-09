@@ -35,6 +35,8 @@ export interface Request extends RequestParams {
   stats?: RequestStatistics;
   status: RequestStatus;
   time?: number;
+  esTime?: number;
+  serializeTime?: number;
 }
 
 export interface RequestParams {

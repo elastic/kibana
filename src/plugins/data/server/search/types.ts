@@ -36,6 +36,13 @@ export interface SearchStrategyDependencies {
   searchSessionsClient: IScopedSearchSessionsClient;
   request: KibanaRequest;
   rollupsEnabled?: boolean;
+  diagnostics: {
+    registerRequestId: (esId: string, rawId: string) => void;
+    getTimings: (esId: string) => {
+      networkTime: number | undefined;
+      serializeTime: number | undefined;
+    };
+  };
 }
 
 export interface ISearchSetup {

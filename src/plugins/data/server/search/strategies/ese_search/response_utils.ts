@@ -35,13 +35,16 @@ export function toAsyncKibanaSearchStatusResponse(
 export function toAsyncKibanaSearchResponse(
   response: AsyncSearchResponse,
   warning?: string,
-  requestParams?: ConnectionRequestParams
+  requestParams?: ConnectionRequestParams,
+  responseTimings?: { networkTime?: number; serializeTime?: number }
 ): IKibanaSearchResponse {
   return {
     id: response.id,
     rawResponse: response.response,
     isPartial: response.is_partial,
     isRunning: response.is_running,
+    esTiming: responseTimings?.networkTime,
+    serializeTiming: responseTimings?.serializeTime,
     ...(warning ? { warning } : {}),
     ...(requestParams ? { requestParams: sanitizeRequestParams(requestParams) } : {}),
     ...getTotalLoaded(response.response),

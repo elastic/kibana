@@ -53,6 +53,12 @@ export class RequestResponder {
 
   public finish(status: RequestStatus, response: Response): void {
     this.request.time = response.time ?? Date.now() - this.request.startTime;
+    if (response.json?.esTiming != null) {
+      this.request.esTime = response.json?.esTiming;
+    }
+    if (response.json?.serializeTiming != null) {
+      this.request.serializeTime = response.json?.serializeTiming;
+    }
     this.request.status = status;
     this.request.response = moveRequestParamsToTopLevel(response);
     this.onChange();
