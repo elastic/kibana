@@ -6716,6 +6716,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/synthetics-private-location@link:x-pack/packages/kbn-synthetics-private-location":
+  version "0.0.0"
+  uid ""
+
 "@kbn/task-manager-fixture-plugin@link:x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture":
   version "0.0.0"
   uid ""

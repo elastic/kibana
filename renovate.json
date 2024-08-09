@@ -23,7 +23,7 @@
     {
       "groupName": "GitHub actions",
       "matchManagers": ["github-actions"],
-      "reviewers": "[team:kibana-operations]",
+      "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "backport:all-open", "release_note:skip"],
       "enabled": true
@@ -442,6 +442,19 @@
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:all-open", "Team:Visualizations"],
       "enabled": true
+    }
+  ],
+  "customManagers": [
+    {
+      "description": "Update Wolfi base image",
+      "customType": "regex",
+      "fileMatch": [
+        "^src/dev/build/tasks/os_packages/docker_generator/run\\.ts$"
+      ],
+      "matchStrings": [
+        "docker\\.elastic\\.co/wolfi/chainguard-base:(?<currentValue>[-a-zA-Z0-9.]+)?(?:@(?<currentDigest>sha256:[a-fA-F0-9]+))?"
+      ],
+      "datasourceTemplate": "docker"
     }
   ]
 }
