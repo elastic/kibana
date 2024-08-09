@@ -147,4 +147,4 @@ async function checkProdNativeModules(log: ToolingLog) {
   }
 }
 
-export { checkProdNativeModules, checkDependencies, isNativeModule, loadPackageJson };
+export { checkProdNativeModules, checkDependencies, isNativeModule };
