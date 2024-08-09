@@ -7,7 +7,7 @@
 
 import { useMemo, useCallback } from 'react';
 import { type AlertsGroupingProps, useAlertsGroupingState } from '@kbn/alerts-grouping';
-import { useAlertDataView } from '@kbn/alerts-ui-shared';
+import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_group_selector';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { AlertsByGroupingAgg } from '../types';
@@ -41,7 +41,7 @@ export const getPersistentControlsHook =
       [grouping, updateGrouping]
     );
 
-    const { dataViews: alertDataViews } = useAlertDataView({
+    const { dataViews: alertDataViews } = useAlertsDataView({
       featureIds,
       dataViewsService: dataViews,
       http,
