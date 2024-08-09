@@ -17,7 +17,7 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { TopNavMenuProps, createBadge } from '@kbn/navigation-plugin/public';
+import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import {
   EuiBreadcrumb,
   EuiButtonEmpty,
@@ -27,7 +27,8 @@ import {
   EuiLoadingSpinner,
   EuiText,
   EuiToolTipProps,
-  EuiWrappingPopover,
+  EuiPopover,
+  EuiBadge,
 } from '@elastic/eui';
 import { MountPoint } from '@kbn/core/public';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
@@ -39,6 +40,7 @@ import {
   dashboardManagedBadge,
   buttonText,
   text,
+  managedText,
 } from '../dashboard_app/_dashboard_app_strings';
 import { UI_SETTINGS } from '../../common';
 import { useDashboardAPI } from '../dashboard_app/dashboard_app';
@@ -75,7 +77,6 @@ export function InternalDashboardTopNav({
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
-  const managedBadgeRef = useRef<HTMLButtonElement>(null);
 
   /**
    * Unpack dashboard services
@@ -327,64 +328,52 @@ export function InternalDashboardTopNav({
       });
     }
     if (showWriteControls && managed) {
-      const managedBadge = (
-        <button
-          ref={managedBadgeRef}
-          onClick={() => {
-            setIsPopoverOpen(!isPopoverOpen);
-          }}
-          css={css`
-            :hover {
-              cursor: pointer;
-            }
-          `}
-        >
-          {createBadge(getManagedContentBadge(dashboardManagedBadge.getText(), true), 3)}
-        </button>
-      );
-
       const renderCustomBadge = () => {
+        const badgeButton = (
+          // @ts-ignore - EuiBadge href type issue
+          <EuiBadge
+            {...getManagedContentBadge(dashboardManagedBadge.getText(), true)}
+            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+          >
+            {managedText}
+          </EuiBadge>
+        );
         return (
-          <>
-            {managedBadge}
-            {managedBadgeRef.current && (
-              <EuiWrappingPopover
-                button={managedBadgeRef.current}
-                isOpen={isPopoverOpen}
-                closePopover={() => setIsPopoverOpen(false)}
-                className="eui-hideFor--s eui-hideFor--xs"
-                data-test-subj="managedContentPopover"
+          <EuiPopover
+            button={badgeButton}
+            isOpen={isPopoverOpen}
+            closePopover={() => setIsPopoverOpen(false)}
+            className="eui-hideFor--s eui-hideFor--xs"
+            data-test-subj="managedContentPopover"
+          >
+            <EuiFlexItem>
+              <EuiText
+                size="s"
+                aria-label={text}
+                css={css`
+                  max-width: 300px;
+                `}
               >
-                <EuiFlexItem>
-                  <EuiText
-                    size="s"
-                    aria-label={text}
-                    css={css`
-                      max-width: 300px;
-                    `}
-                  >
-                    {text}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    size="s"
-                    disabled={isLoading}
-                    aria-label={buttonText}
-                    onClick={() => {
-                      setIsLoading(true);
-                      dashboard.runInteractiveSave(viewMode);
-                      setIsLoading(false);
-                    }}
-                    data-test-subj="managedContentPopoverDuplicateButton"
-                  >
-                    {isLoading && <EuiLoadingSpinner size="m" />}
-                    <EuiText size="s">{buttonText}</EuiText>
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiWrappingPopover>
-            )}
-          </>
+                {text}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                disabled={isLoading}
+                aria-label={buttonText}
+                onClick={() => {
+                  setIsLoading(true);
+                  dashboard.runInteractiveSave(viewMode);
+                  setIsLoading(false);
+                }}
+                data-test-subj="managedContentPopoverDuplicateButton"
+              >
+                {isLoading && <EuiLoadingSpinner size="m" />}
+                <EuiText size="s">{buttonText}</EuiText>
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiPopover>
         );
       };
       allBadges.push({
