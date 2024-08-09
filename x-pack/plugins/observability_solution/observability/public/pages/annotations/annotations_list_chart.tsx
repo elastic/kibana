@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { parse } from '@kbn/datemath';
 import { TooltipValue } from '@elastic/charts/dist/specs';
 import moment from 'moment';
+import { useChartThemes } from '../../hooks/use_chart_themes';
 import { AnnotationsPermissions } from '../../components/annotations/hooks/use_annotation_permissions';
 import { createAnnotationPortal } from './create_annotation_btn';
 import { useAnnotations } from '../../components/annotations/use_annotations';
@@ -76,6 +77,8 @@ export function AnnotationsListChart({
       { x: domain.max, y: 1 },
     ];
 
+  const { baseTheme } = useChartThemes();
+
   return (
     <>
       <InPortal node={createAnnotationPortal}>
@@ -113,6 +116,7 @@ export function AnnotationsListChart({
           onBrushEnd={brushEndListener}
           onAnnotationClick={onAnnotationClick}
           xDomain={domain}
+          baseTheme={baseTheme}
           theme={{
             chartMargins: {
               top: 50,

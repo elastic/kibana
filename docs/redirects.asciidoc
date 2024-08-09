@@ -507,6 +507,12 @@ Refer to {observability-guide}/apm-service-maps.html#service-maps-supported[Supp
 
 Refer to {observability-guide}/apm-service-overview.html[Service overview].
 
+[float]
+[[service-span-duration]]
+=== Span types average duration and dependencies
+
+Refer to {observability-guide}/apm-service-overview.html#service-span-duration[Service overview].
+
 [role="exclude",id="mobile-service-overview"]
 == Mobile service overview
 
@@ -597,6 +603,12 @@ Refer to {observability-guide}/apm-custom-links.html[Create custom links].
 {apm-docs-move-notice}
 
 Refer to {observability-guide}/apm-filters.html[Filter data].
+
+[float]
+[[environment-selector]]
+=== Service environment filter
+
+Refer to {observability-guide}/apm-filters.html#environment-selector[Filter data].
 
 [role="exclude",id="correlations"]
 == Find transaction latency and failure correlations

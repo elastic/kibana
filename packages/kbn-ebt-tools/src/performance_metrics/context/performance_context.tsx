@@ -11,6 +11,9 @@ import { afterFrame } from '@elastic/apm-rum-core';
 import { useLocation } from 'react-router-dom';
 import { perfomanceMarkers } from '../performance_markers';
 import { PerformanceApi, PerformanceContext } from './use_performance_context';
+import { PerformanceMetricEvent } from '../../performance_metric_events';
+
+export type CustomMetrics = Omit<PerformanceMetricEvent, 'eventName' | 'meta' | 'duration'>;
 
 function measureInteraction() {
   performance.mark(perfomanceMarkers.startPageChange);
@@ -19,13 +22,18 @@ function measureInteraction() {
     /**
      * Marks the end of the page ready state and measures the performance between the start of the page change and the end of the page ready state.
      * @param pathname - The pathname of the page.
+     * @param customMetrics - Custom metrics to be included in the performance measure.
      */
-    pageReady(pathname: string) {
+    pageReady(pathname: string, customMetrics?: CustomMetrics) {
       performance.mark(perfomanceMarkers.endPageReady);
 
       if (!trackedRoutes.includes(pathname)) {
         performance.measure(pathname, {
-          detail: { eventName: 'kibana:plugin_render_time', type: 'kibana:performance' },
+          detail: {
+            eventName: 'kibana:plugin_render_time',
+            type: 'kibana:performance',
+            customMetrics,
+          },
           start: perfomanceMarkers.startPageChange,
           end: perfomanceMarkers.endPageReady,
         });
@@ -52,9 +60,9 @@ export function PerformanceContextProvider({ children }: { children: React.React
 
   const api = useMemo<PerformanceApi>(
     () => ({
-      onPageReady() {
+      onPageReady(customMetrics) {
         if (isRendered) {
-          interaction.pageReady(location.pathname);
+          interaction.pageReady(location.pathname, customMetrics);
         }
       },
     }),
