@@ -25,5 +25,44 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: '#/components/schemas/ActionStatusSuccessResponse'
+
+components:
+  schemas:
+    PendingActionsSchema:
+      type: object
+      properties:
+          'isolate':
+            type: integer
+          'unisolate':
+            type: integer
+          'kill-process':
+            type: integer
+          'suspend-process':
+            type: integer
+          'running-processes':
+            type: integer
+          'get-file':
+            type: integer
+          'execute':
+            type: integer
+          'upload':
+            type: integer
+          'scan':
+            type: integer
+
+    ActionStatusSuccessResponse:
+        type: object
+        properties:
+          body:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  agent_id:
+                    $ref: '../../model/schema/common.schema.yaml#/components/schemas/AgentId'
+                  pending_actions:
+                     $ref: '#/components/schemas/PendingActionsSchema'
+
 

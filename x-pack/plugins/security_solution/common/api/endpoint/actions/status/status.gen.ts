@@ -16,7 +16,34 @@
 
 import { z } from 'zod';
 
-import { AgentIds, SuccessResponse } from '../../model/schema/common.gen';
+import { AgentIds, AgentId } from '../../model/schema/common.gen';
+
+export type PendingActionsSchema = z.infer<typeof PendingActionsSchema>;
+export const PendingActionsSchema = z.object({
+  isolate: z.number().int().optional(),
+  unisolate: z.number().int().optional(),
+  'kill-process': z.number().int().optional(),
+  'suspend-process': z.number().int().optional(),
+  'running-processes': z.number().int().optional(),
+  'get-file': z.number().int().optional(),
+  execute: z.number().int().optional(),
+  upload: z.number().int().optional(),
+  scan: z.number().int().optional(),
+});
+
+export type ActionStatusSuccessResponse = z.infer<typeof ActionStatusSuccessResponse>;
+export const ActionStatusSuccessResponse = z.object({
+  body: z
+    .object({
+      data: z
+        .object({
+          agent_id: AgentId.optional(),
+          pending_actions: PendingActionsSchema.optional(),
+        })
+        .optional(),
+    })
+    .optional(),
+});
 
 export type EndpointGetActionsStatusRequestQuery = z.infer<
   typeof EndpointGetActionsStatusRequestQuery
@@ -31,4 +58,4 @@ export type EndpointGetActionsStatusRequestQueryInput = z.input<
 >;
 
 export type EndpointGetActionsStatusResponse = z.infer<typeof EndpointGetActionsStatusResponse>;
-export const EndpointGetActionsStatusResponse = SuccessResponse;
+export const EndpointGetActionsStatusResponse = ActionStatusSuccessResponse;
