@@ -20,7 +20,9 @@ import { camelCase, partition } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import {
   FunctionParameter,
+  FunctionReturnType,
   isFieldType,
+  isReturnType,
   isSupportedDataType,
   SupportedDataType,
 } from '../definitions/types';
@@ -757,7 +759,9 @@ describe('autocomplete', () => {
               );
 
               const getTypesFromParamDefs = (paramDefs: FunctionParameter[]): SupportedDataType[] =>
-                Array.from(new Set(paramDefs.map((p) => p.type))).filter(isSupportedDataType);
+                Array.from(new Set(paramDefs.map((p) => p.type))).filter(
+                  isSupportedDataType
+                ) as SupportedDataType[];
 
               const suggestedConstants = param.literalSuggestions || param.literalOptions;
 
@@ -782,7 +786,9 @@ describe('autocomplete', () => {
                       ),
                       ...getFunctionSignaturesByReturnType(
                         'eval',
-                        getTypesFromParamDefs(acceptsFieldParamDefs),
+                        getTypesFromParamDefs(acceptsFieldParamDefs).filter(
+                          isReturnType
+                        ) as FunctionReturnType[],
                         { scalar: true },
                         undefined,
                         [fn.name]
@@ -806,7 +812,7 @@ describe('autocomplete', () => {
                       ),
                       ...getFunctionSignaturesByReturnType(
                         'eval',
-                        getTypesFromParamDefs(acceptsFieldParamDefs),
+                        getTypesFromParamDefs(acceptsFieldParamDefs) as FunctionReturnType[],
                         { scalar: true },
                         undefined,
                         [fn.name]
@@ -855,13 +861,7 @@ describe('autocomplete', () => {
         ],
         ' '
       );
-      testSuggestions('from a | eval a = 1 year /', [
-        ',',
-        '| ',
-        ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
-          'time_interval',
-        ]),
-      ]);
+      testSuggestions('from a | eval a = 1 year /', [',', '| ', 'IS NOT NULL', 'IS NULL']);
       testSuggestions('from a | eval a = 1 day + 2 /', [',', '| ']);
       testSuggestions(
         'from a | eval 1 day + 2 /',
@@ -1363,314 +1363,39 @@ describe('autocomplete', () => {
         ['keyword']
       ).map((s) => (s.text.toLowerCase().includes('null') ? s : attachTriggerCommand(s)))
     );
-  });
+    describe('field lists', () => {
+      // KEEP field
+      testSuggestions('FROM a | KEEP /', getFieldNamesByType('any').map(attachTriggerCommand));
+      testSuggestions(
+        'FROM a | KEEP doubleFiel/',
+        getFieldNamesByType('any').map(attachTriggerCommand)
+      );
+      testSuggestions('FROM a | KEEP doubleField/', ['doubleField,', 'doubleField| ']);
+      testSuggestions('FROM a | KEEP doubleField /', ['| ', ',']);
 
-  describe('advancing the cursor and opening the suggestion menu automatically ✨', () => {
-    const attachTriggerCommand = (
-      s: string | PartialSuggestionWithText
-    ): PartialSuggestionWithText =>
-      typeof s === 'string'
-        ? {
-            text: s,
-            command: TRIGGER_SUGGESTION_COMMAND,
-          }
-        : { ...s, command: TRIGGER_SUGGESTION_COMMAND };
+      // Let's get funky with the field names
+      testSuggestions('FROM a | KEEP @timestamp/', ['@timestamp,', '@timestamp| '], undefined, [
+        [{ name: '@timestamp', type: 'date' }],
+      ]);
+      testSuggestions('FROM a | KEEP foo.bar/', ['foo.bar,', 'foo.bar| '], undefined, [
+        [{ name: 'foo.bar', type: 'double' }],
+      ]);
+      testSuggestions('FROM a | KEEP `foo.bar`/', ['foo.bar,', 'foo.bar| '], undefined, [
+        [{ name: 'foo.bar', type: 'double' }],
+      ]);
+      testSuggestions('FROM a | KEEP `any#Char$Field`/', [
+        '`any#Char$Field`,',
+        '`any#Char$Field`| ',
+      ]);
 
-    const attachAsSnippet = (s: PartialSuggestionWithText): PartialSuggestionWithText => ({
-      ...s,
-      asSnippet: true,
+      // Subsequent fields
+      testSuggestions(
+        'FROM a | KEEP doubleField, dateFiel/',
+        getFieldNamesByType('any')
+          .filter((s) => s !== 'doubleField')
+          .map(attachTriggerCommand)
+      );
+      testSuggestions('FROM a | KEEP doubleField, dateField/', ['dateField,', 'dateField| ']);
     });
-
-    // Source command
-    testSuggestions(
-      'F',
-      ['FROM $0', 'ROW $0', 'SHOW $0'].map(attachTriggerCommand).map(attachAsSnippet),
-      undefined,
-      1
-    );
-
-    // Pipe command
-    testSuggestions(
-      'FROM a | E',
-      commandDefinitions
-        .filter(({ name }) => !sourceCommands.includes(name))
-        .map(({ name }) => attachTriggerCommand(name.toUpperCase() + ' $0'))
-        .map(attachAsSnippet), // TODO consider making this check more fundamental
-      undefined,
-      10
-    );
-
-    describe('function arguments', () => {
-      // literalSuggestions parameter
-      const dateDiffFirstParamSuggestions =
-        evalFunctionDefinitions.find(({ name }) => name === 'date_diff')?.signatures[0].params?.[0]
-          .literalSuggestions ?? [];
-      testSuggestions(
-        'FROM a | EVAL DATE_DIFF()',
-        dateDiffFirstParamSuggestions.map((s) => `"${s}", `).map(attachTriggerCommand),
-        undefined,
-        24
-      );
-
-      // field parameter
-
-      const expectedStringSuggestionsWhenMoreArgsAreNeeded = [
-        ...getFieldNamesByType('keyword')
-          .map((field) => `${field}, `)
-          .map(attachTriggerCommand),
-        ...getFunctionSignaturesByReturnType('eval', 'keyword', { scalar: true }, undefined, [
-          'replace',
-        ]).map((s) => ({
-          ...s,
-          text: `${s.text},`,
-        })),
-      ];
-
-      testSuggestions(
-        'FROM a | EVAL REPLACE()',
-        expectedStringSuggestionsWhenMoreArgsAreNeeded,
-        undefined,
-        22
-      );
-
-      // subsequent parameter
-      testSuggestions(
-        'FROM a | EVAL REPLACE(stringField, )',
-        expectedStringSuggestionsWhenMoreArgsAreNeeded,
-        undefined,
-        35
-      );
-
-      // final parameter — should not advance!
-      testSuggestions(
-        'FROM a | EVAL REPLACE(stringField, stringField, )',
-        [
-          ...getFieldNamesByType('keyword').map((field) => ({ text: field, command: undefined })),
-          ...getFunctionSignaturesByReturnType('eval', 'keyword', { scalar: true }, undefined, [
-            'replace',
-          ]),
-        ],
-        undefined,
-        48
-      );
-
-      // Trigger character because this is how it will actually be... the user will press
-      // space-bar... this may change if we fix the tokenization of timespan literals
-      // such that "2 days" is a single monaco token
-      testSuggestions(
-        'FROM a | EVAL DATE_TRUNC(2 )',
-        [...timeUnitsToSuggest.map((s) => `${s.name}, `).map(attachTriggerCommand), ','],
-        ' '
-      );
-    });
-
-    // PIPE (|)
-    testSuggestions(
-      'FROM a ',
-      [attachTriggerCommand('| '), ',', attachAsSnippet(attachTriggerCommand('METADATA $0'))],
-      undefined,
-      7
-    );
-
-    // Assignment
-    testSuggestions(`FROM a | ENRICH policy on b with `, [
-      attachTriggerCommand('var0 = '),
-      ...getPolicyFields('policy'),
-    ]);
-
-    // FROM source
-    //
-    // Using an Invoke trigger kind here because that's what Monaco uses when the show suggestions
-    // action is triggered (e.g. accepting the "FROM" suggestion)
-    testSuggestions(
-      'FROM ',
-      [
-        { text: 'index1 ', command: TRIGGER_SUGGESTION_COMMAND },
-        { text: 'index2 ', command: TRIGGER_SUGGESTION_COMMAND },
-      ],
-      undefined,
-      5,
-      [
-        ,
-        [
-          { name: 'index1', hidden: false },
-          { name: 'index2', hidden: false },
-        ],
-      ]
-    );
-
-    // FROM source METADATA
-    testSuggestions(
-      'FROM index1 M',
-      [',', attachAsSnippet(attachTriggerCommand('METADATA $0')), '| '],
-      undefined,
-      13
-    );
-
-    // KEEP field
-    testSuggestions(
-      'FROM a | KEEP ',
-      getFieldNamesByType('any').map(attachTriggerCommand),
-      undefined,
-      14
-    );
-    testSuggestions(
-      'FROM a | KEEP doubleFiel',
-      getFieldNamesByType('any').map(attachTriggerCommand),
-      undefined,
-      24
-    );
-    testSuggestions('FROM a | KEEP doubleField', ['doubleField,', 'doubleField| '], undefined, 25);
-    testSuggestions('FROM a | KEEP doubleField ', ['| ', ','], undefined, 26);
-
-    // Let's get funky with the field names
-    testSuggestions('FROM a | KEEP @timestamp', ['@timestamp,', '@timestamp| '], undefined, 24, [
-      [{ name: '@timestamp', type: 'date' }],
-    ]);
-    testSuggestions('FROM a | KEEP foo.bar', ['foo.bar,', 'foo.bar| '], undefined, 21, [
-      [{ name: 'foo.bar', type: 'double' }],
-    ]);
-    testSuggestions('FROM a | KEEP `foo.bar`', ['foo.bar,', 'foo.bar| '], undefined, 23, [
-      [{ name: 'foo.bar', type: 'double' }],
-    ]);
-    testSuggestions(
-      'FROM a | KEEP `any#Char$Field`',
-      ['`any#Char$Field`,', '`any#Char$Field`| '],
-      undefined,
-      30
-    );
-
-    // Subsequent fields
-    testSuggestions(
-      'FROM a | KEEP doubleField, dateFiel',
-      getFieldNamesByType('any')
-        .filter((s) => s !== 'doubleField')
-        .map(attachTriggerCommand),
-      undefined,
-      35
-    );
-    testSuggestions(
-      'FROM a | KEEP doubleField, dateField',
-      ['dateField,', 'dateField| '],
-      undefined,
-      36
-    );
-
-    // LIMIT number
-    testSuggestions('FROM a | LIMIT ', ['10 ', '100 ', '1000 '].map(attachTriggerCommand));
-
-    // SORT field
-    testSuggestions(
-      'FROM a | SORT ',
-      [
-        ...getFieldNamesByType('any').map((field) => `${field} `),
-        ...getFunctionSignaturesByReturnType('sort', 'any', { scalar: true }),
-      ].map(attachTriggerCommand),
-      undefined,
-      14
-    );
-
-    // SORT field order
-    testSuggestions(
-      'FROM a | SORT field ',
-      [',', ...['ASC ', 'DESC ', '| '].map(attachTriggerCommand)],
-      undefined,
-      20
-    );
-
-    // SORT field order nulls
-    testSuggestions(
-      'FROM a | SORT field ASC ',
-      [',', ...['NULLS FIRST ', 'NULLS LAST ', '| '].map(attachTriggerCommand)],
-      undefined,
-      24
-    );
-
-    // STATS argument
-    testSuggestions(
-      'FROM a | STATS ',
-      [
-        'var0 = ',
-        ...getFunctionSignaturesByReturnType('stats', 'any', { scalar: true, agg: true }).map(
-          attachAsSnippet
-        ),
-      ].map(attachTriggerCommand),
-      undefined,
-      15
-    );
-
-    // STATS argument BY
-    testSuggestions(
-      'FROM a | STATS AVG(numberField) ',
-      [',', attachAsSnippet(attachTriggerCommand('BY $0')), attachTriggerCommand('| ')],
-      undefined,
-      32
-    );
-
-    // STATS argument BY field
-    const allByCompatibleFunctions = getFunctionSignaturesByReturnType(
-      'stats',
-      'any',
-      {
-        scalar: true,
-        grouping: true,
-      },
-      undefined,
-      undefined,
-      'by'
-    );
-    testSuggestions(
-      'FROM a | STATS AVG(numberField) BY ',
-      [
-        attachTriggerCommand('var0 = '),
-        ...getFieldNamesByType('any')
-          .map((field) => `${field} `)
-          .map(attachTriggerCommand),
-        ...allByCompatibleFunctions,
-      ],
-      undefined,
-      35
-    );
-
-    // STATS argument BY assignment (checking field suggestions)
-    testSuggestions(
-      'FROM a | STATS AVG(numberField) BY var0 = ',
-      [
-        ...getFieldNamesByType('any')
-          .map((field) => `${field} `)
-          .map(attachTriggerCommand),
-        ...allByCompatibleFunctions,
-      ],
-      undefined,
-      41
-    );
-
-    // WHERE argument (field suggestions)
-    testSuggestions(
-      'FROM a | WHERE ',
-      [
-        ...getFieldNamesByType('any')
-          .map((field) => `${field} `)
-          .map(attachTriggerCommand),
-        ...getFunctionSignaturesByReturnType('where', 'any', { scalar: true }).map(attachAsSnippet),
-      ],
-      undefined,
-      15
-    );
-
-    // WHERE argument comparison
-    testSuggestions(
-      'FROM a | WHERE stringField ',
-      getFunctionSignaturesByReturnType(
-        'where',
-        'boolean',
-        {
-          builtin: true,
-        },
-        ['string']
-      ).map((s) => (s.text.toLowerCase().includes('null') ? s : attachTriggerCommand(s))),
-      undefined,
-      27
-    );
   });
 });

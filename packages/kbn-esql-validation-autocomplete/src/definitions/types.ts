@@ -86,12 +86,16 @@ type ArrayType =
 /**
  * This is the type of a parameter in a function definition.
  */
-export type FunctionParameterType = Omit<SupportedDataType, 'unsupported'> | ArrayType | 'any';
+export type FunctionParameterType = Exclude<SupportedDataType, 'unsupported'> | ArrayType | 'any';
 
 /**
  * This is the return type of a function definition.
  */
-export type FunctionReturnType = Omit<SupportedDataType, 'unsupported'> | 'any' | 'void';
+export type FunctionReturnType = Exclude<SupportedDataType, 'unsupported'> | 'any' | 'void';
+
+export const isReturnType = (str: string | FunctionParameterType): str is FunctionReturnType =>
+  str !== 'unsupported' &&
+  (dataTypes.includes(str as SupportedDataType) || str === 'any' || str === 'void');
 
 export interface FunctionDefinition {
   type: 'builtin' | 'agg' | 'eval';
