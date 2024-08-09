@@ -38,13 +38,14 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required: [data]
-                properties:
-                  data:
-                    type: object
-                    required: [getOneTimeline]
+                oneOf:
+                  - type: object
+                    required: [data]
                     properties:
-                      getOneTimeline:
-                        $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
-                        nullable: true
+                      data:
+                        type: object
+                        required: [getOneTimeline]
+                        properties:
+                          getOneTimeline:
+                            $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
+                  - type: object

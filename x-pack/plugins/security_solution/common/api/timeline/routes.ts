@@ -75,3 +75,8 @@ export {
   ResolveTimelineRequestQuery,
   ResolveTimelineResponse,
 } from './resolve_timeline/resolve_timeline_route.gen';
+
+export {
+  GetTimelineRequestQuery,
+  GetTimelineResponse,
+} from './get_timeline/get_timeline_route.gen';

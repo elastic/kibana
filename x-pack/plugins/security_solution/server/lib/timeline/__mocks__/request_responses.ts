@@ -18,7 +18,7 @@ import type {
   SavedTimeline,
   PatchTimelineRequestBody,
   CreateTimelinesRequestBody,
-  GetTimelineQuery,
+  GetTimelineRequestQuery,
 } from '../../../../common/api/timeline';
 import {
   type TimelineType,
@@ -166,7 +166,7 @@ export const cleanDraftTimelinesRequest = (timelineType: TimelineType) =>
     },
   });
 
-export const getTimelineRequest = (query?: GetTimelineQuery) =>
+export const getTimelineRequest = (query?: GetTimelineRequestQuery) =>
   requestMock.create({
     method: 'get',
     path: TIMELINE_URL,

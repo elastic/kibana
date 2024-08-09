@@ -5,18 +5,22 @@
  * 2.0.
  */
 
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_URL } from '../../../../../../common/constants';
 
 import type { ConfigType } from '../../../../..';
-import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
-import { getTimelineQuerySchema } from '../../../../../../common/api/timeline';
+import {
+  GetTimelineRequestQuery,
+  type GetTimelineResponse,
+} from '../../../../../../common/api/timeline';
 import { getTimelineTemplateOrNull, getTimelineOrNull } from '../../../saved_object/timelines';
 import type {
   TimelineSavedObject,
@@ -36,10 +40,10 @@ export const getTimelineRoute = (router: SecuritySolutionPluginRouter, _: Config
       {
         version: '2023-10-31',
         validate: {
-          request: { query: buildRouteValidationWithExcess(getTimelineQuerySchema) },
+          request: { query: buildRouteValidationWithZod(GetTimelineRequestQuery) },
         },
       },
-      async (context, request, response) => {
+      async (context, request, response): Promise<IKibanaResponse<GetTimelineResponse>> => {
         try {
           const frameworkRequest = await buildFrameworkRequest(context, request);
           const query = request.query ?? {};
