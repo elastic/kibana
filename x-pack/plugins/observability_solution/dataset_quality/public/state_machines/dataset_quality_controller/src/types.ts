@@ -58,7 +58,7 @@ export interface WithTableOptions {
 export interface WithFlyoutOptions {
   flyout: {
     dataset?: FlyoutDataset;
-    datasetSettings?: DataStreamSettings;
+    dataStreamSettings?: DataStreamSettings;
     datasetDetails?: DataStreamDetails;
     insightsTimeRange?: TimeRangeConfig;
     breakdownField?: string;

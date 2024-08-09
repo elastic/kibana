@@ -18,7 +18,7 @@ export const useDatasetQualityFlyout = () => {
 
   const {
     dataset: dataStreamStat,
-    datasetSettings: dataStreamSettings,
+    dataStreamSettings,
     datasetDetails: dataStreamDetails,
     insightsTimeRange,
     breakdownField,

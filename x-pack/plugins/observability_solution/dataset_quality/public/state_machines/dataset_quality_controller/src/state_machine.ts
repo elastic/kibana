@@ -773,7 +773,7 @@ export const createDatasetQualityControllerStateMachine = ({
       notifyFetchIntegrationsFailed: (_context, event: DoneInvokeEvent<Error>) =>
         fetchIntegrationsFailedNotifier(toasts, event.data),
       notifyFetchDatasetIntegrationsFailed: (context, event: DoneInvokeEvent<Error>) => {
-        const integrationName = context.flyout.datasetSettings?.integration;
+        const integrationName = context.flyout.dataStreamSettings?.integration;
         return fetchDataStreamIntegrationFailedNotifier(toasts, event.data, integrationName);
       },
       notifyAssertBreakdownFieldEcsFailed: (_context, event: DoneInvokeEvent<Error>) =>
@@ -848,11 +848,11 @@ export const createDatasetQualityControllerStateMachine = ({
         });
       },
       loadDataStreamIntegration: (context) => {
-        if (context.flyout.datasetSettings?.integration && context.flyout.dataset) {
+        if (context.flyout.dataStreamSettings?.integration && context.flyout.dataset) {
           const { type } = context.flyout.dataset;
           return dataStreamDetailsClient.getDataStreamIntegration({
             type: type as DataStreamType,
-            integrationName: context.flyout.datasetSettings.integration,
+            integrationName: context.flyout.dataStreamSettings.integration,
           });
         }
         return Promise.resolve();
@@ -880,9 +880,9 @@ export const createDatasetQualityControllerStateMachine = ({
         });
       },
       loadIntegrationDashboards: (context) => {
-        if (context.flyout.datasetSettings?.integration) {
+        if (context.flyout.dataStreamSettings?.integration) {
           return dataStreamDetailsClient.getIntegrationDashboards({
-            integration: context.flyout.datasetSettings.integration,
+            integration: context.flyout.dataStreamSettings.integration,
           });
         }
 
