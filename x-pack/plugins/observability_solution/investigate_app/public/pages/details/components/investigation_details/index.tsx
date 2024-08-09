@@ -11,14 +11,14 @@ import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { keyBy, noop } from 'lodash';
 import React, { useEffect, useMemo, useRef } from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import { useDateRange } from '../../hooks/use_date_range';
-import { useKibana } from '../../hooks/use_kibana';
-import { AddNoteUI } from '../add_note_ui';
-import { AddObservationUI } from '../add_observation_ui';
-import { InvestigateSearchBar } from '../investigate_search_bar';
-import { InvestigateWidgetGrid } from '../investigate_widget_grid';
+import { useDateRange } from '../../../../hooks/use_date_range';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { AddNoteUI } from '../../../../components/add_note_ui';
+import { AddObservationUI } from '../../../../components/add_observation_ui';
+import { InvestigateSearchBar } from '../../../../components/investigate_search_bar';
+import { InvestigateWidgetGrid } from '../../../../components/investigate_widget_grid';
 
-function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
+function InvestigationDetailsWithUser({ user }: { user: AuthenticatedUser }) {
   const {
     dependencies: {
       start: { investigate },
@@ -154,7 +154,7 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
   );
 }
 
-export function InvestigateView({}: {}) {
+export function InvestigationDetails({}: {}) {
   const {
     core: { security },
   } = useKibana();
@@ -163,5 +163,5 @@ export function InvestigateView({}: {}) {
     return security.authc.getCurrentUser();
   }, [security]);
 
-  return user.value ? <InvestigateViewWithUser user={user.value} /> : null;
+  return user.value ? <InvestigationDetailsWithUser user={user.value} /> : null;
 }

@@ -7,12 +7,12 @@
 
 import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
 import React from 'react';
-import { InvestigateView as Component } from '.';
-import { KibanaReactStorybookDecorator } from '../../../.storybook/storybook_decorator';
+import { InvestigationDetails as Component } from '.';
+import { KibanaReactStorybookDecorator } from '../../../../../.storybook/storybook_decorator';
 
 const meta: ComponentMeta<typeof Component> = {
   component: Component,
-  title: 'app/Organisms/InvestigateView',
+  title: 'app/Organisms/InvestigatationDetails',
   decorators: [KibanaReactStorybookDecorator],
 };
 
