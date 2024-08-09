@@ -10,7 +10,6 @@ export type { CspSecuritySolutionContext } from './types';
 export { CLOUD_SECURITY_POSTURE_BASE_PATH } from './common/navigation/constants';
 export type { CloudSecurityPosturePageId } from './common/navigation/types';
 export { getSecuritySolutionLink } from './common/navigation/security_solution_links';
-export { useLatestFindings } from './pages/configurations/latest_findings/use_latest_findings';
 
 export type { CspClientPluginSetup, CspClientPluginStart } from './types';
 
