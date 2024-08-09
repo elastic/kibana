@@ -8,17 +8,27 @@
 
 import React, { useContext } from 'react';
 
+import { PublishingSubject } from '@kbn/presentation-publishing';
 import { ControlStateManager } from '../../types';
 import {
   OptionsListComponentApi,
   OptionsListComponentState,
   OptionsListDisplaySettings,
 } from './types';
+import { OptionsListSelection } from '../../../../common/options_list/options_list_selections';
+
+export type ContextStateManager = ControlStateManager<
+  Omit<OptionsListComponentState, 'exclude' | 'existsSelected' | 'selectedOptions'>
+> & {
+  selectedOptions: PublishingSubject<OptionsListSelection[] | undefined>;
+  existsSelected: PublishingSubject<boolean | undefined>;
+  exclude: PublishingSubject<boolean | undefined>;
+};
 
 export const OptionsListControlContext = React.createContext<
   | {
       api: OptionsListComponentApi;
-      stateManager: ControlStateManager<OptionsListComponentState>;
+      stateManager: ContextStateManager;
       displaySettings: OptionsListDisplaySettings;
     }
   | undefined

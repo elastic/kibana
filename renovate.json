@@ -1,8 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
   "ignorePaths": ["**/__fixtures__/**", "**/fixtures/**"],
-  "enabledManagers": ["npm"],
+  "enabledManagers": ["npm", "github-actions"],
   "baseBranches": ["main", "7.17"],
   "prConcurrentLimit": 0,
   "prHourlyLimit": 0,
@@ -19,6 +19,14 @@
     {
       "matchDepPatterns": [".*"],
       "enabled": false
+    },
+    {
+      "groupName": "GitHub actions",
+      "matchManagers": ["github-actions"],
+      "reviewers": "[team:kibana-operations]",
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "backport:all-open", "release_note:skip"],
+      "enabled": true
     },
     {
       "groupName": "@elastic/charts",

@@ -147,6 +147,10 @@ export interface CommandBaseDefinition {
   name: string;
   alias?: string;
   description: string;
+  /**
+   * Whether to show or hide in autocomplete suggestion list
+   */
+  hidden?: boolean;
   signature: {
     multipleParams: boolean;
     // innerType here is useful to drill down the type in case of "column"
