@@ -96,7 +96,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables scan response action on Endpoint
    */
-  responseActionScanEnabled: false,
+  responseActionScanEnabled: true,
 
   /**
    * Enables new notes
