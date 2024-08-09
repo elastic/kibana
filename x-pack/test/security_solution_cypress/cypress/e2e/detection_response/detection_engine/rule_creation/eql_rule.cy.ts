@@ -226,13 +226,11 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('EQL query validation', () => {
     it('validates missing data source', () => {
-      const indexPattern = 'non-existing-index';
-
       login();
       visit(CREATE_RULE_URL);
       selectEqlRuleType();
       getIndexPatternClearButton().click();
-      getRuleIndexInput().type(`${indexPattern}{enter}`);
+      getRuleIndexInput().type('endgame-*{enter}');
 
       cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
       cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
@@ -244,7 +242,7 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(EQL_QUERY_VALIDATION_ERROR_CONTENT).should('be.visible');
       cy.get(EQL_QUERY_VALIDATION_ERROR_CONTENT).should(
         'have.text',
-        `EQL Validation Errorsindex_not_found_exception\n\tCaused by:\n\t\tverification_exception: Found 1 problem\nline -1:-1: Unknown index [${indexPattern}]\n\tRoot causes:\n\t\tverification_exception: Found 1 problem\nline -1:-1: Unknown index [${indexPattern}]`
+        `EQL Validation Errorsindex_not_found_exception\n\tCaused by:\n\t\tverification_exception: Found 1 problem\nline -1:-1: Unknown index [*,-*]\n\tRoot causes:\n\t\tverification_exception: Found 1 problem\nline -1:-1: Unknown index [*,-*]`
       );
     });
 

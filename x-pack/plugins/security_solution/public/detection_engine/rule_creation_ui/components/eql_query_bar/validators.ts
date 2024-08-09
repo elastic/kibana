@@ -14,6 +14,7 @@ import type { DefineStepRule } from '../../../../detections/pages/detection_engi
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import { validateEql, EQL_ERROR_CODES } from '../../../../common/hooks/eql/api';
 import type { FieldValueQueryBar } from '../query_bar';
+import * as i18n from './translations';
 
 /**
  * Unlike lodash's debounce, which resolves intermediate calls with the most
@@ -60,36 +61,44 @@ export const eqlValidator = async (
     return;
   }
 
-  const { data } = KibanaServices.get();
-  let dataViewTitle = index?.join();
-  let runtimeMappings = {};
-  if (
-    dataViewId != null &&
-    dataViewId !== '' &&
-    formData.dataSourceType === DataSourceType.DataView
-  ) {
-    const dataView = await data.dataViews.get(dataViewId);
+  try {
+    const { data } = KibanaServices.get();
+    let dataViewTitle = index?.join();
+    let runtimeMappings = {};
+    if (
+      dataViewId != null &&
+      dataViewId !== '' &&
+      formData.dataSourceType === DataSourceType.DataView
+    ) {
+      const dataView = await data.dataViews.get(dataViewId);
 
-    dataViewTitle = dataView.title;
-    runtimeMappings = dataView.getRuntimeMappings();
-  }
+      dataViewTitle = dataView.title;
+      runtimeMappings = dataView.getRuntimeMappings();
+    }
 
-  const signal = new AbortController().signal;
-  const response = await validateEql({
-    data,
-    query,
-    signal,
-    dataViewTitle,
-    runtimeMappings,
-    options: eqlOptions,
-  });
+    const signal = new AbortController().signal;
+    const response = await validateEql({
+      data,
+      query,
+      signal,
+      dataViewTitle,
+      runtimeMappings,
+      options: eqlOptions,
+    });
 
-  if (response?.valid === false) {
+    if (response?.valid === false) {
+      return {
+        code: response.error?.code,
+        message: '',
+        messages: response.error?.messages,
+        error: response.error?.error,
+      };
+    }
+  } catch (error) {
     return {
-      code: response.error?.code,
-      message: '',
-      messages: response.error?.messages,
-      error: response.error?.error,
+      code: EQL_ERROR_CODES.FAILED_REQUEST,
+      message: i18n.EQL_VALIDATION_REQUEST_ERROR,
+      error,
     };
   }
 };
