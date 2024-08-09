@@ -120,6 +120,7 @@ export class UnifiedDocViewerPublicPlugin
       uiSettings,
       unifiedDocViewer,
       share,
+      core,
     };
     setUnifiedDocViewerServices(services);
     return unifiedDocViewer;
