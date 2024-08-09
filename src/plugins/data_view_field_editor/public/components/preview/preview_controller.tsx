@@ -187,7 +187,10 @@ export class PreviewController {
     this.dataView.setFieldCustomLabel(updatedField.name, updatedField.customLabel);
     this.dataView.setFieldCustomDescription(updatedField.name, updatedField.customDescription);
 
-    editedField.count = updatedField.popularity || 0;
+    if (updatedField.popularity !== undefined) {
+      this.dataView.setFieldCount(updatedField.name, updatedField.popularity || 0);
+    }
+
     if (updatedField.format) {
       this.dataView.setFieldFormat(updatedField.name, updatedField.format!);
     } else {
