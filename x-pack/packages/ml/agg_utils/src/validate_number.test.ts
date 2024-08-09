@@ -8,6 +8,16 @@
 import { numberValidator } from './validate_number';
 
 describe('numberValidator', () => {
+  it('should allow an empty value if not required', () => {
+    const validator = numberValidator({ min: 1, integerOnly: true, required: false });
+    expect(validator(undefined)).toStrictEqual(null);
+  });
+
+  it('should not allow an empty value if required', () => {
+    const validator = numberValidator({ min: 1, integerOnly: true, required: true });
+    expect(validator(undefined)).toStrictEqual({ required: true });
+  });
+
   it('should only allow integers above zero', () => {
     const integerOnlyValidator = numberValidator({ min: 1, integerOnly: true });
     // invalid

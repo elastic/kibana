@@ -670,19 +670,24 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
     );
   }, [totalMlProcessors, config.adaptive_allocations?.enabled]);
 
-  const minNumberOfAllocationsValidator = numberValidator({ min: 1, integerOnly: true });
+  const minNumberOfAllocationsValidator = numberValidator({
+    min: 1,
+    integerOnly: true,
+    required: false,
+  });
   const maxNumberOfAllocationsValidator = numberValidator({
     min: (config.adaptive_allocations?.min_number_of_allocations ?? 1) + 1,
     integerOnly: true,
+    required: false,
   });
 
   const numOfAllocationsErrors = numOfAllocationsValidator(config.numOfAllocations);
   const deploymentIdErrors = deploymentIdValidator(config.deploymentId ?? '');
   const minNumberOfAllocationsErrors = minNumberOfAllocationsValidator(
-    config.adaptive_allocations?.min_number_of_allocations ?? 1
+    config.adaptive_allocations?.min_number_of_allocations
   );
   const maxNumberOfAllocationsErrors = maxNumberOfAllocationsValidator(
-    config.adaptive_allocations?.max_number_of_allocations ?? 0
+    config.adaptive_allocations?.max_number_of_allocations
   );
 
   const errors: DeploymentSetupProps['errors'] = {
