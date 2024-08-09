@@ -7,11 +7,13 @@
  */
 
 import { inject, injectable } from 'inversify';
-import { RequestToken } from '@kbn/core-http-server';
-import type { EchoRequest } from './route';
+import type { Type } from '@kbn/config-schema';
+import { type KibanaRequest, RequestToken } from '@kbn/core-http-server';
+
+export type EchoRequest = KibanaRequest<never, never, Type<string>>;
 
 @injectable()
-export class EchoService {
+export class Echo {
   constructor(@inject(RequestToken) private readonly request: EchoRequest) {}
 
   echo() {
