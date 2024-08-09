@@ -73,7 +73,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const findingsLinkCount = await dashboard.getFindingsLinksCount(TAB_TYPES.CLOUD);
         for (let i = 0; i < findingsLinkCount; i++) {
           const link = await dashboard.getFindingsLinkAtIndex(TAB_TYPES.CLOUD, i);
-          // for (const link of findingsLink) {
           await link.click();
           await pageObjects.header.waitUntilLoadingHasFinished();
           const groupSelector = await findings.groupSelector();

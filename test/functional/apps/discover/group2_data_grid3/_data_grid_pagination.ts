@@ -30,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const security = getService('security');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const dashboardPanelActions = getService('dashboardPanelActions');
 
   describe('discover data grid pagination', function describeIndexTests() {
     before(async () => {
@@ -126,6 +127,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
       expect((await dataGrid.getDocTableRows()).length).to.be(10); // as in the saved search
       await dataGrid.checkCurrentRowsPerPageToBe(10);
+
+      // should use "rowsPerPage" form the saved search on dashboard
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.addSavedSearch(savedSearchTitle);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect((await dataGrid.getDocTableRows()).length).to.be(10); // as in the saved search
+      await dataGrid.checkCurrentRowsPerPageToBe(10);
+
+      // should use "rowsPerPage" form settings by default on dashboard
+      await dashboardPanelActions.removePanelByTitle(savedSearchTitle);
+      await dashboardAddPanel.addSavedSearch('A Saved Search');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect((await dataGrid.getDocTableRows()).length).to.be(6); // as in settings
+      await dataGrid.checkCurrentRowsPerPageToBe(6);
     });
 
     it('should not split ES|QL results into pages', async () => {
