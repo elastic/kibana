@@ -7,6 +7,7 @@
  */
 
 import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 import { CoreSetup, kibanaResponseFactory } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { registerRoutes } from './register_routes';
@@ -14,19 +15,19 @@ import { routeValidationObject } from './route_validation_object';
 import { NEVER } from 'rxjs';
 
 describe('registerRoutes', () => {
-  const get = jest.fn();
+  const post = jest.fn();
 
-  const getAddVersion = jest.fn();
-  const getWithVersion = jest.fn((_options) => {
+  const postAddVersion = jest.fn();
+  const postWithVersion = jest.fn((_options) => {
     return {
-      addVersion: getAddVersion,
+      addVersion: postAddVersion,
     };
   });
 
   const createRouter = jest.fn().mockReturnValue({
-    get,
+    post,
     versioned: {
-      get: getWithVersion,
+      post: postWithVersion,
     },
   });
 
@@ -73,7 +74,7 @@ describe('registerRoutes', () => {
       },
     } as unknown as CoreSetup;
 
-    const paramsRt = t.type({
+    const iotsParamsRt = t.type({
       body: t.type({
         bodyParam: t.string,
       }),
@@ -85,25 +86,43 @@ describe('registerRoutes', () => {
       }),
     });
 
+    const zodParamsRt = z.object({
+      body: z.object({
+        bodyParam: z.string(),
+      }),
+      query: z.object({
+        queryParam: z.string(),
+      }),
+      path: z.object({
+        pathParam: z.string(),
+      }),
+    });
+
     registerRoutes({
       core: coreSetup,
       repository: {
-        'GET /internal/app/feature': {
-          endpoint: 'GET /internal/app/feature',
+        'POST /internal/app/feature': {
+          endpoint: 'POST /internal/app/feature',
           handler: internalHandler,
-          params: paramsRt,
+          params: iotsParamsRt,
           options: internalOptions,
         },
-        'GET /api/app/feature version': {
-          endpoint: 'GET /api/app/feature version',
+        'POST /api/app/feature version': {
+          endpoint: 'POST /api/app/feature version',
           handler: publicHandler,
-          params: paramsRt,
+          params: iotsParamsRt,
           options: publicOptions,
         },
-        'GET /internal/app/feature/error': {
-          endpoint: 'GET /internal/app/feature/error',
+        'POST /internal/app/feature/error': {
+          endpoint: 'POST /internal/app/feature/error',
           handler: errorHandler,
-          params: paramsRt,
+          params: iotsParamsRt,
+          options: internalOptions,
+        },
+        'POST /internal/app/feature_zod': {
+          endpoint: 'POST /internal/app/feature_zod',
+          handler: internalHandler,
+          params: zodParamsRt,
           options: internalOptions,
         },
       },
@@ -117,21 +136,21 @@ describe('registerRoutes', () => {
   it('creates a router and defines the routes', () => {
     expect(createRouter).toHaveBeenCalledTimes(1);
 
-    expect(get).toHaveBeenCalledTimes(2);
+    expect(post).toHaveBeenCalledTimes(3);
 
-    const [internalRoute] = get.mock.calls[0];
+    const [internalRoute] = post.mock.calls[0];
     expect(internalRoute.path).toEqual('/internal/app/feature');
     expect(internalRoute.options).toEqual(internalOptions);
     expect(internalRoute.validate).toEqual(routeValidationObject);
 
-    expect(getWithVersion).toHaveBeenCalledTimes(1);
-    const [publicRoute] = getWithVersion.mock.calls[0];
+    expect(postWithVersion).toHaveBeenCalledTimes(1);
+    const [publicRoute] = postWithVersion.mock.calls[0];
     expect(publicRoute.path).toEqual('/api/app/feature');
     expect(publicRoute.options).toEqual(publicOptions);
     expect(publicRoute.access).toEqual('public');
 
-    expect(getAddVersion).toHaveBeenCalledTimes(1);
-    const [versionedRoute] = getAddVersion.mock.calls[0];
+    expect(postAddVersion).toHaveBeenCalledTimes(1);
+    const [versionedRoute] = postAddVersion.mock.calls[0];
     expect(versionedRoute.version).toEqual('version');
     expect(versionedRoute.validate).toEqual({
       request: routeValidationObject,
@@ -139,7 +158,48 @@ describe('registerRoutes', () => {
   });
 
   it('calls the route handler with all dependencies', async () => {
-    const [_, internalRouteHandler] = get.mock.calls[0];
+    const [_, internalRouteHandler] = post.mock.calls[0];
+    await internalRouteHandler(mockContext, mockRequest, kibanaResponseFactory);
+
+    const [args] = internalHandler.mock.calls[0];
+    expect(Object.keys(args).sort()).toEqual(
+      ['aService', 'request', 'response', 'context', 'params', 'logger'].sort()
+    );
+
+    const { params, logger, aService, request, response, context } = args;
+    expect(params).toEqual({
+      body: {
+        bodyParam: 'body',
+      },
+      query: {
+        queryParam: 'query',
+      },
+      path: {
+        pathParam: 'path',
+      },
+    });
+    expect(request).toBe(mockRequest);
+    expect(response).toBe(kibanaResponseFactory);
+    expect(context).toBe(mockContext);
+    expect(aService).toBe(mockService);
+    expect(logger).toBe(mockLogger);
+  });
+
+  it('uses Core validation when using zod', () => {
+    const [internalRoute] = post.mock.calls[2];
+    expect(internalRoute.path).toEqual('/internal/app/feature_zod');
+    expect(internalRoute.options).toEqual(internalOptions);
+
+    expect(internalRoute.validate).not.toEqual(routeValidationObject);
+    expect(internalRoute.validate).toEqual({
+      params: expect.any(Function),
+      query: expect.any(Function),
+      body: expect.any(Function),
+    });
+  });
+
+  it('calls the route handler with all dependencies when using zod', async () => {
+    const [_, internalRouteHandler] = post.mock.calls[2];
     await internalRouteHandler(mockContext, mockRequest, kibanaResponseFactory);
 
     const [args] = internalHandler.mock.calls[0];
@@ -167,7 +227,7 @@ describe('registerRoutes', () => {
   });
 
   it('wraps a plain route handler result into a response', async () => {
-    const [_, internalRouteHandler] = get.mock.calls[0];
+    const [_, internalRouteHandler] = post.mock.calls[0];
     const internalResult = await internalRouteHandler(
       mockContext,
       mockRequest,
@@ -183,7 +243,7 @@ describe('registerRoutes', () => {
   });
 
   it('allows for route handlers to define a custom response', async () => {
-    const [_, publicRouteHandler] = getAddVersion.mock.calls[0];
+    const [_, publicRouteHandler] = postAddVersion.mock.calls[0];
     const publicResult = await publicRouteHandler(mockContext, mockRequest, kibanaResponseFactory);
 
     expect(publicHandler).toHaveBeenCalledTimes(1);
@@ -191,7 +251,7 @@ describe('registerRoutes', () => {
   });
 
   it('translates errors thrown in a route handler to an error response', async () => {
-    const [_, errorRouteHandler] = get.mock.calls[1];
+    const [_, errorRouteHandler] = post.mock.calls[1];
     const errorResult = await errorRouteHandler(mockContext, mockRequest, kibanaResponseFactory);
 
     expect(errorHandler).toHaveBeenCalledTimes(1);

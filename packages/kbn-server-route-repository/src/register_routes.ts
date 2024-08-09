@@ -12,15 +12,17 @@ import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server
 import { isKibanaResponse } from '@kbn/core-http-server';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
-import * as t from 'io-ts';
-import { merge, pick } from 'lodash';
 import {
   ServerRoute,
   ServerRouteCreateOptions,
+  ZodParamsObject,
   parseEndpoint,
 } from '@kbn/server-route-repository-utils';
-import { decodeRequestParams } from './decode_request_params';
+import { isZod } from '@kbn/zod';
+import { merge } from 'lodash';
 import { routeValidationObject } from './route_validation_object';
+import { validateParams } from './validate_params';
+import { makeZodValidationObject } from './make_zod_validation_object';
 
 const CLIENT_CLOSED_REQUEST = {
   statusCode: 499,
@@ -55,12 +57,7 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
       response: KibanaResponseFactory
     ) => {
       try {
-        const runtimeType = params || t.strict({});
-
-        const validatedParams = decodeRequestParams(
-          pick(request, 'params', 'body', 'query'),
-          runtimeType
-        );
+        const validatedParams = validateParams(request, params);
 
         const { aborted, result } = await Promise.race([
           handler({
@@ -122,12 +119,16 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
 
     logger.debug(`Registering endpoint ${endpoint}`);
 
+    const validationObject = isZod(params)
+      ? makeZodValidationObject(params as ZodParamsObject)
+      : routeValidationObject;
+
     if (!version) {
       router[method](
         {
           path: pathname,
           options,
-          validate: routeValidationObject,
+          validate: validationObject,
         },
         wrappedHandler
       );
@@ -140,7 +141,7 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
         {
           version,
           validate: {
-            request: routeValidationObject,
+            request: validationObject,
           },
         },
         wrappedHandler

@@ -14,10 +14,9 @@ describe('decodeRequestParams', () => {
     const decode = () => {
       return decodeRequestParams(
         {
-          params: {
+          path: {
             serviceName: 'opbeans-java',
           },
-          body: null,
           query: {
             start: '',
           },
@@ -48,11 +47,10 @@ describe('decodeRequestParams', () => {
     const decode = () => {
       return decodeRequestParams(
         {
-          params: {
+          path: {
             serviceName: 'opbeans-java',
             extraKey: '',
           },
-          body: null,
           query: {
             start: '',
           },
@@ -79,11 +77,9 @@ describe('decodeRequestParams', () => {
     const decode = () => {
       return decodeRequestParams(
         {
-          params: {},
           query: {
             _inspect: 'true',
           },
-          body: null,
         },
         t.type({
           query: t.type({
@@ -102,31 +98,10 @@ describe('decodeRequestParams', () => {
     });
   });
 
-  it('strips empty params', () => {
-    const decode = () => {
-      return decodeRequestParams(
-        {
-          params: {},
-          query: {},
-          body: {},
-        },
-        t.type({
-          body: t.any,
-        })
-      );
-    };
-
-    expect(decode).not.toThrow();
-
-    expect(decode()).toEqual({});
-  });
-
   it('allows excess keys in an any type', () => {
     const decode = () => {
       return decodeRequestParams(
         {
-          params: {},
-          query: {},
           body: {
             body: {
               query: 'foo',
