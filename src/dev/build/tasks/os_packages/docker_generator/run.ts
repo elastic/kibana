@@ -43,10 +43,9 @@ export async function runDockerGenerator(
   if (flags.baseImage === 'ubuntu') baseImageName = 'ubuntu:20.04';
   if (flags.baseImage === 'ubi') baseImageName = 'docker.elastic.co/ubi9/ubi-minimal:latest';
   /**
-   * Renovate config contains a regex manager to automatically update any references to the Chainguard images within
-   * any .ts files.
+   * Renovate config contains a regex manager to automatically updates this Chainguard reference
    *
-   * If this logic moves to file with an ending for anything other than .ts, then the Renovate regex manager
+   * If this logic moves to another file or under another name, then the Renovate regex manager
    * for automatic Chainguard updates will break.
    */
   if (flags.baseImage === 'wolfi')
