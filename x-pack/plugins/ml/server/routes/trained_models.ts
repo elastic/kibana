@@ -582,18 +582,20 @@ export function trainedModelsRoutes(
           },
         },
       },
-      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response, client }) => {
         try {
           const { modelId } = request.params;
-          const body = await mlClient.startTrainedModelDeployment(
-            {
-              model_id: modelId,
-              ...(request.body ? request.body : {}),
-            },
-            {
-              maxRetries: 0,
-            }
-          );
+
+          // TODO use mlClient.startTrainedModelDeployment when esClient is updated
+          const body =
+            await client.asCurrentUser.transport.request<estypes.MlStartTrainedModelDeploymentResponse>(
+              {
+                method: 'POST',
+                path: `_ml/trained_models/${modelId}/deployment/_start`,
+                body: request.body,
+              }
+            );
+
           return response.ok({
             body,
           });
