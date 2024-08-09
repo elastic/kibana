@@ -163,9 +163,10 @@ export const useInvestigateInTimeline = ({
           columns: !unifiedComponentsInTimelineDisabled ? defaultUdtHeaders : defaultHeaders,
           indexNames: timeline.indexNames ?? [],
           show: true,
-          excludedRowRendererIds: !unifiedComponentsInTimelineDisabled
-            ? timeline.excludedRowRendererIds
-            : [],
+          excludedRowRendererIds:
+            !unifiedComponentsInTimelineDisabled && timeline.timelineType !== TimelineType.template
+              ? timeline.excludedRowRendererIds
+              : [],
         },
         to: toTimeline,
         ruleNote,

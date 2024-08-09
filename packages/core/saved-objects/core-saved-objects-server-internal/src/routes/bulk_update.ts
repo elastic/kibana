@@ -35,7 +35,8 @@ export const registerBulkUpdateRoute = (
       path: '/_bulk_update',
       options: {
         access,
-        description: `Update saved objects`,
+        summary: `Update saved objects`,
+        deprecated: true,
       },
       validate: {
         body: schema.arrayOf(

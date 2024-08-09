@@ -100,21 +100,14 @@ interface OptionalRequestParams {
 }
 
 export const getOptionalRequestParams = ({
-  isEnabledRAGAlerts,
   alertsIndexPattern,
   size,
 }: {
-  isEnabledRAGAlerts: boolean;
   alertsIndexPattern?: string;
   size?: number;
 }): OptionalRequestParams => {
   const optionalAlertsIndexPattern = alertsIndexPattern ? { alertsIndexPattern } : undefined;
   const optionalSize = size ? { size } : undefined;
-
-  // the settings toggle must be enabled:
-  if (!isEnabledRAGAlerts) {
-    return {}; // don't send any optional params
-  }
 
   return {
     ...optionalAlertsIndexPattern,

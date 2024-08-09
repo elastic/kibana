@@ -10,9 +10,6 @@ info:
     url: https://www.elastic.co/licensing/elastic-license
 servers:
   - url: /
-security:
-  - basicAuth: []
-  - apiKeyAuth: []
 tags:
   - name: saved objects
     description: Manage Kibana saved objects, including dashboards, visualizations, and more.
@@ -253,11 +250,13 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/saved_objects/_export:
     post:
-      summary: Export saved objects in the default space
+      summary: Export saved objects
       operationId: exportSavedObjectsDefault
       description: |
         Retrieve sets of saved objects that you want to import into Kibana.
         You must include `type` or `objects` in the request body.
+
+        Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
 
         NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.
 
@@ -416,7 +415,7 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/saved_objects/_import:
     post:
-      summary: Import saved objects in the default space
+      summary: Import saved objects
       operationId: importSavedObjectsDefault
       description: |
         Create sets of Kibana saved objects from a file created by the export API.
@@ -798,15 +797,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/400_response'
 components:
-  securitySchemes:
-    basicAuth:
-      type: http
-      scheme: basic
-    apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
   examples:
     key_rotation_response:
       summary: Encryption key rotation using default parameters.
