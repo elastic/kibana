@@ -56,7 +56,7 @@ export function removeDropCommandsFromESQLQuery(esql?: string): string {
 }
 
 /**
- * When the ?t_start and ?t_end params are used, we want to retrieve the timefield from the query.
+ * When the ?start and ?end params are used, we want to retrieve the timefield from the query.
  * @param esql:string
  * @returns string
  */
@@ -69,9 +69,7 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
   });
 
   const params = Walker.params(ast);
-  const timeNamedParam = params.find(
-    (param) => param.value === 't_start' || param.value === 't_end'
-  );
+  const timeNamedParam = params.find((param) => param.value === 'start' || param.value === 'end');
   if (!timeNamedParam || !functions.length) {
     return undefined;
   }
