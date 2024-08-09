@@ -180,10 +180,6 @@ export interface KubernetesVersion {
   metrics: { 'cloudbeat.kubernetes.version': string };
 }
 
-export interface PackagePolicyId {
-  metrics: { 'cloud_security_posture.package_policy.id': string };
-}
-
 export interface LatestDocTimestamp {
   metrics: { '@timestamp': string };
 }

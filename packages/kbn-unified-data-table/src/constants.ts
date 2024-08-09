@@ -7,6 +7,8 @@
  */
 import { EuiDataGridStyle } from '@elastic/eui';
 
+export const DEFAULT_CONTROL_COLUMN_WIDTH = 24;
+
 export const DEFAULT_ROWS_PER_PAGE = 100;
 export const MAX_LOADED_GRID_ROWS = 10000;
 
