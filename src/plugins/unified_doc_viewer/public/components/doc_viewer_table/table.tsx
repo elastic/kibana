@@ -239,51 +239,64 @@ export const DocViewerTable = ({
     ]
   );
 
-  const { pinnedItems, restItems, allFields } = Object.keys(flattened)
-    .sort((fieldA, fieldB) => {
-      const mappingA = mapping(fieldA);
-      const mappingB = mapping(fieldB);
-      const nameA = !mappingA || !mappingA.displayName ? fieldA : mappingA.displayName;
-      const nameB = !mappingB || !mappingB.displayName ? fieldB : mappingB.displayName;
-      return nameA.localeCompare(nameB);
-    })
-    .reduce<ItemsEntry>(
-      (acc, curFieldName) => {
-        if (!shouldShowFieldHandler(curFieldName)) {
-          return acc;
-        }
-        const shouldHideNullValue =
-          areNullValuesHidden && flattened[curFieldName] == null && isEsqlMode;
-        if (shouldHideNullValue) {
-          return acc;
-        }
+  const { pinnedItems, restItems, allFields } = useMemo(
+    () =>
+      Object.keys(flattened)
+        .sort((fieldA, fieldB) => {
+          const mappingA = mapping(fieldA);
+          const mappingB = mapping(fieldB);
+          const nameA = !mappingA || !mappingA.displayName ? fieldA : mappingA.displayName;
+          const nameB = !mappingB || !mappingB.displayName ? fieldB : mappingB.displayName;
+          return nameA.localeCompare(nameB);
+        })
+        .reduce<ItemsEntry>(
+          (acc, curFieldName) => {
+            if (!shouldShowFieldHandler(curFieldName)) {
+              return acc;
+            }
+            const shouldHideNullValue =
+              areNullValuesHidden && flattened[curFieldName] == null && isEsqlMode;
+            if (shouldHideNullValue) {
+              return acc;
+            }
 
-        const isPinned = pinnedFields.includes(curFieldName);
-        const row = fieldToItem(curFieldName, isPinned);
+            const isPinned = pinnedFields.includes(curFieldName);
+            const row = fieldToItem(curFieldName, isPinned);
 
-        if (isPinned) {
-          acc.pinnedItems.push(row);
-        } else {
-          if (onFilterField(curFieldName, row.field.displayName, row.field.fieldType)) {
-            // filter only unpinned fields
-            acc.restItems.push(row);
+            if (isPinned) {
+              acc.pinnedItems.push(row);
+            } else {
+              if (onFilterField(curFieldName, row.field.displayName, row.field.fieldType)) {
+                // filter only unpinned fields
+                acc.restItems.push(row);
+              }
+            }
+
+            acc.allFields.push({
+              name: curFieldName,
+              displayName: row.field.displayName,
+              type: row.field.fieldType,
+            });
+
+            return acc;
+          },
+          {
+            pinnedItems: [],
+            restItems: [],
+            allFields: [],
           }
-        }
-
-        acc.allFields.push({
-          name: curFieldName,
-          displayName: row.field.displayName,
-          type: row.field.fieldType,
-        });
-
-        return acc;
-      },
-      {
-        pinnedItems: [],
-        restItems: [],
-        allFields: [],
-      }
-    );
+        ),
+    [
+      areNullValuesHidden,
+      fieldToItem,
+      flattened,
+      isEsqlMode,
+      mapping,
+      onFilterField,
+      pinnedFields,
+      shouldShowFieldHandler,
+    ]
+  );
 
   const rows = useMemo(() => [...pinnedItems, ...restItems], [pinnedItems, restItems]);
 
