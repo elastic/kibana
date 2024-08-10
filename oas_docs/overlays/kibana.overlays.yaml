@@ -16,8 +16,8 @@ actions:
           kibana_url:
             default: localhost:5601
   # Remove operation-level security definitions
-  - target: "$.paths['/api/status']['get'].security"
-    description: Remove system security definitions
+  - target: "$.paths[*][*].security"
+    description: Remove security definitions
     remove: true
   # Add document-level security definitions
   - target: '$.components.securitySchemes'
@@ -115,64 +115,3 @@ actions:
       x-displayName: "System"
       description: >
         Get information about the system status, resource usage, and installed plugins.
-  # Add some alerting API examples
-  - target: "$.paths['/api/alerting/rule/{id}']['post']"
-    description: "Add examples to create rule API"
-    update: 
-      requestBody: 
-        content: 
-          application/json; Elastic-Api-Version=2023-10-31: 
-            examples:
-              createEsQueryEsqlRuleRequest:
-                $ref: "../examples/create_es_query_esql_rule_request.yaml"
-              createEsQueryRuleRequest:
-                $ref: "../examples/create_es_query_rule_request.yaml"
-              createEsQueryKqlRuleRequest:
-                $ref: "../examples/create_es_query_kql_rule_request.yaml"
-              createIndexThresholdRuleRequest:
-                $ref: "../examples/create_index_threshold_rule_request.yaml"
-              createTrackingContainmentRuleRequest:
-                $ref: "../examples/create_tracking_containment_rule_request.yaml"
-      responses:
-        200:
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              examples:
-                createEsQueryEsqlRuleResponse:
-                  $ref: "../examples/create_es_query_esql_rule_response.yaml"
-                createEsQueryRuleResponse:
-                  $ref: "../examples/create_es_query_rule_response.yaml"
-                createEsQueryKqlRuleResponse:
-                  $ref: "../examples/create_es_query_kql_rule_response.yaml"
-                createIndexThresholdRuleResponse:
-                  $ref: "../examples/create_index_threshold_rule_response.yaml"
-                createTrackingContainmentRuleResponse:
-                  $ref: "../examples/create_tracking_containment_rule_response.yaml"
-  - target: "$.paths['/api/alerting/rule/{id}']['put']"
-    description: "Add examples to update rule API"
-    update: 
-      requestBody: 
-        content: 
-          application/json; Elastic-Api-Version=2023-10-31: 
-            examples:
-              updateRuleRequest:
-                $ref: '../examples/update_rule_request.yaml'
-      responses:
-        200:
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              examples:
-                updateRuleResponse:
-                  $ref: '../examples/update_rule_response.yaml'
-  - target: "$.paths['/api/alerting/rules/_find']['get']"
-    description: "Add examples to find rules API"
-    update:
-      responses:
-        200:
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              examples:
-                findRulesResponse:
-                  $ref: '../examples/find_rules_response.yaml'
-                findConditionalActionRulesResponse:
-                  $ref: '../examples/find_rules_response_conditional_action.yaml'
