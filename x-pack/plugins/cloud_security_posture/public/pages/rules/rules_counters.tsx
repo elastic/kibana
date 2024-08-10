@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/cloud-security-posture';
+// import { useKibana } from '@kbn/cloud-security-posture';
 import { useBenchmarkDynamicValues } from '../../common/hooks/use_benchmark_dynamic_values';
 import { getPostureScorePercentage } from '../compliance_dashboard/compliance_charts/compliance_score_chart';
 import { RULE_COUNTERS_TEST_SUBJ } from './test_subjects';
@@ -29,6 +29,7 @@ import { RULE_FAILED, RULE_PASSED } from '../../../common/constants';
 import { statusColors } from '../../common/constants';
 import { useCspBenchmarkIntegrationsV2 } from '../benchmarks/use_csp_benchmark_integrations';
 import { CspCounterCard } from '../../components/csp_counter_card';
+import { useKibana } from '../../common/hooks/use_kibana';
 
 const EvaluationPieChart = ({ failed, passed }: { failed: number; passed: number }) => {
   const {

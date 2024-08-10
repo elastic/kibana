@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { useKibana } from '@kbn/cloud-security-posture';
+// import { useKibana } from '@kbn/cloud-security-posture';
 import { getFindingsDetectionRuleSearchTagsFromArrayOfRules } from '../../../common/utils/detection_rules';
 import {
   RuleStateAttributesWithoutStates,
@@ -34,6 +34,7 @@ import { CspBenchmarkRulesWithStates } from './rules_container';
 import { MultiSelectFilter } from '../../common/component/multi_select_filter';
 import { showChangeBenchmarkRuleStatesSuccessToast } from '../../components/take_action';
 import { useFetchDetectionRulesByTags } from '../../common/api/use_fetch_detection_rules_by_tags';
+import { useKibana } from '../../common/hooks/use_kibana';
 
 export const RULES_BULK_ACTION_BUTTON = 'bulk-action-button';
 export const RULES_BULK_ACTION_OPTION_ENABLE = 'bulk-action-option-enable';

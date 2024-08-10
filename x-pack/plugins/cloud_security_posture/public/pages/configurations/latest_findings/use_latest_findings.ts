@@ -25,8 +25,9 @@ import {
   getAggregationCount,
   getFindingsCountAggQuery,
   useGetCspBenchmarkRulesStatesApi,
-  useKibana,
+  // useKibana,
 } from '@kbn/cloud-security-posture';
+import { useKibana } from '../../../common/hooks/use_kibana';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
   sort: string[][];

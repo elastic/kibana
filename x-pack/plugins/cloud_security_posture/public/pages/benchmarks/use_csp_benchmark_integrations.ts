@@ -6,11 +6,12 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { useKibana } from '@kbn/cloud-security-posture';
+// import { useKibana } from '@kbn/cloud-security-posture';
 import { BENCHMARKS_ROUTE_PATH } from '../../../common/constants';
 import type { BenchmarksQueryParams } from '../../../common/types/benchmarks/v1';
 import type { GetBenchmarkResponse } from '../../../common/types/latest';
 import type { GetBenchmarkResponse as GetBenchmarkResponseV1 } from '../../../common/types/benchmarks/v1';
+import { useKibana } from '../../common/hooks/use_kibana';
 
 const BENCHMARK_INTEGRATION_QUERY_KEY_V1 = 'csp_benchmark_integrations_v1';
 

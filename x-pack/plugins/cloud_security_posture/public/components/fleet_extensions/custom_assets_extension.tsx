@@ -10,10 +10,11 @@ import { type CustomAssetsAccordionProps, CustomAssetsAccordion } from '@kbn/fle
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { EuiSpacer } from '@elastic/eui';
-import { useKibana } from '@kbn/cloud-security-posture';
+// import { useKibana } from '@kbn/cloud-security-posture';
 import { CloudSecurityPolicyTemplate } from '../../../common/types_old';
 import { VULN_MGMT_POLICY_TEMPLATE } from '../../../common/constants';
 import { benchmarksNavigation, cloudPosturePages } from '../../common/navigation/constants';
+import { useKibana } from '../../common/hooks/use_kibana';
 
 const SECURITY_APP_NAME = 'securitySolutionUI';
 

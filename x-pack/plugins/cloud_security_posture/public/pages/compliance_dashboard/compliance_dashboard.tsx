@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { Redirect, useHistory, useLocation } from 'react-router-dom';
-import { useKibana } from '@kbn/cloud-security-posture';
+// import { useKibana } from '@kbn/cloud-security-posture';
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 import type {
@@ -46,6 +46,7 @@ import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../../common/cons
 import { cloudPosturePages, cspIntegrationDocsNavigation } from '../../common/navigation/constants';
 import { NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS } from '../../common/constants';
 import { encodeQuery } from '../../common/navigation/query_utils';
+import { useKibana } from '../../common/hooks/use_kibana';
 
 const POSTURE_TYPE_CSPM = CSPM_POLICY_TEMPLATE;
 const POSTURE_TYPE_KSPM = KSPM_POLICY_TEMPLATE;

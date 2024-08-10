@@ -12,8 +12,9 @@ import {
   type DefaultPackagesInstallationError,
   API_VERSIONS,
 } from '@kbn/fleet-plugin/common';
-import { useKibana } from '@kbn/cloud-security-posture';
+// import { useKibana } from '@kbn/cloud-security-posture';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../../common/constants';
+import { useKibana } from '../hooks/use_kibana';
 
 /**
  * This hook will find our cis integration and return its PackageInfo

@@ -7,8 +7,9 @@
 
 import { useCallback } from 'react';
 import { type Query } from '@kbn/es-query';
-import { useKibana } from '@kbn/cloud-security-posture';
+// import { useKibana } from '@kbn/cloud-security-posture';
 import { FindingsBaseURLQuery } from '../../types';
+import { useKibana } from '../use_kibana';
 
 export const usePersistedQuery = <T>(getter: ({ filters, query }: FindingsBaseURLQuery) => T) => {
   const {

@@ -12,12 +12,13 @@ import type { HttpSetup } from '@kbn/core/public';
 import { useHistory } from 'react-router-dom';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useQueryClient } from '@tanstack/react-query';
-import { useKibana } from '@kbn/cloud-security-posture';
+// import { useKibana } from '@kbn/cloud-security-posture';
 import { useFetchDetectionRulesAlertsStatus } from '../common/api/use_fetch_detection_rules_alerts_status';
 import { useFetchDetectionRulesByTags } from '../common/api/use_fetch_detection_rules_by_tags';
 import { RuleResponse } from '../common/types';
 import { showCreateDetectionRuleSuccessToast } from './take_action';
 import { DETECTION_ENGINE_ALERTS_KEY, DETECTION_ENGINE_RULES_KEY } from '../common/constants';
+import { useKibana } from '../common/hooks/use_kibana';
 
 const RULES_PAGE_PATH = '/rules/management';
 const ALERTS_PAGE_PATH = '/alerts';

@@ -16,7 +16,8 @@ import {
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/cloud-security-posture';
+// import { useKibana } from '@kbn/cloud-security-posture';
+import { useKibana } from '../../../common/hooks/use_kibana';
 
 export const ErrorCallout = ({ error }: { error: Error }) => {
   const {

@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
 import { HttpSetup } from '@kbn/core/public';
-import { useKibana } from '@kbn/cloud-security-posture';
+// import { useKibana } from '@kbn/cloud-security-posture';
 import { CloudSecurityPostureStartServices } from '../../types';
 import { getFindingsDetectionRuleSearchTags } from '../../../common/utils/detection_rules';
 import { ColumnNameWithTooltip } from '../../components/column_name_with_tooltip';
@@ -30,6 +30,7 @@ import * as TEST_SUBJECTS from './test_subjects';
 import { RuleStateUpdateRequest, useChangeCspRuleState } from './use_change_csp_rule_state';
 import { showChangeBenchmarkRuleStatesSuccessToast } from '../../components/take_action';
 import { fetchDetectionRulesByTags } from '../../common/api/use_fetch_detection_rules_by_tags';
+import { useKibana } from '../../common/hooks/use_kibana';
 
 export const RULES_ROWS_ENABLE_SWITCH_BUTTON = 'rules-row-enable-switch-button';
 export const RULES_ROW_SELECT_ALL_CURRENT_PAGE = 'cloud-security-fields-selector-item-all';

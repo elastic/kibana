@@ -21,7 +21,7 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { generatePath } from 'react-router-dom';
-import { useKibana } from '@kbn/cloud-security-posture';
+// import { useKibana } from '@kbn/cloud-security-posture';
 import { FINDINGS_GROUPING_OPTIONS } from '../../common/constants';
 import { useNavigateFindings } from '../../common/hooks/use_navigate_findings';
 import type { BenchmarkScore, Benchmark, BenchmarksCisId } from '../../../common/types/latest';
@@ -36,6 +36,7 @@ import {
   GetBenchmarkDynamicValues,
   useBenchmarkDynamicValues,
 } from '../../common/hooks/use_benchmark_dynamic_values';
+import { useKibana } from '../../common/hooks/use_kibana';
 
 export const ERROR_STATE_TEST_SUBJECT = 'benchmark_page_error';
 export const EMPTY_EVALUATION_TEST_SUBJECT = 'benchmark-not-evaluated-account';

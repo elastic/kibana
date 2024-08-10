@@ -20,7 +20,7 @@ import type { EuiDescriptionListProps, EuiAccordionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
-import { useKibana } from '@kbn/cloud-security-posture';
+// import { useKibana } from '@kbn/cloud-security-posture';
 import { CspFinding } from '@kbn/cloud-security-posture-common';
 import { getDatasetDisplayName } from '../../../common/utils/get_dataset_display_name';
 import { truthy } from '../../../../common/utils/helpers';
@@ -39,6 +39,7 @@ import {
   RuleNameLink,
 } from './findings_flyout';
 import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter';
+import { useKibana } from '../../../common/hooks/use_kibana';
 
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;

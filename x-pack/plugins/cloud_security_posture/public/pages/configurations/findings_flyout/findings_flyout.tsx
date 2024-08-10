@@ -35,7 +35,8 @@ import type { HttpSetup } from '@kbn/core/public';
 import { generatePath } from 'react-router-dom';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { useKibana, CspFinding } from '@kbn/cloud-security-posture';
+// import { useKibana } from '@kbn/cloud-security-posture';
+import { CspFinding } from '@kbn/cloud-security-posture-common';
 import { CSP_DATASET, getDatasetDisplayName } from '../../../common/utils/get_dataset_display_name';
 import { truthy } from '../../../../common/utils/helpers';
 import { benchmarksNavigation } from '../../../common/navigation/constants';
@@ -52,6 +53,7 @@ import { BenchmarkName } from '../../../../common/types_old';
 import { FINDINGS_FLYOUT, FINDINGS_MISCONFIGS_FLYOUT_DESCRIPTION_LIST } from '../test_subjects';
 import { createDetectionRuleFromBenchmarkRule } from '../utils/create_detection_rule_from_benchmark';
 import { CspInlineDescriptionList } from '../../../components/csp_inline_description_list';
+import { useKibana } from '../../../common/hooks/use_kibana';
 
 const tabs = [
   {

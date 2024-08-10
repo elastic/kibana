@@ -9,9 +9,10 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { buildEsQuery, EsQueryConfig } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useEffect, useMemo } from 'react';
-import { useKibana } from '@kbn/cloud-security-posture';
+// import { useKibana } from '@kbn/cloud-security-posture';
 import { useDataViewContext } from '../../contexts/data_view_context';
 import { FindingsBaseESQueryConfig, FindingsBaseURLQuery } from '../../types';
+import { useKibana } from '../use_kibana';
 
 const getBaseQuery = ({
   dataView,

@@ -22,11 +22,12 @@ import type { HttpSetup } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n as kbnI18n } from '@kbn/i18n';
 import { QueryClient, useQueryClient } from '@tanstack/react-query';
-import { useKibana } from '@kbn/cloud-security-posture';
+// import { useKibana } from '@kbn/cloud-security-posture';
 import type { RuleResponse } from '../common/types';
 import { CREATE_RULE_ACTION_SUBJ, TAKE_ACTION_SUBJ } from './test_subjects';
 import { DETECTION_ENGINE_ALERTS_KEY, DETECTION_ENGINE_RULES_KEY } from '../common/constants';
 import { CloudSecurityPostureStartServices } from '../types';
+import { useKibana } from '../common/hooks/use_kibana';
 
 const RULE_PAGE_PATH = '/app/security/rules/id/';
 

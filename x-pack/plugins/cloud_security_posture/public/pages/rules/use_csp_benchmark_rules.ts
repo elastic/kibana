@@ -5,11 +5,12 @@
  * 2.0.
  */
 import { useQuery } from '@tanstack/react-query';
-import { useKibana } from '@kbn/cloud-security-posture';
+// import { useKibana } from '@kbn/cloud-security-posture';
 import {
   FindCspBenchmarkRuleRequest,
   FindCspBenchmarkRuleResponse,
 } from '../../../common/types/latest';
+import { useKibana } from '../../common/hooks/use_kibana';
 
 import {
   CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
