@@ -7,16 +7,10 @@
 
 import { PluginInitializerContext } from '@kbn/core/server';
 
-export type { FieldsMetadataServerSetup, FieldsMetadataServerStart } from './types';
-export type {
-  IntegrationName,
-  DatasetName,
-  ExtractedIntegrationFields,
-  ExtractedDatasetFields,
-  IFieldsMetadataClient,
-} from './services/fields_metadata/types';
+export type { LogsOptimizationServerSetup, LogsOptimizationServerStart } from './types';
 
 export async function plugin(context: PluginInitializerContext) {
-  const { FieldsMetadataPlugin } = await import('./plugin');
-  return new FieldsMetadataPlugin(context);
+  const { LogsOptimizationPlugin } = await import('./plugin');
+
+  return new LogsOptimizationPlugin(context);
 }

@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   flyoutOpenInDiscoverText,
   flyoutOpenInLogsExplorerText,
@@ -25,6 +26,7 @@ import { NavigationSource } from '../../services/telemetry';
 import { useRedirectLink } from '../../hooks';
 import { IntegrationIcon } from '../common';
 import { BasicDataStream } from '../../../common/types';
+import { useKibanaContextForPlugin } from '../../utils';
 
 export function Header({
   linkDetails,
@@ -45,6 +47,14 @@ export function Header({
       navigationSource: NavigationSource.Header,
     },
   });
+
+  const {
+    services: { http },
+  } = useKibanaContextForPlugin();
+
+  const logsOptimizationLink = http.basePath.prepend(
+    `/app/logs-optimization/${linkDetails.rawName}`
+  );
 
   return (
     <EuiFlyoutHeader hasBorder>
@@ -81,6 +91,16 @@ export function Header({
               justifyContent="flexEnd"
               alignItems="center"
             >
+              <EuiButton
+                data-test-subj="datasetQualityGoToRecommendations"
+                size="s"
+                iconType="sparkles"
+                href={logsOptimizationLink}
+              >
+                {i18n.translate('xpack.datasetQuality.header.logsOptimizationButtonLabel', {
+                  defaultMessage: 'Logs Optimization',
+                })}
+              </EuiButton>
               <EuiButton
                 data-test-subj="datasetQualityHeaderButton"
                 size="s"
