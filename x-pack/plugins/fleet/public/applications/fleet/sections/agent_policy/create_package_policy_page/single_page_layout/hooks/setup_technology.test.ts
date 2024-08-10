@@ -224,6 +224,7 @@ describe('useSetupTechnology', () => {
   it('should set agentless setup technology if agent policy supports agentless in edit page', async () => {
     (useConfig as MockFn).mockReturnValue({
       agentless: {
+        enabled: true,
         api: {
           url: 'https://agentless.api.url',
         },
