@@ -20,6 +20,7 @@ import { useDashboardContainer } from '../../embeddable/dashboard_container';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 import { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
+import { getReferencesForControls } from '../../../../common/dashboard_container/persistable_state/dashboard_container_references';
 
 export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
   const [width, setWidth] = useState<number>(0);
@@ -65,8 +66,6 @@ export const DashboardViewportComponent = () => {
     'dshDashboardViewport--panelExpanded': Boolean(expandedPanelId),
   });
 
-  console.log(dashboard);
-
   return (
     <div
       className={classNames('dshDashboardViewportWrapper', {
@@ -88,15 +87,17 @@ export const DashboardViewportComponent = () => {
                 getSerializedStateForChild: () => {
                   // TODO figure out how to get raw state from dashboardContainer
                   return {
-                    rawState: {
-                      controlStyle: 'oneLine',
-                      chainingSystem: 'HIERARCHICAL',
-                      showApplySelections: false,
-                      panelsJSON: JSON.stringify({}),
-                      ignoreParentSettingsJSON:
-                        '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
-                    },
-                    references: []
+                    rawState: dashboard.controlGroupInput
+                      ? dashboard.controlGroupInput as ControlGroupSerializedState
+                      : {
+                        controlStyle: 'oneLine',
+                        chainingSystem: 'HIERARCHICAL',
+                        showApplySelections: false,
+                        panelsJSON: JSON.stringify({}),
+                        ignoreParentSettingsJSON:
+                          '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
+                      },
+                    references: getReferencesForControls(dashboard.savedObjectReferences)
                   };
                 },
               };

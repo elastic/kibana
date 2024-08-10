@@ -5,9 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import {
-  ControlGroupInput,
-} from '@kbn/controls-plugin/common';
+
 import {
   type ControlGroupContainer,
 } from '@kbn/controls-plugin/public';
@@ -15,9 +13,6 @@ import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
   AggregateQuery,
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
-  Filter,
   Query,
   TimeRange,
 } from '@kbn/es-query';
@@ -26,10 +21,6 @@ import deepEqual from 'fast-deep-equal';
 import { cloneDeep, omit } from 'lodash';
 import {
   BehaviorSubject,
-  combineLatest,
-  distinctUntilChanged,
-  map,
-  startWith,
   Subject,
 } from 'rxjs';
 import { v4 } from 'uuid';
@@ -55,9 +46,6 @@ import { startDiffingDashboardState } from '../../state/diffing/dashboard_diffin
 import { DashboardPublicState, UnsavedPanelState } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
 import { DashboardCreationOptions } from '../dashboard_container_factory';
-import {
-  combineDashboardFiltersWithControlGroupFilters,
-} from './controls/dashboard_control_group_integration';
 import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data_views';
 import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
 import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
@@ -282,11 +270,6 @@ export const initializeDashboard = async ({
     cloneDeep(combinedOverrideInput),
     'controlGroupInput'
   );
-  const initialControlGroupInput: ControlGroupInput | {} = {
-    ...(loadDashboardReturn?.dashboardInput?.controlGroupInput ?? {}),
-    ...(sessionStorageInput?.controlGroupInput ?? {}),
-    ...(overrideInput?.controlGroupInput ?? {}),
-  };
 
   // Back up any view mode passed in explicitly.
   if (overrideInput?.viewMode) {
@@ -303,6 +286,7 @@ export const initializeDashboard = async ({
   // --------------------------------------------------------------------------------------
   untilDashboardReady().then((dashboard) => {
     dashboard.savedObjectReferences = loadDashboardReturn?.references;
+    dashboard.controlGroupInput = loadDashboardReturn?.dashboardInput?.controlGroupInput;
   });
 
   // --------------------------------------------------------------------------------------

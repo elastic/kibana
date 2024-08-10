@@ -7,11 +7,10 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
 import { DashboardContainerInput } from '../../../common';
-import { DashboardCrudTypes } from '../../../common/content_management';
+import { DashboardAttributes, DashboardCrudTypes } from '../../../common/content_management';
 import { DashboardStartDependencies } from '../../plugin';
 import { DashboardBackupServiceType } from '../dashboard_backup/types';
 import { DashboardDataService } from '../data/types';
@@ -64,7 +63,7 @@ export interface LoadDashboardFromSavedObjectProps {
 type DashboardResolveMeta = DashboardCrudTypes['GetOut']['meta'];
 
 export type SavedDashboardInput = DashboardContainerInput & {
-  controlGroupInput?: PersistableControlGroupInput;
+  controlGroupInput?: DashboardAttributes['controlGroupInput'] | undefined;
 };
 
 export interface LoadDashboardReturn {

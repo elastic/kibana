@@ -59,7 +59,7 @@ import { v4 } from 'uuid';
 import { PublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { apiHasSerializableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
-import { DashboardContainerInput, DashboardPanelState } from '../../../common';
+import { DashboardAttributes, DashboardContainerInput, DashboardPanelState } from '../../../common';
 import { getReferencesForPanelId } from '../../../common/dashboard_container/persistable_state/dashboard_container_references';
 import {
   DASHBOARD_APP_ID,
@@ -203,6 +203,7 @@ export class DashboardContainer
     | undefined;
   // new embeddable framework
   public savedObjectReferences: Reference[] = [];
+  public controlGroupInput: DashboardAttributes['controlGroupInput'] | undefined;
 
   constructor(
     initialInput: DashboardContainerInput,
@@ -729,9 +730,6 @@ export class DashboardContainer
         omit(loadDashboardReturn?.dashboardInput, 'controlGroupInput')
       );
       this.dispatch.setManaged(loadDashboardReturn?.managed);
-      if (this.controlGroup) {
-        this.controlGroup.setSavedState(loadDashboardReturn.dashboardInput?.controlGroupInput);
-      }
       this.dispatch.setAnimatePanelTransforms(false); // prevents panels from animating on navigate.
       this.dispatch.setLastSavedId(newSavedObjectId);
       this.setExpandedPanelId(undefined);
