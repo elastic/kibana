@@ -1,0 +1,33 @@
+openapi: 3.0.0
+info:
+  title: Entity Store Common Schema
+  description: Common schema for the Entity Store
+  version: '1'
+paths: {}
+components:
+  schemas:
+    EntityType:
+      type: string
+      description: The type of the related entities.
+      enum:
+        - user
+        - host
+
+    EntityRecord:
+      type: object
+      properties:
+        entity_type:
+          $ref: '#/components/schemas/EntityType'
+        
+        entity:
+          type: object
+          description: The entity
+          properties:
+            name:
+              type: string
+          required:
+            - name
+      required:
+        - entity_type
+        - entity
+

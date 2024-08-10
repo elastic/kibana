@@ -31,6 +31,8 @@ import { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_scor
 import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
 import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client';
 import { buildMlAuthz } from './lib/machine_learning/authz';
+import { EntityRelationsDataClient } from './lib/entity_analytics/entity_store/entity_relations/entity_relations_data_client';
+import { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entities/entities_data_client';
 
 export interface IRequestContextFactory {
   create(
@@ -184,6 +186,24 @@ export class RequestContextFactory implements IRequestContextFactory {
       getAssetCriticalityDataClient: memoize(
         () =>
           new AssetCriticalityDataClient({
+            logger: options.logger,
+            esClient: coreContext.elasticsearch.client.asCurrentUser,
+            namespace: getSpaceId(),
+            auditLogger: getAuditLogger(),
+          })
+      ),
+      getEntityRelationsDataClient: memoize(
+        () =>
+          new EntityRelationsDataClient({
+            logger: options.logger,
+            esClient: coreContext.elasticsearch.client.asCurrentUser,
+            namespace: getSpaceId(),
+            auditLogger: getAuditLogger(),
+          })
+      ),
+      getEntityStoreDataClient: memoize(
+        () =>
+          new EntityStoreDataClient({
             logger: options.logger,
             esClient: coreContext.elasticsearch.client.asCurrentUser,
             namespace: getSpaceId(),

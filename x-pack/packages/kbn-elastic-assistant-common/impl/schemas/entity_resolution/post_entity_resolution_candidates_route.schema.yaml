@@ -1,0 +1,77 @@
+openapi: 3.0.0
+info:
+  title: Post Entity Search discovery API endpoint
+  version: '1'
+paths:
+  /internal/elastic_assistant/entity_resolution/candidates:
+    post:
+      operationId: EntityResolutionCandidatesPost
+      x-codegen-enabled: true
+      description: Find candidates for entity resolution
+      summary: Find candidates which AI based entity resolution can be applied to
+      tags:
+        - entity_analytics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - apiConfig
+                - entitiesIndexPattern
+                - size
+                - subAction
+                - entity
+              properties:
+                entity:
+                  $ref: './common.schema.yaml#/components/schemas/SearchEntity'
+                filter:
+                  type: object
+                entitiesIndexPattern:
+                  type: string
+                size:
+                  type: number
+                  minimum: 1
+                  maximum: 100
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  entity:
+                    $ref: './common.schema.yaml#/components/schemas/SearchEntity'
+                  candidates:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EntityResolutionCandidate'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+components:
+  schemas:
+    EntityResolutionCandidate:
+      type: object
+      properties:
+        index:
+          type: string
+        id:
+          type: string
+        document:
+          type: object
+        entity:
+          type: object
+

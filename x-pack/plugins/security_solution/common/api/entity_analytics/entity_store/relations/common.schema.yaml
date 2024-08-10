@@ -1,0 +1,53 @@
+openapi: 3.0.0
+info:
+  title: Entity Relations Common Schema
+  description: Common schema for Entity Store Relations
+  version: '1'
+paths: {}
+components:
+  schemas:
+    RelatedEntityType:
+      type: string
+      description: The type of the related entities.
+      enum:
+        - user
+        - host
+    RelatedEntityRelation:
+      type: string
+      description: The relation between the entity and the related entity.
+      enum:
+        - is_same
+        - is_different
+    EntityRelationRecord:
+      type: object
+      properties:
+        entity_type:
+          $ref: '#/components/schemas/RelatedEntityType'
+        related_entity:
+          type: object
+          description: The related entity.
+          properties:
+            id:
+              type: string
+              description: The ID of the entity.
+            name:
+              type: string
+              description: The name of the entity.
+          required:
+            - id
+            - name
+        relation:
+          $ref: '#/components/schemas/RelatedEntityRelation'
+        entity:
+          type: object
+          description: The entity.
+          properties:
+            name:
+              type: string
+          required:
+            - name
+      required:
+        - entity_type
+        - entity
+        - relation
+        - related_entity

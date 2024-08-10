@@ -1,0 +1,50 @@
+openapi: 3.0.0
+info:
+  version: '1'
+  title: Get Entity Relations
+servers:
+  - url: 'http://{kibana_host}:{port}'
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+paths:
+  /entity_store/relations:
+    get:
+      x-labels: [ess, serverless]
+      operationId: GetEntityRelations
+      x-codegen-enabled: true
+      summary: Get Entity Relations
+      parameters:
+        - in: query
+          name: relation
+          required: false
+          schema:
+            $ref: './common.schema.yaml#/components/schemas/RelatedEntityRelation'
+        - in: query
+          name: entity_type
+          required: true
+          schema:
+            $ref: './common.schema.yaml#/components/schemas/RelatedEntityType'
+        - in: query
+          name: entity_name
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: size
+          required: false
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './common.schema.yaml#/components/schemas/EntityRelationRecord'
+        '400':
+          description: Invalid request

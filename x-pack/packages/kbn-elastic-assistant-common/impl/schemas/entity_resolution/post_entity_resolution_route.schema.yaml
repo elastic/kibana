@@ -1,0 +1,100 @@
+openapi: 3.0.0
+info:
+  title: Post Entity Search discovery API endpoint
+  version: '1'
+paths:
+  /internal/elastic_assistant/entity_resolution:
+    post:
+      operationId: EntityResolutionPost
+      x-codegen-enabled: true
+      description: Find matching entity suggestions
+      summary: Generate matching entity suggestions for the given entity via the Elastic Assistant
+      tags:
+        - entity_analytics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - apiConfig
+                - entitiesIndexPattern
+                - size
+                - subAction
+              properties:
+                entity:
+                  $ref: './common.schema.yaml#/components/schemas/SearchEntity'
+                filter:
+                  type: object
+                entitiesIndexPattern:
+                  type: string
+                apiConfig:
+                  $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/ApiConfig'
+                  description: LLM API configuration.
+                langSmithProject:
+                  description: used for development
+                  type: string
+                langSmithApiKey:
+                  description: used for development
+                  type: string
+                model:
+                  type: string
+                promptTemplate:
+                  description: Optional prompt template must include $$ENTITY and $$CANDIDATES for entity and candidates respectively to be replaced
+                  example: "Does $$ENTITY match one of these candidates? $$CANDIDATES"
+                  type: string
+                size:
+                  type: number
+                  minimum: 1
+                  maximum: 100
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  entity:
+                    $ref: './common.schema.yaml#/components/schemas/SearchEntity'
+                  foundSuggestion:
+                    type: boolean
+                  suggestions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EntityResolutionSuggestion'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+components:
+  schemas:
+    EntityResolutionSuggestion:
+      type: object
+      properties:
+        index:
+          type: string
+        id:
+          type: string
+        reason:
+          type: string
+        confidence:
+          enum:
+            - high
+            - medium
+            - low
+        document:
+          type: object
+        entity:
+          type: object
+

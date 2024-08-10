@@ -165,26 +165,25 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
     {
       pipeline: {
         ignore_missing_pipeline: true,
-        name: `${definition.id}@platform`,
-      },
-    },
-    {
-      pipeline: {
-        ignore_missing_pipeline: true,
-        name: `${definition.id}-history@platform`,
-      },
-    },
-
-    {
-      pipeline: {
-        ignore_missing_pipeline: true,
         name: `${definition.id}@custom`,
       },
     },
     {
       pipeline: {
         ignore_missing_pipeline: true,
+        name: `${definition.id}@platform`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
         name: `${definition.id}-history@custom`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}-history@platform`,
       },
     },
   ];

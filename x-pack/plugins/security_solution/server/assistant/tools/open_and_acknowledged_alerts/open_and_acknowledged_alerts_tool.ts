@@ -6,7 +6,8 @@
  */
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryPostRequestBody, Replacements } from '@kbn/elastic-assistant-common';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { getAnonymizedValue, transformRawData } from '@kbn/elastic-assistant-common';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
@@ -35,8 +36,13 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
   sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is OpenAndAcknowledgedAlertsToolParams => {
     const { alertsIndexPattern, request, size } = params;
+    const castedRequest = request as unknown as KibanaRequest<
+      unknown,
+      unknown,
+      AttackDiscoveryPostRequestBody
+    >;
     return (
-      requestHasRequiredAnonymizationParams(request) &&
+      requestHasRequiredAnonymizationParams(castedRequest) &&
       alertsIndexPattern != null &&
       size != null &&
       !sizeIsOutOfRange(size)

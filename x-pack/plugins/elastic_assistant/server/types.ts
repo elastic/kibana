@@ -31,6 +31,8 @@ import {
   AssistantFeatures,
   ExecuteConnectorRequestBody,
   Replacements,
+  EntityResolutionPostRequestBody,
+  SearchEntity,
 } from '@kbn/elastic-assistant-common';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import {
@@ -50,6 +52,7 @@ import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 import { AIAssistantDataClient } from './ai_assistant_data_clients';
 import { AIAssistantKnowledgeBaseDataClient } from './ai_assistant_data_clients/knowledge_base';
+import { EntityResolutionDataClient } from './ai_assistant_data_clients/entity_resolution';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 
@@ -121,6 +124,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getAIAssistantConversationsDataClient: () => Promise<AIAssistantConversationsDataClient | null>;
   getAIAssistantKnowledgeBaseDataClient: () => Promise<AIAssistantKnowledgeBaseDataClient | null>;
   getAttackDiscoveryDataClient: () => Promise<AttackDiscoveryDataClient | null>;
+  getEntityResolutionDataClient: () => Promise<EntityResolutionDataClient | null>;
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
   telemetry: AnalyticsServiceSetup;
@@ -224,7 +228,11 @@ export type AssistantToolLlm =
   | ActionsClientSimpleChatModel;
 
 export interface AssistantToolParams {
+  promptTemplate?: string;
+  entityResolutionClient?: EntityResolutionDataClient;
   alertsIndexPattern?: string;
+  entitiesIndexPattern?: string;
+  searchEntity?: SearchEntity;
   anonymizationFields?: AnonymizationFieldResponse[];
   isEnabledKnowledgeBase: boolean;
   chain?: RetrievalQAChain;
@@ -239,7 +247,7 @@ export interface AssistantToolParams {
   request: KibanaRequest<
     unknown,
     unknown,
-    ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody
+    ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody | EntityResolutionPostRequestBody
   >;
   size?: number;
 }

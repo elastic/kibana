@@ -1,0 +1,22 @@
+openapi: 3.0.0
+info:
+  title: Post Entity Search discovery API endpoint
+  version: '1'
+paths: {}
+components:
+  schemas:
+    SearchEntity:
+      type: object
+      required:
+        - type
+        - name
+      properties:
+        type:
+          type: string
+          enum: 
+            - user
+            - host
+        name:
+          type: string
+        email:
+          type: string
