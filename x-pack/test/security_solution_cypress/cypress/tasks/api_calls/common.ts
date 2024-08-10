@@ -36,7 +36,7 @@ export const rootRequest = <T = unknown>({
   ...restOptions
 }: Partial<Cypress.RequestOptions>): Cypress.Chainable<Cypress.Response<T>> => {
   if (Cypress.env('IS_SERVERLESS')) {
-    const role = Cypress.env(CLOUD_SERVERLESS) ? 'system_indices_superuser' : 'admin';
+    const role = Cypress.env(CLOUD_SERVERLESS) ? 'admin' : 'system_indices_superuser';
     return cy.task('getApiKeyForRole', role).then((response) => {
       return cy.request<T>({
         headers: {
