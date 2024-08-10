@@ -16,32 +16,8 @@ actions:
           kibana_url:
             default: localhost:5601
   # Remove operation-level security definitions
-  - target: "$.paths['/api/status']['get'].security"
-    description: Remove system security definitions
-    remove: true
-  - target: "$.paths['/api/alerting/rule/{id}'][*].security"
-    description: Remove alerting security definitions
-    remove: true
-  - target: "$.paths['/api/alerting/rule/{id}/_disable'][*].security"
-    description: Remove alerting security definitions
-    remove: true
-  - target: "$.paths['/api/alerting/rule/{id}/_enable'][*].security"
-    description: Remove alerting security definitions
-    remove: true
-  - target: "$.paths['/api/alerting/rule/{id}/_mute_all'][*].security"
-    description: Remove alerting security definitions
-    remove: true
-  - target: "$.paths['/api/alerting/rule/{id}/_unmute_all'][*].security"
-    description: Remove alerting security definitions
-    remove: true
-  - target: "$.paths['/api/alerting/rule/{id}/_update_api_key'][*].security"
-    description: Remove alerting security definitions
-    remove: true
-  - target: "$.paths['/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute'][*].security"
-    description: Remove alerting security definitions
-    remove: true
-  - target: "$.paths['/api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute'][*].security"
-    description: Remove alerting security definitions
+  - target: "$.paths[*][*].security"
+    description: Remove security definitions
     remove: true
   # Add a document-level security definition
   - target: '$.components.securitySchemes'
