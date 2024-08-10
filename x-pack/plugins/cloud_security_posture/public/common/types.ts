@@ -26,12 +26,6 @@ export interface FindingsBaseESQueryConfig {
   config: EsQueryConfig;
 }
 
-// export interface FindingsBaseEsQuery {
-//   query?: {
-//     bool: BoolQuery;
-//   };
-// }
-
 export type Sort<T> = NonNullable<Criteria<T>['sort']>;
 
 interface RuleSeverityMapping {

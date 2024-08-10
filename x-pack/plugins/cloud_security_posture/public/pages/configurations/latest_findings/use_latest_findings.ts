@@ -18,6 +18,7 @@ import {
   LATEST_FINDINGS_RETENTION_POLICY,
   MAX_FINDINGS_TO_LOAD,
   CspBenchmarkRulesStates,
+  CspFinding,
 } from '@kbn/cloud-security-posture-common';
 import type { FindingsBaseEsQuery } from '@kbn/cloud-security-posture';
 import {
@@ -25,21 +26,7 @@ import {
   getFindingsCountAggQuery,
   useGetCspBenchmarkRulesStatesApi,
   useKibana,
-  CspFinding,
 } from '@kbn/cloud-security-posture';
-// import { CspFinding } from '../../../../common/schemas/csp_finding'; HERE
-// import { useKibana } from '../../../common/hooks/use_kibana'; DONE
-// import type { FindingsBaseEsQuery } from '../../../common/types'; DONE
-// import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils'; DONE
-// import {
-//   CSP_LATEST_FINDINGS_DATA_VIEW,
-//   LATEST_FINDINGS_RETENTION_POLICY,
-// } from '../../../../common/constants'; DONE
-// import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants'; DONE
-// import { showErrorToast } from '../../../common/utils/show_error_toast'; DONE
-// import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_state_api'; //DONE
-// import { CspBenchmarkRulesStates } from '../../../../common/types/latest'; DONE
-// import { buildMutedRulesFilter } from '../../../../common/utils/rules_states'; DONE
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
   sort: string[][];
