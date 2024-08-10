@@ -317,10 +317,10 @@ describe('Agent policy', () => {
     });
 
     it('should create a policy with is_managed true if agentless feature flag is set and in cloud env', async () => {
-      jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ agentless: true } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { enabled: true },
+      } as any);
 
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -353,12 +353,38 @@ describe('Agent policy', () => {
     });
 
     it('should throw error when attempting to create policy with supports_agentless true on cloud environment that does not support the agentless feature', async () => {
-      jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ agentless: true } as any);
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { enabled: false },
+      } as any);
+
       jest
         .spyOn(appContextService, 'getCloud')
-        .mockReturnValue({ isCloudEnabled: false, isServerlessEnabled: false } as any);
+        .mockReturnValue({ isCloudEnabled: true, isServerlessEnabled: false } as any);
+
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await expect(
+        agentPolicyService.create(soClient, esClient, {
+          name: 'test',
+          namespace: 'default',
+          supports_agentless: true,
+        })
+      ).rejects.toThrowError(
+        new AgentPolicyInvalidError(
+          'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
+        )
+      );
+    });
+
+    it('should throw error when attempting to create policy with supports_agentless true on serverless environment that does not support the agentless feature', async () => {
+      jest
+        .spyOn(appContextService, 'getExperimentalFeatures')
+        .mockReturnValue({ agentless: false } as any);
+
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isCloudEnabled: false, isServerlessEnabled: true } as any);
 
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1090,9 +1116,9 @@ describe('Agent policy', () => {
     });
 
     it('should not throw AgentPolicyInvalidError if support_agentless is defined in stateful', async () => {
-      jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ agentless: true } as any);
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { enabled: true },
+      } as any);
       jest
         .spyOn(appContextService, 'getCloud')
         .mockReturnValue({ isServerlessEnabled: false, isCloudEnabled: true } as any);
