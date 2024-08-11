@@ -88,19 +88,19 @@ describe('registerRoutes', () => {
     registerRoutes({
       core: coreSetup,
       repository: {
-        internal: {
+        'GET /internal/app/feature': {
           endpoint: 'GET /internal/app/feature',
           handler: internalHandler,
           params: paramsRt,
           options: internalOptions,
         },
-        public: {
+        'GET /api/app/feature version': {
           endpoint: 'GET /api/app/feature version',
           handler: publicHandler,
           params: paramsRt,
           options: publicOptions,
         },
-        error: {
+        'GET /internal/app/feature/error': {
           endpoint: 'GET /internal/app/feature/error',
           handler: errorHandler,
           params: paramsRt,
@@ -123,11 +123,6 @@ describe('registerRoutes', () => {
     expect(internalRoute.path).toEqual('/internal/app/feature');
     expect(internalRoute.options).toEqual(internalOptions);
     expect(internalRoute.validate).toEqual(routeValidationObject);
-
-    const [errorRoute] = get.mock.calls[1];
-    expect(errorRoute.path).toEqual('/internal/app/feature/error');
-    expect(errorRoute.options).toEqual(internalOptions);
-    expect(errorRoute.validate).toEqual(routeValidationObject);
 
     expect(getWithVersion).toHaveBeenCalledTimes(1);
     const [publicRoute] = getWithVersion.mock.calls[0];
