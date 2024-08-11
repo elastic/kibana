@@ -158,6 +158,11 @@ export async function isPackageVersionOrLaterInstalled(options: {
   });
 }
 
+export interface EnsurePackageResult {
+  status: InstallResultStatus;
+  package: Installation;
+}
+
 export async function ensureInstalledPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
@@ -166,7 +171,7 @@ export async function ensureInstalledPackage(options: {
   spaceId?: string;
   force?: boolean;
   authorizationHeader?: HTTPAuthorizationHeader | null;
-}): Promise<Installation> {
+}): Promise<EnsurePackageResult> {
   const {
     savedObjectsClient,
     pkgName,
@@ -189,7 +194,10 @@ export async function ensureInstalledPackage(options: {
   });
 
   if (installedPackageResult) {
-    return installedPackageResult.package;
+    return {
+      status: 'already_installed',
+      package: installedPackageResult.package,
+    };
   }
   const pkgkey = Registry.pkgToPkgKey(pkgKeyProps);
   const installResult = await installPackage({
@@ -226,7 +234,10 @@ export async function ensureInstalledPackage(options: {
 
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) throw new FleetError(`Could not get installation for ${pkgName}`);
-  return installation;
+  return {
+    status: 'installed',
+    package: installation,
+  };
 }
 
 export async function handleInstallPackageFailure({

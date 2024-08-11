@@ -32,16 +32,12 @@ export interface CompositeEditorProps {
 }
 
 export const CompositeEditor = ({ onReset }: CompositeEditorProps) => {
-  const { links, existingConcreteFields, subfields$ } = useFieldEditorContext();
+  const { links, subfields$ } = useFieldEditorContext();
   const subfields = useObservable(subfields$) || {};
 
   return (
     <div data-test-subj="compositeEditor">
-      <ScriptField
-        existingConcreteFields={existingConcreteFields}
-        links={links}
-        placeholder={"emit('field_name', 'hello world');"}
-      />
+      <ScriptField links={links} placeholder={"emit('field_name', 'hello world');"} />
       <EuiSpacer size="xl" />
       <>
         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">

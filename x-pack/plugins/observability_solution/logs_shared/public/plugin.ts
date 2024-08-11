@@ -52,11 +52,12 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
 
   public start(core: CoreStart, plugins: LogsSharedClientStartDeps) {
     const { http } = core;
-    const { data, dataViews, discoverShared, observabilityAIAssistant } = plugins;
+    const { data, dataViews, discoverShared, observabilityAIAssistant, logsDataAccess } = plugins;
 
     const logViews = this.logViews.start({
       http,
       dataViews,
+      logSourcesService: logsDataAccess.services.logSourcesService,
       search: data.search,
     });
 
