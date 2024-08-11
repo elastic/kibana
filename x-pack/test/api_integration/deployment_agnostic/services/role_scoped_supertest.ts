@@ -20,10 +20,11 @@ export interface RequestHeadersOptions {
 }
 
 export class SupertestWithRoleScope {
-  private roleAuthc: RoleCredentials;
+  private roleAuthc: RoleCredentials | null;
   private supertestWithoutAuth: SupertestWithoutAuthProviderType;
   private samlAuth: SamlAuthProviderType;
   private options: RequestHeadersOptions;
+  private destroyed = false;
 
   constructor(
     roleAuthc: RoleCredentials,
@@ -40,11 +41,19 @@ export class SupertestWithRoleScope {
   async destroy() {
     if (this.roleAuthc) {
       await this.samlAuth.invalidateM2mApiKeyWithRoleScope(this.roleAuthc);
+      this.roleAuthc = null;
+      this.destroyed = true;
     }
   }
 
   private addHeaders(agent: Test): Test {
     const { withInternalHeaders, withCommonHeaders, withCustomHeaders } = this.options;
+
+    if (!this.roleAuthc) {
+      throw new Error(
+        `'roleAuthc' is not set, most likely it was invalidated or the instance was destroyed.`
+      );
+    }
     // set role-based API key by default
     agent.set(this.roleAuthc.apiKeyHeader);
 
@@ -64,6 +73,9 @@ export class SupertestWithRoleScope {
   }
 
   private request(method: 'post' | 'get' | 'put' | 'delete', url: string): Test {
+    if (this.destroyed) {
+      throw new Error('Instance has been destroyed and cannot be used for making requests.');
+    }
     const agent = this.supertestWithoutAuth[method](url);
     return this.addHeaders(agent);
   }
