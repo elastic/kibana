@@ -20,14 +20,18 @@ import { Readable } from 'stream';
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
+import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
+import logsScenarioBase from './logs_scenario_base';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions) => {
-  const { logger } = runOptions;
+  const { logger, scenarioOpts } = runOptions;
   const { numServices = 3, numHosts = 10 } = runOptions.scenarioOpts || {};
+  const { isLogsDb } = parseLogsScenarioOpts(scenarioOpts);
 
   return {
+    ...logsScenarioBase(runOptions),
     generate: ({
       range,
       clients: { apmEsClient, assetsEsClient, logsEsClient, infraEsClient },
@@ -142,7 +146,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
               };
 
               return log
-                .create()
+                .create({ isLogsDb })
                 .message(message.replace('<random>', generateShortId()))
                 .logLevel(level)
                 .service('multi-signal-service')
@@ -182,7 +186,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
               };
 
               return log
-                .create()
+                .create({ isLogsDb })
                 .message(message.replace('<random>', generateShortId()))
                 .logLevel(level)
                 .service('logs-only-services')

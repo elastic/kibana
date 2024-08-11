@@ -16,11 +16,16 @@ import {
 import { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+import logsScenarioBase from './logs_scenario_base';
+import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<LogDocument> = async (runOptions) => {
+  const { isLogsDb } = parseLogsScenarioOpts(runOptions.scenarioOpts);
+
   return {
+    ...logsScenarioBase(runOptions),
     generate: ({ range, clients: { logsEsClient, apmEsClient } }) => {
       const { numServices = 3 } = runOptions.scenarioOpts || {};
       const { logger } = runOptions;
@@ -53,7 +58,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
             .map(() => {
               const index = Math.floor(Math.random() * 3);
               return log
-                .create()
+                .create({ isLogsDb })
                 .message(MESSAGE_LOG_LEVELS[index].message)
                 .logLevel(MESSAGE_LOG_LEVELS[index].level)
                 .service(SERVICE_NAMES[index])

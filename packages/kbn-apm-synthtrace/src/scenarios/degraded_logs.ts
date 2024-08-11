@@ -8,12 +8,16 @@
 import { LogDocument, log, generateShortId, generateLongId } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
+import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
+import logsScenarioBase from './logs_scenario_base';
 
 const MORE_THAN_1024_CHARS =
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?';
 
 const scenario: Scenario<LogDocument> = async (runOptions) => {
+  const { isLogsDb } = parseLogsScenarioOpts(runOptions.scenarioOpts);
   return {
+    ...logsScenarioBase(runOptions),
     generate: ({ range, clients: { logsEsClient } }) => {
       const { logger } = runOptions;
 
@@ -42,7 +46,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
       const datasetSynth1Logs = (timestamp: number) => {
         const index = Math.floor(Math.random() * 3);
         return log
-          .create()
+          .create({ isLogsDb })
           .dataset('synth.1')
           .message(MESSAGE_LOG_LEVELS[index].message as string)
           .logLevel(MESSAGE_LOG_LEVELS[index].level)
@@ -67,7 +71,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         const index = Math.floor(Math.random() * 3);
         const isMalformed = i % 60 === 0;
         return log
-          .create()
+          .create({ isLogsDb })
           .dataset('synth.2')
           .message(MESSAGE_LOG_LEVELS[index].message as string)
           .logLevel(isMalformed ? MORE_THAN_1024_CHARS : MESSAGE_LOG_LEVELS[index].level) // "ignore_above": 1024 in mapping
@@ -92,7 +96,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         const index = Math.floor(Math.random() * 3);
         const isMalformed = i % 10 === 0;
         return log
-          .create()
+          .create({ isLogsDb })
           .dataset('synth.3')
           .message(MESSAGE_LOG_LEVELS[index].message as string)
           .logLevel(isMalformed ? MORE_THAN_1024_CHARS : MESSAGE_LOG_LEVELS[index].level) // "ignore_above": 1024 in mapping

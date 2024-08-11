@@ -20,6 +20,8 @@ import { Scenario } from '../cli/scenario';
 import { Logger } from '../lib/utils/create_logger';
 import { withClient } from '../lib/utils/with_client';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+import logsScenarioBase from './logs_scenario_base';
+import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
@@ -38,10 +40,14 @@ const DEFAULT_SCENARIO_OPTS = {
   logsRate: 1,
   ingestHosts: true,
   ingestTraces: true,
+  logsdb: false,
 };
 
 const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOptions) => {
+  const { isLogsDb } = parseLogsScenarioOpts(runOptions.scenarioOpts);
+
   return {
+    ...logsScenarioBase(runOptions),
     generate: ({ range, clients: { logsEsClient, infraEsClient, apmEsClient } }) => {
       const {
         numSpaces,
@@ -189,7 +195,7 @@ const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOp
           const customFields = getExtraFields(numCustomFields, isMalformed, customFieldPrefix);
 
           return log
-            .create()
+            .create({ isLogsDb })
             .dataset(dataset)
             .message(message)
             .logLevel(logLevel)

@@ -18,13 +18,18 @@ import {
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
+import logsScenarioBase from './logs_scenario_base';
+import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 const alwaysSpikeTransactionName = 'GET /always-spike';
 const sometimesSpikeTransactionName = 'GET /sometimes-spike';
 
-const scenario: Scenario<ApmFields> = async ({ logger }) => {
+const scenario: Scenario<ApmFields> = async ({ logger, ...runOptions }) => {
+  const { isLogsDb } = parseLogsScenarioOpts(runOptions.scenarioOpts);
+
   return {
+    ...logsScenarioBase(runOptions),
     generate: ({ range, clients: { apmEsClient, logsEsClient } }) => {
       const serviceNames = ['spikey-frontend', 'spikey-backend'];
 
@@ -63,7 +68,7 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
             } = clusters[clusterIndex];
 
             return log
-              .create()
+              .create({ isLogsDb })
               .message(`Error message #${generateShortId()} from ${serviceName}`)
               .logLevel('error')
               .service(serviceName)
