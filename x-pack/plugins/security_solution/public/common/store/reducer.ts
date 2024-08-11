@@ -35,10 +35,6 @@ import type { GroupState } from './grouping/types';
 import { analyzerReducer } from '../../resolver/store/reducer';
 import { securitySolutionDiscoverReducer } from './discover/reducer';
 import type { AnalyzerState } from '../../resolver/types';
-import {
-  type DataviewPickerState,
-  reducer as dataviewPickerReducer,
-} from '../../sourcerer/experimental/redux/reducer';
 import type { NotesState } from '../../notes/store/notes.slice';
 import { notesReducer } from '../../notes/store/notes.slice';
 
@@ -73,7 +69,6 @@ export const createInitialState = (
   dataTableState: DataTableState,
   groupsState: GroupState,
   analyzerState: AnalyzerState,
-  dataviewPickerState: DataviewPickerState,
   notesState: NotesState
 ): State => {
   const initialPatterns = {
@@ -136,7 +131,6 @@ export const createInitialState = (
       internal: undefined,
       savedSearch: undefined,
     },
-    dataViewPicker: dataviewPickerState,
     notes: notesState,
   };
 
@@ -156,7 +150,6 @@ export const createReducer: (
     sourcerer: sourcererReducer,
     globalUrlParam: globalUrlParamReducer,
     dataTable: dataTableReducer,
-    dataViewPicker: dataviewPickerReducer,
     groups: groupsReducer,
     analyzer: analyzerReducer,
     discover: securitySolutionDiscoverReducer,

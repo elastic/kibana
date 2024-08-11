@@ -15,8 +15,9 @@ export const createLogViewsServiceSetupMock = (): jest.Mocked<LogViewsServiceSet
 });
 
 export const createLogViewsServiceStartMock = (): jest.Mocked<LogViewsServiceStart> => ({
-  getClient: jest.fn((_savedObjectsClient: any, _elasticsearchClient: any) =>
-    createLogViewsClientMock()
+  getClient: jest.fn(
+    (_savedObjectsClient: any, _elasticsearchClient: any, _logSourcesService: any) =>
+      createLogViewsClientMock()
   ),
   getScopedClient: jest.fn((_request: any) => createLogViewsClientMock()),
 });

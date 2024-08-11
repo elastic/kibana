@@ -1379,6 +1379,21 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.FEEDBACK_LINK",
+        "type": "string",
+        "tags": [],
+        "label": "FEEDBACK_LINK",
+        "description": [],
+        "signature": [
+          "\"https://ela.st/esql-feedback\""
+        ],
+        "path": "packages/kbn-esql-utils/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.TextBasedLanguages",
         "type": "string",
         "tags": [],

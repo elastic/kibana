@@ -8,8 +8,7 @@ import React from 'react';
 import { Redirect, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import { useLatestFindings } from './latest_findings/use_latest_findings';
-import { LATEST_FINDINGS_INDEX_PATTERN } from '../../../common/constants';
+import { CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX } from '../../../common/constants';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { NoFindingsStates } from '../../components/no_findings_states';
 import { CloudPosturePage, defaultLoadingRenderer } from '../../components/cloud_posture_page';
@@ -17,13 +16,14 @@ import { useDataView } from '../../common/api/use_data_view';
 import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
 import { LatestFindingsContainer } from './latest_findings/latest_findings_container';
 import { DataViewContext } from '../../common/contexts/data_view_context';
+import { useLatestFindings } from './latest_findings/use_latest_findings';
 
 export const Configurations = () => {
   const location = useLocation();
-  const dataViewQuery = useDataView(LATEST_FINDINGS_INDEX_PATTERN);
+  const dataViewQuery = useDataView(CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX);
   const { data: getSetupStatus, isLoading: getSetupStatusIsLoading } = useCspSetupStatusApi();
-  const { total } = useLatestFindings({});
-  const hasFindings = !!total;
+  const getLatestFindings = useLatestFindings({ sort: [['asc']], enabled: true, pageSize: 1 });
+  const hasFindings = !!getLatestFindings.data?.pages?.[0]?.total;
 
   const hasConfigurationFindings =
     hasFindings ||
@@ -35,10 +35,8 @@ export const Configurations = () => {
   const noFindingsForPostureType =
     getSetupStatus?.cspm.status !== 'not-installed' ? 'cspm' : 'kspm';
 
-  if (!hasFindings && getSetupStatusIsLoading) return defaultLoadingRenderer();
+  if (getLatestFindings.isLoading || getSetupStatusIsLoading) return defaultLoadingRenderer();
   if (!hasConfigurationFindings) return <NoFindingsStates postureType={noFindingsForPostureType} />;
-
-  console.log(hasFindings);
 
   const dataViewContextValue = {
     dataView: dataViewQuery.data!,
