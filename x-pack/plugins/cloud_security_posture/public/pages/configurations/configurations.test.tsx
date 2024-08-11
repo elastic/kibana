@@ -44,13 +44,41 @@ describe('<Findings />', () => {
     server.use(rulesGetStatesHandler);
   });
 
-  it('renders integrations installation prompt if integration is not installed', async () => {
+  it('renders integrations installation prompt if integration is not installed and there are no findings', async () => {
     server.use(statusHandlers.notInstalledHandler);
     renderFindingsPage();
 
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
     await waitFor(() => expect(screen.getByText(/add cspm integration/i)).toBeInTheDocument());
     expect(screen.getByText(/add kspm integration/i)).toBeInTheDocument();
+  });
+
+  it("renders the 'latest misconfigurations findings' DataTable component when the CSPM/KSPM integration status not installed but there are findings", async () => {
+    const finding1 = generateCspFinding('0003', 'failed');
+    const finding2 = generateCspFinding('0004', 'passed');
+
+    server.use(statusHandlers.notInstalledHandler);
+    server.use(bsearchFindingsHandler([finding1, finding2]));
+    renderFindingsPage();
+
+    // Loading while checking the status API
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+
+    await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
+
+    expect(screen.getByText(finding1.resource.name)).toBeInTheDocument();
+    expect(screen.getByText(finding1.resource.id)).toBeInTheDocument();
+    expect(screen.getByText(finding1.rule.benchmark.rule_number as string)).toBeInTheDocument();
+    expect(screen.getByText(finding1.rule.name)).toBeInTheDocument();
+    expect(screen.getByText(finding1.rule.section)).toBeInTheDocument();
+
+    expect(screen.getByText(finding2.resource.name)).toBeInTheDocument();
+    expect(screen.getByText(finding2.resource.id)).toBeInTheDocument();
+    expect(screen.getByText(finding2.rule.benchmark.rule_number as string)).toBeInTheDocument();
+    expect(screen.getByText(finding2.rule.name)).toBeInTheDocument();
+    expect(screen.getByText(finding2.rule.section)).toBeInTheDocument();
+
+    expect(screen.getByText(/group findings by: none/i)).toBeInTheDocument();
   });
 
   it("renders the 'latest findings' DataTable component when the CSPM/KSPM integration status is 'indexed' grouped by 'none'", async () => {
