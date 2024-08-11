@@ -13,7 +13,7 @@ import {
   entitiesAliasPattern,
   ENTITY_SCHEMA_VERSION_V1,
 } from '@kbn/entities-schema';
-import { getEntityHistoryIndexTemplateV1 } from '../../../../common/helpers';
+import { getEntityHistoryIndexTemplateV1 } from './helpers';
 import {
   ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
   ENTITY_EVENT_COMPONENT_TEMPLATE_V1,

@@ -12,7 +12,7 @@ import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
 import {
   getEntityHistoryIndexTemplateV1,
   getEntityLatestIndexTemplateV1,
-} from '../../../common/helpers';
+} from './templates/helpers';
 import {
   generateHistoryTransformId,
   generateHistoryIngestPipelineId,
