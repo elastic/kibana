@@ -19,6 +19,7 @@ export const useDataView = (dataViewId: string) => {
     spaces,
   } = useKibana<CspClientPluginStartDeps>().services;
   return useQuery(['useDataView', dataViewId], async () => {
+    // Using default space if spaces is not available or for serverless projects where spaces are not enabled.
     const currentSpaceId = spaces ? (await spaces.getActiveSpace()).id : DEFAULT_SPACE_ID;
     const dataViewIdCurrentSpace = `${dataViewId}-${currentSpaceId}`;
     const dataView = await dataViews.get(dataViewIdCurrentSpace);
