@@ -270,7 +270,7 @@ export function getDataStateContainer({
               abortController,
               ...commonFetchDeps,
             },
-            async () => {
+            async (records) => {
               const { resetDefaultProfileState, dataView } = internalStateContainer.getState();
               const { esqlQueryColumns } = dataSubjects.documents$.getValue();
               const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
@@ -282,6 +282,7 @@ export function getDataStateContainer({
                   defaultColumns,
                   dataView,
                   esqlQueryColumns,
+                  records,
                 });
 
                 if (stateUpdate) {
