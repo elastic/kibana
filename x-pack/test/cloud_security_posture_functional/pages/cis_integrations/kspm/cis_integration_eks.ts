@@ -59,7 +59,9 @@ export default function (providerContext: FtrProviderContext) {
         await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickOptionButton(EKS_DIRECT_ACCESS_TEST_ID);
         await pageObjects.header.waitUntilLoadingHasFinished();
+
         await cisIntegration.inputUniqueIntegrationName();
+
         await cisIntegration.fillInTextField(DIRECT_ACCESS_KEY_ID_TEST_ID, directAccessKeyId);
         await cisIntegration.fillInTextField(
           DIRECT_ACCESS_SECRET_KEY_TEST_ID,
@@ -87,7 +89,9 @@ export default function (providerContext: FtrProviderContext) {
         await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickOptionButton(EKS_TEMPORARY_KEYS_TEST_ID);
         await pageObjects.header.waitUntilLoadingHasFinished();
+
         await cisIntegration.inputUniqueIntegrationName();
+
         await cisIntegration.fillInTextField(TEMP_ACCESS_KEY_ID_TEST_ID, accessKeyId);
         await cisIntegration.fillInTextField(
           TEMP_ACCESS_KEY_SECRET_KEY_TEST_ID,
@@ -122,7 +126,9 @@ export default function (providerContext: FtrProviderContext) {
         await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickOptionButton(EKS_SHARED_CREDENTIAL_TEST_ID);
         await pageObjects.header.waitUntilLoadingHasFinished();
+
         await cisIntegration.inputUniqueIntegrationName();
+
         await cisIntegration.fillInTextField(SHARED_CREDENTIALS_FILE_TEST_ID, sharedCredentialFile);
         await cisIntegration.fillInTextField(
           SHARED_CREDETIALS_PROFILE_NAME_TEST_ID,

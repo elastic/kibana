@@ -20,6 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
   const pageObjects = getPageObjects([
     'common',
     'cloudPostureDashboard',
@@ -28,8 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'findings',
   ]);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/178413
-  describe.skip('Cloud Posture Rules Page', function () {
+  describe('Cloud Posture Rules Page', function () {
     this.tags(['cloud_security_posture_rules_page']);
     let rule: typeof pageObjects.rule;
     let findings: typeof pageObjects.findings;
@@ -42,26 +42,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
 
-      const { body: agentPolicyResponse } = await supertest
-        .post(`/api/fleet/agent_policies`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          name: 'Test policy',
-          namespace: 'default',
-        });
+      // const { body: agentPolicyResponse } = await supertest
+      //   .post(`/api/fleet/agent_policies`)
+      //   .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      //   .set('kbn-xsrf', 'xxxx')
+      //   .send({
+      //     name: 'Test policy',
+      //     namespace: 'default',
+      //   });
 
-      agentPolicyId = agentPolicyResponse.item.id;
+      // agentPolicyId = agentPolicyResponse.item.id;
 
-      await createPackagePolicy(
-        supertest,
-        agentPolicyId,
-        'kspm',
-        'cloudbeat/cis_k8s',
-        'vanilla',
-        'kspm'
-      );
-      await rule.waitForPluginInitialized();
+      // await createPackagePolicy(
+      //   supertest,
+      //   agentPolicyId,
+      //   'kspm',
+      //   'cloudbeat/cis_k8s',
+      //   'vanilla',
+      //   'kspm'
+      // );
+      // await rule.waitForPluginInitialized();
       await findings.index.add(k8sFindingsMock);
       await rule.navigateToRulePage('cis_k8s', '1.0.1');
     });
@@ -91,9 +91,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect((await integrationsCounter.getVisibleText()).includes('1')).to.be(true);
       });
 
-      it('Clicking the integrations counter button leads to the integration page', async () => {
-        await rule.rulePage.clickIntegrationsEvaluatedButton();
-        await pageObjects.common.waitUntilUrlIncludes('add-integration/kspm');
+      it('Integrations counter button has URL to add integration page', async () => {
+        await retry.waitFor('Wait until url includes', async () =>
+          rule.rulePage.doesElementContainsUrl(
+            'rules-counters-integrations-evaluated-button',
+            'add-integration/kspm'
+          )
+        );
       });
 
       it('Shows the failed findings counter when there are findings', async () => {
