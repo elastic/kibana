@@ -8,6 +8,7 @@
 
 import dateMath from '@kbn/datemath';
 import classNames from 'classnames';
+import { css } from '@emotion/react';
 import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
@@ -35,6 +36,7 @@ import {
   EuiToolTip,
   EuiButton,
   EuiButtonIcon,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
@@ -47,11 +49,7 @@ import QueryStringInputUI from './query_string_input';
 import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../utils/shallow_equal';
 import { AddFilterPopover } from './add_filter_popover';
-import {
-  DataViewPicker,
-  DataViewPickerProps,
-  OnSaveTextLanguageQueryProps,
-} from '../dataview_picker';
+import { DataViewPicker, DataViewPickerProps } from '../dataview_picker';
 
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import type {
@@ -167,7 +165,6 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   dataViewPickerComponentProps?: DataViewPickerProps;
   textBasedLanguageModeErrors?: Error[];
   textBasedLanguageModeWarning?: string;
-  onTextBasedSavedAndExit?: ({ onSave }: OnSaveTextLanguageQueryProps) => void;
   filterBar?: React.ReactNode;
   showDatePickerAsBadge?: boolean;
   showSubmitButton?: boolean;
@@ -185,6 +182,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   onTextLangQueryChange: (query: AggregateQuery) => void;
   submitOnBlur?: boolean;
   renderQueryInputAppend?: () => React.ReactNode;
+  disableExternalPadding?: boolean;
 }
 
 export const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -232,7 +230,6 @@ export const QueryBarTopRow = React.memo(
   ) {
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
-    const [codeEditorIsExpanded, setCodeEditorIsExpanded] = useState<boolean>(false);
     const submitButtonStyle: QueryBarTopRowProps['submitButtonStyle'] =
       props.submitButtonStyle ?? 'auto';
     const submitButtonIconOnly =
@@ -466,7 +463,10 @@ export const QueryBarTopRow = React.memo(
     }
 
     function shouldShowDatePickerAsBadge(): boolean {
-      return Boolean(props.showDatePickerAsBadge) && !shouldRenderQueryInput();
+      return (
+        (Boolean(props.showDatePickerAsBadge) && !shouldRenderQueryInput()) ||
+        Boolean(isQueryLangSelected && props.query && isOfAggregateQueryType(props.query))
+      );
     }
 
     function renderDatePicker() {
@@ -632,9 +632,7 @@ export const QueryBarTopRow = React.memo(
           <DataViewPicker
             {...props.dataViewPickerComponentProps}
             trigger={{ fullWidth: isMobile, ...props.dataViewPickerComponentProps.trigger }}
-            onTextLangQuerySubmit={props.onTextLangQuerySubmit}
             textBasedLanguage={textBasedLanguage}
-            onSaveTextLanguageQuery={props.onTextBasedSavedAndExit}
             isDisabled={props.isDisabled}
           />
         </EuiFlexItem>
@@ -734,8 +732,6 @@ export const QueryBarTopRow = React.memo(
           <TextBasedLangEditor
             query={props.query}
             onTextLangQueryChange={props.onTextLangQueryChange}
-            expandCodeEditor={(status: boolean) => setCodeEditorIsExpanded(status)}
-            isCodeEditorExpanded={codeEditorIsExpanded}
             errors={props.textBasedLanguageModeErrors}
             warning={props.textBasedLanguageModeWarning}
             detectedTimestamp={detectedTimestamp}
@@ -753,7 +749,7 @@ export const QueryBarTopRow = React.memo(
         )
       );
     }
-
+    const { euiTheme } = useEuiTheme();
     const isScreenshotMode = props.isScreenshotMode === true;
 
     return (
@@ -770,6 +766,11 @@ export const QueryBarTopRow = React.memo(
               direction={isMobile && !shouldShowDatePickerAsBadge() ? 'column' : 'row'}
               responsive={false}
               gutterSize="s"
+              css={css`
+                padding: ${isQueryLangSelected && !props.disableExternalPadding
+                  ? euiTheme.size.s
+                  : 0};
+              `}
               justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
               wrap
             >
@@ -778,18 +779,14 @@ export const QueryBarTopRow = React.memo(
                 grow={!shouldShowDatePickerAsBadge()}
                 style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}
               >
-                {!isQueryLangSelected
-                  ? renderQueryInput()
-                  : !codeEditorIsExpanded
-                  ? renderTextLangEditor()
-                  : null}
+                {!isQueryLangSelected ? renderQueryInput() : null}
               </EuiFlexItem>
               {props.renderQueryInputAppend?.()}
               {shouldShowDatePickerAsBadge() && props.filterBar}
               {renderUpdateButton()}
             </EuiFlexGroup>
             {!shouldShowDatePickerAsBadge() && props.filterBar}
-            {codeEditorIsExpanded && renderTextLangEditor()}
+            {renderTextLangEditor()}
           </>
         )}
       </>

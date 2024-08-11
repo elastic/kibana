@@ -148,8 +148,7 @@ describe('telemetry tasks', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/187719
-  describe.skip('detection-rules', () => {
+  describe('detection-rules', () => {
     it('should execute when scheduled', async () => {
       await mockAndScheduleDetectionRulesTask();
 
@@ -169,8 +168,7 @@ describe('telemetry tasks', () => {
     });
 
     it('should send task metrics', async () => {
-      const task = await mockAndScheduleDetectionRulesTask();
-      const started = performance.now();
+      const [task, started] = await mockAndScheduleDetectionRulesTask();
 
       const requests = await getTaskMetricsRequests(task, started);
 
@@ -181,13 +179,10 @@ describe('telemetry tasks', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/178918
-  // FLAKY: https://github.com/elastic/kibana/issues/187720
-  describe.skip('sender configuration', () => {
+  describe('sender configuration', () => {
     it('should use legacy sender by default', async () => {
       // launch a random task and verify it uses the new configuration
-      const task = await mockAndScheduleDetectionRulesTask();
-      const started = performance.now();
+      const [task, started] = await mockAndScheduleDetectionRulesTask();
 
       const requests = await getTaskMetricsRequests(task, started);
       expect(requests.length).toBeGreaterThan(0);
@@ -216,8 +211,7 @@ describe('telemetry tasks', () => {
         expect(found).toBeFalsy();
       });
 
-      const task = await mockAndScheduleDetectionRulesTask();
-      const started = performance.now();
+      const [task, started] = await mockAndScheduleDetectionRulesTask();
 
       const requests = await getTaskMetricsRequests(task, started);
       expect(requests.length).toBeGreaterThan(0);
@@ -258,8 +252,7 @@ describe('telemetry tasks', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/189192
-  describe.skip('endpoint-diagnostics', () => {
+  describe('endpoint-diagnostics', () => {
     it('should execute when scheduled', async () => {
       await mockAndScheduleEndpointDiagnosticsTask();
 
@@ -298,8 +291,7 @@ describe('telemetry tasks', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/189330
-  describe.skip('endpoint-meta-telemetry', () => {
+  describe('endpoint-meta-telemetry', () => {
     beforeEach(async () => {
       await initEndpointIndices(esClient);
     });
@@ -335,8 +327,7 @@ describe('telemetry tasks', () => {
         Promise.reject(Error(errorMessage))
       );
 
-      const task = await mockAndScheduleEndpointTask();
-      const started = performance.now();
+      const [task, started] = await mockAndScheduleEndpointTask();
 
       const requests = await getTaskMetricsRequests(task, started);
 
@@ -361,8 +352,7 @@ describe('telemetry tasks', () => {
 
       agentClient.listAgents = jest.fn((_) => Promise.reject(Error(errorMessage)));
 
-      const task = await mockAndScheduleEndpointTask();
-      const started = performance.now();
+      const [task, started] = await mockAndScheduleEndpointTask();
 
       const endpointMetaRequests = await getEndpointMetaRequests();
 
@@ -401,8 +391,7 @@ describe('telemetry tasks', () => {
         })
       );
 
-      const task = await mockAndScheduleEndpointTask();
-      const started = performance.now();
+      const [task, started] = await mockAndScheduleEndpointTask();
 
       const endpointMetaRequests = await getEndpointMetaRequests();
 
@@ -434,8 +423,7 @@ describe('telemetry tasks', () => {
 
       telemetryReceiver.fetchPolicyConfigs = jest.fn((_) => Promise.reject(Error(errorMessage)));
 
-      const task = await mockAndScheduleEndpointTask();
-      const started = performance.now();
+      const [task, started] = await mockAndScheduleEndpointTask();
 
       const endpointMetaRequests = await getEndpointMetaRequests();
 
@@ -478,8 +466,7 @@ describe('telemetry tasks', () => {
         } as unknown as AgentPolicy);
       });
 
-      const task = await mockAndScheduleEndpointTask();
-      const started = performance.now();
+      const [task, started] = await mockAndScheduleEndpointTask();
 
       const endpointMetaRequests = await getEndpointMetaRequests();
 
@@ -512,8 +499,7 @@ describe('telemetry tasks', () => {
         return Promise.reject(Error(errorMessage));
       });
 
-      const task = await mockAndScheduleEndpointTask();
-      const started = performance.now();
+      const [task, started] = await mockAndScheduleEndpointTask();
 
       const endpointMetaRequests = await getEndpointMetaRequests();
 
@@ -545,8 +531,7 @@ describe('telemetry tasks', () => {
         return Promise.resolve(new Map());
       });
 
-      const task = await mockAndScheduleEndpointTask();
-      const started = performance.now();
+      const [task, started] = await mockAndScheduleEndpointTask();
 
       const endpointMetaRequests = await getEndpointMetaRequests();
 
@@ -579,8 +564,7 @@ describe('telemetry tasks', () => {
         return Promise.reject(Error(errorMessage));
       });
 
-      const task = await mockAndScheduleEndpointTask();
-      const started = performance.now();
+      const [task, started] = await mockAndScheduleEndpointTask();
 
       const endpointMetaRequests = await getEndpointMetaRequests();
 
@@ -615,8 +599,7 @@ describe('telemetry tasks', () => {
         return Promise.resolve(new Map());
       });
 
-      const task = await mockAndScheduleEndpointTask();
-      const started = performance.now();
+      const [task, started] = await mockAndScheduleEndpointTask();
 
       const endpointMetaRequests = await getEndpointMetaRequests();
 
@@ -663,8 +646,7 @@ describe('telemetry tasks', () => {
         return esClient.search(query);
       });
 
-      const task = await mockAndScheduleEndpointTask();
-      const started = performance.now();
+      const [task, started] = await mockAndScheduleEndpointTask();
 
       const endpointMetaRequests = await getEndpointMetaRequests();
 
@@ -688,8 +670,7 @@ describe('telemetry tasks', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/188234
-  describe.skip('telemetry-prebuilt-rule-alerts', () => {
+  describe('telemetry-prebuilt-rule-alerts', () => {
     it('should execute when scheduled', async () => {
       await mockAndSchedulePrebuiltRulesTask();
 
@@ -722,8 +703,7 @@ describe('telemetry tasks', () => {
 
       telemetryReceiver.fetchPrebuiltRuleAlertsBatch = mockedGenerator;
 
-      const task = await mockAndSchedulePrebuiltRulesTask();
-      const started = performance.now();
+      const [task, started] = await mockAndSchedulePrebuiltRulesTask();
 
       const requests = await getTaskMetricsRequests(task, started);
 
@@ -781,7 +761,7 @@ describe('telemetry tasks', () => {
     });
   }
 
-  async function mockAndScheduleDetectionRulesTask(): Promise<SecurityTelemetryTask> {
+  async function mockAndScheduleDetectionRulesTask(): Promise<[SecurityTelemetryTask, number]> {
     const task = getTelemetryTask(tasks, 'security:telemetry-detection-rules');
 
     // create some data
@@ -797,50 +777,52 @@ describe('telemetry tasks', () => {
     exceptionsListItem.push(exceptionListItem);
 
     // schedule task to run ASAP
-    await eventually(async () => {
+    return eventually(async () => {
+      const started = performance.now();
       await taskManagerPlugin.runSoon(task.getTaskId());
+      return [task, started];
     });
-
-    return task;
   }
 
-  async function mockAndScheduleEndpointTask(): Promise<SecurityTelemetryTask> {
+  async function mockAndScheduleEndpointTask(): Promise<[SecurityTelemetryTask, number]> {
     const task = getTelemetryTask(tasks, 'security:endpoint-meta-telemetry');
 
     await mockEndpointData(esClient, kibanaServer.coreStart.savedObjects);
 
     // schedule task to run ASAP
-    await eventually(async () => {
+    return eventually(async () => {
+      const started = performance.now();
       await taskManagerPlugin.runSoon(task.getTaskId());
+      return [task, started];
     });
-
-    return task;
   }
 
-  async function mockAndSchedulePrebuiltRulesTask(): Promise<SecurityTelemetryTask> {
+  async function mockAndSchedulePrebuiltRulesTask(): Promise<[SecurityTelemetryTask, number]> {
     const task = getTelemetryTask(tasks, 'security:telemetry-prebuilt-rule-alerts');
 
     await mockPrebuiltRulesData(esClient);
 
     // schedule task to run ASAP
-    await eventually(async () => {
+    return eventually(async () => {
+      const started = performance.now();
       await taskManagerPlugin.runSoon(task.getTaskId());
+      return [task, started];
     });
-
-    return task;
   }
 
-  async function mockAndScheduleEndpointDiagnosticsTask(): Promise<SecurityTelemetryTask> {
+  async function mockAndScheduleEndpointDiagnosticsTask(): Promise<
+    [SecurityTelemetryTask, number]
+  > {
     const task = getTelemetryTask(tasks, 'security:endpoint-diagnostics');
 
     await createMockedEndpointAlert(kibanaServer.coreStart.elasticsearch.client.asInternalUser);
 
     // schedule task to run ASAP
-    await eventually(async () => {
+    return eventually(async () => {
+      const started = performance.now();
       await taskManagerPlugin.runSoon(task.getTaskId());
+      return [task, started];
     });
-
-    return task;
   }
 
   function mockAxiosGet(bufferConfig: unknown = fakeBufferAndSizesConfigAsyncDisabled) {
@@ -877,6 +859,7 @@ describe('telemetry tasks', () => {
       requestConfig: AxiosRequestConfig<unknown> | undefined;
     }>
   > {
+    const taskType = getTelemetryTaskType(task);
     return eventually(async () => {
       const calls = mockedAxiosPost.mock.calls.flatMap(([url, data, config]) => {
         return (data as string).split('\n').map((body) => {
@@ -886,20 +869,24 @@ describe('telemetry tasks', () => {
 
       const requests = calls.filter(({ url, body }) => {
         return (
-          body.indexOf(getTelemetryTaskType(task)) !== -1 &&
+          body.indexOf(taskType) !== -1 &&
           url.startsWith(ENDPOINT_STAGING) &&
           url.endsWith('task-metrics')
         );
       });
       expect(requests.length).toBeGreaterThan(0);
-      return requests
+      const filtered = requests
         .map((r) => {
           return {
             taskMetric: JSON.parse(r.body) as TaskMetric,
             requestConfig: r.config,
           };
         })
-        .filter((t) => t.taskMetric.start_time >= olderThan);
+        .filter((t) => {
+          return t.taskMetric.start_time >= olderThan;
+        });
+      expect(filtered.length).toBeGreaterThan(0);
+      return filtered;
     });
   }
 });

@@ -8,7 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { useSelector } from 'react-redux';
-import { TimelineStatus } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum } from '../../../../../common/api/timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { SaveTimelineModal } from './save_timeline_modal';
 import * as i18n from './translations';
@@ -41,8 +41,8 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelin
 
   const { status, isSaving } = useSelector((state: State) => selectTimelineById(state, timelineId));
 
-  const canSaveTimeline = canEditTimelinePrivilege && status !== TimelineStatus.immutable;
-  const isUnsaved = status === TimelineStatus.draft;
+  const canSaveTimeline = canEditTimelinePrivilege && status !== TimelineStatusEnum.immutable;
+  const isUnsaved = status === TimelineStatusEnum.draft;
   const unauthorizedMessage = canSaveTimeline ? null : i18n.CALL_OUT_UNAUTHORIZED_MSG;
 
   return (

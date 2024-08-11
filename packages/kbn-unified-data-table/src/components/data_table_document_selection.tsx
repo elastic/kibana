@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import {
@@ -28,27 +28,18 @@ import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { UseSelectedDocsState } from '../hooks/use_selected_docs';
 import { UnifiedDataTableContext } from '../table_context';
+import { useControlColumn } from '../hooks/use_control_column';
 
-export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueElementProps) => {
+export const SelectButton = (props: EuiDataGridCellValueElementProps) => {
+  const { record, rowIndex } = useControlColumn(props);
   const { euiTheme } = useEuiTheme();
-  const { selectedDocsState, expanded, rows, isDarkMode } = useContext(UnifiedDataTableContext);
+  const { selectedDocsState } = useContext(UnifiedDataTableContext);
   const { isDocSelected, toggleDocSelection } = selectedDocsState;
-  const doc = useMemo(() => rows[rowIndex], [rows, rowIndex]);
 
   const toggleDocumentSelectionLabel = i18n.translate('unifiedDataTable.grid.selectDoc', {
     defaultMessage: `Select document ''{rowNumber}''`,
     values: { rowNumber: rowIndex + 1 },
   });
-
-  useEffect(() => {
-    if (expanded && doc && expanded.id === doc.id) {
-      setCellProps({
-        className: 'unifiedDataTable__cell--selected',
-      });
-    } else {
-      setCellProps({ className: '' });
-    }
-  }, [expanded, doc, setCellProps, isDarkMode]);
 
   return (
     <EuiFlexGroup
@@ -63,12 +54,12 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
     >
       <EuiFlexItem grow={false}>
         <EuiCheckbox
-          id={doc.id}
+          id={record.id}
           aria-label={toggleDocumentSelectionLabel}
-          checked={isDocSelected(doc.id)}
-          data-test-subj={`dscGridSelectDoc-${doc.id}`}
+          checked={isDocSelected(record.id)}
+          data-test-subj={`dscGridSelectDoc-${record.id}`}
           onChange={() => {
-            toggleDocSelection(doc.id);
+            toggleDocSelection(record.id);
           }}
         />
       </EuiFlexItem>

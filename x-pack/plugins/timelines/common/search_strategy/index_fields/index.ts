@@ -81,4 +81,3 @@ export interface FieldCategory {
 export type BrowserFields = Record<FieldCategoryName, FieldCategory>;
 
 export const EMPTY_BROWSER_FIELDS = {};
-export const EMPTY_INDEX_FIELDS: FieldSpec[] = [];

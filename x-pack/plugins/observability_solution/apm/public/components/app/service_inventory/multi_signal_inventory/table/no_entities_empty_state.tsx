@@ -124,14 +124,14 @@ export function NoEntitiesEmptyState() {
                     reportButtonClick('add_apm_agent');
                   }}
                 />
-                <AssociateServiceLogs
-                  onClick={() => {
-                    reportButtonClick('associate_existing_service_logs');
-                  }}
-                />
                 <CollectServiceLogs
                   onClick={() => {
                     reportButtonClick('collect_new_service_logs');
+                  }}
+                />
+                <AssociateServiceLogs
+                  onClick={() => {
+                    reportButtonClick('associate_existing_service_logs');
                   }}
                 />
               </EuiFlexGroup>

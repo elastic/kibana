@@ -34,7 +34,8 @@
       "unifiedSearch",
       "usageCollection",
       "visTypeTimeseries",
-      "apmDataAccess"
+      "apmDataAccess",
+      "logsDataAccess"
     ],
     "optionalPlugins": [
       "spaces",

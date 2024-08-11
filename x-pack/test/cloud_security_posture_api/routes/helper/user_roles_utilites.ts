@@ -129,6 +129,24 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
         },
       ],
     },
+    {
+      name: 'role_security_all',
+      elasticsearch: {
+        indices: securityUserIndinces,
+      },
+      kibana: [
+        {
+          base: [],
+          feature: {
+            siem: ['all'],
+            fleet: ['all'],
+            fleetv2: ['all'],
+            savedObjectsManagement: ['all'],
+          },
+          spaces: ['*'],
+        },
+      ],
+    },
   ];
 
   const users = [
@@ -140,7 +158,7 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
     },
     {
       name: 'role_security_read_user_alerts',
-      full_name: 'user with 0 security privilege for',
+      full_name: 'user with 0 security privilege',
       password: 'csp123',
       roles: ['role_security_read_alerts'],
     },
@@ -152,9 +170,15 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
     },
     {
       name: 'role_security_no_read_user_alerts',
-      full_name: 'user with 0 security privilege for',
+      full_name: 'user with 0 security privilege',
       password: 'csp123',
       roles: ['role_security_no_read_alerts'],
+    },
+    {
+      name: 'role_security_all_user',
+      full_name: 'user with all security privilege',
+      password: 'csp123',
+      roles: ['role_security_all'],
     },
   ];
 

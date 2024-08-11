@@ -55,9 +55,13 @@
 
   .euiDataGridRowCell--controlColumn .euiDataGridRowCell__content,
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='openDetails'],
-  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='select'] {
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='select'],
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id^='additionalRowControl_'],
+  .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn[data-gridcell-column-id^='additionalRowControl_'] {
     padding-left: 0;
     padding-right: 0;
+    border-left: 0;
+    border-right: 0;
   }
 
   .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn[data-gridcell-column-id='select'] {
@@ -136,6 +140,13 @@
   margin-top: -$euiSizeXS;
   .euiDataGridRowCell__content--defaultHeight & { // "Single line" row height setting
     margin-top: 0;
+  }
+
+  &--size-normal {
+    display: inline-block;
+    width: $euiSizeL;
+    height: $euiSizeL;
+    overflow: hidden;
   }
 }
 

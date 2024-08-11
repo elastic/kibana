@@ -21,5 +21,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./roles'));
     loadTestFile(require.resolve('./users'));
     loadTestFile(require.resolve('./privileges_basic'));
+    loadTestFile(require.resolve('./roles_bulk'));
   });
 }
