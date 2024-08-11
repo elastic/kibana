@@ -11,9 +11,9 @@ import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { Logger } from '@kbn/logging';
 import {
-  getEntityHistoryIndexTemplateV1,
-  getEntityLatestIndexTemplateV1,
-} from './templates/helpers';
+  generateHistoryIndexTemplateId,
+  generateLatestIndexTemplateId,
+} from './helpers/generate_component_id';
 import {
   createAndInstallHistoryIngestPipeline,
   createAndInstallLatestIngestPipeline,
@@ -108,12 +108,12 @@ export async function installEntityDefinition({
       deleteTemplate({
         esClient,
         logger,
-        name: getEntityHistoryIndexTemplateV1(definition.id),
+        name: generateHistoryIndexTemplateId(definition),
       }),
       deleteTemplate({
         esClient,
         logger,
-        name: getEntityLatestIndexTemplateV1(definition.id),
+        name: generateLatestIndexTemplateId(definition),
       }),
     ]);
 

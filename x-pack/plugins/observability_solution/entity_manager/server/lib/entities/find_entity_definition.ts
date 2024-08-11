@@ -10,15 +10,13 @@ import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/serve
 import { EntityDefinition } from '@kbn/entities-schema';
 import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
 import {
-  getEntityHistoryIndexTemplateV1,
-  getEntityLatestIndexTemplateV1,
-} from './templates/helpers';
-import {
   generateHistoryTransformId,
+  generateHistoryBackfillTransformId,
   generateHistoryIngestPipelineId,
+  generateHistoryIndexTemplateId,
   generateLatestTransformId,
   generateLatestIngestPipelineId,
-  generateHistoryBackfillTransformId,
+  generateLatestIndexTemplateId,
 } from './helpers/generate_component_id';
 import { BUILT_IN_ID_PREFIX } from './built_in';
 import { EntityDefinitionWithState } from './types';
@@ -80,8 +78,7 @@ async function getEntityDefinitionState(
     ),
     esClient.indices.existsIndexTemplate({
       name: `${
-        (getEntityLatestIndexTemplateV1(definition.id),
-        getEntityHistoryIndexTemplateV1(definition.id))
+        (generateLatestIndexTemplateId(definition), generateHistoryIndexTemplateId(definition))
       }`,
     }),
     esClient.transform.getTransformStats({
