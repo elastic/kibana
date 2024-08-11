@@ -91,26 +91,22 @@ Add test files to `x-pack/test/<my_own_api_integration_folder>/deployment_agnost
 test example
 ```ts
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const samlAuth = getService('samlAuth');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-  let roleAuthc: RoleCredentials;
-  let internalHeaders: InternalRequestHeader;
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let supertestWithAdminScope: SupertestWithRoleScopeType;
 
   describe('compression', () => {
     before(async () => {
-      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
-      internalHeaders = samlAuth.getInternalRequestHeader();
+      supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+        withInternalHeaders: true,
+        withCustomHeaders: { 'accept-encoding': 'gzip' },
+      });
     });
     after(async () => {
-      await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+      await supertestWithAdminScope.destroy();
     });
     describe('against an application page', () => {
       it(`uses compression when there isn't a referer`, async () => {
-        const response = await supertestWithoutAuth
-          .get('/app/kibana')
-          .set('accept-encoding', 'gzip')
-          .set(internalHeaders)
-          .set(roleAuthc.apiKeyHeader);
+        const response = await supertestWithAdminScope.get('/app/kibana');
         expect(response.header).to.have.property('content-encoding', 'gzip');
       });
     });
