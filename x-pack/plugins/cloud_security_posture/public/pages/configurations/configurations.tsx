@@ -8,6 +8,7 @@ import React from 'react';
 import { Redirect, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import { useLatestFindings } from './latest_findings/use_latest_findings';
 import { LATEST_FINDINGS_INDEX_PATTERN } from '../../../common/constants';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { NoFindingsStates } from '../../components/no_findings_states';
@@ -21,16 +22,23 @@ export const Configurations = () => {
   const location = useLocation();
   const dataViewQuery = useDataView(LATEST_FINDINGS_INDEX_PATTERN);
   const { data: getSetupStatus, isLoading: getSetupStatusIsLoading } = useCspSetupStatusApi();
+  const { total } = useLatestFindings({});
+  const hasFindings = !!total;
+
   const hasConfigurationFindings =
-    getSetupStatus?.kspm.status === 'indexed' || getSetupStatus?.cspm.status === 'indexed';
+    hasFindings ||
+    getSetupStatus?.kspm.status === 'indexed' ||
+    getSetupStatus?.cspm.status === 'indexed';
 
   // For now, when there are no findings we prompt first to install cspm, if it is already installed we will prompt to
   // install kspm
   const noFindingsForPostureType =
     getSetupStatus?.cspm.status !== 'not-installed' ? 'cspm' : 'kspm';
 
-  if (getSetupStatusIsLoading) return defaultLoadingRenderer();
+  if (!hasFindings && getSetupStatusIsLoading) return defaultLoadingRenderer();
   if (!hasConfigurationFindings) return <NoFindingsStates postureType={noFindingsForPostureType} />;
+
+  console.log(hasFindings);
 
   const dataViewContextValue = {
     dataView: dataViewQuery.data!,

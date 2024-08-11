@@ -19,7 +19,8 @@ export const useDataView = (indexPattern: string) => {
 
   return useQuery(['useDataView', indexPattern], async () => {
     const [dataView] = await dataViews.find(indexPattern);
-
+    const t = dataView;
+    console.log(t);
     if (!dataView) {
       throw new Error(`Data view not found [${indexPattern}]`);
     }
