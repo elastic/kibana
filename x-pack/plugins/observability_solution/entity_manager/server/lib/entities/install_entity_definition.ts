@@ -210,12 +210,12 @@ async function install({
     upsertTemplate({
       esClient,
       logger,
-      template: getEntitiesHistoryIndexTemplateConfig(definition.id),
+      template: getEntitiesHistoryIndexTemplateConfig(definition),
     }),
     upsertTemplate({
       esClient,
       logger,
-      template: getEntitiesLatestIndexTemplateConfig(definition.id),
+      template: getEntitiesLatestIndexTemplateConfig(definition),
     }),
   ]).then(throwIfRejected);
 
