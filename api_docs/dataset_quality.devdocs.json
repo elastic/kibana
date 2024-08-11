@@ -265,20 +265,26 @@
           "DatasetQualityRouteCreateOptions",
           "; }[TEndpoint] extends { endpoint: any; params?: infer TRouteParamsRT extends ",
           {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "server",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-server.RouteParamsRT",
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.RouteParamsRT",
             "text": "RouteParamsRT"
           },
           " | undefined | undefined; handler: ({}: any) => Promise<any>; } & ",
-          "ServerRouteCreateOptions",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRouteCreateOptions",
+            "text": "ServerRouteCreateOptions"
+          },
           " ? TRouteParamsRT extends ",
           {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "server",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-server.RouteParamsRT",
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.RouteParamsRT",
             "text": "RouteParamsRT"
           },
           " ? ClientRequestParamsOfType<TRouteParamsRT> : {} : never"
@@ -419,7 +425,13 @@
           " & { params: { query: { type?: \"metrics\" | \"synthetics\" | \"traces\" | \"logs\" | \"profiling\" | undefined; } & { datasetQuery?: string | undefined; }; }; }) => Promise<{ datasetUserPrivileges: { canMonitor: boolean; } & { canRead: boolean; canViewIntegrations: boolean; }; dataStreamsStats: ({ name: string; userPrivileges: { canMonitor: boolean; }; } & { size?: string | undefined; sizeBytes?: number | undefined; lastActivity?: number | undefined; integration?: string | undefined; totalDocs?: number | null | undefined; })[]; }>; } & ",
           "DatasetQualityRouteCreateOptions",
           "; }[TEndpoint] extends { endpoint: any; params?: any; handler: ({}: any) => Promise<infer TReturnType>; } & ",
-          "ServerRouteCreateOptions",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRouteCreateOptions",
+            "text": "ServerRouteCreateOptions"
+          },
           " ? TReturnType extends ",
           {
             "pluginId": "@kbn/core-http-server",
