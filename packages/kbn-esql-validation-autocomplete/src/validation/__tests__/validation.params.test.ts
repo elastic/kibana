@@ -23,16 +23,16 @@ test('should allow param inside agg function argument', async () => {
 test('allow params in WHERE command expressions', async () => {
   const { validate } = await setup();
 
-  const res1 = await validate('FROM index | WHERE textField >= ?start');
+  const res1 = await validate('FROM index | WHERE textField >= ?t_start');
   const res2 = await validate(`
     FROM index
-      | WHERE textField >= ?start
+      | WHERE textField >= ?t_start
       | WHERE textField <= ?0
       | WHERE textField == ?
   `);
   const res3 = await validate(`
     FROM index
-      | WHERE textField >= ?start
+      | WHERE textField >= ?t_start
         AND textField <= ?0
         AND textField == ?
   `);
