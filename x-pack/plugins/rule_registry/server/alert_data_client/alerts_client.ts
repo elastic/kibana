@@ -26,13 +26,17 @@ import {
   AlertConsumers,
 } from '@kbn/rule-data-utils';
 
-import {
+import type {
+  AggregationsMultiBucketAggregateBase,
   InlineScript,
   MappingRuntimeFields,
   QueryDslQueryContainer,
   SortCombinations,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { RuleTypeParams, PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/server';
+} from '@elastic/elasticsearch/lib/api/types';
+import type {
+  RuleTypeParams,
+  PluginStartContract as AlertingStart,
+} from '@kbn/alerting-plugin/server';
 import {
   ReadOperations,
   AlertingAuthorization,
@@ -1036,7 +1040,7 @@ export class AlertsClient {
   /**
    * Performs a `find` query to extract aggregations on alert groups
    */
-  public getGroupAggregations({
+  public async getGroupAggregations({
     featureIds,
     groupByField,
     aggregations,
@@ -1086,7 +1090,7 @@ export class AlertsClient {
         `The number of documents is too high. Paginating through more than ${MAX_PAGINATED_ALERTS} documents is not possible.`
       );
     }
-    return this.find({
+    const searchResult = await this.find({
       featureIds,
       aggs: {
         groupByFields: {
@@ -1139,6 +1143,19 @@ export class AlertsClient {
       size: 0,
       _source: false,
     });
+    // Replace artificial uuid values with '--' in null-value buckets and mark them with `isNullGroup = true`
+    const groupsAggregation = searchResult.aggregations
+      ?.groupByFields as AggregationsMultiBucketAggregateBase<{ key: string }>;
+    const buckets = Array.isArray(groupsAggregation?.buckets)
+      ? groupsAggregation.buckets
+      : Object.values(groupsAggregation?.buckets ?? {});
+    buckets.forEach((bucket) => {
+      if (bucket.key === uniqueValue) {
+        bucket.key = '--';
+        (bucket as { isNullGroup?: boolean }).isNullGroup = true;
+      }
+    });
+    return searchResult;
   }
 
   public async getAuthorizedAlertsIndices(featureIds: string[]): Promise<string[] | undefined> {

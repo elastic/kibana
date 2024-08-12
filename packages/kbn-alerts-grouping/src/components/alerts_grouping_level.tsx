@@ -18,9 +18,9 @@ import {
   useGetAlertsGroupAggregationsQuery,
   UseGetAlertsGroupAggregationsQueryProps,
 } from '@kbn/alerts-ui-shared';
-import { AlertsGroupingProps } from '../types';
+import { AlertsGroupingProps, BaseAlertsGroupAggregations } from '../types';
 
-export interface AlertsGroupingLevelProps<T extends Record<string, unknown> = {}>
+export interface AlertsGroupingLevelProps<T extends BaseAlertsGroupAggregations>
   extends AlertsGroupingProps<T> {
   getGrouping: (
     props: Omit<DynamicGroupingProps<T>, 'groupSelector' | 'pagination'>
@@ -40,8 +40,9 @@ const DEFAULT_FILTERS: Filter[] = [];
 /**
  * Renders an alerts grouping level
  */
-export const AlertsGroupingLevel = memo(
-  <T extends Record<string, unknown> = {}>({
+const typedMemo: <T>(c: T) => T = memo;
+export const AlertsGroupingLevel = typedMemo(
+  <T extends BaseAlertsGroupAggregations>({
     featureIds,
     defaultFilters = DEFAULT_FILTERS,
     from,

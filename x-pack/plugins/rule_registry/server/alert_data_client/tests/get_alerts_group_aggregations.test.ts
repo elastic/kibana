@@ -141,6 +141,36 @@ describe('getGroupAggregations()', () => {
     });
   });
 
+  test('replaces the key of null-value buckets and marks them with the `isNullGroup` flag', async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+    alertsClient.find = jest.fn().mockResolvedValue({
+      aggregations: {
+        groupByFields: {
+          buckets: [
+            {
+              key: 'unique-value',
+              doc_count: 1,
+            },
+          ],
+        },
+      },
+    });
+
+    const result = await alertsClient.getGroupAggregations({
+      featureIds: [AlertConsumers.STACK_ALERTS],
+      groupByField: 'kibana.alert.rule.name',
+      aggregations: {},
+      filters: [],
+      pageIndex: 0,
+      pageSize: DEFAULT_ALERTS_GROUP_BY_FIELD_SIZE,
+    });
+
+    const firstBucket = (result.aggregations as any).groupByFields.buckets[0];
+
+    expect(firstBucket.isNullGroup).toBe(true);
+    expect(firstBucket.key).toEqual('--');
+  });
+
   test('rejects with invalid pagination options', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
 
