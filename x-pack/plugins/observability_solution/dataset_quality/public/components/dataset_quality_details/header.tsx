@@ -27,7 +27,7 @@ export default function Header() {
   const { datasetDetails, timeRange, integrationDetails, loadingState } =
     useDatasetQualityDetailsState();
 
-  const { integration, rawName, name: title } = datasetDetails;
+  const { rawName, name: title } = datasetDetails;
   const euiShadow = useEuiShadow('s');
   const { euiTheme } = useEuiTheme();
   const redirectLinkProps = useDatasetQualityDetailsRedirectLink({
@@ -58,7 +58,7 @@ export default function Header() {
                 border-radius: ${euiTheme.size.xxs};
               `}
             >
-              <IntegrationIcon integration={integration} />
+              <IntegrationIcon integration={integrationDetails?.integration} />
             </div>
           </EuiFlexGroup>
           <p>
