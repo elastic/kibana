@@ -163,7 +163,7 @@ export async function installBuiltInEntityDefinitions({
   installOnly,
 }: Omit<InstallDefinitionParams, 'definition'> & {
   builtInDefinitions: EntityDefinition[];
-  installOnly: boolean;
+  installOnly?: boolean;
 }): Promise<EntityDefinition[]> {
   if (builtInDefinitions.length === 0) return [];
 
@@ -210,7 +210,7 @@ export async function installBuiltInEntityDefinitions({
 }
 
 async function installAndStartDefinition(
-  params: InstallDefinitionParams & { installOnly: boolean }
+  params: InstallDefinitionParams & { installOnly?: boolean }
 ) {
   const definition = await installEntityDefinition(params);
   if (!params.installOnly) {
