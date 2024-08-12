@@ -144,12 +144,10 @@ export const initializeDashboard = async ({
   loadDashboardReturn,
   untilDashboardReady,
   creationOptions,
-  controlGroup,
 }: {
   loadDashboardReturn: LoadDashboardReturn;
   untilDashboardReady: () => Promise<DashboardContainer>;
   creationOptions?: DashboardCreationOptions;
-  controlGroup?: ControlGroupContainer;
 }) => {
   const {
     dashboardBackup,

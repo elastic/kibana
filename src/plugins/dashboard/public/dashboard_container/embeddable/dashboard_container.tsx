@@ -711,7 +711,6 @@ export class DashboardContainer
 
     const initializeResult = await initializeDashboard({
       creationOptions: this.creationOptions,
-      controlGroup: this.controlGroup,
       untilDashboardReady,
       loadDashboardReturn,
     });
@@ -772,7 +771,6 @@ export class DashboardContainer
   public clearOverlays = () => {
     this.dispatch.setHasOverlays(false);
     this.dispatch.setFocusedPanelId(undefined);
-    this.controlGroup?.closeAllFlyouts();
     this.overlayRef?.close();
   };
 
