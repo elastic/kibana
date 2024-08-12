@@ -72,6 +72,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
         timeWindow: `${DEFAULT_TIME_WINDOW}`,
         reopenClosedCases: false,
         groupingBy: [],
+        templateId: null,
       },
     [actionParams.subActionParams]
   );
@@ -99,6 +100,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
           timeWindow: `${DEFAULT_TIME_WINDOW}`,
           reopenClosedCases: false,
           groupingBy: [],
+          templateId: null,
         },
         index
       );
@@ -160,11 +162,9 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     caseFields: null,
   };
 
-  console.log('case_params', { featureId, producerId, owner, configurations });
-
   const onTemplateChange = useCallback(
     ({ key, caseFields }: Pick<CasesConfigurationUITemplate, 'caseFields' | 'key'>) => {
-      // editSubActionProperty('templateId', key === DEFAULT_EMPTY_TEMPLATE_KEY ? null : key);
+      editSubActionProperty('templateId', key === DEFAULT_EMPTY_TEMPLATE_KEY ? null : key);
     },
     [editSubActionProperty]
   );

@@ -37,6 +37,7 @@ describe('CasesConnectorRunParamsSchema', () => {
           "ruleUrl": "https://example.com",
           "tags": Array [],
         },
+        "templateId": null,
         "timeWindow": "7d",
       }
     `);
@@ -191,6 +192,19 @@ describe('CasesConnectorRunParamsSchema', () => {
           maximumCasesToOpen: 11,
         })
       ).toThrow();
+    });
+  });
+
+  describe('templateId', () => {
+    it('defaults the templateId to null', () => {
+      expect(CasesConnectorRunParamsSchema.validate(getParams()).templateId).toBe(null);
+    });
+
+    it('accepts templateId as string', () => {
+      expect(
+        CasesConnectorRunParamsSchema.validate(getParams({ templateId: 'case_template_key' }))
+          .templateId
+      ).toBe('case_template_key');
     });
   });
 });

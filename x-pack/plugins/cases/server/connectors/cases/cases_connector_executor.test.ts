@@ -81,6 +81,7 @@ describe('CasesConnectorExecutor', () => {
     timeWindow,
     reopenClosedCases,
     maximumCasesToOpen: 5,
+    templateId: null,
   };
 
   beforeEach(() => {

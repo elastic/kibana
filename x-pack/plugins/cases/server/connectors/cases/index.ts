@@ -99,6 +99,7 @@ export const getCasesConnectorAdapter = (): ConnectorAdapter<
         reopenClosedCases: params.subActionParams.reopenClosedCases,
         timeWindow: params.subActionParams.timeWindow,
         maximumCasesToOpen: DEFAULT_MAX_OPEN_CASES,
+        templateId: params.subActionParams.templateId,
       };
 
       return { subAction: 'run', subActionParams };

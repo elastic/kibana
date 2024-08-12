@@ -15,14 +15,18 @@ import { useApplication } from '../../../common/lib/kibana/use_application';
 import { CasesParamsFields } from './cases_params';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
+import { useGetAllCaseConfigurations } from '../../../containers/configure/use_get_all_case_configurations';
+import { useGetAllCaseConfigurationsResponse } from '../../configure_cases/__mock__';
 
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view');
 jest.mock('../../../common/lib/kibana/use_application');
 jest.mock('../../../common/lib/kibana/kibana_react');
+jest.mock('../../../containers/configure/use_get_all_case_configurations');
 
 const useKibanaMock = jest.mocked(useKibana);
 const useAlertsDataViewMock = jest.mocked(useAlertsDataView);
 const useApplicationMock = useApplication as jest.Mock;
+const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as jest.Mock;
 
 useKibanaMock.mockReturnValue({
   services: { ...createStartServicesMock(), data: { dataViews: {} } },
@@ -79,6 +83,7 @@ describe('CasesParamsFields renders', () => {
         ],
       },
     });
+    useGetAllCaseConfigurationsMock.mockImplementation(() => useGetAllCaseConfigurationsResponse);
   });
 
   it('all params fields are rendered', async () => {
@@ -87,6 +92,7 @@ describe('CasesParamsFields renders', () => {
     expect(await screen.findByTestId('group-by-alert-field-combobox')).toBeInTheDocument();
     expect(await screen.findByTestId('time-window-size-input')).toBeInTheDocument();
     expect(await screen.findByTestId('time-window-unit-select')).toBeInTheDocument();
+    expect(await screen.findByTestId('create-case-template-select')).toBeInTheDocument();
     expect(await screen.findByTestId('reopen-case')).toBeInTheDocument();
   });
 
@@ -127,6 +133,7 @@ describe('CasesParamsFields renders', () => {
       timeWindow: '7d',
       reopenClosedCases: false,
       groupingBy: [],
+      templateId: null,
     });
   });
 
