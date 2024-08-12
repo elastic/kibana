@@ -27,7 +27,7 @@ import { ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID } from '../../../constants';
 import type { ConfigSchema } from '../../../plugin';
 import { getRenderCellValue } from '../common/render_cell_value';
 import { getColumns } from '../common/get_columns';
-import { getPersistentControlsHook } from './get_peristent_controls';
+import { getPersistentControlsHook } from './get_persistent_controls';
 
 export const getAlertsPageTableConfiguration = (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,

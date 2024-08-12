@@ -35,20 +35,19 @@ export const getPersistentControlsHook =
     const onGroupChange = useCallback(
       (selectedGroups: string[]) => {
         updateGrouping({
-          activeGroups: grouping.activeGroups.filter((g) => g !== 'none').concat(selectedGroups),
+          activeGroups:
+            grouping.activeGroups?.filter((g) => g !== 'none').concat(selectedGroups) ?? [],
         });
       },
       [grouping, updateGrouping]
     );
 
-    const { dataViews: alertDataViews } = useAlertsDataView({
+    const { dataView } = useAlertsDataView({
       featureIds,
       dataViewsService: dataViews,
       http,
       toasts: notifications.toasts,
     });
-
-    const dataView = useMemo(() => alertDataViews?.[0], [alertDataViews]);
 
     const groupSelector = useGetGroupSelectorStateless({
       groupingId,
