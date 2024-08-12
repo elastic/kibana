@@ -66,8 +66,8 @@ describe('mergeSourceMonitor', () => {
     ]);
   });
 
-  it('should omit null or undefined values', () => {
-    const result = mapSavedObjectToMonitor({ attributes: testMonitor } as any);
+  it('should not omit null or undefined values', () => {
+    const result = mapSavedObjectToMonitor({ monitor: { attributes: testMonitor } } as any);
 
     expect(result).toEqual({
       __ui: {
@@ -108,6 +108,7 @@ describe('mergeSourceMonitor', () => {
       origin: 'project',
       original_space: 'default',
       project_id: 'test-projects',
+      proxy_url: '',
       'response.include_body': 'on_error',
       'response.include_body_max_bytes': '1024',
       'response.include_headers': true,
@@ -116,11 +117,16 @@ describe('mergeSourceMonitor', () => {
         number: '3',
         unit: 'm',
       },
+      'service.name': '',
+      'ssl.certificate': '',
+      'ssl.certificate_authorities': '',
       'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
       'ssl.verification_mode': 'full',
+      tags: [],
       timeout: '16',
       type: 'http',
       url: '${devUrl}',
+      'url.port': null,
     });
   });
 });

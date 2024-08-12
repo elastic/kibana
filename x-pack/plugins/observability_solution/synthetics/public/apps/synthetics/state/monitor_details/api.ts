@@ -8,10 +8,10 @@
 import moment from 'moment';
 import { apiService } from '../../../../utils/api_service';
 import {
-  EncryptedSyntheticsSavedMonitor,
   EncryptedSyntheticsMonitorCodec,
   PingsResponse,
   PingsResponseType,
+  SyntheticsMonitor,
 } from '../../../../../common/runtime_types';
 import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
@@ -67,11 +67,13 @@ export const fetchSyntheticsMonitor = async ({
   monitorId,
 }: {
   monitorId: string;
-}): Promise<EncryptedSyntheticsSavedMonitor> =>
-  apiService.get<EncryptedSyntheticsSavedMonitor>(
+}): Promise<SyntheticsMonitor> => {
+  return apiService.get<SyntheticsMonitor>(
     SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId),
     {
+      ui: true,
       version: INITIAL_REST_VERSION,
     },
     EncryptedSyntheticsMonitorCodec
   );
+};

@@ -24,9 +24,9 @@ import { getMonitorAction } from '../../../state';
 import { LocationsStatus } from '../../monitor_details/monitor_summary/locations_status';
 import {
   ConfigKey,
-  EncryptedSyntheticsSavedMonitor,
   MonitorFields,
   Ping,
+  SyntheticsMonitor,
 } from '../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from './monitor_type_badge';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
@@ -35,7 +35,7 @@ export interface MonitorDetailsPanelProps {
   latestPing?: Ping;
   loading: boolean;
   configId: string;
-  monitor: EncryptedSyntheticsSavedMonitor | null;
+  monitor: SyntheticsMonitor | null;
   hideEnabled?: boolean;
   hideLocations?: boolean;
   hasBorder?: boolean;

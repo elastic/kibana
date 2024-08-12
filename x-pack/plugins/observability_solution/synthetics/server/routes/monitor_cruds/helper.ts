@@ -6,7 +6,7 @@
  */
 
 import { SavedObject } from '@kbn/core/server';
-import { mergeWith, omit, omitBy } from 'lodash';
+import { mergeWith, omit } from 'lodash';
 import {
   ConfigKey,
   EncryptedSyntheticsMonitor,
@@ -24,7 +24,7 @@ const keysToOmit = [
 
 type Result = MonitorFields & { url?: string; host?: string; inline_script?: string };
 
-export const transformPublicKeys = (result: Result) => {
+export const transformPublicKeys = (result: Result, ui?: boolean) => {
   if (result[ConfigKey.URLS]) {
     result.url = result[ConfigKey.URLS];
   }
@@ -50,20 +50,24 @@ export const transformPublicKeys = (result: Result) => {
       // ignore
     }
   }
+  if (ui) {
+    return result;
+  }
   return omit(result, keysToOmit) as Result;
 };
 
-export function mapSavedObjectToMonitor(
-  so: SavedObject<MonitorFields | EncryptedSyntheticsMonitor>
-) {
-  let result = Object.assign(so.attributes, {
-    created_at: so.created_at,
-    updated_at: so.updated_at,
+export function mapSavedObjectToMonitor({
+  monitor,
+  ui = false,
+}: {
+  monitor: SavedObject<MonitorFields | EncryptedSyntheticsMonitor>;
+  ui?: boolean;
+}) {
+  const result = Object.assign(monitor.attributes, {
+    created_at: monitor.created_at,
+    updated_at: monitor.updated_at,
   }) as Result;
-  result = transformPublicKeys(result);
-
-  // omit undefined value or null value
-  return omitBy(result, removeMonitorEmptyValues);
+  return transformPublicKeys(result, ui);
 }
 export function mergeSourceMonitor(
   normalizedPreviousMonitor: EncryptedSyntheticsMonitor,
@@ -80,18 +84,4 @@ const customizer = (destVal: any, srcValue: any, key: string) => {
   if (key !== ConfigKey.METADATA) {
     return srcValue;
   }
-};
-
-export const removeMonitorEmptyValues = (v: any) => {
-  // value is falsy
-  return (
-    v === undefined ||
-    v === null ||
-    // value is empty string
-    (typeof v === 'string' && v.trim() === '') ||
-    // is empty array
-    (Array.isArray(v) && v.length === 0) ||
-    // object is has no values
-    (typeof v === 'object' && Object.keys(v).length === 0)
-  );
 };

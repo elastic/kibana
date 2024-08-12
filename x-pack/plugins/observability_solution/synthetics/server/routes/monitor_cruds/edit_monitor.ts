@@ -170,9 +170,13 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         });
       }
 
-      return mapSavedObjectToMonitor(
-        editedMonitorSavedObject as SavedObject<EncryptedSyntheticsMonitorAttributes>
-      );
+      return mapSavedObjectToMonitor({
+        ui: reqQuery.ui,
+        monitor: {
+          ...(editedMonitorSavedObject as SavedObject<EncryptedSyntheticsMonitorAttributes>),
+          created_at: previousMonitor.created_at,
+        },
+      });
     } catch (updateErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(updateErr)) {
         return getMonitorNotFoundResponse(response, monitorId);

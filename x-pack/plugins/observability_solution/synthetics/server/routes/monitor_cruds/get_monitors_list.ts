@@ -39,7 +39,11 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
 
     return {
       ...rest,
-      monitors: savedObjects.map(mapSavedObjectToMonitor),
+      monitors: savedObjects.map((monitor) =>
+        mapSavedObjectToMonitor({
+          monitor,
+        })
+      ),
       absoluteTotal,
       perPage: perPageT,
       syncErrors: syntheticsMonitorClient.syntheticsService.syncErrors,

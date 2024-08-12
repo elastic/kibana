@@ -26,13 +26,14 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         id: schema.maybe(schema.string()),
         preserve_namespace: schema.maybe(schema.boolean()),
         gettingStarted: schema.maybe(schema.boolean()),
+        ui: schema.maybe(schema.boolean()),
       }),
     },
   },
   handler: async (routeContext): Promise<any> => {
     const { request, response, server } = routeContext;
     // usually id is auto generated, but this is useful for testing
-    const { id } = request.query;
+    const { id, ui } = request.query;
 
     const addMonitorAPI = new AddEditMonitorAPI(routeContext);
 
@@ -113,7 +114,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       addMonitorAPI.initDefaultAlerts(newMonitor.attributes.name);
       addMonitorAPI.setupGettingStarted(newMonitor.id);
 
-      return mapSavedObjectToMonitor(newMonitor);
+      return mapSavedObjectToMonitor({ monitor: newMonitor, ui });
     } catch (getErr) {
       server.logger.error(getErr);
       if (getErr instanceof InvalidLocationError) {

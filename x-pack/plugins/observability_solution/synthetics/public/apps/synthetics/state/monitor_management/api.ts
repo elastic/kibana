@@ -11,7 +11,6 @@ import { apiService } from '../../../../utils/api_service';
 import {
   EncryptedSyntheticsMonitor,
   SyntheticsMonitor,
-  SyntheticsMonitorCodec,
   ServiceLocationErrorsResponse,
 } from '../../../../../common/runtime_types';
 import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
@@ -25,6 +24,7 @@ export const createMonitorAPI = async ({
 }): Promise<UpsertMonitorResponse> => {
   return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, monitor, null, {
     version: INITIAL_REST_VERSION,
+    ui: true,
   });
 };
 
@@ -57,16 +57,6 @@ export const updateMonitorAPI = async ({
     version: INITIAL_REST_VERSION,
   });
 };
-
-export const getDecryptedMonitorAPI = async ({ id }: { id: string }): Promise<SyntheticsMonitor> =>
-  apiService.get(
-    SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', id),
-    {
-      decrypted: true,
-      version: INITIAL_REST_VERSION,
-    },
-    SyntheticsMonitorCodec
-  );
 
 export const fetchProjectAPIKey = async (
   accessToElasticManagedLocations: boolean

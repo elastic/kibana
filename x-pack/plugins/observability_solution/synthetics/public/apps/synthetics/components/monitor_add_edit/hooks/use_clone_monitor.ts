@@ -6,13 +6,13 @@
  */
 
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { fetchSyntheticsMonitor } from '../../../state/monitor_details/api';
 import { useGetUrlParams } from '../../../hooks';
-import { getDecryptedMonitorAPI } from '../../../state/monitor_management/api';
 
 export const useCloneMonitor = () => {
   const { cloneId } = useGetUrlParams();
   return useFetcher(() => {
     if (!cloneId) return Promise.resolve(undefined);
-    return getDecryptedMonitorAPI({ id: cloneId });
+    return fetchSyntheticsMonitor({ monitorId: cloneId });
   }, [cloneId]);
 };

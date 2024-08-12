@@ -11,7 +11,6 @@ import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
-  EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -29,16 +28,19 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useTheme, FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { MonitorDetailsPanel } from '../../../common/components/monitor_details_panel';
 import { ClientPluginsStart } from '../../../../../../plugin';
 import { LocationsStatus, useStatusByLocation } from '../../../../hooks/use_status_by_location';
 import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enabled';
 import { ActionsPopover } from './actions_popover';
 import {
+  getMonitorAction,
   selectMonitorUpsertStatus,
   selectOverviewState,
   selectServiceLocationsState,
+  selectSyntheticsMonitor,
+  selectSyntheticsMonitorLoading,
   setFlyoutConfig,
 } from '../../../../state';
 import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
@@ -46,7 +48,6 @@ import { ConfigKey, EncryptedSyntheticsMonitor, MonitorOverviewItem } from '../t
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 import { MonitorStatus } from '../../../common/components/monitor_status';
 import { MonitorLocationSelect } from '../../../common/components/monitor_location_select';
-import { fetchSyntheticsMonitor } from '../../../../state/monitor_details/api';
 
 interface Props {
   configId: string;
@@ -247,21 +248,14 @@ export function MonitorDetailFlyout(props: Props) {
   }, [dispatch]);
 
   const upsertStatus = useSelector(selectMonitorUpsertStatus(configId));
+  const monitorObject = useSelector(selectSyntheticsMonitor);
+  const isLoading = useSelector(selectSyntheticsMonitorLoading);
 
   const upsertSuccess = upsertStatus?.status === 'success';
 
-  const {
-    data: monitorObject,
-    error,
-    status,
-    loading,
-  } = useFetcher(
-    () => fetchSyntheticsMonitor({ monitorId: configId }),
-    // FIXME: Dario thinks there is a better way to do this but
-    // he's getting tired and maybe the Synthetics folks can fix it
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [configId, upsertSuccess]
-  );
+  useEffect(() => {
+    dispatch(getMonitorAction.get({ monitorId: configId }));
+  }, [configId, dispatch, upsertSuccess]);
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
@@ -280,9 +274,8 @@ export function MonitorDetailFlyout(props: Props) {
       onClose={props.onClose}
       paddingSize="none"
     >
-      {status === FETCH_STATUS.FAILURE && <EuiErrorBoundary>{error?.message}</EuiErrorBoundary>}
-      {status === FETCH_STATUS.LOADING && <LoadingState />}
-      {status === FETCH_STATUS.SUCCESS && monitorObject && (
+      {isLoading && <LoadingState />}
+      {monitorObject && (
         <>
           <EuiFlyoutHeader hasBorder>
             <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
@@ -329,7 +322,7 @@ export function MonitorDetailFlyout(props: Props) {
                 ...monitorObject,
                 id,
               }}
-              loading={Boolean(loading)}
+              loading={Boolean(isLoading)}
             />
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
