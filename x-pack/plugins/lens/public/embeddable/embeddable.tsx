@@ -792,7 +792,7 @@ export class Embeddable
         ...viz.state.datasourceStates,
         [activeDatasourceId]: datasourceState,
       };
-      const references = extractReferencesFromState({
+      const references = activeDatasourceId === 'formBased' ? extractReferencesFromState({
         activeDatasources: Object.keys(datasourceStates).reduce(
           (acc, datasourceId) => ({
             ...acc,
@@ -807,7 +807,7 @@ export class Embeddable
         activeVisualization: this.activeVisualizationId
           ? this.deps.visualizationMap[visualizationType ?? this.activeVisualizationId]
           : undefined,
-      });
+      }) : [];
       const attrs = {
         ...viz,
         state: {

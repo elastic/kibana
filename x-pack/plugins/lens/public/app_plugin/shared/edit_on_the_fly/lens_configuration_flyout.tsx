@@ -239,6 +239,8 @@ export function LensEditConfigurationFlyout({
     onCancelCb,
   ]);
 
+  const textBasedMode = useMemo(() => isOfAggregateQueryType(query) ? getAggregateQueryMode(query) : undefined, [query]);
+
   const onApply = useCallback(() => {
     const dsStates = Object.fromEntries(
       Object.entries(datasourceStates).map(([id, ds]) => {
@@ -246,7 +248,8 @@ export function LensEditConfigurationFlyout({
         return [id, dsState];
       })
     );
-    const references = extractReferencesFromState({
+    // as ES|QL queries are using adHoc dataviews, we don't want to pass references
+    const references = !textBasedMode ? extractReferencesFromState({
       activeDatasources: Object.keys(datasourceStates).reduce(
         (acc, id) => ({
           ...acc,
@@ -257,7 +260,7 @@ export function LensEditConfigurationFlyout({
       datasourceStates,
       visualizationState: visualization.state,
       activeVisualization,
-    });
+    }): [];
     const attrs = {
       ...attributes,
       state: {
@@ -384,8 +387,6 @@ export function LensEditConfigurationFlyout({
     visualization.state,
     getUserMessages,
   ]);
-
-  const textBasedMode = isOfAggregateQueryType(query) ? getAggregateQueryMode(query) : undefined;
 
   if (isLoading) return null;
   // Example is the Discover editing where we dont want to render the text based editor on the panel, neither the suggestions (for now)
