@@ -222,8 +222,16 @@ export const getArtifactsListTestsData = () => [
           selector: 'fieldAutocompleteComboBox',
         },
         {
+          type: 'wait',
+          selector: '1000',
+        },
+        {
           type: 'customClick',
           selector: 'agent.ephemeral_id',
+        },
+        {
+          type: 'wait',
+          selector: '1500',
         },
         {
           type: 'click',

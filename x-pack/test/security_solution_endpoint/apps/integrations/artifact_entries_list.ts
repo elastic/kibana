@@ -148,24 +148,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       actions:
         | ArtifactActionsType['create']['formFields']
         | ArtifactActionsType['update']['formFields'],
-      suffix?: string,
-      byText?: boolean,
-      waitABit?: boolean
+      suffix?: string
     ) => {
       for (const formAction of actions) {
         if (formAction.type === 'customClick') {
-          if (waitABit) {
-            await new Promise((resolve) => setTimeout(resolve, 500));
-          }
-
-          if (byText) {
-            await find.clickByButtonText(formAction.selector, undefined, testSubjects.FIND_TIME);
-          } else {
-            await find.clickByCssSelector(
-              `button[title="${formAction.selector}"]`,
-              testSubjects.FIND_TIME
-            );
-          }
+          await find.clickByCssSelector(
+            `button[title="${formAction.selector}"]`,
+            testSubjects.FIND_TIME
+          );
         } else if (formAction.type === 'click') {
           await testSubjects.click(formAction.selector);
         } else if (formAction.type === 'input') {
@@ -180,6 +170,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await (
             await (await testSubjects.find(formAction.selector)).findByCssSelector('button')
           ).click();
+        } else if (formAction.type === 'wait') {
+          await new Promise((resolve) => setTimeout(resolve, +formAction.selector));
         }
       }
     };
@@ -212,12 +204,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await testSubjects.click(`${actions.pagePrefix}-emptyState-addButton`);
         }
 
-        await performActions(
-          actions.create.formFields,
-          options?.suffix,
-          options?.byText,
-          options?.waitABit
-        );
+        await performActions(actions.create.formFields, options?.suffix);
 
         if (options?.policyId) {
           await testSubjects.click(`${actions.pageObject}-form-effectedPolicies-perPolicy`);
@@ -300,15 +287,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it.only('flaky test for clicking by css selector', async () => {
           await createArtifact(testData, { policyId: policyInfo.packagePolicy.id });
         });
-        // eslint-disable-next-line ban/ban
-        it.only('flaky test for clicking by text', async () => {
-          await createArtifact(testData, { policyId: policyInfo.packagePolicy.id, byText: true });
-        });
-        // eslint-disable-next-line ban/ban
-        it.only('flaky test for some wait', async () => {
-          await createArtifact(testData, { policyId: policyInfo.packagePolicy.id, waitABit: true });
-        });
-
         // eslint-disable-next-line ban/ban
         it.only('fail so logs are reported', () => {
           expect(2 * 2).to.equal(5);
