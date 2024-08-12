@@ -28,7 +28,7 @@ export const dashboardReadonlyBadge = {
 export const dashboardManagedBadge = {
   getText: () =>
     i18n.translate('dashboard.badge.managed.tooltip', {
-      defaultMessage: 'Elastic manages this dashboard. Duplicate it to make changes.',
+      defaultMessage: 'Elastic manages this dashboard.',
     }),
   getManagedText: () =>
     i18n.translate('dashboard.managedContentBadge.text', {
@@ -36,7 +36,11 @@ export const dashboardManagedBadge = {
     }),
   getDuplicateText: () =>
     i18n.translate('dashboard.managedContentPopoverFooterText', {
-      defaultMessage: 'Duplicate this dashboard',
+      defaultMessage: 'Duplicate this dashboard to make changes',
+    }),
+  getAriaLabel: () =>
+    i18n.translate('dashboard.managedContentBadge.ariaLabel', {
+      defaultMessage: 'Click the badge to duplicate the managed dashboard',
     }),
 };
 
