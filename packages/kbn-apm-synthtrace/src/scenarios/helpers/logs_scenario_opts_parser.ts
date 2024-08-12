@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { parseStringToBoolean } from './parser_helpers';
+export const parseStringToBoolean = (value: string): boolean => /true/i.test(value);
 
 export interface LogsScenarioOpts {
   isLogsDb: boolean;

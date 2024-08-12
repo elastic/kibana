@@ -21,8 +21,7 @@ import { Logger } from '../lib/utils/create_logger';
 import { withClient } from '../lib/utils/with_client';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import logsScenarioBase from './logs_scenario_base';
-import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
-import { parseStringToBoolean } from './helpers/parser_helpers';
+import { parseLogsScenarioOpts, parseStringToBoolean } from './helpers/logs_scenario_opts_parser';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
