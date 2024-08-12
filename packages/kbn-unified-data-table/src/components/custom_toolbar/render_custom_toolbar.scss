@@ -55,11 +55,11 @@
       animation: none !important;
       transform: none !important;
     }
+  }
 
-    .unifiedDataTableToolbarControlIconButton + & {
-      border-inline-start: $euiBorderThin;
-      border-radius: 0;
-    }
+  .unifiedDataTableToolbarControlIconButton + .unifiedDataTableToolbarControlIconButton {
+    border-inline-start: $euiBorderThin;
+    border-radius: 0;
   }
 
   .unifiedDataTableToolbarBottom {

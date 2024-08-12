@@ -192,6 +192,7 @@ export const commandDefinitions: CommandDefinition[] = [
   },
   {
     name: 'metrics',
+    hidden: true,
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.metricsDoc', {
       defaultMessage:
         'A metrics-specific source command, use this command to load data from TSDB indices. ' +
