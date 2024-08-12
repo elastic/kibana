@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ControlGroupRuntimeState } from '../../react_controls/control_group/types';
+import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 
 const RUNTIME_STATE_SESSION_STORAGE_KEY =
   'kibana.examples.controls.reactControlExample.controlGroupRuntimeState';
