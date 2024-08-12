@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -21,14 +20,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('should show the show API request button and click it', async () => {
+    it('click show API request button and flyout should appear in page', async () => {
+      // const flyoutHeader = await testSubjects.find('painlessLabRequestFlyoutHeader');
       await testSubjects.click('btnViewRequest');
-    });
 
-    it('flyout should appear in page', async () => {
-      const flyoutHeader = await testSubjects.find('flyoutHeader');
-
-      expect(await flyoutHeader.isDisplayed()).to.be(true);
+      await testSubjects.existOrFail('painlessLabRequestFlyoutHeader', { timeout: 10 * 1000 });
     });
   });
 }
