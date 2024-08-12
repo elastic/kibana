@@ -13,10 +13,10 @@ export const searchTerms = [
   'not',
   'warn',
   'err',
-  'crit',
+  'cri',
   'sev',
   'ale',
-  'emerg',
+  'emer',
   'fatal',
 ];
 
