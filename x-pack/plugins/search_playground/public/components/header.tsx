@@ -87,7 +87,7 @@ export const Header: React.FC<HeaderProps> = ({
               data-test-subj="page-mode-select"
               options={[
                 { value: 'chat', text: 'Chat' },
-                { value: 'query_builder', text: 'Search' },
+                { value: 'search', text: 'Search' },
               ]}
               value={selectedPageMode}
               onChange={(e) => onSelectPageModeChange(e.target.value as PlaygroundPageMode)}

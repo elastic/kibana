@@ -8,9 +8,3 @@
 export const PLUGIN_ID = 'searchPlayground';
 export const PLUGIN_NAME = 'Playground';
 export const PLUGIN_PATH = '/app/search_playground';
-
-/**
- * UI Setting id for the Search Playground feature flag
- */
-export const SEARCH_PLAYGROUND_QUERY_BUILDER_FEATURE_FLAG_ID =
-  'searchPlayground:queryBuilderEnabled';

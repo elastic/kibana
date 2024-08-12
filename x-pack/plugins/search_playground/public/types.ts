@@ -28,7 +28,10 @@ import { PlaygroundHeaderDocs } from './components/playground_header_docs';
 
 export * from '../common/types';
 
-export type PlaygroundPageMode = 'chat' | 'query_builder';
+export enum PlaygroundPageMode {
+  chat = 'chat',
+  search = 'search',
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchPlaygroundPluginSetup {}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { useWatch } from 'react-hook-form';
@@ -16,8 +16,8 @@ import { useLoadConnectors } from '../hooks/use_load_connectors';
 import { ChatForm, ChatFormFields, PlaygroundPageMode } from '../types';
 import { Chat } from './chat';
 import { SearchMode } from './search_mode/search_mode';
-import { QueryBuilderSetupPage } from './setup_page/query_builder_setup_page';
-import { QueryBuilderMode } from './query_builder_mode/query_builder_mode';
+import { SearchPlaygroundSetupPage } from './setup_page/search_playground_setup_page';
+import { usePageMode } from '../hooks/use_page_mode';
 
 export interface AppProps {
   showDocs?: boolean;
@@ -29,39 +29,35 @@ export enum ViewMode {
   query = 'query',
 }
 
-export const App: React.FC<AppProps> = ({ showDocs = false, pageMode = 'chat' }) => {
-  const [showSetupPage, setShowSetupPage] = useState(true);
+export const App: React.FC<AppProps> = ({
+  showDocs = false,
+  pageMode = PlaygroundPageMode.chat,
+}) => {
   const [selectedMode, setSelectedMode] = useState<ViewMode>(ViewMode.chat);
-  const [selectedPageMode, setSelectedPageMode] = useState<PlaygroundPageMode>(pageMode);
   const { data: connectors } = useLoadConnectors();
-  const hasSelectedIndices = useWatch<ChatForm, ChatFormFields.indices>({
-    name: ChatFormFields.indices,
-  }).length;
+  const hasSelectedIndices = Boolean(
+    useWatch<ChatForm, ChatFormFields.indices>({
+      name: ChatFormFields.indices,
+    }).length
+  );
   const handleModeChange = (id: ViewMode) => setSelectedMode(id);
   const handlePageModeChange = (mode: PlaygroundPageMode) => setSelectedPageMode(mode);
-
-  useEffect(() => {
-    if (selectedPageMode === 'chat') {
-      if (showSetupPage && connectors?.length && hasSelectedIndices) {
-        setShowSetupPage(false);
-      } else if (!showSetupPage && (!connectors?.length || !hasSelectedIndices)) {
-        setShowSetupPage(true);
-      }
-    } else {
-      if (showSetupPage && hasSelectedIndices) {
-        setShowSetupPage(false);
-      } else if (!showSetupPage && !hasSelectedIndices) {
-        setShowSetupPage(true);
-      }
-    }
-  }, [connectors, hasSelectedIndices, showSetupPage, selectedPageMode]);
+  const {
+    showSetupPage,
+    pageMode: selectedPageMode,
+    setPageMode: setSelectedPageMode,
+  } = usePageMode({
+    hasSelectedIndices,
+    hasConnectors: Boolean(connectors?.length),
+    initialPageMode: pageMode,
+  });
 
   const getSetupPage = () => {
     return (
       showSetupPage && (
         <>
-          {selectedPageMode === 'chat' && <ChatSetupPage />}
-          {selectedPageMode === 'query_builder' && <QueryBuilderSetupPage />}
+          {selectedPageMode === PlaygroundPageMode.chat && <ChatSetupPage />}
+          {selectedPageMode === PlaygroundPageMode.search && <SearchPlaygroundSetupPage />}
         </>
       )
     );
@@ -69,10 +65,10 @@ export const App: React.FC<AppProps> = ({ showDocs = false, pageMode = 'chat' })
   const getQueryBuilderPage = () => {
     return (
       !showSetupPage &&
-      selectedPageMode === 'query_builder' && (
+      selectedPageMode === PlaygroundPageMode.search && (
         <>
           {selectedMode === ViewMode.chat && <SearchMode />}
-          {selectedMode === ViewMode.query && <QueryBuilderMode />}
+          {selectedMode === ViewMode.query && <QueryMode />}
         </>
       )
     );
@@ -80,7 +76,7 @@ export const App: React.FC<AppProps> = ({ showDocs = false, pageMode = 'chat' })
   const getChatPage = () => {
     return (
       !showSetupPage &&
-      selectedPageMode === 'chat' && (
+      selectedPageMode === PlaygroundPageMode.chat && (
         <>
           {selectedMode === ViewMode.chat && <Chat />}
           {selectedMode === ViewMode.query && <QueryMode />}
@@ -102,7 +98,7 @@ export const App: React.FC<AppProps> = ({ showDocs = false, pageMode = 'chat' })
       <KibanaPageTemplate.Section
         alignment="top"
         restrictWidth={
-          selectedPageMode === 'query_builder' && selectedMode === 'chat' ? true : false
+          selectedPageMode === PlaygroundPageMode.search && selectedMode === 'chat' ? true : false
         }
         grow
         css={{
@@ -110,7 +106,7 @@ export const App: React.FC<AppProps> = ({ showDocs = false, pageMode = 'chat' })
         }}
         contentProps={{ css: { display: 'flex', flexGrow: 1, position: 'absolute', inset: 0 } }}
         paddingSize={
-          selectedPageMode === 'query_builder' && selectedMode === 'chat' ? 'xl' : 'none'
+          selectedPageMode === PlaygroundPageMode.search && selectedMode === 'chat' ? 'xl' : 'none'
         }
         className="eui-fullHeight"
       >

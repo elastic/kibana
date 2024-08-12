@@ -21,7 +21,7 @@ import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { AddDataSources } from './add_data_sources';
 
-export const QueryBuilderSetupPage: React.FC = () => {
+export const SearchPlaygroundSetupPage: React.FC = () => {
   const usageTracker = useUsageTracker();
   const { isLoading: isIndicesLoading } = useQueryIndices();
 

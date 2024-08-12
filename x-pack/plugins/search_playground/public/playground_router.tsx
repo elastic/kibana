@@ -8,15 +8,11 @@
 import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { ChatPlaygroundOverview } from './chat_playground_overview';
-import { QueryBuilderOverview } from './query_builder_overview';
+import { PlaygroundOverview } from './playground_overview';
 
-import {
-  ROOT_PATH,
-  SEARCH_PLAYGROUND_CHAT_PATH,
-  SEARCH_PLAYGROUND_QUERY_BUILDER_PATH,
-} from './routes';
+import { ROOT_PATH, SEARCH_PLAYGROUND_CHAT_PATH, SEARCH_PLAYGROUND_SEARCH_PATH } from './routes';
 import { useKibana } from './hooks/use_kibana';
+import { PlaygroundPageMode } from './types';
 
 export const PlaygroundRouter: React.FC = () => {
   const {
@@ -27,11 +23,11 @@ export const PlaygroundRouter: React.FC = () => {
     <Routes>
       <Redirect exact from={ROOT_PATH} to={SEARCH_PLAYGROUND_CHAT_PATH} />
       <Route path={SEARCH_PLAYGROUND_CHAT_PATH}>
-        <ChatPlaygroundOverview />
+        <PlaygroundOverview pageMode={PlaygroundPageMode.chat} />
       </Route>
       {featureFlags.searchPlaygroundEnabled && (
-        <Route path={SEARCH_PLAYGROUND_QUERY_BUILDER_PATH}>
-          <QueryBuilderOverview />
+        <Route path={SEARCH_PLAYGROUND_SEARCH_PATH}>
+          <PlaygroundOverview pageMode={PlaygroundPageMode.search} />
         </Route>
       )}
     </Routes>

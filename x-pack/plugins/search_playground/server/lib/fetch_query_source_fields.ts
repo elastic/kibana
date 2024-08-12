@@ -75,6 +75,7 @@ export const fetchFields = async (
   client: IScopedClusterClient,
   indices: string[]
 ): Promise<IndicesQuerySourceFields> => {
+  console.log('efe - fetching fields');
   const fieldCapabilities = await client.asCurrentUser.fieldCaps({
     fields: '*',
     filters: '-metadata',
@@ -82,7 +83,10 @@ export const fetchFields = async (
     index: indices,
   });
 
+  console.log('efe - why do I do this');
   const modelIdFields = getModelIdFields(fieldCapabilities);
+
+  console.log('efe - models are in', modelIdFields);
 
   const indicesAggsMappings = await Promise.all(
     indices.map(async (index) => ({
@@ -109,7 +113,11 @@ export const fetchFields = async (
     }))
   );
 
-  return parseFieldsCapabilities(fieldCapabilities, indicesAggsMappings);
+  console.log('efe - mappings are in', indicesAggsMappings);
+
+  const capabilities = parseFieldsCapabilities(fieldCapabilities, indicesAggsMappings);
+  console.log('efe - capabilities are in', indicesAggsMappings);
+  return capabilities;
 };
 
 const INFERENCE_MODEL_FIELD_REGEXP = /\.predicted_value|\.tokens/;
