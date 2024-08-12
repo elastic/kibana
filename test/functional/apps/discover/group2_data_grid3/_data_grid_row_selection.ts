@@ -204,7 +204,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const clipboardData = await browser.execute(() => navigator.clipboard.readText());
       expect(
         clipboardData.startsWith(
-          '"\'@timestamp"\t "\'@message"\t "\'@message.raw"\t "\'@tags"\t "\'@tags.raw"\t "_id"'
+          '"\'@timestamp"\t"\'@message"\t"\'@message.raw"\t"\'@tags"\t"\'@tags.raw"\t"_id"'
         )
       ).to.be(true);
     });
@@ -234,7 +234,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const clipboardData = await browser.execute(() => navigator.clipboard.readText());
       expect(clipboardData).to.be(
-        '"\'@timestamp"\t extension\t bytes\n"Sep 22, 2015 @ 23:50:13.253"\t jpg\t "7,124"\n"Sep 22, 2015 @ 23:43:58.175"\t jpg\t "5,453"'
+        '"\'@timestamp"\textension\tbytes\n"Sep 22, 2015 @ 23:50:13.253"\tjpg\t"7,124"\n"Sep 22, 2015 @ 23:43:58.175"\tjpg\t"5,453"'
       );
     });
   });

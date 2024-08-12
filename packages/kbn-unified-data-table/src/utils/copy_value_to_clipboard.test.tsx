@@ -165,7 +165,7 @@ describe('copyValueToClipboard', () => {
       valueToStringConverter,
     });
 
-    const output = '"bool_enabled"\t "keyword_key"\nfalse\t abcd1';
+    const output = '"bool_enabled"\t"keyword_key"\nfalse\tabcd1';
     expect(result).toBe(output);
     expect(global.window.navigator.clipboard.writeText).toHaveBeenCalledWith(output);
     expect(servicesMock.toastNotifications.addInfo).toHaveBeenCalledWith({
@@ -184,7 +184,7 @@ describe('copyValueToClipboard', () => {
       valueToStringConverter,
     });
 
-    const output = '"bool_enabled"\t "scripted_string"\nfalse\t "hi there"\ntrue\t "\'=1+2"";=1+2"';
+    const output = '"bool_enabled"\t"scripted_string"\nfalse\t"hi there"\ntrue\t"\'=1+2"";=1+2"';
     expect(result).toBe(output);
     expect(servicesMock.toastNotifications.addWarning).toHaveBeenCalledWith({
       title: 'Copied to clipboard',
