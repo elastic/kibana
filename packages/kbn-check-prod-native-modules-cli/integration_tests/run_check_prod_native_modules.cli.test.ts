@@ -27,7 +27,7 @@ describe('checkProdNativeModules', () => {
 
   it('should return false when no native modules are found', async () => {
     // Use a fixture without native modules
-    const noNativeModulesDir = path.join(fixturesDir, 'no-native-modules');
+    const noNativeModulesDir = path.join(fixturesDir, 'no_native_modules');
     const noNativeModulesPkgJsonPath = path.join(noNativeModulesDir, 'package.json');
     jest.spyOn(process, 'cwd').mockReturnValue(noNativeModulesDir);
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -49,7 +49,7 @@ describe('checkProdNativeModules', () => {
 
   it('should return true and log errors when native modules are found', async () => {
     // Use a fixture with native modules
-    const withNativeModulesDir = path.join(fixturesDir, 'with-native-modules');
+    const withNativeModulesDir = path.join(fixturesDir, 'with_native_modules');
     const withNativeModulesPkgJsonPath = path.join(withNativeModulesDir, 'package.json');
     jest.spyOn(process, 'cwd').mockReturnValue(withNativeModulesDir);
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -74,7 +74,7 @@ describe('checkProdNativeModules', () => {
 
   it('should throw an error when root node_modules folder is not found', async () => {
     // Use a fixture without node_modules
-    const noNodeModulesDir = path.join(fixturesDir, 'no-node-modules');
+    const noNodeModulesDir = path.join(fixturesDir, 'no_node_modules');
     const noNodeModulesPkgJsonPath = path.join(noNodeModulesDir, 'package.json');
     jest.spyOn(process, 'cwd').mockReturnValue(noNodeModulesDir);
 
