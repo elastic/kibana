@@ -17,7 +17,7 @@ import type {
 } from '../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import type { RuleAlertType } from '../../../rule_schema';
-import { isIndexPatternsBulkEditAction } from './utils';
+import { isIndexPatternsBulkEditAction, isAlertSuppressionBulkEditAction } from './utils';
 import { throwDryRunError } from './dry_run';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
@@ -140,6 +140,7 @@ export const dryRunValidateBulkEditRule = async ({
   rule,
   edit,
   mlAuthz,
+  experimentalFeatures,
 }: DryRunBulkEditBulkActionsValidationArgs) => {
   await validateBulkEditRule({
     ruleType: rule.params.type,
@@ -168,5 +169,16 @@ export const dryRunValidateBulkEditRule = async ({
         "ES|QL rule doesn't have index patterns"
       ),
     BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN
+  );
+
+  // check whether "alert suppression" feature is enabled
+  await throwDryRunError(
+    () =>
+      invariant(
+        experimentalFeatures.bulkEditAlertSuppressionEnabled ||
+          !edit.some((action) => isAlertSuppressionBulkEditAction(action.type)),
+        'Bulk alert_suppression action feature is disabled.'
+      ),
+    BulkActionsDryRunErrCode.ALERT_SUPPRESSION_FEATURE
   );
 };

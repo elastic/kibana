@@ -14,6 +14,7 @@ import type {
   BulkActionEditForRuleParams,
   BulkActionEditPayloadIndexPatterns,
   BulkActionEditPayloadInvestigationFields,
+  BulkActionEditPayloadAlertSuppression,
 } from '../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import { invariant } from '../../../../../../common/utils/invariant';
@@ -101,6 +102,33 @@ const shouldSkipInvestigationFieldsBulkAction = (
 
   if (action.type === BulkActionEditTypeEnum.delete_investigation_fields) {
     return hasNoInvestigationFields(investigationFields, action);
+  }
+
+  return false;
+};
+
+// Check if Group by fields already exist in rule
+const hasAlertSuppressionGroupByFields = (
+  groupByFields: string[] | undefined,
+  action: BulkActionEditPayloadAlertSuppression
+) => action.value.group_by.every((field) => groupByFields?.includes(field));
+
+// Check if Group by fields do not exist in rule
+const hasNoAlertSuppressionGroupByFields = (
+  groupByFields: string[] | undefined,
+  action: BulkActionEditPayloadAlertSuppression
+) => action.value.group_by.every((field) => !groupByFields?.includes(field));
+
+const shouldSkipAlertSuppressionFieldsBulkAction = (
+  groupByFields: string[] | undefined,
+  action: BulkActionEditPayloadAlertSuppression
+) => {
+  if (action.type === BulkActionEditTypeEnum.add_alert_suppression) {
+    return hasAlertSuppressionGroupByFields(groupByFields, action);
+  }
+
+  if (action.type === BulkActionEditTypeEnum.delete_alert_suppression) {
+    return hasNoAlertSuppressionGroupByFields(groupByFields, action);
   }
 
   return false;
@@ -236,6 +264,62 @@ const applyBulkActionEditToRuleParams = (
       break;
     }
     case BulkActionEditTypeEnum.set_investigation_fields: {
+      if (shouldSkipInvestigationFieldsBulkAction(ruleParams.investigationFields, action)) {
+        isActionSkipped = true;
+        break;
+      }
+
+      ruleParams.investigationFields = action.value;
+      break;
+    }
+    // alert suppression actions
+    case BulkActionEditTypeEnum.add_alert_suppression: {
+      invariant(
+        ruleParams.type !== 'threshold',
+        "Threshold rule can't be updated. It does not have Suppressed by fields in configuration"
+      );
+
+      if (
+        shouldSkipAlertSuppressionFieldsBulkAction(ruleParams?.alertSuppression?.groupBy, action)
+      ) {
+        isActionSkipped = true;
+        break;
+      }
+
+      ruleParams.alertSuppression = {
+        groupBy: addItemsToArray(
+          ruleParams?.alertSuppression?.groupBy ?? [],
+          action.value.group_by
+        ),
+        duration: action.value.duration,
+        missingFieldsStrategy: action.value.missing_fields_strategy,
+      };
+      break;
+    }
+    case BulkActionEditTypeEnum.delete_alert_suppression: {
+      invariant(
+        ruleParams.type !== 'threshold',
+        "Threshold rule can't be updated. It does not have Suppressed by fields in configuration"
+      );
+
+      if (
+        shouldSkipAlertSuppressionFieldsBulkAction(ruleParams?.alertSuppression?.groupBy, action)
+      ) {
+        isActionSkipped = true;
+        break;
+      }
+
+      ruleParams.alertSuppression = {
+        groupBy: deleteItemsFromArray(
+          ruleParams?.alertSuppression?.groupBy ?? [],
+          action.value.group_by
+        ),
+        duration: action.value.duration,
+        missingFieldsStrategy: action.value.missing_fields_strategy,
+      };
+      break;
+    }
+    case BulkActionEditTypeEnum.set_alert_suppression: {
       if (shouldSkipInvestigationFieldsBulkAction(ruleParams.investigationFields, action)) {
         isActionSkipped = true;
         break;
