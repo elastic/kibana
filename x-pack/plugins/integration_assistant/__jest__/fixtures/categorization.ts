@@ -98,7 +98,7 @@ export const categorizationInitialMockedResponse = [
   {
     field: 'event.category',
     value: ['database'],
-    if: "ctx.mysql_enterprise.audit.general_data.sql_command == 'create_db'",
+    if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
   },
 ];
 
@@ -184,7 +184,7 @@ export const categorizationTestState = {
     {
       field: 'event.category',
       value: ['database'],
-      if: "ctx.mysql_enterprise.audit.general_data.sql_command == 'create_db'",
+      if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
     },
   ],
   invalidCategorization: [{ test: 'testinvalid' }],
@@ -201,7 +201,7 @@ export const categorizationMockProcessors = [
   {
     field: 'event.category',
     value: ['database'],
-    if: "ctx.mysql_enterprise.audit.general_data.sql_command == 'create_db'",
+    if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
   },
 ];
 
@@ -227,7 +227,7 @@ export const categorizationExpectedHandlerResponse = {
         append: {
           field: 'event.category',
           value: ['database'],
-          if: "ctx.mysql_enterprise.audit.general_data.sql_command == 'create_db'",
+          if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
           allow_duplicates: false,
         },
       },
@@ -259,7 +259,7 @@ export const categorizationExpectedHandlerResponse = {
     {
       field: 'event.category',
       value: ['database'],
-      if: "ctx.mysql_enterprise.audit.general_data.sql_command == 'create_db'",
+      if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
     },
   ],
   reviewed: false,
