@@ -234,9 +234,7 @@ function recursiveGetSchemaStructure(internalSchema: Schema, path: string[] = []
   if (!array.length) {
     let type: string;
     try {
-      type = [...new Set([getSpecialType(internalSchema, false, path)].flat())]
-        .filter(Boolean)
-        .join('|');
+      type = prettyPrintType(internalSchema, path);
     } catch (error) {
       // failed to find special type, might need to update for new joi versions or type usages
       type = internalSchema.type || 'unknown';
@@ -250,34 +248,53 @@ function recursiveGetSchemaStructure(internalSchema: Schema, path: string[] = []
   return array;
 }
 
-function getSpecialType(
+/**
+ * Returns a more accurate type from complex schema definitions.
+ *
+ * For example, conditional values resolve to type `any` when the nested value is only ever a `string`.
+ *
+ * @param schema
+ * @param path of current schema
+ * @returns schema type
+ */
+function prettyPrintType(
   schema?: SchemaLike,
-  optional = false,
   path: string[] = []
-): string | string[] {
-  if (!isSchema(schema)) {
-    if (schema === null) return 'null';
-    return `${schema ?? 'unknown'}${optional ? '?' : ''}`;
+): string{
+  const prettyPrintTypeParts = (
+    schema?: SchemaLike,
+    optional = false,
+    path: string[] = []
+  ): string | string[]  => {
+    if (!isSchema(schema)) {
+      if (schema === null) return 'null';
+      return `${schema ?? 'unknown'}${optional ? '?' : ''}`;
+    }
+
+    const isOptionalType = optional || schema._flags?.presence === 'optional';
+    // For explicit custom schema.never
+    if (schema._flags?.presence === 'forbidden') return 'never';
+    // For offeringBasedSchema, schema.when, schema.conditional
+    if (schema.$_terms?.whens?.length > 0)
+      return (schema.$_terms.whens as WhenOptions[]).flatMap((when) =>
+        [when?.then, when?.otherwise].flatMap((s) => prettyPrintTypeParts(s, isOptionalType, path))
+      );
+    // schema.oneOf, schema.allOf, etc.
+    if (schema.$_terms?.matches?.length > 0)
+      return (schema.$_terms.matches as CustomHelpers[]).flatMap((s) =>
+        prettyPrintTypeParts(s.schema, isOptionalType, path)
+      );
+    // schema.literal
+    if (schema._flags?.only && (schema as any)._valids?._values?.size > 0)
+      return [...(schema as any)._valids._values.keys()].flatMap((v) =>
+        prettyPrintTypeParts(v, isOptionalType, path)
+      );
+
+    return `${schema?.type || 'unknown'}${isOptionalType ? '?' : ''}`;
   }
 
-  const isOptionalType = optional || schema._flags?.presence === 'optional';
-  // For explicit custom schema.never
-  if (schema._flags?.presence === 'forbidden') return 'never';
-  // For offeringBasedSchema, schema.when, schema.conditional
-  if (schema.$_terms?.whens?.length > 0)
-    return (schema.$_terms.whens as WhenOptions[]).flatMap((when) =>
-      [when?.then, when?.otherwise].flatMap((s) => getSpecialType(s, isOptionalType, path))
-    );
-  // schema.oneOf, schema.allOf, etc.
-  if (schema.$_terms?.matches?.length > 0)
-    return (schema.$_terms.matches as CustomHelpers[]).flatMap((s) =>
-      getSpecialType(s.schema, isOptionalType, path)
-    );
-  // schema.literal
-  if (schema._flags?.only && (schema as any)._valids?._values?.size > 0)
-    return [...(schema as any)._valids._values.keys()].flatMap((v) =>
-      getSpecialType(v, isOptionalType, path)
-    );
-
-  return `${schema?.type || 'unknown'}${isOptionalType ? '?' : ''}`;
+  // takes array of possible values and de-dups and joins
+  return [...new Set([prettyPrintTypeParts(schema, false, path)].flat())]
+    .filter(Boolean)
+    .join('|');
 }
