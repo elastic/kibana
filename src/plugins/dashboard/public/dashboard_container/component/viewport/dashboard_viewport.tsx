@@ -16,7 +16,7 @@ import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 
 import { DashboardGrid } from '../grid';
-import { useDashboardContainer } from '../../embeddable/dashboard_container';
+import { DashboardContainer, useDashboardContainer } from '../../embeddable/dashboard_container';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 import { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
@@ -36,22 +36,27 @@ export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
   return { ref, width };
 };
 
+function getInitialHasControls(dashboard: DashboardContainer) {
+  if (!dashboard.controlGroupInput) {
+    return false;
+  }
+
+  try {
+    const panels = JSON.parse(dashboard.controlGroupInput.panelsJSON);
+    return Object.keys(panels).length > 0;
+  } catch(error) {
+    // ignore parse error, ReactEmbeddableRenderer will surface parse error to user
+    return false;
+  }
+}
+
 export const DashboardViewportComponent = () => {
   const controlsRoot = useRef(null);
 
   const dashboard = useDashboardContainer();
 
-  /**
-   * Render Control group
-   */
-  /*const controlGroup = dashboard.controlGroup;
-  useEffect(() => {
-    if (controlGroup && controlsRoot.current) controlGroup.render(controlsRoot.current);
-  }, [controlGroup]);*/
-
   const panelCount = Object.keys(dashboard.select((state) => state.explicitInput.panels)).length;
-  // TODO update count on children change
-  const [controlsCount, setControlsCount] = useState(0);
+  const [hasControls, setHasControls] = useState(getInitialHasControls(dashboard));
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
   const dashboardTitle = dashboard.select((state) => state.explicitInput.title);
   const useMargins = dashboard.select((state) => state.explicitInput.useMargins);
@@ -66,6 +71,19 @@ export const DashboardViewportComponent = () => {
     'dshDashboardViewport--panelExpanded': Boolean(expandedPanelId),
   });
 
+  useEffect(() => {
+    const controlGroupApi = dashboard.controlGroupApi$.value;
+    if (!controlGroupApi) {
+      return;
+    }
+    const subscription = controlGroupApi.children$.subscribe((children) => {
+      setHasControls(Object.keys(children).length > 0);
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [dashboard.controlGroupApi$]);
+
   return (
     <div
       className={classNames('dshDashboardViewportWrapper', {
@@ -74,7 +92,7 @@ export const DashboardViewportComponent = () => {
     >
       {viewMode !== ViewMode.PRINT ? (
         <div
-          className={controlsCount > 0 ? 'dshDashboardViewport-controls' : ''}
+          className={hasControls ? 'dshDashboardViewport-controls' : ''}
           ref={controlsRoot}
         >
           <ReactEmbeddableRenderer<ControlGroupSerializedState, ControlGroupRuntimeState, ControlGroupApi>
@@ -85,7 +103,6 @@ export const DashboardViewportComponent = () => {
               return {
                 ...dashboard,
                 getSerializedStateForChild: () => {
-                  // TODO figure out how to get raw state from dashboardContainer
                   return {
                     rawState: dashboard.controlGroupInput
                       ? dashboard.controlGroupInput as ControlGroupSerializedState
