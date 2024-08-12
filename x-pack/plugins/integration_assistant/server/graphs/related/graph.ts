@@ -74,8 +74,8 @@ const graphState: StateGraphArgs<RelatedState>['channels'] = {
     default: () => ({}),
   },
   currentProcessors: {
-    value: (x: object[], y?: object[]) => y ?? x,
-    default: () => [],
+    value: (x?: object[], y?: object[]) => y ?? x,
+    default: () => undefined,
   },
   initialPipeline: {
     value: (x: object, y?: object) => y ?? x,
@@ -122,7 +122,7 @@ function inputRouter(state: RelatedState): string {
 }
 
 function chainRouter(state: RelatedState): string {
-  if (Object.keys(state.currentProcessors).length === 0) {
+  if (!state.currentProcessors) {
     return 'related';
   }
   if (Object.keys(state.errors).length > 0) {

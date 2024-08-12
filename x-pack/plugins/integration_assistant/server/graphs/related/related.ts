@@ -22,18 +22,27 @@ export async function handleRelated(
   const outputParser = new JsonOutputParser();
   const relatedMainGraph = relatedMainPrompt.pipe(model).pipe(outputParser);
 
-  const currentProcessors = (await relatedMainGraph.invoke({
-    pipeline_results: JSON.stringify(state.pipelineResults, null, 2),
-    ex_answer: state.exAnswer,
-    ecs: state.ecs,
-  })) as ESProcessorItem[];
+  try {
+    const currentProcessors = (await relatedMainGraph.invoke({
+      pipeline_results: JSON.stringify(state.pipelineResults, null, 2),
+      ex_answer: state.exAnswer,
+      ecs: state.ecs,
+    })) as ESProcessorItem[];
+    const currentPipeline = combineProcessors(state.initialPipeline as Pipeline, currentProcessors);
 
-  const currentPipeline = combineProcessors(state.initialPipeline as Pipeline, currentProcessors);
+    return {
+      currentPipeline,
+      currentProcessors,
+      reviewed: false,
+      lastExecutedChain: 'related',
+    };
+  } catch (error) {
+    return {
+      currentPipeline: state.initialPipeline,
+      currentProcessors: [],
+      reviewed: false,
+      lastExecutedChain: 'related',
+    };
+  }
 
-  return {
-    currentPipeline,
-    currentProcessors,
-    reviewed: false,
-    lastExecutedChain: 'related',
-  };
 }
