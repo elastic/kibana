@@ -156,6 +156,11 @@ export interface CodeEditorProps {
    */
   accessibilityOverlayEnabled?: boolean;
 
+  /**
+   * Enables the Search bar functionality in the editor. Disabled by default.
+   */
+  enableFindAction?: boolean;
+
   dataTestSubj?: string;
 }
 
@@ -188,6 +193,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   }),
   fitToContent,
   accessibilityOverlayEnabled = true,
+  enableFindAction,
   dataTestSubj,
 }) => {
   const { colorMode, euiTheme } = useEuiTheme();
@@ -375,6 +381,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           monaco.languages.registerCodeActionProvider(languageId, codeActions);
         }
       });
+
+      monaco.editor.addKeybindingRule({
+        // eslint-disable-next-line no-bitwise
+        keybinding: monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyF,
+        command: enableFindAction ? 'actions.find' : null,
+      });
     },
     [
       overrideEditorWillMount,
@@ -385,6 +397,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       hoverProvider,
       codeActions,
       languageConfiguration,
+      enableFindAction,
     ]
   );
 

@@ -51,6 +51,7 @@ describe('AgentDetailsActionMenu', () => {
         readAgents: true,
         allAgents: true,
       },
+      integrations: {},
     } as any);
     mockedUseAgentVersion.mockReturnValue('8.10.2');
   });
@@ -133,6 +134,7 @@ describe('AgentDetailsActionMenu', () => {
         fleet: {
           readAgents: false,
         },
+        integrations: {},
       } as any);
       const res = renderAndGetDiagnosticsButton({
         agent: {

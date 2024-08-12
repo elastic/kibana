@@ -265,10 +265,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
     <EuiSelectable
       data-test-subj={props['data-test-subj']}
       options={displayedOptions}
-      // @ts-expect-error: Type of `nextOptions` in EuiSelectable does not match what's actually being passed back so need to manually override it
-      onChange={(
-        nextOptions: Array<EuiSelectableOption<{ data: Partial<UserProfileWithAvatar> }>>
-      ) => {
+      onChange={(nextOptions: SelectableOption[]) => {
         if (!onChange) {
           return;
         }
@@ -330,7 +327,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
       noMatchesMessage={noMatchesMessage}
       emptyMessage={emptyMessage}
       errorMessage={errorMessage}
-      renderOption={(option, searchValue) => {
+      renderOption={(option: SelectableOption, searchValue) => {
         if (option.user) {
           const displayName = getUserDisplayName(option.user);
           return (

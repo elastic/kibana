@@ -12,7 +12,7 @@ import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { Filter, fromCombinedFilter } from '@kbn/es-query';
 import { Query, uniqFilters } from '@kbn/es-query';
 import { unboxExpressionValue } from '@kbn/expressions-plugin/common';
-import { SavedObjectReference } from '@kbn/core/server';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { ExpressionFunctionKibanaContext } from '@kbn/data-plugin/common';
 import { SavedSearch } from '../types';
 

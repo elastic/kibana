@@ -32,6 +32,7 @@ const START_HOST_ALERTS_DATE = moment.utc(DATES.metricsAndLogs.hosts.min);
 const END_HOST_ALERTS_DATE = moment.utc(DATES.metricsAndLogs.hosts.max);
 const START_HOST_PROCESSES_DATE = moment.utc(DATES.metricsAndLogs.hosts.processesDataStartDate);
 const END_HOST_PROCESSES_DATE = moment.utc(DATES.metricsAndLogs.hosts.processesDataEndDate);
+
 const START_HOST_KUBERNETES_SECTION_DATE = moment.utc(
   DATES.metricsAndLogs.hosts.kubernetesSectionStartDate
 );
@@ -557,7 +558,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
 
             [
-              { metric: 'cpuUsage', value: '99.6%' },
+              { metric: 'cpuUsage', value: '100.0%' },
               { metric: 'normalizedLoad1m', value: '1,300.3%' },
               { metric: 'memoryUsage', value: '42.2%' },
               { metric: 'diskUsage', value: '36.0%' },

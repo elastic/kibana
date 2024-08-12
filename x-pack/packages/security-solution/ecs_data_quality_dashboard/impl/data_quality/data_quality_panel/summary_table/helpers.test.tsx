@@ -452,7 +452,7 @@ describe('helpers', () => {
           </TestProviders>
         );
 
-        expect(screen.getByTestId('incompatibleStat')).toHaveTextContent('-- --'); // the euiScreenReaderOnly content renders an additional set of --
+        expect(screen.getByTestId('incompatibleStat')).toHaveTextContent('--');
       });
     });
 

@@ -19,6 +19,7 @@ import {
 import { processCategoryResults } from '@kbn/aiops-log-pattern-analysis/process_category_results';
 import type { CatResponse } from '@kbn/aiops-log-pattern-analysis/types';
 
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
   type AiOpsKey,
@@ -69,6 +70,7 @@ export function useCategorizeRequest() {
       timeField: string,
       timeRange: { from: number; to: number },
       query: QueryDslQueryContainer,
+      runtimeMappings: MappingRuntimeFields | undefined,
       intervalMs?: number,
       additionalFilter?: CategorizationAdditionalFilter
     ): Promise<ReturnType<typeof processCategoryResults>> => {
@@ -83,6 +85,7 @@ export function useCategorizeRequest() {
               timeField,
               timeRange,
               query,
+              runtimeMappings,
               wrap,
               intervalMs,
               additionalFilter,

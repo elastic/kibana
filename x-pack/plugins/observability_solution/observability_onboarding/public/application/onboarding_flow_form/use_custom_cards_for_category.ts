@@ -23,15 +23,11 @@ export function useCustomCardsForCategory(
   const history = useHistory();
   const location = useLocation();
   const {
-    services: {
-      application,
-      http,
-      context: { isServerless },
-    },
+    services: { application, http },
   } = useKibana<ObservabilityOnboardingAppServices>();
   const getUrlForApp = application?.getUrlForApp;
 
-  const { href: systemLogsUrl } = reactRouterNavigate(history, `/systemLogs/${location.search}`);
+  const { href: autoDetectUrl } = reactRouterNavigate(history, `/auto-detect/${location.search}`);
   const { href: customLogsUrl } = reactRouterNavigate(history, `/customLogs/${location.search}`);
   const { href: otelLogsUrl } = reactRouterNavigate(history, `/otel-logs/${location.search}`);
   const { href: kubernetesUrl } = reactRouterNavigate(history, `/kubernetes/${location.search}`);
@@ -42,7 +38,7 @@ export function useCustomCardsForCategory(
     release: 'preview',
     title: 'OpenTelemetry',
     description:
-      'Collect Logs and host metrics using the Elastic distribution of the OpenTelemetry Collector',
+      'Collect logs and host metrics using the Elastic distribution of the OpenTelemetry Collector',
     name: 'custom-logs-virtual',
     categories: ['observability'],
     icons: [
@@ -117,6 +113,7 @@ export function useCustomCardsForCategory(
           id: 'kubernetes-quick-start',
           type: 'virtual',
           title: 'Kubernetes',
+          release: 'preview',
           description: 'Collect logs and metrics from Kubernetes using minimal configuration',
           name: 'kubernetes-quick-start',
           categories: ['observability'],
@@ -131,7 +128,7 @@ export function useCustomCardsForCategory(
           integration: '',
         },
         toFeaturedCard('docker'),
-        isServerless ? toFeaturedCard('prometheus') : otelCard,
+        otelCard,
         {
           id: 'azure-virtual',
           type: 'virtual',
@@ -178,19 +175,20 @@ export function useCustomCardsForCategory(
     case 'logs':
       return [
         {
-          id: 'system-logs',
+          id: 'auto-detect-logs',
           type: 'virtual',
-          title: 'Stream host system logs',
-          description: 'Collect system logs from your machine or server',
-          name: 'system-logs-virtual',
+          title: 'Auto-detect logs and metrics',
+          release: 'preview',
+          description: 'This installation scans your host and auto-detects log files and metrics',
+          name: 'auto-detect-logs-virtual',
           categories: ['observability'],
           icons: [
             {
-              type: 'svg',
-              src: http?.staticAssets.getPluginAssetHref('system.svg') ?? '',
+              type: 'eui',
+              src: 'consoleApp',
             },
           ],
-          url: systemLogsUrl,
+          url: autoDetectUrl,
           version: '',
           integration: '',
         },
@@ -211,7 +209,7 @@ export function useCustomCardsForCategory(
           version: '',
           integration: '',
         },
-        isServerless ? toFeaturedCard('nginx') : otelCard,
+        otelCard,
         {
           id: 'azure-logs-virtual',
           type: 'virtual',

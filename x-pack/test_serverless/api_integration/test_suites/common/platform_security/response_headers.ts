@@ -20,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
     const baseCSP = `script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; frame-ancestors 'self'`;
     const defaultCOOP = 'same-origin';
     const defaultPermissionsPolicy =
-      'camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()';
+      'camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=();report-to=violations-endpoint';
     const defaultStrictTransportSecurity = 'max-age=31536000; includeSubDomains';
     const defaultReferrerPolicy = 'strict-origin-when-cross-origin';
     const defaultXContentTypeOptions = 'nosniff';

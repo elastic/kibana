@@ -26,7 +26,7 @@ export const ReferenceFieldSelects = () => {
   };
 
   const referenceFieldOptions: SuperSelectOption[] = Object.values(allFields.byId)
-    .filter((field) => field.source.type === 'text')
+    .filter((field) => field.source.type === 'text' && !field.isMultiField)
     .map((field) => ({
       value: field.path.join('.'),
       inputDisplay: field.path.join('.'),

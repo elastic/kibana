@@ -32,7 +32,20 @@ const assertHasCreatedDefinition = (
   expect(soClient.create).toBeCalledWith(SO_ENTITY_DEFINITION_TYPE, definition, {
     id: definition.id,
     overwrite: true,
+    managed: definition.managed,
   });
+
+  expect(esClient.indices.putIndexTemplate).toBeCalledTimes(2);
+  expect(esClient.indices.putIndexTemplate).toBeCalledWith(
+    expect.objectContaining({
+      name: `entities_v1_history_${definition.id}_index_template`,
+    })
+  );
+  expect(esClient.indices.putIndexTemplate).toBeCalledWith(
+    expect.objectContaining({
+      name: `entities_v1_latest_${definition.id}_index_template`,
+    })
+  );
 
   expect(esClient.ingest.putPipeline).toBeCalledTimes(2);
   expect(esClient.ingest.putPipeline).toBeCalledWith({
@@ -111,6 +124,20 @@ const assertHasUninstalledDefinition = (
   expect(esClient.transform.deleteTransform).toBeCalledTimes(2);
   expect(esClient.ingest.deletePipeline).toBeCalledTimes(2);
   expect(soClient.delete).toBeCalledTimes(1);
+
+  expect(esClient.indices.deleteIndexTemplate).toBeCalledTimes(2);
+  expect(esClient.indices.deleteIndexTemplate).toBeCalledWith(
+    {
+      name: `entities_v1_history_${definition.id}_index_template`,
+    },
+    { ignore: [404] }
+  );
+  expect(esClient.indices.deleteIndexTemplate).toBeCalledWith(
+    {
+      name: `entities_v1_latest_${definition.id}_index_template`,
+    },
+    { ignore: [404] }
+  );
 };
 
 describe('install_entity_definition', () => {

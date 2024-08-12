@@ -75,7 +75,7 @@ export const useAgentless = () => {
 };
 
 export function useSetupTechnology({
-  updateNewAgentPolicy,
+  setNewAgentPolicy,
   newAgentPolicy,
   updateAgentPolicies,
   setSelectedPolicyTab,
@@ -83,7 +83,7 @@ export function useSetupTechnology({
   packagePolicy,
   isEditPage,
 }: {
-  updateNewAgentPolicy: (policy: NewAgentPolicy) => void;
+  setNewAgentPolicy: (policy: NewAgentPolicy) => void;
   newAgentPolicy: NewAgentPolicy;
   updateAgentPolicies: (policies: AgentPolicy[]) => void;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
@@ -92,12 +92,8 @@ export function useSetupTechnology({
   isEditPage?: boolean;
 }) {
   const { cloud } = useStartServices();
-  const {
-    isAgentlessEnabled,
-    isAgentlessIntegration,
-    isAgentlessCloudEnabled,
-    isAgentlessServerlessEnabled,
-  } = useAgentless();
+  const { isAgentlessEnabled, isAgentlessCloudEnabled, isAgentlessServerlessEnabled } =
+    useAgentless();
 
   // this is a placeholder for the new agent-BASED policy that will be used when the user switches from agentless to agent-based and back
   const newAgentBasedPolicy = useRef<NewAgentPolicy>(newAgentPolicy);
@@ -107,6 +103,7 @@ export function useSetupTechnology({
   const [newAgentlessPolicy, setNewAgentlessPolicy] = useState<AgentPolicy | NewAgentPolicy>(
     generateNewAgentPolicyWithDefaults({
       supports_agentless: true,
+      monitoring_enabled: [],
     })
   );
 
@@ -121,7 +118,7 @@ export function useSetupTechnology({
       };
       if (nextNewAgentlessPolicy.name !== newAgentlessPolicy.name) {
         setNewAgentlessPolicy(nextNewAgentlessPolicy);
-        updateNewAgentPolicy(nextNewAgentlessPolicy as NewAgentPolicy);
+        setNewAgentPolicy(nextNewAgentlessPolicy as NewAgentPolicy);
         updateAgentPolicies([nextNewAgentlessPolicy] as AgentPolicy[]);
       }
     }
@@ -132,14 +129,8 @@ export function useSetupTechnology({
     packagePolicy.name,
     selectedSetupTechnology,
     updateAgentPolicies,
-    updateNewAgentPolicy,
+    setNewAgentPolicy,
   ]);
-
-  useEffect(() => {
-    if (isAgentlessEnabled && packageInfo && isAgentlessIntegration(packageInfo)) {
-      setSelectedSetupTechnology(SetupTechnology.AGENTLESS);
-    }
-  }, [isAgentlessEnabled, isAgentlessIntegration, packageInfo]);
 
   // tech debt: remove this useEffect when Serverless uses the Agentless API
   // https://github.com/elastic/security-team/issues/9781
@@ -168,23 +159,23 @@ export function useSetupTechnology({
 
       if (setupTechnology === SetupTechnology.AGENTLESS) {
         if (isAgentlessCloudEnabled) {
-          updateNewAgentPolicy(newAgentlessPolicy as NewAgentPolicy);
+          setNewAgentPolicy(newAgentlessPolicy as NewAgentPolicy);
           setSelectedPolicyTab(SelectedPolicyTab.NEW);
           updateAgentPolicies([newAgentlessPolicy] as AgentPolicy[]);
         }
         // tech debt: remove this when Serverless uses the Agentless API
         // https://github.com/elastic/security-team/issues/9781
         if (isAgentlessServerlessEnabled) {
-          updateNewAgentPolicy(newAgentlessPolicy as AgentPolicy);
+          setNewAgentPolicy(newAgentlessPolicy as AgentPolicy);
           updateAgentPolicies([newAgentlessPolicy] as AgentPolicy[]);
           setSelectedPolicyTab(SelectedPolicyTab.EXISTING);
         }
       } else if (setupTechnology === SetupTechnology.AGENT_BASED) {
-        updateNewAgentPolicy({
+        setNewAgentPolicy({
           ...newAgentBasedPolicy.current,
           supports_agentless: false,
           is_managed: false,
-        } as NewAgentPolicy);
+        });
         setSelectedPolicyTab(SelectedPolicyTab.NEW);
         updateAgentPolicies([newAgentBasedPolicy.current] as AgentPolicy[]);
       }
@@ -195,7 +186,7 @@ export function useSetupTechnology({
       selectedSetupTechnology,
       isAgentlessCloudEnabled,
       isAgentlessServerlessEnabled,
-      updateNewAgentPolicy,
+      setNewAgentPolicy,
       newAgentlessPolicy,
       setSelectedPolicyTab,
       updateAgentPolicies,

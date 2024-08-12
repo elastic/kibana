@@ -177,6 +177,11 @@ const SimplifiedVarsSchema = schema.recordOf(
       schema.number(),
       schema.arrayOf(schema.string()),
       schema.arrayOf(schema.number()),
+      // Secrets
+      schema.object({
+        id: schema.string(),
+        isSecretRef: schema.boolean(),
+      }),
     ])
   )
 );

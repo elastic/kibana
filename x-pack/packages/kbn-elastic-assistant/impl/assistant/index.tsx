@@ -80,7 +80,7 @@ import { Conversation } from '../assistant_context/types';
 import { getGenAiConfig } from '../connectorland/helpers';
 import { AssistantAnimatedIcon } from './assistant_animated_icon';
 import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
-import { InstallKnowledgeBaseButton } from '../knowledge_base/install_knowledge_base_button';
+import { SetupKnowledgeBaseButton } from '../knowledge_base/setup_knowledge_base_button';
 import { useFetchPrompts } from './api/prompts/use_fetch_prompts';
 
 export interface Props {
@@ -118,7 +118,6 @@ const AssistantComponent: React.FC<Props> = ({
     assistantAvailability: { isAssistantEnabled },
     getComments,
     http,
-    knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
     promptContexts,
     setLastConversationId,
     getLastConversationId,
@@ -257,6 +256,13 @@ const AssistantComponent: React.FC<Props> = ({
           conversations[WELCOME_CONVERSATION_TITLE] ??
           getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE });
 
+        // updated selected system prompt
+        setEditingSystemPromptId(
+          getDefaultSystemPrompt({
+            allSystemPrompts,
+            conversation: conversationToReturn,
+          })?.id
+        );
         if (
           prev &&
           prev.id === conversationToReturn.id &&
@@ -274,6 +280,7 @@ const AssistantComponent: React.FC<Props> = ({
       });
     }
   }, [
+    allSystemPrompts,
     areConnectorsFetched,
     conversationTitle,
     conversations,
@@ -585,7 +592,6 @@ const AssistantComponent: React.FC<Props> = ({
             showAnonymizedValues,
             refetchCurrentConversation,
             regenerateMessage: handleRegenerateResponse,
-            isEnabledLangChain: isEnabledKnowledgeBase || isEnabledRAGAlerts,
             isFetchingResponse: isLoadingChatSend,
             setIsStreaming,
             currentUserAvatar,
@@ -612,8 +618,6 @@ const AssistantComponent: React.FC<Props> = ({
       showAnonymizedValues,
       refetchCurrentConversation,
       handleRegenerateResponse,
-      isEnabledKnowledgeBase,
-      isEnabledRAGAlerts,
       isLoadingChatSend,
       currentUserAvatar,
       selectedPromptContextsCount,
@@ -651,6 +655,7 @@ const AssistantComponent: React.FC<Props> = ({
             actionTypeId: (defaultConnector?.actionTypeId as string) ?? '.gen-ai',
             provider: apiConfig?.apiProvider,
             model: apiConfig?.defaultModel,
+            defaultSystemPromptId: allSystemPrompts.find((sp) => sp.isNewConversationDefault)?.id,
           },
         });
       },
@@ -669,14 +674,14 @@ const AssistantComponent: React.FC<Props> = ({
 
   useEffect(() => {
     (async () => {
-      if (areConnectorsFetched && currentConversation?.id === '') {
+      if (areConnectorsFetched && currentConversation?.id === '' && !isLoadingPrompts) {
         const conversation = await mutateAsync(currentConversation);
         if (currentConversation.id === '' && conversation) {
           setCurrentConversationId(conversation.id);
         }
       }
     })();
-  }, [areConnectorsFetched, currentConversation, mutateAsync]);
+  }, [areConnectorsFetched, currentConversation, isLoadingPrompts, mutateAsync]);
 
   const handleCreateConversation = useCallback(async () => {
     const newChatExists = find(conversations, ['title', NEW_CHAT]);
@@ -795,10 +800,11 @@ const AssistantComponent: React.FC<Props> = ({
                     isSettingsModalVisible={isSettingsModalVisible}
                     setIsSettingsModalVisible={setIsSettingsModalVisible}
                     allSystemPrompts={allSystemPrompts}
+                    refetchConversations={refetchResults}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <InstallKnowledgeBaseButton />
+                  <SetupKnowledgeBaseButton />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>
@@ -827,6 +833,7 @@ const AssistantComponent: React.FC<Props> = ({
     handleOnSystemPromptSelectionChange,
     isSettingsModalVisible,
     isWelcomeSetup,
+    refetchResults,
   ]);
 
   return (

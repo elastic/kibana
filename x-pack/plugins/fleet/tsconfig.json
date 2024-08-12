@@ -111,5 +111,7 @@
     "@kbn/core-saved-objects-utils-server",
     "@kbn/integration-assistant-plugin",
     "@kbn/core-security-server-mocks",
+    "@kbn/server-http-tools",
+    "@kbn/avc-banner",
   ]
 }

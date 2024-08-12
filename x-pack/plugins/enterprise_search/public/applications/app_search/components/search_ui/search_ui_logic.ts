@@ -59,6 +59,7 @@ export const SearchUILogic = kea<MakeLogicType<SearchUIValues, SearchUIActions>>
     onUrlFieldChange: (urlField) => ({ urlField }),
     onThumbnailFieldChange: (thumbnailField) => ({ thumbnailField }),
   }),
+  // @ts-expect-error upgrade typescript v5.1.6
   reducers: () => ({
     dataLoading: [
       true,
@@ -66,31 +67,42 @@ export const SearchUILogic = kea<MakeLogicType<SearchUIValues, SearchUIActions>>
         onFieldDataLoaded: () => false,
       },
     ],
+    // @ts-expect-error upgrade typescript v5.1.6
     validFields: [[], { onFieldDataLoaded: (_, { validFields }) => validFields }],
+    // @ts-expect-error upgrade typescript v5.1.6
     validSortFields: [[], { onFieldDataLoaded: (_, { validSortFields }) => validSortFields }],
+    // @ts-expect-error upgrade typescript v5.1.6
     validFacetFields: [[], { onFieldDataLoaded: (_, { validFacetFields }) => validFacetFields }],
     titleField: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onTitleFieldChange: (_, { titleField }) => titleField,
+        // @ts-expect-error upgrade typescript v5.1.6
         onFieldDataLoaded: (_, { titleField }) => titleField || '',
       },
     ],
     urlField: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onUrlFieldChange: (_, { urlField }) => urlField,
+        // @ts-expect-error upgrade typescript v5.1.6
         onFieldDataLoaded: (_, { urlField }) => urlField || '',
       },
     ],
     thumbnailField: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onThumbnailFieldChange: (_, { thumbnailField }) => thumbnailField,
       },
     ],
+    // @ts-expect-error upgrade typescript v5.1.6
     facetFields: [[], { onFacetFieldsChange: (_, { facetFields }) => facetFields }],
+    // @ts-expect-error upgrade typescript v5.1.6
     sortFields: [[], { onSortFieldsChange: (_, { sortFields }) => sortFields }],
+    // @ts-expect-error upgrade typescript v5.1.6
     activeField: [ActiveField.None, { onActiveFieldChange: (_, { activeField }) => activeField }],
   }),
   listeners: ({ actions }) => ({

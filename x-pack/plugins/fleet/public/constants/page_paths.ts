@@ -223,7 +223,16 @@ export const pagePathGetters: {
     FLEET_BASE_PATH,
     `/policies/${policyId}/upgrade-package-policy/${packagePolicyId}`,
   ],
-  agent_list: ({ kuery }) => [FLEET_BASE_PATH, `/agents${kuery ? `?kuery=${kuery}` : ''}`],
+  agent_list: ({ kuery, showInactive }) => [
+    FLEET_BASE_PATH,
+    `/agents${
+      kuery && showInactive
+        ? `?kuery=${kuery}&showInactive=true`
+        : showInactive
+        ? '?showInactive=true'
+        : ''
+    }`,
+  ],
   agent_details: ({ agentId, tabId, logQuery }) => [
     FLEET_BASE_PATH,
     `/agents/${agentId}${tabId ? `/${tabId}` : ''}${logQuery ? `?_q=${logQuery}` : ''}`,

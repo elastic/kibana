@@ -33,19 +33,19 @@ function mergeFunc(entity: ServiceEntities, existingEntity?: MergedServiceEntiti
       serviceName: entity.serviceName,
       agentName: entity.agentName,
       signalTypes: entity.signalTypes,
-      environments: compact([entity.entity.identityFields.service?.environment]),
+      environments: compact([entity?.environment]),
       latestTimestamp: entity.entity.latestTimestamp,
       metrics: [entity.entity.metrics],
+      hasLogMetrics: entity.entity.hasLogMetrics,
     };
   }
   return {
     serviceName: entity.serviceName,
     agentName: entity.agentName,
     signalTypes: uniq(compact([...(existingEntity?.signalTypes ?? []), ...entity.signalTypes])),
-    environments: uniq(
-      compact([...existingEntity?.environments, entity.entity.identityFields?.service?.environment])
-    ),
+    environments: uniq(compact([...existingEntity?.environments, entity?.environment])),
     latestTimestamp: entity.entity.latestTimestamp,
     metrics: [...existingEntity?.metrics, entity.entity.metrics],
+    hasLogMetrics: entity.entity.hasLogMetrics || existingEntity.hasLogMetrics,
   };
 }

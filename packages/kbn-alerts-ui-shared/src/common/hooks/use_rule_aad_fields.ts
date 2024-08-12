@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { ToastsStart, HttpStart } from '@kbn/core/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { EMPTY_AAD_FIELDS } from '../constants';
-import { fetchAadFields } from '../apis/fetch_aad_fields';
+import { fetchRuleTypeAadTemplateFields } from '../apis';
 
 export interface UseRuleAADFieldsProps {
   ruleTypeId?: string;
@@ -29,7 +29,7 @@ export function useRuleAADFields(props: UseRuleAADFieldsProps): UseRuleAADFields
   const { ruleTypeId, http, toasts } = props;
 
   const queryAadFieldsFn = () => {
-    return fetchAadFields({ http, ruleTypeId });
+    return fetchRuleTypeAadTemplateFields({ http, ruleTypeId });
   };
 
   const onErrorFn = () => {

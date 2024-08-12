@@ -151,7 +151,7 @@ describe('tabifyAggResponse Integration', () => {
 
       function getTopAggregations(
         rawResp: typeof threeTermBuckets
-      ): typeof threeTermBuckets['aggregations'] {
+      ): (typeof threeTermBuckets)['aggregations'] {
         return !isSamplingEnabled(probability)
           ? rawResp.aggregations!
           : // @ts-ignore
@@ -188,9 +188,9 @@ describe('tabifyAggResponse Integration', () => {
       ) {
         expect(typeof row).toBe('object');
 
-        asserts.forEach((assert, i: number) => {
+        asserts.forEach((a, i: number) => {
           if (row[`col-${i}`]) {
-            assert(row[`col-${i}`]);
+            a(row[`col-${i}`]);
           }
         });
       }
@@ -214,7 +214,7 @@ describe('tabifyAggResponse Integration', () => {
       // check for something like an average bytes result
       function expectAvgBytes(val: string | number) {
         expect(typeof val).toBe('number');
-        expect(val === 0 || val > 1000).toBeDefined();
+        expect(val === 0 || +val > 1000).toBe(true);
       }
 
       test('for non-hierarchical vis', () => {

@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import {
+  ENTITY_BASE_PREFIX,
+  ENTITY_SCHEMA_VERSION_V1,
+  ENTITY_HISTORY,
+  ENTITY_LATEST,
+} from '@kbn/entities-schema';
+
 // Base constants
-export const ENTITY_BASE_PREFIX = 'entities';
-export const ENTITY_SCHEMA_VERSION_V1 = 'v1';
-export const ENTITY_INDEX_PREFIX = `.${ENTITY_BASE_PREFIX}` as const;
-export const ENTITY_INDICES_PATTERN = `${ENTITY_INDEX_PREFIX}*` as const;
+export const ENTITY_INTERNAL_INDICES_PATTERN = `.${ENTITY_BASE_PREFIX}*` as const;
 
 export const ENTITY_ENTITY_COMPONENT_TEMPLATE_V1 =
   `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_entity` as const;
@@ -17,26 +21,16 @@ export const ENTITY_EVENT_COMPONENT_TEMPLATE_V1 =
   `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_event` as const;
 
 // History constants
-export const ENTITY_HISTORY = 'history' as const;
-export const ENTITY_HISTORY_INDEX_TEMPLATE_V1 =
-  `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_HISTORY}_index_template` as const;
 export const ENTITY_HISTORY_BASE_COMPONENT_TEMPLATE_V1 =
   `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_HISTORY}_base` as const;
 export const ENTITY_HISTORY_PREFIX_V1 =
   `${ENTITY_BASE_PREFIX}-${ENTITY_SCHEMA_VERSION_V1}-${ENTITY_HISTORY}` as const;
-export const ENTITY_HISTORY_INDEX_PREFIX_V1 =
-  `${ENTITY_INDEX_PREFIX}.${ENTITY_SCHEMA_VERSION_V1}.${ENTITY_HISTORY}` as const;
 
 // Latest constants
-export const ENTITY_LATEST = 'latest' as const;
-export const ENTITY_LATEST_INDEX_TEMPLATE_V1 =
-  `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_LATEST}_index_template` as const;
 export const ENTITY_LATEST_BASE_COMPONENT_TEMPLATE_V1 =
   `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_LATEST}_base` as const;
 export const ENTITY_LATEST_PREFIX_V1 =
   `${ENTITY_BASE_PREFIX}-${ENTITY_SCHEMA_VERSION_V1}-${ENTITY_LATEST}` as const;
-export const ENTITY_LATEST_INDEX_PREFIX_V1 =
-  `${ENTITY_INDEX_PREFIX}.${ENTITY_SCHEMA_VERSION_V1}.${ENTITY_LATEST}` as const;
 
 // Transform constants
 export const ENTITY_DEFAULT_HISTORY_FREQUENCY = '1m';

@@ -14,7 +14,7 @@ import {
   PluginConfigDescriptor,
   Logger,
 } from '@kbn/core/server';
-import { upsertComponent, upsertTemplate } from './lib/manage_index_templates';
+import { upsertComponent } from './lib/manage_index_templates';
 import { setupRoutes } from './routes';
 import {
   EntityManagerPluginSetupDependencies,
@@ -27,8 +27,6 @@ import { entityDefinition, EntityDiscoveryApiKeyType } from './saved_objects';
 import { entitiesEntityComponentTemplateConfig } from './templates/components/entity';
 import { entitiesLatestBaseComponentTemplateConfig } from './templates/components/base_latest';
 import { entitiesHistoryBaseComponentTemplateConfig } from './templates/components/base_history';
-import { entitiesHistoryIndexTemplateConfig } from './templates/entities_history_template';
-import { entitiesLatestIndexTemplateConfig } from './templates/entities_latest_template';
 
 export type EntityManagerServerPluginSetup = ReturnType<EntityManagerServerPlugin['setup']>;
 export type EntityManagerServerPluginStart = ReturnType<EntityManagerServerPlugin['start']>;
@@ -113,22 +111,7 @@ export class EntityManagerServerPlugin
         logger: this.logger,
         component: entitiesEntityComponentTemplateConfig,
       }),
-    ])
-      .then(() =>
-        upsertTemplate({
-          esClient,
-          logger: this.logger,
-          template: entitiesHistoryIndexTemplateConfig,
-        })
-      )
-      .then(() =>
-        upsertTemplate({
-          esClient,
-          logger: this.logger,
-          template: entitiesLatestIndexTemplateConfig,
-        })
-      )
-      .catch(() => {});
+    ]).catch(() => {});
 
     return {};
   }

@@ -104,11 +104,15 @@ export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props
             <EuiFlexItem grow={0}>
               <EuiLink
                 color="text"
-                href={getDiscoverLink(discover, slo, {
-                  from: 'now-24h',
-                  to: 'now',
-                  mode: 'relative',
-                })}
+                href={getDiscoverLink(
+                  slo,
+                  {
+                    from: 'now-24h',
+                    to: 'now',
+                    mode: 'relative',
+                  },
+                  discover
+                )}
                 data-test-subj="sloDetailDiscoverLink"
               >
                 <EuiIcon type="sortRight" style={{ marginRight: '4px' }} />

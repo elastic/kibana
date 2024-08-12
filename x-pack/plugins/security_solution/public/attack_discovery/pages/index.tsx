@@ -136,9 +136,15 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     // If there is only one connector, set it as the selected connector
     if (aiConnectors != null && aiConnectors.length === 1) {
       setConnectorId(aiConnectors[0].id);
+    } else if (aiConnectors != null && aiConnectors.length === 0) {
+      // connectors have been removed, reset the connectorId and cached Attack discoveries
+      setConnectorId(undefined);
+      setSelectedConnectorAttackDiscoveries([]);
     }
-  }, [aiConnectors, setConnectorId]);
+  }, [aiConnectors]);
 
+  const animatedLogo = useMemo(() => <EuiLoadingLogo logo="logoSecurity" size="xl" />, []);
+  const connectorsAreConfigured = aiConnectors != null && aiConnectors.length > 0;
   const attackDiscoveriesCount = selectedConnectorAttackDiscoveries.length;
 
   if (!isAssistantEnabled) {
@@ -166,7 +172,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
         <HeaderPage border title={pageTitle}>
           <Header
             connectorId={connectorId}
-            connectorsAreConfigured={aiConnectors != null && aiConnectors.length > 0}
+            connectorsAreConfigured={connectorsAreConfigured}
             isLoading={isLoading}
             // disable header actions before post request has completed
             isDisabledActions={isLoadingPost}
@@ -177,8 +183,8 @@ const AttackDiscoveryPageComponent: React.FC = () => {
           />
           <EuiSpacer size="m" />
         </HeaderPage>
-        {!didInitialFetch ? (
-          <EuiEmptyPrompt icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />} />
+        {connectorsAreConfigured && connectorId != null && !didInitialFetch ? (
+          <EuiEmptyPrompt data-test-subj="animatedLogo" icon={animatedLogo} />
         ) : (
           <>
             {showSummary({

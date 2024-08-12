@@ -8,7 +8,7 @@
 import { SearchResponse, AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
 import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';

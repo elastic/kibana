@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { PluginInitializer } from '@kbn/core/public';
+import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { AIAssistantManagementPlugin } from './plugin';
 
 import type {
@@ -24,4 +24,5 @@ export type {
 export const plugin: PluginInitializer<
   AIAssistantManagementSelectionPluginPublicSetup,
   AIAssistantManagementSelectionPluginPublicStart
-> = () => new AIAssistantManagementPlugin();
+> = (initializerContext: PluginInitializerContext) =>
+  new AIAssistantManagementPlugin(initializerContext);

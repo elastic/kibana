@@ -12,14 +12,7 @@ import {
   bedrockClaude2SuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/bedrock_simulation';
 import { DEFAULT_TOKEN_LIMIT } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
-import { PassThrough } from 'stream';
-import { EventStreamCodec } from '@smithy/eventstream-codec';
-import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import {
-  ELASTIC_HTTP_VERSION_HEADER,
-  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
-} from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
@@ -432,38 +425,6 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             });
           });
 
-          it('should invoke stream with assistant AI body argument formatted to bedrock expectations', async () => {
-            await new Promise<void>((resolve, reject) => {
-              const passThrough = new PassThrough();
-
-              supertest
-                .post(`/internal/elastic_assistant/actions/connector/${bedrockActionId}/_execute`)
-                .set('kbn-xsrf', 'foo')
-                .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-                .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-                .on('error', reject)
-                .send({
-                  actionTypeId: '.bedrock',
-                  subAction: 'invokeStream',
-                  message: 'Hello world',
-                  isEnabledKnowledgeBase: false,
-                  isEnabledRAGAlerts: false,
-                  replacements: {},
-                })
-                .pipe(passThrough);
-              const responseBuffer: Uint8Array[] = [];
-              passThrough.on('data', (chunk) => {
-                responseBuffer.push(chunk);
-              });
-
-              passThrough.on('end', () => {
-                const parsed = parseBedrockBuffer(responseBuffer);
-                expect(parsed).to.eql('Hello world, what a unique string!');
-                resolve();
-              });
-            });
-          });
-
           describe('Token tracking dashboard', () => {
             const dashboardId = 'specific-dashboard-id-default';
 
@@ -646,47 +607,4 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
       });
     });
   });
-}
-
-const parseBedrockBuffer = (chunks: Uint8Array[]): string => {
-  let bedrockBuffer: Uint8Array = new Uint8Array(0);
-
-  return chunks
-    .map((chunk) => {
-      bedrockBuffer = concatChunks(bedrockBuffer, chunk);
-      let messageLength = getMessageLength(bedrockBuffer);
-      const buildChunks = [];
-      while (bedrockBuffer.byteLength > 0 && bedrockBuffer.byteLength >= messageLength) {
-        const extractedChunk = bedrockBuffer.slice(0, messageLength);
-        buildChunks.push(extractedChunk);
-        bedrockBuffer = bedrockBuffer.slice(messageLength);
-        messageLength = getMessageLength(bedrockBuffer);
-      }
-
-      const awsDecoder = new EventStreamCodec(toUtf8, fromUtf8);
-
-      return buildChunks
-        .map((bChunk) => {
-          const event = awsDecoder.decode(bChunk);
-          const body = JSON.parse(
-            Buffer.from(JSON.parse(new TextDecoder().decode(event.body)).bytes, 'base64').toString()
-          );
-          return body.delta.text;
-        })
-        .join('');
-    })
-    .join('');
-};
-
-function concatChunks(a: Uint8Array, b: Uint8Array): Uint8Array {
-  const newBuffer = new Uint8Array(a.length + b.length);
-  newBuffer.set(a);
-  newBuffer.set(b, a.length);
-  return newBuffer;
-}
-
-function getMessageLength(buffer: Uint8Array): number {
-  if (buffer.byteLength === 0) return 0;
-  const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
-  return view.getUint32(0, false);
 }

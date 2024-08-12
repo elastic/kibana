@@ -17,10 +17,15 @@ import type { FleetUsage } from '../../collectors/register';
 
 import { appContextService } from '../app_context';
 
-import { fleetAgentsSchema, fleetUsagesSchema } from './fleet_usages_schema';
+import {
+  fleetAgentsSchema,
+  fleetUsagesSchema,
+  fleetIntegrationsSchema,
+} from './fleet_usages_schema';
 
 const FLEET_USAGES_EVENT_TYPE = 'fleet_usage';
 const FLEET_AGENTS_EVENT_TYPE = 'fleet_agents';
+const FLEET_INTEGRATIONS_EVENT_TYPE = 'fleet_integrations';
 
 export class FleetUsageSender {
   private taskManager?: TaskManagerStartContract;
@@ -89,6 +94,7 @@ export class FleetUsageSender {
         agents_per_output_type: agentsPerOutputType,
         agents_per_privileges: agentsPerPrivileges,
         upgrade_details: upgradeDetails,
+        integrations_details: integrationsDetails,
         ...fleetUsageData
       } = usageData;
       appContextService
@@ -125,6 +131,15 @@ export class FleetUsageSender {
         .debug(() => 'Agents upgrade details telemetry: ' + JSON.stringify(upgradeDetails));
       upgradeDetails.forEach((upgradeDetailsObj) => {
         core.analytics.reportEvent(FLEET_AGENTS_EVENT_TYPE, { upgrade_details: upgradeDetailsObj });
+      });
+
+      appContextService
+        .getLogger()
+        .debug(() => 'Integrations details telemetry: ' + JSON.stringify(integrationsDetails));
+      integrationsDetails.forEach((integrationDetailsObj) => {
+        core.analytics.reportEvent(FLEET_INTEGRATIONS_EVENT_TYPE, {
+          integrations_details: integrationDetailsObj,
+        });
       });
     } catch (error) {
       appContextService
@@ -179,6 +194,11 @@ export class FleetUsageSender {
     core.analytics.registerEventType({
       eventType: FLEET_AGENTS_EVENT_TYPE,
       schema: fleetAgentsSchema,
+    });
+
+    core.analytics.registerEventType({
+      eventType: FLEET_INTEGRATIONS_EVENT_TYPE,
+      schema: fleetIntegrationsSchema,
     });
   }
 }

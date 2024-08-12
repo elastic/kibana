@@ -7,7 +7,7 @@
  */
 
 import { AcknowledgedResponseBase } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { cancelSyncs } from './cancel_syncs';
 
 export const deleteConnectorById = async (client: ElasticsearchClient, id: string) => {

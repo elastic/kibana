@@ -11,7 +11,7 @@ import { finalSignificantItemGroups } from '@kbn/aiops-test-utils/artificial_log
 import {
   addSignificantItems,
   addSignificantItemsGroup,
-  resetAll,
+  resetResults,
   resetGroups,
   updateLoadingState,
   getDefaultState,
@@ -58,7 +58,7 @@ describe('streamReducer', () => {
 
     expect(state1.significantItems).toHaveLength(1);
 
-    const state2 = streamReducer(state1, resetAll());
+    const state2 = streamReducer(state1, resetResults());
 
     expect(state2.significantItems).toHaveLength(0);
   });

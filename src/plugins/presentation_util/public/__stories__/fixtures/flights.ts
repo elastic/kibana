@@ -15,7 +15,7 @@ import {
 } from '@kbn/field-formats-plugin/common';
 import { flights } from './flights_data';
 
-export type Flight = typeof flights[number];
+export type Flight = (typeof flights)[number];
 export type FlightField = keyof Flight;
 
 export const flightFieldNames: FlightField[] = [

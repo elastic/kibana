@@ -8,9 +8,27 @@
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 
 export const openAIFunctionAgentPrompt = ChatPromptTemplate.fromMessages([
+  ['system', 'You are a helpful assistant'],
+  ['placeholder', '{chat_history}'],
+  ['human', '{input}'],
+  ['placeholder', '{agent_scratchpad}'],
+]);
+
+export const bedrockToolCallingAgentPrompt = ChatPromptTemplate.fromMessages([
   [
     'system',
-    'You are a helpful assistant\n\nUse the below context as a sample of information about the user from their knowledge base:\n\n```{knowledge_history}```',
+    'You are a helpful assistant. ALWAYS use the provided tools. Use tools as often as possible, as they have access to the latest data and syntax. Always return value from ESQLKnowledgeBaseTool as is. Never return <thinking> tags in the response, but make sure to include <result> tags content in the response. Do not reflect on the quality of the returned search results in your response.',
+  ],
+  ['placeholder', '{chat_history}'],
+  ['human', '{input}'],
+  ['placeholder', '{agent_scratchpad}'],
+]);
+
+export const geminiToolCallingAgentPrompt = ChatPromptTemplate.fromMessages([
+  [
+    'system',
+    'You are a helpful assistant. ALWAYS use the provided tools. Use tools as often as possible, as they have access to the latest data and syntax.\n\n' +
+      "The final response will be the only output the user sees and should be a complete answer to the user's question, as if you were responding to the user's initial question. The final response should never be empty.",
   ],
   ['placeholder', '{chat_history}'],
   ['human', '{input}'],
@@ -52,8 +70,5 @@ export const structuredChatAgentPrompt = ChatPromptTemplate.fromMessages([
       'Begin! Reminder to ALWAYS respond with a valid json blob of a single action with no additional output. When using tools, ALWAYS input the expected JSON schema args. Your answer will be parsed as JSON, so never use double quotes within the output and instead use backticks. Single quotes may be used, such as apostrophes. Response format is Action:```$JSON_BLOB```then Observation',
   ],
   ['placeholder', '{chat_history}'],
-  [
-    'human',
-    'Use the below context as a sample of information about the user from their knowledge base:\n\n```\n{knowledge_history}\n```\n\n{input}\n\n{agent_scratchpad}\n(reminder to respond in a JSON blob with no additional output no matter what)',
-  ],
+  ['human', '{input}\n\n{agent_scratchpad}\n\n(reminder to respond in a JSON blob no matter what)'],
 ]);

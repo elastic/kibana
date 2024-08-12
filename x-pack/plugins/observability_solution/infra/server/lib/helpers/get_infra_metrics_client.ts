@@ -6,8 +6,8 @@
  */
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import type { KibanaRequest } from '@kbn/core/server';
+import { MetricsDataClient } from '@kbn/metrics-data-access-plugin/server';
 import type { InfraPluginRequestHandlerContext } from '../../types';
-import { InfraSources } from '../sources';
 import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
 
 type RequiredParams = Omit<ESSearchRequest, 'index'> & {
@@ -20,20 +20,21 @@ type RequiredParams = Omit<ESSearchRequest, 'index'> & {
 export type InfraMetricsClient = Awaited<ReturnType<typeof getInfraMetricsClient>>;
 
 export async function getInfraMetricsClient({
-  sourceId,
   framework,
-  infraSources,
+  metricsDataAccess,
   requestContext,
   request,
 }: {
-  sourceId: string;
   framework: KibanaFramework;
-  infraSources: InfraSources;
+  metricsDataAccess: MetricsDataClient;
   requestContext: InfraPluginRequestHandlerContext;
   request?: KibanaRequest;
 }) {
-  const soClient = (await requestContext.core).savedObjects.getClient();
-  const source = await infraSources.getSourceConfiguration(soClient, sourceId);
+  const coreContext = await requestContext.core;
+  const savedObjectsClient = coreContext.savedObjects.client;
+  const indices = await metricsDataAccess.getMetricIndices({
+    savedObjectsClient,
+  });
 
   return {
     search<TDocument, TParams extends RequiredParams>(
@@ -44,7 +45,7 @@ export async function getInfraMetricsClient({
         'search',
         {
           ...searchParams,
-          index: source.configuration.metricAlias,
+          index: indices,
         },
         request
       ) as Promise<any>;

@@ -104,7 +104,10 @@ export type SideNavNodeStatus = 'hidden' | 'visible';
 
 export type RenderAs = 'block' | 'accordion' | 'panelOpener' | 'item';
 
-export type EuiThemeSize = Exclude<typeof EuiThemeSizes[number], 'base' | 'xxs' | 'xxxl' | 'xxxxl'>;
+export type EuiThemeSize = Exclude<
+  (typeof EuiThemeSizes)[number],
+  'base' | 'xxs' | 'xxxl' | 'xxxxl'
+>;
 
 export type GetIsActiveFn = (params: {
   /** The current path name including the basePath + hash value but **without** any query params */
@@ -431,7 +434,7 @@ export interface SolutionNavigationDefinition<LinkId extends AppDeepLinkId = App
   icon?: IconType;
   /** React component to render in the side nav for the navigation */
   sideNavComponent?: SideNavComponent;
-  /** The page to navigate to when switching to this solution navigation. */
+  /** The page to navigate to when clicking on the Kibana (or custom) logo. */
   homePage?: LinkId;
 }
 

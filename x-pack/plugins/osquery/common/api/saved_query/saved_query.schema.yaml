@@ -8,9 +8,7 @@ paths:
       summary: Find saved queries
       operationId: OsqueryFindSavedQueries
       x-codegen-enabled: true
-      x-labels:
-        - ess
-        - serverless
+      x-labels: [serverless, ess]
       parameters:
         - name: query
           in: query
@@ -28,9 +26,7 @@ paths:
       summary: Create a saved query
       operationId: OsqueryCreateSavedQuery
       x-codegen-enabled: true
-      x-labels:
-        - ess
-        - serverless
+      x-labels: [serverless, ess]
       requestBody:
         required: true
         content:
@@ -49,15 +45,13 @@ paths:
       summary: Get saved query details
       operationId: OsqueryGetSavedQueryDetails
       x-codegen-enabled: true
-      x-labels:
-        - ess
-        - serverless
+      x-labels: [serverless, ess]
       parameters:
-        - name: query
+        - name: id
           in: path
           required: true
           schema:
-            $ref: './read_saved_query.schema.yaml#/components/schemas/ReadSavedQueryRequestQuery'
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryId'
       responses:
         '200':
           description: OK
@@ -69,15 +63,13 @@ paths:
       summary: Delete saved query
       operationId: OsqueryDeleteSavedQuery
       x-codegen-enabled: true
-      x-labels:
-        - ess
-        - serverless
+      x-labels: [serverless, ess]
       parameters:
-        - name: query
+        - name: id
           in: path
           required: true
           schema:
-            $ref: './delete_saved_query.schema.yaml#/components/schemas/DeleteSavedQueryRequestQuery'
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryId'
       responses:
         '200':
           description: OK
@@ -89,21 +81,19 @@ paths:
       summary: Update saved query
       operationId: OsqueryUpdateSavedQuery
       x-codegen-enabled: true
-      x-labels:
-        - ess
-        - serverless
+      x-labels: [serverless, ess]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryId'
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: './update_saved_query.schema.yaml#/components/schemas/UpdateSavedQueryRequestBody'
-      parameters:
-        - name: query
-          in: path
-          required: true
-          schema:
-            $ref: './update_saved_query.schema.yaml#/components/schemas/UpdateSavedQueryRequestParams'
       responses:
         '200':
           description: OK

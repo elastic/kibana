@@ -42,7 +42,7 @@ export const putSpaceSettingsHandler: FleetRequestHandler<
       },
       spaceId: soClient.getCurrentNamespace(),
     });
-    const settings = await settingsService.getSettings(soClient);
+    const settings = await getSpaceSettings(soClient.getCurrentNamespace());
     const body = {
       item: settings,
     };

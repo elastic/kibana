@@ -975,7 +975,7 @@
             "label": "'kibana.alert.workflow_status'",
             "description": [],
             "signature": [
-              "\"in-progress\" | \"open\" | \"closed\" | \"acknowledged\" | undefined"
+              "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\" | undefined"
             ],
             "path": "packages/kbn-securitysolution-ecs/src/index.ts",
             "deprecated": false,

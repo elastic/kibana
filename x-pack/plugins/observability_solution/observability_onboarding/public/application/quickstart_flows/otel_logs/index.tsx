@@ -71,12 +71,8 @@ export const OtelLogsPanel: React.FC = () => {
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
-  const AGENT_CDN_BASE_URL = isServerless
-    ? 'snapshots.elastic.co/8.15.0-9bb1fcab/downloads/beats/elastic-agent'
-    : 'artifacts.elastic.co/downloads/beats/elastic-agent';
-  // TODO change once otel flow is shown on serverless
-  // const agentVersion = isServerless ? setup?.elasticAgentVersion : stackVersion;
-  const agentVersion = isServerless ? '8.15.0-SNAPSHOT' : stackVersion;
+  const AGENT_CDN_BASE_URL = 'artifacts.elastic.co/downloads/beats/elastic-agent';
+  const agentVersion = isServerless ? setup?.elasticAgentVersion : stackVersion;
 
   const allDatasetsLocator =
     share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID);
@@ -438,6 +434,7 @@ data:
           - resourcedetection/gcp
           - resource/k8s
           - resource/cloud
+          - attributes/k8s_logs_dataset
           receivers:
           - filelog
         metrics:
@@ -454,7 +451,6 @@ data:
           - resource/cloud
           - attributes/dataset
           - resource/process
-          - attributes/k8s_logs_dataset
           receivers:
           - kubeletstats
           - hostmetrics
@@ -555,7 +551,7 @@ spec:
       firstStepTitle: HOST_COMMAND,
       content: `arch=$(if ([[ $(arch) == "arm" || $(arch) == "aarch64" ]]); then echo "arm64"; else echo $(arch); fi)
 
-curl --output elastic-distro-${agentVersion}-linux-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${agentVersion}-linux-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir elastic-distro-${agentVersion}-linux-$arch && tar -xvf elastic-distro-${agentVersion}-linux-$arch.tar.gz -C "elastic-distro-${agentVersion}-linux-$arch" --strip-components=1 && cd elastic-distro-${agentVersion}-linux-$arch 
+curl --output elastic-distro-${agentVersion}-linux-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${agentVersion}-linux-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir -p elastic-distro-${agentVersion}-linux-$arch && tar -xvf elastic-distro-${agentVersion}-linux-$arch.tar.gz -C "elastic-distro-${agentVersion}-linux-$arch" --strip-components=1 && cd elastic-distro-${agentVersion}-linux-$arch 
 
 sudo setcap 'cap_dac_read_search=ep' ./data/elastic-agent-*/elastic-agent
         
@@ -569,7 +565,7 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
       firstStepTitle: HOST_COMMAND,
       content: `arch=$(if [[ $(arch) == "arm64" ]]; then echo "aarch64"; else echo $(arch); fi)
 
-curl --output elastic-distro-${agentVersion}-darwin-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${agentVersion}-darwin-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir "elastic-distro-${agentVersion}-darwin-$arch" && tar -xvf elastic-distro-${agentVersion}-darwin-$arch.tar.gz -C "elastic-distro-${agentVersion}-darwin-$arch" --strip-components=1 && cd elastic-distro-${agentVersion}-darwin-$arch 
+curl --output elastic-distro-${agentVersion}-darwin-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${agentVersion}-darwin-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir -p "elastic-distro-${agentVersion}-darwin-$arch" && tar -xvf elastic-distro-${agentVersion}-darwin-$arch.tar.gz -C "elastic-distro-${agentVersion}-darwin-$arch" --strip-components=1 && cd elastic-distro-${agentVersion}-darwin-$arch 
       
 rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mkdir -p ./data/otelcol  && sed -i '' 's#\\\${env:STORAGE_DIR}#'"$PWD"/data/otelcol'#g' ./otel.yml && sed -i '' 's#\\\${env:ELASTIC_ENDPOINT}#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i '' 's/\\\${env:ELASTIC_API_KEY}/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
       start: './otelcol --config otel.yml',
@@ -875,7 +871,7 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
                           link: (
                             <EuiLink
                               data-test-subj="observabilityOnboardingOtelLogsPanelDocumentationLink"
-                              href="https://www.elastic.co/guide/en/observability/current/get-started-opentelemetry.html"
+                              href="https://ela.st/elastic-otel"
                               target="_blank"
                               external
                             >

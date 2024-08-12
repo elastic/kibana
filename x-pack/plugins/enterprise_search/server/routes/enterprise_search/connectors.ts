@@ -38,6 +38,7 @@ import {
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
 import { generateConfig } from '../../lib/connectors/generate_config';
+import { generateConnectorName } from '../../lib/connectors/generate_connector_name';
 import { startSync } from '../../lib/connectors/start_sync';
 import { deleteAccessControlIndex } from '../../lib/indices/delete_access_control_index';
 import { fetchIndexCounts } from '../../lib/indices/fetch_index_counts';
@@ -833,6 +834,43 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         },
         headers: { 'content-type': 'application/json' },
       });
+    })
+  );
+  router.post(
+    {
+      path: '/internal/enterprise_search/connectors/generate_connector_name',
+      validate: {
+        body: schema.object({
+          connectorType: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { connectorType } = request.body;
+      try {
+        const generatedNames = await generateConnectorName(client, connectorType ?? 'custom');
+        return response.ok({
+          body: generatedNames,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (error.message === ErrorCode.GENERATE_INDEX_NAME_ERROR) {
+          return createError({
+            errorCode: ErrorCode.GENERATE_INDEX_NAME_ERROR,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.connectors.generateConfiguration.indexAlreadyExistsError',
+              {
+                defaultMessage: 'Cannot find a unique connector name',
+              }
+            ),
+            response,
+            statusCode: 409,
+          });
+        } else {
+          throw error;
+        }
+      }
     })
   );
 }

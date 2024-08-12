@@ -624,6 +624,94 @@
       },
       {
         "parentPluginId": "@kbn/apm-synthtrace-client",
+        "id": "def-common.Entity",
+        "type": "Class",
+        "tags": [],
+        "label": "Entity",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/apm-synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnApmSynthtraceClientPluginApi",
+            "section": "def-common.Entity",
+            "text": "Entity"
+          },
+          "<TFields>"
+        ],
+        "path": "packages/kbn-apm-synthtrace-client/src/lib/entity.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.Entity.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-apm-synthtrace-client/src/lib/entity.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.Entity.Unnamed.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "fields",
+                "description": [],
+                "signature": [
+                  "TFields"
+                ],
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/entity.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.Entity.defaults",
+            "type": "Function",
+            "tags": [],
+            "label": "defaults",
+            "description": [],
+            "signature": [
+              "(defaults: TFields) => this"
+            ],
+            "path": "packages/kbn-apm-synthtrace-client/src/lib/entity.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.Entity.defaults.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "defaults",
+                "description": [],
+                "signature": [
+                  "TFields"
+                ],
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/entity.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-synthtrace-client",
         "id": "def-common.Instance",
         "type": "Class",
         "tags": [],
@@ -638,7 +726,13 @@
             "text": "Instance"
           },
           " extends ",
-          "Entity",
+          {
+            "pluginId": "@kbn/apm-synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnApmSynthtraceClientPluginApi",
+            "section": "def-common.Entity",
+            "text": "Entity"
+          },
           "<",
           {
             "pluginId": "@kbn/apm-synthtrace-client",
@@ -1020,7 +1114,13 @@
             "text": "MobileDevice"
           },
           " extends ",
-          "Entity",
+          {
+            "pluginId": "@kbn/apm-synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnApmSynthtraceClientPluginApi",
+            "section": "def-common.Entity",
+            "text": "Entity"
+          },
           "<",
           {
             "pluginId": "@kbn/apm-synthtrace-client",
@@ -1534,7 +1634,13 @@
             "text": "Serializable"
           },
           "<TFields> extends ",
-          "Entity",
+          {
+            "pluginId": "@kbn/apm-synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnApmSynthtraceClientPluginApi",
+            "section": "def-common.Entity",
+            "text": "Entity"
+          },
           "<TFields>"
         ],
         "path": "packages/kbn-apm-synthtrace-client/src/lib/serializable.ts",
@@ -2616,7 +2722,9 @@
           " | ",
           "DockerContainerMetricsDocument",
           " | ",
-          "K8sContainerMetricsDocument"
+          "K8sContainerMetricsDocument",
+          " | ",
+          "AWSRdsMetricsDocument"
         ],
         "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/index.ts",
         "deprecated": false,
@@ -2983,6 +3091,46 @@
                 "label": "nodeName",
                 "description": [],
                 "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/k8s_container.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.infra.awsRds",
+            "type": "Function",
+            "tags": [],
+            "label": "awsRds",
+            "description": [],
+            "signature": [
+              "(arn: string, name: string) => ",
+              "AWSRds"
+            ],
+            "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.infra.awsRds.$1",
+                "type": "string",
+                "tags": [],
+                "label": "arn",
+                "description": [],
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/aws/rds.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.infra.awsRds.$2",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/aws/rds.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

@@ -38,7 +38,7 @@ export function generateLatestMetadataAggregations(definition: EntityDefinition)
         filter: {
           range: {
             'event.ingested': {
-              gte: `now-${definition.history.interval.toJSON()}`,
+              gte: `now-${definition.history.interval}`,
             },
           },
         },

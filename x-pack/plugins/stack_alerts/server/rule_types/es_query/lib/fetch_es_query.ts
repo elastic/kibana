@@ -120,6 +120,7 @@ export async function fetchEsQuery({
         ),
       },
       ...(isGroupAgg ? { topHitsSize: params.size } : {}),
+      loggerCb: (message: string) => logger.warn(message),
     }),
   });
 
@@ -145,6 +146,7 @@ export async function fetchEsQuery({
       sourceFieldsParams: params.sourceFields,
     }),
     link,
+    query: sortedQuery,
     index: params.index,
   };
 }

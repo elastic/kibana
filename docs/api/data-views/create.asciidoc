@@ -4,7 +4,7 @@
 <titleabbrev>Create data view</titleabbrev>
 ++++
 
-experimental[] Create data views.
+Create data views.
 
 [NOTE]
 ====

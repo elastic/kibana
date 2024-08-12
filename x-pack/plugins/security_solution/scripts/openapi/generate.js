@@ -18,7 +18,6 @@ const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
     rootDir: SECURITY_SOLUTION_ROOT,
     sourceGlob: './common/**/*.schema.yaml',
     templateName: 'zod_operation_schema',
-    skipLinting: true,
   });
 
   await generate({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 
 export const ELASTIC_CLOUD_APM_POLICY = 'elastic-cloud-apm';

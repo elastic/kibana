@@ -14,6 +14,7 @@ import {
   getIndexForESQLQuery,
   ENABLE_ESQL,
   getESQLQueryColumns,
+  getInitialESQLQuery,
 } from '@kbn/esql-utils';
 import type { Datasource, Visualization } from '../../types';
 import type { LensPluginStartDependencies } from '../../plugin';
@@ -21,6 +22,7 @@ import { suggestionsApi } from '../../lens_suggestions_api';
 import { generateId } from '../../id_generator';
 import { executeEditAction } from './edit_action_helpers';
 import { Embeddable } from '../../embeddable';
+import type { EditorFrameService } from '../../editor_frame_service';
 
 // datasourceMap and visualizationMap setters/getters
 export const [getVisualizationMap, setVisualizationMap] = createGetterSetter<
@@ -31,7 +33,7 @@ export const [getDatasourceMap, setDatasourceMap] = createGetterSetter<
   Record<string, Datasource<unknown, unknown>>
 >('DatasourceMap', false);
 
-export function isCreateActionCompatible(core: CoreStart) {
+export async function isCreateActionCompatible(core: CoreStart) {
   return core.uiSettings.get(ENABLE_ESQL);
 }
 
@@ -39,31 +41,51 @@ export async function executeCreateAction({
   deps,
   core,
   api,
+  editorFrameService,
 }: {
   deps: LensPluginStartDependencies;
   core: CoreStart;
   api: PresentationContainer;
+  editorFrameService: EditorFrameService;
 }) {
-  const isCompatibleAction = isCreateActionCompatible(core);
-
   const getFallbackDataView = async () => {
     const indexName = await getIndexForESQLQuery({ dataViews: deps.dataViews });
     if (!indexName) return null;
-    const dataView = await getESQLAdHocDataview(indexName, deps.dataViews);
+    const dataView = await getESQLAdHocDataview(`from ${indexName}`, deps.dataViews);
     return dataView;
   };
 
-  const dataView = await getFallbackDataView();
+  const [isCompatibleAction, dataView] = await Promise.all([
+    isCreateActionCompatible(core),
+    getFallbackDataView(),
+  ]);
 
   if (!isCompatibleAction || !dataView) {
     throw new IncompatibleActionError();
   }
-  const visualizationMap = getVisualizationMap();
-  const datasourceMap = getDatasourceMap();
-  const defaultIndex = dataView.getIndexPattern();
+
+  let visualizationMap = getVisualizationMap();
+  let datasourceMap = getDatasourceMap();
+
+  if (!visualizationMap || !datasourceMap) {
+    [visualizationMap, datasourceMap] = await Promise.all([
+      editorFrameService.loadVisualizations(),
+      editorFrameService.loadDatasources(),
+    ]);
+
+    if (!visualizationMap && !datasourceMap) {
+      throw new IncompatibleActionError();
+    }
+
+    // persist for retrieval elsewhere
+    setDatasourceMap(datasourceMap);
+    setVisualizationMap(visualizationMap);
+  }
+
+  const esqlQuery = getInitialESQLQuery(dataView);
 
   const defaultEsqlQuery = {
-    esql: `FROM ${defaultIndex} | LIMIT 10`,
+    esql: esqlQuery,
   };
 
   // For the suggestions api we need only the columns
@@ -72,9 +94,10 @@ export async function executeCreateAction({
   // all the table
   const abortController = new AbortController();
   const columns = await getESQLQueryColumns({
-    esqlQuery: `from ${defaultIndex}`,
+    esqlQuery,
     search: deps.data.search.search,
     signal: abortController.signal,
+    timeRange: deps.data.query.timefilter.timefilter.getAbsoluteTime(),
   });
 
   const context = {

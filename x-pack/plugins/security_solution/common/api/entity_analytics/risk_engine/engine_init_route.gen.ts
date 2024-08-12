@@ -16,8 +16,8 @@
 
 import { z } from 'zod';
 
-export type RiskEngineInitResult = z.infer<typeof RiskEngineInitResult>;
-export const RiskEngineInitResult = z.object({
+export type InitRiskEngineResult = z.infer<typeof InitRiskEngineResult>;
+export const InitRiskEngineResult = z.object({
   risk_engine_enabled: z.boolean(),
   risk_engine_resources_installed: z.boolean(),
   risk_engine_configuration_created: z.boolean(),
@@ -25,13 +25,13 @@ export const RiskEngineInitResult = z.object({
   errors: z.array(z.string()),
 });
 
-export type RiskEngineInitResponse = z.infer<typeof RiskEngineInitResponse>;
-export const RiskEngineInitResponse = z.object({
-  result: RiskEngineInitResult,
-});
-
-export type RiskEngineInitErrorResponse = z.infer<typeof RiskEngineInitErrorResponse>;
-export const RiskEngineInitErrorResponse = z.object({
+export type InitRiskEngineErrorResponse = z.infer<typeof InitRiskEngineErrorResponse>;
+export const InitRiskEngineErrorResponse = z.object({
   message: z.string(),
   full_error: z.string(),
+});
+
+export type InitRiskEngineResponse = z.infer<typeof InitRiskEngineResponse>;
+export const InitRiskEngineResponse = z.object({
+  result: InitRiskEngineResult,
 });

@@ -99,7 +99,7 @@ export type RuleInterval = z.infer<typeof RuleInterval>;
 export const RuleInterval = z.string();
 
 /**
- * Time from which data is analyzed each time the rule executes, using a date math range. For example, now-4200s means the rule analyzes data from 70 minutes before its start time. Defaults to now-6m (analyzes data from 6 minutes before the start time).
+ * Time from which data is analyzed each time the rule runs, using a date math range. For example, now-4200s means the rule analyzes data from 70 minutes before its start time. Defaults to now-6m (analyzes data from 6 minutes before the start time).
  */
 export type RuleIntervalFrom = z.infer<typeof RuleIntervalFrom>;
 export const RuleIntervalFrom = z.string().superRefine(isValidDateMath);
@@ -454,7 +454,7 @@ export const InvestigationFields = z.object({
 });
 
 /**
- * Defines the interval on which a rule's actions are executed.
+ * Defines how often rule actions are taken.
  */
 export type RuleActionThrottle = z.infer<typeof RuleActionThrottle>;
 export const RuleActionThrottle = z.union([
@@ -514,7 +514,7 @@ export const RuleAction = z.object({
    * The action type used for sending notifications.
    */
   action_type_id: z.string(),
-  group: RuleActionGroup,
+  group: RuleActionGroup.optional(),
   id: RuleActionId,
   params: RuleActionParams,
   uuid: NonEmptyString.optional(),

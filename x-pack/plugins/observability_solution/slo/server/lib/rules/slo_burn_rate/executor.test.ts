@@ -338,19 +338,22 @@ describe('BurnRateRuleExecutor', () => {
     });
 
     it('schedules an alert when both windows of first window definition burn rate have reached the threshold', async () => {
-      const slo = createSLO({ objective: { target: 0.9 }, groupBy: ['group.by.field'] });
+      const slo = createSLO({
+        objective: { target: 0.9 },
+        groupBy: ['group.by.field', 'client.geo.continent_name'],
+      });
       const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
       soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
       const buckets = [
         {
-          instanceId: 'foo',
+          instanceId: 'foo,asia',
           windows: [
             { shortWindowBurnRate: 2.1, longWindowBurnRate: 2.3 },
             { shortWindowBurnRate: 0.9, longWindowBurnRate: 1.2 },
           ],
         },
         {
-          instanceId: 'bar',
+          instanceId: 'bar,asia',
           windows: [
             { shortWindowBurnRate: 2.2, longWindowBurnRate: 2.5 },
             { shortWindowBurnRate: 0.9, longWindowBurnRate: 1.2 },
@@ -391,75 +394,93 @@ describe('BurnRateRuleExecutor', () => {
       });
 
       expect(servicesMock.alertsClient?.report).toBeCalledWith({
-        id: 'foo',
+        id: 'foo,asia',
         actionGroup: ALERT_ACTION.id,
         state: {
           alertState: AlertStates.ALERT,
         },
         payload: {
           [ALERT_REASON]:
-            'CRITICAL: The burn rate for the past 1h is 2.3 and for the past 5m is 2.1 for foo. Alert when above 2 for both windows',
+            'CRITICAL: The burn rate for the past 1h is 2.3 and for the past 5m is 2.1 for foo,asia. Alert when above 2 for both windows',
           [ALERT_EVALUATION_THRESHOLD]: 2,
           [ALERT_EVALUATION_VALUE]: 2.1,
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
-          [SLO_INSTANCE_ID_FIELD]: 'foo',
+          [SLO_INSTANCE_ID_FIELD]: 'foo,asia',
           [ALERT_GROUP]: [
             {
               field: 'group.by.field',
               value: 'foo',
             },
+            {
+              field: 'client.geo.continent_name',
+              value: 'asia',
+            },
           ],
+          'client.geo.continent_name': 'asia',
         },
       });
       expect(servicesMock.alertsClient?.report).toBeCalledWith({
-        id: 'bar',
+        id: 'bar,asia',
         actionGroup: ALERT_ACTION.id,
         state: {
           alertState: AlertStates.ALERT,
         },
         payload: {
           [ALERT_REASON]:
-            'CRITICAL: The burn rate for the past 1h is 2.5 and for the past 5m is 2.2 for bar. Alert when above 2 for both windows',
+            'CRITICAL: The burn rate for the past 1h is 2.5 and for the past 5m is 2.2 for bar,asia. Alert when above 2 for both windows',
           [ALERT_EVALUATION_THRESHOLD]: 2,
           [ALERT_EVALUATION_VALUE]: 2.2,
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
-          [SLO_INSTANCE_ID_FIELD]: 'bar',
+          [SLO_INSTANCE_ID_FIELD]: 'bar,asia',
           [ALERT_GROUP]: [
             {
               field: 'group.by.field',
               value: 'bar',
             },
+            {
+              field: 'client.geo.continent_name',
+              value: 'asia',
+            },
           ],
+          'client.geo.continent_name': 'asia',
         },
       });
+      expect(servicesMock.alertsClient?.setAlertData).toHaveBeenCalledTimes(2);
       expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(1, {
-        id: 'foo',
+        id: 'foo,asia',
         context: expect.objectContaining({
           longWindow: { burnRate: 2.3, duration: '1h' },
           shortWindow: { burnRate: 2.1, duration: '5m' },
           burnRateThreshold: 2,
           reason:
-            'CRITICAL: The burn rate for the past 1h is 2.3 and for the past 5m is 2.1 for foo. Alert when above 2 for both windows',
+            'CRITICAL: The burn rate for the past 1h is 2.3 and for the past 5m is 2.1 for foo,asia. Alert when above 2 for both windows',
           alertDetailsUrl: 'mockedAlertsLocator > getLocation',
         }),
       });
       expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(2, {
-        id: 'bar',
+        id: 'bar,asia',
         context: expect.objectContaining({
           longWindow: { burnRate: 2.5, duration: '1h' },
           shortWindow: { burnRate: 2.2, duration: '5m' },
           burnRateThreshold: 2,
           reason:
-            'CRITICAL: The burn rate for the past 1h is 2.5 and for the past 5m is 2.2 for bar. Alert when above 2 for both windows',
+            'CRITICAL: The burn rate for the past 1h is 2.5 and for the past 5m is 2.2 for bar,asia. Alert when above 2 for both windows',
           alertDetailsUrl: 'mockedAlertsLocator > getLocation',
         }),
       });
 
-      expect(alertsLocatorMock.getLocation).toBeCalledWith({
+      expect(alertsLocatorMock.getLocation).toHaveBeenCalledTimes(2);
+      expect(alertsLocatorMock.getLocation).toHaveBeenNthCalledWith(1, {
         baseUrl: 'https://kibana.dev',
-        kuery: 'kibana.alert.uuid: "uuid-foo"',
+        kuery: 'kibana.alert.uuid: "uuid-foo,asia"',
+        rangeFrom: expect.stringMatching(ISO_DATE_REGEX),
+        spaceId: 'irrelevant',
+      });
+      expect(alertsLocatorMock.getLocation).toHaveBeenNthCalledWith(2, {
+        baseUrl: 'https://kibana.dev',
+        kuery: 'kibana.alert.uuid: "uuid-bar,asia"',
         rangeFrom: expect.stringMatching(ISO_DATE_REGEX),
         spaceId: 'irrelevant',
       });

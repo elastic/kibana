@@ -27,6 +27,10 @@ spec:
       pipeline_file: ".buildkite/pipelines/pointer_compression.yml"
       provider_settings:
         trigger_mode: none
+      schedules:
+        Daily run:
+          branch: main
+          cronline: "@daily"
       teams:
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ

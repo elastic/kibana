@@ -22,6 +22,73 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/triggers-actions-ui-types",
+        "id": "def-common.ActionGroupWithMessageVariables",
+        "type": "Interface",
+        "tags": [],
+        "label": "ActionGroupWithMessageVariables",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/triggers-actions-ui-types",
+            "scope": "common",
+            "docId": "kibKbnTriggersActionsUiTypesPluginApi",
+            "section": "def-common.ActionGroupWithMessageVariables",
+            "text": "ActionGroupWithMessageVariables"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionGroup",
+            "text": "ActionGroup"
+          },
+          "<string>"
+        ],
+        "path": "packages/kbn-triggers-actions-ui-types/action_group_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/triggers-actions-ui-types",
+            "id": "def-common.ActionGroupWithMessageVariables.omitMessageVariables",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "omitMessageVariables",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/triggers-actions-ui-types",
+                "scope": "common",
+                "docId": "kibKbnTriggersActionsUiTypesPluginApi",
+                "section": "def-common.OmitMessageVariablesType",
+                "text": "OmitMessageVariablesType"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-triggers-actions-ui-types/action_group_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/triggers-actions-ui-types",
+            "id": "def-common.ActionGroupWithMessageVariables.defaultActionMessage",
+            "type": "string",
+            "tags": [],
+            "label": "defaultActionMessage",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-triggers-actions-ui-types/action_group_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/triggers-actions-ui-types",
         "id": "def-common.RuleType",
         "type": "Interface",
         "tags": [],
@@ -133,6 +200,21 @@
           "AsActionVariables<\"params\"> & Partial<AsActionVariables<\"context\" | \"state\">>"
         ],
         "path": "packages/kbn-triggers-actions-ui-types/action_variable_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/triggers-actions-ui-types",
+        "id": "def-common.OmitMessageVariablesType",
+        "type": "Type",
+        "tags": [],
+        "label": "OmitMessageVariablesType",
+        "description": [],
+        "signature": [
+          "\"all\" | \"keepContext\""
+        ],
+        "path": "packages/kbn-triggers-actions-ui-types/action_group_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

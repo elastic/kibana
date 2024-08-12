@@ -12,4 +12,4 @@ export * from './diff/rule_diff/fields_diff';
 export * from './diff/rule_diff/rule_diff';
 export * from './diff/three_way_diff/three_way_diff_outcome';
 export * from './diff/three_way_diff/three_way_diff';
-export * from './diff/three_way_diff/three_way_merge_outcome';
+export * from './diff/three_way_diff/three_way_diff_conflict';

@@ -12,9 +12,8 @@ import {
   getLogLevelColor,
 } from '@kbn/discover-utils';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
+import { LOG_LEVEL_FIELDS } from '../../../../../common/data_types/logs/constants';
 import type { DataSourceProfileProvider } from '../../../profiles';
-
-const LOG_LEVEL_FIELDS = ['log.level', 'log_level'];
 
 export const getRowIndicatorProvider: DataSourceProfileProvider['profile']['getRowIndicatorProvider'] =
 

@@ -32,6 +32,7 @@ export const getCasesLazy = ({
   ruleDetailsNavigation,
   showAlertDetails,
   useFetchAlertData,
+  onAlertsTableLoaded,
   refreshRef,
   timelineIntegration,
   features,
@@ -55,6 +56,7 @@ export const getCasesLazy = ({
         ruleDetailsNavigation={ruleDetailsNavigation}
         showAlertDetails={showAlertDetails}
         useFetchAlertData={useFetchAlertData}
+        onAlertsTableLoaded={onAlertsTableLoaded}
         refreshRef={refreshRef}
         timelineIntegration={timelineIntegration}
       />

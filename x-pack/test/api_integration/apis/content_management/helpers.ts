@@ -66,7 +66,7 @@ export async function loginAsInteractiveUser({
   getService,
   username = users[0],
 }: Pick<FtrProviderContext, 'getService'> & {
-  username?: typeof users[number];
+  username?: (typeof users)[number];
 }): Promise<LoginAsInteractiveUserResponse> {
   const supertest = getService('supertestWithoutAuth');
 

@@ -65,13 +65,6 @@ export interface IRenderOptions {
   isAnonymousPage?: boolean;
 
   /**
-   * Inject custom vars into the page metadata.
-   * @deprecated for legacy use only. Can be removed when https://github.com/elastic/kibana/issues/127733 is done.
-   * @internal
-   */
-  vars?: Record<string, any>;
-
-  /**
    * @internal
    * This is only used for integration tests that allow us to verify which config keys are exposed to the browser.
    */

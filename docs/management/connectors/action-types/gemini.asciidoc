@@ -56,7 +56,7 @@ Body::      A stringified JSON payload sent to the {gemini} invoke model API. Fo
   body: JSON.stringify({
         contents: [{
             role: user,
-            parts: [{ text: 'Write the first line of a story about a magic backpack.' }]
+            parts: [{ text: 'Hello world!' }]
         }],
         generation_config: {
             temperature: 0,

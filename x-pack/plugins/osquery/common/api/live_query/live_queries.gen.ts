@@ -19,10 +19,7 @@ import { z } from 'zod';
 import { FindLiveQueryRequestQuery } from './find_live_query.gen';
 import { DefaultSuccessResponse, Id } from '../model/schema/common_attributes.gen';
 import { CreateLiveQueryRequestBody } from './create_live_query.gen';
-import {
-  GetLiveQueryResultsRequestQuery,
-  GetLiveQueryResultsRequestParams,
-} from './get_live_query_results.gen';
+import { GetLiveQueryResultsRequestQuery } from './get_live_query_results.gen';
 
 export type OsqueryCreateLiveQueryRequestBody = z.infer<typeof OsqueryCreateLiveQueryRequestBody>;
 export const OsqueryCreateLiveQueryRequestBody = CreateLiveQueryRequestBody;
@@ -78,7 +75,8 @@ export type OsqueryGetLiveQueryResultsRequestParams = z.infer<
   typeof OsqueryGetLiveQueryResultsRequestParams
 >;
 export const OsqueryGetLiveQueryResultsRequestParams = z.object({
-  query: GetLiveQueryResultsRequestParams,
+  id: Id,
+  actionId: Id,
 });
 export type OsqueryGetLiveQueryResultsRequestParamsInput = z.input<
   typeof OsqueryGetLiveQueryResultsRequestParams

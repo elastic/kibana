@@ -83,13 +83,15 @@ const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof Experimental
 jest.mock('../../../../../common/lib/kibana');
 
 // unified-field-list is reporting multiple analytics events
-jest.mock(`@kbn/ebt/client`);
+jest.mock(`@elastic/ebt/client`);
 
 const mockOpenFlyout = jest.fn();
+const mockCloseFlyout = jest.fn();
 jest.mock('@kbn/expandable-flyout', () => {
   return {
     useExpandableFlyoutApi: () => ({
       openFlyout: mockOpenFlyout,
+      closeFlyout: mockCloseFlyout,
     }),
     TestProvider: ({ children }: PropsWithChildren<{}>) => <>{children}</>,
   };
@@ -775,6 +777,54 @@ describe('query tab with unified timeline', () => {
 
         await waitFor(() => {
           expect(screen.queryByTestId('fieldListGroupedFieldGroups')).not.toBeInTheDocument();
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+  });
+
+  describe('Leading actions - expand event', () => {
+    it(
+      'should expand and collapse event correctly',
+      async () => {
+        renderTestComponents();
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+        expect(screen.getByTestId('docTableExpandToggleColumn').firstChild).toHaveAttribute(
+          'data-euiicon-type',
+          'expand'
+        );
+
+        // Open Flyout
+        fireEvent.click(screen.getByTestId('docTableExpandToggleColumn'));
+
+        await waitFor(() => {
+          expect(mockOpenFlyout).toHaveBeenNthCalledWith(1, {
+            right: {
+              id: 'document-details-right',
+              params: {
+                id: '1',
+                indexName: '',
+                scopeId: TimelineId.test,
+              },
+            },
+          });
+        });
+
+        expect(screen.getByTestId('docTableExpandToggleColumn').firstChild).toHaveAttribute(
+          'data-euiicon-type',
+          'minimize'
+        );
+
+        // Close Flyout
+        fireEvent.click(screen.getByTestId('docTableExpandToggleColumn'));
+
+        await waitFor(() => {
+          expect(mockCloseFlyout).toHaveBeenNthCalledWith(1);
+          expect(screen.getByTestId('docTableExpandToggleColumn').firstChild).toHaveAttribute(
+            'data-euiicon-type',
+            'expand'
+          );
         });
       },
       SPECIAL_TEST_TIMEOUT

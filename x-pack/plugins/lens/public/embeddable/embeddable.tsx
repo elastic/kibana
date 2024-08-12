@@ -185,6 +185,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
     data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
   ) => void;
   abortController?: AbortController;
+  onBeforeBadgesRender?: (userMessages: UserMessage[]) => UserMessage[];
 }
 
 export type LensByValueInput = {
@@ -610,6 +611,22 @@ export class Embeddable
 
   private fullAttributes: LensSavedObjectAttributes | undefined;
 
+  private handleExternalUserMessage = (messages: UserMessage[]) => {
+    if (this.input.onBeforeBadgesRender) {
+      // we need something else to better identify those errors
+      const [messagesToHandle, originalMessages] = partition(messages, (message) =>
+        message.displayLocations.some((location) => location.id === 'embeddableBadge')
+      );
+
+      if (messagesToHandle.length > 0) {
+        const customBadgeMessages = this.input.onBeforeBadgesRender(messagesToHandle);
+        return [...originalMessages, ...customBadgeMessages];
+      }
+    }
+
+    return messages;
+  };
+
   public getUserMessages: UserMessagesGetter = (locationId, filters) => {
     const userMessages: UserMessage[] = [];
     userMessages.push(
@@ -637,8 +654,9 @@ export class Embeddable
     );
 
     if (!this.savedVis) {
-      return userMessages;
+      return this.handleExternalUserMessage(userMessages);
     }
+
     const mergedSearchContext = this.getMergedSearchContext();
 
     const framePublicAPI: FramePublicAPI = {
@@ -683,10 +701,12 @@ export class Embeddable
       }) ?? [])
     );
 
-    return filterAndSortUserMessages(
-      [...userMessages, ...Object.values(this.additionalUserMessages)],
-      locationId,
-      filters ?? {}
+    return this.handleExternalUserMessage(
+      filterAndSortUserMessages(
+        [...userMessages, ...Object.values(this.additionalUserMessages)],
+        locationId,
+        filters ?? {}
+      )
     );
   };
 

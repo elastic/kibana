@@ -219,8 +219,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     scopeId: tableId,
   });
 
-  const { DetailsPanel, SessionView } = useSessionView({
-    entityType,
+  const { SessionView } = useSessionView({
     scopeId: tableId,
   });
 
@@ -617,7 +616,6 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
           </StyledEuiPanel>
         </InspectButtonContainer>
       </FullScreenContainer>
-      {DetailsPanel}
     </>
   );
 };

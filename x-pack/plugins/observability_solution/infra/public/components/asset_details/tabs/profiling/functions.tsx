@@ -31,11 +31,13 @@ export function Functions({ kuery }: Props) {
   const { dateRange, getDateRangeInTimestamp } = useDatePickerContext();
   const { from, to } = getDateRangeInTimestamp();
   const { request$ } = useRequestObservable<TopNFunctions>();
+  const { renderMode } = useAssetDetailsRenderPropsContext();
 
   const profilingLinkLocator = services.observabilityShared.locators.profiling.topNFunctionsLocator;
   const profilingLinkLabel = i18n.translate('xpack.infra.flamegraph.profilingAppTopFunctionsLink', {
     defaultMessage: 'Go to Universal Profiling Functions',
   });
+  const showFullScreenSelector = renderMode.mode === 'page';
 
   const params = useMemo(
     () => ({
@@ -85,6 +87,8 @@ export function Functions({ kuery }: Props) {
         isLoading={isPending(status)}
         rangeFrom={from}
         rangeTo={to}
+        height="60vh"
+        showFullScreenSelector={showFullScreenSelector}
       />
     </>
   );

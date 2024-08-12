@@ -41,7 +41,7 @@ import type {
   SecurityPluginSetup,
   SecurityPluginStart,
 } from '@kbn/security-plugin/server';
-import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldsMetadataServerSetup } from '@kbn/fields-metadata-plugin/server';
 import type {
   TaskManagerSetupContract,

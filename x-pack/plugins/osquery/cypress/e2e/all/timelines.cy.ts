@@ -41,7 +41,8 @@ describe('ALL - Timelines', { tags: ['@ess'] }, () => {
     });
     cy.getBySel('sourcerer-save').click();
 
-    cy.getBySel('docTableExpandToggleColumn').first().click();
+    // Force true due to pointer-events: none on parent prevents user mouse interaction.
+    cy.getBySel('docTableExpandToggleColumn').first().click({ force: true });
     takeOsqueryActionWithParams();
   });
 });

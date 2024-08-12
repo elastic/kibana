@@ -91,7 +91,13 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           'enableStrictKQLValidation',
           'subfeaturePrivileges',
           'enablePackagesStateMachine',
+          'agentless',
         ])}`,
+        `--xpack.cloud.id='123456789'`,
+        `--xpack.fleet.agentless.api.url=https://api.agentless.url/api/v1/ess`,
+        `--xpack.fleet.agentless.api.tls.certificate=./config/node.crt`,
+        `--xpack.fleet.agentless.api.tls.key=./config/node.key`,
+        `--xpack.fleet.agentless.api.tls.ca=./config/ca.crt`,
         `--logging.loggers=${JSON.stringify([
           ...getKibanaCliLoggers(xPackAPITestsConfig.get('kbnTestServer.serverArgs')),
 

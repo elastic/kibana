@@ -1,16 +1,14 @@
 openapi: 3.0.0
 info:
-  title: Get list API endpoint
+  title: Read list API endpoint
   version: '2023-10-31'
 paths:
   /api/lists:
     get:
       x-labels: [serverless, ess]
-      operationId: GetList
+      operationId: ReadList
       x-codegen-enabled: true
       summary: Retrieves a list using its id field
-      tags:
-        - List API
       parameters:
         - name: id
           in: query

@@ -9,7 +9,6 @@ import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import {
   EuiButton,
-  EuiCopy,
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
   EuiDataGridCustomBodyProps,
@@ -26,6 +25,7 @@ import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
+  mockRowAdditionalLeadingControls,
   testLeadingControlColumn,
   testTrailingControlColumns,
 } from '../../__mocks__/external_control_columns';
@@ -129,6 +129,23 @@ async function toggleDocSelection(
 }
 
 describe('UnifiedDataTable', () => {
+  const originalClipboard = global.window.navigator.clipboard;
+
+  beforeAll(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      value: {
+        writeText: jest.fn(),
+      },
+      writable: true,
+    });
+  });
+
+  afterAll(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      value: originalClipboard,
+    });
+  });
+
   afterEach(async () => {
     jest.clearAllMocks();
   });
@@ -212,11 +229,36 @@ describe('UnifiedDataTable', () => {
       expect(getDisplayedDocNr(component)).toBe(5);
     });
 
-    test('copying selected documents to clipboard', async () => {
+    test('copying selected documents to clipboard as JSON', async () => {
       await toggleDocSelection(component, esHitsMock[0]);
       findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
-      expect(component.find(EuiCopy).prop('textToCopy')).toMatchInlineSnapshot(
-        `"[{\\"_index\\":\\"i\\",\\"_id\\":\\"1\\",\\"_score\\":1,\\"_type\\":\\"_doc\\",\\"_source\\":{\\"date\\":\\"2020-20-01T12:12:12.123\\",\\"message\\":\\"test1\\",\\"bytes\\":20}}]"`
+      findTestSubject(component, 'dscGridCopySelectedDocumentsJSON').simulate('click');
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+        '[{"_index":"i","_id":"1","_score":1,"_type":"_doc","_source":{"date":"2020-20-01T12:12:12.123","message":"test1","bytes":20}}]'
+      );
+    });
+
+    test('copying selected documents to clipboard as text', async () => {
+      await toggleDocSelection(component, esHitsMock[2]);
+      await toggleDocSelection(component, esHitsMock[1]);
+      findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
+      findTestSubject(component, 'unifiedDataTableCopyRowsAsText').simulate('click');
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+        '"\'@timestamp"\t"_index"\t"_score"\tbytes\tdate\textension\tmessage\tname\n-\ti\t1\t-\t"2020-20-01T12:12:12.124"\tjpg\t-\ttest2\n-\ti\t1\t50\t"2020-20-01T12:12:12.124"\tgif\t-\ttest3'
+      );
+    });
+
+    test('copying selected columns to clipboard as text', async () => {
+      component = await getComponent({
+        ...getProps(),
+        columns: ['date', 'extension', 'name'],
+      });
+      await toggleDocSelection(component, esHitsMock[2]);
+      await toggleDocSelection(component, esHitsMock[1]);
+      findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
+      findTestSubject(component, 'unifiedDataTableCopyRowsAsText').simulate('click');
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+        '"\'@timestamp"\tdate\textension\tname\n-\t"2020-20-01T12:12:12.124"\tjpg\ttest2\n-\t"2020-20-01T12:12:12.124"\tgif\ttest3'
       );
     });
   });
@@ -451,9 +493,8 @@ describe('UnifiedDataTable', () => {
     });
   });
 
-  describe('customControlColumnsConfiguration', () => {
-    const customControlColumnsConfiguration = jest.fn();
-    it('should be able to customise the leading control column', async () => {
+  describe('custom control columns', () => {
+    it('should be able to customise the leading controls', async () => {
       const component = await getComponent({
         ...getProps(),
         expandedDoc: {
@@ -467,23 +508,19 @@ describe('UnifiedDataTable', () => {
         setExpandedDoc: jest.fn(),
         renderDocumentView: jest.fn(),
         externalControlColumns: [testLeadingControlColumn],
-        customControlColumnsConfiguration: customControlColumnsConfiguration.mockImplementation(
-          () => {
-            return {
-              leadingControlColumns: [testLeadingControlColumn, testTrailingControlColumns[0]],
-              trailingControlColumns: [],
-            };
-          }
-        ),
+        rowAdditionalLeadingControls: mockRowAdditionalLeadingControls,
       });
 
       expect(findTestSubject(component, 'test-body-control-column-cell').exists()).toBeTruthy();
       expect(
-        findTestSubject(component, 'test-trailing-column-popover-button').exists()
+        findTestSubject(component, 'exampleRowControl-visBarVerticalStacked').exists()
+      ).toBeTruthy();
+      expect(
+        findTestSubject(component, 'unifiedDataTable_additionalRowControl_menuControl').exists()
       ).toBeTruthy();
     });
 
-    it('should be able to customise the trailing control column', async () => {
+    it('should be able to customise the trailing controls', async () => {
       const component = await getComponent({
         ...getProps(),
         expandedDoc: {
@@ -497,14 +534,7 @@ describe('UnifiedDataTable', () => {
         setExpandedDoc: jest.fn(),
         renderDocumentView: jest.fn(),
         externalControlColumns: [testLeadingControlColumn],
-        customControlColumnsConfiguration: customControlColumnsConfiguration.mockImplementation(
-          () => {
-            return {
-              leadingControlColumns: [],
-              trailingControlColumns: [testLeadingControlColumn, testTrailingControlColumns[0]],
-            };
-          }
-        ),
+        trailingControlColumns: testTrailingControlColumns,
       });
 
       expect(findTestSubject(component, 'test-body-control-column-cell').exists()).toBeTruthy();
@@ -691,7 +721,7 @@ describe('UnifiedDataTable', () => {
       // additional controls become available after selecting a document
       act(() => {
         component
-          .find('[data-gridcell-column-id="select"] .euiCheckbox__input')
+          .find('.euiDataGridRowCell[data-gridcell-column-id="select"] .euiCheckbox__input')
           .first()
           .simulate('change');
       });
@@ -767,17 +797,28 @@ describe('UnifiedDataTable', () => {
       );
     };
 
-    const getSelectedDocumentsButton = () => screen.queryByRole('button', { name: /Selected/ });
+    const getSelectedDocumentsButton = () => screen.queryByTestId('unifiedDataTableSelectionBtn');
 
     const selectDocument = (document: EsHitRecord) =>
       userEvent.click(screen.getByTestId(`dscGridSelectDoc-${getDocId(document)}`));
 
-    const getCompareDocumentsButton = () => screen.queryByRole('button', { name: /Compare/ });
+    const openSelectedRowsMenu = async () => {
+      userEvent.click(await screen.findByTestId('unifiedDataTableSelectionBtn'));
+      await screen.findAllByText('Clear selection');
+    };
+
+    const closeSelectedRowsMenu = async () => {
+      userEvent.click(await screen.findByTestId('unifiedDataTableSelectionBtn'));
+    };
+
+    const getCompareDocumentsButton = () =>
+      screen.queryByTestId('unifiedDataTableCompareSelectedDocuments');
 
     const goToComparisonMode = async () => {
       selectDocument(esHitsMock[0]);
       selectDocument(esHitsMock[1]);
-      userEvent.click(getCompareDocumentsButton()!);
+      await openSelectedRowsMenu();
+      userEvent.click(await screen.findByTestId('unifiedDataTableCompareSelectedDocuments'));
       await screen.findByText('Comparing 2 documents');
     };
 
@@ -796,22 +837,28 @@ describe('UnifiedDataTable', () => {
     const getCellValues = () =>
       Array.from(document.querySelectorAll(`.${CELL_CLASS}`)).map(({ textContent }) => textContent);
 
-    it('should not allow comparison if less than 2 documents are selected', () => {
+    it('should not allow comparison if less than 2 documents are selected', async () => {
       renderDataTable({ enableComparisonMode: true });
       expect(getSelectedDocumentsButton()).not.toBeInTheDocument();
       selectDocument(esHitsMock[0]);
       expect(getSelectedDocumentsButton()).toBeInTheDocument();
+      await openSelectedRowsMenu();
       expect(getCompareDocumentsButton()).not.toBeInTheDocument();
+      await closeSelectedRowsMenu();
       selectDocument(esHitsMock[1]);
       expect(getSelectedDocumentsButton()).toBeInTheDocument();
+      await openSelectedRowsMenu();
       expect(getCompareDocumentsButton()).toBeInTheDocument();
+      await closeSelectedRowsMenu();
     });
 
-    it('should not allow comparison if comparison mode is disabled', () => {
+    it('should not allow comparison if comparison mode is disabled', async () => {
       renderDataTable({ enableComparisonMode: false });
       selectDocument(esHitsMock[0]);
       selectDocument(esHitsMock[1]);
+      await openSelectedRowsMenu();
       expect(getCompareDocumentsButton()).not.toBeInTheDocument();
+      await closeSelectedRowsMenu();
     });
 
     it('should allow comparison if 2 or more documents are selected and comparison mode is enabled', async () => {

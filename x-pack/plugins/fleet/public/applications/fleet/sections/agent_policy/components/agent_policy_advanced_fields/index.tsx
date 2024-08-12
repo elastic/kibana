@@ -63,6 +63,7 @@ import { CustomFields } from './custom_fields';
 
 interface Props {
   agentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
+  allowedNamespacePrefixes?: string[];
   updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
   validation: ValidationResults;
   disabled?: boolean;

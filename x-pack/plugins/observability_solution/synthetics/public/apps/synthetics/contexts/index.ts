@@ -7,5 +7,3 @@
 
 export * from './synthetics_refresh_context';
 export * from './synthetics_settings_context';
-export * from './synthetics_theme_context';
-export * from './synthetics_startup_plugins_context';

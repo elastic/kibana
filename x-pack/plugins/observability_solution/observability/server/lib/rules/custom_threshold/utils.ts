@@ -167,7 +167,7 @@ export const hasAdditionalContext = (
 ): boolean => {
   return groupBy
     ? Array.isArray(groupBy)
-      ? groupBy.every((group) => validGroups.includes(group))
+      ? groupBy.some((group) => validGroups.includes(group))
       : validGroups.includes(groupBy)
     : false;
 };

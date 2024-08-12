@@ -21,12 +21,13 @@ export const languageConfiguration: monaco.languages.LanguageConfiguration = {
 
 export const lexerRules: monaco.languages.IMonarchLanguage = {
   ...consoleSharedLexerRules,
+  ignoreCase: true,
   tokenizer: {
     ...consoleSharedLexerRules.tokenizer,
     root: [
       ...consoleSharedLexerRules.tokenizer.root,
       // method
-      matchTokensWithEOL('method', /([a-zA-Z]+)/, 'root', 'method_sep'),
+      matchTokensWithEOL('method', /get|post|put|patch|delete|head/, 'root', 'method_sep'),
       // whitespace
       matchToken('whitespace', '\\s+'),
       // text
