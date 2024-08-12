@@ -25,7 +25,7 @@ const aliasTable: Record<string, string[]> = {
 const aliases = new Set(Object.values(aliasTable).flat());
 
 const evalSupportedCommandsAndOptions = {
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
 };
 
