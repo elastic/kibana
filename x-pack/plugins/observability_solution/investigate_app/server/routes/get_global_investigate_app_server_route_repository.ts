@@ -5,14 +5,20 @@
  * 2.0.
  */
 
-import { createInvestigationParamsSchema } from '@kbn/investigate-plugin/common';
-import { findInvestigationsParamsSchema } from '@kbn/investigate-plugin/common';
-import { getInvestigationParamsSchema } from '@kbn/investigate-plugin/common';
+import {
+  createInvestigationParamsSchema,
+  findInvestigationsParamsSchema,
+  getInvestigationParamsSchema,
+} from '@kbn/investigate-plugin/common';
+import { createInvestigationNoteParamsSchema } from '@kbn/investigate-plugin/common/schema/create_notes';
+import { deleteInvestigationParamsSchema } from '@kbn/investigate-plugin/common/schema/delete';
 import { createInvestigation } from '../services/create_investigation';
-import { investigationRepositoryFactory } from '../services/investigation_repository';
-import { createInvestigateAppServerRoute } from './create_investigate_app_server_route';
+import { createInvestigationNote } from '../services/create_investigation_note';
+import { deleteInvestigation } from '../services/delete_investigation';
 import { findInvestigations } from '../services/find_investigations';
 import { getInvestigation } from '../services/get_investigation';
+import { investigationRepositoryFactory } from '../services/investigation_repository';
+import { createInvestigateAppServerRoute } from './create_investigate_app_server_route';
 
 const createInvestigationRoute = createInvestigateAppServerRoute({
   endpoint: 'POST /api/observability/investigations 2023-10-31',
@@ -56,11 +62,41 @@ const getInvestigationRoute = createInvestigateAppServerRoute({
   },
 });
 
+const deleteInvestigationRoute = createInvestigateAppServerRoute({
+  endpoint: 'DELETE /api/observability/investigations/{id} 2023-10-31',
+  options: {
+    tags: [],
+  },
+  params: deleteInvestigationParamsSchema,
+  handler: async (params) => {
+    const soClient = (await params.context.core).savedObjects.client;
+    const repository = investigationRepositoryFactory({ soClient, logger: params.logger });
+
+    return await deleteInvestigation(params.params.path.id, repository);
+  },
+});
+
+const createInvestigationNoteRoute = createInvestigateAppServerRoute({
+  endpoint: 'POST /api/observability/investigations/{id}/notes 2023-10-31',
+  options: {
+    tags: [],
+  },
+  params: createInvestigationNoteParamsSchema,
+  handler: async (params) => {
+    const soClient = (await params.context.core).savedObjects.client;
+    const repository = investigationRepositoryFactory({ soClient, logger: params.logger });
+
+    return await createInvestigationNote(params.params.path.id, params.params.body, repository);
+  },
+});
+
 export function getGlobalInvestigateAppServerRouteRepository() {
   return {
     ...createInvestigationRoute,
     ...findInvestigationsRoute,
     ...getInvestigationRoute,
+    ...deleteInvestigationRoute,
+    ...createInvestigationNoteRoute,
   };
 }
 

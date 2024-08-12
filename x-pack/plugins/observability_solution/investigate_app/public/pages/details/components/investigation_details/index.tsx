@@ -36,9 +36,7 @@ function InvestigationDetailsWithUser({
   const widgetDefinitions = investigate.getWidgetDefinitions();
   const [range, setRange] = useDateRange();
 
-  const { data: investigationData, isLoading } = useFetchInvestigation({ id: investigationId });
-
-  console.dir({ investigationData, isLoading });
+  const { data: investigationData } = useFetchInvestigation({ id: investigationId });
 
   const {
     addItem,
@@ -101,7 +99,7 @@ function InvestigationDetailsWithUser({
     });
   }, [renderableInvestigation, widgetDefinitions]);
 
-  if (!investigation || !renderableInvestigation || !gridItems) {
+  if (!investigation || !renderableInvestigation || !gridItems || !investigationData) {
     return <EuiLoadingSpinner />;
   }
 

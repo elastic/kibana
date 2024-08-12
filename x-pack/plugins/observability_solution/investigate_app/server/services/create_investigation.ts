@@ -25,6 +25,7 @@ export async function createInvestigation(
     createdAt: Date.now(),
     createdBy: 'elastic',
     status: InvestigationStatus.ongoing,
+    notes: [],
   };
   await repository.save(investigation);
 
