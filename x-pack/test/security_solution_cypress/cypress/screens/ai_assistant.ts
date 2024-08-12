@@ -6,3 +6,5 @@
  */
 
 export const AI_ASSISTANT_BUTTON = '[data-test-subj="assistantHeaderLink"]';
+export const WELCOME_CONNECTOR_SETUP = '[data-test-subj="connector-setup"]';
+export const CHAT_ICON = '[data-test-subj="discuss"]';
