@@ -63,6 +63,7 @@ import { gcpField, getInputVarsFields } from './gcp_credentials_form/gcp_credent
 import { SetupTechnologySelector } from './setup_technology_selector/setup_technology_selector';
 import { useSetupTechnology } from './setup_technology_selector/use_setup_technology';
 import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
+import { useKibana } from '../../common/hooks/use_kibana';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
@@ -668,6 +669,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       : undefined;
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
+    const { cloud } = useKibana().services;
+    const isServerless = !!cloud.serverless.projectType;
     const input = getSelectedOption(newPolicy.inputs, integration);
     const getIsSubscriptionValid = useIsSubscriptionStatusValid();
     const isSubscriptionValid = !!getIsSubscriptionValid.data;
@@ -725,8 +728,10 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     });
 
     useEffect(() => {
-      setIsValid(isSubscriptionValid);
-    }, [isSubscriptionValid]);
+      if (!isServerless) {
+        setIsValid(isSubscriptionValid);
+      }
+    }, [isServerless, isSubscriptionValid]);
 
     useEffect(() => {
       if (isEditPage) return;
