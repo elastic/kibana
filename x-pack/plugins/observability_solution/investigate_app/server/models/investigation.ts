@@ -12,9 +12,14 @@ export const investigationSchema = t.type({
   title: t.string,
   createdAt: t.number,
   createdBy: t.string,
-  parameters: t.type({
+  params: t.type({
     timeRange: t.type({ from: t.number, to: t.number }),
   }),
+  origin: t.type({
+    type: t.string,
+    id: t.string,
+  }),
+  status: t.union([t.literal('ongoing'), t.literal('closed')]),
 });
 
 export type Investigation = t.TypeOf<typeof investigationSchema>;

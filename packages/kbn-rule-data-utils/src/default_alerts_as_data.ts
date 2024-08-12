@@ -118,6 +118,8 @@ const ALERT_URL = `${ALERT_NAMESPACE}.url` as const;
 // kibana.alert.rule.uuid - rule ID for rule that generated this alert
 const ALERT_RULE_UUID = `${ALERT_RULE_NAMESPACE}.uuid` as const;
 
+const ALERT_INVESTIGATION_IDS = `${ALERT_NAMESPACE}.investigation_ids` as const;
+
 const namespaces = {
   KIBANA_NAMESPACE,
   ALERT_NAMESPACE,
@@ -160,6 +162,7 @@ const fields = {
   SPACE_IDS,
   TIMESTAMP,
   VERSION,
+  ALERT_INVESTIGATION_IDS,
 };
 
 export {
@@ -204,6 +207,7 @@ export {
   SPACE_IDS,
   TIMESTAMP,
   VERSION,
+  ALERT_INVESTIGATION_IDS,
 };
 
 export type DefaultAlertFieldName = ValuesType<typeof fields & typeof namespaces>;

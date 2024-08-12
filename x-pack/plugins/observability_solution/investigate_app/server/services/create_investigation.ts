@@ -12,7 +12,12 @@ export async function createInvestigation(
   params: CreateInvestigationInput,
   repository: InvestigationRepository
 ): Promise<CreateInvestigationResponse> {
-  const investigation = { ...params, createdAt: Date.now(), createdBy: 'elastic' };
+  const investigation = {
+    ...params,
+    createdAt: Date.now(),
+    createdBy: 'elastic',
+    status: 'ongoing' as const,
+  };
   await repository.save(investigation);
 
   return investigation;

@@ -25,13 +25,21 @@ import {
   ALERT_RULE_UUID,
   ALERT_STATUS_ACTIVE,
   ALERT_UUID,
+  ALERT_INVESTIGATION_IDS,
+  ALERT_RULE_CATEGORY,
+  ALERT_START,
+  ALERT_END,
 } from '@kbn/rule-data-utils';
 
+import { v4 as uuidv4 } from 'uuid';
+import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { useKibana } from '../../../utils/kibana_react';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import type { TopAlert } from '../../../typings/alerts';
 import { paths } from '../../../../common/locators/paths';
 import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
+import { useCreateInvestigation } from '../hooks/use_create_investigation';
+import { useUpdateInvestigationIds } from '../hooks/use_update_investigation_ids';
 
 export interface HeaderActionsProps {
   alert: TopAlert | null;
@@ -52,11 +60,15 @@ export function HeaderActions({
     },
     triggersActionsUi: { getEditRuleFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
     http,
+    application: { navigateToApp },
+    investigate,
   } = useKibana().services;
 
   const { rule, refetch } = useFetchRule({
     ruleId: alert?.fields[ALERT_RULE_UUID] || '',
   });
+
+  const investigationId = alert?.fields[ALERT_INVESTIGATION_IDS] ?? 'new';
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [ruleConditionsFlyoutOpen, setRuleConditionsFlyoutOpen] = useState<boolean>(false);
@@ -109,9 +121,71 @@ export function HeaderActions({
     setSnoozeModalOpen(true);
   };
 
+  const { mutateAsync: createInvestigation } = useCreateInvestigation();
+  const { mutateAsync: updateInvestigationIds } = useUpdateInvestigationIds();
+
+  const alertStart = alert?.fields[ALERT_START];
+  const alertEnd = alert?.fields[ALERT_END];
+
+  const createOrOpenInvestigation = async () => {
+    if (!alert) return;
+
+    if (!alert.fields[ALERT_INVESTIGATION_IDS]) {
+      const paddedAlertTimeRange = getPaddedAlertTimeRange(alertStart!, alertEnd);
+
+      const investigationResponse = await createInvestigation({
+        investigation: {
+          id: uuidv4(),
+          title: `Investigate ${alert.fields[ALERT_RULE_CATEGORY]} breached`,
+          params: {
+            timeRange: {
+              from: new Date(paddedAlertTimeRange.from).getTime(),
+              to: new Date(paddedAlertTimeRange.to).getTime(),
+            },
+          },
+          origin: {
+            type: 'alert',
+            id: alert.fields[ALERT_UUID] ?? '',
+          },
+        },
+      });
+
+      updateInvestigationIds({
+        index: alertIndex ?? '',
+        alertUuid: alert.fields[ALERT_UUID],
+        investigationIds: [investigationResponse.id],
+      });
+
+      navigateToApp('investigate', { path: `/${investigationResponse.id}`, replace: false });
+    } else {
+      navigateToApp('investigate', {
+        path: `/${alert?.fields[ALERT_INVESTIGATION_IDS]}`,
+        replace: false,
+      });
+    }
+  };
+
   return (
     <>
       <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
+        {investigate && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={() => {
+                createOrOpenInvestigation();
+              }}
+              fill
+              data-test-subj="investigate-alert-button"
+            >
+              <EuiText size="s">
+                {i18n.translate('xpack.observability.alertDetails.investigateAlert', {
+                  defaultMessage:
+                    investigationId === 'new' ? 'Start investigation' : 'Ongoing investigation',
+                })}
+              </EuiText>
+            </EuiButton>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiButton
             fill

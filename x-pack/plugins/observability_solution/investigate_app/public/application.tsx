@@ -11,6 +11,7 @@ import type { History } from 'history';
 import React, { useMemo } from 'react';
 import type { Observable } from 'rxjs';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { InvestigateAppStartDependencies } from './types';
 import { investigateRouter } from './routes/config';
 import { InvestigateAppKibanaContext } from './hooks/use_kibana';
@@ -45,13 +46,17 @@ function Application({
     [coreStart, pluginsStart, services]
   );
 
+  const queryClient = new QueryClient();
+
   return (
     <KibanaThemeProvider theme={theme}>
       <InvestigateAppContextProvider context={context}>
         <RedirectAppLinks coreStart={coreStart}>
           <coreStart.i18n.Context>
             <RouterProvider history={history} router={investigateRouter as any}>
-              <RouteRenderer />
+              <QueryClientProvider client={queryClient}>
+                <RouteRenderer />
+              </QueryClientProvider>
             </RouterProvider>
           </coreStart.i18n.Context>
         </RedirectAppLinks>

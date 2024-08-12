@@ -17,6 +17,7 @@ import { getFeatureIdsByRegistrationContexts } from './get_feature_ids_by_regist
 import { getBrowserFieldsByFeatureId } from './get_browser_fields_by_feature_id';
 import { getAlertSummaryRoute } from './get_alert_summary';
 import { getAADFieldsByRuleType } from './get_aad_fields_by_rule_type';
+import { updateAlertInvestigationIdsRoute } from './update_alert_investigation_ids';
 
 export function defineRoutes(router: IRouter<RacRequestHandlerContext>) {
   getAlertByIdRoute(router);
@@ -29,4 +30,5 @@ export function defineRoutes(router: IRouter<RacRequestHandlerContext>) {
   getBrowserFieldsByFeatureId(router);
   getAlertSummaryRoute(router);
   getAADFieldsByRuleType(router);
+  updateAlertInvestigationIdsRoute(router);
 }
