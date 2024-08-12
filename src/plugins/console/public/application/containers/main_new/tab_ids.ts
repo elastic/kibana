@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { Main } from './main';
-export { Main as MainNew } from './main_new';
-export { Panel, PanelsContainer } from './split_panel';
+export const SHELL_TAB_ID = 'shell';
+export const HISTORY_TAB_ID = 'history';
+export const CONFIG_TAB_ID = 'config';

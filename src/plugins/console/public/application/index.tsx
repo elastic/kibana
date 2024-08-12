@@ -22,7 +22,7 @@ import {
 import { createUsageTracker } from '../services/tracker';
 import { loadActiveApi } from '../lib/kb';
 import * as localStorageObjectClient from '../lib/local_storage_object_client';
-import { Main } from './containers';
+import { Main, MainNew } from './containers';
 import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
 import { createApi, createEsHostService } from './lib';
 import { ConsoleStartServices } from '../types';
@@ -94,7 +94,8 @@ export async function renderApp({
       >
         <RequestContextProvider>
           <EditorContextProvider settings={settings.toJSON()}>
-            <Main />
+            {/* TODO: Add condition based on a config setting*/}
+            <MainNew />
           </EditorContextProvider>
         </RequestContextProvider>
       </ServicesContextProvider>
