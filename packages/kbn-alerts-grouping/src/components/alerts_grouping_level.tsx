@@ -20,8 +20,9 @@ import {
 } from '@kbn/alerts-ui-shared';
 import { AlertsGroupingProps, BaseAlertsGroupAggregations } from '../types';
 
-export interface AlertsGroupingLevelProps<T extends BaseAlertsGroupAggregations>
-  extends AlertsGroupingProps<T> {
+export interface AlertsGroupingLevelProps<
+  T extends BaseAlertsGroupAggregations = BaseAlertsGroupAggregations
+> extends AlertsGroupingProps<T> {
   getGrouping: (
     props: Omit<DynamicGroupingProps<T>, 'groupSelector' | 'pagination'>
   ) => ReactElement;
