@@ -435,7 +435,7 @@ export class DashboardContainer
       panels,
     } = this.input;
 
-    let combinedFilters = combineDashboardFiltersWithControlGroupFilters(filters, this.controlGroupApi$.value);
+    let combinedFilters = combineDashboardFiltersWithControlGroupFilters(filters, this.controlGroupApi$?.value);
     const hasCustomTimeRange = Boolean(
       (panels[id]?.explicitInput as Partial<InheritedChildInput>)?.timeRange
     );
