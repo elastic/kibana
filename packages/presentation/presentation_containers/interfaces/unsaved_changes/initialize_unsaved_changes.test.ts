@@ -39,7 +39,6 @@ describe('unsavedChanges api', () => {
     key1$.next(lastSavedState.key1);
     key2$.next(lastSavedState.key2);
     ({ api } = initializeUnsavedChanges<TestState>(lastSavedState, parentApi, comparators));
-    await new Promise((resolve) => setTimeout(resolve, COMPARATOR_SUBJECTS_DEBOUNCE + 1)); // wait for first emit to be skipped
   });
 
   test('should have no unsaved changes after initialization', () => {
