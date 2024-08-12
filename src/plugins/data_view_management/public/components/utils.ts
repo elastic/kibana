@@ -86,7 +86,10 @@ export const getTags = (
   return tags;
 };
 
-export const getFieldInfo = (indexPattern: DataViewListItem | AbstractDataView, field: DataViewField) => {
+export const getFieldInfo = (
+  indexPattern: DataViewListItem | AbstractDataView,
+  field: DataViewField
+) => {
   if (!isRollup(indexPattern.type)) {
     return [];
   }

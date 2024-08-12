@@ -58,7 +58,9 @@ export class ScriptedFieldsTable extends Component<
   }
 
   fetchFields = async () => {
-    const fields = Object.values(this.props.indexPattern.getScriptedFields({ fieldName: ['*']})) as ScriptedFieldItem[];
+    const fields = Object.values(
+      this.props.indexPattern.getScriptedFields({ fieldName: ['*'] })
+    ) as ScriptedFieldItem[];
 
     const deprecatedLangsInUse = [];
     const deprecatedLangs = getDeprecatedScriptingLanguages();

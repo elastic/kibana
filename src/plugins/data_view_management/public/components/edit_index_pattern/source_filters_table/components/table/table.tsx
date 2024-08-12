@@ -19,7 +19,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import { SourceFiltersTableFilter } from '../../types';
 
 const filterHeader = i18n.translate(
@@ -69,7 +69,7 @@ const cancelAria = i18n.translate(
 );
 
 export interface TableProps {
-  indexPattern: DataView;
+  fields: DataViewField[];
   items: SourceFiltersTableFilter[];
   deleteFilter: Function;
   fieldWildcardMatcher: Function;
@@ -114,7 +114,7 @@ export class Table extends Component<TableProps, TableState> {
   };
 
   getColumns(): Array<EuiBasicTableColumn<SourceFiltersTableFilter>> {
-    const { deleteFilter, fieldWildcardMatcher, indexPattern, saveFilter } = this.props;
+    const { deleteFilter, fieldWildcardMatcher, fields, saveFilter } = this.props;
 
     return [
       {
@@ -149,8 +149,7 @@ export class Table extends Component<TableProps, TableState> {
           const wildcardMatcher = fieldWildcardMatcher([
             this.state.editingFilterId === filter.clientId ? this.state.editingFilterValue : value,
           ]);
-          const matches = indexPattern
-            .getNonScriptedFields()
+          const matches = fields
             .map((currentFilter) => currentFilter.name)
             .filter(wildcardMatcher)
             .sort();

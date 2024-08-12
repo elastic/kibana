@@ -31,7 +31,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { DataView } from '@kbn/data-views-plugin/public';
+import { DataViewLazy } from '@kbn/data-views-plugin/public';
 import { StartServices } from '../../../../../types';
 import { IndexedFieldItem } from '../../types';
 
@@ -201,7 +201,7 @@ const conflictType = i18n.translate(
 );
 
 interface IndexedFieldProps {
-  indexPattern: DataView;
+  indexPattern: DataViewLazy;
   items: IndexedFieldItem[];
   editField: (field: IndexedFieldItem) => void;
   deleteField: (fieldName: string[]) => void;

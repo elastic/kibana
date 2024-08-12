@@ -9,21 +9,21 @@
 import React, { Component } from 'react';
 import { createSelector } from 'reselect';
 import { OverlayStart } from '@kbn/core/public';
-import { DataViewField, DataView, RuntimeField } from '@kbn/data-views-plugin/public';
+import { DataViewField, DataViewLazy, RuntimeField } from '@kbn/data-views-plugin/public';
 import { Table } from './components/table';
 import { IndexedFieldItem } from './types';
 import { StartServices } from '../../../types';
 
 interface IndexedFieldsTableProps {
   fields: DataViewField[];
-  indexPattern: DataView;
+  indexPattern: DataViewLazy;
   fieldFilter?: string;
   indexedFieldTypeFilter: string[];
   schemaFieldTypeFilter: string[];
   helpers: {
     editField: (fieldName: string) => void;
     deleteField: (fieldName: string[]) => void;
-    getFieldInfo: (indexPattern: DataView, field: DataViewField) => string[];
+    getFieldInfo: (indexPattern: DataViewLazy, field: DataViewField) => string[];
   };
   fieldWildcardMatcher: (filters: string[] | undefined) => (val: string) => boolean;
   userEditPermission: boolean;

@@ -16,7 +16,7 @@ import { IndexPatternManagmentContext } from '../../types';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
 const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ ...props }) => {
-  const { dataViews, setBreadcrumbs, notifications } =
+  const { dataViews, setBreadcrumbs, notifications, dataViewMgmtService } =
     useKibana<IndexPatternManagmentContext>().services;
   const [error, setError] = useState<Error | undefined>();
   const [indexPattern, setIndexPattern] = useState<DataViewLazy>();
@@ -25,13 +25,15 @@ const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ .
     dataViews
       .getDataViewLazy(props.match.params.id)
       .then((ip: DataViewLazy) => {
+        dataViewMgmtService.setDataView(ip);
+        // todo
         setIndexPattern(ip);
         setBreadcrumbs(getEditBreadcrumbs(ip));
       })
       .catch((err) => {
         setError(err);
       });
-  }, [dataViews, props.match.params.id, setBreadcrumbs, setError]);
+  }, [dataViews, props.match.params.id, setBreadcrumbs, setError, dataViewMgmtService]);
 
   if (error) {
     const [errorTitle, errorMessage] = [

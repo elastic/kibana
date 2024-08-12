@@ -8,7 +8,7 @@
 
 import React, { useCallback, useRef, useEffect } from 'react';
 
-import { DataView } from '../shared_imports';
+import { DataViewLazy } from '../shared_imports';
 import { OpenFieldDeleteModalOptions } from '../open_delete_modal';
 import { CloseEditor } from '../types';
 
@@ -18,7 +18,7 @@ export interface Props {
   /**
    * Data view of fields to be deleted
    */
-  dataView: DataView;
+  dataView: DataViewLazy;
   /**
    * Callback fired when fields are deleted
    * @param fieldNames - the names of the deleted fields
