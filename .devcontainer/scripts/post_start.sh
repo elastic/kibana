@@ -1,4 +1,3 @@
 #!/bin/bash
 
-# yarn kbn bootstrap
-
+yarn kbn bootstrap
