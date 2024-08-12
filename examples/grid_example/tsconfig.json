@@ -5,5 +5,10 @@
   },
   "include": ["index.ts", "public/**/*.ts", "public/**/*.tsx", "../../typings/**/*"],
   "exclude": ["target/**/*"],
-  "kbn_references": ["@kbn/grid-layout"]
+  "kbn_references": [
+    "@kbn/grid-layout",
+    "@kbn/core-application-browser",
+    "@kbn/core",
+    "@kbn/developer-examples-plugin",
+  ]
 }

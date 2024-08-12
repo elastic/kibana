@@ -84,6 +84,7 @@
     "@kbn/lens-embeddable-utils",
     "@kbn/lens-plugin",
     "@kbn/recently-accessed",
+    "@kbn/storybook",
   ],
   "exclude": ["target/**/*"]
 }
