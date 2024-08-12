@@ -179,20 +179,6 @@ export default function (providerContext: FtrProviderContext) {
     return testPolicyRes;
   };
 
-  const deletePackagePolicy = async (packagePolicyId: string, spaceId?: string) => {
-    await supertest
-      .post(
-        spaceId
-          ? `/s/${spaceId}/api/fleet/package_policies/delete`
-          : `/api/fleet/package_policies/delete`
-      )
-      .send({
-        packagePolicyId,
-      })
-      .set('kbn-xsrf', 'xxxx')
-      .expect(200);
-  };
-
   const getAgentPolicy = async (
     policyId: string,
     spaceId?: string
@@ -861,8 +847,6 @@ export default function (providerContext: FtrProviderContext) {
           deleteAgentPolicy(policy2.item.id),
           deleteAgentPolicy(policy3.item.id, TEST_SPACE_ID),
           deleteAgentPolicy(policy4.item.id, TEST_SPACE_ID),
-          deletePackagePolicy(packagePolicy1.item.id),
-          deletePackagePolicy(packagePolicy2.item.id, TEST_SPACE_ID),
         ]);
       });
 
@@ -919,8 +903,6 @@ export default function (providerContext: FtrProviderContext) {
           deleteAgentPolicy(policy2.item.id),
           deleteAgentPolicy(policy3.item.id, TEST_SPACE_ID),
           deleteAgentPolicy(policy4.item.id, TEST_SPACE_ID),
-          deletePackagePolicy(packagePolicy1.item.id),
-          deletePackagePolicy(packagePolicy2.item.id, TEST_SPACE_ID),
         ]);
       });
     });
