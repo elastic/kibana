@@ -55,7 +55,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('For each artifact list under management', function () {
     targetTags(this, ['@ess', '@serverless']);
-    this.timeout(60_000 * 5);
+    this.timeout(60_000 * 15);
 
     let indexedData: IndexedHostsAndAlertsResponse;
     let policyInfo: PolicyTestResourceInfo;
@@ -240,7 +240,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           successes++;
         }
         log.info(
-          '🧀 🥭 IN PROGRESS',
+          'flaky-test-for-artifacts IN PROGRESS',
           JSON.stringify(
             { byText: options?.byText, waitABit: options?.waitABit, hasFailed, fails, successes },
             null,
@@ -252,7 +252,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       }
 
       log.info(
-        '🧀 🥭 RESULTS ARE IN',
+        'flaky-test-for-artifacts RESULTS ARE IN',
         JSON.stringify(
           { byText: options?.byText, waitABit: options?.waitABit, fails, successes },
           null,
@@ -307,6 +307,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // eslint-disable-next-line ban/ban
         it.only('flaky test for some wait', async () => {
           await createArtifact(testData, { policyId: policyInfo.packagePolicy.id, waitABit: true });
+        });
+
+        // eslint-disable-next-line ban/ban
+        it.only('fail so logs are reported', () => {
+          expect(2 * 2).to.equal(5);
         });
 
         it(`should not show page title if there is no ${testData.title} entry`, async () => {
