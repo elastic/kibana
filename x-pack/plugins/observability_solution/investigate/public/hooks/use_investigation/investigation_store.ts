@@ -9,13 +9,14 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { MaybePromise } from '@kbn/utility-types';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { v4 } from 'uuid';
-import { InvestigateWidget, mergePlainObjects } from '../../../common';
+import { InvestigateWidget } from '../../../common';
 import {
   GlobalWidgetParameters,
   InvestigateWidgetCreate,
   Investigation,
 } from '../../../common/types';
 import { WidgetDefinition } from '../../types';
+import { regenerateItem } from './regenerate_item';
 
 export type StatefulInvestigateWidget = InvestigateWidget & {
   loading: boolean;
@@ -36,47 +37,8 @@ interface InvestigationStore {
   setGlobalParameters: (globalWidgetParameters: GlobalWidgetParameters) => Promise<void>;
   setTitle: (title: string) => Promise<void>;
   destroy: () => void;
-}
-
-async function regenerateItem({
-  user,
-  widgetDefinitions,
-  signal,
-  widget,
-  globalWidgetParameters,
-}: {
-  user: AuthenticatedUser;
-  widgetDefinitions: WidgetDefinition[];
-  widget: InvestigateWidgetCreate | InvestigateWidget;
-  signal: AbortSignal;
-  globalWidgetParameters: GlobalWidgetParameters;
-}): Promise<InvestigateWidget> {
-  const now = Date.now();
-
-  const definition = widgetDefinitions.find(
-    (currentDefinition) => currentDefinition.type === widget.type
-  );
-
-  if (!definition) {
-    throw new Error(`Definition for widget ${widget.type} not found`);
-  }
-
-  const nextParameters = mergePlainObjects(widget.parameters, globalWidgetParameters);
-
-  const widgetData = await definition.generate({
-    parameters: nextParameters,
-    signal,
-  });
-
-  return {
-    created: now,
-    id: v4(),
-    ...widget,
-    parameters: nextParameters,
-    data: widgetData,
-    user,
-    last_updated: now,
-  };
+  addNote: (note: string) => Promise<void>;
+  deleteNote: (id: string) => Promise<void>;
 }
 
 export function createInvestigationStore({
@@ -143,16 +105,9 @@ export function createInvestigationStore({
     },
     deleteItem: (itemId) => {
       return updateInvestigationInPlace((prevInvestigation) => {
-        const itemToDelete = prevInvestigation.items.find((item) => item.id === itemId);
-        if (!itemToDelete) {
-          return prevInvestigation;
-        }
-
         return {
           ...prevInvestigation,
-          items: prevInvestigation.items.filter(
-            (itemAtIndex) => itemAtIndex.id !== itemToDelete.id
-          ),
+          items: prevInvestigation.items.filter((item) => item.id !== itemId),
         };
       });
     },
@@ -195,6 +150,27 @@ export function createInvestigationStore({
     setTitle: async (title: string) => {
       return updateInvestigationInPlace((prevInvestigation) => {
         return { ...prevInvestigation, title };
+      });
+    },
+    addNote: async (note: string) => {
+      return updateInvestigationInPlace((prevInvestigation) => {
+        return {
+          ...prevInvestigation,
+          notes: prevInvestigation.notes.concat({
+            id: v4(),
+            createdAt: Date.now(),
+            createdBy: user,
+            content: note,
+          }),
+        };
+      });
+    },
+    deleteNote: async (id: string) => {
+      return updateInvestigationInPlace((prevInvestigation) => {
+        return {
+          ...prevInvestigation,
+          notes: prevInvestigation.notes.filter((note) => note.id !== id),
+        };
       });
     },
   };
