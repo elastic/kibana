@@ -89,6 +89,14 @@ export function CategoryFacets({
               id={category.id}
               quantity={category.count}
               onClick={() => onCategoryChange(category)}
+              aria-label={i18n.translate('xpack.fleet.epmList.facetButton.ariaLabel', {
+                defaultMessage:
+                  '{key}, {count} {count, plural, one { integration } other { integrations }}',
+                values: {
+                  key: category.title,
+                  count: category.count,
+                },
+              })}
             >
               {category.title}
             </EuiFacetButton>

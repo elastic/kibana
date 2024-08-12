@@ -45,8 +45,11 @@ export const CLOUD_SECURITY_POSTURE_PACKAGE_NAME = 'cloud_security_posture';
 export const CDR_MISCONFIGURATIONS_DATA_VIEW_NAME = 'Latest Cloud Security Misconfigurations';
 export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX =
   'security_solution_cdr_latest_misconfigurations';
-export const CDR_MISCONFIGURATIONS_INDEX_PATTERN =
-  'logs-*_latest_misconfigurations_cdr,logs-cloud_security_posture.findings_latest-default';
+export const CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN =
+  'logs-cloud_security_posture.findings_latest-default';
+export const CDR_LATEST_THIRD_PARTY_MISCONFIGURATIONS_INDEX_PATTERN =
+  'logs-*_latest_misconfigurations_cdr';
+export const CDR_MISCONFIGURATIONS_INDEX_PATTERN = `${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN},${CDR_LATEST_THIRD_PARTY_MISCONFIGURATIONS_INDEX_PATTERN}`;
 
 export const CDR_VULNERABILITIES_DATA_VIEW_NAME = 'Latest Cloud Security Vulnerabilities';
 export const CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX =
@@ -54,15 +57,11 @@ export const CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX =
 export const CDR_VULNERABILITIES_INDEX_PATTERN =
   'logs-*_latest_vulnerabilities_cdr,logs-cloud_security_posture.vulnerabilities_latest-default';
 
-// TODO: REMOVE CSP_LATEST_FINDINGS_DATA_VIEW and replace it with LATEST_FINDINGS_INDEX_PATTERN
-export const CSP_LATEST_FINDINGS_DATA_VIEW = 'logs-cloud_security_posture.findings_latest-*';
-
 export const FINDINGS_INDEX_NAME = 'logs-cloud_security_posture.findings';
 export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-default*';
 export const FINDINGS_INDEX_DEFAULT_NS = 'logs-cloud_security_posture.findings-default';
 
 export const LATEST_FINDINGS_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.findings_latest';
-export const LATEST_FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings_latest-*';
 export const LATEST_FINDINGS_INDEX_DEFAULT_NS =
   'logs-cloud_security_posture.findings_latest-default';
 

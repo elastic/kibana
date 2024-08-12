@@ -5253,6 +5253,449 @@
       },
       {
         "parentPluginId": "controls",
+        "id": "def-public.ControlGroupRuntimeState",
+        "type": "Interface",
+        "tags": [],
+        "label": "ControlGroupRuntimeState",
+        "description": [],
+        "path": "src/plugins/controls/public/react_controls/control_group/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupRuntimeState.chainingSystem",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "chainingSystem",
+            "description": [],
+            "signature": [
+              "\"NONE\" | \"HIERARCHICAL\""
+            ],
+            "path": "src/plugins/controls/public/react_controls/control_group/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupRuntimeState.defaultControlGrow",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "defaultControlGrow",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/public/react_controls/control_group/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupRuntimeState.defaultControlWidth",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "defaultControlWidth",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.ControlWidth",
+                "text": "ControlWidth"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/controls/public/react_controls/control_group/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupRuntimeState.labelPosition",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "labelPosition",
+            "description": [],
+            "signature": [
+              "\"twoLine\" | \"oneLine\""
+            ],
+            "path": "src/plugins/controls/public/react_controls/control_group/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupRuntimeState.autoApplySelections",
+            "type": "boolean",
+            "tags": [],
+            "label": "autoApplySelections",
+            "description": [],
+            "path": "src/plugins/controls/public/react_controls/control_group/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupRuntimeState.ignoreParentSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "ignoreParentSettings",
+            "description": [],
+            "signature": [
+              "ParentIgnoreSettings",
+              " | undefined"
+            ],
+            "path": "src/plugins/controls/public/react_controls/control_group/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupRuntimeState.initialChildControlState",
+            "type": "Object",
+            "tags": [],
+            "label": "initialChildControlState",
+            "description": [],
+            "signature": [
+              "ControlPanelsState",
+              "<",
+              "ControlPanelState",
+              ">"
+            ],
+            "path": "src/plugins/controls/public/react_controls/control_group/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupRuntimeState.editorConfig",
+            "type": "Object",
+            "tags": [],
+            "label": "editorConfig",
+            "description": [
+              "TODO: Handle the editor config, which is used with the control group renderer component"
+            ],
+            "signature": [
+              "{ hideDataViewSelector?: boolean | undefined; hideWidthSettings?: boolean | undefined; hideAdditionalSettings?: boolean | undefined; } | undefined"
+            ],
+            "path": "src/plugins/controls/public/react_controls/control_group/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-public.ControlGroupSerializedState",
+        "type": "Interface",
+        "tags": [],
+        "label": "ControlGroupSerializedState",
+        "description": [],
+        "path": "src/plugins/controls/public/react_controls/control_group/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupSerializedState.chainingSystem",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "chainingSystem",
+            "description": [],
+            "signature": [
+              "\"NONE\" | \"HIERARCHICAL\""
+            ],
+            "path": "src/plugins/controls/public/react_controls/control_group/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupSerializedState.panelsJSON",
+            "type": "string",
+            "tags": [],
+            "label": "panelsJSON",
+            "description": [],
+            "path": "src/plugins/controls/public/react_controls/control_group/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupSerializedState.ignoreParentSettingsJSON",
+            "type": "string",
+            "tags": [],
+            "label": "ignoreParentSettingsJSON",
+            "description": [],
+            "path": "src/plugins/controls/public/react_controls/control_group/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupSerializedState.controlStyle",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "controlStyle",
+            "description": [],
+            "signature": [
+              "\"twoLine\" | \"oneLine\""
+            ],
+            "path": "src/plugins/controls/public/react_controls/control_group/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupSerializedState.showApplySelections",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showApplySelections",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/public/react_controls/control_group/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-public.DataControlFactory",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataControlFactory",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "controls",
+            "scope": "public",
+            "docId": "kibControlsPluginApi",
+            "section": "def-public.DataControlFactory",
+            "text": "DataControlFactory"
+          },
+          "<State, Api> extends ",
+          {
+            "pluginId": "controls",
+            "scope": "public",
+            "docId": "kibControlsPluginApi",
+            "section": "def-public.ControlFactory",
+            "text": "ControlFactory"
+          },
+          "<State, Api>"
+        ],
+        "path": "src/plugins/controls/public/react_controls/controls/data_controls/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.DataControlFactory.isFieldCompatible",
+            "type": "Function",
+            "tags": [],
+            "label": "isFieldCompatible",
+            "description": [],
+            "signature": [
+              "(field: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              ") => boolean"
+            ],
+            "path": "src/plugins/controls/public/react_controls/controls/data_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.DataControlFactory.isFieldCompatible.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewField",
+                    "text": "DataViewField"
+                  }
+                ],
+                "path": "src/plugins/controls/public/react_controls/controls/data_controls/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.DataControlFactory.CustomOptionsComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "CustomOptionsComponent",
+            "description": [],
+            "signature": [
+              "React.FC<",
+              "CustomOptionsComponentProps",
+              "<State>> | undefined"
+            ],
+            "path": "src/plugins/controls/public/react_controls/controls/data_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-public.DataControlServices",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataControlServices",
+        "description": [],
+        "path": "src/plugins/controls/public/react_controls/controls/data_controls/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.DataControlServices.core",
+            "type": "Object",
+            "tags": [],
+            "label": "core",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.CoreStart",
+                "text": "CoreStart"
+              }
+            ],
+            "path": "src/plugins/controls/public/react_controls/controls/data_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.DataControlServices.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
+            ],
+            "path": "src/plugins/controls/public/react_controls/controls/data_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.DataControlServices.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.DataViewsServicePublic",
+                "text": "DataViewsServicePublic"
+              }
+            ],
+            "path": "src/plugins/controls/public/react_controls/controls/data_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-public.DefaultDataControlState",
+        "type": "Interface",
+        "tags": [],
+        "label": "DefaultDataControlState",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "controls",
+            "scope": "public",
+            "docId": "kibControlsPluginApi",
+            "section": "def-public.DefaultDataControlState",
+            "text": "DefaultDataControlState"
+          },
+          " extends ",
+          "DefaultControlState"
+        ],
+        "path": "src/plugins/controls/public/react_controls/controls/data_controls/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.DefaultDataControlState.dataViewId",
+            "type": "string",
+            "tags": [],
+            "label": "dataViewId",
+            "description": [],
+            "path": "src/plugins/controls/public/react_controls/controls/data_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.DefaultDataControlState.fieldName",
+            "type": "string",
+            "tags": [],
+            "label": "fieldName",
+            "description": [],
+            "path": "src/plugins/controls/public/react_controls/controls/data_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.DefaultDataControlState.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/controls/public/react_controls/controls/data_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
         "id": "def-public.IEditableControlFactory",
         "type": "Interface",
         "tags": [],
@@ -5850,7 +6293,7 @@
         "label": "ACTION_EDIT_CONTROL",
         "description": [],
         "signature": [
-          "\"editControl\""
+          "\"editLegacyEmbeddableControl\""
         ],
         "path": "src/plugins/controls/public/control_group/actions/index.ts",
         "deprecated": false,
@@ -6035,6 +6478,184 @@
           ">"
         ],
         "path": "src/plugins/controls/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-public.ControlGroupApi",
+        "type": "Type",
+        "tags": [],
+        "label": "ControlGroupApi",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "public",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-public.PresentationContainer",
+            "text": "PresentationContainer"
+          },
+          " & ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.DefaultEmbeddableApi",
+            "text": "DefaultEmbeddableApi"
+          },
+          "<",
+          {
+            "pluginId": "controls",
+            "scope": "public",
+            "docId": "kibControlsPluginApi",
+            "section": "def-public.ControlGroupSerializedState",
+            "text": "ControlGroupSerializedState"
+          },
+          ", ",
+          {
+            "pluginId": "controls",
+            "scope": "public",
+            "docId": "kibControlsPluginApi",
+            "section": "def-public.ControlGroupRuntimeState",
+            "text": "ControlGroupRuntimeState"
+          },
+          "> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesFilters",
+            "text": "PublishesFilters"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesDataViews",
+            "text": "PublishesDataViews"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "public",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-public.HasSerializedChildState",
+            "text": "HasSerializedChildState"
+          },
+          "<",
+          "ControlPanelState",
+          "> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasEditCapabilities",
+            "text": "HasEditCapabilities"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesDataLoading",
+            "text": "PublishesDataLoading"
+          },
+          " & Pick<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesUnsavedChanges",
+            "text": "PublishesUnsavedChanges"
+          },
+          "<object>, \"unsavedChanges\"> & ",
+          "PublishesControlDisplaySettings",
+          " & { labelPosition: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          "ControlStyle",
+          ">; } & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesTimeslice",
+            "text": "PublishesTimeslice"
+          },
+          " & Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasParentApi",
+            "text": "HasParentApi"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesUnifiedSearch",
+            "text": "PublishesUnifiedSearch"
+          },
+          "> & ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "public",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-public.HasSaveNotification",
+            "text": "HasSaveNotification"
+          },
+          "> & { asyncResetUnsavedChanges: () => Promise<void>; autoApplySelections$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<boolean>; controlFetch$: (controlUuid: string) => ",
+          "Observable",
+          "<",
+          "ControlFetchContext",
+          ">; getLastSavedControlState: (controlUuid: string) => object; ignoreParentSettings$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          "ParentIgnoreSettings",
+          " | undefined>; allowExpensiveQueries$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<boolean>; untilInitialized: () => Promise<void>; openAddDataControlFlyout: (settings?: { controlInputTransform?: ",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlInputTransform",
+            "text": "ControlInputTransform"
+          },
+          " | undefined; } | undefined) => void; }"
+        ],
+        "path": "src/plugins/controls/public/react_controls/control_group/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6261,6 +6882,148 @@
           "\"small\" | \"medium\" | \"large\""
         ],
         "path": "src/plugins/controls/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-public.DataControlApi",
+        "type": "Type",
+        "tags": [],
+        "label": "DataControlApi",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesDataLoading",
+            "text": "PublishesDataLoading"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesBlockingError",
+            "text": "PublishesBlockingError"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesUnsavedChanges",
+            "text": "PublishesUnsavedChanges"
+          },
+          "<object> & ",
+          "PublishesControlDisplaySettings",
+          " & Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesPanelTitle",
+            "text": "PublishesPanelTitle"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesDisabledActionIds",
+            "text": "PublishesDisabledActionIds"
+          },
+          " & ",
+          "HasCustomPrepend",
+          "> & ",
+          {
+            "pluginId": "controls",
+            "scope": "public",
+            "docId": "kibControlsPluginApi",
+            "section": "def-public.CanClearSelections",
+            "text": "CanClearSelections"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasType",
+            "text": "HasType"
+          },
+          "<string> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasUniqueId",
+            "text": "HasUniqueId"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasParentApi",
+            "text": "HasParentApi"
+          },
+          "<",
+          {
+            "pluginId": "controls",
+            "scope": "public",
+            "docId": "kibControlsPluginApi",
+            "section": "def-public.ControlGroupApi",
+            "text": "ControlGroupApi"
+          },
+          "> & { serializeState: () => ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "public",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-public.SerializedPanelState",
+            "text": "SerializedPanelState"
+          },
+          "<",
+          "DefaultControlState",
+          ">; setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; } & Omit<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesPanelTitle",
+            "text": "PublishesPanelTitle"
+          },
+          ", \"hidePanelTitle\"> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasEditCapabilities",
+            "text": "HasEditCapabilities"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesDataViews",
+            "text": "PublishesDataViews"
+          },
+          " & ",
+          "PublishesField",
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesFilters",
+            "text": "PublishesFilters"
+          },
+          " & { untilFiltersReady: () => Promise<void>; }"
+        ],
+        "path": "src/plugins/controls/public/react_controls/controls/data_controls/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

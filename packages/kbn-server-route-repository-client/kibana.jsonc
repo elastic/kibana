@@ -1,0 +1,5 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/server-route-repository-client",
+  "owner": "@elastic/obs-knowledge-team"
+}
