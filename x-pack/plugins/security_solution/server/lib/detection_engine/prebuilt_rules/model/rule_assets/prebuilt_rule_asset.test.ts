@@ -9,19 +9,21 @@ import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zo
 import { getListArrayMock } from '../../../../../../common/detection_engine/schemas/types/lists.mock';
 import { PrebuiltRuleAsset, TypeSpecificFields } from './prebuilt_rule_asset';
 import { getPrebuiltRuleMock, getPrebuiltThreatMatchRuleMock } from './prebuilt_rule_asset.mock';
-import { TypeSpecificCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { TypeSpecificCreateProps } from '../../../../../../common/api/detection_engine';
 
-describe('TypeSpecificFields', () => {
-  it.only('contains all the rule types that are supported by the prebuilt rule asset', () => {
-    const createPropsTypes = TypeSpecificCreateProps.options.map(option => option.shape.type.value);
-    const fieldsTypes = TypeSpecificFields.options.map(option => option.shape.type.value);
+describe('Prebuilt rule asset schema', () => {
+  it('can be of all rule types that are supported', () => {
+    // Check that the discriminated union TypeSpecificFields, which is used to create 
+    // the PrebuiltRuleAsset schema, contains all the rule types that are supported.
+    const createPropsTypes = TypeSpecificCreateProps.options.map(
+      (option) => option.shape.type.value
+    );
+    const fieldsTypes = TypeSpecificFields.options.map((option) => option.shape.type.value);
 
     expect(createPropsTypes).toHaveLength(fieldsTypes.length);
     expect(new Set(createPropsTypes)).toEqual(new Set(fieldsTypes));
   });
-});
 
-describe('Prebuilt rule asset schema', () => {
   test('empty objects do not validate', () => {
     const payload: Partial<PrebuiltRuleAsset> = {};
 
@@ -43,7 +45,7 @@ describe('Prebuilt rule asset schema', () => {
     expect(result.data).toEqual(getPrebuiltRuleMock());
   });
 
-  describe('ommited fields from the rule schema are ignored', () => {
+  describe('omitted fields from the rule schema are ignored', () => {
     // The PrebuiltRuleAsset schema is built out of the rule schema,
     // but the following fields are manually omitted.
     // See: detection_engine/prebuilt_rules/model/rule_assets/prebuilt_rule_asset.ts

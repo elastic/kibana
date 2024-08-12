@@ -50,7 +50,7 @@ const BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET = zodMaskFor<BaseCreateProps>(
 /**
  * Aditionally remove fields which are part only of the optional fields in the rule types that make up
  * the TypeSpecificCreateProps discriminatedUnion, by recreating a discriminated union of the types, but
- * with the necessary fields ommitted, in the types where they exist. Fields to extract:
+ * with the necessary fields omitted, in the types where they exist. Fields to extract:
  *  - response_actions: from Query and SavedQuery rules
  */
 const TYPE_SPECIFIC_FIELDS_TO_OMIT = ['response_actions'] as const;
@@ -81,6 +81,8 @@ export const areTypesEqual: IsEqual<
   typeof TypeSpecificFields._type.type
 > = true;
 
+const PrebuiltAssetBaseProps = BaseCreateProps.omit(BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET);  
+
 /**
  * Asset containing source content of a prebuilt Security detection rule.
  * Is defined for each prebuilt rule in https://github.com/elastic/detection-rules.
@@ -97,7 +99,7 @@ export const areTypesEqual: IsEqual<
  *  - some fields are omitted because they are not present in https://github.com/elastic/detection-rules
  */
 export type PrebuiltRuleAsset = z.infer<typeof PrebuiltRuleAsset>;
-export const PrebuiltRuleAsset = BaseCreateProps.omit(BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET)
+export const PrebuiltRuleAsset = PrebuiltAssetBaseProps
   .and(TypeSpecificFields)
   .and(
     z.object({
@@ -115,19 +117,13 @@ export const PrebuiltRuleAsset = BaseCreateProps.omit(BASE_PROPS_REMOVED_FROM_PR
  */
 function createUpgradableRuleFieldsByTypeMap() {
   const baseFields = Object.keys(
-    BaseCreateProps.omit(BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET).shape
+    PrebuiltAssetBaseProps.shape
   );
 
-  const specificTypesToOmit: readonly string[] = TYPE_SPECIFIC_FIELDS_TO_OMIT;
-
   return new Map(
-    TypeSpecificCreateProps.options.map((option) => {
+    TypeSpecificFields.options.map((option) => {
       const typeName = option.shape.type.value;
-      const typeSpecificFields = Object.keys(option.shape).filter(
-        // Filter out type-specific fields that should not be part of the upgradable fields
-        (field) => !specificTypesToOmit.includes(field)
-      );
-      return [typeName, [...baseFields, ...typeSpecificFields]];
+      return [typeName, [...baseFields, ...Object.keys(option.shape)]];
     })
   );
 }
