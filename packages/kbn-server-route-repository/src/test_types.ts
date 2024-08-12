@@ -7,9 +7,9 @@
  */
 import * as t from 'io-ts';
 import { kibanaResponseFactory } from '@kbn/core/server';
+import { EndpointOf, ReturnOf, RouteRepositoryClient } from '@kbn/server-route-repository-utils';
 import { createServerRouteFactory } from './create_server_route_factory';
 import { decodeRequestParams } from './decode_request_params';
-import { EndpointOf, ReturnOf, RouteRepositoryClient } from './typings';
 
 function assertType<TShape = never>(value: TShape) {
   return value;
