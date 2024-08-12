@@ -9,7 +9,7 @@ import { monaco } from './monaco_imports';
 import type { LangModuleType, CustomLangModuleType } from './types';
 
 export function registerLanguage(language: LangModuleType | CustomLangModuleType) {
-  const { ID, lexerRules, languageConfiguration } = language;
+  const { ID, lexerRules, languageConfiguration, foldingRangeProvider } = language;
 
   monaco.languages.register({ id: ID });
 
@@ -20,6 +20,10 @@ export function registerLanguage(language: LangModuleType | CustomLangModuleType
 
     if (languageConfiguration) {
       monaco.languages.setLanguageConfiguration(ID, languageConfiguration);
+    }
+
+    if (foldingRangeProvider) {
+      monaco.languages.registerFoldingRangeProvider(ID, foldingRangeProvider);
     }
 
     if ('onLanguage' in language) {
