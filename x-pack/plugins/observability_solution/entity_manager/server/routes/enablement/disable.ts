@@ -29,8 +29,10 @@ import { EntityDiscoveryApiKeyType } from '../../saved_objects';
  *           type: boolean
  *           default: false
  *     responses:
+ *       403:
+ *         description: The current user does not have the required permissions to enable entity discovery
  *       200:
- *         description: OK - validate disable result in response body
+ *         description: Built-in entity discovery successfully disabled
  *         content:
  *           application/json:
  *             schema:
@@ -38,13 +40,6 @@ import { EntityDiscoveryApiKeyType } from '../../saved_objects';
  *               properties:
  *                 success:
  *                  type: boolean
- *                  example: false
- *                 reason: 
- *                  type: string
- *                  example: user_not_authorized
- *                 message:
- *                  type: string
- *                  example: Current Kibana user does not have the required permissions to disable entity discovery
  */
 export function disableEntityDiscoveryRoute<T extends RequestHandlerContext>({
   router,

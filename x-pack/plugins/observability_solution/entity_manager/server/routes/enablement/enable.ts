@@ -29,6 +29,8 @@ import { EntityDiscoveryApiKeyType } from '../../saved_objects';
  *     tags:
  *       - management
  *     responses:
+ *       403:
+ *         description: The current user does not have the required permissions to enable entity discovery
  *       200:
  *         description: OK - validate enable result in response body
  *         content:
