@@ -145,8 +145,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // unskip with https://github.com/elastic/kibana/issues/190138 fix
-    describe.skip('managed panels in dashboards', () => {
+    describe('managed panels in dashboards', () => {
       it('inlines panels when managed dashboard cloned', async () => {
         await PageObjects.common.navigateToActualUrl(
           'dashboard',
