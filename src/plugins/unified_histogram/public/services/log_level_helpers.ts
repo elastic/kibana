@@ -6,17 +6,18 @@
  * Side Public License, v 1.
  */
 
-const searchTerms = [
-  'trace*',
-  'deb*',
-  'info*',
-  'not*',
-  'warn*',
-  'err*',
-  'cri*',
-  'ale*',
-  'emer*',
-  'fatal*',
+export const searchTerms = [
+  'trace',
+  'deb',
+  'info',
+  'not',
+  'warn',
+  'err',
+  'crit',
+  'sev',
+  'ale',
+  'emerg',
+  'fatal',
 ];
 
 export const finalTerms = [
@@ -27,6 +28,7 @@ export const finalTerms = [
   'warning',
   'error',
   'critical',
+  'critical',
   'alert',
   'emergency',
   'fatal',
@@ -35,7 +37,9 @@ export const finalTerms = [
 export const getLogLevelVariableCommand = (): string => {
   let evalPipe = `| EVAL log_level = CASE(`;
   for (const term of searchTerms) {
-    evalPipe += `to_lower(log.level) LIKE "${term}" , "${finalTerms[searchTerms.indexOf(term)]}", `;
+    evalPipe += `to_lower(log.level) LIKE "${term}*" , "${
+      finalTerms[searchTerms.indexOf(term)]
+    }", `;
   }
   evalPipe += `"Other")`;
 

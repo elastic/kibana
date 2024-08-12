@@ -44,7 +44,11 @@ import { computeInterval } from '../utils/compute_interval';
 import { fieldSupportsBreakdown } from '../utils/field_supports_breakdown';
 import { shouldDisplayHistogram } from '../layout/helpers';
 import { enrichLensAttributesWithTablesData } from '../utils/lens_vis_from_table';
-import { getLogLevelVariableCommand, finalTerms as LOG_LEVEL_TERMS } from './log_level_helpers';
+import {
+  getLogLevelVariableCommand,
+  finalTerms as LOG_LEVEL_COALESCED_TERMS,
+  searchTerms as LOG_LEVEL_TERMS,
+} from './log_level_helpers';
 
 const UNIFIED_HISTOGRAM_LAYER_ID = 'unifiedHistogram';
 
@@ -466,8 +470,8 @@ export class LensVisService {
       if (!isOnHistogramMode) return undefined;
 
       const interval = computeInterval(timeRange, this.services.data);
-      const hasLogLevelField = queryParams?.columns?.some(
-        (column) => column.name === LOG_LEVEL_FIELD
+      const hasLogLevelField = queryParams?.columns?.some((column) =>
+        column.name.includes(LOG_LEVEL_FIELD)
       );
       const esqlQuery = this.getESQLHistogramQuery({
         dataView,
@@ -562,8 +566,11 @@ export class LensVisService {
     return allSuggestions;
   };
 
-  private getColorMapping = () => {
-    const assignments = LOG_LEVEL_TERMS.map((term) => {
+  private getColorMapping = ({ hasCoalescedValues }: { hasCoalescedValues: boolean }) => {
+    const uniqueTerms = hasCoalescedValues
+      ? [...new Set(LOG_LEVEL_COALESCED_TERMS)]
+      : [...new Set([...LOG_LEVEL_TERMS, ...LOG_LEVEL_COALESCED_TERMS])];
+    const assignments = uniqueTerms.map((term) => {
       const logLevelCoalescedValue = getLogLevelCoalescedValue(term);
       return {
         rule: {
@@ -635,14 +642,17 @@ export class LensVisService {
       breakdownField: isTextBased ? undefined : breakdownField?.name,
     };
 
-    const hasLogLevelField = table?.columns.some((column) => column.name === LOG_LEVEL_FIELD);
+    const hasLogLevelField = table?.columns.some((column) => column.name.includes(LOG_LEVEL_FIELD));
+    const isHistogramQuery =
+      suggestionType === UnifiedHistogramSuggestionType.histogramForESQL &&
+      isTextBased &&
+      timeRange;
 
-    const currentQuery =
-      suggestionType === UnifiedHistogramSuggestionType.histogramForESQL && isTextBased && timeRange
-        ? {
-            esql: this.getESQLHistogramQuery({ dataView, query, timeRange, hasLogLevelField }),
-          }
-        : query;
+    const currentQuery = isHistogramQuery
+      ? {
+          esql: this.getESQLHistogramQuery({ dataView, query, timeRange, hasLogLevelField }),
+        }
+      : query;
 
     let externalVisContextStatus: UnifiedHistogramExternalVisContextStatus;
     let visContext: UnifiedHistogramVisContext | undefined;
@@ -675,7 +685,9 @@ export class LensVisService {
         filters,
         suggestion,
         dataView,
-        colorMapping: hasLogLevelField ? this.getColorMapping() : undefined,
+        colorMapping: hasLogLevelField
+          ? this.getColorMapping({ hasCoalescedValues: Boolean(isHistogramQuery) })
+          : undefined,
       }) as TypedLensByValueInput['attributes'];
 
       if (suggestionType === UnifiedHistogramSuggestionType.histogramForDataView) {
