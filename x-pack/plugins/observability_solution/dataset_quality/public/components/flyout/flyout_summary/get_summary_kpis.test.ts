@@ -83,7 +83,7 @@ describe('getSummaryKpis', () => {
       {
         title: flyoutSizeText,
         value: formatNumber(dataStreamDetails.sizeBytes ?? 0, BYTE_NUMBER_FORMAT),
-        userHasPrivilege: true,
+        userHasPrivilege: false,
       },
       {
         title: flyoutServicesText,
@@ -143,7 +143,7 @@ describe('getSummaryKpis', () => {
       {
         title: flyoutSizeText,
         value: formatNumber(dataStreamDetails.sizeBytes ?? 0, BYTE_NUMBER_FORMAT),
-        userHasPrivilege: true,
+        userHasPrivilege: false,
       },
       {
         title: flyoutServicesText,

@@ -7,13 +7,16 @@
 
 import React, { useMemo } from 'react';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { DatasetQualityDetailsController } from '../../controller/dataset_quality_details';
 import { DatasetQualityStartDeps } from '../../types';
 import { ITelemetryClient } from '../../services/telemetry';
 import { useKibanaContextForPluginProvider } from '../../utils';
+
 import { DatasetQualityDetailsContext, DatasetQualityDetailsContextValue } from './context';
-import { DatasetQualityDetails } from './dataset_quality_details';
+
+const DatasetQualityDetails = dynamic(() => import('./dataset_quality_details'));
 
 export interface DatasetQualityDetailsProps {
   controller: DatasetQualityDetailsController;

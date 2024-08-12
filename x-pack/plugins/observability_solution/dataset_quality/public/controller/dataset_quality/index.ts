@@ -7,4 +7,3 @@
 
 export * from './create_controller';
 export * from './types';
-export * from './lazy_create_controller';

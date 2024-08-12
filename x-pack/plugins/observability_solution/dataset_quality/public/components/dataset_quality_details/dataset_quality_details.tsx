@@ -14,7 +14,9 @@ const Header = dynamic(() => import('./header'));
 const Overview = dynamic(() => import('./overview'));
 const Details = dynamic(() => import('./details'));
 
-export function DatasetQualityDetails() {
+// Allow for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default function DatasetQualityDetails() {
   const { isIndexNotFoundError, dataStream } = useDatasetQualityDetailsState();
   return isIndexNotFoundError ? (
     <DataStreamNotFoundPrompt dataStream={dataStream} />

@@ -9,8 +9,8 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/cor
 import { TelemetryService } from './services/telemetry';
 import { createDatasetQuality } from './components/dataset_quality';
 import { createDatasetQualityDetails } from './components/dataset_quality_details';
-import { createDatasetQualityControllerLazyFactory } from './controller/dataset_quality';
-import { createDatasetQualityDetailsControllerLazyFactory } from './controller/dataset_quality_details';
+import { createDatasetQualityControllerLazyFactory } from './controller/dataset_quality/lazy_create_controller';
+import { createDatasetQualityDetailsControllerLazyFactory } from './controller/dataset_quality_details/lazy_create_controller';
 import { DataStreamsStatsService } from './services/data_streams_stats';
 import { DataStreamDetailsService } from './services/data_stream_details';
 import {
