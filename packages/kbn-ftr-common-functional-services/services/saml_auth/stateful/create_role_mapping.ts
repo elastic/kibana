@@ -6,47 +6,43 @@
  * Side Public License, v 1.
  */
 
-import { Config, createEsClientForFtrConfig } from '@kbn/test';
+import { type Client } from '@elastic/elasticsearch';
+import { SecurityPutRoleRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ToolingLog } from '@kbn/tooling-log';
-import { KibanaServer } from '../../..';
 
 export interface CreateRoleProps {
-  roleName: string;
-  roleMapping: string[];
-  kibanaServer: KibanaServer;
+  roleMapping: SecurityPutRoleRequest;
+  esClient: Client;
   log: ToolingLog;
 }
 
 export interface CreateRoleMappingProps {
   name: string;
   roles: string[];
-  config: Config;
+  esClient: Client;
   log: ToolingLog;
 }
 
 export async function createRole(props: CreateRoleProps) {
-  const { roleName, roleMapping, kibanaServer, log } = props;
-  log.debug(`Adding a role: ${roleName}`);
-  const { status, statusText } = await kibanaServer.request({
-    path: `/api/security/role/${roleName}`,
-    method: 'PUT',
-    body: roleMapping,
-    retries: 0,
-  });
-  if (status !== 204) {
-    throw new Error(`Expected status code of 204, received ${status} ${statusText}`);
-  }
+  const { roleMapping, esClient, log } = props;
+  log.debug(`Adding a role: ${roleMapping.name}`);
+  const response = await esClient.security.putRole(roleMapping);
+  log.debug(response.role.created ? 'Role successfully created' : 'Role was not created');
 }
 
 export async function createRoleMapping(props: CreateRoleMappingProps) {
-  const { name, roles, config, log } = props;
+  const { name, roles, esClient, log } = props;
   log.debug(`Creating a role mapping: {realm.name: ${name}, roles: ${roles}}`);
-  const esClient = createEsClientForFtrConfig(config);
-  await esClient.security.putRoleMapping({
+  const response = await esClient.security.putRoleMapping({
     name,
     roles,
     enabled: true,
-    // @ts-ignore
+    // @ts-expect-error `realm.name` is not defined as the supported field
     rules: { field: { 'realm.name': name } },
   });
+  log.debug(
+    response.role_mapping.created
+      ? 'Role mapping successfully created'
+      : 'Role mapping was not created'
+  );
 }

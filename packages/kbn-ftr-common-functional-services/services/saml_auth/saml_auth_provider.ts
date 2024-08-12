@@ -23,11 +23,10 @@ export interface RoleCredentials {
 export async function SamlAuthProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const isCloud = !!process.env.TEST_CLOUD;
 
-  const authRoleProvider = await getAuthProvider({ config, kibanaServer, log });
+  const authRoleProvider = await getAuthProvider({ config, log });
   const supportedRoleDescriptors = authRoleProvider.getSupportedRoleDescriptors();
   const supportedRoles = Object.keys(supportedRoleDescriptors);
 

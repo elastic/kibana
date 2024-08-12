@@ -6,20 +6,15 @@
  * Side Public License, v 1.
  */
 
-import fs from 'fs';
-import { type Config } from '@kbn/test';
+import { type Config, createEsClientForFtrConfig } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
-import { KibanaServer } from '../..';
-
 import { ServerlessAuthProvider } from './serverless/auth_provider';
 import { StatefulAuthProvider } from './stateful/auth_provider';
 import { createRole, createRoleMapping } from './stateful/create_role_mapping';
 
-const STATEFUL_ADMIN_ROLE_MAPPING_PATH = './stateful/admin_mapping';
-
 export interface AuthProvider {
-  getSupportedRoleDescriptors(): any;
+  getSupportedRoleDescriptors(): Record<string, unknown>;
   getDefaultRole(): string;
   getRolesDefinitionPath(): string;
   getCommonRequestHeader(): { [key: string]: string };
@@ -28,12 +23,11 @@ export interface AuthProvider {
 
 export interface AuthProviderProps {
   config: Config;
-  kibanaServer: KibanaServer;
   log: ToolingLog;
 }
 
 export const getAuthProvider = async (props: AuthProviderProps) => {
-  const { config, log, kibanaServer } = props;
+  const { config, log } = props;
   const isServerless = !!props.config.get('serverless');
   if (isServerless) {
     return new ServerlessAuthProvider(config);
@@ -42,12 +36,35 @@ export const getAuthProvider = async (props: AuthProviderProps) => {
   const provider = new StatefulAuthProvider();
   // TODO: Move it to @kbn-es package, so that roles and its mapping are created before FTR services loading starts.
   // 'viewer' and 'editor' roles are available by default, but we have to create 'admin' role
-  const adminRoleMapping = JSON.parse(
-    fs.readFileSync(require.resolve(STATEFUL_ADMIN_ROLE_MAPPING_PATH), 'utf8')
-  );
-  await createRole({ roleName: 'admin', roleMapping: adminRoleMapping, kibanaServer, log });
+  const esClient = createEsClientForFtrConfig(config);
+  const adminRoleMapping = {
+    name: 'admin',
+    applications: [
+      {
+        application: '*',
+        privileges: ['*'],
+        resources: ['*'],
+      },
+    ],
+    cluster: ['all'],
+    indices: [
+      {
+        names: ['*'],
+        privileges: ['all'],
+        allow_restricted_indices: false,
+      },
+      {
+        names: ['*'],
+        privileges: ['monitor', 'read', 'read_cross_cluster', 'view_index_metadata'],
+        allow_restricted_indices: true,
+      },
+    ],
+    run_as: ['*'],
+  };
+
+  await createRole({ roleMapping: adminRoleMapping, esClient, log });
   const roles = Object.keys(provider.getSupportedRoleDescriptors());
   // Creating roles mapping for mock-idp
-  await createRoleMapping({ name: MOCK_IDP_REALM_NAME, roles, config, log });
+  await createRoleMapping({ name: MOCK_IDP_REALM_NAME, roles, esClient, log });
   return provider;
 };
