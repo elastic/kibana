@@ -26,6 +26,7 @@ import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
+  mockRowAdditionalLeadingControls,
   testLeadingControlColumn,
   testTrailingControlColumns,
 } from '../../__mocks__/external_control_columns';
@@ -451,9 +452,8 @@ describe('UnifiedDataTable', () => {
     });
   });
 
-  describe('customControlColumnsConfiguration', () => {
-    const customControlColumnsConfiguration = jest.fn();
-    it('should be able to customise the leading control column', async () => {
+  describe('custom control columns', () => {
+    it('should be able to customise the leading controls', async () => {
       const component = await getComponent({
         ...getProps(),
         expandedDoc: {
@@ -467,23 +467,19 @@ describe('UnifiedDataTable', () => {
         setExpandedDoc: jest.fn(),
         renderDocumentView: jest.fn(),
         externalControlColumns: [testLeadingControlColumn],
-        customControlColumnsConfiguration: customControlColumnsConfiguration.mockImplementation(
-          () => {
-            return {
-              leadingControlColumns: [testLeadingControlColumn, testTrailingControlColumns[0]],
-              trailingControlColumns: [],
-            };
-          }
-        ),
+        rowAdditionalLeadingControls: mockRowAdditionalLeadingControls,
       });
 
       expect(findTestSubject(component, 'test-body-control-column-cell').exists()).toBeTruthy();
       expect(
-        findTestSubject(component, 'test-trailing-column-popover-button').exists()
+        findTestSubject(component, 'exampleRowControl-visBarVerticalStacked').exists()
+      ).toBeTruthy();
+      expect(
+        findTestSubject(component, 'unifiedDataTable_additionalRowControl_menuControl').exists()
       ).toBeTruthy();
     });
 
-    it('should be able to customise the trailing control column', async () => {
+    it('should be able to customise the trailing controls', async () => {
       const component = await getComponent({
         ...getProps(),
         expandedDoc: {
@@ -497,14 +493,7 @@ describe('UnifiedDataTable', () => {
         setExpandedDoc: jest.fn(),
         renderDocumentView: jest.fn(),
         externalControlColumns: [testLeadingControlColumn],
-        customControlColumnsConfiguration: customControlColumnsConfiguration.mockImplementation(
-          () => {
-            return {
-              leadingControlColumns: [],
-              trailingControlColumns: [testLeadingControlColumn, testTrailingControlColumns[0]],
-            };
-          }
-        ),
+        trailingControlColumns: testTrailingControlColumns,
       });
 
       expect(findTestSubject(component, 'test-body-control-column-cell').exists()).toBeTruthy();

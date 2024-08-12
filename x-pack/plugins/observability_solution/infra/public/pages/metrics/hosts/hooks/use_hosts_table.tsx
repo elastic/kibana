@@ -287,10 +287,10 @@ export const useHostsTable = () => {
           />
         ),
         width: metricColumnsWidth,
-        field: 'cpu',
+        field: 'cpuTotal',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-cpuUsage',
-        render: (avg: number) => formatMetric('cpu', avg),
+        render: (avg: number) => formatMetric('cpuTotal', avg),
         align: 'right',
       },
       {

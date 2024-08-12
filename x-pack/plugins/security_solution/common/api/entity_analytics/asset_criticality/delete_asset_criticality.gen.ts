@@ -16,7 +16,7 @@
 
 import { z } from 'zod';
 
-import { IdField } from './common.gen';
+import { IdField, AssetCriticalityRecord } from './common.gen';
 
 export type DeleteAssetCriticalityRecordRequestQuery = z.infer<
   typeof DeleteAssetCriticalityRecordRequestQuery
@@ -38,3 +38,14 @@ export const DeleteAssetCriticalityRecordRequestQuery = z.object({
 export type DeleteAssetCriticalityRecordRequestQueryInput = z.input<
   typeof DeleteAssetCriticalityRecordRequestQuery
 >;
+
+export type DeleteAssetCriticalityRecordResponse = z.infer<
+  typeof DeleteAssetCriticalityRecordResponse
+>;
+export const DeleteAssetCriticalityRecordResponse = z.object({
+  /**
+   * If the record was deleted. If false the record did not exist.
+   */
+  deleted: z.boolean(),
+  record: AssetCriticalityRecord.optional(),
+});
