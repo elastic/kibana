@@ -375,7 +375,11 @@ export class DiscoverPlugin
         const services = await getDiscoverServicesInternal();
         const initialState = await deserializeState({
           serializedState: {
-            rawState: { savedObjectId: savedObject.id },
+            rawState: savedObject.managed
+              ? {
+                  attributes: { ...savedObject.attributes, references: savedObject.references },
+                }
+              : { savedObjectId: savedObject.id },
             references: savedObject.references,
           },
           discoverServices: services,

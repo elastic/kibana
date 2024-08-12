@@ -31,8 +31,8 @@ export const deserializeLinksSavedObject = async (
   return {
     links,
     layout,
-    savedObjectId: linksSavedObject.id,
-    defaultPanelTitle,
-    defaultPanelDescription,
+    ...(linksSavedObject.managed
+      ? {}
+      : { savedObjectId: linksSavedObject.id, defaultPanelTitle, defaultPanelDescription }),
   };
 };
