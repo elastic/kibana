@@ -7,8 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { toAlphanumeric } from '../../../common/utils/to_alphanumeric';
-
+import { createApiKey } from '../../lib/indices/create_api_key';
 import { RouteDependencies } from '../../plugin';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 
@@ -30,20 +29,7 @@ export function registerApiKeysRoutes({ log, router }: RouteDependencies) {
       const { keyName } = request.body;
       const { security: coreSecurity } = await context.core;
 
-      const createResponse = await coreSecurity.authc.apiKeys.create({
-        name: keyName,
-        role_descriptors: {
-          [`${toAlphanumeric(indexName)}-key-role`]: {
-            cluster: [],
-            index: [
-              {
-                names: [indexName],
-                privileges: ['all'],
-              },
-            ],
-          },
-        },
-      });
+      const createResponse = await createApiKey(request, coreSecurity, indexName, keyName);
 
       if (!createResponse) {
         throw new Error('Unable to create API Key');
