@@ -9,7 +9,6 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { uniqBy } from 'lodash';
-import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DiscoverAppState } from '../discover_app_state_container';
 import {
   DefaultAppStateColumn,
@@ -25,14 +24,12 @@ export const getDefaultProfileState = ({
   defaultColumns,
   dataView,
   esqlQueryColumns,
-  records,
 }: {
   profilesManager: ProfilesManager;
   resetDefaultProfileState: InternalState['resetDefaultProfileState'];
   defaultColumns: string[];
   dataView: DataView;
   esqlQueryColumns: DataDocumentsMsg['esqlQueryColumns'];
-  records: DataTableRecord[];
 }) => {
   const stateUpdate: DiscoverAppState = {};
   const defaultState = getDefaultState(profilesManager, dataView);
@@ -44,22 +41,20 @@ export const getDefaultProfileState = ({
       defaultState.columns?.concat(mappedDefaultColumns).filter(isValidColumn),
       'name'
     );
-    const columnsWithValues = validColumns.filter((column) =>
-      records.some((record) => record.flattened[column.name] != null)
-    );
 
-    if (columnsWithValues?.length) {
-      const hasAutoWidthColumn = columnsWithValues.some(({ width }) => !width);
-      const columns = columnsWithValues.reduce<DiscoverGridSettings['columns']>(
+    if (validColumns?.length) {
+      const hasAutoWidthColumn = validColumns.some(({ width }) => !width);
+      const columns = validColumns.reduce<DiscoverGridSettings['columns']>(
         (acc, { name, width }, index) => {
-          const skipColumnWidth = !hasAutoWidthColumn && index === columnsWithValues.length - 1;
+          // Ensure there's at least one auto width column so the columns fill the grid
+          const skipColumnWidth = !hasAutoWidthColumn && index === validColumns.length - 1;
           return width && !skipColumnWidth ? { ...acc, [name]: { width } } : acc;
         },
         undefined
       );
 
       stateUpdate.grid = columns ? { columns } : undefined;
-      stateUpdate.columns = columnsWithValues.map(({ name }) => name);
+      stateUpdate.columns = validColumns.map(({ name }) => name);
     }
   }
 

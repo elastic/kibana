@@ -12,7 +12,6 @@ import { BehaviorSubject, combineLatest, filter, firstValueFrom, switchMap } fro
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { isEqual } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DiscoverAppState } from '../state_management/discover_app_state_container';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
@@ -55,7 +54,7 @@ export function fetchAll(
   dataSubjects: SavedSearchData,
   reset = false,
   fetchDeps: FetchDeps,
-  onFetchRecordsComplete?: (records: DataTableRecord[]) => Promise<void>
+  onFetchRecordsComplete?: () => Promise<void>
 ): Promise<void> {
   const {
     initialFetchStatus,
@@ -180,9 +179,7 @@ export function fetchAll(
     // Return a promise that will resolve once all the requests have finished or failed
     return firstValueFrom(
       combineLatest([
-        isComplete(dataSubjects.documents$).pipe(
-          switchMap(async ({ result }) => onFetchRecordsComplete?.(result ?? []))
-        ),
+        isComplete(dataSubjects.documents$).pipe(switchMap(async () => onFetchRecordsComplete?.())),
         isComplete(dataSubjects.totalHits$),
       ])
     ).then(() => {
