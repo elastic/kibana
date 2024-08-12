@@ -33,9 +33,7 @@ describe('checkProdNativeModules', () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     jest.replaceProperty(require('@kbn/repo-info'), 'REPO_ROOT', noNativeModulesDir);
 
-    const noNativeModulesPkgJson = JSON.parse(
-      fs.readFileSync(noNativeModulesPkgJsonPath, 'utf8')
-    );
+    const noNativeModulesPkgJson = JSON.parse(fs.readFileSync(noNativeModulesPkgJsonPath, 'utf8'));
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     jest.replaceProperty(require('@kbn/repo-info'), 'kibanaPackageJson', noNativeModulesPkgJson);
 
