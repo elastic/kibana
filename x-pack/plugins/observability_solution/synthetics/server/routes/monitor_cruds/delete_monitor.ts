@@ -56,6 +56,12 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
     const { ids } = request.body || {};
     const { id: queryId } = request.params;
 
+    if (ids && queryId) {
+      return response.badRequest({
+        body: { message: 'id must be provided either via param or body.' },
+      });
+    }
+
     const result: Array<{ id: string; deleted: boolean; error?: string }> = [];
     const idsToDelete = [...(ids ?? []), ...(queryId ? [queryId] : [])];
     if (idsToDelete.length === 0) {
