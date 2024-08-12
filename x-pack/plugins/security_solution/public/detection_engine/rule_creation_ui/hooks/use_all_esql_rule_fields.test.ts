@@ -46,7 +46,7 @@ const mockEsqlDatatable = {
 };
 
 // FLAKY: https://github.com/elastic/kibana/issues/190063
-describe.skip('useAllEsqlRuleFields', () => {
+describe('useAllEsqlRuleFields', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     getESQLQueryColumnsMock.mockImplementation(({ esqlQuery }) =>
@@ -146,7 +146,6 @@ describe.skip('useAllEsqlRuleFields', () => {
   });
 
   it('should deduplicate index pattern fields and ES|QL fields when fields have same name', async () => {
-    //  getESQLQueryColumnsMock.mockClear();
     computeIsESQLQueryAggregatingMock.mockReturnValue(false);
 
     const { result, waitFor } = renderHook(
