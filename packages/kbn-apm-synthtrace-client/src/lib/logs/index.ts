@@ -15,6 +15,10 @@ interface LogsOptions {
   isLogsDb: boolean;
 }
 
+const defaultLogsOptions: LogsOptions = {
+  isLogsDb: false,
+};
+
 export type LogDocument = Fields &
   Partial<{
     'input.type': string;
@@ -98,7 +102,7 @@ class Log extends Serializable<LogDocument> {
   }
 }
 
-function create({ isLogsDb }: LogsOptions): Log {
+function create({ isLogsDb }: LogsOptions = defaultLogsOptions): Log {
   return new Log(
     {
       'input.type': 'logs',
