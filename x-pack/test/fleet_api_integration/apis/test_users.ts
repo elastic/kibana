@@ -21,6 +21,17 @@ export const testUsers: {
     username: 'fleet_all_int_all',
     password: 'changeme',
   },
+  fleet_all_int_all_default_space_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['all'],
+        fleet: ['all'],
+      },
+      spaces: ['default'],
+    },
+    username: 'fleet_all_int_all_default_space_only',
+    password: 'changeme',
+  },
   fleet_read_only: {
     permissions: {
       feature: {

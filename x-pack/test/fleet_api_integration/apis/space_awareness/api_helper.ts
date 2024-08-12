@@ -36,15 +36,20 @@ import {
   GetUninstallTokensMetadataResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
 import { SimplifiedPackagePolicy } from '@kbn/fleet-plugin/common/services/simplified_package_policy_helper';
+import { testUsers } from '../test_users';
 
 export class SpaceTestApiClient {
-  constructor(private readonly supertest: Agent) {}
+  constructor(
+    private readonly supertest: Agent,
+    private readonly auth = testUsers.fleet_all_int_all
+  ) {}
   private getBaseUrl(spaceId?: string) {
     return spaceId ? `/s/${spaceId}` : '';
   }
   async setup(spaceId?: string): Promise<CreateAgentPolicyResponse> {
     const { body: res } = await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/setup`)
+      .auth(this.auth.username, this.auth.password)
       .set('kbn-xsrf', 'xxxx')
       .send({})
       .expect(200);
@@ -58,6 +63,7 @@ export class SpaceTestApiClient {
   ): Promise<CreateAgentPolicyResponse> {
     const { body: res } = await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/agent_policies`)
+      .auth(this.auth.username, this.auth.password)
       .set('kbn-xsrf', 'xxxx')
       .send({
         name: `test ${uuidV4()}`,
@@ -129,15 +135,23 @@ export class SpaceTestApiClient {
     data: Partial<UpdateAgentPolicyRequest['body']>,
     spaceId?: string
   ): Promise<UpdateAgentPolicyResponse> {
-    const { body: res } = await this.supertest
+    const { body: res, statusCode } = await this.supertest
       .put(`${this.getBaseUrl(spaceId)}/api/fleet/agent_policies/${policyId}`)
+      .auth(this.auth.username, this.auth.password)
       .send({
         ...data,
       })
-      .set('kbn-xsrf', 'xxxx')
-      .expect(200);
+      .set('kbn-xsrf', 'xxxx');
 
-    return res;
+    if (statusCode === 200) {
+      return res;
+    }
+
+    if (statusCode === 404) {
+      throw new Error('404 "Not Found"');
+    } else {
+      throw new Error(`${statusCode} ${res?.error} ${res.message}`);
+    }
   }
   async getAgentPolicies(spaceId?: string): Promise<GetAgentPoliciesResponse> {
     const { body: res } = await this.supertest

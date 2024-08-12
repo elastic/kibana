@@ -36,7 +36,7 @@ export async function updateAgentPolicySpaces({
   }
 
   const esClient = appContextService.getInternalUserESClient();
-  const soClient = appContextService.getInternalUserSOClient();
+  const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
   const currentSpaceSoClient = appContextService.getInternalUserSOClientForSpaceId(currentSpaceId);
   const existingPolicy = await agentPolicyService.get(currentSpaceSoClient, agentPolicyId);
@@ -82,7 +82,7 @@ export async function updateAgentPolicySpaces({
     ],
     spacesToAdd,
     spacesToRemove,
-    { refresh: 'wait_for' }
+    { refresh: 'wait_for', namespace: currentSpaceId }
   );
 
   for (const soRes of res.objects) {

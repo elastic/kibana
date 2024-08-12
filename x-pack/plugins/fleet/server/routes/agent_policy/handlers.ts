@@ -330,7 +330,6 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
 
       spaceId = spaceIds[0];
     }
-
     const agentPolicy = await agentPolicyService.update(
       appContextService.getInternalUserSOClientForSpaceId(spaceId),
       esClient,
@@ -338,6 +337,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
       data,
       { force, user, spaceId }
     );
+
     const body: UpdateAgentPolicyResponse = { item: agentPolicy };
     return response.ok({
       body,

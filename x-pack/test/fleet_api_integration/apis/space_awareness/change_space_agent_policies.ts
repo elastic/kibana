@@ -10,12 +10,19 @@ import { CreateAgentPolicyResponse, GetOnePackagePolicyResponse } from '@kbn/fle
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
-import { cleanFleetIndices, createFleetAgent, expectToRejectWithNotFound } from './helpers';
+import {
+  cleanFleetIndices,
+  createFleetAgent,
+  expectToRejectWithError,
+  expectToRejectWithNotFound,
+} from './helpers';
 import { setupTestSpaces, TEST_SPACE_1 } from './space_helpers';
+import { testUsers, setupTestUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
 
@@ -24,6 +31,7 @@ export default function (providerContext: FtrProviderContext) {
     const apiClient = new SpaceTestApiClient(supertest);
 
     before(async () => {
+      await setupTestUsers(getService('security'));
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.savedObjects.cleanStandardList({
         space: TEST_SPACE_1,
@@ -65,6 +73,29 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('PUT /agent_policies/{id}', () => {
+      beforeEach(async () => {
+        // Reset policy in default space
+        await apiClient
+          .putAgentPolicy(
+            defaultSpacePolicy1.item.id,
+            {
+              name: 'tata',
+              namespace: 'default',
+              description: 'tata',
+              space_ids: ['default'],
+            },
+            TEST_SPACE_1
+          )
+          .catch(() => {});
+        await apiClient
+          .putAgentPolicy(defaultSpacePolicy1.item.id, {
+            name: 'tata',
+            namespace: 'default',
+            description: 'tata',
+            space_ids: ['default'],
+          })
+          .catch(() => {});
+      });
       async function assertPolicyAvailableInSpace(spaceId?: string) {
         await apiClient.getAgentPolicy(defaultSpacePolicy1.item.id, spaceId);
         await apiClient.getPackagePolicy(defaultPackagePolicy1.item.id, spaceId);
@@ -116,6 +147,49 @@ export default function (providerContext: FtrProviderContext) {
 
         await assertPolicyNotAvailableInSpace();
         await assertPolicyAvailableInSpace(TEST_SPACE_1);
+      });
+
+      it('should not allow add policy to a space where user do not have access', async () => {
+        const testApiClient = new SpaceTestApiClient(
+          supertestWithoutAuth,
+          testUsers.fleet_all_int_all_default_space_only
+        );
+
+        await expectToRejectWithError(
+          () =>
+            testApiClient.putAgentPolicy(defaultSpacePolicy1.item.id, {
+              name: 'tata',
+              namespace: 'default',
+              description: 'tata',
+              space_ids: ['default', TEST_SPACE_1],
+            }),
+          /400 Bad Request No enough permissions to create policies in space test1/
+        );
+      });
+
+      it('should not allow to remove policy from a space where user do not have access', async () => {
+        await apiClient.putAgentPolicy(defaultSpacePolicy1.item.id, {
+          name: 'tata',
+          namespace: 'default',
+          description: 'tata',
+          space_ids: ['default', TEST_SPACE_1],
+        });
+
+        const testApiClient = new SpaceTestApiClient(
+          supertestWithoutAuth,
+          testUsers.fleet_all_int_all_default_space_only
+        );
+
+        await expectToRejectWithError(
+          () =>
+            testApiClient.putAgentPolicy(defaultSpacePolicy1.item.id, {
+              name: 'tata',
+              namespace: 'default',
+              description: 'tata',
+              space_ids: ['default'],
+            }),
+          /400 Bad Request No enough permissions to remove policies fromspace test1/
+        );
       });
     });
   });
