@@ -86,6 +86,7 @@ export const resolveGridRow = (
   if (dragRequest) {
     nextRowData.panels[dragRequest.id] = dragRequest;
   }
+  // return nextRowData;
 
   // push all panels down if they collide with another panel
   const sortedKeys = getKeysInOrder(nextRowData, dragRequest?.id);

@@ -63,16 +63,29 @@ export const GridLayout = ({
       })}
       <EuiPortal>
         <div
-          ref={gridLayoutStateManager.dragPreviewRef}
           css={css`
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            overflow: hidden;
             pointer-events: none;
             z-index: ${euiThemeVars.euiZModal};
-            border-radius: ${euiThemeVars.euiBorderRadius};
-            background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.2)};
-            transition: opacity 100ms linear;
-            position: absolute;
           `}
-        />
+        >
+          <div
+            ref={gridLayoutStateManager.dragPreviewRef}
+            css={css`
+              pointer-events: none;
+              z-index: ${euiThemeVars.euiZModal};
+              border-radius: ${euiThemeVars.euiBorderRadius};
+              background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.2)};
+              transition: opacity 100ms linear;
+              position: absolute;
+            `}
+          />
+        </div>
       </EuiPortal>
     </div>
   );

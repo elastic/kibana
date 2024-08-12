@@ -10,17 +10,6 @@ import { useEffect, useRef } from 'react';
 import { resolveGridRow } from './resolve_grid_row';
 import { GridPanelData, GridLayoutStateManager } from './types';
 
-export const getScrollAmount = () => ({
-  scrollLeft:
-    window.scrollX !== undefined
-      ? window.scrollX
-      : (document.documentElement || document.body.parentNode || document.body).scrollLeft,
-  scrollTop:
-    window.scrollY !== undefined
-      ? window.scrollY
-      : (document.documentElement || document.body.parentNode || document.body).scrollTop,
-});
-
 export const isGridDataEqual = (a?: GridPanelData, b?: GridPanelData) => {
   return (
     a?.id === b?.id &&
@@ -72,19 +61,13 @@ export const useGridLayoutEvents = ({
         return;
       }
 
-      const { scrollLeft, scrollTop } = getScrollAmount();
-
       const mouseTargetPixel = { x: e.clientX, y: e.clientY };
       const panelRect = interactionEvent.panelDiv.getBoundingClientRect();
       const previewRect = {
-        left: isResize
-          ? panelRect.left + scrollLeft
-          : mouseTargetPixel.x - interactionEvent.mouseOffsets.left + scrollLeft,
-        top: isResize
-          ? panelRect.top + scrollTop
-          : mouseTargetPixel.y - interactionEvent.mouseOffsets.top + scrollTop,
-        bottom: mouseTargetPixel.y - interactionEvent.mouseOffsets.bottom + scrollTop,
-        right: mouseTargetPixel.x - interactionEvent.mouseOffsets.right + scrollLeft,
+        left: isResize ? panelRect.left : mouseTargetPixel.x - interactionEvent.mouseOffsets.left,
+        top: isResize ? panelRect.top : mouseTargetPixel.y - interactionEvent.mouseOffsets.top,
+        bottom: mouseTargetPixel.y - interactionEvent.mouseOffsets.bottom,
+        right: mouseTargetPixel.x - interactionEvent.mouseOffsets.right,
       };
       gridLayoutStateManager.updatePreviewElement(previewRect);
 
@@ -101,8 +84,7 @@ export const useGridLayoutEvents = ({
           if (!row) return;
           const rowRect = row.getBoundingClientRect();
           const overlap =
-            Math.min(previewBottom, rowRect.bottom + scrollTop) -
-            Math.max(previewRect.top, rowRect.top + scrollTop);
+            Math.min(previewBottom, rowRect.bottom) - Math.max(previewRect.top, rowRect.top);
           if (overlap > highestOverlap) {
             highestOverlap = overlap;
             highestOverlapRowIndex = index;
@@ -123,13 +105,17 @@ export const useGridLayoutEvents = ({
       // calculate the requested grid position
       const { columnCount, gutterSize, rowHeight, columnPixelWidth } = runtimeSettings$.value;
       const targetedGridRow = gridRowElements[targetRowIndex];
-      const targetedGridLeft = (targetedGridRow?.getBoundingClientRect().left ?? 0) + scrollLeft;
-      const targetedGridTop = (targetedGridRow?.getBoundingClientRect().top ?? 0) + scrollTop;
+      const targetedGridLeft = targetedGridRow?.getBoundingClientRect().left ?? 0;
+      const targetedGridTop = targetedGridRow?.getBoundingClientRect().top ?? 0;
 
       const maxColumn = isResize ? columnCount : columnCount - currentGridData.width;
 
-      const localXCoordinate = (isResize ? previewRect.right : previewRect.left) - targetedGridLeft;
-      const localYCoordinate = (isResize ? previewRect.bottom : previewRect.top) - targetedGridTop;
+      const localXCoordinate = isResize
+        ? previewRect.right - targetedGridLeft
+        : previewRect.left - targetedGridLeft;
+      const localYCoordinate = isResize
+        ? previewRect.bottom - targetedGridTop
+        : previewRect.top - targetedGridTop;
 
       const targetColumn = Math.min(
         Math.max(Math.round(localXCoordinate / (columnPixelWidth + gutterSize)), 0),
