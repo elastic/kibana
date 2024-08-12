@@ -55,7 +55,7 @@ export const validateKQLStringFilter = (value: string) => {
     kbnBuildEsQuery(undefined, [{ query: value, language: 'kuery' }], [], {
       allowLeadingWildcards: true,
       queryStringOptions: {},
-      ignoreFilterIfFieldNotInIndex: true,
+      ignoreFilterIfFieldNotInIndex: false,
     });
   } catch (e) {
     return i18n.translate('xpack.observability.customThreshold.rule.schema.invalidFilterQuery', {
