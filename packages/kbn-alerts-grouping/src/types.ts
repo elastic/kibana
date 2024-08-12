@@ -29,7 +29,9 @@ export interface AlertsGroupingState {
   [groupingId: string]: GroupModel;
 }
 
-export interface AlertsGroupingProps<T extends BaseAlertsGroupAggregations> {
+export interface AlertsGroupingProps<
+  T extends BaseAlertsGroupAggregations = BaseAlertsGroupAggregations
+> {
   /**
    * The leaf component that will be rendered in the grouping panels
    */
