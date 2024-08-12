@@ -6,11 +6,11 @@
  */
 
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { useMutation } from '@tanstack/react-query';
 import {
   CreateInvestigationNoteInput,
   CreateInvestigationNoteResponse,
 } from '../../common/schema/create_notes';
-import { useMutation } from '@tanstack/react-query';
 import { useKibana } from './use_kibana';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
@@ -40,11 +40,11 @@ export function useAddInvestigationNote() {
     {
       onSuccess: (response, {}) => {
         // TODO: clear investigationNotes key from queryClient, and push new note to the internal store.
-        console.log(response);
+        // console.log(response);
         toasts.addSuccess('Note saved');
       },
       onError: (error, {}, context) => {
-        console.log(error);
+        // console.log(error);
       },
     }
   );
