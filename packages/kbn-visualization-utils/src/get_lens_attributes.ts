@@ -46,15 +46,24 @@ export const getLensAttributesFromSuggestion = ({
       : {
           formBased: {},
         };
-  const visualization = {
-    ...suggestionVisualizationState,
-    layers: suggestionVisualizationState?.layers?.map((layer) => {
-      return {
-        ...layer,
-        ...(colorMapping && { colorMapping }),
-      };
-    }),
-  };
+
+  let visualization = suggestionVisualizationState;
+  if (
+    suggestion &&
+    'layers' in suggestionVisualizationState &&
+    colorMapping &&
+    Array.isArray(suggestionVisualizationState.layers)
+  ) {
+    visualization = {
+      ...suggestionVisualizationState,
+      layers: suggestionVisualizationState.layers.map((layer) => {
+        return {
+          ...layer,
+          ...(colorMapping && { colorMapping }),
+        };
+      }),
+    };
+  }
   const attributes = {
     title:
       suggestion?.title ??
