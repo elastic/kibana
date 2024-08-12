@@ -39,7 +39,7 @@ You can find an example package's folder structure
 
 By default OpenAPI code generator generation produces artifacts for `components` defined in OpenAPI specs but disabled for `paths`. `x-codegen-enabled` custom property allows to enable/disable code generation for particular path item or components. `x-codegen-enabled: true` should be always added to path items you want to enable code generation for.
 
-> **Warning:** When code generation for path items is enabled OpenAPI code generator produces Zod schemas and TS types for request body, request parameters and successful response. ==You DON'T need to define schemas for request body, request parameters and successful response manually.== If you don't see such artifacts most probably path items code generation is disabled.
+> **Warning:** When code generation for path items is enabled OpenAPI code generator produces Zod schemas and TS types for request body, request parameters and successful response. **You AREN'T required to define schemas for request body, request parameters and successful response manually.** If you don't see such artifacts most probably path items code generation is disabled.
 
 #### Examples
 
