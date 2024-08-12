@@ -7,37 +7,37 @@
 :frontmatter-description: {kib} provides you with several options to share *Discover* saved searches, dashboards, *Visualize Library* visualizations, and *Canvas* workpads with others, or on a website.
 :frontmatter-tags-products: [kibana]
 
-{kib} provides you with several options to share *Discover* saved searches, dashboards, *Visualize Library* visualizations, and *Canvas* workpads.
+{kib} provides you with several options to share *Discover* saved searches, dashboards, *Visualize Library* visualizations, and *Canvas* workpads. These sharing options are available from the *Share* menu in the toolbar.
 
-You access the options from the *Share* menu in the toolbar. The sharing options include the following:
+[float]
+[[share-a-direct-link]]
+== Share with a direct link
 
-* *PDF Reports* &mdash; Generate and download PDF files of dashboards, visualizations, and *Canvas* workpads. PDF reports are a link:https://www.elastic.co/subscriptions[subscription feature].
+You can share direct links to saved searches, dashboards, and visualizations. When clicking **Share**, look for the **Links** tab to get the shareable link and copy it. When sharing an object with unsaved changes, you're getting a temporary link that might break in the future for example in case of upgrade. Save the object to get a permanent link instead.
 
-* *PNG Reports* &mdash; Generate and download PNG files of dashboards and visualizations. PNG reports are a link:https://www.elastic.co/subscriptions[subscription feature].
+To access the object shared with the link, users need to authenticate.
+
+TIP: Anonymous users can also access the link if you have configured <<anonymous-authentication,Anonymous authentication>> and your anonymous service account has privileges to access what you want to share.
+
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt49f2b5a80ec89a34/66b9e919af508f4ac182c194/share-dashboard.gif[getting a shareable link for a dashboard]
+
+
+[float]
+[[manually-generate-reports]]
+== Export as a file
+
+Create and download PDF, PNG, or CSV reports of saved searches, dashboards, visualizations, and workpads:
+
+* *PDF* &mdash; Generate and download PDF files of dashboards, visualizations, and *Canvas* workpads. PDF reports are a link:https://www.elastic.co/subscriptions[subscription feature].
+
+* *PNG* &mdash; Generate and download PNG files of dashboards and visualizations. PNG reports are a link:https://www.elastic.co/subscriptions[subscription feature].
 
 * *CSV Reports* &mdash; Generate CSV reports of saved searches. <<csv-limitations,Certain limitations apply>>.
 
 * *CSV Download* &mdash; Generate and download CSV files of *Lens* visualizations.
 
-* *Get links* &mdash; Share direct links to saved searches, dashboards, and visualizations.
-
 * *Download as JSON* &mdash; Generate and download JSON files of *Canvas* workpads.
 
-* beta[] *Share on a website* &mdash; Download and securely share *Canvas* workpads on any website.
-
-* *Embed code* &mdash; Embed fully interactive dashboards as an iframe on web pages.
-
-[[reporting-on-cloud-resource-requirements]]
-NOTE: For Elastic Cloud deployments, {kib} instances require a minimum of 2GB RAM to generate PDF or PNG reports. To
-change {kib} sizing, {ess-console}[edit the deployment].
-
-For more information on how to configure reporting in {kib}, refer to <<secure-reporting,Configure reporting in {kib}>>
-
-[float]
-[[manually-generate-reports]]
-== Create reports
-
-Create and download PDF, PNG, or CSV reports of saved searches, dashboards, visualizations, and workpads.
 
 [[reporting-layout-sizing]]
 The layout and size of the report depends on what you are sharing.
@@ -84,33 +84,6 @@ include::reporting-csv-limitations.asciidoc[]
 include::reporting-pdf-limitations.asciidoc[]
 
 [float]
-[[share-a-direct-link]]
-== Share direct links
-
-Create and share direct links to saved searches, dashboards, and visualizations. To access the shared object, authentication is required.
-
-. Open the main menu, then open the saved search, dashboard, or visualization you want to share.
-
-. From the toolbar, click *Share*, then select *Get links*.
-
-. Specify how you want to generate the link:
-
-* To display only the current state of the object, select *Snapshot*.
-
-* To display up-to-date changes, select *Saved object*.
-
-* To generate a shortened link, select *Short URL*.
-
-* To automatically log in anonymous users when you have multiple authentication providers enabled, select *Public URL*.
-+
-[role="screenshot"]
-image::images/permalink-public-url.png[Permalink share menu with Public URL option highlighted]
-+
-NOTE: *Public URL* is available only when anonymous access is configured and your anonymous service account has privileges to access what you want to share. For more information, refer to <<anonymous-authentication,Anonymous authentication>>.
-
-. Click *Copy link*.
-
-[float]
 [[download-as-json]]
 == Create JSON files
 
@@ -121,6 +94,29 @@ Create and share JSON files for workpads.
 . Open the workpad you want to share.
 
 . From the toolbar, click *Share*, then select *Download as JSON*.
+
+[float]
+== Embed outside of {kib}
+
+
+
+* beta[] *Share on a website* &mdash; Download and securely share *Canvas* workpads on any website.
+
+* *Embed code* &mdash; Embed fully interactive dashboards as an iframe on web pages.
+
+[[reporting-on-cloud-resource-requirements]]
+NOTE: For Elastic Cloud deployments, {kib} instances require a minimum of 2GB RAM to generate PDF or PNG reports. To
+change {kib} sizing, {ess-console}[edit the deployment].
+
+
+[float]
+[[manually-generate-reports]]
+== Create reports
+
+For more information on how to configure reporting in {kib}, refer to <<secure-reporting,Configure reporting in {kib}>>
+
+
+
 
 [float]
 [[add-workpad-website]]
