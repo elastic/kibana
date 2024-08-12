@@ -58,7 +58,7 @@ export type LogDocument = Fields &
   }>;
 
 class Log extends Serializable<LogDocument> {
-  constructor(fields: LogDocument, private isLogsDb: boolean) {
+  constructor(fields: LogDocument, private logsOptions: LogsOptions) {
     super({
       ...fields,
     });
@@ -85,7 +85,7 @@ class Log extends Serializable<LogDocument> {
   }
 
   dataset(value: string) {
-    const dataset = `${this.isLogsDb ? LOGSDB_DATASET_PREFIX : ''}${value}`;
+    const dataset = `${this.logsOptions.isLogsDb ? LOGSDB_DATASET_PREFIX : ''}${value}`;
     this.fields['data_stream.dataset'] = dataset;
     this.fields['event.dataset'] = dataset;
     return this;
@@ -102,7 +102,7 @@ class Log extends Serializable<LogDocument> {
   }
 }
 
-function create({ isLogsDb }: LogsOptions = defaultLogsOptions): Log {
+function create(logsOptions: LogsOptions = defaultLogsOptions): Log {
   return new Log(
     {
       'input.type': 'logs',
@@ -110,7 +110,7 @@ function create({ isLogsDb }: LogsOptions = defaultLogsOptions): Log {
       'data_stream.type': 'logs',
       'host.name': 'synth-host',
     },
-    isLogsDb
+    logsOptions
   ).dataset('synth');
 }
 

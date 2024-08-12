@@ -13,7 +13,7 @@ import { LogDocument } from '@kbn/apm-synthtrace-client/src/lib/logs';
 import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
 import { Logger } from '../utils/create_logger';
-import { indexTemplates, IndexTemplateName } from './templates';
+import { indexTemplates, IndexTemplateName } from './custom_logsdb_index_templates';
 
 export type LogsSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 

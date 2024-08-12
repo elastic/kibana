@@ -7,7 +7,7 @@
  */
 import { ScenarioBootstrap } from '../cli/scenario';
 import { RunOptions } from '../cli/utils/parse_run_cli_flags';
-import { IndexTemplateName } from '../lib/logs/templates';
+import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
 import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
 
 const logsScenarioBase: (runOptions: RunOptions) => { bootstrap: ScenarioBootstrap } = (
