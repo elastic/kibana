@@ -72,9 +72,12 @@ export const getControlGroupEmbeddableFactory = (services: {
       } = initialRuntimeState;
 
       const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
+      const parentDataViewId = apiPublishesDataViews(parentApi)
+        ? parentApi.dataViews.value?.[0]?.id
+        : undefined;
       const controlsManager = initControlsManager(
         initialChildControlState,
-        await services.dataViews.getDefaultId()
+        parentDataViewId ?? (await services.dataViews.getDefaultId())
       );
       const selectionsManager = initSelectionsManager({
         ...controlsManager.api,

@@ -38,10 +38,10 @@ export function getControlsInOrder(initialControlPanelsState: ControlPanelsState
 
 export function initControlsManager(
   initialControlPanelsState: ControlPanelsState,
-  defaultDataviewId: string | null
+  defaultDataViewId: string | null
 ) {
   const lastUsedDataViewId$ = new BehaviorSubject<string | undefined>(
-    getLastDataViewId(initialControlPanelsState) ?? defaultDataviewId ?? undefined
+    getLastUsedDataViewId(initialControlPanelsState) ?? defaultDataViewId ?? undefined
   );
   const lastSavedControlsPanelState$ = new BehaviorSubject(initialControlPanelsState);
   const initialControlIds = Object.keys(initialControlPanelsState);
@@ -235,12 +235,15 @@ export function initControlsManager(
   };
 }
 
-function getLastDataViewId(initialControlPanelsState: ControlPanelsState) {
+function getLastUsedDataViewId(initialControlPanelsState: ControlPanelsState) {
+  const panelStates = Object.values(initialControlPanelsState);
   let dataViewId: string | undefined;
-  Object.values(initialControlPanelsState).forEach((panelState) => {
+  for (let i = 0; i < panelStates.length; i++) {
+    const panelState = panelStates[i];
     if ((panelState as unknown as DefaultDataControlState).dataViewId) {
       dataViewId = (panelState as unknown as DefaultDataControlState).dataViewId;
+      break;
     }
-  });
+  }
   return dataViewId;
 }
