@@ -72,8 +72,6 @@ export const MESSAGE = '[data-test-subj="formatted-field-message"]';
 
 export const SELECTED_ALERTS = '[data-test-subj="selectedShowBulkActionsButton"]';
 
-export const SELECT_AGGREGATION_CHART = '[data-test-subj="chart-select-table"]';
-
 export const SEND_ALERT_TO_TIMELINE_BTN = '[data-test-subj="send-alert-to-timeline-button"]';
 
 export const OPEN_ANALYZER_BTN = '[data-test-subj="view-in-analyzer"]';
@@ -131,6 +129,33 @@ export const ACTIONS_EXPAND_BUTTON = '[data-test-subj="euiDataGridCellExpandButt
 export const SHOW_TOP_N_HEADER =
   '[data-test-subj="topN-container"] [data-test-subj="header-section-title"]';
 
+export const SESSION_VIEWER_BUTTON = '[data-test-subj="session-view-button"]';
+
+export const OVERLAY_CONTAINER = '[data-test-subj="overlayContainer"]';
+
+/**
+ * Alerts KPIs
+ */
+
+export const ALERT_CHARTS_TOGGLE_BUTTON = getDataTestSubjectSelector('query-toggle-header');
+
+export const SELECT_OVERVIEW_CHARTS = getDataTestSubjectSelector('chart-select-charts');
+
+export const ALERT_SUMMARY_CHARTS = getDataTestSubjectSelector('alerts-charts-panel');
+
+export const ALERT_SUMMARY_SEVERITY_DONUT_CHART =
+  getDataTestSubjectSelector('severity-level-donut');
+
+export const ALERT_SUMMARY_RULES_TABLE = getDataTestSubjectSelector('alerts-by-rule-panel');
+
+export const ALERT_SUMMARY_PROGRESS_BAR_CHARTS = getDataTestSubjectSelector(
+  'alerts-progress-bar-panel'
+);
+
+export const ALERT_SUMMARY_CHARTS_COLLAPSED = getDataTestSubjectSelector('chart-collapse');
+
+export const ALERTS_HISTOGRAM = getDataTestSubjectSelector('alerts-histogram-panel');
+
 export const ALERTS_HISTOGRAM_LEGEND =
   '[data-test-subj="alerts-histogram-panel"] .echLegendItem__action';
 
@@ -146,12 +171,13 @@ export const LEGEND_ACTIONS = {
   COPY: (ruleName: string) => `[data-test-subj="legend-${ruleName}-embeddable_copyToClipboard"]`,
 };
 
-export const SESSION_VIEWER_BUTTON = '[data-test-subj="session-view-button"]';
+export const ALERT_COUNT_TABLE = getDataTestSubjectSelector('alertsCountPanel');
 
-export const OVERLAY_CONTAINER = '[data-test-subj="overlayContainer"]';
+export const SELECT_COUNTS_TABLE = '[data-test-subj="chart-select-table"]';
 
-export const ALERT_SUMMARY_SEVERITY_DONUT_CHART =
-  getDataTestSubjectSelector('severity-level-donut');
+export const SELECT_TREEMAP = getDataTestSubjectSelector('chart-select-treemap');
+
+export const ALERT_TREEMAP = getDataTestSubjectSelector('treemapPanel');
 
 export const ALERT_TAGGING_CONTEXT_MENU_ITEM = '[data-test-subj="alert-tags-context-menu-item"]';
 
