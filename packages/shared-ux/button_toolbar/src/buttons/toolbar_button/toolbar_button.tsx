@@ -88,7 +88,7 @@ const computeToolbarButtonCommonCSSProps = (
       : {};
 
   const defaultStyles = {
-    ...toolButtonStyles.default,
+    ...(type === 'primary' ? {} : toolButtonStyles.default),
     ...groupPositionStyles,
   };
 
@@ -96,7 +96,7 @@ const computeToolbarButtonCommonCSSProps = (
     ? defaultStyles
     : {
         ...defaultStyles,
-        ...(type === 'primary' ? {} : toolButtonStyles.emptyButton),
+        ...(type === 'empty' ? toolButtonStyles.emptyButton : {}),
       };
 };
 
@@ -130,7 +130,7 @@ const ToolbarStandardButton = ({
     <EuiButton
       size={rest.size}
       isDisabled={isDisabled}
-      css={type === 'primary' ? null : cssProps}
+      css={cssProps}
       iconType={icon}
       iconSide={iconType ? iconSide : 'right'}
       fullWidth={fullWidth}
