@@ -97,6 +97,7 @@ export class LogsSharedPlugin
     const logViews = this.logViews.start({
       savedObjects: core.savedObjects,
       dataViews: plugins.dataViews,
+      logsDataAccess: plugins.logsDataAccess,
       elasticsearch: core.elasticsearch,
     });
 

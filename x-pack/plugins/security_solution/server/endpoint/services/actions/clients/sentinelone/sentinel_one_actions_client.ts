@@ -57,7 +57,6 @@ import type {
   EndpointActionResponseDataOutput,
   GetProcessesActionOutputContent,
   KillProcessActionOutputContent,
-  KillProcessRequestBody,
   LogsEndpointAction,
   LogsEndpointActionResponse,
   ResponseActionGetFileOutputContent,
@@ -81,6 +80,8 @@ import type {
   GetProcessesRequestBody,
   IsolationRouteRequestBody,
   ResponseActionGetFileRequestBody,
+  KillProcessRequestBody,
+  UnisolationRouteRequestBody,
 } from '../../../../../../common/api/endpoint';
 import type {
   ResponseActionsClientOptions,
@@ -361,7 +362,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   }
 
   async release(
-    actionRequest: IsolationRouteRequestBody,
+    actionRequest: UnisolationRouteRequestBody,
     options: CommonResponseActionMethodOptions = {}
   ): Promise<ActionDetails> {
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
