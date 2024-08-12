@@ -230,10 +230,13 @@ describe('LensEditConfigurationFlyout', () => {
   it('should call the onApplyCb callback if apply button is clicked', async () => {
     const onApplyCbSpy = jest.fn();
 
-    renderConfigFlyout({
-      closeFlyout: jest.fn(),
-      onApplyCb: onApplyCbSpy,
-    }, { esql: "from index1 | limit 10" });
+    renderConfigFlyout(
+      {
+        closeFlyout: jest.fn(),
+        onApplyCb: onApplyCbSpy,
+      },
+      { esql: 'from index1 | limit 10' }
+    );
     userEvent.click(screen.getByTestId('applyFlyoutButton'));
     expect(onApplyCbSpy).toHaveBeenCalledWith({
       title: 'test',
@@ -242,11 +245,11 @@ describe('LensEditConfigurationFlyout', () => {
         datasourceStates: { testDatasource: 'state' },
         visualization: {},
         filters: [],
-        query: { esql: 'from index1 | limit 10' }
+        query: { esql: 'from index1 | limit 10' },
       },
       filters: [],
       query: { esql: 'from index1 | limit 10' },
-      references: []
+      references: [],
     });
   });
 

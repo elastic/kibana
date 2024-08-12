@@ -239,7 +239,10 @@ export function LensEditConfigurationFlyout({
     onCancelCb,
   ]);
 
-  const textBasedMode = useMemo(() => isOfAggregateQueryType(query) ? getAggregateQueryMode(query) : undefined, [query]);
+  const textBasedMode = useMemo(
+    () => (isOfAggregateQueryType(query) ? getAggregateQueryMode(query) : undefined),
+    [query]
+  );
 
   const onApply = useCallback(() => {
     const dsStates = Object.fromEntries(
@@ -249,18 +252,20 @@ export function LensEditConfigurationFlyout({
       })
     );
     // as ES|QL queries are using adHoc dataviews, we don't want to pass references
-    const references = !textBasedMode ? extractReferencesFromState({
-      activeDatasources: Object.keys(datasourceStates).reduce(
-        (acc, id) => ({
-          ...acc,
-          [id]: datasourceMap[id],
-        }),
-        {}
-      ),
-      datasourceStates,
-      visualizationState: visualization.state,
-      activeVisualization,
-    }): [];
+    const references = !textBasedMode
+      ? extractReferencesFromState({
+          activeDatasources: Object.keys(datasourceStates).reduce(
+            (acc, id) => ({
+              ...acc,
+              [id]: datasourceMap[id],
+            }),
+            {}
+          ),
+          datasourceStates,
+          visualizationState: visualization.state,
+          activeVisualization,
+        })
+      : [];
     const attrs = {
       ...attributes,
       state: {
@@ -292,14 +297,15 @@ export function LensEditConfigurationFlyout({
     onApplyCb?.(attrs as TypedLensByValueInput['attributes']);
     closeFlyout?.();
   }, [
-    visualization.activeId,
-    savedObjectId,
-    closeFlyout,
-    onApplyCb,
     datasourceStates,
+    textBasedMode,
     visualization.state,
+    visualization.activeId,
     activeVisualization,
     attributes,
+    savedObjectId,
+    onApplyCb,
+    closeFlyout,
     datasourceMap,
     saveByRef,
     updateByRefInput,
