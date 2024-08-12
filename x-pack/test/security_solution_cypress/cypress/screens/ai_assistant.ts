@@ -16,3 +16,4 @@ export const CONNECTOR_SELECTOR = '[data-test-subj="connector-selector"]';
 export const USER_PROMPT = '[data-test-subj="prompt-textarea"]';
 export const PROMPT_CONTEXT_BUTTON = (i: string | number) =>
   `[data-test-subj="selectedPromptContext-${i}-button"]`;
+export const CONNECTOR_MISSING_CALLOUT = '[data-test-subj="connectorMissingCallout"]';
