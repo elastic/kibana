@@ -53,7 +53,7 @@ export function DatasetQualityDetailsContextProvider({
     }),
     [navigateToApp]
   );
-  const [breadcrumb, setBreadcrumb] = useState<ChromeBreadcrumb[]>([rootBreadCrumb]);
+  const [breadcrumbs, setBreadcrumbs] = useState<ChromeBreadcrumb[]>([rootBreadCrumb]);
 
   useEffect(() => {
     async function getDatasetQualityDetailsController() {
@@ -88,7 +88,7 @@ export function DatasetQualityDetailsContextProvider({
             datasetQualityDetailsState: state,
           });
           const breadcrumbValue = getBreadcrumbValue(state.dataStream, state.integration);
-          setBreadcrumb([rootBreadCrumb, { text: breadcrumbValue }]);
+          setBreadcrumbs([rootBreadCrumb, { text: breadcrumbValue }]);
         }
       );
 
@@ -101,7 +101,7 @@ export function DatasetQualityDetailsContextProvider({
     getDatasetQualityDetailsController();
   }, [datasetQuality, history, rootBreadCrumb, toastsService, urlStateStorageContainer]);
 
-  useBreadcrumbs(breadcrumb, appParams, chrome);
+  useBreadcrumbs(breadcrumbs, appParams, chrome);
 
   return (
     <DatasetQualityDetailsContext.Provider value={{ controller }}>

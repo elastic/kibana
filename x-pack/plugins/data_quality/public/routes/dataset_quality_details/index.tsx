@@ -42,7 +42,7 @@ const ConnectedContent = React.memo(() => {
         title={
           <FormattedMessage
             id="xpack.dataQuality.Initializing"
-            defaultMessage="Initializing Data Set Quality page"
+            defaultMessage="Initializing Data set quality details page"
           />
         }
       />

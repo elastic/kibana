@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { ApiErrorResponse } from '../fetch_options';
+import { ApiErrorResponse } from './fetch_options';
 
-export class GetDataStreamsStatsError extends Error {
+export class DatasetQualityError extends Error {
   readonly statusCode?: number;
   readonly originalMessage?: string;
 
   constructor(message: string, originalError?: ApiErrorResponse) {
     super(message);
-    this.name = 'GetDataStreamsStatsError';
     Object.setPrototypeOf(this, new.target.prototype);
+    this.name = 'DatasetQualityError';
+
     if (originalError && originalError.body) {
       const { statusCode, message: originalMessage } = originalError.body;
       this.statusCode = statusCode;

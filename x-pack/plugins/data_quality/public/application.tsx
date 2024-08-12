@@ -55,7 +55,7 @@ const AppWithExecutionContext = ({
         <PerformanceContextProvider>
           <Routes>
             <Route path="/" exact={true} render={() => <DatasetQualityRoute />} />
-            <Route path="/dataset" exact={true} render={() => <DatasetQualityDetailsRoute />} />
+            <Route path="/details" exact={true} render={() => <DatasetQualityDetailsRoute />} />
           </Routes>
         </PerformanceContextProvider>
       </Router>
