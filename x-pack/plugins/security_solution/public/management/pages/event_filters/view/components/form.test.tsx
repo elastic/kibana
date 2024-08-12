@@ -550,7 +550,7 @@ describe('Event filter form', () => {
       it('should not show warning text when unique fields are added', async () => {
         formProps.item.entries = [
           {
-            field: 'event.category',
+            field: 'event.action',
             operator: 'included',
             type: 'match',
             value: 'some value',
@@ -573,13 +573,13 @@ describe('Event filter form', () => {
       it('should not show warning text when field values are not added', async () => {
         formProps.item.entries = [
           {
-            field: 'event.category',
+            field: 'event.action',
             operator: 'included',
             type: 'match',
             value: '',
           },
           {
-            field: 'event.category',
+            field: 'event.action',
             operator: 'excluded',
             type: 'match',
             value: '',
@@ -596,13 +596,13 @@ describe('Event filter form', () => {
       it('should show warning text when duplicate fields are added with values', async () => {
         formProps.item.entries = [
           {
-            field: 'event.category',
+            field: 'event.action',
             operator: 'included',
             type: 'match',
             value: 'some value',
           },
           {
-            field: 'event.category',
+            field: 'event.action',
             operator: 'excluded',
             type: 'match',
             value: 'some other value',

@@ -25,6 +25,7 @@ import type {
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { CspRouterProps } from './application/csp_router';
 import type { CloudSecurityPosturePageId } from './common/navigation/types';
 
@@ -67,6 +68,7 @@ export interface CspClientPluginStartDeps {
   licensing: LicensingPluginStart;
   share: SharePluginStart;
   storage: Storage;
+  spaces: SpacesPluginStart;
 
   // optional
   usageCollection?: UsageCollectionStart;
