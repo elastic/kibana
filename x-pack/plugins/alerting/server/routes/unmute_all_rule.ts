@@ -32,7 +32,9 @@ export const unmuteAllRuleRoute = (
         tags: ['oas-tag:alerting'],
       },
       validate: {
-        params: paramSchema,
+        request: {
+          params: paramSchema,
+        },
         response: {
           204: {
             description: 'Indicates a successful call.',
