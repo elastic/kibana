@@ -40,7 +40,7 @@ export const dashboardManagedBadge = {
     }),
   getAriaLabel: () =>
     i18n.translate('dashboard.managedContentBadge.ariaLabel', {
-      defaultMessage: 'Click the badge to duplicate the managed dashboard',
+      defaultMessage: 'Elastic manages this dashboard. Duplicate it to make changes.',
     }),
 };
 

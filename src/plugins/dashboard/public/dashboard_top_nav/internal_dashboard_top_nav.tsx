@@ -16,18 +16,16 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import {
   EuiBreadcrumb,
   EuiButtonEmpty,
-  EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
   EuiText,
   EuiToolTipProps,
   EuiPopover,
   EuiBadge,
-  EuiBadgeProps,
 } from '@elastic/eui';
 import { MountPoint } from '@kbn/core/public';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
@@ -323,15 +321,15 @@ export function InternalDashboardTopNav({
       });
     }
     if (showWriteControls && managed) {
+      const badgeProps = {
+        ...getManagedContentBadge(dashboardManagedBadge.getManagedText(), false),
+        onClickAriaLabel: dashboardManagedBadge.getAriaLabel(),
+        iconOnClick: () => setIsPopoverOpen(!isPopoverOpen),
+        iconOnClickAriaLabel: dashboardManagedBadge.getAriaLabel(),
+        onClick: () => setIsPopoverOpen(!isPopoverOpen),
+      } as TopNavMenuBadgeProps;
       allBadges.push({
         renderCustomBadge: ({ badgeText }) => {
-          const badgeProps = {
-            ...getManagedContentBadge(badgeText, false),
-            onClickAriaLabel: dashboardManagedBadge.getAriaLabel(),
-            iconOnClick: () => setIsPopoverOpen(!isPopoverOpen),
-            iconOnClickAriaLabel: dashboardManagedBadge.getAriaLabel(),
-            onClick: () => setIsPopoverOpen(!isPopoverOpen),
-          } as EuiBadgeProps;
           const badgeButton = <EuiBadge {...badgeProps}>{badgeText}</EuiBadge>;
           return (
             <EuiPopover
@@ -341,27 +339,21 @@ export function InternalDashboardTopNav({
               className="eui-hideFor--s eui-hideFor--xs"
               panelStyle={{ maxWidth: 350 }}
             >
-              <EuiFlexItem>
-                <EuiText size="s" aria-label={dashboardManagedBadge.getText()}>
-                  {dashboardManagedBadge.getText()}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  flush="both"
-                  size="xs"
-                  aria-label={dashboardManagedBadge.getDuplicateText()}
-                  onClick={() => {
-                    dashboard.runInteractiveSave(viewMode);
-                  }}
-                >
-                  <EuiText size="s">{dashboardManagedBadge.getDuplicateText()}</EuiText>
-                </EuiButtonEmpty>
-              </EuiFlexItem>
+              <EuiText size="s">{dashboardManagedBadge.getText()}</EuiText>
+              <EuiButtonEmpty
+                flush="both"
+                size="xs"
+                aria-label={dashboardManagedBadge.getDuplicateText()}
+                onClick={() => {
+                  dashboard.runInteractiveSave(viewMode);
+                }}
+              >
+                <EuiText size="s">{dashboardManagedBadge.getDuplicateText()}</EuiText>
+              </EuiButtonEmpty>
             </EuiPopover>
           );
         },
-        badgeText: dashboardManagedBadge.getManagedText(),
+        badgeText: badgeProps.badgeText,
       });
     }
     return allBadges;
