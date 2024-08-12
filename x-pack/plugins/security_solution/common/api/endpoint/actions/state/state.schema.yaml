@@ -19,15 +19,17 @@ paths:
 components:
   schemas:
     ActionStateSuccessResponse:
-        type:
-          object
-        properties:
-          body:
-            type: object
-            properties:
-              data:
-                type: object
-                properties:
-                  canEncrypt:
-                    type: boolean
+      required: ['body']
+      type:
+        object
+      properties:
+        body:
+          required: ['data']
+          type: object
+          properties:
+            data:
+              type: object
+              properties:
+                canEncrypt:
+                  type: boolean
 

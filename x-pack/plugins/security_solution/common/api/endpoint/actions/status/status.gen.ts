@@ -22,31 +22,29 @@ export type PendingActionDataType = z.infer<typeof PendingActionDataType>;
 export const PendingActionDataType = z.number().int();
 
 export type PendingActionsSchema = z.infer<typeof PendingActionsSchema>;
-export const PendingActionsSchema = z.object({
-  isolate: PendingActionDataType.optional(),
-  unisolate: PendingActionDataType.optional(),
-  'kill-process': PendingActionDataType.optional(),
-  'suspend-process': PendingActionDataType.optional(),
-  'running-processes': PendingActionDataType.optional(),
-  'get-file': PendingActionDataType.optional(),
-  execute: PendingActionDataType.optional(),
-  upload: PendingActionDataType.optional(),
-  scan: PendingActionDataType.optional(),
-  additionalProperties: PendingActionDataType.optional(),
-});
+export const PendingActionsSchema = z.union([
+  z.object({
+    isolate: PendingActionDataType.optional(),
+    unisolate: PendingActionDataType.optional(),
+    'kill-process': PendingActionDataType.optional(),
+    'suspend-process': PendingActionDataType.optional(),
+    'running-processes': PendingActionDataType.optional(),
+    'get-file': PendingActionDataType.optional(),
+    execute: PendingActionDataType.optional(),
+    upload: PendingActionDataType.optional(),
+    scan: PendingActionDataType.optional(),
+  }),
+  z.object({}).catchall(z.unknown()),
+]);
 
 export type ActionStatusSuccessResponse = z.infer<typeof ActionStatusSuccessResponse>;
 export const ActionStatusSuccessResponse = z.object({
-  body: z
-    .object({
-      data: z
-        .object({
-          agent_id: AgentId.optional(),
-          pending_actions: PendingActionsSchema.optional(),
-        })
-        .optional(),
-    })
-    .optional(),
+  body: z.object({
+    data: z.object({
+      agent_id: AgentId,
+      pending_actions: PendingActionsSchema,
+    }),
+  }),
 });
 
 export type EndpointGetActionsStatusRequestQuery = z.infer<

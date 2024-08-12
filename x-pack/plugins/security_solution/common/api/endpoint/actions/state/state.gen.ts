@@ -18,15 +18,11 @@ import { z } from 'zod';
 
 export type ActionStateSuccessResponse = z.infer<typeof ActionStateSuccessResponse>;
 export const ActionStateSuccessResponse = z.object({
-  body: z
-    .object({
-      data: z
-        .object({
-          canEncrypt: z.boolean().optional(),
-        })
-        .optional(),
-    })
-    .optional(),
+  body: z.object({
+    data: z.object({
+      canEncrypt: z.boolean().optional(),
+    }),
+  }),
 });
 
 export type EndpointGetActionsStateResponse = z.infer<typeof EndpointGetActionsStateResponse>;
