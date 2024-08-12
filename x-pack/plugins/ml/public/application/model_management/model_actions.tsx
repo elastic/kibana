@@ -216,36 +216,46 @@ export function useModelActions({
 
           try {
             onLoading(true);
-            await trainedModelsApiService.startModelAllocation(item.model_id, {
-              ...(modelDeploymentParams.adaptive_allocations?.enabled
-                ? {
-                    adaptive_allocations: {
-                      enabled: modelDeploymentParams.adaptive_allocations?.enabled,
-                      ...(Number.isInteger(
-                        modelDeploymentParams.adaptive_allocations?.min_number_of_allocations
-                      )
-                        ? {
-                            min_number_of_allocations:
-                              modelDeploymentParams.adaptive_allocations?.min_number_of_allocations,
-                          }
-                        : {}),
-                      ...(Number.isInteger(
-                        modelDeploymentParams.adaptive_allocations?.max_number_of_allocations
-                      )
-                        ? {
-                            max_number_of_allocations:
-                              modelDeploymentParams.adaptive_allocations?.max_number_of_allocations,
-                          }
-                        : {}),
-                    },
-                  }
-                : { number_of_allocations: modelDeploymentParams.numOfAllocations! }),
-              threads_per_allocation: modelDeploymentParams.threadsPerAllocations!,
-              priority: modelDeploymentParams.priority!,
-              deployment_id: !!modelDeploymentParams.deploymentId
-                ? modelDeploymentParams.deploymentId
-                : item.model_id,
-            });
+            await trainedModelsApiService.startModelAllocation(
+              item.model_id,
+              {
+                threads_per_allocation: modelDeploymentParams.threadsPerAllocations!,
+                priority: modelDeploymentParams.priority!,
+                deployment_id: !!modelDeploymentParams.deploymentId
+                  ? modelDeploymentParams.deploymentId
+                  : item.model_id,
+                ...(modelDeploymentParams.adaptive_allocations?.enabled
+                  ? {}
+                  : { number_of_allocations: modelDeploymentParams.numOfAllocations! }),
+              },
+              {
+                ...(modelDeploymentParams.adaptive_allocations?.enabled
+                  ? {
+                      adaptive_allocations: {
+                        enabled: modelDeploymentParams.adaptive_allocations?.enabled,
+                        ...(Number.isInteger(
+                          modelDeploymentParams.adaptive_allocations?.min_number_of_allocations
+                        )
+                          ? {
+                              min_number_of_allocations:
+                                modelDeploymentParams.adaptive_allocations
+                                  ?.min_number_of_allocations,
+                            }
+                          : {}),
+                        ...(Number.isInteger(
+                          modelDeploymentParams.adaptive_allocations?.max_number_of_allocations
+                        )
+                          ? {
+                              max_number_of_allocations:
+                                modelDeploymentParams.adaptive_allocations
+                                  ?.max_number_of_allocations,
+                            }
+                          : {}),
+                      },
+                    }
+                  : {}),
+              }
+            );
             displaySuccessToast(
               i18n.translate('xpack.ml.trainedModels.modelsList.startSuccess', {
                 defaultMessage: 'Deployment for "{modelId}" has been started successfully.',

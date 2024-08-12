@@ -56,19 +56,24 @@ export interface InferenceStatsResponse {
   trained_model_stats: TrainedModelStat[];
 }
 
-export interface CommonDeploymentParams {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type CommonDeploymentParams = {
   deployment_id?: string;
   threads_per_allocation: number;
   priority: 'low' | 'normal';
-}
-
-export interface AllocationsParams {
   number_of_allocations?: number;
+};
+
+export interface AdaptiveAllocationsParams {
   adaptive_allocations?: {
     enabled: boolean;
     min_number_of_allocations?: number;
     max_number_of_allocations?: number;
   };
+}
+
+export interface UpdateAllocationParams extends AdaptiveAllocationsParams {
+  number_of_allocations?: number;
 }
 
 /**
@@ -212,10 +217,15 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    startModelAllocation(modelId: string, bodyParams?: CommonDeploymentParams & AllocationsParams) {
+    startModelAllocation(
+      modelId: string,
+      queryParams: CommonDeploymentParams,
+      bodyParams?: AdaptiveAllocationsParams
+    ) {
       return httpService.http<{ acknowledge: boolean }>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/${modelId}/deployment/_start`,
         method: 'POST',
+        query: queryParams,
         ...(bodyParams ? { body: JSON.stringify(bodyParams) } : {}),
         version: '1',
       });
@@ -238,7 +248,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    updateModelDeployment(modelId: string, deploymentId: string, params: AllocationsParams) {
+    updateModelDeployment(modelId: string, deploymentId: string, params: UpdateAllocationParams) {
       return httpService.http<{ acknowledge: boolean }>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/${modelId}/${deploymentId}/deployment/_update`,
         method: 'POST',
