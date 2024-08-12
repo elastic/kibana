@@ -41,13 +41,12 @@ Props description:
 | **configRowHeight** | (optional)number | Optional value for providing configuration setting for UnifiedDataTable rows height. |
 | **showMultiFields** | (optional)boolean | Optional value for providing configuration setting for enabling to display the complex fields in the table. Default is true. |
 | **maxDocFieldsDisplayed** | (optional)number | Optional value for providing configuration setting for maximum number of document fields to display in the table. Default is 50. |
-| **externalControlColumns** | (optional)EuiDataGridControlColumn[] | Optional value for providing EuiDataGridControlColumn list of the additional leading control columns. UnifiedDataTable includes two control columns: Open Details and Select. |
+| **rowAdditionalLeadingControls** | (optional)RowControlColumn[] | Optional value for providing an list of the additional leading control columns. UnifiedDataTable includes two control columns: Open Details and Select. |
 | **totalHits** | (optional)number | Number total hits from ES. |
 | **onFetchMoreRecords** | (optional)() => void | To fetch more. |
 | **externalAdditionalControls** | (optional)React.ReactNode | Optional value for providing the additional controls available in the UnifiedDataTable toolbar to manage it's records or state. UnifiedDataTable includes Columns, Sorting and Bulk Actions. |
 | **rowsPerPageOptions** | (optional)number[] | Optional list of number type values to set custom UnifiedDataTable paging options to display the records per page. |
 | **renderCustomGridBody** | (optional)(args: EuiDataGridCustomBodyProps) => React.ReactNode; | An optional function called to completely customize and control the rendering of EuiDataGrid's body and cell placement. |
-| **trailingControlColumns** | (optional)EuiDataGridControlColumn[] | An optional list of the EuiDataGridControlColumn type for setting trailing control columns standard for EuiDataGrid. |
 | **visibleCellActions** | (optional)number | An optional value for a custom number of the visible cell actions in the table. By default is up to 3. |
 | **externalCustomRenderers** | (optional)Record<string,(props: EuiDataGridCellValueElementProps) => React.ReactNode>; | An optional settings for a specified fields rendering like links. Applied only for the listed fields rendering. |
 | **consumer** | (optional)string | Name of the UnifiedDataTable consumer component or application. |
@@ -141,9 +140,7 @@ Usage example:
                 [browserFields, handleOnPanelClosed, runtimeMappings, timelineId]
             );
       }
-      externalControlColumns={leadingControlColumns}
       externalAdditionalControls={additionalControls}
-      trailingControlColumns={trailingControlColumns}
       renderCustomGridBody={renderCustomGridBody}
       rowsPerPageOptions={[10, 30, 40, 100]}
       showFullScreenButton={false}

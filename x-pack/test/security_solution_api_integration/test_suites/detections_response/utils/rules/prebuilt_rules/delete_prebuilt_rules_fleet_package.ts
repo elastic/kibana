@@ -6,6 +6,7 @@
  */
 
 import { epmRouteService } from '@kbn/fleet-plugin/common';
+import { PREBUILT_RULES_PACKAGE_NAME } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import type SuperTest from 'supertest';
 
 /**
@@ -15,7 +16,7 @@ import type SuperTest from 'supertest';
  */
 export async function deletePrebuiltRulesFleetPackage(supertest: SuperTest.Agent) {
   const resp = await supertest
-    .get(epmRouteService.getInfoPath('security_detection_engine'))
+    .get(epmRouteService.getInfoPath(PREBUILT_RULES_PACKAGE_NAME))
     .set('kbn-xsrf', 'true')
     .set('elastic-api-version', '2023-10-31')
     .send();
@@ -23,7 +24,7 @@ export async function deletePrebuiltRulesFleetPackage(supertest: SuperTest.Agent
   if (resp.status === 200 && resp.body.response.status === 'installed') {
     await supertest
       .delete(
-        epmRouteService.getRemovePath('security_detection_engine', resp.body.response.version)
+        epmRouteService.getRemovePath(PREBUILT_RULES_PACKAGE_NAME, resp.body.response.version)
       )
       .set('kbn-xsrf', 'true')
       .send({ force: true });
