@@ -675,7 +675,7 @@ export class LensVisService {
         filters,
         suggestion,
         dataView,
-        colorMapping: this.getColorMapping(),
+        colorMapping: hasLogLevelField ? this.getColorMapping() : undefined,
       }) as TypedLensByValueInput['attributes'];
 
       if (suggestionType === UnifiedHistogramSuggestionType.histogramForDataView) {
