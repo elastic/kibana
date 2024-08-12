@@ -10,7 +10,6 @@
     "@kbn/features-plugin",
     "@kbn/security-plugin-types-common",
     "@kbn/security-authorization-core",
-    "@kbn/security-role-management-model",
     "@kbn/licensing-plugin",
   ]
 }
