@@ -196,6 +196,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const getResultsLink = async () => {
     // getting the link
     await dataGrid.clickRowToggle();
+    await testSubjects.click('toggleLongFieldValue-context_link');
     const contextMessageElement = await testSubjects.find('tableDocViewRow-context_link-value');
     const contextMessage = await contextMessageElement.getVisibleText();
 
