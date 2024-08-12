@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import chalk from 'chalk';
 import type {
   OpenApiDocument,
   OpenApiComponentsObject,
@@ -14,6 +15,7 @@ import type {
 import { extractByJsonPointer } from './helpers/extract_by_json_pointer';
 import { findLocalRefs } from './helpers/find_local_refs';
 import { parseRef } from './helpers/parse_ref';
+import { PlainObject } from './helpers/plain_object';
 
 /**
  * Returns document components.
@@ -42,7 +44,11 @@ export function getComponents(document: OpenApiDocument): OpenApiComponentsObjec
   const sortedSchemas: OpenApiSchemasObject = {};
 
   for (const schemaName of sortedSchemaRefs) {
-    sortedSchemas[schemaName] = extractByJsonPointer(document, `/components/schemas/${schemaName}`);
+    const schema = extractByJsonPointer(document, `/components/schemas/${schemaName}`);
+
+    validateSchema(schemaName, schema);
+
+    sortedSchemas[schemaName] = schema;
   }
 
   return {
@@ -126,4 +132,23 @@ function sortTopologically(
   }
 
   return sortedSchemas;
+}
+
+/**
+ * Validates a provided schema to satisfy expected characteristics like
+ * conforming with the best practices.
+ */
+function validateSchema(schemaName: string, schema: PlainObject): void {
+  const isEnumWithDefault = 'enum' in schema && 'default' in schema;
+  const containsDefaultInName = schemaName.startsWith('Default') || schemaName.endsWith('Default');
+
+  if (isEnumWithDefault && !containsDefaultInName) {
+    throw new Error(
+      `Primitive schema ${chalk.blue(
+        schemaName
+      )} should not have default value specified since it's an anti-pattern leading to subtle bugs. Consider adding a default value into consumer node(s) next to ${chalk.bold(
+        '$ref'
+      )} or renaming the schema to ${chalk.blue(`Default${schemaName}`)}.`
+    );
+  }
 }

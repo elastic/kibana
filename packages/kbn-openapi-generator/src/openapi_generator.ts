@@ -57,10 +57,15 @@ export const generate = async (config: GeneratorConfig) => {
   let parsedSources = await Promise.all(
     schemaPaths.map(async (sourcePath) => {
       const parsedSchema = (await SwaggerParser.parse(sourcePath)) as OpenApiDocument;
-      return {
-        sourcePath,
-        generationContext: getGenerationContext(parsedSchema),
-      };
+
+      try {
+        return {
+          sourcePath,
+          generationContext: getGenerationContext(parsedSchema),
+        };
+      } catch (e) {
+        throw new Error(`Unable to process ${chalk.bold(sourcePath)}: ${e.message}`);
+      }
     })
   );
   // If there are no operations or components to generate, skip this file
