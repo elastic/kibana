@@ -43,7 +43,8 @@ export const useQuickPromptEditor = ({
   const onQuickPromptSelectionChange = useCallback(
     (quickPrompt: PromptResponse | string, color?: string) => {
       const isNew = typeof quickPrompt === 'string';
-      const qpColor = color ?? isNew ? getRandomEuiColor() : quickPrompt.color;
+      const qpColor = color ? color : isNew ? getRandomEuiColor() : quickPrompt.color;
+
       const newSelectedQuickPrompt: PromptResponse | undefined = isNew
         ? {
             name: quickPrompt,
