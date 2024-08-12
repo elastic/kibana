@@ -80,7 +80,6 @@ export const DashboardViewportComponent = () => {
       {viewMode !== ViewMode.PRINT ? (
         <div
           className={hasControls ? 'dshDashboardViewport-controls' : ''}
-          ref={controlsRoot}
         >
           <ReactEmbeddableRenderer<ControlGroupSerializedState, ControlGroupRuntimeState, ControlGroupApi>
             key={dashboard.id}
