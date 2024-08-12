@@ -24,18 +24,14 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import moment from 'moment';
-import {
-  KnowledgeBaseEntry,
-  KnowledgeBaseType,
-} from '@kbn/observability-ai-assistant-plugin/public';
-import { partition } from 'lodash';
+import { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/public';
 import { useGetKnowledgeBaseEntries } from '../../hooks/use_get_knowledge_base_entries';
 import { categorizeEntries, KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
 import { KnowledgeBaseEditManualEntryFlyout } from './knowledge_base_edit_manual_entry_flyout';
 import { KnowledgeBaseCategoryFlyout } from './knowledge_base_category_flyout';
 import { KnowledgeBaseBulkImportFlyout } from './knowledge_base_bulk_import_flyout';
 import { useKibana } from '../../hooks/use_kibana';
-import { KnowledgeBaseEditSystemPromptFlyout } from './knowledge_base_edit_system_prompt_flyout';
+import { KnowledgeBaseEditUserInstructionFlyout } from './knowledge_base_edit_system_prompt_flyout';
 
 export function KnowledgeBaseTab() {
   const { uiSettings } = useKibana().services;
@@ -185,7 +181,7 @@ export function KnowledgeBaseTab() {
   >();
 
   const [isNewEntryPopoverOpen, setIsNewEntryPopoverOpen] = useState(false);
-  const [isEditSystemPromptFlyoutOpen, setIsEditSystemPromptFlyoutOpen] = useState(false);
+  const [isEditUserInstructionFlyoutOpen, setIsEditUserInstructionFlyoutOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [sortBy, setSortBy] = useState<'doc_id' | '@timestamp'>('doc_id');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -195,11 +191,7 @@ export function KnowledgeBaseTab() {
     isLoading,
     refetch,
   } = useGetKnowledgeBaseEntries({ query, sortBy, sortDirection });
-  const [userInstructionEntries, contextualEntries] = partition(
-    entries,
-    (entry) => entry.type === KnowledgeBaseType.UserInstruction
-  );
-  const categorizedEntries = categorizeEntries({ entries: contextualEntries });
+  const categorizedEntries = categorizeEntries({ entries });
 
   const handleChangeSort = ({
     sort,
@@ -260,7 +252,7 @@ export function KnowledgeBaseTab() {
               <EuiButton
                 data-test-subj="observabilityAiAssistantManagementKnowledgeBaseTabEditInstructionsButton"
                 color="text"
-                onClick={() => setIsEditSystemPromptFlyoutOpen(true)}
+                onClick={() => setIsEditUserInstructionFlyoutOpen(true)}
               >
                 {i18n.translate(
                   'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.editInstructionsButtonLabel',
@@ -349,10 +341,9 @@ export function KnowledgeBaseTab() {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {isEditSystemPromptFlyoutOpen ? (
-        <KnowledgeBaseEditSystemPromptFlyout
-          entry={userInstructionEntries.find((entry) => entry.public === false)}
-          onClose={() => setIsEditSystemPromptFlyoutOpen(false)}
+      {isEditUserInstructionFlyoutOpen ? (
+        <KnowledgeBaseEditUserInstructionFlyout
+          onClose={() => setIsEditUserInstructionFlyoutOpen(false)}
         />
       ) : null}
 

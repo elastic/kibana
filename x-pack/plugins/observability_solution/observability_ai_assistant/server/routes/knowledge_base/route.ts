@@ -13,7 +13,7 @@ import { notImplemented } from '@hapi/boom';
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import { KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../../../common/types';
+import { Instruction, KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../../../common/types';
 
 const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/kb/status',
@@ -57,6 +57,28 @@ const setupKnowledgeBase = createObservabilityAIAssistantServerRoute({
     await client.setupKnowledgeBase();
 
     return {};
+  },
+});
+
+const getKnowledgeBaseUserInstructions = createObservabilityAIAssistantServerRoute({
+  endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
+  options: {
+    tags: ['access:ai_assistant'],
+  },
+  handler: async (
+    resources
+  ): Promise<{
+    userInstructions: Array<Instruction & { public?: boolean }>;
+  }> => {
+    const client = await resources.service.getClient({ request: resources.request });
+
+    if (!client) {
+      throw notImplemented();
+    }
+
+    return {
+      userInstructions: await client.getKnowledgeBaseUserInstructions(),
+    };
   },
 });
 
@@ -210,6 +232,7 @@ export const knowledgeBaseRoutes = {
   ...setupKnowledgeBase,
   ...getKnowledgeBaseStatus,
   ...getKnowledgeBaseEntries,
+  ...getKnowledgeBaseUserInstructions,
   ...importKnowledgeBaseEntries,
   ...saveKnowledgeBaseEntry,
   ...deleteKnowledgeBaseEntry,

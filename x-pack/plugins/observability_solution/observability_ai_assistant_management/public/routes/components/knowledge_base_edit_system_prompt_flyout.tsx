@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
@@ -23,30 +23,29 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  KnowledgeBaseEntry,
-  KnowledgeBaseType,
-} from '@kbn/observability-ai-assistant-plugin/public';
+import { KnowledgeBaseType } from '@kbn/observability-ai-assistant-plugin/public';
 import { useCreateKnowledgeBaseEntry } from '../../hooks/use_create_knowledge_base_entry';
+import { useGetUserInstructions } from '../../hooks/use_get_user_instructions';
 
-export function KnowledgeBaseEditSystemPromptFlyout({
-  entry,
-  onClose,
-}: {
-  entry: KnowledgeBaseEntry | undefined;
-  onClose: () => void;
-}) {
-  const { mutateAsync: createEntry, isLoading } = useCreateKnowledgeBaseEntry();
-  const [newEntryText, setNewEntryText] = useState(entry?.text ?? '');
-  const isFormInvalid = newEntryText.trim() === '';
-  const isPublic = false;
+export function KnowledgeBaseEditUserInstructionFlyout({ onClose }: { onClose: () => void }) {
+  const { userInstructions, isLoading: isFetching } = useGetUserInstructions();
+  const { mutateAsync: createEntry, isLoading: isSaving } = useCreateKnowledgeBaseEntry();
+  const [newEntryText, setNewEntryText] = useState('');
+  const [newEntryDocId, setNewEntryDocId] = useState<string>();
+  const isSubmitDisabled = newEntryText.trim() === '';
+
+  useEffect(() => {
+    const userInstruction = userInstructions?.find((entry) => !entry.public);
+    setNewEntryDocId(userInstruction?.doc_id);
+    setNewEntryText(userInstruction?.text ?? '');
+  }, [userInstructions]);
 
   const handleSubmit = async () => {
     await createEntry({
       entry: {
-        id: entry?.id ?? uuidv4(),
+        id: newEntryDocId ?? uuidv4(),
         text: newEntryText,
-        public: isPublic,
+        public: false, // limit user instructions to private (for now)
         type: KnowledgeBaseType.UserInstruction,
       },
     });
@@ -89,7 +88,7 @@ export function KnowledgeBaseEditSystemPromptFlyout({
             )}
             height={300}
             initialViewMode="editing"
-            readOnly={false}
+            readOnly={isFetching}
             placeholder={i18n.translate(
               'xpack.observabilityAiAssistantManagement.knowledgeBaseEditManualEntryFlyout.euiMarkdownEditor.enterContentsLabel',
               { defaultMessage: 'Enter contents' }
@@ -106,7 +105,7 @@ export function KnowledgeBaseEditSystemPromptFlyout({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               data-test-subj="knowledgeBaseEditManualEntryFlyoutCancelButton"
-              disabled={isLoading}
+              disabled={isSaving}
               onClick={onClose}
             >
               {i18n.translate(
@@ -119,9 +118,9 @@ export function KnowledgeBaseEditSystemPromptFlyout({
             <EuiButton
               data-test-subj="knowledgeBaseEditManualEntryFlyoutSaveButton"
               fill
-              isLoading={isLoading}
+              isLoading={isSaving}
               onClick={handleSubmit}
-              isDisabled={isFormInvalid}
+              isDisabled={isSubmitDisabled}
             >
               {i18n.translate(
                 'xpack.observabilityAiAssistantManagement.knowledgeBaseNewManualEntryFlyout.saveButtonLabel',

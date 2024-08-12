@@ -462,7 +462,7 @@ export class KnowledgeBaseService {
   getUserInstructions = async (
     namespace: string,
     user?: { name: string }
-  ): Promise<Instruction[]> => {
+  ): Promise<Array<Instruction & { public?: boolean }>> => {
     try {
       const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
         index: resourceNames.aliases.kb,
@@ -479,12 +479,13 @@ export class KnowledgeBaseService {
           },
         },
         size: 500,
-        _source: ['doc_id', 'text'],
+        _source: ['doc_id', 'text', 'public'],
       });
 
       return response.hits.hits.map((hit) => ({
         doc_id: hit._source?.doc_id ?? '',
         text: hit._source?.text ?? '',
+        public: hit._source?.public,
       }));
     } catch (error) {
       this.dependencies.logger.error('Failed to load instructions from knowledge base');
@@ -507,18 +508,17 @@ export class KnowledgeBaseService {
         index: resourceNames.aliases.kb,
         query: {
           bool: {
-            // filter by search query
             filter: [
-              ...(query ? [{ wildcard: { doc_id: { value: `${query}*` } } }] : [{ match_all: {} }]),
+              // filter title by query
+              ...(query ? [{ wildcard: { doc_id: { value: `${query}*` } } }] : []),
+              {
+                // exclude user instructions
+                bool: { must_not: { term: { type: KnowledgeBaseType.UserInstruction } } },
+              },
             ],
-
-            // boost score of user instruction entries
-            should: [{ term: { type: KnowledgeBaseType.UserInstruction } }],
-            minimum_should_match: 0,
           },
         },
         sort: [
-          { _score: { order: 'desc' } },
           {
             [String(sortBy)]: {
               order: sortDirection,
