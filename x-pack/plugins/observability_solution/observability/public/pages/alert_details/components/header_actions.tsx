@@ -29,6 +29,8 @@ import {
   ALERT_RULE_CATEGORY,
   ALERT_START,
   ALERT_END,
+  ALERT_RULE_TYPE_ID,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
 
 import { v4 as uuidv4 } from 'uuid';
@@ -168,24 +170,25 @@ export function HeaderActions({
   return (
     <>
       <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
-        {investigate && (
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={() => {
-                createOrOpenInvestigation();
-              }}
-              fill
-              data-test-subj="investigate-alert-button"
-            >
-              <EuiText size="s">
-                {i18n.translate('xpack.observability.alertDetails.investigateAlert', {
-                  defaultMessage:
-                    investigationId === 'new' ? 'Start investigation' : 'Ongoing investigation',
-                })}
-              </EuiText>
-            </EuiButton>
-          </EuiFlexItem>
-        )}
+        {investigate &&
+          alert?.fields[ALERT_RULE_TYPE_ID] === OBSERVABILITY_THRESHOLD_RULE_TYPE_ID && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={() => {
+                  createOrOpenInvestigation();
+                }}
+                fill
+                data-test-subj="investigate-alert-button"
+              >
+                <EuiText size="s">
+                  {i18n.translate('xpack.observability.alertDetails.investigateAlert', {
+                    defaultMessage:
+                      investigationId === 'new' ? 'Start investigation' : 'Ongoing investigation',
+                  })}
+                </EuiText>
+              </EuiButton>
+            </EuiFlexItem>
+          )}
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
