@@ -32,9 +32,8 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       return await retry.tryForTime(retryTimeout, async () => {
         const response = await supertest
           .get(`/api/alerting/rule/${ruleId}`)
-          .set('kbn-xsrf', 'foo')
-          .set('x-elastic-internal-origin', 'foo')
           .set(roleAuthc.apiKeyHeader)
+          .set(roleAuthc.getInternalRequestHeader())
           .timeout(requestTimeout);
         const { execution_status: executionStatus } = response.body || {};
         const { status } = executionStatus || {};
@@ -95,11 +94,19 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       });
     },
 
-    async createIndexConnector({ name, indexName }: { name: string; indexName: string }) {
+    async createIndexConnector({
+      name,
+      indexName,
+      roleAuthc,
+    }: {
+      name: string;
+      indexName: string;
+      roleAuthC: RoleCredentials;
+    }) {
       const { body } = await supertest
         .post(`/api/actions/connector`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo')
+        .set(roleAuthc.apiKeyHeader)
+        .set(roleAuthC.getInternalRequestHeader())
         .send({
           name,
           config: {
@@ -119,6 +126,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       tags = [],
       schedule,
       consumer,
+      roleAuthc,
     }: {
       ruleTypeId: string;
       name: string;
@@ -127,11 +135,12 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       tags?: any[];
       schedule?: { interval: string };
       consumer: string;
+      roleAuthc: RoleCredentials;
     }) {
       const { body } = await supertest
         .post(`/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo')
+        .set(roleAuthc.apiKeyHeader)
+        .set(roleAuthC.getInternalRequestHeader())
         .send({
           params,
           consumer,
@@ -146,14 +155,14 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       return body;
     },
 
-    async findRule(ruleId: string) {
+    async findRule(ruleId: string, roleAuthc: RoleCredentials) {
       if (!ruleId) {
         throw new Error(`'ruleId' is undefined`);
       }
       const response = await supertest
         .get('/api/alerting/rules/_find')
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
+        .set(roleAuthc.apiKeyHeader)
+        .set(roleAuthC.getInternalRequestHeader());
       return response.body.data.find((obj: any) => obj.id === ruleId);
     },
   };
