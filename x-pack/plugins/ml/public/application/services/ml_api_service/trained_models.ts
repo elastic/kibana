@@ -56,13 +56,13 @@ export interface InferenceStatsResponse {
   trained_model_stats: TrainedModelStat[];
 }
 
-interface CommonDeploymentParams {
+export interface CommonDeploymentParams {
   deployment_id?: string;
   threads_per_allocation: number;
   priority: 'low' | 'normal';
 }
 
-interface AllocationsParams {
+export interface AllocationsParams {
   number_of_allocations?: number;
   adaptive_allocations?: {
     enabled: boolean;
