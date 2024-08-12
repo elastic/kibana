@@ -9,7 +9,7 @@ import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import {
   CreateInvestigationNoteInput,
   CreateInvestigationNoteResponse,
-} from '@kbn/investigate-app-plugin/common/schema/create_notes';
+} from '../../common/schema/create_notes';
 import { useMutation } from '@tanstack/react-query';
 import { useKibana } from './use_kibana';
 

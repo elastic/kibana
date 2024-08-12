@@ -10,7 +10,7 @@ import type { InvestigateWidgetCreate } from '@kbn/investigate-plugin/public';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { keyBy, noop } from 'lodash';
 import React, { useEffect, useMemo, useRef } from 'react';
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { AddObservationUI } from '../../../../components/add_observation_ui';
 import { InvestigateSearchBar } from '../../../../components/investigate_search_bar';
