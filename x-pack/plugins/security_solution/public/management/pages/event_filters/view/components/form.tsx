@@ -564,15 +564,22 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         // handle wildcard with wrong operator case
         setHasWildcardWithWrongOperator(hasWrongOperatorWithWildcard(arg.exceptionItems));
 
-        const updatedItem: Partial<ArtifactFormComponentProps['item']> = {
-          ...arg.exceptionItems[0],
-          name: exception?.name ?? '',
-          description: exception?.description ?? '',
-          comments: exception?.comments ?? [],
-          os_types: exception?.os_types ?? [OperatingSystem.WINDOWS],
-          tags: exception?.tags ?? [],
-          meta: exception.meta,
-        };
+        // need to fix the last part of the ternary to account for when the user backspaces the field name. currently there is dummy code for testing purposes
+        const updatedItem: Partial<ArtifactFormComponentProps['item']> =
+          arg.exceptionItems[0] !== undefined
+            ? {
+                ...arg.exceptionItems[0],
+                name: exception?.name ?? '',
+                description: exception?.description ?? '',
+                comments: exception?.comments ?? [],
+                os_types: exception?.os_types ?? [OperatingSystem.WINDOWS],
+                tags: exception?.tags ?? [],
+                meta: exception.meta,
+              }
+            : {
+                ...exception,
+                entries: [{ field: '', operator: 'included', type: 'match', value: 'somevalue' }],
+              };
         const hasValidConditions =
           arg.exceptionItems[0] !== undefined
             ? !(arg.errorExists && !arg.exceptionItems[0]?.entries?.length)
