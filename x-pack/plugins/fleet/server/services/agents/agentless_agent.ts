@@ -22,6 +22,7 @@ import { appContextService } from '../app_context';
 
 import { listEnrollmentApiKeys } from '../api_keys';
 import { listFleetServerHosts } from '../fleet_server_host';
+import { prependAgentlessApiBasePathToEndpoint } from '../utils/agentless';
 
 class AgentlessAgentService {
   public async createAgentlessAgent(
@@ -69,7 +70,7 @@ class AgentlessAgentService {
     );
 
     const requestConfig = {
-      url: `${agentlessConfig.api.url}/deployments`,
+      url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, '/deployments'),
       data: {
         policy_id: policyId,
         fleet_url: fleetUrl,
