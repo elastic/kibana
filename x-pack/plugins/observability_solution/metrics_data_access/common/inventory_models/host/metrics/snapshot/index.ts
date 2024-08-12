@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cpuV2 } from './cpu_V2';
+import { cpuV2 } from './cpu_v2';
 import { cpu } from './cpu';
 import { diskLatency } from './disk_latency';
 import { diskSpaceUsage } from './disk_space_usage';
