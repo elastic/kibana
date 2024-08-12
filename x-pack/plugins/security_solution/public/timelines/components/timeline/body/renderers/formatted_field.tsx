@@ -12,15 +12,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isEmpty, isNumber } from 'lodash/fp';
 import React from 'react';
 import { css } from '@emotion/css';
-
-import type { BrowserField } from '../../../../../common/containers/source';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import { getAgentTypeForAgentIdField } from '../../../../../common/lib/endpoint/utils/get_agent_type_for_agent_id_field';
 import {
   ALERT_HOST_CRITICALITY,
   ALERT_USER_CRITICALITY,
 } from '../../../../../../common/field_maps/field_names';
-import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../../common/utils/sentinelone_alert_check';
-import { SentinelOneAgentStatus } from '../../../../../detections/components/host_isolation/sentinel_one_agent_status';
-import { EndpointAgentStatusById } from '../../../../../common/components/endpoint/endpoint_agent_status';
+import { AgentStatus } from '../../../../../common/components/endpoint/agents/agent_status';
 import { INDICATOR_REFERENCE } from '../../../../../../common/cti/constants';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { Bytes, BYTES_FORMAT } from './bytes';
@@ -72,7 +70,7 @@ const FormattedFieldValueComponent: React.FC<{
   isObjectArray?: boolean;
   isUnifiedDataTable?: boolean;
   fieldFormat?: string;
-  fieldFromBrowserField?: BrowserField;
+  fieldFromBrowserField?: Partial<FieldSpec>;
   fieldName: string;
   fieldType?: string;
   isButton?: boolean;
@@ -269,11 +267,6 @@ const FormattedFieldValueComponent: React.FC<{
         iconSide={isButton ? 'right' : undefined}
       />
     );
-  } else if (
-    fieldName === AGENT_STATUS_FIELD_NAME &&
-    fieldFromBrowserField?.name === SENTINEL_ONE_AGENT_ID_FIELD
-  ) {
-    return <SentinelOneAgentStatus agentId={String(value ?? '')} />;
   } else if (fieldName === ALERT_HOST_CRITICALITY || fieldName === ALERT_USER_CRITICALITY) {
     return (
       <AssetCriticalityLevel
@@ -288,8 +281,9 @@ const FormattedFieldValueComponent: React.FC<{
     );
   } else if (fieldName === AGENT_STATUS_FIELD_NAME) {
     return (
-      <EndpointAgentStatusById
-        endpointAgentId={String(value ?? '')}
+      <AgentStatus
+        agentId={String(value ?? '')}
+        agentType={getAgentTypeForAgentIdField(fieldFromBrowserField?.name ?? '')}
         data-test-subj="endpointHostAgentStatus"
       />
     );

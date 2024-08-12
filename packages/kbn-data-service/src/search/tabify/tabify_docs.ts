@@ -36,7 +36,9 @@ interface TabifyDocsOptions {
 
 // This is an overwrite of the SearchHit type to add the ignored_field_values.
 // Can be removed once the estypes.SearchHit knows about ignored_field_values
-type Hit<T = unknown> = estypes.SearchHit<T> & { ignored_field_values?: Record<string, unknown[]> };
+type Hit<T = unknown> = Partial<estypes.SearchHit<T>> & {
+  ignored_field_values?: Record<string, unknown[]>;
+};
 
 function flattenAccum(
   flat: Record<string, any>,
@@ -137,7 +139,7 @@ export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDoc
       const isExcludedMetaField =
         EXCLUDED_META_FIELDS.includes(fieldName) || fieldName.charAt(0) !== '_';
       if (!isExcludedMetaField) {
-        flat[fieldName] = hit[fieldName as keyof estypes.SearchHit];
+        flat[fieldName] = hit[fieldName as keyof Hit];
       }
     }
   }

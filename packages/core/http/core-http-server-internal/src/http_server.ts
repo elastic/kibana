@@ -10,14 +10,7 @@ import { Server, Request } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  createServer,
-  getListenerOptions,
-  getServerOptions,
-  setTlsConfig,
-  getRequestId,
-} from '@kbn/server-http-tools';
-
+import { createServer, getServerOptions, setTlsConfig, getRequestId } from '@kbn/server-http-tools';
 import type { Duration } from 'moment';
 import { Observable, Subscription, firstValueFrom, pairwise, take } from 'rxjs';
 import apm from 'elastic-apm-node';
@@ -235,9 +228,8 @@ export class HttpServer {
     this.config = config;
 
     const serverOptions = getServerOptions(config);
-    const listenerOptions = getListenerOptions(config);
 
-    this.server = createServer(serverOptions, listenerOptions);
+    this.server = createServer(serverOptions);
     await this.server.register([HapiStaticFiles]);
     if (config.compression.brotli.enabled) {
       await this.server.register({
@@ -298,7 +290,12 @@ export class HttpServer {
       registerOnPreResponse: this.registerOnPreResponse.bind(this),
       createCookieSessionStorageFactory: <T extends object>(
         cookieOptions: SessionStorageCookieOptions<T>
-      ) => this.createCookieSessionStorageFactory(cookieOptions, config.basePath),
+      ) =>
+        this.createCookieSessionStorageFactory(
+          cookieOptions,
+          config.csp.disableEmbedding,
+          config.basePath
+        ),
       basePath: basePathService,
       csp: config.csp,
       auth: {
@@ -561,6 +558,7 @@ export class HttpServer {
 
   private async createCookieSessionStorageFactory<T extends object>(
     cookieOptions: SessionStorageCookieOptions<T>,
+    disableEmbedding: boolean,
     basePath?: string
   ) {
     if (this.server === undefined) {
@@ -577,6 +575,7 @@ export class HttpServer {
       this.logger.get('http', 'server', this.name, 'cookie-session-storage'),
       this.server,
       cookieOptions,
+      disableEmbedding,
       basePath
     );
     return sessionStorageFactory;

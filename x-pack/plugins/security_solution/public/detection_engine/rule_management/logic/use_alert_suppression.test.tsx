@@ -6,25 +6,27 @@
  */
 import { renderHook } from '@testing-library/react-hooks';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import * as useIsExperimentalFeatureEnabledMock from '../../../common/hooks/use_experimental_features';
 import { useAlertSuppression } from './use_alert_suppression';
 
 describe('useAlertSuppression', () => {
-  beforeEach(() => {
-    jest
-      .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
-      .mockReturnValue(false);
+  (
+    [
+      'new_terms',
+      'threat_match',
+      'saved_query',
+      'query',
+      'threshold',
+      'eql',
+      'esql',
+      'machine_learning',
+    ] as Type[]
+  ).forEach((ruleType) => {
+    it(`should return the isSuppressionEnabled true for ${ruleType} rule type that exists in SUPPRESSIBLE_ALERT_RULES`, () => {
+      const { result } = renderHook(() => useAlertSuppression(ruleType));
+
+      expect(result.current.isSuppressionEnabled).toBe(true);
+    });
   });
-
-  (['new_terms', 'threat_match', 'saved_query', 'query', 'threshold', 'eql'] as Type[]).forEach(
-    (ruleType) => {
-      it(`should return the isSuppressionEnabled true for ${ruleType} rule type that exists in SUPPRESSIBLE_ALERT_RULES`, () => {
-        const { result } = renderHook(() => useAlertSuppression(ruleType));
-
-        expect(result.current.isSuppressionEnabled).toBe(true);
-      });
-    }
-  );
 
   it('should return false if rule type is undefined', () => {
     const { result } = renderHook(() => useAlertSuppression(undefined));

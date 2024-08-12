@@ -15,9 +15,10 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { RunCollectorCallbackHandler } from '@langchain/core/tracers/run_collector';
 import { Dataset } from '@kbn/elastic-assistant-common';
+import { isLangSmithEnabled } from '@kbn/langchain/server/tracers/langsmith';
 import { AgentExecutorEvaluatorWithMetadata } from '../langchain/executors/types';
 import { callAgentWithRetry, getMessageFromLangChainResponse } from './utils';
-import { isLangSmithEnabled, writeLangSmithFeedback } from '../../routes/evaluate/utils';
+import { writeLangSmithFeedback } from '../../routes/evaluate/utils';
 import { ResponseBody } from '../langchain/types';
 
 export interface PerformEvaluationParams {

@@ -41,12 +41,18 @@ describe('generateDatasets', () => {
       size: '82.1kb',
       sizeBytes: 84160,
       integration: 'system',
+      userPrivileges: {
+        canMonitor: true,
+      },
     },
     {
       name: 'logs-synth-default',
       lastActivity: 1712911241117,
       size: '62.5kb',
       sizeBytes: 64066,
+      userPrivileges: {
+        canMonitor: true,
+      },
     },
   ];
 
@@ -55,12 +61,14 @@ describe('generateDatasets', () => {
       dataset: 'logs-system.application-default',
       percentage: 0,
       count: 0,
+      docsCount: 0,
       quality: 'good' as const,
     },
     {
       dataset: 'logs-synth-default',
       percentage: 11.320754716981131,
       count: 6,
+      docsCount: 0,
       quality: 'poor' as const,
     },
   ];
@@ -81,6 +89,7 @@ describe('generateDatasets', () => {
         degradedDocs: {
           percentage: degradedDocs[0].percentage,
           count: degradedDocs[0].count,
+          docsCount: degradedDocs[0].docsCount,
           quality: degradedDocs[0].quality,
         },
       },
@@ -94,6 +103,7 @@ describe('generateDatasets', () => {
         degradedDocs: {
           count: 0,
           percentage: 0,
+          docsCount: 0,
           quality: 'good',
         },
       },
@@ -111,6 +121,7 @@ describe('generateDatasets', () => {
         lastActivity: undefined,
         size: undefined,
         sizeBytes: undefined,
+        userPrivileges: undefined,
         namespace: indexNameToDataStreamParts(degradedDocs[0].dataset).namespace,
         title:
           integrations[0].datasets[indexNameToDataStreamParts(degradedDocs[0].dataset).dataset],
@@ -118,6 +129,7 @@ describe('generateDatasets', () => {
         degradedDocs: {
           percentage: degradedDocs[0].percentage,
           count: degradedDocs[0].count,
+          docsCount: degradedDocs[0].docsCount,
           quality: degradedDocs[0].quality,
         },
       },
@@ -128,12 +140,14 @@ describe('generateDatasets', () => {
         lastActivity: undefined,
         size: undefined,
         sizeBytes: undefined,
+        userPrivileges: undefined,
         namespace: indexNameToDataStreamParts(degradedDocs[1].dataset).namespace,
         title: indexNameToDataStreamParts(degradedDocs[1].dataset).dataset,
         integration: undefined,
         degradedDocs: {
           percentage: degradedDocs[1].percentage,
           count: degradedDocs[1].count,
+          docsCount: degradedDocs[1].docsCount,
           quality: degradedDocs[1].quality,
         },
       },
@@ -156,6 +170,7 @@ describe('generateDatasets', () => {
         degradedDocs: {
           percentage: degradedDocs[0].percentage,
           count: degradedDocs[0].count,
+          docsCount: degradedDocs[0].docsCount,
           quality: degradedDocs[0].quality,
         },
       },
@@ -169,6 +184,7 @@ describe('generateDatasets', () => {
         degradedDocs: {
           percentage: degradedDocs[1].percentage,
           count: degradedDocs[1].count,
+          docsCount: degradedDocs[1].docsCount,
           quality: degradedDocs[1].quality,
         },
       },
@@ -184,6 +200,9 @@ describe('generateDatasets', () => {
       size: '82.1kb',
       sizeBytes: 84160,
       integration: 'system',
+      userPrivileges: {
+        canMonitor: true,
+      },
     };
 
     const datasets = generateDatasets([nonDefaultDataset], undefined, integrations);
@@ -200,6 +219,7 @@ describe('generateDatasets', () => {
         degradedDocs: {
           count: 0,
           percentage: 0,
+          docsCount: 0,
           quality: 'good',
         },
       },

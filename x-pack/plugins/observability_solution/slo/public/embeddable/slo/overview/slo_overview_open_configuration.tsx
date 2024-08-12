@@ -22,7 +22,7 @@ export async function openSloConfiguration(
   const queryClient = new QueryClient();
   return new Promise(async (resolve, reject) => {
     try {
-      const modalSession = overlays.openFlyout(
+      const flyoutSession = overlays.openFlyout(
         toMountPoint(
           <KibanaContextProvider
             services={{
@@ -34,17 +34,17 @@ export async function openSloConfiguration(
               <SloConfiguration
                 initialInput={initialState}
                 onCreate={(update: GroupSloCustomInput | SingleSloCustomInput) => {
-                  modalSession.close();
+                  flyoutSession.close();
                   resolve(update);
                 }}
                 onCancel={() => {
-                  modalSession.close();
+                  flyoutSession.close();
                   reject();
                 }}
               />
             </QueryClientProvider>
           </KibanaContextProvider>,
-          { i18n: coreStart.i18n, theme: coreStart.theme }
+          coreStart
         )
       );
     } catch (error) {

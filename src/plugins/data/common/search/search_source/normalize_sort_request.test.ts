@@ -29,14 +29,15 @@ describe('SearchSource#normalizeSortRequest', function () {
     name: 'script boolean',
     type: 'boolean',
   };
-  const murmurScriptedField = {
-    ...scriptedField,
-    sortable: false,
-    name: 'murmur script',
-    type: 'murmur3',
-  };
+
+  const fields = [scriptedField, stringScriptedField, booleanScriptedField];
+
   const indexPattern = {
-    fields: [scriptedField, stringScriptedField, booleanScriptedField, murmurScriptedField],
+    fields,
+    getScriptedField: (name: string) => {
+      return fields.find((field) => field.name === name);
+    },
+    getRuntimeField: (name: string) => null,
   } as DataView;
 
   it('should return an array', function () {
@@ -147,25 +148,6 @@ describe('SearchSource#normalizeSortRequest', function () {
             lang: booleanScriptedField.lang,
           },
           type: 'string',
-          order: SortDirection.asc,
-        },
-      },
-    ]);
-  });
-
-  it('should use script based sorting only on sortable types', function () {
-    const result = normalizeSortRequest(
-      [
-        {
-          [murmurScriptedField.name]: SortDirection.asc,
-        },
-      ],
-      indexPattern
-    );
-
-    expect(result).toEqual([
-      {
-        [murmurScriptedField.name]: {
           order: SortDirection.asc,
         },
       },

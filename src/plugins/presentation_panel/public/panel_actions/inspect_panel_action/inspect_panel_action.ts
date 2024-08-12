@@ -59,7 +59,7 @@ export class InspectPanelAction implements Action<EmbeddableApiContext> {
     const panelTitle =
       getPanelTitle(embeddable) ||
       i18n.translate('presentationPanel.action.inspectPanel.untitledEmbeddableFilename', {
-        defaultMessage: 'untitled',
+        defaultMessage: '[No Title]',
       });
     const session = inspector.open(adapters, {
       title: panelTitle,

@@ -50,7 +50,7 @@ describe('Group View', () => {
       refetch: jest.fn(),
     });
     const { queryByTestId, getByTestId } = render(
-      <GroupView groupBy="slo.tags" kqlQuery="" sloView="cardView" sort="status" direction="desc" />
+      <GroupView groupBy="slo.tags" kqlQuery="" view="cardView" sort="status" direction="desc" />
     );
 
     expect(queryByTestId('sloGroupView')).toBeNull();
@@ -71,7 +71,7 @@ describe('Group View', () => {
     });
 
     const { queryByTestId, getByTestId } = render(
-      <GroupView groupBy="slo.tags" kqlQuery="" sloView="cardView" sort="status" direction="desc" />
+      <GroupView groupBy="slo.tags" kqlQuery="" view="cardView" sort="status" direction="desc" />
     );
 
     expect(queryByTestId('sloGroupView')).toBeNull();
@@ -85,7 +85,7 @@ describe('Group View', () => {
     });
 
     const { queryByTestId, getByTestId } = render(
-      <GroupView groupBy="slo.tags" kqlQuery="" sloView="cardView" sort="status" direction="desc" />
+      <GroupView groupBy="slo.tags" kqlQuery="" view="cardView" sort="status" direction="desc" />
     );
     expect(queryByTestId('sloGroupView')).toBeNull();
     expect(getByTestId('sloGroupListLoading')).toBeInTheDocument();
@@ -105,30 +105,72 @@ describe('Group View', () => {
             {
               group: 'production',
               groupBy: 'slo.tags',
-              summary: { total: 3, worst: 0.95, healthy: 2, violated: 1, degrading: 0, noData: 0 },
+              summary: {
+                total: 3,
+                worst: {
+                  sliValue: 1,
+                  status: 'healthy',
+                  slo: {
+                    id: 'irrelevant',
+                    instanceId: 'irrelevant',
+                    name: 'irrelevant',
+                    groupings: {},
+                  },
+                },
+                healthy: 2,
+                violated: 1,
+                degrading: 0,
+                noData: 0,
+              },
             },
             {
               group: 'something',
               groupBy: 'slo.tags',
-              summary: { total: 1, worst: 0.9, healthy: 0, violated: 1, degrading: 0, noData: 0 },
+              summary: {
+                total: 1,
+                worst: {
+                  sliValue: 1,
+                  status: 'healthy',
+                  slo: {
+                    id: 'irrelevant',
+                    instanceId: 'irrelevant',
+                    name: 'irrelevant',
+                    groupings: {},
+                  },
+                },
+                healthy: 0,
+                violated: 1,
+                degrading: 0,
+                noData: 0,
+              },
             },
             {
               group: 'anything',
               groupBy: 'slo.tags',
-              summary: { total: 2, worst: 0.85, healthy: 1, violated: 0, degrading: 0, noData: 1 },
+              summary: {
+                total: 2,
+                worst: {
+                  sliValue: 1,
+                  status: 'healthy',
+                  slo: {
+                    id: 'irrelevant',
+                    instanceId: 'irrelevant',
+                    name: 'irrelevant',
+                    groupings: {},
+                  },
+                },
+                healthy: 1,
+                violated: 0,
+                degrading: 0,
+                noData: 1,
+              },
             },
           ],
         },
         refetch: jest.fn(),
       });
       const { queryAllByTestId, getByTestId } = render(
-        <GroupView
-          groupBy="slo.tags"
-          kqlQuery=""
-          sloView="cardView"
-          sort="status"
-          direction="desc"
-        />
+        <GroupView groupBy="slo.tags" kqlQuery="" view="cardView" sort="status" direction="desc" />
       );
       expect(getByTestId('sloGroupView')).toBeInTheDocument();
       expect(useFetchSloGroups).toHaveBeenCalled();
@@ -163,7 +205,7 @@ describe('Group View', () => {
           results: [
             {
               group: 'production',
-              groupBy: 'tags',
+              groupBy: 'slo.tags',
               summary: { total: 3, worst: 0.95, healthy: 2, violated: 1, degrading: 0, noData: 0 },
             },
           ],
@@ -172,13 +214,7 @@ describe('Group View', () => {
       });
 
       const { queryAllByTestId } = render(
-        <GroupView
-          groupBy="slo.tags"
-          kqlQuery=""
-          sloView="cardView"
-          sort="status"
-          direction="desc"
-        />
+        <GroupView groupBy="slo.tags" kqlQuery="" view="cardView" sort="status" direction="desc" />
       );
       expect(useFetchSloGroups).toHaveBeenCalled();
       expect(useFetchSloGroups).toHaveBeenCalledWith({
@@ -194,7 +230,7 @@ describe('Group View', () => {
   describe('group by status', () => {
     it('should render slo groups grouped by status', async () => {
       const { getByTestId } = render(
-        <GroupView groupBy="status" kqlQuery="" sloView="cardView" sort="status" direction="desc" />
+        <GroupView groupBy="status" kqlQuery="" view="cardView" sort="status" direction="desc" />
       );
       expect(getByTestId('sloGroupView')).toBeInTheDocument();
       expect(useFetchSloGroups).toHaveBeenCalled();
@@ -213,7 +249,7 @@ describe('Group View', () => {
         <GroupView
           groupBy="slo.indicator.type"
           kqlQuery=""
-          sloView="cardView"
+          view="cardView"
           sort="status"
           direction="desc"
         />

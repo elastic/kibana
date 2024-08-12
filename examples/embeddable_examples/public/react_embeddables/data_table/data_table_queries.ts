@@ -40,8 +40,7 @@ export const initializeDataTableQueries = async (
 
   // set up search source
   let abortController: AbortController | undefined;
-  const fields: Record<string, string> = { field: '*', include_unmapped: 'true' };
-  searchSource.setField('fields', [fields]);
+  searchSource.setField('fields', [{ field: '*', include_unmapped: true }]);
   searchSource.setField('size', 50);
 
   // initialize state for API.

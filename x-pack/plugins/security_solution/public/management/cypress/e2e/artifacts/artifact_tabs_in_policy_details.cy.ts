@@ -83,7 +83,9 @@ describe(
     });
 
     for (const testData of getArtifactsListTestsData()) {
-      describe(`${testData.title} tab`, () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/183670
+      // FLAKY: https://github.com/elastic/kibana/issues/183671
+      describe.skip(`${testData.title} tab`, () => {
         beforeEach(() => {
           login();
           removeExceptionsList(testData.createRequestBody.list_id);

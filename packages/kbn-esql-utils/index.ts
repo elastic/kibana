@@ -9,6 +9,7 @@
 export {
   getESQLAdHocDataview,
   getIndexPatternFromESQLQuery,
+  hasTransformationalCommand,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
   getIndexForESQLQuery,
@@ -17,7 +18,13 @@ export {
   appendToESQLQuery,
   appendWhereClauseToESQLQuery,
   getESQLQueryColumns,
+  getESQLQueryColumnsRaw,
+  getESQLResults,
+  formatESQLColumns,
+  getTimeFieldFromESQLQuery,
+  getStartEndParams,
+  hasStartEndParams,
   TextBasedLanguages,
 } from './src';
 
-export { ESQL_LATEST_VERSION, ENABLE_ESQL } from './constants';
+export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';

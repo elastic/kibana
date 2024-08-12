@@ -12,13 +12,12 @@ import { useLicense } from '../../common/hooks/use_license';
 import type { MaybeImmutable } from '../../../common/endpoint/types';
 import type { EndpointCapabilities } from '../../../common/endpoint/service/response_actions/constants';
 import { type ResponseActionAgentType } from '../../../common/endpoint/service/response_actions/constants';
-import { HeaderSentinelOneInfo } from '../components/endpoint_responder/components/header_info/sentinel_one/header_sentinel_one_info';
+import { AgentInfo } from '../components/endpoint_responder/components/header_info/agent_info/agent_info';
 
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import {
   ActionLogButton,
   getEndpointConsoleCommands,
-  HeaderEndpointInfo,
   OfflineCallout,
 } from '../components/endpoint_responder';
 import { useConsoleManager } from '../components/console';
@@ -33,6 +32,7 @@ export interface BasicConsoleProps {
   hostName: string;
   /** Required for Endpoint agents. */
   capabilities: MaybeImmutable<EndpointCapabilities[]>;
+  platform: string;
 }
 
 type ResponderInfoProps =
@@ -41,7 +41,6 @@ type ResponderInfoProps =
     })
   | (BasicConsoleProps & {
       agentType: Exclude<ResponseActionAgentType, 'endpoint'>;
-      platform: string;
     });
 
 export const useWithShowResponder = (): ShowResponseActionsConsole => {
@@ -51,10 +50,17 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
   const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
     'responseActionsSentinelOneV1Enabled'
   );
+  const responseActionsCrowdstrikeManualHostIsolationEnabled = useIsExperimentalFeatureEnabled(
+    'responseActionsCrowdstrikeManualHostIsolationEnabled'
+  );
 
   return useCallback(
     (props: ResponderInfoProps) => {
-      const { agentId, agentType, capabilities, hostName } = props;
+      const { agentId, agentType, capabilities, hostName, platform } = props;
+      const isExternalEdr =
+        (isSentinelOneV1Enabled && agentType === 'sentinel_one') ||
+        (responseActionsCrowdstrikeManualHostIsolationEnabled && agentType === 'crowdstrike');
+
       // If no authz, just exit and log something to the console
       if (agentType === 'endpoint' && !endpointPrivileges.canAccessResponseConsole) {
         window.console.error(new Error(`Access denied to ${agentType} response actions console`));
@@ -81,19 +87,14 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
           'data-test-subj': `${agentType}ResponseActionsConsole`,
           storagePrefix: 'xpack.securitySolution.Responder',
           TitleComponent: () => {
-            if (agentType === 'endpoint') {
-              return <HeaderEndpointInfo endpointId={agentId} />;
-            }
-            if (agentType === 'sentinel_one') {
-              return (
-                <HeaderSentinelOneInfo
-                  agentId={agentId}
-                  hostName={hostName}
-                  platform={props.platform}
-                />
-              );
-            }
-            return null;
+            return (
+              <AgentInfo
+                agentId={agentId}
+                agentType={agentType}
+                hostName={hostName}
+                platform={platform}
+              />
+            );
           },
         };
 
@@ -104,10 +105,11 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
               agentId,
               hostName,
               capabilities,
+              platform,
             },
             consoleProps,
             PageTitleComponent: () => {
-              if (isSentinelOneV1Enabled && agentType === 'sentinel_one') {
+              if (isExternalEdr) {
                 return (
                   <EuiFlexGroup>
                     <EuiFlexItem>{RESPONDER_PAGE_TITLE}</EuiFlexItem>
@@ -139,6 +141,12 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
           .show();
       }
     },
-    [endpointPrivileges, isEnterpriseLicense, isSentinelOneV1Enabled, consoleManager]
+    [
+      isSentinelOneV1Enabled,
+      responseActionsCrowdstrikeManualHostIsolationEnabled,
+      endpointPrivileges,
+      isEnterpriseLicense,
+      consoleManager,
+    ]
   );
 };

@@ -9,7 +9,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { makeAction } from '../mocks/helpers';
-import { CellActionExecutionContext } from '../types';
+import type { CellActionExecutionContext } from '../types';
 import { ActionItem } from './cell_action_item';
 
 describe('ActionItem', () => {

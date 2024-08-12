@@ -17,7 +17,7 @@ interface VerticalLinesProps {
 }
 
 export function VerticalLines({ topTraceDuration, plotValues, marks = [] }: VerticalLinesProps) {
-  const { width, height, margins, tickValues, xScale } = plotValues;
+  const { width, margins, tickValues, xScale } = plotValues;
 
   const markTimes = marks.filter((mark) => mark.verticalLine).map(({ offset }) => offset);
 
@@ -38,7 +38,7 @@ export function VerticalLines({ topTraceDuration, plotValues, marks = [] }: Vert
   return (
     <svg
       width={width}
-      height={height + margins.top}
+      height="100%"
       style={{
         position: 'absolute',
         top: 0,
@@ -52,7 +52,7 @@ export function VerticalLines({ topTraceDuration, plotValues, marks = [] }: Vert
             x1={position}
             x2={position}
             y1={0}
-            y2={height}
+            y2="100%"
             stroke={theme.eui.euiColorLightestShade}
           />
         ))}
@@ -62,7 +62,7 @@ export function VerticalLines({ topTraceDuration, plotValues, marks = [] }: Vert
             x1={position}
             x2={position}
             y1={0}
-            y2={height}
+            y2="100%"
             stroke={theme.eui.euiColorMediumShade}
           />
         ))}
@@ -72,7 +72,7 @@ export function VerticalLines({ topTraceDuration, plotValues, marks = [] }: Vert
             x1={topTraceDurationPosition}
             x2={topTraceDurationPosition}
             y1={0}
-            y2={height}
+            y2="100%"
             stroke={theme.eui.euiColorMediumShade}
           />
         )}

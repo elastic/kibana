@@ -9,14 +9,18 @@ import { errors } from '@elastic/elasticsearch';
 import { isBoom } from '@hapi/boom';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
+import { isKibanaResponse } from '@kbn/core-http-server';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
 import * as t from 'io-ts';
 import { merge, pick } from 'lodash';
+import {
+  ServerRoute,
+  ServerRouteCreateOptions,
+  parseEndpoint,
+} from '@kbn/server-route-repository-utils';
 import { decodeRequestParams } from './decode_request_params';
-import { parseEndpoint } from './parse_endpoint';
 import { routeValidationObject } from './route_validation_object';
-import type { ServerRoute, ServerRouteCreateOptions } from './typings';
 
 const CLIENT_CLOSED_REQUEST = {
   statusCode: 499,
@@ -25,7 +29,7 @@ const CLIENT_CLOSED_REQUEST = {
   },
 };
 
-export function registerRoutes({
+export function registerRoutes<TDependencies extends Record<string, any>>({
   core,
   repository,
   logger,
@@ -34,7 +38,7 @@ export function registerRoutes({
   core: CoreSetup;
   repository: Record<string, ServerRoute<string, any, any, any, ServerRouteCreateOptions>>;
   logger: Logger;
-  dependencies: Record<string, any>;
+  dependencies: TDependencies;
 }) {
   const routes = Object.values(repository);
 
@@ -58,9 +62,10 @@ export function registerRoutes({
           runtimeType
         );
 
-        const { aborted, data } = await Promise.race([
+        const { aborted, result } = await Promise.race([
           handler({
             request,
+            response,
             context,
             params: validatedParams,
             logger,
@@ -68,13 +73,13 @@ export function registerRoutes({
           }).then((value) => {
             return {
               aborted: false,
-              data: value,
+              result: value,
             };
           }),
           request.events.aborted$.toPromise().then(() => {
             return {
               aborted: true,
-              data: undefined,
+              result: undefined,
             };
           }),
         ]);
@@ -83,9 +88,12 @@ export function registerRoutes({
           return response.custom(CLIENT_CLOSED_REQUEST);
         }
 
-        const body = data || {};
-
-        return response.ok({ body });
+        if (isKibanaResponse(result)) {
+          return result;
+        } else {
+          const body = result || {};
+          return response.ok({ body });
+        }
       } catch (error) {
         logger.error(error);
 

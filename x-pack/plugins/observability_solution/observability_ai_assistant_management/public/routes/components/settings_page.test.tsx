@@ -6,44 +6,24 @@
  */
 
 import React from 'react';
-import { useAppContext } from '../../hooks/use_app_context';
-import { coreStart, render } from '../../helpers/test_helper';
+import { coreStartMock, render } from '../../helpers/test_helper';
 import { SettingsPage } from './settings_page';
 
-jest.mock('../../hooks/use_app_context');
-
-const useAppContextMock = useAppContext as jest.Mock;
-
-const setBreadcrumbs = jest.fn();
-const navigateToApp = jest.fn();
-
 describe('Settings Page', () => {
-  beforeEach(() => {
-    useAppContextMock.mockReturnValue({
-      uiSettings: {
-        get: jest.fn(),
-      },
-      docLinks: {
-        links: {},
-      },
-      observabilityAIAssistant: {
-        useGenAIConnectors: () => ({ connectors: [] }),
-        useUserPreferredLanguage: () => ({
-          LANGUAGE_OPTIONS: [{ label: 'English' }],
-          selectedLanguage: 'English',
-          setSelectedLanguage: () => {},
-          getPreferredLanguage: () => 'English',
-        }),
-      },
-      setBreadcrumbs,
-      application: { navigateToApp },
-    });
-  });
-
   it('should navigate to home when not authorized', () => {
-    render(<SettingsPage />, { show: false });
+    render(<SettingsPage />, {
+      coreStart: {
+        application: {
+          capabilities: {
+            observabilityAIAssistant: {
+              show: false,
+            },
+          },
+        },
+      },
+    });
 
-    expect(coreStart.application.navigateToApp).toBeCalledWith('home');
+    expect(coreStartMock.application.navigateToApp).toBeCalledWith('home');
   });
 
   it('should render settings and knowledge base tabs', () => {
@@ -54,7 +34,10 @@ describe('Settings Page', () => {
   });
 
   it('should set breadcrumbs', () => {
-    render(<SettingsPage />);
+    const setBreadcrumbs = jest.fn();
+    render(<SettingsPage />, {
+      appContextValue: { setBreadcrumbs },
+    });
 
     expect(setBreadcrumbs).toHaveBeenCalledWith([
       {

@@ -27,6 +27,7 @@ const generatePackagePolicySOAttributesMock = (
     updated_at: '2024-01-25T15:21:13.389Z',
     updated_by: 'user-a',
     policy_id: '444-555-666',
+    policy_ids: ['444-555-666'],
     enabled: true,
     inputs: [],
     namespace: 'default',

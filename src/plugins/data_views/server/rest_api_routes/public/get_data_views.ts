@@ -15,7 +15,12 @@ import type {
   DataViewsServerPluginStartDependencies,
   DataViewsServerPluginStart,
 } from '../../types';
-import { SERVICE_KEY, SERVICE_PATH, INITIAL_REST_VERSION } from '../../constants';
+import {
+  SERVICE_KEY,
+  SERVICE_PATH,
+  INITIAL_REST_VERSION,
+  GET_DATA_VIEWS_DESCRIPTION,
+} from '../../constants';
 import { DataViewListItemRestResponse } from '../route_types';
 
 interface GetDataViewsArgs {
@@ -34,7 +39,7 @@ export const getDataViews = async ({
 };
 
 const getDataViewsRouteFactory =
-  (path: string, serviceKey: string) =>
+  (path: string, serviceKey: string, description?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -57,7 +62,7 @@ const getDataViewsRouteFactory =
       return schema.object({ [serviceKey]: dataViewListSchema });
     };
 
-    router.versioned.get({ path, access: 'public' }).addVersion(
+    router.versioned.get({ path, access: 'public', description }).addVersion(
       {
         version: INITIAL_REST_VERSION,
         validate: {
@@ -98,4 +103,8 @@ const getDataViewsRouteFactory =
     );
   };
 
-export const registerGetDataViewsRoute = getDataViewsRouteFactory(SERVICE_PATH, SERVICE_KEY);
+export const registerGetDataViewsRoute = getDataViewsRouteFactory(
+  SERVICE_PATH,
+  SERVICE_KEY,
+  GET_DATA_VIEWS_DESCRIPTION
+);

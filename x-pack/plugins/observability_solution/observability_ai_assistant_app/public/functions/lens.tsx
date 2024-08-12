@@ -57,7 +57,7 @@ function Lens({
       title: indexPattern,
       timeFieldName: timeField,
     });
-  }, [indexPattern]);
+  }, [indexPattern, dataViews, timeField]);
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
 

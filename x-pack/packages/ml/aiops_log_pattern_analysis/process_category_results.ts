@@ -11,7 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
-import type { Category, CategoriesAgg, CatResponse } from './types';
+import type { Category, CategoriesAgg, CatResponse, Sparkline } from './types';
 
 export function processCategoryResults(
   result: CatResponse,
@@ -29,24 +29,17 @@ export function processCategoryResults(
   ) as CategoriesAgg;
 
   const categories: Category[] = buckets.map((b) => {
-    const sparkline =
-      b.sparkline === undefined
-        ? {}
-        : b.sparkline.buckets.reduce<Record<number, number>>((acc2, cur2) => {
-            acc2[cur2.key] = cur2.doc_count;
-            return acc2;
-          }, {});
-
     return {
       key: b.key,
       count: b.doc_count,
       examples: b.examples.hits.hits.map((h) => get(h._source, field)),
-      sparkline,
+      sparkline: getSparkline(b.sparkline),
       subTimeRangeCount: b.sub_time_range?.buckets[0].doc_count ?? undefined,
       subFieldCount: b.sub_time_range?.buckets[0].sub_field?.doc_count ?? undefined,
       subFieldExamples:
         b.sub_time_range?.buckets[0].examples.hits.hits.map((h) => get(h._source, field)) ??
         undefined,
+      subFieldSparkline: getSparkline(b.sub_time_range?.buckets[0].sparkline),
       regex: b.regex,
     };
   });
@@ -58,4 +51,13 @@ export function processCategoryResults(
     categories,
     hasExamples,
   };
+}
+
+function getSparkline(sparkline?: Sparkline) {
+  return sparkline === undefined
+    ? {}
+    : sparkline.buckets.reduce<Record<number, number>>((acc, cur) => {
+        acc[cur.key] = cur.doc_count;
+        return acc;
+      }, {});
 }

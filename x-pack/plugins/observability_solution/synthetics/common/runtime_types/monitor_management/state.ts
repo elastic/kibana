@@ -46,6 +46,7 @@ export const MonitorManagementEnablementResultCodec = t.type({
   canManageApiKeys: t.boolean,
   areApiKeysEnabled: t.boolean,
   isValidApiKey: t.boolean,
+  isServiceAllowed: t.boolean,
 });
 
 export type MonitorManagementEnablementResult = t.TypeOf<

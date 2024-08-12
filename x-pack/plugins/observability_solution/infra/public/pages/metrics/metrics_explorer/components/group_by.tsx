@@ -7,19 +7,17 @@
 
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
 import React, { useCallback } from 'react';
+import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
-import { DerivedIndexPattern } from '../../../../containers/metrics_source';
 
 interface Props {
   options: MetricsExplorerOptions;
   onChange: (groupBy: string | null | string[]) => void;
-  fields: DerivedIndexPattern['fields'];
-  errorOptions?: string[];
 }
 
-export const MetricsExplorerGroupBy = ({ options, onChange, fields, errorOptions }: Props) => {
+export const MetricsExplorerGroupBy = ({ options, onChange }: Props) => {
+  const { metricsView } = useMetricsDataViewContext();
   const handleChange = useCallback(
     (selectedOptions: Array<{ label: string }>) => {
       const groupBy = selectedOptions.map((option) => option.label);
@@ -29,18 +27,14 @@ export const MetricsExplorerGroupBy = ({ options, onChange, fields, errorOptions
   );
 
   const selectedOptions = Array.isArray(options.groupBy)
-    ? options.groupBy.map((field) => ({
-        label: field,
-        color: errorOptions?.includes(field) ? 'danger' : undefined,
-      }))
+    ? options.groupBy.map((field) => ({ label: field }))
     : options.groupBy
-    ? [
-        {
-          label: options.groupBy,
-          color: errorOptions?.includes(options.groupBy) ? 'danger' : undefined,
-        },
-      ]
+    ? [{ label: options.groupBy }]
     : [];
+
+  const comboOptions = (metricsView?.fields ?? [])
+    .filter((f) => f.aggregatable && f.type === 'string')
+    .map((f) => ({ label: f.name }));
 
   return (
     <EuiComboBox
@@ -54,9 +48,7 @@ export const MetricsExplorerGroupBy = ({ options, onChange, fields, errorOptions
       fullWidth
       singleSelection={false}
       selectedOptions={selectedOptions}
-      options={fields
-        .filter((f) => f.aggregatable && f.type === 'string')
-        .map((f) => ({ label: f.name }))}
+      options={comboOptions}
       onChange={handleChange}
       isClearable={true}
     />

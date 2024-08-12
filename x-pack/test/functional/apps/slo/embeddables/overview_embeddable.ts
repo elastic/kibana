@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Single SLO', function () {
       it('should open SLO configuration flyout', async () => {
         await dashboardAddPanel.clickEditorMenuButton();
-        await dashboardAddPanel.clickEmbeddableFactoryGroupButton('slos');
+        await dashboardAddPanel.verifyEmbeddableFactoryGroupExists('slos');
         await dashboardAddPanel.clickAddNewPanelFromUIActionLink('SLO Overview');
         await sloUi.common.assertSloOverviewConfigurationExists();
       });
@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Group of SLOs', function () {
       it('can select Group Overview mode in the Flyout configuration', async () => {
         await dashboardAddPanel.clickEditorMenuButton();
-        await dashboardAddPanel.clickEmbeddableFactoryGroupButton('slos');
+        await dashboardAddPanel.verifyEmbeddableFactoryGroupExists('slos');
         await dashboardAddPanel.clickAddNewPanelFromUIActionLink('SLO Overview');
         await sloUi.common.clickOverviewMode();
         await sloUi.common.assertSloConfigurationGroupOverviewModeIsSelected();

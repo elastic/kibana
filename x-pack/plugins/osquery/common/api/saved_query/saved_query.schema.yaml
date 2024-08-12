@@ -6,17 +6,27 @@ paths:
   /api/osquery/saved_queries:
     get:
       summary: Find saved queries
+      operationId: OsqueryFindSavedQueries
+      x-codegen-enabled: true
+      x-labels: [serverless, ess]
       parameters:
-          - $ref: './find_saved_query.schema.yaml#/components/parameters/FindSavedQueryRequestQueryParameter'
+        - name: query
+          in: query
+          required: true
+          schema:
+            $ref: './find_saved_query.schema.yaml#/components/schemas/FindSavedQueryRequestQuery'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: './find_saved_query.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
     post:
       summary: Create a saved query
+      operationId: OsqueryCreateSavedQuery
+      x-codegen-enabled: true
+      x-labels: [serverless, ess]
       requestBody:
         required: true
         content:
@@ -29,44 +39,65 @@ paths:
           content:
             application/json:
               schema:
-                $ref: './create_saved_query.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
   /api/osquery/saved_queries/{id}:
     get:
       summary: Get saved query details
+      operationId: OsqueryGetSavedQueryDetails
+      x-codegen-enabled: true
+      x-labels: [serverless, ess]
       parameters:
-        - $ref: './read_saved_query.schema.yaml#/components/parameters/ReadSavedQueryRequestQueryParameter'
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryId'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: './read_saved_query.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
     delete:
-          summary: Delete saved query
-          parameters:
-            - $ref: './delete_saved_query.schema.yaml#/components/parameters/DeleteSavedQueryRequestQueryParameter'
-          responses:
-            '200':
-              description: OK
-              content:
-                application/json:
-                  schema:
-                    $ref: './find_saved_query.schema.yaml#/components/schemas/SuccessResponse'
+      summary: Delete saved query
+      operationId: OsqueryDeleteSavedQuery
+      x-codegen-enabled: true
+      x-labels: [serverless, ess]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
     put:
-          summary: Update saved query
-          requestBody:
-            required: true
-            content:
-              application/json:
-                schema:
-                  $ref: './update_saved_query.schema.yaml#/components/schemas/UpdateSavedQueryRequestBody'
-          parameters:
-            - $ref: './update_saved_query.schema.yaml#/components/parameters/UpdateSavedQueryRequestQueryParameter'
-          responses:
-            '200':
-              description: OK
-              content:
-                application/json:
-                  schema:
-                    $ref: './update_saved_query.schema.yaml#/components/schemas/SuccessResponse'
+      summary: Update saved query
+      operationId: OsqueryUpdateSavedQuery
+      x-codegen-enabled: true
+      x-labels: [serverless, ess]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './update_saved_query.schema.yaml#/components/schemas/UpdateSavedQueryRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'

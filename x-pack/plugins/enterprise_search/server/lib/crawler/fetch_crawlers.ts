@@ -111,6 +111,6 @@ export const fetchCrawlerDocumentIdByIndexName = async (
     query: { term: { index_name: indexName } },
     _source: '_id',
   });
-  const crawlerId = crawlerResult.hits.hits[0]?._id;
+  const crawlerId = crawlerResult.hits.hits[0]?._id!;
   return crawlerId;
 };

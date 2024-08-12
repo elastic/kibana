@@ -12,10 +12,10 @@ import { FtrProviderContext } from './ftr_provider_context';
 
 async function ftrConfig({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
-    require.resolve('../../../../../test/common/config.js')
+    require.resolve('@kbn/test-suites-src/common/config')
   );
   const xpackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../../../../test/functional/config.base.js')
+    require.resolve('@kbn/test-suites-xpack/functional/config.base')
   );
 
   return {

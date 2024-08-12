@@ -28,6 +28,23 @@ import type {
   Visualization,
 } from '../types';
 import { getMissingIndexPattern } from '../editor_frame_service/editor_frame/state_helpers';
+import {
+  EDITOR_MISSING_DATAVIEW,
+  EDITOR_MISSING_EXPRESSION_DATAVIEW,
+  EDITOR_MISSING_VIS_TYPE,
+  EDITOR_UNKNOWN_DATASOURCE_TYPE,
+  EDITOR_UNKNOWN_VIS_TYPE,
+} from '../user_messages_ids';
+
+export interface UserMessageGetterProps {
+  visualizationType: string | null | undefined;
+  visualization: Visualization | undefined;
+  visualizationState: VisualizationState | undefined;
+  activeDatasource: Datasource | null | undefined;
+  activeDatasourceState: { isLoading: boolean; state: unknown } | null;
+  dataViews: DataViewsState;
+  core: CoreStart;
+}
 
 /**
  * Provides a place to register general user messages that don't belong in the datasource or visualization objects
@@ -40,15 +57,7 @@ export const getApplicationUserMessages = ({
   activeDatasourceState,
   dataViews,
   core,
-}: {
-  visualizationType: string | null | undefined;
-  visualization: Visualization | undefined;
-  visualizationState: VisualizationState | undefined;
-  activeDatasource: Datasource | null | undefined;
-  activeDatasourceState: { isLoading: boolean; state: unknown } | null;
-  dataViews: DataViewsState;
-  core: CoreStart;
-}): UserMessage[] => {
+}: UserMessageGetterProps): UserMessage[] => {
   const messages: UserMessage[] = [];
 
   if (!visualizationType) {
@@ -78,6 +87,7 @@ export const getApplicationUserMessages = ({
 
 function getMissingVisTypeError(): UserMessage {
   return {
+    uniqueId: EDITOR_MISSING_VIS_TYPE,
     severity: 'error',
     displayLocations: [{ id: 'visualizationOnEmbeddable' }],
     fixableInEditor: true,
@@ -90,6 +100,7 @@ function getMissingVisTypeError(): UserMessage {
 
 function getUnknownVisualizationTypeError(visType: string): UserMessage {
   return {
+    uniqueId: EDITOR_UNKNOWN_VIS_TYPE,
     severity: 'error',
     fixableInEditor: false,
     displayLocations: [{ id: 'visualization' }],
@@ -107,6 +118,7 @@ function getUnknownVisualizationTypeError(visType: string): UserMessage {
 
 function getUnknownDatasourceTypeError(): UserMessage {
   return {
+    uniqueId: EDITOR_UNKNOWN_DATASOURCE_TYPE,
     severity: 'error',
     fixableInEditor: false,
     displayLocations: [{ id: 'visualization' }],
@@ -130,6 +142,7 @@ function getMissingIndexPatternsErrors(
   const canFix = isManagementEnabled && isIndexPatternManagementEnabled;
   return [
     {
+      uniqueId: EDITOR_MISSING_DATAVIEW,
       severity: 'error',
       fixableInEditor: canFix,
       displayLocations: [{ id: 'visualizationInEditor' }],
@@ -176,6 +189,7 @@ function getMissingIndexPatternsErrors(
       ),
     },
     {
+      uniqueId: EDITOR_MISSING_EXPRESSION_DATAVIEW,
       severity: 'error',
       fixableInEditor: canFix,
       displayLocations: [{ id: 'visualizationOnEmbeddable' }],

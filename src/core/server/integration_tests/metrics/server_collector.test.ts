@@ -116,7 +116,7 @@ describe('ServerMetricsCollector', () => {
     // Subscribe to the aborted$ event
     const waitFor1stAbort = disconnectAborted$.pipe(take(1)).toPromise();
 
-    discoReq1.abort();
+    void discoReq1.abort();
 
     // Wait for the aborted$ event
     await waitFor1stAbort;
@@ -132,7 +132,7 @@ describe('ServerMetricsCollector', () => {
     // Subscribe to the aborted$ event
     const waitFor2ndAbort = disconnectAborted$.pipe(take(1)).toPromise();
 
-    discoReq2.abort();
+    void discoReq2.abort();
 
     // Wait for the aborted$ event
     await waitFor2ndAbort;

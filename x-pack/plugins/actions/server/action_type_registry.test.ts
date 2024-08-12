@@ -610,6 +610,26 @@ describe('actionTypeRegistry', () => {
     beforeEach(() => {
       actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
       actionTypeRegistry.register(fooActionType);
+      // @ts-expect-error accessing private property for testing
+      actionTypeRegistry.inMemoryConnectors.push({
+        ...fooActionType,
+        id: 'foo-preconfig',
+        name: 'Foo-preconfig',
+        actionTypeId: 'foo',
+        isPreconfigured: true,
+        config: {},
+        secrets: {},
+      });
+      // @ts-expect-error accessing private property for testing
+      actionTypeRegistry.inMemoryConnectors.push({
+        ...fooActionType,
+        id: 'foo-system',
+        name: 'Foo-system',
+        actionTypeId: 'foo',
+        isSystemAction: true,
+        config: {},
+        secrets: {},
+      });
     });
 
     test('should call isLicenseValidForActionType of the license state with notifyUsage false by default', async () => {
@@ -626,6 +646,35 @@ describe('actionTypeRegistry', () => {
       expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalledWith(fooActionType, {
         notifyUsage: true,
       });
+    });
+
+    test('should return true for enabled type', async () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      const result = actionTypeRegistry.isActionExecutable('123', 'foo');
+      expect(result).toEqual(true);
+    });
+
+    test('should return false when license invalid', async () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({
+        isValid: false,
+        reason: 'invalid',
+      });
+      const result = actionTypeRegistry.isActionExecutable('123', 'foo');
+      expect(result).toEqual(false);
+    });
+
+    test('should return true for disabled type, but preconfigured connector', async () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      mockedActionsConfig.isActionTypeEnabled.mockReturnValue(false);
+      const result = actionTypeRegistry.isActionExecutable('foo-preconfig', 'foo');
+      expect(result).toEqual(true);
+    });
+
+    test('should return true for disabled type, but system connector', async () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      mockedActionsConfig.isActionTypeEnabled.mockReturnValue(false);
+      const result = actionTypeRegistry.isActionExecutable('foo-system', 'foo');
+      expect(result).toEqual(true);
     });
   });
 

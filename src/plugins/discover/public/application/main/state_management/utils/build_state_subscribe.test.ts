@@ -11,6 +11,8 @@ import { FetchStatus } from '../../../types';
 import { dataViewComplexMock } from '../../../../__mocks__/data_view_complex';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { discoverServiceMock } from '../../../../__mocks__/services';
+import { createDataViewDataSource, DataSourceType } from '../../../../../common/data_sources';
+import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 
 describe('buildStateSubscribe', () => {
   const savedSearch = savedSearchMock;
@@ -18,6 +20,7 @@ describe('buildStateSubscribe', () => {
   stateContainer.dataState.refetch$.next = jest.fn();
   stateContainer.dataState.reset = jest.fn();
   stateContainer.actions.setDataView = jest.fn();
+  stateContainer.savedSearchState.update = jest.fn();
 
   const getSubscribeFn = () => {
     return buildStateSubscribe({
@@ -35,7 +38,9 @@ describe('buildStateSubscribe', () => {
   });
 
   it('should set the data view if the index has changed, and refetch should be triggered', async () => {
-    await getSubscribeFn()({ index: dataViewComplexMock.id });
+    await getSubscribeFn()({
+      dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
+    });
 
     expect(stateContainer.actions.setDataView).toHaveBeenCalledWith(dataViewComplexMock);
     expect(stateContainer.dataState.reset).toHaveBeenCalled();
@@ -46,6 +51,20 @@ describe('buildStateSubscribe', () => {
     await getSubscribeFn()(stateContainer.appState.getState());
 
     expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
+  });
+
+  it('should not call refetch$ if viewMode changes', async () => {
+    await getSubscribeFn()({
+      ...stateContainer.appState.getState(),
+      dataSource: {
+        type: DataSourceType.Esql,
+      },
+      viewMode: VIEW_MODE.AGGREGATED_LEVEL,
+    });
+
+    expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
+    expect(stateContainer.dataState.reset).not.toHaveBeenCalled();
+    expect(stateContainer.savedSearchState.update).toHaveBeenCalled();
   });
 
   it('should call refetch$ if the chart is hidden', async () => {
@@ -75,18 +94,26 @@ describe('buildStateSubscribe', () => {
   it('should not execute setState function if initialFetchStatus is UNINITIALIZED', async () => {
     const stateSubscribeFn = getSubscribeFn();
     stateContainer.dataState.getInitialFetchStatus = jest.fn(() => FetchStatus.UNINITIALIZED);
-    await stateSubscribeFn({ index: dataViewComplexMock.id });
+    await stateSubscribeFn({
+      dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
+    });
 
     expect(stateContainer.dataState.reset).toHaveBeenCalled();
   });
   it('should not execute setState twice if the identical data view change is propagated twice', async () => {
-    await getSubscribeFn()({ index: dataViewComplexMock.id });
+    await getSubscribeFn()({
+      dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
+    });
 
     expect(stateContainer.dataState.reset).toBeCalledTimes(1);
 
-    stateContainer.appState.getPrevious = jest.fn(() => ({ index: dataViewComplexMock.id }));
+    stateContainer.appState.getPrevious = jest.fn(() => ({
+      dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
+    }));
 
-    await getSubscribeFn()({ index: dataViewComplexMock.id });
+    await getSubscribeFn()({
+      dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
+    });
     expect(stateContainer.dataState.reset).toBeCalledTimes(1);
   });
 });

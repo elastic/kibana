@@ -6,98 +6,107 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { shallow } from 'enzyme';
-import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { ValuesInput } from './values_input';
+import { RenderOptions, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('react-use/lib/useDebounce', () => (fn: () => void) => fn());
 
+const renderValuesInput = (
+  {
+    value = 5,
+    onChange = jest.fn(),
+  }: {
+    value?: number;
+    onChange?: (value: number) => void;
+  } = {
+    value: 5,
+    onChange: jest.fn(),
+  },
+  renderOptions?: RenderOptions
+) => {
+  return render(<ValuesInput value={value} onChange={onChange} />, renderOptions);
+};
+
+const getNumberInput = () => screen.getByLabelText(/number of values/i);
+
 describe('Values', () => {
   it('should render EuiFieldNumber correctly', () => {
-    const onChangeSpy = jest.fn();
-    const instance = shallow(<ValuesInput value={5} onChange={onChangeSpy} />);
-
-    expect(instance.find(EuiFieldNumber).prop('value')).toEqual('5');
+    renderValuesInput();
+    expect(getNumberInput()).toHaveValue(5);
   });
 
   it('should not run onChange function on mount', () => {
     const onChangeSpy = jest.fn();
-    shallow(<ValuesInput value={5} onChange={onChangeSpy} />);
+    renderValuesInput({ onChange: onChangeSpy });
 
-    expect(onChangeSpy.mock.calls.length).toBe(0);
+    expect(onChangeSpy).not.toHaveBeenCalled();
   });
 
   it('should run onChange function on update', () => {
     const onChangeSpy = jest.fn();
-    const instance = shallow(<ValuesInput value={5} onChange={onChangeSpy} />);
-    act(() => {
-      instance.find(EuiFieldNumber).simulate('change', { currentTarget: { value: '7' } });
-    });
-    expect(instance.find(EuiFieldNumber).prop('value')).toEqual('7');
-    expect(onChangeSpy.mock.calls.length).toBe(1);
-    expect(onChangeSpy.mock.calls[0][0]).toBe(7);
+    renderValuesInput({ onChange: onChangeSpy });
+    userEvent.type(getNumberInput(), '{backspace}7');
+
+    expect(getNumberInput()).toHaveValue(7);
+    expect(onChangeSpy).toHaveBeenCalledTimes(1);
+    expect(onChangeSpy).toHaveBeenCalledWith(7);
   });
 
   it('should not run onChange function on update when value is out of 1-10000 range', () => {
     const onChangeSpy = jest.fn();
-    const instance = shallow(<ValuesInput value={5} onChange={onChangeSpy} />);
-    act(() => {
-      instance.find(EuiFieldNumber).simulate('change', { currentTarget: { value: '10007' } });
-    });
-    instance.update();
-    expect(instance.find(EuiFieldNumber).prop('value')).toEqual('10007');
-    expect(onChangeSpy.mock.calls.length).toBe(1);
-    expect(onChangeSpy.mock.calls[0][0]).toBe(10000);
+    renderValuesInput({ onChange: onChangeSpy });
+    userEvent.type(getNumberInput(), '{backspace}10007');
+
+    expect(getNumberInput()).toHaveValue(10007);
+    expect(onChangeSpy).toHaveBeenCalledWith(10000);
   });
 
   it('should show an error message when the value is out of bounds', () => {
-    const instance = shallow(<ValuesInput value={-5} onChange={jest.fn()} />);
+    renderValuesInput({ value: -5 });
 
-    expect(instance.find(EuiFieldNumber).prop('isInvalid')).toBeTruthy();
-    expect(instance.find(EuiFormRow).prop('error')).toEqual(
-      expect.arrayContaining([expect.stringMatching('Value is lower')])
-    );
-
-    act(() => {
-      instance.find(EuiFieldNumber).simulate('change', { currentTarget: { value: '10007' } });
-    });
-    instance.update();
-
-    expect(instance.find(EuiFieldNumber).prop('isInvalid')).toBeTruthy();
-    expect(instance.find(EuiFormRow).prop('error')).toEqual(
-      expect.arrayContaining([expect.stringMatching('Value is higher')])
-    );
+    expect(getNumberInput()).toBeInvalid();
+    expect(
+      screen.getByText('Value is lower than the minimum 1, the minimum value is used instead.')
+    ).toBeInTheDocument();
+    userEvent.type(getNumberInput(), '{backspace}{backspace}10007');
+    expect(getNumberInput()).toBeInvalid();
+    expect(
+      screen.getByText('Value is higher than the maximum 10000, the maximum value is used instead.')
+    ).toBeInTheDocument();
   });
 
   it('should fallback to last valid value on input blur', () => {
-    const instance = shallow(<ValuesInput value={123} onChange={jest.fn()} />);
+    const Wrapper = ({ children }: { children: React.ReactNode }) => (
+      <div>
+        <button>testing blur by clicking outside button</button>
+        {children}
+      </div>
+    );
+
+    renderValuesInput({ value: 123 }, { wrapper: Wrapper });
 
     function changeAndBlur(newValue: string) {
-      act(() => {
-        instance.find(EuiFieldNumber).simulate('change', {
-          currentTarget: { value: newValue },
-        });
-      });
-      instance.update();
-      act(() => {
-        instance.find(EuiFieldNumber).simulate('blur');
-      });
-      instance.update();
+      userEvent.type(getNumberInput(), newValue);
+      userEvent.click(
+        screen.getByRole('button', { name: /testing blur by clicking outside button/i })
+      );
     }
 
-    changeAndBlur('-5');
+    changeAndBlur('{backspace}{backspace}{backspace}-5');
 
-    expect(instance.find(EuiFieldNumber).prop('isInvalid')).toBeFalsy();
-    expect(instance.find(EuiFieldNumber).prop('value')).toBe('1');
+    expect(getNumberInput()).not.toBeInvalid();
+    expect(getNumberInput()).toHaveValue(1);
 
-    changeAndBlur('50000');
+    changeAndBlur('{backspace}{backspace}50000');
 
-    expect(instance.find(EuiFieldNumber).prop('isInvalid')).toBeFalsy();
-    expect(instance.find(EuiFieldNumber).prop('value')).toBe('10000');
+    expect(getNumberInput()).not.toBeInvalid();
+    expect(getNumberInput()).toHaveValue(10000);
 
-    changeAndBlur('');
+    changeAndBlur('{backspace}{backspace}{backspace}{backspace}{backspace}');
+
     // as we're not handling the onChange state, it fallbacks to the value prop
-    expect(instance.find(EuiFieldNumber).prop('value')).toBe('123');
+    expect(getNumberInput()).not.toBeInvalid();
+    expect(getNumberInput()).toHaveValue(123);
   });
 });

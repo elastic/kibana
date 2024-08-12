@@ -6,4 +6,3 @@
  */
 
 export * from './types';
-export type { RiskWeight, RiskWeights, GlobalRiskWeight, RiskCategoryRiskWeight } from './schema';

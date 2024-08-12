@@ -5,8 +5,7 @@
  * 2.0.
  */
 import { expect, journey, Page, step } from '@elastic/synthetics';
-import { FormMonitorType } from '../../../common/runtime_types';
-import { recordVideo } from '../../helpers/record_video';
+import { FormMonitorType } from '@kbn/synthetics-plugin/common/runtime_types';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 import {
   isEuiFormFieldInValid,
@@ -362,10 +361,7 @@ const exitingMonitorConfig = {
 journey(
   `SyntheticsAddMonitor - Validation Test`,
   async ({ page, params }: { page: Page; params: any }) => {
-    page.setDefaultTimeout(60 * 1000);
-    recordVideo(page);
-
-    const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
+    const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
 
     step('Go to monitor management', async () => {
       await syntheticsApp.navigateToMonitorManagement(true);

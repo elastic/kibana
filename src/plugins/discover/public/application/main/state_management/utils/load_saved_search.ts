@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { cloneDeep, isEqual } from 'lodash';
-import { getDataViewByTextBasedQueryLang } from './get_data_view_by_text_based_query_lang';
-import { isTextBasedQuery } from '../../utils/is_text_based_query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { getEsqlDataView } from './get_esql_data_view';
 import { loadAndResolveDataView } from './resolve_data_view';
 import { DiscoverInternalStateContainer } from '../discover_internal_state_container';
 import { DiscoverDataStateContainer } from '../discover_data_state_container';
@@ -24,6 +25,7 @@ import {
 } from '../discover_app_state_container';
 import { DiscoverGlobalStateContainer } from '../discover_global_state_container';
 import { DiscoverServices } from '../../../../build_services';
+import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 
 interface LoadSavedSearchDeps {
   appStateContainer: DiscoverAppStateContainer;
@@ -58,11 +60,24 @@ export const loadSavedSearch = async (
   const appState = appStateExists ? appStateContainer.getState() : initialAppState;
 
   // Loading the saved search or creating a new one
-  let nextSavedSearch = savedSearchId
-    ? await savedSearchContainer.load(savedSearchId)
-    : await savedSearchContainer.new(
-        await getStateDataView(params, { services, appState, internalStateContainer })
-      );
+  let nextSavedSearch: SavedSearch;
+
+  if (savedSearchId) {
+    nextSavedSearch = await savedSearchContainer.load(savedSearchId);
+  } else {
+    const dataViewId = isDataSourceType(appState?.dataSource, DataSourceType.DataView)
+      ? appState?.dataSource.dataViewId
+      : undefined;
+
+    nextSavedSearch = await savedSearchContainer.new(
+      await getStateDataView(params, {
+        dataViewId,
+        query: appState?.query,
+        services,
+        internalStateContainer,
+      })
+    );
+  }
 
   // Cleaning up the previous state
   services.filterManager.setAppFilters([]);
@@ -86,14 +101,15 @@ export const loadSavedSearch = async (
 
   // Update saved search by a given app state (in URL)
   if (appState) {
-    if (savedSearchId && appState.index) {
+    if (savedSearchId && isDataSourceType(appState.dataSource, DataSourceType.DataView)) {
       // This is for the case appState is overwriting the loaded saved search data view
       const savedSearchDataViewId = nextSavedSearch.searchSource.getField('index')?.id;
       const stateDataView = await getStateDataView(params, {
-        services,
-        appState,
-        internalStateContainer,
+        dataViewId: appState.dataSource.dataViewId,
+        query: appState.query,
         savedSearch: nextSavedSearch,
+        services,
+        internalStateContainer,
       });
       const dataViewDifferentToAppState = stateDataView.id !== savedSearchDataViewId;
       if (
@@ -145,7 +161,7 @@ function updateBySavedSearch(savedSearch: SavedSearch, deps: LoadSavedSearchDeps
   }
 
   // Finally notify dataStateContainer, data.query and filterManager about new derived state
-  dataStateContainer.reset(savedSearch);
+  dataStateContainer.reset();
   // set data service filters
   const filters = savedSearch.searchSource.getField('filter');
   if (Array.isArray(filters) && filters.length) {
@@ -175,35 +191,39 @@ function updateBySavedSearch(savedSearch: SavedSearch, deps: LoadSavedSearchDeps
 const getStateDataView = async (
   params: LoadParams,
   {
+    dataViewId,
+    query,
     savedSearch,
-    appState,
     services,
     internalStateContainer,
   }: {
+    dataViewId?: string;
+    query: DiscoverAppState['query'];
     savedSearch?: SavedSearch;
-    appState?: DiscoverAppState;
     services: DiscoverServices;
     internalStateContainer: DiscoverInternalStateContainer;
   }
 ) => {
-  const { dataView, dataViewSpec } = params ?? {};
+  const { dataView, dataViewSpec } = params;
+  const isEsqlQuery = isOfAggregateQueryType(query);
+
   if (dataView) {
     return dataView;
   }
-  const query = appState?.query;
 
-  if (isTextBasedQuery(query)) {
-    return await getDataViewByTextBasedQueryLang(query, dataView, services);
+  if (isEsqlQuery) {
+    return await getEsqlDataView(query, dataView, services);
   }
 
   const result = await loadAndResolveDataView(
     {
-      id: appState?.index,
+      id: dataViewId,
       dataViewSpec,
       savedSearch,
-      isTextBasedQuery: isTextBasedQuery(appState?.query),
+      isEsqlMode: isEsqlQuery,
     },
     { services, internalStateContainer }
   );
+
   return result.dataView;
 };

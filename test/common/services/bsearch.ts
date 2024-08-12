@@ -39,8 +39,8 @@ const getSpaceUrlPrefix = (spaceId?: string): string => {
 /**
  * Options for the send method
  */
-interface SendOptions {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+export interface SendOptions {
+  supertest: SuperTest.Agent;
   options: object;
   strategy: string;
   space?: string;

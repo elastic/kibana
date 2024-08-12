@@ -7,10 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { get } from 'lodash';
-
-import { useHistory } from 'react-router-dom';
 
 import './edit_policy.scss';
 
@@ -27,7 +26,13 @@ import {
   EuiTimeline,
 } from '@elastic/eui';
 
-import { TextField, useForm, useFormData, useKibana } from '../../../shared_imports';
+import {
+  TextField,
+  useForm,
+  useFormData,
+  useKibana,
+  useFormIsModified,
+} from '../../../shared_imports';
 import { toasts } from '../../services/notification';
 import { UseField } from './form';
 import { savePolicy } from './save_policy';
@@ -69,10 +74,11 @@ export const EditPolicy: React.FunctionComponent = () => {
   } = useEditPolicyContext();
 
   const {
-    services: { cloud, docLinks },
+    services: { cloud, docLinks, history, navigateToUrl, overlays, http },
   } = useKibana();
 
   const [isClonedPolicy, setIsClonedPolicy] = useState(false);
+  const [hasSubmittedForm, setHasSubmittedForm] = useState<boolean>(false);
   const originalPolicyName: string = isNewPolicy ? '' : policyName!;
   const isAllowedByLicense = license.canUseSearchableSnapshot();
   const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
@@ -105,6 +111,8 @@ export const EditPolicy: React.FunctionComponent = () => {
   });
 
   const [formData] = useFormData({ form, watch: policyNamePath });
+  const isFormDirty = useFormIsModified({ form });
+
   const getPolicyName = () => {
     return isNewPolicy || isClonedPolicy ? get(formData, policyNamePath) : originalPolicyName;
   };
@@ -119,7 +127,6 @@ export const EditPolicy: React.FunctionComponent = () => {
     [originalPolicyName, existingPolicies, isClonedPolicy]
   );
 
-  const history = useHistory();
   const backToPolicyList = () => {
     history.push('/policies');
   };
@@ -134,6 +141,7 @@ export const EditPolicy: React.FunctionComponent = () => {
         })
       );
     } else {
+      setHasSubmittedForm(true);
       const success = await savePolicy(
         {
           ...policy,
@@ -141,6 +149,7 @@ export const EditPolicy: React.FunctionComponent = () => {
         },
         isNewPolicy || isClonedPolicy
       );
+
       if (success) {
         backToPolicyList();
       }
@@ -150,6 +159,21 @@ export const EditPolicy: React.FunctionComponent = () => {
   const togglePolicyJsonFlyout = () => {
     setIsShowingPolicyJsonFlyout(!isShowingPolicyJsonFlyout);
   };
+
+  useUnsavedChangesPrompt({
+    titleText: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.unsavedPrompt.title', {
+      defaultMessage: 'Exit without saving changes?',
+    }),
+    messageText: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.unsavedPrompt.body', {
+      defaultMessage:
+        'The data will be lost if you leave this page without saving the policy changes.',
+    }),
+    hasUnsavedChanges: isFormDirty && hasSubmittedForm === false,
+    openConfirm: overlays.openConfirm,
+    history,
+    http,
+    navigateToUrl,
+  });
 
   return (
     <>

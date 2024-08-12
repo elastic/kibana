@@ -20,6 +20,7 @@ export const mapPackagePolicySavedObjectToPackagePolicy = ({
     enabled,
     is_managed,
     policy_id,
+    policy_ids,
     // `package` is a reserved keyword
     package: packageInfo,
     inputs,
@@ -43,6 +44,7 @@ export const mapPackagePolicySavedObjectToPackagePolicy = ({
     enabled,
     is_managed,
     policy_id,
+    policy_ids,
     package: packageInfo,
     inputs,
     vars,

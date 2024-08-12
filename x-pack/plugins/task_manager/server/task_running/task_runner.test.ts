@@ -24,7 +24,7 @@ import {
   TaskPersistence,
   asTaskManagerStatEvent,
 } from '../task_events';
-import { ConcreteTaskInstance, TaskStatus } from '../task';
+import { ConcreteTaskInstance, getDeleteTaskRunResult, TaskStatus } from '../task';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import moment from 'moment';
 import { TaskDefinitionRegistry, TaskTypeDictionary } from '../task_type_dictionary';
@@ -1140,6 +1140,58 @@ describe('TaskManagerRunner', () => {
       expect(onTaskEvent).toHaveBeenCalledTimes(2);
     });
 
+    test(`doesn't reschedule recurring tasks that return shouldDeleteTask = true`, async () => {
+      const id = _.random(1, 20).toString();
+      const onTaskEvent = jest.fn();
+      const {
+        runner,
+        store,
+        instance: originalInstance,
+      } = await readyToRunStageSetup({
+        onTaskEvent,
+        instance: {
+          id,
+          schedule: { interval: '20m' },
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+          enabled: true,
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return getDeleteTaskRunResult();
+              },
+            }),
+          },
+        },
+      });
+
+      await runner.run();
+
+      expect(store.remove).toHaveBeenCalled();
+      expect(store.update).not.toHaveBeenCalled();
+
+      expect(onTaskEvent).toHaveBeenCalledWith(
+        withAnyTiming(
+          asTaskRunEvent(
+            id,
+            asOk({
+              persistence: TaskPersistence.Recurring,
+              task: originalInstance,
+              result: TaskRunResult.Deleted,
+              isExpired: false,
+            })
+          )
+        )
+      );
+      expect(onTaskEvent).toHaveBeenCalledWith(
+        asTaskManagerStatEvent('runDelay', asOk(expect.any(Number)))
+      );
+      expect(onTaskEvent).toHaveBeenCalledTimes(2);
+    });
+
     test('tasks that return runAt override the schedule', async () => {
       const runAt = minutesFromNow(_.random(5));
       const { runner, store } = await readyToRunStageSetup({
@@ -2086,11 +2138,11 @@ describe('TaskManagerRunner', () => {
       });
       await runner.run();
 
-      expect(logger.debug).toHaveBeenCalledTimes(2);
+      expect(logger.debug).toHaveBeenCalledTimes(3);
       expect(logger.debug).toHaveBeenNthCalledWith(1, 'Running task bar "foo"', {
         tags: ['task:start', 'foo', 'bar'],
       });
-      expect(logger.debug).toHaveBeenNthCalledWith(2, 'Task bar "foo" ended', {
+      expect(logger.debug).toHaveBeenNthCalledWith(3, 'Task bar "foo" ended', {
         tags: ['task:end', 'foo', 'bar'],
       });
     });

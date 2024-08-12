@@ -31,7 +31,7 @@ export function SimpleTestResults({ testRunId, expectPings, onDone }: Props) {
         );
         return summaryDocs.map((updatedDoc) => ({
           ...updatedDoc,
-          ...(prevById[updatedDoc.docId] ?? {}),
+          ...(prevById[updatedDoc.docId!] ?? {}),
         }));
       });
 

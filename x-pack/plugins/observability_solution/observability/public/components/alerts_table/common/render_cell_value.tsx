@@ -20,6 +20,7 @@ import {
   ALERT_RULE_NAME,
   ALERT_RULE_CATEGORY,
   ALERT_START,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
@@ -97,6 +98,7 @@ export const getRenderCellValue = ({
       return <AlertStatusIndicator alertStatus={value} />;
     case TIMESTAMP:
     case ALERT_START:
+    case ALERT_RULE_EXECUTION_TIMESTAMP:
       return <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />;
     case ALERT_DURATION:
       return asDuration(Number(value));

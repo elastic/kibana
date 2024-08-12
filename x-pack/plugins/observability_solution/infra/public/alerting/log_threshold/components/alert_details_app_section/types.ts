@@ -14,8 +14,3 @@ export interface AlertDetailsAppSectionProps {
   alert: TopAlert<Record<string, any>>;
   setAlertSummaryFields: React.Dispatch<React.SetStateAction<AlertSummaryField[] | undefined>>;
 }
-
-export interface Group {
-  field: string;
-  value: string;
-}

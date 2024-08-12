@@ -1,0 +1,71 @@
+###
+# For more information on authoring pipeline definitions,
+# follow the guides at https://docs.elastic.dev/ci/getting-started-with-buildkite-at-elastic
+###
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: bk-kibana-trigger-version-dependent-jobs
+  description: 'Trigger version-dependent jobs'
+  links:
+    - url: 'https://buildkite.com/elastic/kibana-trigger-version-dependent-jobs'
+      title: Pipeline link
+spec:
+  type: buildkite-pipeline
+  system: buildkite
+  owner: 'group:kibana-operations'
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / trigger version-dependent jobs
+      description: 'Trigger version-dependent jobs'
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+
+      allow_rebuilds: false
+      branch_configuration: main
+      default_branch: main
+      repository: elastic/kibana
+      pipeline_file: .buildkite/scripts/pipelines/trigger_version_dependent_jobs/pipeline.sh
+      skip_intermediate_builds: false
+      provider_settings:
+        prefix_pull_request_fork_branch_names: false
+        skip_pull_request_builds_for_existing_commits: true
+        trigger_mode: none
+      teams:
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+        appex-qa:
+          access_level: MANAGE_BUILD_AND_READ
+        kibana-tech-leads:
+          access_level: MANAGE_BUILD_AND_READ
+        everyone:
+          access_level: BUILD_AND_READ
+      schedules:
+        Trigger ES forward compatibility tests:
+          cronline: 0 5 * * *
+          message: Trigger ES forward compatibility tests
+          env:
+            TRIGGER_PIPELINE_SET: es-forward
+        Trigger artifact staging builds:
+          cronline: 0 7 * * * America/New_York
+          message: Trigger artifact staging builds
+          env:
+            TRIGGER_PIPELINE_SET: artifacts-staging
+            MESSAGE: Daily staging build
+        Trigger artifact snapshot builds:
+          cronline: 0 7 * * * America/New_York
+          message: Trigger artifact snapshot builds
+          env:
+              TRIGGER_PIPELINE_SET: artifacts-snapshot
+              MESSAGE: Daily snapshot build
+        Run kibana-artifacts-trigger:
+          cronline: 0 */2 * * * America/New_York
+          message: Trigger 'kibana-artifacts-trigger'
+          env:
+            TRIGGER_PIPELINE_SET: artifacts-trigger
+            MESSAGE: Daily build

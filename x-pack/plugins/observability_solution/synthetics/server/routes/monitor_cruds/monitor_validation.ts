@@ -11,7 +11,7 @@ import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
 import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { AlertConfigSchema } from '../../../common/runtime_types/monitor_management/alert_config';
+import { AlertConfigSchema } from '../../../common/runtime_types/monitor_management/alert_config_schema';
 import { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { flattenAndFormatObject } from '../../synthetics_service/project_monitor/normalizers/common_fields';
 import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
@@ -255,7 +255,7 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
         formattedConfig,
         errorMessage: i18n.translate('xpack.synthetics.restApi.monitor.invalidParams', {
           defaultMessage: 'Invalid params: {error}',
-          values: { error },
+          values: { error: error.message },
         }),
       };
     }
@@ -270,7 +270,7 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
         formattedConfig,
         errorMessage: i18n.translate('xpack.synthetics.restApi.monitor.invalidPlaywrightOptions', {
           defaultMessage: 'Invalid playwright_options: {error}',
-          values: { error },
+          values: { error: error.message },
         }),
       };
     }

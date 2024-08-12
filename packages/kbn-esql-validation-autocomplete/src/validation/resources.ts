@@ -29,6 +29,17 @@ export async function retrieveFields(
   if (!callbacks || commands.length < 1) {
     return new Map();
   }
+  // Do not fetch fields, if query has only one source command and that command
+  // does not require fields.
+  if (commands.length === 1) {
+    switch (commands[0].name) {
+      case 'from':
+      case 'show':
+      case 'row': {
+        return new Map();
+      }
+    }
+  }
   if (commands[0].name === 'row') {
     return new Map();
   }
@@ -87,20 +98,12 @@ export async function retrievePoliciesFields(
   return await getFieldsByTypeHelper(customQuery, callbacks).getFieldsMap();
 }
 
-export async function retrieveMetadataFields(callbacks?: ESQLCallbacks): Promise<Set<string>> {
-  if (!callbacks || !callbacks.getMetaFields) {
-    return new Set();
-  }
-  const fields = await callbacks.getMetaFields();
-  return new Set(fields);
-}
-
 export async function retrieveFieldsFromStringSources(
   queryString: string,
   commands: ESQLCommand[],
   callbacks?: ESQLCallbacks
 ): Promise<Map<string, ESQLRealField>> {
-  if (!callbacks || !callbacks?.getMetaFields) {
+  if (!callbacks) {
     return new Map();
   }
   const customQuery = buildQueryForFieldsForStringSources(queryString, commands);

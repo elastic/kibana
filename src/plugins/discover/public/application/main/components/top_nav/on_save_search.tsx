@@ -10,13 +10,13 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
 import { isLegacyTableEnabled } from '@kbn/discover-utils';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
+import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 
 async function saveDataSource({
   savedSearch,
@@ -36,7 +36,7 @@ async function saveDataSource({
     if (id) {
       services.toastNotifications.addSuccess({
         title: i18n.translate('discover.notifications.savedSearchTitle', {
-          defaultMessage: `Search '{savedSearchTitle}' was saved`,
+          defaultMessage: `Search ''{savedSearchTitle}'' was saved`,
           values: {
             savedSearchTitle: savedSearch.title,
           },
@@ -57,7 +57,7 @@ async function saveDataSource({
   function onError(error: Error) {
     services.toastNotifications.addDanger({
       title: i18n.translate('discover.notifications.notSavedSearchTitle', {
-        defaultMessage: `Search '{savedSearchTitle}' was not saved.`,
+        defaultMessage: `Search ''{savedSearchTitle}'' was not saved.`,
         values: {
           savedSearchTitle: savedSearch.title,
         },
@@ -114,6 +114,7 @@ export async function onSaveSearch({
     isTitleDuplicateConfirmed: boolean;
     onTitleDuplicate: () => void;
   }) => {
+    const appState = state.appState.getState();
     const currentTitle = savedSearch.title;
     const currentTimeRestore = savedSearch.timeRestore;
     const currentRowsPerPage = savedSearch.rowsPerPage;
@@ -121,18 +122,19 @@ export async function onSaveSearch({
     const currentDescription = savedSearch.description;
     const currentTags = savedSearch.tags;
     const currentVisContext = savedSearch.visContext;
+
     savedSearch.title = newTitle;
     savedSearch.description = newDescription;
     savedSearch.timeRestore = newTimeRestore;
     savedSearch.rowsPerPage = isLegacyTableEnabled({
       uiSettings,
-      isTextBasedQueryMode: isOfAggregateQueryType(savedSearch.searchSource.getField('query')),
+      isEsqlMode: isDataSourceType(appState.dataSource, DataSourceType.Esql),
     })
       ? currentRowsPerPage
-      : state.appState.getState().rowsPerPage;
+      : appState.rowsPerPage;
 
     // save the custom value or reset it if it's invalid
-    const appStateSampleSize = state.appState.getState().sampleSize;
+    const appStateSampleSize = appState.sampleSize;
     const allowedSampleSize = getAllowedSampleSize(appStateSampleSize, uiSettings);
     savedSearch.sampleSize =
       appStateSampleSize && allowedSampleSize === appStateSampleSize
@@ -165,6 +167,7 @@ export async function onSaveSearch({
       state,
       navigateOrReloadSavedSearch,
     });
+
     // If the save wasn't successful, put the original values back.
     if (!response) {
       savedSearch.title = currentTitle;
@@ -180,7 +183,9 @@ export async function onSaveSearch({
       state.internalState.transitions.resetOnSavedSearchChange();
       state.appState.resetInitialState();
     }
+
     onSaveCb?.();
+
     return response;
   };
 
@@ -199,6 +204,7 @@ export async function onSaveSearch({
       onClose={onClose ?? (() => {})}
     />
   );
+
   showSaveModal(saveModal);
 }
 

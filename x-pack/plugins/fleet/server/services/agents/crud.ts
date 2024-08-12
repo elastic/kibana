@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { groupBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
-import { groupBy } from 'lodash';
 
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
@@ -26,18 +26,24 @@ import {
   AgentNotFoundError,
   FleetUnauthorizedError,
 } from '../../errors';
-
 import { auditLoggingService } from '../audit_logging';
+import { isAgentInNamespace } from '../spaces/agent_namespaces';
+import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
-
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
 import { getLatestAvailableAgentVersion } from './versions';
 
-const INACTIVE_AGENT_CONDITION = `status:inactive OR status:unenrolled`;
+const INACTIVE_AGENT_CONDITION = `status:inactive`;
 const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
+const ENROLLED_AGENT_CONDITION = `NOT status:unenrolled`;
 
-function _joinFilters(filters: Array<string | undefined | KueryNode>): KueryNode | undefined {
+const includeUnenrolled = (kuery?: string) =>
+  kuery?.toLowerCase().includes('status:*') || kuery?.toLowerCase().includes('status:unenrolled');
+
+export function _joinFilters(
+  filters: Array<string | undefined | KueryNode>
+): KueryNode | undefined {
   try {
     return filters
       .filter((filter) => filter !== undefined)
@@ -155,6 +161,9 @@ export async function getAgentTags(
   if (showInactive === false) {
     filters.push(ACTIVE_AGENT_CONDITION);
   }
+  if (!includeUnenrolled(kuery)) {
+    filters.push(ENROLLED_AGENT_CONDITION);
+  }
 
   const kueryNode = _joinFilters(filters);
   const body = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
@@ -182,38 +191,12 @@ export async function getAgentTags(
   }
 }
 
-export function getElasticsearchQuery(
-  kuery: string,
-  showInactive = false,
-  includeHosted = false,
-  hostedPolicies: string[] = [],
-  extraFilters: string[] = []
-): estypes.QueryDslQueryContainer | undefined {
-  const filters = [];
-
-  if (kuery && kuery !== '') {
-    filters.push(kuery);
-  }
-
-  if (showInactive === false) {
-    filters.push(ACTIVE_AGENT_CONDITION);
-  }
-
-  if (!includeHosted && hostedPolicies.length > 0) {
-    filters.push('NOT (policy_id:{policyIds})'.replace('{policyIds}', hostedPolicies.join(',')));
-  }
-
-  filters.push(...extraFilters);
-
-  const kueryNode = _joinFilters(filters);
-  return kueryNode ? toElasticsearchQuery(kueryNode) : undefined;
-}
-
 export async function getAgentsByKuery(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   options: ListWithKuery & {
     showInactive: boolean;
+    spaceId?: string;
     getStatusSummary?: boolean;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
@@ -241,8 +224,18 @@ export async function getAgentsByKuery(
     searchAfter,
     pitId,
     aggregations,
+    spaceId,
   } = options;
   const filters = [];
+
+  const useSpaceAwareness = appContextService.getExperimentalFeatures()?.useSpaceAwareness;
+  if (useSpaceAwareness && spaceId) {
+    if (spaceId === DEFAULT_SPACE_ID) {
+      filters.push(`namespaces:"${DEFAULT_SPACE_ID}" or not namespaces:*`);
+    } else {
+      filters.push(`namespaces:"${spaceId}"`);
+    }
+  }
 
   if (kuery && kuery !== '') {
     filters.push(kuery);
@@ -250,6 +243,9 @@ export async function getAgentsByKuery(
 
   if (showInactive === false) {
     filters.push(ACTIVE_AGENT_CONDITION);
+  }
+  if (!includeUnenrolled(kuery)) {
+    filters.push(ENROLLED_AGENT_CONDITION);
   }
 
   const kueryNode = _joinFilters(filters);
@@ -408,6 +404,10 @@ export async function getAgentById(
 
   if ('notFound' in agentHit) {
     throw new AgentNotFoundError(`Agent ${agentId} not found`);
+  }
+
+  if (!isAgentInNamespace(agentHit, getCurrentNamespace(soClient))) {
+    throw new AgentNotFoundError(`${agentHit.id} not found in namespace`);
   }
 
   return agentHit;

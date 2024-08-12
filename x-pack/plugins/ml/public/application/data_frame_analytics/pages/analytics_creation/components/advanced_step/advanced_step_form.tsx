@@ -292,11 +292,11 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
                 ),
               },
             ]}
-            value={computeFeatureInfluence}
+            value={computeFeatureInfluence ? 'true' : 'false'}
             hasNoInitialSelection={false}
             onChange={(e) => {
               setFormState({
-                computeFeatureInfluence: e.target.value,
+                computeFeatureInfluence: e.target.value === 'true' ? true : false,
               });
             }}
           />
@@ -402,6 +402,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
             {
               defaultMessage:
                 'Define the name of the prediction field in the results. The default is <dependent_variable>_prediction.',
+              ignoreTag: true,
             }
           )}
         >

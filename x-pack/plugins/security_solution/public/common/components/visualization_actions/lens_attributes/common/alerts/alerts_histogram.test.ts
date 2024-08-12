@@ -15,7 +15,7 @@ jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('0039eb0c-9a1a-4687-ae54-0f4e239bec75'),
 }));
 
-jest.mock('../../../../../containers/sourcerer', () => ({
+jest.mock('../../../../../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
     dataViewId: 'security-solution-my-test',
     indicesExist: true,

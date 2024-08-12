@@ -30,10 +30,7 @@ const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
 export class AdvancedSettingsPlugin
   implements Plugin<AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup>
 {
-  public setup(
-    core: CoreSetup,
-    { management, home, usageCollection }: AdvancedSettingsPluginSetup
-  ) {
+  public setup(core: CoreSetup, { management, home }: AdvancedSettingsPluginSetup) {
     const kibanaSection = management.sections.section.kibana;
 
     kibanaSection.registerApp({
@@ -42,6 +39,9 @@ export class AdvancedSettingsPlugin
       order: 3,
       async mount({ element, setBreadcrumbs, history }) {
         const [coreStart] = await core.getStartServices();
+
+        const { docTitle } = coreStart.chrome;
+        docTitle.change(title);
         setBreadcrumbs([{ text: title }]);
 
         ReactDOM.render(
@@ -53,6 +53,7 @@ export class AdvancedSettingsPlugin
           element
         );
         return () => {
+          docTitle.reset();
           ReactDOM.unmountComponentAtNode(element);
         };
       },

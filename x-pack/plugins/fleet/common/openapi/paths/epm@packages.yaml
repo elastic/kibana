@@ -79,6 +79,8 @@ post:
               - items
     '400':
       $ref: ../components/responses/error.yaml
+    '429':
+      $ref: ../components/responses/error.yaml
   operationId: install-package-by-upload
   description: ''
   parameters:

@@ -42,11 +42,18 @@ export interface NewAgentPolicy {
   advanced_settings?: { [key: string]: any } | null;
   keep_monitoring_alive?: boolean | null;
   supports_agentless?: boolean | null;
+  global_data_tags?: GlobalDataTag[];
+}
+
+export interface GlobalDataTag {
+  name: string;
+  value: string | number;
 }
 
 // SO definition for this type is declared in server/types/interfaces
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   id: string;
+  space_id?: string | undefined;
   status: ValueOf<AgentPolicyStatus>;
   package_policies?: PackagePolicy[];
   is_managed: boolean; // required for created policy
@@ -54,7 +61,9 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   updated_by: string;
   revision: number;
   agents?: number;
+  unprivileged_agents?: number;
   is_protected: boolean;
+  version?: string;
 }
 
 export interface FullAgentPolicyInputStream {
@@ -79,7 +88,19 @@ export interface FullAgentPolicyInput {
     [key: string]: unknown;
   };
   streams?: FullAgentPolicyInputStream[];
+  processors?: FullAgentPolicyAddFields[];
   [key: string]: any;
+}
+
+export type TemplateAgentPolicyInput = Pick<FullAgentPolicyInput, 'id' | 'type' | 'streams'>;
+
+export interface FullAgentPolicyAddFields {
+  add_fields: {
+    target: string;
+    fields: {
+      [key: string]: string | number;
+    };
+  };
 }
 
 export type FullAgentPolicyOutputPermissions = Record<string, SecurityRoleDescriptor>;
@@ -100,6 +121,7 @@ export interface FullAgentPolicyMonitoring {
 
 export interface FullAgentPolicy {
   id: string;
+  namespaces?: string[];
   outputs: {
     [key: string]: FullAgentPolicyOutput;
   };
@@ -172,6 +194,10 @@ export interface FleetServerPolicy {
    */
   coordinator_idx: number;
   /**
+   * The namespaces of the policy
+   */
+  namespaces?: string[];
+  /**
    * The opaque payload.
    */
   data: {
@@ -189,4 +215,9 @@ export interface FleetServerPolicy {
    * Mark agents as inactive if they have not checked in for this many seconds
    */
   inactivity_timeout?: number;
+}
+
+export interface AgentlessApiResponse {
+  id: string;
+  region_id: string;
 }

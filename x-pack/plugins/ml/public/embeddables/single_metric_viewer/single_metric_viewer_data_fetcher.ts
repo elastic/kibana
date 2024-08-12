@@ -45,6 +45,7 @@ export const initializeSingleMetricViewerDataFetcher = (
     jobIds: api.jobIds,
     selectedDetectorIndex: api.selectedDetectorIndex,
     selectedEntities: api.selectedEntities,
+    forecastId: api.forecastId,
     functionDescription: api.functionDescription,
   });
 
@@ -52,8 +53,12 @@ export const initializeSingleMetricViewerDataFetcher = (
     ([singleMetricViewerData, fetchContext]) => {
       let bounds;
       let lastRefresh;
-      if (timefilter !== undefined && fetchContext.timeRange !== undefined) {
-        bounds = timefilter.calculateBounds(fetchContext.timeRange);
+      if (timefilter !== undefined) {
+        bounds = timefilter.calculateBounds(
+          fetchContext?.timeRange
+            ? fetchContext?.timeRange
+            : api.timeRange$?.value ?? timefilter.getTime()
+        );
         lastRefresh = Date.now();
       }
       singleMetricViewerData$.next({ singleMetricViewerData, bounds, lastRefresh });

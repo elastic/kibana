@@ -12,6 +12,7 @@ import React from 'react';
 import { SAME_FAMILY } from '../../data_quality_panel/same_family/translations';
 import {
   eventCategory,
+  someField,
   eventCategoryWithUnallowedValues,
 } from '../../mock/enriched_field_metadata/mock_enriched_field_metadata';
 import { TestProviders } from '../../mock/test_providers/test_providers';
@@ -261,15 +262,9 @@ describe('getCommonTableColumns', () => {
       const columns = getCommonTableColumns();
       const descriptionolumnRender = columns[5].render;
 
-      const withDescription: EnrichedFieldMetadata = {
-        ...eventCategory,
-        description: undefined,
-      };
-
       render(
         <TestProviders>
-          {descriptionolumnRender != null &&
-            descriptionolumnRender(withDescription.description, withDescription)}
+          {descriptionolumnRender != null && descriptionolumnRender(undefined, someField)}
         </TestProviders>
       );
 

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiComment } from '@elastic/eui';
+import { EuiComment, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface SystemMessageProps {
@@ -15,6 +15,8 @@ interface SystemMessageProps {
 }
 
 export const SystemMessage: React.FC<SystemMessageProps> = ({ content }) => {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiComment
       username={i18n.translate('xpack.searchPlayground.chat.message.system.username', {
@@ -29,6 +31,13 @@ export const SystemMessage: React.FC<SystemMessageProps> = ({ content }) => {
       event={content}
       timelineAvatar="dot"
       eventColor="subdued"
+      css={{
+        '.euiAvatar': { backgroundColor: euiTheme.colors.ghost },
+        '.euiCommentEvent': {
+          border: euiTheme.border.thin,
+          borderRadius: euiTheme.border.radius.medium,
+        },
+      }}
     />
   );
 };

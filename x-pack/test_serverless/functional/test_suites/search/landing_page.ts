@@ -19,11 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('landing page', function () {
     before(async () => {
-      await pageObjects.svlCommonPage.login();
-    });
-
-    after(async () => {
-      await pageObjects.svlCommonPage.forceLogout();
+      await pageObjects.svlCommonPage.loginAsViewer();
     });
 
     it('has serverless side nav', async () => {

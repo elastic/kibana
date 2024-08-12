@@ -24,8 +24,11 @@ import {
   ALERT_START,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_PREVIOUS_ACTION_GROUP,
+  ALERT_SEVERITY_IMPROVING,
 } from '@kbn/rule-data-utils';
 import { DeepPartial } from '@kbn/utility-types';
+import { get } from 'lodash';
 import { Alert as LegacyAlert } from '../../alert/alert';
 import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
@@ -95,6 +98,9 @@ export const buildRecoveredAlert = <
     [ALERT_FLAPPING]: legacyAlert.getFlapping(),
     // Set latest flapping_history
     [ALERT_FLAPPING_HISTORY]: legacyAlert.getFlappingHistory(),
+    // Alert is recovering from active state so by default it is improving
+    [ALERT_SEVERITY_IMPROVING]: true,
+    [ALERT_PREVIOUS_ACTION_GROUP]: get(alert, ALERT_ACTION_GROUP),
     // Set latest maintenance window IDs
     [ALERT_MAINTENANCE_WINDOW_IDS]: legacyAlert.getMaintenanceWindowIds(),
     // Set latest match count, should be 0

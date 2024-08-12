@@ -10,7 +10,7 @@ import {
   InfraWaffleMapGroupOfNodes,
   InfraWaffleMapGradientLegend,
   InfraWaffleMapStepLegend,
-} from '../../../../lib/lib';
+} from '../../../../common/inventory/types';
 
 export function isInfraWaffleMapStepLegend(subject: any): subject is InfraWaffleMapStepLegend {
   return subject.type && subject.type === 'step';

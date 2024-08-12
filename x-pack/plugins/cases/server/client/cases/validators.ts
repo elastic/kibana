@@ -9,7 +9,7 @@ import { differenceWith, intersectionWith, isEmpty } from 'lodash';
 import Boom from '@hapi/boom';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
 import type { CaseRequestCustomFields, CasesSearchRequest } from '../../../common/types/api';
-import { validateDuplicatedCustomFieldKeysInRequest } from '../validators';
+import { validateDuplicatedKeysInRequest } from '../validators';
 import type { ICasesCustomField } from '../../custom_fields';
 import { casesCustomFields } from '../../custom_fields';
 import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
@@ -20,7 +20,10 @@ interface CustomFieldValidationParams {
 }
 
 export const validateCustomFields = (params: CustomFieldValidationParams) => {
-  validateDuplicatedCustomFieldKeysInRequest(params);
+  validateDuplicatedKeysInRequest({
+    requestFields: params.requestCustomFields,
+    fieldName: 'customFields',
+  });
   validateCustomFieldKeysAgainstConfiguration(params);
   validateRequiredCustomFields(params);
   validateCustomFieldTypesInRequest(params);

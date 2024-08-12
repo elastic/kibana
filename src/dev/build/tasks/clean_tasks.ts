@@ -192,26 +192,6 @@ export const CleanExtraFilesFromModules: Task = {
   },
 };
 
-export const CleanExtraBinScripts: Task = {
-  description: 'Cleaning extra bin/* scripts from platform-specific builds',
-
-  async run(config, log, build) {
-    for (const platform of config.getNodePlatforms()) {
-      if (platform.isWindows()) {
-        await deleteAll(
-          [
-            build.resolvePathForPlatform(platform, 'bin', '*'),
-            `!${build.resolvePathForPlatform(platform, 'bin', '*.bat')}`,
-          ],
-          log
-        );
-      } else {
-        await deleteAll([build.resolvePathForPlatform(platform, 'bin', '*.bat')], log);
-      }
-    }
-  },
-};
-
 export const CleanEmptyFolders: Task = {
   description: 'Cleaning all empty folders recursively',
 

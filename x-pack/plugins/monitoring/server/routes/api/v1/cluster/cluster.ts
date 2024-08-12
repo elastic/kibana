@@ -30,6 +30,9 @@ export function clusterRoute(server: MonitoringCore) {
       params: validateParams,
       body: validateBody,
     },
+    options: {
+      access: 'internal',
+    },
     handler: async (req) => {
       const options = {
         clusterUuid: req.params.clusterUuid,

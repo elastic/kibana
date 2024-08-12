@@ -60,7 +60,7 @@ export const Logs = () => {
 
   const filter = useMemo(() => {
     const query = [
-      `${findInventoryFields(asset.type).id}: "${asset.name}"`,
+      `${findInventoryFields(asset.type).id}: "${asset.id}"`,
       ...(textQueryDebounced !== '' ? [textQueryDebounced] : []),
     ].join(' and ');
 
@@ -68,7 +68,7 @@ export const Logs = () => {
       language: 'kuery',
       query,
     };
-  }, [asset.type, asset.name, textQueryDebounced]);
+  }, [asset.type, asset.id, textQueryDebounced]);
 
   const onQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTextQuery(e.target.value);
@@ -82,12 +82,12 @@ export const Logs = () => {
   const logsUrl = useMemo(() => {
     return nodeLogsLocator.getRedirectUrl({
       nodeField: findInventoryFields(asset.type).id,
-      nodeId: asset.name,
+      nodeId: asset.id,
       time: state.startTimestamp,
       filter: textQueryDebounced,
       logView,
     });
-  }, [nodeLogsLocator, asset.name, asset.type, state.startTimestamp, textQueryDebounced, logView]);
+  }, [nodeLogsLocator, asset.id, asset.type, state.startTimestamp, textQueryDebounced, logView]);
 
   return (
     <EuiFlexGroup direction="column" ref={ref}>

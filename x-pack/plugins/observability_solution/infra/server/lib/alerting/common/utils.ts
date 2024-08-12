@@ -19,6 +19,7 @@ import {
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { set } from '@kbn/safer-lodash-set';
 import { Alert } from '@kbn/alerts-as-data-utils';
+import { type Group } from '@kbn/observability-alerting-rule-utils';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 import {
   getInventoryViewInAppUrl,
@@ -195,7 +196,7 @@ export const doFieldsExist = async (
   // Get all supported fields
   const respMapping = await esClient.fieldCaps({
     index,
-    fields: '*',
+    fields,
   });
 
   const fieldsExisted: Record<string, boolean> = {};
@@ -309,6 +310,25 @@ export const getGroupByObject = (
             }, {})
           : { [groupBy]: groupSet }
       );
+    });
+  }
+  return groupByKeysObjectMapping;
+};
+
+export const getFormattedGroupBy = (
+  groupBy: string | string[] | undefined,
+  groupSet: Set<string>
+): Record<string, Group[]> => {
+  const groupByKeysObjectMapping: Record<string, Group[]> = {};
+  if (groupBy) {
+    groupSet.forEach((group) => {
+      const groupSetKeys = group.split(',');
+      groupByKeysObjectMapping[group] = Array.isArray(groupBy)
+        ? groupBy.reduce((result: Group[], groupByItem, index) => {
+            result.push({ field: groupByItem, value: groupSetKeys[index]?.trim() });
+            return result;
+          }, [])
+        : [{ field: groupBy, value: group }];
     });
   }
   return groupByKeysObjectMapping;

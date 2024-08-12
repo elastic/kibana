@@ -22,12 +22,12 @@ const VIEW_MENU_SELECTED_TEXT = 'View: selected';
 const mockDataView = {
   fields: {
     getAll: () => [
-      { id: 'field1', name: 'field1', customLabel: 'Label 1', visualizable: true },
-      { id: 'field2', name: 'field2', customLabel: 'Label 2', visualizable: true },
-      { id: 'field3', name: 'field3', customLabel: 'Label 3', visualizable: true },
-      { id: 'field4', name: 'field4', customLabel: 'Label 3.A', visualizable: true },
-      { id: 'not-visible', name: 'not-visible', customLabel: 'Label 3.A', visualizable: false },
-      { id: '_index', name: '_index', customLabel: 'should not be shown', visualizable: true },
+      { id: 'field1', name: 'field1', visualizable: true },
+      { id: 'field2', name: 'field2', visualizable: true },
+      { id: 'field3', name: 'field3', visualizable: true },
+      { id: 'field4', name: 'field4', visualizable: true },
+      { id: 'not-visible', name: 'not-visible', visualizable: false },
+      { id: '_index', name: '_index', visualizable: true },
     ],
   },
 } as any;
@@ -58,8 +58,8 @@ describe('FieldsSelectorTable', () => {
   it('renders the table with data correctly', () => {
     const { getByText } = renderFieldsTable();
 
-    expect(getByText('Label 1')).toBeInTheDocument();
-    expect(getByText('Label 2')).toBeInTheDocument();
+    expect(getByText('field1')).toBeInTheDocument();
+    expect(getByText('field2')).toBeInTheDocument();
   });
 
   it('calls onAddColumn when a checkbox is checked', () => {
@@ -174,17 +174,12 @@ describe('FieldsSelectorTable', () => {
       ).toEqual(4);
 
       expect(
-        filterFieldsBySearch(mockDataView.fields.getAll(), ['field3', 'field4'], 'Label', false)
+        filterFieldsBySearch(mockDataView.fields.getAll(), ['field3', 'field4'], 'field', false)
           .length
       ).toEqual(4);
 
       expect(
-        filterFieldsBySearch(mockDataView.fields.getAll(), ['field3', 'field4'], 'Label 3', false)
-          .length
-      ).toEqual(2);
-
-      expect(
-        filterFieldsBySearch(mockDataView.fields.getAll(), ['field3', 'field4'], 'Label 3.A', false)
+        filterFieldsBySearch(mockDataView.fields.getAll(), ['field3', 'field4'], 'field3', false)
           .length
       ).toEqual(1);
 
@@ -207,17 +202,12 @@ describe('FieldsSelectorTable', () => {
       ).toEqual(2);
 
       expect(
-        filterFieldsBySearch(mockDataView.fields.getAll(), ['field3', 'field4'], 'Label', true)
+        filterFieldsBySearch(mockDataView.fields.getAll(), ['field3', 'field4'], 'field', true)
           .length
       ).toEqual(2);
 
       expect(
-        filterFieldsBySearch(mockDataView.fields.getAll(), ['field3', 'field4'], 'Label 3', true)
-          .length
-      ).toEqual(2);
-
-      expect(
-        filterFieldsBySearch(mockDataView.fields.getAll(), ['field3', 'field4'], 'Label 3.A', true)
+        filterFieldsBySearch(mockDataView.fields.getAll(), ['field3', 'field4'], 'field3', true)
           .length
       ).toEqual(1);
 

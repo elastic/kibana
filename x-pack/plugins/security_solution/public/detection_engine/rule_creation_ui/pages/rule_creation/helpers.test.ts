@@ -6,6 +6,9 @@
  */
 
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
+import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
+import type { ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
+
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { Rule } from '../../../rule_management/logic';
 import {
@@ -140,6 +143,7 @@ describe('helpers', () => {
             version: '^1.2.3',
           },
         ],
+        required_fields: [{ name: 'host.name', type: 'keyword' }],
       };
 
       expect(result).toEqual(expected);
@@ -175,6 +179,20 @@ describe('helpers', () => {
             version: '^1.2.3',
           },
         ],
+      });
+    });
+
+    test('filters out empty required fields', () => {
+      const result = formatDefineStepData({
+        ...mockData,
+        requiredFields: [
+          { name: 'host.name', type: 'keyword' },
+          { name: '', type: '' },
+        ],
+      });
+
+      expect(result).toMatchObject({
+        required_fields: [{ name: 'host.name', type: 'keyword' }],
       });
     });
 
@@ -567,9 +585,36 @@ describe('helpers', () => {
             version: '^1.2.3',
           },
         ],
+        required_fields: [{ name: 'host.name', type: 'keyword' }],
       };
 
       expect(result).toEqual(expected);
+    });
+
+    it('returns suppression fields for machine_learning rules', () => {
+      const mockStepData: DefineStepRule = {
+        ...mockData,
+        ruleType: 'machine_learning',
+        machineLearningJobId: ['some_jobert_id'],
+        anomalyThreshold: 44,
+        groupByFields: ['event.type'],
+        groupByRadioSelection: GroupByOptions.PerTimePeriod,
+        groupByDuration: { value: 10, unit: 'm' },
+      };
+      const result = formatDefineStepData(mockStepData);
+
+      const expected: DefineStepRuleJson = {
+        machine_learning_job_id: ['some_jobert_id'],
+        anomaly_threshold: 44,
+        type: 'machine_learning',
+        alert_suppression: {
+          group_by: ['event.type'],
+          duration: { value: 10, unit: 'm' },
+          missing_fields_strategy: 'suppress',
+        },
+      };
+
+      expect(result).toEqual(expect.objectContaining(expected));
     });
   });
 
@@ -1062,13 +1107,19 @@ describe('helpers', () => {
 
   describe('formatActionsStepData', () => {
     let mockData: ActionsStepRule;
+    const actionTypeRegistry = {
+      ...actionTypeRegistryMock.create(),
+      get: jest.fn((actionTypeId: string) => ({
+        isSystemAction: false,
+      })),
+    } as unknown as jest.Mocked<ActionTypeRegistryContract>;
 
     beforeEach(() => {
       mockData = mockActionsStepRule();
     });
 
     test('returns formatted object as ActionsStepRuleJson', () => {
-      const result = formatActionsStepData(mockData);
+      const result = formatActionsStepData(mockData, actionTypeRegistry);
       const expected: ActionsStepRuleJson = {
         actions: [],
         enabled: false,
@@ -1092,7 +1143,7 @@ describe('helpers', () => {
         ...mockData,
         actions: [mockAction],
       };
-      const result = formatActionsStepData(mockStepData);
+      const result = formatActionsStepData(mockStepData, actionTypeRegistry);
       const expected: ActionsStepRuleJson = {
         actions: [
           {
@@ -1117,6 +1168,7 @@ describe('helpers', () => {
     let mockDefine: DefineStepRule;
     let mockSchedule: ScheduleStepRule;
     let mockActions: ActionsStepRule;
+    const actionTypeRegistry = actionTypeRegistryMock.create();
 
     beforeEach(() => {
       mockAbout = mockAboutStepRule();
@@ -1126,7 +1178,13 @@ describe('helpers', () => {
     });
 
     test('returns rule with type of query when saved_id exists but shouldLoadQueryDynamically=false', () => {
-      const result = formatRule<Rule>(mockDefine, mockAbout, mockSchedule, mockActions);
+      const result = formatRule<Rule>(
+        mockDefine,
+        mockAbout,
+        mockSchedule,
+        mockActions,
+        actionTypeRegistry
+      );
 
       expect(result.type).toEqual('query');
     });
@@ -1136,7 +1194,8 @@ describe('helpers', () => {
         { ...mockDefine, shouldLoadQueryDynamically: true },
         mockAbout,
         mockSchedule,
-        mockActions
+        mockActions,
+        actionTypeRegistry
       );
 
       expect(result.type).toEqual('saved_query');
@@ -1154,14 +1213,21 @@ describe('helpers', () => {
         mockDefineStepRuleWithoutSavedId,
         mockAbout,
         mockSchedule,
-        mockActions
+        mockActions,
+        actionTypeRegistry
       );
 
       expect(result.type).toEqual('query');
     });
 
     test('returns rule without id if ruleId does not exist', () => {
-      const result = formatRule<RuleCreateProps>(mockDefine, mockAbout, mockSchedule, mockActions);
+      const result = formatRule<RuleCreateProps>(
+        mockDefine,
+        mockAbout,
+        mockSchedule,
+        mockActions,
+        actionTypeRegistry
+      );
 
       expect(result).not.toHaveProperty<RuleCreateProps>('id');
     });

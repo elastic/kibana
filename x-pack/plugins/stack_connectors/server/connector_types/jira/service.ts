@@ -15,6 +15,7 @@ import {
   throwIfResponseIsNotValid,
 } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 import {
   CreateCommentParams,
   CreateIncidentParams,
@@ -66,7 +67,7 @@ export const createExternalService = (
   const searchUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/search`;
 
   const axiosInstance = axios.create({
-    auth: { username: email, password: apiToken },
+    headers: getBasicAuthHeader({ username: email, password: apiToken }),
   });
 
   const getIncidentViewURL = (key: string) => {

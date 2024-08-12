@@ -141,7 +141,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dataViews.waitForSwitcherToBe('logst*');
     });
 
-    it('should visualize correctly text based language queries in Discover', async () => {
+    it('should visualize correctly ES|QL queries in Discover', async () => {
       await PageObjects.discover.selectTextBaseLang();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
@@ -167,7 +167,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await testSubjects.click('TextBasedLangEditor-expand');
       await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
       expect(await testSubjects.exists('xyVisChart')).to.be(true);
       expect(await PageObjects.lens.canRemoveDimension('lnsXY_xDimensionPanel')).to.equal(true);
@@ -182,7 +181,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       assertMatchesExpectedData(data!);
     });
 
-    it('should visualize correctly text based language queries in Lens', async () => {
+    it('should visualize correctly ES|QL queries in Lens', async () => {
       await PageObjects.discover.selectTextBaseLang();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
@@ -190,7 +189,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.click('TextBasedLangEditor-expand');
       await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -201,7 +199,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    it('should visualize correctly text based language queries based on index patterns', async () => {
+    it('should visualize correctly ES|QL queries based on index patterns', async () => {
       await PageObjects.discover.selectTextBaseLang();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
@@ -209,7 +207,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.click('TextBasedLangEditor-expand');
       await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -228,7 +225,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.click('TextBasedLangEditor-expand');
       await testSubjects.click('unifiedHistogramSaveVisualization');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -257,7 +253,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await monacoEditor.setCodeEditorValue('from logstash-* | limit 10');
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.click('TextBasedLangEditor-expand');
       // save the visualization
       await testSubjects.click('unifiedHistogramSaveVisualization');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -308,7 +303,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.click('TextBasedLangEditor-expand');
       await testSubjects.click('unifiedHistogramSaveVisualization');
       await PageObjects.header.waitUntilLoadingHasFinished();
       let title = await testSubjects.getAttribute('savedObjectTitle', 'value');

@@ -38,13 +38,18 @@ const projectType: ServerlessProjectType = 'es';
  */
 export function createTestServerlessInstances({
   adjustTimeout,
+  kibana = {},
 }: {
-  adjustTimeout: (timeout: number) => void;
-}): TestServerlessUtils {
+  kibana?: {
+    settings?: {};
+    cliArgs?: Partial<CliArgs>;
+  };
+  adjustTimeout?: (timeout: number) => void;
+} = {}): TestServerlessUtils {
   adjustTimeout?.(150_000);
 
   const esUtils = createServerlessES();
-  const kbUtils = createServerlessKibana();
+  const kbUtils = createServerlessKibana(kibana.settings, kibana.cliArgs);
 
   return {
     startES: async () => {

@@ -7,28 +7,36 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 export default ({ getService }: FtrProviderContext) => {
   const svlCommonApi = getService('svlCommonApi');
   const consoleService = getService('console');
-  const supertest = getService('supertest');
-  const sendRequest = (query: object) =>
-    supertest
+
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let internalRequestHeader: InternalRequestHeader;
+  let roleAuthc: RoleCredentials;
+
+  const sendRequest = async (query: object) => {
+    return await supertestWithoutAuth
       .get('/api/console/autocomplete_entities')
-      .set(svlCommonApi.getInternalRequestHeader())
+      .set(internalRequestHeader)
+      .set(roleAuthc.apiKeyHeader)
       .query(query);
+  };
 
   describe('/api/console/autocomplete_entities', function () {
-    let createIndex: typeof consoleService['helpers']['createIndex'];
-    let createAlias: typeof consoleService['helpers']['createAlias'];
-    let createIndexTemplate: typeof consoleService['helpers']['createIndexTemplate'];
-    let createComponentTemplate: typeof consoleService['helpers']['createComponentTemplate'];
-    let createDataStream: typeof consoleService['helpers']['createDataStream'];
-    let deleteIndex: typeof consoleService['helpers']['deleteIndex'];
-    let deleteAlias: typeof consoleService['helpers']['deleteAlias'];
-    let deleteIndexTemplate: typeof consoleService['helpers']['deleteIndexTemplate'];
-    let deleteComponentTemplate: typeof consoleService['helpers']['deleteComponentTemplate'];
-    let deleteDataStream: typeof consoleService['helpers']['deleteDataStream'];
+    let createIndex: (typeof consoleService)['helpers']['createIndex'];
+    let createAlias: (typeof consoleService)['helpers']['createAlias'];
+    let createIndexTemplate: (typeof consoleService)['helpers']['createIndexTemplate'];
+    let createComponentTemplate: (typeof consoleService)['helpers']['createComponentTemplate'];
+    let createDataStream: (typeof consoleService)['helpers']['createDataStream'];
+    let deleteIndex: (typeof consoleService)['helpers']['deleteIndex'];
+    let deleteAlias: (typeof consoleService)['helpers']['deleteAlias'];
+    let deleteIndexTemplate: (typeof consoleService)['helpers']['deleteIndexTemplate'];
+    let deleteComponentTemplate: (typeof consoleService)['helpers']['deleteComponentTemplate'];
+    let deleteDataStream: (typeof consoleService)['helpers']['deleteDataStream'];
 
     const indexName = 'test-index-1';
     const aliasName = 'test-alias-1';
@@ -37,6 +45,8 @@ export default ({ getService }: FtrProviderContext) => {
     const dataStreamName = 'test-data-stream-1';
 
     before(async () => {
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+      internalRequestHeader = svlCommonApi.getInternalRequestHeader();
       ({
         helpers: {
           createIndex,
@@ -67,6 +77,8 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteDataStream(dataStreamName);
       await deleteIndexTemplate(indexTemplateName);
       await deleteComponentTemplate(componentTemplateName);
+
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('should not succeed if no settings are provided in query params', async () => {

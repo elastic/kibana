@@ -42,6 +42,8 @@ export function createAddSingleMetricViewerPanelAction(
         getIconType: () => PLUGIN_ICON,
       },
     ],
+    order: 20,
+    getIconType: () => 'visLine',
     getDisplayName: () =>
       i18n.translate('xpack.ml.components.singleMetricViewerEmbeddable.displayName', {
         defaultMessage: 'Single metric viewer',
@@ -58,7 +60,7 @@ export function createAddSingleMetricViewerPanelAction(
       const presentationContainerParent = await parentApiIsCompatible(context.embeddable);
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
-      const [coreStart, { data }] = await getStartServices();
+      const [coreStart, { data, share }] = await getStartServices();
 
       try {
         const { resolveEmbeddableSingleMetricViewerUserInput } = await import(
@@ -70,7 +72,9 @@ export function createAddSingleMetricViewerPanelAction(
 
         const initialState = await resolveEmbeddableSingleMetricViewerUserInput(
           coreStart,
-          data,
+          context.embeddable,
+          context.embeddable.uuid,
+          { data, share },
           mlApiServices
         );
 

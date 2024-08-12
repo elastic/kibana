@@ -12,15 +12,15 @@ import React, { useMemo } from 'react';
 
 import * as i18n from '../../../index_properties/translations';
 import { CalloutItem } from '../../styles';
-import type { EnrichedFieldMetadata } from '../../../../types';
+import type { EcsBasedFieldMetadata } from '../../../../types';
 
 interface Props {
   children?: React.ReactNode;
-  enrichedFieldMetadata: EnrichedFieldMetadata[];
+  ecsBasedFieldMetadata: EcsBasedFieldMetadata[];
 }
 
-const IncompatibleCalloutComponent: React.FC<Props> = ({ children, enrichedFieldMetadata }) => {
-  const fieldCount = enrichedFieldMetadata.length;
+const IncompatibleCalloutComponent: React.FC<Props> = ({ children, ecsBasedFieldMetadata }) => {
+  const fieldCount = ecsBasedFieldMetadata.length;
   const title = useMemo(
     () => <span data-test-subj="title">{i18n.INCOMPATIBLE_CALLOUT_TITLE(fieldCount)}</span>,
     [fieldCount]

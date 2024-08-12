@@ -19,7 +19,7 @@ import { agentPolicies, uiQueryParams } from '../../store/selectors';
 import { useAppUrl } from '../../../../../common/lib/kibana/hooks';
 import type { ContextMenuItemNavByRouterProps } from '../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
 import { isEndpointHostIsolated } from '../../../../../common/utils/validators';
-import { isIsolationSupported } from '../../../../../../common/endpoint/service/host_isolation/utils';
+import { getHostPlatform } from '../../../../../common/lib/endpoint/utils/get_host_platform';
 
 interface Options {
   isEndpointList: boolean;
@@ -58,11 +58,6 @@ export const useEndpointActionItems = (
     const endpointPolicyId = endpointMetadata.Endpoint.policy.applied.id;
     const endpointHostName = endpointMetadata.host.hostname;
     const fleetAgentId = endpointMetadata.elastic.agent.id;
-    const isolationSupported = isIsolationSupported({
-      osName: endpointMetadata.host.os.name,
-      version: endpointMetadata.agent.version,
-      capabilities: endpointMetadata.Endpoint.capabilities,
-    });
     const { show, selected_endpoint: _selectedEndpoint, ...currentUrlParams } = allCurrentUrlParams;
     const endpointActionsPath = getEndpointDetailsPath({
       name: 'endpointActivityLog',
@@ -100,7 +95,7 @@ export const useEndpointActionItems = (
           />
         ),
       });
-    } else if (isolationSupported && canIsolateHost) {
+    } else if (canIsolateHost) {
       // For Platinum++ licenses, users also have ability to isolate
       isolationActions.push({
         'data-test-subj': 'isolateLink',
@@ -136,6 +131,7 @@ export const useEndpointActionItems = (
                   capabilities:
                     (endpointMetadata.Endpoint.capabilities as EndpointCapabilities[]) ?? [],
                   hostName: endpointMetadata.host.name,
+                  platform: getHostPlatform(endpointMetadata),
                 });
               },
               children: (

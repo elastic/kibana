@@ -10,6 +10,7 @@ export {
   CONTEXT_DEFAULT_SIZE_SETTING,
   CONTEXT_STEP_SETTING,
   CONTEXT_TIE_BREAKER_FIELDS_SETTING,
+  DEFAULT_ALLOWED_LOGS_BASE_PATTERNS,
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
@@ -27,9 +28,11 @@ export {
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
   TRUNCATE_MAX_HEIGHT,
+  TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE,
   IgnoredReason,
   buildDataTableRecord,
   buildDataTableRecordList,
+  createLogsContextService,
   fieldConstants,
   formatFieldValue,
   formatHit,
@@ -41,6 +44,14 @@ export {
   isNestedFieldParent,
   isLegacyTableEnabled,
   usePager,
+  calcFieldCounts,
+  getLogLevelColor,
+  getLogLevelCoalescedValue,
+  getLogLevelCoalescedValueLabel,
+  LogLevelCoalescedValue,
+  LogLevelBadge,
 } from './src';
+
+export type { LogsContextService } from './src';
 
 export * from './src/types';

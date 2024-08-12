@@ -23,7 +23,16 @@ export const getAllCommentsRoute = createCasesRoute({
       case_id: schema.string(),
     }),
   },
-  options: { deprecated: true },
+  options: {
+    deprecated: true,
+  },
+  routerOptions: {
+    access: 'public',
+    summary: `Gets all case comments`,
+    tags: ['oas-tag:cases'],
+    // description: 'You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you\'re seeking.',
+    deprecated: true,
+  },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;

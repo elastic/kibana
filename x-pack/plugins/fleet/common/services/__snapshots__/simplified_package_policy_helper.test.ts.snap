@@ -234,6 +234,9 @@ Object {
     "version": "1.5.0",
   },
   "policy_id": "policy123",
+  "policy_ids": Array [
+    "policy123",
+  ],
   "vars": undefined,
 }
 `;

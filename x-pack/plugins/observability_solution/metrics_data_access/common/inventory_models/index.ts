@@ -29,7 +29,7 @@ const catalog = {
 
 export const inventoryModels = Object.values(catalog);
 
-type InventoryModels<T extends InventoryItemType> = typeof catalog[T];
+type InventoryModels<T extends InventoryItemType> = (typeof catalog)[T];
 
 export const findInventoryModel = <T extends InventoryItemType>(type: T): InventoryModels<T> => {
   const model = inventoryModels.find((m) => m.id === type);

@@ -24,6 +24,22 @@ test('handles number', () => {
   expect(duration().validate(123000)).toEqual(momentDuration(123000));
 });
 
+test('handles multi-unit', () => {
+  expect(duration().validate('1m30s')).toEqual(momentDuration(90000));
+  expect(duration().validate('1m30s70ms')).toEqual(momentDuration(90070));
+});
+
+test.each([60000, '60000', '60000ms', '60s', '1m', '1m0s'])(
+  'multiple ways of introducing 1 minute: %p',
+  (d) => {
+    expect(duration().validate(d)).toEqual(momentDuration(60000));
+  }
+);
+
+test('it supports years as Y and y', () => {
+  expect(duration().validate('1y')).toEqual(duration().validate('1Y'));
+});
+
 test('is required by default', () => {
   expect(() => duration().validate(undefined)).toThrowErrorMatchingInlineSnapshot(
     `"expected value of type [moment.Duration] but got [undefined]"`
@@ -184,10 +200,10 @@ test('returns error when not valid string or non-safe positive integer', () => {
   );
 
   expect(() => duration().validate('123foo')).toThrowErrorMatchingInlineSnapshot(
-    `"Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format <count>[ms|s|m|h|d|w|M|Y] (e.g. '70ms', '5s', '3d', '1Y'), where the duration is a safe positive integer."`
+    `"Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format <count>[ms|s|m|h|d|w|M|y] (e.g. '70ms', '5s', '3d', '1y', '1m30s'), where the duration is a safe positive integer."`
   );
 
   expect(() => duration().validate('123 456')).toThrowErrorMatchingInlineSnapshot(
-    `"Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format <count>[ms|s|m|h|d|w|M|Y] (e.g. '70ms', '5s', '3d', '1Y'), where the duration is a safe positive integer."`
+    `"Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format <count>[ms|s|m|h|d|w|M|y] (e.g. '70ms', '5s', '3d', '1y', '1m30s'), where the duration is a safe positive integer."`
   );
 });

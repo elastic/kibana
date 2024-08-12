@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await PageObjects.svlCommonPage.loginWithRole('viewer');
+      await PageObjects.svlCommonPage.loginAsViewer();
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
@@ -90,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         expect(await discoverLink?.getAttribute('href')).to.contain(
           '/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15m,to:now))' +
-            "&_a=(columns:!(),filters:!(),index:'logstash-*',interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))"
+            "&_a=(columns:!(),dataSource:(dataViewId:'logstash-*',type:dataView),filters:!(),interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))"
         );
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await filterBar.addFilter({
@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'query:(bool:(minimum_should_match:1,should:!((match_phrase:(extension.raw:jpg)),' +
             "(match_phrase:(extension.raw:css))))))),query:(language:kuery,query:'')," +
             "refreshInterval:(pause:!t,value:60000),time:(from:'2015-09-19T06:31:44.000Z'," +
-            "to:'2015-09-23T18:31:44.000Z'))&_a=(columns:!(),filters:!(),index:'logstash-*'," +
+            "to:'2015-09-23T18:31:44.000Z'))&_a=(columns:!(),dataSource:(dataViewId:'logstash-*',type:dataView),filters:!()," +
             "interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))"
         );
         await PageObjects.svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover' });

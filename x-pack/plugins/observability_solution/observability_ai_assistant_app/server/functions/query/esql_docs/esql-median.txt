@@ -1,25 +1,21 @@
-MEDIAN
+## MEDIAN
 
-Syntax
-MEDIAN(expression)
-Parameters
-expression
-Expression from which to return the median value.
-DescriptionReturns the value that is greater than half of all values and less than half of
-all values, also known as the 50% PERCENTILE.
-Like PERCENTILE, MEDIAN is usually approximate.
-MEDIAN is also non-deterministic.
-This means you can get slightly different results using the same data.
-Example
+The `MEDIAN` function in ES|QL returns the value that is greater than half of all values and less than half of all values, also known as the 50% PERCENTILE. Like `PERCENTILE`, `MEDIAN` is usually approximate and is also non-deterministic. This means you can get slightly different results using the same data.
+
+### Examples
+
+Here are a couple of examples of how to use the `MEDIAN` function in ES|QL:
+
 ```esql
 FROM employees
 | STATS MEDIAN(salary), PERCENTILE(salary, 50)
 ```
 
-The expression can use inline functions. For example, to calculate the median of
-the maximum values of a multivalued column, first use MV_MAX to get the
-maximum value per row, and use the result with the MEDIAN function:
+In this example, the `MEDIAN` function is used to calculate the median salary from the `employees` data stream or index.
+
 ```esql
 FROM employees
 | STATS median_max_salary_change = MEDIAN(MV_MAX(salary_change))
 ```
+
+In this example, the `MEDIAN` function is used in conjunction with the `MV_MAX` function to calculate the median of the maximum values of a multivalued column `salary_change`.

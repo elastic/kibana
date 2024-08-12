@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { RiskScoresPreviewResponse } from '../../../../../common/api/entity_analytics';
+import { RiskScoresPreviewRequest } from '../../../../../common/api/entity_analytics';
 import {
   APP_ID,
   DEFAULT_RISK_SCORE_PAGE_SIZE,
   RISK_SCORE_PREVIEW_URL,
 } from '../../../../../common/constants';
-import { riskScorePreviewRequestSchema } from '../../../../../common/entity_analytics/risk_engine/risk_score_preview/request_schema';
-import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskScoreAuditActions } from '../audit';
@@ -37,9 +37,11 @@ export const riskScorePreviewRoute = (
     .addVersion(
       {
         version: '1',
-        validate: { request: { body: buildRouteValidation(riskScorePreviewRequestSchema) } },
+        validate: {
+          request: { body: buildRouteValidationWithZod(RiskScoresPreviewRequest) },
+        },
       },
-      async (context, request, response) => {
+      async (context, request, response): Promise<IKibanaResponse<RiskScoresPreviewResponse>> => {
         const siemResponse = buildSiemResponse(response);
         const securityContext = await context.securitySolution;
         const coreContext = await context.core;

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { RootSchema } from '@kbn/analytics-client';
-import type { AnalyticsServiceSetup } from '@kbn/core/public';
+import type { AnalyticsServiceSetup, RootSchema } from '@kbn/core/public';
 
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
@@ -20,6 +19,7 @@ export enum InfraTelemetryEventTypes {
   HOST_VIEW_TOTAL_HOST_COUNT_RETRIEVED = 'Host View Total Host Count Retrieved',
   ASSET_DETAILS_FLYOUT_VIEWED = 'Asset Details Flyout Viewed',
   ASSET_DETAILS_PAGE_VIEWED = 'Asset Details Page Viewed',
+  ASSET_DASHBOARD_LOADED = 'Asset Dashboard Loaded',
 }
 
 export interface HostsViewQuerySubmittedParams {
@@ -53,13 +53,19 @@ export interface AssetDetailsFlyoutViewedParams {
 export interface AssetDetailsPageViewedParams extends AssetDetailsFlyoutViewedParams {
   integrations?: string[];
 }
+export interface AssetDashboardLoadedParams {
+  state: boolean;
+  assetType: string;
+  filtered_by?: string[];
+}
 
 export type InfraTelemetryEventParams =
   | HostsViewQuerySubmittedParams
   | HostEntryClickedParams
   | HostFlyoutFilterActionParams
   | HostsViewQueryHostsCountRetrievedParams
-  | AssetDetailsFlyoutViewedParams;
+  | AssetDetailsFlyoutViewedParams
+  | AssetDashboardLoadedParams;
 
 export interface PerformanceMetricInnerEvents {
   key1?: string;
@@ -80,6 +86,7 @@ export interface ITelemetryClient {
     innerEvents: PerformanceMetricInnerEvents,
     meta: Record<string, unknown>
   ): void;
+  reportAssetDashboardLoaded(params: AssetDashboardLoadedParams): void;
 }
 
 export type InfraTelemetryEvent =
@@ -110,4 +117,8 @@ export type InfraTelemetryEvent =
   | {
       eventType: InfraTelemetryEventTypes.ASSET_DETAILS_PAGE_VIEWED;
       schema: RootSchema<AssetDetailsPageViewedParams>;
+    }
+  | {
+      eventType: InfraTelemetryEventTypes.ASSET_DASHBOARD_LOADED;
+      schema: RootSchema<AssetDashboardLoadedParams>;
     };

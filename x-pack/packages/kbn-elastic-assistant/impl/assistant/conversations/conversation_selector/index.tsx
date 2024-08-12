@@ -18,10 +18,13 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 
+import {
+  PromptResponse,
+  PromptTypeEnum,
+} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { getGenAiConfig } from '../../../connectorland/helpers';
 import { AIConnector } from '../../../connectorland/connector_selector';
 import { Conversation } from '../../../..';
-import { useAssistantContext } from '../../../assistant_context';
 import * as i18n from './translations';
 import { DEFAULT_CONVERSATION_TITLE } from '../../use_conversation/translations';
 import { useConversation } from '../../use_conversation';
@@ -32,9 +35,9 @@ interface Props {
   selectedConversationId: string | undefined;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   onConversationDeleted: (conversationId: string) => void;
-  shouldDisableKeyboardShortcut?: () => boolean;
   isDisabled?: boolean;
   conversations: Record<string, Conversation>;
+  allPrompts: PromptResponse[];
 }
 
 const getPreviousConversationId = (conversationIds: string[], selectedConversationId: string) => {
@@ -61,13 +64,15 @@ export const ConversationSelector: React.FC<Props> = React.memo(
     defaultConnector,
     onConversationSelected,
     onConversationDeleted,
-    shouldDisableKeyboardShortcut = () => false,
     isDisabled = false,
     conversations,
+    allPrompts,
   }) => {
-    const { allSystemPrompts } = useAssistantContext();
-
     const { createConversation } = useConversation();
+    const allSystemPrompts = useMemo(
+      () => allPrompts.filter((p) => p.promptType === PromptTypeEnum.system),
+      [allPrompts]
+    );
     const conversationIds = useMemo(() => Object.keys(conversations), [conversations]);
     const conversationOptions = useMemo<ConversationSelectorOption[]>(() => {
       return Object.values(conversations).map((conversation) => ({
@@ -192,9 +197,8 @@ export const ConversationSelector: React.FC<Props> = React.memo(
 
     const renderOption: (
       option: ConversationSelectorOption,
-      searchValue: string,
-      OPTION_CONTENT_CLASSNAME: string
-    ) => React.ReactNode = (option, searchValue, contentClassName) => {
+      searchValue: string
+    ) => React.ReactNode = (option, searchValue) => {
       const { label, id, value } = option;
 
       return (

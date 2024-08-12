@@ -33,6 +33,7 @@ import type { SwimlaneType } from '../../application/explorer/explorer_constants
 import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
 import type { AnomalySwimLaneEmbeddableState, AnomalySwimlaneEmbeddableUserInput } from '..';
 import { getDefaultSwimlanePanelTitle } from './anomaly_swimlane_embeddable';
+import { getJobSelectionErrors } from '../utils';
 
 export type ExplicitInput = AnomalySwimlaneEmbeddableUserInput;
 
@@ -44,16 +45,6 @@ export interface AnomalySwimlaneInitializerProps {
   onCancel: () => void;
   adJobsApiService: MlApiServices['jobs'];
 }
-
-const getJobSelectionErrors = (jobIds: string[]) => {
-  if (jobIds.length === 0) {
-    return [
-      i18n.translate('xpack.ml.swimlaneEmbeddable.setupModal.jobSelectionRequiredError', {
-        defaultMessage: 'Job selection is required',
-      }),
-    ];
-  }
-};
 
 export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = ({
   onCreate,
@@ -166,52 +157,58 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
             }}
             errors={jobIdsErrors}
           />
+          {jobIds.length > 0 ? (
+            <>
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.ml.swimlaneEmbeddable.panelTitleLabel"
+                    defaultMessage="Panel title"
+                  />
+                }
+                isInvalid={!isPanelTitleValid}
+                fullWidth
+              >
+                <EuiFieldText
+                  id="panelTitle"
+                  name="panelTitle"
+                  value={panelTitle}
+                  onChange={(e) => {
+                    titleManuallyChanged.current = true;
+                    setPanelTitle(e.target.value);
+                  }}
+                  isInvalid={!isPanelTitleValid}
+                  fullWidth
+                />
+              </EuiFormRow>
 
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.ml.swimlaneEmbeddable.panelTitleLabel"
-                defaultMessage="Panel title"
-              />
-            }
-            isInvalid={!isPanelTitleValid}
-            fullWidth
-          >
-            <EuiFieldText
-              id="panelTitle"
-              name="panelTitle"
-              value={panelTitle}
-              onChange={(e) => {
-                titleManuallyChanged.current = true;
-                setPanelTitle(e.target.value);
-              }}
-              isInvalid={!isPanelTitleValid}
-              fullWidth
-            />
-          </EuiFormRow>
-
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.ml.swimlaneEmbeddable.setupModal.swimlaneTypeLabel"
-                defaultMessage="Swim lane type"
-              />
-            }
-            fullWidth
-          >
-            <EuiButtonGroup
-              id="selectSwimlaneType"
-              name="selectSwimlaneType"
-              color="primary"
-              isFullWidth
-              legend={i18n.translate('xpack.ml.swimlaneEmbeddable.setupModal.swimlaneTypeLabel', {
-                defaultMessage: 'Swim lane type',
-              })}
-              options={swimlaneTypeOptions}
-              idSelected={swimlaneType}
-              onChange={(id) => setSwimlaneType(id as SwimlaneType)}
-            />
-          </EuiFormRow>
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.ml.swimlaneEmbeddable.setupModal.swimlaneTypeLabel"
+                    defaultMessage="Swim lane type"
+                  />
+                }
+                fullWidth
+              >
+                <EuiButtonGroup
+                  id="selectSwimlaneType"
+                  name="selectSwimlaneType"
+                  color="primary"
+                  isFullWidth
+                  legend={i18n.translate(
+                    'xpack.ml.swimlaneEmbeddable.setupModal.swimlaneTypeLabel',
+                    {
+                      defaultMessage: 'Swim lane type',
+                    }
+                  )}
+                  options={swimlaneTypeOptions}
+                  idSelected={swimlaneType}
+                  onChange={(id) => setSwimlaneType(id as SwimlaneType)}
+                />
+              </EuiFormRow>
+            </>
+          ) : null}
 
           {swimlaneType === SWIMLANE_TYPE.VIEW_BY && (
             <>

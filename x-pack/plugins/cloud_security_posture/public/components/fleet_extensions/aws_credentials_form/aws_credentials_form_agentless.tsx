@@ -6,10 +6,23 @@
  */
 
 import React from 'react';
-import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import semverCompare from 'semver/functions/compare';
+import semverValid from 'semver/functions/valid';
 import { i18n } from '@kbn/i18n';
+
+import {
+  getTemplateUrlFromPackageInfo,
+  SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
+} from '../../../common/utils/get_template_url_package_info';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
+import {
+  CLOUD_CREDENTIALS_PACKAGE_VERSION,
+  ORGANIZATION_ACCOUNT,
+  SINGLE_ACCOUNT,
+  TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
+} from '../../../../common/constants';
 import {
   DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
   getAwsCredentialsFormAgentlessOptions,
@@ -20,10 +33,146 @@ import { getAwsCredentialsType, getPosturePolicy } from '../utils';
 import { AwsInputVarFields } from './aws_input_var_fields';
 import {
   AwsFormProps,
-  ReadDocumentation,
   AWSSetupInfoContent,
   AwsCredentialTypeSelector,
+  ReadDocumentation,
 } from './aws_credentials_form';
+
+const CLOUD_FORMATION_EXTERNAL_DOC_URL =
+  'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html';
+
+export const CloudFormationCloudCredentialsGuide = ({
+  isOrganization,
+}: {
+  isOrganization?: boolean;
+}) => {
+  return (
+    <EuiText size="s" color="subdued">
+      <FormattedMessage
+        id="xpack.csp.agentlessForm.cloudFormation.guide.description"
+        defaultMessage="Access keys are long-term credentials for an IAM user or the AWS account root user.
+Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to set up access. {learnMore}."
+        values={{
+          learnMore: (
+            <EuiLink
+              href={CLOUD_FORMATION_EXTERNAL_DOC_URL}
+              target="_blank"
+              rel="noopener nofollow noreferrer"
+              data-test-subj="externalLink"
+            >
+              <FormattedMessage
+                id="xpack.csp.agentlessForm.cloudFormation.guide.learnMoreLinkText"
+                defaultMessage="Learn more about CloudFormation"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+      <EuiSpacer size="m" />
+      <EuiText size="s" color="subdued">
+        <ol>
+          {isOrganization ? (
+            <li>
+              <FormattedMessage
+                id="xpack.csp.agentlessForm.cloudFormation.guide.steps.organizationLogin"
+                defaultMessage="Log in as an {admin} in the management account of the AWS Organization you want to onboard"
+                values={{
+                  admin: <strong>admin</strong>,
+                }}
+              />
+            </li>
+          ) : (
+            <li>
+              <FormattedMessage
+                id="xpack.csp.agentlessForm.cloudFormation.guide.steps.singleLogin"
+                defaultMessage="Log in as an {admin} in the AWS account you want to onboard"
+                values={{
+                  admin: <strong>admin</strong>,
+                }}
+              />
+            </li>
+          )}
+          <EuiSpacer size="xs" />
+          <li>
+            <FormattedMessage
+              id="xpack.csp.agentlessForm.cloudFormation.guide.steps.launch"
+              defaultMessage="Click the {launchCloudFormation} button below."
+              values={{
+                launchCloudFormation: <strong>Launch CloudFormation</strong>,
+              }}
+            />
+          </li>
+          <EuiSpacer size="xs" />
+          <li>
+            <FormattedMessage
+              id="xpack.csp.agentlessForm.cloudFormation.steps.region"
+              defaultMessage="(Optional) Change the {amazonRegion} in the upper right corner to the region you want to deploy your stack to"
+              values={{
+                amazonRegion: <strong>AWS region</strong>,
+              }}
+            />
+          </li>
+          <EuiSpacer size="xs" />
+          <li>
+            <FormattedMessage
+              id="xpack.csp.agentlessForm.cloudFormation.steps.accept"
+              defaultMessage="Tick the checkbox under {capabilities} in the opened CloudFormation stack review form: {acknowledge}"
+              values={{
+                acknowledge: (
+                  <em>
+                    <FormattedMessage
+                      id="xpack.csp.agentlessForm.cloudFormation.steps.accept.acknowledge"
+                      defaultMessage="I acknowledge that AWS CloudFormation might create IAM resources."
+                    />
+                  </em>
+                ),
+                capabilities: (
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.csp.agentlessForm.cloudFormation.steps.accept.capabilties"
+                      defaultMessage="capabilities"
+                    />
+                  </strong>
+                ),
+              }}
+            />
+          </li>
+          <EuiSpacer size="xs" />
+          <li>
+            <FormattedMessage
+              id="xpack.csp.agentlessForm.cloudFormation.steps.create"
+              defaultMessage="Click {createStack}."
+              values={{
+                createStack: <strong>Create stack</strong>,
+              }}
+            />
+          </li>
+          <EuiSpacer size="xs" />
+          <li>
+            <FormattedMessage
+              id="xpack.csp.agentlessForm.cloudFormation.steps.stackStatus"
+              defaultMessage="Once  stack status is {createComplete} then click the Outputs tab"
+              values={{
+                createComplete: <strong>CREATE_COMPLETE</strong>,
+              }}
+            />
+          </li>
+          <EuiSpacer size="xs" />
+          <li>
+            <FormattedMessage
+              id="xpack.csp.agentlessForm.cloudFormation.steps.credentials"
+              defaultMessage="Copy {accessKeyId} and {secretAccessKey} then paste the credentials below"
+              values={{
+                accessKeyId: <strong>Access Key Id</strong>,
+                secretAccessKey: <strong>Secret Access Key</strong>,
+              }}
+            />
+          </li>
+        </ol>
+      </EuiText>
+    </EuiText>
+  );
+};
 
 export const AwsCredentialsFormAgentless = ({
   input,
@@ -36,6 +185,20 @@ export const AwsCredentialsFormAgentless = ({
   const group = options[awsCredentialsType];
   const fields = getInputVarsFields(input, group.fields);
   const integrationLink = cspIntegrationDocsNavigation.cspm.getStartedPath;
+  const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
+
+  const isValidSemantic = semverValid(packageInfo.version);
+  const showCloudCredentialsButton = isValidSemantic
+    ? semverCompare(packageInfo.version, CLOUD_CREDENTIALS_PACKAGE_VERSION) >= 0
+    : false;
+
+  const automationCredentialTemplate = getTemplateUrlFromPackageInfo(
+    packageInfo,
+    input.policy_template,
+    SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CREDENTIALS
+  )?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType);
+
+  const isOrganization = accountType === ORGANIZATION_ACCOUNT;
 
   return (
     <>
@@ -73,10 +236,38 @@ export const AwsCredentialsFormAgentless = ({
         }}
       />
       <EuiSpacer size="m" />
-      {group.info}
-      <EuiSpacer size="m" />
-      <ReadDocumentation url={integrationLink} />
-      <EuiSpacer size="l" />
+      {awsCredentialsType === DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE &&
+        !showCloudCredentialsButton && (
+          <>
+            <EuiCallOut color="warning">
+              <FormattedMessage
+                id="xpack.csp.fleetIntegration.awsCloudCredentials.cloudFormationSupportedMessage"
+                defaultMessage="Launch Cloud Formation for Automated Credentials not supported in current integration version. Please upgrade to the latest version to enable Launch CloudFormation for automated credentials."
+              />
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
+      {awsCredentialsType === DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE &&
+        showCloudCredentialsButton && (
+          <>
+            <CloudFormationCloudCredentialsGuide isOrganization={isOrganization} />
+            <EuiSpacer size="m" />
+            <EuiButton
+              data-test-subj="launchCloudFormationAgentlessButton"
+              target="_blank"
+              iconSide="left"
+              iconType="launch"
+              href={automationCredentialTemplate}
+            >
+              <FormattedMessage
+                id="xpack.csp.agentlessForm.agentlessAWSCredentialsForm.cloudFormation.launchButton"
+                defaultMessage="Launch CloudFormation"
+              />
+            </EuiButton>
+            <EuiSpacer size="m" />
+          </>
+        )}
       <AwsInputVarFields
         fields={fields}
         packageInfo={packageInfo}
@@ -84,6 +275,7 @@ export const AwsCredentialsFormAgentless = ({
           updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }));
         }}
       />
+      <ReadDocumentation url={integrationLink} />
     </>
   );
 };

@@ -21,7 +21,7 @@ export const ML_ALERT_TYPES = {
   AD_JOBS_HEALTH: 'xpack.ml.anomaly_detection_jobs_health',
 } as const;
 
-export type MlAlertType = typeof ML_ALERT_TYPES[keyof typeof ML_ALERT_TYPES];
+export type MlAlertType = (typeof ML_ALERT_TYPES)[keyof typeof ML_ALERT_TYPES];
 
 export const ALERT_PREVIEW_SAMPLE_SIZE = 5;
 

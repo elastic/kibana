@@ -1,4 +1,0 @@
---max-old-space-size=812
---unhandled-rejections=warn
---enable-fips
---openssl-config=/usr/share/kibana/config/nodejs.cnf

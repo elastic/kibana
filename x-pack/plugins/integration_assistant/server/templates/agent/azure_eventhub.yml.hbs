@@ -1,0 +1,28 @@
+{{#if eventhub}}
+eventhub: {{eventhub}}
+{{/if}}
+{{#if consumer_group}}
+consumer_group: {{consumer_group}}
+{{/if}}
+{{#if connection_string}}
+connection_string: {{connection_string}}
+{{/if}}
+{{#if storage_account}}
+storage_account: {{storage_account}}
+{{/if}}
+{{#if storage_account_key}}
+storage_account_key: {{storage_account_key}}
+{{/if}}
+{{#if storage_account_container}}
+storage_account_container: {{storage_account_container}}
+{{/if}}
+{{#if resource_manager_endpoint}}
+resource_manager_endpoint: {{resource_manager_endpoint}}
+{{/if}}
+sanitize_options:
+{{#if sanitize_newlines}}
+  - NEW_LINES
+{{/if}}
+{{#if sanitize_singlequotes}}
+  - SINGLE_QUOTES
+{{/if}}

@@ -18,6 +18,9 @@
     "@kbn/core-http-server",
     "@kbn/core-lifecycle-server",
     "@kbn/logging",
+    "@kbn/core",
+    "@kbn/logging-mocks",
+    "@kbn/server-route-repository-utils",
   ],
   "exclude": [
     "target/**/*",

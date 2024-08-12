@@ -13,7 +13,7 @@ spec:
     kind: Pipeline
     metadata:
       name: "Kibana / Serverless / Security Solution Quality Gate / Investigations"
-      description: "[MKI] Executes Cypress tests for the Investigations team"
+      description: "[MKI] Executes Cypress and API tests for the Investigations team"
     spec:
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/security_solution_quality_gate/mki_security_solution_investigations.yml

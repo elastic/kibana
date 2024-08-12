@@ -59,9 +59,9 @@ tar xzvf elastic-agent-${agentVersion}-linux-x86_64.tar.gz
 cd elastic-agent-${agentVersion}-linux-x86_64
 sudo ./elastic-agent install ${enrollArgs}`;
 
-  const macCommand = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-darwin-x86_64.tar.gz
-tar xzvf elastic-agent-${agentVersion}-darwin-x86_64.tar.gz
-cd elastic-agent-${agentVersion}-darwin-x86_64
+  const macCommand = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-darwin-aarch64.tar.gz
+tar xzvf elastic-agent-${agentVersion}-darwin-aarch64.tar.gz
+cd elastic-agent-${agentVersion}-darwin-aarch64
 sudo ./elastic-agent install ${enrollArgs}`;
 
   const windowsCommand = `$ProgressPreference = 'SilentlyContinue'

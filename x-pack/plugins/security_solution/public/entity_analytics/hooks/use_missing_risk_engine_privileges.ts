@@ -6,9 +6,13 @@
  */
 
 import { useMemo } from 'react';
+import type { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 import { useRiskEnginePrivileges } from '../api/hooks/use_risk_engine_privileges';
 import { getMissingRiskEnginePrivileges } from '../../../common/entity_analytics/risk_engine';
-import type { MissingPrivileges } from '../../../common/entity_analytics/risk_engine';
+import type {
+  MissingPrivileges,
+  RiskEngineIndexPrivilege,
+} from '../../../common/entity_analytics/risk_engine';
 export type RiskEngineMissingPrivilegesResponse =
   | { isLoading: true }
   | { isLoading: false; hasAllRequiredPrivileges: true }
@@ -18,7 +22,9 @@ export type RiskEngineMissingPrivilegesResponse =
       hasAllRequiredPrivileges: false;
     };
 
-export const useMissingRiskEnginePrivileges = (): RiskEngineMissingPrivilegesResponse => {
+export const useMissingRiskEnginePrivileges = (
+  required: NonEmptyArray<RiskEngineIndexPrivilege> = ['read', 'write']
+): RiskEngineMissingPrivilegesResponse => {
   const { data: privilegesResponse, isLoading } = useRiskEnginePrivileges();
 
   return useMemo<RiskEngineMissingPrivilegesResponse>(() => {
@@ -36,8 +42,18 @@ export const useMissingRiskEnginePrivileges = (): RiskEngineMissingPrivilegesRes
     }
 
     const { indexPrivileges, clusterPrivileges } = getMissingRiskEnginePrivileges(
-      privilegesResponse.privileges
+      privilegesResponse.privileges,
+      required
     );
+
+    // privilegesResponse.has_all_required` is slightly misleading, it checks if it has *all* default required privileges.
+    // Here we check if there are no missing privileges of the provided set of required privileges
+    if (indexPrivileges.every(([_, missingPrivileges]) => missingPrivileges.length === 0)) {
+      return {
+        isLoading: false,
+        hasAllRequiredPrivileges: true,
+      };
+    }
 
     return {
       isLoading: false,
@@ -47,5 +63,5 @@ export const useMissingRiskEnginePrivileges = (): RiskEngineMissingPrivilegesRes
         clusterPrivileges,
       },
     };
-  }, [isLoading, privilegesResponse]);
+  }, [isLoading, privilegesResponse, required]);
 };

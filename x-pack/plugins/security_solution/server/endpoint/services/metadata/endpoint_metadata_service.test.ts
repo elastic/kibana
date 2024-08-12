@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { uniq } from 'lodash';
 import type { EndpointMetadataServiceTestContextMock } from './mocks';
 import { createEndpointMetadataServiceTestContextMock } from './mocks';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -125,11 +125,11 @@ describe('EndpointMetadataService', () => {
       const packagePolicies = [
         Object.assign(endpointDocGenerator.generatePolicyPackagePolicy(), {
           id: 'test-package-policy-id',
-          policy_id: policyId,
+          policy_ids: [policyId],
           revision: 1,
         }),
       ];
-      const packagePolicyIds = packagePolicies.map((policy) => policy.policy_id);
+      const packagePolicyIds = uniq(packagePolicies.flatMap((policy) => policy.policy_ids));
       const agentPolicies = [
         Object.assign(endpointDocGenerator.generateAgentPolicy(), {
           id: policyId,

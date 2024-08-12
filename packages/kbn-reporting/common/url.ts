@@ -29,12 +29,6 @@ export interface LocatorParams<P extends SerializableRecord = SerializableRecord
   params: P;
 }
 
-export type IlmPolicyMigrationStatus = 'policy-not-found' | 'indices-not-managed-by-policy' | 'ok';
-
-export interface IlmPolicyStatusResponse {
-  status: IlmPolicyMigrationStatus;
-}
-
 type Url = string;
 type UrlLocatorTuple = [url: Url, locatorParams: LocatorParams];
 

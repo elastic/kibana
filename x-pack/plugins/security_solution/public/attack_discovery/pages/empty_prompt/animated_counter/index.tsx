@@ -11,14 +11,14 @@ import * as d3 from 'd3';
 import React, { useRef, useEffect } from 'react';
 
 interface Props {
+  animationDurationMs?: number;
   count: number;
 }
 
-const AnimatedCounterComponent: React.FC<Props> = ({ count }) => {
+const AnimatedCounterComponent: React.FC<Props> = ({ animationDurationMs = 1000 * 1, count }) => {
   const { euiTheme } = useEuiTheme();
   const d3Ref = useRef(null);
   const zero = 0; // counter starts at zero
-  const animationDurationMs = 1000 * 1;
 
   useEffect(() => {
     if (d3Ref.current) {

@@ -20,7 +20,6 @@ export { waitForUpdates, waitForDocumentsAndPreviewUpdate } from './helpers';
 const defaultProps: Props = {
   onSave: () => {},
   onCancel: () => {},
-  isSavingField: false,
 };
 
 const getActions = (testBed: TestBed) => {

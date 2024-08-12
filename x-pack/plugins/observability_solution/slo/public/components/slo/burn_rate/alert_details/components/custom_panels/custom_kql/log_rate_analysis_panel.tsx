@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
 import type { WindowSchema } from '../../../../../../../typings';
 import { TimeRange } from '../../../../../error_rate_chart/use_lens_definition';
-import { BurnRateAlert, BurnRateRule } from '../../../alert_details_app_section';
+import { BurnRateAlert, BurnRateRule } from '../../../types';
 import { getActionGroupFromReason } from '../../../utils/alert';
 import { useKibana } from '../../../../../../../utils/kibana_react';
 import { getESQueryForLogRateAnalysis } from './helpers/log_rate_analysis_query';

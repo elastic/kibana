@@ -39,7 +39,7 @@ import { retryTransientEsErrors } from '../retry';
 import { PackageESError, PackageInvalidArchiveError } from '../../../../errors';
 
 import { getDefaultProperties, histogram, keyword, scaledFloat } from './mappings';
-import { isUserSettingsTemplate } from './utils';
+import { isUserSettingsTemplate, fillConstantKeywordValues } from './utils';
 
 interface Properties {
   [key: string]: any;
@@ -986,7 +986,7 @@ const updateAllDataStreams = async (
       });
     },
     {
-      // Limit concurrent putMapping/rollover requests to avoid overhwhelming ES cluster
+      // Limit concurrent putMapping/rollover requests to avoid overwhelming ES cluster
       concurrency: 20,
     }
   );
@@ -1012,25 +1012,28 @@ const updateExistingDataStream = async ({
 
   const existingDsConfig = Object.values(existingDs);
   const currentBackingIndexConfig = existingDsConfig.at(-1);
-
   const currentIndexMode = currentBackingIndexConfig?.settings?.index?.mode;
   // @ts-expect-error Property 'mode' does not exist on type 'MappingSourceField'
   const currentSourceType = currentBackingIndexConfig.mappings?._source?.mode;
 
   let settings: IndicesIndexSettings;
-  let mappings: MappingTypeMapping;
+  let mappings: MappingTypeMapping = {};
   let lifecycle: any;
-
+  let subobjectsFieldChanged: boolean = false;
+  let simulateResult: any = {};
   try {
-    const simulateResult = await retryTransientEsErrors(async () =>
+    simulateResult = await retryTransientEsErrors(async () =>
       esClient.indices.simulateTemplate({
         name: await getIndexTemplate(esClient, dataStreamName),
       })
     );
 
     settings = simulateResult.template.settings;
-    mappings = simulateResult.template.mappings;
-    // @ts-expect-error template is not yet typed with DLM
+    mappings = fillConstantKeywordValues(
+      currentBackingIndexConfig?.mappings || {},
+      simulateResult.template.mappings
+    );
+
     lifecycle = simulateResult.template.lifecycle;
 
     // for now, remove from object so as not to update stream or data stream properties of the index until type and name
@@ -1040,7 +1043,9 @@ const updateExistingDataStream = async ({
       delete mappings.properties.stream;
       delete mappings.properties.data_stream;
     }
-
+    if (currentBackingIndexConfig?.mappings?.subobjects !== mappings.subobjects) {
+      subobjectsFieldChanged = true;
+    }
     logger.info(`Attempt to update the mappings for the ${dataStreamName} (write_index_only)`);
     await retryTransientEsErrors(
       () =>
@@ -1055,11 +1060,14 @@ const updateExistingDataStream = async ({
     // if update fails, rollover data stream and bail out
   } catch (err) {
     if (
-      isResponseError(err) &&
-      err.statusCode === 400 &&
-      err.body?.error?.type === 'illegal_argument_exception'
+      (isResponseError(err) &&
+        err.statusCode === 400 &&
+        err.body?.error?.type === 'illegal_argument_exception') ||
+      // handling the case when subobjects field changed, it should also trigger a rollover
+      subobjectsFieldChanged
     ) {
       logger.info(`Mappings update for ${dataStreamName} failed due to ${err}`);
+      logger.trace(`Attempted mappings: ${mappings}`);
       if (options?.skipDataStreamRollover === true) {
         logger.info(
           `Skipping rollover for ${dataStreamName} as "skipDataStreamRollover" is enabled`
@@ -1072,6 +1080,7 @@ const updateExistingDataStream = async ({
       }
     }
     logger.error(`Mappings update for ${dataStreamName} failed due to unexpected error: ${err}`);
+    logger.trace(`Attempted mappings: ${mappings}`);
     if (options?.ignoreMappingUpdateErrors === true) {
       logger.info(`Ignore mapping update errors as "ignoreMappingUpdateErrors" is enabled`);
       return;

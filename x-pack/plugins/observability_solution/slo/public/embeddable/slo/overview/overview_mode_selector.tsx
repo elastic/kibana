@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonGroup, type EuiButtonGroupOptionProps } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow, type EuiButtonGroupOptionProps } from '@elastic/eui';
 import { OverviewMode } from './types';
 
 const overviewModeOptions: EuiButtonGroupOptionProps[] = [
@@ -38,13 +39,20 @@ export interface OverviewModeSelectorProps {
 
 export function OverviewModeSelector({ value, onChange }: OverviewModeSelectorProps) {
   return (
-    <EuiButtonGroup
-      data-test-subj="sloOverviewModeSelector"
-      isFullWidth
-      legend="This is a basic group"
-      options={overviewModeOptions}
-      idSelected={value}
-      onChange={onChange as (id: string) => void}
-    />
+    <EuiFormRow
+      fullWidth
+      label={i18n.translate('xpack.slo.overviewEmbeddable.viewTypeLabel', {
+        defaultMessage: 'View type',
+      })}
+    >
+      <EuiButtonGroup
+        data-test-subj="sloOverviewModeSelector"
+        isFullWidth
+        legend="This is a basic group"
+        options={overviewModeOptions}
+        idSelected={value}
+        onChange={onChange as (id: string) => void}
+      />
+    </EuiFormRow>
   );
 }

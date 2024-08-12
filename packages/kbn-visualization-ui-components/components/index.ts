@@ -12,8 +12,6 @@ export * from './name_input';
 
 export * from './debounced_input';
 
-export * from './debounced_value';
-
 export * from './color_picker';
 
 export * from './icon_select';

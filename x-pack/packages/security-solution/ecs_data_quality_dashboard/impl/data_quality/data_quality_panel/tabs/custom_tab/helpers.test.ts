@@ -35,7 +35,7 @@ const formatNumber = (value: number | undefined) =>
 describe('helpers', () => {
   describe('getCustomMarkdownComment', () => {
     test('it returns a comment for custom fields with the expected field counts and ECS version', () => {
-      expect(getCustomMarkdownComment({ enrichedFieldMetadata: [hostNameKeyword, someField] }))
+      expect(getCustomMarkdownComment({ customFieldMetadata: [hostNameKeyword, someField] }))
         .toEqual(`#### 2 Custom field mappings
 
 These fields are not defined by the Elastic Common Schema (ECS), version ${EcsVersion}.

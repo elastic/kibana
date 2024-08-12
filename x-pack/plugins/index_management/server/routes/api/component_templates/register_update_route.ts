@@ -43,7 +43,6 @@ export const registerUpdateRoute = ({
             template: template as estypes.IndicesIndexState,
             version,
             _meta,
-            // @ts-expect-error deprecated property is not yet part of the API types
             deprecated,
           },
         });

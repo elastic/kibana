@@ -36,6 +36,7 @@ describe('toPackagePolicy', () => {
           name: 'nginx-1',
           namespace: 'default',
           policy_id: 'policy123',
+          policy_ids: ['policy123'],
           description: 'Test description',
           inputs: {
             'nginx-logfile': {
@@ -62,6 +63,7 @@ describe('toPackagePolicy', () => {
           name: 'nginx-1',
           namespace: 'default',
           policy_id: 'policy123',
+          policy_ids: ['policy123'],
           description: 'Test description',
         },
         nginxPackageInfo as unknown as PackageInfo
@@ -79,6 +81,7 @@ describe('toPackagePolicy', () => {
           name: 'nginx-1',
           namespace: 'default',
           policy_id: 'policy123',
+          policy_ids: ['policy123'],
           description: 'Test description',
           inputs: {
             'nginx-logfile': { enabled: false },
@@ -98,6 +101,7 @@ describe('toPackagePolicy', () => {
           name: 'nginx-1',
           namespace: 'default',
           policy_id: 'policy123',
+          policy_ids: ['policy123'],
           description: 'Test description',
           inputs: {
             'nginx-logfile': {
@@ -122,6 +126,7 @@ describe('toPackagePolicy', () => {
           name: 'nginx-1',
           namespace: 'default',
           policy_id: 'policy123',
+          policy_ids: ['policy123'],
           description: 'Test description',
         },
         nginxPackageInfo as unknown as PackageInfo,

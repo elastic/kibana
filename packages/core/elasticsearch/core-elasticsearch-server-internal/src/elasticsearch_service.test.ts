@@ -46,8 +46,8 @@ const { pollEsNodesVersion: pollEsNodesVersionActual } = jest.requireActual(
 
 const isValidConnectionMock = isValidConnection as jest.Mock;
 
-const delay = async (durationMs: number) =>
-  await new Promise((resolve) => setTimeout(resolve, durationMs));
+const TICK = 10;
+const tick = (ticks = 1) => jest.advanceTimersByTime(TICK * ticks);
 
 const configService = configServiceMock.create();
 
@@ -67,11 +67,13 @@ beforeEach(() => {
 
   env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
+  jest.useFakeTimers();
+
   mockConfig$ = new BehaviorSubject({
     hosts: ['http://1.2.3.4'],
     healthCheck: {
-      delay: duration(10),
-      startupDelay: duration(10),
+      delay: duration(TICK),
+      startupDelay: duration(TICK),
     },
     ssl: {
       verificationMode: 'none',
@@ -96,6 +98,7 @@ beforeEach(() => {
 
 afterEach(async () => {
   jest.clearAllMocks();
+  jest.useRealTimers();
   MockClusterClient.mockClear();
   isScriptingEnabledMock.mockReset();
   getClusterInfoMock.mockReset();
@@ -223,13 +226,18 @@ describe('#setup', () => {
       elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
     );
 
-    const setupContract = await elasticsearchService.setup(setupDeps);
-    await delay(10);
-
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
 
-    await firstValueFrom(setupContract.esNodesCompatibility$);
+    const setupContract = await elasticsearchService.setup(setupDeps);
+
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
+
+    tick();
+
+    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
+
+    await firstValueFrom(setupContract.esNodesCompatibility$);
+    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2); // shares the last value
   });
 
   it('esNodeVersionCompatibility$ stops polling when unsubscribed from', async () => {
@@ -238,13 +246,17 @@ describe('#setup', () => {
       elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
     );
 
-    const setupContract = await elasticsearchService.setup(setupDeps);
-
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
 
-    await firstValueFrom(setupContract.esNodesCompatibility$);
-    await delay(100);
+    const setupContract = await elasticsearchService.setup(setupDeps);
+
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
+
+    await firstValueFrom(setupContract.esNodesCompatibility$);
+
+    tick();
+
+    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -276,6 +288,7 @@ describe('#start', () => {
     pollEsNodesVersionMocked.mockImplementation(() => observable$);
 
     await elasticsearchService.setup(setupDeps);
+    tick();
     await elasticsearchService.start();
     expect(loggingSystemMock.collect(coreContext.logger).error).toEqual([]);
     observable$.next({
@@ -290,7 +303,7 @@ describe('#start', () => {
 
   it('logs an info message about connecting to ES', async () => {
     isValidConnectionMock.mockImplementation(async () => {
-      await new Promise((r) => setTimeout(r, 50));
+      tick();
     });
 
     await elasticsearchService.setup(setupDeps);
@@ -309,7 +322,7 @@ describe('#start', () => {
 
   it('returns the information about the time spent waiting for Elasticsearch', async () => {
     isValidConnectionMock.mockImplementation(async () => {
-      await new Promise((r) => setTimeout(r, 50));
+      tick();
     });
 
     await elasticsearchService.setup(setupDeps);
@@ -487,11 +500,11 @@ describe('#stop', () => {
       setupContract.esNodesCompatibility$.pipe(
         concatMap(async () => {
           expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
-          await delay(10);
+          tick();
           expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
 
           await elasticsearchService.stop();
-          await delay(100);
+          tick(10);
           expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
         })
       )

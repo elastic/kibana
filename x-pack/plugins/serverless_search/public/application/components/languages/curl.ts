@@ -32,7 +32,9 @@ export API_KEY="${apiKey}"`,
   },
   iconType: 'curl.svg',
   id: Languages.CURL,
-  ingestData: `curl -X POST "\$\{ES_URL\}/_bulk?pretty" \\
+  ingestData: ({ ingestPipeline }) => `curl -X POST "\$\{ES_URL\}/_bulk?pretty${
+    ingestPipeline ? `&pipeline=${ingestPipeline}` : ''
+  }" \\
   -H "Authorization: ApiKey "\$\{API_KEY\}"" \\
   -H "Content-Type: application/json" \\
   -d'
@@ -49,7 +51,13 @@ export API_KEY="${apiKey}"`,
 { "index" : { "_index" : "books" } }
 {"name": "The Handmaid'"'"'s Tale", "author": "Margaret Atwood", "release_date": "1985-06-01", "page_count": 311}
 '`,
-  ingestDataIndex: ({ apiKey, url, indexName }) => `curl -X POST ${url}/_bulk?pretty \\
+  ingestDataIndex: ({
+    apiKey,
+    indexName,
+    ingestPipeline,
+  }) => `curl -X POST "\$\{url\}/_bulk?pretty${
+    ingestPipeline ? `&pipeline=${ingestPipeline}` : ''
+  }" \\
   -H "Authorization: ApiKey ${apiKey}" \\
   -H "Content-Type: application/json" \\
   -d'

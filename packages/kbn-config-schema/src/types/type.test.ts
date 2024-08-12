@@ -9,7 +9,7 @@
 import { get } from 'lodash';
 import { internals } from '../internals';
 import { Type, TypeOptions } from './type';
-import { META_FIELD_X_OAS_REF_ID, META_FIELD_X_OAS_DEPRECATED } from '../oas_meta_fields';
+import { META_FIELD_X_OAS_DEPRECATED } from '../oas_meta_fields';
 
 class MyType extends Type<any> {
   constructor(opts: TypeOptions<any> = {}) {
@@ -20,12 +20,11 @@ class MyType extends Type<any> {
 describe('meta', () => {
   it('sets meta when provided', () => {
     const type = new MyType({
-      meta: { description: 'my description', id: 'foo', deprecated: true },
+      meta: { description: 'my description', deprecated: true },
     });
     const meta = type.getSchema().describe();
     expect(get(meta, 'flags.description')).toBe('my description');
-    expect(get(meta, `metas[0].${META_FIELD_X_OAS_REF_ID}`)).toBe('foo');
-    expect(get(meta, `metas[1].${META_FIELD_X_OAS_DEPRECATED}`)).toBe(true);
+    expect(get(meta, `metas[0].${META_FIELD_X_OAS_DEPRECATED}`)).toBe(true);
   });
 
   it('does not set meta when no provided', () => {

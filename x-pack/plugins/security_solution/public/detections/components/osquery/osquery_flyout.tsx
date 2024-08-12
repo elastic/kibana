@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import {
   EuiFlyout,
@@ -13,6 +13,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiTitle,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useQueryClient } from '@tanstack/react-query';
@@ -46,6 +47,14 @@ const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
   onClose,
   ecsData,
 }) => {
+  const { euiTheme } = useEuiTheme();
+
+  // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
+  const maskProps = useMemo(
+    () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }),
+    [euiTheme.levels.flyout]
+  );
+
   const {
     services: { osquery },
   } = useKibana();
@@ -63,7 +72,13 @@ const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
 
   if (osquery?.OsqueryAction) {
     return (
-      <EuiFlyout size="m" onClose={onClose} aria-labelledby={osqueryFlyoutTitleId}>
+      <EuiFlyout
+        size="m"
+        onClose={onClose}
+        aria-labelledby={osqueryFlyoutTitleId}
+        // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
+        maskProps={maskProps}
+      >
         <EuiFlyoutHeader hasBorder data-test-subj="flyout-header-osquery">
           <EuiTitle>
             <h2 id={osqueryFlyoutTitleId}>{ACTION_OSQUERY}</h2>

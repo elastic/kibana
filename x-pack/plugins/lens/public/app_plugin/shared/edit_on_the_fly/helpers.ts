@@ -7,15 +7,77 @@
 import {
   getIndexPatternFromESQLQuery,
   getESQLAdHocDataview,
-  getESQLQueryColumns,
+  getESQLResults,
+  formatESQLColumns,
 } from '@kbn/esql-utils';
-import type { AggregateQuery } from '@kbn/es-query';
+import { type AggregateQuery, buildEsQuery } from '@kbn/es-query';
+import type { ESQLRow } from '@kbn/es-types';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { getTime } from '@kbn/data-plugin/common';
+import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import { suggestionsApi } from '../../../lens_suggestions_api';
+
+export interface ESQLDataGridAttrs {
+  rows: ESQLRow[];
+  dataView: DataView;
+  columns: DatatableColumn[];
+}
+
+const getDSLFilter = (queryService: DataPublicPluginStart['query'], timeFieldName?: string) => {
+  const kqlQuery = queryService.queryString.getQuery();
+  const filters = queryService.filterManager.getFilters();
+  const timeFilter =
+    queryService.timefilter.timefilter.getTime() &&
+    getTime(undefined, queryService.timefilter.timefilter.getTime(), {
+      fieldName: timeFieldName,
+    });
+
+  return buildEsQuery(undefined, kqlQuery || [], [
+    ...(filters ?? []),
+    ...(timeFilter ? [timeFilter] : []),
+  ]);
+};
+
+export const getGridAttrs = async (
+  query: AggregateQuery,
+  adHocDataViews: DataViewSpec[],
+  deps: LensPluginStartDependencies,
+  abortController?: AbortController
+): Promise<ESQLDataGridAttrs> => {
+  const indexPattern = getIndexPatternFromESQLQuery(query.esql);
+  const dataViewSpec = adHocDataViews.find((adHoc) => {
+    return adHoc.name === indexPattern;
+  });
+
+  const dataView = dataViewSpec
+    ? await deps.dataViews.create(dataViewSpec)
+    : await getESQLAdHocDataview(query.esql, deps.dataViews);
+
+  const filter = getDSLFilter(deps.data.query, dataView.timeFieldName);
+
+  const results = await getESQLResults({
+    esqlQuery: query.esql,
+    search: deps.data.search.search,
+    signal: abortController?.signal,
+    filter,
+    dropNullColumns: true,
+    timeRange: deps.data.query.timefilter.timefilter.getAbsoluteTime(),
+  });
+
+  const columns = formatESQLColumns(results.response.columns);
+
+  return {
+    rows: results.response.values,
+    dataView,
+    columns,
+  };
+};
 
 export const getSuggestions = async (
   query: AggregateQuery,
@@ -24,29 +86,25 @@ export const getSuggestions = async (
   visualizationMap: VisualizationMap,
   adHocDataViews: DataViewSpec[],
   setErrors: (errors: Error[]) => void,
-  abortController?: AbortController
+  abortController?: AbortController,
+  setDataGridAttrs?: (attrs: ESQLDataGridAttrs) => void
 ) => {
   try {
-    const indexPattern = getIndexPatternFromESQLQuery(query.esql);
-    const dataViewSpec = adHocDataViews.find((adHoc) => {
-      return adHoc.name === indexPattern;
+    const { dataView, columns, rows } = await getGridAttrs(
+      query,
+      adHocDataViews,
+      deps,
+      abortController
+    );
+
+    setDataGridAttrs?.({
+      rows,
+      dataView,
+      columns,
     });
 
-    const dataView = dataViewSpec
-      ? await deps.dataViews.create(dataViewSpec)
-      : await getESQLAdHocDataview(indexPattern, deps.dataViews);
-
-    if (dataView.fields.getByName('@timestamp')?.type === 'date' && !dataViewSpec) {
-      dataView.timeFieldName = '@timestamp';
-    }
-
-    const columns = await getESQLQueryColumns({
-      esqlQuery: 'esql' in query ? query.esql : '',
-      search: deps.data.search.search,
-      signal: abortController?.signal,
-    });
     const context = {
-      dataViewSpec: dataView?.toSpec(),
+      dataViewSpec: dataView?.toSpec(false),
       fieldName: '',
       textBasedColumns: columns,
       query,

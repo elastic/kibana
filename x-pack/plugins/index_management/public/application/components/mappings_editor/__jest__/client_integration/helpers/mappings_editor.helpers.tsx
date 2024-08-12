@@ -380,8 +380,11 @@ export const setup = (
   props: any = { onUpdate() {} },
   appDependencies?: any
 ): MappingsEditorTestBed => {
+  const defaultAppDependencies = {
+    plugins: {},
+  };
   const setupTestBed = registerTestBed<TestSubjects>(
-    WithAppDependencies(MappingsEditor, appDependencies),
+    WithAppDependencies(MappingsEditor, appDependencies ?? defaultAppDependencies),
     {
       memoryRouter: {
         wrapComponent: false,

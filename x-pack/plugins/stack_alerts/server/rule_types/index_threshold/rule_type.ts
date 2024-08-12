@@ -290,7 +290,7 @@ export function getRuleType(
       },
       useCalculatedDateRange: false,
     });
-    logger.debug(`rule ${ID}:${ruleId} "${name}" query result: ${JSON.stringify(result)}`);
+    logger.debug(() => `rule ${ID}:${ruleId} "${name}" query result: ${JSON.stringify(result)}`);
 
     const isGroupAgg = isGroupAggregation(queryParams.termField);
 
@@ -307,9 +307,10 @@ export function getRuleType(
 
       if (value === null || value === undefined) {
         logger.debug(
-          `rule ${ID}:${ruleId} "${name}": no metrics found for group ${alertId}} from groupResult ${JSON.stringify(
-            groupResult
-          )}`
+          () =>
+            `rule ${ID}:${ruleId} "${name}": no metrics found for group ${alertId}} from groupResult ${JSON.stringify(
+              groupResult
+            )}`
         );
         continue;
       }
@@ -348,7 +349,7 @@ export function getRuleType(
           [ALERT_EVALUATION_VALUE]: `${actionContext.value}`,
         },
       });
-      logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
+      logger.debug(() => `scheduled actionGroup: ${JSON.stringify(actionContext)}`);
     }
 
     alertsClient.setAlertLimitReached(result.truncated);

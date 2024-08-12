@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { CommandDefinition, FunctionDefinition } from './types';
+import type { CommandDefinition, FunctionDefinition, FunctionParameterType } from './types';
 
 /**
  * Given a function definition, this function will return a list of function signatures
@@ -17,20 +17,22 @@ import type { CommandDefinition, FunctionDefinition } from './types';
  */
 export function getFunctionSignatures(
   { name, signatures }: FunctionDefinition,
-  { withTypes }: { withTypes: boolean } = { withTypes: true }
+  { withTypes, capitalize }: { withTypes: boolean; capitalize?: boolean } = {
+    withTypes: true,
+    capitalize: false,
+  }
 ) {
-  return signatures.map(({ params, returnType, minParams, examples }) => {
+  return signatures.map(({ params, returnType, minParams }) => {
     // for functions with a minimum number of args, repeat the last arg multiple times
     // just make sure to compute the right number of args to add
     const minParamsToAdd = Math.max((minParams || 0) - params.length, 0);
     const extraArg = Array(minParamsToAdd || 1).fill(params[Math.max(params.length - 1, 0)]);
     return {
-      declaration: `${name}(${params
+      declaration: `${capitalize ? name.toUpperCase() : name}(${params
         .map((arg) => printArguments(arg, withTypes))
         .join(', ')}${handleAdditionalArgs(minParamsToAdd > 0, extraArg, withTypes)})${
         withTypes ? `: ${returnType}` : ''
       }`,
-      examples,
     };
   });
 }
@@ -57,12 +59,16 @@ export function getCommandSignature(
   { withTypes }: { withTypes: boolean } = { withTypes: true }
 ) {
   return {
-    declaration: `${name} ${printCommandArguments(signature, withTypes)} ${options.map(
+    declaration: `${name.toUpperCase()} ${printCommandArguments(
+      signature,
+      withTypes
+    )} ${options.map(
       (option) =>
-        `${option.wrapped ? option.wrapped[0] : ''}${option.name} ${printCommandArguments(
-          option.signature,
-          withTypes
-        )}${option.wrapped ? option.wrapped[1] : ''}`
+        `${
+          option.wrapped ? option.wrapped[0] : ''
+        }${option.name.toUpperCase()} ${printCommandArguments(option.signature, withTypes)}${
+          option.wrapped ? option.wrapped[1] : ''
+        }`
     )}`,
     examples,
   };
@@ -96,12 +102,10 @@ export function printArguments(
     name,
     type,
     optional,
-    reference,
   }: {
     name: string;
-    type: string | string[];
+    type: FunctionParameterType | FunctionParameterType[];
     optional?: boolean;
-    reference?: string;
   },
   withTypes: boolean
 ): string {

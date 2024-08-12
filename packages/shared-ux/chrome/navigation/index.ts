@@ -9,6 +9,8 @@
 export { NavigationKibanaProvider, NavigationProvider } from './src/services';
 
 export { Navigation } from './src/ui';
+export { EventType, FieldType } from './src/analytics';
+
 export type { NavigationProps } from './src/ui';
 
 export type { PanelComponentProps, PanelContent, PanelContentProvider } from './src/ui';

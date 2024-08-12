@@ -13,8 +13,8 @@ import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_fe
 export const useTimelineClick = () => {
   const queryTimelineById = useQueryTimelineById();
 
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
   );
 
   const handleTimelineClick = useCallback(
@@ -23,10 +23,10 @@ export const useTimelineClick = () => {
         graphEventId,
         timelineId,
         onError,
-        unifiedComponentsInTimelineEnabled,
+        unifiedComponentsInTimelineDisabled,
       });
     },
-    [queryTimelineById, unifiedComponentsInTimelineEnabled]
+    [queryTimelineById, unifiedComponentsInTimelineDisabled]
   );
 
   return handleTimelineClick;

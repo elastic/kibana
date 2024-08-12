@@ -8,6 +8,7 @@
 export const FAKE_HOSTS = 'fake_hosts';
 export const FAKE_LOGS = 'fake_logs';
 export const FAKE_STACK = 'fake_stack';
+export const SERVICE_LOGS = 'service.logs';
 
 export const INDEX_PREFIX = 'kbn-data-forge';
 
@@ -34,5 +35,6 @@ export const DEFAULTS = {
   EVENT_TEMPLATE: 'good',
   REDUCE_WEEKEND_TRAFFIC_BY: 0,
   EPHEMERAL_PROJECT_IDS: 0,
-  ALIGN_EVENTS_TO_INTERVAL: 0,
+  ALIGN_EVENTS_TO_INTERVAL: true,
+  CARDINALITY: 1,
 };

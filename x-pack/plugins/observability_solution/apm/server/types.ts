@@ -26,10 +26,7 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { ActionsPlugin } from '@kbn/actions-plugin/server';
 import { AlertingPlugin } from '@kbn/alerting-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
-import {
-  PluginSetupContract as FeaturesPluginSetup,
-  PluginStartContract as FeaturesPluginStart,
-} from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
@@ -53,6 +50,10 @@ import {
   ProfilingDataAccessPluginSetup,
   ProfilingDataAccessPluginStart,
 } from '@kbn/profiling-data-access-plugin/server';
+import {
+  LogsDataAccessPluginSetup,
+  LogsDataAccessPluginStart,
+} from '@kbn/logs-data-access-plugin/server';
 import type {
   ObservabilityAIAssistantServerSetup,
   ObservabilityAIAssistantServerStart,
@@ -88,6 +89,7 @@ export interface APMPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   customIntegrations?: CustomIntegrationsPluginSetup;
   profilingDataAccess?: ProfilingDataAccessPluginSetup;
+  logsDataAccess: LogsDataAccessPluginSetup;
 }
 export interface APMPluginStartDependencies {
   // required dependencies
@@ -114,4 +116,5 @@ export interface APMPluginStartDependencies {
   usageCollection?: undefined;
   customIntegrations?: CustomIntegrationsPluginStart;
   profilingDataAccess?: ProfilingDataAccessPluginStart;
+  logsDataAccess: LogsDataAccessPluginStart;
 }

@@ -26,8 +26,16 @@ export class DescendantsQuery extends BaseResolverQuery {
     timeRange,
     isInternalRequest,
     shouldExcludeColdAndFrozenTiers,
+    agentId,
   }: ResolverQueryParams) {
-    super({ schema, indexPatterns, timeRange, isInternalRequest, shouldExcludeColdAndFrozenTiers });
+    super({
+      schema,
+      indexPatterns,
+      timeRange,
+      isInternalRequest,
+      shouldExcludeColdAndFrozenTiers,
+      agentId,
+    });
   }
 
   private query(nodes: NodeID[], size: number): JsonObject {
@@ -47,6 +55,9 @@ export class DescendantsQuery extends BaseResolverQuery {
             {
               terms: { [this.schema.parent]: nodes },
             },
+            ...(this.schema.agentId && this.agentId
+              ? [{ term: { 'agent.id': this.agentId } }]
+              : []),
             {
               exists: {
                 field: this.schema.id,
@@ -128,6 +139,9 @@ export class DescendantsQuery extends BaseResolverQuery {
                 [ancestryField]: nodes,
               },
             },
+            ...(this.schema.agentId && this.agentId
+              ? [{ term: { 'agent.id': this.agentId } }]
+              : []),
             {
               exists: {
                 field: this.schema.id,

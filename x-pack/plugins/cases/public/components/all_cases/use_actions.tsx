@@ -174,7 +174,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
           <EuiButtonIcon
             onClick={tooglePopover}
             iconType="boxesHorizontal"
-            aria-label={i18n.ACTIONS}
+            aria-label={i18n.ACTIONS_BUTTON_ARIA_LABEL(theCase.title)}
             color="text"
             key={`case-action-popover-button-${theCase.id}`}
             data-test-subj={`case-action-popover-button-${theCase.id}`}

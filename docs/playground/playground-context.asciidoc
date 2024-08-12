@@ -15,6 +15,11 @@ There are a few ways to optimize this context for better results.
 Some adjustments can be made directly in the {x} UI.
 Others require refining your indexing strategy, and potentially reindexing your data.
 
+[NOTE]
+=====
+Currently you can only select *one field* to be provided as context to the LLM.
+=====
+
 [float]
 [[playground-context-ui]]
 == Edit context in UI
@@ -51,9 +56,9 @@ Refer to the following Python notebooks for examples of how to chunk your docume
 
 [float]
 [[playground-context-balance]]
-=== Balancing cost and latency
+=== Balancing cost/latency and result quality
 
-Here are some general recommendations for balancing cost and latency with different context sizes:
+Here are some general recommendations for balancing cost/latency and result quality with different context sizes:
 
 Optimize context length::
 Determine the optimal context length through empirical testing.

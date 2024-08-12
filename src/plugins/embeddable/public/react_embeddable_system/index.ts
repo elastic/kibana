@@ -11,9 +11,4 @@ export {
   registerReactEmbeddableFactory,
 } from './react_embeddable_registry';
 export { ReactEmbeddableRenderer } from './react_embeddable_renderer';
-export { startTrackingEmbeddableUnsavedChanges } from './react_embeddable_unsaved_changes';
-export type {
-  DefaultEmbeddableApi,
-  ReactEmbeddableFactory,
-  ReactEmbeddableRegistration,
-} from './types';
+export type { DefaultEmbeddableApi, ReactEmbeddableFactory } from './types';

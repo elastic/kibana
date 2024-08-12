@@ -40,10 +40,9 @@ exports[`FilterListUsagePopover opens the popover onButtonClick 1`] = `
           hasEmptyLabelSpace={false}
           id="filter_list_edit_description_row"
           label={
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Filter list description"
               id="xpack.ml.settings.filterLists.editDescriptionPopover.filterListDescriptionAriaLabel"
-              values={Object {}}
             />
           }
           labelType="label"
@@ -101,10 +100,9 @@ exports[`FilterListUsagePopover renders the popover with a description 1`] = `
           hasEmptyLabelSpace={false}
           id="filter_list_edit_description_row"
           label={
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Filter list description"
               id="xpack.ml.settings.filterLists.editDescriptionPopover.filterListDescriptionAriaLabel"
-              values={Object {}}
             />
           }
           labelType="label"
@@ -162,10 +160,9 @@ exports[`FilterListUsagePopover renders the popover with no description 1`] = `
           hasEmptyLabelSpace={false}
           id="filter_list_edit_description_row"
           label={
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Filter list description"
               id="xpack.ml.settings.filterLists.editDescriptionPopover.filterListDescriptionAriaLabel"
-              values={Object {}}
             />
           }
           labelType="label"

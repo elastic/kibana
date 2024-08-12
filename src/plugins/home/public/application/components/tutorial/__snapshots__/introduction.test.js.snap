@@ -8,10 +8,9 @@ exports[`props Beats badge should not show 1`] = `
       iconType="arrowLeft"
       size="xs"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Browse all integrations"
         id="home.tutorial.introduction.browseAllIntegrationsButton"
-        values={Object {}}
       />
     </EuiButtonEmpty>
   </div>
@@ -47,10 +46,9 @@ exports[`props Beats badge should show 1`] = `
       iconType="arrowLeft"
       size="xs"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Browse all integrations"
         id="home.tutorial.introduction.browseAllIntegrationsButton"
-        values={Object {}}
       />
     </EuiButtonEmpty>
   </div>
@@ -75,10 +73,9 @@ exports[`props Beats badge should show 1`] = `
         <React.Fragment>
            
           <EuiBadge>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Beats"
               id="home.tutorial.introduction.beatsBadgeLabel"
-              values={Object {}}
             />
           </EuiBadge>
         </React.Fragment>
@@ -96,10 +93,9 @@ exports[`props exportedFieldsUrl 1`] = `
       iconType="arrowLeft"
       size="xs"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Browse all integrations"
         id="home.tutorial.introduction.browseAllIntegrationsButton"
-        values={Object {}}
       />
     </EuiButtonEmpty>
   </div>
@@ -117,10 +113,9 @@ exports[`props exportedFieldsUrl 1`] = `
             rel="noopener"
             target="_blank"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="View exported fields"
               id="home.tutorial.introduction.viewButtonLabel"
-              values={Object {}}
             />
           </EuiLink>
         </React.Fragment>
@@ -143,10 +138,9 @@ exports[`props iconType 1`] = `
       iconType="arrowLeft"
       size="xs"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Browse all integrations"
         id="home.tutorial.introduction.browseAllIntegrationsButton"
-        values={Object {}}
       />
     </EuiButtonEmpty>
   </div>
@@ -177,10 +171,9 @@ exports[`props isBeta 1`] = `
       iconType="arrowLeft"
       size="xs"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Browse all integrations"
         id="home.tutorial.introduction.browseAllIntegrationsButton"
-        values={Object {}}
       />
     </EuiButtonEmpty>
   </div>
@@ -216,10 +209,9 @@ exports[`props previewUrl 1`] = `
       iconType="arrowLeft"
       size="xs"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Browse all integrations"
         id="home.tutorial.introduction.browseAllIntegrationsButton"
-        values={Object {}}
       />
     </EuiButtonEmpty>
   </div>
@@ -260,10 +252,9 @@ exports[`render 1`] = `
       iconType="arrowLeft"
       size="xs"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Browse all integrations"
         id="home.tutorial.introduction.browseAllIntegrationsButton"
-        values={Object {}}
       />
     </EuiButtonEmpty>
   </div>

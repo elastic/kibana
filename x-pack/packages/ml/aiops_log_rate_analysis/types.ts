@@ -55,3 +55,37 @@ export interface DocumentCountStatsChangePoint {
   /** The type of change point. */
   type: string;
 }
+
+/**
+ * Represents the document count statistics for a given time range.
+ */
+export interface DocumentCountStats {
+  /** The time interval in milliseconds. */
+  interval?: number;
+  /** The document count per time bucket. */
+  buckets?: { [key: string]: number };
+  /** The change point in the document count statistics. */
+  changePoint?: DocumentCountStatsChangePoint;
+  /** The earliest timestamp in the time range. */
+  timeRangeEarliest?: number;
+  /** The latest timestamp in the time range. */
+  timeRangeLatest?: number;
+  /** The total document count. */
+  totalCount: number;
+  /** The timestamp of the last document in the time range. */
+  lastDocTimeStampMs?: number;
+}
+
+/**
+ * Represents the overall document stats.
+ */
+export interface DocumentStats {
+  /** The probability of sampling. */
+  sampleProbability: number;
+  /** The total document count. */
+  totalCount: number;
+  /** The document count statistics. */
+  documentCountStats?: DocumentCountStats;
+  /** The document count statistics for comparison. */
+  documentCountStatsCompare?: DocumentCountStats;
+}

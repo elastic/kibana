@@ -42,7 +42,7 @@ describe('APIKeysGridPage', () => {
     coreStart.http.post.mockClear();
     authc.getCurrentUser.mockClear();
 
-    coreStart.http.get.mockResolvedValue({
+    coreStart.http.post.mockResolvedValue({
       apiKeys: [
         {
           type: 'rest',
@@ -72,6 +72,43 @@ describe('APIKeysGridPage', () => {
       canManageCrossClusterApiKeys: true,
       canManageApiKeys: true,
       canManageOwnApiKeys: true,
+      total: 2,
+      aggregationTotal: 2,
+      aggregations: {
+        usernames: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [
+            {
+              key: 'elastic',
+              doc_count: 4256,
+            },
+          ],
+        },
+        types: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [
+            {
+              key: 'rest',
+              doc_count: 2,
+            },
+          ],
+        },
+        expired: {
+          doc_count: 0,
+        },
+        managed: {
+          buckets: {
+            metadataBased: {
+              doc_count: 0,
+            },
+            namePrefixBased: {
+              doc_count: 0,
+            },
+          },
+        },
+      },
     });
 
     authc.getCurrentUser.mockResolvedValue(
@@ -121,7 +158,7 @@ describe('APIKeysGridPage', () => {
   it('displays callout when API keys are disabled', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
 
-    coreStart.http.get.mockRejectedValueOnce({
+    coreStart.http.post.mockRejectedValueOnce({
       body: { message: 'disabled.feature="api_keys"' },
     });
 
@@ -145,7 +182,7 @@ describe('APIKeysGridPage', () => {
   it('displays error when user does not have required permissions', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
 
-    coreStart.http.get.mockRejectedValueOnce({
+    coreStart.http.post.mockRejectedValueOnce({
       body: { statusCode: 403, message: 'forbidden' },
     });
 
@@ -167,7 +204,7 @@ describe('APIKeysGridPage', () => {
   });
 
   it('displays error when fetching API keys fails', async () => {
-    coreStart.http.get.mockRejectedValueOnce({
+    coreStart.http.post.mockRejectedValueOnce({
       body: {
         error: 'Internal Server Error',
         message: 'Internal Server Error',
@@ -195,11 +232,14 @@ describe('APIKeysGridPage', () => {
 
   describe('Read Only View', () => {
     beforeEach(() => {
-      coreStart.http.get.mockResolvedValue({
+      coreStart.http.post.mockResolvedValue({
         apiKeys: [],
         canManageCrossClusterApiKeys: false,
         canManageApiKeys: false,
         canManageOwnApiKeys: false,
+        total: 0,
+        aggregations: {},
+        aggregationTotal: 0,
       });
     });
 

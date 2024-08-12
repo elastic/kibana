@@ -7,89 +7,76 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import * as t from 'io-ts';
-import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
+import { z } from 'zod';
 
-export const file_name = t.string;
-export type FileName = t.TypeOf<typeof file_name>;
+export type FileName = z.infer<typeof file_name>;
+export const file_name = z.string();
 
-export const exclude_export_details = t.boolean;
-export type ExcludeExportDetails = t.TypeOf<typeof exclude_export_details>;
+export type ExcludeExportDetails = z.infer<typeof exclude_export_details>;
+export const exclude_export_details = z.boolean();
 
-export const saved_id = t.string;
+export const saved_id = z.string();
 
-export const savedIdOrUndefined = t.union([saved_id, t.undefined]);
-export type SavedIdOrUndefined = t.TypeOf<typeof savedIdOrUndefined>;
+export type SavedIdOrUndefined = z.infer<typeof savedIdOrUndefined>;
+export const savedIdOrUndefined = saved_id.optional();
 
-export const anomaly_threshold = PositiveInteger;
+export const status = z.enum(['open', 'closed', 'acknowledged', 'in-progress']);
+export type Status = z.infer<typeof status>;
 
-export const status = t.keyof({
-  open: null,
-  closed: null,
-  acknowledged: null,
-  'in-progress': null,
-});
-export type Status = t.TypeOf<typeof status>;
+export const signal_ids = z.array(z.string());
+export type SignalIds = z.infer<typeof signal_ids>;
 
-export const conflicts = t.keyof({ abort: null, proceed: null });
+export const alert_tag_ids = z.array(z.string());
+export type AlertTagIds = z.infer<typeof alert_tag_ids>;
 
-export const signal_ids = t.array(t.string);
-export type SignalIds = t.TypeOf<typeof signal_ids>;
-
-// TODO: Can this be more strict or is this is the set of all Elastic Queries?
-export const signal_status_query = t.object;
-
-export const alert_tag_ids = t.array(t.string);
-export type AlertTagIds = t.TypeOf<typeof alert_tag_ids>;
-
-export const indexRecord = t.record(
-  t.string,
-  t.type({
-    all: t.boolean,
-    maintenance: t.boolean,
-    read: t.boolean,
-    create_index: t.boolean,
-    index: t.boolean,
-    monitor: t.boolean,
-    delete: t.boolean,
-    manage: t.boolean,
-    delete_index: t.boolean,
-    create_doc: t.boolean,
-    view_index_metadata: t.boolean,
-    create: t.boolean,
-    write: t.boolean,
+export const indexRecord = z.record(
+  z.string(),
+  z.object({
+    all: z.boolean(),
+    maintenance: z.boolean(),
+    read: z.boolean(),
+    create_index: z.boolean(),
+    index: z.boolean(),
+    monitor: z.boolean(),
+    delete: z.boolean(),
+    manage: z.boolean(),
+    delete_index: z.boolean(),
+    create_doc: z.boolean(),
+    view_index_metadata: z.boolean(),
+    create: z.boolean(),
+    write: z.boolean(),
   })
 );
 
-export const privilege = t.type({
-  username: t.string,
-  has_all_requested: t.boolean,
-  cluster: t.type({
-    monitor_ml: t.boolean,
-    manage_index_templates: t.boolean,
-    monitor_transform: t.boolean,
-    manage_security: t.boolean,
-    manage_own_api_key: t.boolean,
-    all: t.boolean,
-    monitor: t.boolean,
-    manage: t.boolean,
-    manage_transform: t.boolean,
-    manage_ml: t.boolean,
-    manage_pipeline: t.boolean,
+export const privilege = z.object({
+  username: z.string(),
+  has_all_requested: z.boolean(),
+  cluster: z.object({
+    monitor_ml: z.boolean(),
+    manage_index_templates: z.boolean(),
+    monitor_transform: z.boolean(),
+    manage_security: z.boolean(),
+    manage_own_api_key: z.boolean(),
+    all: z.boolean(),
+    monitor: z.boolean(),
+    manage: z.boolean(),
+    manage_transform: z.boolean(),
+    manage_ml: z.boolean(),
+    manage_pipeline: z.boolean(),
   }),
   index: indexRecord,
-  is_authenticated: t.boolean,
-  has_encryption_key: t.boolean,
+  is_authenticated: z.boolean(),
+  has_encryption_key: z.boolean(),
 });
 
-export type Privilege = t.TypeOf<typeof privilege>;
+export type Privilege = z.infer<typeof privilege>;
 
-export const alert_tags = t.type({
-  tags_to_add: t.array(t.string),
-  tags_to_remove: t.array(t.string),
+export const alert_tags = z.object({
+  tags_to_add: z.array(z.string()),
+  tags_to_remove: z.array(z.string()),
 });
 
-export type AlertTags = t.TypeOf<typeof alert_tags>;
+export type AlertTags = z.infer<typeof alert_tags>;
 
-export const user_search_term = t.string;
-export type UserSearchTerm = t.TypeOf<typeof user_search_term>;
+export const user_search_term = z.string();
+export type UserSearchTerm = z.infer<typeof user_search_term>;

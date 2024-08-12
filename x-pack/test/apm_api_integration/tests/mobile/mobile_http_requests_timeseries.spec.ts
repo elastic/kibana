@@ -47,7 +47,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  registry.when(
+  registry.when.skip(
     'Mobile HTTP requests without data loaded',
     { config: 'basic', archives: [] },
     () => {
@@ -63,75 +63,81 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   // FLAKY: https://github.com/elastic/kibana/issues/177390
-  registry.when('Mobile HTTP requests with data loaded', { config: 'basic', archives: [] }, () => {
-    before(async () => {
-      await generateMobileData({
-        apmSynthtraceEsClient,
-        start,
-        end,
+  registry.when.skip(
+    'Mobile HTTP requests with data loaded',
+    { config: 'basic', archives: [] },
+    () => {
+      before(async () => {
+        await generateMobileData({
+          apmSynthtraceEsClient,
+          start,
+          end,
+        });
       });
-    });
 
-    after(() => apmSynthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
-    describe('when data is loaded', () => {
-      it('returns timeseries for http requests chart', async () => {
-        const response = await getHttpRequestsChart({
-          serviceName: 'synth-android',
-          offset: '1d',
+      describe('when data is loaded', () => {
+        it('returns timeseries for http requests chart', async () => {
+          const response = await getHttpRequestsChart({
+            serviceName: 'synth-android',
+            offset: '1d',
+          });
+
+          expect(response.status).to.be(200);
+          expect(response.body.currentPeriod.timeseries.some((item) => item.x && item.y)).to.eql(
+            true
+          );
+          expect(response.body.previousPeriod.timeseries[0].y).to.eql(0);
         });
 
-        expect(response.status).to.be(200);
-        expect(response.body.currentPeriod.timeseries.some((item) => item.x && item.y)).to.eql(
-          true
-        );
-        expect(response.body.previousPeriod.timeseries[0].y).to.eql(0);
+        it('returns only current period timeseries when offset is not available', async () => {
+          const response = await getHttpRequestsChart({ serviceName: 'synth-android' });
+
+          expect(response.status).to.be(200);
+          expect(
+            response.body.currentPeriod.timeseries.some((item) => item.y === 0 && item.x)
+          ).to.eql(true);
+
+          expect(response.body.currentPeriod.timeseries[0].y).to.eql(7);
+          expect(response.body.previousPeriod.timeseries).to.eql([]);
+        });
       });
 
-      it('returns only current period timeseries when offset is not available', async () => {
-        const response = await getHttpRequestsChart({ serviceName: 'synth-android' });
+      describe('when filters are applied', () => {
+        it('returns empty state for filters', async () => {
+          const response = await getHttpRequestsChart({
+            serviceName: 'synth-android',
+            environment: 'production',
+            kuery: `app.version:"none"`,
+          });
 
-        expect(response.status).to.be(200);
-        expect(
-          response.body.currentPeriod.timeseries.some((item) => item.y === 0 && item.x)
-        ).to.eql(true);
-
-        expect(response.body.currentPeriod.timeseries[0].y).to.eql(7);
-        expect(response.body.previousPeriod.timeseries).to.eql([]);
-      });
-    });
-
-    describe('when filters are applied', () => {
-      it('returns empty state for filters', async () => {
-        const response = await getHttpRequestsChart({
-          serviceName: 'synth-android',
-          environment: 'production',
-          kuery: `app.version:"none"`,
+          expect(response.status).to.be(200);
+          expect(response.body.currentPeriod.timeseries.every((item) => item.y === 0)).to.eql(true);
+          expect(response.body.previousPeriod.timeseries.every((item) => item.y === 0)).to.eql(
+            true
+          );
         });
 
-        expect(response.status).to.be(200);
-        expect(response.body.currentPeriod.timeseries.every((item) => item.y === 0)).to.eql(true);
-        expect(response.body.previousPeriod.timeseries.every((item) => item.y === 0)).to.eql(true);
-      });
+        it('returns the correct values when filter is applied', async () => {
+          const response = await getHttpRequestsChart({
+            serviceName: 'synth-android',
+            environment: 'production',
+            kuery: `network.connection.type:"wifi"`,
+          });
 
-      it('returns the correct values when filter is applied', async () => {
-        const response = await getHttpRequestsChart({
-          serviceName: 'synth-android',
-          environment: 'production',
-          kuery: `network.connection.type:"wifi"`,
+          const ntcCell = await getHttpRequestsChart({
+            serviceName: 'synth-android',
+            environment: 'production',
+            kuery: `network.connection.type:"cell"`,
+          });
+
+          expect(response.status).to.be(200);
+          expect(ntcCell.status).to.be(200);
+          expect(response.body.currentPeriod.timeseries[0].y).to.eql(5);
+          expect(ntcCell.body.currentPeriod.timeseries[0].y).to.eql(2);
         });
-
-        const ntcCell = await getHttpRequestsChart({
-          serviceName: 'synth-android',
-          environment: 'production',
-          kuery: `network.connection.type:"cell"`,
-        });
-
-        expect(response.status).to.be(200);
-        expect(ntcCell.status).to.be(200);
-        expect(response.body.currentPeriod.timeseries[0].y).to.eql(5);
-        expect(ntcCell.body.currentPeriod.timeseries[0].y).to.eql(2);
       });
-    });
-  });
+    }
+  );
 }

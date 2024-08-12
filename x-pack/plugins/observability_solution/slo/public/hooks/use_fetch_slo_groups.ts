@@ -98,7 +98,7 @@ export function useFetchSloGroups({
     }),
     queryFn: async ({ signal }) => {
       const response = await http.get<FindSLOGroupsResponse>(
-        '/internal/api/observability/slos/_groups',
+        '/internal/observability/slos/_groups',
         {
           query: {
             ...(page && { page }),

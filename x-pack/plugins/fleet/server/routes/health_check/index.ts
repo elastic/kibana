@@ -9,22 +9,26 @@ import https from 'https';
 import type { TypeOf } from '@kbn/config-schema';
 import fetch from 'node-fetch';
 
+import { getFleetServerHost } from '../../services/fleet_server_host';
+
 import { API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { APP_API_ROUTES } from '../../constants';
 import type { FleetRequestHandler } from '../../types';
+
 import { defaultFleetErrorHandler } from '../../errors';
 import { PostHealthCheckRequestSchema } from '../../types';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
-  // get fleet server health check by host
+  // get fleet server health check by host id
   router.versioned
     .post({
       path: APP_API_ROUTES.HEALTH_CHECK_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allSettings: true },
       },
+      description: `Check Fleet Server health`,
     })
     .addVersion(
       {
@@ -40,15 +44,39 @@ export const postHealthCheckHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof PostHealthCheckRequestSchema.body>
 > = async (context, request, response) => {
+  const abortController = new AbortController();
+  const { id, host: deprecatedField } = request.body;
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+
+  if (deprecatedField) {
+    return response.badRequest({
+      body: {
+        message: `Property 'host' is deprecated. Please use id instead.`,
+      },
+    });
+  }
   try {
-    const abortController = new AbortController();
-    const { host } = request.body;
+    const fleetServerHost = await getFleetServerHost(soClient, id);
+
+    if (
+      !fleetServerHost ||
+      !fleetServerHost?.host_urls ||
+      fleetServerHost?.host_urls?.length === 0
+    ) {
+      return response.badRequest({
+        body: {
+          message: `The requested host id ${id} does not have associated host urls.`,
+        },
+      });
+    }
 
     // Sometimes when the host is not online, the request hangs
     // Setting a timeout to abort the request after 5s
     setTimeout(() => {
       abortController.abort();
     }, 5000);
+    const host = fleetServerHost.host_urls[0];
 
     const res = await fetch(`${host}/api/status`, {
       headers: {
@@ -65,10 +93,18 @@ export const postHealthCheckHandler: FleetRequestHandler<
 
     return response.ok({ body });
   } catch (error) {
+    if (error.isBoom && error.output.statusCode === 404) {
+      return response.notFound({
+        body: {
+          message: `The requested host id ${request.body.id} does not exist.`,
+        },
+      });
+    }
+
     // when the request is aborted, return offline status
-    if (error.name === 'AbortError') {
+    if (error.name === 'AbortError' || error.message.includes('user aborted')) {
       return response.ok({
-        body: { name: 'fleet-server', status: `OFFLINE`, host: request.body.host },
+        body: { status: `OFFLINE`, host_id: request.body.id },
       });
     }
     return defaultFleetErrorHandler({ error, response });

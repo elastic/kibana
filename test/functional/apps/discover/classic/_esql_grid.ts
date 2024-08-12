@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dataGrid.clickRowToggle({ rowIndex: 0 });
 
-      await testSubjects.existOrFail('docTableDetailsFlyout');
+      await testSubjects.existOrFail('docViewerFlyout');
 
       await PageObjects.discover.saveSearch(savedSearchESQL);
 
@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dataGrid.clickRowToggle({ rowIndex: 0 });
 
-      await testSubjects.existOrFail('docTableDetailsFlyout');
+      await testSubjects.existOrFail('docViewerFlyout');
 
       await dashboardPanelActions.removePanelByTitle(savedSearchESQL);
 

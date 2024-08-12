@@ -339,6 +339,55 @@ describe('request', () => {
       `"Do not use \\"baseURL\\" in the creation of your axios instance because you will mostly break proxy"`
     );
   });
+
+  test('it converts the auth property to basic auth header', async () => {
+    await request({
+      axios,
+      url: '/test',
+      logger,
+      configurationUtilities,
+      auth: { username: 'username', password: 'password' },
+    });
+
+    expect(axiosMock).toHaveBeenCalledWith('/test', {
+      method: 'get',
+      httpAgent: undefined,
+      httpsAgent: expect.any(HttpsAgent),
+      proxy: false,
+      maxContentLength: 1000000,
+      timeout: 360000,
+      headers: { Authorization: `Basic ${Buffer.from('username:password').toString('base64')}` },
+    });
+  });
+
+  test('it does not override an authorization header if provided', async () => {
+    await request({
+      axios,
+      url: '/test',
+      logger,
+      configurationUtilities,
+      auth: { username: 'username', password: 'password' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Test-Header': 'test',
+        Authorization: 'Bearer my_token',
+      },
+    });
+
+    expect(axiosMock).toHaveBeenCalledWith('/test', {
+      method: 'get',
+      httpAgent: undefined,
+      httpsAgent: expect.any(HttpsAgent),
+      proxy: false,
+      maxContentLength: 1000000,
+      timeout: 360000,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Test-Header': 'test',
+        Authorization: 'Bearer my_token',
+      },
+    });
+  });
 });
 
 describe('patch', () => {

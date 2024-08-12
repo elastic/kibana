@@ -19,6 +19,7 @@ import {
   PreconfiguredOutputsSchema,
   PreconfiguredFleetServerHostsSchema,
   PreconfiguredFleetProxiesSchema,
+  PreconfiguredSpaceSettingsSchema,
 } from './types';
 import { BULK_CREATE_MAX_ARTIFACTS_BYTES } from './services/artifacts/artifacts';
 
@@ -32,6 +33,11 @@ export const config: PluginConfigDescriptor = {
     epm: true,
     agents: {
       enabled: true,
+    },
+    agentless: {
+      api: {
+        url: true,
+      },
     },
     enableExperimental: true,
     developer: {
@@ -141,11 +147,24 @@ export const config: PluginConfigDescriptor = {
           })
         ),
       }),
+      agentless: schema.maybe(
+        schema.object({
+          api: schema.object({
+            url: schema.uri({ scheme: ['http', 'https'] }),
+            tls: schema.object({
+              certificate: schema.string(),
+              key: schema.string(),
+              ca: schema.string(),
+            }),
+          }),
+        })
+      ),
       packages: PreconfiguredPackagesSchema,
       agentPolicies: PreconfiguredAgentPoliciesSchema,
       outputs: PreconfiguredOutputsSchema,
       fleetServerHosts: PreconfiguredFleetServerHostsSchema,
       proxies: PreconfiguredFleetProxiesSchema,
+      spaceSettings: PreconfiguredSpaceSettingsSchema,
       agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
       setup: schema.maybe(
         schema.object({

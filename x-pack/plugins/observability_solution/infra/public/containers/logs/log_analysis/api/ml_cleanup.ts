@@ -8,9 +8,9 @@
 import * as rt from 'io-ts';
 import type { HttpHandler } from '@kbn/core/public';
 
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { IdFormat, JobType } from '../../../../../common/http_api/latest';
 import { getDatafeedId, getJobId } from '../../../../../common/log_analysis';
-import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface DeleteJobsRequestArgs<T extends JobType> {
   spaceId: string;

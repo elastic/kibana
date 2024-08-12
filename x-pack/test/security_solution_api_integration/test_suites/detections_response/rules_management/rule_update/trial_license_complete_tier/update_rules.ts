@@ -46,9 +46,7 @@ export default ({ getService }: FtrProviderContext) => {
   const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service for pulling kibana username, similar to getService('es')
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
   describe('@ess @serverless @skipInServerlessMKI update_rules', () => {
     describe('update rules', () => {
@@ -72,7 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { body } = await securitySolutionApi.updateRule({ body: updatedRule }).expect(200);
 
-        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
         outputRule.name = 'some other name';
         outputRule.revision = 1;
@@ -91,7 +89,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { body } = await securitySolutionApi.updateRule({ body: updatedRule }).expect(200);
 
-        const outputRule = updateUsername(getSimpleMlRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleMlRuleOutput(), await utils.getUsername());
 
         // @ts-expect-error type narrowing is lost due to Omit<>
         outputRule.machine_learning_job_id = ['legacy_job_id'];
@@ -111,7 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { body } = await securitySolutionApi.updateRule({ body: updatedRule }).expect(200);
 
-        const outputRule = updateUsername(getSimpleMlRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleMlRuleOutput(), await utils.getUsername());
         outputRule.name = 'some other name';
         outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body);
@@ -133,7 +131,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = updateUsername(
           getSimpleRuleOutputWithoutRuleId(),
-          ELASTICSEARCH_USERNAME
+          await utils.getUsername()
         );
 
         outputRule.name = 'some other name';
@@ -182,7 +180,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = updateUsername(
           getSimpleRuleOutputWithoutRuleId(),
-          ELASTICSEARCH_USERNAME
+          await utils.getUsername()
         );
         outputRule.name = 'some other name';
         outputRule.revision = 1;
@@ -203,7 +201,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { body } = await securitySolutionApi.updateRule({ body: updatedRule }).expect(200);
 
-        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
         outputRule.name = 'some other name';
         outputRule.revision = 1;
@@ -221,7 +219,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { body } = await securitySolutionApi.updateRule({ body: updatedRule }).expect(200);
 
-        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
         outputRule.enabled = false;
         outputRule.severity = 'low';
@@ -247,7 +245,7 @@ export default ({ getService }: FtrProviderContext) => {
         // update a simple rule's name
         const { body } = await securitySolutionApi.updateRule({ body: ruleUpdate2 }).expect(200);
 
-        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
         outputRule.name = 'some other name';
         outputRule.revision = 2;
@@ -579,7 +577,7 @@ export default ({ getService }: FtrProviderContext) => {
                 );
                 const expectedRule = updateUsername(
                   getSimpleRuleOutputWithoutRuleId(),
-                  ELASTICSEARCH_USERNAME
+                  await utils.getUsername()
                 );
 
                 expectedRule.revision = 1;
@@ -610,7 +608,7 @@ export default ({ getService }: FtrProviderContext) => {
 
               const expectedRule = updateUsername(
                 getSimpleRuleOutputWithoutRuleId(),
-                ELASTICSEARCH_USERNAME
+                await utils.getUsername()
               );
               expectedRule.revision = 1;
               expectedRule.actions = actionsWithoutFrequencies.map((action) => ({
@@ -648,7 +646,7 @@ export default ({ getService }: FtrProviderContext) => {
 
               const expectedRule = updateUsername(
                 getSimpleRuleOutputWithoutRuleId(),
-                ELASTICSEARCH_USERNAME
+                await utils.getUsername()
               );
               expectedRule.revision = 1;
               expectedRule.actions = actionsWithFrequencies;
@@ -676,7 +674,7 @@ export default ({ getService }: FtrProviderContext) => {
 
                 const expectedRule = updateUsername(
                   getSimpleRuleOutputWithoutRuleId(),
-                  ELASTICSEARCH_USERNAME
+                  await utils.getUsername()
                 );
                 expectedRule.revision = 1;
                 expectedRule.actions = someActionsWithFrequencies.map((action) => ({
@@ -706,7 +704,7 @@ export default ({ getService }: FtrProviderContext) => {
 
               const expectedRule = updateUsername(
                 getSimpleRuleOutputWithoutRuleId(),
-                ELASTICSEARCH_USERNAME
+                await utils.getUsername()
               );
               expectedRule.revision = 1;
               expectedRule.actions = someActionsWithFrequencies.map((action) => ({

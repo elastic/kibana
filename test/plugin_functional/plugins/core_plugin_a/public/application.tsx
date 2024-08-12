@@ -10,6 +10,7 @@ import { History } from 'history';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { withRouter, RouteComponentProps, Redirect } from 'react-router-dom';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Router, Route } from '@kbn/shared-ux-router';
 
 import {
@@ -100,16 +101,18 @@ const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
 ));
 
 const FooApp = ({ history, coreStart }: { history: History; coreStart: CoreStart }) => (
-  <Router history={history}>
-    <EuiPage>
-      <EuiPageSidebar>
-        <Nav navigateToApp={coreStart.application.navigateToApp} />
-      </EuiPageSidebar>
-      <Route path="/" exact render={() => <Redirect to="/home" />} />
-      <Route path="/home" exact component={Home} />
-      <Route path="/page-a" component={PageA} />
-    </EuiPage>
-  </Router>
+  <KibanaRenderContextProvider {...coreStart}>
+    <Router history={history}>
+      <EuiPage>
+        <EuiPageSidebar>
+          <Nav navigateToApp={coreStart.application.navigateToApp} />
+        </EuiPageSidebar>
+        <Route path="/" exact render={() => <Redirect to="/home" />} />
+        <Route path="/home" exact component={Home} />
+        <Route path="/page-a" component={PageA} />
+      </EuiPage>
+    </Router>
+  </KibanaRenderContextProvider>
 );
 
 export const renderApp = (coreStart: CoreStart, { history, element }: AppMountParameters) => {

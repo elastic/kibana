@@ -53,7 +53,7 @@ export const DeletePolicyModal = ({
           const errorMessage = i18n.translate(
             'xpack.idxMgmt.enrichPolicies.deleteModal.errorDeleteNotificationMessage',
             {
-              defaultMessage: "Error deleting enrich policy: '{error}'",
+              defaultMessage: "Error deleting enrich policy: ''{error}''",
               values: { error: error.message },
             }
           );

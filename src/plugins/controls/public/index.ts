@@ -9,12 +9,29 @@
 import { ControlsPlugin } from './plugin';
 
 export type {
+  ControlGroupApi,
+  ControlGroupRuntimeState,
+  ControlGroupSerializedState,
+} from './react_controls/control_group/types';
+export type {
+  DataControlApi,
+  DefaultDataControlState,
+  DataControlFactory,
+  DataControlServices,
+} from './react_controls/controls/data_controls/types';
+
+/**
+ * TODO: remove all exports below this when control group embeddable is removed
+ */
+
+export type {
   ControlOutput,
   ControlFactory,
   ControlEmbeddable,
   ControlEditorProps,
   CommonControlOutput,
   IEditableControlFactory,
+  CanClearSelections,
 } from './types';
 
 export type {
@@ -64,6 +81,9 @@ export {
   ControlGroupRenderer,
   type ControlGroupRendererProps,
 } from './control_group';
+
+/** TODO: Remove this once it is no longer needed in the examples plugin */
+export { CONTROL_WIDTH_OPTIONS } from './control_group/editor/editor_constants';
 
 export function plugin() {
   return new ControlsPlugin();

@@ -56,8 +56,8 @@ export const OWNER_INFO: Record<Owner, RouteInfo> = {
   [GENERAL_CASES_OWNER]: {
     id: GENERAL_CASES_OWNER,
     appId: 'management',
-    label: 'Stack',
-    iconType: 'casesApp',
+    label: 'Management',
+    iconType: 'managementApp',
     appRoute: '/app/management/insightsAndAlerting',
     validRuleConsumers: [AlertConsumers.ML, AlertConsumers.STACK_ALERTS, AlertConsumers.EXAMPLE],
   },

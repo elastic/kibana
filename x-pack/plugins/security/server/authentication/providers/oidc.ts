@@ -268,7 +268,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       })) as any;
     } catch (err) {
       this.logger.debug(
-        `Failed to authenticate request via OpenID Connect: ${getDetailedErrorMessage(err)}`
+        () => `Failed to authenticate request via OpenID Connect: ${getDetailedErrorMessage(err)}`
       );
       return AuthenticationResult.failed(err);
     }
@@ -319,7 +319,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       );
     } catch (err) {
       this.logger.debug(
-        `Failed to initiate OpenID Connect authentication: ${getDetailedErrorMessage(err)}`
+        () => `Failed to initiate OpenID Connect authentication: ${getDetailedErrorMessage(err)}`
       );
       return AuthenticationResult.failed(err);
     }
@@ -349,7 +349,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.succeeded(user, { authHeaders });
     } catch (err) {
       this.logger.debug(
-        `Failed to authenticate request via state: ${getDetailedErrorMessage(err)}`
+        () => `Failed to authenticate request via state: ${getDetailedErrorMessage(err)}`
       );
       return AuthenticationResult.failed(err);
     }
@@ -448,7 +448,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
           return DeauthenticationResult.redirectTo(redirect);
         }
       } catch (err) {
-        this.logger.debug(`Failed to deauthenticate user: ${getDetailedErrorMessage(err)}`);
+        this.logger.debug(() => `Failed to deauthenticate user: ${getDetailedErrorMessage(err)}`);
         return DeauthenticationResult.failed(err);
       }
     }

@@ -161,7 +161,7 @@ export default ({ getService }: FtrProviderContext): void => {
   });
 };
 
-const expectImportToHaveOneCase = async (supertestService: supertest.SuperTest<supertest.Test>) => {
+const expectImportToHaveOneCase = async (supertestService: supertest.Agent) => {
   const findResponse = await findCases({ supertest: supertestService, query: {} });
   expect(findResponse.total).to.eql(1);
   expect(findResponse.cases[0].title).to.eql('A case with a connector');

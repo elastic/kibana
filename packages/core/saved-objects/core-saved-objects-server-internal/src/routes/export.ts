@@ -143,6 +143,13 @@ export const registerExportRoute = (
   router.post(
     {
       path: '/_export',
+      options: {
+        summary: `Export saved objects`,
+        tags: ['oas-tag:saved objects'],
+        access: 'public',
+        description:
+          'Retrieve sets of saved objects that you want to import into Kibana. You must include `type` or `objects` in the request body.  \nExported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.  \nNOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.',
+      },
       validate: {
         body: schema.object({
           type: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),

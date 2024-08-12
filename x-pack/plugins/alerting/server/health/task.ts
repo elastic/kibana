@@ -11,9 +11,9 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { HealthStatus } from '@kbn/alerting-types';
 import { AlertingConfig } from '../config';
 import { AlertingPluginsStart } from '../plugin';
-import { HealthStatus } from '../types';
 import { getAlertingHealthStatus } from './get_health';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 

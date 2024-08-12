@@ -14,11 +14,12 @@ import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import {
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
-  ESQL_LATEST_VERSION,
+  getStartEndParams,
+  hasStartEndParams,
 } from '@kbn/esql-utils';
 import { buildEsQuery } from '@kbn/es-query';
 import type { Filter, Query } from '@kbn/es-query';
-import type { ESQLSearchParams, ESQLSearchReponse } from '@kbn/es-types';
+import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
 import { getTime } from '@kbn/data-plugin/public';
 import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
@@ -116,11 +117,11 @@ export class ESQLSource
   }
 
   getApplyGlobalQuery() {
-    return this._descriptor.narrowByGlobalSearch;
+    return this._descriptor.narrowByGlobalSearch || hasStartEndParams(this._descriptor.esql);
   }
 
   async isTimeAware() {
-    return this._descriptor.narrowByGlobalTime;
+    return this._descriptor.narrowByGlobalTime || hasStartEndParams(this._descriptor.esql);
   }
 
   getApplyGlobalTime() {
@@ -157,7 +158,6 @@ export class ESQLSource
     const params: ESQLSearchParams = {
       query: this._descriptor.esql,
       dropNullColumns: true,
-      version: ESQL_LATEST_VERSION,
     };
 
     const query: Query[] = [];
@@ -188,6 +188,14 @@ export class ESQLSource
       filters.push(extentFilter);
     }
 
+    const timeRange = requestMeta.timeslice
+      ? {
+          from: new Date(requestMeta.timeslice.from).toISOString(),
+          to: new Date(requestMeta.timeslice.to).toISOString(),
+          mode: 'absolute' as 'absolute',
+        }
+      : requestMeta.timeFilters;
+
     if (requestMeta.applyGlobalTime) {
       if (!this._descriptor.dateField) {
         throw new Error(
@@ -197,19 +205,18 @@ export class ESQLSource
           })
         );
       }
-      const timeRange = requestMeta.timeslice
-        ? {
-            from: new Date(requestMeta.timeslice.from).toISOString(),
-            to: new Date(requestMeta.timeslice.to).toISOString(),
-            mode: 'absolute' as 'absolute',
-          }
-        : requestMeta.timeFilters;
       const timeFilter = getTime(undefined, timeRange, {
         fieldName: this._descriptor.dateField,
       });
+
       if (timeFilter) {
         filters.push(timeFilter);
       }
+    }
+
+    const namedParams = getStartEndParams(this._descriptor.esql, timeRange);
+    if (namedParams.length) {
+      params.params = namedParams;
     }
 
     params.filter = buildEsQuery(undefined, query, filters, getEsQueryConfig(getUiSettings()));
@@ -243,7 +250,7 @@ export class ESQLSource
 
     requestResponder.ok({ json: rawResponse, requestParams });
 
-    const esqlSearchResponse = rawResponse as unknown as ESQLSearchReponse;
+    const esqlSearchResponse = rawResponse as unknown as ESQLSearchResponse;
     const resultsCount = esqlSearchResponse.values.length;
     return {
       data: convertToGeoJson(esqlSearchResponse),

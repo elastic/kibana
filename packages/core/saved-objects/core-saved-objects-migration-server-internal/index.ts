@@ -24,7 +24,6 @@ export {
   calculateExcludeFilters,
   checkForUnknownDocs,
   waitForIndexStatus,
-  initAction,
   cloneIndex,
   waitForTask,
   updateAndPickupMappings,
@@ -40,6 +39,7 @@ export {
   fetchIndices,
   waitForReindexTask,
   waitForPickupUpdatedMappingsTask,
+  checkClusterRoutingAllocationEnabled,
 } from './src/actions';
 export type {
   OpenPitResponse,

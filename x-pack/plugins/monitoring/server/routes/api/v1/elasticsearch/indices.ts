@@ -32,6 +32,9 @@ export function esIndicesRoute(server: MonitoringCore) {
       query: validateQuery,
       body: validateBody,
     },
+    options: {
+      access: 'internal',
+    },
     async handler(req) {
       const { clusterUuid } = req.params;
       const { show_system_indices: showSystemIndices } = req.query;

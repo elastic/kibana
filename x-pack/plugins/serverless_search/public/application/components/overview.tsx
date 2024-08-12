@@ -37,6 +37,7 @@ import type {
 } from '@kbn/search-api-panels';
 import { useLocation } from 'react-router-dom';
 import { CloudDetailsPanel } from '@kbn/search-api-panels';
+import { DEFAULT_INGESTION_PIPELINE } from '../../../common';
 import { docLinks } from '../../../common/doc_links';
 import { useKibanaServices } from '../hooks/use_kibana';
 import { useAssetBasePath } from '../hooks/use_asset_base_path';
@@ -55,6 +56,7 @@ import { PipelineOverviewButton } from './pipeline_overview_button';
 import { SelectClientCallouts } from './select_client_callouts';
 import { PipelineManageButton } from './pipeline_manage_button';
 import { OPTIONAL_LABEL } from '../../../common/i18n_string';
+import { useIngestPipelines } from '../hooks/api/use_ingest_pipelines';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(javaDefinition);
@@ -82,12 +84,16 @@ export const ElasticsearchOverview = () => {
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
+  const [selectedPipeline, setSelectedPipeline] = React.useState<string>('');
 
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
     url: elasticsearchURL,
     apiKey: clientApiKey,
     cloudId,
+    ingestPipeline: selectedPipeline,
   };
+
+  const { data: pipelineData } = useIngestPipelines();
 
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchOverviewPage">
@@ -186,6 +192,9 @@ export const ElasticsearchOverview = () => {
               assetBasePath={assetBasePath}
               application={application}
               sharePlugin={share}
+              consoleTitle={i18n.translate('xpack.serverlessSearch.configureClient.title', {
+                defaultMessage: 'Configure your client',
+              })}
             />
           }
           links={[
@@ -232,6 +241,9 @@ export const ElasticsearchOverview = () => {
               assetBasePath={assetBasePath}
               application={application}
               sharePlugin={share}
+              consoleTitle={i18n.translate('xpack.serverlessSearch.testConnection.title', {
+                defaultMessage: 'Test your connection',
+              })}
             />
           }
           links={[]}
@@ -302,7 +314,8 @@ export const ElasticsearchOverview = () => {
             'ingestData',
             codeSnippetArguments
           )}
-          consoleRequest={getConsoleRequest('ingestData')}
+          ingestPipelineData={pipelineData?.pipelines}
+          consoleRequest={getConsoleRequest('ingestData', codeSnippetArguments)}
           languages={languageDefinitions}
           selectedLanguage={selectedLanguage}
           setSelectedLanguage={setSelectedLanguage}
@@ -312,6 +325,9 @@ export const ElasticsearchOverview = () => {
           consolePlugin={consolePlugin}
           sharePlugin={share}
           additionalIngestionPanel={<ConnectorIngestionPanel assetBasePath={assetBasePath} />}
+          selectedPipeline={selectedPipeline}
+          setSelectedPipeline={setSelectedPipeline}
+          defaultIngestPipeline={DEFAULT_INGESTION_PIPELINE}
         />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section
@@ -339,6 +355,9 @@ export const ElasticsearchOverview = () => {
               application={application}
               consolePlugin={consolePlugin}
               sharePlugin={share}
+              consoleTitle={i18n.translate('xpack.serverlessSearch.searchQuery.title', {
+                defaultMessage: 'Build your first search query',
+              })}
             />
           }
           links={[]}

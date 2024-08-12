@@ -49,7 +49,9 @@ export const elasticsearch = new ElasticsearchService(logger, kibanaPackageJson.
         logger,
         type,
         // we use an independent AgentManager for cli_setup, no need to track performance of this one
-        agentFactoryProvider: new AgentManager(logger.get('agent-manager')),
+        agentFactoryProvider: new AgentManager(logger.get('agent-manager'), {
+          dnsCacheTtlInSeconds: config?.dnsCacheTtl?.asSeconds() ?? 0,
+        }),
         kibanaVersion: kibanaPackageJson.version,
       });
     },

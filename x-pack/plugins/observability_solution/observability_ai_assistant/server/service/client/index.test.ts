@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { waitFor } from '@testing-library/react';
 import { last, merge, repeat } from 'lodash';
@@ -14,7 +14,6 @@ import { Subject } from 'rxjs';
 import { EventEmitter, PassThrough, type Readable } from 'stream';
 import { finished } from 'stream/promises';
 import { ObservabilityAIAssistantClient } from '.';
-import { createResourceNamesMap } from '..';
 import { MessageRole, type Message } from '../../../common';
 import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
@@ -24,8 +23,10 @@ import {
   StreamingChatResponseEventType,
 } from '../../../common/conversation_complete';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
+import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import { ChatFunctionClient } from '../chat_function_client';
 import type { KnowledgeBaseService } from '../knowledge_base_service';
+import { USER_INSTRUCTIONS_HEADER } from '../util/get_system_message_from_instructions';
 import { observableIntoStream } from '../util/observable_into_stream';
 import { CreateChatCompletionResponseChunk } from './adapters/process_openai_stream';
 
@@ -33,7 +34,7 @@ type ChunkDelta = CreateChatCompletionResponseChunk['choices'][number]['delta'];
 
 type LlmSimulator = ReturnType<typeof createLlmSimulator>;
 
-const EXPECTED_STORED_SYSTEM_MESSAGE = `system\n\nWhat follows is a set of instructions provided by the user, please abide by them as long as they don't conflict with anything you've been told so far:\n\nYou MUST respond in the users preferred language which is: English.`;
+const EXPECTED_STORED_SYSTEM_MESSAGE = `system\n\n${USER_INSTRUCTIONS_HEADER}\n\nYou MUST respond in the users preferred language which is: English.`;
 
 const nextTick = () => {
   return new Promise(process.nextTick);
@@ -94,6 +95,10 @@ describe('Observability AI Assistant client', () => {
     get: jest.fn(),
   } as any;
 
+  const uiSettingsClientMock: DeeplyMockedKeys<IUiSettingsClient> = {
+    get: jest.fn(),
+  } as any;
+
   const internalUserEsClientMock: DeeplyMockedKeys<ElasticsearchClient> = {
     search: jest.fn(),
     index: jest.fn(),
@@ -107,7 +112,7 @@ describe('Observability AI Assistant client', () => {
 
   const knowledgeBaseServiceMock: DeeplyMockedKeys<KnowledgeBaseService> = {
     recall: jest.fn(),
-    getInstructions: jest.fn(),
+    getUserInstructions: jest.fn(),
   } as any;
 
   let loggerMock: DeeplyMockedKeys<Logger> = {} as any;
@@ -141,7 +146,7 @@ describe('Observability AI Assistant client', () => {
 
     functionClientMock.getFunctions.mockReturnValue([]);
     functionClientMock.hasFunction.mockImplementation((name) => {
-      return name !== 'context';
+      return name !== CONTEXT_FUNCTION_NAME;
     });
 
     functionClientMock.hasAction.mockReturnValue(false);
@@ -166,12 +171,13 @@ describe('Observability AI Assistant client', () => {
       fields: [],
     } as any);
 
-    knowledgeBaseServiceMock.getInstructions.mockResolvedValue([]);
+    knowledgeBaseServiceMock.getUserInstructions.mockResolvedValue([]);
 
     functionClientMock.getInstructions.mockReturnValue(['system']);
 
     return new ObservabilityAIAssistantClient({
       actionsClient: actionsClientMock,
+      uiSettingsClient: uiSettingsClientMock,
       esClient: {
         asInternalUser: internalUserEsClientMock,
         asCurrentUser: currentUserEsClientMock,
@@ -179,7 +185,6 @@ describe('Observability AI Assistant client', () => {
       knowledgeBaseService: knowledgeBaseServiceMock,
       logger: loggerMock,
       namespace: 'default',
-      resources: createResourceNamesMap(),
       user: {
         name: 'johndoe',
       },
@@ -362,8 +367,8 @@ describe('Observability AI Assistant client', () => {
               last_updated: expect.any(String),
               token_count: {
                 completion: 1,
-                prompt: 78,
-                total: 79,
+                prompt: 84,
+                total: 85,
               },
             },
             type: StreamingChatResponseEventType.ConversationCreate,
@@ -419,8 +424,8 @@ describe('Observability AI Assistant client', () => {
               last_updated: expect.any(String),
               token_count: {
                 completion: 6,
-                prompt: 262,
-                total: 268,
+                prompt: 268,
+                total: 274,
               },
             },
             type: StreamingChatResponseEventType.ConversationCreate,
@@ -437,8 +442,8 @@ describe('Observability AI Assistant client', () => {
                 title: 'An auto-generated title',
                 token_count: {
                   completion: 6,
-                  prompt: 262,
-                  total: 268,
+                  prompt: 268,
+                  total: 274,
                 },
               },
               labels: {},
@@ -568,8 +573,8 @@ describe('Observability AI Assistant client', () => {
           last_updated: expect.any(String),
           token_count: {
             completion: 2,
-            prompt: 156,
-            total: 158,
+            prompt: 162,
+            total: 164,
           },
         },
         type: StreamingChatResponseEventType.ConversationUpdate,
@@ -587,8 +592,8 @@ describe('Observability AI Assistant client', () => {
             title: 'My stored conversation',
             token_count: {
               completion: 2,
-              prompt: 156,
-              total: 158,
+              prompt: 162,
+              total: 164,
             },
           },
           labels: {},
@@ -1225,8 +1230,7 @@ describe('Observability AI Assistant client', () => {
             content: '',
             role: MessageRole.Assistant,
             function_call: {
-              name: 'context',
-              arguments: JSON.stringify({ queries: [], categories: [] }),
+              name: CONTEXT_FUNCTION_NAME,
               trigger: MessageRole.Assistant,
             },
           },
@@ -1243,7 +1247,7 @@ describe('Observability AI Assistant client', () => {
           message: {
             content: JSON.stringify([{ id: 'my_document', text: 'My document' }]),
             role: MessageRole.User,
-            name: 'context',
+            name: CONTEXT_FUNCTION_NAME,
           },
         },
       });
@@ -1435,7 +1439,7 @@ describe('Observability AI Assistant client', () => {
 
     it('executes the context function', async () => {
       expect(functionClientMock.executeFunction).toHaveBeenCalledWith(
-        expect.objectContaining({ name: 'context' })
+        expect.objectContaining({ name: CONTEXT_FUNCTION_NAME })
       );
     });
 
@@ -1449,8 +1453,7 @@ describe('Observability AI Assistant client', () => {
             content: '',
             role: MessageRole.Assistant,
             function_call: {
-              name: 'context',
-              arguments: JSON.stringify({ queries: [], categories: [] }),
+              name: CONTEXT_FUNCTION_NAME,
               trigger: MessageRole.Assistant,
             },
           },

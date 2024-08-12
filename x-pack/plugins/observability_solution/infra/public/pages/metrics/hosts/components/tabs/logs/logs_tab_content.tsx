@@ -16,7 +16,7 @@ import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { useLogsSearchUrlState } from '../../../hooks/use_logs_search_url_state';
 import { LogsLinkToStream } from './logs_link_to_stream';
 import { LogsSearchBar } from './logs_search_bar';
-import { buildCombinedHostsFilter } from '../../../../../../utils/filters/build';
+import { buildCombinedAssetFilter } from '../../../../../../utils/filters/build';
 import { useLogViewReference } from '../../../../../../hooks/use_log_view_reference';
 
 export const LogsTabContent = () => {
@@ -27,7 +27,7 @@ export const LogsTabContent = () => {
 
   const hostsFilterQuery = useMemo(
     () =>
-      buildCombinedHostsFilter({
+      buildCombinedAssetFilter({
         field: 'host.name',
         values: hostNodes.map((p) => p.name),
       }),

@@ -174,6 +174,7 @@ export interface AllocateAction {
 export interface ShrinkAction {
   number_of_shards?: number;
   max_primary_shard_size?: string;
+  allow_write_after_shrink?: boolean;
 }
 
 export interface ForcemergeAction {

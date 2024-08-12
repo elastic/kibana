@@ -6,14 +6,18 @@
  */
 
 import React, { useState, useCallback, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { useForm, Form, FormConfig } from '../../../shared_imports';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { Pipeline, Processor } from '../../../../common/types';
+import { useForm, Form, FormConfig, useFormIsModified } from '../../../shared_imports';
 
+import { useKibana } from '../../../shared_imports';
 import { OnUpdateHandlerArg, OnUpdateHandler } from '../pipeline_editor';
 
+import { deepEqualIgnoreUndefined } from './utils';
 import { PipelineRequestFlyout } from './pipeline_request_flyout';
 import { PipelineFormFields } from './pipeline_form_fields';
 import { PipelineFormError } from './pipeline_form_error';
@@ -48,7 +52,16 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
   onCancel,
   canEditName,
 }) => {
+  const {
+    overlays,
+    history,
+    application: { navigateToUrl },
+    http,
+  } = useKibana().services;
+
   const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);
+  const [areProcessorsDirty, setAreProcessorsDirty] = useState<boolean>(false);
+  const [hasSubmittedForm, setHasSubmittedForm] = useState<boolean>(false);
 
   const {
     processors: initialProcessors,
@@ -74,6 +87,11 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
     if (processorStateRef.current) {
       const state = processorStateRef.current;
       if (await state.validate()) {
+        // We only want to show unsaved changed prompts to the user when the form
+        // hasnt been submitted.
+        setHasSubmittedForm(true);
+
+        // Save the form state, this will also trigger a redirect to pipelines list
         onSave({ ...formData, ...state.getData() });
       }
     }
@@ -84,6 +102,8 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
     defaultValue: defaultFormValues,
     onSubmit: handleSave,
   });
+
+  const isFormDirty = useFormIsModified({ form });
 
   const onEditorFlyoutOpen = useCallback(() => {
     setIsRequestVisible(false);
@@ -107,9 +127,48 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
   );
 
   const onProcessorsChangeHandler = useCallback<OnUpdateHandler>(
-    (arg) => (processorStateRef.current = arg),
-    []
+    (arg) => {
+      processorStateRef.current = arg;
+
+      const currentProcessorsState = processorStateRef.current?.getData();
+
+      // Calculate if the current processor state has changed compared to the
+      // initial processors state.
+      setAreProcessorsDirty(
+        !deepEqualIgnoreUndefined(
+          {
+            processors: processorsState?.processors || [],
+            onFailure: processorsState?.onFailure || [],
+          },
+          {
+            processors: currentProcessorsState?.processors || [],
+            onFailure: currentProcessorsState?.on_failure || [],
+          }
+        )
+      );
+    },
+    [processorsState]
   );
+
+  /*
+    We need to check if the form is dirty and also if the form has been submitted.
+    Because on form submission we also redirect the user to the pipelines list,
+    and this could otherwise trigger an unwanted unsaved changes prompt.
+  */
+  useUnsavedChangesPrompt({
+    titleText: i18n.translate('xpack.ingestPipelines.form.unsavedPrompt.title', {
+      defaultMessage: 'Exit without saving changes?',
+    }),
+    messageText: i18n.translate('xpack.ingestPipelines.form.unsavedPrompt.body', {
+      defaultMessage:
+        'The data will be lost if you leave this page without saving the pipeline changes.',
+    }),
+    hasUnsavedChanges: (isFormDirty || areProcessorsDirty) && !hasSubmittedForm,
+    openConfirm: overlays.openConfirm,
+    history,
+    http,
+    navigateToUrl,
+  });
 
   return (
     <>
@@ -136,6 +195,8 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
           isEditing={isEditing}
           canEditName={canEditName}
         />
+
+        <EuiSpacer size="xl" />
 
         {/* Form submission */}
         <EuiFlexGroup justifyContent="spaceBetween">

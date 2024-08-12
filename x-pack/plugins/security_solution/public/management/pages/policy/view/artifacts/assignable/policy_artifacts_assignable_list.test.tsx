@@ -35,6 +35,7 @@ describe('Policy artifacts list', () => {
       selectedArtifactIds: [],
       isListLoading: true,
       selectedArtifactsUpdated: selectedArtifactsUpdatedMock,
+      CardDecorator: undefined,
     });
 
     expect(component.getByTestId('artifactsAssignableListLoader')).not.toBeNull();
@@ -47,6 +48,7 @@ describe('Policy artifacts list', () => {
       selectedArtifactIds: [],
       isListLoading: false,
       selectedArtifactsUpdated: selectedArtifactsUpdatedMock,
+      CardDecorator: undefined,
     });
     expect(component.queryByTestId('artifactsList')).toBeNull();
   });
@@ -58,6 +60,7 @@ describe('Policy artifacts list', () => {
       selectedArtifactIds: [],
       isListLoading: false,
       selectedArtifactsUpdated: selectedArtifactsUpdatedMock,
+      CardDecorator: undefined,
     });
     expect(component.getByTestId('artifactsList')).not.toBeNull();
   });
@@ -69,6 +72,7 @@ describe('Policy artifacts list', () => {
       selectedArtifactIds: [artifactsResponse.data[0].id],
       isListLoading: false,
       selectedArtifactsUpdated: selectedArtifactsUpdatedMock,
+      CardDecorator: undefined,
     });
     const tACardCheckbox = component.getByTestId(`${getMockListResponse().data[1].name}_checkbox`);
 

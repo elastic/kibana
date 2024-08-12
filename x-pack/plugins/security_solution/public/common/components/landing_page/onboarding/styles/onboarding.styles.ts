@@ -15,7 +15,10 @@ export const useOnboardingStyles = () => {
   return useMemo(
     () => ({
       wrapperStyles: css({
-        margin: `0 -${euiTheme.size.l}`,
+        margin: `-${euiTheme.size.l} -${euiTheme.size.l}`,
+      }),
+      headerSectionStyles: css({
+        backgroundColor: euiTheme.colors.lightestShade,
       }),
       progressSectionStyles: css({
         backgroundColor: euiTheme.colors.lightestShade,

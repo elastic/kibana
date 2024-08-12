@@ -10,7 +10,11 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { omit } from 'lodash';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
+import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
 import { DiscoverServices } from '../../../../build_services';
@@ -27,17 +31,19 @@ export const getTopNavLinks = ({
   services,
   state,
   onOpenInspector,
-  isTextBased,
+  isEsqlMode,
   adHocDataViews,
   topNavCustomization,
+  shouldShowESQLToDataViewTransitionModal,
 }: {
   dataView: DataView | undefined;
   services: DiscoverServices;
   state: DiscoverStateContainer;
   onOpenInspector: () => void;
-  isTextBased: boolean;
+  isEsqlMode: boolean;
   adHocDataViews: DataView[];
   topNavCustomization: TopNavCustomization | undefined;
+  shouldShowESQLToDataViewTransitionModal: boolean;
 }): TopNavMenuData[] => {
   const alerts = {
     id: 'alerts',
@@ -53,10 +59,58 @@ export const getTopNavLinks = ({
         services,
         stateContainer: state,
         adHocDataViews,
-        isPlainRecord: isTextBased,
+        isEsqlMode,
       });
     },
     testId: 'discoverAlertsButton',
+  };
+
+  /**
+   * Switches from ES|QL to classic mode and vice versa
+   */
+  const esqLDataViewTransitionToggle = {
+    id: 'esql',
+    label: isEsqlMode
+      ? i18n.translate('discover.localMenu.switchToClassicTitle', {
+          defaultMessage: 'Switch to classic',
+        })
+      : i18n.translate('discover.localMenu.tryESQLTitle', {
+          defaultMessage: 'Try ES|QL',
+        }),
+    emphasize: true,
+    fill: false,
+    color: 'text',
+    tooltip: isEsqlMode
+      ? i18n.translate('discover.localMenu.switchToClassicTooltipLabel', {
+          defaultMessage: 'Switch to KQL or Lucene syntax.',
+        })
+      : i18n.translate('discover.localMenu.esqlTooltipLabel', {
+          defaultMessage: `ES|QL is Elastic's powerful new piped query language.`,
+        }),
+    run: () => {
+      if (dataView) {
+        if (isEsqlMode) {
+          services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:back_to_classic_clicked`);
+          /**
+           * Display the transition modal if:
+           * - the user has not dismissed the modal
+           * - the user has opened and applied changes to the saved search
+           */
+          if (
+            shouldShowESQLToDataViewTransitionModal &&
+            !services.storage.get(ESQL_TRANSITION_MODAL_KEY)
+          ) {
+            state.internalState.transitions.setIsESQLToDataViewTransitionModalVisible(true);
+          } else {
+            state.actions.transitionFromESQLToDataView(dataView.id ?? '');
+          }
+        } else {
+          state.actions.transitionFromDataViewToESQL(dataView);
+          services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:try_btn_clicked`);
+        }
+      }
+    },
+    testId: isEsqlMode ? 'switch-to-dataviews' : 'select-text-based-language-btn',
   };
 
   const newSearch = {
@@ -126,7 +180,7 @@ export const getTopNavLinks = ({
         savedSearch.searchSource,
         state.appState.getState(),
         services,
-        isTextBased
+        isEsqlMode
       );
 
       const { locator, notifications } = services;
@@ -138,7 +192,7 @@ export const getTopNavLinks = ({
 
       // Share -> Get links -> Snapshot
       const params: DiscoverAppLocatorParams = {
-        ...appState,
+        ...omit(appState, 'dataSource'),
         ...(savedSearch.id ? { savedSearchId: savedSearch.id } : {}),
         ...(dataView?.isPersisted()
           ? { dataViewId: dataView?.id }
@@ -182,8 +236,13 @@ export const getTopNavLinks = ({
         shareableUrlLocatorParams: { locator, params },
         objectId: savedSearch.id,
         objectType: 'search',
+        objectTypeMeta: {
+          title: i18n.translate('discover.share.shareModal.title', {
+            defaultMessage: 'Share this search',
+          }),
+        },
         sharingData: {
-          isTextBased,
+          isTextBased: isEsqlMode,
           locatorParams: [{ id: locator.id, params }],
           ...searchSourceSharingData,
           // CSV reports can be generated without a saved search so we provide a fallback title
@@ -219,6 +278,10 @@ export const getTopNavLinks = ({
 
   const defaultMenu = topNavCustomization?.defaultMenu;
   const entries = [...(topNavCustomization?.getMenuItems?.() ?? [])];
+
+  if (services.uiSettings.get(ENABLE_ESQL)) {
+    entries.push({ data: esqLDataViewTransitionToggle, order: 0 });
+  }
 
   if (!defaultMenu?.newItem?.disabled) {
     entries.push({ data: newSearch, order: defaultMenu?.newItem?.order ?? 100 });

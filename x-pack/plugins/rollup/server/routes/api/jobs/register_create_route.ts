@@ -21,7 +21,7 @@ export const registerCreateRoute = ({
         body: schema.object({
           job: schema.object(
             {
-              id: schema.string(),
+              id: schema.string({ maxLength: 1000 }),
             },
             { unknowns: 'allow' }
           ),

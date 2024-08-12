@@ -37,7 +37,7 @@ const DeleteConfirm = (props: DeleteButtonProps & { onActionDismiss: OnActionDis
     defaultMessage: 'Cancel',
   });
   const message = i18n.translate('data.mgmt.searchSessions.cancelModal.message', {
-    defaultMessage: `Deleting the search session \'{name}\' deletes all cached results.`,
+    defaultMessage: `Deleting the search session ''{name}'' deletes all cached results.`,
     values: {
       name,
     },

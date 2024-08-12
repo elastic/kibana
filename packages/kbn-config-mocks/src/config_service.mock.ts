@@ -29,6 +29,7 @@ const createConfigServiceMock = ({
     getDeprecatedConfigPath$: jest.fn(),
     addDynamicConfigPaths: jest.fn(),
     setDynamicConfigOverrides: jest.fn(),
+    setGlobalStripUnknownKeys: jest.fn(),
   };
 
   mocked.atPath.mockReturnValue(new BehaviorSubject(atPath));

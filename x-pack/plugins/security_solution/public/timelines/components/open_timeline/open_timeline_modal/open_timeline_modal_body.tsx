@@ -5,30 +5,21 @@
  * 2.0.
  */
 
-import { EuiModalBody, EuiModalHeader, EuiSpacer } from '@elastic/eui';
-import React, { Fragment, memo, useMemo } from 'react';
-import styled from 'styled-components';
+import { EuiModalBody, EuiModalHeader, EuiSpacer, EuiTitle } from '@elastic/eui';
+import type { EuiBasicTable } from '@elastic/eui';
+import React, { Fragment, memo, useMemo, useRef } from 'react';
 
-import type { OpenTimelineProps, ActionTimelineToShow } from '../types';
+import type { OpenTimelineProps, ActionTimelineToShow, OpenTimelineResult } from '../types';
 import { SearchRow } from '../search_row';
 import { TimelinesTable } from '../timelines_table';
-import { TitleRow } from '../title_row';
-
-export const HeaderContainer = styled.div`
-  width: 100%;
-`;
-
-HeaderContainer.displayName = 'HeaderContainer';
 
 export const OpenTimelineModalBody = memo<OpenTimelineProps>(
   ({
     deleteTimelines,
     defaultPageSize,
-    favoriteCount,
     hideActions = [],
     isLoading,
     itemIdToExpandedNotesRowMap,
-    onAddTimelinesToFavorites,
     onDeleteSelected,
     onlyFavorites,
     onOpenTimeline,
@@ -40,7 +31,6 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
     pageIndex,
     pageSize,
     searchResults,
-    selectedItems,
     sortDirection,
     sortField,
     timelineFilter,
@@ -49,6 +39,8 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
     title,
     totalSearchResultsCount,
   }) => {
+    const tableRef = useRef<EuiBasicTable<OpenTimelineResult> | null>(null);
+
     const actionsToShow = useMemo(() => {
       const actions: ActionTimelineToShow[] = ['createFrom', 'duplicate'];
 
@@ -71,14 +63,9 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
     return (
       <>
         <EuiModalHeader>
-          <HeaderContainer>
-            <TitleRow
-              data-test-subj="title-row"
-              onAddTimelinesToFavorites={onAddTimelinesToFavorites}
-              selectedTimelinesCount={selectedItems.length}
-              title={title}
-            />
-          </HeaderContainer>
+          <EuiTitle size="l">
+            <h2 data-test-subj="open-timeline-modal-title">{title}</h2>
+          </EuiTitle>
         </EuiModalHeader>
 
         <EuiModalBody>
@@ -118,6 +105,7 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
               sortField={sortField}
               timelineType={timelineType}
               totalSearchResultsCount={totalSearchResultsCount}
+              tableRef={tableRef}
             />
           </>
         </EuiModalBody>

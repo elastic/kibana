@@ -8,11 +8,8 @@
 
 export type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
-export type {
-  DataViewsPublicPluginStart,
-  DataView,
-  DataViewField,
-} from '@kbn/data-views-plugin/public';
+export type { DataViewsPublicPluginStart, DataViewField } from '@kbn/data-views-plugin/public';
+export { DataView, DataViewLazy } from '@kbn/data-views-plugin/public';
 export type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 export type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';

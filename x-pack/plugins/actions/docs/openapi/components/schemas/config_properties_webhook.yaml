@@ -4,10 +4,10 @@ type: object
 properties:
   authType:
     type: string
+    nullable: true
     enum:
       - webhook-authentication-basic
       - webhook-authentication-ssl
-      - "null"
     description: >
       The type of authentication to use: basic, SSL, or none.
   ca:
@@ -27,9 +27,8 @@ properties:
     description: >
       If `true`, a user name and password must be provided for login type authentication.
   headers:
-    type:
-      - "object"
-      - "null"
+    type: object
+    nullable: true
     description: A set of key-value pairs sent as headers with the request.
   method:
     type: string

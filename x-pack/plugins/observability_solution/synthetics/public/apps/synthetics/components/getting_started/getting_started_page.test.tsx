@@ -130,6 +130,14 @@ describe('GettingStartedPage', () => {
       <GettingStartedPage />,
       {
         state: {
+          syntheticsEnablement: {
+            loading: false,
+            enablement: {
+              canEnable: true,
+              isEnabled: true,
+              isServiceAllowed: true,
+            },
+          },
           serviceLocations: {
             locations: [],
             locationsLoaded: true,
@@ -171,7 +179,7 @@ describe('GettingStartedPage', () => {
     });
 
     // page is loaded
-    expect(kibanaService.core.application.navigateToApp).toHaveBeenCalledWith('synthetics', {
+    expect(kibanaService.coreStart.application.navigateToApp).toHaveBeenCalledWith('synthetics', {
       path: '/monitors',
     });
   });

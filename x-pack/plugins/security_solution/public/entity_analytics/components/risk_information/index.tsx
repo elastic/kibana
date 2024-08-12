@@ -37,7 +37,7 @@ import {
   CriticalityLevels,
   CriticalityModifiers,
 } from '../../../../common/entity_analytics/asset_criticality';
-import { RiskScoreDocLink } from '../risk_score_onboarding/risk_score_doc_link';
+import { EntityAnalyticsLearnMoreLink } from '../risk_score_onboarding/entity_analytics_doc_link';
 import { BETA } from '../risk_score_onboarding/translations';
 import { AssetCriticalityBadge } from '../asset_criticality';
 
@@ -69,11 +69,11 @@ const getRiskLevelTableColumns = (): Array<EuiBasicTableColumn<RiskLevelTableIte
 ];
 
 const riskLevelTableItems: RiskLevelTableItem[] = [
-  { level: RiskSeverity.critical, range: i18n.CRITICAL_RISK_DESCRIPTION },
-  { level: RiskSeverity.high, range: '70 - 90 ' },
-  { level: RiskSeverity.moderate, range: '40 - 70' },
-  { level: RiskSeverity.low, range: '20 - 40' },
-  { level: RiskSeverity.unknown, range: i18n.UNKNOWN_RISK_DESCRIPTION },
+  { level: RiskSeverity.Critical, range: i18n.CRITICAL_RISK_DESCRIPTION },
+  { level: RiskSeverity.High, range: '70 - 90 ' },
+  { level: RiskSeverity.Moderate, range: '40 - 70' },
+  { level: RiskSeverity.Low, range: '20 - 40' },
+  { level: RiskSeverity.Unknown, range: i18n.UNKNOWN_RISK_DESCRIPTION },
 ];
 
 interface CriticalityLevelTableItem {
@@ -262,14 +262,7 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
           </SpacedOrderedList>
         </EuiText>
         <EuiSpacer size="m" />
-        <RiskScoreDocLink
-          title={
-            <FormattedMessage
-              id="xpack.securitySolution.riskInformation.learnMore"
-              defaultMessage="Learn more about Entity risk"
-            />
-          }
-        />
+        <EntityAnalyticsLearnMoreLink />
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>

@@ -631,13 +631,33 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '*',
       },
+      index_labels: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate('searchConnectors.nativeConnectors.confluence.indexLabelsLabel', {
+          defaultMessage: 'Enable indexing labels',
+        }),
+        options: [],
+        order: 10,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate('searchConnectors.nativeConnectors.confluence.indexLabelsTooltip', {
+          defaultMessage:
+            'Enabling this will increase the amount of network calls to the source, and may decrease performance',
+        }),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
       ssl_enabled: {
         default_value: null,
         depends_on: [],
         display: DisplayType.TOGGLE,
         label: ENABLE_SSL_LABEL,
         options: [],
-        order: 10,
+        order: 11,
         required: true,
         sensitive: false,
         tooltip: null,
@@ -657,7 +677,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.TEXTBOX,
         label: SSL_CERTIFICATE_LABEL,
         options: [],
-        order: 11,
+        order: 12,
         required: true,
         sensitive: false,
         tooltip: null,
@@ -672,7 +692,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.NUMERIC,
         label: RETRIES_PER_REQUEST_LABEL,
         options: [],
-        order: 12,
+        order: 13,
         required: false,
         sensitive: false,
         tooltip: null,
@@ -687,7 +707,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.NUMERIC,
         label: MAX_CONCURRENT_DOWNLOADS_LABEL,
         options: [],
-        order: 13,
+        order: 14,
         required: false,
         sensitive: false,
         tooltip: null,
@@ -712,7 +732,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.TOGGLE,
         label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
         options: [],
-        order: 14,
+        order: 15,
         required: true,
         sensitive: false,
         tooltip: getEnableDocumentLevelSecurityTooltip(
@@ -731,7 +751,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.TOGGLE,
         label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
         options: [],
-        order: 15,
+        order: 16,
         required: true,
         sensitive: false,
         tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
@@ -866,8 +886,56 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
+      use_document_level_security: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
+        options: [],
+        order: 8,
+        required: true,
+        sensitive: false,
+        tooltip: getEnableDocumentLevelSecurityTooltip(
+          i18n.translate('searchConnectors.nativeConnectors.dropbox.tooltipName', {
+            defaultMessage: 'Dropbox',
+          })
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
+      include_inherited_users_and_groups: {
+        default_value: null,
+        depends_on: [{ field: 'use_document_level_security', value: true }],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.dropbox.includeInheritedUsersAndGroups.label',
+          {
+            defaultMessage: 'Include groups and inherited users',
+          }
+        ),
+        options: [],
+        order: 9,
+        required: false,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.dropbox.includeInheritedUsersAndGroups.tooltip',
+          {
+            defaultMessage:
+              'Include groups and inherited users when indexing permissions. Enabling this configurable field will cause a significant performance degradation.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
     },
     features: {
+      [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
+      },
       [FeatureName.SYNC_RULES]: {
         advanced: { enabled: true },
         basic: { enabled: true },
@@ -1208,6 +1276,10 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       defaultMessage: 'Github',
     }),
     features: {
+      [FeatureName.SYNC_RULES]: {
+        advanced: { enabled: true },
+        basic: { enabled: true },
+      },
       [FeatureName.INCREMENTAL_SYNC]: {
         enabled: true,
       },
@@ -1332,6 +1404,10 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       },
     },
     features: {
+      [FeatureName.SYNC_RULES]: {
+        advanced: { enabled: true },
+        basic: { enabled: true },
+      },
       [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
         enabled: true,
       },
@@ -1793,14 +1869,20 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ],
         display: DisplayType.TEXTBOX,
         label: i18n.translate('searchConnectors.nativeConnectors.jira.cloudServiceAccountLabel', {
-          defaultMessage: 'Jira Cloud service account id',
+          defaultMessage: 'Jira Cloud email address',
         }),
         options: [],
         order: 6,
         placeholder: 'me@example.com',
         required: true,
         sensitive: false,
-        tooltip: null,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.jira.cloudServiceAccountTooltip',
+          {
+            defaultMessage:
+              'Email address associated with Jira Cloud account. E.g. jane.doe@gmail.com',
+          }
+        ),
         type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],
@@ -1935,12 +2017,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       },
       use_document_level_security: {
         default_value: null,
-        depends_on: [
-          {
-            field: 'data_source',
-            value: 'jira_cloud',
-          },
-        ],
+        depends_on: [],
         display: DisplayType.TOGGLE,
         label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
         options: [],
@@ -2492,7 +2569,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     },
     features: {
       [FeatureName.SYNC_RULES]: {
-        advanced: { enabled: false },
+        advanced: { enabled: true },
         basic: { enabled: true },
       },
     },
@@ -2794,7 +2871,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     },
     features: {
       [FeatureName.SYNC_RULES]: {
-        advanced: { enabled: false },
+        advanced: { enabled: true },
         basic: { enabled: true },
       },
       [FeatureName.INCREMENTAL_SYNC]: {
@@ -2895,7 +2972,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         value: '',
       },
     },
-    features: {},
+    features: {
+      [FeatureName.SYNC_RULES]: {
+        advanced: { enabled: true },
+        basic: { enabled: true },
+      },
+    },
     name: i18n.translate('searchConnectors.nativeConnectors.notion.name', {
       defaultMessage: 'Notion',
     }),
@@ -3024,6 +3106,10 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       defaultMessage: 'OneDrive',
     }),
     features: {
+      [FeatureName.SYNC_RULES]: {
+        advanced: { enabled: true },
+        basic: { enabled: true },
+      },
       [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
         enabled: true,
       },
@@ -3563,11 +3649,33 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
+      use_document_level_security: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
+        options: [],
+        order: 13,
+        required: true,
+        sensitive: false,
+        tooltip: getEnableDocumentLevelSecurityTooltip(
+          i18n.translate('searchConnectors.nativeConnectors.outlookTooltip.name', {
+            defaultMessage: 'Outlook',
+          })
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
     },
     features: {
       [FeatureName.SYNC_RULES]: {
         advanced: { enabled: false },
         basic: { enabled: true },
+      },
+      [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
       },
       [FeatureName.INCREMENTAL_SYNC]: {
         enabled: true,
@@ -3768,7 +3876,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     },
     features: {
       [FeatureName.SYNC_RULES]: {
-        advanced: { enabled: false },
+        advanced: { enabled: true },
         basic: { enabled: true },
       },
     },
@@ -3917,7 +4025,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         value: false,
       },
     },
-    features: {},
+    features: {
+      [FeatureName.SYNC_RULES]: {
+        advanced: { enabled: true },
+        basic: { enabled: true },
+      },
+    },
     name: i18n.translate('searchConnectors.content.nativeConnectors.s3.name', {
       defaultMessage: 'S3',
     }),
@@ -3925,6 +4038,10 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
   },
   salesforce: {
     features: {
+      [FeatureName.SYNC_RULES]: {
+        advanced: { enabled: true },
+        basic: { enabled: true },
+      },
       [FeatureName.INCREMENTAL_SYNC]: {
         enabled: true,
       },
@@ -4003,13 +4120,32 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
+      use_document_level_security: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
+        options: [],
+        order: 4,
+        required: true,
+        sensitive: false,
+        tooltip: getEnableDocumentLevelSecurityTooltip(
+          i18n.translate('searchConnectors.nativeConnectors.salesforce.name', {
+            defaultMessage: 'Salesforce',
+          })
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
       use_text_extraction_service: {
         default_value: null,
         depends_on: [],
         display: DisplayType.TOGGLE,
         label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
         options: [],
-        order: 4,
+        order: 5,
         required: true,
         sensitive: false,
         tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
@@ -4518,6 +4654,291 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       defaultMessage: 'Sharepoint Online',
     }),
     serviceType: 'sharepoint_online',
+  },
+  sharepoint_server: {
+    configuration: {
+      authentication: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.DROPDOWN,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_server.configuration.authentication',
+          {
+            defaultMessage: 'Authentication',
+          }
+        ),
+        options: [
+          {
+            label: i18n.translate(
+              'searchConnectors.nativeConnectors.sharepoint_server.options.basicLabel',
+              {
+                defaultMessage: 'Basic',
+              }
+            ),
+            value: 'basic_auth',
+          },
+          {
+            label: i18n.translate(
+              'searchConnectors.nativeConnectors.sharepoint_server.options.ntlmLabel',
+              {
+                defaultMessage: 'NTLM',
+              }
+            ),
+            value: 'ntlm_auth',
+          },
+        ],
+        order: 1,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: 'basic_auth',
+      },
+      username: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_server.configuration.username',
+          {
+            defaultMessage: 'SharePoint Server username',
+          }
+        ),
+        options: [],
+        order: 2,
+        required: true,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      password: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_server.configuration.password',
+          {
+            defaultMessage: 'SharePoint Server password',
+          }
+        ),
+        options: [],
+        order: 3,
+        required: true,
+        sensitive: true,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      host_url: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_server.configuration.host',
+          {
+            defaultMessage: 'SharePoint host',
+          }
+        ),
+        options: [],
+        order: 4,
+        required: true,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      site_collections: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTAREA,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_server.configuration.site_collections',
+          {
+            defaultMessage: 'Comma-separated list of SharePoint site collections to index',
+          }
+        ),
+        options: [],
+        order: 5,
+        required: true,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.LIST,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      ssl_enabled: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: ENABLE_SSL_LABEL,
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
+      ssl_ca: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'ssl_enabled',
+            value: true,
+          },
+        ],
+        display: DisplayType.TEXTBOX,
+        label: SSL_CERTIFICATE_LABEL,
+        options: [],
+        order: 7,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      retry_count: {
+        default_value: 3,
+        depends_on: [],
+        display: DisplayType.NUMERIC,
+        label: RETRIES_PER_REQUEST_LABEL,
+        options: [],
+        order: 8,
+        required: false,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.INTEGER,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: 3,
+      },
+      use_text_extraction_service: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
+        options: [],
+        order: 9,
+        required: true,
+        sensitive: false,
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
+      use_document_level_security: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
+        options: [],
+        order: 10,
+        required: true,
+        sensitive: false,
+        tooltip: getEnableDocumentLevelSecurityTooltip(
+          i18n.translate('searchConnectors.nativeConnectors.sharepoint_server.name', {
+            defaultMessage: 'Sharepoint Server',
+          })
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
+      fetch_unique_list_permissions: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'use_document_level_security',
+            value: true,
+          },
+        ],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_server.configuration.fetchUniqueListPermissionsLabel',
+          {
+            defaultMessage: 'Fetch unique list permissions',
+          }
+        ),
+        options: [],
+        order: 11,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_server.configuration.fetchUniqueListPermissionsTooltip',
+          {
+            defaultMessage:
+              'Enable this option to fetch unique list permissions. This setting can increase sync time. If this setting is disabled a list will inherit permissions from its parent site.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
+      fetch_unique_list_item_permissions: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'use_document_level_security',
+            value: true,
+          },
+        ],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_server.configuration.fetchUniqueListItemPermissionsLabel',
+          {
+            defaultMessage: 'Fetch unique list item permissions',
+          }
+        ),
+        options: [],
+        order: 12,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_server.configuration.fetchUniqueListItemPermissionsTooltip',
+          {
+            defaultMessage:
+              'Enable this option to fetch unique list item permissions. This setting can increase sync time. If this setting is disabled a list item will inherit permissions from its parent site.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
+    },
+    features: {
+      [FeatureName.SYNC_RULES]: {
+        advanced: { enabled: false },
+        basic: { enabled: true },
+      },
+      [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
+      },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
+    },
+    name: i18n.translate('searchConnectors.nativeConnectors.sharepoint_server.name', {
+      defaultMessage: 'Sharepoint Server',
+    }),
+    serviceType: 'sharepoint_server',
   },
   slack: {
     configuration: {

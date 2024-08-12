@@ -29,7 +29,7 @@
     "@kbn/presentation-publishing",
     "@kbn/presentation-containers",
     "@kbn/react-kibana-mount",
-    "@kbn/analytics"
+    "@kbn/analytics",
   ],
   "exclude": ["target/**/*"]
 }

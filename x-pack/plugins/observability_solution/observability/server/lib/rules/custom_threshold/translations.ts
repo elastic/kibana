@@ -78,54 +78,18 @@ export const SUM_I18N = (metric: string) =>
     },
   });
 
+export const LAST_VALUE_I18N = (metric: string) =>
+  i18n.translate('xpack.observability.customThreshold.rule.aggregators.last_value', {
+    defaultMessage: 'Last value of {metric}',
+    values: {
+      metric,
+    },
+  });
+
 export const CUSTOM_EQUATION_I18N = i18n.translate(
   'xpack.observability.customThreshold.rule.aggregators.customEquation',
   {
     defaultMessage: 'Custom equation',
-  }
-);
-
-// Comparators
-
-export const BELOW_TEXT = i18n.translate(
-  'xpack.observability.customThreshold.rule.threshold.below',
-  {
-    defaultMessage: 'below',
-  }
-);
-
-export const BELOW_OR_EQ_TEXT = i18n.translate(
-  'xpack.observability.customThreshold.rule.threshold.belowOrEqual',
-  {
-    defaultMessage: 'below or equal',
-  }
-);
-
-export const ABOVE_TEXT = i18n.translate(
-  'xpack.observability.customThreshold.rule.threshold.above',
-  {
-    defaultMessage: 'above',
-  }
-);
-
-export const ABOVE_OR_EQ_TEXT = i18n.translate(
-  'xpack.observability.customThreshold.rule.threshold.aboveOrEqual',
-  {
-    defaultMessage: 'above or equal',
-  }
-);
-
-export const BETWEEN_TEXT = i18n.translate(
-  'xpack.observability.customThreshold.rule.threshold.between',
-  {
-    defaultMessage: 'between',
-  }
-);
-
-export const NOT_BETWEEN_TEXT = i18n.translate(
-  'xpack.observability.customThreshold.rule.threshold.notBetween',
-  {
-    defaultMessage: 'not between',
   }
 );
 

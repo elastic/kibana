@@ -21,11 +21,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
   const toasts = getService('toasts');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/180295
-  describe.skip('Cases persistable attachments', () => {
+  describe('Cases persistable attachments', () => {
     describe('lens visualization', () => {
       before(async () => {
-        await svlCommonPage.login();
+        await svlCommonPage.loginAsAdmin();
         await common.navigateToApp('security', { path: 'dashboards' });
         await header.waitUntilLoadingHasFinished();
 
@@ -42,7 +41,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       after(async () => {
         await svlCases.api.deleteAllCaseItems();
-        await svlCommonPage.forceLogout();
       });
 
       it('adds lens visualization to a new case', async () => {
@@ -52,17 +50,27 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('embeddablePanelToggleMenuIcon');
         await testSubjects.click('embeddablePanelMore-mainMenu');
         await testSubjects.click('embeddablePanelAction-embeddable_addToExistingCase');
-        await testSubjects.click('cases-table-add-case-filter-bar');
 
-        await testSubjects.existOrFail('create-case-flyout');
+        await retry.waitFor('wait for the modal to open', async () => {
+          return (
+            (await testSubjects.exists('all-cases-modal')) &&
+            (await testSubjects.exists('cases-table-add-case-filter-bar'))
+          );
+        });
+
+        await retry.waitFor('wait for the flyout to open', async () => {
+          if (await testSubjects.exists('cases-table-add-case-filter-bar')) {
+            await testSubjects.click('cases-table-add-case-filter-bar');
+          }
+
+          return testSubjects.exists('create-case-flyout');
+        });
 
         await testSubjects.setValue('input', caseTitle);
-
         await testSubjects.setValue('euiMarkdownEditorTextArea', 'test description');
 
         // verify that solution picker is not visible
         await testSubjects.missingOrFail('caseOwnerSelector');
-
         await testSubjects.click('create-case-submit');
 
         await cases.common.expectToasterToContain(`${caseTitle} has been updated`);
@@ -77,7 +85,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
         expect(await title.getVisibleText()).toEqual(caseTitle);
 
-        await testSubjects.existOrFail('comment-persistableState-.lens');
+        await retry.waitFor('wait for the visualization to exist', async () => {
+          return testSubjects.exists('comment-persistableState-.lens');
+        });
       });
 
       it('adds lens visualization to an existing case from dashboard', async () => {
@@ -90,6 +100,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await common.navigateToApp('security', { path: 'dashboards' });
         await header.waitUntilLoadingHasFinished();
+        await testSubjects.click('LandingImageCards-accordionButton');
 
         if (await testSubjects.exists('edit-unsaved-New-Dashboard')) {
           await testSubjects.click('edit-unsaved-New-Dashboard');

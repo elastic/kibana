@@ -27,7 +27,6 @@ export function getConnectorType(): ConnectorTypeModel<
         defaultMessage: 'Send a request to a Case Management web service.',
       }
     ),
-    isExperimental: true,
     actionTypeTitle: i18n.translate(
       'xpack.stackConnectors.components.casesWebhookxpack.stackConnectors.components.casesWebhook.connectorTypeTitle',
       {

@@ -11,7 +11,7 @@ import { useLogMlJobIdFormatsShimContext } from '../../../pages/logs/shared/use_
 import { IdFormat, JobType } from '../../../../common/http_api/latest';
 import { DatasetFilter } from '../../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { useTrackedPromise } from '../../../hooks/use_tracked_promise';
 import { useModuleStatus } from './log_analysis_module_status';
 import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
 

@@ -1,11 +1,21 @@
-ST_CENTROID_AGG
+## ST_CENTROID_AGG
 
+ST_CENTROID_AGG is a function that calculates the spatial centroid over a field with spatial point geometry type. This functionality is currently in technical preview and may be changed or removed in a future release.
 
-This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-Calculate the spatial centroid over a field with spatial point geometry type.
+### Examples
+
+Here are a couple of examples of full ES|QL queries using the ST_CENTROID_AGG function:
+
 ```esql
 FROM airports
-| STATS centroid=ST_CENTROID_AGG(location)
+| STATS centroid = ST_CENTROID_AGG(location)
 ```
 
-Supported types:
+In this example, the ST_CENTROID_AGG function is used to calculate the spatial centroid over the 'location' field from the 'airports' index.
+
+```esql
+FROM geo_data
+| STATS geo_centroid = ST_CENTROID_AGG(geo_point)
+```
+
+In this second example, the ST_CENTROID_AGG function is used to calculate the spatial centroid over the 'geo_point' field from the 'geo_data' index.

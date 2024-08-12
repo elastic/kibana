@@ -16,17 +16,11 @@ import { streamPartsToIndexPattern } from '../../common/utils';
 class DataStreamService {
   public async getMatchingDataStreams(
     esClient: ElasticsearchClient,
-    dataStreamParts: {
-      dataset: string;
-      type: string;
-    }
+    datasetName: string
   ): Promise<IndicesDataStream[]> {
     try {
       const { data_streams: dataStreamsInfo } = await esClient.indices.getDataStream({
-        name: streamPartsToIndexPattern({
-          typePattern: dataStreamParts.type,
-          datasetPattern: dataStreamParts.dataset,
-        }),
+        name: datasetName,
       });
 
       return dataStreamsInfo;
@@ -51,6 +45,25 @@ class DataStreamService {
           typePattern: dataStreamParts.type,
           datasetPattern: dataStreamParts.dataset,
         }),
+        human: true,
+      });
+
+      return dataStreamsStats;
+    } catch (e) {
+      if (e.statusCode === 404) {
+        return [];
+      }
+      throw e;
+    }
+  }
+
+  public async getStreamsStats(
+    esClient: ElasticsearchClient,
+    dataStreams: string[]
+  ): Promise<IndicesDataStreamsStatsDataStreamsStatsItem[]> {
+    try {
+      const { data_streams: dataStreamsStats } = await esClient.indices.dataStreamsStats({
+        name: dataStreams.join(','),
         human: true,
       });
 

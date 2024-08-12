@@ -16,14 +16,14 @@ import { getInnerType, SettingsFieldWrapper } from './settings_field_wrapper';
 
 export const settingComponentRegistry = new Map<
   string,
-  (settingsconfig: SettingsConfig) => React.ReactElement
+  (settingsconfig: SettingsConfig & { disabled?: boolean }) => React.ReactElement
 >();
 
-settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodObject, (settingsConfig) => (
-  <SettingsFieldGroup settingsConfig={settingsConfig} />
+settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodObject, ({ disabled, ...settingsConfig }) => (
+  <SettingsFieldGroup settingsConfig={settingsConfig} disabled={disabled} />
 ));
 
-settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodNumber, (settingsConfig) => {
+settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodNumber, ({ disabled, ...settingsConfig }) => {
   return (
     <SettingsFieldWrapper
       settingsConfig={settingsConfig}
@@ -31,6 +31,7 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodNumber, (settingsConfig) =
       renderItem={({ fieldKey, fieldValue, handleChange, isInvalid, coercedSchema }: any) => (
         <EuiFieldNumber
           fullWidth
+          disabled={disabled}
           data-test-subj={fieldKey}
           value={fieldValue}
           onChange={handleChange}
@@ -43,7 +44,7 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodNumber, (settingsConfig) =
   );
 });
 
-settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodString, (settingsConfig) => {
+settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodString, ({ disabled, ...settingsConfig }) => {
   return (
     <SettingsFieldWrapper
       settingsConfig={settingsConfig}
@@ -51,6 +52,7 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodString, (settingsConfig) =
       renderItem={({ fieldKey, fieldValue, handleChange, isInvalid }: any) => (
         <EuiFieldText
           fullWidth
+          disabled={disabled}
           data-test-subj={fieldKey}
           value={fieldValue}
           onChange={handleChange}
@@ -61,9 +63,10 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodString, (settingsConfig) =
   );
 });
 
-settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodNativeEnum, (settingsConfig) => {
+settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodEnum, ({ disabled, ...settingsConfig }) => {
   return (
     <SettingsFieldWrapper
+      disabled={disabled}
       settingsConfig={settingsConfig}
       typeName={ZodFirstPartyTypeKind.ZodString}
       renderItem={({ fieldKey, fieldValue, handleChange }: any) => (
@@ -71,13 +74,12 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodNativeEnum, (settingsConfi
           data-test-subj={fieldKey}
           value={fieldValue}
           fullWidth
+          disabled={disabled}
           onChange={handleChange}
-          options={Object.entries(settingsConfig.schema._def.innerType._def.values).map(
-            ([key, value]) => ({
-              text: key,
-              value: value as string,
-            })
-          )}
+          options={settingsConfig.schema._def.innerType._def.values.map((value: string) => ({
+            text: value,
+            value,
+          }))}
         />
       )}
     />
@@ -86,8 +88,10 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodNativeEnum, (settingsConfi
 
 export function ConfiguredSettings({
   configuredSettings,
+  disabled,
 }: {
   configuredSettings: SettingsConfig[];
+  disabled?: boolean;
 }) {
   return (
     <>
@@ -100,7 +104,9 @@ export function ConfiguredSettings({
             throw new Error(`Unknown setting type: ${configuredSetting.schema._type}}`);
           }
 
-          return <Component key={configuredSetting.name} {...configuredSetting} />;
+          return (
+            <Component key={configuredSetting.name} {...configuredSetting} disabled={disabled} />
+          );
         })}
     </>
   );

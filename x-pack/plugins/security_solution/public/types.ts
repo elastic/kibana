@@ -59,6 +59,8 @@ import type { UpsellingService } from '@kbn/security-solution-upselling/service'
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { PluginStartContract } from '@kbn/alerting-plugin/public/plugin';
+import type { MapsStartApi } from '@kbn/maps-plugin/public';
+import type { IntegrationAssistantPluginStart } from '@kbn/integration-assistant-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -130,6 +132,7 @@ export interface StartPlugins {
   timelines: TimelinesUIStart;
   sessionView: SessionViewStart;
   uiActions: UiActionsStart;
+  maps: MapsStartApi;
   ml?: MlPluginStart;
   spaces?: SpacesPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
@@ -150,6 +153,7 @@ export interface StartPlugins {
   savedSearch: SavedSearchPublicPluginStart;
   alerting: PluginStartContract;
   core: CoreStart;
+  integrationAssistant?: IntegrationAssistantPluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {

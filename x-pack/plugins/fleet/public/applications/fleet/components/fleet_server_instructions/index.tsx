@@ -23,6 +23,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 
+import { MAX_FLYOUT_WIDTH } from '../../constants';
 import { useStartServices, useFlyoutContext, useCheckPermissions } from '../../hooks';
 import { FleetServerMissingESPrivileges } from '../../sections/agents/components';
 
@@ -133,7 +134,7 @@ export const FleetServerFlyout: React.FunctionComponent<Props> = ({ onClose }) =
   }
 
   return (
-    <EuiFlyout data-test-subj="fleetServerFlyout" onClose={onClose} size="m">
+    <EuiFlyout data-test-subj="fleetServerFlyout" onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH}>
       <EuiFlyoutHeader hasBorder aria-labelledby="FleetAddFleetServerFlyoutTitle">
         <Header
           tabs={tabs}

@@ -96,7 +96,7 @@ export const AddAnalyticsCollectionLogic = kea<
     apiSuccess: async ({ name }) => {
       flashSuccessToast(
         i18n.translate('xpack.enterpriseSearch.analytics.collectionsCreate.action.successMessage', {
-          defaultMessage: "Successfully added collection '{name}'",
+          defaultMessage: "Successfully added collection ''{name}''",
           values: {
             name,
           },
@@ -128,6 +128,7 @@ export const AddAnalyticsCollectionLogic = kea<
     inputError: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setInputError: (_, { inputError }) => inputError,
         setNameValue: () => null,
       },
@@ -135,6 +136,7 @@ export const AddAnalyticsCollectionLogic = kea<
     name: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setNameValue: (_, { name }) => name,
       },
     ],

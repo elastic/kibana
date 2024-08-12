@@ -29,7 +29,14 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { BETA_LABEL, NATIVE_LABEL, CONNECTOR_CLIENT_LABEL } from '../../../../shared/constants';
+import { EXAMPLE_CONNECTOR_SERVICE_TYPES } from '../../../../../../common/constants';
+
+import {
+  BETA_LABEL,
+  NATIVE_LABEL,
+  CONNECTOR_CLIENT_LABEL,
+  EXAMPLE_CONNECTOR_LABEL,
+} from '../../../../shared/constants';
 
 import { PlatinumLicensePopover } from '../../shared/platinum_license_popover/platinum_license_popover';
 
@@ -249,7 +256,14 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                         </EuiBadge>
                       </EuiFlexItem>
                     )}
-                    {isTechPreview && (
+                    {EXAMPLE_CONNECTOR_SERVICE_TYPES.includes(serviceType) && (
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge color="hollow" iconType="beaker">
+                          <EuiText size="xs">{EXAMPLE_CONNECTOR_LABEL}</EuiText>
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    )}
+                    {isTechPreview && !EXAMPLE_CONNECTOR_SERVICE_TYPES.includes(serviceType) && (
                       <EuiFlexItem grow={false}>
                         <EuiBadge color="hollow" iconType="beaker">
                           <EuiText size="xs">

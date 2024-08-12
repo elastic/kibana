@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import { IRouter, RouteConfigOptions, RouteMethod } from '@kbn/core/server';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
+import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
 import { Rule } from '../../../../application/rule/types';
 import {
   AlertingRequestHandlerContext,
@@ -28,18 +28,29 @@ interface BuildGetRulesRouteParams {
   path: string;
   router: IRouter<AlertingRequestHandlerContext>;
   excludeFromPublicApi?: boolean;
+  options?: RouteConfigOptions<RouteMethod>;
 }
 const buildGetRuleRoute = ({
   licenseState,
   path,
   router,
   excludeFromPublicApi = false,
+  options,
 }: BuildGetRulesRouteParams) => {
   router.get(
     {
       path,
+      options,
       validate: {
-        params: getRuleRequestParamsSchemaV1,
+        request: {
+          params: getRuleRequestParamsSchemaV1,
+        },
+        response: {
+          200: {
+            body: () => ruleResponseSchemaV1,
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(
@@ -73,6 +84,11 @@ export const getRuleRoute = (
     licenseState,
     path: `${BASE_ALERTING_API_PATH}/rule/{id}`,
     router,
+    options: {
+      access: 'public',
+      summary: `Get rule details`,
+      tags: ['oas-tag:alerting'],
+    },
   });
 
 export const getInternalRuleRoute = (

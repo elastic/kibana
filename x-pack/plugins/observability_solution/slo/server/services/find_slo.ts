@@ -27,7 +27,8 @@ export class FindSLO {
       params.kqlQuery ?? '',
       params.filters ?? '',
       toSort(params),
-      toPagination(params)
+      toPagination(params),
+      params.hideStale
     );
 
     const localSloDefinitions = await this.repository.findAllByIds(

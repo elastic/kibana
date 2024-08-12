@@ -5,34 +5,15 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { FormProvider, useForm } from 'react-hook-form';
-import { ChatForm, ChatFormFields } from '../types';
+import React, { FC } from 'react';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '../utils/query_client';
+import { FormProvider } from './form_provider';
 
-const queryClient = new QueryClient({});
-
-export interface PlaygroundProviderProps {
-  children: React.ReactNode;
-  defaultValues?: Partial<Pick<ChatForm, ChatFormFields.indices>>;
-}
-
-export const PlaygroundProvider: FC<PropsWithChildren<PlaygroundProviderProps>> = ({
-  children,
-  defaultValues,
-}) => {
-  const form = useForm<ChatForm>({
-    defaultValues: {
-      prompt: 'You are an assistant for question-answering tasks.',
-      doc_size: 3,
-      source_fields: [],
-      indices: defaultValues?.indices || [],
-    },
-  });
-
+export const PlaygroundProvider: FC = ({ children }) => {
   return (
     <QueryClientProvider client={queryClient}>
-      <FormProvider {...form}>{children}</FormProvider>
+      <FormProvider>{children}</FormProvider>
     </QueryClientProvider>
   );
 };

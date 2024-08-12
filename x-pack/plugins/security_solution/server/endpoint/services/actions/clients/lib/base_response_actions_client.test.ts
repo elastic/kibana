@@ -11,6 +11,7 @@ import type {
   ResponseActionsClientUpdateCasesOptions,
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
   ResponseActionsClientWriteActionResponseToEndpointIndexOptions,
+  ResponseActionsClientPendingAction,
 } from './base_response_actions_client';
 import { HOST_NOT_ENROLLED, ResponseActionsClientImpl } from './base_response_actions_client';
 import type {
@@ -116,6 +117,17 @@ describe('ResponseActionsClientImpl base class', () => {
       await expect(responsePromise).rejects.toBeInstanceOf(ResponseActionsNotSupportedError);
       await expect(responsePromise).rejects.toHaveProperty('statusCode', 405);
     });
+
+    it.each(['getFileDownload', 'getFileInfo'])(
+      'should throw not implemented error for %s()',
+      async (method) => {
+        // @ts-expect-error ignoring input type to method since they all should throw
+        const responsePromise = baseClassMock[method]({});
+
+        await expect(responsePromise).rejects.toThrow(`Method ${method}() not implemented`);
+        await expect(responsePromise).rejects.toHaveProperty('statusCode', 501);
+      }
+    );
   });
 
   describe('#updateCases()', () => {
@@ -666,11 +678,7 @@ describe('ResponseActionsClientImpl base class', () => {
     });
 
     it('should provide an array of pending actions', async () => {
-      const iterationData: Array<
-        Array<
-          LogsEndpointAction<EndpointActionDataParameterTypes, EndpointActionResponseDataOutput, {}>
-        >
-      > = [];
+      const iterationData: ResponseActionsClientPendingAction[][] = [];
 
       for await (const pendingActions of baseClassMock.fetchAllPendingActions()) {
         iterationData.push(pendingActions);
@@ -679,12 +687,15 @@ describe('ResponseActionsClientImpl base class', () => {
       expect(iterationData.length).toBe(2);
       expect(iterationData[0]).toEqual([]); // First page of results should be empty due to how the mock was setup
       expect(iterationData[1]).toEqual([
-        expect.objectContaining({
-          EndpointActions: expect.objectContaining({
-            action_id: 'action-id-2',
+        {
+          action: expect.objectContaining({
+            EndpointActions: expect.objectContaining({
+              action_id: 'action-id-2',
+            }),
+            agent: { id: 'agent-b' },
           }),
-          agent: { id: 'agent-b' },
-        }),
+          pendingAgentIds: ['agent-b'],
+        },
       ]);
     });
   });
@@ -727,7 +738,7 @@ class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
     return super.writeActionResponseToEndpointIndex<TOutputContent>(options);
   }
 
-  public fetchAllPendingActions(): AsyncIterable<LogsEndpointAction[]> {
+  public fetchAllPendingActions(): AsyncIterable<ResponseActionsClientPendingAction[]> {
     return super.fetchAllPendingActions();
   }
 }

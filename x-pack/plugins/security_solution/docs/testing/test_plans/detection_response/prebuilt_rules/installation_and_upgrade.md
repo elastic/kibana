@@ -198,6 +198,9 @@ Examples:
 │ New Terms         │ Custom query                      │ Overview            │ Definition          │
 │ New Terms         │ Filters                           │ Overview            │ Definition          │
 │ ESQL              │ ESQL query                        │ Overview            │ Definition          │
+│ ESQL              │ Suppress alerts by                │ Overview            │ Definition          │
+│ ESQL              │ Suppress alerts for               │ Overview            │ Definition          │
+│ ESQL              │ If a suppression field is missing │ Overview            │ Definition          │
 ```
 
 ## Scenarios

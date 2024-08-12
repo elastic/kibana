@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/exploratory-view-plugin",
-  "owner": "@elastic/obs-ux-infra_services-team",
+  "owner": "@elastic/obs-ux-management-team",
   "plugin": {
     "id": "exploratoryView",
     "server": false,

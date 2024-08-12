@@ -42,6 +42,12 @@ export default function (providerContext: FtrProviderContext) {
     describe('should respond with correct enrollment settings', async function () {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/fleet_server');
+        // package verification error without force
+        await supertest
+          .post(`/api/fleet/epm/packages/fleet_server`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
       });
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/fleet_server');

@@ -14,6 +14,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
+  'securitySolution:excludedDataTiersForRuleExecution': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'Non-default value of setting.' },
+    },
+  },
   'securitySolution:defaultThreatIndex': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
@@ -107,10 +114,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'securitySolution:enableNewsFeed': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'securitySolution:enableExpandableFlyout': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -468,7 +471,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:apmEnableMultiSignal': {
+  'observability:entityCentricExperience': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -492,7 +495,18 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:aiAssistantSearchConnectorIndexPattern': {
+    type: 'text',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:logsExplorer:allowedDataViews': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'Non-default value of setting.' },
+    },
+  },
+  'observability:logSources': {
     type: 'array',
     items: {
       type: 'keyword',
@@ -624,6 +638,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:enableInfrastructureHostsView': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:enableInfrastructureContainerAssetView': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

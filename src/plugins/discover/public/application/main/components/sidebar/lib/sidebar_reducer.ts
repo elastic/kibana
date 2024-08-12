@@ -8,7 +8,7 @@
 
 import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { getDataViewFieldList, getTextBasedQueryFieldList } from './get_field_list';
+import { getDataViewFieldList, getEsqlQueryFieldList } from './get_field_list';
 
 export enum DiscoverSidebarReducerActionType {
   RESET = 'RESET',
@@ -33,15 +33,15 @@ type DiscoverSidebarReducerAction =
   | {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING;
       payload: {
-        isPlainRecord: boolean;
+        isEsqlMode: boolean;
       };
     }
   | {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED;
       payload: {
         fieldCounts: DiscoverSidebarReducerState['fieldCounts'];
-        textBasedQueryColumns?: DatatableColumn[]; // from text-based searches
-        isPlainRecord: boolean;
+        esqlQueryColumns?: DatatableColumn[]; // from ES|QL searches
+        isEsqlMode: boolean;
         dataView: DataView | null | undefined;
       };
     };
@@ -92,12 +92,12 @@ export function discoverSidebarReducer(
       return {
         ...state,
         fieldCounts: null,
-        allFields: action.payload.isPlainRecord ? null : state.allFields,
+        allFields: action.payload.isEsqlMode ? null : state.allFields,
         status: DiscoverSidebarReducerStatus.PROCESSING,
       };
     case DiscoverSidebarReducerActionType.DOCUMENTS_LOADED:
-      const mappedAndUnmappedFields = action.payload.isPlainRecord
-        ? getTextBasedQueryFieldList(action.payload.textBasedQueryColumns)
+      const mappedAndUnmappedFields = action.payload.isEsqlMode
+        ? getEsqlQueryFieldList(action.payload.esqlQueryColumns)
         : getDataViewFieldList(action.payload.dataView, action.payload.fieldCounts);
       return {
         ...state,

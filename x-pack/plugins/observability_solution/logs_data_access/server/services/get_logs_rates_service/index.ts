@@ -7,8 +7,8 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { estypes } from '@elastic/elasticsearch';
-import { RegisterServicesParams } from '../register_services';
-import { getLogErrorRate, getLogRatePerMinute } from './utils';
+import { getLogErrorRate, getLogRatePerMinute } from '../../utils';
+import { LOG_LEVEL } from '../../es_fields';
 
 export interface LogsRatesServiceParams {
   esClient: ElasticsearchClient;
@@ -26,14 +26,16 @@ interface LogRateQueryAggregation {
   services: estypes.AggregationsTermsAggregateBase<LogErrorsAggregation>;
 }
 
-export interface LogsRatesServiceReturnType {
-  [serviceName: string]: {
-    logRatePerMinute: number;
-    logErrorRate: null | number;
-  };
+export interface LogsRatesMetrics {
+  logRatePerMinute: number;
+  logErrorRate: null | number;
 }
 
-export function createGetLogsRatesService(params: RegisterServicesParams) {
+export interface LogsRatesServiceReturnType {
+  [serviceName: string]: LogsRatesMetrics;
+}
+
+export function createGetLogsRatesService() {
   return async ({
     esClient,
     identifyingMetadata,
@@ -47,6 +49,12 @@ export function createGetLogsRatesService(params: RegisterServicesParams) {
       query: {
         bool: {
           filter: [
+            {
+              exists: {
+                // For now, we don't want to count APM server logs or any other logs that don't have the log.level field.
+                field: LOG_LEVEL,
+              },
+            },
             {
               terms: {
                 [identifyingMetadata]: serviceNames,
@@ -72,7 +80,7 @@ export function createGetLogsRatesService(params: RegisterServicesParams) {
           aggs: {
             logErrors: {
               terms: {
-                field: 'log.level',
+                field: LOG_LEVEL,
                 include: ['error', 'ERROR'],
               },
             },

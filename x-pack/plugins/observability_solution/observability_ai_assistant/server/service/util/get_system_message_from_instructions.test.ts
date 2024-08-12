@@ -4,14 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getSystemMessageFromInstructions } from './get_system_message_from_instructions';
+import {
+  getSystemMessageFromInstructions,
+  USER_INSTRUCTIONS_HEADER,
+} from './get_system_message_from_instructions';
 
 describe('getSystemMessageFromInstructions', () => {
   it('handles plain instructions', () => {
     expect(
       getSystemMessageFromInstructions({
         registeredInstructions: ['first', 'second'],
-        knowledgeBaseInstructions: [],
+        userInstructions: [],
         requestInstructions: [],
         availableFunctionNames: [],
       })
@@ -27,7 +30,7 @@ describe('getSystemMessageFromInstructions', () => {
             return availableFunctionNames[0];
           },
         ],
-        knowledgeBaseInstructions: [],
+        userInstructions: [],
         requestInstructions: [],
         availableFunctionNames: ['myFunction'],
       })
@@ -38,26 +41,22 @@ describe('getSystemMessageFromInstructions', () => {
     expect(
       getSystemMessageFromInstructions({
         registeredInstructions: ['first'],
-        knowledgeBaseInstructions: [{ doc_id: 'second', text: 'second_kb' }],
+        userInstructions: [{ doc_id: 'second', text: 'second_kb' }],
         requestInstructions: [{ doc_id: 'second', text: 'second_request' }],
         availableFunctionNames: [],
       })
-    ).toEqual(
-      `first\n\nWhat follows is a set of instructions provided by the user, please abide by them as long as they don't conflict with anything you've been told so far:\n\nsecond_request`
-    );
+    ).toEqual(`first\n\n${USER_INSTRUCTIONS_HEADER}\n\nsecond_request`);
   });
 
   it('includes kb instructions if there is no request instruction', () => {
     expect(
       getSystemMessageFromInstructions({
         registeredInstructions: ['first'],
-        knowledgeBaseInstructions: [{ doc_id: 'second', text: 'second_kb' }],
+        userInstructions: [{ doc_id: 'second', text: 'second_kb' }],
         requestInstructions: [],
         availableFunctionNames: [],
       })
-    ).toEqual(
-      `first\n\nWhat follows is a set of instructions provided by the user, please abide by them as long as they don't conflict with anything you've been told so far:\n\nsecond_kb`
-    );
+    ).toEqual(`first\n\n${USER_INSTRUCTIONS_HEADER}\n\nsecond_kb`);
   });
 
   it('handles undefined values', () => {
@@ -69,7 +68,7 @@ describe('getSystemMessageFromInstructions', () => {
             return undefined;
           },
         ],
-        knowledgeBaseInstructions: [],
+        userInstructions: [],
         requestInstructions: [],
         availableFunctionNames: [],
       })

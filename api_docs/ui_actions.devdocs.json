@@ -767,18 +767,6 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/search_embeddable_factory.ts"
-              },
-              {
-                "plugin": "discover",
                 "path": "src/plugins/discover/public/plugin.tsx"
               },
               {
@@ -2190,6 +2178,49 @@
       },
       {
         "parentPluginId": "uiActions",
+        "id": "def-public.PresentableGroup",
+        "type": "Interface",
+        "tags": [],
+        "label": "PresentableGroup",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/ui-actions-browser",
+            "scope": "common",
+            "docId": "kibKbnUiActionsBrowserPluginApi",
+            "section": "def-common.PresentableGroup",
+            "text": "PresentableGroup"
+          },
+          "<Context> extends Partial<Pick<",
+          {
+            "pluginId": "@kbn/ui-actions-browser",
+            "scope": "common",
+            "docId": "kibKbnUiActionsBrowserPluginApi",
+            "section": "def-common.Presentable",
+            "text": "Presentable"
+          },
+          "<Context>, \"order\" | \"getDisplayName\" | \"getIconType\" | \"getDisplayNameTooltip\">>"
+        ],
+        "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.PresentableGroup.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "uiActions",
         "id": "def-public.Trigger",
         "type": "Interface",
         "tags": [],
@@ -2549,6 +2580,21 @@
       },
       {
         "parentPluginId": "uiActions",
+        "id": "def-public.ADD_PANEL_TRIGGER",
+        "type": "string",
+        "tags": [],
+        "label": "ADD_PANEL_TRIGGER",
+        "description": [],
+        "signature": [
+          "\"ADD_PANEL_TRIGGER\""
+        ],
+        "path": "packages/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "uiActions",
         "id": "def-public.FrequentCompatibilityChangeAction",
         "type": "Type",
         "tags": [],
@@ -2625,9 +2671,9 @@
           "Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.EmbeddableApiContext",
+            "section": "def-public.EmbeddableApiContext",
             "text": "EmbeddableApiContext"
           },
           "> & { data: { rowIndex: number; table: ",
@@ -2677,6 +2723,53 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "uiActions",
+        "id": "def-public.addPanelMenuTrigger",
+        "type": "Object",
+        "tags": [],
+        "label": "addPanelMenuTrigger",
+        "description": [],
+        "path": "packages/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.addPanelMenuTrigger.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.addPanelMenuTrigger.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "packages/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.addPanelMenuTrigger.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "packages/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "uiActions",
         "id": "def-public.rowClickTrigger",

@@ -21,12 +21,12 @@ import {
   sourceIpWithTextMapping,
 } from '../../../../mock/enriched_field_metadata/mock_enriched_field_metadata';
 import { TestProviders } from '../../../../mock/test_providers/test_providers';
-import { EnrichedFieldMetadata } from '../../../../types';
+import { EcsBasedFieldMetadata } from '../../../../types';
 import { IncompatibleCallout } from '.';
 
 const content = 'Is your name Michael?';
 
-const eventCategoryWithWildcard: EnrichedFieldMetadata = {
+const eventCategoryWithWildcard: EcsBasedFieldMetadata = {
   ...eventCategory, // `event.category` is a `keyword` per the ECS spec
   indexFieldType: 'wildcard', // this index has a mapping of `wildcard` instead of `keyword`
   isInSameFamily: true, // `wildcard` and `keyword` are in the same family
@@ -38,7 +38,7 @@ describe('IncompatibleCallout', () => {
     render(
       <TestProviders>
         <IncompatibleCallout
-          enrichedFieldMetadata={[
+          ecsBasedFieldMetadata={[
             eventCategoryWithWildcard, // `wildcard` and `keyword`
             eventCategoryWithUnallowedValues, // `keyword` and `keyword`
             hostNameWithTextMapping, // `keyword` and `text`

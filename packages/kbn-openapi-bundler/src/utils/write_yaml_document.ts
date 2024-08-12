@@ -23,18 +23,46 @@ export async function writeYamlDocument(filePath: string, document: unknown): Pr
 
 function stringifyToYaml(document: unknown): string {
   try {
+    // We don't want to have `undefined` values serialized into YAML.
+    // `JSON.stringify()` simply skips `undefined` values while js-yaml v 3.14 DOES NOT.
+    // js-yaml >= v4 has it fixed so `dump()`'s behavior is consistent with  `JSON.stringify()`.
+    // Until js-yaml is updated to v4 use the hack with JSON serialization/deserialization.
+    const clearedDocument = JSON.parse(JSON.stringify(document));
+
     // Disable YAML Anchors https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases
     // It makes YAML much more human readable
-    return dump(document, { noRefs: true });
+    return dump(clearedDocument, {
+      noRefs: true,
+      sortKeys: sortYamlKeys,
+    });
   } catch (e) {
-    // RangeError might happened because of stack overflow
-    // due to circular references in the document
-    // since YAML Anchors are disabled
-    if (e instanceof RangeError) {
-      // Try to stringify with YAML Anchors enabled
-      return dump(document, { noRefs: false });
-    }
-
-    throw e;
+    // Try to stringify with YAML Anchors enabled
+    return dump(document, { noRefs: false, sortKeys: sortYamlKeys });
   }
 }
+
+function sortYamlKeys(a: string, b: string): number {
+  if (a in FIELDS_ORDER && b in FIELDS_ORDER) {
+    return FIELDS_ORDER[a as CustomOrderedField] - FIELDS_ORDER[b as CustomOrderedField];
+  }
+
+  return a.localeCompare(b);
+}
+
+const FIELDS_ORDER = {
+  // root level fields
+  openapi: 1,
+  info: 2,
+  servers: 3,
+  paths: 4,
+  components: 5,
+  security: 6,
+  tags: 7,
+  externalDocs: 8,
+  // object schema fields
+  type: 9,
+  properties: 10,
+  required: 11,
+} as const;
+
+type CustomOrderedField = keyof typeof FIELDS_ORDER;

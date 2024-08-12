@@ -55,7 +55,7 @@ class FollowerIndexResumeProviderUi extends PureComponent {
       ? i18n.translate(
           'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.resumeSingleTitle',
           {
-            defaultMessage: `Resume replication to follower index '{name}'?`,
+            defaultMessage: `Resume replication to follower index ''{name}''?`,
             values: { name: ids[0] },
           }
         )

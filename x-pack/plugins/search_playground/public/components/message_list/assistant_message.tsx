@@ -13,14 +13,17 @@ import {
   EuiButtonEmpty,
   EuiComment,
   EuiFlexGroup,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { docLinks } from '../../../common/doc_links';
 import { RetrievalDocsFlyout } from './retrieval_docs_flyout';
 import type { AIMessage as AIMessageType } from '../../types';
 
@@ -40,6 +43,7 @@ const AIMessageCSS = css`
 `;
 
 export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) => {
+  const { euiTheme } = useEuiTheme();
   const [isDocsFlyoutOpen, setIsDocsFlyoutOpen] = useState(false);
   const { content, createdAt, citations, retrievalDocs, inputTokens } = message;
   const username = i18n.translate('xpack.searchPlayground.chat.message.assistant.username', {
@@ -49,33 +53,115 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) =
   return (
     <>
       {!!retrievalDocs?.length && (
+        <>
+          <EuiComment
+            username={username}
+            timelineAvatar="dot"
+            data-test-subj="assistant-message-searching"
+            eventColor="subdued"
+            css={{
+              '.euiAvatar': { backgroundColor: euiTheme.colors.ghost },
+              '.euiCommentEvent': {
+                border: euiTheme.border.thin,
+                borderRadius: euiTheme.border.radius.medium,
+              },
+            }}
+            event={
+              <EuiText size="s">
+                <p>
+                  <FormattedMessage
+                    id="xpack.searchPlayground.chat.message.assistant.searchingQuestion"
+                    defaultMessage='Searching for "{question}"'
+                    values={{ question: inputTokens.searchQuery }}
+                  />
+                </p>
+              </EuiText>
+            }
+          />
+          <EuiComment
+            username={username}
+            timelineAvatar="dot"
+            data-test-subj="retrieval-docs-comment"
+            eventColor="subdued"
+            css={{
+              '.euiAvatar': { backgroundColor: euiTheme.colors.ghost },
+              '.euiCommentEvent': {
+                border: euiTheme.border.thin,
+                borderRadius: euiTheme.border.radius.medium,
+              },
+            }}
+            event={
+              <>
+                <EuiText size="s">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.searchPlayground.chat.message.assistant.retrievalDocs"
+                      defaultMessage="Grounding answer based on"
+                    />
+                    {` `}
+                  </p>
+                </EuiText>
+
+                <EuiButtonEmpty
+                  css={{ blockSize: 'auto' }}
+                  size="s"
+                  flush="left"
+                  data-test-subj="retrieval-docs-button"
+                  onClick={() => setIsDocsFlyoutOpen(true)}
+                >
+                  <FormattedMessage
+                    id="xpack.searchPlayground.chat.message.assistant.retrievalDocButton"
+                    defaultMessage="{count} document sources"
+                    values={{ count: retrievalDocs.length }}
+                  />
+                </EuiButtonEmpty>
+
+                {isDocsFlyoutOpen && (
+                  <RetrievalDocsFlyout
+                    onClose={() => setIsDocsFlyoutOpen(false)}
+                    retrievalDocs={retrievalDocs}
+                  />
+                )}
+              </>
+            }
+          />
+        </>
+      )}
+      {retrievalDocs?.length === 0 && (
         <EuiComment
           username={username}
           timelineAvatar="dot"
+          data-test-subj="retrieval-docs-comment-no-docs"
+          eventColor="subdued"
+          css={{
+            '.euiAvatar': { backgroundColor: euiTheme.colors.ghost },
+            '.euiCommentEvent': {
+              border: euiTheme.border.thin,
+              borderRadius: euiTheme.border.radius.medium,
+            },
+          }}
           event={
             <>
               <EuiText size="s">
                 <p>
                   <FormattedMessage
-                    id="xpack.searchPlayground.chat.message.assistant.retrievalDocs"
-                    defaultMessage="Grounding answer based on"
+                    id="xpack.searchPlayground.chat.message.assistant.noRetrievalDocs"
+                    defaultMessage="Unable to retrieve documents based on the provided question and query."
                   />
                   {` `}
                 </p>
               </EuiText>
 
-              <EuiButtonEmpty
-                css={{ blockSize: 'auto' }}
-                size="s"
-                flush="left"
-                onClick={() => setIsDocsFlyoutOpen(true)}
+              <EuiLink
+                href={docLinks.retrievalOptimize}
+                target="_blank"
+                data-test-subj="retrieval-optimization-documentation-link"
               >
                 <FormattedMessage
-                  id="xpack.searchPlayground.chat.message.assistant.retrievalDocButton"
-                  defaultMessage="{count} document sources"
-                  values={{ count: retrievalDocs.length }}
+                  id="xpack.searchPlayground.chat.message.assistant.noRetrievalDocs.learnMore"
+                  defaultMessage=" Learn more."
                 />
-              </EuiButtonEmpty>
+              </EuiLink>
 
               {isDocsFlyoutOpen && (
                 <RetrievalDocsFlyout
@@ -92,6 +178,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) =
         event={i18n.translate('xpack.searchPlayground.chat.message.assistant.event.responded', {
           defaultMessage: 'responded',
         })}
+        data-test-subj="assistant-message"
         timestamp={
           createdAt &&
           i18n.translate('xpack.searchPlayground.chat.message.assistant.createdAt', {
@@ -101,6 +188,13 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) =
             },
           })
         }
+        css={{
+          '.euiAvatar': { backgroundColor: euiTheme.colors.ghost },
+          '.euiCommentEvent__body': {
+            backgroundColor: euiTheme.colors.ghost,
+          },
+        }}
+        eventColor="subdued"
         timelineAvatar="compute"
         timelineAvatarAriaLabel={i18n.translate(
           'xpack.searchPlayground.chat.message.assistant.avatarAriaLabel',
@@ -110,7 +204,11 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) =
         )}
         actions={
           <>
-            <TokenEstimateTooltip context={inputTokens.context} total={inputTokens.total} />
+            <TokenEstimateTooltip
+              context={inputTokens.context}
+              total={inputTokens.total}
+              clipped={inputTokens.contextClipped}
+            />
             <CopyActionButton
               copyText={String(content)}
               ariaLabel={i18n.translate('xpack.searchPlayground.chat.message.assistant.copyLabel', {
@@ -137,7 +235,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) =
         {!!citations?.length && (
           <>
             <EuiSpacer size="l" />
-            <EuiTitle size="xs">
+            <EuiTitle size="xs" data-test-subj="assistant-message-citations">
               <p>
                 <FormattedMessage
                   id="xpack.searchPlayground.chat.message.assistant.citations.title"

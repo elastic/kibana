@@ -11,6 +11,14 @@ import { ChatForm } from '../../../types';
 import { Prompt } from '../../../../common/prompt';
 import { getESQuery } from './utils';
 
+export const getSourceFields = (sourceFields: ChatForm['source_fields']) => {
+  const fields = Object.keys(sourceFields).reduce<Record<string, string>>((acc, index: string) => {
+    acc[index] = sourceFields[index][0];
+    return acc;
+  }, {});
+  return JSON.stringify(fields, null, 4);
+};
+
 export const LANGCHAIN_PYTHON = (formValues: ChatForm, clientDetails: string) => (
   <EuiCodeBlock language="py" isCopyable overflowHeight="100%">
     {`## Install the required packages
@@ -27,38 +35,38 @@ import os
 ${clientDetails}
 
 def build_query(query):
-  return ${getESQuery(formValues.elasticsearch_query)}
+    return ${getESQuery(formValues.elasticsearch_query)}
 
-index_source_fields = ${JSON.stringify(formValues.source_fields, null, 2)}
+index_source_fields = ${getSourceFields(formValues.source_fields)}
 
 retriever = ElasticsearchRetriever(
-  index_name="${formValues.indices.join(',')}",
-  body_func=build_query,
-  content_field=index_source_fields,
-  es_client=es_client
+    index_name="${formValues.indices.join(',')}",
+    body_func=build_query,
+    content_field=index_source_fields,
+    es_client=es_client
 )
 
 model = ChatOpenAI(openai_api_key=os.environ["OPENAI_API_KEY"], model_name="gpt-3.5-turbo")
 
 ANSWER_PROMPT = ChatPromptTemplate.from_template(
-  f"""${Prompt(formValues.prompt, {
-    context: true,
-    citations: formValues.citations,
-    type: 'openai',
-  })}"""
+    """${Prompt(formValues.prompt, {
+      context: true,
+      citations: formValues.citations,
+      type: 'openai',
+    })}"""
 )
 
 DEFAULT_DOCUMENT_PROMPT = PromptTemplate.from_template(template="{page_content}")
 
 def _combine_documents(
-  docs, document_prompt=DEFAULT_DOCUMENT_PROMPT, document_separator="\\n\\n"
+    docs, document_prompt=DEFAULT_DOCUMENT_PROMPT, document_separator="\\n\\n"
 ):
-  doc_strings = [format_document(doc, document_prompt) for doc in docs]
-  return document_separator.join(doc_strings)
+    doc_strings = [format_document(doc, document_prompt) for doc in docs]
+    return document_separator.join(doc_strings)
 
 _context = {
-  "context": retriever | _combine_documents,
-  "question": RunnablePassthrough(),
+    "context": retriever | _combine_documents,
+    "question": RunnablePassthrough(),
 }
 
 chain = _context | ANSWER_PROMPT | model | StrOutputParser()

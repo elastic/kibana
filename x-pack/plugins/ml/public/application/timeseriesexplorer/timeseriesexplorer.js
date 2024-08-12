@@ -1059,8 +1059,11 @@ export class TimeSeriesExplorer extends React.Component {
               <EuiFormRow hasEmptyLabelSpace style={{ maxWidth: '100%' }}>
                 <ForecastingModal
                   job={selectedJob}
+                  jobState={selectedJob.state}
                   detectorIndex={selectedDetectorIndex}
                   entities={entityControls}
+                  earliestRecordTimestamp={selectedJob.data_counts.earliest_record_timestamp}
+                  latestRecordTimestamp={selectedJob.data_counts.latest_record_timestamp}
                   setForecastId={this.setForecastId}
                   className="forecast-controls"
                 />
@@ -1163,6 +1166,7 @@ export class TimeSeriesExplorer extends React.Component {
               </EuiFlexGroup>
 
               <TimeSeriesExplorerControls
+                forecastId={this.props.selectedForecastId}
                 selectedDetectorIndex={selectedDetectorIndex}
                 selectedEntities={selectedEntities}
                 selectedJobId={selectedJobId}

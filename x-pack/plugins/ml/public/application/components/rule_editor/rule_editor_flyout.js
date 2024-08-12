@@ -60,6 +60,7 @@ class RuleEditorFlyoutUI extends Component {
   static propTypes = {
     setShowFunction: PropTypes.func.isRequired,
     unsetShowFunction: PropTypes.func.isRequired,
+    selectedJob: PropTypes.object,
   };
 
   constructor(props) {
@@ -100,7 +101,7 @@ class RuleEditorFlyoutUI extends Component {
 
   showFlyout = (anomaly) => {
     let ruleIndex = -1;
-    const job = mlJobService.getJob(anomaly.jobId);
+    const job = this.props.selectedJob ?? mlJobService.getJob(anomaly.jobId);
     if (job === undefined) {
       // No details found for this job, display an error and
       // don't open the Flyout as no edits can be made without the job.
@@ -337,12 +338,13 @@ class RuleEditorFlyoutUI extends Component {
 
   updateRuleAtIndex = (ruleIndex, editedRule) => {
     const { toasts } = this.props.kibana.services.notifications;
+    const { mlApiServices } = this.props.kibana.services.mlServices;
     const { job, anomaly } = this.state;
 
     const jobId = job.job_id;
     const detectorIndex = anomaly.detectorIndex;
 
-    saveJobRule(job, detectorIndex, ruleIndex, editedRule)
+    saveJobRule(job, detectorIndex, ruleIndex, editedRule, mlApiServices)
       .then((resp) => {
         if (resp.success) {
           toasts.add({
@@ -391,11 +393,12 @@ class RuleEditorFlyoutUI extends Component {
 
   deleteRuleAtIndex = (index) => {
     const { toasts } = this.props.kibana.services.notifications;
+    const { mlApiServices } = this.props.kibana.services.mlServices;
     const { job, anomaly } = this.state;
     const jobId = job.job_id;
     const detectorIndex = anomaly.detectorIndex;
 
-    deleteJobRule(job, detectorIndex, index)
+    deleteJobRule(job, detectorIndex, index, mlApiServices)
       .then((resp) => {
         if (resp.success) {
           toasts.addSuccess(
@@ -443,7 +446,8 @@ class RuleEditorFlyoutUI extends Component {
 
   addItemToFilterList = (item, filterId, closeFlyoutOnAdd) => {
     const { toasts } = this.props.kibana.services.notifications;
-    addItemToFilter(item, filterId)
+    const { mlApiServices } = this.props.kibana.services.mlServices;
+    addItemToFilter(item, filterId, mlApiServices)
       .then(() => {
         if (closeFlyoutOnAdd === true) {
           toasts.add({
@@ -562,6 +566,7 @@ class RuleEditorFlyoutUI extends Component {
 
       flyout = (
         <EuiFlyout
+          data-test-subj="mlRuleEditorFlyout"
           className="ml-rule-editor-flyout"
           onClose={this.closeFlyout}
           aria-labelledby="flyoutTitle"

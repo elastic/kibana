@@ -58,6 +58,7 @@ import {
   getLifecycleAlertsQueries,
   getMaintenanceWindowAlertsQuery,
   getContinualAlertsQuery,
+  isAlertImproving,
 } from './lib';
 import { isValidAlertIndexName } from '../alerts_service';
 import { resolveAlertConflicts } from './lib/alert_conflict_resolver';
@@ -431,6 +432,13 @@ export class AlertsClient<
           this.fetchedAlerts.data.hasOwnProperty(id) &&
           get(this.fetchedAlerts.data[id], ALERT_STATUS) === 'active'
         ) {
+          const isImproving = isAlertImproving<
+            AlertData,
+            LegacyState,
+            LegacyContext,
+            ActionGroupIds,
+            RecoveryActionGroupId
+          >(this.fetchedAlerts.data[id], activeAlerts[id], this.ruleType.actionGroups);
           activeAlertsToIndex.push(
             buildOngoingAlert<
               AlertData,
@@ -442,6 +450,7 @@ export class AlertsClient<
               alert: this.fetchedAlerts.data[id],
               legacyAlert: activeAlerts[id],
               rule: this.rule,
+              isImproving,
               runTimestamp: this.runTimestampString,
               timestamp: currentTime,
               payload: this.reportedAlerts[id],
@@ -508,12 +517,6 @@ export class AlertsClient<
                 timestamp: currentTime,
                 rule: this.rule,
               })
-        );
-      } else {
-        this.options.logger.debug(
-          `Could not find alert document to update for recovered alert with id ${id} and uuid ${currentRecoveredAlerts[
-            id
-          ].getUuid()}`
         );
       }
     }

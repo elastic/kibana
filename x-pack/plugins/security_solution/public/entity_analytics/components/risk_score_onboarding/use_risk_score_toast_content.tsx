@@ -10,21 +10,20 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { RiskScoreEntity } from '../../../../common/search_strategy';
-import { RiskScoreDocLink } from './risk_score_doc_link';
+import { EntityAnalyticsLearnMoreLink } from './entity_analytics_doc_link';
 
 const StyledButton = styled(EuiButton)`
   float: right;
 `;
 
-export const useRiskScoreToastContent = (riskScoreEntity: RiskScoreEntity) => {
+export const useRiskScoreToastContent = () => {
   const renderDocLink = useCallback(
     (message: string) => (
       <>
-        {message} <RiskScoreDocLink riskScoreEntity={riskScoreEntity} />
+        {message} <EntityAnalyticsLearnMoreLink />
       </>
     ),
-    [riskScoreEntity]
+    []
   );
   const renderDashboardLink = useCallback(
     (message: string, targetUrl: string) => (

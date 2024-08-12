@@ -129,6 +129,9 @@ describe('Field', function () {
 
     const fieldC = getField({ indexed: false, aggregatable: false, scripted: false });
     expect(fieldC.sortable).toEqual(false);
+
+    const fieldD = getField({ type: 'date', scripted: true });
+    expect(fieldD.sortable).toEqual(false);
   });
 
   it('calculates filterable', () => {

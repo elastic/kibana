@@ -8,7 +8,8 @@
 
 import React, { useMemo } from 'react';
 
-import { EuiButtonIcon, EuiToolTip, IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { CellAction, CellActionExecutionContext } from '../types';
 
 export const ActionItem = ({

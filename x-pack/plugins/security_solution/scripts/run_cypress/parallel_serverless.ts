@@ -343,8 +343,7 @@ ${JSON.stringify(argv, null, 2)}
       const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
 
-      // if KIBANA_MKI_QUALITY_GATE exists and has a value, it means that we are running the tests against the second
-      // quality gate.
+      // if KIBANA_MKI_QUALITY_GATE exists and has a value, we are running the tests against the Kibana QA quality gate.
       if (process.env.KIBANA_MKI_QUALITY_GATE) {
         log.info(
           'KIBANA_MKI_QUALITY_GATE is provided, so @serverlessQA --@skipInServerless --@skipInServerlessMKI tags will run.'
@@ -541,7 +540,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               } else {
                 try {
                   result = await cypress.run({
-                    browser: 'electron',
+                    browser: 'chrome',
                     spec: filePath,
                     configFile: cypressConfigFilePath,
                     reporter: argv.reporter as string,
@@ -554,6 +553,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                       numTestsKeptInMemory: 0,
                       env: cyCustomEnv,
                     },
+                    runnerUi: !process.env.CI,
                   });
                   if ((result as CypressCommandLine.CypressRunResult)?.totalFailed) {
                     failedSpecFilePaths.push(filePath);

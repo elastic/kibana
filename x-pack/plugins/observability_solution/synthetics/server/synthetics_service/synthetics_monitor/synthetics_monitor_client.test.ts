@@ -52,7 +52,7 @@ describe('SyntheticsMonitorClient', () => {
 
   const serverMock: SyntheticsServerSetup = {
     logger,
-    uptimeEsClient: mockEsClient,
+    syntheticsEsClient: mockEsClient,
     authSavedObjectsClient: {
       bulkUpdate: jest.fn(),
       get: jest.fn(),

@@ -28,6 +28,8 @@ export const CreateDebPackage: Task = {
       'amd64',
       '--deb-priority',
       'optional',
+      '--depends',
+      ' adduser',
     ]);
 
     await runFpm(config, log, build, 'deb', 'arm64', [
@@ -35,6 +37,8 @@ export const CreateDebPackage: Task = {
       'arm64',
       '--deb-priority',
       'optional',
+      '--depends',
+      ' adduser',
     ]);
   },
 };
@@ -80,13 +84,34 @@ export const CreateDockerUbuntu: Task = {
   },
 };
 
+export const CreateDockerWolfi: Task = {
+  description: 'Creating Docker Wolfi image',
+
+  async run(config, log, build) {
+    await runDockerGenerator(config, log, build, {
+      architecture: 'x64',
+      baseImage: 'wolfi',
+      context: false,
+      image: true,
+      dockerBuildDate,
+    });
+    await runDockerGenerator(config, log, build, {
+      architecture: 'aarch64',
+      baseImage: 'wolfi',
+      context: false,
+      image: true,
+      dockerBuildDate,
+    });
+  },
+};
+
 export const CreateDockerServerless: Task = {
   description: 'Creating Docker Serverless image',
 
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
       architecture: 'x64',
-      baseImage: 'ubuntu',
+      baseImage: 'wolfi',
       context: false,
       serverless: true,
       image: true,
@@ -94,7 +119,7 @@ export const CreateDockerServerless: Task = {
     });
     await runDockerGenerator(config, log, build, {
       architecture: 'aarch64',
-      baseImage: 'ubuntu',
+      baseImage: 'wolfi',
       context: false,
       serverless: true,
       image: true,
@@ -162,6 +187,12 @@ export const CreateDockerContexts: Task = {
       dockerBuildDate,
     });
     await runDockerGenerator(config, log, build, {
+      baseImage: 'wolfi',
+      context: true,
+      image: false,
+      dockerBuildDate,
+    });
+    await runDockerGenerator(config, log, build, {
       baseImage: 'ubi',
       context: true,
       image: false,
@@ -179,7 +210,7 @@ export const CreateDockerContexts: Task = {
       image: false,
     });
     await runDockerGenerator(config, log, build, {
-      baseImage: 'ubuntu',
+      baseImage: 'wolfi',
       serverless: true,
       context: true,
       image: false,

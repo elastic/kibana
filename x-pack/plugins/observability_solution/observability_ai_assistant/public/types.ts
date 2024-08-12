@@ -9,6 +9,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { Observable } from 'rxjs';
 import type {
+  ChatCompletionChunkEvent,
   MessageAddEvent,
   StreamingChatResponseEventWithoutError,
 } from '../common/conversation_complete';
@@ -17,6 +18,7 @@ import type {
   Message,
   ObservabilityAIAssistantScreenContext,
   PendingMessage,
+  UserInstructionOrPlainText,
 } from '../common/types';
 import type { TelemetryEventTypeWithPayload } from './analytics';
 import type { ObservabilityAIAssistantAPIClient } from './api';
@@ -34,6 +36,13 @@ import { createScreenContextAction } from './utils/create_screen_context_action'
 
 export type { PendingMessage };
 
+export interface DiscoveredDataset {
+  title: string;
+  description: string;
+  indexPatterns: string[];
+  columns: unknown[];
+}
+
 export interface ObservabilityAIAssistantChatService {
   sendAnalyticsEvent: (event: TelemetryEventTypeWithPayload) => void;
   chat: (
@@ -41,19 +50,25 @@ export interface ObservabilityAIAssistantChatService {
     options: {
       messages: Message[];
       connectorId: string;
-      function?: 'none' | 'auto';
+      functions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
+      functionCall?: string;
       signal: AbortSignal;
     }
-  ) => Observable<StreamingChatResponseEventWithoutError>;
+  ) => Observable<ChatCompletionChunkEvent>;
   complete: (options: {
     getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
     conversationId?: string;
     connectorId: string;
     messages: Message[];
     persist: boolean;
-    disableFunctions: boolean;
+    disableFunctions:
+      | boolean
+      | {
+          except: string[];
+        };
     signal: AbortSignal;
-    responseLanguage: string;
+    responseLanguage?: string;
+    instructions?: UserInstructionOrPlainText[];
   }) => Observable<StreamingChatResponseEventWithoutError>;
   getFunctions: (options?: { contexts?: string[]; filter?: string }) => FunctionDefinition[];
   hasFunction: (name: string) => boolean;

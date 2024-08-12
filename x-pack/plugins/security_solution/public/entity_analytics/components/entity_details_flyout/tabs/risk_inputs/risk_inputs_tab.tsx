@@ -14,6 +14,8 @@ import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 
 import { get } from 'lodash/fp';
+import { AlertPreviewButton } from '../../../../../flyout/shared/components/alert_preview_button';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import { formatRiskScore } from '../../../../common';
@@ -40,6 +42,7 @@ import { ActionColumn } from '../../components/action_column';
 export interface RiskInputsTabProps extends Record<string, unknown> {
   entityType: RiskScoreEntity;
   entityName: string;
+  scopeId: string;
 }
 
 const FIRST_RECORD_PAGINATION = {
@@ -47,9 +50,10 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
+export const EXPAND_ALERT_TEST_ID = 'risk-input-alert-preview-button';
 export const RISK_INPUTS_TAB_QUERY_ID = 'RiskInputsTabQuery';
 
-export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) => {
+export const RiskInputsTab = ({ entityType, entityName, scopeId }: RiskInputsTabProps) => {
   const { setQuery, deleteQuery } = useGlobalTime();
   const [selectedItems, setSelectedItems] = useState<InputAlert[]>([]);
 
@@ -96,9 +100,26 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
     }),
     []
   );
+  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
   const inputColumns: Array<EuiBasicTableColumn<InputAlert>> = useMemo(
     () => [
+      ...(isPreviewEnabled
+        ? [
+            {
+              render: (data: InputAlert) => (
+                <AlertPreviewButton
+                  id={data._id}
+                  indexName={data.input.index}
+                  scopeId={scopeId}
+                  data-test-subj={EXPAND_ALERT_TEST_ID}
+                />
+              ),
+              width: '5%',
+            },
+          ]
+        : []),
+
       {
         name: (
           <FormattedMessage
@@ -153,7 +174,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
         render: formatContribution,
       },
     ],
-    []
+    [isPreviewEnabled, scopeId]
   );
 
   const [isAssetCriticalityEnabled] = useUiSetting$<boolean>(ENABLE_ASSET_CRITICALITY_SETTING);

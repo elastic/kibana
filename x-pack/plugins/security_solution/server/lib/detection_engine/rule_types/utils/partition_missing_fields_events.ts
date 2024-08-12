@@ -17,20 +17,25 @@ import type { SignalSourceHit } from '../types';
  * 2. where any of fields is empty
  */
 export const partitionMissingFieldsEvents = <
-  T extends SignalSourceHit | { event: SignalSourceHit }
+  T extends SignalSourceHit | { event: SignalSourceHit } | Record<string, string | null | number>
 >(
   events: T[],
   suppressedBy: string[] = [],
   // path to fields property within event object. At this point, it can be in root of event object or within event key
-  fieldsPath: ['event'] | [] = []
+  fieldsPath: ['event', 'fields'] | ['fields'] | [] = [],
+  mergeSourceAndFields: boolean = false
 ): T[][] => {
   return partition(events, (event) => {
     if (suppressedBy.length === 0) {
       return true;
     }
-    const eventFields = get(event, [...fieldsPath, 'fields']);
-    const hasMissingFields =
-      Object.keys(pick(eventFields, suppressedBy)).length < suppressedBy.length;
+    const eventFields = fieldsPath.length ? get(event, fieldsPath) : event;
+    const sourceFields =
+      (event as SignalSourceHit)?._source || (event as { event: SignalSourceHit })?.event?._source;
+
+    const fields = mergeSourceAndFields ? { ...sourceFields, ...eventFields } : eventFields;
+
+    const hasMissingFields = Object.keys(pick(fields, suppressedBy)).length < suppressedBy.length;
 
     return !hasMissingFields;
   });

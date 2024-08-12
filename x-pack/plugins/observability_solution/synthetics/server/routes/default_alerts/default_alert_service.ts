@@ -196,7 +196,7 @@ export class DefaultAlertService {
   async getActionConnectors() {
     const actionsClient = (await this.context.actions)?.getActionsClient();
 
-    const settings = await savedObjectsAdapter.getUptimeDynamicSettings(this.soClient);
+    const settings = await savedObjectsAdapter.getSyntheticsDynamicSettings(this.soClient);
     let actionConnectors: FindActionResult[] = [];
     try {
       actionConnectors = await actionsClient.getAll();

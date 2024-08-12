@@ -49,7 +49,7 @@ export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(
     const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
     const { canWritePolicyManagement } = useUserPrivileges().endpointPrivileges;
     const { isLoading: isUpdating, mutateAsync: sendPolicyUpdate } = useUpdateEndpointPolicy();
-    const { data: agentSummaryData } = useFetchAgentByAgentPolicySummary(policy.policy_id);
+    const { data: agentSummaryData } = useFetchAgentByAgentPolicySummary(policy.policy_ids);
 
     const [policySettings, setPolicySettings] = useState<PolicyConfig>(
       cloneDeep(policy.inputs[0].config.policy.value)

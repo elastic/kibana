@@ -16,7 +16,6 @@
     "**/*.tsx",
   ],
   "kbn_references": [
-    "@kbn/crypto-browser",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/core-injected-metadata-browser-internal",
@@ -52,6 +51,10 @@
     "@kbn/core-base-browser-mocks",
     "@kbn/logging",
     "@kbn/logging-mocks",
+    "@kbn/core-i18n-browser-mocks",
+    "@kbn/core-theme-browser-mocks",
+    "@kbn/react-kibana-context-render",
+    "@kbn/recently-accessed",
   ],
   "exclude": [
     "target/**/*",

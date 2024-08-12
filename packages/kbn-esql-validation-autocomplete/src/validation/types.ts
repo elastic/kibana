@@ -7,6 +7,7 @@
  */
 
 import type { ESQLMessage, ESQLLocation } from '@kbn/esql-ast';
+import { FieldType } from '../definitions/types';
 import type { EditorError } from '../types';
 
 export interface ESQLVariable {
@@ -17,7 +18,10 @@ export interface ESQLVariable {
 
 export interface ESQLRealField {
   name: string;
-  type: string;
+  type: FieldType;
+  metadata?: {
+    description?: string;
+  };
 }
 
 export interface ESQLPolicy {
@@ -32,7 +36,6 @@ export interface ReferenceMaps {
   variables: Map<string, ESQLVariable[]>;
   fields: Map<string, ESQLRealField>;
   policies: Map<string, ESQLPolicy>;
-  metadataFields: Set<string>;
   query: string;
 }
 
@@ -167,6 +170,26 @@ export interface ValidationErrors {
   wrongDissectOptionArgumentType: {
     message: string;
     type: { value: string | number };
+  };
+  noAggFunction: {
+    message: string;
+    type: {
+      commandName: string;
+      expression: string;
+    };
+  };
+  expressionNotAggClosed: {
+    message: string;
+    type: {
+      commandName: string;
+      expression: string;
+    };
+  };
+  aggInAggFunction: {
+    message: string;
+    type: {
+      nestedAgg: string;
+    };
   };
 }
 

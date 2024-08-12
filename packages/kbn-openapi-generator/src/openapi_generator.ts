@@ -100,6 +100,7 @@ export const generate = async (config: GeneratorConfig) => {
         version: 'Bundle (no version)',
       },
       imports: {},
+      circularRefs: new Set<string>(),
     });
 
     await fs.writeFile(bundle.outFile, result);

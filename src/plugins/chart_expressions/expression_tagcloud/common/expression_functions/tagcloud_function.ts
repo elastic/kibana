@@ -69,7 +69,7 @@ export const errors = {
   invalidPercent: (percent: number) =>
     new Error(
       i18n.translate('expressionTagcloud.functions.tagcloud.invalidPercentErrorMessage', {
-        defaultMessage: "Invalid value: '{percent}'. Percentage must be between 0 and 1",
+        defaultMessage: "Invalid value: ''{percent}''. Percentage must be between 0 and 1",
         values: {
           percent,
         },
@@ -78,7 +78,7 @@ export const errors = {
   invalidImageUrl: (imageUrl: string) =>
     new Error(
       i18n.translate('expressionTagcloud.functions.tagcloud.invalidImageUrl', {
-        defaultMessage: "Invalid image url: '{imageUrl}'.",
+        defaultMessage: "Invalid image url: ''{imageUrl}''.",
         values: {
           imageUrl,
         },

@@ -14,6 +14,9 @@ import type {
   SentinelOneGetActivitiesResponse,
   SentinelOneGetAgentsResponse,
   SentinelOneActivityRecord,
+  SentinelOneOsType,
+  SentinelOneGetRemoteScriptStatusApiResponse,
+  SentinelOneRemoteScriptExecutionStatus,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import { EndpointActionGenerator } from './endpoint_action_generator';
 import { SENTINEL_ONE_ACTIVITY_INDEX_PATTERN } from '../..';
@@ -22,9 +25,25 @@ import type {
   SentinelOneActivityEsDoc,
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
+  SentinelOneActivityDataForType80,
 } from '../types';
 
 export class SentinelOneDataGenerator extends EndpointActionGenerator {
+  static readonly scriptExecutionStatusValues: Readonly<
+    Array<SentinelOneRemoteScriptExecutionStatus['status']>
+  > = Object.freeze([
+    'canceled',
+    'completed',
+    'created',
+    'expired',
+    'failed',
+    'in_progress',
+    'partially_completed',
+    'pending',
+    'pending_user_action',
+    'scheduled',
+  ]);
+
   generate<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
@@ -32,21 +51,26 @@ export class SentinelOneDataGenerator extends EndpointActionGenerator {
   >(
     overrides: DeepPartial<LogsEndpointAction<TParameters, TOutputContent, TMeta>> = {}
   ): LogsEndpointAction<TParameters, TOutputContent, TMeta> {
-    return super.generate({
-      EndpointActions: {
-        input_type: 'sentinel_one',
-      },
-      ...overrides,
-    }) as LogsEndpointAction<TParameters, TOutputContent, TMeta>;
+    return super.generate(
+      merge(
+        {
+          EndpointActions: {
+            input_type: 'sentinel_one',
+          },
+        },
+        overrides
+      )
+    ) as LogsEndpointAction<TParameters, TOutputContent, TMeta>;
   }
 
   /** Generate a SentinelOne activity index ES doc */
-  generateActivityEsDoc(
+  generateActivityEsDoc<TData>(
     overrides: DeepPartial<SentinelOneActivityEsDoc> = {}
-  ): SentinelOneActivityEsDoc {
+  ): SentinelOneActivityEsDoc<TData> {
     const doc: SentinelOneActivityEsDoc = {
       sentinel_one: {
         activity: {
+          data: {},
           agent: {
             id: this.seededUUIDv4(),
           },
@@ -60,13 +84,13 @@ export class SentinelOneDataGenerator extends EndpointActionGenerator {
       },
     };
 
-    return merge(doc, overrides);
+    return merge(doc, overrides) as SentinelOneActivityEsDoc<TData>;
   }
 
-  generateActivityEsSearchHit(
-    overrides: DeepPartial<SentinelOneActivityEsDoc> = {}
-  ): SearchHit<SentinelOneActivityEsDoc> {
-    const hit = this.toEsSearchHit<SentinelOneActivityEsDoc>(
+  generateActivityEsSearchHit<TData>(
+    overrides: DeepPartial<SentinelOneActivityEsDoc<TData>> = {}
+  ): SearchHit<SentinelOneActivityEsDoc<TData>> {
+    const hit = this.toEsSearchHit<SentinelOneActivityEsDoc<TData>>(
       this.generateActivityEsDoc(overrides),
       SENTINEL_ONE_ACTIVITY_INDEX_PATTERN
     );
@@ -81,10 +105,39 @@ export class SentinelOneDataGenerator extends EndpointActionGenerator {
     return hit;
   }
 
-  generateActivityEsSearchResponse(
-    docs: Array<SearchHit<SentinelOneActivityEsDoc>> = [this.generateActivityEsSearchHit()]
-  ): SearchResponse<SentinelOneActivityEsDoc> {
-    return this.toEsSearchResponse<SentinelOneActivityEsDoc>(docs);
+  generateActivityEsSearchResponse<TData>(
+    docs: Array<SearchHit<SentinelOneActivityEsDoc<TData>>> = [this.generateActivityEsSearchHit()]
+  ): SearchResponse<SentinelOneActivityEsDoc<TData>> {
+    return this.toEsSearchResponse<SentinelOneActivityEsDoc<TData>>(docs);
+  }
+
+  generateActivityFetchFileResponseData(
+    overrides: DeepPartial<SentinelOneActivityDataForType80> = {}
+  ): SentinelOneActivityDataForType80 {
+    const data: SentinelOneActivityDataForType80 = {
+      flattened: {
+        commandId: Number([...this.randomNGenerator(1000, 2)].join('')),
+        commandBatchUuid: this.seededUUIDv4(),
+        filename: 'file.zip',
+        sourceType: 'API',
+        uploadedFilename: 'file_fetch.zip',
+      },
+      site: { name: 'Default site' },
+      group_name: 'Default Group',
+      scope: { level: 'Group', name: 'Default Group' },
+      fullscope: {
+        details: 'Group Default Group in Site Default site of Account Foo',
+        details_path: 'Global / Foo / Default site / Default Group',
+      },
+      downloaded: {
+        url: `/agents/${[...this.randomNGenerator(100, 4)].join('')}/uploads/${[
+          ...this.randomNGenerator(100, 4),
+        ].join('')}`,
+      },
+      account: { name: 'Foo' },
+    };
+
+    return merge(data, overrides);
   }
 
   generateSentinelOneApiActivityResponse(
@@ -335,6 +388,44 @@ export class SentinelOneDataGenerator extends EndpointActionGenerator {
       pagination: { totalItems: 1, nextCursor: null },
       data: [merge(agent, agentDetailsOverrides)],
       errors: null,
+    };
+  }
+
+  generateSentinelOneApiRemoteScriptStatusResponse(
+    overrides: Partial<SentinelOneRemoteScriptExecutionStatus> = {}
+  ): SentinelOneGetRemoteScriptStatusApiResponse {
+    const scriptExecutionStatus: SentinelOneRemoteScriptExecutionStatus = {
+      accountId: this.seededUUIDv4(),
+      accountName: 'Elastic',
+      agentComputerName: this.randomHostname(),
+      agentId: this.seededUUIDv4(),
+      agentIsActive: true,
+      agentIsDecommissioned: false,
+      agentMachineType: 'server',
+      agentOsType: this.randomOSFamily() as SentinelOneOsType,
+      agentUuid: this.seededUUIDv4(),
+      createdAt: '2024-06-04T15:48:07.183909Z',
+      description: 'Terminate Processes',
+      detailedStatus: 'Execution completed successfully',
+      groupId: '1392053568591146999',
+      groupName: 'Default Group',
+      id: this.seededUUIDv4(),
+      initiatedBy: this.randomUser(),
+      initiatedById: '1809444483386312727',
+      parentTaskId: this.seededUUIDv4(),
+      scriptResultsSignature: '632e6e027',
+      siteId: '1392053568582758390',
+      siteName: 'Default site',
+      status: this.randomChoice(SentinelOneDataGenerator.scriptExecutionStatusValues),
+      statusCode: 'ok',
+      statusDescription: 'Completed',
+      type: 'script_execution',
+      updatedAt: '2024-06-04T15:49:20.508099Z',
+    };
+
+    return {
+      data: [merge(scriptExecutionStatus, overrides)],
+      pagination: { totalItems: 1, nextCursor: undefined },
     };
   }
 }

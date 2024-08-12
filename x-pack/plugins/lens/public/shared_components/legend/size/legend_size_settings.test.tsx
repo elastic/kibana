@@ -6,92 +6,64 @@
  */
 
 import React from 'react';
-import { LegendSizeSettings } from './legend_size_settings';
-import { EuiSuperSelect } from '@elastic/eui';
-import { shallow } from 'enzyme';
-import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/public';
+import { LegendSizeSettings, LegendSizeSettingsProps } from './legend_size_settings';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 describe('legend size settings', () => {
+  const renderLegendSizeSettings = (props?: Partial<LegendSizeSettingsProps>) => {
+    const defaultProps: LegendSizeSettingsProps = {
+      legendSize: undefined,
+      onLegendSizeChange: () => {},
+      isVerticalLegend: true,
+      showAutoOption: false,
+    };
+    return render(<LegendSizeSettings {...defaultProps} {...props} />);
+  };
+  const openSelect = () => userEvent.click(screen.getByRole('button'));
+  const chooseOption = (option: string) => {
+    openSelect();
+    fireEvent.click(screen.getByRole('option', { name: option }));
+  };
   it('renders nothing if not vertical legend', () => {
-    const instance = shallow(
-      <LegendSizeSettings
-        legendSize={undefined}
-        onLegendSizeChange={() => {}}
-        isVerticalLegend={false}
-        showAutoOption={false}
-      />
-    );
-
-    expect(instance.html()).toBeNull();
+    const { container } = renderLegendSizeSettings({ isVerticalLegend: false });
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('defaults to correct value', () => {
-    const instance = shallow(
-      <LegendSizeSettings
-        legendSize={undefined}
-        onLegendSizeChange={() => {}}
-        isVerticalLegend={true}
-        showAutoOption={false}
-      />
-    );
-
-    expect(instance.find(EuiSuperSelect).props().valueOfSelected).toBe(
-      DEFAULT_LEGEND_SIZE.toString()
-    );
+    renderLegendSizeSettings();
+    expect(screen.getByRole('button')).toHaveTextContent('Medium');
   });
 
   it('reflects current setting in select', () => {
     const CURRENT_SIZE = LegendSize.SMALL;
-
-    const instance = shallow(
-      <LegendSizeSettings
-        legendSize={CURRENT_SIZE}
-        onLegendSizeChange={() => {}}
-        isVerticalLegend={true}
-        showAutoOption={false}
-      />
-    );
-
-    expect(instance.find(EuiSuperSelect).props().valueOfSelected).toBe(CURRENT_SIZE);
+    renderLegendSizeSettings({ legendSize: CURRENT_SIZE });
+    expect(screen.getByRole('button')).toHaveTextContent('Small');
   });
 
   it('allows user to select a new option', () => {
     const onSizeChange = jest.fn();
-
-    const instance = shallow(
-      <LegendSizeSettings
-        legendSize={undefined}
-        onLegendSizeChange={onSizeChange}
-        isVerticalLegend={true}
-        showAutoOption={false}
-      />
-    );
-
-    const onChange = instance.find(EuiSuperSelect).props().onChange;
-
-    onChange(LegendSize.EXTRA_LARGE);
-    onChange(DEFAULT_LEGEND_SIZE);
-
+    renderLegendSizeSettings({ onLegendSizeChange: onSizeChange });
+    chooseOption('Extra large');
+    chooseOption('Medium');
     expect(onSizeChange).toHaveBeenNthCalledWith(1, LegendSize.EXTRA_LARGE);
     expect(onSizeChange).toHaveBeenNthCalledWith(2, undefined);
   });
 
   it('hides "auto" option if visualization not using it', () => {
-    const getOptions = (showAutoOption: boolean) =>
-      shallow(
-        <LegendSizeSettings
-          legendSize={LegendSize.LARGE}
-          onLegendSizeChange={() => {}}
-          isVerticalLegend={true}
-          showAutoOption={showAutoOption}
-        />
-      )
-        .find(EuiSuperSelect)
-        .props().options;
+    renderLegendSizeSettings({ showAutoOption: true });
+    openSelect();
+    expect(
+      screen.getAllByRole('option').filter((option) => option.textContent === 'Auto')
+    ).toHaveLength(1);
 
-    const autoOption = expect.objectContaining({ value: LegendSize.AUTO });
+    cleanup();
 
-    expect(getOptions(true)).toContainEqual(autoOption);
-    expect(getOptions(false)).not.toContainEqual(autoOption);
+    renderLegendSizeSettings({ showAutoOption: false });
+    openSelect();
+    expect(
+      screen.getAllByRole('option').filter((option) => option.textContent === 'Auto')
+    ).toHaveLength(0);
   });
 });

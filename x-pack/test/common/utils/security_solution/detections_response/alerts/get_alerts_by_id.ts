@@ -20,7 +20,7 @@ import { getQueryAlertsId } from './get_query_alerts_ids';
  * @param ids Rule id
  */
 export const getAlertsById = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   id: string
 ): Promise<SearchResponse<DetectionAlert>> => {

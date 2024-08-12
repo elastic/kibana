@@ -42,7 +42,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<HostRiskScore> = {
               name: 'testUsername',
               risk: {
                 rule_risks: [],
-                calculated_level: RiskSeverity.high,
+                calculated_level: RiskSeverity.High,
                 calculated_score_norm: 75,
                 multipliers: [],
                 id_field: '',

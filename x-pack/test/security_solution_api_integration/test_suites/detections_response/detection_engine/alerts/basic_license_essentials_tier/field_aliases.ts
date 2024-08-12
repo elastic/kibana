@@ -39,12 +39,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await createAlertsIndex(supertest, log);
-    });
-
-    afterEach(async () => {
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
+      await createAlertsIndex(supertest, log);
     });
 
     it('should keep the original alias value such as "host_alias" from a source index when the value is indexed', async () => {

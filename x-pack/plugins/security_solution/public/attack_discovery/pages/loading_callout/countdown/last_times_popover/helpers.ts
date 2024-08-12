@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { GenerationInterval } from '@kbn/elastic-assistant-common';
 import moment from 'moment';
 
 import { APPROXIMATE_TIME_REMAINING, ABOVE_THE_AVERAGE_TIME } from '../translations';
-import type { GenerationInterval } from '../../../../types';
 
 export const MAX_SECONDS_BADGE_WIDTH = 64; // px
 

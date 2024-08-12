@@ -1,0 +1,233 @@
+[
+  {
+    "hits" : {
+      "hits" : [
+        {
+          "_index": ".ds-metrics-logstash.plugins-default-2024.06.03-000001",
+          "_id": "6EMlJsVNKzn4Y3TAAAABj98c_a0",
+          "_score": null,
+          "_source": {
+            "@timestamp": "2024-06-03T17:19:30.221Z",
+            "agent": {
+              "name": "Mashhurs-MacBook-Pro.local",
+              "id": "ef37141b-605e-4b6e-a69f-ec525f8dcdd4",
+              "ephemeral_id": "893247f4-d8da-4d3d-a9bf-5c7e2831a47b",
+              "type": "filebeat",
+              "version": "8.13.4"
+            },
+            "data_stream": {
+              "dataset": "logstash.plugins",
+              "namespace": "default",
+              "type": "metrics"
+            },
+            "ecs": {
+              "version": "8.0.0"
+            },
+            "elastic_agent": {
+              "id": "ef37141b-605e-4b6e-a69f-ec525f8dcdd4",
+              "version": "8.13.4",
+              "snapshot": false
+            },
+            "event": {
+              "agent_id_status": "auth_metadata_missing",
+              "dataset": "logstash.plugins",
+              "ingested": "2024-06-03T17:19:40Z"
+            },
+            "host": {
+              "architecture": "x86_64",
+              "hostname": "mashhurs-macbook-pro.local",
+              "id": "6F56EC02-BC0B-50C7-A3C4-A414CB348C79",
+              "ip": [
+                "10.236.165.121",
+                "fe80::1848:3d0c:b1c8:47aa",
+                "fe80::957e:345:d271:b978",
+                "fe80::9b2a:96c0:39a4:d7ca",
+                "fe80::ac34:f7ff:fe89:8259",
+                "fe80::b010:4f46:40d5:9d21",
+                "fe80::ce81:b1c:bd2c:69e",
+                "fe80::f4d4:88ff:fe6a:a6b2"
+              ],
+              "mac": [
+                "36-73-F9-F5-80-80",
+                "36-73-F9-F5-80-84",
+                "36-73-F9-F5-80-88",
+                "AE-34-F7-89-82-59",
+                "F2-39-B9-E9-DB-17",
+                "F2-39-B9-E9-DB-18",
+                "F2-39-B9-E9-DB-19",
+                "F2-39-B9-E9-DB-F7",
+                "F2-39-B9-E9-DB-F8",
+                "F2-39-B9-E9-DB-F9",
+                "F4-D4-88-6A-A6-B2",
+                "F6-D4-88-6A-A6-B2"
+              ],
+              "name": "mashhurs-macbook-pro.local",
+              "os": {
+                "build": "23F79",
+                "family": "darwin",
+                "kernel": "23.5.0",
+                "name": "macOS",
+                "platform": "darwin",
+                "type": "macos",
+                "version": "14.5"
+              }
+            },
+            "input": {
+              "type": "cel"
+            },
+            "logstash": {
+              "pipeline": {
+                "elasticsearch": {
+                  "cluster": {
+                    "id": "1nmp"
+                  }
+                },
+                "host": {
+                  "address": "127.0.0.1:9600",
+                  "name": "Mashhurs-MacBook-Pro.local"
+                },
+                "id": "a3bf686e789a4fbb312192cf2f27667831f9c56b7c9394c1f2d8b933fe5c3ddc",
+                "name": "test",
+                "plugin": {
+                  "codec": {
+                    "decode": {
+                      "duration": {
+                        "ms": 2292616
+                      },
+                      "in": 2284,
+                      "out": 2284
+                    },
+                    "encode": {
+                      "duration": {
+                        "ms": 0
+                      },
+                      "in": 0
+                    },
+                    "id": "plain_5fea2751-110a-4919-b777-94791da43bb9",
+                    "name": "plain"
+                  },
+                  "type": "codec"
+                }
+              }
+            }
+          },
+          "sort": [
+            1717435170221
+          ]
+        },
+        {
+          "_index": ".ds-metrics-logstash.plugins-default-2024.06.03-000001",
+          "_id": "Owe4Rq9c7dsJjf_XAAABj98c_a0",
+          "_score": null,
+          "_source": {
+            "@timestamp": "2024-06-03T17:19:30.221Z",
+            "agent": {
+              "name": "Mashhurs-MacBook-Pro.local",
+              "id": "ef37141b-605e-4b6e-a69f-ec525f8dcdd4",
+              "ephemeral_id": "893247f4-d8da-4d3d-a9bf-5c7e2831a47b",
+              "type": "filebeat",
+              "version": "8.13.4"
+            },
+            "data_stream": {
+              "dataset": "logstash.plugins",
+              "namespace": "default",
+              "type": "metrics"
+            },
+            "ecs": {
+              "version": "8.0.0"
+            },
+            "elastic_agent": {
+              "id": "ef37141b-605e-4b6e-a69f-ec525f8dcdd4",
+              "version": "8.13.4",
+              "snapshot": false
+            },
+            "event": {
+              "agent_id_status": "auth_metadata_missing",
+              "dataset": "logstash.plugins",
+              "ingested": "2024-06-03T17:19:40Z"
+            },
+            "host": {
+              "architecture": "x86_64",
+              "hostname": "mashhurs-macbook-pro.local",
+              "id": "6F56EC02-BC0B-50C7-A3C4-A414CB348C79",
+              "ip": [
+                "10.236.165.121",
+                "fe80::1848:3d0c:b1c8:47aa",
+                "fe80::957e:345:d271:b978",
+                "fe80::9b2a:96c0:39a4:d7ca",
+                "fe80::ac34:f7ff:fe89:8259",
+                "fe80::b010:4f46:40d5:9d21",
+                "fe80::ce81:b1c:bd2c:69e",
+                "fe80::f4d4:88ff:fe6a:a6b2"
+              ],
+              "mac": [
+                "36-73-F9-F5-80-80",
+                "36-73-F9-F5-80-84",
+                "36-73-F9-F5-80-88",
+                "AE-34-F7-89-82-59",
+                "F2-39-B9-E9-DB-17",
+                "F2-39-B9-E9-DB-18",
+                "F2-39-B9-E9-DB-19",
+                "F2-39-B9-E9-DB-F7",
+                "F2-39-B9-E9-DB-F8",
+                "F2-39-B9-E9-DB-F9",
+                "F4-D4-88-6A-A6-B2",
+                "F6-D4-88-6A-A6-B2"
+              ],
+              "name": "mashhurs-macbook-pro.local",
+              "os": {
+                "build": "23F79",
+                "family": "darwin",
+                "kernel": "23.5.0",
+                "name": "macOS",
+                "platform": "darwin",
+                "type": "macos",
+                "version": "14.5"
+              }
+            },
+            "input": {
+              "type": "cel"
+            },
+            "logstash": {
+              "pipeline": {
+                "elasticsearch": {
+                  "cluster": {
+                    "id": "1nmp"
+                  }
+                },
+                "host": {
+                  "address": "127.0.0.1:9600",
+                  "name": "Mashhurs-MacBook-Pro.local"
+                },
+                "id": "a2acd1139178b1bcac1c6b716462d504553d5295fc887930efa031fdc3126c83",
+                "name": "another_test",
+                "plugin": {
+                  "codec": {
+                    "decode": {
+                      "duration": {
+                        "ms": 0
+                      },
+                      "in": 0,
+                      "out": 0
+                    },
+                    "encode": {
+                      "duration": {
+                        "ms": 0
+                      },
+                      "in": 0
+                    },
+                    "id": "plain_a9b27bb6-f9dd-4c54-bb93-c61f1b9001b3",
+                    "name": "plain"
+                  },
+                  "type": "codec"
+                }
+              }
+            }
+          },
+          "sort": [
+            1717435170221
+          ]
+        }
+      ]
+    }
+  }]

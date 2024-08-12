@@ -14,10 +14,7 @@ import {
   LIGHTWEIGHT_TEST_NOW_RUN,
 } from '../synthetics_monitor/synthetics_monitor_client';
 import { scheduleCleanUpTask } from './clean_up_task';
-import {
-  getAgentPoliciesAsInternalUser,
-  getAgentPolicyAsInternalUser,
-} from '../../routes/settings/private_locations/get_agent_policies';
+import { getAgentPoliciesAsInternalUser } from '../../routes/settings/private_locations/get_agent_policies';
 import { SyntheticsServerSetup } from '../../types';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import {
@@ -78,7 +75,7 @@ export class SyntheticsPrivateLocation {
     globalParams: Record<string, string>,
     testRunId?: string,
     runOnce?: boolean
-  ): Promise<(NewPackagePolicy & { policy_id: string }) | null> {
+  ): Promise<NewPackagePolicy | null> {
     const { label: locName } = privateLocation;
 
     const newPolicy = cloneDeep(newPolicyTemplate);
@@ -86,6 +83,7 @@ export class SyntheticsPrivateLocation {
     try {
       newPolicy.is_managed = true;
       newPolicy.policy_id = privateLocation.agentPolicyId;
+      newPolicy.policy_ids = [privateLocation.agentPolicyId];
       if (testRunId) {
         newPolicy.name =
           config.type === 'browser' ? BROWSER_TEST_NOW_RUN : LIGHTWEIGHT_TEST_NOW_RUN;
@@ -96,9 +94,9 @@ export class SyntheticsPrivateLocation {
           newPolicy.name = `${config[ConfigKey.NAME]}-${locName}-${spaceId}`;
         }
       }
-      const configNameSpace = config[ConfigKey.NAMESPACE];
+      const configNamespace = config[ConfigKey.NAMESPACE];
 
-      newPolicy.namespace = await this.getPolicyNameSpace(configNameSpace, privateLocation);
+      newPolicy.namespace = await this.getPolicyNamespace(configNamespace);
 
       const { formattedPolicy } = formatSyntheticsPolicy(
         newPolicy,
@@ -442,18 +440,14 @@ export class SyntheticsPrivateLocation {
   }
 
   async getAgentPolicies() {
-    return await getAgentPoliciesAsInternalUser(this.server);
+    return await getAgentPoliciesAsInternalUser({ server: this.server });
   }
 
-  async getPolicyNameSpace(configNameSpace: string, privateLocation: PrivateLocationAttributes) {
-    if (configNameSpace && configNameSpace !== DEFAULT_NAMESPACE_STRING) {
-      return configNameSpace;
+  async getPolicyNamespace(configNamespace: string) {
+    if (configNamespace && configNamespace !== DEFAULT_NAMESPACE_STRING) {
+      return configNamespace;
     }
-    if (privateLocation.namespace) {
-      return privateLocation.namespace;
-    }
-    const agentPolicy = await getAgentPolicyAsInternalUser(this.server, privateLocation.id);
-    return agentPolicy?.namespace ?? DEFAULT_NAMESPACE_STRING;
+    return undefined;
   }
 }
 

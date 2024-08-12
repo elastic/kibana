@@ -83,7 +83,7 @@ const SameFamilyTabComponent: React.FC<Props> = ({
 
   return (
     <div data-test-subj="sameFamilyTab">
-      <SameFamilyCallout enrichedFieldMetadata={partitionedFieldMetadata.sameFamily}>
+      <SameFamilyCallout ecsBasedFieldMetadata={partitionedFieldMetadata.sameFamily}>
         <EuiButtonEmpty aria-label={i18n.COPY_TO_CLIPBOARD} flush="both" onClick={onCopy}>
           {i18n.COPY_TO_CLIPBOARD}
         </EuiButtonEmpty>

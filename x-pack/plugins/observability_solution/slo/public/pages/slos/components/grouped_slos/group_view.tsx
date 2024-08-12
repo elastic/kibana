@@ -19,7 +19,7 @@ import { GroupListView } from './group_list_view';
 interface Props {
   groupBy: GroupByField;
   kqlQuery?: string;
-  sloView: SLOView;
+  view: SLOView;
   sort?: SortField;
   direction?: SortDirection;
   filters?: Filter[];
@@ -29,7 +29,7 @@ interface Props {
 
 export function GroupView({
   kqlQuery,
-  sloView,
+  view,
   sort,
   direction,
   groupBy,
@@ -83,7 +83,7 @@ export function GroupView({
           <GroupListView
             groupBy={result.groupBy}
             key={result.group}
-            sloView={sloView}
+            view={view}
             group={result.group}
             kqlQuery={kqlQuery}
             sort={sort}
@@ -93,7 +93,7 @@ export function GroupView({
           />
         ))}
 
-      {total > 0 ? (
+      {total > 0 && total > perPage ? (
         <EuiFlexItem>
           <EuiTablePagination
             data-test-subj="sloGroupListPagination"
@@ -103,7 +103,7 @@ export function GroupView({
             itemsPerPage={perPage}
             itemsPerPageOptions={[10, 25, 50, 100]}
             onChangeItemsPerPage={(newPerPage) => {
-              onStateChange({ perPage: newPerPage });
+              onStateChange({ perPage: newPerPage, page: 0 });
             }}
           />
         </EuiFlexItem>

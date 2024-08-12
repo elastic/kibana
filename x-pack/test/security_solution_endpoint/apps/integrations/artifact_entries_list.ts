@@ -14,7 +14,7 @@ import {
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
 import { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../configs/ftr_provider_context';
 import {
   ArtifactBodyType,
   getArtifactsListTestsData,
@@ -52,11 +52,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .set('kbn-xsrf', 'true');
   };
 
-  describe('For each artifact list under management', function () {
-    // It's flaky only in Serverless
-    targetTags(this, ['@ess', '@serverless']);
-
+  // Failing: See https://github.com/elastic/kibana/issues/187314
+  // Failing: See https://github.com/elastic/kibana/issues/187383
+  // Failing: See https://github.com/elastic/kibana/issues/188131
+  // Failing: See https://github.com/elastic/kibana/issues/188125
+  describe.skip('For each artifact list under management', function () {
+    targetTags(this, ['@ess', '@skipInServerless']);
     this.timeout(60_000 * 5);
+
     let indexedData: IndexedHostsAndAlertsResponse;
     let policyInfo: PolicyTestResourceInfo;
 
@@ -76,13 +79,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Check edited artifact is in the list with new values (wait for list to be updated)
       let updatedArtifact: ArtifactElasticsearchProperties | undefined;
       await retry.waitForWithTimeout('fleet artifact is updated', 120_000, async () => {
-        const artifacts = await endpointArtifactsTestResources.getArtifacts();
+        const artifacts = await endpointArtifactsTestResources.getArtifactsFromUnifiedManifestSO();
 
+        // This expects manifest artifact to come from unified so
         const manifestArtifact = artifacts.find((artifact) => {
           return (
-            artifact.artifactId ===
-              `${expectedArtifact.identifier}-${expectedArtifact.decoded_sha256}` &&
-            artifact.policyId === policy?.packagePolicy.id
+            artifact.artifactIds.includes(
+              `${expectedArtifact.identifier}-${expectedArtifact.decoded_sha256}`
+            ) && artifact.policyId === policy?.packagePolicy.id
           );
         });
 

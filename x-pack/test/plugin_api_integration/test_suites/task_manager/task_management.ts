@@ -296,6 +296,20 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should remove recurring task if task requests deletion', async () => {
+      await scheduleTask({
+        taskType: 'sampleRecurringTaskThatDeletesItself',
+        schedule: { interval: '1s' },
+        params: {},
+      });
+
+      await retry.try(async () => {
+        const history = await historyDocs();
+        expect(history.length).to.eql(5);
+        expect((await currentTasks()).docs).to.eql([]);
+      });
+    });
+
     it('should use a given ID as the task document ID', async () => {
       const result = await scheduleTask({
         id: 'test-task-for-sample-task-plugin-to-test-task-manager',

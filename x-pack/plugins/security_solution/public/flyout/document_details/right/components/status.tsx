@@ -18,7 +18,7 @@ import type {
 } from '../../../../common/components/event_details/types';
 import { SIGNAL_STATUS_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { StatusPopoverButton } from '../../../../common/components/event_details/overview/status_popover_button';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { getEnrichedFieldInfo } from '../../../../common/components/event_details/helpers';
 import { CellActions } from './cell_actions';
 import { STATUS_TITLE_TEST_ID } from './test_ids';
@@ -36,7 +36,7 @@ function hasData(fieldInfo?: EnrichedFieldInfo): fieldInfo is EnrichedFieldInfoW
 export const DocumentStatus: FC = () => {
   const { closeFlyout } = useExpandableFlyoutApi();
   const { eventId, browserFields, dataFormattedForFieldBrowser, scopeId, isPreview } =
-    useRightPanelContext();
+    useDocumentDetailsContext();
 
   const statusData = useMemo(() => {
     const item = find(

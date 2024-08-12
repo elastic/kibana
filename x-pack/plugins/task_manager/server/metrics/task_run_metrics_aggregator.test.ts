@@ -6,6 +6,7 @@
  */
 
 import * as uuid from 'uuid';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { asOk, asErr } from '../lib/result_type';
 import { TaskStatus } from '../task';
 import {
@@ -16,6 +17,8 @@ import {
 } from '../task_events';
 import { TaskRunResult } from '../task_running';
 import { TaskRunMetricsAggregator } from './task_run_metrics_aggregator';
+
+const logger = loggingSystemMock.createLogger();
 
 export const getTaskRunSuccessEvent = (type: string, isExpired: boolean = false) => {
   const id = uuid.v4();
@@ -81,7 +84,7 @@ export const getTaskManagerStatEvent = (value: number, id: TaskManagerStats = 'r
 describe('TaskRunMetricsAggregator', () => {
   let taskRunMetricsAggregator: TaskRunMetricsAggregator;
   beforeEach(() => {
-    taskRunMetricsAggregator = new TaskRunMetricsAggregator();
+    taskRunMetricsAggregator = new TaskRunMetricsAggregator(logger);
   });
 
   test('should correctly initialize', () => {

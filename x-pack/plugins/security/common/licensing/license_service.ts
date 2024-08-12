@@ -28,6 +28,8 @@ export class SecurityLicenseService {
       license: Object.freeze({
         isLicenseAvailable: () => rawLicense?.isAvailable ?? false,
 
+        getLicenseType: () => rawLicense?.type ?? undefined,
+
         getUnavailableReason: () => rawLicense?.getUnavailableReason(),
 
         isEnabled: () => this.isSecurityEnabledFromRawLicense(rawLicense),
@@ -81,6 +83,7 @@ export class SecurityLicenseService {
         allowRbac: false,
         allowSubFeaturePrivileges: false,
         allowUserProfileCollaboration: false,
+        allowFips: false,
         layout:
           rawLicense !== undefined && !rawLicense?.isAvailable
             ? 'error-xpack-unavailable'
@@ -103,6 +106,7 @@ export class SecurityLicenseService {
         allowRbac: false,
         allowSubFeaturePrivileges: false,
         allowUserProfileCollaboration: false,
+        allowFips: false,
       };
     }
 
@@ -124,6 +128,7 @@ export class SecurityLicenseService {
       allowRemoteClusterPrivileges: isLicensePlatinumOrBetter,
       allowRbac: true,
       allowUserProfileCollaboration: isLicenseStandardOrBetter,
+      allowFips: isLicensePlatinumOrBetter,
     };
   }
 }

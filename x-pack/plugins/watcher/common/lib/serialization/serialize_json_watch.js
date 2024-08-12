@@ -5,17 +5,21 @@
  * 2.0.
  */
 
-import { set } from '@kbn/safer-lodash-set';
 import { WATCH_TYPES } from '../../constants';
 
 export function serializeJsonWatch(name, json) {
   // We don't want to overwrite any metadata provided by the consumer.
   const { metadata = {} } = json;
-  set(metadata, 'xpack.type', WATCH_TYPES.JSON);
 
   const serializedWatch = {
     ...json,
-    metadata,
+    metadata: {
+      ...metadata,
+      xpack: {
+        ...metadata.xpack,
+        type: WATCH_TYPES.JSON,
+      },
+    },
   };
 
   if (name) {

@@ -10,10 +10,9 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
     <EuiFlyoutHeader>
       <EuiTitle>
         <h2>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cluster statistics"
             id="telemetry.callout.clusterStatisticsTitle"
-            values={Object {}}
           />
         </h2>
       </EuiTitle>
@@ -21,10 +20,9 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
         color="subdued"
       >
         <EuiText>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="This is an example of the basic cluster statistics that we'll collect. It includes the number of indices, shards, and nodes. It also includes high-level usage statistics, such as whether monitoring is turned on."
             id="telemetry.callout.clusterStatisticsDescription"
-            values={Object {}}
           />
         </EuiText>
       </EuiTextColor>

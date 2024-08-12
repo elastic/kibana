@@ -14,7 +14,7 @@ import type { Query } from '@kbn/es-query';
 import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
-import type { GroupTableItem } from '@kbn/aiops-components';
+import type { GroupTableItem } from '@kbn/aiops-log-rate-analysis/state';
 
 /*
  * Contains utility functions for building and processing queries.

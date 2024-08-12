@@ -33,7 +33,7 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
   message,
   status,
 }) => {
-  const { hasAssistantPrivilege } = useAssistantAvailability();
+  const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
   const { shouldBeDisplayed, color, title } = getPropsByStatus(status);
   const getPromptContext = useCallback(
     async () =>
@@ -84,6 +84,7 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
             getPromptContext={getPromptContext}
             suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT}
             tooltip={i18n.ASK_ASSISTANT_TOOLTIP}
+            isAssistantEnabled={isAssistantEnabled}
           >
             {i18n.ASK_ASSISTANT_ERROR_BUTTON}
           </NewChat>

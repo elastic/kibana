@@ -5,40 +5,38 @@
  * 2.0.
  */
 
-import type { EcsMetadata, UnallowedValueRequestItem } from '../../types';
+import type { EcsFlatTyped } from '../../constants';
+import type { EcsFieldMetadata, UnallowedValueRequestItem } from '../../types';
 
 export const hasAllowedValues = ({
   ecsMetadata,
   fieldName,
 }: {
-  ecsMetadata: Record<string, EcsMetadata> | null;
+  ecsMetadata: EcsFlatTyped;
   fieldName: string;
-}): boolean =>
-  ecsMetadata != null ? (ecsMetadata[fieldName]?.allowed_values?.length ?? 0) > 0 : false;
+}): boolean => (ecsMetadata[fieldName]?.allowed_values?.length ?? 0) > 0;
 
-export const getValidValues = (field: EcsMetadata | undefined): string[] =>
-  field?.allowed_values?.flatMap(({ name }) => (name != null ? name : [])) ?? [];
+export const getValidValues = (field?: EcsFieldMetadata): string[] =>
+  field?.allowed_values?.flatMap(({ name }) => name) ?? [];
 
 export const getUnallowedValueRequestItems = ({
   ecsMetadata,
   indexName,
 }: {
-  ecsMetadata: Record<string, EcsMetadata> | null;
+  ecsMetadata: EcsFlatTyped;
   indexName: string;
 }): UnallowedValueRequestItem[] =>
-  ecsMetadata != null
-    ? Object.keys(ecsMetadata).reduce<UnallowedValueRequestItem[]>(
-        (acc, fieldName) =>
-          hasAllowedValues({ ecsMetadata, fieldName })
-            ? [
-                ...acc,
-                {
-                  indexName,
-                  indexFieldName: fieldName,
-                  allowedValues: getValidValues(ecsMetadata[fieldName]),
-                },
-              ]
-            : acc,
-        []
-      )
-    : [];
+  Object.keys(ecsMetadata).reduce<UnallowedValueRequestItem[]>(
+    (acc, fieldName) =>
+      hasAllowedValues({ ecsMetadata, fieldName })
+        ? [
+            ...acc,
+            {
+              indexName,
+              indexFieldName: fieldName,
+              allowedValues: getValidValues(ecsMetadata[fieldName]),
+            },
+          ]
+        : acc,
+    []
+  );

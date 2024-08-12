@@ -1,17 +1,13 @@
 openapi: 3.0.0
 info:
   title: Get Asset Criticality Privileges Schema
-  version: 1.0.0
-servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
+  version: '1'
 paths:
   /internal/asset_criticality/privileges:
     get:
+      x-labels: [ess, serverless]
+      x-internal: true
+      x-codegen-enabled: true
       operationId: AssetCriticalityGetPrivileges
       summary: Get Asset Criticality Privileges
       responses:
@@ -24,7 +20,7 @@ paths:
               example:
                 elasticsearch:
                   index:
-                    ".asset-criticality.asset-criticality-*":
+                    '.asset-criticality.asset-criticality-*':
                       read: true
                       write: false
                 has_all_required: false

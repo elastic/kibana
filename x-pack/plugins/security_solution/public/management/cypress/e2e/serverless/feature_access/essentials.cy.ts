@@ -18,6 +18,11 @@ describe(
     env: {
       ftrConfig: {
         productTypes: [{ product_line: 'security', product_tier: 'essentials' }],
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'responseActionScanEnabled',
+          ])}`,
+        ],
       },
     },
   },

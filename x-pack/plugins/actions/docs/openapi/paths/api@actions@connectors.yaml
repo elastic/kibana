@@ -1,8 +1,10 @@
 get:
-  summary: Retrieves all connectors.
+  summary: Get all connectors
   operationId: getConnectors
   tags:
     - connectors
+  # parameters:
+  #   - $ref: '../components/headers/elastic_api_version.yaml'
   responses:
     '200':
       description: Indicates a successful call.

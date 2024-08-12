@@ -18,8 +18,14 @@ export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = () =>
   path: SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT,
   writeAccess: false,
   validate: {},
-  handler: async ({ savedObjectsClient, request, server }): Promise<any> => {
+  handler: async ({
+    savedObjectsClient,
+    request,
+    server,
+    syntheticsMonitorClient,
+  }): Promise<any> => {
     try {
+      const isServiceAllowed = syntheticsMonitorClient.syntheticsService.isAllowed;
       const result = await getSyntheticsEnablement({
         server,
       });
@@ -44,12 +50,14 @@ export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = () =>
           server,
         });
       } else {
-        return result;
+        return { ...result, isServiceAllowed };
       }
 
-      return getSyntheticsEnablement({
+      const res = await getSyntheticsEnablement({
         server,
       });
+
+      return { ...res, isServiceAllowed };
     } catch (e) {
       server.logger.error(e);
       throw e;

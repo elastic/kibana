@@ -2,7 +2,7 @@
 
 exports[`renders ControlsTab 1`] = `
 <div>
-  <InjectIntl(ControlEditorUi)
+  <injectIntl(ControlEditorUi)
     controlIndex={0}
     controlParams={
       Object {
@@ -64,7 +64,7 @@ exports[`renders ControlsTab 1`] = `
       ]
     }
   />
-  <InjectIntl(ControlEditorUi)
+  <injectIntl(ControlEditorUi)
     controlIndex={1}
     controlParams={
       Object {
@@ -174,10 +174,9 @@ exports[`renders ControlsTab 1`] = `
             iconType="plusInCircle"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Add"
               id="inputControl.editor.controlsTab.addButtonLabel"
-              values={Object {}}
             />
           </EuiButton>
         </EuiFormRow>

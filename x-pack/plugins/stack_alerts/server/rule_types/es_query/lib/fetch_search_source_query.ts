@@ -22,8 +22,9 @@ import {
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { Logger } from '@kbn/core/server';
+import { Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { OnlySearchSourceRuleParams } from '../types';
 import { getComparatorScript } from '../../../../common';
 
@@ -57,23 +58,31 @@ export async function fetchSearchSourceQuery({
   const isGroupAgg = isGroupAggregation(params.termField);
   const isCountAgg = isCountAggregation(params.aggType);
 
-  const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
+  let initialSearchSource;
+  try {
+    initialSearchSource = await searchSourceClient.createLazy(params.searchConfiguration);
+  } catch (err) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+      throw createTaskRunError(err, TaskErrorSource.USER);
+    }
+    throw err;
+  }
 
   const index = initialSearchSource.getField('index') as DataView;
-  const { searchSource, filterToExcludeHitsFromPreviousRun } = updateSearchSource(
+  const { searchSource, filterToExcludeHitsFromPreviousRun } = await updateSearchSource(
     initialSearchSource,
     index,
     params,
     latestTimestamp,
     dateStart,
     dateEnd,
+    logger,
     alertLimit
   );
 
+  const searchRequestBody: unknown = searchSource.getSearchRequestBody();
   logger.debug(
-    `search source query rule (${ruleId}) query: ${JSON.stringify(
-      searchSource.getSearchRequestBody()
-    )}`
+    () => `search source query rule (${ruleId}) query: ${JSON.stringify(searchRequestBody)}`
   );
 
   const searchResult = await searchSource.fetch();
@@ -99,20 +108,22 @@ export async function fetchSearchSourceQuery({
       sourceFieldsParams: params.sourceFields,
     }),
     index: [index.name],
+    query: searchRequestBody,
   };
 }
 
-export function updateSearchSource(
+export async function updateSearchSource(
   searchSource: ISearchSource,
   index: DataView,
   params: OnlySearchSourceRuleParams,
   latestTimestamp: string | undefined,
   dateStart: string,
   dateEnd: string,
+  logger: Logger,
   alertLimit?: number
-): { searchSource: ISearchSource; filterToExcludeHitsFromPreviousRun: Filter | null } {
+): Promise<{ searchSource: ISearchSource; filterToExcludeHitsFromPreviousRun: Filter | null }> {
   const isGroupAgg = isGroupAggregation(params.termField);
-  const timeField = index.getTimeField();
+  const timeField = await index.getTimeField();
 
   if (!timeField) {
     throw new Error(`Data view with ID ${index.id} no longer contains a time field.`);
@@ -172,6 +183,7 @@ export function updateSearchSource(
         ),
       },
       ...(isGroupAgg ? { topHitsSize: params.size } : {}),
+      loggerCb: (message: string) => logger.warn(message),
     })
   );
   return {

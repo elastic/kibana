@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
+
 /**
  * The `CYPRESS_ELASTICSEARCH_USERNAME` environment variable specifies the
  * username to be used when authenticating with Kibana
@@ -28,3 +30,9 @@ export const IS_SERVERLESS = 'IS_SERVERLESS';
  * environment is a real MKI.
  */
 export const CLOUD_SERVERLESS = 'CLOUD_SERVERLESS';
+
+/**
+ * The `DEFAULT_SERVERLESS_ROLE` environment variable specifies the default role used
+ * on serverless tests/
+ */
+export const DEFAULT_SERVERLESS_ROLE = ROLES.platform_engineer;

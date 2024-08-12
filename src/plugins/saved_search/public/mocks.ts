@@ -12,7 +12,9 @@ import { SearchSource } from '@kbn/data-plugin/public';
 import { SearchSourceDependencies } from '@kbn/data-plugin/common/search';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedSearchPublicPluginStart } from './plugin';
-import type { SavedSearchAttributeService } from './services/saved_searches';
+import { SavedSearch } from '../common';
+import { SerializableSavedSearch } from '../common/types';
+import { SavedSearchUnwrapResult } from './services/saved_searches';
 
 const createEmptySearchSource = jest.fn(() => {
   const deps = {
@@ -32,36 +34,38 @@ const createEmptySearchSource = jest.fn(() => {
   return searchSource;
 });
 
+const toSavedSearchMock = jest.fn((result, serialized) =>
+  Promise.resolve(
+    serialized
+      ? ({
+          title: result.attributes.title,
+          serializedSearchSource: createEmptySearchSource().getSerializedFields(),
+          managed: false,
+        } as SerializableSavedSearch)
+      : ({
+          title: result.attributes.title,
+          searchSource: createEmptySearchSource(),
+          managed: false,
+        } as SavedSearch)
+  )
+) as SavedSearchPublicPluginStart['byValueToSavedSearch'];
+
 const savedSearchStartMock = (): SavedSearchPublicPluginStart => ({
-  get: jest.fn().mockImplementation(() => ({
-    id: 'savedSearch',
-    title: 'savedSearchTitle',
-    searchSource: createEmptySearchSource(),
-  })),
+  get: jest
+    .fn()
+    .mockImplementation((id, serialized) =>
+      toSavedSearchMock(
+        { attributes: { title: 'savedSearchTitle' } } as SavedSearchUnwrapResult,
+        serialized
+      )
+    ),
   getAll: jest.fn(),
   getNew: jest.fn().mockImplementation(() => ({
     searchSource: createEmptySearchSource(),
   })),
   save: jest.fn(),
-  byValue: {
-    attributeService: {
-      getInputAsRefType: jest.fn(),
-      getInputAsValueType: jest.fn(),
-      inputIsRefType: jest.fn(),
-      unwrapAttributes: jest.fn(() => ({
-        attributes: { id: 'savedSearch', title: 'savedSearchTitle' },
-      })),
-      wrapAttributes: jest.fn(),
-    } as unknown as SavedSearchAttributeService,
-    toSavedSearch: jest.fn((id, result) =>
-      Promise.resolve({
-        id,
-        title: result.attributes.title,
-        searchSource: createEmptySearchSource(),
-        managed: false,
-      })
-    ),
-  },
+  checkForDuplicateTitle: jest.fn(),
+  byValueToSavedSearch: toSavedSearchMock,
 });
 
 export const savedSearchPluginMock = {

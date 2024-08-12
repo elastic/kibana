@@ -107,6 +107,7 @@ test('generates table config', async () => {
                 "query": Object {
                   "esql": "from test | count=count() by category",
                 },
+                "timeField": undefined,
               },
             },
           },

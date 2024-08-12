@@ -73,7 +73,6 @@ function getProps(
   return {
     stateContainer,
     savedQuery: '',
-    updateQuery: jest.fn(),
     onFieldEdited: jest.fn(),
   };
 }

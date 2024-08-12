@@ -10,7 +10,6 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_FAVORITE_URL } from '../../../../../../common/constants';
 
-import type { SetupPlugins } from '../../../../../plugin';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import type { ConfigType } from '../../../../..';
 
@@ -18,13 +17,9 @@ import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
 import { persistFavorite } from '../../../saved_object/timelines';
-import { TimelineType, persistFavoriteSchema } from '../../../../../../common/api/timeline';
+import { TimelineTypeEnum, persistFavoriteSchema } from '../../../../../../common/api/timeline';
 
-export const persistFavoriteRoute = (
-  router: SecuritySolutionPluginRouter,
-  _: ConfigType,
-  security: SetupPlugins['security']
-) => {
+export const persistFavoriteRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
   router.versioned
     .patch({
       path: TIMELINE_FAVORITE_URL,
@@ -44,7 +39,7 @@ export const persistFavoriteRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const frameworkRequest = await buildFrameworkRequest(context, request);
           const { timelineId, templateTimelineId, templateTimelineVersion, timelineType } =
             request.body;
 
@@ -53,7 +48,7 @@ export const persistFavoriteRoute = (
             timelineId || null,
             templateTimelineId || null,
             templateTimelineVersion || null,
-            timelineType || TimelineType.default
+            timelineType || TimelineTypeEnum.default
           );
 
           return response.ok({

@@ -160,7 +160,7 @@ export const DAYS_OF_WEEK_VALUES = [
   'friday',
   'saturday',
 ] as const;
-export type DayOfWeek = typeof DAYS_OF_WEEK_VALUES[number];
+export type DayOfWeek = (typeof DAYS_OF_WEEK_VALUES)[number];
 
 export interface BlockedWindow {
   jobType: SyncJobType;

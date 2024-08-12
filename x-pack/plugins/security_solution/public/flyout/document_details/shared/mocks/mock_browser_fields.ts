@@ -16,7 +16,6 @@ export const mockBrowserFields: BrowserFields = {
       'kibana.alert.workflow_status': {
         aggregatable: true,
         esTypes: ['0'],
-        format: '',
         name: 'kibana.alert.workflow_status',
         readFromDocValues: true,
         searchable: true,

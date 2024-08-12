@@ -23,29 +23,29 @@ export interface MetricThresholdRuleTypeParams extends RuleTypeParams {
 const metricThresholdDefaultActionMessage = i18n.translate(
   'xpack.infra.metrics.alerting.metric.threshold.defaultActionMessage',
   {
-    defaultMessage: `\\{\\{context.reason\\}\\}
+    defaultMessage: `'{{context.reason}}'
 
-\\{\\{rule.name\\}\\} is active with the following conditions:
+'{{rule.name}}' is active with the following conditions:
 
-- Affected: \\{\\{context.group\\}\\}
-- Metric: \\{\\{context.metric\\}\\}
-- Observed value: \\{\\{context.value\\}\\}
-- Threshold: \\{\\{context.threshold\\}\\}
+- Affected: '{{context.group}}'
+- Metric: '{{context.metric}}'
+- Observed value: '{{context.value}}'
+- Threshold: '{{context.threshold}}'
 
-[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+[View alert details]('{{context.alertDetailsUrl}}')
 `,
   }
 );
 const metricThresholdDefaultRecoveryMessage = i18n.translate(
   'xpack.infra.metrics.alerting.metric.threshold.defaultRecoveryMessage',
   {
-    defaultMessage: `\\{\\{rule.name\\}\\} has recovered.
+    defaultMessage: `'{{rule.name}}' has recovered.
 
-- Affected: \\{\\{context.group\\}\\}
-- Metric: \\{\\{context.metric\\}\\}
-- Threshold: \\{\\{context.threshold\\}\\}
+- Affected: '{{context.group}}'
+- Metric: '{{context.metric}}'
+- Threshold: '{{context.threshold}}'
 
-[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+[View alert details]('{{context.alertDetailsUrl}}')
 `,
   }
 );

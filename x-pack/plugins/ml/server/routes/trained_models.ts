@@ -10,7 +10,11 @@ import { groupBy } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { ElserVersion, InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type {
+  ElasticCuratedModelName,
+  ElserVersion,
+  InferenceAPIConfigResponse,
+} from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
@@ -30,6 +34,8 @@ import {
   updateDeploymentParamsSchema,
   createIngestPipelineSchema,
   modelDownloadsQuery,
+  curatedModelsParamsSchema,
+  curatedModelsQuerySchema,
 } from './schemas/inference_schema';
 import type { PipelineDefinition } from '../../common/types/trained_models';
 import { type TrainedModelConfigResponse } from '../../common/types/trained_models';
@@ -579,10 +585,15 @@ export function trainedModelsRoutes(
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
           const { modelId } = request.params;
-          const body = await mlClient.startTrainedModelDeployment({
-            model_id: modelId,
-            ...(request.query ? request.query : {}),
-          });
+          const body = await mlClient.startTrainedModelDeployment(
+            {
+              model_id: modelId,
+              ...(request.query ? request.query : {}),
+            },
+            {
+              maxRetries: 0,
+            }
+          );
           return response.ok({
             body,
           });
@@ -878,6 +889,84 @@ export function trainedModelsRoutes(
             const body = await modelsProvider(client, mlClient, cloud).installElasticModel(
               modelId,
               mlSavedObjectService
+            );
+
+            return response.ok({
+              body,
+            });
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
+        }
+      )
+    );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {get} /internal/ml/trained_models/download_status Gets models download status
+   * @apiName ModelsDownloadStatus
+   * @apiDescription Gets download status for all currently downloading models
+   */
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/download_status`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canCreateTrainedModels'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      routeGuard.fullLicenseAPIGuard(
+        async ({ client, mlClient, request, response, mlSavedObjectService }) => {
+          try {
+            const body = await modelsProvider(client, mlClient, cloud).getModelsDownloadStatus();
+
+            return response.ok({
+              body,
+            });
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
+        }
+      )
+    );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {get} /internal/ml/trained_models/curated_model_config Gets curated model config
+   * @apiName ModelsCuratedConfigs
+   * @apiDescription Gets curated model config for the specified model based on cluster architecture
+   */
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/curated_model_config/{modelName}`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canGetTrainedModels'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: curatedModelsParamsSchema,
+            query: curatedModelsQuerySchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(
+        async ({ client, mlClient, request, response, mlSavedObjectService }) => {
+          try {
+            const body = await modelsProvider(client, mlClient, cloud).getCuratedModelConfig(
+              request.params.modelName as ElasticCuratedModelName,
+              { version: request.query.version as ElserVersion }
             );
 
             return response.ok({

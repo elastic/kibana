@@ -32,7 +32,8 @@ export function activemqLogsSpecProvider(context: TutorialContext): TutorialSche
       defaultMessage: 'Collect and parse logs from ActiveMQ instances with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.activemqLogs.longDescription', {
-      defaultMessage: 'Collect ActiveMQ logs with Filebeat. \
+      defaultMessage:
+        'Collect ActiveMQ logs with Filebeat. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-activemq.html',

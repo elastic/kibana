@@ -14,7 +14,9 @@ import { ActionsRequestHandlerContext } from '../../types';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const paramSchema = schema.object({
-  id: schema.string(),
+  id: schema.string({
+    meta: { description: 'An identifier for the connector.' },
+  }),
 });
 
 export const deleteActionRoute = (
@@ -25,6 +27,13 @@ export const deleteActionRoute = (
   router.delete(
     {
       path: `${BASE_ACTION_API_PATH}/action/{id}`,
+      options: {
+        access: 'public',
+        summary: `Delete a connector`,
+        description: 'WARNING: When you delete a connector, it cannot be recovered.',
+        tags: ['oas-tag:connectors'],
+        deprecated: true,
+      },
       validate: {
         params: paramSchema,
       },

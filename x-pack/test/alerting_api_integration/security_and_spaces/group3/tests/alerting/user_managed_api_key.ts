@@ -632,7 +632,8 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
     const generatedApiKeyName = generateAPIKeyName(ruleTypeId, ruleName);
 
     const { body: allApiKeys } = await supertest
-      .get(`/internal/security/api_key?isAdmin=true`)
+      .post(`/internal/security/api_key/_query`)
+      .send({ query: { match: { name: generatedApiKeyName } } })
       .set('kbn-xsrf', 'foo')
       .expect(200);
 

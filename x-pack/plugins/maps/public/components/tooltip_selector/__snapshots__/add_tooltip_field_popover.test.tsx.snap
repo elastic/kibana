@@ -10,10 +10,9 @@ exports[`Should remove selected fields from selectable 1`] = `
       onClick={[Function]}
       size="xs"
     >
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Add"
         id="xpack.maps.tooltipSelector.togglePopoverLabel"
-        values={Object {}}
       />
     </EuiButtonEmpty>
   }
@@ -86,10 +85,9 @@ exports[`Should render 1`] = `
       onClick={[Function]}
       size="xs"
     >
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Add"
         id="xpack.maps.tooltipSelector.togglePopoverLabel"
-        values={Object {}}
       />
     </EuiButtonEmpty>
   }

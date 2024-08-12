@@ -28,7 +28,7 @@ export async function mountManagementSection(
 ) {
   const { element, setBreadcrumbs, history, license } = params;
   const [coreStart, depsStart] = await getStartServices();
-  const { docLinks, application, executionContext } = coreStart;
+  const { docLinks, application, executionContext, overlays } = coreStart;
 
   documentationService.setup(docLinks);
   breadcrumbService.setup(setBreadcrumbs);
@@ -49,6 +49,8 @@ export async function mountManagementSection(
     executionContext,
     license,
     consolePlugin: depsStart.console,
+    overlays,
+    http,
   };
 
   return renderApp(element, services, { ...coreStart, http });

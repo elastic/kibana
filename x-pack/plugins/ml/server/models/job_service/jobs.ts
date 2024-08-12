@@ -289,7 +289,7 @@ export function jobsProvider(
       if (
         auditMessage !== undefined &&
         job.create_time !== undefined &&
-        job.create_time <= auditMessage.msgTime
+        Number(job.create_time) <= auditMessage.msgTime
       ) {
         tempJob.auditMessage = {
           level: auditMessage.highestLevel,

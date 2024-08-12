@@ -32,6 +32,14 @@ export interface CreateSamlSessionParams {
   log: ToolingLog;
 }
 
+export interface SAMLResponseValueParams {
+  location: string;
+  ecSession: string;
+  email: string;
+  kbnHost: string;
+  log: ToolingLog;
+}
+
 export interface User {
   readonly email: string;
   readonly password: string;
@@ -46,4 +54,9 @@ export interface UserProfile {
   email: string;
   enabled: boolean;
   elastic_cloud_user: boolean;
+}
+
+export interface RetryParams {
+  attemptsCount: number;
+  attemptDelay: number;
 }

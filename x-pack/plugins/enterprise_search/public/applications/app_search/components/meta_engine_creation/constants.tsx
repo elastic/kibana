@@ -113,6 +113,6 @@ export const META_ENGINE_CREATION_FORM_MAX_SOURCE_ENGINES_WARNING_TITLE = (
 
 export const META_ENGINE_CREATION_SUCCESS_MESSAGE = (name: string) =>
   i18n.translate('xpack.enterpriseSearch.appSearch.metaEngineCreation.successMessage', {
-    defaultMessage: "Meta engine '{name}' was created",
+    defaultMessage: "Meta engine ''{name}'' was created",
     values: { name },
   });

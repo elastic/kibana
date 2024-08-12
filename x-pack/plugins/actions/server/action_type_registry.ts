@@ -88,6 +88,12 @@ export class ActionTypeRegistry {
     actionTypeId: string,
     options: { notifyUsage: boolean } = { notifyUsage: false }
   ) {
+    const validLicense = this.licenseState.isLicenseValidForActionType(
+      this.get(actionTypeId),
+      options
+    ).isValid;
+    if (validLicense === false) return false;
+
     const actionTypeEnabled = this.isActionTypeEnabled(actionTypeId, options);
     const inMemoryConnector = this.inMemoryConnectors.find(
       (connector) => connector.id === actionId

@@ -477,7 +477,8 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToTrainedModels();
       });
 
-      describe('with imported models', function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/175443
+      describe.skip('with imported models', function () {
         before(async () => {
           await ml.navigation.navigateToTrainedModels();
         });

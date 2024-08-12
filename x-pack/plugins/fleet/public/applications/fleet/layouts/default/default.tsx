@@ -7,9 +7,11 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 
+import { useDismissableTour } from '../../../../hooks/use_dismissable_tour';
 import type { Section } from '../../sections';
-import { useLink, useConfig, useAuthz } from '../../hooks';
+import { useLink, useConfig, useAuthz, useStartServices } from '../../hooks';
 import { WithHeaderLayout } from '../../../../layouts';
 
 import { ExperimentalFeaturesService } from '../../services';
@@ -30,7 +32,10 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
   const { getHref } = useLink();
   const { agents } = useConfig();
   const authz = useAuthz();
-  const { agentTamperProtectionEnabled } = ExperimentalFeaturesService.get();
+  const { agentTamperProtectionEnabled, subfeaturePrivileges } = ExperimentalFeaturesService.get();
+
+  const { docLinks } = useStartServices();
+  const granularPrivilegesCallout = useDismissableTour('GRANULAR_PRIVILEGES');
 
   const tabs = [
     {
@@ -109,8 +114,37 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
     .map(({ isHidden, ...tab }) => tab);
 
   return (
-    <WithHeaderLayout leftColumn={<DefaultPageTitle />} rightColumn={rightColumn} tabs={tabs}>
-      {children}
-    </WithHeaderLayout>
+    <>
+      {!subfeaturePrivileges || !authz.fleet.all || granularPrivilegesCallout.isHidden ? null : (
+        <EuiCallOut
+          size="s"
+          iconType="cheer"
+          onDismiss={granularPrivilegesCallout.dismiss}
+          title={
+            <>
+              <FormattedMessage
+                id="xpack.fleet.granularPrivileges.callOutContent"
+                defaultMessage="We've added new privileges that let you define more granularly who can view or edit Fleet agents, policies, and settings. {learnMoreLink}"
+                values={{
+                  learnMoreLink: (
+                    <EuiLink href={docLinks.links.fleet.roleAndPrivileges} external>
+                      <strong>
+                        <FormattedMessage
+                          id="xpack.fleet.granularPrivileges.learnMoreLinkText"
+                          defaultMessage="Learn more."
+                        />
+                      </strong>
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </>
+          }
+        />
+      )}
+      <WithHeaderLayout leftColumn={<DefaultPageTitle />} rightColumn={rightColumn} tabs={tabs}>
+        {children}
+      </WithHeaderLayout>
+    </>
   );
 };

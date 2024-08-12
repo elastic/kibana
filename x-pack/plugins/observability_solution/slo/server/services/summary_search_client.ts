@@ -10,13 +10,14 @@ import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/co
 import { ALL_VALUE, Paginated, Pagination } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { partition } from 'lodash';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import { Groupings, SLODefinition, SLOId, Summary } from '../domain/models';
+import { Groupings, SLODefinition, SLOId, StoredSLOSettings, Summary } from '../domain/models';
 import { toHighPrecision } from '../utils/number';
 import { createEsParams, typedSearch } from '../utils/queries';
-import { getListOfSummaryIndices } from './slo_settings';
+import { getListOfSummaryIndices, getSloSettings } from './slo_settings';
 import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
-import { getElasticsearchQueryOrThrow } from './transform_generators';
+import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_generators';
 import { fromRemoteSummaryDocumentToSloDefinition } from './unsafe_federated/remote_summary_doc_to_slo';
 import { getFlattenedGroupings } from './utils';
 
@@ -32,7 +33,14 @@ export interface SummaryResult {
   };
 }
 
-type SortField = 'error_budget_consumed' | 'error_budget_remaining' | 'sli_value' | 'status';
+type SortField =
+  | 'error_budget_consumed'
+  | 'error_budget_remaining'
+  | 'sli_value'
+  | 'status'
+  | 'burn_rate_5m'
+  | 'burn_rate_1h'
+  | 'burn_rate_1d';
 
 export interface Sort {
   field: SortField;
@@ -44,7 +52,8 @@ export interface SummarySearchClient {
     kqlQuery: string,
     filters: string,
     sort: Sort,
-    pagination: Pagination
+    pagination: Pagination,
+    hideStale?: boolean
   ): Promise<Paginated<SummaryResult>>;
 }
 
@@ -60,17 +69,12 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
     kqlQuery: string,
     filters: string,
     sort: Sort,
-    pagination: Pagination
+    pagination: Pagination,
+    hideStale?: boolean
   ): Promise<Paginated<SummaryResult>> {
-    let parsedFilters: any = {};
-
-    try {
-      parsedFilters = JSON.parse(filters);
-    } catch (e) {
-      this.logger.error(`Failed to parse filters: ${e.message}`);
-    }
-
-    const indices = await getListOfSummaryIndices(this.soClient, this.esClient);
+    const parsedFilters = parseStringFilters(filters, this.logger);
+    const settings = await getSloSettings(this.soClient);
+    const { indices } = await getListOfSummaryIndices(this.esClient, settings);
     const esParams = createEsParams({
       index: indices,
       track_total_hits: true,
@@ -78,6 +82,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         bool: {
           filter: [
             { term: { spaceId: this.spaceId } },
+            ...excludeStaleSummaryFilter(settings, kqlQuery, hideStale),
             getElasticsearchQueryOrThrow(kqlQuery),
             ...(parsedFilters.filter ?? []),
           ],
@@ -159,6 +164,10 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
               },
               sliValue: toHighPrecision(doc._source.sliValue),
               status: summaryDoc.status,
+              summaryUpdatedAt: summaryDoc.summaryUpdatedAt,
+              fiveMinuteBurnRate: toHighPrecision(summaryDoc.fiveMinuteBurnRate?.value ?? 0),
+              oneHourBurnRate: toHighPrecision(summaryDoc.oneHourBurnRate?.value ?? 0),
+              oneDayBurnRate: toHighPrecision(summaryDoc.oneDayBurnRate?.value ?? 0),
             },
             groupings: getFlattenedGroupings({
               groupings: summaryDoc.slo.groupings,
@@ -189,6 +198,32 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
   }
 }
 
+function excludeStaleSummaryFilter(
+  settings: StoredSLOSettings,
+  kqlFilter: string,
+  hideStale?: boolean
+): estypes.QueryDslQueryContainer[] {
+  if (kqlFilter.includes('summaryUpdatedAt') || !settings.staleThresholdInHours || !hideStale) {
+    return [];
+  }
+  return [
+    {
+      bool: {
+        should: [
+          { term: { isTempDoc: true } },
+          {
+            range: {
+              summaryUpdatedAt: {
+                gte: `now-${settings.staleThresholdInHours}h`,
+              },
+            },
+          },
+        ],
+      },
+    },
+  ];
+}
+
 function getRemoteClusterName(index: string) {
   if (index.includes(':')) {
     return index.split(':')[0];
@@ -205,6 +240,12 @@ function toDocumentSortField(field: SortField) {
       return 'status';
     case 'sli_value':
       return 'sliValue';
+    case 'burn_rate_5m':
+      return 'fiveMinuteBurnRate.value';
+    case 'burn_rate_1h':
+      return 'oneHourBurnRate.value';
+    case 'burn_rate_1d':
+      return 'oneDayBurnRate.value';
     default:
       assertNever(field);
   }

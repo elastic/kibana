@@ -1,0 +1,13 @@
+paths:
+{{#each paths as |path|}}
+  - {{path}}
+{{/each}}
+{{#if exclude_files}}
+prospector.scanner.exclude_files:
+{{#each exclude_files as |pattern f|}}
+  - {{pattern}}
+{{/each}}
+{{/if}}
+{{#if custom}}
+{{custom}}
+{{/if}}

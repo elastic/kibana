@@ -9,7 +9,6 @@ import {
   HealthStatus,
   IndexName,
   IndicesStatsIndexMetadataState,
-  QueryDslQueryContainer,
   Uuid,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
@@ -21,10 +20,10 @@ import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { AppMountParameters } from '@kbn/core/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { ChatRequestData } from '../common/types';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import { ChatRequestData, MessageRole } from '../common/types';
 import type { App } from './components/app';
 import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
-import type { Toolbar } from './components/toolbar';
 import { PlaygroundHeaderDocs } from './components/playground_header_docs';
 
 export * from '../common/types';
@@ -33,7 +32,6 @@ export * from '../common/types';
 export interface SearchPlaygroundPluginSetup {}
 export interface SearchPlaygroundPluginStart {
   PlaygroundProvider: React.FC<React.ComponentProps<typeof PlaygroundProviderComponent>>;
-  PlaygroundToolbar: React.FC<React.ComponentProps<typeof Toolbar>>;
   Playground: React.FC<React.ComponentProps<typeof App>>;
   PlaygroundHeaderDocs: React.FC<React.ComponentProps<typeof PlaygroundHeaderDocs>>;
 }
@@ -44,6 +42,7 @@ export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   share: SharePluginStart;
+  console?: ConsolePluginStart;
 }
 
 export interface AppServicesContext {
@@ -53,6 +52,7 @@ export interface AppServicesContext {
   cloud?: CloudSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection?: UsageCollectionStart;
+  console?: ConsolePluginStart;
 }
 
 export enum ChatFormFields {
@@ -73,16 +73,10 @@ export interface ChatForm {
   [ChatFormFields.citations]: boolean;
   [ChatFormFields.indices]: string[];
   [ChatFormFields.summarizationModel]: LLMModel;
-  [ChatFormFields.elasticsearchQuery]: { query: QueryDslQueryContainer };
-  [ChatFormFields.sourceFields]: string[];
+  [ChatFormFields.elasticsearchQuery]: { retriever: any }; // RetrieverContainer leads to "Type instantiation is excessively deep and possibly infinite" error
+  [ChatFormFields.sourceFields]: { [index: string]: string[] };
   [ChatFormFields.docSize]: number;
   [ChatFormFields.queryFields]: { [index: string]: string[] };
-}
-
-export enum MessageRole {
-  'user' = 'human',
-  'assistant' = 'assistant',
-  'system' = 'system',
 }
 
 export interface Message {
@@ -106,8 +100,9 @@ export interface AnnotationDoc {
 }
 
 export interface AnnotationTokens {
-  type: 'prompt_token_count' | 'context_token_count';
+  type: 'prompt_token_count' | 'context_token_count' | 'context_clipped' | 'search_query';
   count: number;
+  question?: string;
 }
 
 export interface Doc {
@@ -122,6 +117,8 @@ export interface AIMessage extends Message {
   inputTokens: {
     context: number;
     total: number;
+    contextClipped?: number;
+    searchQuery: string;
   };
 }
 
@@ -208,6 +205,7 @@ export interface UseChatHelpers {
 }
 
 export interface LLMModel {
+  id: string;
   name: string;
   value?: string;
   showConnectorName?: boolean;

@@ -14,7 +14,8 @@ export const GithubLink: React.FC<{
   assetBasePath: string;
   label: string;
   href: string;
-}> = ({ assetBasePath, label, href }) => {
+  'aria-label'?: string;
+}> = ({ assetBasePath, label, href, 'aria-label': ariaLabel }) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
@@ -22,7 +23,7 @@ export const GithubLink: React.FC<{
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s">
-          <EuiLink target="_blank" href={href}>
+          <EuiLink target="_blank" href={href} aria-label={ariaLabel}>
             {label}
           </EuiLink>
         </EuiText>

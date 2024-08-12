@@ -208,6 +208,7 @@ export async function setAlertsToUntracked(
     // Retry this updateByQuery up to 3 times to make sure the number of documents
     // updated equals the number of documents matched
     let total = 0;
+
     for (let retryCount = 0; retryCount < 3; retryCount++) {
       const response = await esClient.updateByQuery({
         index: indices,
@@ -224,14 +225,18 @@ export async function setAlertsToUntracked(
       });
 
       if (total === 0 && response.total === 0) {
-        throw new Error('No active alerts matched the query');
+        logger.debug('No active alerts matched the query');
+        break;
       }
+
       if (response.total) {
         total = response.total;
       }
+
       if (response.total === response.updated) {
         break;
       }
+
       logger.warn(
         `Attempt ${retryCount + 1}: Failed to untrack ${
           (response.total ?? 0) - (response.updated ?? 0)
@@ -239,6 +244,10 @@ export async function setAlertsToUntracked(
           ruleIds ? ruleIds : alertUuids
         }`
       );
+    }
+
+    if (total === 0) {
+      return [];
     }
 
     // Fetch and return updated rule and alert instance UUIDs
@@ -251,6 +260,7 @@ export async function setAlertsToUntracked(
         query: getUntrackQuery(params, ALERT_STATUS_UNTRACKED),
       },
     });
+
     return searchResponse.hits.hits.map((hit) => hit._source) as UntrackedAlertsResult;
   } catch (err) {
     logger.error(

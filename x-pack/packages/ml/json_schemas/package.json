@@ -1,0 +1,9 @@
+{
+  "name": "@kbn/json-schemas",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0",
+  "scripts": {
+    "jsonSchema": "../../../../node_modules/ts-node/dist/bin.js scripts/index.ts"
+  }
+}

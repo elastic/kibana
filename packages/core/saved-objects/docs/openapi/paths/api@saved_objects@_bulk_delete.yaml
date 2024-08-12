@@ -1,5 +1,5 @@
 post:
-  summary: Remove multiple Kibana saved objects.
+  summary: Delete saved objects
   operationId: bulkDeleteSavedObjects
   description: >
     WARNING: When you delete a saved object, it cannot be recovered.

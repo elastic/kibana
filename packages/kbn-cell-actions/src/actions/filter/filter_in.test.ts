@@ -5,17 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { FilterManager, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import type { FilterManager } from '@kbn/data-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { createFilterInActionFactory } from './filter_in';
 import { makeActionContext } from '../../mocks/helpers';
-import { NotificationsStart } from '@kbn/core-notifications-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 
 const mockFilterManager = { addFilters: jest.fn() } as unknown as FilterManager;
 
-const mockCreateFilter = jest.fn((_: any) => ({}));
+const mockCreateFilter = jest.fn((_: unknown) => ({}));
 jest.mock('./create_filter', () => ({
   ...jest.requireActual('./create_filter'),
-  createFilter: (params: any) => mockCreateFilter(params),
+  createFilter: (params: unknown) => mockCreateFilter(params),
 }));
 
 const fieldName = 'user.name';

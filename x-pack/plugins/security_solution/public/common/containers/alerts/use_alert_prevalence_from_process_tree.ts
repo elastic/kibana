@@ -22,6 +22,7 @@ export interface StatsNode {
     };
   };
 }
+
 interface UserAlertPrevalenceFromProcessTreeResult {
   loading: boolean;
   alertIds: undefined | string[];
@@ -39,6 +40,7 @@ interface EntityResponse {
   id: string;
   name: string;
   schema: object;
+  agentId: string;
 }
 
 interface UseAlertPrevalenceFromProcessTree {
@@ -73,16 +75,18 @@ function useAlertDocumentAnalyzerSchema({ documentId, indices }: UseAlertDocumen
       error: false,
       id: null,
       schema: null,
+      agentId: null,
     };
   } else if (query.data && query.data.length > 0) {
     const {
-      data: [{ schema, id }],
+      data: [{ schema, id, agentId }],
     } = query;
     return {
       loading: false,
       error: false,
       id,
       schema,
+      agentId,
     };
   } else {
     return {
@@ -90,6 +94,7 @@ function useAlertDocumentAnalyzerSchema({ documentId, indices }: UseAlertDocumen
       error: true,
       id: null,
       schema: null,
+      agentId: null,
     };
   }
 }
@@ -103,7 +108,7 @@ export function useAlertPrevalenceFromProcessTree({
 
   const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline);
   const alertAndOriginalIndices = [...new Set(selectedPatterns.concat(indices))];
-  const { loading, id, schema } = useAlertDocumentAnalyzerSchema({
+  const { loading, id, schema, agentId } = useAlertDocumentAnalyzerSchema({
     documentId,
     indices: alertAndOriginalIndices,
   });
@@ -118,6 +123,7 @@ export function useAlertPrevalenceFromProcessTree({
           indexPatterns: alertAndOriginalIndices,
           nodes: [id],
           includeHits: true,
+          agentId,
         }),
       });
     },

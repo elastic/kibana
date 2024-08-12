@@ -7,7 +7,17 @@
 
 import { createTestConfig } from '../../config.base';
 
-const enabledActionTypes = ['.index', '.server-log'];
+const enabledActionTypes = [
+  '.cases-webhook',
+  '.index',
+  '.jira',
+  '.resilient',
+  '.server-log',
+  '.servicenow',
+  '.servicenow-itom',
+  '.servicenow-sir',
+  '.swimlane',
+];
 
 export default createTestConfig({
   serverlessProject: 'oblt',

@@ -8,17 +8,17 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { EventRenderer } from './event_renderer';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { EVENT_RENDERER_TEST_ID } from './test_ids';
-import { mockContextValue } from '../mocks/mock_context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockDataAsNestedObject } from '../../shared/mocks/mock_data_as_nested_object';
 import { TestProviders } from '../../../../common/mock';
 
-const renderEventRenderer = (contextValue: RightPanelContext) =>
+const renderEventRenderer = (contextValue: DocumentDetailsContext) =>
   render(
-    <RightPanelContext.Provider value={contextValue}>
+    <DocumentDetailsContext.Provider value={contextValue}>
       <EventRenderer />
-    </RightPanelContext.Provider>,
+    </DocumentDetailsContext.Provider>,
     { wrapper: TestProviders }
   );
 
@@ -38,7 +38,7 @@ describe('<EventRenderer />', () => {
   });
 
   it('should render empty component if event renderer is not available', async () => {
-    const { container } = renderEventRenderer({} as unknown as RightPanelContext);
+    const { container } = renderEventRenderer({} as unknown as DocumentDetailsContext);
 
     expect(container).toBeEmptyDOMElement();
   });

@@ -36,11 +36,6 @@ function getCallbacksCode(callbacks: CodeSnippetProps['callbacks']) {
             : ''
         }
         ${
-          callbacks.metaFields
-            ? `getMetaFields: async () => ['_version', '_id', '_index', '_source'],`
-            : ''
-        }
-        ${
           callbacks.policies
             ? `getPolicies: async () => [
             {

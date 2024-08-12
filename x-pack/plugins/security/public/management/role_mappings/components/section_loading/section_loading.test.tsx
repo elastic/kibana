@@ -18,10 +18,9 @@ describe('SectionLoading', () => {
       <EuiText
         color="subdued"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Loading…"
           id="xpack.security.management.editRoleMapping.loadingRoleMappingDescription"
-          values={Object {}}
         />
       </EuiText>
     `);

@@ -44,7 +44,9 @@ import { observabilityFeatureId } from '../../../common';
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { AlertOverview } from '../../components/alert_overview/alert_overview';
+import { CustomThresholdRule } from '../../components/custom_threshold/components/types';
 import { AlertDetailContextualInsights } from './alert_details_contextual_insights';
+import { AlertHistoryChart } from './components/alert_history';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -77,8 +79,9 @@ export function AlertDetails() {
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
   const CasesContext = getCasesContext();
   const userCasesPermissions = canUseCases([observabilityFeatureId]);
+  const ruleId = alertDetail?.formatted.fields[ALERT_RULE_UUID];
   const { rule } = useFetchRule({
-    ruleId: alertDetail?.formatted.fields[ALERT_RULE_UUID],
+    ruleId,
   });
   const [summaryFields, setSummaryFields] = useState<AlertSummaryField[]>();
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
@@ -165,23 +168,29 @@ export function AlertDetails() {
   const overviewTab = alertDetail ? (
     AlertDetailsAppSection &&
     /*
-    when feature flag is enabled, show alert details page with customized overview tab, 
-    otherwise show default overview tab 
+    when feature flag is enabled, show alert details page with customized overview tab,
+    otherwise show default overview tab
     */
     isAlertDetailsEnabledPerApp(alertDetail.formatted, config) ? (
       <>
         <EuiSpacer size="l" />
-        <AlertSummary alertSummaryFields={summaryFields} />
+        <AlertSummary alert={alertDetail.formatted} alertSummaryFields={summaryFields} />
         <AlertDetailContextualInsights alert={alertDetail} />
         <EuiSpacer size="l" />
         {rule && alertDetail.formatted && (
-          <AlertDetailsAppSection
-            alert={alertDetail.formatted}
-            rule={rule}
-            timeZone={timeZone}
-            setAlertSummaryFields={setSummaryFields}
-            ruleLink={http.basePath.prepend(paths.observability.ruleDetails(rule.id))}
-          />
+          <>
+            <AlertDetailsAppSection
+              alert={alertDetail.formatted}
+              rule={rule}
+              timeZone={timeZone}
+              setAlertSummaryFields={setSummaryFields}
+            />
+            <EuiSpacer size="l" />
+            <AlertHistoryChart
+              alert={alertDetail.formatted}
+              rule={rule as unknown as CustomThresholdRule}
+            />
+          </>
         )}
       </>
     ) : (
@@ -189,7 +198,7 @@ export function AlertDetails() {
         <EuiSpacer size="l" />
         <AlertDetailContextualInsights alert={alertDetail} />
         <EuiSpacer size="l" />
-        <AlertOverview alert={alertDetail.formatted} />
+        <AlertOverview alert={alertDetail.formatted} alertStatus={alertStatus} />
       </EuiPanel>
     )
   ) : (
@@ -278,7 +287,7 @@ export function getScreenDescription(alertDetail: AlertData) {
   Use the following alert fields as background information for generating a response. Do not list them as bullet points in the response.
   ${Object.entries(getRelevantAlertFields(alertDetail))
     .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
-    .join('\n')}  
+    .join('\n')}
   `);
 }
 

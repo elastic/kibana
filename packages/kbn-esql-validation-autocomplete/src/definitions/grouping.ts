@@ -7,8 +7,53 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FunctionDefinition } from './types';
+import { FunctionDefinition, FunctionParameterType, FunctionReturnType } from './types';
 
+const groupingTypeTable: Array<
+  [
+    FunctionParameterType,
+    FunctionParameterType,
+    FunctionParameterType | null,
+    FunctionParameterType | null,
+    FunctionReturnType
+  ]
+> = [
+  // field   // bucket   //from    // to   //result
+  ['date', 'date_period', null, null, 'date'],
+  ['date', 'integer', 'date', 'date', 'date'],
+  // Modified time_duration to time_literal
+  ['date', 'time_literal', null, null, 'date'],
+  ['double', 'double', null, null, 'double'],
+  ['double', 'integer', 'double', 'double', 'double'],
+  ['double', 'integer', 'double', 'integer', 'double'],
+  ['double', 'integer', 'double', 'long', 'double'],
+  ['double', 'integer', 'integer', 'double', 'double'],
+  ['double', 'integer', 'integer', 'integer', 'double'],
+  ['double', 'integer', 'integer', 'long', 'double'],
+  ['double', 'integer', 'long', 'double', 'double'],
+  ['double', 'integer', 'long', 'integer', 'double'],
+  ['double', 'integer', 'long', 'long', 'double'],
+  ['integer', 'double', null, null, 'double'],
+  ['integer', 'integer', 'double', 'double', 'double'],
+  ['integer', 'integer', 'double', 'integer', 'double'],
+  ['integer', 'integer', 'double', 'long', 'double'],
+  ['integer', 'integer', 'integer', 'double', 'double'],
+  ['integer', 'integer', 'integer', 'integer', 'double'],
+  ['integer', 'integer', 'integer', 'long', 'double'],
+  ['integer', 'integer', 'long', 'double', 'double'],
+  ['integer', 'integer', 'long', 'integer', 'double'],
+  ['integer', 'integer', 'long', 'long', 'double'],
+  ['long', 'double', null, null, 'double'],
+  ['long', 'integer', 'double', 'double', 'double'],
+  ['long', 'integer', 'double', 'integer', 'double'],
+  ['long', 'integer', 'double', 'long', 'double'],
+  ['long', 'integer', 'integer', 'double', 'double'],
+  ['long', 'integer', 'integer', 'integer', 'double'],
+  ['long', 'integer', 'integer', 'long', 'double'],
+  ['long', 'integer', 'long', 'double', 'double'],
+  ['long', 'integer', 'long', 'integer', 'double'],
+  ['long', 'integer', 'long', 'long', 'double'],
+];
 export const groupingFunctionDefinitions: FunctionDefinition[] = [
   {
     name: 'bucket',
@@ -21,80 +66,25 @@ export const groupingFunctionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats'],
     supportedOptions: ['by'],
     signatures: [
-      {
-        params: [
-          { name: 'field', type: 'date' },
-          { name: 'buckets', type: 'time_literal', constantOnly: true },
-        ],
-        returnType: 'date',
-        examples: ['from index | eval hd = bucket(hire_date, 1 hour)'],
-      },
-      {
-        params: [
-          { name: 'field', type: 'number' },
-          { name: 'buckets', type: 'number', constantOnly: true },
-        ],
-        returnType: 'number',
-        examples: ['from index | eval hd = bucket(bytes, 1 hour)'],
-      },
-      {
-        params: [
-          { name: 'field', type: 'date' },
-          { name: 'buckets', type: 'number', constantOnly: true },
-          { name: 'startDate', type: 'string', constantOnly: true },
-          { name: 'endDate', type: 'string', constantOnly: true },
-        ],
-        returnType: 'date',
-        examples: [
-          'from index | eval hd = bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
-        ],
-      },
-      {
-        params: [
-          { name: 'field', type: 'date' },
-          { name: 'buckets', type: 'number', constantOnly: true },
-          { name: 'startDate', type: 'date', constantOnly: true },
-          { name: 'endDate', type: 'date', constantOnly: true },
-        ],
-        returnType: 'date',
-        examples: [
-          'from index | eval hd = bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
-        ],
-      },
-      {
-        params: [
-          { name: 'field', type: 'date' },
-          { name: 'buckets', type: 'number', constantOnly: true },
-          { name: 'startDate', type: 'string', constantOnly: true },
-          { name: 'endDate', type: 'date', constantOnly: true },
-        ],
-        returnType: 'date',
-        examples: [
-          'from index | eval hd = bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
-        ],
-      },
-      {
-        params: [
-          { name: 'field', type: 'date' },
-          { name: 'buckets', type: 'number', constantOnly: true },
-          { name: 'startDate', type: 'date', constantOnly: true },
-          { name: 'endDate', type: 'string', constantOnly: true },
-        ],
-        returnType: 'date',
-        examples: [
-          'from index | eval hd = bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
-        ],
-      },
-      {
-        params: [
-          { name: 'field', type: 'number' },
-          { name: 'buckets', type: 'number', constantOnly: true },
-          { name: 'startValue', type: 'number', constantOnly: true },
-          { name: 'endValue', type: 'number', constantOnly: true },
-        ],
-        returnType: 'number',
-        examples: ['from index | eval bs = bucket(bytes, 20, 25324, 74999)'],
-      },
+      ...groupingTypeTable.map((signature) => {
+        const [fieldType, bucketType, fromType, toType, resultType] = signature;
+        return {
+          params: [
+            { name: 'field', type: fieldType },
+            { name: 'buckets', type: bucketType, constantOnly: true },
+            ...(fromType ? [{ name: 'startDate', type: fromType, constantOnly: true }] : []),
+            ...(toType ? [{ name: 'endDate', type: toType, constantOnly: true }] : []),
+          ],
+          returnType: resultType,
+        };
+      }),
+    ],
+    examples: [
+      'from index | eval hd = bucket(bytes, 1 hour)',
+      'from index | eval hd = bucket(hire_date, 1 hour)',
+      'from index | eval hd = bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
+      'from index | eval hd = bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
+      'from index | eval bs = bucket(bytes, 20, 25324, 74999)',
     ],
   },
 ];

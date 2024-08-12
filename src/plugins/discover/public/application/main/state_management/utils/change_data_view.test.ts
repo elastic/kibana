@@ -17,6 +17,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { PureTransitionsToTransitions } from '@kbn/kibana-utils-plugin/common/state_containers';
 import { InternalStateTransitions } from '../discover_internal_state_container';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
 
 const setupTestParams = (dataView: DataView | undefined) => {
   const savedSearch = savedSearchMock;
@@ -30,6 +31,7 @@ const setupTestParams = (dataView: DataView | undefined) => {
   discoverState.appState.update = jest.fn();
   discoverState.internalState.transitions = {
     setIsDataViewLoading: jest.fn(),
+    setResetDefaultProfileState: jest.fn(),
   } as unknown as Readonly<PureTransitionsToTransitions<InternalStateTransitions>>;
   return {
     services,
@@ -44,7 +46,7 @@ describe('changeDataView', () => {
     await changeDataView(dataViewWithDefaultColumnMock.id!, params);
     expect(params.appState.update).toHaveBeenCalledWith({
       columns: ['default_column'], // default_column would be added as dataViewWithDefaultColumn has it as a mapped field
-      index: 'data-view-with-user-default-column-id',
+      dataSource: createDataViewDataSource({ dataViewId: 'data-view-with-user-default-column-id' }),
       sort: [['@timestamp', 'desc']],
     });
     expect(params.internalState.transitions.setIsDataViewLoading).toHaveBeenNthCalledWith(1, true);
@@ -56,7 +58,7 @@ describe('changeDataView', () => {
     await changeDataView(dataViewComplexMock.id!, params);
     expect(params.appState.update).toHaveBeenCalledWith({
       columns: [], // default_column would not be added as dataViewComplexMock does not have it as a mapped field
-      index: 'data-view-with-various-field-types-id',
+      dataSource: createDataViewDataSource({ dataViewId: 'data-view-with-various-field-types-id' }),
       sort: [['data', 'desc']],
     });
     expect(params.internalState.transitions.setIsDataViewLoading).toHaveBeenNthCalledWith(1, true);
@@ -69,5 +71,15 @@ describe('changeDataView', () => {
     expect(params.appState.update).not.toHaveBeenCalled();
     expect(params.internalState.transitions.setIsDataViewLoading).toHaveBeenNthCalledWith(1, true);
     expect(params.internalState.transitions.setIsDataViewLoading).toHaveBeenNthCalledWith(2, false);
+  });
+
+  it('should call setResetDefaultProfileState correctly when switching data view', async () => {
+    const params = setupTestParams(dataViewComplexMock);
+    expect(params.internalState.transitions.setResetDefaultProfileState).not.toHaveBeenCalled();
+    await changeDataView(dataViewComplexMock.id!, params);
+    expect(params.internalState.transitions.setResetDefaultProfileState).toHaveBeenCalledWith({
+      columns: true,
+      rowHeight: true,
+    });
   });
 });

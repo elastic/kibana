@@ -90,6 +90,7 @@ export class ConsoleUIPlugin
           const { renderApp } = await import('./application');
 
           return renderApp({
+            ...startServices,
             http,
             docLinkVersion: DOC_LINK_VERSION,
             docLinks: links,
@@ -98,7 +99,7 @@ export class ConsoleUIPlugin
             element,
             autocompleteInfo: this.autocompleteInfo,
             isMonacoEnabled,
-            startServices,
+            isDevMode: this.ctx.env.mode.dev,
           });
         },
       });
@@ -125,6 +126,7 @@ export class ConsoleUIPlugin
       ui: { enabled: isConsoleUiEnabled, embeddedEnabled: isEmbeddedConsoleEnabled },
       dev: { enableMonaco: isMonacoEnabled },
     } = this.ctx.config.get<ClientConfigType>();
+    const isDevMode = this.ctx.env.mode.dev;
 
     const consoleStart: ConsolePluginStart = {};
     const embeddedConsoleUiSetting = core.uiSettings.get<boolean>(
@@ -146,6 +148,7 @@ export class ConsoleUIPlugin
           },
           alternateView: this._embeddableConsole.alternateView,
           isMonacoEnabled,
+          isDevMode,
           getConsoleHeight: this._embeddableConsole.getConsoleHeight.bind(this._embeddableConsole),
           setConsoleHeight: this._embeddableConsole.setConsoleHeight.bind(this._embeddableConsole),
         });
@@ -154,6 +157,8 @@ export class ConsoleUIPlugin
         this._embeddableConsole.isEmbeddedConsoleAvailable();
       consoleStart.openEmbeddedConsole = (content?: string) =>
         this._embeddableConsole.openEmbeddedConsole(content);
+      consoleStart.openEmbeddedConsoleAlternateView = () =>
+        this._embeddableConsole.openEmbeddedConsoleAlternateView();
       consoleStart.registerEmbeddedConsoleAlternateView = (view: EmbeddedConsoleView | null) => {
         this._embeddableConsole.registerAlternateView(view);
       };

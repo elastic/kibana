@@ -6,10 +6,10 @@
  */
 import { renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../mock';
-import { SourcererScopeName } from '../store/sourcerer/model';
+import { SourcererScopeName } from '../../sourcerer/store/model';
 import { DEFAULT_DATA_VIEW_ID } from '../../../common/constants';
 import { useDataViewId } from './use_data_view_id';
-import * as sourcererSelectors from '../store/sourcerer/selectors';
+import * as sourcererSelectors from '../../sourcerer/store/selectors';
 
 describe('useDataViewId', () => {
   it.each(Object.values(SourcererScopeName))(

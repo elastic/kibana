@@ -43,6 +43,7 @@ export type InventoryItemType = rt.TypeOf<typeof ItemTypeRT>;
 
 export const InventoryMetricRT = rt.keyof({
   hostSystemOverview: null,
+  hostCpuUsageTotal: null,
   hostCpuUsage: null,
   hostFilesystem: null,
   hostK8sOverview: null,
@@ -348,6 +349,7 @@ export type MetricsUIAggregation = rt.TypeOf<typeof MetricsUIAggregationRT>;
 
 export const SnapshotMetricTypeKeys = {
   count: null,
+  cpuTotal: null,
   cpu: null,
   diskLatency: null,
   diskSpaceUsage: null,
@@ -358,6 +360,8 @@ export const SnapshotMetricTypeKeys = {
   normalizedLoad1m: null,
   tx: null,
   rx: null,
+  txV2: null,
+  rxV2: null,
   logRate: null,
   diskIOReadBytes: null,
   diskIOWriteBytes: null,
@@ -385,7 +389,7 @@ export interface InventoryMetrics {
   tsvb: { [name: string]: TSVBMetricModelCreator };
   snapshot: { [name: string]: MetricsUIAggregation | undefined };
   defaultSnapshot: SnapshotMetricType;
-  /** This is used by the inventory view to calculate the appropriate amount of time for the metrics detail page. Some metris like awsS3 require multiple days where others like host only need an hour.*/
+  /** This is used by the inventory view to calculate the appropriate amount of time for the metrics detail page. Some metrics like awsS3 require multiple days where others like host only need an hour.*/
   defaultTimeRangeInSeconds: number;
 }
 

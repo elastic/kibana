@@ -12,10 +12,13 @@ import type {
   RuleResponseEndpointAction,
   ProcessesParams,
 } from '../../../../common/api/detection_engine';
-import type { KillOrSuspendProcessRequestBody } from '../../../../common/endpoint/types';
 import { getErrorProcessAlerts, getIsolateAlerts, getProcessAlerts } from './utils';
 import type { AlertsAction, ResponseActionAlerts } from './types';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
+import type {
+  ResponseActionParametersWithEntityId,
+  ResponseActionParametersWithPid,
+} from '../../../../common/endpoint/types';
 
 export const endpointResponseAction = async (
   responseAction: RuleResponseEndpointAction,
@@ -115,7 +118,9 @@ export const endpointResponseAction = async (
                     comment,
                     endpoint_ids,
                     alert_ids,
-                    parameters: parameters as KillOrSuspendProcessRequestBody['parameters'],
+                    parameters: parameters as
+                      | ResponseActionParametersWithPid
+                      | ResponseActionParametersWithEntityId,
                   },
                   {
                     hosts,

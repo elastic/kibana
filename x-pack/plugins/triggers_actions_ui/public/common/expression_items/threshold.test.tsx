@@ -49,7 +49,7 @@ describe('threshold expression', () => {
               "value": "between",
             },
             Object {
-              "text": "Not between",
+              "text": "Is not between",
               "value": "notBetween",
             },
           ]

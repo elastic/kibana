@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import { TopNType } from '@kbn/profiling-utils';
 import { EMBEDDABLE_STACK_TRACES } from '.';
-import { ProfilingEmbeddable } from './profiling_embeddable';
+import { getProfilingComponent } from '../helpers/component_registry';
 
 interface Props {
   type: TopNType;
@@ -20,5 +21,18 @@ interface Props {
 }
 
 export function EmbeddableStackTraces(props: Props) {
-  return <ProfilingEmbeddable {...props} embeddableFactoryId={EMBEDDABLE_STACK_TRACES} />;
+  const EmbeddableStackTracesComponent = getProfilingComponent<Props>(EMBEDDABLE_STACK_TRACES);
+  return (
+    <div
+      css={css`
+        width: 100%;
+        display: flex;
+        flex: 1 1 100%;
+        z-index: 1;
+        min-height: 0;
+      `}
+    >
+      {EmbeddableStackTracesComponent && <EmbeddableStackTracesComponent {...props} />}
+    </div>
+  );
 }

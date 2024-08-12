@@ -9,8 +9,8 @@ import expect from 'expect';
 import { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import {
-  getSimpleRule,
   getCustomQueryRuleParams,
+  getSimpleRule,
   getSimpleRuleOutputWithoutRuleId,
   getSimpleRuleWithoutRuleId,
   removeServerGeneratedProperties,
@@ -32,9 +32,9 @@ export default ({ getService }: FtrProviderContext) => {
   const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
   const es = getService('es');
+  const utils = getService('securitySolutionUtils');
   // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditbeatPath = dataPathBuilder.getPath('auditbeat/hosts');
@@ -64,13 +64,13 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
         expect(bodyToCompare).toEqual(expectedRule);
       });
 
       it('should create a rule with defaultable fields', async () => {
-        const expectedRule = getCustomQueryRuleParams({
+        const ruleCreateProperties = getCustomQueryRuleParams({
           rule_id: 'rule-1',
           max_signals: 200,
           setup: '# some setup markdown',
@@ -78,10 +78,22 @@ export default ({ getService }: FtrProviderContext) => {
             { package: 'package-a', version: '^1.2.3' },
             { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
           ],
+          required_fields: [
+            { name: '@timestamp', type: 'date' },
+            { name: 'my-non-ecs-field', type: 'keyword' },
+          ],
         });
 
+        const expectedRule = {
+          ...ruleCreateProperties,
+          required_fields: [
+            { name: '@timestamp', type: 'date', ecs: true },
+            { name: 'my-non-ecs-field', type: 'keyword', ecs: false },
+          ],
+        };
+
         const { body: createdRuleResponse } = await securitySolutionApi
-          .createRule({ body: expectedRule })
+          .createRule({ body: ruleCreateProperties })
           .expect(200);
 
         expect(createdRuleResponse).toMatchObject(expectedRule);
@@ -120,6 +132,9 @@ export default ({ getService }: FtrProviderContext) => {
             false_positives: [],
             from: 'now-6m',
             immutable: false,
+            rule_source: {
+              type: 'internal',
+            },
             interval: '5m',
             rule_id: 'rule-1',
             language: 'kuery',
@@ -144,7 +159,7 @@ export default ({ getService }: FtrProviderContext) => {
             version: 1,
             revision: 0,
           },
-          ELASTICSEARCH_USERNAME
+          await utils.getUsername()
         );
 
         expect(bodyToCompare).toEqual(expectedRule);
@@ -158,7 +173,7 @@ export default ({ getService }: FtrProviderContext) => {
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
         const expectedRule = updateUsername(
           getSimpleRuleOutputWithoutRuleId(),
-          ELASTICSEARCH_USERNAME
+          await utils.getUsername()
         );
 
         expect(bodyToCompare).toEqual(expectedRule);
@@ -205,6 +220,32 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body.message).toBe(
             '[request body]: max_signals: Number must be greater than or equal to 1'
           );
+        });
+      });
+
+      describe('required_fields', () => {
+        it('creates a rule with required_fields defaulted to an empty array when not present', async () => {
+          const customQueryRuleParams = getCustomQueryRuleParams({
+            rule_id: 'rule-without-required-fields',
+          });
+
+          expect(customQueryRuleParams.required_fields).toBeUndefined();
+
+          const { body } = await securitySolutionApi
+            .createRule({
+              body: customQueryRuleParams,
+            })
+            .expect(200);
+
+          expect(body.required_fields).toEqual([]);
+
+          const { body: createdRule } = await securitySolutionApi
+            .readRule({
+              query: { rule_id: 'rule-without-required-fields' },
+            })
+            .expect(200);
+
+          expect(createdRule.required_fields).toEqual([]);
         });
       });
     });

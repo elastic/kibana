@@ -8,7 +8,7 @@
    "source": [
     "# Keyword querying and filtering\n",
     "\n",
-    "[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/elasticsearch-labs/blob/main/search/01-keyword-querying-filtering.ipynb)\n",
+    "[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/elastic/elasticsearch-labs/blob/main/notebooks/search/01-keyword-querying-filtering.ipynb)\n",
     "\n",
     "This interactive notebook will introduce you to the basic Elasticsearch queries, using the official Elasticsearch Python client. Before getting started on this section you should work through our [quick start](https://github.com/elastic/elasticsearch-labs/blob/main/notebooks/search/00-quick-start.ipynb), as you will be using the same dataset."
    ]
@@ -65,6 +65,44 @@
     "    cloud_id=ELASTIC_CLOUD_ID,\n",
     "    api_key=ELASTIC_API_KEY,\n",
     ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Enable Telemetry\n",
+    "\n",
+    "Knowing that you are using this notebook helps us decide where to invest our efforts to improve our products. We would like to ask you that you run the following code to let us gather anonymous usage statistics. See [telemetry.py](https://github.com/elastic/elasticsearch-labs/blob/main/telemetry/telemetry.py) for details. Thank you!"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "!curl -O -s https://raw.githubusercontent.com/elastic/elasticsearch-labs/main/telemetry/telemetry.py\n",
+    "from telemetry import enable_telemetry\n",
+    "\n",
+    "client = enable_telemetry(client, \"01-keyword-querying-filtering\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Test the Client\n",
+    "Before you continue, confirm that the client has connected with this test."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(client.info())"
    ]
   },
   {
@@ -899,7 +937,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.10.3"
+   "version": "3.10.13"
   },
   "vscode": {
    "interpreter": {

@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  FindListItemsRequestQuery,
+  FindListItemsResponse,
+} from '@kbn/securitysolution-lists-common/api';
 
 import type { ListsPluginRouter } from '../../types';
 import { decodeCursor } from '../../services/utils';
-import {
-  FindListItemRequestQueryDecoded,
-  findListItemRequestQuery,
-  findListItemResponse,
-} from '../../../common/api';
-import { buildRouteValidation, buildSiemResponse, getListClient } from '../utils';
+import { buildSiemResponse, getListClient } from '../utils';
 
 export const findListItemRoute = (router: ListsPluginRouter): void => {
   router.versioned
@@ -31,10 +30,7 @@ export const findListItemRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            query: buildRouteValidation<
-              typeof findListItemRequestQuery,
-              FindListItemRequestQueryDecoded
-            >(findListItemRequestQuery),
+            query: buildRouteValidationWithZod(FindListItemsRequestQuery),
           },
         },
         version: '2023-10-31',
@@ -72,32 +68,28 @@ export const findListItemRoute = (router: ListsPluginRouter): void => {
               body: errorMessage,
               statusCode: 400,
             });
-          } else {
-            const exceptionList = await lists.findListItem({
-              currentIndexPosition,
-              filter,
-              listId,
-              page,
-              perPage,
-              runtimeMappings: undefined,
-              searchAfter,
-              sortField,
-              sortOrder,
-            });
-            if (exceptionList == null) {
-              return siemResponse.error({
-                body: `list id: "${listId}" does not exist`,
-                statusCode: 404,
-              });
-            } else {
-              const [validated, errors] = validate(exceptionList, findListItemResponse);
-              if (errors != null) {
-                return siemResponse.error({ body: errors, statusCode: 500 });
-              } else {
-                return response.ok({ body: validated ?? {} });
-              }
-            }
           }
+
+          const exceptionList = await lists.findListItem({
+            currentIndexPosition,
+            filter,
+            listId,
+            page,
+            perPage,
+            runtimeMappings: undefined,
+            searchAfter,
+            sortField,
+            sortOrder,
+          });
+
+          if (exceptionList == null) {
+            return siemResponse.error({
+              body: `list id: "${listId}" does not exist`,
+              statusCode: 404,
+            });
+          }
+
+          return response.ok({ body: FindListItemsResponse.parse(exceptionList) });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

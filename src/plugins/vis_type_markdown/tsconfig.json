@@ -17,6 +17,8 @@
     "@kbn/i18n-react",
     "@kbn/config-schema",
     "@kbn/kibana-react-plugin",
+    "@kbn/react-kibana-context-render",
+    "@kbn/core-lifecycle-browser",
   ],
   "exclude": [
     "target/**/*",

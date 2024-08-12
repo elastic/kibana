@@ -43,14 +43,16 @@ export async function createAgentAction(
   newAgentAction: NewAgentAction
 ): Promise<AgentAction> {
   const actionId = newAgentAction.id ?? uuidv4();
-  const timestamp = new Date().toISOString();
+  const now = Date.now();
+  const timestamp = new Date(now).toISOString();
   const body: FleetServerAgentAction = {
     '@timestamp': timestamp,
     expiration:
       newAgentAction.expiration === NO_EXPIRATION
         ? undefined
-        : newAgentAction.expiration ?? new Date(Date.now() + ONE_MONTH_IN_MS).toISOString(),
+        : newAgentAction.expiration ?? new Date(now + ONE_MONTH_IN_MS).toISOString(),
     agents: newAgentAction.agents,
+    namespaces: newAgentAction.namespaces,
     action_id: actionId,
     data: newAgentAction.data,
     type: newAgentAction.type,
@@ -181,6 +183,7 @@ export async function bulkCreateAgentActionResults(
   results: Array<{
     actionId: string;
     agentId: string;
+    namespaces?: string[];
     error?: string;
   }>
 ): Promise<void> {
@@ -193,6 +196,7 @@ export async function bulkCreateAgentActionResults(
       '@timestamp': new Date().toISOString(),
       action_id: result.actionId,
       agent_id: result.agentId,
+      namespaces: result.namespaces,
       error: result.error,
     };
 

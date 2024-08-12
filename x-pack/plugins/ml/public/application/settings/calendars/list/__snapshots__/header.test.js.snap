@@ -3,10 +3,9 @@
 exports[`CalendarListsHeader renders header 1`] = `
 <Fragment>
   <MlPageHeader>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Calendars"
       id="xpack.ml.settings.calendars.listHeader.calendarsTitle"
-      values={Object {}}
     />
   </MlPageHeader>
   <EuiFlexGroup
@@ -28,7 +27,7 @@ exports[`CalendarListsHeader renders header 1`] = `
             color="subdued"
           >
             <p>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="{totalCount} in total"
                 id="xpack.ml.settings.calendars.listHeader.calendarsListTotalCount"
                 values={
@@ -59,10 +58,9 @@ exports[`CalendarListsHeader renders header 1`] = `
             onClick={[MockFunction]}
             size="s"
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Refresh"
               id="xpack.ml.settings.calendars.listHeader.refreshButtonLabel"
-              values={Object {}}
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -77,7 +75,7 @@ exports[`CalendarListsHeader renders header 1`] = `
       <EuiTextColor
         color="subdued"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Calendars contain a list of scheduled events for which you do not want to generate anomalies, such as planned system outages or public holidays. The same calendar can be assigned to multiple jobs.{br}{learnMoreLink}"
           id="xpack.ml.settings.calendars.listHeader.calendarsDescription"
           values={
@@ -87,10 +85,9 @@ exports[`CalendarListsHeader renders header 1`] = `
                 href="jest-metadata-mock-url"
                 target="_blank"
               >
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Learn more"
                   id="xpack.ml.settings.calendars.listHeader.calendarsDescription.learnMoreLinkText"
-                  values={Object {}}
                 />
               </EuiLink>,
             }

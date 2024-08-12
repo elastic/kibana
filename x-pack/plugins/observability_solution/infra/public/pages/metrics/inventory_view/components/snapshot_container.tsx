@@ -7,27 +7,19 @@
 
 import React from 'react';
 import { useSourceContext } from '../../../../containers/metrics_source';
-import { SnapshotNode } from '../../../../../common/http_api';
 import { useSnapshot } from '../hooks/use_snaphot';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import { useWaffleTimeContext } from '../hooks/use_waffle_time';
+import { FilterBar } from './filter_bar';
+import { LayoutView } from './layout_view';
 
-interface RenderProps {
-  reload: () => Promise<any>;
-  interval: string;
-  nodes: SnapshotNode[];
-  loading: boolean;
-}
-
-interface Props {
-  render: React.FC<RenderProps>;
-}
-export const SnapshotContainer = ({ render }: Props) => {
+export const SnapshotContainer = React.memo(() => {
   const { sourceId } = useSourceContext();
   const { metric, groupBy, nodeType, accountId, region } = useWaffleOptionsContext();
   const { currentTime } = useWaffleTimeContext();
   const { filterQueryAsJson } = useWaffleFiltersContext();
+
   const {
     loading,
     nodes,
@@ -43,12 +35,14 @@ export const SnapshotContainer = ({ render }: Props) => {
       currentTime,
       accountId,
       region,
-      sendRequestImmediately: false,
     },
-    {
-      abortable: true,
-    }
+    { sendRequestImmediately: true }
   );
 
-  return render({ loading, nodes, reload, interval });
-};
+  return (
+    <>
+      <FilterBar interval={interval} />
+      <LayoutView loading={loading} nodes={nodes} reload={reload} interval={interval} />
+    </>
+  );
+});

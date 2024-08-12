@@ -6,9 +6,10 @@
  */
 
 import { EuiIcon, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ApmRoutes } from '../../routing/apm_route_config';
 import { asMillisecondDuration, asTransactionRate } from '../../../../common/utils/formatters';
@@ -132,10 +133,18 @@ const noItemsMessage = (
 
 export function TraceList({ response }: Props) {
   const { data: { items } = { items: [] }, status } = response;
+  const { onPageReady } = usePerformanceContext();
 
   const { query } = useApmParams('/traces');
 
   const traceListColumns = useMemo(() => getTraceListColumns({ query }), [query]);
+
+  useEffect(() => {
+    if (status === FETCH_STATUS.SUCCESS) {
+      onPageReady();
+    }
+  }, [status, onPageReady]);
+
   return (
     <ManagedTable
       isLoading={status === FETCH_STATUS.LOADING}

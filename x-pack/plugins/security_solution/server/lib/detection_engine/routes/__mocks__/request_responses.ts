@@ -11,6 +11,12 @@ import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import type { SanitizedRule, ResolvedSanitizedRule } from '@kbn/alerting-plugin/common';
 
+import type {
+  SetAlertsStatusByIds,
+  SetAlertsStatusByQuery,
+  SetAlertsStatusRequestBodyInput,
+  SearchAlertsRequestBody,
+} from '../../../../../common/api/detection_engine/signals';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -27,6 +33,7 @@ import {
 import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../common/api/detection_engine/rule_management/urls';
 
 import {
+  BOOTSTRAP_PREBUILT_RULES_URL,
   PREBUILT_RULES_STATUS_URL,
   PREBUILT_RULES_URL,
 } from '../../../../../common/api/detection_engine/prebuilt_rules';
@@ -36,10 +43,7 @@ import {
 } from '../../../../../common/api/detection_engine/rule_management/mocks';
 
 import { getCreateRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
-import type {
-  QuerySignalsSchemaDecoded,
-  SetSignalsStatusSchemaDecoded,
-} from '../../../../../common/api/detection_engine/signals';
+
 import {
   getFinalizeSignalsMigrationSchemaMock,
   getSignalsMigrationStatusSchemaMock,
@@ -53,26 +57,28 @@ import { getQueryRuleParams } from '../../rule_schema/mocks';
 import { requestMock } from './request';
 import type { HapiReadableStream } from '../../../../types';
 
-export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
+export const typicalSetStatusSignalByIdsPayload = (): SetAlertsStatusByIds => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
   status: 'closed',
 });
 
-export const typicalSetStatusSignalByQueryPayload = (): SetSignalsStatusSchemaDecoded => ({
+export const typicalSetStatusSignalByQueryPayload = (): SetAlertsStatusByQuery => ({
   query: { bool: { filter: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } } } },
   status: 'closed',
+  conflicts: 'abort',
 });
 
-export const typicalSignalsQuery = (): QuerySignalsSchemaDecoded => ({
+export const typicalSignalsQuery = (): SearchAlertsRequestBody => ({
   aggs: {},
   query: { match_all: {} },
 });
 
-export const typicalSignalsQueryAggs = (): QuerySignalsSchemaDecoded => ({
+export const typicalSignalsQueryAggs = (): SearchAlertsRequestBody => ({
   aggs: { statuses: { terms: { field: ALERT_WORKFLOW_STATUS, size: 10 } } },
 });
 
-export const setStatusSignalMissingIdsAndQueryPayload = (): SetSignalsStatusSchemaDecoded => ({
+// @ts-expect-error data with missing required fields
+export const setStatusSignalMissingIdsAndQueryPayload = (): SetAlertsStatusRequestBodyInput => ({
   status: 'closed',
 });
 
@@ -196,6 +202,12 @@ export const getRuleManagementFiltersRequest = () =>
   requestMock.create({
     method: 'get',
     path: RULE_MANAGEMENT_FILTERS_URL,
+  });
+
+export const getBootstrapRulesRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: BOOTSTRAP_PREBUILT_RULES_URL,
   });
 
 export interface FindHit<T = RuleAlertType> {

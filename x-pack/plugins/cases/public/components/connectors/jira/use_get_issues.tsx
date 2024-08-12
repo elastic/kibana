@@ -10,7 +10,8 @@ import useDebounce from 'react-use/lib/useDebounce';
 import type { HttpSetup } from '@kbn/core/public';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { useQuery } from '@tanstack/react-query';
-import { isEmpty } from 'lodash';
+import { isEmpty, noop } from 'lodash';
+import { SEARCH_DEBOUNCE_MS } from '../../../../common/constants';
 import type { ActionConnector } from '../../../../common/types/domain';
 import { getIssues } from './api';
 import type { Issues } from './types';
@@ -23,16 +24,16 @@ interface Props {
   http: HttpSetup;
   query: string | null;
   actionConnector?: ActionConnector;
+  onDebounce?: () => void;
 }
 
-const SEARCH_DEBOUNCE_MS = 500;
-
-export const useGetIssues = ({ http, actionConnector, query }: Props) => {
+export const useGetIssues = ({ http, actionConnector, query, onDebounce = noop }: Props) => {
   const [debouncedQuery, setDebouncedQuery] = useState(query);
 
   useDebounce(
     () => {
       setDebouncedQuery(query);
+      onDebounce();
     },
     SEARCH_DEBOUNCE_MS,
     [query]

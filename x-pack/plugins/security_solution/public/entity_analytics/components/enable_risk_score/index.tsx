@@ -11,7 +11,7 @@ import { useCheckSignalIndex } from '../../../detections/containers/detection_en
 import type { inputsModel } from '../../../common/store';
 import { RiskScoreHeaderTitle } from '../risk_score_onboarding/risk_score_header_title';
 import { HeaderSection } from '../../../common/components/header_section';
-import { RiskScoreDocLink } from '../risk_score_onboarding/risk_score_doc_link';
+import { EntityAnalyticsLearnMoreLink } from '../risk_score_onboarding/entity_analytics_doc_link';
 import { RiskScoreEnableButton } from '../risk_score_onboarding/risk_score_enable_button';
 import * as i18n from './translations';
 
@@ -55,7 +55,7 @@ const EnableRiskScoreComponent = ({
           <>
             {text.body}
             {` `}
-            <RiskScoreDocLink riskScoreEntity={entityType} />
+            <EntityAnalyticsLearnMoreLink />
           </>
         }
         actions={

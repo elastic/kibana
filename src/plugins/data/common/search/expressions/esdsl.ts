@@ -51,6 +51,7 @@ export const getEsdslFn = ({
     name,
     type: 'es_raw_response',
     inputTypes: ['kibana_context', 'null'],
+    allowCache: true,
     help: i18n.translate('data.search.esdsl.help', {
       defaultMessage: 'Run Elasticsearch request',
     }),

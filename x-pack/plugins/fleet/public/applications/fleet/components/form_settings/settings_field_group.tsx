@@ -26,9 +26,10 @@ import {
   validateSchema,
 } from './settings_field_wrapper';
 
-export const SettingsFieldGroup: React.FC<{ settingsConfig: SettingsConfig }> = ({
-  settingsConfig,
-}) => {
+export const SettingsFieldGroup: React.FC<{
+  settingsConfig: SettingsConfig;
+  disabled?: boolean;
+}> = ({ settingsConfig, disabled }) => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const agentPolicyFormContext = useAgentPolicyFormContext();
   const shape = settingsConfig.schema._def.innerType._def.shape();
@@ -90,6 +91,7 @@ export const SettingsFieldGroup: React.FC<{ settingsConfig: SettingsConfig }> = 
                   return (
                     <EuiFieldNumber
                       fullWidth
+                      disabled={disabled}
                       data-test-subj={fieldKey}
                       value={fieldValue}
                       onChange={handleChange}
@@ -102,6 +104,7 @@ export const SettingsFieldGroup: React.FC<{ settingsConfig: SettingsConfig }> = 
                   return (
                     <EuiFieldText
                       fullWidth
+                      disabled={disabled}
                       data-test-subj={fieldKey}
                       value={fieldValue}
                       onChange={handleChange}
@@ -112,6 +115,7 @@ export const SettingsFieldGroup: React.FC<{ settingsConfig: SettingsConfig }> = 
                   return (
                     <EuiSwitch
                       label={''}
+                      disabled={disabled}
                       checked={fieldValue}
                       onChange={(e) => {
                         updateFieldValue(e.target.checked);
@@ -127,6 +131,7 @@ export const SettingsFieldGroup: React.FC<{ settingsConfig: SettingsConfig }> = 
               <EuiFlexItem key={`flexItem-${fieldKey}`}>
                 <EuiFormRow
                   fullWidth
+                  isDisabled={disabled}
                   key={fieldKey}
                   label={description}
                   error={errors[key]}

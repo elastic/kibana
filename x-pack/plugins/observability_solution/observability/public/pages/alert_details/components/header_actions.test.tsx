@@ -13,7 +13,7 @@ import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { render } from '../../../utils/test_helper';
 import { useKibana } from '../../../utils/kibana_react';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
-import { alertWithTags, mockAlertUuid, untrackedAlert } from '../mock/alert';
+import { alertWithGroupsAndTags, mockAlertUuid, untrackedAlert } from '../mock/alert';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 
 import { HeaderActions } from './header_actions';
@@ -87,8 +87,8 @@ describe('Header Actions', () => {
     it('should display an actions button', () => {
       const { queryByTestId } = render(
         <HeaderActions
-          alert={alertWithTags}
-          alertStatus={alertWithTags.fields[ALERT_STATUS] as AlertStatus}
+          alert={alertWithGroupsAndTags}
+          alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
         />
       );
@@ -109,9 +109,9 @@ describe('Header Actions', () => {
 
         const { getByTestId, findByTestId } = render(
           <HeaderActions
-            alert={alertWithTags}
+            alert={alertWithGroupsAndTags}
             alertIndex={'alert-index'}
-            alertStatus={alertWithTags.fields[ALERT_STATUS] as AlertStatus}
+            alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
             onUntrackAlert={mockOnUntrackAlert}
           />
         );
@@ -136,8 +136,8 @@ describe('Header Actions', () => {
       it('should offer a "Edit rule" button which opens the edit rule flyout', async () => {
         const { getByTestId, findByTestId } = render(
           <HeaderActions
-            alert={alertWithTags}
-            alertStatus={alertWithTags.fields[ALERT_STATUS] as AlertStatus}
+            alert={alertWithGroupsAndTags}
+            alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
             onUntrackAlert={mockOnUntrackAlert}
           />
         );
@@ -150,8 +150,8 @@ describe('Header Actions', () => {
       it('should offer a "Mark as untracked" button which is enabled', async () => {
         const { queryByTestId, findByTestId } = render(
           <HeaderActions
-            alert={alertWithTags}
-            alertStatus={alertWithTags.fields[ALERT_STATUS] as AlertStatus}
+            alert={alertWithGroupsAndTags}
+            alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
             onUntrackAlert={mockOnUntrackAlert}
           />
         );
@@ -163,8 +163,8 @@ describe('Header Actions', () => {
       it('should offer a "Go to rule details" button which opens the rule details page in a new tab', async () => {
         const { queryByTestId, findByTestId } = render(
           <HeaderActions
-            alert={alertWithTags}
-            alertStatus={alertWithTags.fields[ALERT_STATUS] as AlertStatus}
+            alert={alertWithGroupsAndTags}
+            alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
             onUntrackAlert={mockOnUntrackAlert}
           />
         );
@@ -188,8 +188,8 @@ describe('Header Actions', () => {
     it("should disable the 'Edit rule' when the rule is not available/deleted", async () => {
       const { queryByTestId, findByTestId } = render(
         <HeaderActions
-          alert={alertWithTags}
-          alertStatus={alertWithTags.fields[ALERT_STATUS] as AlertStatus}
+          alert={alertWithGroupsAndTags}
+          alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
         />
       );
@@ -214,8 +214,8 @@ describe('Header Actions', () => {
     it("should disable the 'View rule details' when the rule is not available/deleted", async () => {
       const { queryByTestId, findByTestId } = render(
         <HeaderActions
-          alert={alertWithTags}
-          alertStatus={alertWithTags.fields[ALERT_STATUS] as AlertStatus}
+          alert={alertWithGroupsAndTags}
+          alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
         />
       );

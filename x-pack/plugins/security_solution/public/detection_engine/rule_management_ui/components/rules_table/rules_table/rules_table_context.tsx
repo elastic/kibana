@@ -138,6 +138,7 @@ export type LoadingRuleAction =
   | 'export'
   | 'load'
   | 'edit'
+  | 'run'
   | null;
 
 export interface LoadingRules {

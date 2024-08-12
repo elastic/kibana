@@ -4,23 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useState } from 'react';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSuperDatePicker,
-  OnTimeChangeProps,
-  OnRefreshProps,
   EuiSpacer,
+  EuiSuperDatePicker,
+  OnRefreshProps,
+  OnTimeChangeProps,
 } from '@elastic/eui';
 import DateMath from '@kbn/datemath';
-import { useKibana } from '../../../../utils/kibana_react';
-import { HistoricalDataCharts } from '../historical_data_charts';
-import { useBurnRateOptions } from '../../hooks/use_burn_rate_options';
-import { SloTabId } from '../slo_details';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import React, { useMemo, useState } from 'react';
 import { BurnRates } from '../../../../components/slo/burn_rate/burn_rates';
+import { useKibana } from '../../../../utils/kibana_react';
+import { useBurnRateOptions } from '../../hooks/use_burn_rate_options';
+import { TimeBounds } from '../../types';
 import { EventsChartPanel } from '../events_chart_panel';
+import { HistoricalDataCharts } from '../historical_data_charts';
+import { SloTabId } from '../slo_details';
+
 export interface Props {
   slo: SLOWithSummaryResponse;
   isAutoRefreshing: boolean;
@@ -29,10 +31,8 @@ export interface Props {
 
 export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Props) {
   const { uiSettings } = useKibana().services;
-
   const { burnRateOptions } = useBurnRateOptions(slo);
-
-  const [start, setStart] = useState('now-30d');
+  const [start, setStart] = useState(`now-${slo.timeWindow.duration}`);
   const [end, setEnd] = useState('now');
 
   const onTimeChange = (val: OnTimeChangeProps) => {
@@ -42,19 +42,17 @@ export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Prop
 
   const onRefresh = (val: OnRefreshProps) => {};
 
-  const absRange = useMemo(() => {
+  const range = useMemo(() => {
     return {
       from: new Date(DateMath.parse(start)!.valueOf()),
       to: new Date(DateMath.parse(end, { roundUp: true })!.valueOf()),
-      absoluteFrom: DateMath.parse(start)!.valueOf(),
-      absoluteTo: DateMath.parse(end, { roundUp: true })!.valueOf(),
     };
   }, [start, end]);
 
-  const onBrushed = useCallback(({ fromUtc, toUtc }) => {
-    setStart(fromUtc);
-    setEnd(toUtc);
-  }, []);
+  const onBrushed = ({ from, to }: TimeBounds) => {
+    setStart(from.toISOString());
+    setEnd(to.toISOString());
+  };
 
   return (
     <>
@@ -94,10 +92,7 @@ export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Prop
             isAutoRefreshing={isAutoRefreshing}
             burnRateOptions={burnRateOptions}
             selectedTabId={selectedTabId}
-            range={{
-              from: absRange.from,
-              to: absRange.to,
-            }}
+            range={range}
             onBrushed={onBrushed}
           />
         </EuiFlexItem>
@@ -105,19 +100,13 @@ export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Prop
           slo={slo}
           selectedTabId={selectedTabId}
           isAutoRefreshing={isAutoRefreshing}
-          range={{
-            from: start,
-            to: end,
-          }}
+          range={range}
           onBrushed={onBrushed}
         />
         <EuiFlexItem>
           <EventsChartPanel
             slo={slo}
-            range={{
-              start: absRange.absoluteFrom,
-              end: absRange.absoluteTo,
-            }}
+            range={range}
             selectedTabId={selectedTabId}
             onBrushed={onBrushed}
           />

@@ -4,11 +4,15 @@ info:
   version: '2023-10-31'
 paths:
   /api/detection_engine/signals/assignees:
-    summary: Assigns users to alerts
     post:
-      operationId: SetAlertAssignees
+      x-labels: [ess, serverless]
       x-codegen-enabled: true
-      description: Assigns users to alerts.
+      operationId: SetAlertAssignees
+      summary: Assign and unassign users from detection alerts
+      description: |
+        Assign users to detection alerts, and unassign them from alerts.
+        > info
+        > You cannot add and remove the same assignee in the same request.
       requestBody:
         required: true
         content:

@@ -10,6 +10,7 @@ import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { CoreSetup, CoreStart, AppMountParameters } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { BfetchExplorerStartPlugins, ExplorerService } from './plugin';
 import { App } from './containers/app';
 
@@ -26,9 +27,11 @@ export const mount =
     const [core, plugins] = await coreSetup.getStartServices();
     const deps: BfetchDeps = { appBasePath, core, plugins, explorer };
     const reactElement = (
-      <KibanaContextProvider services={deps}>
-        <App />
-      </KibanaContextProvider>
+      <KibanaRenderContextProvider {...core}>
+        <KibanaContextProvider services={deps}>
+          <App />
+        </KibanaContextProvider>
+      </KibanaRenderContextProvider>
     );
     render(reactElement, element);
     return () => unmountComponentAtNode(element);

@@ -169,4 +169,48 @@ describe('LicenseFetcher', () => {
     license = await fetcher();
     expect(license.error).toEqual('woups');
   });
+
+  it('logs a warning in case of successful call without license', async () => {
+    clusterClient.asInternalUser.xpack.info.mockResponse({
+      license: undefined,
+      features: {},
+    } as any);
+
+    const fetcher = getLicenseFetcher({
+      logger,
+      clusterClient,
+      cacheDurationMs: 50_000,
+    });
+
+    const license = await fetcher();
+    expect(license.isAvailable).toEqual(false);
+    expect(loggerMock.collect(logger).warn.map((args) => args[0])).toMatchInlineSnapshot(`
+      Array [
+        "License information fetched from Elasticsearch, but no license is available",
+      ]
+    `);
+  });
+
+  it('logs a warning in case of successful call with a missing license', async () => {
+    clusterClient.asInternalUser.xpack.info.mockResponse({
+      license: buildRawLicense({
+        type: 'missing',
+      }),
+      features: {},
+    } as any);
+
+    const fetcher = getLicenseFetcher({
+      logger,
+      clusterClient,
+      cacheDurationMs: 50_000,
+    });
+
+    const license = await fetcher();
+    expect(license.isAvailable).toEqual(false);
+    expect(loggerMock.collect(logger).warn.map((args) => args[0])).toMatchInlineSnapshot(`
+      Array [
+        "License information fetched from Elasticsearch, but no license is available",
+      ]
+    `);
+  });
 });

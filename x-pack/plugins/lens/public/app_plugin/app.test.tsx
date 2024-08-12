@@ -186,8 +186,8 @@ describe('Lens App', () => {
         query: { query: '', language: 'lucene' },
         filters: [pinnedFilter],
         resolvedDateRange: {
-          fromDate: '2021-01-10T04:00:00.000Z',
-          toDate: '2021-01-10T08:00:00.000Z',
+          fromDate: 'now-7d',
+          toDate: 'now',
         },
       }),
     });
@@ -1117,8 +1117,8 @@ describe('Lens App', () => {
         lens: expect.objectContaining({
           query: { query: '', language: 'lucene' },
           resolvedDateRange: {
-            fromDate: '2021-01-10T04:00:00.000Z',
-            toDate: '2021-01-10T08:00:00.000Z',
+            fromDate: 'now-7d',
+            toDate: 'now',
           },
         }),
       });
@@ -1154,8 +1154,8 @@ describe('Lens App', () => {
         lens: expect.objectContaining({
           query: { query: 'new', language: 'lucene' },
           resolvedDateRange: {
-            fromDate: '2021-01-09T04:00:00.000Z',
-            toDate: '2021-01-09T08:00:00.000Z',
+            fromDate: 'now-14d',
+            toDate: 'now-7d',
           },
         }),
       });
@@ -1454,8 +1454,8 @@ describe('Lens App', () => {
         type: 'lens/setState',
         payload: {
           resolvedDateRange: {
-            fromDate: '2021-01-10T04:00:00.000Z',
-            toDate: '2021-01-10T08:00:00.000Z',
+            fromDate: 'now-7d',
+            toDate: 'now',
           },
           searchSessionId: 'sessionId-2',
         },

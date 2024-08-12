@@ -11,6 +11,7 @@ export const testMonitorPolicy = {
   package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.9.10' },
   enabled: true,
   policy_id: '',
+  policy_ids: [''],
   inputs: [
     {
       type: 'synthetics/http',

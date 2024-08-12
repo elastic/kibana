@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { AggregateQuery } from '@kbn/es-query';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { UiActionsActionDefinition, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '../triggers';
@@ -20,6 +21,7 @@ export interface SelectRangeActionContext {
     column: number;
     range: number[];
     timeFieldName?: string;
+    query?: AggregateQuery;
   };
 }
 

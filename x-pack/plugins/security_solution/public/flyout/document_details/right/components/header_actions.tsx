@@ -17,14 +17,14 @@ import {
   ALERT_SUMMARY_CONVERSATION_ID,
   EVENT_SUMMARY_CONVERSATION_ID,
 } from '../../../../common/components/event_details/translations';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { SHARE_BUTTON_TEST_ID } from './test_ids';
 
 /**
  * Actions displayed in the header menu in the right section of alerts flyout
  */
 export const HeaderActions: VFC = memo(() => {
-  const { dataFormattedForFieldBrowser, eventId, indexName } = useRightPanelContext();
+  const { dataFormattedForFieldBrowser, eventId, indexName } = useDocumentDetailsContext();
   const { isAlert, timestamp } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 
   const alertDetailsLink = useGetAlertDetailsFlyoutLink({

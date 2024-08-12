@@ -4,43 +4,52 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
-  ASSET_CRITICALITY_URL,
+  CreateAssetCriticalityRecordRequestBody,
+  type CreateAssetCriticalityRecordResponse,
+} from '../../../../../common/api/entity_analytics';
+import {
+  ASSET_CRITICALITY_PUBLIC_URL,
   APP_ID,
   ENABLE_ASSET_CRITICALITY_SETTING,
+  API_VERSIONS,
 } from '../../../../../common/constants';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
-import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
-import { CreateAssetCriticalityRecord } from '../../../../../common/api/entity_analytics';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { AssetCriticalityAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
-export const assetCriticalityUpsertRoute = (
+
+export const assetCriticalityPublicUpsertRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger
 ) => {
   router.versioned
     .post({
-      access: 'internal',
-      path: ASSET_CRITICALITY_URL,
+      access: 'public',
+      path: ASSET_CRITICALITY_PUBLIC_URL,
       options: {
         tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
       },
     })
     .addVersion(
       {
-        version: '1',
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(CreateAssetCriticalityRecord),
+            body: buildRouteValidationWithZod(CreateAssetCriticalityRecordRequestBody),
           },
         },
       },
-      async (context, request, response) => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<CreateAssetCriticalityRecordResponse>> => {
         const siemResponse = buildSiemResponse(response);
         try {
           await assertAdvancedSettingsEnabled(await context.core, ENABLE_ASSET_CRITICALITY_SETTING);

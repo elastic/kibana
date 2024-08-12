@@ -30,12 +30,12 @@ import { useAnimatedProgressBarBackground } from './use_animated_progress_bar_ba
  * Props for ProgressControlProps
  */
 interface ProgressControlProps {
-  isBrushCleared: boolean;
   progress: number;
   progressMessage: string;
   onRefresh: () => void;
   onCancel: () => void;
   onReset: () => void;
+  isBrushCleared: boolean;
   isRunning: boolean;
   shouldRerunAnalysis: boolean;
   runAnalysisDisabled?: boolean;
@@ -43,7 +43,7 @@ interface ProgressControlProps {
 
 /**
  * ProgressControls React Component
- * Component with ability to Run & cancel analysis
+ * Component with ability to run & cancel analysis
  * by default uses `Baseline` and `Deviation` for the badge name
  *
  * @param props ProgressControls component props
@@ -52,18 +52,21 @@ interface ProgressControlProps {
 export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (props) => {
   const {
     children,
-    isBrushCleared,
     progress,
     progressMessage,
     onRefresh,
     onCancel,
     onReset,
+    isBrushCleared,
     isRunning,
     shouldRerunAnalysis,
     runAnalysisDisabled = false,
   } = props;
 
+  const progressOutput = Math.round(progress * 100);
+
   const { euiTheme } = useEuiTheme();
+
   const runningProgressBarStyles = useAnimatedProgressBarBackground(euiTheme.colors.success);
   const analysisCompleteStyle = { display: 'none' };
 
@@ -147,7 +150,7 @@ export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (pr
                 data-test-subj="aiopsProgressTitleMessage"
                 id="xpack.aiops.progressTitle"
                 defaultMessage="Progress: {progress}% — {progressMessage}"
-                values={{ progress: Math.round(progress * 100), progressMessage }}
+                values={{ progress: progressOutput, progressMessage }}
               />
             </EuiText>
           </EuiFlexItem>
@@ -156,7 +159,7 @@ export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (pr
               aria-label={i18n.translate('xpack.aiops.progressAriaLabel', {
                 defaultMessage: 'Progress',
               })}
-              value={Math.round(progress * 100)}
+              value={progressOutput}
               max={100}
               size="m"
             />

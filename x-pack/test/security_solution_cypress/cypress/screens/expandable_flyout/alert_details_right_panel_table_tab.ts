@@ -5,19 +5,23 @@
  * 2.0.
  */
 
-import { getClassSelector, getDataTestSubjectSelector } from '../../helpers/common';
+import { getDataTestSubjectSelector } from '../../helpers/common';
 
-export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_FILTER = getClassSelector('euiFieldSearch');
+export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_FILTER = getDataTestSubjectSelector(
+  'securitySolutionFlyoutDocumentTableSearchInput'
+);
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_ROW = getDataTestSubjectSelector(
-  'event-fields-table-row-@timestamp'
+  'flyout-table-row-@timestamp'
 );
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_CELL =
   getDataTestSubjectSelector('event-field-@timestamp');
-export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ID_ROW = getDataTestSubjectSelector(
-  'event-fields-table-row-_id'
-);
+export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ID_ROW =
+  getDataTestSubjectSelector('flyout-table-row-_id');
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_HOST_OS_BUILD_ROW = getDataTestSubjectSelector(
-  'event-fields-table-row-host.os.build'
+  'flyout-table-row-host.os.build'
+);
+export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_THREAT_ENRICHMENTS = getDataTestSubjectSelector(
+  'flyout-table-row-threat.enrichments'
 );
 const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_ACTIONS =
   'actionItem-security-detailsFlyout-cellActions-';

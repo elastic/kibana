@@ -8,48 +8,72 @@
 
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import {
+  createKbnUrlStateStorage,
+  IKbnUrlStateStorage,
+  withNotifyOnErrors,
+} from '@kbn/kibana-utils-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { History } from 'history';
-import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import {
-  DiscoverAppStateContainer,
-  getDiscoverAppStateContainer,
-  isEqualState,
-} from './discover_app_state_container';
+import { getDiscoverAppStateContainer, isEqualState } from './discover_app_state_container';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import { createDataViewDataSource } from '../../../../common/data_sources';
+import { getInternalStateContainer } from './discover_internal_state_container';
+import {
+  DiscoverSavedSearchContainer,
+  getSavedSearchContainer,
+} from './discover_saved_search_container';
+import { getDiscoverGlobalStateContainer } from './discover_global_state_container';
 
 let history: History;
-let state: DiscoverAppStateContainer;
+let stateStorage: IKbnUrlStateStorage;
+let internalState: ReturnType<typeof getInternalStateContainer>;
+let savedSearchState: DiscoverSavedSearchContainer;
 
 describe('Test discover app state container', () => {
   beforeEach(async () => {
     const storeInSessionStorage = discoverServiceMock.uiSettings.get('state:storeInSessionStorage');
     const toasts = discoverServiceMock.core.notifications.toasts;
-    const stateStorage = createKbnUrlStateStorage({
+    stateStorage = createKbnUrlStateStorage({
       useHash: storeInSessionStorage,
       history,
       ...(toasts && withNotifyOnErrors(toasts)),
     });
-    state = getDiscoverAppStateContainer({
-      stateStorage,
-      savedSearch: savedSearchMock,
+    internalState = getInternalStateContainer();
+    savedSearchState = getSavedSearchContainer({
       services: discoverServiceMock,
+      globalStateContainer: getDiscoverGlobalStateContainer(stateStorage),
     });
   });
 
+  const getStateContainer = () =>
+    getDiscoverAppStateContainer({
+      stateStorage,
+      internalStateContainer: internalState,
+      savedSearchContainer: savedSearchState,
+      services: discoverServiceMock,
+    });
+
   test('hasChanged returns whether the current state has changed', async () => {
-    state.set({ index: 'modified' });
+    const state = getStateContainer();
+    state.set({
+      dataSource: createDataViewDataSource({ dataViewId: 'modified' }),
+    });
     expect(state.hasChanged()).toBeTruthy();
     state.resetInitialState();
     expect(state.hasChanged()).toBeFalsy();
   });
 
   test('getPrevious returns the state before the current', async () => {
-    state.set({ index: 'first' });
+    const state = getStateContainer();
+    state.set({
+      dataSource: createDataViewDataSource({ dataViewId: 'first' }),
+    });
     const stateA = state.getState();
-    state.set({ index: 'second' });
+    state.set({
+      dataSource: createDataViewDataSource({ dataViewId: 'second' }),
+    });
     expect(state.getPrevious()).toEqual(stateA);
   });
 
@@ -103,6 +127,7 @@ describe('Test discover app state container', () => {
     } as SavedSearch;
 
     test('should return correct output', () => {
+      const state = getStateContainer();
       const appState = state.getAppStateFromSavedSearch(localSavedSearchMock);
       expect(appState).toMatchObject(
         expect.objectContaining({
@@ -111,7 +136,7 @@ describe('Test discover app state container', () => {
           filters: [customFilter],
           grid: undefined,
           hideChart: true,
-          index: 'the-data-view-id',
+          dataSource: createDataViewDataSource({ dataViewId: 'the-data-view-id' }),
           interval: 'auto',
           query: customQuery,
           rowHeight: undefined,
@@ -126,6 +151,7 @@ describe('Test discover app state container', () => {
     });
 
     test('should return default query if query is undefined', () => {
+      const state = getStateContainer();
       discoverServiceMock.data.query.queryString.getDefaultQuery = jest
         .fn()
         .mockReturnValue(defaultQuery);
@@ -147,7 +173,7 @@ describe('Test discover app state container', () => {
           filters: [customFilter],
           grid: undefined,
           hideChart: undefined,
-          index: 'the-data-view-id',
+          dataSource: createDataViewDataSource({ dataViewId: 'the-data-view-id' }),
           interval: 'auto',
           query: defaultQuery,
           rowHeight: undefined,
@@ -217,10 +243,91 @@ describe('Test discover app state container', () => {
         expect(isEqualState(initialState, { ...initialState, ...param })).toBeFalsy();
       });
     });
+
     test('allows to exclude variables from comparison', () => {
       expect(
-        isEqualState(initialState, { ...initialState, index: undefined }, ['index'])
+        isEqualState(initialState, { ...initialState, dataSource: undefined }, ['dataSource'])
       ).toBeTruthy();
+    });
+  });
+
+  test('should automatically set ES|QL data source when query is ES|QL', () => {
+    const state = getStateContainer();
+    state.update({
+      dataSource: createDataViewDataSource({ dataViewId: 'test' }),
+    });
+    expect(state.get().dataSource?.type).toBe('dataView');
+    state.update({
+      query: {
+        esql: 'from test',
+      },
+    });
+    expect(state.get().dataSource?.type).toBe('esql');
+  });
+
+  describe('initAndSync', () => {
+    it('should call setResetDefaultProfileState correctly with no initial state', () => {
+      const state = getStateContainer();
+      expect(internalState.get().resetDefaultProfileState).toEqual({
+        columns: false,
+        rowHeight: false,
+      });
+      state.initAndSync();
+      expect(internalState.get().resetDefaultProfileState).toEqual({
+        columns: true,
+        rowHeight: true,
+      });
+    });
+
+    it('should call setResetDefaultProfileState correctly with initial columns', () => {
+      const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
+      stateStorageGetSpy.mockReturnValue({ columns: ['test'] });
+      const state = getStateContainer();
+      expect(internalState.get().resetDefaultProfileState).toEqual({
+        columns: false,
+        rowHeight: false,
+      });
+      state.initAndSync();
+      expect(internalState.get().resetDefaultProfileState).toEqual({
+        columns: false,
+        rowHeight: true,
+      });
+    });
+
+    it('should call setResetDefaultProfileState correctly with initial rowHeight', () => {
+      const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
+      stateStorageGetSpy.mockReturnValue({ rowHeight: 5 });
+      const state = getStateContainer();
+      expect(internalState.get().resetDefaultProfileState).toEqual({
+        columns: false,
+        rowHeight: false,
+      });
+      state.initAndSync();
+      expect(internalState.get().resetDefaultProfileState).toEqual({
+        columns: true,
+        rowHeight: false,
+      });
+    });
+
+    it('should call setResetDefaultProfileState correctly with saved search', () => {
+      const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
+      stateStorageGetSpy.mockReturnValue({ columns: ['test'], rowHeight: 5 });
+      const savedSearchGetSpy = jest.spyOn(savedSearchState, 'getState');
+      savedSearchGetSpy.mockReturnValue({
+        id: 'test',
+        searchSource: createSearchSourceMock(),
+        managed: false,
+      });
+      const state = getStateContainer();
+      expect(internalState.get().resetDefaultProfileState).toEqual({
+        columns: false,
+        rowHeight: false,
+      });
+      state.initAndSync();
+      expect(internalState.get().resetDefaultProfileState).toEqual({
+        columns: false,
+        rowHeight: false,
+      });
     });
   });
 });

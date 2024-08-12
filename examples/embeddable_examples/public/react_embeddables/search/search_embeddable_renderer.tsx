@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import React, { useMemo } from 'react';
 import { TimeRange } from '@kbn/es-query';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { useSearchApi } from '@kbn/presentation-publishing';
 import type { SearchApi, SearchSerializedState } from './types';
 import { SEARCH_EMBEDDABLE_ID } from './constants';
 
@@ -28,26 +28,16 @@ export function SearchEmbeddableRenderer(props: Props) {
     // only run onMount
   }, []);
 
-  const parentApi = useMemo(() => {
-    return {
-      timeRange$: new BehaviorSubject(props.timeRange),
-    };
-    // only run onMount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    parentApi.timeRange$.next(props.timeRange);
-  }, [props.timeRange, parentApi.timeRange$]);
+  const searchApi = useSearchApi({ timeRange: props.timeRange });
 
   return (
-    <div className="mapEmbeddableContainer">
-      <ReactEmbeddableRenderer<SearchSerializedState, SearchApi>
-        type={SEARCH_EMBEDDABLE_ID}
-        state={initialState}
-        parentApi={parentApi}
-        hidePanelChrome={true}
-      />
-    </div>
+    <ReactEmbeddableRenderer<SearchSerializedState, SearchApi>
+      type={SEARCH_EMBEDDABLE_ID}
+      getParentApi={() => ({
+        ...searchApi,
+        getSerializedStateForChild: () => initialState,
+      })}
+      hidePanelChrome={true}
+    />
   );
 }

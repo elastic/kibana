@@ -66,6 +66,7 @@ export const createScriptedFieldsDeprecationsConfig: (
                   allTitles: indexPatternTitles.join('; '),
                   numberOfIndexPatternsWithScriptedFields: indexPatternsWithScriptedFields.length,
                 },
+                ignoreTag: true,
               }),
             ],
           },

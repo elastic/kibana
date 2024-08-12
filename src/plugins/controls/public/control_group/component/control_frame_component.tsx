@@ -129,7 +129,7 @@ export const ControlFrame = ({
         'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
       })}
       viewMode={viewMode}
-      embeddable={embeddable}
+      api={embeddable}
       disabledActions={disabledActions}
       isEnabled={embeddable && enableActions}
     >

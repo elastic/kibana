@@ -116,9 +116,12 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.succeeded(user);
     } catch (err) {
       this.logger.debug(
-        `Failed to authenticate request to ${request.url.pathname} via authorization header with "${
-          authorizationHeader.scheme
-        }" scheme: ${getDetailedErrorMessage(err)}`
+        () =>
+          `Failed to authenticate request to ${
+            request.url.pathname
+          } via authorization header with "${
+            authorizationHeader.scheme
+          }" scheme: ${getDetailedErrorMessage(err)}`
       );
       return AuthenticationResult.failed(err);
     }

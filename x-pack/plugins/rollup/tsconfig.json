@@ -34,6 +34,7 @@
     "@kbn/shared-ux-router",
     "@kbn/data-views-plugin",
     "@kbn/react-kibana-context-render",
+    "@kbn/rollup",
 
   ],
   "exclude": [

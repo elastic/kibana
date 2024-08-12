@@ -109,6 +109,8 @@ export function InstallElasticAgent() {
 
   const { apiKeyEncoded, onboardingId } = installShipperSetup ?? getState();
 
+  const successfullyInstalledShipperSetup = installShipperSetupStatus === FETCH_STATUS.SUCCESS;
+
   const { data: yamlConfig = '', status: yamlConfigStatus } = useFetcher(
     (callApi) => {
       if (apiKeyEncoded && onboardingId) {
@@ -118,7 +120,9 @@ export function InstallElasticAgent() {
         });
       }
     },
-    [apiKeyEncoded, onboardingId, installShipperSetupStatus === FETCH_STATUS.SUCCESS]
+    // FIXME: Dario could not find a reasonable fix for successfullyInstalledShipperSetup
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [apiKeyEncoded, onboardingId, successfullyInstalledShipperSetup]
   );
 
   useEffect(() => {

@@ -5,19 +5,10 @@
  * 2.0.
  */
 
-import {
-  EuiAccordion,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiAccordion, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isEmpty, omit } from 'lodash/fp';
 import React, { useCallback } from 'react';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
-
+import styled from '@emotion/styled';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { Conversation } from '../../../assistant_context/types';
@@ -26,14 +17,12 @@ import type { PromptContext, SelectedPromptContext } from '../../prompt_context/
 import * as i18n from './translations';
 
 export interface Props {
-  isNewConversation: boolean;
   promptContexts: Record<string, PromptContext>;
   selectedPromptContexts: Record<string, SelectedPromptContext>;
   setSelectedPromptContexts: React.Dispatch<
     React.SetStateAction<Record<string, SelectedPromptContext>>
   >;
   currentReplacements: Conversation['replacements'] | undefined;
-  isFlyoutMode: boolean;
 }
 
 export const EditorContainer = styled.div<{
@@ -45,20 +34,11 @@ export const EditorContainer = styled.div<{
 `;
 
 const SelectedPromptContextsComponent: React.FC<Props> = ({
-  isNewConversation,
   promptContexts,
   selectedPromptContexts,
   setSelectedPromptContexts,
   currentReplacements,
-  isFlyoutMode,
 }) => {
-  const [accordionState, setAccordionState] = React.useState<'closed' | 'open'>('closed');
-
-  const onToggle = useCallback(
-    () => setAccordionState((prev) => (prev === 'open' ? 'closed' : 'open')),
-    []
-  );
-
   const unselectPromptContext = useCallback(
     (unselectedId: string) => {
       setSelectedPromptContexts((prev) => omit(unselectedId, prev));
@@ -71,22 +51,13 @@ const SelectedPromptContextsComponent: React.FC<Props> = ({
   }
 
   return (
-    <EuiFlexGroup
-      data-test-subj="selectedPromptContexts"
-      direction="column"
-      gutterSize={isFlyoutMode ? 's' : 'none'}
-    >
+    <EuiFlexGroup data-test-subj="selectedPromptContexts" direction="column" gutterSize={'s'}>
       {Object.keys(selectedPromptContexts)
         .sort()
         .map((id) => (
           <EuiFlexItem data-test-subj={`selectedPromptContext-${id}`} grow={false} key={id}>
-            {!isFlyoutMode &&
-            (isNewConversation || Object.keys(selectedPromptContexts).length > 1) ? (
-              <EuiSpacer data-test-subj="spacer" />
-            ) : null}
             <EuiAccordion
               buttonContent={promptContexts[id]?.description}
-              {...(!isFlyoutMode && { forceState: accordionState })}
               extraAction={
                 <EuiToolTip content={i18n.REMOVE_CONTEXT}>
                   <EuiButtonIcon
@@ -98,43 +69,26 @@ const SelectedPromptContextsComponent: React.FC<Props> = ({
                 </EuiToolTip>
               }
               id={id}
-              {...(!isFlyoutMode && { onToggle })}
               paddingSize="s"
-              {...(isFlyoutMode
-                ? {
-                    css: css`
-                      background: ${euiThemeVars.euiPageBackgroundColor};
-                      border-radius: ${euiThemeVars.euiBorderRadius};
+              css={css`
+                background: ${euiThemeVars.euiPageBackgroundColor};
+                border-radius: ${euiThemeVars.euiBorderRadius};
 
-                      > div:first-child {
-                        color: ${euiThemeVars.euiColorPrimary};
-                        padding: ${euiThemeVars.euiFormControlPadding};
-                      }
-                    `,
-                    borders: 'all',
-                    arrowProps: {
-                      color: 'primary',
-                    },
-                  }
-                : {})}
+                > div:first-child {
+                  color: ${euiThemeVars.euiColorPrimary};
+                  padding: ${euiThemeVars.euiFormControlPadding};
+                }
+              `}
+              borders={'all'}
+              arrowProps={{
+                color: 'primary',
+              }}
             >
-              {isFlyoutMode ? (
-                <DataAnonymizationEditor
-                  currentReplacements={currentReplacements}
-                  selectedPromptContext={selectedPromptContexts[id]}
-                  setSelectedPromptContexts={setSelectedPromptContexts}
-                  isFlyoutMode={isFlyoutMode}
-                />
-              ) : (
-                <EditorContainer $accordionState={accordionState}>
-                  <DataAnonymizationEditor
-                    currentReplacements={currentReplacements}
-                    selectedPromptContext={selectedPromptContexts[id]}
-                    setSelectedPromptContexts={setSelectedPromptContexts}
-                    isFlyoutMode={isFlyoutMode}
-                  />
-                </EditorContainer>
-              )}
+              <DataAnonymizationEditor
+                currentReplacements={currentReplacements}
+                selectedPromptContext={selectedPromptContexts[id]}
+                setSelectedPromptContexts={setSelectedPromptContexts}
+              />
             </EuiAccordion>
           </EuiFlexItem>
         ))}

@@ -9,6 +9,7 @@ import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import {
@@ -50,7 +51,15 @@ const topDependenciesRoute = createApmServerRoute({
     tags: ['access:apm'],
   },
   handler: async (resources): Promise<TopDependenciesResponse> => {
-    const apmEventClient = await getApmEventClient(resources);
+    const {
+      request,
+      plugins: { security },
+    } = resources;
+
+    const [apmEventClient, randomSampler] = await Promise.all([
+      getApmEventClient(resources),
+      getRandomSampler({ security, request, probability: 1 }),
+    ]);
     const { environment, offset, numBuckets, kuery, start, end } = resources.params.query;
 
     return getTopDependencies({
@@ -61,6 +70,7 @@ const topDependenciesRoute = createApmServerRoute({
       environment,
       kuery,
       offset,
+      randomSampler,
     });
   },
 });
@@ -83,7 +93,16 @@ const upstreamServicesForDependencyRoute = createApmServerRoute({
     tags: ['access:apm'],
   },
   handler: async (resources): Promise<UpstreamServicesForDependencyResponse> => {
-    const apmEventClient = await getApmEventClient(resources);
+    const {
+      request,
+      plugins: { security },
+    } = resources;
+
+    const [apmEventClient, randomSampler] = await Promise.all([
+      getApmEventClient(resources),
+      getRandomSampler({ security, request, probability: 1 }),
+    ]);
+
     const {
       query: { dependencyName, environment, offset, numBuckets, kuery, start, end },
     } = resources.params;
@@ -97,6 +116,7 @@ const upstreamServicesForDependencyRoute = createApmServerRoute({
       environment,
       kuery,
       offset,
+      randomSampler,
     });
   },
 });

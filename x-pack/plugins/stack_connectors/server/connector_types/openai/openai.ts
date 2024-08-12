@@ -319,6 +319,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    * Non-streamed security solution AI Assistant requests
    * Responsible for invoking the runApi method with the provided body.
    * It then formats the response into a string
+   * To use function calling, call the run subaction directly
    * @param body - the OpenAI chat completion request body
    * @returns an object with the response string and the usage object
    */

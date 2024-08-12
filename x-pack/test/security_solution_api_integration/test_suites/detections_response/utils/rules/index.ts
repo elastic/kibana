@@ -49,5 +49,6 @@ export * from './remove_server_generated_properties_including_rule_id';
 export * from './rule_to_update_schema';
 export * from './update_rule';
 export * from './get_simple_rule_as_ndjson';
+export * from './rule_gaps';
 
 export * from './prebuilt_rules';

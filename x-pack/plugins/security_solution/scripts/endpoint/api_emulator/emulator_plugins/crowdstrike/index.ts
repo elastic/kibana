@@ -5,21 +5,18 @@
  * 2.0.
  */
 
+import type { ExternalEdrServerEmulatorCoreServices } from '../../external_edr_server_emulator.types';
 import type { EmulatorServerPlugin } from '../../lib/emulator_server.types';
+import { getCrowdstrikeRouteDefinitions } from './routes';
 
-export const getCrowdstrikeEmulator = () => {
-  const plugin: EmulatorServerPlugin = {
-    name: 'crowdstrike',
-    register({ router }) {
-      router.route({
-        path: '/',
-        method: 'GET',
-        handler: () => {
-          return { message: `Live! But not implemented` };
-        },
-      });
-    },
+export const getCrowdstrikeEmulator =
+  (): EmulatorServerPlugin<ExternalEdrServerEmulatorCoreServices> => {
+    const plugin: EmulatorServerPlugin<ExternalEdrServerEmulatorCoreServices> = {
+      name: 'crowdstrike',
+      register({ router, expose, services }) {
+        router.route(getCrowdstrikeRouteDefinitions());
+      },
+    };
+
+    return plugin;
   };
-
-  return plugin;
-};

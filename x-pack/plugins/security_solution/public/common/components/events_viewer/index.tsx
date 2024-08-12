@@ -49,8 +49,8 @@ import { inputsActions } from '../../store/actions';
 import { InspectButtonContainer } from '../inspect';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { eventsViewerSelector } from './selectors';
-import type { SourcererScopeName } from '../../store/sourcerer/model';
-import { useSourcererDataView } from '../../containers/sourcerer';
+import type { SourcererScopeName } from '../../../sourcerer/store/model';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { useKibana } from '../../lib/kibana';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
@@ -219,8 +219,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     scopeId: tableId,
   });
 
-  const { DetailsPanel, SessionView } = useSessionView({
-    entityType,
+  const { SessionView } = useSessionView({
     scopeId: tableId,
   });
 
@@ -617,7 +616,6 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
           </StyledEuiPanel>
         </InspectButtonContainer>
       </FullScreenContainer>
-      {DetailsPanel}
     </>
   );
 };

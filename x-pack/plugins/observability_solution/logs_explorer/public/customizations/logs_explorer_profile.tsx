@@ -11,13 +11,11 @@ import type { CustomizationCallback } from '@kbn/discover-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { waitFor } from 'xstate/lib/waitFor';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { UnifiedDocViewerLogsOverview } from '@kbn/unified-doc-viewer-plugin/public';
 import type { LogsExplorerController } from '../controller';
 import type { LogsExplorerStartDeps } from '../types';
 import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
 import { createCustomSearchBar } from './custom_search_bar';
-import { createCustomCellRenderer } from './custom_cell_renderer';
-import { createCustomGridColumnsConfiguration } from './custom_column';
-import { smartFields } from './custom_field_list';
 import { createCustomUnifiedHistogram } from './custom_unified_histogram';
 
 const LazyCustomDataSourceFilters = dynamic(() => import('./custom_data_source_filters'));
@@ -83,18 +81,15 @@ export const createLogsExplorerProfileCustomizations =
 
     customizations.set({
       id: 'data_table',
-      customCellRenderer: createCustomCellRenderer({ data }),
-      customGridColumnsConfiguration: createCustomGridColumnsConfiguration(),
-      customControlColumnsConfiguration: await import('./custom_control_column').then((module) =>
-        module.createCustomControlColumnsConfiguration(service)
+      logsEnabled: true,
+      rowAdditionalLeadingControls: await import('./custom_control_column').then((module) =>
+        module.getRowAdditionalControlColumns()
       ),
     });
 
     customizations.set({
       id: 'field_list',
-      additionalFieldGroups: {
-        smartFields,
-      },
+      logsFieldsEnabled: true,
     });
 
     // Fix bug where filtering on histogram does not work
@@ -136,7 +131,23 @@ export const createLogsExplorerProfileCustomizations =
         },
       },
       docViewsRegistry: (registry) => {
-        registry.enableById('doc_view_logs_overview');
+        const logsAIAssistantFeature = plugins.discoverShared.features.registry.getById(
+          'observability-logs-ai-assistant'
+        );
+
+        registry.add({
+          id: 'doc_view_logs_overview',
+          title: i18n.translate('xpack.logsExplorer.docViews.logsOverview.title', {
+            defaultMessage: 'Overview',
+          }),
+          order: 0,
+          component: (props) => (
+            <UnifiedDocViewerLogsOverview
+              {...props}
+              renderAIAssistant={logsAIAssistantFeature?.render}
+            />
+          ),
+        });
 
         return registry;
       },

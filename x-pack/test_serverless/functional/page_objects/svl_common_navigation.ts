@@ -17,6 +17,7 @@ import type { NavigationID as DevNavId } from '@kbn/default-nav-devtools';
 type NavigationId = MlNavId | AlNavId | MgmtNavId | DevNavId | string;
 
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { NavigationalSearchPageObject } from '@kbn/test-suites-xpack/functional/page_objects/navigational_search';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 const getSectionIdTestSubj = (sectionId: NavigationId) => `~nav-item-${sectionId}`;
@@ -335,8 +336,6 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
   };
 }
 
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { NavigationalSearchPageObject } from '../../../test/functional/page_objects/navigational_search';
 class SvlNavigationSearchPageObject extends NavigationalSearchPageObject {
   constructor(ctx: FtrProviderContext) {
     // @ts-expect-error -- this expects FtrProviderContext from x-pack/test/functional/ftr_provider_context.ts

@@ -7,4 +7,4 @@
  */
 
 require('../src/setup_node_env');
-require('../test/common/services/saved_object_info').runSavedObjInfoSvc();
+require('@kbn/test-suites-src/common/services/saved_object_info').runSavedObjInfoSvc();

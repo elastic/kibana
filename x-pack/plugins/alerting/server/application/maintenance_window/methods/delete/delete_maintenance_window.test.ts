@@ -6,18 +6,24 @@
  */
 
 import { deleteMaintenanceWindow } from './delete_maintenance_window';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
 import {
   MaintenanceWindowClientContext,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
 } from '../../../../../common';
 
 const savedObjectsClient = savedObjectsClientMock.create();
+const uiSettings = uiSettingsServiceMock.createClient();
 
 const mockContext: jest.Mocked<MaintenanceWindowClientContext> = {
   logger: loggingSystemMock.create().get(),
   getModificationMetadata: jest.fn(),
   savedObjectsClient,
+  uiSettings,
 };
 
 describe('MaintenanceWindowClient - delete', () => {

@@ -12,6 +12,11 @@ import { getParser, ROOT_STATEMENT } from './antlr_facade';
 import { AstListener } from './ast_factory';
 import type { ESQLAst, EditorError } from './types';
 
+// These will need to be manually updated whenever the relevant grammar changes.
+const SYNTAX_ERRORS_TO_IGNORE = [
+  `SyntaxError: mismatched input '<EOF>' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}`,
+];
+
 export function getAstAndSyntaxErrors(text: string | undefined): {
   errors: EditorError[];
   ast: ESQLAst;
@@ -25,5 +30,9 @@ export function getAstAndSyntaxErrors(text: string | undefined): {
 
   parser[ROOT_STATEMENT]();
 
-  return { ...parseListener.getAst(), errors: errorListener.getErrors() };
+  const errors = errorListener.getErrors().filter((error) => {
+    return !SYNTAX_ERRORS_TO_IGNORE.includes(error.message);
+  });
+
+  return { ...parseListener.getAst(), errors };
 }

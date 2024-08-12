@@ -23,6 +23,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiLink,
+  EuiPanel,
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
@@ -44,14 +45,10 @@ const DEFAULT_EVAL_TYPES_OPTIONS = [
 ];
 const DEFAULT_OUTPUT_INDEX = '.kibana-elastic-ai-assistant-evaluation-results';
 
-interface Props {
-  onEvaluationSettingsChange?: () => void;
-}
-
 /**
  * Evaluation Settings -- development-only feature for evaluating models
  */
-export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSettingsChange }) => {
+export const EvaluationSettings: React.FC = React.memo(() => {
   const { actionTypeRegistry, basePath, http, setTraceOptions, traceOptions } =
     useAssistantContext();
   const { data: connectors } = useLoadConnectors({ http });
@@ -352,12 +349,8 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
   `;
 
   return (
-    <>
-      <EuiTitle size={'s'}>
-        <h2>{i18n.SETTINGS_TITLE}</h2>
-      </EuiTitle>
-      <EuiSpacer size="xs" />
-      <EuiText size={'s'}>{i18n.SETTINGS_DESCRIPTION}</EuiText>
+    <EuiPanel hasShadow={false} hasBorder paddingSize="l">
+      <EuiText size={'m'}>{i18n.SETTINGS_DESCRIPTION}</EuiText>
       <EuiHorizontalRule margin={'s'} />
       {/* Run Details*/}
       <EuiAccordion
@@ -615,7 +608,7 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
         <EuiFlexItem>
           <EuiText color={'subdued'} size={'xs'}>
             <FormattedMessage
-              defaultMessage="Fun Facts: Watch the Kibana server logs for progress, and view results in {discover} / {apm} once complete. Will take (many) minutes depending on dataset, and closing this dialog will cancel the evaluation!"
+              defaultMessage="Closing this dialog will cancel the evaluation. You can watch the Kibana server logs for progress, and view results in {discover} {apm}. Can take many minutes for large datasets."
               id="xpack.elasticAssistant.assistant.settings.evaluationSettings.evaluatorFunFactText"
               values={{
                 discover: (
@@ -634,7 +627,7 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-    </>
+    </EuiPanel>
   );
 });
 

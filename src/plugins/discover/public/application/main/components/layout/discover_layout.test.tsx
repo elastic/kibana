@@ -21,11 +21,9 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import {
-  AvailableFields$,
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
-  RecordRawType,
 } from '../../state_management/discover_data_state_container';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
@@ -39,6 +37,7 @@ import { DiscoverMainProvider } from '../../state_management/discover_state_prov
 import { act } from 'react-dom/test-utils';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { PanelsToggle } from '../../../../components/panels_toggle';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -50,10 +49,8 @@ async function mountComponent(
   prevSidebarClosed?: boolean,
   mountOptions: { attachTo?: HTMLElement } = {},
   query?: Query | AggregateQuery,
-  isPlainRecord?: boolean,
   main$: DataMain$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    recordRawType: isPlainRecord ? RecordRawType.PLAIN : RecordRawType.DOCUMENT,
     foundDocuments: true,
   }) as DataMain$
 ) {
@@ -85,11 +82,6 @@ async function mountComponent(
     result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataView)),
   }) as DataDocuments$;
 
-  const availableFields$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    fields: [] as string[],
-  }) as AvailableFields$;
-
   const totalHits$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
     result: Number(esHitsMock.length),
@@ -99,14 +91,17 @@ async function mountComponent(
     main$,
     documents$,
     totalHits$,
-    availableFields$,
   };
 
   const session = getSessionServiceMock();
 
   session.getSession$.mockReturnValue(new BehaviorSubject('123'));
 
-  stateContainer.appState.update({ index: dataView.id, interval: 'auto', query });
+  stateContainer.appState.update({
+    dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
+    interval: 'auto',
+    query,
+  });
   stateContainer.internalState.transitions.setDataView(dataView);
 
   const props = {
@@ -180,10 +175,8 @@ describe('Discover component', () => {
       undefined,
       undefined,
       undefined,
-      undefined,
       new BehaviorSubject({
         fetchStatus: FetchStatus.ERROR,
-        recordRawType: RecordRawType.DOCUMENT,
         foundDocuments: false,
         error: new Error('No results'),
       }) as DataMain$

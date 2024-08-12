@@ -20,6 +20,7 @@
       "data",
       "dataViews",
       "dataViewEditor",
+      "embeddable",
       "fieldFormats",
       "uiActions",
       "presentationUtil",
@@ -38,7 +39,8 @@
       "dashboard",
       "expressions",
       "logsExplorer",
-      "licensing"
+      "licensing",
+      "navigation"
     ],
     "optionalPlugins": [
       "discover",

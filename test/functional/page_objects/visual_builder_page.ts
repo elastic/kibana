@@ -353,7 +353,7 @@ export class VisualBuilderPageObject extends FtrService {
   public async getRhythmChartLegendValue(nth = 0) {
     await this.visChart.waitForVisualizationRenderingStabilized();
     const metricValue = (
-      await this.find.allByCssSelector(`.echLegendItem .echLegendItem__extra`, 20000)
+      await this.find.allByCssSelector(`.echLegendItem .echLegendItem__legendValue`, 20000)
     )[nth];
     await metricValue.moveMouseTo();
     return await metricValue.getVisibleText();
@@ -824,7 +824,7 @@ export class VisualBuilderPageObject extends FtrService {
       .toArray()
       .map((li) => {
         const label = $(li).find('.echLegendItem__label').text();
-        const value = $(li).find('.echLegendItem__extra').text();
+        const value = $(li).find('.echLegendItem__legendValue').text();
 
         return `${label}: ${value}`;
       });

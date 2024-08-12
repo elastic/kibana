@@ -89,4 +89,5 @@ export type ComponentTemplateDetailsTestSubjects =
   | 'deprecatedComponentTemplateBadge'
   | 'manageComponentTemplateButton'
   | 'manageComponentTemplateContextMenu'
+  | 'missingCustomComponentTemplate'
   | 'manageComponentTemplateContextMenu.action';

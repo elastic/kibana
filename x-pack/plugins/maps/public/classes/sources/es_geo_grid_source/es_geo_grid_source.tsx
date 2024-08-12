@@ -377,6 +377,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
 
       const aggr = esResponse.aggregations?.compositeSplit as AggregationsCompositeAggregate;
       afterKey = aggr.after_key;
+      // @ts-expect-error upgrade typescript v5.1.6
       if (aggr.buckets.length < gridsPerRequest) {
         // Finished because request did not get full resultset back
         break;

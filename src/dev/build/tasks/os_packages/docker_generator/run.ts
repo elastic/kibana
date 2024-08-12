@@ -29,7 +29,7 @@ export async function runDockerGenerator(
   build: Build,
   flags: {
     architecture?: string;
-    baseImage: 'none' | 'ubi' | 'ubuntu';
+    baseImage: 'none' | 'wolfi' | 'ubi' | 'ubuntu';
     context: boolean;
     image: boolean;
     ironbank?: boolean;
@@ -42,9 +42,19 @@ export async function runDockerGenerator(
   let baseImageName = '';
   if (flags.baseImage === 'ubuntu') baseImageName = 'ubuntu:20.04';
   if (flags.baseImage === 'ubi') baseImageName = 'docker.elastic.co/ubi9/ubi-minimal:latest';
+  /**
+   * Renovate config contains a regex manager to automatically updates this Chainguard reference
+   *
+   * If this logic moves to another file or under another name, then the Renovate regex manager
+   * for automatic Chainguard updates will break.
+   */
+  if (flags.baseImage === 'wolfi')
+    baseImageName =
+      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:082266206be6e559baea1c8b2eeb4fb86ea1318a0cf99cbf0e612dd2c611e80b';
 
   let imageFlavor = '';
   if (flags.baseImage === 'ubi') imageFlavor += `-ubi`;
+  if (flags.baseImage === 'wolfi' && !flags.serverless) imageFlavor += `-wolfi`;
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
   if (flags.serverless) imageFlavor += '-serverless';
@@ -61,7 +71,9 @@ export async function runDockerGenerator(
   const imageTag = `docker.elastic.co/${imageNamespace}/kibana`;
   const version = config.getBuildVersion();
   const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';
-  const artifactPrefix = `kibana-${version}-linux`;
+  let artifactVariant = '';
+  if (flags.serverless) artifactVariant = '-serverless';
+  const artifactPrefix = `kibana${artifactVariant}-${version}-linux`;
   const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.tar.gz`;
   const beatsArchitecture = flags.architecture === 'aarch64' ? 'arm64' : 'x86_64';
   const metricbeatTarball = `metricbeat-${version}-linux-${beatsArchitecture}.tar.gz`;

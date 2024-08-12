@@ -12,11 +12,11 @@ import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
 import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../configs/ftr_provider_context';
 import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects(['common', 'header']);
+  const pageObjects = getPageObjects(['common', 'header', 'timePicker']);
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
   const endpointTestResources = getService('endpointTestResources');
@@ -28,11 +28,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const unzipPromisify = promisify(unzip);
   const comboBox = getService('comboBox');
   const toasts = getService('toasts');
+  const MINUTES = 60 * 1000 * 10;
 
   describe('Endpoint Exceptions', function () {
     targetTags(this, ['@ess', '@serverless']);
 
-    this.timeout(10 * 60_000);
+    this.timeout(10 * MINUTES);
 
     const clearPrefilledEntries = async () => {
       const entriesContainer = await testSubjects.find('exceptionEntriesContainer');
@@ -49,6 +50,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     const openNewEndpointExceptionFlyout = async () => {
+      await testSubjects.scrollIntoView('timeline-context-menu-button');
       await testSubjects.click('timeline-context-menu-button');
       await testSubjects.click('add-endpoint-exception-menu-item');
       await testSubjects.existOrFail('addExceptionFlyout');
@@ -101,19 +103,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     const checkArtifact = (expectedArtifact: object) => {
-      return retry.tryForTime(120_000, async () => {
-        const artifacts = await endpointArtifactTestResources.getArtifacts();
+      return retry.tryForTime(2 * MINUTES, async () => {
+        const artifacts = await endpointArtifactTestResources.getArtifactsFromUnifiedManifestSO();
 
-        const manifestArtifact = artifacts.find((artifact) =>
-          artifact.artifactId.startsWith('endpoint-exceptionlist-macos-v1')
-        );
+        const foundArtifactId = artifacts
+          .flatMap((artifact) => artifact.artifactIds)
+          .find((artifactId) => artifactId.startsWith('endpoint-exceptionlist-macos-v1'));
 
-        expect(manifestArtifact).to.not.be(undefined);
+        expect(foundArtifactId).to.not.be(undefined);
 
         // Get fleet artifact
         const artifactResult = await esClient.get({
           index: '.fleet-artifacts-7',
-          id: `endpoint:${manifestArtifact!.artifactId}`,
+          id: `endpoint:${foundArtifactId!}`,
         });
 
         const artifact = artifactResult._source as ArtifactElasticsearchProperties;
@@ -132,7 +134,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const waitForAlertsToAppear = async () => {
         await pageObjects.common.navigateToUrlWithBrowserHistory('security', `/alerts`);
         await pageObjects.header.waitUntilLoadingHasFinished();
-        await retry.waitForWithTimeout('alerts to appear', 10 * 60_000, async () => {
+        await pageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
+        await retry.waitForWithTimeout('alerts to appear', 10 * MINUTES, async () => {
           await queryBar.clickQuerySubmitButton();
           return testSubjects.exists('timeline-context-menu-button');
         });
@@ -146,6 +149,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
+      this.timeout(MINUTES);
+
       const deleteEndpointExceptions = async () => {
         const { body } = await supertest
           .get(`${EXCEPTION_LIST_ITEM_URL}/_find?list_id=endpoint_list&namespace_type=agnostic`)
@@ -163,6 +168,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should add `event.module=endpoint` to entry if only wildcard operator is present', async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('security', `/alerts`);
+      await pageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
 
       await openNewEndpointExceptionFlyout();
       await clearPrefilledEntries();
@@ -207,6 +213,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should NOT add `event.module=endpoint` to entry if there is another operator', async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('security', `/alerts`);
+      await pageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
 
       await openNewEndpointExceptionFlyout();
       await clearPrefilledEntries();

@@ -81,7 +81,7 @@ describe('KnowledgeBaseTab', () => {
 
       getByTestId('knowledgeBaseEditManualEntryFlyoutSaveButton').click();
 
-      expect(createMock).toHaveBeenCalledWith({ entry: { id: 'foo', text: 'bar' } });
+      expect(createMock).toHaveBeenCalledWith({ entry: { id: 'foo', public: false, text: 'bar' } });
     });
 
     it('should require an id', () => {
@@ -121,6 +121,7 @@ describe('KnowledgeBaseTab', () => {
   describe('when there are entries', () => {
     beforeEach(() => {
       useGetKnowledgeBaseEntriesMock.mockReturnValue({
+        refetch: jest.fn(),
         loading: false,
         entries: [
           {
@@ -161,6 +162,11 @@ describe('KnowledgeBaseTab', () => {
 
       useDeleteKnowledgeBaseEntryMock.mockReturnValue({
         mutateAsync: deleteMock,
+      });
+
+      useCreateKnowledgeBaseEntryMock.mockReturnValue({
+        mutateAsync: createMock,
+        isLoading: false,
       });
     });
 

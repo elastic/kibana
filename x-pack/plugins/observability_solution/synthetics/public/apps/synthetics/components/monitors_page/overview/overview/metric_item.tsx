@@ -6,12 +6,15 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { css } from '@emotion/react';
 import { Chart, Settings, Metric, MetricTrendShape } from '@elastic/charts';
-import { EuiPanel, EuiIconTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { DARK_THEME } from '@elastic/charts';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
+import { MetricItemBody } from './metric_item/metric_item_body';
+import { MetricItemExtra } from './metric_item/metric_item_extra';
 import { selectErrorPopoverState, toggleErrorPopoverOpen } from '../../../../state';
 import { useLocationName, useStatusByLocationOverview } from '../../../../hooks';
 import { formatDuration } from '../../../../utils/formatting';
@@ -46,22 +49,20 @@ export const getColor = (
 
 export const MetricItem = ({
   monitor,
-  medianDuration,
-  maxDuration,
-  minDuration,
-  avgDuration,
+  stats,
   data,
   onClick,
 }: {
   monitor: MonitorOverviewItem;
   data: Array<{ x: number; y: number }>;
-  medianDuration: number;
-  avgDuration: number;
-  minDuration: number;
-  maxDuration: number;
+  stats: {
+    medianDuration: number;
+    avgDuration: number;
+    minDuration: number;
+    maxDuration: number;
+  };
   onClick: (params: { id: string; configId: string; location: string; locationId: string }) => void;
 }) => {
-  const [isMouseOver, setIsMouseOver] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const isErrorPopoverOpen = useSelector(selectErrorPopoverState);
   const locationName = useLocationName(monitor);
@@ -80,24 +81,29 @@ export const MetricItem = ({
       <EuiPanel
         data-test-subj={`${monitor.name}-metric-item-${locationName}-${status}`}
         paddingSize="none"
-        onMouseOver={() => {
-          if (!isMouseOver) {
-            setIsMouseOver(true);
-          }
-        }}
         onMouseLeave={() => {
           if (isErrorPopoverOpen) {
             dispatch(toggleErrorPopoverOpen(null));
           }
-          if (isMouseOver) {
-            setIsMouseOver(false);
+        }}
+        css={css`
+          height: 100%;
+          overflow: hidden;
+          position: relative;
+
+          & .cardItemActions_hover {
+            pointer-events: none;
+            opacity: 0;
+            &:focus-within {
+              pointer-events: auto;
+              opacity: 1;
+            }
           }
-        }}
-        style={{
-          height: '100%',
-          overflow: 'hidden',
-          position: 'relative',
-        }}
+          &:hover .cardItemActions_hover {
+            pointer-events: auto;
+            opacity: 1;
+          }
+        `}
         title={moment(timestamp).format('LLL')}
       >
         <Chart>
@@ -130,52 +136,19 @@ export const MetricItem = ({
                 {
                   title: monitor.name,
                   subtitle: locationName,
-                  value: medianDuration,
+                  value: stats.medianDuration,
                   trendShape: MetricTrendShape.Area,
                   trend: data,
-                  extra: (
-                    <EuiFlexGroup
-                      alignItems="center"
-                      gutterSize="xs"
-                      justifyContent="flexEnd"
-                      // empty title to prevent default title from showing
-                      title=""
-                      component="span"
-                    >
-                      <EuiFlexItem grow={false} component="span">
-                        {i18n.translate('xpack.synthetics.overview.duration.label', {
-                          defaultMessage: 'Duration',
-                        })}
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false} component="span">
-                        <EuiIconTip
-                          title={i18n.translate('xpack.synthetics.overview.duration.description', {
-                            defaultMessage: 'Median duration of last 50 checks',
-                          })}
-                          content={i18n.translate(
-                            'xpack.synthetics.overview.duration.description.values',
-                            {
-                              defaultMessage: 'Avg: {avg}, Min: {min}, Max: {max}',
-                              values: {
-                                avg: formatDuration(avgDuration, { noSpace: true }),
-                                min: formatDuration(minDuration, { noSpace: true }),
-                                max: formatDuration(maxDuration, { noSpace: true }),
-                              },
-                            }
-                          )}
-                          position="top"
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  ),
+                  extra: <MetricItemExtra stats={stats} />,
                   valueFormatter: (d: number) => formatDuration(d),
                   color: getColor(theme, monitor.isEnabled, status),
+                  body: <MetricItemBody monitor={monitor} />,
                 },
               ],
             ]}
           />
         </Chart>
-        {(isMouseOver || isPopoverOpen) && (
+        <div className={isPopoverOpen ? '' : 'cardItemActions_hover'}>
           <ActionsPopover
             monitor={monitor}
             isPopoverOpen={isPopoverOpen}
@@ -183,7 +156,7 @@ export const MetricItem = ({
             position="relative"
             locationId={monitor.location.id}
           />
-        )}
+        </div>
         {configIdByLocation && (
           <MetricItemIcon
             monitor={monitor}

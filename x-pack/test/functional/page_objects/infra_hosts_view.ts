@@ -29,21 +29,17 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('hostsViewTableAddFilterButton');
     },
 
-    async clickCloseFlyoutButton() {
-      return testSubjects.click('euiFlyoutCloseButton');
-    },
-
     async getBetaBadgeExists() {
       return testSubjects.exists('infra-beta-badge');
     },
 
     // Inventory UI
     async clickTryHostViewLink() {
-      return await testSubjects.click('inventory-hostsView-link');
+      return testSubjects.click('inventory-hostsView-link');
     },
 
     async clickTryHostViewBadge() {
-      return await testSubjects.click('inventory-hostsView-link-badge');
+      return testSubjects.click('inventory-hostsView-link-badge');
     },
 
     // Table
@@ -133,8 +129,6 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       const button = await element.findByTestSubject('embeddablePanelToggleMenuIcon');
       await button.click();
       await testSubjects.existOrFail('embeddablePanelAction-openInLens');
-      // forces the modal to close
-      await element.click();
     },
 
     // KPIs
@@ -253,17 +247,17 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     // Sorting
-    getCpuUsageHeader() {
-      return testSubjects.find('tableHeaderCell_cpu_3');
+    getMemoryHeader() {
+      return testSubjects.find('tableHeaderCell_memory_5');
     },
 
     getTitleHeader() {
       return testSubjects.find('tableHeaderCell_title_2');
     },
 
-    async sortByCpuUsage() {
-      const diskLatency = await this.getCpuUsageHeader();
-      const button = await testSubjects.findDescendant('tableHeaderSortButton', diskLatency);
+    async sortByMemoryUsage() {
+      const memory = await this.getMemoryHeader();
+      const button = await testSubjects.findDescendant('tableHeaderSortButton', memory);
       await button.click();
     },
 

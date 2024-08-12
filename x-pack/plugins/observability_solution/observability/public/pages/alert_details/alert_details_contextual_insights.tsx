@@ -60,11 +60,13 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
         The following contextual information is available to help you understand the alert:
         ${obsAlertContext}
 
+        The user already know the alert reason so do not repeat this: ${alert.formatted.reason}
         Be brief and to the point.
         Do not list the alert details as bullet points.
-        Refer to the contextual information provided above when relevant.
         Pay special attention to regressions in downstream dependencies like big increases or decreases in throughput, latency or failure rate
         Suggest reasons why the alert happened and what may have contributed to it.
+        Present the primary insights in a single paragraph at the top in bold text. Add additional paragraphs with more detailed insights if needed but keep them brief.
+        If the alert is a false positive, mention that in the first paragraph.
         `
         ),
       });
