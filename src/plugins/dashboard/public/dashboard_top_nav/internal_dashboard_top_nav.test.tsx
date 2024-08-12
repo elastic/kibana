@@ -58,8 +58,6 @@ describe('Internal dashboard top nav', () => {
       </DashboardAPIContext.Provider>
     );
 
-    expect(
-      component.getByText('Elastic manages this dashboard. Duplicate it to make changes.')
-    ).toBeInTheDocument();
+    expect(component.getByText('Managed')).toBeInTheDocument();
   });
 });

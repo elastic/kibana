@@ -339,7 +339,7 @@ export function InternalDashboardTopNav({
               isOpen={isPopoverOpen}
               closePopover={() => setIsPopoverOpen(false)}
               className="eui-hideFor--s eui-hideFor--xs"
-              panelStyle={{ maxWidth: 300 }}
+              panelStyle={{ maxWidth: 350 }}
             >
               <EuiFlexItem>
                 <EuiText size="s" aria-label={dashboardManagedBadge.getText()}>
@@ -348,7 +348,8 @@ export function InternalDashboardTopNav({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  size="s"
+                  flush="both"
+                  size="xs"
                   aria-label={dashboardManagedBadge.getDuplicateText()}
                   onClick={() => {
                     dashboard.runInteractiveSave(viewMode);
