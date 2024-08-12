@@ -16,7 +16,7 @@ import { useKibana } from '../../../common/hooks/use_kibana';
 import type { FindingsBaseEsQuery } from '../../../common/types';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
 import {
-  CSP_LATEST_FINDINGS_DATA_VIEW,
+  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
   LATEST_FINDINGS_RETENTION_POLICY,
 } from '../../../../common/constants';
 import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
@@ -48,7 +48,7 @@ export const getFindingsQuery = (
   const mutedRulesFilterQuery = buildMutedRulesFilter(rulesStates);
 
   return {
-    index: CSP_LATEST_FINDINGS_DATA_VIEW,
+    index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
     sort: getMultiFieldsSort(sort),
     size: MAX_FINDINGS_TO_LOAD,
     aggs: getFindingsCountAggQuery(),
