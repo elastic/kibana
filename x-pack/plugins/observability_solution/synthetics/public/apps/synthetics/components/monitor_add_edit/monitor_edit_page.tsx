@@ -45,10 +45,7 @@ export const MonitorEditPage: React.FC = () => {
 
   const { data, loading, error } = useFetcher(() => {
     return getDecryptedMonitorAPI({ id: monitorId });
-    // FIXME: Dario thinks there is a better way to do this but
-    // he's getting tired and maybe the Synthetics folks can fix it
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [monitorId]);
 
   const monitorNotFoundError = useMonitorNotFound(
     error as IHttpFetchError<ResponseErrorBody>,

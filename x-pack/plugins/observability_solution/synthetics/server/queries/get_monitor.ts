@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { syntheticsMonitorType } from '../../common/types/saved_objects';
 import {
@@ -23,7 +23,7 @@ export const getSyntheticsMonitor = async ({
   monitorId: string;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   savedObjectsClient: SavedObjectsClientContract;
-}): Promise<SyntheticsMonitor> => {
+}): Promise<SavedObject<SyntheticsMonitor>> => {
   try {
     const encryptedMonitor = await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
       syntheticsMonitorType,
@@ -38,8 +38,7 @@ export const getSyntheticsMonitor = async ({
           namespace: encryptedMonitor.namespaces?.[0],
         }
       );
-    const { attributes } = normalizeSecrets(decryptedMonitor);
-    return attributes;
+    return normalizeSecrets(decryptedMonitor);
   } catch (e) {
     throw e;
   }
