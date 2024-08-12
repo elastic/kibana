@@ -364,10 +364,12 @@ describe('requests_utils', () => {
         ...getMockModel(content),
         getPositionAt: () => ({ lineNumber: 1 }),
       } as unknown as monaco.editor.ITextModel;
-      const index = 0;
-      const parsedRequests = [parsedRequest];
 
-      const result = getRequestEndLineNumber(parsedRequest, model, index, parsedRequests);
+      const result = getRequestEndLineNumber({
+        parsedRequest,
+        model,
+        startLineNumber: 1,
+      });
       expect(result).toEqual(2);
     });
 
@@ -384,10 +386,12 @@ describe('requests_utils', () => {
         ...getMockModel(content),
         getPositionAt: () => ({ lineNumber: 1 }),
       } as unknown as monaco.editor.ITextModel;
-      const index = 0;
-      const parsedRequests = [parsedRequest];
 
-      const result = getRequestEndLineNumber(parsedRequest, model, index, parsedRequests);
+      const result = getRequestEndLineNumber({
+        parsedRequest,
+        model,
+        startLineNumber: 1,
+      });
       expect(result).toEqual(3);
     });
   });

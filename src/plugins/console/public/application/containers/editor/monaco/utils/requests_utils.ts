@@ -83,22 +83,27 @@ export const getRequestStartLineNumber = (
  * If there is no end offset (the parser was not able to parse this request completely),
  * then the last non-empty line is returned or the line before the next request.
  */
-export const getRequestEndLineNumber = (
-  parsedRequest: ParsedRequest,
-  model: monaco.editor.ITextModel,
-  index: number,
-  parsedRequests: ParsedRequest[]
-): number => {
+export const getRequestEndLineNumber = ({
+  parsedRequest,
+  nextRequest,
+  model,
+  startLineNumber,
+}: {
+  parsedRequest: ParsedRequest;
+  nextRequest?: ParsedRequest;
+  model: monaco.editor.ITextModel;
+  startLineNumber: number;
+}): number => {
   let endLineNumber: number;
   if (parsedRequest.endOffset) {
     // if the parser set an end offset for this request, then find the line number for it
     endLineNumber = model.getPositionAt(parsedRequest.endOffset).lineNumber;
   } else {
     // if no end offset, try to find the line before the next request starts
-    const nextRequest = parsedRequests.at(index + 1);
     if (nextRequest) {
       const nextRequestStartLine = model.getPositionAt(nextRequest.startOffset).lineNumber;
-      endLineNumber = nextRequestStartLine - 1;
+      endLineNumber =
+        nextRequestStartLine > startLineNumber ? nextRequestStartLine - 1 : startLineNumber;
     } else {
       // if there is no next request, find the end of the text or the line that starts with a method
       let nextLineNumber = model.getPositionAt(parsedRequest.startOffset).lineNumber + 1;
@@ -113,7 +118,7 @@ export const getRequestEndLineNumber = (
       }
       // nextLineNumber is now either the line with a method or 1 line after the end of the text
       // set the end line for this request to the line before nextLineNumber
-      endLineNumber = nextLineNumber - 1;
+      endLineNumber = nextLineNumber > startLineNumber ? nextLineNumber - 1 : startLineNumber;
     }
   }
   // if the end line is empty, go up to find the first non-empty line
@@ -192,7 +197,7 @@ export const getRequestFromEditor = (
   startLineNumber: number,
   endLineNumber: number
 ): EditorRequest | null => {
-  const methodUrlLine = model.getLineContent(startLineNumber);
+  const methodUrlLine = model.getLineContent(startLineNumber).trim();
   if (!methodUrlLine) {
     return null;
   }
@@ -220,10 +225,6 @@ export const getRequestFromEditor = (
 
 export const containsComments = (text: string) => {
   return text.indexOf('//') >= 0 || text.indexOf('/*') >= 0;
-};
-
-const cleanUpWhitespaces = (line: string): string => {
-  return line.trim().replaceAll(/\s+/g, ' ');
 };
 
 export const indentData = (dataString: string): string => {
@@ -286,4 +287,8 @@ const splitDataIntoJsonObjects = (dataString: string): string[] => {
     });
   }
   return [dataString];
+};
+
+const cleanUpWhitespaces = (line: string): string => {
+  return line.trim().replaceAll(/\s+/g, ' ');
 };

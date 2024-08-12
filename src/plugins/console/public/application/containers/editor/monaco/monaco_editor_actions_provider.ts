@@ -177,12 +177,12 @@ export class MonacoEditorActionsProvider {
     const selectedRequests: AdjustedParsedRequest[] = [];
     for (const [index, parsedRequest] of parsedRequests.entries()) {
       const requestStartLineNumber = getRequestStartLineNumber(parsedRequest, model);
-      const requestEndLineNumber = getRequestEndLineNumber(
+      const requestEndLineNumber = getRequestEndLineNumber({
         parsedRequest,
+        nextRequest: parsedRequests.at(index + 1),
         model,
-        index,
-        parsedRequests
-      );
+        startLineNumber,
+      });
       if (requestStartLineNumber > endLineNumber) {
         // request is past the selection, no need to check further requests
         break;
@@ -409,9 +409,8 @@ export class MonacoEditorActionsProvider {
       return null;
     }
 
-    // if the current request doesn't have a method, the request is not valid
-    // and shouldn't have an autocomplete type
-    if (!currentRequest) {
+    // if no end offset, the request is invalid, no autocomplete
+    if (!currentRequest.endOffset) {
       return null;
     }
 
