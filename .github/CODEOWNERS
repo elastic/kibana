@@ -1277,6 +1277,9 @@ x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /x-pack/test_serverless/functional/test_suites/common/home_page/  @elastic/appex-qa
 /x-pack/test_serverless/**/services/ @elastic/appex-qa
 /packages/kbn-es/src/stateful_resources/roles.yml @elastic/appex-qa
+x-pack/test/api_integration/deployment_agnostic/default_configs/ @elastic/appex-qa
+x-pack/test/api_integration/deployment_agnostic/services/ @elastic/appex-qa
+x-pack/test/**/deployment_agnostic/ @elastic/appex-qa #temporarily to monitor tests migration
 
 # Core
 /config/ @elastic/kibana-core
