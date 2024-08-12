@@ -9,6 +9,7 @@
 export { formatRequest, parseEndpoint } from '@kbn/server-route-repository-utils';
 export { createServerRouteFactory } from './src/create_server_route_factory';
 export { decodeRequestParams } from './src/decode_request_params';
+export { formatParams } from './src/format_params';
 export { routeValidationObject } from './src/route_validation_object';
 export { registerRoutes } from './src/register_routes';
 
@@ -24,4 +25,5 @@ export type {
   RouteState,
   DefaultRouteCreateOptions,
   DefaultRouteHandlerResources,
+  IoTsParamsObject,
 } from '@kbn/server-route-repository-utils';

@@ -10,7 +10,11 @@ import * as t from 'io-ts';
 import { Logger, KibanaRequest, KibanaResponseFactory, RouteRegistrar } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import agent from 'elastic-apm-node';
-import { ServerRouteRepository } from '@kbn/server-route-repository';
+import {
+  IoTsParamsObject,
+  ServerRouteRepository,
+  formatParams,
+} from '@kbn/server-route-repository';
 import { merge } from 'lodash';
 import {
   decodeRequestParams,
@@ -94,10 +98,10 @@ export function registerRoutes({
       inspectableEsQueriesMap.set(request, []);
 
       try {
-        const runtimeType = params ? mergeRt(params, inspectRt) : inspectRt;
+        const runtimeType = params ? mergeRt(params as IoTsParamsObject, inspectRt) : inspectRt;
 
         const validatedParams = decodeRequestParams(
-          pickKeys(request, 'params', 'body', 'query'),
+          formatParams(pickKeys(request, 'params', 'body', 'query')),
           runtimeType
         );
 

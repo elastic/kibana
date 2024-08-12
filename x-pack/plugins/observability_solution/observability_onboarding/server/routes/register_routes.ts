@@ -9,8 +9,10 @@ import Boom from '@hapi/boom';
 import type { IKibanaResponse } from '@kbn/core/server';
 import { CoreSetup, Logger, RouteRegistrar } from '@kbn/core/server';
 import {
+  IoTsParamsObject,
   ServerRouteRepository,
   decodeRequestParams,
+  formatParams,
   parseEndpoint,
   routeValidationObject,
 } from '@kbn/server-route-repository';
@@ -58,12 +60,12 @@ export function registerRoutes({
       async (context, request, response) => {
         try {
           const decodedParams = decodeRequestParams(
-            {
+            formatParams({
               params: request.params,
               body: request.body,
               query: request.query,
-            },
-            params ?? t.strict({})
+            }),
+            (params as IoTsParamsObject) ?? t.strict({})
           );
 
           const data = (await handler({

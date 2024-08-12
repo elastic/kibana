@@ -14,7 +14,9 @@ import {
   RuleRegistryPluginSetupContract,
 } from '@kbn/rule-registry-plugin/server';
 import {
+  IoTsParamsObject,
   decodeRequestParams,
+  formatParams,
   parseEndpoint,
   routeValidationObject,
 } from '@kbn/server-route-repository';
@@ -65,12 +67,12 @@ export function registerRoutes({ config, repository, core, logger, dependencies 
       async (context, request, response) => {
         try {
           const decodedParams = decodeRequestParams(
-            {
+            formatParams({
               params: request.params,
               body: request.body,
               query: request.query,
-            },
-            params ?? t.strict({})
+            }),
+            (params as IoTsParamsObject) ?? t.strict({})
           );
 
           const data = await handler({
