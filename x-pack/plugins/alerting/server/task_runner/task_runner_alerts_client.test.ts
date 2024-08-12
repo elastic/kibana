@@ -65,7 +65,7 @@ import * as RuleRunMetricsStoreModule from '../lib/rule_run_metrics_store';
 import { legacyAlertsClientMock } from '../alerts_client/legacy_alerts_client.mock';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
 import { AlertsService } from '../alerts_service';
-import { ReplaySubject } from 'rxjs';
+import { of, ReplaySubject } from 'rxjs';
 import { IAlertsClient } from '../alerts_client/types';
 import { getDataStreamAdapter } from '../alerts_service/lib/data_stream_adapter';
 import {
@@ -122,6 +122,7 @@ const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const alertingEventLogger = alertingEventLoggerMock.create();
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+const elasticsearchAndSOAvailability$ = of(true);
 
 const ruleTypeWithAlerts: jest.Mocked<UntypedNormalizedRuleType> = {
   ...ruleType,
@@ -387,6 +388,7 @@ describe('Task Runner', () => {
           kibanaVersion: '8.8.0',
           elasticsearchClientPromise: Promise.resolve(clusterClient),
           dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts }),
+          elasticsearchAndSOAvailability$,
         });
         const spy = jest
           .spyOn(alertsService, 'getContextInitializationPromise')
@@ -516,6 +518,7 @@ describe('Task Runner', () => {
           kibanaVersion: '8.8.0',
           elasticsearchClientPromise: Promise.resolve(clusterClient),
           dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts }),
+          elasticsearchAndSOAvailability$,
         });
         const spy = jest
           .spyOn(alertsService, 'getContextInitializationPromise')

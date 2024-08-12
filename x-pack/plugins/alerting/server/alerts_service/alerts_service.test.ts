@@ -1798,7 +1798,7 @@ describe('Alerts Service', () => {
           expect(logger.info).toHaveBeenCalledWith(
             `Skipped retrying common resource initialization because it is already being retried.`
           );
-        }, 10000);
+        });
 
         test('should retry initializing context specific resources if context specific resource initialization failed', async () => {
           clusterClient.indices.simulateTemplate.mockImplementationOnce(async () => ({
