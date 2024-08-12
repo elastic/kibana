@@ -7,8 +7,19 @@
 
 import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
 import { getListArrayMock } from '../../../../../../common/detection_engine/schemas/types/lists.mock';
-import { PrebuiltRuleAsset } from './prebuilt_rule_asset';
+import { PrebuiltRuleAsset, TypeSpecificFields } from './prebuilt_rule_asset';
 import { getPrebuiltRuleMock, getPrebuiltThreatMatchRuleMock } from './prebuilt_rule_asset.mock';
+import { TypeSpecificCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+
+describe('TypeSpecificFields', () => {
+  it.only('contains all the rule types that are supported by the prebuilt rule asset', () => {
+    const createPropsTypes = TypeSpecificCreateProps.options.map(option => option.shape.type.value);
+    const fieldsTypes = TypeSpecificFields.options.map(option => option.shape.type.value);
+
+    expect(createPropsTypes).toHaveLength(fieldsTypes.length);
+    expect(new Set(createPropsTypes)).toEqual(new Set(fieldsTypes));
+  });
+});
 
 describe('Prebuilt rule asset schema', () => {
   test('empty objects do not validate', () => {
