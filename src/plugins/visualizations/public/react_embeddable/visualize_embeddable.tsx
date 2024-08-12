@@ -76,7 +76,6 @@ export const getVisualizeEmbeddableFactory: (deps: {
       state
     );
     // if it is provided, start the dynamic actions manager
-    console.log('dynamicActionsApi', dynamicActionsApi);
     const maybeStopDynamicActions = dynamicActionsApi?.startDynamicActions();
 
     const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
@@ -391,7 +390,6 @@ export const getVisualizeEmbeddableFactory: (deps: {
                         },
                       };
                     }
-                    console.log('CONTEXT', context);
                     await getUiActions().getTrigger(triggerId).exec(context);
                   }
                 },
