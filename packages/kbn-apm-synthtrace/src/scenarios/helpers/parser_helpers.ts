@@ -6,18 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { parseStringToBoolean } from './parser_helpers';
-
-export interface LogsScenarioOpts {
-  isLogsDb: boolean;
-}
-
-export const parseLogsScenarioOpts = (
-  scenarioOpts: Record<string, any> | undefined
-): LogsScenarioOpts => {
-  const isLogsDb = parseStringToBoolean(scenarioOpts?.logsdb);
-
-  return {
-    isLogsDb,
-  };
-};
+export const parseStringToBoolean = (value: string): boolean => /true/i.test(value);

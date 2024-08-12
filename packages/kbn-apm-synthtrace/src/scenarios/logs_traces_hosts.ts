@@ -22,6 +22,7 @@ import { withClient } from '../lib/utils/with_client';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import logsScenarioBase from './logs_scenario_base';
 import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
+import { parseStringToBoolean } from './helpers/parser_helpers';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
@@ -64,6 +65,10 @@ const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOp
         ingestHosts,
         ingestTraces,
       } = { ...DEFAULT_SCENARIO_OPTS, ...(runOptions.scenarioOpts || {}) };
+
+      const parsedIngestHosts = parseStringToBoolean(`${ingestHosts}`);
+      const parsedIngestTraces = parseStringToBoolean(`${ingestTraces}`);
+
       const { logger } = runOptions;
 
       killIfUnknownScenarioOptions(logger, runOptions.scenarioOpts || {});
@@ -226,7 +231,7 @@ const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOp
         });
 
       return [
-        ...(ingestHosts
+        ...(parsedIngestHosts
           ? [
               withClient(
                 infraEsClient,
@@ -234,7 +239,7 @@ const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOp
               ),
             ]
           : []),
-        ...(ingestTraces
+        ...(parsedIngestTraces
           ? [
               withClient(
                 apmEsClient,
