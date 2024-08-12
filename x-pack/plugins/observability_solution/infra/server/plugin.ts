@@ -16,9 +16,9 @@ import {
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import { i18n } from '@kbn/i18n';
 import { Logger } from '@kbn/logging';
-import { alertsLocatorID } from '@kbn/observability-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { GetMetricIndicesOptions } from '@kbn/metrics-data-access-plugin/server';
+import { mapValues } from 'lodash';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { publicConfigKeys } from '../common/plugin_config_types';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
@@ -212,12 +212,22 @@ export class InfraServerPlugin
       metrics: new InfraMetricsDomain(new KibanaMetricsAdapter(framework)),
     };
 
+    const libsPlugins = mapValues(plugins, (value, key) => {
+      return {
+        setup: value,
+        start: () =>
+          core.getStartServices().then((services) => {
+            const [, pluginsStartContracts] = services;
+            return pluginsStartContracts[key as keyof InfraServerPluginStartDeps];
+          }),
+      };
+    }) as InfraBackendLibs['plugins'];
+
     this.libs = {
       configuration: this.config,
       framework,
       sources,
       sourceStatus,
-      metricsClient,
       getApmIndices,
       ...domainLibs,
       handleEsError,
@@ -227,7 +237,7 @@ export class InfraServerPlugin
       getAlertDetailsConfig: () => plugins.observability.getAlertDetailsConfig(),
       logger: this.logger,
       basePath: core.http.basePath,
-      alertsLocator: plugins.share.url.locators.get(alertsLocatorID),
+      plugins: libsPlugins,
     };
 
     plugins.features.registerKibanaFeature(METRICS_FEATURE);

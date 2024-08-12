@@ -219,7 +219,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
         const infraMetricsClient = await getInfraMetricsClient({
           framework,
           request,
-          metricsDataAccess: libs.metricsClient,
+          metricsDataAccess: libs.plugins.metricsDataAccess.setup.client,
           requestContext,
         });
 

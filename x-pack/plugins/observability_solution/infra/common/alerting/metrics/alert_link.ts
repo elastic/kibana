@@ -6,16 +6,20 @@
  */
 
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
+import moment from 'moment';
 import { encode } from '@kbn/rison';
-import { stringify } from 'query-string';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { type InventoryItemType, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 import {
-  fifteenMinutesInMilliseconds,
-  HOST_NAME_FIELD,
-  LINK_TO_INVENTORY,
-  METRICS_EXPLORER_URL,
-} from '../../constants';
+  ASSET_DETAILS_LOCATOR_ID,
+  type AssetDetailsLocatorParams,
+  type InventoryLocatorParams,
+} from '@kbn/observability-shared-plugin/common';
+import { fifteenMinutesInMilliseconds, METRICS_EXPLORER_URL } from '../../constants';
+
+const ALERT_RULE_PARAMTERS_INVENTORY_METRIC_ID = `${ALERT_RULE_PARAMETERS}.criteria.metric`;
+export const ALERT_RULE_PARAMETERS_NODE_TYPE = `${ALERT_RULE_PARAMETERS}.nodeType`;
 
 export const flatAlertRuleParams = (params: {}, pKey = ''): Record<string, unknown[]> => {
   return Object.entries(params).reduce((acc, [key, field]) => {
@@ -32,9 +36,23 @@ export const flatAlertRuleParams = (params: {}, pKey = ''): Record<string, unkno
   }, {} as Record<string, unknown[]>);
 };
 
-export const getInventoryViewInAppUrl = (
-  fields: ParsedTechnicalFields & Record<string, any>
-): string => {
+const isAssetDetailsLocator = (
+  locator: LocatorPublic<AssetDetailsLocatorParams> | LocatorPublic<InventoryLocatorParams>
+): locator is LocatorPublic<AssetDetailsLocatorParams> => {
+  return locator.id === ASSET_DETAILS_LOCATOR_ID;
+};
+
+export const getInventoryViewInAppUrl = ({
+  fields,
+  locator,
+}: {
+  fields: ParsedTechnicalFields & Record<string, any>;
+  locator?: LocatorPublic<AssetDetailsLocatorParams> | LocatorPublic<InventoryLocatorParams>;
+}): string => {
+  if (!locator) {
+    return '';
+  }
+
   let inventoryFields = fields;
 
   /* Temporary Solution -> https://github.com/elastic/kibana/issues/137033
@@ -52,68 +70,110 @@ export const getInventoryViewInAppUrl = (
     };
   }
 
-  const nodeTypeField = `${ALERT_RULE_PARAMETERS}.nodeType`;
-  const nodeType = inventoryFields[nodeTypeField] as InventoryItemType;
-  const hostName = inventoryFields[HOST_NAME_FIELD];
+  const nodeType = inventoryFields[ALERT_RULE_PARAMETERS_NODE_TYPE][0] as InventoryItemType;
 
-  if (nodeType) {
-    if (hostName) {
-      return getLinkToHostDetails({ hostName, timestamp: inventoryFields[TIMESTAMP] });
-    }
-    const linkToParams = {
-      nodeType: inventoryFields[nodeTypeField][0],
-      timestamp: Date.parse(inventoryFields[TIMESTAMP]),
-      customMetric: '',
-      metric: '',
-    };
-
-    // We always pick the first criteria metric for the URL
-    const criteriaMetric = inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.metric`][0];
-    if (criteriaMetric === 'custom') {
-      const criteriaCustomMetricId =
-        inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.customMetric.id`][0];
-      const criteriaCustomMetricAggregation =
-        inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.customMetric.aggregation`][0];
-      const criteriaCustomMetricField =
-        inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.customMetric.field`][0];
-
-      const customMetric = encode({
-        id: criteriaCustomMetricId,
-        type: 'custom',
-        field: criteriaCustomMetricField,
-        aggregation: criteriaCustomMetricAggregation,
-      });
-      linkToParams.customMetric = customMetric;
-      linkToParams.metric = customMetric;
-    } else {
-      linkToParams.metric = encode({ type: criteriaMetric });
-    }
-    return `${LINK_TO_INVENTORY}?${stringify(linkToParams)}`;
+  if (!nodeType) {
+    return '';
   }
 
-  return LINK_TO_INVENTORY;
-};
+  if (isAssetDetailsLocator(locator)) {
+    const assetIdField = findInventoryModel(nodeType).fields.id;
+    const assetId = inventoryFields[assetIdField];
+    const alertRuleMetric = inventoryFields[ALERT_RULE_PARAMTERS_INVENTORY_METRIC_ID][0];
+    return getLinkToAssetDetails({
+      assetId,
+      assetType: nodeType,
+      timestamp: inventoryFields[TIMESTAMP],
+      alertRuleMetric,
+      assetDetailsLocator: locator,
+    });
+  }
 
-export const getMetricsViewInAppUrl = (fields: ParsedTechnicalFields & Record<string, any>) => {
-  const hostName = fields[HOST_NAME_FIELD];
-  const timestamp = fields[TIMESTAMP];
-
-  return hostName ? getLinkToHostDetails({ hostName, timestamp }) : METRICS_EXPLORER_URL;
-};
-
-export function getLinkToHostDetails({
-  hostName,
-  timestamp,
-}: {
-  hostName: string;
-  timestamp: string;
-}): string {
-  const queryParams = {
-    from: Date.parse(timestamp),
-    to: Date.parse(timestamp) + fifteenMinutesInMilliseconds,
+  const linkToParams = {
+    nodeType,
+    timestamp: Date.parse(inventoryFields[TIMESTAMP]),
+    customMetric: '',
+    metric: '',
   };
 
-  const encodedParams = encode(stringify(queryParams));
+  // We always pick the first criteria metric for the URL
+  const criteriaMetric = inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.metric`][0];
+  if (criteriaMetric === 'custom') {
+    const criteriaCustomMetricId =
+      inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.customMetric.id`][0];
+    const criteriaCustomMetricAggregation =
+      inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.customMetric.aggregation`][0];
+    const criteriaCustomMetricField =
+      inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.customMetric.field`][0];
 
-  return `/app/metrics/link-to/host-detail/${hostName}?${encodedParams}`;
+    const customMetric = encode({
+      id: criteriaCustomMetricId,
+      type: 'custom',
+      field: criteriaCustomMetricField,
+      aggregation: criteriaCustomMetricAggregation,
+    });
+    linkToParams.customMetric = customMetric;
+    linkToParams.metric = customMetric;
+  } else {
+    linkToParams.metric = encode({ type: criteriaMetric });
+  }
+
+  return locator.getRedirectUrl({
+    ...linkToParams,
+  });
+};
+
+export const getMetricsViewInAppUrl = ({
+  fields,
+  nodeType,
+  assetDetailsLocator,
+}: {
+  fields: ParsedTechnicalFields & Record<string, any>;
+  nodeType?: InventoryItemType;
+  assetDetailsLocator?: LocatorPublic<AssetDetailsLocatorParams>;
+}) => {
+  if (assetDetailsLocator && nodeType) {
+    const assetId = fields[findInventoryModel(nodeType).fields.id];
+    const timestamp = fields[TIMESTAMP];
+
+    return getLinkToAssetDetails({
+      assetId,
+      assetType: nodeType,
+      timestamp,
+      assetDetailsLocator,
+    });
+  }
+
+  return METRICS_EXPLORER_URL;
+};
+
+export function getLinkToAssetDetails({
+  assetId,
+  assetType,
+  timestamp,
+  alertRuleMetric,
+  assetDetailsLocator,
+}: {
+  assetId: string;
+  assetType: InventoryItemType;
+  timestamp: string;
+  alertRuleMetric?: string;
+  assetDetailsLocator?: LocatorPublic<AssetDetailsLocatorParams>;
+}): string {
+  if (!assetDetailsLocator) {
+    return '';
+  }
+  const link = assetDetailsLocator.getRedirectUrl({
+    assetId,
+    assetType,
+    assetDetails: {
+      dateRange: {
+        from: timestamp,
+        to: moment(timestamp).add(fifteenMinutesInMilliseconds, 'ms').toISOString(),
+      },
+      ...(alertRuleMetric ? { incomingAlertMetric: alertRuleMetric } : undefined),
+    },
+  });
+
+  return link;
 }
