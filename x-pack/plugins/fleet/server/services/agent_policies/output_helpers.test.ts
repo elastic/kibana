@@ -13,7 +13,7 @@ import { appContextService } from '..';
 import { outputService } from '../output';
 
 import { validateOutputForPolicy } from '.';
-import { validateOutputForPackagePolicy } from './outputs_helpers';
+import { validateAgentPolicyOutputForIntegration } from './outputs_helpers';
 
 jest.mock('../app_context');
 jest.mock('../output');
@@ -254,14 +254,14 @@ describe('validateOutputForPolicy', () => {
   });
 });
 
-describe('validateOutputForPackagePolicy', () => {
+describe('validateAgentPolicyOutputForIntegration', () => {
   it('should not allow fleet_server integration to be added or edited to a policy using a logstash output', async () => {
     mockHasLicence(true);
     mockedOutputService.get.mockResolvedValue({
       type: 'logstash',
     } as any);
     await expect(
-      validateOutputForPackagePolicy(
+      validateAgentPolicyOutputForIntegration(
         savedObjectsClientMock.create(),
         {
           name: 'Agent policy',
@@ -274,7 +274,7 @@ describe('validateOutputForPackagePolicy', () => {
       'Integration "fleet_server" cannot be added to agent policy "Agent policy" because it uses output type "logstash".'
     );
     await expect(
-      validateOutputForPackagePolicy(
+      validateAgentPolicyOutputForIntegration(
         savedObjectsClientMock.create(),
         {
           name: 'Agent policy',
@@ -295,7 +295,7 @@ describe('validateOutputForPackagePolicy', () => {
       type: 'kafka',
     } as any);
     await expect(
-      validateOutputForPackagePolicy(
+      validateAgentPolicyOutputForIntegration(
         savedObjectsClientMock.create(),
         {
           name: 'Agent policy',
@@ -308,7 +308,7 @@ describe('validateOutputForPackagePolicy', () => {
       'Integration "apm" cannot be added to agent policy "Agent policy" because it uses output type "kafka".'
     );
     await expect(
-      validateOutputForPackagePolicy(
+      validateAgentPolicyOutputForIntegration(
         savedObjectsClientMock.create(),
         {
           name: 'Agent policy',
@@ -330,7 +330,7 @@ describe('validateOutputForPackagePolicy', () => {
     } as any);
     mockedOutputService.getDefaultDataOutputId.mockResolvedValue('default');
     await expect(
-      validateOutputForPackagePolicy(
+      validateAgentPolicyOutputForIntegration(
         savedObjectsClientMock.create(),
         {
           name: 'Agent policy',
@@ -348,7 +348,7 @@ describe('validateOutputForPackagePolicy', () => {
       type: 'logstash',
     } as any);
 
-    await validateOutputForPackagePolicy(
+    await validateAgentPolicyOutputForIntegration(
       savedObjectsClientMock.create(),
       {
         name: 'Agent policy',
@@ -363,7 +363,7 @@ describe('validateOutputForPackagePolicy', () => {
       type: 'elasticsearch',
     } as any);
 
-    await validateOutputForPackagePolicy(
+    await validateAgentPolicyOutputForIntegration(
       savedObjectsClientMock.create(),
       {
         name: 'Agent policy',

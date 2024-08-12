@@ -21,10 +21,7 @@ import type {
   PackagePolicyInput,
   NewPackagePolicyInput,
 } from '../../../types';
-import { appContextService } from '../../../services';
-import { agentPolicyService, licenseService, outputService } from '../../../services';
-import { LICENCE_FOR_OUTPUT_PER_INTEGRATION } from '../../../../common/constants';
-import { getAllowedOutputTypesForIntegration } from '../../../../common/services/output_helpers';
+import { agentPolicyService } from '../../../services';
 import type { SimplifiedPackagePolicy } from '../../../../common/services/simplified_package_policy_helper';
 import { PackagePolicyRequestError } from '../../../errors';
 import type { NewPackagePolicyInputStream } from '../../../../common';
@@ -56,49 +53,6 @@ export function removeFieldsFromInputSchema(
     delete newInput.compiled_input;
     return newInput;
   });
-}
-
-const LICENCE_FOR_MULTIPLE_AGENT_POLICIES = 'enterprise';
-
-export function canUseMultipleAgentPolicies() {
-  const hasEnterpriseLicence = licenseService.hasAtLeast(LICENCE_FOR_MULTIPLE_AGENT_POLICIES);
-  const { enableReusableIntegrationPolicies } = appContextService.getExperimentalFeatures();
-
-  return {
-    canUseReusablePolicies: hasEnterpriseLicence && enableReusableIntegrationPolicies,
-    errorMessage: !hasEnterpriseLicence
-      ? 'Reusable integration policies are only available with an Enterprise license'
-      : 'Reusable integration policies are not supported',
-  };
-}
-
-export async function canUseOutputForIntegration(
-  soClient: SavedObjectsClientContract,
-  packageName: string,
-  outputId: string
-) {
-  const hasAllowedLicense = licenseService.hasAtLeast(LICENCE_FOR_OUTPUT_PER_INTEGRATION);
-  if (!hasAllowedLicense) {
-    return {
-      canUseOutputForIntegrationResult: false,
-      errorMessage: `Output per integration is only available with an ${LICENCE_FOR_OUTPUT_PER_INTEGRATION} license`,
-    };
-  }
-
-  const allowedOutputTypes = getAllowedOutputTypesForIntegration(packageName);
-  const output = await outputService.get(soClient, outputId);
-
-  if (!allowedOutputTypes.includes(output.type)) {
-    return {
-      canUseOutputForIntegrationResult: false,
-      errorMessage: `Output type "${output.type}" is not usable with package "${packageName}"`,
-    };
-  }
-
-  return {
-    canUseOutputForIntegrationResult: true,
-    errorMessage: null,
-  };
 }
 
 /**

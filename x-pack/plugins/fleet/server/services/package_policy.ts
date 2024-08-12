@@ -115,6 +115,7 @@ import { sendTelemetryEvents } from './upgrade_sender';
 import {
   handleExperimentalDatastreamFeatureOptIn,
   mapPackagePolicySavedObjectToPackagePolicy,
+  preflightCheckPackagePolicy,
 } from './package_policies';
 import { updateDatastreamExperimentalFeatures } from './epm/packages/update';
 import type {
@@ -131,7 +132,7 @@ import {
   isSecretStorageEnabled,
 } from './secrets';
 import { getPackageAssetsMap } from './epm/packages/get';
-import { validateOutputForPackagePolicy } from './agent_policies/outputs_helpers';
+import { validateAgentPolicyOutputForIntegration } from './agent_policies/outputs_helpers';
 import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy_service';
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 
@@ -212,6 +213,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     logger.debug(`Creating new package policy`);
 
     this.keepPolicyIdInSync(packagePolicy);
+    await preflightCheckPackagePolicy(soClient, packagePolicy);
 
     let enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
       'packagePolicyCreate',
@@ -228,8 +230,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       const agentPolicy = await agentPolicyService.get(soClient, policyId, true);
       agentPolicies.push(agentPolicy);
 
-      if (agentPolicy && enrichedPackagePolicy.package?.name) {
-        await validateOutputForPackagePolicy(
+      // If package policy did not set an output_id, see if the agent policy's output is compatible
+      if (!packagePolicy.output_id && agentPolicy && enrichedPackagePolicy.package?.name) {
+        await validateAgentPolicyOutputForIntegration(
           soClient,
           agentPolicy,
           enrichedPackagePolicy.package?.name
@@ -408,14 +411,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       if (!packagePolicy.id) {
         packagePolicy.id = SavedObjectsUtils.generateId();
       }
-
-      this.keepPolicyIdInSync(packagePolicy);
-
       auditLoggingService.writeCustomSoAuditLog({
         action: 'create',
         id: packagePolicy.id,
         savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
+
+      this.keepPolicyIdInSync(packagePolicy);
+      await preflightCheckPackagePolicy(soClient, packagePolicy);
     }
 
     const agentPolicyIds = new Set(packagePolicies.flatMap((pkgPolicy) => pkgPolicy.policy_ids));
@@ -471,6 +474,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           }
 
           const { pkgInfo, assetsMap } = packageInfoAndAsset;
+          validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
           inputs = pkgInfo
             ? await _compilePackagePolicyInputs(
@@ -822,6 +826,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     try {
       logger.debug(`Starting update of package policy ${id}`);
+      await preflightCheckPackagePolicy(soClient, packagePolicyUpdate);
       enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
         'packagePolicyUpdate',
         packagePolicyUpdate,
@@ -1050,6 +1055,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         const id = packagePolicyUpdate.id;
         this.keepPolicyIdInSync(packagePolicyUpdate);
         const packagePolicy = { ...packagePolicyUpdate, name: packagePolicyUpdate.name.trim() };
+        await preflightCheckPackagePolicy(soClient, packagePolicy);
         const oldPackagePolicy = oldPackagePolicies.find((p) => p.id === id);
         if (!oldPackagePolicy) {
           throw new PackagePolicyNotFoundError('Package policy not found');
@@ -2020,7 +2026,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             if (packagePolicy.package?.name) {
               const agentPolicy = await agentPolicyService.get(soClient, policyId, true);
               if (agentPolicy) {
-                await validateOutputForPackagePolicy(
+                await validateAgentPolicyOutputForIntegration(
                   soClient,
                   agentPolicy,
                   packagePolicy.package.name,

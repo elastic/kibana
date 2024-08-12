@@ -63,8 +63,6 @@ import {
 import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
 import {
-  canUseMultipleAgentPolicies,
-  canUseOutputForIntegration,
   isSimplifiedCreatePackagePolicyRequest,
   removeFieldsFromInputSchema,
   renameAgentlessAgentPolicy,
@@ -249,20 +247,6 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       throw new PackagePolicyRequestError('Either policy_id or policy_ids must be provided');
     }
 
-    const { canUseReusablePolicies, errorMessage: canUseMultipleAgentPoliciesErrorMessage } =
-      canUseMultipleAgentPolicies();
-    if ((newPolicy.policy_ids ?? []).length > 1 && !canUseReusablePolicies) {
-      throw new PackagePolicyRequestError(canUseMultipleAgentPoliciesErrorMessage);
-    }
-
-    if (newPolicy.output_id && pkg) {
-      const { canUseOutputForIntegrationResult, errorMessage: outputForIntegrationErrorMessage } =
-        await canUseOutputForIntegration(soClient, pkg.name, newPolicy.output_id);
-      if (!canUseOutputForIntegrationResult && outputForIntegrationErrorMessage) {
-        throw new PackagePolicyRequestError(outputForIntegrationErrorMessage);
-      }
-    }
-
     let newPackagePolicy: NewPackagePolicy;
     if (isSimplifiedCreatePackagePolicyRequest(newPolicy)) {
       if (!pkg) {
@@ -421,21 +405,9 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       }
     }
     newData.inputs = alignInputsAndStreams(newData.inputs);
-    const { canUseReusablePolicies, errorMessage } = canUseMultipleAgentPolicies();
-    if ((newData.policy_ids ?? []).length > 1 && !canUseReusablePolicies) {
-      throw new PackagePolicyRequestError(errorMessage);
-    }
 
     if (newData.policy_ids && newData.policy_ids.length === 0) {
       throw new PackagePolicyRequestError('At least one agent policy id must be provided');
-    }
-
-    if (newData.output_id && newData.package) {
-      const { canUseOutputForIntegrationResult, errorMessage: outputForIntegrationErrorMessage } =
-        await canUseOutputForIntegration(soClient, newData.package.name, newData.output_id);
-      if (!canUseOutputForIntegrationResult && outputForIntegrationErrorMessage) {
-        throw new PackagePolicyRequestError(outputForIntegrationErrorMessage);
-      }
     }
 
     await renameAgentlessAgentPolicy(soClient, esClient, packagePolicy, newData.name);

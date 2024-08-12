@@ -96,7 +96,7 @@ export async function validateOutputForPolicy(
   }
 }
 
-export async function validateOutputForPackagePolicy(
+export async function validateAgentPolicyOutputForIntegration(
   soClient: SavedObjectsClientContract,
   agentPolicy: AgentPolicy,
   packageName: string,
