@@ -8,7 +8,6 @@ import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { ApmDocumentType } from '../../../../../common/document_type';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -24,8 +23,6 @@ import {
   ServiceInventoryFieldName,
 } from './table/multi_signal_services_table';
 import { ServiceListItem } from '../../../../../common/service_inventory';
-import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
-import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
 import { NoEntitiesEmptyState } from './table/no_entities_empty_state';
 import { Welcome } from '../../../shared/entity_enablement/welcome_modal';
 import { useKibana } from '../../../../context/kibana_context/use_kibana';
@@ -100,15 +97,7 @@ function useServicesEntitiesDetailedStatisticsFetcher({
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const dataSourceOptions = usePreferredDataSourceAndBucketSize({
-    start,
-    end,
-    kuery,
-    type: ApmDocumentType.ServiceTransactionMetric,
-    numBuckets: 20,
-  });
-
-  const timeseriesDataFetch = useProgressiveFetcher(
+  const timeseriesDataFetch = useFetcher(
     (callApmApi) => {
       const serviceNames = services.map(({ serviceName }) => serviceName);
 
@@ -116,8 +105,7 @@ function useServicesEntitiesDetailedStatisticsFetcher({
         start &&
         end &&
         serviceNames.length > 0 &&
-        mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
-        dataSourceOptions
+        mainStatisticsStatus === FETCH_STATUS.SUCCESS
       ) {
         return callApmApi('POST /internal/apm/entities/services/detailed_statistics', {
           params: {
@@ -126,9 +114,6 @@ function useServicesEntitiesDetailedStatisticsFetcher({
               kuery,
               start,
               end,
-              documentType: dataSourceOptions.source.documentType,
-              rollupInterval: dataSourceOptions.source.rollupInterval,
-              bucketSizeInSeconds: dataSourceOptions.bucketSizeInSeconds,
             },
             body: {
               // Service name is sorted to guarantee the same order every time this API is called so the result can be cached.

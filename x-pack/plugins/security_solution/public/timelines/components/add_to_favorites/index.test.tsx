@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { mockTimelineModel, TestProviders } from '../../../common/mock';
 import { AddToFavoritesButton } from '.';
-import { TimelineStatus } from '../../../../common/api/timeline';
+import { TimelineStatusEnum } from '../../../../common/api/timeline';
 
 const mockGetState = jest.fn();
 jest.mock('react-redux', () => {
@@ -41,7 +41,7 @@ describe('AddToFavoritesButton', () => {
   it('should render favorite button enabled and unchecked', () => {
     mockGetState.mockReturnValue({
       ...mockTimelineModel,
-      status: TimelineStatus.active,
+      status: TimelineStatusEnum.active,
     });
 
     const { getByTestId, queryByTestId } = renderAddFavoritesButton();
@@ -57,7 +57,7 @@ describe('AddToFavoritesButton', () => {
   it('should render favorite button disabled for a draft timeline', () => {
     mockGetState.mockReturnValue({
       ...mockTimelineModel,
-      status: TimelineStatus.draft,
+      status: TimelineStatusEnum.draft,
     });
 
     const { getByTestId } = renderAddFavoritesButton();
@@ -68,7 +68,7 @@ describe('AddToFavoritesButton', () => {
   it('should render favorite button disabled for an immutable timeline', () => {
     mockGetState.mockReturnValue({
       ...mockTimelineModel,
-      status: TimelineStatus.immutable,
+      status: TimelineStatusEnum.immutable,
     });
 
     const { getByTestId } = renderAddFavoritesButton();
@@ -91,7 +91,7 @@ describe('AddToFavoritesButton', () => {
   it('should use id for guided tour if prop is true', () => {
     mockGetState.mockReturnValue({
       ...mockTimelineModel,
-      status: TimelineStatus.active,
+      status: TimelineStatusEnum.active,
     });
 
     const { getByTestId } = renderAddFavoritesButton(true);

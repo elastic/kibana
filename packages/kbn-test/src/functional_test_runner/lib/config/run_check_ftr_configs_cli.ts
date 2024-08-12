@@ -125,7 +125,8 @@ export async function runCheckFtrConfigsCli() {
 
       const invalid = possibleConfigs.filter((path) => !allFtrConfigs.includes(path));
       if (invalid.length) {
-        const invalidList = invalid.map((path) => Path.relative(REPO_ROOT, path)).join('\n  - ');
+        const invalidList =
+          ' - ' + invalid.map((path) => Path.relative(REPO_ROOT, path)).join('\n - ');
         log.error(
           `The following files look like FTR configs which are not listed in one of manifest files:\n${invalidList}\n
 Make sure to add your new FTR config to the correct manifest file.\n

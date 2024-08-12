@@ -126,7 +126,8 @@
     "@kbn/react-hooks",
     "@kbn/server-route-repository-utils",
     "@kbn/core-analytics-browser",
-    "@kbn/apm-types"
+    "@kbn/apm-types",
+    "@kbn/entities-schema"
   ],
   "exclude": [
     "target/**/*"

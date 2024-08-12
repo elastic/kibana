@@ -43,6 +43,7 @@ export type InventoryItemType = rt.TypeOf<typeof ItemTypeRT>;
 
 export const InventoryMetricRT = rt.keyof({
   hostSystemOverview: null,
+  hostCpuUsageTotal: null,
   hostCpuUsage: null,
   hostFilesystem: null,
   hostK8sOverview: null,
@@ -348,6 +349,7 @@ export type MetricsUIAggregation = rt.TypeOf<typeof MetricsUIAggregationRT>;
 
 export const SnapshotMetricTypeKeys = {
   count: null,
+  cpuTotal: null,
   cpu: null,
   diskLatency: null,
   diskSpaceUsage: null,

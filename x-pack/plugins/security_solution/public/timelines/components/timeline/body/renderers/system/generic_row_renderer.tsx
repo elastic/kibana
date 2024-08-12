@@ -9,7 +9,7 @@ import { get } from 'lodash/fp';
 import React from 'react';
 
 import type { RowRenderer } from '../../../../../../../common/types/timeline';
-import { RowRendererId } from '../../../../../../../common/api/timeline';
+import { RowRendererIdEnum } from '../../../../../../../common/api/timeline';
 
 import { DnsRequestEventDetails } from '../dns/dns_request_event_details';
 import { EndgameSecurityEventDetails } from '../endgame/endgame_security_event_details';
@@ -28,7 +28,7 @@ export const createGenericSystemRowRenderer = ({
   actionName: string;
   text: string;
 }): RowRenderer => ({
-  id: RowRendererId.system,
+  id: RowRendererIdEnum.system,
   isInstance: (ecs) => {
     const module: string | null | undefined = get('event.module[0]', ecs);
     const action: string | null | undefined = get('event.action[0]', ecs);
@@ -59,7 +59,7 @@ export const createEndgameProcessRowRenderer = ({
   actionName: string;
   text: string;
 }): RowRenderer => ({
-  id: RowRendererId.system_file,
+  id: RowRendererIdEnum.system_file,
   isInstance: (ecs) => {
     const action: string | null | undefined = get('event.action[0]', ecs);
     const category: string | null | undefined = get('event.category[0]', ecs);
@@ -91,7 +91,7 @@ export const createFimRowRenderer = ({
   actionName: string;
   text: string;
 }): RowRenderer => ({
-  id: RowRendererId.system_fim,
+  id: RowRendererIdEnum.system_fim,
   isInstance: (ecs) => {
     const action: string | null | undefined = get('event.action[0]', ecs);
     const category: string | null | undefined = get('event.category[0]', ecs);
@@ -132,7 +132,7 @@ export const createEndpointAlertsRowRenderer = ({
   skipRedundantProcessDetails = false,
   text,
 }: EndpointAlertCriteria): RowRenderer => ({
-  id: RowRendererId.alerts,
+  id: RowRendererIdEnum.alerts,
   isInstance: (ecs) => {
     const action: string[] | null | undefined = get('event.action', ecs);
     const category: string[] | null | undefined = get('event.category', ecs);
@@ -173,7 +173,7 @@ export const createEndpointLibraryRowRenderer = ({
   actionName: string;
   text: string;
 }): RowRenderer => ({
-  id: RowRendererId.library,
+  id: RowRendererIdEnum.library,
   isInstance: (ecs) => {
     const action: string | null | undefined = get('event.action[0]', ecs);
     const dataset: string | null | undefined = get('event.dataset[0]', ecs);
@@ -202,7 +202,7 @@ export const createGenericFileRowRenderer = ({
   actionName: string;
   text: string;
 }): RowRenderer => ({
-  id: RowRendererId.system_file,
+  id: RowRendererIdEnum.system_file,
   isInstance: (ecs) => {
     const module: string | null | undefined = get('event.module[0]', ecs);
     const action: string | null | undefined = get('event.action[0]', ecs);
@@ -233,7 +233,7 @@ export const createSocketRowRenderer = ({
   actionName: string;
   text: string;
 }): RowRenderer => ({
-  id: RowRendererId.system_socket,
+  id: RowRendererIdEnum.system_socket,
   isInstance: (ecs) => {
     const action: string | null | undefined = get('event.action[0]', ecs);
     return action != null && action.toLowerCase() === actionName;
@@ -256,7 +256,7 @@ export const createSecurityEventRowRenderer = ({
 }: {
   actionName: string;
 }): RowRenderer => ({
-  id: RowRendererId.system_security_event,
+  id: RowRendererIdEnum.system_security_event,
   isInstance: (ecs) => {
     const category: string | null | undefined = get('event.category[0]', ecs);
     const action: string | null | undefined = get('event.action[0]', ecs);
@@ -280,7 +280,7 @@ export const createSecurityEventRowRenderer = ({
 });
 
 export const createDnsRowRenderer = (): RowRenderer => ({
-  id: RowRendererId.system_dns,
+  id: RowRendererIdEnum.system_dns,
   isInstance: (ecs) => {
     const dnsQuestionType: string | null | undefined = get('dns.question.type[0]', ecs);
     const dnsQuestionName: string | null | undefined = get('dns.question.name[0]', ecs);
@@ -305,7 +305,7 @@ export const createEndpointRegistryRowRenderer = ({
   actionName: string;
   text: string;
 }): RowRenderer => ({
-  id: RowRendererId.registry,
+  id: RowRendererIdEnum.registry,
   isInstance: (ecs) => {
     const action: string | null | undefined = get('event.action[0]', ecs);
     const dataset: string | null | undefined = get('event.dataset[0]', ecs);

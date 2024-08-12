@@ -41,5 +41,6 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/test-jest-helpers",
     "@kbn/router-utils",
+    "@kbn/logs-data-access-plugin",
   ]
 }
