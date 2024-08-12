@@ -22,21 +22,22 @@ import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/a
 import type { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import {
+  createIngestPipelineSchema,
+  curatedModelsParamsSchema,
+  curatedModelsQuerySchema,
   deleteTrainedModelQuerySchema,
   getInferenceQuerySchema,
   inferTrainedModelBody,
   inferTrainedModelQuery,
   modelAndDeploymentIdSchema,
+  modelDownloadsQuery,
   modelIdSchema,
   optionalModelIdSchema,
   pipelineSimulateBody,
   putTrainedModelQuerySchema,
-  threadingParamsSchema,
+  threadingParamsBodySchema,
+  threadingParamsQuerySchema,
   updateDeploymentParamsSchema,
-  createIngestPipelineSchema,
-  modelDownloadsQuery,
-  curatedModelsParamsSchema,
-  curatedModelsQuerySchema,
 } from './schemas/inference_schema';
 import type { PipelineDefinition } from '../../common/types/trained_models';
 import { type TrainedModelConfigResponse } from '../../common/types/trained_models';
@@ -579,7 +580,8 @@ export function trainedModelsRoutes(
         validate: {
           request: {
             params: modelIdSchema,
-            body: threadingParamsSchema,
+            query: threadingParamsQuerySchema,
+            body: threadingParamsBodySchema,
           },
         },
       },
@@ -593,6 +595,7 @@ export function trainedModelsRoutes(
               {
                 method: 'POST',
                 path: `_ml/trained_models/${modelId}/deployment/_start`,
+                ...(isPopulatedObject(request.query) ? { querystring: request.query } : {}),
                 ...(isPopulatedObject(request.body) ? { body: request.body } : {}),
               }
             );
