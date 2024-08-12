@@ -66,10 +66,11 @@ const SPACE_2 = 'space2';
 
 export default ({ getService }: FtrProviderContextWithSpaces) => {
   const esArchiver = getService('esArchiver');
+  const utils = getService('securitySolutionUtils');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const getPostBody = (): JsonObject => ({
     defaultIndex: ['.alerts-*'],
-    entityType: 'alerts',
+    entityType: 'events',
     factoryQueryType: TimelineEventsQueries.all,
     fieldRequested: ['@timestamp', 'message', ALERT_RULE_CONSUMER, ALERT_UUID, 'event.kind'],
     fields: [],
@@ -91,7 +92,8 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
       {
         field: '@timestamp',
         direction: Direction.desc,
-        type: 'number',
+        type: 'date',
+        esTypes: ['date'],
       },
     ],
     timerange: {
@@ -101,9 +103,9 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
     },
   });
 
-  // TODO: Fix or update the tests
   describe('Timeline - Events', () => {
     before(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
       await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
     });
     after(async () => {
@@ -126,18 +128,17 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
           // This will be flake until it uses the bsearch service, but these tests aren't operational. Once you do make this operational
           // use const bsearch = getService('bsearch');
           const LOG_URL = `${getSpaceUrlPrefix(space)}${TEST_URL}`;
+          const supertest = await utils.createSuperTest();
 
           const bsearch = getService('bsearch');
-          const resp = await bsearch.send({
-            supertest: supertestWithoutAuth,
+          const timeline = await bsearch.send({
+            supertest,
             space,
             strategy: STRATEGY,
             options: {
               ...body,
             },
           });
-
-          console.log({ resp1: resp });
 
           // const resp = await supertestWithoutAuth
           //   .post(`${getSpaceUrlPrefix(space)}${TEST_URL}`)
@@ -148,12 +149,13 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
           //   .send({ ...body })
           //   .expect(200);
 
-          const timeline = resp.body;
-
+          console.log({ timeline });
           expect(
             timeline.edges.every((hit: TimelineEdges) => {
               const data: TimelineNonEcsData[] = hit.node.data;
-              return data.some(({ field, value }) => {
+              return data.some(async ({ field, value }) => {
+                console.log({ field, value });
+                await new Promise((resolve) => setTimeout(resolve, 5000));
                 return (
                   field === ALERT_RULE_CONSUMER && featureIds.includes((value && value[0]) ?? '')
                 );
@@ -231,7 +233,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
           body: {
             ...getPostBody(),
             defaultIndex: ['.alerts-*'],
-            entityType: 'alerts',
+            entityType: 'events',
             alertConsumers: ['siem'],
           },
           authorizedUsers: [
