@@ -838,27 +838,31 @@ components:
     Parameters:
       description: Optional parameters object
       type: object
+    PendingActionDataType:
+      type: integer
     PendingActionsSchema:
       type: object
       properties:
+        additionalProperties:
+          $ref: '#/components/schemas/PendingActionDataType'
         execute:
-          type: integer
+          $ref: '#/components/schemas/PendingActionDataType'
         get-file:
-          type: integer
+          $ref: '#/components/schemas/PendingActionDataType'
         isolate:
-          type: integer
+          $ref: '#/components/schemas/PendingActionDataType'
         kill-process:
-          type: integer
+          $ref: '#/components/schemas/PendingActionDataType'
         running-processes:
-          type: integer
+          $ref: '#/components/schemas/PendingActionDataType'
         scan:
-          type: integer
+          $ref: '#/components/schemas/PendingActionDataType'
         suspend-process:
-          type: integer
+          $ref: '#/components/schemas/PendingActionDataType'
         unisolate:
-          type: integer
+          $ref: '#/components/schemas/PendingActionDataType'
         upload:
-          type: integer
+          $ref: '#/components/schemas/PendingActionDataType'
     ProtectionUpdatesNoteResponse:
       type: object
       properties:
