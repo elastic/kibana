@@ -57,7 +57,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
           {
             title: i18n.translate(
               'xpack.observability_onboarding.autoDetectPanel.runTheCommandOnLabel',
-              { defaultMessage: 'Run the command on your host' }
+              { defaultMessage: 'Install standalone Elastic Agent on your host' }
             ),
             status: status === 'notStarted' ? 'current' : 'complete',
             children: command ? (
