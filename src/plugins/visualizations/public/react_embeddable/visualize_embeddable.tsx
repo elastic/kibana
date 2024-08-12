@@ -7,6 +7,7 @@
  */
 import { EuiEmptyPrompt, EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import { EmbeddableStart, ReactEmbeddableFactory, ViewMode } from '@kbn/embeddable-plugin/public';
@@ -33,7 +34,7 @@ import React, { useRef } from 'react';
 import { BehaviorSubject, switchMap } from 'rxjs';
 import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
 import { VIS_EVENT_TO_TRIGGER } from '../embeddable';
-import { getInspector, getUiActions } from '../services';
+import { getCapabilities, getInspector, getUiActions } from '../services';
 import { ACTION_CONVERT_TO_LENS } from '../triggers';
 import { urlFor } from '../utils/saved_visualize_utils';
 import type { SerializedVis, Vis } from '../vis';
@@ -43,13 +44,12 @@ import { saveToLibrary } from './save_to_library';
 import { deserializeState, serializeState } from './state';
 import {
   ExtraSavedObjectProperties,
-  isVisualizeSavedObjectState,
   VisualizeApi,
   VisualizeOutputState,
   VisualizeRuntimeState,
   VisualizeSerializedState,
+  isVisualizeSavedObjectState,
 } from './types';
-import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 
 export const getVisualizeEmbeddableFactory: (deps: {
   embeddableStart: EmbeddableStart;
@@ -187,7 +187,16 @@ export const getVisualizeEmbeddableFactory: (deps: {
             },
           });
         },
-        isEditingEnabled: () => viewMode$.getValue() === ViewMode.EDIT,
+        isEditingEnabled: () => {
+          if (viewMode$.getValue() !== ViewMode.EDIT) return false;
+          const readOnly = Boolean(vis$.getValue().type.disableEdit);
+          if (readOnly) return false;
+          const capabilities = getCapabilities();
+          const isByValue = !savedObjectId$.getValue();
+          if (isByValue)
+            return Boolean(capabilities.dashboard?.save && capabilities.visualize?.open);
+          else return Boolean(capabilities.visualize?.save);
+        },
         updateVis: async (visUpdates) => {
           const currentSerializedVis = vis$.getValue().serialize();
           serializedVis$.next({
@@ -376,7 +385,6 @@ export const getVisualizeEmbeddableFactory: (deps: {
                         },
                       };
                     }
-
                     await getUiActions().getTrigger(triggerId).exec(context);
                   }
                 },
