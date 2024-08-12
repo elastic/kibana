@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { NoDataPage, NoDataPageProps } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
 import { SubscriptionNotAllowed } from './subscription_not_allowed';
-import { useSubscriptionStatus } from '../common/hooks/use_subscription_status';
+import { useIsSubscriptionStatusValid } from '../common/hooks/use_subscription_status';
 import { FullSizeCenteredPage } from './full_size_centered_page';
 import { CspLoadingState } from './csp_loading_state';
 
@@ -171,7 +171,7 @@ export const CloudPosturePage = <TData, TError>({
   errorRender = defaultErrorRenderer,
   noDataRenderer = defaultNoDataRenderer,
 }: CloudPosturePageProps<TData, TError>) => {
-  const subscriptionStatus = useSubscriptionStatus();
+  const subscriptionStatus = useIsSubscriptionStatusValid();
 
   const render = () => {
     if (subscriptionStatus.isError) {

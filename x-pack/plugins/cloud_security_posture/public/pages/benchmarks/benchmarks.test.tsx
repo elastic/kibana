@@ -15,7 +15,7 @@ import { Benchmarks } from './benchmarks';
 import * as TEST_SUBJ from './test_subjects';
 import { useCspBenchmarkIntegrationsV2 } from './use_csp_benchmark_integrations';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
-import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
+import { useIsSubscriptionStatusValid } from '../../common/hooks/use_subscription_status';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 import { ERROR_STATE_TEST_SUBJECT } from './benchmarks_table';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
@@ -45,7 +45,7 @@ describe('<Benchmarks />', () => {
       })
     );
 
-    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+    (useIsSubscriptionStatusValid as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: true,

@@ -14,7 +14,7 @@ import {
 } from '../../../common/constants';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useDataView } from '../../common/api/use_data_view';
-import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
+import { useIsSubscriptionStatusValid } from '../../common/hooks/use_subscription_status';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
@@ -40,7 +40,7 @@ const chance = new Chance();
 beforeEach(() => {
   jest.restoreAllMocks();
 
-  (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+  (useIsSubscriptionStatusValid as jest.Mock).mockImplementation(() =>
     createReactQueryResponse({
       status: 'success',
       data: true,

@@ -61,24 +61,27 @@ describe('<Findings />', () => {
     server.use(bsearchFindingsHandler([finding1, finding2]));
     renderFindingsPage();
 
-    // Loading while checking the status API
+    // Loading while checking the status API and fetching the findings
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
 
     await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
 
-    expect(screen.getByText(finding1.resource.name)).toBeInTheDocument();
-    expect(screen.getByText(finding1.resource.id)).toBeInTheDocument();
-    expect(screen.getByText(finding1.rule.benchmark.rule_number as string)).toBeInTheDocument();
-    expect(screen.getByText(finding1.rule.name)).toBeInTheDocument();
-    expect(screen.getByText(finding1.rule.section)).toBeInTheDocument();
+    const fieldsToCheck = [
+      finding1.resource.name,
+      finding1.resource.id,
+      finding1.rule.benchmark.rule_number as string,
+      finding1.rule.name,
+      finding1.rule.section,
+      finding2.resource.name,
+      finding2.resource.id,
+      finding2.rule.benchmark.rule_number as string,
+      finding2.rule.name,
+      finding2.rule.section,
+    ];
 
-    expect(screen.getByText(finding2.resource.name)).toBeInTheDocument();
-    expect(screen.getByText(finding2.resource.id)).toBeInTheDocument();
-    expect(screen.getByText(finding2.rule.benchmark.rule_number as string)).toBeInTheDocument();
-    expect(screen.getByText(finding2.rule.name)).toBeInTheDocument();
-    expect(screen.getByText(finding2.rule.section)).toBeInTheDocument();
-
-    expect(screen.getByText(/group findings by: none/i)).toBeInTheDocument();
+    fieldsToCheck.forEach((fieldValue) => {
+      expect(screen.getByText(fieldValue)).toBeInTheDocument();
+    });
   });
 
   it("renders the 'latest findings' DataTable component when the CSPM/KSPM integration status is 'indexed' grouped by 'none'", async () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useSubscriptionStatus } from '../common/hooks/use_subscription_status';
+import { useIsSubscriptionStatusValid } from '../common/hooks/use_subscription_status';
 import Chance from 'chance';
 import {
   DEFAULT_NO_DATA_TEST_SUBJECT,
@@ -36,7 +36,7 @@ describe('<CloudPosturePage />', () => {
   beforeEach(() => {
     jest.resetAllMocks();
 
-    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+    (useIsSubscriptionStatusValid as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: true,
@@ -73,7 +73,7 @@ describe('<CloudPosturePage />', () => {
   };
 
   it('renders with license url locator', () => {
-    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+    (useIsSubscriptionStatusValid as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: false,
@@ -88,7 +88,7 @@ describe('<CloudPosturePage />', () => {
   });
 
   it('renders no license url locator', () => {
-    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+    (useIsSubscriptionStatusValid as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: false,
@@ -113,7 +113,7 @@ describe('<CloudPosturePage />', () => {
   });
 
   it('renders default loading state when the subscription query is loading', () => {
-    (useSubscriptionStatus as jest.Mock).mockImplementation(
+    (useIsSubscriptionStatusValid as jest.Mock).mockImplementation(
       () =>
         createReactQueryResponse({
           status: 'loading',
@@ -131,7 +131,7 @@ describe('<CloudPosturePage />', () => {
   });
 
   it('renders default error state when the subscription query has an error', () => {
-    (useSubscriptionStatus as jest.Mock).mockImplementation(
+    (useIsSubscriptionStatusValid as jest.Mock).mockImplementation(
       () =>
         createReactQueryResponse({
           status: 'error',
@@ -150,7 +150,7 @@ describe('<CloudPosturePage />', () => {
   });
 
   it('renders subscription not allowed prompt if subscription is not installed', () => {
-    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+    (useIsSubscriptionStatusValid as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: false,
