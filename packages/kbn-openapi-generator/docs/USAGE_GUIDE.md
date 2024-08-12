@@ -4,6 +4,8 @@ OpenAPI code generator (`kbn-openapi-generator`) could be used to generate runti
 
 Any OpenAPI spec files should conform to [OpenAPI Specification 3.0](https://swagger.io/specification/v3/). OpenAPI Generator supports a subset of the specification.
 
+_For general information and getting started guide check `README` in the root of this package._
+
 ### How to organize files with OpenAPI specs?
 
 You have quite a lot of freedom on organizing your OpenAPI specs and code generator supports any valid OpenAPI. Though we recommend to follow rules derived from using OpenAPI specs and code generation in Rule Management team
