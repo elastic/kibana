@@ -43,11 +43,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should show the "Convert to Lens" menu item', async () => {
-      expect(await panelActions.canConvertToLensByTitle('Heatmap - With Y-Axis only')).to.eql(true);
+      expect(await panelActions.canConvertToLensByTitle('Heatmap - With X-Axis only')).to.eql(true);
     });
 
     it('should convert to Lens', async () => {
-      await panelActions.convertToLensByTitle('Heatmap - With Y-Axis only');
+      await panelActions.convertToLensByTitle('Heatmap - With X-Axis only');
       await lens.waitForVisualization('heatmapChart');
       await lens.enableEchDebugState();
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
