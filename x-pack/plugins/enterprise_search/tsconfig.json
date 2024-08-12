@@ -81,6 +81,7 @@
     "@kbn/core-chrome-browser",
     "@kbn/navigation-plugin",
     "@kbn/search-homepage",
-    "@kbn/security-plugin-types-common"
+    "@kbn/security-plugin-types-common",
+    "@kbn/core-security-server"
   ]
 }
