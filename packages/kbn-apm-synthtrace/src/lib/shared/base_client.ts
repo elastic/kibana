@@ -76,6 +76,9 @@ export class SynthtraceEsClient<TFields extends Fields> {
       index: this.indices,
     })) as CatIndicesResponse;
     const indexNames = allIndices.map((index) => index.index).join(',');
+    if (!indexNames) {
+      return;
+    }
     this.logger.debug(`Cleaning indices: "${indexNames}"`);
     return this.client.indices.delete({
       index: indexNames,
