@@ -15,17 +15,30 @@ import { AddObservationUI } from '../../../../components/add_observation_ui';
 import { InvestigateSearchBar } from '../../../../components/investigate_search_bar';
 import { InvestigateWidgetGrid } from '../../../../components/investigate_widget_grid';
 import { useDateRange } from '../../../../hooks/use_date_range';
+import { useFetchInvestigation } from '../../../../hooks/use_fetch_investigation';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { InvestigationNotes } from '../investigation_notes/investigation_notes';
+import { useParams } from 'react-router';
+import { InvestigationDetailsPathParams } from '../../types';
 
-function InvestigationDetailsWithUser({ user }: { user: AuthenticatedUser }) {
+function InvestigationDetailsWithUser({
+  user,
+  investigationId,
+}: {
+  user: AuthenticatedUser;
+  investigationId: string;
+}) {
   const {
     dependencies: {
       start: { investigate },
     },
   } = useKibana();
-  const widgetDefinitions = useMemo(() => investigate.getWidgetDefinitions(), [investigate]);
+  const widgetDefinitions = investigate.getWidgetDefinitions();
   const [range, setRange] = useDateRange();
+
+  const { data: investigationData, isLoading } = useFetchInvestigation({ id: investigationId });
+
+  console.dir({ investigationData, isLoading });
 
   const {
     addItem,
@@ -148,14 +161,23 @@ function InvestigationDetailsWithUser({ user }: { user: AuthenticatedUser }) {
   );
 }
 
-export function InvestigationDetails({}: {}) {
+export function InvestigationDetails() {
   const {
     core: { security },
   } = useKibana();
+
+  const { investigationId } = useParams<InvestigationDetailsPathParams>();
 
   const user = useAsync(() => {
     return security.authc.getCurrentUser();
   }, [security]);
 
-  return user.value ? <InvestigationDetailsWithUser user={user.value} /> : null;
+  if (investigationId == null) {
+    // TODO: return 404 page
+    return null;
+  }
+
+  return user.value ? (
+    <InvestigationDetailsWithUser user={user.value} investigationId={investigationId} />
+  ) : null;
 }

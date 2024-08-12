@@ -23,7 +23,7 @@ export interface UseFetchInvestigationResponse {
   data: GetInvestigationResponse | undefined;
 }
 
-export function useFetchInvestigationList({ id }: Params): UseFetchInvestigationResponse {
+export function useFetchInvestigation({ id }: Params): UseFetchInvestigationResponse {
   const {
     core: {
       http,
