@@ -8,17 +8,18 @@ _For general information and getting started guide check `README` in the root of
 
 ### How to organize files with OpenAPI specs?
 
-You have quite a lot of freedom on organizing your OpenAPI specs and code generator supports any valid OpenAPI. Though we recommend to follow rules derived from using OpenAPI specs and code generation in Rule Management team
+We recommend to follow rules described below. These rules were derived from hands-on experience while using OpenAPI specs and code generation in Rule Management team.
 
-- All your OpenAPI specs should be under a single domain folder with clear ownership assigned to your team via `.CODEOWNERS` file.
 - Prefer placing OpenAPI specs in a package (see `kbn-securitysolution-lists-common` or `kbn-securitysolution-exceptions-common` for examples). Generated artifacts can be easily imported into the other packages or plugins. Having specs in a package simplify reusing (you don't need long relative paths `../../../../my.schema.yaml`) of common OpenAPI primitives like `NonEmptyString` or `UUID` defined in `kbn-openapi-common` package.
 - Split API endpoint declarations into separate files. The rule of thumb here is having one HTTP Method declaration per file. For example you want to declare two endpoints `GET /api/my/data` and `POST /api/my/data` so you need to create two OpenAPI spec files for them.
-- Make sure you define `operationId` for each path item.
-- Make sure file name matches defined `operationId`.
-- Feel free to group OpenAPI specs inside domain folder in smaller groups according business logic.
-- In the majority of cases importing `.gen.ts` file directly may complicate further OpenAPI schemas reorganization. To mitigate this problem prefer usage of index files.
+- Make sure you define `operationId` for each path item. `operationId` is a unique string used to identify the operation (a single API operation on a path like `GET` and `POST`). The id MUST be unique among all operations described in Kibana. The `operationId` value is case-sensitive. Tools and libraries use the `operationId` to uniquely identify an operation.
+- Make sure OpenAPI spec file name matches defined `operationId` so it can be easily found in IDE.
+- Feel free to group OpenAPI specs inside domain folder in smaller groups according to the business logic.
+- Prefer reducing tight coupling by using index files to reexport artifacts from `*.gen.ts` files (see `kbn-securitysolution-lists-common` or `kbn-securitysolution-exceptions-common` for examples).
 
-> **Info:** By default OpenAPI code generator expects OpenAPI spec files named `<my-name>.schema.yaml`. If it's absolutely necessary to use another suffix make sure OpenAPI code generator picks file up by expecting generating script where `generate()` function is invoked.
+> **Info:** By default OpenAPI code generator expects OpenAPI spec files named `<my-name>.schema.yaml`. If it's absolutely necessary to use another suffix make sure OpenAPI code generator picks file up by modifying generating script where `generate()` function is invoked.
+
+You have quite a lot of freedom on organizing your OpenAPI specs and code generator supports any valid OpenAPI.
 
 #### Example
 
