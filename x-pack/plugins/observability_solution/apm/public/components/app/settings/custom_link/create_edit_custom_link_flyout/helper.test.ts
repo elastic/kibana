@@ -7,6 +7,7 @@
 
 import { getSelectOptions, replaceTemplateVariables } from './helper';
 import { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
+import { Filter } from '../../../../../../common/custom_link/custom_link_types';
 
 describe('Custom link helper', () => {
   describe('getSelectOptions', () => {
@@ -77,6 +78,24 @@ describe('Custom link helper', () => {
           ''
         )
       ).toEqual([{ value: 'DEFAULT', text: 'Select field...' }]);
+    });
+
+    it("does not remove item added if it's the default option", () => {
+      expect(
+        getSelectOptions(
+          [
+            { key: 'service.name', value: 'foo' },
+            { key: '', value: '' },
+            { key: '', value: '' },
+          ],
+          'DEFAULT' as Filter['key']
+        )
+      ).toEqual([
+        { value: 'DEFAULT', text: 'Select field...' },
+        { value: 'service.environment', text: 'service.environment' },
+        { value: 'transaction.type', text: 'transaction.type' },
+        { value: 'transaction.name', text: 'transaction.name' },
+      ]);
     });
   });
 
