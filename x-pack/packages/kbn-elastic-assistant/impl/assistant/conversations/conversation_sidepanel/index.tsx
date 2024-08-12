@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
@@ -70,11 +69,6 @@ const getNextConversation = (
     ? conversationList[0]
     : conversationList[conversationIndex + 1];
 };
-
-export type ConversationSelectorOption = EuiComboBoxOptionOption<{
-  isDefault: boolean;
-}>;
-
 export const ConversationSidePanel = React.memo<Props>(
   ({
     currentConversation,
