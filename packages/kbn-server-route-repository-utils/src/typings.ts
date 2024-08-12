@@ -31,18 +31,11 @@ type WithoutIncompatibleMethods<T extends t.Any> = Omit<T, 'encode' | 'asEncoder
   asEncoder: () => t.Encoder<any, any>;
 };
 
-export type ZodParamsObject = z.ZodObject<
-  | {
-      path?: z.AnyZodObject;
-      query?: z.AnyZodObject;
-      body?: z.AnyZodObject;
-    }
-  | {
-      path?: z.ZodOptional<z.AnyZodObject>;
-      query?: z.ZodOptional<z.AnyZodObject>;
-      body?: z.ZodOptional<z.AnyZodObject>;
-    }
->;
+export type ZodParamsObject = z.ZodObject<{
+  path?: any;
+  query?: any;
+  body?: any;
+}>;
 
 export type IoTsParamsObject = WithoutIncompatibleMethods<
   t.Type<{
