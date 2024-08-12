@@ -6,7 +6,6 @@
  */
 
 import { pagePathGetters, pkgKeyFromPackageInfo } from '@kbn/fleet-plugin/public';
-// import { useKibana } from '@kbn/cloud-security-posture';
 import { useCisKubernetesIntegration } from '../api/use_cis_kubernetes_integration';
 import { useCspBenchmarkIntegrationsV1 } from '../../pages/benchmarks/use_csp_benchmark_integrations';
 import { PostureTypes } from '../../../common/types_old';

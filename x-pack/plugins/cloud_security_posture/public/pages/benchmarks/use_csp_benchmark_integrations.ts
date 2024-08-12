@@ -6,7 +6,6 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-// import { useKibana } from '@kbn/cloud-security-posture';
 import { BENCHMARKS_ROUTE_PATH } from '../../../common/constants';
 import type { BenchmarksQueryParams } from '../../../common/types/benchmarks/v1';
 import type { GetBenchmarkResponse } from '../../../common/types/latest';

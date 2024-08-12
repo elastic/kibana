@@ -20,10 +20,12 @@ import {
   CspFinding,
 } from '@kbn/cloud-security-posture-common';
 import { showErrorToast, buildMutedRulesFilter } from '@kbn/cloud-security-posture-common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { CspClientPluginStartDeps } from '../../type';
 import type { FindingsBaseEsQuery } from '../../type';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
 import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_state_api';
-import { useKibana } from './use_kibana';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
   sort: string[][];
@@ -122,7 +124,7 @@ export const useMisconfigurationPreview = (options: UseFindingsOptions) => {
   const {
     data,
     notifications: { toasts },
-  } = useKibana().services;
+  } = useKibana<CoreStart & CspClientPluginStartDeps>().services;
   const { data: rulesStates } = useGetCspBenchmarkRulesStatesApi();
 
   /**

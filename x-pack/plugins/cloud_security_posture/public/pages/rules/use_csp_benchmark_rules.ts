@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { useQuery } from '@tanstack/react-query';
-// import { useKibana } from '@kbn/cloud-security-posture';
 import {
   FindCspBenchmarkRuleRequest,
   FindCspBenchmarkRuleResponse,

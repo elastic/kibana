@@ -7,7 +7,6 @@
 
 import { useCallback } from 'react';
 import { type Query } from '@kbn/es-query';
-// import { useKibana } from '@kbn/cloud-security-posture';
 import { FindingsBaseURLQuery } from '../../types';
 import { useKibana } from '../use_kibana';
 

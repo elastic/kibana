@@ -11,7 +11,7 @@ import {
   CSP_GET_BENCHMARK_RULES_STATE_ROUTE_PATH,
   CspBenchmarkRulesStates,
 } from '@kbn/cloud-security-posture-common';
-import { useKibana } from './use_kibana';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 export const getRuleStatesKey = ['get_rules_state_key'];
 

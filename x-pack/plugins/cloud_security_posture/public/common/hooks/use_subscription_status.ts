@@ -6,7 +6,6 @@
  */
 import { useContext } from 'react';
 import { useQuery } from '@tanstack/react-query';
-// import { useKibana } from '@kbn/cloud-security-posture';
 import { SetupContext } from '../../application/setup_context';
 import { isSubscriptionAllowed } from '../../../common/utils/subscription';
 import { useKibana } from './use_kibana';

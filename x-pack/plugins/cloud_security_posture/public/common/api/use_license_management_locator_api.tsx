@@ -7,8 +7,6 @@
 
 import { useKibana } from '../hooks/use_kibana';
 
-// import { useKibana } from '@kbn/cloud-security-posture';
-
 const LICENSE_MANAGEMENT_LOCATOR = 'LICENSE_MANAGEMENT_LOCATOR';
 
 /**

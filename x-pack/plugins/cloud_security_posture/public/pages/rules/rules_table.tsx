@@ -21,7 +21,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
 import { HttpSetup } from '@kbn/core/public';
-// import { useKibana } from '@kbn/cloud-security-posture';
 import { CloudSecurityPostureStartServices } from '../../types';
 import { getFindingsDetectionRuleSearchTags } from '../../../common/utils/detection_rules';
 import { ColumnNameWithTooltip } from '../../components/column_name_with_tooltip';

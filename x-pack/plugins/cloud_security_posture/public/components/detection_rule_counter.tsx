@@ -12,7 +12,6 @@ import type { HttpSetup } from '@kbn/core/public';
 import { useHistory } from 'react-router-dom';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useQueryClient } from '@tanstack/react-query';
-// import { useKibana } from '@kbn/cloud-security-posture';
 import { useFetchDetectionRulesAlertsStatus } from '../common/api/use_fetch_detection_rules_alerts_status';
 import { useFetchDetectionRulesByTags } from '../common/api/use_fetch_detection_rules_by_tags';
 import { RuleResponse } from '../common/types';

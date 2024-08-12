@@ -32,7 +32,6 @@ import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-// import { useKibana } from '@kbn/cloud-security-posture';
 import { DASHBOARD_COMPLIANCE_SCORE_CHART } from '../test_subjects';
 import { statusColors } from '../../../common/constants';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';

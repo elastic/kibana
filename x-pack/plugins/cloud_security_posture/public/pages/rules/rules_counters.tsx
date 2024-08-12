@@ -18,7 +18,6 @@ import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
-// import { useKibana } from '@kbn/cloud-security-posture';
 import { useBenchmarkDynamicValues } from '../../common/hooks/use_benchmark_dynamic_values';
 import { getPostureScorePercentage } from '../compliance_dashboard/compliance_charts/compliance_score_chart';
 import { RULE_COUNTERS_TEST_SUBJ } from './test_subjects';

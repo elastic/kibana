@@ -23,7 +23,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { HttpSetup } from '@kbn/core/public';
-// import { useKibana } from '@kbn/cloud-security-posture';
 import { getFindingsDetectionRuleSearchTags } from '../../../common/utils/detection_rules';
 import { CspBenchmarkRuleMetadata } from '../../../common/types/latest';
 import { getRuleList } from '../configurations/findings_flyout/rule_tab';

@@ -26,7 +26,6 @@ import { AddFieldFilterHandler } from '@kbn/unified-field-list';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-// import { useKibana } from '@kbn/cloud-security-posture';
 import { MAX_FINDINGS_TO_LOAD } from '@kbn/cloud-security-posture-common';
 import { CloudPostureDataTableResult } from '../../common/hooks/use_cloud_posture_data_table';
 import { EmptyState } from '../empty_state';

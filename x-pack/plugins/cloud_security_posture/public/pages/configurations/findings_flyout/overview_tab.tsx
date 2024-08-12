@@ -20,7 +20,6 @@ import type { EuiDescriptionListProps, EuiAccordionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
-// import { useKibana } from '@kbn/cloud-security-posture';
 import { CspFinding } from '@kbn/cloud-security-posture-common';
 import { getDatasetDisplayName } from '../../../common/utils/get_dataset_display_name';
 import { truthy } from '../../../../common/utils/helpers';

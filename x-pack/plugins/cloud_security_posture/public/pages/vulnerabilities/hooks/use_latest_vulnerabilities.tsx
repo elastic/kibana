@@ -16,7 +16,6 @@ import {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { EsHitRecord } from '@kbn/discover-utils/types';
-// import { useKibana } from '@kbn/cloud-security-posture';
 import { FindingsBaseEsQuery } from '@kbn/cloud-security-posture';
 import { MAX_FINDINGS_TO_LOAD, showErrorToast } from '@kbn/cloud-security-posture-common';
 import { VULNERABILITY_FIELDS } from '../../../common/constants';

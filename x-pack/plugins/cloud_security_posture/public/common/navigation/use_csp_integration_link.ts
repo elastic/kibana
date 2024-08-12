@@ -6,7 +6,6 @@
  */
 
 import { pagePathGetters, pkgKeyFromPackageInfo } from '@kbn/fleet-plugin/public';
-// import { useKibana } from '@kbn/cloud-security-posture';
 import type { CloudSecurityPolicyTemplate } from '../../../common/types_old';
 import { useCisKubernetesIntegration } from '../api/use_cis_kubernetes_integration';
 import { useKibana } from '../hooks/use_kibana';
