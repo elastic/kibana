@@ -70,32 +70,46 @@ export function generateDockerContainersData({
     );
 }
 
-export function generateHostData({
-  from,
-  to,
-  count = 1,
-}: {
-  from: string;
-  to: string;
-  count: number;
-}) {
+export function generateHostData({ from, to }: { from: string; to: string }) {
   const range = timerange(from, to);
 
-  const hosts = Array(count)
-    .fill(0)
-    .map((_, idx) => infra.host(`host-name-${idx}`));
+  // cpuValue is sent to the generator to simulate different 'system.cpu.total.norm.pct' metric
+  // that is the default metric in inventory and hosts view and host details page
+  const hosts = [
+    {
+      hostName: 'host-1',
+      cpuValue: 0.5,
+    },
+    {
+      hostName: 'host-2',
+      cpuValue: 0.7,
+    },
+    {
+      hostName: 'host-3',
+      cpuValue: 0.9,
+    },
+    {
+      hostName: 'host-4',
+      cpuValue: 0.3,
+    },
+    {
+      hostName: 'host-5',
+      cpuValue: 0.1,
+    },
+  ];
 
   return range
     .interval('30s')
     .rate(1)
     .generator((timestamp) =>
-      hosts.flatMap((host) => [
-        host.cpu().timestamp(timestamp),
-        host.memory().timestamp(timestamp),
-        host.network().timestamp(timestamp),
-        host.load().timestamp(timestamp),
-        host.filesystem().timestamp(timestamp),
-        host.diskio().timestamp(timestamp),
+      hosts.flatMap(({ hostName, cpuValue }) => [
+        infra.host(hostName).cpu(cpuValue).timestamp(timestamp),
+        infra.host(hostName).memory().timestamp(timestamp),
+        infra.host(hostName).network().timestamp(timestamp),
+        infra.host(hostName).load().timestamp(timestamp),
+        infra.host(hostName).filesystem().timestamp(timestamp),
+        infra.host(hostName).diskio().timestamp(timestamp),
+        infra.host(hostName).core().timestamp(timestamp),
       ])
     );
 }
@@ -113,7 +127,7 @@ export function generatePodsData({
 
   const pods = Array(count)
     .fill(0)
-    .map((_, idx) => infra.pod(`pod-uid-${idx}`, `node-name-${idx}`));
+    .map((_, idx) => infra.pod(`pod-${idx}`, `node-name-${idx}`));
 
   return range
     .interval('30s')
