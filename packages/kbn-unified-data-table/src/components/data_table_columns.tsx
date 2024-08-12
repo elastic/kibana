@@ -30,6 +30,7 @@ import {
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
 import { buildEditFieldButton } from './build_edit_field_button';
 import { DataTableColumnHeader, DataTableTimeColumnHeader } from './data_table_column_header';
+import { UnifiedDataTableProps } from './data_table';
 
 export const getColumnDisplayName = (
   columnName: string,
@@ -105,6 +106,7 @@ function buildEuiGridColumn({
   headerRowHeight,
   customGridColumnsConfiguration,
   columnDisplay,
+  onResize,
 }: {
   numberOfColumns: number;
   columnName: string;
@@ -126,6 +128,7 @@ function buildEuiGridColumn({
   headerRowHeight?: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
   columnDisplay?: string;
+  onResize: UnifiedDataTableProps['onResize'];
 }) {
   const dataViewField = !isPlainRecord
     ? dataView.getFieldByName(columnName)
@@ -193,6 +196,21 @@ function buildEuiGridColumn({
       showMoveLeft: !defaultColumns,
       showMoveRight: !defaultColumns,
       additional: [
+        ...(onResize && columnWidth > 0
+          ? [
+              {
+                label: i18n.translate('unifiedDataTable.resetWidthColumnLabel', {
+                  defaultMessage: 'Reset width',
+                }),
+                iconType: 'refresh',
+                size: 'xs' as 'xs',
+                iconProps: { size: 'm' as 'm' },
+                onClick: () => {
+                  onResize({ columnId: columnName });
+                },
+              },
+            ]
+          : []),
         ...(columnName === '__source'
           ? []
           : [
@@ -268,6 +286,7 @@ export function getEuiGridColumns({
   showColumnTokens,
   headerRowHeightLines,
   customGridColumnsConfiguration,
+  onResize,
 }: {
   columns: string[];
   columnsCellActions?: EuiDataGridColumnCellAction[][];
@@ -290,6 +309,7 @@ export function getEuiGridColumns({
   showColumnTokens?: boolean;
   headerRowHeightLines: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
+  onResize: UnifiedDataTableProps['onResize'];
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
   const headerRowHeight = deserializeHeaderRowHeight(headerRowHeightLines);
@@ -317,6 +337,7 @@ export function getEuiGridColumns({
       headerRowHeight,
       customGridColumnsConfiguration,
       columnDisplay: settings?.columns?.[column]?.display,
+      onResize,
     })
   );
 }

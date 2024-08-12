@@ -45,6 +45,7 @@ import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AdditionalFieldGroups } from '@kbn/unified-field-list';
+import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import {
   UnifiedDataTableSettings,
   ValueToStringConverter,
@@ -163,7 +164,7 @@ export interface UnifiedDataTableProps {
   /**
    * Function triggered when a column is resized by the user
    */
-  onResize?: (colSettings: { columnId: string; width: number }) => void;
+  onResize?: (colSettings: { columnId: string; width?: number }) => void;
   /**
    * Function to set all columns
    */
@@ -696,6 +697,16 @@ export const UnifiedDataTable = ({
     [dataView, displayedColumns, shouldPrependTimeFieldColumn]
   );
 
+  useDeepCompareEffect(() => {
+    const hasAutowidthColumn = visibleColumns.some(
+      (col) => settings?.columns?.[col]?.width == null
+    );
+
+    if (!hasAutowidthColumn) {
+      onResize?.({ columnId: visibleColumns[visibleColumns.length - 1] });
+    }
+  }, [onResize, visibleColumns]);
+
   const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
     (fieldName, rowIndex) =>
       displayedRows[rowIndex % displayedRows.length].flattened[fieldName] as Serializable,
@@ -778,6 +789,7 @@ export const UnifiedDataTable = ({
         showColumnTokens,
         headerRowHeightLines,
         customGridColumnsConfiguration,
+        onResize,
       }),
     [
       columnsMeta,
@@ -792,6 +804,7 @@ export const UnifiedDataTable = ({
       isPlainRecord,
       isSortEnabled,
       onFilter,
+      onResize,
       settings,
       showColumnTokens,
       toastNotifications,

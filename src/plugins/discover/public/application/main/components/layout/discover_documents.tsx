@@ -27,6 +27,7 @@ import {
   type DataTableColumnsMeta,
   getTextBasedColumnsMeta,
   getRenderCustomToolbarWithElements,
+  UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -85,7 +86,7 @@ const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
 // export needs for testing
 export const onResize = (
-  colSettings: { columnId: string; width: number },
+  colSettings: { columnId: string; width?: number },
   stateContainer: DiscoverStateContainer
 ) => {
   const state = stateContainer.appState.getState();
@@ -179,7 +180,7 @@ function DiscoverDocumentsComponent({
     [stateContainer]
   );
 
-  const onResizeDataGrid = useCallback(
+  const onResizeDataGrid = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
     (colSettings) => onResize(colSettings, stateContainer),
     [stateContainer]
   );
