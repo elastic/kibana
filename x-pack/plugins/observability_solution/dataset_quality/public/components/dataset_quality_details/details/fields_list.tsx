@@ -45,11 +45,8 @@ export function FieldsList({
                   {fieldValue}
                 </EuiFlexItem>
               </EuiSkeletonRectangle>
-              <EuiFlexItem grow={1}>
-                {actionsMenu && <EuiFlexItem grow={false}>{actionsMenu}</EuiFlexItem>}
-              </EuiFlexItem>
+              {actionsMenu && <EuiFlexItem grow={false}>{actionsMenu}</EuiFlexItem>}
             </EuiFlexGroup>
-
             {index < fields.length - 1 ? <EuiHorizontalRule margin="s" /> : null}
           </Fragment>
         ))}
