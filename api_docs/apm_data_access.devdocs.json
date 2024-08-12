@@ -1922,7 +1922,9 @@
             "section": "def-common.ApmDataSource",
             "text": "ApmDataSource"
           },
-          "<AnyApmDocumentType> & { hasDocs: boolean; hasDurationSummaryField: boolean; })[]>; }"
+          "<AnyApmDocumentType> & { hasDocs: boolean; hasDurationSummaryField: boolean; })[]>; getHostNames: ({ start, end, size, query, documentSources }: ",
+          "HostNamesRequest",
+          ") => Promise<string[]>; }"
         ],
         "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
         "deprecated": false,
@@ -2099,7 +2101,9 @@
               "section": "def-common.ApmDataSource",
               "text": "ApmDataSource"
             },
-            "<AnyApmDocumentType> & { hasDocs: boolean; hasDurationSummaryField: boolean; })[]>; }"
+            "<AnyApmDocumentType> & { hasDocs: boolean; hasDurationSummaryField: boolean; })[]>; getHostNames: ({ start, end, size, query, documentSources }: ",
+            "HostNamesRequest",
+            ") => Promise<string[]>; }"
           ],
           "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
           "deprecated": false,
