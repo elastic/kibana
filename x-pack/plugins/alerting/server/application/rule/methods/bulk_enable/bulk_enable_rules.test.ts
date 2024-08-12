@@ -634,7 +634,7 @@ describe('bulkEnableRules', () => {
           schedule: {
             interval: '5m',
           },
-          enabled: true,
+          enabled: false,
           state: {
             alertInstances: {},
             alertTypeState: {},
@@ -710,7 +710,7 @@ describe('bulkEnableRules', () => {
           schedule: {
             interval: '5m',
           },
-          enabled: true,
+          enabled: false,
           state: {
             alertInstances: {},
             alertTypeState: {},
@@ -789,7 +789,7 @@ describe('bulkEnableRules', () => {
           schedule: {
             interval: '5m',
           },
-          enabled: true,
+          enabled: false,
           state: {
             alertInstances: {},
             alertTypeState: {},
@@ -868,7 +868,7 @@ describe('bulkEnableRules', () => {
           schedule: {
             interval: '5m',
           },
-          enabled: true,
+          enabled: false,
           state: {
             alertInstances: {},
             alertTypeState: {},
@@ -887,7 +887,7 @@ describe('bulkEnableRules', () => {
           schedule: {
             interval: '5m',
           },
-          enabled: true,
+          enabled: false,
           scope: ['alerting'],
           state: {
             alertInstances: {},

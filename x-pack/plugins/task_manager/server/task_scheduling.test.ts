@@ -223,7 +223,7 @@ describe('TaskScheduling', () => {
       });
     });
 
-    test('should not enable task if it is already enabled and have runAt set', async () => {
+    test('should not enable task if it is already enabled', async () => {
       const task = taskManagerMock.createTask({ id, enabled: true, schedule: { interval: '3h' } });
 
       mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
@@ -234,31 +234,6 @@ describe('TaskScheduling', () => {
       const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
 
       expect(bulkUpdatePayload).toHaveLength(0);
-    });
-
-    test('should enable task if it is already enabled but does not have runAt set', async () => {
-      const task = taskManagerMock.createTask({
-        id,
-        enabled: true,
-        schedule: { interval: '3h' },
-        runAt: undefined,
-      });
-
-      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
-
-      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
-      await taskScheduling.bulkEnable([id]);
-
-      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
-
-      expect(bulkUpdatePayload).toEqual([
-        {
-          ...task,
-          enabled: true,
-          runAt: new Date('1970-01-01T00:00:00.000Z'),
-          scheduledAt: new Date('1970-01-01T00:00:00.000Z'),
-        },
-      ]);
     });
 
     test('should set runAt and scheduledAt if runSoon is true', async () => {

@@ -276,7 +276,7 @@ const bulkEnableRulesWithOCC = async (
                   alertInstances: {},
                 },
                 scope: ['alerting'],
-                enabled: true,
+                enabled: false, // we create the task as disabled, taskManager.bulkEnable will enable them by randomising their schedule datetime
               });
             } else {
               taskIdsToEnable.push(rule.id);
