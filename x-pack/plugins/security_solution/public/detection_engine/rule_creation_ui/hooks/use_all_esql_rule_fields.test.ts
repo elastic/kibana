@@ -7,20 +7,11 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import type { DataViewFieldBase } from '@kbn/es-query';
-import { getESQLQueryColumns } from '@kbn/esql-utils';
 import { useQuery } from '@tanstack/react-query';
 import { useAllEsqlRuleFields } from './use_all_esql_rule_fields';
 import { computeIsESQLQueryAggregating } from '@kbn/securitysolution-utils';
 
 jest.mock('@kbn/securitysolution-utils', () => ({ computeIsESQLQueryAggregating: jest.fn() }));
-
-jest.mock('@kbn/esql-utils', () => {
-  return {
-    getESQLQueryColumns: jest.fn(),
-    getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('auditbeat*'),
-  };
-});
-
 jest.mock('@tanstack/react-query', () => {
   return {
     useQuery: jest.fn(),
@@ -28,7 +19,6 @@ jest.mock('@tanstack/react-query', () => {
 });
 
 const computeIsESQLQueryAggregatingMock = computeIsESQLQueryAggregating as jest.Mock;
-const getESQLQueryColumnsMock = getESQLQueryColumns as jest.Mock;
 const mockUseQuery = useQuery as jest.Mock;
 const mockEsqlQuery = 'from auditbeat* metadata _id';
 const mockIndexPatternFields: DataViewFieldBase[] = [
@@ -50,16 +40,6 @@ const mockEsqlDatatable = {
 describe('useAllEsqlRuleFields', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    getESQLQueryColumnsMock.mockImplementation(({ esqlQuery }) =>
-      Promise.resolve(
-        esqlQuery === 'deduplicate_test'
-          ? [
-              { id: 'agent.name', name: 'agent.name', meta: { type: 'string' } }, // agent.name is already present in mockIndexPatternFields
-              { id: '_custom_field_0', name: '_custom_field_0', meta: { type: 'string' } },
-            ]
-          : mockEsqlDatatable.columns
-      )
-    );
     computeIsESQLQueryAggregatingMock.mockReturnValue(false);
     mockUseQuery.mockImplementation((config) => {
       const data =
