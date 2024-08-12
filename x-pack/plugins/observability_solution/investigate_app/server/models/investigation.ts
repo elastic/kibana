@@ -16,7 +16,7 @@ export const investigationSchema = t.type({
     timeRange: t.type({ from: t.number, to: t.number }),
   }),
   origin: t.type({
-    type: t.string,
+    type: t.union([t.literal('alert'), t.literal('blank')]),
     id: t.string,
   }),
   status: t.union([t.literal('ongoing'), t.literal('closed')]),

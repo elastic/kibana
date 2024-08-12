@@ -145,7 +145,7 @@ export function HeaderActions({
           },
           origin: {
             type: 'alert',
-            id: alert.fields[ALERT_UUID] ?? '',
+            id: alert.fields[ALERT_UUID],
           },
         },
       });
