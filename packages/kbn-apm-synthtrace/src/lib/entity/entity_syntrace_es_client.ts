@@ -24,8 +24,8 @@ export class EntitySynthtraceEsClient extends SynthtraceEsClient<any> {
       pipeline: entityPipeline(),
     });
     this.indices = [
-      '.entities.v1.history.builtin_services',
-      '.entities.v1.latest.builtin_services',
+      '.entities.v1.history.builtin_services*',
+      '.entities.v1.latest.builtin_services*',
     ];
   }
 }

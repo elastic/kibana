@@ -16,6 +16,7 @@ import {
 import { castArray, isFunction } from 'lodash';
 import { Readable, Transform } from 'stream';
 import { isGeneratorObject } from 'util/types';
+import { CatIndicesResponse } from '@elastic/elasticsearch/lib/api/types';
 import { Logger } from '../utils/create_logger';
 import { sequential } from '../utils/stream_utils';
 
@@ -62,17 +63,26 @@ export class SynthtraceEsClient<TFields extends Fields> {
             }),
           ]
         : []),
-      ...(this.indices.length
-        ? [
-            this.client.indices.delete({
-              index: this.indices.join(','),
-              expand_wildcards: ['open', 'hidden'],
-              ignore_unavailable: true,
-              allow_no_indices: true,
-            }),
-          ]
-        : []),
+      this.cleanIndices(),
     ]);
+  }
+
+  async cleanIndices() {
+    if (this.indices.length === 0) {
+      return;
+    }
+    const allIndices = (await this.client.cat.indices({
+      format: 'json',
+      index: this.indices,
+    })) as CatIndicesResponse;
+    const indexNames = allIndices.map((index) => index.index).join(',');
+    this.logger.debug(`Cleaning indices: "${indexNames}"`);
+    return this.client.indices.delete({
+      index: indexNames,
+      expand_wildcards: ['open', 'hidden'],
+      ignore_unavailable: true,
+      allow_no_indices: true,
+    });
   }
 
   async refresh() {

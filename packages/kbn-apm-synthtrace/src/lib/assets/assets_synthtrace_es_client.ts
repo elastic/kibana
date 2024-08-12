@@ -31,7 +31,6 @@ export class AssetsSynthtraceEsClient extends SynthtraceEsClient<AssetDocument> 
       ...options,
       pipeline: assetsPipeline(),
     });
-    this.indices = ['assets'];
   }
 }
 
