@@ -23,6 +23,7 @@ export interface AssetDetailsLocatorParams extends SerializableRecord {
   };
   assetDetails?: {
     tabId?: string;
+    name?: string;
     dashboardId?: string;
     dateRange?: {
       from: string;
