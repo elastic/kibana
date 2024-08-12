@@ -15,6 +15,11 @@ import ActionsConnectorsHome, { MatchParams } from './actions_connectors_home';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import userEvent from '@testing-library/user-event';
 
+jest.mock('../../../lib/action_connector_api', () => ({
+  loadAllActions: jest.fn(),
+  loadActionTypes: jest.fn(),
+}));
+const { loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../lib/capabilities');
 jest.mock('../../../../common/get_experimental_features');
@@ -71,6 +76,7 @@ describe('ActionsConnectorsHome', () => {
       </IntlProvider>
     );
 
+    expect(loadAllActions).toHaveBeenCalled();
     expect(await screen.findByTestId('actionsConnectorsListComponent')).toBeInTheDocument();
   });
 
@@ -106,7 +112,7 @@ describe('ActionsConnectorsHome', () => {
     expect(tabs[1]).toHaveTextContent('Logs');
   });
 
-  it('show "Create connector" button when on Connectors tab', async () => {
+  it('show "Create connector" and "Documentation" buttons when on Connectors tab', async () => {
     const props: RouteComponentProps<MatchParams> = {
       history: createMemoryHistory({
         initialEntries: ['/connectors'],
