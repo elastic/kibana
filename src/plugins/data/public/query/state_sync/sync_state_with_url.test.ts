@@ -96,7 +96,7 @@ describe('sync_query_state_with_url', () => {
     filterManager.setFilters([gF, aF]);
     kbnUrlStateStorage.kbnUrlControls.flush(); // sync force location change
     expect(history.location.hash).toMatchInlineSnapshot(
-      `"#?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!t,index:'logstash-*',key:query,negate:!t,type:custom,value:'%7B%22match%22:%7B%22key1%22:%22value1%22%7D%7D'),query:(match:(key1:value1)))),refreshInterval:(pause:!f,value:1000),time:(from:now-15m,to:now))"`
+      `"#?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!t,index:'logstash-*',key:query,negate:!t,type:custom,value:'%7B%22match%22:%7B%22key1%22:%22value1%22%7D%7D'),query:(match:(key1:value1)))),refreshInterval:(pause:!t,value:1000),time:(from:now-15m,to:now))"`
     );
     stop();
   });

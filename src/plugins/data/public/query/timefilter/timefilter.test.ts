@@ -175,6 +175,22 @@ describe('setRefreshInterval', () => {
     });
   });
 
+  test('should pause if initial value is set to 0 regardless of minRefreshInterval', () => {
+    timefilter = new Timefilter(
+      {
+        ...defaultTimefilterConfig,
+        refreshIntervalDefaults: { pause: false, value: 0 },
+      },
+      timefilterSetupMock.history,
+      nowProviderMock
+    );
+
+    expect(timefilter.getRefreshInterval()).toEqual({
+      pause: true,
+      value: minRefreshIntervalDefault,
+    });
+  });
+
   test('should register changes to the initial interval', () => {
     timefilter.setRefreshInterval(defaultTimefilterConfig.refreshIntervalDefaults);
     expect(timefilter.isRefreshIntervalTouched()).toBe(false);
@@ -224,8 +240,14 @@ describe('setRefreshInterval', () => {
     expect(timefilter.getRefreshInterval()).toEqual({ pause: true, value: 0 });
   });
 
+  test('should pause when interval is set to zero regardless of minRefreshInterval', () => {
+    timefilter.setRefreshInterval({ value: 5000, pause: false });
+    timefilter.setRefreshInterval({ value: 0 });
+    expect(timefilter.getRefreshInterval()).toEqual({ pause: true, value: 1000 });
+  });
+
   test('not emit anything if nothing has changed', () => {
-    timefilter.setRefreshInterval({ pause: false, value: 0 });
+    timefilter.setRefreshInterval(timefilter.getRefreshInterval());
     expect(update.called).toBe(false);
     expect(fetch.called).toBe(false);
   });
