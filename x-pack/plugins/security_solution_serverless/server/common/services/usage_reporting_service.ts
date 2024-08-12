@@ -19,11 +19,13 @@ export class UsageReportingService {
     records: UsageRecord[],
     url = USAGE_SERVICE_USAGE_URL
   ): Promise<Response> {
+    const isHttps = url.includes('https');
+
     return fetch(url, {
       method: 'post',
       body: JSON.stringify(records),
       headers: { 'Content-Type': 'application/json' },
-      agent,
+      agent: isHttps ? agent : undefined, // Conditionally add agent if URL is HTTPS for supporting integration tests.
     });
   }
 }

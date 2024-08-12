@@ -21,6 +21,62 @@
     "functions": [
       {
         "parentPluginId": "@kbn/data-view-utils",
+        "id": "def-common.convertDatatableColumnToDataViewFieldSpec",
+        "type": "Function",
+        "tags": [],
+        "label": "convertDatatableColumnToDataViewFieldSpec",
+        "description": [
+          "\nConvert a datatable column to a DataViewFieldSpec"
+        ],
+        "signature": [
+          "(column: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          ") => ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          }
+        ],
+        "path": "packages/kbn-data-view-utils/src/utils/convert_to_data_view_field_spec.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-view-utils",
+            "id": "def-common.convertDatatableColumnToDataViewFieldSpec.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "column",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              }
+            ],
+            "path": "packages/kbn-data-view-utils/src/utils/convert_to_data_view_field_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-view-utils",
         "id": "def-common.createRegExpPatternFrom",
         "type": "Function",
         "tags": [],

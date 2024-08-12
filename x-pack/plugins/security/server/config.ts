@@ -336,6 +336,9 @@ export function createConfig(
     encryptionKey = crypto.randomBytes(16).toString('hex');
   }
 
+  const hashedEncryptionKey = crypto.createHash('sha3-256').update(encryptionKey).digest('base64');
+  logger.info(`Hashed 'xpack.security.encryptionKey' for this instance: ${hashedEncryptionKey}`);
+
   let secureCookies = config.secureCookies;
 
   if (!isTLSEnabled) {

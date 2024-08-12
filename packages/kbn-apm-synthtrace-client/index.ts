@@ -22,6 +22,7 @@ export { httpExitSpan } from './src/lib/apm/span';
 export { DistributedTrace } from './src/lib/dsl/distributed_trace_client';
 export { serviceMap } from './src/lib/dsl/service_map';
 export type { Fields } from './src/lib/entity';
+export { Entity } from './src/lib/entity';
 export { infra, type InfraDocument } from './src/lib/infra';
 export { parseInterval } from './src/lib/interval';
 export { monitoring, type MonitoringDocument } from './src/lib/monitoring';

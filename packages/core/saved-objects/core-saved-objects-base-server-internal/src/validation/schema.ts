@@ -20,7 +20,7 @@ type SavedObjectSanitizedDocSchema = {
 };
 
 const baseSchema = schema.object<SavedObjectSanitizedDocSchema>({
-  id: schema.string(),
+  id: schema.string({ minLength: 1 }),
   type: schema.string(),
   references: schema.arrayOf(
     schema.object({
@@ -42,7 +42,7 @@ const baseSchema = schema.object<SavedObjectSanitizedDocSchema>({
   version: schema.maybe(schema.string()),
   originId: schema.maybe(schema.string()),
   managed: schema.maybe(schema.boolean()),
-  attributes: schema.maybe(schema.any()),
+  attributes: schema.recordOf(schema.string(), schema.maybe(schema.any())),
 });
 
 /**
@@ -52,9 +52,13 @@ const baseSchema = schema.object<SavedObjectSanitizedDocSchema>({
  * @internal
  */
 export const createSavedObjectSanitizedDocSchema = (
-  attributesSchema: SavedObjectsValidationSpec
+  attributesSchema: SavedObjectsValidationSpec | undefined
 ) => {
-  return baseSchema.extends({
-    attributes: attributesSchema,
-  });
+  if (attributesSchema) {
+    return baseSchema.extends({
+      attributes: attributesSchema,
+    });
+  } else {
+    return baseSchema;
+  }
 };

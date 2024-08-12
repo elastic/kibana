@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const rows = await dataGrid.getDocTableRows();
       expect(rows.length).to.be.above(0);
 
-      const cell = await dataGrid.getCellElement(0, 2);
+      const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
       const content = await cell.findByCssSelector('.unifiedDataTable__descriptionListDescription');
       expect(await content.getVisibleText()).to.be(VALUE_WITHOUT_NEW_LINES);
       expect(await content.getComputedStyle('white-space')).to.be('normal');
@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.unifiedFieldList.clickFieldListItemAdd('message');
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      let cell = await dataGrid.getCellElement(0, 2);
+      let cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
       let content = await cell.findByCssSelector('.unifiedDataTable__cellValue');
       expect(await content.getVisibleText()).to.be(VALUE_WITH_NEW_LINES);
       expect(await content.getComputedStyle('white-space')).to.be('pre-wrap');
@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.changeRowHeightValue('Auto fit');
       await dataGrid.clickGridSettings();
 
-      cell = await dataGrid.getCellElement(0, 2);
+      cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
       content = await cell.findByCssSelector('.unifiedDataTable__cellValue');
       expect(await content.getVisibleText()).to.be(VALUE_WITH_NEW_LINES);
       expect(await content.getComputedStyle('white-space')).to.be('pre-wrap');
@@ -101,7 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.changeRowHeightValue('Single');
       await dataGrid.clickGridSettings();
 
-      cell = await dataGrid.getCellElement(0, 2);
+      cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
       content = await cell.findByCssSelector('.unifiedDataTable__cellValue');
       expect(await content.getVisibleText()).to.be(VALUE_WITHOUT_NEW_LINES);
       expect(await content.getComputedStyle('white-space')).to.be('nowrap');

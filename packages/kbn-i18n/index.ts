@@ -15,7 +15,6 @@ import {
   handleIntlError,
   getIsInitialized,
 } from './src/core';
-import { polyfillLocale } from './src/polyfills';
 
 import {
   registerTranslationFile,
@@ -43,7 +42,6 @@ const i18nLoader = {
   getAllTranslations,
   getAllTranslationsFromPaths,
   getRegisteredLocales: getRegisteredLocalesForLoader,
-  polyfillLocale,
 };
 
 export type { Translation, TranslationInput } from './src/translation';

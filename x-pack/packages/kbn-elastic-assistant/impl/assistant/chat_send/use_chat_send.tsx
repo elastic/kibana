@@ -16,7 +16,7 @@ import { useConversation } from '../use_conversation';
 import { getCombinedMessage } from '../prompt/helpers';
 import { Conversation, useAssistantContext } from '../../..';
 import { getMessageFromRawResponse } from '../helpers';
-import { getDefaultSystemPrompt } from '../use_conversation/helpers';
+import { getDefaultSystemPrompt, getDefaultNewSystemPrompt } from '../use_conversation/helpers';
 
 export interface UseChatSendProps {
   allSystemPrompts: PromptResponse[];
@@ -57,11 +57,7 @@ export const useChatSend = ({
   setUserPrompt,
   setCurrentConversation,
 }: UseChatSendProps): UseChatSend => {
-  const {
-    assistantTelemetry,
-    knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
-    toasts,
-  } = useAssistantContext();
+  const { assistantTelemetry, toasts } = useAssistantContext();
 
   const { isLoading, sendMessage, abortStream } = useSendMessage();
   const { clearConversation, removeLastMessage } = useConversation();
@@ -129,8 +125,6 @@ export const useChatSend = ({
       assistantTelemetry?.reportAssistantMessageSent({
         conversationId: currentConversation.title,
         role: userMessage.role,
-        isEnabledKnowledgeBase,
-        isEnabledRAGAlerts,
         actionTypeId: currentConversation.apiConfig.actionTypeId,
         model: currentConversation.apiConfig.model,
         provider: currentConversation.apiConfig.provider,
@@ -149,8 +143,6 @@ export const useChatSend = ({
         actionTypeId: currentConversation.apiConfig.actionTypeId,
         model: currentConversation.apiConfig.model,
         provider: currentConversation.apiConfig.provider,
-        isEnabledKnowledgeBase,
-        isEnabledRAGAlerts,
       });
     },
     [
@@ -159,8 +151,6 @@ export const useChatSend = ({
       currentConversation,
       editingSystemPromptId,
       http,
-      isEnabledKnowledgeBase,
-      isEnabledRAGAlerts,
       selectedPromptContexts,
       sendMessage,
       setCurrentConversation,
@@ -204,10 +194,11 @@ export const useChatSend = ({
   }, [currentConversation, http, removeLastMessage, sendMessage, setCurrentConversation, toasts]);
 
   const handleOnChatCleared = useCallback(async () => {
-    const defaultSystemPromptId = getDefaultSystemPrompt({
-      allSystemPrompts,
-      conversation: currentConversation,
-    })?.id;
+    const defaultSystemPromptId =
+      getDefaultSystemPrompt({
+        allSystemPrompts,
+        conversation: currentConversation,
+      })?.id ?? getDefaultNewSystemPrompt(allSystemPrompts)?.id;
 
     setUserPrompt('');
     setSelectedPromptContexts({});

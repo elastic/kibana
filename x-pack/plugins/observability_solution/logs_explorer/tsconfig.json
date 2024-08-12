@@ -45,6 +45,8 @@
     "@kbn/xstate-utils",
     "@kbn/esql-utils",
     "@kbn/data-view-utils",
+    "@kbn/unified-doc-viewer-plugin",
+    "@kbn/discover-shared-plugin",
   ],
   "exclude": [
     "target/**/*"

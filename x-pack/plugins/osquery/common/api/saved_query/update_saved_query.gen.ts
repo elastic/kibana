@@ -27,11 +27,6 @@ import {
   RemovedOrUndefined,
 } from '../model/schema/common_attributes.gen';
 
-export type UpdateSavedQueryRequestParams = z.infer<typeof UpdateSavedQueryRequestParams>;
-export const UpdateSavedQueryRequestParams = z.object({
-  id: SavedQueryId.optional(),
-});
-
 export type UpdateSavedQueryRequestBody = z.infer<typeof UpdateSavedQueryRequestBody>;
 export const UpdateSavedQueryRequestBody = z.object({
   id: SavedQueryId.optional(),

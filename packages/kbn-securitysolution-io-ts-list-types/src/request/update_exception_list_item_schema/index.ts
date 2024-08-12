@@ -7,9 +7,9 @@
  */
 
 import * as t from 'io-ts';
+import { ExceptionListItemEntryArray } from '@kbn/securitysolution-exceptions-common/api';
 import { NamespaceType } from '../../common/default_namespace';
 import { DefaultUpdateCommentsArray } from '../../common/default_update_comments_array';
-import { EntriesArray } from '../../common/entries';
 import { exceptionListItemType } from '../../common/exception_list_item_type';
 import { nonEmptyEntriesArray } from '../../common/non_empty_entries_array';
 import { OsTypeArray, osTypeArrayOrUndefined } from '../../common/os_type';
@@ -57,7 +57,7 @@ export type UpdateExceptionListItemSchemaDecoded = Omit<
 > & {
   comments: UpdateCommentsArray;
   tags: Tags;
-  entries: EntriesArray;
+  entries: ExceptionListItemEntryArray;
   namespace_type: NamespaceType;
   os_types: OsTypeArray;
   expire_time: ExpireTimeOrUndefined;

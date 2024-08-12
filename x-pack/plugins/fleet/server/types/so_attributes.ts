@@ -239,6 +239,11 @@ export interface SettingsSOAttributes {
   output_secret_storage_requirements_met?: boolean;
 }
 
+export interface SpaceSettingsSOAttributes {
+  allowed_namespace_prefixes?: string[] | null;
+  managed_by?: 'kibana_config' | null;
+}
+
 export interface DownloadSourceSOAttributes {
   name: string;
   host: string;

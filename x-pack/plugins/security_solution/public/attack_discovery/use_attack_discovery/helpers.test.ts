@@ -133,8 +133,6 @@ describe('getRequestBody', () => {
     ],
   };
   const knowledgeBase = {
-    isEnabledKnowledgeBase: true,
-    isEnabledRAGAlerts: true,
     latestAlerts: 20,
   };
   const traceOptions = {

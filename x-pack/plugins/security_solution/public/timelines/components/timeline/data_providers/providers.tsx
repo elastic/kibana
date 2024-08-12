@@ -28,7 +28,8 @@ import {
   getTimelineProviderDroppableId,
 } from '../../../../common/components/drag_and_drop/helpers';
 import type { DataProvider, DataProvidersAnd } from './data_provider';
-import { DataProviderType, IS_OPERATOR } from './data_provider';
+import { IS_OPERATOR } from './data_provider';
+import { DataProviderTypeEnum } from '../../../../../common/api/timeline';
 import { EMPTY_GROUP, flattenIntoAndGroups } from './helpers';
 import { ProviderItemBadge } from './provider_item_badge';
 
@@ -212,9 +213,9 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
         id: timelineId,
         providerId: index > 0 ? group[0].id : dataProvider.id,
         type:
-          dataProvider.type === DataProviderType.template
-            ? DataProviderType.default
-            : DataProviderType.template,
+          dataProvider.type === DataProviderTypeEnum.template
+            ? DataProviderTypeEnum.default
+            : DataProviderTypeEnum.template,
         andProviderId: index > 0 ? dataProvider.id : undefined,
       };
 

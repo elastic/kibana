@@ -10,11 +10,24 @@ require('../src/setup_node_env');
 
 var yaml = require('js-yaml');
 var fs = require('fs');
+var path = require('path');
+
+var manifestsJsonPath = path.resolve(__dirname, '../.buildkite/ftr_configs_manifests.json');
+console.log(manifestsJsonPath);
+var manifestsSource = JSON.parse(fs.readFileSync(manifestsJsonPath, 'utf8'));
+var allManifestPaths = Object.values(manifestsSource).flat();
 
 try {
-  yaml.load(fs.readFileSync('.buildkite/ftr_configs.yml', 'utf8')).enabled.forEach(function (x) {
-    console.log(x);
-  });
+  for (var manifestRelPath of allManifestPaths) {
+    var manifest = yaml.load(fs.readFileSync(manifestRelPath, 'utf8'));
+    if (manifest.enabled) {
+      manifest.enabled.forEach(function (x) {
+        console.log(x);
+      });
+    } else {
+      console.log(`${manifestRelPath} has no enabled FTR configs`);
+    }
+  }
 } catch (e) {
   console.log(e);
 }

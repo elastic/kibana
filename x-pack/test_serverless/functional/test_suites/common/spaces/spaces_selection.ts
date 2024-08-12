@@ -14,7 +14,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
   describe('space selection', function () {
     before(async () => {
-      await svlCommonPage.loginWithRole('viewer');
+      await svlCommonPage.loginAsViewer();
     });
 
     it('does not have the space selection menu in header', async () => {

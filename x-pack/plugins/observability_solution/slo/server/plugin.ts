@@ -16,7 +16,7 @@ import {
   SavedObjectsClient,
 } from '@kbn/core/server';
 import { PluginSetupContract, PluginStartContract } from '@kbn/alerting-plugin/server';
-import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import {
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,
@@ -49,11 +49,11 @@ export interface PluginSetup {
   alerting: PluginSetupContract;
   ruleRegistry: RuleRegistryPluginSetupContract;
   share: SharePluginSetup;
-  features: FeaturesSetup;
+  features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
   spaces?: SpacesPluginSetup;
   cloud?: CloudSetup;
-  usageCollection?: UsageCollectionSetup;
+  usageCollection: UsageCollectionSetup;
 }
 
 export interface PluginStart {

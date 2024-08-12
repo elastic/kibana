@@ -22,7 +22,7 @@ post:
           properties:
             params:
               type: object
-              description: The parameters of the connector. Parameter properties vary depending on the connector type. 
+              description: The parameters of the connector. Parameter properties vary depending on the connector type.
   responses:
     '200':
       description: Indicates a successful call.

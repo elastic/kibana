@@ -42,8 +42,6 @@ export const RULES_SELECT_ALL_RULES = 'select-all-rules-button';
 export const RULES_CLEAR_ALL_RULES_SELECTION = 'clear-rules-selection-button';
 export const RULES_DISABLED_FILTER = 'rules-disabled-filter';
 export const RULES_ENABLED_FILTER = 'rules-enabled-filter';
-export const CIS_SECTION_FILTER = 'cis-section-filter';
-export const RULE_NUMBER_FILTER = 'rule-number-filter';
 
 interface RulesTableToolbarProps {
   search: (value: string) => void;
@@ -333,8 +331,13 @@ const CurrentPageOfTotal = ({
           <EuiText size="xs" textAlign="left" color="subdued" style={{ marginLeft: '8px' }}>
             <FormattedMessage
               id="xpack.csp.rules.rulesTable.showingPageOfTotalLabel"
-              defaultMessage="Showing {pageSize} of {total, plural, one {# rule} other {# rules}} \u2000|\u2000 Selected {selectedRulesAmount, plural, one {# rule} other {# rules}}"
-              values={{ pageSize, total, selectedRulesAmount: selectedRules.length || 0 }}
+              defaultMessage="Showing {pageSize} of {total, plural, one {# rule} other {# rules}} {pipe} Selected {selectedRulesAmount, plural, one {# rule} other {# rules}}"
+              values={{
+                pageSize,
+                total,
+                selectedRulesAmount: selectedRules.length || 0,
+                pipe: '\u2000|\u2000',
+              }}
             />
           </EuiText>
         </EuiFlexItem>

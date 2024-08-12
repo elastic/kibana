@@ -9,18 +9,10 @@
     "objects": []
   },
   "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.SavedObjectConfig",
+        "id": "def-server.SavedObjectConfig",
         "type": "Class",
         "tags": [],
         "label": "SavedObjectConfig",
@@ -31,7 +23,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.SavedObjectConfig.maxImportPayloadBytes",
+            "id": "def-server.SavedObjectConfig.maxImportPayloadBytes",
             "type": "number",
             "tags": [],
             "label": "maxImportPayloadBytes",
@@ -42,7 +34,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.SavedObjectConfig.maxImportExportSize",
+            "id": "def-server.SavedObjectConfig.maxImportExportSize",
             "type": "number",
             "tags": [],
             "label": "maxImportExportSize",
@@ -53,7 +45,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.SavedObjectConfig.allowHttpApiAccess",
+            "id": "def-server.SavedObjectConfig.allowHttpApiAccess",
             "type": "boolean",
             "tags": [],
             "label": "allowHttpApiAccess",
@@ -64,7 +56,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.SavedObjectConfig.migration",
+            "id": "def-server.SavedObjectConfig.migration",
             "type": "Object",
             "tags": [],
             "label": "migration",
@@ -94,7 +86,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.SavedObjectConfig.Unnamed",
+            "id": "def-server.SavedObjectConfig.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -108,7 +100,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-                "id": "def-common.SavedObjectConfig.Unnamed.$1",
+                "id": "def-server.SavedObjectConfig.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "rawConfig",
@@ -131,7 +123,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-                "id": "def-common.SavedObjectConfig.Unnamed.$2",
+                "id": "def-server.SavedObjectConfig.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "rawMigrationConfig",
@@ -170,7 +162,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.aggregateMappingAdditions",
+        "id": "def-server.aggregateMappingAdditions",
         "type": "Function",
         "tags": [],
         "label": "aggregateMappingAdditions",
@@ -181,17 +173,17 @@
           "(changes: ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectsModelChange",
+            "section": "def-server.SavedObjectsModelChange",
             "text": "SavedObjectsModelChange"
           },
           "[]) => ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectsMappingProperties",
+            "section": "def-server.SavedObjectsMappingProperties",
             "text": "SavedObjectsMappingProperties"
           }
         ],
@@ -201,7 +193,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.aggregateMappingAdditions.$1",
+            "id": "def-server.aggregateMappingAdditions.$1",
             "type": "Array",
             "tags": [],
             "label": "changes",
@@ -209,9 +201,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectsModelChange",
+                "section": "def-server.SavedObjectsModelChange",
                 "text": "SavedObjectsModelChange"
               },
               "[]"
@@ -227,7 +219,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.assertValidModelVersion",
+        "id": "def-server.assertValidModelVersion",
         "type": "Function",
         "tags": [],
         "label": "assertValidModelVersion",
@@ -243,7 +235,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.assertValidModelVersion.$1",
+            "id": "def-server.assertValidModelVersion.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "modelVersion",
@@ -262,7 +254,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.buildModelVersionTransformFn",
+        "id": "def-server.buildModelVersionTransformFn",
         "type": "Function",
         "tags": [],
         "label": "buildModelVersionTransformFn",
@@ -273,17 +265,17 @@
           "(modelChanges: ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectsModelChange",
+            "section": "def-server.SavedObjectsModelChange",
             "text": "SavedObjectsModelChange"
           },
           "[]) => ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectModelTransformationFn",
+            "section": "def-server.SavedObjectModelTransformationFn",
             "text": "SavedObjectModelTransformationFn"
           },
           "<unknown, unknown>"
@@ -294,7 +286,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.buildModelVersionTransformFn.$1",
+            "id": "def-server.buildModelVersionTransformFn.$1",
             "type": "Array",
             "tags": [],
             "label": "modelChanges",
@@ -302,9 +294,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectsModelChange",
+                "section": "def-server.SavedObjectsModelChange",
                 "text": "SavedObjectsModelChange"
               },
               "[]"
@@ -320,7 +312,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.compareVirtualVersions",
+        "id": "def-server.compareVirtualVersions",
         "type": "Function",
         "tags": [],
         "label": "compareVirtualVersions",
@@ -329,17 +321,17 @@
           "({ appVersions, indexVersions, deletedTypes, }: ",
           {
             "pluginId": "@kbn/core-saved-objects-base-server-internal",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-            "section": "def-common.CompareModelVersionMapParams",
+            "section": "def-server.CompareModelVersionMapParams",
             "text": "CompareModelVersionMapParams"
           },
           ") => ",
           {
             "pluginId": "@kbn/core-saved-objects-base-server-internal",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-            "section": "def-common.CompareModelVersionResult",
+            "section": "def-server.CompareModelVersionResult",
             "text": "CompareModelVersionResult"
           }
         ],
@@ -349,7 +341,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.compareVirtualVersions.$1",
+            "id": "def-server.compareVirtualVersions.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  appVersions,\n  indexVersions,\n  deletedTypes,\n}",
@@ -357,9 +349,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-base-server-internal",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-                "section": "def-common.CompareModelVersionMapParams",
+                "section": "def-server.CompareModelVersionMapParams",
                 "text": "CompareModelVersionMapParams"
               }
             ],
@@ -374,7 +366,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.convertModelVersionBackwardConversionSchema",
+        "id": "def-server.convertModelVersionBackwardConversionSchema",
         "type": "Function",
         "tags": [],
         "label": "convertModelVersionBackwardConversionSchema",
@@ -383,9 +375,9 @@
           "(schema: ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectModelVersionForwardCompatibilitySchema",
+            "section": "def-server.SavedObjectModelVersionForwardCompatibilitySchema",
             "text": "SavedObjectModelVersionForwardCompatibilitySchema"
           },
           "<unknown, unknown>) => ",
@@ -397,7 +389,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.convertModelVersionBackwardConversionSchema.$1",
+            "id": "def-server.convertModelVersionBackwardConversionSchema.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "schema",
@@ -405,9 +397,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectModelVersionForwardCompatibilitySchema",
+                "section": "def-server.SavedObjectModelVersionForwardCompatibilitySchema",
                 "text": "SavedObjectModelVersionForwardCompatibilitySchema"
               },
               "<unknown, unknown>"
@@ -423,7 +415,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.decodeRequestVersion",
+        "id": "def-server.decodeRequestVersion",
         "type": "Function",
         "tags": [],
         "label": "decodeRequestVersion",
@@ -439,7 +431,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.decodeRequestVersion.$1",
+            "id": "def-server.decodeRequestVersion.$1",
             "type": "string",
             "tags": [],
             "label": "version",
@@ -458,7 +450,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.decodeVersion",
+        "id": "def-server.decodeVersion",
         "type": "Function",
         "tags": [],
         "label": "decodeVersion",
@@ -474,7 +466,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.decodeVersion.$1",
+            "id": "def-server.decodeVersion.$1",
             "type": "string",
             "tags": [],
             "label": "version",
@@ -493,7 +485,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.encodeHitVersion",
+        "id": "def-server.encodeHitVersion",
         "type": "Function",
         "tags": [],
         "label": "encodeHitVersion",
@@ -509,7 +501,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.encodeHitVersion.$1",
+            "id": "def-server.encodeHitVersion.$1",
             "type": "Object",
             "tags": [],
             "label": "response",
@@ -520,7 +512,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-                "id": "def-common.encodeHitVersion.$1._seq_no",
+                "id": "def-server.encodeHitVersion.$1._seq_no",
                 "type": "number",
                 "tags": [],
                 "label": "_seq_no",
@@ -534,7 +526,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-                "id": "def-common.encodeHitVersion.$1._primary_term",
+                "id": "def-server.encodeHitVersion.$1._primary_term",
                 "type": "number",
                 "tags": [],
                 "label": "_primary_term",
@@ -554,7 +546,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.encodeVersion",
+        "id": "def-server.encodeVersion",
         "type": "Function",
         "tags": [],
         "label": "encodeVersion",
@@ -570,7 +562,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.encodeVersion.$1",
+            "id": "def-server.encodeVersion.$1",
             "type": "number",
             "tags": [],
             "label": "seqNo",
@@ -585,7 +577,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.encodeVersion.$2",
+            "id": "def-server.encodeVersion.$2",
             "type": "number",
             "tags": [],
             "label": "primaryTerm",
@@ -604,7 +596,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.getCurrentVirtualVersion",
+        "id": "def-server.getCurrentVirtualVersion",
         "type": "Function",
         "tags": [],
         "label": "getCurrentVirtualVersion",
@@ -615,9 +607,9 @@
           "(type: ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectsType",
+            "section": "def-server.SavedObjectsType",
             "text": "SavedObjectsType"
           },
           "<any>) => string"
@@ -628,7 +620,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.getCurrentVirtualVersion.$1",
+            "id": "def-server.getCurrentVirtualVersion.$1",
             "type": "Object",
             "tags": [],
             "label": "type",
@@ -636,9 +628,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectsType",
+                "section": "def-server.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
               "<any>"
@@ -654,7 +646,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.getFieldListFromTypeMapping",
+        "id": "def-server.getFieldListFromTypeMapping",
         "type": "Function",
         "tags": [],
         "label": "getFieldListFromTypeMapping",
@@ -665,9 +657,9 @@
           "(typeMappings: ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectsTypeMappingDefinition",
+            "section": "def-server.SavedObjectsTypeMappingDefinition",
             "text": "SavedObjectsTypeMappingDefinition"
           },
           ") => string[]"
@@ -678,7 +670,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.getFieldListFromTypeMapping.$1",
+            "id": "def-server.getFieldListFromTypeMapping.$1",
             "type": "Object",
             "tags": [],
             "label": "typeMappings",
@@ -686,9 +678,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectsTypeMappingDefinition",
+                "section": "def-server.SavedObjectsTypeMappingDefinition",
                 "text": "SavedObjectsTypeMappingDefinition"
               }
             ],
@@ -703,7 +695,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.getFieldListMapFromMappingDefinitions",
+        "id": "def-server.getFieldListMapFromMappingDefinitions",
         "type": "Function",
         "tags": [],
         "label": "getFieldListMapFromMappingDefinitions",
@@ -716,9 +708,9 @@
           ") => ",
           {
             "pluginId": "@kbn/core-saved-objects-base-server-internal",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-            "section": "def-common.FieldListMap",
+            "section": "def-server.FieldListMap",
             "text": "FieldListMap"
           }
         ],
@@ -728,7 +720,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.getFieldListMapFromMappingDefinitions.$1",
+            "id": "def-server.getFieldListMapFromMappingDefinitions.$1",
             "type": "Object",
             "tags": [],
             "label": "mappings",
@@ -747,7 +739,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.getIndexForType",
+        "id": "def-server.getIndexForType",
         "type": "Function",
         "tags": [],
         "label": "getIndexForType",
@@ -761,7 +753,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.getIndexForType.$1",
+            "id": "def-server.getIndexForType.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  type,\n  typeRegistry,\n  defaultIndex,\n  kibanaVersion,\n}",
@@ -780,7 +772,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.getLatestMappingsVirtualVersionMap",
+        "id": "def-server.getLatestMappingsVirtualVersionMap",
         "type": "Function",
         "tags": [],
         "label": "getLatestMappingsVirtualVersionMap",
@@ -791,17 +783,17 @@
           "(types: ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectsType",
+            "section": "def-server.SavedObjectsType",
             "text": "SavedObjectsType"
           },
           "<any>[]) => ",
           {
             "pluginId": "@kbn/core-saved-objects-base-server-internal",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-            "section": "def-common.VirtualVersionMap",
+            "section": "def-server.VirtualVersionMap",
             "text": "VirtualVersionMap"
           }
         ],
@@ -811,7 +803,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.getLatestMappingsVirtualVersionMap.$1",
+            "id": "def-server.getLatestMappingsVirtualVersionMap.$1",
             "type": "Array",
             "tags": [],
             "label": "types",
@@ -819,9 +811,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectsType",
+                "section": "def-server.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
               "<any>[]"
@@ -837,7 +829,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.getLatestMigrationVersion",
+        "id": "def-server.getLatestMigrationVersion",
         "type": "Function",
         "tags": [],
         "label": "getLatestMigrationVersion",
@@ -846,9 +838,9 @@
           "(type: ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectsType",
+            "section": "def-server.SavedObjectsType",
             "text": "SavedObjectsType"
           },
           "<any>) => string"
@@ -859,7 +851,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.getLatestMigrationVersion.$1",
+            "id": "def-server.getLatestMigrationVersion.$1",
             "type": "Object",
             "tags": [],
             "label": "type",
@@ -867,9 +859,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectsType",
+                "section": "def-server.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
               "<any>"
@@ -885,7 +877,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.getLatestModelVersion",
+        "id": "def-server.getLatestModelVersion",
         "type": "Function",
         "tags": [],
         "label": "getLatestModelVersion",
@@ -896,9 +888,9 @@
           "(type: ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectsType",
+            "section": "def-server.SavedObjectsType",
             "text": "SavedObjectsType"
           },
           "<any>) => number"
@@ -909,7 +901,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.getLatestModelVersion.$1",
+            "id": "def-server.getLatestModelVersion.$1",
             "type": "Object",
             "tags": [],
             "label": "type",
@@ -917,9 +909,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectsType",
+                "section": "def-server.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
               "<any>"
@@ -935,7 +927,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.getModelVersionDelta",
+        "id": "def-server.getModelVersionDelta",
         "type": "Function",
         "tags": [],
         "label": "getModelVersionDelta",
@@ -951,7 +943,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.getModelVersionDelta.$1",
+            "id": "def-server.getModelVersionDelta.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  currentVersions,\n  targetVersions,\n  deletedTypes,\n}",
@@ -970,7 +962,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.getModelVersionMapForTypes",
+        "id": "def-server.getModelVersionMapForTypes",
         "type": "Function",
         "tags": [],
         "label": "getModelVersionMapForTypes",
@@ -981,17 +973,17 @@
           "(types: ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectsType",
+            "section": "def-server.SavedObjectsType",
             "text": "SavedObjectsType"
           },
           "<any>[]) => ",
           {
             "pluginId": "@kbn/core-saved-objects-base-server-internal",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-            "section": "def-common.ModelVersionMap",
+            "section": "def-server.ModelVersionMap",
             "text": "ModelVersionMap"
           }
         ],
@@ -1001,7 +993,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.getModelVersionMapForTypes.$1",
+            "id": "def-server.getModelVersionMapForTypes.$1",
             "type": "Array",
             "tags": [],
             "label": "types",
@@ -1009,9 +1001,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectsType",
+                "section": "def-server.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
               "<any>[]"
@@ -1027,7 +1019,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.getProperty",
+        "id": "def-server.getProperty",
         "type": "Function",
         "tags": [],
         "label": "getProperty",
@@ -1036,9 +1028,9 @@
           "(mappings: ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectsFieldMapping",
+            "section": "def-server.SavedObjectsFieldMapping",
             "text": "SavedObjectsFieldMapping"
           },
           " | ",
@@ -1046,9 +1038,9 @@
           ", path: string | string[]) => ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectsFieldMapping",
+            "section": "def-server.SavedObjectsFieldMapping",
             "text": "SavedObjectsFieldMapping"
           },
           " | undefined"
@@ -1059,7 +1051,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.getProperty.$1",
+            "id": "def-server.getProperty.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "mappings",
@@ -1067,9 +1059,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectsFieldMapping",
+                "section": "def-server.SavedObjectsFieldMapping",
                 "text": "SavedObjectsFieldMapping"
               },
               " | ",
@@ -1082,7 +1074,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.getProperty.$2",
+            "id": "def-server.getProperty.$2",
             "type": "CompoundType",
             "tags": [],
             "label": "path",
@@ -1101,7 +1093,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.getRootProperties",
+        "id": "def-server.getRootProperties",
         "type": "Function",
         "tags": [],
         "label": "getRootProperties",
@@ -1114,9 +1106,9 @@
           ") => ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectsMappingProperties",
+            "section": "def-server.SavedObjectsMappingProperties",
             "text": "SavedObjectsMappingProperties"
           }
         ],
@@ -1126,7 +1118,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.getRootProperties.$1",
+            "id": "def-server.getRootProperties.$1",
             "type": "Object",
             "tags": [],
             "label": "mapping",
@@ -1145,7 +1137,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.getRootPropertiesObjects",
+        "id": "def-server.getRootPropertiesObjects",
         "type": "Function",
         "tags": [],
         "label": "getRootPropertiesObjects",
@@ -1156,9 +1148,9 @@
           ") => ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectsMappingProperties",
+            "section": "def-server.SavedObjectsMappingProperties",
             "text": "SavedObjectsMappingProperties"
           }
         ],
@@ -1168,7 +1160,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.getRootPropertiesObjects.$1",
+            "id": "def-server.getRootPropertiesObjects.$1",
             "type": "Object",
             "tags": [],
             "label": "mappings",
@@ -1187,7 +1179,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.getTypes",
+        "id": "def-server.getTypes",
         "type": "Function",
         "tags": [],
         "label": "getTypes",
@@ -1205,7 +1197,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.getTypes.$1",
+            "id": "def-server.getTypes.$1",
             "type": "Object",
             "tags": [],
             "label": "mappings",
@@ -1224,7 +1216,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.getVersionAddedFields",
+        "id": "def-server.getVersionAddedFields",
         "type": "Function",
         "tags": [],
         "label": "getVersionAddedFields",
@@ -1235,9 +1227,9 @@
           "(version: ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectsModelVersion",
+            "section": "def-server.SavedObjectsModelVersion",
             "text": "SavedObjectsModelVersion"
           },
           ") => string[]"
@@ -1248,7 +1240,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.getVersionAddedFields.$1",
+            "id": "def-server.getVersionAddedFields.$1",
             "type": "Object",
             "tags": [],
             "label": "version",
@@ -1256,9 +1248,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectsModelVersion",
+                "section": "def-server.SavedObjectsModelVersion",
                 "text": "SavedObjectsModelVersion"
               }
             ],
@@ -1273,7 +1265,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.getVersionAddedMappings",
+        "id": "def-server.getVersionAddedMappings",
         "type": "Function",
         "tags": [],
         "label": "getVersionAddedMappings",
@@ -1284,17 +1276,17 @@
           "(version: ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectsModelVersion",
+            "section": "def-server.SavedObjectsModelVersion",
             "text": "SavedObjectsModelVersion"
           },
           ") => ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectsMappingProperties",
+            "section": "def-server.SavedObjectsMappingProperties",
             "text": "SavedObjectsMappingProperties"
           }
         ],
@@ -1304,7 +1296,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.getVersionAddedMappings.$1",
+            "id": "def-server.getVersionAddedMappings.$1",
             "type": "Object",
             "tags": [],
             "label": "version",
@@ -1312,9 +1304,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectsModelVersion",
+                "section": "def-server.SavedObjectsModelVersion",
                 "text": "SavedObjectsModelVersion"
               }
             ],
@@ -1329,7 +1321,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.getVirtualVersionMap",
+        "id": "def-server.getVirtualVersionMap",
         "type": "Function",
         "tags": [],
         "label": "getVirtualVersionMap",
@@ -1340,17 +1332,17 @@
           "(types: ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectsType",
+            "section": "def-server.SavedObjectsType",
             "text": "SavedObjectsType"
           },
           "<any>[]) => ",
           {
             "pluginId": "@kbn/core-saved-objects-base-server-internal",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-            "section": "def-common.VirtualVersionMap",
+            "section": "def-server.VirtualVersionMap",
             "text": "VirtualVersionMap"
           }
         ],
@@ -1360,7 +1352,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.getVirtualVersionMap.$1",
+            "id": "def-server.getVirtualVersionMap.$1",
             "type": "Array",
             "tags": [],
             "label": "types",
@@ -1368,9 +1360,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectsType",
+                "section": "def-server.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
               "<any>[]"
@@ -1386,7 +1378,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.getVirtualVersionsFromMappingMeta",
+        "id": "def-server.getVirtualVersionsFromMappingMeta",
         "type": "Function",
         "tags": [],
         "label": "getVirtualVersionsFromMappingMeta",
@@ -1399,9 +1391,9 @@
           ") => ",
           {
             "pluginId": "@kbn/core-saved-objects-base-server-internal",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-            "section": "def-common.VirtualVersionMap",
+            "section": "def-server.VirtualVersionMap",
             "text": "VirtualVersionMap"
           },
           " | undefined"
@@ -1412,7 +1404,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.getVirtualVersionsFromMappingMeta.$1",
+            "id": "def-server.getVirtualVersionsFromMappingMeta.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  meta,\n  source,\n  knownTypes,\n}",
@@ -1431,7 +1423,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.getVirtualVersionsFromMappings",
+        "id": "def-server.getVirtualVersionsFromMappings",
         "type": "Function",
         "tags": [],
         "label": "getVirtualVersionsFromMappings",
@@ -1444,9 +1436,9 @@
           ") => ",
           {
             "pluginId": "@kbn/core-saved-objects-base-server-internal",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-            "section": "def-common.VirtualVersionMap",
+            "section": "def-server.VirtualVersionMap",
             "text": "VirtualVersionMap"
           },
           " | undefined"
@@ -1457,7 +1449,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.getVirtualVersionsFromMappings.$1",
+            "id": "def-server.getVirtualVersionsFromMappings.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  mappings,\n  source,\n  knownTypes,\n}",
@@ -1476,7 +1468,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.isVirtualModelVersion",
+        "id": "def-server.isVirtualModelVersion",
         "type": "Function",
         "tags": [],
         "label": "isVirtualModelVersion",
@@ -1492,7 +1484,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.isVirtualModelVersion.$1",
+            "id": "def-server.isVirtualModelVersion.$1",
             "type": "string",
             "tags": [],
             "label": "version",
@@ -1511,7 +1503,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.modelVersionToVirtualVersion",
+        "id": "def-server.modelVersionToVirtualVersion",
         "type": "Function",
         "tags": [],
         "label": "modelVersionToVirtualVersion",
@@ -1527,7 +1519,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.modelVersionToVirtualVersion.$1",
+            "id": "def-server.modelVersionToVirtualVersion.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "modelVersion",
@@ -1546,7 +1538,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.virtualVersionToModelVersion",
+        "id": "def-server.virtualVersionToModelVersion",
         "type": "Function",
         "tags": [],
         "label": "virtualVersionToModelVersion",
@@ -1562,7 +1554,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.virtualVersionToModelVersion.$1",
+            "id": "def-server.virtualVersionToModelVersion.$1",
             "type": "string",
             "tags": [],
             "label": "virtualVersion",
@@ -1583,7 +1575,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.CompareModelVersionDetails",
+        "id": "def-server.CompareModelVersionDetails",
         "type": "Interface",
         "tags": [],
         "label": "CompareModelVersionDetails",
@@ -1594,7 +1586,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.CompareModelVersionDetails.greater",
+            "id": "def-server.CompareModelVersionDetails.greater",
             "type": "Array",
             "tags": [],
             "label": "greater",
@@ -1608,7 +1600,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.CompareModelVersionDetails.lesser",
+            "id": "def-server.CompareModelVersionDetails.lesser",
             "type": "Array",
             "tags": [],
             "label": "lesser",
@@ -1622,7 +1614,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.CompareModelVersionDetails.equal",
+            "id": "def-server.CompareModelVersionDetails.equal",
             "type": "Array",
             "tags": [],
             "label": "equal",
@@ -1639,7 +1631,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.CompareModelVersionMapParams",
+        "id": "def-server.CompareModelVersionMapParams",
         "type": "Interface",
         "tags": [],
         "label": "CompareModelVersionMapParams",
@@ -1650,7 +1642,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.CompareModelVersionMapParams.appVersions",
+            "id": "def-server.CompareModelVersionMapParams.appVersions",
             "type": "Object",
             "tags": [],
             "label": "appVersions",
@@ -1666,7 +1658,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.CompareModelVersionMapParams.indexVersions",
+            "id": "def-server.CompareModelVersionMapParams.indexVersions",
             "type": "Object",
             "tags": [],
             "label": "indexVersions",
@@ -1682,7 +1674,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.CompareModelVersionMapParams.deletedTypes",
+            "id": "def-server.CompareModelVersionMapParams.deletedTypes",
             "type": "Array",
             "tags": [],
             "label": "deletedTypes",
@@ -1701,7 +1693,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.CompareModelVersionResult",
+        "id": "def-server.CompareModelVersionResult",
         "type": "Interface",
         "tags": [],
         "label": "CompareModelVersionResult",
@@ -1712,7 +1704,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.CompareModelVersionResult.status",
+            "id": "def-server.CompareModelVersionResult.status",
             "type": "CompoundType",
             "tags": [],
             "label": "status",
@@ -1726,7 +1718,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.CompareModelVersionResult.details",
+            "id": "def-server.CompareModelVersionResult.details",
             "type": "Object",
             "tags": [],
             "label": "details",
@@ -1734,9 +1726,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-base-server-internal",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-                "section": "def-common.CompareModelVersionDetails",
+                "section": "def-server.CompareModelVersionDetails",
                 "text": "CompareModelVersionDetails"
               }
             ],
@@ -1749,7 +1741,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.DocumentMigrateOptions",
+        "id": "def-server.DocumentMigrateOptions",
         "type": "Interface",
         "tags": [],
         "label": "DocumentMigrateOptions",
@@ -1762,7 +1754,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.DocumentMigrateOptions.allowDowngrade",
+            "id": "def-server.DocumentMigrateOptions.allowDowngrade",
             "type": "CompoundType",
             "tags": [],
             "label": "allowDowngrade",
@@ -1778,7 +1770,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.DocumentMigrateOptions.targetTypeVersion",
+            "id": "def-server.DocumentMigrateOptions.targetTypeVersion",
             "type": "string",
             "tags": [],
             "label": "targetTypeVersion",
@@ -1797,7 +1789,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.IDocumentMigrator",
+        "id": "def-server.IDocumentMigrator",
         "type": "Interface",
         "tags": [],
         "label": "IDocumentMigrator",
@@ -1810,7 +1802,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.IDocumentMigrator.migrate",
+            "id": "def-server.IDocumentMigrator.migrate",
             "type": "Function",
             "tags": [],
             "label": "migrate",
@@ -1821,25 +1813,25 @@
               "(doc: ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectUnsanitizedDoc",
+                "section": "def-server.SavedObjectUnsanitizedDoc",
                 "text": "SavedObjectUnsanitizedDoc"
               },
               "<unknown>, options?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-base-server-internal",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-                "section": "def-common.DocumentMigrateOptions",
+                "section": "def-server.DocumentMigrateOptions",
                 "text": "DocumentMigrateOptions"
               },
               " | undefined) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectUnsanitizedDoc",
+                "section": "def-server.SavedObjectUnsanitizedDoc",
                 "text": "SavedObjectUnsanitizedDoc"
               },
               "<unknown>"
@@ -1850,7 +1842,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-                "id": "def-common.IDocumentMigrator.migrate.$1",
+                "id": "def-server.IDocumentMigrator.migrate.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "doc",
@@ -1858,9 +1850,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                    "section": "def-common.SavedObjectUnsanitizedDoc",
+                    "section": "def-server.SavedObjectUnsanitizedDoc",
                     "text": "SavedObjectUnsanitizedDoc"
                   },
                   "<unknown>"
@@ -1872,7 +1864,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-                "id": "def-common.IDocumentMigrator.migrate.$2",
+                "id": "def-server.IDocumentMigrator.migrate.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -1880,9 +1872,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-base-server-internal",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-                    "section": "def-common.DocumentMigrateOptions",
+                    "section": "def-server.DocumentMigrateOptions",
                     "text": "DocumentMigrateOptions"
                   },
                   " | undefined"
@@ -1897,7 +1889,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.IDocumentMigrator.migrateAndConvert",
+            "id": "def-server.IDocumentMigrator.migrateAndConvert",
             "type": "Function",
             "tags": [],
             "label": "migrateAndConvert",
@@ -1908,17 +1900,17 @@
               "(doc: ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectUnsanitizedDoc",
+                "section": "def-server.SavedObjectUnsanitizedDoc",
                 "text": "SavedObjectUnsanitizedDoc"
               },
               "<unknown>) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectUnsanitizedDoc",
+                "section": "def-server.SavedObjectUnsanitizedDoc",
                 "text": "SavedObjectUnsanitizedDoc"
               },
               "<unknown>[]"
@@ -1929,7 +1921,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-                "id": "def-common.IDocumentMigrator.migrateAndConvert.$1",
+                "id": "def-server.IDocumentMigrator.migrateAndConvert.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "doc",
@@ -1937,9 +1929,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                    "section": "def-common.SavedObjectUnsanitizedDoc",
+                    "section": "def-server.SavedObjectUnsanitizedDoc",
                     "text": "SavedObjectUnsanitizedDoc"
                   },
                   "<unknown>"
@@ -1954,7 +1946,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.IDocumentMigrator.isDowngradeRequired",
+            "id": "def-server.IDocumentMigrator.isDowngradeRequired",
             "type": "Function",
             "tags": [],
             "label": "isDowngradeRequired",
@@ -1965,17 +1957,17 @@
               "(doc: ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectUnsanitizedDoc",
+                "section": "def-server.SavedObjectUnsanitizedDoc",
                 "text": "SavedObjectUnsanitizedDoc"
               },
               "<unknown>, options?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-base-server-internal",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-                "section": "def-common.IsDowngradeRequiredOptions",
+                "section": "def-server.IsDowngradeRequiredOptions",
                 "text": "IsDowngradeRequiredOptions"
               },
               " | undefined) => boolean"
@@ -1986,7 +1978,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-                "id": "def-common.IDocumentMigrator.isDowngradeRequired.$1",
+                "id": "def-server.IDocumentMigrator.isDowngradeRequired.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "doc",
@@ -1994,9 +1986,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                    "section": "def-common.SavedObjectUnsanitizedDoc",
+                    "section": "def-server.SavedObjectUnsanitizedDoc",
                     "text": "SavedObjectUnsanitizedDoc"
                   },
                   "<unknown>"
@@ -2008,7 +2000,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-                "id": "def-common.IDocumentMigrator.isDowngradeRequired.$2",
+                "id": "def-server.IDocumentMigrator.isDowngradeRequired.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -2016,9 +2008,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-base-server-internal",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-                    "section": "def-common.IsDowngradeRequiredOptions",
+                    "section": "def-server.IsDowngradeRequiredOptions",
                     "text": "IsDowngradeRequiredOptions"
                   },
                   " | undefined"
@@ -2036,7 +2028,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.IsDowngradeRequiredOptions",
+        "id": "def-server.IsDowngradeRequiredOptions",
         "type": "Interface",
         "tags": [],
         "label": "IsDowngradeRequiredOptions",
@@ -2049,7 +2041,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.IsDowngradeRequiredOptions.targetTypeVersion",
+            "id": "def-server.IsDowngradeRequiredOptions.targetTypeVersion",
             "type": "string",
             "tags": [],
             "label": "targetTypeVersion",
@@ -2071,7 +2063,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.CompareModelVersionStatus",
+        "id": "def-server.CompareModelVersionStatus",
         "type": "Type",
         "tags": [],
         "label": "CompareModelVersionStatus",
@@ -2088,7 +2080,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.FieldListMap",
+        "id": "def-server.FieldListMap",
         "type": "Type",
         "tags": [],
         "label": "FieldListMap",
@@ -2103,7 +2095,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.globalSwitchToModelVersionAt",
+        "id": "def-server.globalSwitchToModelVersionAt",
         "type": "string",
         "tags": [],
         "label": "globalSwitchToModelVersionAt",
@@ -2120,7 +2112,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.ModelVersionMap",
+        "id": "def-server.ModelVersionMap",
         "type": "Type",
         "tags": [],
         "label": "ModelVersionMap",
@@ -2137,7 +2129,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.modelVersionVirtualMajor",
+        "id": "def-server.modelVersionVirtualMajor",
         "type": "number",
         "tags": [],
         "label": "modelVersionVirtualMajor",
@@ -2154,7 +2146,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.SavedObjectsConfigType",
+        "id": "def-server.SavedObjectsConfigType",
         "type": "Type",
         "tags": [],
         "label": "SavedObjectsConfigType",
@@ -2177,7 +2169,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.SavedObjectsMigrationConfigType",
+        "id": "def-server.SavedObjectsMigrationConfigType",
         "type": "Type",
         "tags": [],
         "label": "SavedObjectsMigrationConfigType",
@@ -2208,7 +2200,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.VirtualVersionMap",
+        "id": "def-server.VirtualVersionMap",
         "type": "Type",
         "tags": [],
         "label": "VirtualVersionMap",
@@ -2227,7 +2219,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.DEFAULT_INDEX_TYPES_MAP",
+        "id": "def-server.DEFAULT_INDEX_TYPES_MAP",
         "type": "Object",
         "tags": [],
         "label": "DEFAULT_INDEX_TYPES_MAP",
@@ -2240,7 +2232,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.DEFAULT_INDEX_TYPES_MAP..kibana_task_manager",
+            "id": "def-server.DEFAULT_INDEX_TYPES_MAP..kibana_task_manager",
             "type": "Array",
             "tags": [],
             "label": "'.kibana_task_manager'",
@@ -2254,7 +2246,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.DEFAULT_INDEX_TYPES_MAP..kibana",
+            "id": "def-server.DEFAULT_INDEX_TYPES_MAP..kibana",
             "type": "Array",
             "tags": [],
             "label": "'.kibana'",
@@ -2271,7 +2263,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.HASH_TO_VERSION_MAP",
+        "id": "def-server.HASH_TO_VERSION_MAP",
         "type": "Object",
         "tags": [],
         "label": "HASH_TO_VERSION_MAP",
@@ -2284,7 +2276,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.action_task_params3d1b76c39bfb2cc8296b024d73854724",
+            "id": "def-server.HASH_TO_VERSION_MAP.action_task_params3d1b76c39bfb2cc8296b024d73854724",
             "type": "string",
             "tags": [],
             "label": "'action_task_params|3d1b76c39bfb2cc8296b024d73854724'",
@@ -2295,7 +2287,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.action0be88ebcc8560a075b6898236a202eb1",
+            "id": "def-server.HASH_TO_VERSION_MAP.action0be88ebcc8560a075b6898236a202eb1",
             "type": "string",
             "tags": [],
             "label": "'action|0be88ebcc8560a075b6898236a202eb1'",
@@ -2306,7 +2298,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.alert96a5a144778243a9f4fece0e71c2197f",
+            "id": "def-server.HASH_TO_VERSION_MAP.alert96a5a144778243a9f4fece0e71c2197f",
             "type": "string",
             "tags": [],
             "label": "'alert|96a5a144778243a9f4fece0e71c2197f'",
@@ -2317,7 +2309,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.api_key_pending_invalidation16f515278a295f6245149ad7c5ddedb7",
+            "id": "def-server.HASH_TO_VERSION_MAP.api_key_pending_invalidation16f515278a295f6245149ad7c5ddedb7",
             "type": "string",
             "tags": [],
             "label": "'api_key_pending_invalidation|16f515278a295f6245149ad7c5ddedb7'",
@@ -2328,7 +2320,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.apmcustomdashboards561810b957ac3c09fcfc08f32f168e97",
+            "id": "def-server.HASH_TO_VERSION_MAP.apmcustomdashboards561810b957ac3c09fcfc08f32f168e97",
             "type": "string",
             "tags": [],
             "label": "'apm-custom-dashboards|561810b957ac3c09fcfc08f32f168e97'",
@@ -2339,7 +2331,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.apmindices3d1b76c39bfb2cc8296b024d73854724",
+            "id": "def-server.HASH_TO_VERSION_MAP.apmindices3d1b76c39bfb2cc8296b024d73854724",
             "type": "string",
             "tags": [],
             "label": "'apm-indices|3d1b76c39bfb2cc8296b024d73854724'",
@@ -2350,7 +2342,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.apmserverschemab1d71908f324c17bf744ac72af5038fb",
+            "id": "def-server.HASH_TO_VERSION_MAP.apmserverschemab1d71908f324c17bf744ac72af5038fb",
             "type": "string",
             "tags": [],
             "label": "'apm-server-schema|b1d71908f324c17bf744ac72af5038fb'",
@@ -2361,7 +2353,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.apmservicegroup2af509c6506f29a858e5a0950577d9fa",
+            "id": "def-server.HASH_TO_VERSION_MAP.apmservicegroup2af509c6506f29a858e5a0950577d9fa",
             "type": "string",
             "tags": [],
             "label": "'apm-service-group|2af509c6506f29a858e5a0950577d9fa'",
@@ -2372,7 +2364,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.apmtelemetry3d1b76c39bfb2cc8296b024d73854724",
+            "id": "def-server.HASH_TO_VERSION_MAP.apmtelemetry3d1b76c39bfb2cc8296b024d73854724",
             "type": "string",
             "tags": [],
             "label": "'apm-telemetry|3d1b76c39bfb2cc8296b024d73854724'",
@@ -2383,7 +2375,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.app_search_telemetry3d1b76c39bfb2cc8296b024d73854724",
+            "id": "def-server.HASH_TO_VERSION_MAP.app_search_telemetry3d1b76c39bfb2cc8296b024d73854724",
             "type": "string",
             "tags": [],
             "label": "'app_search_telemetry|3d1b76c39bfb2cc8296b024d73854724'",
@@ -2394,7 +2386,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.application_usage_daily43b8830d5d0df85a6823d290885fc9fd",
+            "id": "def-server.HASH_TO_VERSION_MAP.application_usage_daily43b8830d5d0df85a6823d290885fc9fd",
             "type": "string",
             "tags": [],
             "label": "'application_usage_daily|43b8830d5d0df85a6823d290885fc9fd'",
@@ -2405,7 +2397,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.application_usage_totals3d1b76c39bfb2cc8296b024d73854724",
+            "id": "def-server.HASH_TO_VERSION_MAP.application_usage_totals3d1b76c39bfb2cc8296b024d73854724",
             "type": "string",
             "tags": [],
             "label": "'application_usage_totals|3d1b76c39bfb2cc8296b024d73854724'",
@@ -2416,7 +2408,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.canvaselement7390014e1091044523666d97247392fc",
+            "id": "def-server.HASH_TO_VERSION_MAP.canvaselement7390014e1091044523666d97247392fc",
             "type": "string",
             "tags": [],
             "label": "'canvas-element|7390014e1091044523666d97247392fc'",
@@ -2427,7 +2419,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.canvasworkpadtemplateae2673f678281e2c055d764b153e9715",
+            "id": "def-server.HASH_TO_VERSION_MAP.canvasworkpadtemplateae2673f678281e2c055d764b153e9715",
             "type": "string",
             "tags": [],
             "label": "'canvas-workpad-template|ae2673f678281e2c055d764b153e9715'",
@@ -2438,7 +2430,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.canvasworkpadb0a1706d356228dbdcb4a17e6b9eb231",
+            "id": "def-server.HASH_TO_VERSION_MAP.canvasworkpadb0a1706d356228dbdcb4a17e6b9eb231",
             "type": "string",
             "tags": [],
             "label": "'canvas-workpad|b0a1706d356228dbdcb4a17e6b9eb231'",
@@ -2449,7 +2441,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.casescomments93535d41ca0279a4a2e5d08acd3f28e3",
+            "id": "def-server.HASH_TO_VERSION_MAP.casescomments93535d41ca0279a4a2e5d08acd3f28e3",
             "type": "string",
             "tags": [],
             "label": "'cases-comments|93535d41ca0279a4a2e5d08acd3f28e3'",
@@ -2460,7 +2452,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.casesconfigurec124bd0be4c139d0f0f91fb9eeca8e37",
+            "id": "def-server.HASH_TO_VERSION_MAP.casesconfigurec124bd0be4c139d0f0f91fb9eeca8e37",
             "type": "string",
             "tags": [],
             "label": "'cases-configure|c124bd0be4c139d0f0f91fb9eeca8e37'",
@@ -2471,7 +2463,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.casesconnectormappingsa98c33813f364f0b068e8c592ac6ef6d",
+            "id": "def-server.HASH_TO_VERSION_MAP.casesconnectormappingsa98c33813f364f0b068e8c592ac6ef6d",
             "type": "string",
             "tags": [],
             "label": "'cases-connector-mappings|a98c33813f364f0b068e8c592ac6ef6d'",
@@ -2482,7 +2474,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.casesrules1cb4b03690489e07aa86f283dcea5ce1",
+            "id": "def-server.HASH_TO_VERSION_MAP.casesrules1cb4b03690489e07aa86f283dcea5ce1",
             "type": "string",
             "tags": [],
             "label": "'cases-rules|1cb4b03690489e07aa86f283dcea5ce1'",
@@ -2493,7 +2485,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.casestelemetry3d1b76c39bfb2cc8296b024d73854724",
+            "id": "def-server.HASH_TO_VERSION_MAP.casestelemetry3d1b76c39bfb2cc8296b024d73854724",
             "type": "string",
             "tags": [],
             "label": "'cases-telemetry|3d1b76c39bfb2cc8296b024d73854724'",
@@ -2504,7 +2496,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.casesuseractions07a6651cf37853dd5d64bfb2c796e102",
+            "id": "def-server.HASH_TO_VERSION_MAP.casesuseractions07a6651cf37853dd5d64bfb2c796e102",
             "type": "string",
             "tags": [],
             "label": "'cases-user-actions|07a6651cf37853dd5d64bfb2c796e102'",
@@ -2515,7 +2507,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.cases8f7dc53b17c272ea19f831537daa082d",
+            "id": "def-server.HASH_TO_VERSION_MAP.cases8f7dc53b17c272ea19f831537daa082d",
             "type": "string",
             "tags": [],
             "label": "'cases|8f7dc53b17c272ea19f831537daa082d'",
@@ -2526,7 +2518,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.cloudsecurityposturesettings3d1b76c39bfb2cc8296b024d73854724",
+            "id": "def-server.HASH_TO_VERSION_MAP.cloudsecurityposturesettings3d1b76c39bfb2cc8296b024d73854724",
             "type": "string",
             "tags": [],
             "label": "'cloud-security-posture-settings|3d1b76c39bfb2cc8296b024d73854724'",
@@ -2537,7 +2529,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.configglobalc63748b75f39d0c54de12d12c1ccbc20",
+            "id": "def-server.HASH_TO_VERSION_MAP.configglobalc63748b75f39d0c54de12d12c1ccbc20",
             "type": "string",
             "tags": [],
             "label": "'config-global|c63748b75f39d0c54de12d12c1ccbc20'",
@@ -2548,7 +2540,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.configc63748b75f39d0c54de12d12c1ccbc20",
+            "id": "def-server.HASH_TO_VERSION_MAP.configc63748b75f39d0c54de12d12c1ccbc20",
             "type": "string",
             "tags": [],
             "label": "'config|c63748b75f39d0c54de12d12c1ccbc20'",
@@ -2559,7 +2551,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.connector_token740b3fd18387d4097dca8d177e6a35c6",
+            "id": "def-server.HASH_TO_VERSION_MAP.connector_token740b3fd18387d4097dca8d177e6a35c6",
             "type": "string",
             "tags": [],
             "label": "'connector_token|740b3fd18387d4097dca8d177e6a35c6'",
@@ -2570,7 +2562,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.coreusagestats3d1b76c39bfb2cc8296b024d73854724",
+            "id": "def-server.HASH_TO_VERSION_MAP.coreusagestats3d1b76c39bfb2cc8296b024d73854724",
             "type": "string",
             "tags": [],
             "label": "'core-usage-stats|3d1b76c39bfb2cc8296b024d73854724'",
@@ -2581,7 +2573,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.cspruletemplate6ee70dc06c0ca3ddffc18222f202ab25",
+            "id": "def-server.HASH_TO_VERSION_MAP.cspruletemplate6ee70dc06c0ca3ddffc18222f202ab25",
             "type": "string",
             "tags": [],
             "label": "'csp-rule-template|6ee70dc06c0ca3ddffc18222f202ab25'",
@@ -2592,7 +2584,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.dashboardb8aa800aa5e0d975c5e8dc57f03d41f8",
+            "id": "def-server.HASH_TO_VERSION_MAP.dashboardb8aa800aa5e0d975c5e8dc57f03d41f8",
             "type": "string",
             "tags": [],
             "label": "'dashboard|b8aa800aa5e0d975c5e8dc57f03d41f8'",
@@ -2603,7 +2595,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.endpointunifieduserartifactmanifest393c6e4f5f16288c24ef9057e4d76a4c",
+            "id": "def-server.HASH_TO_VERSION_MAP.endpointunifieduserartifactmanifest393c6e4f5f16288c24ef9057e4d76a4c",
             "type": "string",
             "tags": [],
             "label": "'endpoint:unified-user-artifact-manifest|393c6e4f5f16288c24ef9057e4d76a4c'",
@@ -2614,7 +2606,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.endpointuserartifactmanifest7502b5c5bc923abe8aa5ccfd636e8c3d",
+            "id": "def-server.HASH_TO_VERSION_MAP.endpointuserartifactmanifest7502b5c5bc923abe8aa5ccfd636e8c3d",
             "type": "string",
             "tags": [],
             "label": "'endpoint:user-artifact-manifest|7502b5c5bc923abe8aa5ccfd636e8c3d'",
@@ -2625,7 +2617,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.enterprise_search_telemetry3d1b76c39bfb2cc8296b024d73854724",
+            "id": "def-server.HASH_TO_VERSION_MAP.enterprise_search_telemetry3d1b76c39bfb2cc8296b024d73854724",
             "type": "string",
             "tags": [],
             "label": "'enterprise_search_telemetry|3d1b76c39bfb2cc8296b024d73854724'",
@@ -2636,7 +2628,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.epmpackagesassets44621b2f6052ef966da47b7c3a00f33b",
+            "id": "def-server.HASH_TO_VERSION_MAP.epmpackagesassets44621b2f6052ef966da47b7c3a00f33b",
             "type": "string",
             "tags": [],
             "label": "'epm-packages-assets|44621b2f6052ef966da47b7c3a00f33b'",
@@ -2647,7 +2639,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.epmpackages8ce219acd0f6f3529237d52193866afb",
+            "id": "def-server.HASH_TO_VERSION_MAP.epmpackages8ce219acd0f6f3529237d52193866afb",
             "type": "string",
             "tags": [],
             "label": "'epm-packages|8ce219acd0f6f3529237d52193866afb'",
@@ -2658,7 +2650,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.event_loop_delays_daily5df7e292ddd5028e07c1482e130e6654",
+            "id": "def-server.HASH_TO_VERSION_MAP.event_loop_delays_daily5df7e292ddd5028e07c1482e130e6654",
             "type": "string",
             "tags": [],
             "label": "'event_loop_delays_daily|5df7e292ddd5028e07c1482e130e6654'",
@@ -2669,7 +2661,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.eventannotationgroupdf07b1a361c32daf4e6842c1d5521dbe",
+            "id": "def-server.HASH_TO_VERSION_MAP.eventannotationgroupdf07b1a361c32daf4e6842c1d5521dbe",
             "type": "string",
             "tags": [],
             "label": "'event-annotation-group|df07b1a361c32daf4e6842c1d5521dbe'",
@@ -2680,7 +2672,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.exceptionlistagnostic8a1defe5981db16792cb9a772e84bb9a",
+            "id": "def-server.HASH_TO_VERSION_MAP.exceptionlistagnostic8a1defe5981db16792cb9a772e84bb9a",
             "type": "string",
             "tags": [],
             "label": "'exception-list-agnostic|8a1defe5981db16792cb9a772e84bb9a'",
@@ -2691,7 +2683,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.exceptionlist8a1defe5981db16792cb9a772e84bb9a",
+            "id": "def-server.HASH_TO_VERSION_MAP.exceptionlist8a1defe5981db16792cb9a772e84bb9a",
             "type": "string",
             "tags": [],
             "label": "'exception-list|8a1defe5981db16792cb9a772e84bb9a'",
@@ -2702,7 +2694,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.fileuploadusagecollectiontelemetrya34fbb8e3263d105044869264860c697",
+            "id": "def-server.HASH_TO_VERSION_MAP.fileuploadusagecollectiontelemetrya34fbb8e3263d105044869264860c697",
             "type": "string",
             "tags": [],
             "label": "'file-upload-usage-collection-telemetry|a34fbb8e3263d105044869264860c697'",
@@ -2713,7 +2705,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.file8e9dd7f8a22efdb8fb1c15ed38fde9f6",
+            "id": "def-server.HASH_TO_VERSION_MAP.file8e9dd7f8a22efdb8fb1c15ed38fde9f6",
             "type": "string",
             "tags": [],
             "label": "'file|8e9dd7f8a22efdb8fb1c15ed38fde9f6'",
@@ -2724,7 +2716,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.fileShareaa8f7ac2ddf8ab1a91bd34e347046caa",
+            "id": "def-server.HASH_TO_VERSION_MAP.fileShareaa8f7ac2ddf8ab1a91bd34e347046caa",
             "type": "string",
             "tags": [],
             "label": "'fileShare|aa8f7ac2ddf8ab1a91bd34e347046caa'",
@@ -2735,7 +2727,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.fleetfleetserverhostc28ce72481d1696a9aac8b2cdebcecfa",
+            "id": "def-server.HASH_TO_VERSION_MAP.fleetfleetserverhostc28ce72481d1696a9aac8b2cdebcecfa",
             "type": "string",
             "tags": [],
             "label": "'fleet-fleet-server-host|c28ce72481d1696a9aac8b2cdebcecfa'",
@@ -2746,7 +2738,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.fleetmessagesigningkeys3d1b76c39bfb2cc8296b024d73854724",
+            "id": "def-server.HASH_TO_VERSION_MAP.fleetmessagesigningkeys3d1b76c39bfb2cc8296b024d73854724",
             "type": "string",
             "tags": [],
             "label": "'fleet-message-signing-keys|3d1b76c39bfb2cc8296b024d73854724'",
@@ -2757,7 +2749,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.fleetpreconfigurationdeletionrecord4c36f199189a367e43541f236141204c",
+            "id": "def-server.HASH_TO_VERSION_MAP.fleetpreconfigurationdeletionrecord4c36f199189a367e43541f236141204c",
             "type": "string",
             "tags": [],
             "label": "'fleet-preconfiguration-deletion-record|4c36f199189a367e43541f236141204c'",
@@ -2768,7 +2760,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.fleetproxy05b7a22977de25ce67a77e44dd8e6c33",
+            "id": "def-server.HASH_TO_VERSION_MAP.fleetproxy05b7a22977de25ce67a77e44dd8e6c33",
             "type": "string",
             "tags": [],
             "label": "'fleet-proxy|05b7a22977de25ce67a77e44dd8e6c33'",
@@ -2779,7 +2771,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.fleetuninstalltokenscdb2b655f6b468ecb57d132972425f2e",
+            "id": "def-server.HASH_TO_VERSION_MAP.fleetuninstalltokenscdb2b655f6b468ecb57d132972425f2e",
             "type": "string",
             "tags": [],
             "label": "'fleet-uninstall-tokens|cdb2b655f6b468ecb57d132972425f2e'",
@@ -2790,7 +2782,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.graphworkspace27a94b2edcb0610c6aea54a7c56d7752",
+            "id": "def-server.HASH_TO_VERSION_MAP.graphworkspace27a94b2edcb0610c6aea54a7c56d7752",
             "type": "string",
             "tags": [],
             "label": "'graph-workspace|27a94b2edcb0610c6aea54a7c56d7752'",
@@ -2801,7 +2793,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.guidedonboardingguidestatea3db59c45a3fd2730816d4f53c35c7d9",
+            "id": "def-server.HASH_TO_VERSION_MAP.guidedonboardingguidestatea3db59c45a3fd2730816d4f53c35c7d9",
             "type": "string",
             "tags": [],
             "label": "'guided-onboarding-guide-state|a3db59c45a3fd2730816d4f53c35c7d9'",
@@ -2812,7 +2804,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.guidedonboardingpluginstate3d1b76c39bfb2cc8296b024d73854724",
+            "id": "def-server.HASH_TO_VERSION_MAP.guidedonboardingpluginstate3d1b76c39bfb2cc8296b024d73854724",
             "type": "string",
             "tags": [],
             "label": "'guided-onboarding-plugin-state|3d1b76c39bfb2cc8296b024d73854724'",
@@ -2823,7 +2815,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.indexpattern83c02d842fe2a94d14dfa13f7dcd6e87",
+            "id": "def-server.HASH_TO_VERSION_MAP.indexpattern83c02d842fe2a94d14dfa13f7dcd6e87",
             "type": "string",
             "tags": [],
             "label": "'index-pattern|83c02d842fe2a94d14dfa13f7dcd6e87'",
@@ -2834,7 +2826,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.infracustomdashboards1eb3c9e1888b8daea8495769e8d3ba2d",
+            "id": "def-server.HASH_TO_VERSION_MAP.infracustomdashboards1eb3c9e1888b8daea8495769e8d3ba2d",
             "type": "string",
             "tags": [],
             "label": "'infra-custom-dashboards|1eb3c9e1888b8daea8495769e8d3ba2d'",
@@ -2845,7 +2837,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.infrastructuremonitoringlogviewc50526fc6040c5355ed027d34d05b35c",
+            "id": "def-server.HASH_TO_VERSION_MAP.infrastructuremonitoringlogviewc50526fc6040c5355ed027d34d05b35c",
             "type": "string",
             "tags": [],
             "label": "'infrastructure-monitoring-log-view|c50526fc6040c5355ed027d34d05b35c'",
@@ -2856,7 +2848,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.infrastructureuisource3d1b76c39bfb2cc8296b024d73854724",
+            "id": "def-server.HASH_TO_VERSION_MAP.infrastructureuisource3d1b76c39bfb2cc8296b024d73854724",
             "type": "string",
             "tags": [],
             "label": "'infrastructure-ui-source|3d1b76c39bfb2cc8296b024d73854724'",
@@ -2867,7 +2859,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.ingest_manager_settingsb91ffb075799c78ffd7dbd51a279c8c9",
+            "id": "def-server.HASH_TO_VERSION_MAP.ingest_manager_settingsb91ffb075799c78ffd7dbd51a279c8c9",
             "type": "string",
             "tags": [],
             "label": "'ingest_manager_settings|b91ffb075799c78ffd7dbd51a279c8c9'",
@@ -2878,7 +2870,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.ingestagentpolicies0fd93cd11c019b118e93a9157c22057b",
+            "id": "def-server.HASH_TO_VERSION_MAP.ingestagentpolicies0fd93cd11c019b118e93a9157c22057b",
             "type": "string",
             "tags": [],
             "label": "'ingest-agent-policies|0fd93cd11c019b118e93a9157c22057b'",
@@ -2889,7 +2881,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.ingestdownloadsources0b0f6828e59805bd07a650d80817c342",
+            "id": "def-server.HASH_TO_VERSION_MAP.ingestdownloadsources0b0f6828e59805bd07a650d80817c342",
             "type": "string",
             "tags": [],
             "label": "'ingest-download-sources|0b0f6828e59805bd07a650d80817c342'",
@@ -2900,7 +2892,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.ingestoutputsb1237f7fdc0967709e75d65d208ace05",
+            "id": "def-server.HASH_TO_VERSION_MAP.ingestoutputsb1237f7fdc0967709e75d65d208ace05",
             "type": "string",
             "tags": [],
             "label": "'ingest-outputs|b1237f7fdc0967709e75d65d208ace05'",
@@ -2911,7 +2903,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.ingestpackagepoliciesaef7977b81f7930f23cbfd8711ba272e",
+            "id": "def-server.HASH_TO_VERSION_MAP.ingestpackagepoliciesaef7977b81f7930f23cbfd8711ba272e",
             "type": "string",
             "tags": [],
             "label": "'ingest-package-policies|aef7977b81f7930f23cbfd8711ba272e'",
@@ -2922,7 +2914,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.inventoryview3d1b76c39bfb2cc8296b024d73854724",
+            "id": "def-server.HASH_TO_VERSION_MAP.inventoryview3d1b76c39bfb2cc8296b024d73854724",
             "type": "string",
             "tags": [],
             "label": "'inventory-view|3d1b76c39bfb2cc8296b024d73854724'",
@@ -2933,7 +2925,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.kqltelemetry3d1b76c39bfb2cc8296b024d73854724",
+            "id": "def-server.HASH_TO_VERSION_MAP.kqltelemetry3d1b76c39bfb2cc8296b024d73854724",
             "type": "string",
             "tags": [],
             "label": "'kql-telemetry|3d1b76c39bfb2cc8296b024d73854724'",
@@ -2944,7 +2936,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.legacyurlalias0750774cf16475f88f2361e99cc5c8f0",
+            "id": "def-server.HASH_TO_VERSION_MAP.legacyurlalias0750774cf16475f88f2361e99cc5c8f0",
             "type": "string",
             "tags": [],
             "label": "'legacy-url-alias|0750774cf16475f88f2361e99cc5c8f0'",
@@ -2955,7 +2947,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.lensuitelemetry509bfa5978586998e05f9e303c07a327",
+            "id": "def-server.HASH_TO_VERSION_MAP.lensuitelemetry509bfa5978586998e05f9e303c07a327",
             "type": "string",
             "tags": [],
             "label": "'lens-ui-telemetry|509bfa5978586998e05f9e303c07a327'",
@@ -2966,7 +2958,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.lensb0da10d5ab9ebd81d61700737ddc76c9",
+            "id": "def-server.HASH_TO_VERSION_MAP.lensb0da10d5ab9ebd81d61700737ddc76c9",
             "type": "string",
             "tags": [],
             "label": "'lens|b0da10d5ab9ebd81d61700737ddc76c9'",
@@ -2977,7 +2969,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.links3378bb9b651572865d9f61f5b448e415",
+            "id": "def-server.HASH_TO_VERSION_MAP.links3378bb9b651572865d9f61f5b448e415",
             "type": "string",
             "tags": [],
             "label": "'links|3378bb9b651572865d9f61f5b448e415'",
@@ -2988,7 +2980,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.maintenancewindowa58ac2ef53ff5103710093e669dcc1d8",
+            "id": "def-server.HASH_TO_VERSION_MAP.maintenancewindowa58ac2ef53ff5103710093e669dcc1d8",
             "type": "string",
             "tags": [],
             "label": "'maintenance-window|a58ac2ef53ff5103710093e669dcc1d8'",
@@ -2999,7 +2991,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.map9134b47593116d7953f6adba096fc463",
+            "id": "def-server.HASH_TO_VERSION_MAP.map9134b47593116d7953f6adba096fc463",
             "type": "string",
             "tags": [],
             "label": "'map|9134b47593116d7953f6adba096fc463'",
@@ -3010,7 +3002,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.metricsdatasource3d1b76c39bfb2cc8296b024d73854724",
+            "id": "def-server.HASH_TO_VERSION_MAP.metricsdatasource3d1b76c39bfb2cc8296b024d73854724",
             "type": "string",
             "tags": [],
             "label": "'metrics-data-source|3d1b76c39bfb2cc8296b024d73854724'",
@@ -3021,7 +3013,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.metricsexplorerview3d1b76c39bfb2cc8296b024d73854724",
+            "id": "def-server.HASH_TO_VERSION_MAP.metricsexplorerview3d1b76c39bfb2cc8296b024d73854724",
             "type": "string",
             "tags": [],
             "label": "'metrics-explorer-view|3d1b76c39bfb2cc8296b024d73854724'",
@@ -3032,7 +3024,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.mljob3bb64c31915acf93fc724af137a0891b",
+            "id": "def-server.HASH_TO_VERSION_MAP.mljob3bb64c31915acf93fc724af137a0891b",
             "type": "string",
             "tags": [],
             "label": "'ml-job|3bb64c31915acf93fc724af137a0891b'",
@@ -3043,7 +3035,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.mlmodulef6c6b7b7ebdca4154246923f24d6340d",
+            "id": "def-server.HASH_TO_VERSION_MAP.mlmodulef6c6b7b7ebdca4154246923f24d6340d",
             "type": "string",
             "tags": [],
             "label": "'ml-module|f6c6b7b7ebdca4154246923f24d6340d'",
@@ -3054,7 +3046,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.mltrainedmodeld2f03c1a5dd038fa58af14a56944312b",
+            "id": "def-server.HASH_TO_VERSION_MAP.mltrainedmodeld2f03c1a5dd038fa58af14a56944312b",
             "type": "string",
             "tags": [],
             "label": "'ml-trained-model|d2f03c1a5dd038fa58af14a56944312b'",
@@ -3065,7 +3057,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.monitoringtelemetry2669d5ec15e82391cf58df4294ee9c68",
+            "id": "def-server.HASH_TO_VERSION_MAP.monitoringtelemetry2669d5ec15e82391cf58df4294ee9c68",
             "type": "string",
             "tags": [],
             "label": "'monitoring-telemetry|2669d5ec15e82391cf58df4294ee9c68'",
@@ -3076,7 +3068,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.observabilityonboardingstatea4e5c9d018037114140bdb1647c2d568",
+            "id": "def-server.HASH_TO_VERSION_MAP.observabilityonboardingstatea4e5c9d018037114140bdb1647c2d568",
             "type": "string",
             "tags": [],
             "label": "'observability-onboarding-state|a4e5c9d018037114140bdb1647c2d568'",
@@ -3087,7 +3079,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.osquerymanagerusagemetric4dc4f647d27247c002f56f22742175fe",
+            "id": "def-server.HASH_TO_VERSION_MAP.osquerymanagerusagemetric4dc4f647d27247c002f56f22742175fe",
             "type": "string",
             "tags": [],
             "label": "'osquery-manager-usage-metric|4dc4f647d27247c002f56f22742175fe'",
@@ -3098,7 +3090,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.osquerypackassetfe0dfa13c4c24ac37ce1aec04c560a81",
+            "id": "def-server.HASH_TO_VERSION_MAP.osquerypackassetfe0dfa13c4c24ac37ce1aec04c560a81",
             "type": "string",
             "tags": [],
             "label": "'osquery-pack-asset|fe0dfa13c4c24ac37ce1aec04c560a81'",
@@ -3109,7 +3101,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.osquerypack6bc20973adab06f00156cbc4578a19ac",
+            "id": "def-server.HASH_TO_VERSION_MAP.osquerypack6bc20973adab06f00156cbc4578a19ac",
             "type": "string",
             "tags": [],
             "label": "'osquery-pack|6bc20973adab06f00156cbc4578a19ac'",
@@ -3120,7 +3112,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.osquerysavedquerya05ec7031231a4b71bfb4493a07b2dc5",
+            "id": "def-server.HASH_TO_VERSION_MAP.osquerysavedquerya05ec7031231a4b71bfb4493a07b2dc5",
             "type": "string",
             "tags": [],
             "label": "'osquery-saved-query|a05ec7031231a4b71bfb4493a07b2dc5'",
@@ -3131,7 +3123,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.policysettingsprotectionupdatesnote37d4035a1dc3c5e58f1b519f99093f21",
+            "id": "def-server.HASH_TO_VERSION_MAP.policysettingsprotectionupdatesnote37d4035a1dc3c5e58f1b519f99093f21",
             "type": "string",
             "tags": [],
             "label": "'policy-settings-protection-updates-note|37d4035a1dc3c5e58f1b519f99093f21'",
@@ -3142,7 +3134,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.queryaa811b49f48906074f59110bfa83984c",
+            "id": "def-server.HASH_TO_VERSION_MAP.queryaa811b49f48906074f59110bfa83984c",
             "type": "string",
             "tags": [],
             "label": "'query|aa811b49f48906074f59110bfa83984c'",
@@ -3153,7 +3145,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.riskengineconfiguration431232781a82926aad5b1fd849715c0f",
+            "id": "def-server.HASH_TO_VERSION_MAP.riskengineconfiguration431232781a82926aad5b1fd849715c0f",
             "type": "string",
             "tags": [],
             "label": "'risk-engine-configuration|431232781a82926aad5b1fd849715c0f'",
@@ -3164,7 +3156,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.rulessettings001f60645e96c71520214b57f3ea7590",
+            "id": "def-server.HASH_TO_VERSION_MAP.rulessettings001f60645e96c71520214b57f3ea7590",
             "type": "string",
             "tags": [],
             "label": "'rules-settings|001f60645e96c71520214b57f3ea7590'",
@@ -3175,7 +3167,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.sampledatatelemetry7d3cfeb915303c9641c59681967ffeb4",
+            "id": "def-server.HASH_TO_VERSION_MAP.sampledatatelemetry7d3cfeb915303c9641c59681967ffeb4",
             "type": "string",
             "tags": [],
             "label": "'sample-data-telemetry|7d3cfeb915303c9641c59681967ffeb4'",
@@ -3186,7 +3178,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.searchsessionfea3612a90b81672991617646f229a61",
+            "id": "def-server.HASH_TO_VERSION_MAP.searchsessionfea3612a90b81672991617646f229a61",
             "type": "string",
             "tags": [],
             "label": "'search-session|fea3612a90b81672991617646f229a61'",
@@ -3197,7 +3189,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.searchtelemetry3d1b76c39bfb2cc8296b024d73854724",
+            "id": "def-server.HASH_TO_VERSION_MAP.searchtelemetry3d1b76c39bfb2cc8296b024d73854724",
             "type": "string",
             "tags": [],
             "label": "'search-telemetry|3d1b76c39bfb2cc8296b024d73854724'",
@@ -3208,7 +3200,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.searchdf07b1a361c32daf4e6842c1d5521dbe",
+            "id": "def-server.HASH_TO_VERSION_MAP.searchdf07b1a361c32daf4e6842c1d5521dbe",
             "type": "string",
             "tags": [],
             "label": "'search|df07b1a361c32daf4e6842c1d5521dbe'",
@@ -3219,7 +3211,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.securityrule9d9d11b97e3aaa87fbaefbace2b5c25f",
+            "id": "def-server.HASH_TO_VERSION_MAP.securityrule9d9d11b97e3aaa87fbaefbace2b5c25f",
             "type": "string",
             "tags": [],
             "label": "'security-rule|9d9d11b97e3aaa87fbaefbace2b5c25f'",
@@ -3230,7 +3222,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.securitysolutionsignalsmigration4060b5a63dddfd54d2cd56450882cc0e",
+            "id": "def-server.HASH_TO_VERSION_MAP.securitysolutionsignalsmigration4060b5a63dddfd54d2cd56450882cc0e",
             "type": "string",
             "tags": [],
             "label": "'security-solution-signals-migration|4060b5a63dddfd54d2cd56450882cc0e'",
@@ -3241,7 +3233,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.siemdetectionengineruleactionsf5c218f837bac10ab2c3980555176cf9",
+            "id": "def-server.HASH_TO_VERSION_MAP.siemdetectionengineruleactionsf5c218f837bac10ab2c3980555176cf9",
             "type": "string",
             "tags": [],
             "label": "'siem-detection-engine-rule-actions|f5c218f837bac10ab2c3980555176cf9'",
@@ -3252,7 +3244,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.siemuitimelinenote28393dfdeb4e4413393eb5f7ec8c5436",
+            "id": "def-server.HASH_TO_VERSION_MAP.siemuitimelinenote28393dfdeb4e4413393eb5f7ec8c5436",
             "type": "string",
             "tags": [],
             "label": "'siem-ui-timeline-note|28393dfdeb4e4413393eb5f7ec8c5436'",
@@ -3263,7 +3255,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.siemuitimelinepinnedevent293fce142548281599060e07ad2c9ddb",
+            "id": "def-server.HASH_TO_VERSION_MAP.siemuitimelinepinnedevent293fce142548281599060e07ad2c9ddb",
             "type": "string",
             "tags": [],
             "label": "'siem-ui-timeline-pinned-event|293fce142548281599060e07ad2c9ddb'",
@@ -3274,7 +3266,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.siemuitimelinef6739fd4b17646a6c86321a746c247ef",
+            "id": "def-server.HASH_TO_VERSION_MAP.siemuitimelinef6739fd4b17646a6c86321a746c247ef",
             "type": "string",
             "tags": [],
             "label": "'siem-ui-timeline|f6739fd4b17646a6c86321a746c247ef'",
@@ -3285,7 +3277,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.slosettings3d1b76c39bfb2cc8296b024d73854724",
+            "id": "def-server.HASH_TO_VERSION_MAP.slosettings3d1b76c39bfb2cc8296b024d73854724",
             "type": "string",
             "tags": [],
             "label": "'slo-settings|3d1b76c39bfb2cc8296b024d73854724'",
@@ -3296,7 +3288,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.slodc7f35c0cf07d71bb36f154996fe10c6",
+            "id": "def-server.HASH_TO_VERSION_MAP.slodc7f35c0cf07d71bb36f154996fe10c6",
             "type": "string",
             "tags": [],
             "label": "'slo|dc7f35c0cf07d71bb36f154996fe10c6'",
@@ -3307,7 +3299,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.spacec3aec2a5d4afcb75554fed96411170e1",
+            "id": "def-server.HASH_TO_VERSION_MAP.spacec3aec2a5d4afcb75554fed96411170e1",
             "type": "string",
             "tags": [],
             "label": "'space|c3aec2a5d4afcb75554fed96411170e1'",
@@ -3318,7 +3310,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.spacesusagestats3d1b76c39bfb2cc8296b024d73854724",
+            "id": "def-server.HASH_TO_VERSION_MAP.spacesusagestats3d1b76c39bfb2cc8296b024d73854724",
             "type": "string",
             "tags": [],
             "label": "'spaces-usage-stats|3d1b76c39bfb2cc8296b024d73854724'",
@@ -3329,7 +3321,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.syntheticsmonitor918c09d935b1dcb6a84935b176262c3a",
+            "id": "def-server.HASH_TO_VERSION_MAP.syntheticsmonitor918c09d935b1dcb6a84935b176262c3a",
             "type": "string",
             "tags": [],
             "label": "'synthetics-monitor|918c09d935b1dcb6a84935b176262c3a'",
@@ -3340,7 +3332,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.syntheticsparam3d1b76c39bfb2cc8296b024d73854724",
+            "id": "def-server.HASH_TO_VERSION_MAP.syntheticsparam3d1b76c39bfb2cc8296b024d73854724",
             "type": "string",
             "tags": [],
             "label": "'synthetics-param|3d1b76c39bfb2cc8296b024d73854724'",
@@ -3351,7 +3343,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.syntheticsprivateslocations3d1b76c39bfb2cc8296b024d73854724",
+            "id": "def-server.HASH_TO_VERSION_MAP.syntheticsprivateslocations3d1b76c39bfb2cc8296b024d73854724",
             "type": "string",
             "tags": [],
             "label": "'synthetics-privates-locations|3d1b76c39bfb2cc8296b024d73854724'",
@@ -3362,7 +3354,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.tag83d55da58f6530f7055415717ec06474",
+            "id": "def-server.HASH_TO_VERSION_MAP.tag83d55da58f6530f7055415717ec06474",
             "type": "string",
             "tags": [],
             "label": "'tag|83d55da58f6530f7055415717ec06474'",
@@ -3373,7 +3365,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.taskb4a368fd68cd32ef6990877634639db6",
+            "id": "def-server.HASH_TO_VERSION_MAP.taskb4a368fd68cd32ef6990877634639db6",
             "type": "string",
             "tags": [],
             "label": "'task|b4a368fd68cd32ef6990877634639db6'",
@@ -3384,7 +3376,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.telemetry3d1b76c39bfb2cc8296b024d73854724",
+            "id": "def-server.HASH_TO_VERSION_MAP.telemetry3d1b76c39bfb2cc8296b024d73854724",
             "type": "string",
             "tags": [],
             "label": "'telemetry|3d1b76c39bfb2cc8296b024d73854724'",
@@ -3395,7 +3387,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.thresholdexplorerview3d1b76c39bfb2cc8296b024d73854724",
+            "id": "def-server.HASH_TO_VERSION_MAP.thresholdexplorerview3d1b76c39bfb2cc8296b024d73854724",
             "type": "string",
             "tags": [],
             "label": "'threshold-explorer-view|3d1b76c39bfb2cc8296b024d73854724'",
@@ -3406,7 +3398,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.uimetric0d409297dc5ebe1e3a1da691c6ee32e3",
+            "id": "def-server.HASH_TO_VERSION_MAP.uimetric0d409297dc5ebe1e3a1da691c6ee32e3",
             "type": "string",
             "tags": [],
             "label": "'ui-metric|0d409297dc5ebe1e3a1da691c6ee32e3'",
@@ -3417,7 +3409,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.upgradeassistantmlupgradeoperation3caf305ad2da94d80d49453b0970156d",
+            "id": "def-server.HASH_TO_VERSION_MAP.upgradeassistantmlupgradeoperation3caf305ad2da94d80d49453b0970156d",
             "type": "string",
             "tags": [],
             "label": "'upgrade-assistant-ml-upgrade-operation|3caf305ad2da94d80d49453b0970156d'",
@@ -3428,7 +3420,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.upgradeassistantreindexoperation6d1e2aca91767634e1829c30f20f6b16",
+            "id": "def-server.HASH_TO_VERSION_MAP.upgradeassistantreindexoperation6d1e2aca91767634e1829c30f20f6b16",
             "type": "string",
             "tags": [],
             "label": "'upgrade-assistant-reindex-operation|6d1e2aca91767634e1829c30f20f6b16'",
@@ -3439,7 +3431,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.uptimedynamicsettings3d1b76c39bfb2cc8296b024d73854724",
+            "id": "def-server.HASH_TO_VERSION_MAP.uptimedynamicsettings3d1b76c39bfb2cc8296b024d73854724",
             "type": "string",
             "tags": [],
             "label": "'uptime-dynamic-settings|3d1b76c39bfb2cc8296b024d73854724'",
@@ -3450,7 +3442,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.uptimesyntheticsapikeyc3178f0fde61e18d3530ba9a70bc278a",
+            "id": "def-server.HASH_TO_VERSION_MAP.uptimesyntheticsapikeyc3178f0fde61e18d3530ba9a70bc278a",
             "type": "string",
             "tags": [],
             "label": "'uptime-synthetics-api-key|c3178f0fde61e18d3530ba9a70bc278a'",
@@ -3461,7 +3453,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.urla37dbae7645ad5811045f4dd3dc1c0a8",
+            "id": "def-server.HASH_TO_VERSION_MAP.urla37dbae7645ad5811045f4dd3dc1c0a8",
             "type": "string",
             "tags": [],
             "label": "'url|a37dbae7645ad5811045f4dd3dc1c0a8'",
@@ -3472,7 +3464,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.usagecounters8cc260bdceffec4ffc3ad165c97dc1b4",
+            "id": "def-server.HASH_TO_VERSION_MAP.usagecounters8cc260bdceffec4ffc3ad165c97dc1b4",
             "type": "string",
             "tags": [],
             "label": "'usage-counters|8cc260bdceffec4ffc3ad165c97dc1b4'",
@@ -3483,7 +3475,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.visualization4891c012863513388881fc109fec4809",
+            "id": "def-server.HASH_TO_VERSION_MAP.visualization4891c012863513388881fc109fec4809",
             "type": "string",
             "tags": [],
             "label": "'visualization|4891c012863513388881fc109fec4809'",
@@ -3494,7 +3486,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.workplace_search_telemetry3d1b76c39bfb2cc8296b024d73854724",
+            "id": "def-server.HASH_TO_VERSION_MAP.workplace_search_telemetry3d1b76c39bfb2cc8296b024d73854724",
             "type": "string",
             "tags": [],
             "label": "'workplace_search_telemetry|3d1b76c39bfb2cc8296b024d73854724'",
@@ -3508,7 +3500,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.savedObjectsConfig",
+        "id": "def-server.savedObjectsConfig",
         "type": "Object",
         "tags": [],
         "label": "savedObjectsConfig",
@@ -3519,7 +3511,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.savedObjectsConfig.path",
+            "id": "def-server.savedObjectsConfig.path",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -3530,7 +3522,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.savedObjectsConfig.schema",
+            "id": "def-server.savedObjectsConfig.schema",
             "type": "Object",
             "tags": [],
             "label": "schema",
@@ -3586,7 +3578,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-        "id": "def-common.savedObjectsMigrationConfig",
+        "id": "def-server.savedObjectsMigrationConfig",
         "type": "Object",
         "tags": [],
         "label": "savedObjectsMigrationConfig",
@@ -3597,7 +3589,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.savedObjectsMigrationConfig.path",
+            "id": "def-server.savedObjectsMigrationConfig.path",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -3608,7 +3600,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.savedObjectsMigrationConfig.schema",
+            "id": "def-server.savedObjectsMigrationConfig.schema",
             "type": "Object",
             "tags": [],
             "label": "schema",
@@ -3751,5 +3743,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

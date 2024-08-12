@@ -2,6 +2,10 @@ openapi: 3.0.3
 info:
   title: Kibana Serverless APIs
   description: |
+    **Technical preview**  
+    This functionality is in technical preview and may be changed or removed in a future release.
+    Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+
     The Kibana REST APIs for Elastic serverless enable you to manage resources
     such as connectors, data views, and saved objects. The API calls are
     stateless. Each request that you make happens in isolation from other calls

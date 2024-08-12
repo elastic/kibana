@@ -17,7 +17,6 @@ import {
   getKibanaMigratorTestKit,
   startElasticsearch,
 } from '../../migrations/kibana_migrator_test_kit';
-import { delay } from '../../migrations/test_utils';
 import { getBaseMigratorParams } from '../../migrations/fixtures/zdt_base.fixtures';
 
 export const logFilePath = Path.join(__dirname, 'update.test.log');
@@ -93,7 +92,6 @@ describe('SOR - update API', () => {
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(10);
   });
 
   const setup = async () => {

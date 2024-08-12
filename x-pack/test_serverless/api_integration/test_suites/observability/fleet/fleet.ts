@@ -32,11 +32,11 @@ export default function (ctx: FtrProviderContext) {
       defaultEsOutputUrl = await expectDefaultElasticsearchOutput(ctx);
       expect(defaultEsOutputUrl).not.toBe('');
 
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('rejects request to create a new fleet server hosts if host url is different from default', async () => {

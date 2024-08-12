@@ -8,8 +8,11 @@
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 import type { FromSchema } from 'json-schema-to-ts';
 import type { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/public';
-import type { InvestigateWidget, WorkflowBlock } from '../common';
+import type { AuthenticatedUser } from '@kbn/core/public';
+import type { InvestigateWidget } from '../common';
 import type { GlobalWidgetParameters, InvestigateWidgetCreate } from '../common/types';
+import type { UseInvestigationApi } from './hooks/use_investigation';
+import type { UseInvestigateWidgetApi } from './hooks/use_investigate_widget';
 
 export enum ChromeOption {
   disabled = 'disabled',
@@ -19,14 +22,9 @@ export enum ChromeOption {
 
 export type OnWidgetAdd = (create: InvestigateWidgetCreate) => Promise<void>;
 
-type UnregisterFunction = () => void;
-
 export interface WidgetRenderAPI {
   onDelete: () => void;
   onWidgetAdd: OnWidgetAdd;
-  blocks: {
-    publish: (blocks: WorkflowBlock[]) => UnregisterFunction;
-  };
 }
 
 type WidgetRenderOptions<TInvestigateWidget extends InvestigateWidget> = {
@@ -76,9 +74,15 @@ export interface InvestigateSetupDependencies {}
 export interface InvestigateStartDependencies {}
 
 export interface InvestigatePublicSetup {
-  registerWidget: RegisterWidget;
+  register: (callback: (registerWidget: RegisterWidget) => Promise<void>) => void;
 }
 
 export interface InvestigatePublicStart {
   getWidgetDefinitions: () => WidgetDefinition[];
+  useInvestigation: ({}: {
+    user: AuthenticatedUser;
+    from: string;
+    to: string;
+  }) => UseInvestigationApi;
+  useInvestigateWidget: () => UseInvestigateWidgetApi | undefined;
 }

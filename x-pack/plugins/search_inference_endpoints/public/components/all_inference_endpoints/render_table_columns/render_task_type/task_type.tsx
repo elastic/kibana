@@ -7,7 +7,7 @@
 
 import { EuiBadge } from '@elastic/eui';
 import React from 'react';
-import { TaskTypes } from '../../types';
+import { TaskTypes } from '../../../../../common/types';
 
 interface TaskTypeProps {
   type?: TaskTypes;

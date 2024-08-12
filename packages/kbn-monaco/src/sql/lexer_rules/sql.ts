@@ -13,7 +13,7 @@ const brackets = [
   { open: '(', close: ')', token: 'delimiter.parenthesis' },
 ];
 
-const keywords = [
+export const keywords = [
   'describe',
   'between',
   'in',
@@ -47,7 +47,7 @@ const keywords = [
   'distinct',
   'is',
 ];
-const builtinFunctions = [
+export const builtinFunctions = [
   'avg',
   'count',
   'first',
@@ -212,7 +212,7 @@ export const lexerRules = {
         {
           cases: {
             '@keywords': 'keyword',
-            '@builtinFunctions': 'identifier',
+            '@builtinFunctions': 'keyword',
             '@default': 'identifier',
           },
         },

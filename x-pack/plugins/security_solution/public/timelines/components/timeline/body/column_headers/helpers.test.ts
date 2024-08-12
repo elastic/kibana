@@ -106,7 +106,6 @@ describe('helpers', () => {
         {
           aggregatable: true,
           columnHeaderType: 'not-filtered',
-          format: '',
           id: '@timestamp',
           name: '@timestamp',
           readFromDocValues: true,
@@ -118,7 +117,6 @@ describe('helpers', () => {
         {
           aggregatable: true,
           columnHeaderType: 'not-filtered',
-          format: '',
           id: 'source.ip',
           name: 'source.ip',
           searchable: true,
@@ -129,7 +127,6 @@ describe('helpers', () => {
         {
           aggregatable: true,
           columnHeaderType: 'not-filtered',
-          format: '',
           id: 'destination.ip',
           name: 'destination.ip',
           searchable: true,
@@ -182,7 +179,7 @@ describe('helpers', () => {
             test_field_1: {
               aggregatable: true,
               esTypes: ['keyword'],
-              format: 'string',
+              format: { id: 'string' },
               name: 'test_field_1',
               readFromDocValues: true,
               searchable: true,
@@ -197,7 +194,7 @@ describe('helpers', () => {
           aggregatable: true,
           columnHeaderType: 'not-filtered',
           esTypes: ['keyword'],
-          format: 'string',
+          format: { id: 'string' },
           id: 'test_field_1',
           initialWidth: 180,
           name: 'test_field_1',
@@ -223,7 +220,7 @@ describe('helpers', () => {
             'foo.bar': {
               aggregatable: true,
               esTypes: ['keyword'],
-              format: 'string',
+              format: { id: 'string' },
               name: 'foo.bar',
               readFromDocValues: true,
               searchable: true,
@@ -238,7 +235,7 @@ describe('helpers', () => {
           aggregatable: true,
           columnHeaderType: 'not-filtered',
           esTypes: ['keyword'],
-          format: 'string',
+          format: { id: 'string' },
           id: 'foo.bar',
           initialWidth: 180,
           name: 'foo.bar',

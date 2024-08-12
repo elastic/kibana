@@ -13,8 +13,13 @@ import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/pub
 import * as monitorDetail from '../../../../hooks/use_monitor_detail';
 import * as statusByLocation from '../../../../hooks/use_status_by_location';
 import * as monitorDetailLocator from '../../../../hooks/use_monitor_detail_locator';
+import { TagsList } from '@kbn/observability-shared-plugin/public';
 
 jest.mock('@kbn/observability-shared-plugin/public');
+
+const TagsListMock = TagsList as jest.Mock;
+
+TagsListMock.mockReturnValue(<div>Tags list</div>);
 
 describe('Monitor Detail Flyout', () => {
   beforeEach(() => {
@@ -117,6 +122,7 @@ describe('Monitor Detail Flyout', () => {
       status: observabilitySharedPublic.FETCH_STATUS.SUCCESS,
       data: {
         enabled: true,
+        type: 'http',
         name: 'test-monitor',
         schedule: {
           number: '1',

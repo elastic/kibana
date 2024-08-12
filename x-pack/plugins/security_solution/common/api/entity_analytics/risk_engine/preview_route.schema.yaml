@@ -3,19 +3,13 @@ info:
   version: '1'
   title: Risk Scoring API
   description: These APIs allow the consumer to manage Entity Risk Scores within Entity Analytics.
-servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
-
 paths:
   /internal/risk_score/preview:
     post:
       x-labels: [ess, serverless]
       x-internal: true
+      x-codegen-enabled: true
+      operationId: PreviewRiskScore
       summary: Preview the calculation of Risk Scores
       description: Calculates and returns a list of Risk Scores, sorted by identifier_type and risk score.
       requestBody:

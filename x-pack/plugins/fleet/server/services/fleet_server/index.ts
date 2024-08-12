@@ -128,11 +128,19 @@ export async function checkFleetServerVersionsForSecretsStorage(
       hasMore = false;
     }
   }
+  if (policyIds.size === 0) {
+    return false;
+  }
+
+  const kuery = `policy_id:(${Array.from(policyIds)
+    .map((id) => `"${id}"`)
+    .join(' or ')})`;
 
   const managedAgentPolicies = await agentPolicyService.getAllManagedAgentPolicies(soClient);
   const fleetServerAgents = await getAgentsByKuery(esClient, soClient, {
     showInactive: true,
     perPage: SO_SEARCH_LIMIT,
+    kuery,
   });
 
   if (fleetServerAgents.agents.length === 0) {

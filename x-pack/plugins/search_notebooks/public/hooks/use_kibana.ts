@@ -9,13 +9,14 @@ import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana as useKibanaBase } from '@kbn/kibana-react-plugin/public';
 
-import { NotebookListValue } from '../types';
+import { NotebookListValue, AppMetricsTracker } from '../types';
 
 export interface SearchNotebooksContext {
   console: ConsolePluginStart;
   notebooks: {
     getNotebookList: () => NotebookListValue;
   };
+  usageTracker: AppMetricsTracker;
 }
 
 type ServerlessSearchKibanaContext = CoreStart & SearchNotebooksContext;

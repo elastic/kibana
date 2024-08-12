@@ -6,6 +6,8 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+
 import type {
   RulePatchProps,
   RuleResponse,
@@ -20,6 +22,7 @@ import { ClientError, toggleRuleEnabledOnUpdate, validateMlAuth } from '../utils
 import { getRuleByIdOrRuleId } from './get_rule_by_id_or_rule_id';
 
 interface PatchRuleOptions {
+  actionsClient: ActionsClient;
   rulesClient: RulesClient;
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   rulePatch: RulePatchProps;
@@ -27,6 +30,7 @@ interface PatchRuleOptions {
 }
 
 export const patchRule = async ({
+  actionsClient,
   rulesClient,
   prebuiltRuleAssetClient,
   rulePatch,
@@ -55,7 +59,7 @@ export const patchRule = async ({
 
   const patchedInternalRule = await rulesClient.update({
     id: existingRule.id,
-    data: convertRuleResponseToAlertingRule(patchedRule),
+    data: convertRuleResponseToAlertingRule(patchedRule, actionsClient),
   });
 
   const { enabled } = await toggleRuleEnabledOnUpdate(rulesClient, existingRule, patchedRule);

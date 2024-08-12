@@ -40,7 +40,7 @@ export function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: Fleet
   registerAgentPolicyRoutes(fleetAuthzRouter);
   registerPackagePolicyRoutes(fleetAuthzRouter);
   registerOutputRoutes(fleetAuthzRouter);
-  registerSettingsRoutes(fleetAuthzRouter);
+  registerSettingsRoutes(fleetAuthzRouter, config);
   registerDataStreamRoutes(fleetAuthzRouter);
   registerPreconfigurationRoutes(fleetAuthzRouter);
   registerFleetServerHostRoutes(fleetAuthzRouter);

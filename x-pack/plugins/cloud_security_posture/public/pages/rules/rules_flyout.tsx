@@ -62,7 +62,7 @@ const tabs = [
   },
 ] as const;
 
-type RuleTab = typeof tabs[number]['id'];
+type RuleTab = (typeof tabs)[number]['id'];
 
 export const RuleFlyout = ({ onClose, rule }: RuleFlyoutProps) => {
   const [tab, setTab] = useState<RuleTab>('overview');

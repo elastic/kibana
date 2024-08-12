@@ -1,0 +1,90 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`i18n json serializer should serialize default messages to JSON 1`] = `
+"{
+  \\"formats\\": {
+    \\"number\\": {
+      \\"currency\\": {
+        \\"style\\": \\"currency\\"
+      },
+      \\"percent\\": {
+        \\"style\\": \\"percent\\"
+      }
+    },
+    \\"date\\": {
+      \\"short\\": {
+        \\"month\\": \\"numeric\\",
+        \\"day\\": \\"numeric\\",
+        \\"year\\": \\"2-digit\\"
+      },
+      \\"medium\\": {
+        \\"month\\": \\"short\\",
+        \\"day\\": \\"numeric\\",
+        \\"year\\": \\"numeric\\"
+      },
+      \\"long\\": {
+        \\"month\\": \\"long\\",
+        \\"day\\": \\"numeric\\",
+        \\"year\\": \\"numeric\\"
+      },
+      \\"full\\": {
+        \\"weekday\\": \\"long\\",
+        \\"month\\": \\"long\\",
+        \\"day\\": \\"numeric\\",
+        \\"year\\": \\"numeric\\"
+      }
+    },
+    \\"time\\": {
+      \\"short\\": {
+        \\"hour\\": \\"numeric\\",
+        \\"minute\\": \\"numeric\\"
+      },
+      \\"medium\\": {
+        \\"hour\\": \\"numeric\\",
+        \\"minute\\": \\"numeric\\",
+        \\"second\\": \\"numeric\\"
+      },
+      \\"long\\": {
+        \\"hour\\": \\"numeric\\",
+        \\"minute\\": \\"numeric\\",
+        \\"second\\": \\"numeric\\",
+        \\"timeZoneName\\": \\"short\\"
+      },
+      \\"full\\": {
+        \\"hour\\": \\"numeric\\",
+        \\"minute\\": \\"numeric\\",
+        \\"second\\": \\"numeric\\",
+        \\"timeZoneName\\": \\"short\\"
+      }
+    },
+    \\"relative\\": {
+      \\"years\\": {
+        \\"style\\": \\"long\\"
+      },
+      \\"months\\": {
+        \\"style\\": \\"long\\"
+      },
+      \\"days\\": {
+        \\"style\\": \\"long\\"
+      },
+      \\"hours\\": {
+        \\"style\\": \\"long\\"
+      },
+      \\"minutes\\": {
+        \\"style\\": \\"long\\"
+      },
+      \\"seconds\\": {
+        \\"style\\": \\"long\\"
+      }
+    }
+  },
+  \\"messages\\": {
+    \\"plugin1.message.id-1\\": \\"Message text 1 \\",
+    \\"plugin2.message.id-2\\": {
+      \\"text\\": \\"Message text 2\\",
+      \\"comment\\": \\"Message description\\"
+    }
+  }
+}
+"
+`;

@@ -21,7 +21,7 @@ export const VALID_SERVERLESS_PROJECT_TYPES = ['es', 'oblt', 'security'];
 const serverlessConfigSchema = schema.maybe(
   schema.oneOf(
     VALID_SERVERLESS_PROJECT_TYPES.map((projectName) => schema.literal(projectName)) as [
-      Type<typeof VALID_SERVERLESS_PROJECT_TYPES[number]> // This cast is needed because it's different to Type<T>[] :sight:
+      Type<(typeof VALID_SERVERLESS_PROJECT_TYPES)[number]> // This cast is needed because it's different to Type<T>[] :sight:
     ]
   )
 );

@@ -19,6 +19,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
+
 import type { AgentPolicy } from '../../../../../types';
 import {
   useStartServices,
@@ -74,11 +76,15 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
     const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>({
       ...originalAgentPolicy,
     });
+    const spaceSettings = useSpaceSettingsContext();
+
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [hasChanges, setHasChanges] = useState<boolean>(false);
     const [agentCount, setAgentCount] = useState<number>(0);
     const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
-    const validation = agentPolicyFormValidation(agentPolicy);
+    const validation = agentPolicyFormValidation(agentPolicy, {
+      allowedNamespacePrefixes: spaceSettings?.allowedNamespacePrefixes,
+    });
     const [hasAdvancedSettingsErrors, setHasAdvancedSettingsErrors] = useState<boolean>(false);
 
     const updateAgentPolicy = (updatedFields: Partial<AgentPolicy>) => {

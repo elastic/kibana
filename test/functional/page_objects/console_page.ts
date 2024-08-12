@@ -286,6 +286,18 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('settings-save-button');
   }
 
+  public async toggleKeyboardShortcuts(enabled: boolean) {
+    await this.openSettings();
+
+    // while the settings form opens/loads this may fail, so retry for a while
+    await this.retry.try(async () => {
+      const toggle = await this.testSubjects.find('enableKeyboardShortcuts');
+      await toggle.click();
+    });
+
+    await this.testSubjects.click('settings-save-button');
+  }
+
   public async getFontSize(editor: WebElementWrapper) {
     const aceLine = await editor.findByClassName('ace_line');
     return await aceLine.getComputedStyle('font-size');

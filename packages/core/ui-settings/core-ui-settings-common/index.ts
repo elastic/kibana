@@ -13,6 +13,7 @@ export type {
   UiSettingsParams,
   UserProvidedValues,
   UiSettingsScope,
+  GetUiSettingsContext,
 } from './src/ui_settings';
 export { type DarkModeValue, parseDarkModeValue } from './src/dark_mode';
 

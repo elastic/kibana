@@ -115,6 +115,13 @@ describe('checkFleetServerVersionsForSecretsStorage', () => {
       version
     );
     expect(result).toBe(true);
+    expect(mockedGetAgentsByKuery).toHaveBeenCalledWith(
+      esClientMock,
+      soClientMock,
+      expect.objectContaining({
+        kuery: 'policy_id:("1" or "2")',
+      })
+    );
   });
 });
 

@@ -22,8 +22,6 @@ import { useFleetServerUnhealthy } from '../../applications/fleet/sections/agent
 import type { FlyOutProps } from './types';
 import { AgentEnrollmentFlyout } from '.';
 
-jest.mock('../../hooks/use_authz');
-
 const render = (props?: Partial<FlyOutProps>) => {
   cleanup();
   const renderer = createFleetTestRendererMock();
@@ -53,6 +51,7 @@ describe('<AgentEnrollmentFlyout />', () => {
       fleet: {
         readAgentPolicies: true,
       },
+      integrations: {},
     } as any);
     jest.mocked(useFleetServerStandalone).mockReturnValue({ isFleetServerStandalone: false });
 

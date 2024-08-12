@@ -18,6 +18,10 @@
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/es-query",
     "@kbn/interpreter",
+    "@kbn/security-plugin",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/core-security-common",
   ],
   "exclude": ["target/**/*"]
 }

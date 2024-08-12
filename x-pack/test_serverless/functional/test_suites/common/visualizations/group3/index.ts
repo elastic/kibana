@@ -11,6 +11,8 @@ export default ({ loadTestFile, getPageObject }: FtrProviderContext) => {
   const svlCommonPage = getPageObject('svlCommonPage');
 
   describe('Visualizations - Group 3', function () {
+    this.tags(['esGate']);
+
     before(async () => {
       await svlCommonPage.loginWithPrivilegedRole();
     });

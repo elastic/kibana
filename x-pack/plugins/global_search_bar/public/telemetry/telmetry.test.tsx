@@ -46,6 +46,8 @@ const createBatch = (...results: Result[]): GlobalSearchBatchedResults => ({
   results: results.map(createResult),
 });
 
+const searchCharLimit = 1000;
+
 describe('SearchBar', () => {
   const usageCollection = usageCollectionPluginMock.createSetupContract();
   const core = coreMock.createStart();
@@ -110,7 +112,7 @@ describe('SearchBar', () => {
       render(
         <IntlProvider locale="en">
           <SearchBar
-            globalSearch={searchService}
+            globalSearch={{ ...searchService, searchCharLimit }}
             navigateToUrl={applications.navigateToUrl}
             basePathUrl={basePathUrl}
             chromeStyle$={chromeStyle$}
@@ -132,7 +134,7 @@ describe('SearchBar', () => {
       render(
         <IntlProvider locale="en">
           <SearchBar
-            globalSearch={searchService}
+            globalSearch={{ ...searchService, searchCharLimit }}
             navigateToUrl={applications.navigateToUrl}
             basePathUrl={basePathUrl}
             chromeStyle$={chromeStyle$}
@@ -159,7 +161,7 @@ describe('SearchBar', () => {
       render(
         <IntlProvider locale="en">
           <SearchBar
-            globalSearch={searchService}
+            globalSearch={{ ...searchService, searchCharLimit }}
             navigateToUrl={applications.navigateToUrl}
             basePathUrl={basePathUrl}
             chromeStyle$={chromeStyle$}
@@ -196,7 +198,7 @@ describe('SearchBar', () => {
       render(
         <IntlProvider locale="en">
           <SearchBar
-            globalSearch={searchService}
+            globalSearch={{ ...searchService, searchCharLimit }}
             navigateToUrl={applications.navigateToUrl}
             basePathUrl={basePathUrl}
             chromeStyle$={chromeStyle$}
@@ -232,7 +234,7 @@ describe('SearchBar', () => {
       render(
         <IntlProvider locale="en">
           <SearchBar
-            globalSearch={searchService}
+            globalSearch={{ ...searchService, searchCharLimit }}
             navigateToUrl={applications.navigateToUrl}
             basePathUrl={basePathUrl}
             chromeStyle$={chromeStyle$}
@@ -261,7 +263,7 @@ describe('SearchBar', () => {
         render(
           <IntlProvider locale="en">
             <SearchBar
-              globalSearch={searchService}
+              globalSearch={{ ...searchService, searchCharLimit }}
               navigateToUrl={applications.navigateToUrl}
               basePathUrl={basePathUrl}
               chromeStyle$={chromeStyle$}
@@ -290,7 +292,7 @@ describe('SearchBar', () => {
         render(
           <IntlProvider locale="en">
             <SearchBar
-              globalSearch={searchService}
+              globalSearch={{ ...searchService, searchCharLimit }}
               navigateToUrl={applications.navigateToUrl}
               basePathUrl={basePathUrl}
               chromeStyle$={chromeStyle$}

@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import Boom from '@hapi/boom';
+import { jsonRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { EntityServiceListItem } from '../../../../common/entities/types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
@@ -11,10 +13,42 @@ import { createEntitiesESClient } from '../../../lib/helpers/create_es_client/cr
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../../default_api_types';
 import { getServiceEntities } from './get_service_entities';
+import { getServiceEntitySummary } from '../get_service_entity_summary';
+import { ServiceEntities } from '../types';
+import { getServiceEntitiesHistoryTimeseries } from '../get_service_entities_history_timeseries';
 
 export interface EntityServicesResponse {
   services: EntityServiceListItem[];
 }
+
+const serviceEntitiesSummaryRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/entities/services/{serviceName}/summary',
+  params: t.type({
+    path: t.type({ serviceName: t.string }),
+    query: t.intersection([environmentRt, rangeRt]),
+  }),
+  options: { tags: ['access:apm'] },
+  async handler(resources): Promise<ServiceEntities> {
+    const { context, params, request } = resources;
+    const coreContext = await context.core;
+
+    const entitiesESClient = await createEntitiesESClient({
+      request,
+      esClient: coreContext.elasticsearch.client.asCurrentUser,
+    });
+
+    const { serviceName } = params.path;
+    const { start, end, environment } = params.query;
+
+    return getServiceEntitySummary({
+      entitiesESClient,
+      start,
+      end,
+      serviceName,
+      environment,
+    });
+  },
+});
 
 const servicesEntitiesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/entities/services',
@@ -46,6 +80,46 @@ const servicesEntitiesRoute = createApmServerRoute({
   },
 });
 
+const servicesEntitiesDetailedStatisticsRoute = createApmServerRoute({
+  endpoint: 'POST /internal/apm/entities/services/detailed_statistics',
+  params: t.type({
+    query: t.intersection([environmentRt, kueryRt, rangeRt]),
+    body: t.type({ serviceNames: jsonRt.pipe(t.array(t.string)) }),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (resources) => {
+    const { context, params, request } = resources;
+    const coreContext = await context.core;
+
+    const entitiesESClient = await createEntitiesESClient({
+      request,
+      esClient: coreContext.elasticsearch.client.asCurrentUser,
+    });
+
+    const { environment, start, end } = params.query;
+
+    const { serviceNames } = params.body;
+
+    if (!serviceNames.length) {
+      throw Boom.badRequest(`serviceNames cannot be empty`);
+    }
+
+    const serviceEntitiesTimeseries = await getServiceEntitiesHistoryTimeseries({
+      start,
+      end,
+      serviceNames,
+      environment,
+      entitiesESClient,
+    });
+
+    return {
+      currentPeriod: {
+        ...serviceEntitiesTimeseries,
+      },
+    };
+  },
+});
+
 const serviceLogRateTimeseriesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/entities/services/{serviceName}/logs_rate_timeseries',
   params: t.type({
@@ -65,8 +139,8 @@ const serviceLogRateTimeseriesRoute = createApmServerRoute({
     const { serviceName } = params.path;
     const { start, end, kuery, environment } = params.query;
 
-    const curentPeriodlogsRateTimeseries = await logsDataAccessStart.services.getLogsRateTimeseries(
-      {
+    const currentPeriodLogsRateTimeseries =
+      await logsDataAccessStart.services.getLogsRateTimeseries({
         esClient: coreContext.elasticsearch.client.asCurrentUser,
         identifyingMetadata: 'service.name',
         timeFrom: start,
@@ -74,10 +148,9 @@ const serviceLogRateTimeseriesRoute = createApmServerRoute({
         kuery,
         serviceEnvironmentQuery: environmentQuery(environment),
         serviceNames: [serviceName],
-      }
-    );
+      });
 
-    return { currentPeriod: curentPeriodlogsRateTimeseries };
+    return { currentPeriod: currentPeriodLogsRateTimeseries };
   },
 });
 
@@ -118,4 +191,6 @@ export const servicesEntitiesRoutesRepository = {
   ...servicesEntitiesRoute,
   ...serviceLogRateTimeseriesRoute,
   ...serviceLogErrorRateTimeseriesRoute,
+  ...servicesEntitiesDetailedStatisticsRoute,
+  ...serviceEntitiesSummaryRoute,
 };

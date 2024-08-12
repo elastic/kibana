@@ -12,33 +12,14 @@
                 "additionalProperties": false,
                 "properties": {
                   "level": {
-                    "anyOf": [
-                      {
-                        "enum": [
-                          "available"
-                        ],
-                        "type": "string"
-                      },
-                      {
-                        "enum": [
-                          "degraded"
-                        ],
-                        "type": "string"
-                      },
-                      {
-                        "enum": [
-                          "unavailable"
-                        ],
-                        "type": "string"
-                      },
-                      {
-                        "enum": [
-                          "critical"
-                        ],
-                        "type": "string"
-                      }
+                    "description": "Service status levels as human and machine readable values.",
+                    "enum": [
+                      "available",
+                      "degraded",
+                      "unavailable",
+                      "critical"
                     ],
-                    "description": "Service status levels as human and machine readable values."
+                    "type": "string"
                   }
                 },
                 "required": [
@@ -129,33 +110,14 @@
                         "type": "string"
                       },
                       "level": {
-                        "anyOf": [
-                          {
-                            "enum": [
-                              "available"
-                            ],
-                            "type": "string"
-                          },
-                          {
-                            "enum": [
-                              "degraded"
-                            ],
-                            "type": "string"
-                          },
-                          {
-                            "enum": [
-                              "unavailable"
-                            ],
-                            "type": "string"
-                          },
-                          {
-                            "enum": [
-                              "critical"
-                            ],
-                            "type": "string"
-                          }
+                        "description": "Service status levels as human and machine readable values.",
+                        "enum": [
+                          "available",
+                          "degraded",
+                          "unavailable",
+                          "critical"
                         ],
-                        "description": "Service status levels as human and machine readable values."
+                        "type": "string"
                       },
                       "meta": {
                         "additionalProperties": {},
@@ -186,33 +148,14 @@
                         "type": "string"
                       },
                       "level": {
-                        "anyOf": [
-                          {
-                            "enum": [
-                              "available"
-                            ],
-                            "type": "string"
-                          },
-                          {
-                            "enum": [
-                              "degraded"
-                            ],
-                            "type": "string"
-                          },
-                          {
-                            "enum": [
-                              "unavailable"
-                            ],
-                            "type": "string"
-                          },
-                          {
-                            "enum": [
-                              "critical"
-                            ],
-                            "type": "string"
-                          }
+                        "description": "Service status levels as human and machine readable values.",
+                        "enum": [
+                          "available",
+                          "degraded",
+                          "unavailable",
+                          "critical"
                         ],
-                        "description": "Service status levels as human and machine readable values."
+                        "type": "string"
                       },
                       "meta": {
                         "additionalProperties": {},
@@ -250,33 +193,14 @@
                     "type": "string"
                   },
                   "level": {
-                    "anyOf": [
-                      {
-                        "enum": [
-                          "available"
-                        ],
-                        "type": "string"
-                      },
-                      {
-                        "enum": [
-                          "degraded"
-                        ],
-                        "type": "string"
-                      },
-                      {
-                        "enum": [
-                          "unavailable"
-                        ],
-                        "type": "string"
-                      },
-                      {
-                        "enum": [
-                          "critical"
-                        ],
-                        "type": "string"
-                      }
+                    "description": "Service status levels as human and machine readable values.",
+                    "enum": [
+                      "available",
+                      "degraded",
+                      "unavailable",
+                      "critical"
                     ],
-                    "description": "Service status levels as human and machine readable values."
+                    "type": "string"
                   },
                   "meta": {
                     "additionalProperties": {},
@@ -308,33 +232,14 @@
                       "type": "string"
                     },
                     "level": {
-                      "anyOf": [
-                        {
-                          "enum": [
-                            "available"
-                          ],
-                          "type": "string"
-                        },
-                        {
-                          "enum": [
-                            "degraded"
-                          ],
-                          "type": "string"
-                        },
-                        {
-                          "enum": [
-                            "unavailable"
-                          ],
-                          "type": "string"
-                        },
-                        {
-                          "enum": [
-                            "critical"
-                          ],
-                          "type": "string"
-                        }
+                      "description": "Service status levels as human and machine readable values.",
+                      "enum": [
+                        "available",
+                        "degraded",
+                        "unavailable",
+                        "critical"
                       ],
-                      "description": "Service status levels as human and machine readable values."
+                      "type": "string"
                     },
                     "meta": {
                       "additionalProperties": {},
@@ -376,21 +281,12 @@
                 "type": "string"
               },
               "build_flavor": {
-                "anyOf": [
-                  {
-                    "enum": [
-                      "serverless"
-                    ],
-                    "type": "string"
-                  },
-                  {
-                    "enum": [
-                      "traditional"
-                    ],
-                    "type": "string"
-                  }
+                "description": "The build flavour determines configuration and behavior of Kibana. On premise users will almost always run the \"traditional\" flavour, while other flavours are reserved for Elastic-specific use cases.",
+                "enum": [
+                  "serverless",
+                  "traditional"
                 ],
-                "description": "The build flavour determines configuration and behavior of Kibana. On premise users will almost always run the \"traditional\" flavour, while other flavours are reserved for Elastic-specific use cases."
+                "type": "string"
               },
               "build_hash": {
                 "description": "A unique hash value representing the git commit of this Kibana build.",
@@ -499,7 +395,8 @@
                   "description": "Kibana's operational status. A minimal response is sent for unauthorized users."
                 }
               }
-            }
+            },
+            "description": "Overall status is OK and Kibana should be functioning normally."
           },
           "503": {
             "content": {
@@ -516,11 +413,14 @@
                   "description": "Kibana's operational status. A minimal response is sent for unauthorized users."
                 }
               }
-            }
+            },
+            "description": "Kibana or some of it's essential services are unavailable. Kibana may be degraded or unavailable."
           }
         },
         "summary": "Get Kibana's current status",
-        "tags": []
+        "tags": [
+          "system"
+        ]
       }
     }
   },
@@ -534,5 +434,9 @@
       "url": "http://localhost:5622"
     }
   ],
-  "tags": []
+  "tags": [
+    {
+      "name": "system"
+    }
+  ]
 }

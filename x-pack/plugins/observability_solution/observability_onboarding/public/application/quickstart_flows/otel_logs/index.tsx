@@ -25,6 +25,7 @@ import {
   EuiLink,
   EuiImage,
   EuiCallOut,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import {
   AllDatasetsLocatorParams,
@@ -38,6 +39,8 @@ import { ObservabilityOnboardingAppServices } from '../../..';
 import { ApiKeyBanner } from '../custom_logs/api_key_banner';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { MultiIntegrationInstallBanner } from './multi_integration_install_banner';
+
+const feedbackUrl = 'https://ela.st/otelcollector';
 
 const HOST_COMMAND = i18n.translate(
   'xpack.observability_onboarding.otelLogsPanel.p.runTheCommandOnYourHostLabel',
@@ -68,12 +71,8 @@ export const OtelLogsPanel: React.FC = () => {
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
-  const AGENT_CDN_BASE_URL = isServerless
-    ? 'snapshots.elastic.co/8.15.0-dd63864e/downloads/beats/elastic-agent'
-    : 'artifacts.elastic.co/downloads/beats/elastic-agent';
-  // TODO change once otel flow is shown on serverless
-  // const agentVersion = isServerless ? setup?.elasticAgentVersion : stackVersion;
-  const agentVersion = isServerless ? '8.15.0-SNAPSHOT' : stackVersion;
+  const AGENT_CDN_BASE_URL = 'artifacts.elastic.co/downloads/beats/elastic-agent';
+  const agentVersion = isServerless ? setup?.elasticAgentVersion : stackVersion;
 
   const allDatasetsLocator =
     share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID);
@@ -190,6 +189,8 @@ data:
         endpoints: 
         - \${env:ES_ENDPOINT}
         api_key: \${env:ES_API_KEY}
+        logs_dynamic_index:
+          enabled: true
         mapping:
           mode: ecs
     processors:
@@ -213,6 +214,11 @@ data:
           - key: service.name
             from_attribute: app.label.component
             action: insert
+      attributes/k8s_logs_dataset:
+        actions:
+          - key: data_stream.dataset
+            value: "kubernetes.container_logs"
+            action: upsert
       attributes/dataset:
         actions:
           - key: event.dataset
@@ -428,6 +434,7 @@ data:
           - resourcedetection/gcp
           - resource/k8s
           - resource/cloud
+          - attributes/k8s_logs_dataset
           receivers:
           - filelog
         metrics:
@@ -544,7 +551,7 @@ spec:
       firstStepTitle: HOST_COMMAND,
       content: `arch=$(if ([[ $(arch) == "arm" || $(arch) == "aarch64" ]]); then echo "arm64"; else echo $(arch); fi)
 
-curl --output elastic-distro-${agentVersion}-linux-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${agentVersion}-linux-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir elastic-distro-${agentVersion}-linux-$arch && tar -xvf elastic-distro-${agentVersion}-linux-$arch.tar.gz -C "elastic-distro-${agentVersion}-linux-$arch" --strip-components=1 && cd elastic-distro-${agentVersion}-linux-$arch 
+curl --output elastic-distro-${agentVersion}-linux-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${agentVersion}-linux-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir -p elastic-distro-${agentVersion}-linux-$arch && tar -xvf elastic-distro-${agentVersion}-linux-$arch.tar.gz -C "elastic-distro-${agentVersion}-linux-$arch" --strip-components=1 && cd elastic-distro-${agentVersion}-linux-$arch 
 
 sudo setcap 'cap_dac_read_search=ep' ./data/elastic-agent-*/elastic-agent
         
@@ -558,7 +565,7 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
       firstStepTitle: HOST_COMMAND,
       content: `arch=$(if [[ $(arch) == "arm64" ]]; then echo "aarch64"; else echo $(arch); fi)
 
-curl --output elastic-distro-${agentVersion}-darwin-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${agentVersion}-darwin-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir "elastic-distro-${agentVersion}-darwin-$arch" && tar -xvf elastic-distro-${agentVersion}-darwin-$arch.tar.gz -C "elastic-distro-${agentVersion}-darwin-$arch" --strip-components=1 && cd elastic-distro-${agentVersion}-darwin-$arch 
+curl --output elastic-distro-${agentVersion}-darwin-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${agentVersion}-darwin-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir -p "elastic-distro-${agentVersion}-darwin-$arch" && tar -xvf elastic-distro-${agentVersion}-darwin-$arch.tar.gz -C "elastic-distro-${agentVersion}-darwin-$arch" --strip-components=1 && cd elastic-distro-${agentVersion}-darwin-$arch 
       
 rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mkdir -p ./data/otelcol  && sed -i '' 's#\\\${env:STORAGE_DIR}#'"$PWD"/data/otelcol'#g' ./otel.yml && sed -i '' 's#\\\${env:ELASTIC_ENDPOINT}#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i '' 's/\\\${env:ELASTIC_API_KEY}/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
       start: './otelcol --config otel.yml',
@@ -633,7 +640,7 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiFlexGroup direction="column">
+        <EuiFlexGroup direction="column" gutterSize="none">
           <MultiIntegrationInstallBanner />
           {error && (
             <EuiFlexItem>
@@ -864,7 +871,7 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
                           link: (
                             <EuiLink
                               data-test-subj="observabilityOnboardingOtelLogsPanelDocumentationLink"
-                              href="https://www.elastic.co/guide/en/observability/current/get-started-opentelemetry.html"
+                              href="https://ela.st/elastic-otel"
                               target="_blank"
                               external
                             >
@@ -882,6 +889,37 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
               },
             ]}
           />
+          <EuiHorizontalRule />
+
+          <EuiFlexGroup responsive={false} direction="row" alignItems="center" gutterSize="s" wrap>
+            <EuiFlexItem grow={false}>
+              <EuiText color="subdued" size="s">
+                {i18n.translate(
+                  'xpack.observability_onboarding.otelLogsPanel.feedbackButtons.label',
+                  {
+                    defaultMessage: 'Was this helpful or were there any problems?',
+                  }
+                )}
+              </EuiText>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType="editorComment"
+                data-test-subj="observabilityOnboardingOtelLogsPanelGiveFeedbackButton"
+                href={feedbackUrl}
+                color="warning"
+                target="_blank"
+              >
+                {i18n.translate(
+                  'xpack.observability_onboarding.otelLogsPanel.feedbackButtons.title',
+                  {
+                    defaultMessage: 'Give feedback',
+                  }
+                )}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexGroup>
       </EuiModalBody>
     </EuiPanel>

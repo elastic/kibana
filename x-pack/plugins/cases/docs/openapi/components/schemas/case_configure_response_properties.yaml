@@ -7,8 +7,7 @@ connector:
 created_at:
   type: string
   format: date-time
-  examples:
-    - 2022-06-01T17:07:17.767Z
+  example: 2022-06-01T17:07:17.767Z
 created_by:
   type: object
   required:
@@ -25,15 +24,12 @@ customFields:
     properties:
       $ref: 'case_configure_customfields.yaml'
 error:
-  type:
-    - 'string'
-    - 'null'
-  examples:
-    - null
+  type: string
+  nullable: true
+  example: null
 id:
   type: string
-  examples:
-    - 4a97a440-e1cd-11ec-be9b-9b1838238ee6
+  example: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
 mappings:
   type: array
   items:
@@ -41,38 +37,31 @@ mappings:
     properties:
       action_type:
         type: string
-        examples:
-          - overwrite
+        example: overwrite
       source:
         type: string
-        examples:
-          - title
+        example: title
       target:
         type: string
-        examples:
-          - summary
+        example: summary
 owner:
   $ref: 'owners.yaml'
 templates:
   $ref: 'templates.yaml'
 updated_at:
-  type:
-    - 'string'
-    - 'null'
+  type: string
   format: date-time
-  examples:
-    - 2022-06-01T19:58:48.169Z
+  nullable: true
+  example: 2022-06-01T19:58:48.169Z
 updated_by:
-  type:
-    - 'object'
-    - 'null'
+  type: object
   required:
     - email
     - full_name
     - username
   properties:
     $ref: 'user_properties.yaml'
+  nullable: true
 version:
   type: string
-  examples:
-    - WzIwNzMsMV0=
+  example: WzIwNzMsMV0=

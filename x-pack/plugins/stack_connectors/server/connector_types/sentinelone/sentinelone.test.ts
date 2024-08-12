@@ -120,4 +120,31 @@ describe('SentinelOne Connector', () => {
       );
     });
   });
+
+  describe('#downloadRemoteScriptResults()', () => {
+    it('should call SentinelOne api to retrieve task results', async () => {
+      await connectorInstance.downloadRemoteScriptResults({ taskId: 'task-123' });
+
+      expect(connectorInstance.requestSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: `${connectorInstance.constructorParams.config.url}${API_PATH}/remote-scripts/fetch-files`,
+          data: { data: { taskIds: ['task-123'] } },
+        })
+      );
+    });
+
+    it('should error if task does not have a download url', async () => {
+      connectorInstance.mockResponses.getRemoteScriptResults.data.download_links = [];
+
+      await expect(
+        connectorInstance.downloadRemoteScriptResults({ taskId: 'task-123' })
+      ).rejects.toThrow('Download URL for script results of task id [task-123] not found');
+    });
+
+    it('should return a Stream for downloading the file', async () => {
+      await expect(
+        connectorInstance.downloadRemoteScriptResults({ taskId: 'task-123' })
+      ).resolves.toEqual(connectorInstance.mockResponses.downloadRemoteScriptResults);
+    });
+  });
 });

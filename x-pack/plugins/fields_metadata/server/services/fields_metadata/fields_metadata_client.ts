@@ -9,12 +9,14 @@ import { Logger } from '@kbn/core/server';
 import { FieldName, FieldMetadata, FieldsMetadataDictionary } from '../../../common';
 import { EcsFieldsRepository } from './repositories/ecs_fields_repository';
 import { IntegrationFieldsRepository } from './repositories/integration_fields_repository';
+import { MetadataFieldsRepository } from './repositories/metadata_fields_repository';
 import { IntegrationFieldsSearchParams } from './repositories/types';
 import { FindFieldsMetadataOptions, IFieldsMetadataClient } from './types';
 
 interface FieldsMetadataClientDeps {
   logger: Logger;
   ecsFieldsRepository: EcsFieldsRepository;
+  metadataFieldsRepository: MetadataFieldsRepository;
   integrationFieldsRepository: IntegrationFieldsRepository;
 }
 
@@ -22,6 +24,7 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
   private constructor(
     private readonly logger: Logger,
     private readonly ecsFieldsRepository: EcsFieldsRepository,
+    private readonly metadataFieldsRepository: MetadataFieldsRepository,
     private readonly integrationFieldsRepository: IntegrationFieldsRepository
   ) {}
 
@@ -31,8 +34,13 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
   ): Promise<FieldMetadata | undefined> {
     this.logger.debug(`Retrieving field metadata for: ${fieldName}`);
 
-    // 1. Try resolving from ecs static metadata
-    let field = this.ecsFieldsRepository.getByName(fieldName);
+    // 1. Try resolving from metadata-fields static metadata
+    let field = this.metadataFieldsRepository.getByName(fieldName);
+
+    // 2. Try resolving from ecs static metadata
+    if (!field) {
+      field = this.ecsFieldsRepository.getByName(fieldName);
+    }
 
     // 2. Try searching for the fiels in the Elastic Package Registry
     if (!field && integration) {
@@ -48,7 +56,10 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
     dataset,
   }: FindFieldsMetadataOptions = {}): Promise<FieldsMetadataDictionary> {
     if (!fieldNames) {
-      return this.ecsFieldsRepository.find();
+      return FieldsMetadataDictionary.create({
+        ...this.metadataFieldsRepository.find().getFields(),
+        ...this.ecsFieldsRepository.find().getFields(),
+      });
     }
 
     const fields: Record<string, FieldMetadata> = {};
@@ -66,8 +77,14 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
   public static create({
     logger,
     ecsFieldsRepository,
+    metadataFieldsRepository,
     integrationFieldsRepository,
   }: FieldsMetadataClientDeps) {
-    return new FieldsMetadataClient(logger, ecsFieldsRepository, integrationFieldsRepository);
+    return new FieldsMetadataClient(
+      logger,
+      ecsFieldsRepository,
+      metadataFieldsRepository,
+      integrationFieldsRepository
+    );
   }
 }

@@ -218,6 +218,7 @@ export const TemplateForm = ({
               ? serializeAsESLifecycle(wizardData.logistics.lifecycle)
               : undefined,
           },
+          ignoreMissingComponentTemplates: initialTemplate.ignoreMissingComponentTemplates,
         };
 
         return cleanupTemplateObject(outputTemplate as TemplateDeserialized);

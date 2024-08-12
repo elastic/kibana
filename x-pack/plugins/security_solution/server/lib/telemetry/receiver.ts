@@ -102,6 +102,8 @@ export interface ITelemetryReceiver {
 
   fetchClusterInfo(): Promise<ESClusterInfo>;
 
+  getLicenseInfo(): Nullable<ESLicense>;
+
   fetchLicenseInfo(): Promise<Nullable<ESLicense>>;
 
   closePointInTime(pitId: string): Promise<void>;
@@ -204,6 +206,7 @@ export interface ITelemetryReceiver {
   }>;
 
   fetchPrebuiltRuleAlertsBatch(
+    index: string,
     executeFrom: string,
     executeTo: string
   ): AsyncGenerator<TelemetryEvent[], void, unknown>;
@@ -247,6 +250,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   private getIndexForType?: (type: string) => string;
   private alertsIndex?: string;
   private clusterInfo?: ESClusterInfo;
+  private licenseInfo?: Nullable<ESLicense>;
   private processTreeFetcher?: Fetcher;
   private packageService?: PackageService;
   private experimentalFeatures: ExperimentalFeatures | undefined;
@@ -279,6 +283,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     this.soClient =
       core?.savedObjects.createInternalRepository() as unknown as SavedObjectsClientContract;
     this.clusterInfo = await this.fetchClusterInfo();
+    this.licenseInfo = await this.fetchLicenseInfo();
     this.experimentalFeatures = endpointContextService?.experimentalFeatures;
     const elasticsearch = core?.elasticsearch.client as unknown as IScopedClusterClient;
     this.processTreeFetcher = new Fetcher(elasticsearch);
@@ -288,6 +293,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
   public getClusterInfo(): ESClusterInfo | undefined {
     return this.clusterInfo;
+  }
+
+  public getLicenseInfo(): Nullable<ESLicense> {
+    return this.licenseInfo;
   }
 
   public getAlertsIndex(): string | undefined {
@@ -312,6 +321,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         ?.listAgents({
           perPage: this.maxRecords,
           showInactive: true,
+          kuery: 'status:*', // include unenrolled agents
           sortField: 'enrolled_at',
           sortOrder: 'desc',
         })
@@ -746,13 +756,17 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     };
   }
 
-  public async *fetchPrebuiltRuleAlertsBatch(executeFrom: string, executeTo: string) {
+  public async *fetchPrebuiltRuleAlertsBatch(
+    index: string,
+    executeFrom: string,
+    executeTo: string
+  ) {
     this.logger.debug('Searching prebuilt rule alerts from', {
       executeFrom,
       executeTo,
     } as LogMeta);
 
-    let pitId = await this.openPointInTime(DEFAULT_DIAGNOSTIC_INDEX);
+    let pitId = await this.openPointInTime(index);
     let fetchMore = true;
     let searchAfter: SortResults | undefined;
 

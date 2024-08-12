@@ -24,7 +24,7 @@ import { performChecks } from '../helpers';
 export const updateConversationRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
     .put({
-      access: 'internal',
+      access: 'public',
       path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
       options: {
         tags: ['access:elasticAssistant'],
@@ -32,7 +32,7 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(ConversationUpdateProps),

@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const find = getService('find');
   const dataGrid = getService('dataGrid');
   const log = getService('log');
   const retry = getService('retry');
@@ -79,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
       await retry.waitForWithTimeout('timestamp matches expected doc', 5000, async () => {
-        const cell = await dataGrid.getCellElement(0, 2);
+        const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         const text = await cell.getVisibleText();
         log.debug(`row document timestamp: ${text}`);
         return text === 'Sep 22, 2015 @ 23:50:13.253';
@@ -96,10 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       log.debug(`expanded document id: ${expandDocId}`);
 
-      await dataGrid.clickRowToggle();
-      await find.clickByCssSelectorWhenNotDisabledWithoutRetry(
-        '#kbn_doc_viewer_tab_doc_view_source'
-      );
+      await dataGrid.clickRowToggle({ defaultTabId: 'doc_view_source' });
 
       await retry.waitForWithTimeout(
         'document id in flyout matching the expanded document id',
@@ -126,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.addSavedSearch('expand-cell-search');
 
       await retry.waitForWithTimeout('timestamp matches expected doc', 5000, async () => {
-        const cell = await dataGrid.getCellElement(0, 2);
+        const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         const text = await cell.getVisibleText();
         log.debug(`row document timestamp: ${text}`);
         return text === 'Sep 22, 2015 @ 23:50:13.253';
@@ -140,10 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       log.debug(`expanded document id: ${expandDocId}`);
 
-      await dataGrid.clickRowToggle();
-      await find.clickByCssSelectorWhenNotDisabledWithoutRetry(
-        '#kbn_doc_viewer_tab_doc_view_source'
-      );
+      await dataGrid.clickRowToggle({ defaultTabId: 'doc_view_source' });
 
       await retry.waitForWithTimeout(
         'document id in flyout matching the expanded document id',

@@ -11,7 +11,7 @@ import {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SUMMARY_FILTER } from '../../../common/constants/client_defaults';
-import { UptimeEsClient } from '../../lib';
+import { SyntheticsEsClient } from '../../lib';
 import {
   GetPingsParams,
   HttpResponseBody,
@@ -37,10 +37,12 @@ type GetParamsWithFields<F> = GetPingsParams & {
 type GetParamsWithoutFields = GetPingsParams;
 
 export async function queryPings<F>(
-  params: (GetParamsWithFields<F> | GetParamsWithoutFields) & { uptimeEsClient: UptimeEsClient }
+  params: (GetParamsWithFields<F> | GetParamsWithoutFields) & {
+    syntheticsEsClient: SyntheticsEsClient;
+  }
 ): Promise<PingsResponse | { total: number; pings: F[] }> {
   const {
-    uptimeEsClient,
+    syntheticsEsClient,
     dateRange: { from, to },
     index,
     monitorId,
@@ -100,7 +102,7 @@ export async function queryPings<F>(
       body: {
         hits: { hits, total },
       },
-    } = await uptimeEsClient.search({ body: searchBody });
+    } = await syntheticsEsClient.search({ body: searchBody });
 
     return {
       total: total.value,
@@ -112,7 +114,7 @@ export async function queryPings<F>(
     body: {
       hits: { hits, total },
     },
-  } = await uptimeEsClient.search({ body: searchBody });
+  } = await syntheticsEsClient.search({ body: searchBody });
 
   const pings: Ping[] = hits.map((doc: any) => {
     const { _id, _source } = doc;

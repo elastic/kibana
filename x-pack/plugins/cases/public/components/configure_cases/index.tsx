@@ -24,7 +24,11 @@ import {
 
 import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
-import type { CustomFieldConfiguration, TemplateConfiguration } from '../../../common/types/domain';
+import type {
+  CustomFieldConfiguration,
+  TemplateConfiguration,
+  CustomFieldTypes,
+} from '../../../common/types/domain';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
@@ -48,6 +52,8 @@ import { Templates } from '../templates';
 import type { TemplateFormProps } from '../templates/types';
 import { CustomFieldsForm } from '../custom_fields/form';
 import { TemplateForm } from '../templates/form';
+import type { CasesConfigurationUI, CaseUI } from '../../containers/types';
+import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 
 const sectionWrapperCss = css`
   box-sizing: content-box;
@@ -67,6 +73,40 @@ interface Flyout {
   type: 'addConnector' | 'editConnector' | 'customField' | 'template';
   visible: boolean;
 }
+
+const addNewCustomFieldToTemplates = ({
+  templates,
+  customFields,
+}: Pick<CasesConfigurationUI, 'templates' | 'customFields'>) => {
+  return templates.map((template) => {
+    const templateCustomFields = template.caseFields?.customFields ?? [];
+
+    customFields.forEach((field) => {
+      if (
+        !templateCustomFields.length ||
+        !templateCustomFields.find((templateCustomField) => templateCustomField.key === field.key)
+      ) {
+        const customFieldFactory = customFieldsBuilderMap[field.type];
+        const { getDefaultValue } = customFieldFactory();
+        const value = getDefaultValue?.() ?? null;
+
+        templateCustomFields.push({
+          key: field.key,
+          type: field.type as CustomFieldTypes,
+          value: field.defaultValue ?? value,
+        } as CaseUI['customFields'][number]);
+      }
+    });
+
+    return {
+      ...template,
+      caseFields: {
+        ...template.caseFields,
+        customFields: [...templateCustomFields],
+      },
+    };
+  });
+};
 
 export const ConfigureCases: React.FC = React.memo(() => {
   const { permissions } = useCasesContext();
@@ -334,10 +374,16 @@ export const ConfigureCases: React.FC = React.memo(() => {
     (data: CustomFieldConfiguration) => {
       const updatedCustomFields = addOrReplaceField(customFields, data);
 
+      // add the new custom field to each template as well
+      const updatedTemplates = addNewCustomFieldToTemplates({
+        templates,
+        customFields: updatedCustomFields,
+      });
+
       persistCaseConfigure({
         connector,
         customFields: updatedCustomFields,
-        templates,
+        templates: updatedTemplates,
         id: configurationId,
         version: configurationVersion,
         closureType,

@@ -20,7 +20,7 @@
 .gphSidebar__header {
   margin-top: $euiSizeS;
   color: $euiColorEmptyShade;
-  background-color: $euiColorDarkShade;
+  background-color: $euiColorDarkestShade;
   padding: $euiSizeXS;
   border-radius: $euiBorderRadius;
   margin-bottom: $euiSizeXS;
@@ -63,6 +63,9 @@
   line-height: $euiLineHeight;
   margin: $euiSizeXS 0;
   cursor: pointer;
+  width: 100%;
+  display: block;
+  text-align: left;
 
   > * {
     vertical-align: middle;

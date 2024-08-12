@@ -25,7 +25,7 @@ import {
 } from '../../common/http_api/latest';
 import type { InventoryView } from '../../common/inventory_views';
 import { useKibanaContextForPlugin } from './use_kibana';
-import { useUrlState } from '../utils/use_url_state';
+import { useUrlState } from './use_url_state';
 import { useSavedViewsNotifier } from './use_saved_views_notifier';
 import { useSourceContext } from '../containers/metrics_source';
 

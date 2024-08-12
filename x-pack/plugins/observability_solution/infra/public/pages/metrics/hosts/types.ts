@@ -6,4 +6,4 @@
  */
 import { HOST_LIMIT_OPTIONS } from './constants';
 
-export type HostLimitOptions = typeof HOST_LIMIT_OPTIONS[number];
+export type HostLimitOptions = (typeof HOST_LIMIT_OPTIONS)[number];

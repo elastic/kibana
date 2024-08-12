@@ -44,7 +44,7 @@ export const useFetchPrompts = (payload?: UseFetchPromptsParams) => {
     QUERY.page,
     QUERY.per_page,
     QUERY.filter,
-    API_VERSIONS.internal.v1,
+    API_VERSIONS.public.v1,
   ];
 
   return useQuery<FindPromptsResponse, unknown, FindPromptsResponse>(
@@ -52,7 +52,7 @@ export const useFetchPrompts = (payload?: UseFetchPromptsParams) => {
     async () =>
       http.fetch(ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND, {
         method: 'GET',
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         query: QUERY,
         signal: payload?.signal,
       }),
@@ -87,7 +87,7 @@ export const getPrompts = async ({
   try {
     return await http.fetch<FindPromptsResponse>(ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND, {
       method: 'GET',
-      version: API_VERSIONS.internal.v1,
+      version: API_VERSIONS.public.v1,
       signal,
     });
   } catch (error) {

@@ -18,3 +18,13 @@ export const plugin: PluginInitializer<
 
 export type { EntityManagerPublicPluginSetup, EntityManagerPublicPluginStart };
 export type EntityManagerAppId = 'entityManager';
+
+export {
+  ERROR_API_KEY_NOT_FOUND,
+  ERROR_API_KEY_NOT_VALID,
+  ERROR_API_KEY_SERVICE_DISABLED,
+  ERROR_PARTIAL_BUILTIN_INSTALLATION,
+  ERROR_DEFINITION_STOPPED,
+} from '../common/errors';
+
+export { EntityManagerUnauthorizedError } from './lib/errors';

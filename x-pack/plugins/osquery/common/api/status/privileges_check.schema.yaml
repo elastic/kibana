@@ -5,6 +5,9 @@ info:
 paths:
   /internal/osquery/privileges_check:
     get:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: ReadPrivilegesCheck
       summary: Get Osquery privileges check
       responses:
         '200':
@@ -13,4 +16,4 @@ paths:
             application/json:
               schema:
                 type: object
-                properties: { }
+                properties: {}

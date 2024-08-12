@@ -8,10 +8,23 @@
 
 import * as t from 'io-ts';
 
+export function isPrimitive(value: unknown): value is string | number | boolean | null | undefined {
+  return (
+    typeof value === 'string' ||
+    typeof value === 'number' ||
+    typeof value === 'boolean' ||
+    value === null ||
+    value === undefined
+  );
+}
+
 export const toBooleanRt = new t.Type<boolean, boolean, unknown>(
   'ToBoolean',
   t.boolean.is,
-  (input) => {
+  (input, context) => {
+    if (!isPrimitive(input)) {
+      return t.failure(input, context);
+    }
     let value: boolean;
     if (typeof input === 'string') {
       value = input === 'true';

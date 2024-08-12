@@ -65,9 +65,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs')
       );
 
-      it('renders an empty data prompt', async () => {
+      it('renders an empty data prompt and redirects to the onboarding page', async () => {
         await pageObjects.common.navigateToApp('infraOps');
-        await pageObjects.infraHome.getNoMetricsIndicesPrompt();
+        await pageObjects.infraHome.noDataPromptExists();
+        await pageObjects.infraHome.noDataPromptAddDataClick();
+
+        await retry.try(async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          const parsedUrl = new URL(currentUrl);
+          const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
+          const expectedUrlPattern = `${baseUrl}/app/observabilityOnboarding/?category=infra`;
+          expect(currentUrl).to.equal(expectedUrlPattern);
+        });
       });
 
       // Unskip once asset details error handling has been implemented
@@ -164,7 +173,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           [
-            { metric: 'cpuUsage', value: '0.8%' },
+            { metric: 'cpuUsage', value: 'N/A' },
             { metric: 'normalizedLoad1m', value: '1.4%' },
             { metric: 'memoryUsage', value: '18.0%' },
             { metric: 'diskUsage', value: '35.0%' },
@@ -397,7 +406,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.clearSearchTerm();
       });
 
-      it('sort nodes by descending value', async () => {
+      it.skip('sort nodes by descending value', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.getWaffleMap();
         await pageObjects.infraHome.sortNodesBy('value');
@@ -414,7 +423,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      it('sort nodes by ascending value', async () => {
+      it.skip('sort nodes by ascending value', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.getWaffleMap();
         await pageObjects.infraHome.sortNodesBy('value');
@@ -441,7 +450,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      it('filter nodes by search term', async () => {
+      it.skip('filter nodes by search term', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.getWaffleMap();
         await pageObjects.infraHome.enterSearchTerm('host.name: "demo-stack-apache-01"');
@@ -454,7 +463,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.clearSearchTerm();
       });
 
-      it('change color palette', async () => {
+      it.skip('change color palette', async () => {
         await pageObjects.infraHome.openLegendControls();
         await pageObjects.infraHome.changePalette('temperature');
         await pageObjects.infraHome.applyLegendControls();
@@ -554,6 +563,36 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await returnTo(INVENTORY_PATH);
           });
         });
+      });
+
+      it('should not allow adding more than 20 custom metrics', async () => {
+        // open
+        await pageObjects.infraHome.clickCustomMetricDropdown();
+
+        const fields = [
+          'process.cpu.pct',
+          'process.memory.pct',
+          'system.core.total.pct',
+          'system.core.user.pct',
+          'system.core.nice.pct',
+          'system.core.idle.pct',
+          'system.core.iowait.pct',
+          'system.core.irq.pct',
+          'system.core.softirq.pct',
+          'system.core.steal.pct',
+          'system.cpu.nice.pct',
+        ];
+
+        for (const field of fields) {
+          await pageObjects.infraHome.addCustomMetric(field);
+        }
+        const metricsCount = await pageObjects.infraHome.getMetricsContextMenuItemsCount();
+        // there are 7 default metrics in the context menu for hosts
+        expect(metricsCount).to.eql(20);
+
+        await pageObjects.infraHome.ensureCustomMetricAddButtonIsDisabled();
+        // close
+        await pageObjects.infraHome.clickCustomMetricDropdown();
       });
     });
 

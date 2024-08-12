@@ -10,6 +10,7 @@ import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { EuiStepProps } from '@elastic/eui';
 
+import { useSpaceSettingsContext } from '../../../../../../hooks/use_space_settings_context';
 import type { AgentPolicy, NewAgentPolicy, NewPackagePolicy } from '../../../../../../../common';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services';
 import { SelectedPolicyTab, StepSelectHosts } from '../../create_package_policy_page/components';
@@ -49,8 +50,12 @@ export function usePackagePolicySteps({
   packagePolicyId,
   setNewAgentPolicyName,
 }: Params) {
+  const spaceSettings = useSpaceSettingsContext();
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
-    generateNewAgentPolicyWithDefaults({ name: 'Agent policy 1' })
+    generateNewAgentPolicyWithDefaults({
+      name: 'Agent policy 1',
+      namespace: spaceSettings.defaultNamespace,
+    })
   );
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
 
@@ -134,10 +139,12 @@ export function usePackagePolicySteps({
 
   const { selectedSetupTechnology } = useSetupTechnology({
     newAgentPolicy,
-    updateNewAgentPolicy,
+    setNewAgentPolicy,
     updateAgentPolicies,
     setSelectedPolicyTab,
     packageInfo,
+    packagePolicy,
+    isEditPage: true,
   });
 
   const stepSelectAgentPolicy = useMemo(

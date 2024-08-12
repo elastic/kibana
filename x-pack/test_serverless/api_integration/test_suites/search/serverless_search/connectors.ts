@@ -20,10 +20,10 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Connectors routes', function () {
     describe('GET connectors', function () {
       before(async () => {
-        roleAuthc = await svlUserManager.createApiKeyForRole('viewer');
+        roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('viewer');
       });
       after(async () => {
-        await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+        await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       });
       it('returns list of connectors', async () => {
         const { body } = await supertestWithoutAuth

@@ -58,14 +58,15 @@ export const patchListItemRoute = (router: ListsPluginRouter): void => {
             refresh: shouldRefresh,
             value,
           });
+
           if (listItem == null) {
             return siemResponse.error({
               body: `list item id: "${id}" not found`,
               statusCode: 404,
             });
-          } else {
-            return response.ok({ body: PatchListItemResponse.parse(listItem) });
           }
+
+          return response.ok({ body: PatchListItemResponse.parse(listItem) });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

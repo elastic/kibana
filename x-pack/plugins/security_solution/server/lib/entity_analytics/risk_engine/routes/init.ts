@@ -7,10 +7,11 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import type {
-  RiskEngineInitResponse,
-  RiskEngineInitResult,
-} from '../../../../../common/api/entity_analytics/risk_engine/engine_init_route.gen';
+  InitRiskEngineResponse,
+  InitRiskEngineResult,
+} from '../../../../../common/api/entity_analytics';
 import { RISK_ENGINE_INIT_URL, APP_ID } from '../../../../../common/constants';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
@@ -31,75 +32,78 @@ export const riskEngineInitRoute = (
     })
     .addVersion(
       { version: '1', validate: {} },
-      withRiskEnginePrivilegeCheck(getStartServices, async (context, request, response) => {
-        const securitySolution = await context.securitySolution;
+      withRiskEnginePrivilegeCheck(
+        getStartServices,
+        async (context, request, response): Promise<IKibanaResponse<InitRiskEngineResponse>> => {
+          const securitySolution = await context.securitySolution;
 
-        securitySolution.getAuditLogger()?.log({
-          message: 'User attempted to initialize the risk engine',
-          event: {
-            action: RiskEngineAuditActions.RISK_ENGINE_INIT,
-            category: AUDIT_CATEGORY.DATABASE,
-            type: AUDIT_TYPE.CHANGE,
-            outcome: AUDIT_OUTCOME.UNKNOWN,
-          },
-        });
-
-        const siemResponse = buildSiemResponse(response);
-        const [_, { taskManager }] = await getStartServices();
-        const riskEngineDataClient = securitySolution.getRiskEngineDataClient();
-        const riskScoreDataClient = securitySolution.getRiskScoreDataClient();
-        const spaceId = securitySolution.getSpaceId();
-
-        try {
-          if (!taskManager) {
-            return siemResponse.error({
-              statusCode: 400,
-              body: TASK_MANAGER_UNAVAILABLE_ERROR,
-            });
-          }
-
-          const initResult = await riskEngineDataClient.init({
-            taskManager,
-            namespace: spaceId,
-            riskScoreDataClient,
+          securitySolution.getAuditLogger()?.log({
+            message: 'User attempted to initialize the risk engine',
+            event: {
+              action: RiskEngineAuditActions.RISK_ENGINE_INIT,
+              category: AUDIT_CATEGORY.DATABASE,
+              type: AUDIT_TYPE.CHANGE,
+              outcome: AUDIT_OUTCOME.UNKNOWN,
+            },
           });
 
-          const result: RiskEngineInitResult = {
-            risk_engine_enabled: initResult.riskEngineEnabled,
-            risk_engine_resources_installed: initResult.riskEngineResourcesInstalled,
-            risk_engine_configuration_created: initResult.riskEngineConfigurationCreated,
-            legacy_risk_engine_disabled: initResult.legacyRiskEngineDisabled,
-            errors: initResult.errors,
-          };
+          const siemResponse = buildSiemResponse(response);
+          const [_, { taskManager }] = await getStartServices();
+          const riskEngineDataClient = securitySolution.getRiskEngineDataClient();
+          const riskScoreDataClient = securitySolution.getRiskScoreDataClient();
+          const spaceId = securitySolution.getSpaceId();
 
-          const initResponse: RiskEngineInitResponse = {
-            result,
-          };
+          try {
+            if (!taskManager) {
+              return siemResponse.error({
+                statusCode: 400,
+                body: TASK_MANAGER_UNAVAILABLE_ERROR,
+              });
+            }
 
-          if (
-            !initResult.riskEngineEnabled ||
-            !initResult.riskEngineResourcesInstalled ||
-            !initResult.riskEngineConfigurationCreated
-          ) {
-            return siemResponse.error({
-              statusCode: 400,
+            const initResult = await riskEngineDataClient.init({
+              taskManager,
+              namespace: spaceId,
+              riskScoreDataClient,
+            });
+
+            const result: InitRiskEngineResult = {
+              risk_engine_enabled: initResult.riskEngineEnabled,
+              risk_engine_resources_installed: initResult.riskEngineResourcesInstalled,
+              risk_engine_configuration_created: initResult.riskEngineConfigurationCreated,
+              legacy_risk_engine_disabled: initResult.legacyRiskEngineDisabled,
+              errors: initResult.errors,
+            };
+
+            if (
+              !initResult.riskEngineEnabled ||
+              !initResult.riskEngineResourcesInstalled ||
+              !initResult.riskEngineConfigurationCreated
+            ) {
+              return siemResponse.error({
+                statusCode: 400,
+                body: {
+                  message: result.errors.join('\n'),
+                  full_error: result,
+                },
+                bypassErrorFormat: true,
+              });
+            }
+            return response.ok({
               body: {
-                message: result.errors.join('\n'),
-                full_error: result,
+                result,
               },
+            });
+          } catch (e) {
+            const error = transformError(e);
+
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: { message: error.message, full_error: JSON.stringify(e) },
               bypassErrorFormat: true,
             });
           }
-          return response.ok({ body: initResponse });
-        } catch (e) {
-          const error = transformError(e);
-
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: { message: error.message, full_error: JSON.stringify(e) },
-            bypassErrorFormat: true,
-          });
         }
-      })
+      )
     );
 };

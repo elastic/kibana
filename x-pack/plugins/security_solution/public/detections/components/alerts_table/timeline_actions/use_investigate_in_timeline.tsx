@@ -22,7 +22,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { createHistoryEntry } from '../../../../common/utils/global_query_string/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { timelineActions } from '../../../../timelines/store';
 import { sendAlertToTimelineAction } from '../actions';
 import { useUpdateTimeline } from '../../../../timelines/components/open_timeline/use_update_timeline';
@@ -141,11 +141,11 @@ export const useInvestigateInTimeline = ({
 
   const clearActiveTimeline = useCreateTimeline({
     timelineId: TimelineId.active,
-    timelineType: TimelineType.default,
+    timelineType: TimelineTypeEnum.default,
   });
 
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
   );
   const updateTimeline = useUpdateTimeline();
 
@@ -160,12 +160,14 @@ export const useInvestigateInTimeline = ({
         notes: [],
         timeline: {
           ...timeline,
-          columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
+          columns: !unifiedComponentsInTimelineDisabled ? defaultUdtHeaders : defaultHeaders,
           indexNames: timeline.indexNames ?? [],
           show: true,
-          excludedRowRendererIds: unifiedComponentsInTimelineEnabled
-            ? timeline.excludedRowRendererIds
-            : [],
+          excludedRowRendererIds:
+            !unifiedComponentsInTimelineDisabled &&
+            timeline.timelineType !== TimelineTypeEnum.template
+              ? timeline.excludedRowRendererIds
+              : [],
         },
         to: toTimeline,
         ruleNote,
@@ -175,7 +177,7 @@ export const useInvestigateInTimeline = ({
       updateTimeline,
       updateTimelineIsLoading,
       clearActiveTimeline,
-      unifiedComponentsInTimelineEnabled,
+      unifiedComponentsInTimelineDisabled,
     ]
   );
 

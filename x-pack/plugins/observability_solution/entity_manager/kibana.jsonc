@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/entityManager-plugin",
-  "owner": "@elastic/obs-knowledge-team",
+  "owner": "@elastic/obs-entities",
   "description": "Entity manager plugin for entity assets (inventory, topology, etc)",
   "plugin": {
     "id": "entityManager",

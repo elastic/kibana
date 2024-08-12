@@ -123,6 +123,8 @@ export const SETTINGS_API_ROUTES = {
   INFO_PATTERN: `${API_ROOT}/settings`,
   UPDATE_PATTERN: `${API_ROOT}/settings`,
   ENROLLMENT_INFO_PATTERN: `${INTERNAL_ROOT}/settings/enrollment`,
+  SPACE_INFO_PATTERN: `${API_ROOT}/space_settings`,
+  SPACE_UPDATE_PATTERN: `${API_ROOT}/space_settings`,
 };
 
 // App API routes

@@ -37,6 +37,7 @@ import type {
 } from '@kbn/search-api-panels';
 import { useLocation } from 'react-router-dom';
 import { CloudDetailsPanel } from '@kbn/search-api-panels';
+import { DEFAULT_INGESTION_PIPELINE } from '../../../common';
 import { docLinks } from '../../../common/doc_links';
 import { useKibanaServices } from '../hooks/use_kibana';
 import { useAssetBasePath } from '../hooks/use_asset_base_path';
@@ -44,7 +45,6 @@ import {
   API_KEY_PLACEHOLDER,
   CLOUD_ID_PLACEHOLDER,
   ELASTICSEARCH_URL_PLACEHOLDER,
-  DEFAULT_INGESTION_PIPELINE,
 } from '../constants';
 import { javaDefinition } from './languages/java';
 import { languageDefinitions } from './languages/languages';
@@ -192,6 +192,9 @@ export const ElasticsearchOverview = () => {
               assetBasePath={assetBasePath}
               application={application}
               sharePlugin={share}
+              consoleTitle={i18n.translate('xpack.serverlessSearch.configureClient.title', {
+                defaultMessage: 'Configure your client',
+              })}
             />
           }
           links={[
@@ -238,6 +241,9 @@ export const ElasticsearchOverview = () => {
               assetBasePath={assetBasePath}
               application={application}
               sharePlugin={share}
+              consoleTitle={i18n.translate('xpack.serverlessSearch.testConnection.title', {
+                defaultMessage: 'Test your connection',
+              })}
             />
           }
           links={[]}
@@ -349,6 +355,9 @@ export const ElasticsearchOverview = () => {
               application={application}
               consolePlugin={consolePlugin}
               sharePlugin={share}
+              consoleTitle={i18n.translate('xpack.serverlessSearch.searchQuery.title', {
+                defaultMessage: 'Build your first search query',
+              })}
             />
           }
           links={[]}

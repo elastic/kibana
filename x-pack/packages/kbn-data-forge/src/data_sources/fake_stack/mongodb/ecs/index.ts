@@ -25,7 +25,7 @@ const components = [
 ];
 
 export const indexTemplate: IndexTemplateDef = {
-  namespace: MONGODB,
+  name: `logs-${MONGODB}@template`,
   template: { ...template, composed_of: components.map(({ name }) => name) },
   components,
 };

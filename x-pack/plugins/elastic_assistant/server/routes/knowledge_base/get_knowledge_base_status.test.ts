@@ -32,6 +32,14 @@ describe('Get Knowledge Base Status Route', () => {
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
     context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser);
+    context.elasticAssistant.getAIAssistantKnowledgeBaseDataClient = jest.fn().mockResolvedValue({
+      getKnowledgeBaseDocuments: jest.fn().mockResolvedValue([]),
+      indexTemplateAndPattern: {
+        alias: 'knowledge-base-alias',
+      },
+      isModelInstalled: jest.fn().mockResolvedValue(true),
+      isSetupAvailable: jest.fn().mockResolvedValue(true),
+    });
 
     getKnowledgeBaseStatusRoute(server.router, mockGetElser);
   });

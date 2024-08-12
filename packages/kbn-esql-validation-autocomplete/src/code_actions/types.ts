@@ -7,9 +7,10 @@
  */
 
 import type { EditorError } from '../types';
+import type { ESQLRealField } from '../validation/types';
 
 type GetSourceFn = () => Promise<string[]>;
-type GetFieldsByTypeFn = (type: string | string[], ignored?: string[]) => Promise<string[]>;
+type GetFieldsByTypeFn = (type: string | string[], ignored?: string[]) => Promise<ESQLRealField[]>;
 type GetPoliciesFn = () => Promise<string[]>;
 type GetPolicyFieldsFn = (name: string) => Promise<string[]>;
 

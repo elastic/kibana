@@ -64,18 +64,12 @@ export interface AssistantTelemetry {
   reportAssistantMessageSent: (params: {
     conversationId: string;
     role: string;
-    isEnabledKnowledgeBase: boolean;
-    isEnabledRAGAlerts: boolean;
     actionTypeId: string;
     model?: string;
     provider?: string;
   }) => void;
   reportAssistantQuickPrompt: (params: { conversationId: string; promptTitle: string }) => void;
-  reportAssistantSettingToggled: (params: {
-    isEnabledKnowledgeBase?: boolean;
-    isEnabledRAGAlerts?: boolean;
-    assistantStreamingEnabled?: boolean;
-  }) => void;
+  reportAssistantSettingToggled: (params: { assistantStreamingEnabled?: boolean }) => void;
 }
 
 export interface AssistantAvailability {

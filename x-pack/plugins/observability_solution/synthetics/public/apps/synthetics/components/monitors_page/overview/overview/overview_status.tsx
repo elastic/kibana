@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiStat, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { Subject } from 'rxjs';
+import { useSyntheticsRefreshContext } from '../../../../contexts';
+import { EmbeddablePanelWrapper } from '../../../common/components/embeddable_panel_wrapper';
 import { clearOverviewStatusErrorAction } from '../../../../state/overview_status';
 import { kibanaService } from '../../../../../../utils/kibana_service';
 import { useGetUrlParams } from '../../../../hooks/use_url_params';
@@ -18,10 +21,16 @@ function title(t?: number) {
   return t ?? '-';
 }
 
-export function OverviewStatus() {
+export function OverviewStatus({ reload$ }: { reload$?: Subject<boolean> }) {
   const { statusFilter } = useGetUrlParams();
 
-  const { status, error: statusError } = useOverviewStatus({ scopeStatusByLocation: true });
+  const { refreshApp } = useSyntheticsRefreshContext();
+
+  const {
+    status,
+    error: statusError,
+    loading,
+  } = useOverviewStatus({ scopeStatusByLocation: true });
   const dispatch = useDispatch();
   const [statusConfig, setStatusConfig] = useState({
     up: status?.up,
@@ -29,6 +38,14 @@ export function OverviewStatus() {
     pending: status?.pending,
     disabledCount: status?.disabledCount,
   });
+
+  useEffect(() => {
+    const sub = reload$?.subscribe(() => {
+      refreshApp();
+    });
+
+    return () => sub?.unsubscribe();
+  }, [refreshApp, reload$]);
 
   useEffect(() => {
     if (statusError) {
@@ -87,10 +104,7 @@ export function OverviewStatus() {
   }, [status, statusFilter]);
 
   return (
-    <EuiPanel hasShadow={false} hasBorder>
-      <EuiTitle size="xs">
-        <h3>{headingText}</h3>
-      </EuiTitle>
+    <EmbeddablePanelWrapper title={headingText} loading={loading}>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem grow={false}>
@@ -136,7 +150,7 @@ export function OverviewStatus() {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-    </EuiPanel>
+    </EmbeddablePanelWrapper>
   );
 }
 

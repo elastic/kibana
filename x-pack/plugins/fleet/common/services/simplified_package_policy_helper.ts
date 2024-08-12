@@ -50,8 +50,9 @@ export interface SimplifiedPackagePolicy {
   inputs?: SimplifiedInputs;
 }
 
-export interface FormattedPackagePolicy extends Omit<PackagePolicy, 'inputs'> {
+export interface FormattedPackagePolicy extends Omit<PackagePolicy, 'inputs' | 'vars'> {
   inputs?: SimplifiedInputs;
+  vars?: SimplifiedVars;
 }
 
 export interface FormattedCreatePackagePolicyResponse {
@@ -61,6 +62,10 @@ export interface FormattedCreatePackagePolicyResponse {
 export function packagePolicyToSimplifiedPackagePolicy(packagePolicy: PackagePolicy) {
   const formattedPackagePolicy = packagePolicy as unknown as FormattedPackagePolicy;
   formattedPackagePolicy.inputs = formatInputs(packagePolicy.inputs);
+  if (packagePolicy.vars) {
+    formattedPackagePolicy.vars = formatVars(packagePolicy.vars);
+  }
+
   return formattedPackagePolicy;
 }
 

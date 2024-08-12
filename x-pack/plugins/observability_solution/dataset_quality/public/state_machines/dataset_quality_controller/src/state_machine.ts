@@ -8,6 +8,7 @@
 import { IToasts } from '@kbn/core/public';
 import { getDateISORange } from '@kbn/timerange';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
+import { DatasetQualityStartDeps } from '../../../types';
 import { Dashboard, DataStreamStat, DegradedFieldResponse } from '../../../../common/api_types';
 import { Integration } from '../../../../common/data_streams_stats/integration';
 import { IDataStreamDetailsClient } from '../../../services/data_stream_details';
@@ -18,6 +19,7 @@ import {
   GetIntegrationsParams,
   GetNonAggregatableDataStreamsParams,
   GetNonAggregatableDataStreamsResponse,
+  DataStreamStatServiceResponse,
 } from '../../../../common/data_streams_stats';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 import { DataStreamType } from '../../../../common/types';
@@ -35,6 +37,7 @@ import {
   noDatasetSelected,
   fetchNonAggregatableDatasetsFailedNotifier,
   fetchDataStreamIntegrationFailedNotifier,
+  assertBreakdownFieldEcsFailedNotifier,
 } from './notifications';
 import {
   DatasetQualityControllerContext,
@@ -354,6 +357,8 @@ export const createPureDatasetQualityControllerStateMachine = (
                           actions: ['storeFlyoutOptions'],
                         },
                         BREAKDOWN_FIELD_CHANGE: {
+                          target:
+                            '#DatasetQualityController.flyout.initializing.assertBreakdownFieldIsEcs.fetching',
                           actions: ['storeFlyoutOptions'],
                         },
                       },
@@ -387,6 +392,25 @@ export const createPureDatasetQualityControllerStateMachine = (
                         },
                       },
                     },
+                  },
+                },
+                assertBreakdownFieldIsEcs: {
+                  initial: 'fetching',
+                  states: {
+                    fetching: {
+                      invoke: {
+                        src: 'assertBreakdownFieldIsEcs',
+                        onDone: {
+                          target: 'done',
+                          actions: ['storeBreakdownFieldIsEcs'],
+                        },
+                        onError: {
+                          target: 'done',
+                          actions: ['notifyAssertBreakdownFieldEcsFailed'],
+                        },
+                      },
+                    },
+                    done: {},
                   },
                 },
               },
@@ -552,24 +576,35 @@ export const createPureDatasetQualityControllerStateMachine = (
             },
           };
         }),
-        resetFlyoutOptions: assign((_context, _event) => ({ flyout: DEFAULT_CONTEXT.flyout })),
-        storeDataStreamStats: assign((_context, event) => {
-          if ('data' in event && 'dataStreamsStats' in event.data) {
-            const dataStreamStats = event.data.dataStreamsStats as DataStreamStat[];
-            const datasetUserPrivileges = event.data.datasetUserPrivileges;
-
-            // Check if any DataStreamStat has null; to check for serverless
-            const isSizeStatsAvailable =
-              !dataStreamStats.length || dataStreamStats.some((stat) => stat.totalDocs !== null);
-
-            return {
-              dataStreamStats,
-              isSizeStatsAvailable,
-              datasetUserPrivileges,
-            };
-          }
-          return {};
+        storeBreakdownFieldIsEcs: assign((context, event: DoneInvokeEvent<boolean | null>) => {
+          return {
+            flyout: {
+              ...context.flyout,
+              isBreakdownFieldEcs:
+                'data' in event && typeof event.data === 'boolean' ? event.data : null,
+            },
+          };
         }),
+        resetFlyoutOptions: assign((_context, _event) => ({ flyout: DEFAULT_CONTEXT.flyout })),
+        storeDataStreamStats: assign(
+          (_context, event: DoneInvokeEvent<DataStreamStatServiceResponse>) => {
+            if ('data' in event && 'dataStreamsStats' in event.data) {
+              const dataStreamStats = event.data.dataStreamsStats as DataStreamStat[];
+              const datasetUserPrivileges = event.data.datasetUserPrivileges;
+
+              // Check if any DataStreamStat has null; to check for serverless
+              const isSizeStatsAvailable =
+                !dataStreamStats.length || dataStreamStats.some((stat) => stat.totalDocs !== null);
+
+              return {
+                dataStreamStats,
+                isSizeStatsAvailable,
+                datasetUserPrivileges,
+              };
+            }
+            return {};
+          }
+        ),
         storeDegradedDocStats: assign((_context, event) => {
           return 'data' in event
             ? {
@@ -689,7 +724,12 @@ export const createPureDatasetQualityControllerStateMachine = (
       },
       guards: {
         checkIfActionForbidden: (context, event) => {
-          return 'data' in event && 'statusCode' in event.data && event.data.statusCode === 403;
+          return (
+            'data' in event &&
+            typeof event.data === 'object' &&
+            'statusCode' in event.data! &&
+            event.data.statusCode === 403
+          );
         },
       },
     }
@@ -697,6 +737,7 @@ export const createPureDatasetQualityControllerStateMachine = (
 
 export interface DatasetQualityControllerStateMachineDependencies {
   initialContext?: DatasetQualityControllerContext;
+  plugins: DatasetQualityStartDeps;
   toasts: IToasts;
   dataStreamStatsClient: IDataStreamsStatsClient;
   dataStreamDetailsClient: IDataStreamDetailsClient;
@@ -704,6 +745,7 @@ export interface DatasetQualityControllerStateMachineDependencies {
 
 export const createDatasetQualityControllerStateMachine = ({
   initialContext = DEFAULT_CONTEXT,
+  plugins,
   toasts,
   dataStreamStatsClient,
   dataStreamDetailsClient,
@@ -728,6 +770,8 @@ export const createDatasetQualityControllerStateMachine = ({
         const integrationName = context.flyout.datasetSettings?.integration;
         return fetchDataStreamIntegrationFailedNotifier(toasts, event.data, integrationName);
       },
+      notifyAssertBreakdownFieldEcsFailed: (_context, event: DoneInvokeEvent<Error>) =>
+        assertBreakdownFieldEcsFailedNotifier(toasts, event.data),
     },
     services: {
       loadDataStreamStats: (context) =>
@@ -860,6 +904,27 @@ export const createDatasetQualityControllerStateMachine = ({
             namespace,
           }),
         });
+      },
+      assertBreakdownFieldIsEcs: async (context) => {
+        if (context.flyout.breakdownField) {
+          const allowedFieldSources = ['ecs', 'metadata'];
+
+          // This timeout is to avoid a runtime error that randomly happens on breakdown field change
+          // TypeError: Cannot read properties of undefined (reading 'timeFieldName')
+          await new Promise((res) => setTimeout(res, 300));
+
+          const client = await plugins.fieldsMetadata.getClient();
+          const { fields } = await client.find({
+            attributes: ['source'],
+            fieldNames: [context.flyout.breakdownField],
+          });
+
+          const breakdownFieldSource = fields[context.flyout.breakdownField]?.source;
+
+          return !!(breakdownFieldSource && allowedFieldSources.includes(breakdownFieldSource));
+        }
+
+        return null;
       },
     },
   });

@@ -46,3 +46,14 @@ export interface GetEnrollmentSettingsResponse {
   };
   download_source?: DownloadSource;
 }
+export interface PutSpaceSettingsRequest {
+  body: {
+    allowed_namespace_prefixes?: string[];
+  };
+}
+
+export interface GetSpaceSettingsResponse {
+  item: {
+    allowed_namespace_prefixes?: string[];
+  };
+}

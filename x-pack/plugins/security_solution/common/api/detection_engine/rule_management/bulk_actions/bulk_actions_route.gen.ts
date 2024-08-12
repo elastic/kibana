@@ -53,7 +53,6 @@ export const BulkActionsDryRunErrCode = z.enum([
   'MACHINE_LEARNING_AUTH',
   'MACHINE_LEARNING_INDEX_PATTERN',
   'ESQL_INDEX_PATTERN',
-  'INVESTIGATION_FIELDS_FEATURE',
   'MANUAL_RULE_RUN_FEATURE',
   'MANUAL_RULE_RUN_DISABLED_RULE',
 ]);
@@ -219,7 +218,7 @@ export const BulkActionEditTypeEnum = BulkActionEditType.enum;
 export type NormalizedRuleAction = z.infer<typeof NormalizedRuleAction>;
 export const NormalizedRuleAction = z
   .object({
-    group: RuleActionGroup,
+    group: RuleActionGroup.optional(),
     id: RuleActionId,
     params: RuleActionParams,
     frequency: RuleActionFrequency.optional(),
@@ -241,7 +240,7 @@ export const BulkActionEditPayloadSchedule = z.object({
   type: z.literal('set_schedule'),
   value: z.object({
     /**
-     * Interval in which the rule is executed
+     * Interval in which the rule runs. For example, `"1h"` means the rule runs every hour.
      */
     interval: z.string().regex(/^[1-9]\d*[smh]$/),
     /**

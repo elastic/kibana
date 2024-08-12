@@ -175,7 +175,7 @@ describe('StepSelectHosts', () => {
     });
 
     waitFor(() => {
-      expect(renderResult.getByText('An agent policy is required.')).toBeInTheDocument();
+      expect(renderResult.getByText('At least one agent policy is required.')).toBeInTheDocument();
     });
   });
 });

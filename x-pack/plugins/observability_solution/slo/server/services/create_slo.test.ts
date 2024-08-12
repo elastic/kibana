@@ -165,12 +165,12 @@ describe('CreateSLO', () => {
       );
 
       expect(mockRepository.deleteById).toHaveBeenCalled();
+      expect(mockEsClient.ingest.deletePipeline).toHaveBeenCalledTimes(1);
 
       expect(mockSummaryTransformManager.stop).not.toHaveBeenCalled();
       expect(mockSummaryTransformManager.uninstall).not.toHaveBeenCalled();
       expect(mockTransformManager.stop).not.toHaveBeenCalled();
       expect(mockTransformManager.uninstall).not.toHaveBeenCalled();
-      expect(mockEsClient.ingest.deletePipeline).not.toHaveBeenCalled();
     });
 
     it('rollbacks completed operations when summary transform start fails', async () => {
@@ -186,7 +186,7 @@ describe('CreateSLO', () => {
       expect(mockRepository.deleteById).toHaveBeenCalled();
       expect(mockTransformManager.stop).toHaveBeenCalled();
       expect(mockTransformManager.uninstall).toHaveBeenCalled();
-      expect(mockEsClient.ingest.deletePipeline).toHaveBeenCalled();
+      expect(mockEsClient.ingest.deletePipeline).toHaveBeenCalledTimes(2);
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
 
       expect(mockSummaryTransformManager.stop).not.toHaveBeenCalled();
@@ -203,7 +203,7 @@ describe('CreateSLO', () => {
       expect(mockRepository.deleteById).toHaveBeenCalled();
       expect(mockTransformManager.stop).toHaveBeenCalled();
       expect(mockTransformManager.uninstall).toHaveBeenCalled();
-      expect(mockEsClient.ingest.deletePipeline).toHaveBeenCalled();
+      expect(mockEsClient.ingest.deletePipeline).toHaveBeenCalledTimes(2);
       expect(mockSummaryTransformManager.stop).toHaveBeenCalled();
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
     });

@@ -4,7 +4,7 @@
 <titleabbrev>Set default data view</titleabbrev>
 ++++
 
-experimental[] Set a default data view ID. Kibana UI will use the default data view unless user picks a different one. 
+Set a default data view ID. Kibana UI will use the default data view unless user picks a different one. 
 The API doesn't validate if given `data_view_id` is a valid id. 
 
 [NOTE]
