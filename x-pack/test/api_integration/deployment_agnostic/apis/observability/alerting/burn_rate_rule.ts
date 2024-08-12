@@ -33,9 +33,14 @@ export default function ({ getService }: FtrProviderContext) {
     let actionId: string;
     let ruleId: string;
 
+    const samlAuth = getService('samlAuth');
+    const supertestWithoutAuth = getService('supertestWithoutAuth');
+    let roleAuthc: RoleCredentials;
+    let internalHeaders: InternalRequestHeader;
+
     before(async () => {
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+      internalHeaders = samlAuth.getInternalRequestHeader();
       dataForgeConfig = {
         schedule: [
           {
@@ -52,23 +57,29 @@ export default function ({ getService }: FtrProviderContext) {
         indexing: { dataset: 'fake_hosts' as Dataset, eventsPerCycle: 1, interval: 10000 },
       };
       dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
-      await alertingApi.waitForDocumentInIndex({ indexName: DATA_VIEW, docCountTarget: 360 });
+      await alertingApi.waitForDocumentInIndex({
+        indexName: DATA_VIEW,
+        docCountTarget: 360,
+        roleAuthc,
+      });
       await dataViewApi.create({
+        roleAuthc,
         name: DATA_VIEW,
         id: DATA_VIEW_ID,
         title: DATA_VIEW,
       });
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
 
     after(async () => {
       await supertest
         .delete(`/api/alerting/rule/${ruleId}`)
+        .set(roleAuthc.apiKeyHeader)
         .set('kbn-xsrf', 'foo')
         .set('x-elastic-internal-origin', 'foo');
       await supertest
         .delete(`/api/actions/connector/${actionId}`)
         .set('kbn-xsrf', 'foo')
+        .set(roleAuthc.apiKeyHeader)
         .set('x-elastic-internal-origin', 'foo');
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
@@ -76,6 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
         conflicts: 'proceed',
       });
       await dataViewApi.delete({
+        roleAuthc,
         id: DATA_VIEW_ID,
       });
       await supertest
@@ -85,7 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await esDeleteAllIndices([ALERT_ACTION_INDEX, ...dataForgeIndices]);
       await cleanup({ client: esClient, config: dataForgeConfig, logger });
-      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('Rule creation', () => {
@@ -95,29 +107,32 @@ export default function ({ getService }: FtrProviderContext) {
           indexName: ALERT_ACTION_INDEX,
         });
 
-        await sloApi.create({
-          id: 'my-custom-id',
-          name: 'my custom name',
-          description: 'my custom description',
-          indicator: {
-            type: 'sli.kql.custom',
-            params: {
-              index: DATA_VIEW,
-              good: 'system.cpu.total.norm.pct > 1',
-              total: 'system.cpu.total.norm.pct: *',
-              timestampField: '@timestamp',
+        await sloApi.create(
+          {
+            id: 'my-custom-id',
+            name: 'my custom name',
+            description: 'my custom description',
+            indicator: {
+              type: 'sli.kql.custom',
+              params: {
+                index: DATA_VIEW,
+                good: 'system.cpu.total.norm.pct > 1',
+                total: 'system.cpu.total.norm.pct: *',
+                timestampField: '@timestamp',
+              },
             },
+            timeWindow: {
+              duration: '7d',
+              type: 'rolling',
+            },
+            budgetingMethod: 'occurrences',
+            objective: {
+              target: 0.999,
+            },
+            groupBy: '*',
           },
-          timeWindow: {
-            duration: '7d',
-            type: 'rolling',
-          },
-          budgetingMethod: 'occurrences',
-          objective: {
-            target: 0.999,
-          },
-          groupBy: '*',
-        });
+          roleAuthc
+        );
 
         const dependencyRule = await alertingApi.createRule({
           tags: ['observability'],
@@ -274,6 +289,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should be active', async () => {
         const executionStatus = await alertingApi.waitForRuleStatus({
+          roleAuthc,
           ruleId,
           expectedStatus: 'active',
         });
