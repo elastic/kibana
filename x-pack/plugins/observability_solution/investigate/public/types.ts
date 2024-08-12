@@ -10,7 +10,11 @@ import type { FromSchema } from 'json-schema-to-ts';
 import type { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/core/public';
 import type { InvestigateWidget } from '../common';
-import type { GlobalWidgetParameters, InvestigateWidgetCreate } from '../common/types';
+import type {
+  GlobalWidgetParameters,
+  InvestigateWidgetCreate,
+  Investigation,
+} from '../common/types';
 import type { UseInvestigationApi } from './hooks/use_investigation';
 import type { UseInvestigateWidgetApi } from './hooks/use_investigate_widget';
 

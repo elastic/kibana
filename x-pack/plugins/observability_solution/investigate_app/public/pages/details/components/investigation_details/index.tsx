@@ -10,16 +10,17 @@ import type { InvestigateWidgetCreate } from '@kbn/investigate-plugin/public';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { keyBy, noop } from 'lodash';
 import React, { useEffect, useMemo, useRef } from 'react';
+import { useParams } from 'react-router';
 import useAsync from 'react-use/lib/useAsync';
 import { AddObservationUI } from '../../../../components/add_observation_ui';
 import { InvestigateSearchBar } from '../../../../components/investigate_search_bar';
 import { InvestigateWidgetGrid } from '../../../../components/investigate_widget_grid';
+import { useAddInvestigationNote } from '../../../../hooks/use_add_investigation_note';
 import { useDateRange } from '../../../../hooks/use_date_range';
 import { useFetchInvestigation } from '../../../../hooks/use_fetch_investigation';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { InvestigationNotes } from '../investigation_notes/investigation_notes';
-import { useParams } from 'react-router';
 import { InvestigationDetailsPathParams } from '../../types';
+import { InvestigationNotes } from '../investigation_notes/investigation_notes';
 
 function InvestigationDetailsWithUser({
   user,
@@ -37,6 +38,12 @@ function InvestigationDetailsWithUser({
   const [range, setRange] = useDateRange();
 
   const { data: investigationData } = useFetchInvestigation({ id: investigationId });
+  const { mutateAsync: addInvestigationNote } = useAddInvestigationNote();
+  const handleAddInvestigationNote = async (note: string) => {
+    await addInvestigationNote({ investigationId, note: { content: note } });
+    // todo: move following to mutate hook
+    await addNote(note);
+  };
 
   const {
     addItem,
@@ -153,7 +160,11 @@ function InvestigationDetailsWithUser({
       </EuiFlexItem>
 
       <EuiFlexItem grow={2}>
-        <InvestigationNotes notes={investigation.notes} addNote={addNote} deleteNote={deleteNote} />
+        <InvestigationNotes
+          notes={investigationData.notes}
+          addNote={handleAddInvestigationNote}
+          deleteNote={deleteNote}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

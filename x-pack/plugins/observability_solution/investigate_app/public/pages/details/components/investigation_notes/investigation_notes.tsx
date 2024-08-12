@@ -69,7 +69,7 @@ export function InvestigationNotes({ notes, addNote, deleteNote }: Props) {
             return (
               <TimelineMessage
                 key={currNote.id}
-                icon={<EuiAvatar name={currNote.createdBy.username} size="s" />}
+                icon={<EuiAvatar name={currNote.createdBy} size="s" />}
                 note={currNote}
                 onDelete={() => deleteNote(currNote.id)}
               />
