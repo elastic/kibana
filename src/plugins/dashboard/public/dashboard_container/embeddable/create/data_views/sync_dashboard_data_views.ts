@@ -19,19 +19,11 @@ export function startSyncingDashboardDataViews(this: DashboardContainer) {
     data: { dataViews },
   } = pluginServices.getServices();
 
-  const controlGroupDataViewsPipe: Observable<DataView[]> = this.controlGroup
-    ? this.controlGroup.getOutput$().pipe(
-        map((output) => output.dataViewIds ?? []),
-        switchMap(
-          (dataViewIds) =>
-            new Promise<DataView[]>((resolve) =>
-              Promise.all(dataViewIds.map((id) => dataViews.get(id))).then((nextDataViews) =>
-                resolve(nextDataViews)
-              )
-            )
-        )
-      )
-    : of([]);
+  const controlGroupDataViewsPipe: Observable<DataView[] | undefined> = this.controlGroupApi$.pipe(
+    switchMap(controlGroupApi => {
+      return controlGroupApi ? controlGroupApi.dataViews : of([]);
+    })
+  );
 
   const childDataViewsPipe = combineCompatibleChildrenApis<PublishesDataViews, DataView[]>(
     this,
@@ -43,7 +35,10 @@ export function startSyncingDashboardDataViews(this: DashboardContainer) {
   return combineLatest([controlGroupDataViewsPipe, childDataViewsPipe])
     .pipe(
       switchMap(([controlGroupDataViews, childDataViews]) => {
-        const allDataViews = controlGroupDataViews.concat(childDataViews);
+        const allDataViews = [
+          ...(controlGroupDataViews ? controlGroupDataViews : []),
+          ...childDataViews,
+        ];
         if (allDataViews.length === 0) {
           return (async () => {
             const defaultDataViewId = await dataViews.getDefaultId();
@@ -54,7 +49,6 @@ export function startSyncingDashboardDataViews(this: DashboardContainer) {
       })
     )
     .subscribe((newDataViews) => {
-      if (newDataViews[0].id) this.controlGroup?.setRelevantDataViewId(newDataViews[0].id);
       this.setAllDataViews(newDataViews);
     });
 }
