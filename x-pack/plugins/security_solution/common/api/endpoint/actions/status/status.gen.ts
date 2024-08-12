@@ -18,17 +18,21 @@ import { z } from 'zod';
 
 import { AgentIds, AgentId } from '../../model/schema/common.gen';
 
+export type PendingActionDataType = z.infer<typeof PendingActionDataType>;
+export const PendingActionDataType = z.number().int();
+
 export type PendingActionsSchema = z.infer<typeof PendingActionsSchema>;
 export const PendingActionsSchema = z.object({
-  isolate: z.number().int().optional(),
-  unisolate: z.number().int().optional(),
-  'kill-process': z.number().int().optional(),
-  'suspend-process': z.number().int().optional(),
-  'running-processes': z.number().int().optional(),
-  'get-file': z.number().int().optional(),
-  execute: z.number().int().optional(),
-  upload: z.number().int().optional(),
-  scan: z.number().int().optional(),
+  isolate: PendingActionDataType.optional(),
+  unisolate: PendingActionDataType.optional(),
+  'kill-process': PendingActionDataType.optional(),
+  'suspend-process': PendingActionDataType.optional(),
+  'running-processes': PendingActionDataType.optional(),
+  'get-file': PendingActionDataType.optional(),
+  execute: PendingActionDataType.optional(),
+  upload: PendingActionDataType.optional(),
+  scan: PendingActionDataType.optional(),
+  additionalProperties: PendingActionDataType.optional(),
 });
 
 export type ActionStatusSuccessResponse = z.infer<typeof ActionStatusSuccessResponse>;

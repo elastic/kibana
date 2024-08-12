@@ -33,23 +33,28 @@ components:
       type: object
       properties:
           'isolate':
-            type: integer
+            $ref: '#/components/schemas/PendingActionDataType'
           'unisolate':
-            type: integer
+            $ref: '#/components/schemas/PendingActionDataType'
           'kill-process':
-            type: integer
+            $ref: '#/components/schemas/PendingActionDataType'
           'suspend-process':
-            type: integer
+            $ref: '#/components/schemas/PendingActionDataType'
           'running-processes':
-            type: integer
+            $ref: '#/components/schemas/PendingActionDataType'
           'get-file':
-            type: integer
+            $ref: '#/components/schemas/PendingActionDataType'
           'execute':
-            type: integer
+            $ref: '#/components/schemas/PendingActionDataType'
           'upload':
-            type: integer
+            $ref: '#/components/schemas/PendingActionDataType'
           'scan':
-            type: integer
+            $ref: '#/components/schemas/PendingActionDataType'
+          additionalProperties:
+            $ref: "#/components/schemas/PendingActionDataType"
+
+    PendingActionDataType:
+      type: integer
 
     ActionStatusSuccessResponse:
         type: object
