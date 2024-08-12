@@ -31,6 +31,11 @@ jest.mock('@kbn/security-solution-features/product_features', () => ({
     baseKibanaSubFeatureIds: [],
     subFeaturesMap: new Map(),
   })),
+  getAttackDiscoveryFeature: jest.fn(() => ({
+    baseKibanaFeature: {},
+    baseKibanaSubFeatureIds: [],
+    subFeaturesMap: new Map(),
+  })),
 }));
 
 export const createProductFeaturesServiceMock = (
