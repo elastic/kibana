@@ -18,17 +18,17 @@ const createInvestigationNoteParamsSchema = t.type({
 
 const createInvestigationNoteResponseSchema = investigationNoteResponseSchema;
 
-type createInvestigationNoteInput = t.OutputOf<
+type CreateInvestigationNoteInput = t.OutputOf<
   typeof createInvestigationNoteParamsSchema.props.body
 >;
-type createInvestigationNoteParams = t.TypeOf<
+type CreateInvestigationNoteParams = t.TypeOf<
   typeof createInvestigationNoteParamsSchema.props.body
 >;
-type createInvestigationNoteResponse = t.OutputOf<typeof createInvestigationNoteResponseSchema>;
+type CreateInvestigationNoteResponse = t.OutputOf<typeof createInvestigationNoteResponseSchema>;
 
 export { createInvestigationNoteParamsSchema, createInvestigationNoteResponseSchema };
 export type {
-  createInvestigationNoteInput,
-  createInvestigationNoteParams,
-  createInvestigationNoteResponse,
+  CreateInvestigationNoteInput,
+  CreateInvestigationNoteParams,
+  CreateInvestigationNoteResponse,
 };

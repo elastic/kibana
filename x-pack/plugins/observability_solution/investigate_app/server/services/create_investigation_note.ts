@@ -6,17 +6,17 @@
  */
 
 import {
-  createInvestigationNoteInput,
-  createInvestigationNoteResponse,
+  CreateInvestigationNoteInput,
+  CreateInvestigationNoteResponse,
 } from '@kbn/investigate-app-plugin/common/schema/create_notes';
-import { InvestigationRepository } from './investigation_repository';
 import { v4 } from 'uuid';
+import { InvestigationRepository } from './investigation_repository';
 
 export async function createInvestigationNote(
   investigationId: string,
-  params: createInvestigationNoteInput,
+  params: CreateInvestigationNoteInput,
   repository: InvestigationRepository
-): Promise<createInvestigationNoteResponse> {
+): Promise<CreateInvestigationNoteResponse> {
   const investigation = await repository.findById(investigationId);
 
   const investigationNote = {

@@ -6,7 +6,10 @@
  */
 
 import { GetInvestigationParams } from '@kbn/investigate-plugin/common';
-import { GetInvestigationResponse } from '@kbn/investigate-plugin/common/schema/get';
+import {
+  GetInvestigationResponse,
+  getInvestigationResponseSchema,
+} from '@kbn/investigate-plugin/common/schema/get';
 import { InvestigationRepository } from './investigation_repository';
 
 export async function getInvestigation(
@@ -15,5 +18,5 @@ export async function getInvestigation(
 ): Promise<GetInvestigationResponse> {
   const investigation = await repository.findById(params.id);
 
-  return investigation;
+  return getInvestigationResponseSchema.encode(investigation);
 }

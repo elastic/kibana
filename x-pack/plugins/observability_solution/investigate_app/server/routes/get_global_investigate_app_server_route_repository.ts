@@ -19,6 +19,8 @@ import { findInvestigations } from '../services/find_investigations';
 import { getInvestigation } from '../services/get_investigation';
 import { investigationRepositoryFactory } from '../services/investigation_repository';
 import { createInvestigateAppServerRoute } from './create_investigate_app_server_route';
+import { getInvestigationNotes } from '../services/get_investigation_notes';
+import { getInvestigationNotesParamsSchema } from '@kbn/investigate-app-plugin/common/schema/get_notes';
 
 const createInvestigationRoute = createInvestigateAppServerRoute({
   endpoint: 'POST /api/observability/investigations 2023-10-31',
@@ -90,6 +92,20 @@ const createInvestigationNoteRoute = createInvestigateAppServerRoute({
   },
 });
 
+const getInvestigationNotesRoute = createInvestigateAppServerRoute({
+  endpoint: 'GET /api/observability/investigations/{id}/notes 2023-10-31',
+  options: {
+    tags: [],
+  },
+  params: getInvestigationNotesParamsSchema,
+  handler: async (params) => {
+    const soClient = (await params.context.core).savedObjects.client;
+    const repository = investigationRepositoryFactory({ soClient, logger: params.logger });
+
+    return await getInvestigationNotes(params.params.path.id, repository);
+  },
+});
+
 export function getGlobalInvestigateAppServerRouteRepository() {
   return {
     ...createInvestigationRoute,
@@ -97,6 +113,7 @@ export function getGlobalInvestigateAppServerRouteRepository() {
     ...getInvestigationRoute,
     ...deleteInvestigationRoute,
     ...createInvestigationNoteRoute,
+    ...getInvestigationNotesRoute,
   };
 }
 
