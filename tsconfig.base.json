@@ -1546,6 +1546,8 @@
       "@kbn/server-http-tools/*": ["packages/kbn-server-http-tools/*"],
       "@kbn/server-route-repository": ["packages/kbn-server-route-repository"],
       "@kbn/server-route-repository/*": ["packages/kbn-server-route-repository/*"],
+      "@kbn/server-route-repository-client": ["packages/kbn-server-route-repository-client"],
+      "@kbn/server-route-repository-client/*": ["packages/kbn-server-route-repository-client/*"],
       "@kbn/server-route-repository-utils": ["packages/kbn-server-route-repository-utils"],
       "@kbn/server-route-repository-utils/*": ["packages/kbn-server-route-repository-utils/*"],
       "@kbn/serverless": ["x-pack/plugins/serverless"],
