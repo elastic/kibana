@@ -51,5 +51,6 @@
     "@kbn/ui-actions-plugin",
     "@kbn/esql-datagrid",
     "@kbn/server-route-repository-utils",
+    "@kbn/core-saved-objects-server",
   ],
 }
