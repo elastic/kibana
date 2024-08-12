@@ -174,7 +174,6 @@ export const useCurrentConversation = ({
         );
         setCurrentConversationId(updatedConvo.id);
       } else if (allConversations?.data?.[cId]) {
-        // selectedConversation = allConversations?.data?.[cId];
         setCurrentConversationId(cId);
       }
     },
@@ -185,6 +184,7 @@ export const useCurrentConversation = ({
     ]
   );
 
+  // update currentConversation when conversations or currentConversationId update
   useEffect(() => {
     if (!mayUpdateConversations) return;
     const updateConversation = async () => {
