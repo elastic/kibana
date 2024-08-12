@@ -2248,28 +2248,28 @@
     {
       "query": "from index | project ",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}"
       ],
       "warning": []
     },
     {
       "query": "from index | project textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}"
       ],
       "warning": []
     },
     {
       "query": "from index | PROJECT textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
+        "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}"
       ],
       "warning": []
     },
     {
       "query": "from index | project missingField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}"
       ],
       "warning": []
     },
