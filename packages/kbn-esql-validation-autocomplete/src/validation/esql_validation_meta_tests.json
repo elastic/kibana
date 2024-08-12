@@ -2248,28 +2248,28 @@
     {
       "query": "from index | project ",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}"
       ],
       "warning": []
     },
     {
       "query": "from index | project textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}"
       ],
       "warning": []
     },
     {
       "query": "from index | PROJECT textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
+        "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}"
       ],
       "warning": []
     },
     {
       "query": "from index | project missingField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}"
       ],
       "warning": []
     },
@@ -37148,48 +37148,6 @@
       "error": [
         "SyntaxError: mismatched input '=' expecting <EOF>",
         "Unknown index [assignment]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "FROM index, missingIndex",
-      "error": [
-        "Unknown index [missingIndex]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from average()",
-      "error": [
-        "Unknown index [average()]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "fRom custom_function()",
-      "error": [
-        "Unknown index [custom_function()]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "FROM indexes*",
-      "error": [
-        "Unknown index [indexes*]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from numberField",
-      "error": [
-        "Unknown index [numberField]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "FROM policy",
-      "error": [
-        "Unknown index [policy]"
       ],
       "warning": []
     },

@@ -37,15 +37,9 @@ import {
   isNestedFieldParent,
   usePager,
 } from '@kbn/discover-utils';
-import {
-  FieldDescription,
-  getFieldSearchMatchingHighlight,
-  getTextBasedColumnIconType,
-} from '@kbn/field-utils';
+import { getTextBasedColumnIconType } from '@kbn/field-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { FieldName } from '@kbn/unified-doc-viewer';
 import { getUnifiedDocViewerServices } from '../../plugin';
-import { TableFieldValue } from './table_cell_value';
 import {
   type TableRow,
   getFieldCellActions,
@@ -58,6 +52,7 @@ import {
   getTabContentAvailableHeight,
 } from '../doc_viewer_source/get_height';
 import { TableFilters, TableFiltersProps, useTableFilters } from './table_filters';
+import { TableCell } from './table_cell';
 
 export type FieldRecord = TableRow;
 
@@ -137,7 +132,7 @@ export const DocViewerTable = ({
 }: DocViewRenderProps) => {
   const isEsqlMode = Array.isArray(textBasedHits);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const { fieldFormats, storage, uiSettings, fieldsMetadata } = getUnifiedDocViewerServices();
+  const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
 
@@ -375,60 +370,17 @@ export const DocViewerTable = ({
 
   const renderCellValue: EuiDataGridProps['renderCellValue'] = useCallback(
     ({ rowIndex, columnId, isDetails }) => {
-      const row = rows[rowIndex];
-
-      if (!row) {
-        return null;
-      }
-
-      const {
-        action: { flattenedField },
-        field: { field, fieldMapping, fieldType, scripted, pinned },
-        value: { formattedValue, ignored },
-      } = row;
-
-      if (columnId === 'name') {
-        return (
-          <div>
-            <FieldName
-              fieldName={field}
-              fieldType={fieldType}
-              fieldMapping={fieldMapping}
-              scripted={scripted}
-              highlight={getFieldSearchMatchingHighlight(
-                fieldMapping?.displayName ?? field,
-                tableFiltersProps.searchTerm
-              )}
-              isPinned={pinned}
-            />
-
-            {isDetails && !!fieldMapping ? (
-              <div>
-                <FieldDescription
-                  fieldsMetadataService={fieldsMetadata}
-                  field={fieldMapping}
-                  truncate={false}
-                />
-              </div>
-            ) : null}
-          </div>
-        );
-      }
-
-      if (columnId === 'value') {
-        return (
-          <TableFieldValue
-            field={field}
-            formattedValue={formattedValue}
-            rawValue={flattenedField}
-            ignoreReason={ignored}
-          />
-        );
-      }
-
-      return null;
+      return (
+        <TableCell
+          searchTerm={tableFiltersProps.searchTerm}
+          rows={rows}
+          rowIndex={rowIndex}
+          columnId={columnId}
+          isDetails={isDetails}
+        />
+      );
     },
-    [rows, tableFiltersProps.searchTerm, fieldsMetadata]
+    [rows, tableFiltersProps.searchTerm]
   );
 
   const renderCellPopover = useCallback(
@@ -528,6 +480,7 @@ export const DocViewerTable = ({
             `}
           >
             <EuiDataGrid
+              key={`fields-table-${hit.id}`}
               {...GRID_PROPS}
               aria-label={i18n.translate('unifiedDocViewer.fieldsTable.ariaLabel', {
                 defaultMessage: 'Field values',
