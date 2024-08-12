@@ -21,7 +21,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('click show API request button and flyout should appear in page', async () => {
-      // const flyoutHeader = await testSubjects.find('painlessLabRequestFlyoutHeader');
       await testSubjects.click('btnViewRequest');
 
       await testSubjects.existOrFail('painlessLabRequestFlyoutHeader', { timeout: 10 * 1000 });
