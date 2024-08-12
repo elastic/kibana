@@ -81,7 +81,7 @@ export const areTypesEqual: IsEqual<
   typeof TypeSpecificFields._type.type
 > = true;
 
-const PrebuiltAssetBaseProps = BaseCreateProps.omit(BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET);  
+const PrebuiltAssetBaseProps = BaseCreateProps.omit(BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET);
 
 /**
  * Asset containing source content of a prebuilt Security detection rule.
@@ -99,14 +99,12 @@ const PrebuiltAssetBaseProps = BaseCreateProps.omit(BASE_PROPS_REMOVED_FROM_PREB
  *  - some fields are omitted because they are not present in https://github.com/elastic/detection-rules
  */
 export type PrebuiltRuleAsset = z.infer<typeof PrebuiltRuleAsset>;
-export const PrebuiltRuleAsset = PrebuiltAssetBaseProps
-  .and(TypeSpecificFields)
-  .and(
-    z.object({
-      rule_id: RuleSignatureId,
-      version: RuleVersion,
-    })
-  );
+export const PrebuiltRuleAsset = PrebuiltAssetBaseProps.and(TypeSpecificFields).and(
+  z.object({
+    rule_id: RuleSignatureId,
+    version: RuleVersion,
+  })
+);
 
 /**
  * Creates a Map of the fields that are upgradable during the Upgrade workflow, by type.
@@ -116,14 +114,12 @@ export const PrebuiltRuleAsset = PrebuiltAssetBaseProps
  *  - manually add or remove any fields if we decide that they should not be part of the upgradable fields.
  */
 function createUpgradableRuleFieldsByTypeMap() {
-  const baseFields = Object.keys(
-    PrebuiltAssetBaseProps.shape
-  );
+  const baseFields = Object.keys(PrebuiltAssetBaseProps.shape);
 
   return new Map(
     TypeSpecificFields.options.map((option) => {
       const typeName = option.shape.type.value;
-      return [typeName, [...baseFields, ...Object.keys(option.shape)]];
+      return [typeName, [...baseFields, 'version', ...Object.keys(option.shape)]];
     })
   );
 }

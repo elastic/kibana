@@ -13,7 +13,7 @@ import { TypeSpecificCreateProps } from '../../../../../../common/api/detection_
 
 describe('Prebuilt rule asset schema', () => {
   it('can be of all rule types that are supported', () => {
-    // Check that the discriminated union TypeSpecificFields, which is used to create 
+    // Check that the discriminated union TypeSpecificFields, which is used to create
     // the PrebuiltRuleAsset schema, contains all the rule types that are supported.
     const createPropsTypes = TypeSpecificCreateProps.options.map(
       (option) => option.shape.type.value
