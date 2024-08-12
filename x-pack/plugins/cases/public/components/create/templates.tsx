@@ -23,7 +23,10 @@ import { TEMPLATE_HELP_TEXT, TEMPLATE_LABEL } from './translations';
 interface Props {
   isLoading: boolean;
   templates: CasesConfigurationUI['templates'];
-  onTemplateChange: (caseFields: CasesConfigurationUITemplate['caseFields']) => void;
+  onTemplateChange: ({
+    caseFields,
+    key,
+  }: Pick<CasesConfigurationUITemplate, 'caseFields' | 'key'>) => void;
 }
 
 export const TemplateSelectorComponent: React.FC<Props> = ({
@@ -45,7 +48,7 @@ export const TemplateSelectorComponent: React.FC<Props> = ({
 
       if (selectedTemplated) {
         onSelectTemplate(selectedTemplated.key);
-        onTemplateChange(selectedTemplated.caseFields);
+        onTemplateChange({ key: selectedTemplated.key, caseFields: selectedTemplated.caseFields });
       }
     },
     [onTemplateChange, templates]
