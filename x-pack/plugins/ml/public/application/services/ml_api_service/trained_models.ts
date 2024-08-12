@@ -216,7 +216,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       return httpService.http<{ acknowledge: boolean }>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/${modelId}/deployment/_start`,
         method: 'POST',
-        body: JSON.stringify(bodyParams),
+        ...(bodyParams ? { body: JSON.stringify(bodyParams) } : {}),
         version: '1',
       });
     },

@@ -17,6 +17,7 @@ import type {
 } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import type { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
@@ -592,7 +593,7 @@ export function trainedModelsRoutes(
               {
                 method: 'POST',
                 path: `_ml/trained_models/${modelId}/deployment/_start`,
-                body: request.body,
+                ...(isPopulatedObject(request.body) ? { body: request.body } : {}),
               }
             );
 

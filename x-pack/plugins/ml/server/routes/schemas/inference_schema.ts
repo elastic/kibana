@@ -29,7 +29,7 @@ export const createInferenceSchema = schema.object({
   inferenceId: schema.string(),
 });
 
-export const threadingParamsSchema = schema.maybe(
+export const threadingParamsSchema = schema.nullable(
   schema.object({
     number_of_allocations: schema.maybe(schema.number()),
     threads_per_allocation: schema.maybe(schema.number()),
