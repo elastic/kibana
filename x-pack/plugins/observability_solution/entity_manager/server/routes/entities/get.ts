@@ -33,7 +33,7 @@ import { findEntityDefinitions } from '../../lib/entities/find_entity_definition
  *         content:
  *           application/json:
  *             schema:
- *               allOf: 
+ *               allOf:
  *                 - $ref: '#/components/schemas/entityDefinitionSchema'
  *                 - type: object
  *                   properties:

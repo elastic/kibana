@@ -36,7 +36,7 @@ import { getClientsFromAPIKey } from '../../lib/utils';
  *                 enabled:
  *                  type: boolean
  *                  example: false
- *                 reason: 
+ *                 reason:
  *                  type: string
  *                  example: api_key_not_found
  */

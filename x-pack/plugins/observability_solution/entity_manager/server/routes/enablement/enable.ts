@@ -41,7 +41,7 @@ import { EntityDiscoveryApiKeyType } from '../../saved_objects';
  *                 success:
  *                  type: boolean
  *                  example: false
- *                 reason: 
+ *                 reason:
  *                  type: string
  *                  example: api_key_service_disabled
  *                 message:
