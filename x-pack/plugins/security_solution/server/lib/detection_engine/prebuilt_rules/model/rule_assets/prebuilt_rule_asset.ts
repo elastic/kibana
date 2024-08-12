@@ -6,12 +6,29 @@
  */
 
 import * as z from '@kbn/zod';
+import type { IsEqual } from 'type-fest';
 import {
   RuleSignatureId,
   RuleVersion,
   BaseCreateProps,
   TypeSpecificCreateProps,
+  EqlRuleCreateFields,
+  EsqlRuleCreateFields,
+  MachineLearningRuleCreateFields,
+  NewTermsRuleCreateFields,
+  QueryRuleCreateFields,
+  SavedQueryRuleCreateFields,
+  ThreatMatchRuleCreateFields,
+  ThresholdRuleCreateFields,
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
+
+function zodMaskFor<T>() {
+  return function <U extends keyof T>(props: U[]): Record<U, true> {
+    type PropObject = Record<string, boolean>;
+    const propObjects: PropObject[] = props.map((p: U) => ({ [p]: true }));
+    return Object.assign({}, ...propObjects);
+  };
+}
 
 /**
  * The PrebuiltRuleAsset schema is created based on the rule schema defined in our OpenAPI specs.
@@ -32,37 +49,37 @@ const BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET = zodMaskFor<BaseCreateProps>(
 
 /**
  * Aditionally remove fields which are part only of the optional fields in the rule types that make up
- * the TypeSpecificCreateProps discriminatedUnion, by using a Zod transformation which extracts out the
- * necessary fields in the rules types where they exist. Fields to extract:
+ * the TypeSpecificCreateProps discriminatedUnion, by recreating a discriminated union of the types, but
+ * with the necessary fields ommitted, in the types where they exist. Fields to extract:
  *  - response_actions: from Query and SavedQuery rules
  */
-const TYPE_SPECIFIC_FIELDS_TO_OMIT = new Set(['response_actions']);
+const TYPE_SPECIFIC_FIELDS_TO_OMIT = ['response_actions'] as const;
 
-const filterTypeSpecificFields = (props: TypeSpecificCreateProps) =>
-  Object.fromEntries(
-    Object.entries(props).filter(([key]) => !TYPE_SPECIFIC_FIELDS_TO_OMIT.has(key))
-  );
+const TYPE_SPECIFIC_FIELDS_TO_OMIT_FROM_QUERY_RULES = zodMaskFor<QueryRuleCreateFields>()([
+  ...TYPE_SPECIFIC_FIELDS_TO_OMIT,
+]);
+const TYPE_SPECIFIC_FIELDS_TO_OMIT_FROM_SAVED_QUERY_RULES =
+  zodMaskFor<SavedQueryRuleCreateFields>()([...TYPE_SPECIFIC_FIELDS_TO_OMIT]);
 
-const TypeSpecificFields = TypeSpecificCreateProps.transform((val) => {
-  switch (val.type) {
-    case 'query': {
-      return filterTypeSpecificFields(val);
-    }
-    case 'saved_query': {
-      return filterTypeSpecificFields(val);
-    }
-    default:
-      return val;
-  }
-});
+export type TypeSpecificFields = z.infer<typeof TypeSpecificFields>;
+export const TypeSpecificFields = z.discriminatedUnion('type', [
+  EqlRuleCreateFields,
+  QueryRuleCreateFields.omit(TYPE_SPECIFIC_FIELDS_TO_OMIT_FROM_QUERY_RULES),
+  SavedQueryRuleCreateFields.omit(TYPE_SPECIFIC_FIELDS_TO_OMIT_FROM_SAVED_QUERY_RULES),
+  ThresholdRuleCreateFields,
+  ThreatMatchRuleCreateFields,
+  MachineLearningRuleCreateFields,
+  NewTermsRuleCreateFields,
+  EsqlRuleCreateFields,
+]);
 
-function zodMaskFor<T>() {
-  return function <U extends keyof T>(props: U[]): Record<U, true> {
-    type PropObject = Record<string, boolean>;
-    const propObjects: PropObject[] = props.map((p: U) => ({ [p]: true }));
-    return Object.assign({}, ...propObjects);
-  };
-}
+// Make sure the type-specific fields contain all the same rule types as the type-specific rule params.
+// TS will throw a type error if the types are not equal (for example, if a new rule type is added to
+// the TypeSpecificCreateProps and the new type is not reflected in TypeSpecificFields).
+export const areTypesEqual: IsEqual<
+  typeof TypeSpecificCreateProps._type.type,
+  typeof TypeSpecificFields._type.type
+> = true;
 
 /**
  * Asset containing source content of a prebuilt Security detection rule.
@@ -101,12 +118,14 @@ function createUpgradableRuleFieldsByTypeMap() {
     BaseCreateProps.omit(BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET).shape
   );
 
+  const specificTypesToOmit: readonly string[] = TYPE_SPECIFIC_FIELDS_TO_OMIT;
+
   return new Map(
     TypeSpecificCreateProps.options.map((option) => {
       const typeName = option.shape.type.value;
       const typeSpecificFields = Object.keys(option.shape).filter(
         // Filter out type-specific fields that should not be part of the upgradable fields
-        (field) => !TYPE_SPECIFIC_FIELDS_TO_OMIT.has(field)
+        (field) => !specificTypesToOmit.includes(field)
       );
       return [typeName, [...baseFields, ...typeSpecificFields]];
     })
@@ -114,3 +133,14 @@ function createUpgradableRuleFieldsByTypeMap() {
 }
 
 export const UPGRADABLE_RULES_FIELDS_BY_TYPE_MAP = createUpgradableRuleFieldsByTypeMap();
+
+export const test: PrebuiltRuleAsset = {
+  name: 'Test',
+  description: 'Test',
+  risk_score: 1,
+  severity: 'low',
+  type: 'query',
+  version: 1,
+  rule_id: 'rule-1',
+  unknown_field: 'unknown_value',
+};
