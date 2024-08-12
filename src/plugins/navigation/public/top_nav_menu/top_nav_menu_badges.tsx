@@ -22,7 +22,7 @@ export const TopNavMenuBadges = ({ badges }: { badges: TopNavMenuBadgeProps[] | 
   );
 };
 
-export function createBadge(
+function createBadge(
   { badgeText, toolTipProps, renderCustomBadge, ...badgeProps }: TopNavMenuBadgeProps,
   i: number
 ): ReactElement {

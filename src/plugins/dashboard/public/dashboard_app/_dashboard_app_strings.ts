@@ -30,21 +30,15 @@ export const dashboardManagedBadge = {
     i18n.translate('dashboard.badge.managed.tooltip', {
       defaultMessage: 'Elastic manages this dashboard. Duplicate it to make changes.',
     }),
+  getManagedText: () =>
+    i18n.translate('dashboard.managedContentBadge.text', {
+      defaultMessage: 'Managed',
+    }),
+  getDuplicateText: () =>
+    i18n.translate('dashboard.managedContentPopoverFooterText', {
+      defaultMessage: 'Duplicate this dashboard',
+    }),
 };
-
-export const managedText = i18n.translate('dashboard.managedContentBadge.text', {
-  defaultMessage: 'Managed',
-});
-
-export const text = dashboardManagedBadge.getText();
-
-export const buttonText = i18n.translate('dashboard.managedContentPopoverFooterText', {
-  defaultMessage: 'Duplicate this dashboard',
-});
-
-export const cancelButtonText = i18n.translate('dashboard.managedContentPopoverFooterCancelText', {
-  defaultMessage: 'Cancel',
-});
 
 /**
  * @param title {string} the current title of the dashboard

@@ -8,7 +8,6 @@
 
 import UseUnmount from 'react-use/lib/useUnmount';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { css } from '@emotion/react';
 
 import {
   withSuspense,
@@ -24,7 +23,6 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
-  EuiLoadingSpinner,
   EuiText,
   EuiToolTipProps,
   EuiPopover,
@@ -38,9 +36,6 @@ import {
   getDashboardBreadcrumb,
   unsavedChangesBadgeStrings,
   dashboardManagedBadge,
-  buttonText,
-  text,
-  managedText,
 } from '../dashboard_app/_dashboard_app_strings';
 import { UI_SETTINGS } from '../../common';
 import { useDashboardAPI } from '../dashboard_app/dashboard_app';
@@ -121,7 +116,6 @@ export function InternalDashboardTopNav({
   // store data views in state & subscribe to dashboard data view changes.
   const [allDataViews, setAllDataViews] = useState<DataView[]>([]);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
     setAllDataViews(dashboard.getAllDataViews());
     const subscription = dashboard.onDataViewsUpdate$.subscribe((dataViews) =>
@@ -330,12 +324,11 @@ export function InternalDashboardTopNav({
     if (showWriteControls && managed) {
       const renderCustomBadge = () => {
         const badgeButton = (
-          // @ts-ignore - EuiBadge href type issue
           <EuiBadge
             {...getManagedContentBadge(dashboardManagedBadge.getText(), false)}
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           >
-            {managedText}
+            {dashboardManagedBadge.getManagedText()}
           </EuiBadge>
         );
         return (
@@ -344,33 +337,22 @@ export function InternalDashboardTopNav({
             isOpen={isPopoverOpen}
             closePopover={() => setIsPopoverOpen(false)}
             className="eui-hideFor--s eui-hideFor--xs"
-            data-test-subj="managedContentPopover"
+            panelStyle={{ maxWidth: 300 }}
           >
             <EuiFlexItem>
-              <EuiText
-                size="s"
-                aria-label={text}
-                css={css`
-                  max-width: 300px;
-                `}
-              >
-                {text}
+              <EuiText size="s" aria-label={dashboardManagedBadge.getText()}>
+                {dashboardManagedBadge.getText()}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="s"
-                disabled={isLoading}
-                aria-label={buttonText}
+                aria-label={dashboardManagedBadge.getDuplicateText()}
                 onClick={() => {
-                  setIsLoading(true);
                   dashboard.runInteractiveSave(viewMode);
-                  setIsLoading(false);
                 }}
-                data-test-subj="managedContentPopoverDuplicateButton"
               >
-                {isLoading && <EuiLoadingSpinner size="m" />}
-                <EuiText size="s">{buttonText}</EuiText>
+                <EuiText size="s">{dashboardManagedBadge.getDuplicateText()}</EuiText>
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiPopover>
@@ -389,7 +371,6 @@ export function InternalDashboardTopNav({
     showWriteControls,
     managed,
     isPopoverOpen,
-    isLoading,
     dashboard,
   ]);
 
