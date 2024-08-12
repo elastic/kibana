@@ -49,6 +49,7 @@ import {
   VisualizeRuntimeState,
   VisualizeSerializedState,
 } from './types';
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 
 export const getVisualizeEmbeddableFactory: (deps: {
   embeddableStart: EmbeddableStart;
@@ -140,7 +141,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
         defaultPanelTitle,
         dataLoading: dataLoading$,
         dataViews: new BehaviorSubject<DataView[] | undefined>(initialDataViews),
-        supportedTriggers: () => [ACTION_CONVERT_TO_LENS],
+        supportedTriggers: () => [ACTION_CONVERT_TO_LENS, APPLY_FILTER_TRIGGER],
         serializeState: () => {
           const savedObjectProperties = savedObjectProperties$.getValue();
           return serializeState({
