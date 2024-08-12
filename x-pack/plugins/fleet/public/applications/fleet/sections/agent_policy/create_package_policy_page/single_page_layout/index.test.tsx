@@ -491,7 +491,7 @@ describe('When on the package policy create page', () => {
       expect(sendCreateAgentPolicy as jest.MockedFunction<any>).toHaveBeenCalledWith(
         {
           description: '',
-          monitoring_enabled: ['logs', 'metrics'],
+          monitoring_enabled: ['logs', 'metrics', 'traces'],
           name: 'Agent policy 2',
           namespace: 'default',
           inactivity_timeout: 1209600,
@@ -526,7 +526,7 @@ describe('When on the package policy create page', () => {
         expect(sendCreateAgentPolicy as jest.MockedFunction<any>).toHaveBeenCalledWith(
           {
             description: '',
-            monitoring_enabled: ['logs', 'metrics'],
+            monitoring_enabled: ['logs', 'metrics', 'traces'],
             name: 'Agent policy 2',
             namespace: 'default',
             inactivity_timeout: 1209600,
@@ -826,7 +826,7 @@ describe('When on the package policy create page', () => {
         expect(sendGetOneAgentPolicy).not.toHaveBeenCalled();
         expect(sendCreateAgentPolicy).toHaveBeenCalledWith(
           expect.objectContaining({
-            monitoring_enabled: ['logs', 'metrics'],
+            monitoring_enabled: ['logs', 'metrics', 'traces'],
             name: 'Agent policy 1',
           }),
           { withSysMonitoring: true }
