@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { RequestHandler, ResponseHeaders } from '@kbn/core/server';
+import type { KibanaRequest, RequestHandler, ResponseHeaders } from '@kbn/core/server';
 import pMap from 'p-map';
 import { safeDump } from 'js-yaml';
 
@@ -28,6 +28,7 @@ import type {
   FleetRequestHandler,
   BulkGetAgentPoliciesRequestSchema,
   AgentPolicy,
+  FleetRequestHandlerContext,
 } from '../../types';
 
 import type {
@@ -47,6 +48,7 @@ import {
   defaultFleetErrorHandler,
   AgentPolicyNotFoundError,
   FleetUnauthorizedError,
+  FleetError,
 } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
 import { updateAgentPolicySpaces } from '../../services/spaces/agent_policy';
@@ -96,6 +98,24 @@ function sanitizeItemForReadAgentOnly(item: AgentPolicy): AgentPolicy {
     monitoring_enabled: item.monitoring_enabled,
     package_policies: [],
   };
+}
+
+export async function checkAgentPoliciesAllPrivilegesForSpaces(
+  request: KibanaRequest,
+  context: FleetRequestHandlerContext,
+  spaceIds: string[]
+) {
+  const security = appContextService.getSecurity();
+  const spaces = await (await context.fleet).getAllSpaces();
+  const allSpaceId = spaces.map((s) => s.id);
+  const res = await security.authz.checkPrivilegesWithRequest(request).atSpaces(allSpaceId, {
+    kibana: [security.authz.actions.api.get(`fleet-agent-policies-all`)],
+  });
+
+  return allSpaceId.filter(
+    (id) =>
+      res.privileges.kibana.find((privilege) => privilege.resource === id)?.authorized ?? false
+  );
 }
 
 export const getAgentPoliciesHandler: FleetRequestHandler<
@@ -229,20 +249,43 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
   try {
+    let authorizedSpaces: string[] | undefined;
+    if (spaceIds?.length) {
+      authorizedSpaces = await checkAgentPoliciesAllPrivilegesForSpaces(request, context, spaceIds);
+      for (const requestedSpaceId of spaceIds) {
+        if (!authorizedSpaces.includes(requestedSpaceId)) {
+          throw new FleetError(
+            `No enough permissions to create policies in space ${requestedSpaceId}`
+          );
+        }
+      }
+    }
+
+    const agentPolicy = await createAgentPolicyWithPackages({
+      soClient,
+      esClient,
+      newPolicy,
+      hasFleetServer,
+      withSysMonitoring,
+      monitoringEnabled,
+      spaceId,
+      user,
+      authorizationHeader,
+      force,
+    });
+
     const body: CreateAgentPolicyResponse = {
-      item: await createAgentPolicyWithPackages({
-        soClient,
-        esClient,
-        newPolicy,
-        hasFleetServer,
-        withSysMonitoring,
-        monitoringEnabled,
-        spaceId,
-        user,
-        authorizationHeader,
-        force,
-      }),
+      item: agentPolicy,
     };
+
+    if (spaceIds?.length && authorizedSpaces) {
+      await updateAgentPolicySpaces({
+        agentPolicyId: agentPolicy.id,
+        currentSpaceId: spaceId,
+        newSpaceIds: spaceIds,
+        authorizedSpaces,
+      });
+    }
 
     return response.ok({
       body,
@@ -273,16 +316,10 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
 
   try {
     if (spaceIds?.length) {
-      const security = appContextService.getSecurity();
-      const spaces = await (await context.fleet).getAllSpaces();
-      const allSpaceId = spaces.map((s) => s.id);
-      const res = await security.authz.checkPrivilegesWithRequest(request).atSpaces(allSpaceId, {
-        kibana: [security.authz.actions.api.get(`fleet-agent-policies-all`)],
-      });
-
-      const authorizedSpaces = allSpaceId.filter(
-        (id) =>
-          res.privileges.kibana.find((privilege) => privilege.resource === id)?.authorized ?? false
+      const authorizedSpaces = await checkAgentPoliciesAllPrivilegesForSpaces(
+        request,
+        context,
+        spaceIds
       );
       await updateAgentPolicySpaces({
         agentPolicyId: request.params.agentPolicyId,

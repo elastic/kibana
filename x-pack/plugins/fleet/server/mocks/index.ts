@@ -116,6 +116,7 @@ export const createFleetRequestHandlerContextMock = (): jest.Mocked<
 > => {
   return {
     authz: createFleetAuthzMock(),
+    getAllSpaces: jest.fn(),
     agentClient: {
       asCurrentUser: agentServiceMock.createClient(),
       asInternalUser: agentServiceMock.createClient(),
