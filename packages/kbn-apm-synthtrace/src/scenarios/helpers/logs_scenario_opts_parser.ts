@@ -6,7 +6,16 @@
  * Side Public License, v 1.
  */
 
-export const parseStringToBoolean = (value: string): boolean => /true/i.test(value);
+export const parseStringToBoolean = (value: string, defaultValue?: boolean): boolean => {
+  switch (value.trim().toLowerCase()) {
+    case 'true':
+      return true;
+    case 'false':
+      return false;
+    default:
+      return defaultValue ?? /true/i.test(value);
+  }
+};
 
 export interface LogsScenarioOpts {
   isLogsDb: boolean;

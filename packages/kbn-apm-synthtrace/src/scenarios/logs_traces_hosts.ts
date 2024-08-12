@@ -20,8 +20,8 @@ import { Scenario } from '../cli/scenario';
 import { Logger } from '../lib/utils/create_logger';
 import { withClient } from '../lib/utils/with_client';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
-import logsScenarioBase from './logs_scenario_base';
 import { parseLogsScenarioOpts, parseStringToBoolean } from './helpers/logs_scenario_opts_parser';
+import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
@@ -47,7 +47,9 @@ const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOp
   const { isLogsDb } = parseLogsScenarioOpts(runOptions.scenarioOpts);
 
   return {
-    ...logsScenarioBase(runOptions),
+    bootstrap: async ({ logsEsClient }) => {
+      if (isLogsDb) await logsEsClient.createIndexTemplate(IndexTemplateName.LogsDb);
+    },
     generate: ({ range, clients: { logsEsClient, infraEsClient, apmEsClient } }) => {
       const {
         numSpaces,

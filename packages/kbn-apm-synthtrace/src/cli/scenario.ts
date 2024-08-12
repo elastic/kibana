@@ -26,8 +26,6 @@ type Generate<TFields> = (options: {
 }) => ScenarioReturnType<TFields> | Array<ScenarioReturnType<TFields>>;
 
 export type Scenario<TFields> = (options: RunOptions & { logger: Logger }) => Promise<{
-  bootstrap?: ScenarioBootstrap;
+  bootstrap?: (options: EsClients) => Promise<void>;
   generate: Generate<TFields>;
 }>;
-
-export type ScenarioBootstrap = (options: EsClients) => Promise<void>;
