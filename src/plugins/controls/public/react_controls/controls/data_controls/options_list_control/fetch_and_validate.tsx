@@ -28,7 +28,6 @@ import { ControlStateManager } from '../../types';
 import { DataControlServices } from '../types';
 import { OptionsListFetchCache } from './options_list_fetch_cache';
 import { OptionsListComponentApi, OptionsListComponentState, OptionsListControlApi } from './types';
-import { pluginServices } from '../../../../services';
 
 export function fetchAndValidate$({
   api,
@@ -63,7 +62,7 @@ export function fetchAndValidate$({
     api.loadMoreSubject.pipe(debounceTime(100)), // debounce load more so "loading" state briefly shows
     apiPublishesReload(api.parentApi)
       ? api.parentApi.reload$.pipe(
-          tap(() => pluginServices.getServices().optionsList.clearOptionsListCache()),
+          tap(() => requestCache.clearCache()),
           startWith(undefined)
         )
       : of(undefined),

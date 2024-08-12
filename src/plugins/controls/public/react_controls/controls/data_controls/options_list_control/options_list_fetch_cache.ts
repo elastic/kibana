@@ -119,4 +119,11 @@ export class OptionsListFetchCache {
       return result;
     }
   }
+
+  public clearCache = () => {
+    this.cache = new LRUCache<string, OptionsListSuccessResponse>({
+      max: REQUEST_CACHE_SIZE,
+      maxAge: REQUEST_CACHE_TTL,
+    });
+  };
 }
