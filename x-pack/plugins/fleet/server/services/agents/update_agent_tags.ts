@@ -12,10 +12,13 @@ import { AgentReassignmentError } from '../../errors';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
+import { agentsKueryNamespaceFilter, isAgentInNamespace } from '../spaces/agent_namespaces';
+
+import { getCurrentNamespace } from '../spaces/get_current_namespace';
+
 import { getAgentsById, getAgentsByKuery, openPointInTime } from './crud';
 import type { GetAgentsOptions } from '.';
 import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
-import { agentsKueryNamespaceFilter, isAgentInNamespace } from './namespace';
 
 export async function updateAgentTags(
   soClient: SavedObjectsClientContract,
@@ -26,7 +29,7 @@ export async function updateAgentTags(
 ): Promise<{ actionId: string }> {
   const outgoingErrors: Record<Agent['id'], Error> = {};
   const givenAgents: Agent[] = [];
-  const currentNameSpace = soClient.getCurrentNamespace();
+  const currentNameSpace = getCurrentNamespace(soClient);
 
   if ('agentIds' in options) {
     const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);

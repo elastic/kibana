@@ -113,8 +113,8 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     }
   }, [nodeType, metricsHostsAnomalies, metricsK8sAnomalies]);
 
-  const metricLabel = toMetricOpt(metric.type)?.textLC;
-  const metricPopoverLabel = toMetricOpt(metric.type)?.text;
+  const metricLabel = toMetricOpt(metric.type, nodeType)?.textLC;
+  const metricPopoverLabel = toMetricOpt(metric.type, nodeType)?.text;
 
   const chartMetric = {
     color: Color.color0,

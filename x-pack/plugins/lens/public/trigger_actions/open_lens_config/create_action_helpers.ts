@@ -14,6 +14,7 @@ import {
   getIndexForESQLQuery,
   ENABLE_ESQL,
   getESQLQueryColumns,
+  getInitialESQLQuery,
 } from '@kbn/esql-utils';
 import type { Datasource, Visualization } from '../../types';
 import type { LensPluginStartDependencies } from '../../plugin';
@@ -81,10 +82,10 @@ export async function executeCreateAction({
     setVisualizationMap(visualizationMap);
   }
 
-  const defaultIndex = dataView.getIndexPattern();
+  const esqlQuery = getInitialESQLQuery(dataView);
 
   const defaultEsqlQuery = {
-    esql: `FROM ${defaultIndex} | LIMIT 10`,
+    esql: esqlQuery,
   };
 
   // For the suggestions api we need only the columns
@@ -93,7 +94,7 @@ export async function executeCreateAction({
   // all the table
   const abortController = new AbortController();
   const columns = await getESQLQueryColumns({
-    esqlQuery: `from ${defaultIndex}`,
+    esqlQuery,
     search: deps.data.search.search,
     signal: abortController.signal,
     timeRange: deps.data.query.timefilter.timefilter.getAbsoluteTime(),

@@ -49,14 +49,14 @@ export async function openLinkEditorFlyout({
     });
   };
 
-  return new Promise<UnorderedLink | undefined>((resolve, reject) => {
+  return new Promise<UnorderedLink | undefined>((resolve) => {
     const onSave = async (newLink: UnorderedLink) => {
       resolve(newLink);
       await unmountFlyout();
     };
 
     const onCancel = async () => {
-      reject();
+      resolve(undefined);
       await unmountFlyout();
     };
 
@@ -71,8 +71,5 @@ export async function openLinkEditorFlyout({
       </KibanaRenderContextProvider>,
       ref.current
     );
-  }).catch(() => {
-    // on reject (i.e. on cancel), just return the original list of links
-    return undefined;
   });
 }

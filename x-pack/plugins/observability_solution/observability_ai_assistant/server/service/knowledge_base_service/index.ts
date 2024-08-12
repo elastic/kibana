@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { errors } from '@elastic/elasticsearch';
-import { serverUnavailable, gatewayTimeout } from '@hapi/boom';
+import { serverUnavailable, gatewayTimeout, badRequest } from '@hapi/boom';
 import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -39,14 +39,20 @@ export interface RecalledEntry {
   labels?: Record<string, string>;
 }
 
-function isAlreadyExistsError(error: Error) {
+function isModelMissingOrUnavailableError(error: Error) {
   return (
     error instanceof errors.ResponseError &&
     (error.body.error.type === 'resource_not_found_exception' ||
       error.body.error.type === 'status_exception')
   );
 }
-
+function isCreateModelValidationError(error: Error) {
+  return (
+    error instanceof errors.ResponseError &&
+    error.statusCode === 400 &&
+    error.body?.error?.type === 'action_request_validation_exception'
+  );
+}
 function throwKnowledgeBaseNotReady(body: any) {
   throw serverUnavailable(`Knowledge base is not ready yet`, body);
 }
@@ -84,52 +90,73 @@ export class KnowledgeBaseService {
     const elserModelId = await this.dependencies.getModelId();
 
     const retryOptions = { factor: 1, minTimeout: 10000, retries: 12 };
-
-    const installModel = async () => {
-      this.dependencies.logger.info('Installing ELSER model');
-      await this.dependencies.esClient.asInternalUser.ml.putTrainedModel(
-        {
-          model_id: elserModelId,
-          input: {
-            field_names: ['text_field'],
-          },
-          wait_for_completion: true,
-        },
-        { requestTimeout: '20m' }
-      );
-      this.dependencies.logger.info('Finished installing ELSER model');
-    };
-
-    const getIsModelInstalled = async () => {
-      const getResponse = await this.dependencies.esClient.asInternalUser.ml.getTrainedModels({
+    const getModelInfo = async () => {
+      return await this.dependencies.esClient.asInternalUser.ml.getTrainedModels({
         model_id: elserModelId,
         include: 'definition_status',
       });
-
-      this.dependencies.logger.debug(
-        () => 'Model definition status:\n' + JSON.stringify(getResponse.trained_model_configs[0])
-      );
-
-      return Boolean(getResponse.trained_model_configs[0]?.fully_defined);
     };
 
-    await pRetry(async () => {
-      let isModelInstalled: boolean = false;
+    const isModelInstalledAndReady = async () => {
       try {
-        isModelInstalled = await getIsModelInstalled();
+        const getResponse = await getModelInfo();
+        this.dependencies.logger.debug(
+          () => 'Model definition status:\n' + JSON.stringify(getResponse.trained_model_configs[0])
+        );
+
+        return Boolean(getResponse.trained_model_configs[0]?.fully_defined);
       } catch (error) {
-        if (isAlreadyExistsError(error)) {
-          await installModel();
-          isModelInstalled = await getIsModelInstalled();
+        if (isModelMissingOrUnavailableError(error)) {
+          return false;
+        } else {
+          throw error;
         }
       }
+    };
 
-      if (!isModelInstalled) {
-        throwKnowledgeBaseNotReady({
-          message: 'Model is not fully defined',
-        });
+    const installModelIfDoesNotExist = async () => {
+      const modelInstalledAndReady = await isModelInstalledAndReady();
+      if (!modelInstalledAndReady) {
+        await installModel();
       }
-    }, retryOptions);
+    };
+
+    const installModel = async () => {
+      this.dependencies.logger.info('Installing ELSER model');
+      try {
+        await this.dependencies.esClient.asInternalUser.ml.putTrainedModel(
+          {
+            model_id: elserModelId,
+            input: {
+              field_names: ['text_field'],
+            },
+            wait_for_completion: true,
+          },
+          { requestTimeout: '20m' }
+        );
+      } catch (error) {
+        if (isCreateModelValidationError(error)) {
+          throw badRequest(error);
+        } else {
+          throw error;
+        }
+      }
+      this.dependencies.logger.info('Finished installing ELSER model');
+    };
+
+    const pollForModelInstallCompleted = async () => {
+      await pRetry(async () => {
+        this.dependencies.logger.info('Polling installation of ELSER model');
+        const modelInstalledAndReady = await isModelInstalledAndReady();
+        if (!modelInstalledAndReady) {
+          throwKnowledgeBaseNotReady({
+            message: 'Model is not fully defined',
+          });
+        }
+      }, retryOptions);
+    };
+    await installModelIfDoesNotExist();
+    await pollForModelInstallCompleted();
 
     try {
       await this.dependencies.esClient.asInternalUser.ml.startTrainedModelDeployment({
@@ -139,7 +166,7 @@ export class KnowledgeBaseService {
     } catch (error) {
       this.dependencies.logger.debug('Error starting model deployment');
       this.dependencies.logger.debug(error);
-      if (!isAlreadyExistsError(error)) {
+      if (!isModelMissingOrUnavailableError(error)) {
         throw error;
       }
     }
@@ -380,7 +407,7 @@ export class KnowledgeBaseService {
         namespace,
         modelId,
       }).catch((error) => {
-        if (isAlreadyExistsError(error)) {
+        if (isModelMissingOrUnavailableError(error)) {
           throwKnowledgeBaseNotReady(error.body);
         }
         throw error;
@@ -521,7 +548,7 @@ export class KnowledgeBaseService {
         })),
       };
     } catch (error) {
-      if (isAlreadyExistsError(error)) {
+      if (isModelMissingOrUnavailableError(error)) {
         throwKnowledgeBaseNotReady(error.body);
       }
       throw error;
@@ -588,7 +615,7 @@ export class KnowledgeBaseService {
 
       return Promise.resolve();
     } catch (error) {
-      if (isAlreadyExistsError(error)) {
+      if (isModelMissingOrUnavailableError(error)) {
         throwKnowledgeBaseNotReady(error.body);
       }
       throw error;

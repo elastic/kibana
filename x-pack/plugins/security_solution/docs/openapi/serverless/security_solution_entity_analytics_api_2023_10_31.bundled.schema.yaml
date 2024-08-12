@@ -38,10 +38,26 @@ paths:
             type: string
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    description: >-
+                      If the record was deleted. If false the record did not
+                      exist.
+                    type: boolean
+                  record:
+                    $ref: '#/components/schemas/AssetCriticalityRecord'
+                required:
+                  - deleted
           description: Successful response
         '400':
           description: Invalid request
       summary: Delete Criticality Record
+      tags:
+        - Security Solution Entity Analytics API
     get:
       operationId: GetAssetCriticalityRecord
       parameters:
@@ -70,6 +86,8 @@ paths:
         '404':
           description: Criticality record not found
       summary: Get Criticality Record
+      tags:
+        - Security Solution Entity Analytics API
     post:
       operationId: CreateAssetCriticalityRecord
       requestBody:
@@ -98,6 +116,8 @@ paths:
         '400':
           description: Invalid request
       summary: Create Criticality Record
+      tags:
+        - Security Solution Entity Analytics API
   /api/asset_criticality/bulk:
     post:
       operationId: BulkUpsertAssetCriticalityRecords
@@ -153,6 +173,8 @@ paths:
       summary: >-
         Bulk upsert asset criticality data, creating or updating records as
         needed
+      tags:
+        - Security Solution Entity Analytics API
   /api/asset_criticality/list:
     post:
       operationId: FindAssetCriticalityRecords
@@ -226,6 +248,8 @@ paths:
                   - total
           description: Bulk upload successful
       summary: 'List asset criticality data, filtering and sorting as needed'
+      tags:
+        - Security Solution Entity Analytics API
 components:
   schemas:
     AssetCriticalityBulkUploadErrorItem:
@@ -304,3 +328,6 @@ components:
       type: http
 security:
   - BasicAuth: []
+tags:
+  - description: ''
+    name: Security Solution Entity Analytics API

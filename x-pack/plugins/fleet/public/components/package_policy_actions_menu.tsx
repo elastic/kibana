@@ -10,8 +10,10 @@ import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
-import { useAgentPolicyRefresh, useAuthz, useLink } from '../hooks';
+import { useAgentPolicyRefresh, useAuthz, useLink, useStartServices } from '../hooks';
 import { policyHasFleetServer } from '../services';
+
+import { PLUGIN_ID, pagePathGetters } from '../constants';
 
 import { AgentEnrollmentFlyout } from './agent_enrollment_flyout';
 import { ContextMenuActions } from './context_menu_actions';
@@ -36,6 +38,9 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const { getHref } = useLink();
   const authz = useAuthz();
+  const {
+    application: { navigateToApp },
+  } = useStartServices();
 
   const agentPolicy = agentPolicies.length > 0 ? agentPolicies[0] : undefined; // TODO: handle multiple agent policies
   const canWriteIntegrationPolicies = authz.integrations.writeIntegrationPolicies;
@@ -87,13 +92,23 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       : []),
     <EuiContextMenuItem
       data-test-subj="PackagePolicyActionsEditItem"
-      disabled={!canWriteIntegrationPolicies || !agentPolicy}
+      disabled={
+        !canWriteIntegrationPolicies || !agentPolicy || (agentPolicy?.supports_agentless ?? false)
+      }
       icon="pencil"
       href={`${getHref('edit_integration', {
         policyId: agentPolicy?.id ?? '',
         packagePolicyId: packagePolicy.id,
       })}${from ? `?from=${from}` : ''}`}
       key="packagePolicyEdit"
+      toolTipContent={
+        (agentPolicy?.supports_agentless ?? false) && (
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetails.integrationList.editIntegrationAgentlessTooltip"
+            defaultMessage="Editing an agentless integration is not supported. Add a new integration if needed."
+          />
+        )
+      }
     >
       <FormattedMessage
         id="xpack.fleet.policyDetails.packagePoliciesTable.editActionTitle"
@@ -123,7 +138,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     // </EuiContextMenuItem>,
   ];
 
-  if (!agentPolicy || !agentPolicyIsManaged) {
+  if (!agentPolicy || !agentPolicyIsManaged || agentPolicy?.supports_agentless) {
     const ContextMenuItem = canWriteIntegrationPolicies
       ? DangerEuiContextMenuItem
       : EuiContextMenuItem;
@@ -138,7 +153,12 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
               onClick={() => {
                 deletePackagePoliciesPrompt([packagePolicy.id], () => {
                   setIsActionsMenuOpen(false);
-                  refreshAgentPolicy();
+                  if (agentPolicy?.supports_agentless) {
+                    // go back to all agent policies
+                    navigateToApp(PLUGIN_ID, { path: pagePathGetters.policies_list()[1] });
+                  } else {
+                    refreshAgentPolicy();
+                  }
                 });
               }}
             >

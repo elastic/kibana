@@ -17,12 +17,16 @@ import { type DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { ExpandButton } from './data_table_expand_button';
-import { ControlColumns, CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
+import { CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
 import type { ValueToStringConverter, DataTableColumnsMeta } from '../types';
 import { buildCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
 import { SelectButton, SelectAllButton } from './data_table_document_selection';
-import { defaultTimeColumnWidth, ROWS_HEIGHT_OPTIONS } from '../constants';
+import {
+  defaultTimeColumnWidth,
+  ROWS_HEIGHT_OPTIONS,
+  DEFAULT_CONTROL_COLUMN_WIDTH,
+} from '../constants';
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
 import { buildEditFieldButton } from './build_edit_field_button';
 import { DataTableColumnHeader, DataTableTimeColumnHeader } from './data_table_column_header';
@@ -53,7 +57,7 @@ export const SELECT_ROW = 'select';
 
 const openDetails = {
   id: OPEN_DETAILS,
-  width: 26,
+  width: DEFAULT_CONTROL_COLUMN_WIDTH,
   headerCellRender: () => (
     <EuiScreenReaderOnly>
       <span>
@@ -68,17 +72,10 @@ const openDetails = {
 
 const select = {
   id: SELECT_ROW,
-  width: 24,
+  width: DEFAULT_CONTROL_COLUMN_WIDTH,
   rowCellRender: SelectButton,
   headerCellRender: SelectAllButton,
 };
-
-export function getAllControlColumns(): ControlColumns {
-  return {
-    [SELECT_ROW]: select,
-    [OPEN_DETAILS]: openDetails,
-  };
-}
 
 export function getLeadControlColumns(canSetExpandedDoc: boolean) {
   if (!canSetExpandedDoc) {

@@ -223,11 +223,13 @@ export const JobSetupScreen = (props: Props) => {
             />
             <EuiSpacer />
             {setupStatus.reasons.map((errorMessage, i) => (
-              <EuiCallOut key={i} color="danger" iconType="warning" title={errorCalloutTitle}>
-                <EuiCode transparentBackground>{errorMessage}</EuiCode>
-              </EuiCallOut>
+              <>
+                <EuiCallOut key={i} color="danger" iconType="warning" title={errorCalloutTitle}>
+                  <EuiCode transparentBackground>{errorMessage}</EuiCode>
+                </EuiCallOut>
+                <EuiSpacer />
+              </>
             ))}
-            <EuiSpacer />
             <EuiButton data-test-subj="infraJobSetupScreenTryAgainButton" fill onClick={createJobs}>
               <FormattedMessage
                 id="xpack.infra.ml.steps.setupProcess.tryAgainButton"

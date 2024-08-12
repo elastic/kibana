@@ -13,7 +13,7 @@ test('can mint a numeric literal', () => {
 
   expect(node).toMatchObject({
     type: 'literal',
-    literalType: 'number',
+    literalType: 'integer',
     name: '42',
     value: 42,
   });

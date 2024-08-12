@@ -15,6 +15,7 @@ import {
   EuiStepStatus,
 } from '@elastic/eui';
 import useEvent from 'react-use/lib/useEvent';
+import { i18n } from '@kbn/i18n';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { CommandSnippet } from './command_snippet';
@@ -37,7 +38,12 @@ export const KubernetesPanel: React.FC = () => {
 
   const steps = [
     {
-      title: 'Install Elastic Agent on your host',
+      title: i18n.translate(
+        'xpack.observability_onboarding.experimentalOnboardingFlow.kubernetes.installStepTitle',
+        {
+          defaultMessage: 'Install Elastic Agent on your Kubernetes cluster',
+        }
+      ),
       children: (
         <>
           {status !== FETCH_STATUS.SUCCESS && (
@@ -60,7 +66,12 @@ export const KubernetesPanel: React.FC = () => {
       ),
     },
     {
-      title: 'Monitor your Kubernetes cluster',
+      title: i18n.translate(
+        'xpack.observability_onboarding.experimentalOnboardingFlow.kubernetes.monitorStepTitle',
+        {
+          defaultMessage: 'Monitor your Kubernetes cluster',
+        }
+      ),
       status: (isMonitoringStepActive ? 'current' : 'incomplete') as EuiStepStatus,
       children: isMonitoringStepActive && <DataIngestStatus onboardingId={data.onboardingId} />,
     },

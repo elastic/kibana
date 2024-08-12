@@ -17,7 +17,7 @@ describe('literal expression', () => {
 
     expect(literal).toMatchObject({
       type: 'literal',
-      literalType: 'number',
+      literalType: 'integer',
       name: '1',
       value: 1,
     });

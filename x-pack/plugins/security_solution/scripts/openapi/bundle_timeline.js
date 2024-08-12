@@ -20,10 +20,19 @@ const ROOT = resolve(__dirname, '../..');
     ),
     options: {
       includeLabels: ['serverless'],
-      specInfo: {
-        title: 'Security Solution Timeline API (Elastic Cloud Serverless)',
-        description:
-          'You can create Timelines and Timeline templates via the API, as well as import new Timelines from an ndjson file.',
+      prototypeDocument: {
+        info: {
+          title: 'Security Solution Timeline API (Elastic Cloud Serverless)',
+          description:
+            'You can create Timelines and Timeline templates via the API, as well as import new Timelines from an ndjson file.',
+        },
+        tags: [
+          {
+            name: 'Security Solution Timeline API',
+            description:
+              'You can create Timelines and Timeline templates via the API, as well as import new Timelines from an ndjson file.',
+          },
+        ],
       },
     },
   });
@@ -36,10 +45,19 @@ const ROOT = resolve(__dirname, '../..');
     ),
     options: {
       includeLabels: ['ess'],
-      specInfo: {
-        title: 'Security Solution Timeline API (Elastic Cloud and self-hosted)',
-        description:
-          'You can create Timelines and Timeline templates via the API, as well as import new Timelines from an ndjson file.',
+      prototypeDocument: {
+        info: {
+          title: 'Security Solution Timeline API (Elastic Cloud and self-hosted)',
+          description:
+            'You can create Timelines and Timeline templates via the API, as well as import new Timelines from an ndjson file.',
+        },
+        tags: [
+          {
+            name: 'Security Solution Timeline API',
+            description:
+              'You can create Timelines and Timeline templates via the API, as well as import new Timelines from an ndjson file.',
+          },
+        ],
       },
     },
   });

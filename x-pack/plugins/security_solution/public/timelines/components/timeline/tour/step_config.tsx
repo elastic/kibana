@@ -8,7 +8,7 @@
 import { EuiText, EuiCode } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { TimelineTabs } from '../../../../../common/types';
 import * as i18n from './translations';
 
@@ -66,7 +66,7 @@ export const timelineTourSteps = [
     anchor: TIMELINE_TOUR_CONFIG_ANCHORS.DATA_VIEW,
   },
   {
-    timelineType: TimelineType.default,
+    timelineType: TimelineTypeEnum.default,
     timelineTab: TimelineTabs.query,
     title: i18n.TIMELINE_TOUR_DATA_PROVIDER_VISIBILITY_TITLE,
     content: <EuiText>{i18n.TIMELINE_TOUR_DATA_PROVIDER_VISIBILITY_DESCRIPTION}</EuiText>,
