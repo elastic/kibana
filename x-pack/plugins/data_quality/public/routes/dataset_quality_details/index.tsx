@@ -41,7 +41,7 @@ const ConnectedContent = React.memo(() => {
         icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
         title={
           <FormattedMessage
-            id="xpack.dataQuality.Initializing"
+            id="xpack.dataQuality.details.Initializing"
             defaultMessage="Initializing Data set quality details page"
           />
         }

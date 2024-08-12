@@ -16,9 +16,7 @@ const OverviewHeader = dynamic(() => import('./header'));
 const Summary = dynamic(() => import('./summary'));
 const DegradedDocs = dynamic(() => import('./document_trends/degraded_docs'));
 
-// Allow for lazy loading
-// eslint-disable-next-line import/no-default-export
-export default function Overview() {
+export function Overview() {
   const { dataStream, isNonAggregatable, updateTimeRange } = useDatasetQualityDetailsState();
   const [lastReloadTime, setLastReloadTime] = useState<number>(Date.now());
 

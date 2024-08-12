@@ -9,9 +9,7 @@ import React from 'react';
 import { DetailsHeader } from './header';
 import { DatasetSummary } from './dataset_summary';
 
-// Allow for lazy loading
-// eslint-disable-next-line import/no-default-export
-export default function Details() {
+export function Details() {
   return (
     <>
       <DetailsHeader />

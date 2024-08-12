@@ -6,13 +6,11 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
-import { dynamic } from '@kbn/shared-ux-utility';
 import { useDatasetQualityDetailsState } from '../../hooks';
 import { DataStreamNotFoundPrompt } from './index_not_found_prompt';
-
-const Header = dynamic(() => import('./header'));
-const Overview = dynamic(() => import('./overview'));
-const Details = dynamic(() => import('./details'));
+import { Header } from './header';
+import { Overview } from './overview';
+import { Details } from './details';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export

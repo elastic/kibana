@@ -21,9 +21,7 @@ import { openInDiscoverText, openInLogsExplorerText } from '../../../common/tran
 import { useDatasetQualityDetailsRedirectLink, useDatasetQualityDetailsState } from '../../hooks';
 import { IntegrationIcon } from '../common';
 
-// Allow for lazy loading
-// eslint-disable-next-line import/no-default-export
-export default function Header() {
+export function Header() {
   const { datasetDetails, timeRange, integrationDetails, loadingState } =
     useDatasetQualityDetailsState();
 
