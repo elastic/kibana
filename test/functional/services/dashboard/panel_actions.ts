@@ -99,20 +99,20 @@ export class DashboardPanelActionsService extends FtrService {
     await this.clickContextMenuMoreItem();
   }
 
-  async clickContextMenuItem(itemSelector: string, parent?: WebElementWrapper) {
+  async clickContextMenuItem(testSubject: string, parent?: WebElementWrapper) {
     this.log.debug(`clickContextMenuItem`);
     await this.openContextMenu(parent);
-    const exists = await this.testSubjects.exists(itemSelector);
+    const exists = await this.testSubjects.exists(testSubject);
     if (!exists) {
       await this.clickContextMenuMoreItem();
     }
-    await this.testSubjects.click(itemSelector);
+    await this.testSubjects.click(testSubject);
   }
 
-  async clickContextMenuItemByTitle(itemSelector: string, title = '') {
+  async clickContextMenuItemByTitle(testSubject: string, title = '') {
     this.log.debug(`openContextMenuByTitle(${title})`);
     const header = await this.getPanelHeading(title);
-    await this.clickContextMenuItem(itemSelector, header);
+    await this.clickContextMenuItem(testSubject, header);
   }
 
   async navigateToEditorFromFlyout() {
