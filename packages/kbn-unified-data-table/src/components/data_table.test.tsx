@@ -9,7 +9,6 @@ import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import {
   EuiButton,
-  EuiCopy,
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
   EuiDataGridCustomBodyProps,
@@ -130,6 +129,23 @@ async function toggleDocSelection(
 }
 
 describe('UnifiedDataTable', () => {
+  const originalClipboard = global.window.navigator.clipboard;
+
+  beforeAll(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      value: {
+        writeText: jest.fn(),
+      },
+      writable: true,
+    });
+  });
+
+  afterAll(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      value: originalClipboard,
+    });
+  });
+
   afterEach(async () => {
     jest.clearAllMocks();
   });
@@ -213,11 +229,36 @@ describe('UnifiedDataTable', () => {
       expect(getDisplayedDocNr(component)).toBe(5);
     });
 
-    test('copying selected documents to clipboard', async () => {
+    test('copying selected documents to clipboard as JSON', async () => {
       await toggleDocSelection(component, esHitsMock[0]);
       findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
-      expect(component.find(EuiCopy).prop('textToCopy')).toMatchInlineSnapshot(
-        `"[{\\"_index\\":\\"i\\",\\"_id\\":\\"1\\",\\"_score\\":1,\\"_type\\":\\"_doc\\",\\"_source\\":{\\"date\\":\\"2020-20-01T12:12:12.123\\",\\"message\\":\\"test1\\",\\"bytes\\":20}}]"`
+      findTestSubject(component, 'dscGridCopySelectedDocumentsJSON').simulate('click');
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+        '[{"_index":"i","_id":"1","_score":1,"_type":"_doc","_source":{"date":"2020-20-01T12:12:12.123","message":"test1","bytes":20}}]'
+      );
+    });
+
+    test('copying selected documents to clipboard as text', async () => {
+      await toggleDocSelection(component, esHitsMock[2]);
+      await toggleDocSelection(component, esHitsMock[1]);
+      findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
+      findTestSubject(component, 'unifiedDataTableCopyRowsAsText').simulate('click');
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+        '"\'@timestamp"\t"_index"\t"_score"\tbytes\tdate\textension\tmessage\tname\n-\ti\t1\t-\t"2020-20-01T12:12:12.124"\tjpg\t-\ttest2\n-\ti\t1\t50\t"2020-20-01T12:12:12.124"\tgif\t-\ttest3'
+      );
+    });
+
+    test('copying selected columns to clipboard as text', async () => {
+      component = await getComponent({
+        ...getProps(),
+        columns: ['date', 'extension', 'name'],
+      });
+      await toggleDocSelection(component, esHitsMock[2]);
+      await toggleDocSelection(component, esHitsMock[1]);
+      findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
+      findTestSubject(component, 'unifiedDataTableCopyRowsAsText').simulate('click');
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+        '"\'@timestamp"\tdate\textension\tname\n-\t"2020-20-01T12:12:12.124"\tjpg\ttest2\n-\t"2020-20-01T12:12:12.124"\tgif\ttest3'
       );
     });
   });
