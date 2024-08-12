@@ -114,7 +114,7 @@ describe('useAllEsqlRuleFields', () => {
     ]);
   });
 
-  it('should return only ES|QL fields when ES|QL query is aggregating', async () => {
+  it('should return only ES|QL fields when ES|QL query is aggregating', () => {
     computeIsESQLQueryAggregatingMock.mockReturnValue(true);
 
     const { result } = renderHook(() =>
@@ -133,7 +133,7 @@ describe('useAllEsqlRuleFields', () => {
     ]);
   });
 
-  it('should deduplicate index pattern fields and ES|QL fields when fields have same name', async () => {
+  it('should deduplicate index pattern fields and ES|QL fields when fields have same name', () => {
     computeIsESQLQueryAggregatingMock.mockReturnValue(false);
 
     const { result } = renderHook(() =>
