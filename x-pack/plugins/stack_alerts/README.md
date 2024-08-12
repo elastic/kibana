@@ -20,4 +20,4 @@ export interface IService {
 
 Each Stack RuleType is described in it's own README:
 
-- index threshold: [`server/alert_types/index_threshold`](server/alert_types/index_threshold/README.md)
+- index threshold: [`server/rule_types/index_threshold`](server/rule_types/index_threshold/README.md)
