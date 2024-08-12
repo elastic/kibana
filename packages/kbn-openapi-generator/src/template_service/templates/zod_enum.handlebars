@@ -1,0 +1,9 @@
+{{~#if (isSingle enum)~}}
+  z.literal("{{first enum}}")
+{{~else~}}
+  z.enum([
+    {{~#each enum~}}
+      "{{.}}",
+    {{~/each~}}
+  ])
+{{~/if~}}

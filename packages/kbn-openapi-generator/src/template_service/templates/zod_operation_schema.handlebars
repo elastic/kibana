@@ -36,8 +36,21 @@ export const {{@key}} = {{> zod_schema_item}};
 {{/if}}
 {{#if enum}}
 {{#unless (isSingle enum)}}
-export type {{@key}}Enum = typeof {{@key}}.enum;
-export const {{@key}}Enum = {{@key}}.enum;
+  {{#if default }}
+  {{!
+      `zod_schema_item` generated enum with a default value via `.default()`. It has type `ZodDefault`.
+      At the same time `ZodDefault` doesn't have `enum` member causing type checking error.
+      As per https://github.com/colinhacks/zod/issues/290 to fix it original enum should be used.
+      The solution below generates enum without a default value making the code below passing the
+      type check.
+  }}
+  const {{@key}}NonDefault = {{> zod_enum}}
+  export type {{@key}}Enum = typeof {{@key}}NonDefault.enum;
+  export const {{@key}}Enum = {{@key}}NonDefault.enum;
+  {{else}}
+  export type {{@key}}Enum = typeof {{@key}}.enum;
+  export const {{@key}}Enum = {{@key}}.enum;
+  {{/if}}
 {{/unless}}
 {{/if}}
 
