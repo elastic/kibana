@@ -168,7 +168,7 @@ export const copyRowsAsTextToClipboard = async ({
   toastNotifications: ToastsStart;
   valueToStringConverter: ValueToStringConverter;
 }): Promise<string | null> => {
-  const columnSeparator = '\t ';
+  const columnSeparator = '\t';
   const rowSeparator = '\n';
   let withFormula = false;
   let textToCopy = '';
