@@ -9,7 +9,7 @@
 import { debounce } from 'lodash';
 import classNames from 'classnames';
 import useResizeObserver from 'use-resize-observer/polyfilled';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { EuiPortal } from '@elastic/eui';
 import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
@@ -22,6 +22,7 @@ import { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState 
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import { getReferencesForControls } from '../../../../common/dashboard_container/persistable_state/dashboard_container_references';
 import { pluginServices } from '../../../services/plugin_services';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
 export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
   const [width, setWidth] = useState<number>(0);
@@ -38,10 +39,9 @@ export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
 };
 
 export const DashboardViewportComponent = () => {
-  const controlsRoot = useRef(null);
-
   const dashboard = useDashboardContainer();
 
+  const controlGroupApi = useStateFromPublishingSubject(dashboard.controlGroupApi$);
   const panelCount = Object.keys(dashboard.select((state) => state.explicitInput.panels)).length;
   const [hasControls, setHasControls] = useState(false);
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
@@ -59,7 +59,6 @@ export const DashboardViewportComponent = () => {
   });
 
   useEffect(() => {
-    const controlGroupApi = dashboard.controlGroupApi$.value;
     if (!controlGroupApi) {
       return;
     }
@@ -69,7 +68,7 @@ export const DashboardViewportComponent = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [dashboard.controlGroupApi$]);
+  }, [controlGroupApi]);
 
   return (
     <div
