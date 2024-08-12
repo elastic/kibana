@@ -10,7 +10,7 @@ import type { ChromeBreadcrumb, ChromeStart } from '@kbn/core-chrome-browser';
 import { useEffect } from 'react';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Integration } from '@kbn/dataset-quality-plugin/common/data_streams_stats/integration';
-import { indexNameToDataStreamParts } from '@kbn/dataset-quality-plugin/common/utils';
+import { indexNameToDataStreamParts } from '@kbn/dataset-quality-plugin/common';
 
 export const useBreadcrumbs = (
   breadcrumbs: ChromeBreadcrumb[],
