@@ -19,10 +19,7 @@ const scenario: Scenario<Partial<EntityFields>> = async (runOptions) => {
   const SYNTH_NODE_TRACES_LOGS_ENTITY_ID = generateShortId();
 
   return {
-    generate: ({
-      range,
-      clients: { apmEsClient, assetsEsClient, logsEsClient, infraEsClient, entityEsClient },
-    }) => {
+    generate: ({ range, clients: { entityEsClient } }) => {
       const entityHistoryTimestamps = range.interval('1m').rate(1);
 
       const synthNodeTracesLogs = entity.serviceEntity({

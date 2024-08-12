@@ -11,7 +11,6 @@ import {
   ApmSynthtraceEsClient,
   ApmSynthtraceKibanaClient,
   LogsSynthtraceEsClient,
-  AssetsSynthtraceEsClient,
   createLogger,
   LogLevel,
 } from '@kbn/apm-synthtrace';
@@ -78,9 +77,6 @@ export interface CreateTest {
       context: InheritedFtrProviderContext
     ) => Promise<LogsSynthtraceEsClient>;
     synthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
-    assetsSynthtraceEsClient: (
-      context: InheritedFtrProviderContext
-    ) => Promise<AssetsSynthtraceEsClient>;
     apmSynthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
     synthtraceKibanaClient: (
       context: InheritedFtrProviderContext
@@ -126,12 +122,6 @@ export function createTestConfig(
         },
         logSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
           new LogsSynthtraceEsClient({
-            client: context.getService('es'),
-            logger: createLogger(LogLevel.info),
-            refreshAfterIndex: true,
-          }),
-        assetsSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
-          new AssetsSynthtraceEsClient({
             client: context.getService('es'),
             logger: createLogger(LogLevel.info),
             refreshAfterIndex: true,
