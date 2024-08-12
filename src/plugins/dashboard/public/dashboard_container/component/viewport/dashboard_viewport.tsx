@@ -16,7 +16,7 @@ import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 
 import { DashboardGrid } from '../grid';
-import { DashboardContainer, useDashboardContainer } from '../../embeddable/dashboard_container';
+import { useDashboardContainer } from '../../embeddable/dashboard_container';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 import { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
@@ -36,27 +36,13 @@ export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
   return { ref, width };
 };
 
-function getInitialHasControls(dashboard: DashboardContainer) {
-  if (!dashboard.controlGroupInput) {
-    return false;
-  }
-
-  try {
-    const panels = JSON.parse(dashboard.controlGroupInput.panelsJSON);
-    return Object.keys(panels).length > 0;
-  } catch(error) {
-    // ignore parse error, ReactEmbeddableRenderer will surface parse error to user
-    return false;
-  }
-}
-
 export const DashboardViewportComponent = () => {
   const controlsRoot = useRef(null);
 
   const dashboard = useDashboardContainer();
 
   const panelCount = Object.keys(dashboard.select((state) => state.explicitInput.panels)).length;
-  const [hasControls, setHasControls] = useState(getInitialHasControls(dashboard));
+  const [hasControls, setHasControls] = useState(false);
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
   const dashboardTitle = dashboard.select((state) => state.explicitInput.title);
   const useMargins = dashboard.select((state) => state.explicitInput.useMargins);
