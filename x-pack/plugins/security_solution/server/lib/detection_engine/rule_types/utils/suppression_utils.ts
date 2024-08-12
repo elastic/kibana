@@ -8,6 +8,7 @@
 import pick from 'lodash/pick';
 import get from 'lodash/get';
 import sortBy from 'lodash/sortBy';
+import isEmpty from 'lodash/isEmpty';
 
 import {
   ALERT_SUPPRESSION_DOCS_COUNT,
@@ -83,11 +84,11 @@ export const getSuppressionTerms = ({
   const suppressedBy = alertSuppression?.groupBy ?? [];
 
   const suppressedProps = pick(
-    fields != null && fields?.length > 0 ? fields : event?._source,
+    fields != null && !isEmpty(fields) ? fields : event?._source,
     suppressedBy
   ) as Record<string, string[] | number[] | undefined>;
   const suppressionTerms = suppressedBy.map((field) => {
-    const value = suppressedProps[field] ?? null;
+    const value = get(suppressedProps, field) ?? null;
     const sortedValue = Array.isArray(value) ? (sortBy(value) as string[] | number[]) : value;
     return {
       field,
