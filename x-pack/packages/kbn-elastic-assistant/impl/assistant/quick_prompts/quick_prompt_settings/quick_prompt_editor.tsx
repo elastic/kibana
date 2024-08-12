@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { EuiFormRow, EuiColorPicker, EuiTextArea, euiPaletteColorBlind } from '@elastic/eui';
+import { EuiFormRow, EuiColorPicker, EuiTextArea } from '@elastic/eui';
 
 import { EuiSetColorMethod } from '@elastic/eui/src/services/color_picker/color_picker';
 import { css } from '@emotion/react';
@@ -14,6 +14,7 @@ import {
   PromptResponse,
   PerformBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { getRandomEuiColor } from './helpers';
 import { PromptContextTemplate } from '../../../..';
 import * as i18n from './translations';
 import { QuickPromptSelector } from '../quick_prompt_selector/quick_prompt_selector';
@@ -29,12 +30,6 @@ interface Props {
   setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<PromptResponse[]>>;
   promptsBulkActions: PromptsPerformBulkActionRequestBody;
   setPromptsBulkActions: React.Dispatch<React.SetStateAction<PromptsPerformBulkActionRequestBody>>;
-}
-
-const euiVisPalette = euiPaletteColorBlind();
-function getRandomEuiColor() {
-  const randomIndex = Math.floor(Math.random() * euiVisPalette.length);
-  return euiVisPalette[randomIndex];
 }
 
 const QuickPromptSettingsEditorComponent = ({
