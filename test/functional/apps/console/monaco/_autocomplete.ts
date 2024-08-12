@@ -338,7 +338,7 @@ GET _search
       });
 
       await asyncForEach(CONDITIONAL_TEMPLATES, async ({ type, template }) => {
-        it('should insert different templates depending on the value of type', async () => {
+        it('should insert different templates depending on the value of type!', async () => {
           await PageObjects.console.monaco.enterText(`{\n\t"type": "${type}",\n`);
           await PageObjects.console.sleepForDebouncePeriod();
           // Prompt autocomplete for 'settings'
