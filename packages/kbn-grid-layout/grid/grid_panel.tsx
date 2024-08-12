@@ -6,26 +6,32 @@
  * Side Public License, v 1.
  */
 
-import { EuiIcon, EuiPanel, transparentize, useEuiOverflowScroll } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiPanel,
+  euiFullHeight,
+  transparentize,
+  useEuiOverflowScroll,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback, useRef } from 'react';
 import { GridPanelData, PanelInteractionEvent } from './types';
 
 export const GridPanel = ({
-  panelData: gridData,
   activePanelId,
+  panelData,
+  renderPanelContents,
   setInteractionEvent,
 }: {
   panelData: GridPanelData;
   activePanelId: string | undefined;
-  setInteractionEvent: (
-    interactionData?: Omit<PanelInteractionEvent, 'targetRowIndex' | 'originRowIndex'>
-  ) => void;
+  renderPanelContents: (panelId: string) => React.ReactNode;
+  setInteractionEvent: (interactionData?: Omit<PanelInteractionEvent, 'targetRowIndex'>) => void;
 }) => {
   const panelRef = useRef<HTMLDivElement>(null);
   const ghostRef = useRef<HTMLDivElement>(null);
-  const thisPanelActive = activePanelId === gridData.id;
+  const thisPanelActive = activePanelId === panelData.id;
 
   const interactionStart = useCallback(
     (type: 'drag' | 'resize', e: React.DragEvent) => {
@@ -36,7 +42,7 @@ export const GridPanel = ({
       const panelRect = panelRef.current.getBoundingClientRect();
       setInteractionEvent({
         type,
-        id: gridData.id,
+        id: panelData.id,
         panelDiv: panelRef.current,
         mouseOffsets: {
           top: e.clientY - panelRect.top,
@@ -46,17 +52,17 @@ export const GridPanel = ({
         },
       });
     },
-    [gridData.id, setInteractionEvent]
+    [panelData.id, setInteractionEvent]
   );
 
   return (
     <div
       ref={panelRef}
       css={css`
-        grid-column-start: ${gridData.column + 1};
-        grid-column-end: ${gridData.column + 1 + gridData.width};
-        grid-row-start: ${gridData.row + 1};
-        grid-row-end: ${gridData.row + 1 + gridData.height};
+        grid-column-start: ${panelData.column + 1};
+        grid-column-end: ${panelData.column + 1 + panelData.width};
+        grid-row-start: ${panelData.row + 1};
+        grid-row-end: ${panelData.row + 1 + panelData.height};
       `}
     >
       <EuiPanel
@@ -77,15 +83,15 @@ export const GridPanel = ({
           }
         `}
       >
-        {/* Dragging ghost */}
+        {/* Hidden dragging ghost */}
         <div
           css={css`
-            position: absolute;
             top: 0;
             left: 0;
             opacity: 0;
             width: 100%;
             height: 100%;
+            position: absolute;
             pointer-events: none;
           `}
           ref={ghostRef}
@@ -96,19 +102,19 @@ export const GridPanel = ({
           className="dragHandle"
           css={css`
             opacity: 0;
-            margin-left: ${euiThemeVars.euiSizeS};
-            top: -${euiThemeVars.euiSizeL};
+            display: flex;
+            cursor: move;
             position: absolute;
-            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            top: -${euiThemeVars.euiSizeL};
+            width: ${euiThemeVars.euiSizeL};
+            height: ${euiThemeVars.euiSizeL};
+            z-index: ${euiThemeVars.euiZLevel3};
+            margin-left: ${euiThemeVars.euiSizeS};
             border: 1px solid ${euiThemeVars.euiBorderColor};
             background-color: ${euiThemeVars.euiColorEmptyShade};
             border-radius: ${euiThemeVars.euiBorderRadius} ${euiThemeVars.euiBorderRadius} 0 0;
-            width: ${euiThemeVars.euiSizeL};
-            height: ${euiThemeVars.euiSizeL};
-            cursor: move;
-            display: flex;
-            justify-content: center;
-            align-items: center;
           `}
           onDragStart={(e: React.DragEvent<HTMLDivElement>) => interactionStart('drag', e)}
         >
@@ -123,21 +129,29 @@ export const GridPanel = ({
             right: 0;
             bottom: 0;
             opacity: 0;
+            margin: -2px;
             position: absolute;
             width: ${euiThemeVars.euiSizeL};
             height: ${euiThemeVars.euiSizeL};
+            transition: opacity 0.2s, border 0.2s;
             border-radius: 7px 0 7px 0;
             border-bottom: 2px solid ${euiThemeVars.euiColorSuccess};
             border-right: 2px solid ${euiThemeVars.euiColorSuccess};
-            transition: opacity 0.2s, border 0.2s;
-            margin: -2px;
             :hover {
               background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.05)};
               cursor: se-resize;
             }
           `}
         />
-        {/* Contents */}
+        <div
+          css={css`
+            ${euiFullHeight()}
+            ${useEuiOverflowScroll('y', false)}
+            ${useEuiOverflowScroll('x', false)}
+          `}
+        >
+          {renderPanelContents(panelData.id)}
+        </div>
       </EuiPanel>
     </div>
   );

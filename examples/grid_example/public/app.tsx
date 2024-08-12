@@ -16,9 +16,12 @@ export const GridExample = () => {
   return (
     <EuiProvider>
       <EuiPageTemplate offset={0} restrictWidth={false}>
-        <EuiPageTemplate.Header pageTitle="Grid Layout Example" />
+        <EuiPageTemplate.Header iconType={'dashboardApp'} pageTitle="Grid Layout Example" />
         <EuiPageTemplate.Section>
           <GridLayout
+            renderPanelContents={(id) => {
+              return <div style={{ padding: 8 }}>{id}</div>;
+            }}
             getCreationOptions={() => {
               const initialLayout: GridLayoutData = [
                 {

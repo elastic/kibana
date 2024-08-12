@@ -18,8 +18,10 @@ import { useGridLayoutState } from './use_grid_layout_state';
 
 export const GridLayout = ({
   getCreationOptions,
+  renderPanelContents,
 }: {
   getCreationOptions: () => { initialLayout: GridLayoutData; gridSettings: GridSettings };
+  renderPanelContents: (panelId: string) => React.ReactNode;
 }) => {
   const { gridLayoutStateManager, gridSizeRef } = useGridLayoutState({
     getCreationOptions,
@@ -42,6 +44,7 @@ export const GridLayout = ({
             rowIndex={rowIndex}
             runtimeSettings={runtimeSettings}
             activePanelId={interactionEvent?.id}
+            renderPanelContents={renderPanelContents}
             targetRowIndex={interactionEvent?.targetRowIndex}
             toggleIsCollapsed={() => {
               const currentLayout = gridLayoutStateManager.gridLayout$.value;

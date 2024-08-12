@@ -33,6 +33,7 @@ export const GridRow = forwardRef<
     activePanelId: string | undefined;
     targetRowIndex: number | undefined;
     runtimeSettings: RuntimeGridSettings;
+    renderPanelContents: (panelId: string) => React.ReactNode;
     setInteractionEvent: (interactionData?: PanelInteractionEvent) => void;
   }
 >(
@@ -44,6 +45,7 @@ export const GridRow = forwardRef<
       targetRowIndex,
       runtimeSettings,
       toggleIsCollapsed,
+      renderPanelContents,
       setInteractionEvent,
     },
     gridRef
@@ -61,18 +63,22 @@ export const GridRow = forwardRef<
 
     return (
       <>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup gutterSize="s">
-          <EuiButtonIcon
-            color="text"
-            iconType={rowData.isCollapsed ? 'arrowRight' : 'arrowDown'}
-            onClick={toggleIsCollapsed}
-          />
-          <EuiTitle size="s">
-            <h2>{rowData.title}</h2>
-          </EuiTitle>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
+        {rowIndex !== 0 && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiFlexGroup gutterSize="s">
+              <EuiButtonIcon
+                color="text"
+                iconType={rowData.isCollapsed ? 'arrowRight' : 'arrowDown'}
+                onClick={toggleIsCollapsed}
+              />
+              <EuiTitle size="xs">
+                <h2>{rowData.title}</h2>
+              </EuiTitle>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+          </>
+        )}
         {!rowData.isCollapsed && (
           <div
             ref={gridRef}
@@ -97,12 +103,12 @@ export const GridRow = forwardRef<
                 key={panelData.id}
                 panelData={panelData}
                 activePanelId={activePanelId}
+                renderPanelContents={renderPanelContents}
                 setInteractionEvent={(partialInteractionEvent) => {
                   if (partialInteractionEvent) {
                     setInteractionEvent({
                       ...partialInteractionEvent,
                       targetRowIndex: rowIndex,
-                      originRowIndex: rowIndex,
                     });
                     return;
                   }

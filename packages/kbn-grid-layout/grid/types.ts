@@ -80,11 +80,6 @@ export interface PanelInteractionEvent {
   targetRowIndex: number;
 
   /**
-   * The index of the grid row this panel interaction started on.
-   */
-  originRowIndex: number;
-
-  /**
    * The pixel rect of the panel being interacted with.
    */
   panelDiv: HTMLDivElement;

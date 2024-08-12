@@ -89,6 +89,8 @@ export const useGridLayoutEvents = ({
       gridLayoutStateManager.updatePreviewElement(previewRect);
 
       // find the grid that the preview rect is over
+      const previewBottom =
+        previewRect.top + gridLayoutStateManager.runtimeSettings$.value.rowHeight;
       const lastRowIndex = interactionEvent?.targetRowIndex;
       const targetRowIndex = (() => {
         if (isResize) return lastRowIndex;
@@ -99,7 +101,7 @@ export const useGridLayoutEvents = ({
           if (!row) return;
           const rowRect = row.getBoundingClientRect();
           const overlap =
-            Math.min(previewRect.bottom, rowRect.bottom + scrollTop) -
+            Math.min(previewBottom, rowRect.bottom + scrollTop) -
             Math.max(previewRect.top, rowRect.top + scrollTop);
           if (overlap > highestOverlap) {
             highestOverlap = overlap;
