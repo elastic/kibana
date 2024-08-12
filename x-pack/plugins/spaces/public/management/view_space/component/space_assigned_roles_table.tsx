@@ -36,6 +36,8 @@ interface ISpaceAssignedRolesTableProps {
   isReadOnly: boolean;
   assignedRoles: Role[];
   onAssignNewRoleClick: () => Promise<void>;
+  onClickBulkEdit: (selectedRoles: Role[]) => Promise<void>;
+  onClickBulkRemove: (selectedRoles: Role[]) => Promise<void>;
 }
 
 /**
@@ -69,6 +71,14 @@ const getTableColumns = ({ isReadOnly }: Pick<ISpaceAssignedRolesTableProps, 'is
       ),
       render: (_, record) => {
         return record.kibana.map((kibanaPrivilege) => {
+          if (!kibanaPrivilege.base.length) {
+            return i18n.translate(
+              'xpack.spaces.management.spaceDetails.rolesTable.column.privileges.customPrivilege',
+              {
+                defaultMessage: 'custom',
+              }
+            );
+          }
           return kibanaPrivilege.base.join(', ');
         });
       },
@@ -201,6 +211,8 @@ export const SpaceAssignedRolesTable = ({
   isReadOnly,
   assignedRoles,
   onAssignNewRoleClick,
+  onClickBulkEdit,
+  onClickBulkRemove,
 }: ISpaceAssignedRolesTableProps) => {
   const tableColumns = useMemo(() => getTableColumns({ isReadOnly }), [isReadOnly]);
   const [rolesInView, setRolesInView] = useState<Role[]>(assignedRoles);
@@ -319,17 +331,23 @@ export const SpaceAssignedRolesTable = ({
                               defaultMessage: 'Edit privileges',
                             }
                           ),
-                          onClick: () => {},
+                          onClick: async () => {
+                            await onClickBulkEdit(selectedRoles);
+                          },
                         },
                         {
                           icon: <EuiIcon type="trash" color="danger" />,
-                          name: i18n.translate(
-                            'xpack.spaces.management.spaceDetails.rolesTable.bulkActions.remove',
-                            {
-                              defaultMessage: 'Remove from space',
-                            }
+                          name: (
+                            <EuiTextColor color="danger">
+                              {i18n.translate(
+                                'xpack.spaces.management.spaceDetails.rolesTable.bulkActions.remove',
+                                { defaultMessage: 'Remove from space' }
+                              )}
+                            </EuiTextColor>
                           ),
-                          onClick: () => {},
+                          onClick: async () => {
+                            await onClickBulkRemove(selectedRoles);
+                          },
                         },
                       ],
                     },
@@ -337,25 +355,36 @@ export const SpaceAssignedRolesTable = ({
                 />
               </EuiPopover>
             </EuiFlexItem>
-            {Boolean(selectableRoles.current.length) && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconType="pagesSelect"
-                  onClick={setSelectedRoles.bind(null, selectableRoles.current)}
-                >
-                  {i18n.translate(
-                    'xpack.spaces.management.spaceDetails.rolesTable.selectAllRoles',
-                    {
-                      defaultMessage:
-                        'Select {count, plural, one {role} other {all {count} roles}}',
-                      values: {
-                        count: selectableRoles.current.length,
-                      },
+            <EuiFlexItem grow={false}>
+              {React.createElement(EuiButtonEmpty, {
+                size: 's',
+                ...(Boolean(selectedRoles.length)
+                  ? {
+                      iconType: 'crossInCircle',
+                      onClick: setSelectedRoles.bind(null, []),
+                      children: i18n.translate(
+                        'xpack.spaces.management.spaceDetails.rolesTable.clearRolesSelection',
+                        {
+                          defaultMessage: 'Clear selection',
+                        }
+                      ),
                     }
-                  )}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
+                  : {
+                      iconType: 'pagesSelect',
+                      onClick: setSelectedRoles.bind(null, selectableRoles.current),
+                      children: i18n.translate(
+                        'xpack.spaces.management.spaceDetails.rolesTable.selectAllRoles',
+                        {
+                          defaultMessage:
+                            'Select {count, plural, one {role} other {all {count} roles}}',
+                          values: {
+                            count: selectableRoles.current.length,
+                          },
+                        }
+                      ),
+                    }),
+              })}
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -363,7 +392,15 @@ export const SpaceAssignedRolesTable = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  }, [isBulkActionContextOpen, pagination, rolesInView, selectedRoles]);
+  }, [
+    isBulkActionContextOpen,
+    onClickBulkEdit,
+    onClickBulkRemove,
+    pagination.index,
+    pagination.size,
+    rolesInView.length,
+    selectedRoles,
+  ]);
 
   const onTableChange = ({ page }: CriteriaWithPagination<Role>) => {
     setPagination(page);

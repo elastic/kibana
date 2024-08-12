@@ -9,6 +9,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
+  EuiCallOut,
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,7 +26,7 @@ import {
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { KibanaFeature, KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -173,6 +174,12 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
   const [selectedRoles, setSelectedRoles] = useState<ReturnType<typeof createRolesComboBoxOptions>>(
     []
   );
+  const selectedRolesHasPrivilegeConflict = useMemo(() => {
+    return selectedRoles.reduce((result, selectedRole) => {
+      // TODO: determine heuristics for role privilege conflicts
+      return result;
+    }, false);
+  }, [selectedRoles]);
 
   const [assigningToRole, setAssigningToRole] = useState(false);
 
@@ -231,6 +238,30 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
             fullWidth
           />
         </EuiFormRow>
+        <>
+          {!selectedRolesHasPrivilegeConflict && (
+            <EuiFormRow>
+              <EuiCallOut
+                color="warning"
+                iconType="iInCircle"
+                title={i18n.translate(
+                  'xpack.spaces.management.spaceDetails.roles.assign.privilegeConflictMsg.title',
+                  {
+                    defaultMessage: 'Selected roles have different privileges granted',
+                  }
+                )}
+              >
+                {i18n.translate(
+                  'xpack.spaces.management.spaceDetails.roles.assign.privilegeConflictMsg.description',
+                  {
+                    defaultMessage:
+                      'Updating the settings here in a bulk will override current individual settings.',
+                  }
+                )}
+              </EuiCallOut>
+            </EuiFormRow>
+          )}
+        </>
         <EuiFormRow
           helpText={i18n.translate(
             'xpack.spaces.management.spaceDetails.roles.assign.privilegesHelpText',
@@ -322,7 +353,12 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
     <EuiFlyout onClose={closeFlyout} size="s">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>Assign role to {space.name}</h2>
+          <h2>
+            {i18n.translate('xpack.spaces.management.spaceDetails.roles.assign.privileges.custom', {
+              defaultMessage: 'Assign role to {spaceName}',
+              values: { spaceName: space.name },
+            })}
+          </h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="s">
