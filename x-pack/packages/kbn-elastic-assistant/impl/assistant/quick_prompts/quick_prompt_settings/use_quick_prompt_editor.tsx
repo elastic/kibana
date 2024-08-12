@@ -11,6 +11,7 @@ import {
   PerformBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { useCallback } from 'react';
+import { getRandomEuiColor } from './helpers';
 import { useAssistantContext } from '../../../..';
 
 export const useQuickPromptEditor = ({
@@ -40,14 +41,15 @@ export const useQuickPromptEditor = ({
 
   // When top level quick prompt selection changes
   const onQuickPromptSelectionChange = useCallback(
-    (quickPrompt: PromptResponse | string, color: string) => {
+    (quickPrompt: PromptResponse | string, color?: string) => {
       const isNew = typeof quickPrompt === 'string';
+      const qpColor = color ?? isNew ? getRandomEuiColor() : quickPrompt.color;
       const newSelectedQuickPrompt: PromptResponse | undefined = isNew
         ? {
             name: quickPrompt,
             id: quickPrompt,
             content: '',
-            color,
+            color: qpColor,
             categories: [],
             promptType: PromptTypeEnum.quick,
             consumer: currentAppId,
