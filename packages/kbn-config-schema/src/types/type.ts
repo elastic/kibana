@@ -253,48 +253,46 @@ function recursiveGetSchemaStructure(internalSchema: Schema, path: string[] = []
  *
  * For example, conditional values resolve to type `any` when the nested value is only ever a `string`.
  *
- * @param schema
+ * @param internalSchema
  * @param path of current schema
  * @returns schema type
  */
-function prettyPrintType(
+function prettyPrintType(schema?: SchemaLike, path: string[] = []): string {
+  // takes array of possible values and de-dups and joins
+  return [...new Set([prettyPrintTypeParts(schema, false, path)].flat())].filter(Boolean).join('|');
+}
+
+/**
+ * Recursively collects all possible nested schema types.
+ */
+function prettyPrintTypeParts(
   schema?: SchemaLike,
+  optional = false,
   path: string[] = []
-): string{
-  const prettyPrintTypeParts = (
-    schema?: SchemaLike,
-    optional = false,
-    path: string[] = []
-  ): string | string[]  => {
-    if (!isSchema(schema)) {
-      if (schema === null) return 'null';
-      return `${schema ?? 'unknown'}${optional ? '?' : ''}`;
-    }
-
-    const isOptionalType = optional || schema._flags?.presence === 'optional';
-    // For explicit custom schema.never
-    if (schema._flags?.presence === 'forbidden') return 'never';
-    // For offeringBasedSchema, schema.when, schema.conditional
-    if (schema.$_terms?.whens?.length > 0)
-      return (schema.$_terms.whens as WhenOptions[]).flatMap((when) =>
-        [when?.then, when?.otherwise].flatMap((s) => prettyPrintTypeParts(s, isOptionalType, path))
-      );
-    // schema.oneOf, schema.allOf, etc.
-    if (schema.$_terms?.matches?.length > 0)
-      return (schema.$_terms.matches as CustomHelpers[]).flatMap((s) =>
-        prettyPrintTypeParts(s.schema, isOptionalType, path)
-      );
-    // schema.literal
-    if (schema._flags?.only && (schema as any)._valids?._values?.size > 0)
-      return [...(schema as any)._valids._values.keys()].flatMap((v) =>
-        prettyPrintTypeParts(v, isOptionalType, path)
-      );
-
-    return `${schema?.type || 'unknown'}${isOptionalType ? '?' : ''}`;
+): string | string[] {
+  if (!isSchema(schema)) {
+    if (schema === null) return 'null';
+    return `${schema ?? 'unknown'}${optional ? '?' : ''}`;
   }
 
-  // takes array of possible values and de-dups and joins
-  return [...new Set([prettyPrintTypeParts(schema, false, path)].flat())]
-    .filter(Boolean)
-    .join('|');
+  const isOptionalType = optional || schema._flags?.presence === 'optional';
+  // For explicit custom schema.never
+  if (schema._flags?.presence === 'forbidden') return 'never';
+  // For offeringBasedSchema, schema.when, schema.conditional
+  if (schema.$_terms?.whens?.length > 0)
+    return (schema.$_terms.whens as WhenOptions[]).flatMap((when) =>
+      [when?.then, when?.otherwise].flatMap((s) => prettyPrintTypeParts(s, isOptionalType, path))
+    );
+  // schema.oneOf, schema.allOf, etc.
+  if (schema.$_terms?.matches?.length > 0)
+    return (schema.$_terms.matches as CustomHelpers[]).flatMap((s) =>
+      prettyPrintTypeParts(s.schema, isOptionalType, path)
+    );
+  // schema.literal
+  if (schema._flags?.only && (schema as any)._valids?._values?.size > 0)
+    return [...(schema as any)._valids._values.keys()].flatMap((v) =>
+      prettyPrintTypeParts(v, isOptionalType, path)
+    );
+
+  return `${schema?.type || 'unknown'}${isOptionalType ? '?' : ''}`;
 }
