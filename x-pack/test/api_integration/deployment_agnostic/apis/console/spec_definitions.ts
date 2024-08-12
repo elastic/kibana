@@ -17,16 +17,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
         withInternalHeaders: true,
+        withCustomHeaders: { 'kbn-xsrf': 'true' },
       });
     });
     after(async () => {
       await supertestWithAdminScope.destroy();
     });
     it('returns autocomplete definitions', async () => {
-      const { body } = await supertestWithAdminScope
-        .get('/api/console/api_server')
-        .set('kbn-xsrf', 'true')
-        .expect(200);
+      const { body } = await supertestWithAdminScope.get('/api/console/api_server').expect(200);
       expect(body.es).to.be.ok();
       const {
         es: { name, globals, endpoints },
