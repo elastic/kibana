@@ -9,6 +9,7 @@
 import { Client } from '@elastic/elasticsearch';
 import { PassThrough, Readable, Transform, pipeline } from 'stream';
 import { ESDocumentWithOperation } from '@kbn/apm-synthtrace-client';
+import moment from 'moment';
 import { SynthtraceEsClient } from '../shared/base_client';
 import { Logger } from '../utils/create_logger';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
@@ -31,7 +32,7 @@ export class EntitySynthtraceEsClient extends SynthtraceEsClient<any> {
 
 function entityPipeline() {
   return (base: Readable) => {
-    const aggregators = [createEntityLatestAggregator('5m')];
+    const aggregators = [createEntityLatestAggregator('2m')];
     return pipeline(
       base,
       getSerializeTransform(),
@@ -88,12 +89,14 @@ function getRoutingTransform() {
       }
       const entityIndexName = entityType === 'service' ? 'services' : entityType;
       if (document['entity.definitionId'] === 'history') {
-        document._index = `.entities.v1.history.builtin_${entityIndexName}`;
+        document._index = `.entities.v1.history.builtin_${entityIndexName}_from_ecs_data.${moment().format(
+          'YYYY-MM-DD'
+        )}`;
       } else if (document['entity.definitionId'] === 'latest') {
         // There should be a single latest document per entity.id
         document._action = {
           index: {
-            _index: `.entities.v1.latest.builtin_${entityIndexName}`,
+            _index: `.entities.v1.latest.builtin_${entityIndexName}_from_ecs_data`,
             _id: document['entity.id'],
           },
         };

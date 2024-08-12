@@ -26,6 +26,12 @@ const KEY_FIELDS: Array<keyof EntityFields> = [
   'entity.schemaVersion',
   'entity.type',
   'event.ingested',
+  'service.name',
+  'service.environment',
+  'service.language.name',
+  'service.runtime.name',
+  'service.runtime.version',
+  'service.version',
 ];
 
 export function createEntityLatestAggregator(flushInterval: string) {
