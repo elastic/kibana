@@ -129,105 +129,59 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         }),
         width: '35%',
         render: (value: string, packagePolicy: InMemoryPackagePolicy) => (
-          <EuiFlexGroup direction="column" gutterSize="xs">
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="xs" alignItems="baseline">
-                <EuiFlexItem data-test-subj="PackagePoliciesTableName" grow={false}>
-                  <EuiLink
-                    title={
-                      agentPolicy.supports_agentless
-                        ? i18n.translate(
-                            'xpack.fleet.policyDetails.packagePoliciesTable.disabledEditTitle',
-                            {
-                              defaultMessage:
-                                'Editing an agentless integration is not supported. Add a new integration if needed.',
-                            }
-                          )
-                        : value
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem data-test-subj="PackagePoliciesTableName" grow={false}>
+              <EuiLink
+                title={value}
+                {...(canReadIntegrationPolicies
+                  ? {
+                      href: getHref('edit_integration', {
+                        policyId: agentPolicy.id,
+                        packagePolicyId: packagePolicy.id,
+                      }),
                     }
-                    {...(canReadIntegrationPolicies && !agentPolicy.supports_agentless
-                      ? {
-                          href: getHref('edit_integration', {
-                            policyId: agentPolicy.id,
-                            packagePolicyId: packagePolicy.id,
-                          }),
-                        }
-                      : { disabled: true })}
-                  >
-                    <span className="eui-textTruncate">{value}</span>
-                    {packagePolicy.description ? (
-                      <span>
-                        &nbsp;
-                        <EuiToolTip content={packagePolicy.description}>
-                          <EuiIcon type="help" />
-                        </EuiToolTip>
-                      </span>
-                    ) : null}
-                  </EuiLink>
-                </EuiFlexItem>
-                {canUseMultipleAgentPolicies &&
-                  canReadAgentPolicies &&
-                  canReadIntegrationPolicies &&
-                  getSharedPoliciesNumber(packagePolicy) > 1 && (
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip
-                        content={
-                          <FormattedMessage
-                            id="xpack.fleet.agentPolicyList.agentsColumn.sharedTooltip"
-                            defaultMessage="This integration is shared by {numberShared} agent policies"
-                            values={{ numberShared: getSharedPoliciesNumber(packagePolicy) }}
-                          />
-                        }
-                      >
-                        <span className="eui-textTruncate" title={value}>
-                          {value}
-                        </span>
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                  )}
-                {canUseMultipleAgentPolicies &&
-                  canReadAgentPolicies &&
-                  canReadIntegrationPolicies &&
-                  getSharedPoliciesNumber(packagePolicy) > 1 && (
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip
-                        content={
-                          <FormattedMessage
-                            id="xpack.fleet.agentPolicyList.agentsColumn.sharedTooltip"
-                            defaultMessage="This integration is shared by {numberShared} agent policies"
-                            values={{ numberShared: getSharedPoliciesNumber(packagePolicy) }}
-                          />
-                        }
-                      >
-                        <EuiText
-                          data-test-subj="PackagePoliciesTableSharedLabel"
-                          color="subdued"
-                          size="xs"
-                          className="eui-textNoWrap"
-                        >
-                          <FormattedMessage
-                            id="xpack.fleet.agentPolicyList.agentsColumn.sharedText"
-                            defaultMessage="Shared"
-                          />{' '}
-                          <EuiIcon type="iInCircle" />
-                        </EuiText>
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                  )}
-              </EuiFlexGroup>
+                  : { disabled: true })}
+              >
+                <span className="eui-textTruncate">{value}</span>
+                {packagePolicy.description ? (
+                  <span>
+                    &nbsp;
+                    <EuiToolTip content={packagePolicy.description}>
+                      <EuiIcon type="help" />
+                    </EuiToolTip>
+                  </span>
+                ) : null}
+              </EuiLink>
             </EuiFlexItem>
-            {packagePolicy.description && (
-              <EuiFlexItem>
-                <EuiText
-                  color="subdued"
-                  className="eui-textTruncate"
-                  title={packagePolicy.description}
-                  size="xs"
-                >
-                  {packagePolicy.description}
-                </EuiText>
-              </EuiFlexItem>
-            )}
+            {canUseMultipleAgentPolicies &&
+              canReadAgentPolicies &&
+              canReadIntegrationPolicies &&
+              getSharedPoliciesNumber(packagePolicy) > 1 && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.fleet.agentPolicyList.agentsColumn.sharedTooltip"
+                        defaultMessage="This integration is shared by {numberShared} agent policies"
+                        values={{ numberShared: getSharedPoliciesNumber(packagePolicy) }}
+                      />
+                    }
+                  >
+                    <EuiText
+                      data-test-subj="PackagePoliciesTableSharedLabel"
+                      color="subdued"
+                      size="xs"
+                      className="eui-textNoWrap"
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.agentPolicyList.agentsColumn.sharedText"
+                        defaultMessage="Shared"
+                      />{' '}
+                      <EuiIcon type="iInCircle" />
+                    </EuiText>
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
           </EuiFlexGroup>
         ),
       },
@@ -327,14 +281,8 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
           ) : (
             <>
               <EuiBadge color="default">{agentPolicy.namespace}</EuiBadge>
-              &nbsp;
               <EuiIconTip
-                content={i18n.translate(
-                  'xpack.fleet.policyDetails.packagePoliciesTable.namespaceFromParentPolicyText',
-                  {
-                    defaultMessage: 'Namespace defined in parent agent policy',
-                  }
-                )}
+                content="Namespace defined in parent agent policy"
                 position="right"
                 type="iInCircle"
                 color="subdued"
