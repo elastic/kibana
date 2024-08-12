@@ -133,14 +133,3 @@ function createUpgradableRuleFieldsByTypeMap() {
 }
 
 export const UPGRADABLE_RULES_FIELDS_BY_TYPE_MAP = createUpgradableRuleFieldsByTypeMap();
-
-export const test: PrebuiltRuleAsset = {
-  name: 'Test',
-  description: 'Test',
-  risk_score: 1,
-  severity: 'low',
-  type: 'query',
-  version: 1,
-  rule_id: 'rule-1',
-  unknown_field: 'unknown_value',
-};
