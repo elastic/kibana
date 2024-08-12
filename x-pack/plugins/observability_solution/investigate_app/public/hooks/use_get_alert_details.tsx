@@ -6,7 +6,6 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-// import { investigationKeys } from './query_key_factory';
 import { BASE_RAC_ALERTS_API_PATH, EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import { useKibana } from './use_kibana';
 
@@ -34,7 +33,6 @@ export function useFetchAlert({ id }: AlertParams): UseFetchAlertResponse {
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
     queryKey: ['fetchAlert', id],
     queryFn: async ({ signal }) => {
-      if (id === '') return {};
       return await http.get<EcsFieldsResponse>(BASE_RAC_ALERTS_API_PATH, {
         query: {
           id,
