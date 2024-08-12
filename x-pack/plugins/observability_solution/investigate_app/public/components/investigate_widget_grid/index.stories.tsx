@@ -62,7 +62,6 @@ function createItem<T extends Partial<InvestigateWidgetGridItem>>(overrides: T) 
     columns: 4,
     rows: 2,
     description: '',
-    locked: false,
     loading: false,
     overrides: [],
   };
@@ -96,7 +95,6 @@ export const InvestigateWidgetGridStory: ComponentStoryObj<typeof Component> = {
         ),
         columns: 4,
         rows: 12,
-        locked: true,
       }),
       createItem({
         title: '5',

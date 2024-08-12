@@ -94,7 +94,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async clickOnFirstNode() {
       const firstNode = await this.getFirstNode();
-      firstNode.click();
+      return firstNode.click();
     },
 
     async clickOnGoToNodeDetails() {

@@ -26,7 +26,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless import_list_items', () => {
+  describe('@ess @serverless @serverlessQA import_list_items', () => {
     let supertest: TestAgent;
 
     before(async () => {

@@ -236,7 +236,7 @@ describe('useFieldBrowserOptions', () => {
   it('should dispatch the proper actions when a field is removed', async () => {
     let onDelete: ((fields: string[]) => void) | undefined;
     useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
-    useKibanaMock().services.dataViewFieldEditor.openDeleteModal = (options) => {
+    useKibanaMock().services.dataViewFieldEditor.openDeleteModal = async (options) => {
       onDelete = options.onDelete;
       return () => {};
     };
