@@ -23217,7 +23217,7 @@
             "label": "monitoring_enabled",
             "description": [],
             "signature": [
-              "(\"metrics\" | \"logs\")[] | undefined"
+              "(\"metrics\" | \"traces\" | \"logs\")[] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
