@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { defaultDataViewFindHandler } from './dataview.handlers.mock';
+import { defaultDataViewFindHandler, defaultDataViewGetHandler } from './dataview.handlers.mock';
 import { defaultFleetCspPackageHandler } from './fleet.handlers.mock';
 import { defaultApiLicensingInfo } from './licensing.handlers.mock';
 
@@ -18,4 +18,5 @@ export const defaultHandlers = [
   defaultApiLicensingInfo,
   defaultDataViewFindHandler,
   defaultFleetCspPackageHandler,
+  defaultDataViewGetHandler,
 ];
