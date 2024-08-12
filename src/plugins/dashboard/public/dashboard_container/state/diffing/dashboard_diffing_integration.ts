@@ -17,6 +17,7 @@ import { pluginServices } from '../../../services/plugin_services';
 import { UnsavedPanelState } from '../../types';
 import { dashboardContainerReducers } from '../dashboard_container_reducers';
 import { isKeyEqualAsync, unsavedChangesDiffingFunctions } from './dashboard_diffing_functions';
+import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 
 /**
  * An array of reducers which cannot cause unsaved changes. Unsaved changes only compares the explicit input
@@ -111,8 +112,11 @@ export function startDiffingDashboardState(
     combineLatest([
       dashboardUnsavedChanges,
       childrenUnsavedChanges$(this.children$),
-      this.controlGroup?.unsavedChanges ??
-        (of(undefined) as Observable<PersistableControlGroupInput | undefined>),
+      this.controlGroupApi$.pipe(
+        switchMap(controlGroupApi => {
+          return controlGroupApi ? controlGroupApi.unsavedChanges : of(undefined);
+        })
+      )
     ]).subscribe(([dashboardChanges, unsavedPanelState, controlGroupChanges]) => {
       // calculate unsaved changes
       const hasUnsavedChanges =
@@ -182,7 +186,7 @@ function backupUnsavedChanges(
   this: DashboardContainer,
   dashboardChanges: Partial<DashboardContainerInput>,
   reactEmbeddableChanges: UnsavedPanelState,
-  controlGroupChanges: PersistableControlGroupInput | undefined
+  controlGroupChanges: Partial<ControlGroupRuntimeState> | undefined
 ) {
   const { dashboardBackup } = pluginServices.getServices();
   const dashboardStateToBackup = omit(dashboardChanges, keysToOmitFromSessionStorage);
@@ -192,8 +196,8 @@ function backupUnsavedChanges(
     {
       ...dashboardStateToBackup,
       panels: dashboardChanges.panels,
-      controlGroupInput: controlGroupChanges,
     },
-    reactEmbeddableChanges
+    reactEmbeddableChanges,
+    controlGroupChanges,
   );
 }

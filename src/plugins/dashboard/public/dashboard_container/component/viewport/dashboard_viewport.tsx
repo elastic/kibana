@@ -21,6 +21,7 @@ import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 import { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import { getReferencesForControls } from '../../../../common/dashboard_container/persistable_state/dashboard_container_references';
+import { pluginServices } from '../../../services/plugin_services';
 
 export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
   const [width, setWidth] = useState<number>(0);
@@ -82,6 +83,7 @@ export const DashboardViewportComponent = () => {
           ref={controlsRoot}
         >
           <ReactEmbeddableRenderer<ControlGroupSerializedState, ControlGroupRuntimeState, ControlGroupApi>
+            key={dashboard.id}
             hidePanelChrome={true}
             type={CONTROL_GROUP_TYPE}
             maybeId={'control_group'}
@@ -102,6 +104,10 @@ export const DashboardViewportComponent = () => {
                       },
                     references: getReferencesForControls(dashboard.savedObjectReferences)
                   };
+                },
+                getRuntimeStateForChild: () => {
+                  const { dashboardBackup } = pluginServices.getServices();
+                  return dashboardBackup.getState(dashboard.id)?.controlGroupChanges;
                 },
               };
             }}
