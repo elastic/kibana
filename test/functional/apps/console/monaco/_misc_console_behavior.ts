@@ -171,7 +171,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.try(async () => {
           const actualResponse = await PageObjects.console.monaco.getOutputText();
-          expect(actualResponse).to.contain('"statusCode": 400');
+          expect(actualResponse).to.contain('parsing_exception');
           expect(await PageObjects.console.hasSuccessBadge()).to.be(false);
         });
       });
