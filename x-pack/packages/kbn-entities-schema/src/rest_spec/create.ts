@@ -8,7 +8,7 @@
 import { z } from 'zod';
 
 export const createEntityDefinitionQuerySchema = z.object({
-  installOnly: z.optional(z.boolean()).default(false),
+  installOnly: z.optional(z.coerce.boolean()).default(false),
 });
 
 export type CreateEntityDefinitionQuery = z.infer<typeof createEntityDefinitionQuerySchema>;

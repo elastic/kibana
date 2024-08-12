@@ -6,7 +6,7 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
-import { CreateEntityDefinitionQuery } from '@kbn/entities-schema';
+import { CreateEntityDefinitionQuery, DeleteEntityDefinitionQuery } from '@kbn/entities-schema';
 import { EntityManagerUnauthorizedError } from './errors';
 import { IEntityClient } from '../types';
 import {
@@ -37,9 +37,11 @@ export class EntityClient implements IEntityClient {
     }
   }
 
-  async disableManagedEntityDiscovery(): Promise<DisableManagedEntityResponse> {
+  async disableManagedEntityDiscovery(
+    query?: DeleteEntityDefinitionQuery
+  ): Promise<DisableManagedEntityResponse> {
     try {
-      return await this.http.delete('/internal/entities/managed/enablement');
+      return await this.http.delete('/internal/entities/managed/enablement', { query });
     } catch (err) {
       if (err.body?.statusCode === 403) {
         throw new EntityManagerUnauthorizedError(err.body.message);
