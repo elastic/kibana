@@ -28,7 +28,7 @@ import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
 import { catchAxiosErrorFormatAndThrow } from '../../common/endpoint/format_axios_error';
 import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 import { renderSummaryTable } from './print_run';
-import { parseTestFileConfig, retrieveIntegrations } from './utils';
+import { getBeforeSpecFunction, parseTestFileConfig, retrieveIntegrations } from './utils';
 import { prefixedOutputLogger } from '../endpoint/common/utils';
 
 import type { ProductType, Credentials, ProjectHandler } from './project_handler/project_handler';
@@ -534,12 +534,10 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
               if (argv.beforeSpec) {
                 const beforeSpecFilePath = require.resolve(`../../${argv.beforeSpec}`) as string;
-                const {
-                  beforeSpec,
-                }: {
-                  beforeSpec: (config: typeof cyCustomEnv) => Promise<void>;
-                } = await import(beforeSpecFilePath);
-                await beforeSpec(cyCustomEnv);
+                const module: unknown = await import(beforeSpecFilePath);
+                const beforeSpecHook = getBeforeSpecFunction(module, beforeSpecFilePath);
+
+                await beforeSpecHook(cyCustomEnv);
               }
 
               if (isOpen) {
