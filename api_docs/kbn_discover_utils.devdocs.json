@@ -2516,6 +2516,21 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE",
+        "type": "number",
+        "tags": [],
+        "label": "TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE",
+        "description": [],
+        "signature": [
+          "115"
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": []

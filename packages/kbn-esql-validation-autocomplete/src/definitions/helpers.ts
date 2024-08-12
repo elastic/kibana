@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { CommandDefinition, FunctionDefinition } from './types';
+import type { CommandDefinition, FunctionDefinition, FunctionParameterType } from './types';
 
 /**
  * Given a function definition, this function will return a list of function signatures
@@ -104,7 +104,7 @@ export function printArguments(
     optional,
   }: {
     name: string;
-    type: string | string[];
+    type: FunctionParameterType | FunctionParameterType[];
     optional?: boolean;
   },
   withTypes: boolean

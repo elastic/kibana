@@ -13,13 +13,14 @@ servers:
 paths:
   /api/endpoint/action:
     get:
+      description: Get a list of action requests and their responses
       operationId: EndpointGetActionsList
       parameters:
         - in: query
           name: query
           required: true
           schema:
-            $ref: '#/components/schemas/EndpointActionListRequestQuery'
+            $ref: '#/components/schemas/GetEndpointActionListRouteQuery'
       responses:
         '200':
           content:
@@ -32,18 +33,20 @@ paths:
         - Security Solution Endpoint Management API
   '/api/endpoint/action_log/{agent_id}':
     get:
-      operationId: EndpointGetActionAuditLog
+      deprecated: true
+      description: Get action requests log
+      operationId: EndpointGetActionLog
       parameters:
+        - in: path
+          name: agent_id
+          required: true
+          schema:
+            $ref: '#/components/schemas/AgentId'
         - in: query
           name: query
           required: true
           schema:
-            $ref: '#/components/schemas/AuditLogRequestQuery'
-        - in: path
-          name: query
-          required: true
-          schema:
-            $ref: '#/components/schemas/AuditLogRequestParams'
+            $ref: '#/components/schemas/ActionLogRequestQuery'
       responses:
         '200':
           content:
@@ -51,11 +54,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
-      summary: Get action audit log schema
+      summary: Get action requests log schema
       tags:
         - Security Solution Endpoint Management API
   /api/endpoint/action_status:
     get:
+      description: Get action status
       operationId: EndpointGetActionsStatus
       parameters:
         - in: query
@@ -71,20 +75,21 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
+                $ref: '#/components/schemas/ActionStatusSuccessResponse'
           description: OK
       summary: Get Actions status schema
       tags:
         - Security Solution Endpoint Management API
   '/api/endpoint/action/{action_id}':
     get:
+      description: Get action details
       operationId: EndpointGetActionsDetails
       parameters:
         - in: path
-          name: query
+          name: action_id
           required: true
           schema:
-            $ref: '#/components/schemas/DetailsRequestParams'
+            type: string
       responses:
         '200':
           content:
@@ -97,13 +102,19 @@ paths:
         - Security Solution Endpoint Management API
   '/api/endpoint/action/{action_id}/file/{file_id}/download`':
     get:
+      description: Download a file from an endpoint
       operationId: EndpointFileDownload
       parameters:
         - in: path
-          name: query
+          name: action_id
           required: true
           schema:
-            $ref: '#/components/schemas/FileDownloadRequestParams'
+            type: string
+        - in: path
+          name: file_id
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           content:
@@ -116,13 +127,19 @@ paths:
         - Security Solution Endpoint Management API
   '/api/endpoint/action/{action_id}/file/{file_id}`':
     get:
+      description: Get file info
       operationId: EndpointFileInfo
       parameters:
         - in: path
-          name: query
+          name: action_id
           required: true
           schema:
-            $ref: '#/components/schemas/FileInfoRequestParams'
+            type: string
+        - in: path
+          name: file_id
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           content:
@@ -135,12 +152,13 @@ paths:
         - Security Solution Endpoint Management API
   /api/endpoint/action/execute:
     post:
+      description: Execute a given command on an endpoint
       operationId: EndpointExecuteAction
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ExecuteActionRequestBody'
+              $ref: '#/components/schemas/ExecuteRouteRequestBody'
         required: true
       responses:
         '200':
@@ -154,12 +172,13 @@ paths:
         - Security Solution Endpoint Management API
   /api/endpoint/action/get_file:
     post:
+      description: Get a file from an endpoint
       operationId: EndpointGetFileAction
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GetFileActionRequestBody'
+              $ref: '#/components/schemas/GetFileRouteRequestBody'
         required: true
       responses:
         '200':
@@ -173,23 +192,13 @@ paths:
         - Security Solution Endpoint Management API
   /api/endpoint/action/isolate:
     post:
-      operationId: EndpointIsolateHostAction
+      description: Isolate an endpoint
+      operationId: EndpointIsolateAction
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                alert_ids:
-                  $ref: '#/components/schemas/AlertIds'
-                case_ids:
-                  $ref: '#/components/schemas/CaseIds'
-                comment:
-                  $ref: '#/components/schemas/Comment'
-                endpoint_ids:
-                  $ref: '#/components/schemas/EndpointIds'
-                parameters:
-                  $ref: '#/components/schemas/Parameters'
+              $ref: '#/components/schemas/IsolateRouteRequestBody'
         required: true
       responses:
         '200':
@@ -198,17 +207,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
-      summary: Isolate host Action
+      summary: Isolate Action
       tags:
         - Security Solution Endpoint Management API
   /api/endpoint/action/kill_process:
     post:
+      description: Kill a running process on an endpoint
       operationId: EndpointKillProcessAction
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProcessActionSchemas'
+              $ref: '#/components/schemas/KillOrSuspendActionSchema'
         required: true
       responses:
         '200':
@@ -222,23 +232,13 @@ paths:
         - Security Solution Endpoint Management API
   /api/endpoint/action/running_procs:
     post:
-      operationId: EndpointGetRunningProcessesAction
+      description: Get list of running processes on an endpoint
+      operationId: EndpointGetProcessesAction
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                alert_ids:
-                  $ref: '#/components/schemas/AlertIds'
-                case_ids:
-                  $ref: '#/components/schemas/CaseIds'
-                comment:
-                  $ref: '#/components/schemas/Comment'
-                endpoint_ids:
-                  $ref: '#/components/schemas/EndpointIds'
-                parameters:
-                  $ref: '#/components/schemas/Parameters'
+              $ref: '#/components/schemas/GetProcessesRouteRequestBody'
         required: true
       responses:
         '200':
@@ -252,12 +252,13 @@ paths:
         - Security Solution Endpoint Management API
   /api/endpoint/action/scan:
     post:
+      description: Scan a file or directory
       operationId: EndpointScanAction
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ScanActionRequestBody'
+              $ref: '#/components/schemas/ScanRouteRequestBody'
         required: true
       responses:
         '200':
@@ -277,19 +278,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
+                $ref: '#/components/schemas/ActionStateSuccessResponse'
           description: OK
       summary: Get Action State schema
       tags:
         - Security Solution Endpoint Management API
   /api/endpoint/action/suspend_process:
     post:
+      description: Suspend a running process on an endpoint
       operationId: EndpointSuspendProcessAction
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProcessActionSchemas'
+              $ref: '#/components/schemas/KillOrSuspendActionSchema'
         required: true
       responses:
         '200':
@@ -303,23 +305,13 @@ paths:
         - Security Solution Endpoint Management API
   /api/endpoint/action/unisolate:
     post:
-      operationId: EndpointUnisolateHostAction
+      description: Release an endpoint
+      operationId: EndpointUnisolateAction
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                alert_ids:
-                  $ref: '#/components/schemas/AlertIds'
-                case_ids:
-                  $ref: '#/components/schemas/CaseIds'
-                comment:
-                  $ref: '#/components/schemas/Comment'
-                endpoint_ids:
-                  $ref: '#/components/schemas/EndpointIds'
-                parameters:
-                  $ref: '#/components/schemas/Parameters'
+              $ref: '#/components/schemas/UnisolateRouteRequestBody'
         required: true
       responses:
         '200':
@@ -328,17 +320,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
-      summary: Unisolate host Action
+      summary: Unisolate Action
       tags:
         - Security Solution Endpoint Management API
   /api/endpoint/action/upload:
     post:
+      description: Upload a file to an endpoint
       operationId: EndpointUploadAction
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/FileUploadActionRequestBody'
+              $ref: '#/components/schemas/UploadRouteRequestBody'
         required: true
       responses:
         '200':
@@ -374,13 +367,10 @@ paths:
       operationId: GetEndpointMetadata
       parameters:
         - in: path
-          name: query
+          name: id
           required: true
           schema:
-            type: object
-            properties:
-              id:
-                type: string
+            type: string
       responses:
         '200':
           content:
@@ -428,6 +418,7 @@ paths:
         - Security Solution Endpoint Management API
   /api/endpoint/policy/summaries:
     get:
+      deprecated: true
       operationId: GetAgentPolicySummary
       parameters:
         - in: query
@@ -535,6 +526,52 @@ paths:
         - Security Solution Endpoint Management API
 components:
   schemas:
+    ActionLogRequestQuery:
+      type: object
+      properties:
+        end_date:
+          $ref: '#/components/schemas/EndDate'
+        page:
+          $ref: '#/components/schemas/Page'
+        page_size:
+          $ref: '#/components/schemas/PageSize'
+        start_date:
+          $ref: '#/components/schemas/StartDate'
+    ActionStateSuccessResponse:
+      type: object
+      properties:
+        body:
+          type: object
+          properties:
+            data:
+              type: object
+              properties:
+                canEncrypt:
+                  type: boolean
+          required:
+            - data
+      required:
+        - body
+    ActionStatusSuccessResponse:
+      type: object
+      properties:
+        body:
+          type: object
+          properties:
+            data:
+              type: object
+              properties:
+                agent_id:
+                  $ref: '#/components/schemas/AgentId'
+                pending_actions:
+                  $ref: '#/components/schemas/PendingActionsSchema'
+              required:
+                - agent_id
+                - pending_actions
+          required:
+            - data
+      required:
+        - body
     AgentId:
       description: Agent ID
       type: string
@@ -549,28 +586,18 @@ components:
           type: array
         - minLength: 1
           type: string
+    AgentTypes:
+      enum:
+        - endpoint
+        - sentinel_one
+        - crowdstrike
+      type: string
     AlertIds:
       description: A list of alerts ids.
       items:
         $ref: '#/components/schemas/NonEmptyString'
       minItems: 1
       type: array
-    AuditLogRequestParams:
-      type: object
-      properties:
-        agent_id:
-          $ref: '#/components/schemas/AgentId'
-    AuditLogRequestQuery:
-      type: object
-      properties:
-        end_date:
-          $ref: '#/components/schemas/EndDate'
-        page:
-          $ref: '#/components/schemas/Page'
-        page_size:
-          $ref: '#/components/schemas/PageSize'
-        start_date:
-          $ref: '#/components/schemas/StartDate'
     CaseIds:
       description: Case IDs to be updated (cannot contain empty strings)
       items:
@@ -589,6 +616,7 @@ components:
         - get-file
         - execute
         - upload
+        - scan
       minLength: 1
       type: string
     Commands:
@@ -598,19 +626,54 @@ components:
     Comment:
       description: Optional comment
       type: string
-    DetailsRequestParams:
-      type: object
-      properties:
-        action_id:
-          type: string
     EndDate:
       description: End date
       type: string
-    EndpointActionListRequestQuery:
+    EndpointIds:
+      description: List of endpoint IDs (cannot contain empty strings)
+      items:
+        minLength: 1
+        type: string
+      minItems: 1
+      type: array
+    ExecuteRouteRequestBody:
+      allOf:
+        - type: object
+          properties:
+            agent_type:
+              $ref: '#/components/schemas/AgentTypes'
+            alert_ids:
+              $ref: '#/components/schemas/AlertIds'
+            case_ids:
+              $ref: '#/components/schemas/CaseIds'
+            comment:
+              $ref: '#/components/schemas/Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Parameters'
+          required:
+            - endpoint_ids
+        - type: object
+          properties:
+            parameters:
+              type: object
+              properties:
+                command:
+                  $ref: '#/components/schemas/Command'
+                timeout:
+                  $ref: '#/components/schemas/Timeout'
+              required:
+                - command
+          required:
+            - parameters
+    GetEndpointActionListRouteQuery:
       type: object
       properties:
         agentIds:
           $ref: '#/components/schemas/AgentIds'
+        agentTypes:
+          $ref: '#/components/schemas/AgentTypes'
         commands:
           $ref: '#/components/schemas/Commands'
         endDate:
@@ -631,17 +694,12 @@ components:
           $ref: '#/components/schemas/UserIds'
         withOutputs:
           $ref: '#/components/schemas/WithOutputs'
-    EndpointIds:
-      description: List of endpoint IDs (cannot contain empty strings)
-      items:
-        minLength: 1
-        type: string
-      minItems: 1
-      type: array
-    ExecuteActionRequestBody:
+    GetFileRouteRequestBody:
       allOf:
         - type: object
           properties:
+            agent_type:
+              $ref: '#/components/schemas/AgentTypes'
             alert_ids:
               $ref: '#/components/schemas/AlertIds'
             case_ids:
@@ -652,81 +710,8 @@ components:
               $ref: '#/components/schemas/EndpointIds'
             parameters:
               $ref: '#/components/schemas/Parameters'
-        - type: object
-          properties:
-            parameters:
-              type: object
-              properties:
-                command:
-                  $ref: '#/components/schemas/Command'
-                timeout:
-                  $ref: '#/components/schemas/Timeout'
-              required:
-                - command
           required:
-            - parameters
-    FileDownloadRequestParams:
-      type: object
-      properties:
-        action_id:
-          type: string
-        file_id:
-          type: string
-      required:
-        - action_id
-        - file_id
-    FileInfoRequestParams:
-      type: object
-      properties:
-        action_id:
-          type: string
-        file_id:
-          type: string
-      required:
-        - action_id
-        - file_id
-    FileUploadActionRequestBody:
-      allOf:
-        - type: object
-          properties:
-            alert_ids:
-              $ref: '#/components/schemas/AlertIds'
-            case_ids:
-              $ref: '#/components/schemas/CaseIds'
-            comment:
-              $ref: '#/components/schemas/Comment'
-            endpoint_ids:
-              $ref: '#/components/schemas/EndpointIds'
-            parameters:
-              $ref: '#/components/schemas/Parameters'
-        - type: object
-          properties:
-            file:
-              format: binary
-              type: string
-            parameters:
-              type: object
-              properties:
-                overwrite:
-                  default: false
-                  type: boolean
-          required:
-            - parameters
-            - file
-    GetFileActionRequestBody:
-      allOf:
-        - type: object
-          properties:
-            alert_ids:
-              $ref: '#/components/schemas/AlertIds'
-            case_ids:
-              $ref: '#/components/schemas/CaseIds'
-            comment:
-              $ref: '#/components/schemas/Comment'
-            endpoint_ids:
-              $ref: '#/components/schemas/EndpointIds'
-            parameters:
-              $ref: '#/components/schemas/Parameters'
+            - endpoint_ids
         - type: object
           properties:
             parameters:
@@ -736,6 +721,44 @@ components:
                   type: string
               required:
                 - path
+          required:
+            - parameters
+    GetProcessesRouteRequestBody:
+      $ref: '#/components/schemas/NoParametersRequestSchema'
+    IsolateRouteRequestBody:
+      $ref: '#/components/schemas/NoParametersRequestSchema'
+    KillOrSuspendActionSchema:
+      allOf:
+        - type: object
+          properties:
+            agent_type:
+              $ref: '#/components/schemas/AgentTypes'
+            alert_ids:
+              $ref: '#/components/schemas/AlertIds'
+            case_ids:
+              $ref: '#/components/schemas/CaseIds'
+            comment:
+              $ref: '#/components/schemas/Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Parameters'
+          required:
+            - endpoint_ids
+        - type: object
+          properties:
+            parameters:
+              oneOf:
+                - type: object
+                  properties:
+                    pid:
+                      minimum: 1
+                      type: integer
+                - type: object
+                  properties:
+                    entity_id:
+                      minLength: 1
+                      type: string
           required:
             - parameters
     ListRequestQuery:
@@ -790,6 +813,28 @@ components:
       minLength: 1
       pattern: ^(?! *$).+$
       type: string
+    NoParametersRequestSchema:
+      type: object
+      properties:
+        body:
+          type: object
+          properties:
+            agent_type:
+              $ref: '#/components/schemas/AgentTypes'
+            alert_ids:
+              $ref: '#/components/schemas/AlertIds'
+            case_ids:
+              $ref: '#/components/schemas/CaseIds'
+            comment:
+              $ref: '#/components/schemas/Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Parameters'
+          required:
+            - endpoint_ids
+      required:
+        - body
     Page:
       default: 1
       description: Page number
@@ -804,45 +849,43 @@ components:
     Parameters:
       description: Optional parameters object
       type: object
-    ProcessActionSchemas:
-      allOf:
+    PendingActionDataType:
+      type: integer
+    PendingActionsSchema:
+      oneOf:
         - type: object
           properties:
-            alert_ids:
-              $ref: '#/components/schemas/AlertIds'
-            case_ids:
-              $ref: '#/components/schemas/CaseIds'
-            comment:
-              $ref: '#/components/schemas/Comment'
-            endpoint_ids:
-              $ref: '#/components/schemas/EndpointIds'
-            parameters:
-              $ref: '#/components/schemas/Parameters'
-        - type: object
-          properties:
-            parameters:
-              oneOf:
-                - type: object
-                  properties:
-                    pid:
-                      minimum: 1
-                      type: integer
-                - type: object
-                  properties:
-                    entity_id:
-                      minLength: 1
-                      type: string
-          required:
-            - parameters
+            execute:
+              $ref: '#/components/schemas/PendingActionDataType'
+            get-file:
+              $ref: '#/components/schemas/PendingActionDataType'
+            isolate:
+              $ref: '#/components/schemas/PendingActionDataType'
+            kill-process:
+              $ref: '#/components/schemas/PendingActionDataType'
+            running-processes:
+              $ref: '#/components/schemas/PendingActionDataType'
+            scan:
+              $ref: '#/components/schemas/PendingActionDataType'
+            suspend-process:
+              $ref: '#/components/schemas/PendingActionDataType'
+            unisolate:
+              $ref: '#/components/schemas/PendingActionDataType'
+            upload:
+              $ref: '#/components/schemas/PendingActionDataType'
+        - additionalProperties: true
+          type: object
     ProtectionUpdatesNoteResponse:
       type: object
       properties:
         note:
           type: string
-    ScanActionRequestBody:
+    ScanRouteRequestBody:
       allOf:
         - type: object
           properties:
+            agent_type:
+              $ref: '#/components/schemas/AgentTypes'
             alert_ids:
               $ref: '#/components/schemas/AlertIds'
             case_ids:
@@ -853,6 +896,8 @@ components:
               $ref: '#/components/schemas/EndpointIds'
             parameters:
               $ref: '#/components/schemas/Parameters'
+          required:
+            - endpoint_ids
         - type: object
           properties:
             parameters:
@@ -875,16 +920,52 @@ components:
       minimum: 1
       type: integer
     Type:
+      description: Type of response action
       enum:
         - automated
         - manual
       type: string
     Types:
+      description: List of types of response actions
       items:
         $ref: '#/components/schemas/Type'
       maxLength: 2
       minLength: 1
       type: array
+    UnisolateRouteRequestBody:
+      $ref: '#/components/schemas/NoParametersRequestSchema'
+    UploadRouteRequestBody:
+      allOf:
+        - type: object
+          properties:
+            agent_type:
+              $ref: '#/components/schemas/AgentTypes'
+            alert_ids:
+              $ref: '#/components/schemas/AlertIds'
+            case_ids:
+              $ref: '#/components/schemas/CaseIds'
+            comment:
+              $ref: '#/components/schemas/Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Parameters'
+          required:
+            - endpoint_ids
+        - type: object
+          properties:
+            file:
+              format: binary
+              type: string
+            parameters:
+              type: object
+              properties:
+                overwrite:
+                  default: false
+                  type: boolean
+          required:
+            - parameters
+            - file
     UserIds:
       description: User IDs
       oneOf:
@@ -896,7 +977,7 @@ components:
         - minLength: 1
           type: string
     WithOutputs:
-      description: With Outputs
+      description: Shows detailed outputs for an action response
       oneOf:
         - items:
             minLength: 1
