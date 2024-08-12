@@ -58,10 +58,9 @@ x-pack/test/<my_own_api_integration_folder>
 ## Step-by-Step Guide
 1. Define Deployment-Agnostic Services
 
-Under `x-pack/test/<my_own_api_integration_folder>/deployment_agnostic/services`, create `index.ts` and load default services like `samlAuth` and `superuserWithoutAuth`:
+Under `x-pack/test/<my_own_api_integration_folder>/deployment_agnostic/services`, create `index.ts` and load base services from `x-pack/test/api_integration/deployment_agnostic/services`:
 
 ```ts
-import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { services as deploymentAgnosticServices } from './../../api_integration/deployment_agnostic/services';
 
 export type {
@@ -141,15 +140,14 @@ Create `stateful.config.ts` and link tests entry file:
 
 ```ts
 import { createStatefulTestConfig } from './../../api_integration/deployment_agnostic/default_configs/stateful.config.base';
+import { services } from './services';
 
 export default createStatefulTestConfig({
   testFiles: [require.resolve('./stateful.index.ts')],
+  services,
   junit: {
     reportName: 'Stateful - Deployment-agnostic API Integration Tests',
   },
-  // extra arguments
-  esServerArgs: [],
-  kbnServerArgs: [],
 });
 ```
 5. Add Tests Entry File and FTR Config File for Specific **Serverless** Project
@@ -170,9 +168,11 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
 oblt.serverless.config.ts
 ```ts
 import { createServerlessTestConfig } from './../../api_integration/deployment_agnostic/default_configs/serverless.config.base';
+import { services } from './services';
 
 export default createServerlessTestConfig({
   serverlessProject: 'oblt',
+  services,
   testFiles: [require.resolve('./oblt.index.ts')],
   junit: {
     reportName: 'Serverless Observability - Deployment-agnostic API Integration Tests',

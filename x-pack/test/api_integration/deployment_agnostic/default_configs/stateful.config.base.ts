@@ -18,17 +18,20 @@ import {
   systemIndicesSuperuser,
   FtrConfigProviderContext,
 } from '@kbn/test';
-import { services } from '../services';
+import { DeploymentAgnosticCommonServices, services } from '../services';
 
-interface CreateTestConfigOptions {
+interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   esServerArgs?: string[];
   kbnServerArgs?: string[];
+  services?: T;
   testFiles: string[];
   junit: { reportName: string };
   suiteTags?: { include?: string[]; exclude?: string[] };
 }
 
-export function createStatefulTestConfig(options: CreateTestConfigOptions) {
+export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServices>(
+  options: CreateTestConfigOptions<T>
+) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     if (options.esServerArgs || options.kbnServerArgs) {
       throw new Error(
@@ -61,7 +64,8 @@ export function createStatefulTestConfig(options: CreateTestConfigOptions) {
       servers,
       testFiles: options.testFiles,
       security: { disableTestUser: true },
-      services,
+      // services can be customized, but must extend DeploymentAgnosticCommonServices
+      services: options.services || services,
       junit: options.junit,
       suiteTags: options.suiteTags,
 

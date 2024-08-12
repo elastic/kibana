@@ -7,12 +7,13 @@
 import { FtrConfigProviderContext, Config } from '@kbn/test';
 
 import { ServerlessProjectType } from '@kbn/es';
-import { services } from '../services';
+import { DeploymentAgnosticCommonServices, services } from '../services';
 
-interface CreateTestConfigOptions {
+interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   serverlessProject: ServerlessProjectType;
   esServerArgs?: string[];
   kbnServerArgs?: string[];
+  services?: T;
   testFiles: string[];
   junit: { reportName: string };
   suiteTags?: { include?: string[]; exclude?: string[] };
@@ -53,7 +54,9 @@ const kbnServerArgsFromController = {
   ],
 };
 
-export function createServerlessTestConfig(options: CreateTestConfigOptions) {
+export function createServerlessTestConfig<T extends DeploymentAgnosticCommonServices>(
+  options: CreateTestConfigOptions<T>
+) {
   return async ({ readConfigFile }: FtrConfigProviderContext): Promise<Config> => {
     if (options.esServerArgs || options.kbnServerArgs) {
       throw new Error(
@@ -70,7 +73,8 @@ export function createServerlessTestConfig(options: CreateTestConfigOptions) {
       ...svlSharedConfig.getAll(),
 
       services: {
-        ...services,
+        // services can be customized, but must extend DeploymentAgnosticCommonServices
+        ...(options.services || services),
       },
       esTestCluster: {
         ...svlSharedConfig.get('esTestCluster'),
