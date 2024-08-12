@@ -23,13 +23,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
-import { KnowledgeBaseType } from '@kbn/observability-ai-assistant-plugin/public';
-import { useCreateKnowledgeBaseEntry } from '../../hooks/use_create_knowledge_base_entry';
 import { useGetUserInstructions } from '../../hooks/use_get_user_instructions';
+import { useCreateKnowledgeBaseUserInstruction } from '../../hooks/use_create_knowledge_base_user_instruction';
 
 export function KnowledgeBaseEditUserInstructionFlyout({ onClose }: { onClose: () => void }) {
   const { userInstructions, isLoading: isFetching } = useGetUserInstructions();
-  const { mutateAsync: createEntry, isLoading: isSaving } = useCreateKnowledgeBaseEntry();
+  const { mutateAsync: createEntry, isLoading: isSaving } = useCreateKnowledgeBaseUserInstruction();
   const [newEntryText, setNewEntryText] = useState('');
   const [newEntryDocId, setNewEntryDocId] = useState<string>();
   const isSubmitDisabled = newEntryText.trim() === '';
@@ -43,10 +42,9 @@ export function KnowledgeBaseEditUserInstructionFlyout({ onClose }: { onClose: (
   const handleSubmit = async () => {
     await createEntry({
       entry: {
-        id: newEntryDocId ?? uuidv4(),
+        doc_id: newEntryDocId ?? uuidv4(),
         text: newEntryText,
         public: false, // limit user instructions to private (for now)
-        type: KnowledgeBaseType.UserInstruction,
       },
     });
 

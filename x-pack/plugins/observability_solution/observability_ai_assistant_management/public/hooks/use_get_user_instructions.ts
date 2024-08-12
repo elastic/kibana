@@ -25,8 +25,6 @@ export function useGetUserInstructions() {
         { signal }
       );
     },
-    keepPreviousData: true,
-    refetchOnWindowFocus: false,
   });
 
   return {

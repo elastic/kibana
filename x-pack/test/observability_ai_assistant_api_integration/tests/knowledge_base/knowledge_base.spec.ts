@@ -7,14 +7,13 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createKnowledgeBaseModel, deleteKnowledgeBaseModel } from './helpers';
+import { clearKnowledgeBase, createKnowledgeBaseModel, deleteKnowledgeBaseModel } from './helpers';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const es = getService('es');
 
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
-  const KB_INDEX = '.kibana-observability-ai-assistant-kb-*';
 
   describe('Knowledge base', () => {
     before(async () => {
@@ -120,18 +119,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
     describe('when managing multiple entries', () => {
       before(async () => {
-        es.deleteByQuery({
-          index: KB_INDEX,
-          conflicts: 'proceed',
-          query: { match_all: {} },
-        });
+        await clearKnowledgeBase(es);
       });
       afterEach(async () => {
-        es.deleteByQuery({
-          index: KB_INDEX,
-          conflicts: 'proceed',
-          query: { match_all: {} },
-        });
+        await clearKnowledgeBase(es);
       });
       const knowledgeBaseEntries = [
         {

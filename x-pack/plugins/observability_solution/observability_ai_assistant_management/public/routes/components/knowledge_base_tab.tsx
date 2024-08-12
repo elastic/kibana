@@ -31,7 +31,7 @@ import { KnowledgeBaseEditManualEntryFlyout } from './knowledge_base_edit_manual
 import { KnowledgeBaseCategoryFlyout } from './knowledge_base_category_flyout';
 import { KnowledgeBaseBulkImportFlyout } from './knowledge_base_bulk_import_flyout';
 import { useKibana } from '../../hooks/use_kibana';
-import { KnowledgeBaseEditUserInstructionFlyout } from './knowledge_base_edit_system_prompt_flyout';
+import { KnowledgeBaseEditUserInstructionFlyout } from './knowledge_base_edit_user_instruction_flyout';
 
 export function KnowledgeBaseTab() {
   const { uiSettings } = useKibana().services;
