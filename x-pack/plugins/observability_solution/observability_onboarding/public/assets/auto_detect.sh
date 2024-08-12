@@ -148,6 +148,7 @@ update_step_progress() {
 
 download_elastic_agent() {
   local download_url="https://artifacts.elastic.co/downloads/beats/elastic-agent/${elastic_agent_artifact_name}.tar.gz"
+  rm -rf "./${elastic_agent_artifact_name}" "./${elastic_agent_artifact_name}.tar.gz"
   curl -L -O $download_url --silent --fail
 
   if [ "$?" -eq 0 ]; then
@@ -314,13 +315,18 @@ read_open_log_file_list() {
 
   # Filtering by the exclude patterns
   while IFS= read -r line; do
-      if ! grep -qE "$(IFS="|"; echo "${exclude_patterns[*]}")" <<< "$line"; then
-          unknown_log_file_path_list_string+="$line\n"
-      fi
+    if ! grep -qE "$(IFS="|"; echo "${exclude_patterns[*]}")" <<< "$line"; then
+        unknown_log_file_path_list_string+="$line\n"
+    fi
   done <<< "$list"
 }
 
 detect_known_integrations() {
+  # Always suggesting to install System integartion.
+  # Even when there is no system logs on the host,
+  # System integration will still be able to to collect metrics.
+  known_integrations_list_string+="system"$'\n'
+
   local nginx_patterns=(
     "/var/log/nginx/access.log*"
     "/var/log/nginx/error.log*"
@@ -348,25 +354,11 @@ detect_known_integrations() {
     fi
   done
 
-  if compgen -G "/var/lib/docker/containers/*/*-json.log" > /dev/null; then
+  if [ -S /var/run/docker.sock ]; then
+    known_integrations_list_string+="docker"$'\n'
+  elif compgen -G "/var/lib/docker/containers/*/*-json.log" > /dev/null; then
     known_integrations_list_string+="docker"$'\n'
   fi
-
-  local system_patterns=(
-    "/var/log/messages*"
-    "/var/log/syslog*"
-    "/var/log/system*"
-    "/var/log/auth.log*"
-    "/var/log/secure*"
-    "/var/log/system.log*"
-  )
-
-  for pattern in "${system_patterns[@]}"; do
-    if compgen -G "$pattern" > /dev/null; then
-      known_integrations_list_string+="system"$'\n'
-      break
-    fi
-  done
 }
 
 known_integration_title() {
@@ -382,7 +374,7 @@ known_integration_title() {
       echo "Docker Container Logs"
       ;;
     "system")
-      echo "System Logs"
+      echo "System Logs And Metrics"
       ;;
     *)
       echo "Unknown"
@@ -392,6 +384,10 @@ known_integration_title() {
 
 build_unknown_log_file_patterns() {
   while IFS= read -r log_file_path; do
+    if [ -z "$log_file_path" ]; then
+      continue
+    fi
+
     unknown_log_file_pattern_list_string+="$(dirname "$log_file_path")/*.log\n"
   done <<< "$(echo -e $unknown_log_file_path_list_string)"
 

@@ -6,18 +6,21 @@
  * Side Public License, v 1.
  */
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import {
   DataTableCompareToolbarBtn,
   DataTableDocumentToolbarBtn,
   SelectButton,
+  SelectAllButton,
 } from './data_table_document_selection';
-import { dataTableContextMock } from '../../__mocks__/table_context';
+import { buildSelectedDocsState, dataTableContextMock } from '../../__mocks__/table_context';
 import { UnifiedDataTableContext } from '../table_context';
 import { getDocId } from '@kbn/discover-utils';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { servicesMock } from '../../__mocks__/services';
 
 describe('document selection', () => {
   describe('getDocId', () => {
@@ -36,6 +39,39 @@ describe('document selection', () => {
         _index: 'test-indices',
       };
       expect(getDocId(doc)).toMatchInlineSnapshot(`"test-indices::test-id::"`);
+    });
+  });
+
+  describe('SelectAllButton', () => {
+    test('is not checked', () => {
+      const contextMock = {
+        ...dataTableContextMock,
+      };
+
+      const component = mountWithIntl(
+        <UnifiedDataTableContext.Provider value={contextMock}>
+          <SelectAllButton />
+        </UnifiedDataTableContext.Provider>
+      );
+
+      const checkBox = findTestSubject(component, 'selectAllDocsOnPageToggle');
+      expect(checkBox.props().checked).toBeFalsy();
+    });
+
+    test('is checked correctly', () => {
+      const contextMock = {
+        ...dataTableContextMock,
+        selectedDocsState: buildSelectedDocsState(['i::1::']),
+      };
+
+      const component = mountWithIntl(
+        <UnifiedDataTableContext.Provider value={contextMock}>
+          <SelectAllButton />
+        </UnifiedDataTableContext.Provider>
+      );
+
+      const checkBox = findTestSubject(component, 'selectAllDocsOnPageToggle');
+      expect(checkBox.props().checked).toBeTruthy();
     });
   });
 
@@ -63,13 +99,13 @@ describe('document selection', () => {
       expect(checkBox.props().checked).toBeFalsy();
     });
 
-    test('is checked', () => {
+    test('is checked correctly', () => {
       const contextMock = {
         ...dataTableContextMock,
-        selectedDocs: ['i::1::'],
+        selectedDocsState: buildSelectedDocsState(['i::1::']),
       };
 
-      const component = mountWithIntl(
+      const component1 = mountWithIntl(
         <UnifiedDataTableContext.Provider value={contextMock}>
           <SelectButton
             rowIndex={0}
@@ -83,8 +119,25 @@ describe('document selection', () => {
         </UnifiedDataTableContext.Provider>
       );
 
-      const checkBox = findTestSubject(component, 'dscGridSelectDoc-i::1::');
-      expect(checkBox.props().checked).toBeTruthy();
+      const checkBox1 = findTestSubject(component1, 'dscGridSelectDoc-i::1::');
+      expect(checkBox1.props().checked).toBeTruthy();
+
+      const component2 = mountWithIntl(
+        <UnifiedDataTableContext.Provider value={contextMock}>
+          <SelectButton
+            rowIndex={1}
+            colIndex={0}
+            setCellProps={jest.fn()}
+            columnId="test"
+            isExpanded={false}
+            isDetails={false}
+            isExpandable={false}
+          />
+        </UnifiedDataTableContext.Provider>
+      );
+
+      const checkBox2 = findTestSubject(component2, 'dscGridSelectDoc-i::2::');
+      expect(checkBox2.props().checked).toBeFalsy();
     });
 
     test('adding a selection', () => {
@@ -108,13 +161,13 @@ describe('document selection', () => {
 
       const checkBox = findTestSubject(component, 'dscGridSelectDoc-i::1::');
       checkBox.simulate('change');
-      expect(contextMock.setSelectedDocs).toHaveBeenCalledWith(['i::1::']);
+      expect(contextMock.selectedDocsState.toggleDocSelection).toHaveBeenCalledWith('i::1::');
     });
 
     test('removing a selection', () => {
       const contextMock = {
         ...dataTableContextMock,
-        selectedDocs: ['i::1::'],
+        selectedDocsState: buildSelectedDocsState(['i::1::']),
       };
 
       const component = mountWithIntl(
@@ -133,55 +186,192 @@ describe('document selection', () => {
 
       const checkBox = findTestSubject(component, 'dscGridSelectDoc-i::1::');
       checkBox.simulate('change');
-      expect(contextMock.setSelectedDocs).toHaveBeenCalledWith([]);
+      expect(contextMock.selectedDocsState.toggleDocSelection).toHaveBeenCalledWith('i::1::');
     });
   });
 
   describe('DataTableDocumentToolbarBtn', () => {
-    test('it renders a button clickable button', () => {
+    test('it renders the button and its menu correctly', () => {
       const props = {
         isPlainRecord: false,
         isFilterActive: false,
         rows: dataTableContextMock.rows,
-        selectedDocs: ['i::1::'],
+        selectedDocsState: buildSelectedDocsState(['i::1::', 'i::2::']),
         setIsFilterActive: jest.fn(),
-        setSelectedDocs: jest.fn(),
+        enableComparisonMode: true,
         setIsCompareActive: jest.fn(),
+        fieldFormats: servicesMock.fieldFormats,
+        pageIndex: 0,
+        pageSize: 2,
       };
       const component = mountWithIntl(<DataTableDocumentToolbarBtn {...props} />);
       const button = findTestSubject(component, 'unifiedDataTableSelectionBtn');
       expect(button.length).toBe(1);
+      expect(button.text()).toBe('Selected2');
+
+      act(() => {
+        button.simulate('click');
+      });
+
+      component.update();
+
+      expect(findTestSubject(component, 'dscGridShowSelectedDocuments').length).toBe(1);
+      expect(findTestSubject(component, 'unifiedDataTableCompareSelectedDocuments').length).toBe(1);
+      expect(findTestSubject(component, 'dscGridSelectAllDocs').text()).toBe('Select all 5');
+
+      act(() => {
+        findTestSubject(component, 'dscGridClearSelectedDocuments').simulate('click');
+      });
+
+      expect(props.selectedDocsState.clearAllSelectedDocs).toHaveBeenCalled();
+    });
+
+    test('it should not render "Select all X" button if less than pageSize is selected', () => {
+      const props = {
+        isPlainRecord: false,
+        isFilterActive: false,
+        rows: dataTableContextMock.rows,
+        selectedDocsState: buildSelectedDocsState(['i::1::']),
+        setIsFilterActive: jest.fn(),
+        enableComparisonMode: true,
+        setIsCompareActive: jest.fn(),
+        fieldFormats: servicesMock.fieldFormats,
+        pageIndex: 0,
+        pageSize: 2,
+      };
+      const component = mountWithIntl(<DataTableDocumentToolbarBtn {...props} />);
+      expect(findTestSubject(component, 'unifiedDataTableSelectionBtn').text()).toBe('Selected1');
+
+      expect(findTestSubject(component, 'dscGridSelectAllDocs').exists()).toBe(false);
+    });
+
+    test('it should render "Select all X" button if all rows on the page are selected', () => {
+      const props = {
+        isPlainRecord: false,
+        isFilterActive: false,
+        rows: dataTableContextMock.rows,
+        selectedDocsState: buildSelectedDocsState(['i::1::', 'i::2::']),
+        setIsFilterActive: jest.fn(),
+        enableComparisonMode: true,
+        setIsCompareActive: jest.fn(),
+        fieldFormats: servicesMock.fieldFormats,
+        pageIndex: 0,
+        pageSize: 2,
+      };
+      const component = mountWithIntl(<DataTableDocumentToolbarBtn {...props} />);
+      expect(findTestSubject(component, 'unifiedDataTableSelectionBtn').text()).toBe('Selected2');
+
+      const button = findTestSubject(component, 'dscGridSelectAllDocs');
+      expect(button.exists()).toBe(true);
+
+      act(() => {
+        button.simulate('click');
+      });
+
+      expect(props.selectedDocsState.selectAllDocs).toHaveBeenCalled();
+    });
+
+    test('it should render "Select all X" button even if on another page', () => {
+      const props = {
+        isPlainRecord: false,
+        isFilterActive: false,
+        rows: dataTableContextMock.rows,
+        selectedDocsState: buildSelectedDocsState(['i::1::', 'i::2::']),
+        setIsFilterActive: jest.fn(),
+        enableComparisonMode: true,
+        setIsCompareActive: jest.fn(),
+        fieldFormats: servicesMock.fieldFormats,
+        pageIndex: 1,
+        pageSize: 2,
+      };
+      const component = mountWithIntl(<DataTableDocumentToolbarBtn {...props} />);
+      expect(findTestSubject(component, 'unifiedDataTableSelectionBtn').text()).toBe('Selected2');
+
+      expect(findTestSubject(component, 'dscGridSelectAllDocs').exists()).toBe(true);
+    });
+
+    test('it should not render "Select all X" button if all rows are selected', () => {
+      const props = {
+        isPlainRecord: false,
+        isFilterActive: false,
+        rows: dataTableContextMock.rows,
+        selectedDocsState: buildSelectedDocsState(dataTableContextMock.rows.map((row) => row.id)),
+        setIsFilterActive: jest.fn(),
+        enableComparisonMode: true,
+        setIsCompareActive: jest.fn(),
+        fieldFormats: servicesMock.fieldFormats,
+        pageIndex: 1,
+        pageSize: 2,
+      };
+      const component = mountWithIntl(<DataTableDocumentToolbarBtn {...props} />);
+      expect(findTestSubject(component, 'unifiedDataTableSelectionBtn').text()).toBe(
+        `Selected${dataTableContextMock.rows.length}`
+      );
+
+      expect(findTestSubject(component, 'dscGridSelectAllDocs').exists()).toBe(false);
     });
   });
 
   describe('DataTableCompareToolbarBtn', () => {
+    const props = {
+      isPlainRecord: false,
+      isFilterActive: false,
+      rows: dataTableContextMock.rows,
+      selectedDocsState: buildSelectedDocsState([]),
+      setIsFilterActive: jest.fn(),
+      enableComparisonMode: true,
+      setIsCompareActive: jest.fn(),
+      fieldFormats: servicesMock.fieldFormats,
+      pageIndex: 0,
+      pageSize: 2,
+    };
+
     const renderCompareBtn = ({
-      selectedDocs = ['1', '2'],
+      selectedDocIds = ['1', '2'],
       setIsCompareActive = jest.fn(),
     }: Partial<Parameters<typeof DataTableCompareToolbarBtn>[0]> = {}) => {
       render(
         <IntlProvider locale="en">
-          <DataTableCompareToolbarBtn
-            selectedDocs={selectedDocs}
+          <DataTableDocumentToolbarBtn
+            {...props}
+            selectedDocsState={buildSelectedDocsState(selectedDocIds)}
             setIsCompareActive={setIsCompareActive}
           />
         </IntlProvider>
       );
       return {
-        getButton: () => screen.queryByRole('button', { name: /Compare/ }),
+        getButton: async () => {
+          const menuButton = await screen.findByTestId('unifiedDataTableSelectionBtn');
+          menuButton.click();
+          return screen.queryByRole('button', { name: /Compare/ });
+        },
       };
     };
 
-    it('should render the compare button', () => {
+    it('should render the compare button', async () => {
       const { getButton } = renderCompareBtn();
-      expect(getButton()).toBeInTheDocument();
+      expect(await getButton()).toBeInTheDocument();
     });
 
-    it('should call setIsCompareActive when the button is clicked', () => {
+    it('should call setIsCompareActive when the button is clicked', async () => {
       const setIsCompareActive = jest.fn();
       const { getButton } = renderCompareBtn({ setIsCompareActive });
-      getButton()?.click();
+      const button = await getButton();
+      expect(button).toBeInTheDocument();
+      expect(button?.getAttribute('disabled')).toBeNull();
+      button?.click();
       expect(setIsCompareActive).toHaveBeenCalledWith(true);
+    });
+
+    it('should disable the button if limit is reached', async () => {
+      const selectedDocIds = Array.from({ length: 500 }, (_, i) => i.toString());
+      const setIsCompareActive = jest.fn();
+      const { getButton } = renderCompareBtn({ selectedDocIds, setIsCompareActive });
+      const button = await getButton();
+      expect(button).toBeInTheDocument();
+      expect(button?.getAttribute('disabled')).toBe('');
+      button?.click();
+      expect(setIsCompareActive).not.toHaveBeenCalled();
     });
   });
 });

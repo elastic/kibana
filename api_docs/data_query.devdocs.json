@@ -63,9 +63,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-ui-settings-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                    "section": "def-common.IUiSettingsClient",
+                    "section": "def-public.IUiSettingsClient",
                     "text": "IUiSettingsClient"
                   }
                 ],
@@ -1455,9 +1455,9 @@
           "(http: ",
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
+            "section": "def-public.HttpSetup",
             "text": "HttpSetup"
           },
           ") => { isDuplicateTitle: (title: string, id?: string | undefined) => Promise<boolean>; createQuery: (attributes: ",
@@ -1524,9 +1524,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               }
             ],

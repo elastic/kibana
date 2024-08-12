@@ -46,13 +46,16 @@ const TRIGGER_SUGGESTIONS_ACTION_LABEL = 'Trigger suggestions';
 const TRIGGER_SUGGESTIONS_HANDLER_ID = 'editor.action.triggerSuggest';
 const DEBOUNCE_HIGHLIGHT_WAIT_MS = 200;
 const DEBOUNCE_AUTOCOMPLETE_WAIT_MS = 500;
+const INSPECT_TOKENS_LABEL = 'Inspect tokens';
+const INSPECT_TOKENS_HANDLER_ID = 'editor.action.inspectTokens';
 
 export class MonacoEditorActionsProvider {
   private parsedRequestsProvider: ConsoleParsedRequestsProvider;
   private highlightedLines: monaco.editor.IEditorDecorationsCollection;
   constructor(
     private editor: monaco.editor.IStandaloneCodeEditor,
-    private setEditorActionsCss: (css: CSSProperties) => void
+    private setEditorActionsCss: (css: CSSProperties) => void,
+    private isDevMode: boolean
   ) {
     this.parsedRequestsProvider = getParsedRequestsProvider(this.editor.getModel());
     this.highlightedLines = this.editor.createDecorationsCollection();
@@ -96,6 +99,9 @@ export class MonacoEditorActionsProvider {
       // trigger autocomplete on backspace
       if (event.keyCode === monaco.KeyCode.Backspace) {
         debouncedTriggerSuggestions();
+      }
+      if (this.isDevMode && event.keyCode === monaco.KeyCode.F1) {
+        this.editor.trigger(INSPECT_TOKENS_LABEL, INSPECT_TOKENS_HANDLER_ID, {});
       }
     });
   }
@@ -215,8 +221,20 @@ export class MonacoEditorActionsProvider {
     } = context;
     const { toasts } = notifications;
     try {
-      const requests = await this.getRequests();
-      if (!requests.length) {
+      const allRequests = await this.getRequests();
+      // if any request doesnt have a method then we gonna treat it as a non-valid
+      // request
+      const requests = allRequests.filter((request) => request.method);
+
+      // If we do have requests but none have methods we are not sending the request
+      if (allRequests.length > 0 && !requests.length) {
+        toasts.addWarning(
+          i18n.translate('console.notification.monaco.error.nonSupportedRequest', {
+            defaultMessage: 'The selected request is not valid.',
+          })
+        );
+        return;
+      } else if (!requests.length) {
         toasts.add(
           i18n.translate('console.notification.monaco.error.noRequestSelectedTitle', {
             defaultMessage:
@@ -371,8 +389,13 @@ export class MonacoEditorActionsProvider {
       return null;
     }
 
-    // if not on the 1st line of the request, suggest request body
+    // if the current request doesn't have a method, the request is not valid
+    // and shouldn't have an autocomplete type
+    if (!currentRequest.method) {
+      return null;
+    }
 
+    // if not on the 1st line of the request, suggest request body
     return AutocompleteType.BODY;
   }
 

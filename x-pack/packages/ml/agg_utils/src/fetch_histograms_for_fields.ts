@@ -31,6 +31,11 @@ interface AggHistogram {
   histogram: {
     field: string;
     interval: number;
+    min_doc_count?: number;
+    extended_bounds?: {
+      min: number;
+      max: number;
+    };
   };
 }
 
@@ -45,7 +50,7 @@ interface AggTerms {
  * Represents an item in numeric data.
  * @interface
  */
-interface NumericDataItem {
+export interface NumericDataItem {
   /**
    * The numeric key.
    */

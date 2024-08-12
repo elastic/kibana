@@ -20,6 +20,7 @@
     "@kbn/logging",
     "@kbn/core",
     "@kbn/logging-mocks",
+    "@kbn/server-route-repository-utils",
   ],
   "exclude": [
     "target/**/*",

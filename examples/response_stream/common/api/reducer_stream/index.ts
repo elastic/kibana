@@ -7,5 +7,3 @@
  */
 
 export { reducerStreamReducer } from './reducer';
-export { reducerStreamRequestBodySchema } from './request_body_schema';
-export type { ReducerStreamRequestBodySchema } from './request_body_schema';

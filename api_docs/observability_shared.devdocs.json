@@ -20,9 +20,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-common.Plugin",
+            "section": "def-public.Plugin",
             "text": "Plugin"
           },
           "<void, void, object, object>"
@@ -58,9 +58,9 @@
               "(coreSetup: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>, pluginsSetup: ",
@@ -91,9 +91,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreSetup",
+                    "section": "def-public.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<object, unknown>"
@@ -132,9 +132,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
               ", plugins: ",
@@ -154,9 +154,9 @@
               "[]>) => void; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; }>; deepLinks: ",
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.AppDeepLink",
+                "section": "def-public.AppDeepLink",
                 "text": "AppDeepLink"
               },
               "<string>[]; updater$: ",
@@ -164,9 +164,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.AppUpdater",
+                "section": "def-public.AppUpdater",
                 "text": "AppUpdater"
               },
               ">; }) => void; }"
@@ -185,9 +185,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreStart",
+                    "section": "def-public.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
@@ -1499,17 +1499,17 @@
           "(extraCrumbs: ",
           {
             "pluginId": "@kbn/core-chrome-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-common.ChromeBreadcrumb",
+            "section": "def-public.ChromeBreadcrumb",
             "text": "ChromeBreadcrumb"
           },
           "[], app?: { id: string; label: string; } | undefined, breadcrumbsAppendExtension?: ",
           {
             "pluginId": "@kbn/core-chrome-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-common.ChromeBreadcrumbsAppendExtension",
+            "section": "def-public.ChromeBreadcrumbsAppendExtension",
             "text": "ChromeBreadcrumbsAppendExtension"
           },
           " | undefined) => void"
@@ -1528,9 +1528,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeBreadcrumb",
+                "section": "def-public.ChromeBreadcrumb",
                 "text": "ChromeBreadcrumb"
               },
               "[]"
@@ -1585,9 +1585,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeBreadcrumbsAppendExtension",
+                "section": "def-public.ChromeBreadcrumbsAppendExtension",
                 "text": "ChromeBreadcrumbsAppendExtension"
               },
               " | undefined"
@@ -1635,9 +1635,9 @@
           "(settingsKeys: string[]) => { fields: Record<string, ",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.FieldDefinition",
+            "section": "def-public.FieldDefinition",
             "text": "FieldDefinition"
           },
           "<",
@@ -1651,9 +1651,9 @@
           ", string | number | boolean | (string | number)[] | null | undefined>>; unsavedChanges: Record<string, ",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UnsavedFieldChange",
+            "section": "def-public.UnsavedFieldChange",
             "text": "UnsavedFieldChange"
           },
           "<",
@@ -1667,9 +1667,9 @@
           ">>; handleFieldChange: ",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.OnFieldChangeFn",
+            "section": "def-public.OnFieldChangeFn",
             "text": "OnFieldChangeFn"
           },
           "<",
@@ -3659,9 +3659,9 @@
           "[]>) => void; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; }>; deepLinks: ",
           {
             "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppDeepLink",
+            "section": "def-public.AppDeepLink",
             "text": "AppDeepLink"
           },
           "<string>[]; updater$: ",
@@ -3669,9 +3669,9 @@
           "<",
           {
             "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppUpdater",
+            "section": "def-public.AppUpdater",
             "text": "AppUpdater"
           },
           ">; }) => void; }"
@@ -3895,9 +3895,9 @@
           "; esResponse: any; kibanaRequest: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.KibanaRequest",
+            "section": "def-server.KibanaRequest",
             "text": "KibanaRequest"
           },
           "<unknown, unknown, unknown, any>; operationName: string; startTime: number; }) => ",
@@ -3997,9 +3997,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"

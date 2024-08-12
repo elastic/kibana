@@ -7,15 +7,15 @@
  */
 
 import { getColumnsWithMetadata } from './ecs_metadata_helper';
-import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { ESQLRealField } from '@kbn/esql-validation-autocomplete';
 
 describe('getColumnsWithMetadata', () => {
   it('should return original columns if fieldsMetadata is not provided', async () => {
-    const columns = [
-      { name: 'ecs.version', type: 'string' as DatatableColumnType },
-      { name: 'field1', type: 'string' as DatatableColumnType },
-      { name: 'field2', type: 'number' as DatatableColumnType },
+    const columns: ESQLRealField[] = [
+      { name: 'ecs.version', type: 'keyword' },
+      { name: 'field1', type: 'text' },
+      { name: 'field2', type: 'double' },
     ];
 
     const result = await getColumnsWithMetadata(columns);
@@ -23,17 +23,17 @@ describe('getColumnsWithMetadata', () => {
   });
 
   it('should return columns with metadata if both name and type match with ECS fields', async () => {
-    const columns = [
-      { name: 'ecs.field', type: 'string' as DatatableColumnType },
-      { name: 'ecs.fakeBooleanField', type: 'boolean' as DatatableColumnType },
-      { name: 'field2', type: 'number' as DatatableColumnType },
+    const columns: ESQLRealField[] = [
+      { name: 'ecs.field', type: 'text' },
+      { name: 'ecs.fakeBooleanField', type: 'boolean' },
+      { name: 'field2', type: 'double' },
     ];
     const fieldsMetadata = {
       getClient: jest.fn().mockResolvedValue({
         find: jest.fn().mockResolvedValue({
           fields: {
             'ecs.version': { description: 'ECS version field', type: 'keyword' },
-            'ecs.field': { description: 'ECS field description', type: 'keyword' },
+            'ecs.field': { description: 'ECS field description', type: 'text' },
             'ecs.fakeBooleanField': {
               description: 'ECS fake boolean field description',
               type: 'keyword',
@@ -48,19 +48,19 @@ describe('getColumnsWithMetadata', () => {
     expect(result).toEqual([
       {
         name: 'ecs.field',
-        type: 'string',
+        type: 'text',
         metadata: { description: 'ECS field description' },
       },
       { name: 'ecs.fakeBooleanField', type: 'boolean' },
-      { name: 'field2', type: 'number' },
+      { name: 'field2', type: 'double' },
     ]);
   });
 
   it('should handle keyword suffix correctly', async () => {
-    const columns = [
-      { name: 'ecs.version', type: 'string' as DatatableColumnType },
-      { name: 'ecs.version.keyword', type: 'string' as DatatableColumnType },
-      { name: 'field2', type: 'number' as DatatableColumnType },
+    const columns: ESQLRealField[] = [
+      { name: 'ecs.version', type: 'keyword' },
+      { name: 'ecs.version.keyword', type: 'keyword' },
+      { name: 'field2', type: 'double' },
     ];
     const fieldsMetadata = {
       getClient: jest.fn().mockResolvedValue({
@@ -75,13 +75,13 @@ describe('getColumnsWithMetadata', () => {
     const result = await getColumnsWithMetadata(columns, fieldsMetadata);
 
     expect(result).toEqual([
-      { name: 'ecs.version', type: 'string', metadata: { description: 'ECS version field' } },
+      { name: 'ecs.version', type: 'keyword', metadata: { description: 'ECS version field' } },
       {
         name: 'ecs.version.keyword',
-        type: 'string',
+        type: 'keyword',
         metadata: { description: 'ECS version field' },
       },
-      { name: 'field2', type: 'number' },
+      { name: 'field2', type: 'double' },
     ]);
   });
 });

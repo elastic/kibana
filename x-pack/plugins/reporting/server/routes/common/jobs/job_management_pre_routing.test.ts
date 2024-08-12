@@ -31,6 +31,7 @@ const mockCounters = {
   errorCounter: jest.fn(),
 };
 const mockUser = { username: 'joeuser' };
+const options = { isInternal: false };
 
 beforeEach(async () => {
   mockSetupDeps = createMockPluginSetup({
@@ -70,6 +71,7 @@ it(`should return 404 if the docId isn't resolve`, async function () {
     'doc123',
     mockUser,
     mockCounters,
+    options,
     handler
   );
 
@@ -97,6 +99,7 @@ it(`should return forbidden if job type is unrecognized`, async function () {
     'doc123',
     mockUser,
     mockCounters,
+    options,
     handler
   );
 
@@ -124,6 +127,7 @@ it(`should call callback when document is available`, async function () {
     'doc123',
     mockUser,
     mockCounters,
+    options,
     handler
   );
 
@@ -154,6 +158,7 @@ describe('usage counters', () => {
       'doc123',
       mockUser,
       mockCounters,
+      options,
       handler
     );
 
@@ -177,6 +182,7 @@ describe('usage counters', () => {
       'doc123',
       mockUser,
       mockCounters,
+      options,
       handler
     );
 

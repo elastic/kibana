@@ -60,6 +60,7 @@ class RuleEditorFlyoutUI extends Component {
   static propTypes = {
     setShowFunction: PropTypes.func.isRequired,
     unsetShowFunction: PropTypes.func.isRequired,
+    selectedJob: PropTypes.object,
   };
 
   constructor(props) {
@@ -100,7 +101,7 @@ class RuleEditorFlyoutUI extends Component {
 
   showFlyout = (anomaly) => {
     let ruleIndex = -1;
-    const job = mlJobService.getJob(anomaly.jobId);
+    const job = this.props.selectedJob ?? mlJobService.getJob(anomaly.jobId);
     if (job === undefined) {
       // No details found for this job, display an error and
       // don't open the Flyout as no edits can be made without the job.
@@ -337,13 +338,13 @@ class RuleEditorFlyoutUI extends Component {
 
   updateRuleAtIndex = (ruleIndex, editedRule) => {
     const { toasts } = this.props.kibana.services.notifications;
-    const { mlApiServices, mlJobService } = this.props.kibana.services.mlServices;
+    const { mlApiServices } = this.props.kibana.services.mlServices;
     const { job, anomaly } = this.state;
 
     const jobId = job.job_id;
     const detectorIndex = anomaly.detectorIndex;
 
-    saveJobRule(job, detectorIndex, ruleIndex, editedRule, mlApiServices, mlJobService)
+    saveJobRule(job, detectorIndex, ruleIndex, editedRule, mlApiServices)
       .then((resp) => {
         if (resp.success) {
           toasts.add({
@@ -392,12 +393,12 @@ class RuleEditorFlyoutUI extends Component {
 
   deleteRuleAtIndex = (index) => {
     const { toasts } = this.props.kibana.services.notifications;
-    const { mlApiServices, mlJobService: jobService } = this.props.kibana.services.mlServices;
+    const { mlApiServices } = this.props.kibana.services.mlServices;
     const { job, anomaly } = this.state;
     const jobId = job.job_id;
     const detectorIndex = anomaly.detectorIndex;
 
-    deleteJobRule(job, detectorIndex, index, mlApiServices, jobService)
+    deleteJobRule(job, detectorIndex, index, mlApiServices)
       .then((resp) => {
         if (resp.success) {
           toasts.addSuccess(

@@ -12,8 +12,8 @@ import { MonitorInspectResponse } from '@kbn/synthetics-plugin/public/apps/synth
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { ProjectAPIKeyResponse } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/get_api_key';
+import { KibanaSupertestProvider } from '@kbn/test-suites-src/api_integration/services/supertest';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { KibanaSupertestProvider } from '../../../../../../test/api_integration/services/supertest';
 
 export class SyntheticsMonitorTestService {
   private supertest: ReturnType<typeof KibanaSupertestProvider>;

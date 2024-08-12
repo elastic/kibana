@@ -12,7 +12,7 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 
 import { TabsContent } from '.';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import { render, screen, waitFor } from '@testing-library/react';
 
@@ -40,7 +40,7 @@ describe('Timeline', () => {
       renderCellValue: () => {},
       rowRenderers: [],
       timelineId: TimelineId.test,
-      timelineType: TimelineType.default,
+      timelineType: TimelineTypeEnum.default,
       timelineDescription: '',
     };
 

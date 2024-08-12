@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "shared-browser",
   "id": "@kbn/ml-date-picker",
   "owner": "@elastic/ml-ui"
 }

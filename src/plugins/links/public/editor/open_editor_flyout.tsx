@@ -62,7 +62,7 @@ export async function openEditorFlyout({
       ? parentDashboard.savedObjectId.value
       : undefined;
 
-  return new Promise((resolve, reject) => {
+  return new Promise<LinksRuntimeState | undefined>((resolve) => {
     const flyoutId = `linksEditorFlyout-${uuidv4()}`;
 
     const closeEditorFlyout = (editorFlyout: OverlayRef) => {
@@ -116,7 +116,7 @@ export async function openEditorFlyout({
     };
 
     const onCancel = () => {
-      reject();
+      resolve(undefined);
       closeEditorFlyout(editorFlyout);
     };
 

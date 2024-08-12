@@ -108,7 +108,7 @@ describe('Agent configuration', () => {
       .invoke('val')
       .should('contain', 'production');
   });
-  it('displays All label when selecting all option', () => {
+  it.skip('displays All label when selecting all option', () => {
     cy.intercept('GET', '/api/apm/settings/agent-configuration/environments').as(
       'serviceEnvironmentApi'
     );

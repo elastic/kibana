@@ -6,11 +6,11 @@
  */
 
 import { after, before, expect, journey, step } from '@elastic/synthetics';
+import { SyntheticsMonitor } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SyntheticsServices } from './services/synthetics_services';
 import { cleanTestMonitors, enableMonitorManagedViaApi } from './services/add_monitor';
 import { addTestMonitorProject } from './services/add_monitor_project';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
-import { SyntheticsMonitor } from '../../../common/runtime_types';
 
 journey('ProjectMonitorReadOnly', async ({ page, params }) => {
   const services = new SyntheticsServices(params);

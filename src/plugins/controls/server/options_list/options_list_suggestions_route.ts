@@ -142,6 +142,7 @@ export const setupOptionsListSuggestionsRoute = (
     const results = suggestionBuilder.parse(rawEsResult, request);
     const totalCardinality = results.totalCardinality;
     const invalidSelections = validationBuilder.parse(rawEsResult, request);
+
     return {
       suggestions: results.suggestions,
       totalCardinality,

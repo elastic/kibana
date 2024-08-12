@@ -8,7 +8,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { Reference } from '@kbn/content-management-utils';
+import type { Reference } from '@kbn/content-management-utils';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';

@@ -11,7 +11,7 @@ import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugi
 import { omit, pick } from 'lodash';
 import dateMath from '@kbn/datemath';
 import moment from 'moment';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { LineStyle } from '@kbn/visualization-ui-components';
 import type { AvailableAnnotationIcon, PointStyleProps } from '@kbn/event-annotation-common';
 import {

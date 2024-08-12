@@ -23,6 +23,7 @@ import { DataView, DataViewSpec, DataViewType } from '@kbn/data-views-plugin/pub
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'rxjs';
+import { getInitialESQLQuery } from '@kbn/esql-utils';
 import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { loadSavedSearch as loadSavedSearchFn } from './utils/load_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
@@ -175,6 +176,16 @@ export interface DiscoverStateContainer {
      */
     onDataViewEdited: (dataView: DataView) => Promise<void>;
     /**
+     * Triggered when transitioning from ESQL to Dataview
+     * Clean ups the ES|QL query and moves to the dataview mode
+     */
+    transitionFromESQLToDataView: (dataViewId: string) => void;
+    /**
+     * Triggered when transitioning from ESQL to Dataview
+     * Clean ups the ES|QL query and moves to the dataview mode
+     */
+    transitionFromDataViewToESQL: (dataView: DataView) => void;
+    /**
      * Triggered when a saved search is opened in the savedObject finder
      * @param savedSearchId
      */
@@ -257,18 +268,19 @@ export function getDiscoverStateContainer({
   });
 
   /**
+   * Internal State Container, state that's not persisted and not part of the URL
+   */
+  const internalStateContainer = getInternalStateContainer();
+
+  /**
    * App State Container, synced with the _a part URL
    */
   const appStateContainer = getDiscoverAppStateContainer({
     stateStorage,
-    savedSearch: savedSearchContainer.getState(),
+    internalStateContainer,
+    savedSearchContainer,
     services,
   });
-
-  /**
-   * Internal State Container, state that's not persisted and not part of the URL
-   */
-  const internalStateContainer = getInternalStateContainer();
 
   const pauseAutoRefreshInterval = async (dataView: DataView) => {
     if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
@@ -281,6 +293,7 @@ export function getDiscoverStateContainer({
       }
     }
   };
+
   const setDataView = (dataView: DataView) => {
     internalStateContainer.transitions.setDataView(dataView);
     pauseAutoRefreshInterval(dataView);
@@ -290,8 +303,8 @@ export function getDiscoverStateContainer({
   const dataStateContainer = getDataStateContainer({
     services,
     searchSessionManager,
-    getAppState: appStateContainer.getState,
-    getInternalState: internalStateContainer.getState,
+    appStateContainer,
+    internalStateContainer,
     getSavedSearch: savedSearchContainer.getState,
     setDataView,
   });
@@ -352,6 +365,31 @@ export function getDiscoverStateContainer({
     }
   };
 
+  const transitionFromESQLToDataView = (dataViewId: string) => {
+    appStateContainer.update({
+      query: {
+        language: 'kuery',
+        query: '',
+      },
+      columns: [],
+      dataSource: {
+        type: DataSourceType.DataView,
+        dataViewId,
+      },
+    });
+  };
+
+  const transitionFromDataViewToESQL = (dataView: DataView) => {
+    const queryString = getInitialESQLQuery(dataView);
+    appStateContainer.update({
+      query: { esql: queryString },
+      dataSource: {
+        type: DataSourceType.Esql,
+      },
+      columns: [],
+    });
+  };
+
   const onDataViewCreated = async (nextDataView: DataView) => {
     if (!nextDataView.isPersisted()) {
       internalStateContainer.transitions.appendAdHocDataViews(nextDataView);
@@ -403,9 +441,8 @@ export function getDiscoverStateContainer({
     });
 
     // initialize app state container, syncing with _g and _a part of the URL
-    const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync(
-      savedSearchContainer.getState()
-    );
+    const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync();
+
     // subscribing to state changes of appStateContainer, triggering data fetching
     const appStateUnsubscribe = appStateContainer.subscribe(
       buildStateSubscribe({
@@ -417,6 +454,7 @@ export function getDiscoverStateContainer({
         setDataView,
       })
     );
+
     // start subscribing to dataStateContainer, triggering data fetching
     const unsubscribeData = dataStateContainer.subscribe();
 
@@ -467,6 +505,7 @@ export function getDiscoverStateContainer({
     await onChangeDataView(newDataView);
     return newDataView;
   };
+
   /**
    * Triggered when a user submits a query in the search bar
    */
@@ -492,6 +531,7 @@ export function getDiscoverStateContainer({
       appState: appStateContainer,
     });
   };
+
   /**
    * Undo all changes to the current saved search
    */
@@ -518,6 +558,7 @@ export function getDiscoverStateContainer({
     await appStateContainer.replaceUrlState(newAppState);
     return nextSavedSearch;
   };
+
   const fetchData = (initial: boolean = false) => {
     addLog('fetchData', { initial });
     if (!initial || dataStateContainer.getInitialFetchStatus() === FetchStatus.LOADING) {
@@ -544,6 +585,8 @@ export function getDiscoverStateContainer({
       onDataViewCreated,
       onDataViewEdited,
       onOpenSavedSearch,
+      transitionFromESQLToDataView,
+      transitionFromDataViewToESQL,
       onUpdateQuery,
       setDataView,
       undoSavedSearchChanges,

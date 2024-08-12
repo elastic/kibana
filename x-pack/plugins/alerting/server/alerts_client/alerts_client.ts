@@ -518,13 +518,6 @@ export class AlertsClient<
                 rule: this.rule,
               })
         );
-      } else {
-        this.options.logger.debug(
-          () =>
-            `Could not find alert document to update for recovered alert with id ${id} and uuid ${currentRecoveredAlerts[
-              id
-            ].getUuid()}`
-        );
       }
     }
 

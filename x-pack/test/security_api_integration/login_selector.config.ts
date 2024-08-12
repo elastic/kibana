@@ -12,7 +12,7 @@ import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaAPITestsConfig = await readConfigFile(
-    require.resolve('../../../test/api_integration/config.js')
+    require.resolve('@kbn/test-suites-src/api_integration/config')
   );
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');

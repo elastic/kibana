@@ -8,9 +8,9 @@
 /* eslint-disable no-console */
 
 import { difference, union } from 'lodash';
+import { SecurityService } from '@kbn/test-suites-src/common/services/security/security';
 import { Elasticsearch, Kibana } from '..';
 import { callKibana, isAxiosError } from './call_kibana';
-import { SecurityService } from '../../../../../../test/common/services/security/security';
 
 interface User {
   username: string;

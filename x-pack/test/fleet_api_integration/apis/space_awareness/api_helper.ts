@@ -25,6 +25,8 @@ import {
   GetInfoResponse,
   GetSpaceSettingsResponse,
   PutSpaceSettingsRequest,
+  GetActionStatusResponse,
+  PostNewAgentActionResponse,
 } from '@kbn/fleet-plugin/common/types';
 import {
   GetUninstallTokenResponse,
@@ -116,7 +118,7 @@ export class SpaceTestApiClient {
 
     return res;
   }
-  // Enrollmennt API Keys
+  // Enrollment API Keys
   async getEnrollmentApiKey(
     keyId: string,
     spaceId?: string
@@ -298,6 +300,24 @@ export class SpaceTestApiClient {
         `${this.getBaseUrl(spaceId)}/api/fleet/epm/packages/${pkgName}/${pkgVersion}/kibana_assets`
       )
       .set('kbn-xsrf', 'xxxx')
+      .expect(200);
+
+    return res;
+  }
+  // Actions
+  async getActionStatus(spaceId?: string): Promise<GetActionStatusResponse> {
+    const { body: res } = await this.supertest
+      .get(`${this.getBaseUrl(spaceId)}/api/fleet/agents/action_status`)
+      .expect(200);
+
+    return res;
+  }
+
+  async postNewAgentAction(agentId: string, spaceId?: string): Promise<PostNewAgentActionResponse> {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/${agentId}/actions`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({ action: { type: 'UNENROLL' } })
       .expect(200);
 
     return res;

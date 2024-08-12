@@ -9,9 +9,10 @@ import { useCallback, useRef } from 'react';
 import type { Subscription } from 'rxjs';
 import { useDispatch } from 'react-redux';
 import memoizeOne from 'memoize-one';
-import type { BrowserField, BrowserFields } from '@kbn/timelines-plugin/common';
+import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { FieldCategory } from '@kbn/timelines-plugin/common/search_strategy';
 
 import { useKibana } from '../../lib/kibana';
 import { sourcererActions } from '../../../sourcerer/store';
@@ -28,10 +29,7 @@ export type IndexFieldSearch = (param: {
   skipScopeUpdate?: boolean;
 }) => Promise<void>;
 
-type DangerCastForBrowserFieldsMutation = Record<
-  string,
-  Omit<BrowserField, 'fields'> & { fields: Record<string, BrowserField> }
->;
+type DangerCastForBrowserFieldsMutation = Record<string, FieldCategory>;
 interface DataViewInfo {
   /**
    * @deprecated use fields list on dataview / "indexPattern"
@@ -62,7 +60,7 @@ export const getDataViewStateFromIndexFields = memoizeOne(
         }
         const categoryFields = browserFields[category].fields;
         if (categoryFields) {
-          categoryFields[name] = field as BrowserField;
+          categoryFields[name] = field;
         }
       }
       return { browserFields: browserFields as DangerCastForBrowserFieldsMutation };

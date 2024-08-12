@@ -47,9 +47,8 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
         const infraMetricsClient = await getInfraMetricsClient({
           framework,
           request,
-          infraSources: libs.sources,
+          metricsDataAccess: libs.metricsClient,
           requestContext,
-          sourceId: params.sourceId,
         });
 
         const alertsClient = await getInfraAlertsClient({
@@ -102,15 +101,14 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
       const body: GetInfraAssetCountRequestBodyPayload = request.body;
       const params: GetInfraAssetCountRequestParamsPayload = request.params;
       const { assetType } = params;
-      const { query, from, to, sourceId } = body;
+      const { query, from, to } = body;
 
       try {
         const infraMetricsClient = await getInfraMetricsClient({
           framework,
           request,
-          infraSources: libs.sources,
+          metricsDataAccess: libs.metricsClient,
           requestContext,
-          sourceId,
         });
 
         const assetCount = await getHostsCount({

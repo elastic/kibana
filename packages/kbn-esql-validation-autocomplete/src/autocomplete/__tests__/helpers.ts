@@ -18,6 +18,14 @@ import type { ESQLCallbacks } from '../../shared/types';
 import type { EditorContext, SuggestionRawDefinition } from '../types';
 import { TIME_SYSTEM_PARAMS } from '../factories';
 import { getFunctionSignatures } from '../../definitions/helpers';
+import { ESQLRealField } from '../../validation/types';
+import {
+  FieldType,
+  fieldTypes,
+  FunctionParameterType,
+  FunctionReturnType,
+  SupportedDataType,
+} from '../../definitions/types';
 
 export interface Integration {
   name: string;
@@ -38,23 +46,13 @@ export const TIME_PICKER_SUGGESTION: PartialSuggestionWithText = {
 
 export const triggerCharacters = [',', '(', '=', ' '];
 
-export const fields: Array<{ name: string; type: string; suggestedAs?: string }> = [
-  ...[
-    'string',
-    'number',
-    'date',
-    'boolean',
-    'ip',
-    'geo_point',
-    'geo_shape',
-    'cartesian_point',
-    'cartesian_shape',
-  ].map((type) => ({
+export const fields: Array<ESQLRealField & { suggestedAs?: string }> = [
+  ...fieldTypes.map((type) => ({
     name: `${camelCase(type)}Field`,
     type,
   })),
-  { name: 'any#Char$Field', type: 'number', suggestedAs: '`any#Char$Field`' },
-  { name: 'kubernetes.something.something', type: 'number' },
+  { name: 'any#Char$Field', type: 'double', suggestedAs: '`any#Char$Field`' },
+  { name: 'kubernetes.something.something', type: 'double' },
 ];
 
 export const indexes = (
@@ -124,7 +122,7 @@ export const policies = [
  */
 export function getFunctionSignaturesByReturnType(
   command: string,
-  _expectedReturnType: string | string[],
+  _expectedReturnType: Readonly<FunctionReturnType | 'any' | Array<FunctionReturnType | 'any'>>,
   {
     agg,
     grouping,
@@ -140,7 +138,7 @@ export function getFunctionSignaturesByReturnType(
     builtin?: boolean;
     skipAssign?: boolean;
   } = {},
-  paramsTypes?: string[],
+  paramsTypes?: Readonly<FunctionParameterType[]>,
   ignored?: string[],
   option?: string
 ): PartialSuggestionWithText[] {
@@ -177,7 +175,7 @@ export function getFunctionSignaturesByReturnType(
       }
       const filteredByReturnType = signatures.filter(
         ({ returnType }) =>
-          expectedReturnType.includes('any') || expectedReturnType.includes(returnType)
+          expectedReturnType.includes('any') || expectedReturnType.includes(returnType as string)
       );
       if (!filteredByReturnType.length) {
         return false;
@@ -226,14 +224,16 @@ export function getFunctionSignaturesByReturnType(
     });
 }
 
-export function getFieldNamesByType(_requestedType: string | string[]) {
+export function getFieldNamesByType(
+  _requestedType: Readonly<FieldType | 'any' | Array<FieldType | 'any'>>
+) {
   const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
   return fields
     .filter(({ type }) => requestedType.includes('any') || requestedType.includes(type))
     .map(({ name, suggestedAs }) => suggestedAs || name);
 }
 
-export function getLiteralsByType(_type: string | string[]) {
+export function getLiteralsByType(_type: SupportedDataType | SupportedDataType[]) {
   const type = Array.isArray(_type) ? _type : [_type];
   if (type.includes('time_literal')) {
     // return only singular
@@ -242,13 +242,13 @@ export function getLiteralsByType(_type: string | string[]) {
   return [];
 }
 
-export function getDateLiteralsByFieldType(_requestedType: string | string[]) {
+export function getDateLiteralsByFieldType(_requestedType: FieldType | FieldType[]) {
   const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
   return requestedType.includes('date') ? [TIME_PICKER_SUGGESTION, ...TIME_SYSTEM_PARAMS] : [];
 }
 
 export function createCustomCallbackMocks(
-  customFields?: Array<{ name: string; type: string }>,
+  customFields?: ESQLRealField[],
   customSources?: Array<{ name: string; hidden: boolean }>,
   customPolicies?: Array<{
     name: string;

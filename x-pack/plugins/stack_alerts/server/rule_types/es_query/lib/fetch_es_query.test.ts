@@ -377,4 +377,106 @@ describe('fetchEsQuery', () => {
       { meta: true }
     );
   });
+
+  it('should log if group by and top hits size is too large', async () => {
+    const params = {
+      ...defaultParams,
+      groupBy: 'top',
+      termField: 'host.name',
+      termSize: 10,
+      size: 200,
+    };
+    const date = new Date().toISOString();
+
+    await fetchEsQuery({
+      ruleId: 'abc',
+      name: 'test-rule',
+      params,
+      timestamp: undefined,
+      services,
+      spacePrefix: '',
+      publicBaseUrl: '',
+      dateStart: date,
+      dateEnd: date,
+    });
+    expect(logger.warn).toHaveBeenCalledWith(`Top hits size is capped at 100`);
+    expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
+      {
+        allow_no_indices: true,
+        body: {
+          aggs: {
+            groupAgg: {
+              aggs: {
+                conditionSelector: {
+                  bucket_selector: {
+                    buckets_path: {
+                      compareValue: '_count',
+                    },
+                    script: 'params.compareValue < 0L',
+                  },
+                },
+                topHitsAgg: {
+                  top_hits: {
+                    size: 100,
+                  },
+                },
+              },
+              terms: {
+                field: 'host.name',
+                size: 10,
+              },
+            },
+            groupAggCount: {
+              stats_bucket: {
+                buckets_path: 'groupAgg._count',
+              },
+            },
+          },
+          docvalue_fields: [
+            {
+              field: '@timestamp',
+              format: 'strict_date_optional_time',
+            },
+          ],
+          query: {
+            bool: {
+              filter: [
+                {
+                  match_all: {},
+                },
+                {
+                  bool: {
+                    filter: [
+                      {
+                        range: {
+                          '@timestamp': {
+                            format: 'strict_date_optional_time',
+                            gte: date,
+                            lte: date,
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          sort: [
+            {
+              '@timestamp': {
+                format: 'strict_date_optional_time||epoch_millis',
+                order: 'desc',
+              },
+            },
+          ],
+        },
+        ignore_unavailable: true,
+        index: ['test-index'],
+        size: 0,
+        track_total_hits: true,
+      },
+      { meta: true }
+    );
+  });
 });
