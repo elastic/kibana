@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export const ESQL_WIDGET_NAME = 'esql';
-export const EMBEDDABLE_WIDGET_NAME = 'embeddable';
+export const paths = {
+  investigations: `/app/investigations`,
+  create: `/app/investigations/new`,
+  investigationDetails: (id: string) => {
+    return `/app/investigations/${encodeURIComponent(id)}`;
+  },
+};
