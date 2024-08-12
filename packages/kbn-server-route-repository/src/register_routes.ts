@@ -14,10 +14,13 @@ import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
 import * as t from 'io-ts';
 import { merge, pick } from 'lodash';
-import { parseEndpoint } from '@kbn/server-route-repository-utils';
+import {
+  ServerRoute,
+  ServerRouteCreateOptions,
+  parseEndpoint,
+} from '@kbn/server-route-repository-utils';
 import { decodeRequestParams } from './decode_request_params';
 import { routeValidationObject } from './route_validation_object';
-import type { ServerRoute, ServerRouteCreateOptions } from './typings';
 
 const CLIENT_CLOSED_REQUEST = {
   statusCode: 499,
@@ -26,7 +29,7 @@ const CLIENT_CLOSED_REQUEST = {
   },
 };
 
-export function registerRoutes({
+export function registerRoutes<TDependencies extends Record<string, any>>({
   core,
   repository,
   logger,
@@ -35,7 +38,7 @@ export function registerRoutes({
   core: CoreSetup;
   repository: Record<string, ServerRoute<string, any, any, any, ServerRouteCreateOptions>>;
   logger: Logger;
-  dependencies: Record<string, any>;
+  dependencies: TDependencies;
 }) {
   const routes = Object.values(repository);
 

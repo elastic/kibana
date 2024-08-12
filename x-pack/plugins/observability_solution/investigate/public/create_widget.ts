@@ -12,7 +12,7 @@ import { GlobalWidgetParameters } from '../common/types';
 type MakePartial<T extends Record<string, any>, K extends keyof T> = Omit<T, K> &
   DeepPartial<Pick<T, K>>;
 
-type PredefinedKeys = 'rows' | 'columns' | 'locked' | 'type';
+type PredefinedKeys = 'rows' | 'columns' | 'type';
 
 type AllowedDefaultKeys = 'rows' | 'columns';
 
@@ -31,7 +31,6 @@ export function createWidgetFactory<TParameters extends Record<string, any>>(
     return {
       rows: 12,
       columns: InvestigateWidgetColumnSpan.Four,
-      locked: false,
       type,
       ...defaults,
       ...widgetCreate,

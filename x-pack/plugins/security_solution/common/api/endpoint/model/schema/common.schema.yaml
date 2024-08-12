@@ -54,6 +54,7 @@ components:
         - get-file
         - execute
         - upload
+        - scan
       minLength: 1
       description: The command to be executed (cannot be an empty string)
 
@@ -101,16 +102,18 @@ components:
           minItems: 1
         - type: string
           minLength: 1
-      description: With Outputs
+      description: Shows detailed outputs for an action response
 
     Type:
       type: string
+      description: Type of response action
       enum:
         - automated
         - manual
 
     Types:
       type: array
+      description: List of types of response actions
       items:
         $ref: '#/components/schemas/Type'
       minLength: 1
@@ -136,6 +139,12 @@ components:
     Parameters:
       type: object
       description: Optional parameters object
+    AgentTypes:
+      type: string
+      enum:
+        - endpoint
+        - sentinel_one
+        - crowdstrike
 
     BaseActionSchema:
       x-inline: true
@@ -151,8 +160,20 @@ components:
           $ref: '#/components/schemas/Comment'
         parameters:
           $ref: '#/components/schemas/Parameters'
+        agent_type:
+          $ref: '#/components/schemas/AgentTypes'
+      required:
+        - endpoint_ids
 
-    ProcessActionSchemas:
+    NoParametersRequestSchema:
+      type: object
+      required:
+        - body
+      properties:
+        body:
+          $ref: '#/components/schemas/BaseActionSchema'
+
+    KillOrSuspendActionSchema:
       allOf:
         - $ref: '#/components/schemas/BaseActionSchema'
         - type: object

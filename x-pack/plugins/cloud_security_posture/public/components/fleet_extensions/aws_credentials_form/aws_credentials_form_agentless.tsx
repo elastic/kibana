@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverCompare from 'semver/functions/compare';
 import semverValid from 'semver/functions/valid';
@@ -35,106 +35,6 @@ import {
   AWSSetupInfoContent,
   AwsCredentialTypeSelector,
 } from './aws_credentials_form';
-
-const CLOUD_FORMATION_EXTERNAL_DOC_URL =
-  'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html';
-
-export const CloudFormationCloudCredentialsGuide = ({
-  isOrganization,
-}: {
-  isOrganization?: boolean;
-}) => {
-  return (
-    <EuiText>
-      <p>
-        <FormattedMessage
-          id="xpack.csp.agentlessForm.cloudFormation.guide.description"
-          defaultMessage="CloudFormation will create all the necessary resources to evaluate the security posture of your AWS environment. {learnMore}."
-          values={{
-            learnMore: (
-              <EuiLink
-                href={CLOUD_FORMATION_EXTERNAL_DOC_URL}
-                target="_blank"
-                rel="noopener nofollow noreferrer"
-                data-test-subj="externalLink"
-              >
-                <FormattedMessage
-                  id="xpack.csp.agentlessForm.cloudFormation.guide.learnMoreLinkText"
-                  defaultMessage="Learn more about CloudFormation"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </p>
-      <EuiText size="s" color="subdued">
-        <ol>
-          {isOrganization ? (
-            <li>
-              <FormattedMessage
-                id="xpack.csp.agentlessForm.cloudFormation.guide.steps.organizationLogin"
-                defaultMessage="Log in as an admin in the management account of the AWS Organization you want to onboard"
-              />
-            </li>
-          ) : (
-            <li>
-              <FormattedMessage
-                id="xpack.csp.agentlessForm.cloudFormation.guide.steps.login"
-                defaultMessage="Log in as an admin in the AWS account you want to onboard"
-              />
-            </li>
-          )}
-          <li>
-            <FormattedMessage
-              id="xpack.csp.agentlessForm.cloudFormation.guide.steps.launch"
-              defaultMessage="Click the Launch CloudFormation button below."
-            />
-          </li>
-          <li>
-            <FormattedMessage
-              id="xpack.csp.agentlessForm.cloudFormation.steps.region"
-              defaultMessage="(Optional) Change the Amazon region in the upper right corner to the region you want to deploy your stack to"
-            />
-          </li>
-          <li>
-            <FormattedMessage
-              id="xpack.csp.agentlessForm.cloudFormation.gsteps.accept"
-              defaultMessage="Tick the checkbox under capabilities in the opened CloudFormation stack review form: {acknowledge}"
-              values={{
-                acknowledge: (
-                  <strong>
-                    <FormattedMessage
-                      id="xpack.csp.agentlessForm.cloudFormation.steps.accept.acknowledge"
-                      defaultMessage="I acknowledge that AWS CloudFormation might create IAM resources."
-                    />
-                  </strong>
-                ),
-              }}
-            />
-          </li>
-          <li>
-            <FormattedMessage
-              id="xpack.csp.agentlessForm.cloudFormation.steps.create"
-              defaultMessage="Click Create stack."
-            />
-          </li>
-          <li>
-            <FormattedMessage
-              id="xpack.csp.agentlessForm.cloudFormation.steps.stackStatus"
-              defaultMessage="Once  stack status is CREATE_COMPLETE then click the Ouputs tab"
-            />
-          </li>
-          <li>
-            <FormattedMessage
-              id="xpack.csp.agentlessForm.cloudFormation.steps.credentials"
-              defaultMessage="Copy Access Key Id and Secret Access Key then paste the credentials below"
-            />
-          </li>
-        </ol>
-      </EuiText>
-    </EuiText>
-  );
-};
 
 export const AwsCredentialsFormAgentless = ({
   input,
