@@ -2957,36 +2957,6 @@ describe('validation logic', () => {
           []
         );
         testErrorsAndWarnings('row date_trunc(1 day, to_datetime("2021-01-01T00:00:00Z"))', []);
-        testErrorsAndWarnings(
-          'from a_index | eval var = date_trunc(timeLiteralField, dateField)',
-          []
-        );
-        testErrorsAndWarnings('from a_index | eval date_trunc(timeLiteralField, dateField)', []);
-        testErrorsAndWarnings(
-          'from a_index | eval var = date_trunc(timeDurationField, dateField)',
-          []
-        );
-        testErrorsAndWarnings('from a_index | eval date_trunc(timeDurationField, dateField)', []);
-
-        testErrorsAndWarnings(
-          'from a_index | eval date_trunc(timeLiteralField, dateField, extraArg)',
-          ['Error: [date_trunc] function expects exactly 2 arguments, got 3.']
-        );
-
-        testErrorsAndWarnings('from a_index | sort date_trunc(timeLiteralField, dateField)', []);
-        testErrorsAndWarnings('from a_index | eval date_trunc(timeLiteralField, "2022")', []);
-
-        testErrorsAndWarnings(
-          'from a_index | eval date_trunc(timeLiteralField, concat("20", "22"))',
-          []
-        );
-
-        testErrorsAndWarnings('from a_index | eval date_trunc(timeDurationField, "2022")', []);
-
-        testErrorsAndWarnings(
-          'from a_index | eval date_trunc(timeDurationField, concat("20", "22"))',
-          []
-        );
       });
 
       describe('e', () => {
@@ -4504,6 +4474,9 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row mv_count(to_geopoint("POINT (30 10)"))', []);
         testErrorsAndWarnings('row var = mv_count(to_geopoint(to_geopoint("POINT (30 10)")))', []);
         testErrorsAndWarnings('row var = mv_count(to_geoshape(to_geopoint("POINT (30 10)")))', []);
+        testErrorsAndWarnings('from a_index | where mv_count(dateNanosField) > 0', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_count(dateNanosField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_count(dateNanosField)', []);
       });
 
       describe('mv_dedupe', () => {
@@ -4807,6 +4780,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row mv_first(to_geopoint("POINT (30 10)"))', []);
         testErrorsAndWarnings('row var = mv_first(to_geopoint(to_geopoint("POINT (30 10)")))', []);
         testErrorsAndWarnings('row var = mv_first(to_geoshape(to_geopoint("POINT (30 10)")))', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_first(dateNanosField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_first(dateNanosField)', []);
       });
 
       describe('mv_last', () => {
@@ -4957,6 +4932,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row mv_last(to_geopoint("POINT (30 10)"))', []);
         testErrorsAndWarnings('row var = mv_last(to_geopoint(to_geopoint("POINT (30 10)")))', []);
         testErrorsAndWarnings('row var = mv_last(to_geoshape(to_geopoint("POINT (30 10)")))', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_last(dateNanosField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_last(dateNanosField)', []);
       });
 
       describe('mv_max', () => {
@@ -5044,6 +5021,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | eval mv_max(nullVar)', []);
         testErrorsAndWarnings('from a_index | eval mv_max("2022")', []);
         testErrorsAndWarnings('from a_index | eval mv_max(concat("20", "22"))', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_max(dateNanosField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_max(dateNanosField)', []);
       });
 
       describe('mv_median', () => {
@@ -5181,6 +5160,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | eval mv_min(nullVar)', []);
         testErrorsAndWarnings('from a_index | eval mv_min("2022")', []);
         testErrorsAndWarnings('from a_index | eval mv_min(concat("20", "22"))', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_min(dateNanosField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_min(dateNanosField)', []);
       });
 
       describe('mv_slice', () => {
@@ -12304,32 +12285,6 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | stats max(concat("20", "22"))', [
           'Argument of [max] must be [double], found value [concat("20","22")] type [keyword]',
         ]);
-        testErrorsAndWarnings('from a_index | stats var = max(datePeriodField)', []);
-        testErrorsAndWarnings('from a_index | stats max(datePeriodField)', []);
-
-        testErrorsAndWarnings('from a_index | where max(datePeriodField)', [
-          'WHERE does not support function max',
-        ]);
-
-        testErrorsAndWarnings('from a_index | where max(datePeriodField) > 0', [
-          'WHERE does not support function max',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval var = max(datePeriodField)', [
-          'EVAL does not support function max',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval var = max(datePeriodField) > 0', [
-          'EVAL does not support function max',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval max(datePeriodField)', [
-          'EVAL does not support function max',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval max(datePeriodField) > 0', [
-          'EVAL does not support function max',
-        ]);
       });
 
       describe('min', () => {
@@ -12651,32 +12606,6 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | stats min("2022")', []);
         testErrorsAndWarnings('from a_index | stats min(concat("20", "22"))', [
           'Argument of [min] must be [double], found value [concat("20","22")] type [keyword]',
-        ]);
-        testErrorsAndWarnings('from a_index | stats var = min(datePeriodField)', []);
-        testErrorsAndWarnings('from a_index | stats min(datePeriodField)', []);
-
-        testErrorsAndWarnings('from a_index | where min(datePeriodField)', [
-          'WHERE does not support function min',
-        ]);
-
-        testErrorsAndWarnings('from a_index | where min(datePeriodField) > 0', [
-          'WHERE does not support function min',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval var = min(datePeriodField)', [
-          'EVAL does not support function min',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval var = min(datePeriodField) > 0', [
-          'EVAL does not support function min',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval min(datePeriodField)', [
-          'EVAL does not support function min',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval min(datePeriodField) > 0', [
-          'EVAL does not support function min',
         ]);
       });
 
@@ -14635,30 +14564,6 @@ describe('validation logic', () => {
             'Argument of [bin] must be a constant, received [longField]',
             'Argument of [bin] must be a constant, received [longField]',
           ]
-        );
-
-        testErrorsAndWarnings('from a_index | stats by bucket(dateField, datePeriodField)', [
-          'Argument of [bucket] must be a constant, received [date_periodField]',
-        ]);
-
-        testErrorsAndWarnings('from a_index | stats by bin(dateField, datePeriodField)', []);
-        testErrorsAndWarnings('from a_index | stats by bucket(dateField, timeLiteralField)', []);
-        testErrorsAndWarnings('from a_index | stats by bin(dateField, timeLiteralField)', []);
-
-        testErrorsAndWarnings('from a_index | sort bucket(dateField, datePeriodField)', [
-          'SORT does not support function bucket',
-        ]);
-
-        testErrorsAndWarnings('from a_index | stats bucket("2022", datePeriodField)', []);
-        testErrorsAndWarnings(
-          'from a_index | stats bucket(concat("20", "22"), datePeriodField)',
-          []
-        );
-        testErrorsAndWarnings('from a_index | stats bucket("2022", timeLiteralField)', []);
-
-        testErrorsAndWarnings(
-          'from a_index | stats bucket(concat("20", "22"), timeLiteralField)',
-          []
         );
       });
 
