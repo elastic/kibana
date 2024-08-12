@@ -9,8 +9,8 @@ import userEvent from '@testing-library/user-event';
 import { FindingsRuleFlyout } from './findings_flyout';
 import { render, screen } from '@testing-library/react';
 import { TestProvider } from '../../../test/test_provider';
+import { CDR_MISCONFIGURATIONS_INDEX_PATTERN } from '../../../../common/constants';
 import { mockFindingsHit, mockWizFinding } from '../__mocks__/findings';
-import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
 
 const onPaginate = jest.fn();
 
@@ -43,7 +43,7 @@ describe('<FindingsFlyout/>', () => {
       getByText(mockFindingsHit.resource.id);
       getByText(mockFindingsHit.resource.name);
       getAllByText(mockFindingsHit.rule.section);
-      getByText(LATEST_FINDINGS_INDEX_DEFAULT_NS);
+      getByText(CDR_MISCONFIGURATIONS_INDEX_PATTERN);
       mockFindingsHit.rule.tags.forEach((tag) => {
         getAllByText(tag);
       });
