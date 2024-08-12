@@ -19,6 +19,7 @@ export type {
   DataControlFactory,
   DataControlServices,
 } from './react_controls/controls/data_controls/types';
+export { ACTION_EDIT_CONTROL } from './react_controls/actions/edit_control_action/edit_control_action';
 
 /**
  * TODO: remove all exports below this when control group embeddable is removed
@@ -57,8 +58,7 @@ export {
   ControlGroupContainerFactory,
   type ControlGroupInput,
   type ControlGroupInputBuilder,
-  type ControlGroupAPI,
-  type AwaitingControlGroupAPI,
+  type AwaitingControlGroupApi,
   type ControlGroupOutput,
   controlGroupInputBuilder,
 } from './control_group';
@@ -76,7 +76,7 @@ export {
 } from './range_slider';
 
 export {
-  ACTION_EDIT_CONTROL,
+  ACTION_EDIT_CONTROL as ACTION_EDIT_LEGACY_CONTROL,
   ACTION_DELETE_CONTROL,
   ControlGroupRenderer,
   type ControlGroupRendererProps,

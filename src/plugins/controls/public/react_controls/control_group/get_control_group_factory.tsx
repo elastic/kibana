@@ -92,6 +92,7 @@ export const getControlGroupEmbeddableFactory = (services: {
         initialLabelPosition ?? DEFAULT_CONTROL_STYLE // TODO: Rename `DEFAULT_CONTROL_STYLE`
       );
       const allowExpensiveQueries$ = new BehaviorSubject<boolean>(true);
+      const disabledActionIds$ = new BehaviorSubject<string[] | undefined>(undefined);
 
       /** TODO: Handle loading; loading should be true if any child is loading */
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
@@ -123,6 +124,9 @@ export const getControlGroupEmbeddableFactory = (services: {
 
       const api = setApi({
         ...controlsManager.api,
+        disabledActionIds: disabledActionIds$,
+        // getEditorConfig: () => initialRuntimeState.settings?.editorConfig,
+        setDisabledActionIds: (ids) => disabledActionIds$.next(ids),
         getLastSavedControlState: (controlUuid: string) => {
           return lastSavedRuntimeState.initialChildControlState[controlUuid] ?? {};
         },

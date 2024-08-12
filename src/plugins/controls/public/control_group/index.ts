@@ -22,7 +22,7 @@ export {
   controlGroupInputBuilder,
 } from './external_api/control_group_input_builder';
 
-export type { ControlGroupAPI, AwaitingControlGroupAPI } from './external_api/control_group_api';
+export type { AwaitingControlGroupApi } from './external_api';
 
 export {
   type ControlGroupRendererProps,

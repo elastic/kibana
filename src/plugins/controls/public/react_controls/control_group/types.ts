@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
-
+import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common/control_group/types';
+import { ParentIgnoreSettings } from '@kbn/controls-plugin/public';
+import { ControlStyle, ControlWidth } from '@kbn/controls-plugin/public/types';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
 import {
@@ -19,6 +20,7 @@ import {
   HasEditCapabilities,
   HasParentApi,
   PublishesDataLoading,
+  PublishesDisabledActionIds,
   PublishesFilters,
   PublishesTimeslice,
   PublishesUnifiedSearch,
@@ -26,21 +28,26 @@ import {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
-
-import { ParentIgnoreSettings } from '../..';
-import { ControlInputTransform } from '../../../common';
-import { ControlGroupChainingSystem } from '../../../common/control_group/types';
-import { ControlStyle, ControlWidth } from '../../types';
-import { DefaultControlState, PublishesControlDisplaySettings } from '../controls/types';
+import { Observable } from 'rxjs';
 import { ControlFetchContext } from './control_fetch/control_fetch';
+import { DefaultControlState, PublishesControlDisplaySettings } from '../controls/types';
+// import { FieldFilterPredicate } from './external_api/types';
+
+/**
+ * ----------------------------------------------------------------
+ * Control group API
+ * ----------------------------------------------------------------
+ */
 
 /** The control display settings published by the control group are the "default" */
 type PublishesControlGroupDisplaySettings = PublishesControlDisplaySettings & {
   labelPosition: PublishingSubject<ControlStyle>;
 };
-export interface ControlPanelsState<ControlState extends ControlPanelState = ControlPanelState> {
-  [panelId: string]: ControlState;
-}
+
+export type ControlInputTransform = (
+  newState: Partial<ControlGroupSerializedState>,
+  controlType: string
+) => Partial<ControlGroupSerializedState>;
 
 export type ControlGroupUnsavedChanges = Omit<
   ControlGroupRuntimeState,
@@ -48,8 +55,6 @@ export type ControlGroupUnsavedChanges = Omit<
 > & {
   filters: Filter[] | undefined;
 };
-
-export type ControlPanelState = DefaultControlState & { type: string; order: number };
 
 export type ControlGroupApi = PresentationContainer &
   DefaultEmbeddableApi<ControlGroupSerializedState, ControlGroupRuntimeState> &
@@ -61,6 +66,7 @@ export type ControlGroupApi = PresentationContainer &
   Pick<PublishesUnsavedChanges, 'unsavedChanges'> &
   PublishesControlGroupDisplaySettings &
   PublishesTimeslice &
+  PublishesDisabledActionIds &
   Partial<HasParentApi<PublishesUnifiedSearch> & HasSaveNotification> & {
     asyncResetUnsavedChanges: () => Promise<void>;
     autoApplySelections$: PublishingSubject<boolean>;
@@ -72,9 +78,29 @@ export type ControlGroupApi = PresentationContainer &
     openAddDataControlFlyout: (settings?: {
       controlInputTransform?: ControlInputTransform;
     }) => void;
+    // getEditorConfig: () => ControlGroupEditorConfig | undefined;
   };
 
-export interface ControlGroupRuntimeState {
+/**
+ * ----------------------------------------------------------------
+ * Control group state
+ * ----------------------------------------------------------------
+ */
+
+export interface ControlGroupSettings {
+  showAddButton?: boolean;
+  editorConfig?: ControlGroupEditorConfig;
+}
+
+export interface ControlGroupEditorConfig {
+  hideDataViewSelector?: boolean;
+  hideWidthSettings?: boolean;
+  hideAdditionalSettings?: boolean;
+  // fieldFilterPredicate?: FieldFilterPredicate;
+}
+
+export interface ControlGroupRuntimeState<State extends DefaultControlState = DefaultControlState>
+  extends Partial<ControlGroupSettings> {
   chainingSystem: ControlGroupChainingSystem;
   defaultControlGrow?: boolean;
   defaultControlWidth?: ControlWidth;
@@ -82,23 +108,22 @@ export interface ControlGroupRuntimeState {
   autoApplySelections: boolean;
   ignoreParentSettings?: ParentIgnoreSettings;
 
-  initialChildControlState: ControlPanelsState<ControlPanelState>;
-  /** TODO: Handle the editor config, which is used with the control group renderer component */
-  editorConfig?: {
-    hideDataViewSelector?: boolean;
-    hideWidthSettings?: boolean;
-    hideAdditionalSettings?: boolean;
-  };
+  panels?: ControlPanelsState;
+  initialChildControlState: ControlPanelsState<State>;
+
+  /*
+   * Configuration settings that are never persisted
+   * - remove after https://github.com/elastic/kibana/issues/189939 is resolved
+   */
+  settings?: ControlGroupSettings;
 }
 
-export type ControlGroupEditorState = Pick<
-  ControlGroupRuntimeState,
-  'chainingSystem' | 'labelPosition' | 'autoApplySelections' | 'ignoreParentSettings'
->;
-
-export interface ControlGroupSerializedState {
-  chainingSystem: ControlGroupChainingSystem;
-  panelsJSON: string;
+export interface ControlGroupSerializedState
+  extends Pick<
+    ControlGroupRuntimeState,
+    'chainingSystem' | 'defaultControlGrow' | 'defaultControlWidth' | 'settings'
+  > {
+  panelsJSON: string; // stringified version of ControlSerializedState
   ignoreParentSettingsJSON: string;
   // In runtime state, we refer to this property as `labelPosition`;
   // to avoid migrations, we will continue to refer to this property as `controlStyle` in the serialized state
@@ -106,4 +131,36 @@ export interface ControlGroupSerializedState {
   // In runtime state, we refer to the inverse of this property as `autoApplySelections`
   // to avoid migrations, we will continue to refer to this property as `showApplySelections` in the serialized state
   showApplySelections: boolean | undefined;
+}
+
+export type ControlGroupEditorState = Pick<
+  ControlGroupRuntimeState,
+  'chainingSystem' | 'labelPosition' | 'autoApplySelections' | 'ignoreParentSettings'
+>;
+
+/**
+ * ----------------------------------------------------------------
+ * Control group panel state
+ * ----------------------------------------------------------------
+ */
+
+export interface ControlPanelsState<State extends DefaultControlState = DefaultControlState> {
+  [panelId: string]: ControlPanelState<State>;
+}
+
+export type ControlPanelState<State extends DefaultControlState = DefaultControlState> = State & {
+  type: string;
+  order: number;
+};
+
+/**
+ * `SerializedControlPanelState` is flattened and converted to `ControlPanelState` via the deserialize method of the
+ * control group, so the type is only relevent to the control group (no individual control ever sees `explicitInput`)
+ */
+export interface SerializedControlPanelState<
+  State extends DefaultControlState = DefaultControlState
+> extends DefaultControlState {
+  type: string;
+  order: number;
+  explicitInput: Omit<State, keyof DefaultControlState> & { id: string };
 }

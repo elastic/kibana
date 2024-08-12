@@ -21,15 +21,18 @@ import {
   EuiSkeletonRectangle,
 } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
 import {
-  type ControlGroupInput,
-  ControlGroupRenderer,
-  AwaitingControlGroupAPI,
-  ACTION_EDIT_CONTROL,
-  ACTION_DELETE_CONTROL,
-} from '@kbn/controls-plugin/public';
+  ControlGroupInput,
+  OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
+} from '@kbn/controls-plugin/common';
 import { ControlInputTransform } from '@kbn/controls-plugin/common/types';
+import {
+  ACTION_DELETE_CONTROL,
+  ACTION_EDIT_CONTROL,
+  ControlGroupRenderer,
+} from '@kbn/controls-plugin/public';
+import { AwaitingControlGroupApi } from '@kbn/controls-plugin/public/control_group/external_api/types';
 
 const INPUT_KEY = 'kbnControls:saveExample:input';
 
@@ -38,7 +41,7 @@ const WITH_CUSTOM_PLACEHOLDER = 'Custom Placeholder';
 export const EditExample = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [controlGroupAPI, setControlGroupAPI] = useState<AwaitingControlGroupAPI>(null);
+  const [controlGroupAPI, setControlGroupAPI] = useState<AwaitingControlGroupApi>(null);
   const [toggleIconIdToSelectedMapIcon, setToggleIconIdToSelectedMapIcon] = useState<{
     [id: string]: boolean;
   }>({});
@@ -55,7 +58,7 @@ export const EditExample = () => {
       const disabledActions: string[] = Object.keys(
         pickBy(newToggleIconIdToSelectedMapIcon, (value) => value)
       );
-      controlGroupAPI.updateInput({ disabledActions });
+      controlGroupAPI.setDisabledActionIds(disabledActions);
     }
 
     setToggleIconIdToSelectedMapIcon(newToggleIconIdToSelectedMapIcon);
@@ -65,7 +68,7 @@ export const EditExample = () => {
     if (!controlGroupAPI) return;
 
     setIsSaving(true);
-    localStorage.setItem(INPUT_KEY, JSON.stringify(controlGroupAPI.getInput()));
+    localStorage.setItem(INPUT_KEY, JSON.stringify(controlGroupAPI.serializeState()));
 
     // simulated async save await
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -133,6 +136,7 @@ export const EditExample = () => {
               iconType="plusInCircle"
               isDisabled={controlGroupAPI === undefined}
               onClick={() => {
+                if (!controlGroupAPI) return;
                 controlGroupAPI!.openAddDataControlFlyout({ controlInputTransform });
               }}
             >

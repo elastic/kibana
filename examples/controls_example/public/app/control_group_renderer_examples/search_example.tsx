@@ -22,7 +22,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { AwaitingControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import { AwaitingControlGroupApi, ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { PLUGIN_ID } from '../../constants';
 
 interface Props {
@@ -33,7 +33,7 @@ interface Props {
 
 export const SearchExample = ({ data, dataView, navigation }: Props) => {
   const [controlFilters, setControlFilters] = useState<Filter[]>([]);
-  const [controlGroupAPI, setControlGroupAPI] = useState<AwaitingControlGroupAPI>();
+  const [controlGroupAPI, setControlGroupAPI] = useState<AwaitingControlGroupApi>();
   const [hits, setHits] = useState(0);
   const [filters, setFilters] = useState<Filter[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -47,8 +47,8 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
     if (!controlGroupAPI) {
       return;
     }
-    const subscription = controlGroupAPI.onFiltersPublished$.subscribe((newFilters) => {
-      setControlFilters([...newFilters]);
+    const subscription = controlGroupAPI.filters$.subscribe((newFilters) => {
+      setControlFilters(newFilters ?? []);
     });
     return () => {
       subscription.unsubscribe();

@@ -6,11 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ControlGroupContainer } from '..';
-
-// TODO lock down ControlGroupAPI
-export type ControlGroupAPI = ControlGroupContainer;
-export type AwaitingControlGroupAPI = ControlGroupAPI | null;
-
-export const buildApiFromControlGroupContainer = (container?: ControlGroupContainer) =>
-  container ?? null;
+export { ControlGroupRenderer } from './control_group_renderer';
+export { controlGroupInputBuilder } from './control_group_input_builder';
+export type { AwaitingControlGroupApi } from './types';
