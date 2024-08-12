@@ -23,7 +23,7 @@
     {
       "groupName": "GitHub actions",
       "matchManagers": ["github-actions"],
-      "reviewers": "[t'eam:kibana-operations]",
+      "reviewers": "[team:kibana-operations]",
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "backport:all-open", "release_note:skip"],
       "enabled": true
