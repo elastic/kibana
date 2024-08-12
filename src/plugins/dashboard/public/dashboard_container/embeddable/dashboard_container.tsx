@@ -151,7 +151,6 @@ export class DashboardContainer
   public integrationSubscriptions: Subscription = new Subscription();
   public publishingSubscription: Subscription = new Subscription();
   public diffingSubscription: Subscription = new Subscription();
-  public controlGroup?: ControlGroupContainer;
   public controlGroupApi$: PublishingSubject<ControlGroupApi | undefined> = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
   public settings: Record<string, PublishingSubject<boolean | undefined>>;
 
@@ -464,7 +463,6 @@ export class DashboardContainer
   public destroy() {
     super.destroy();
     this.cleanupStateTools();
-    this.controlGroup?.destroy();
     this.diffingSubscription.unsubscribe();
     this.publishingSubscription.unsubscribe();
     this.integrationSubscriptions.unsubscribe();
@@ -651,8 +649,6 @@ export class DashboardContainer
   public forceRefresh(refreshControlGroup: boolean = true) {
     this.dispatch.setLastReloadRequestTimeToNow({});
     if (refreshControlGroup) {
-      this.controlGroup?.reload();
-
       // only reload all panels if this refresh does not come from the control group.
       this.reload$.next();
     }
@@ -660,7 +656,7 @@ export class DashboardContainer
 
   public onDataViewsUpdate$ = new Subject<DataView[]>();
 
-  public resetToLastSavedState() {
+  public async asyncResetToLastSavedState() {
     this.dispatch.resetToLastSavedInput({});
     const {
       explicitInput: { timeRange, refreshInterval },
@@ -669,8 +665,8 @@ export class DashboardContainer
       },
     } = this.getState();
 
-    if (this.controlGroup) {
-      this.controlGroup.resetToLastSavedState();
+    if (this.controlGroupApi$.value) {
+      await this.controlGroupApi$.value.asyncResetUnsavedChanges();
     }
 
     // if we are using the unified search integration, we need to force reset the time picker.
