@@ -57,7 +57,7 @@ export function ResizableTextInput({ disabled, value, onChange, onSubmit, placeh
     <EuiTextArea
       data-test-subj="investigateAppResizableTextInputTextArea"
       className={css`
-        max-height: 200;
+        max-height: 350px;
         padding: 8px 12px;
       `}
       disabled={disabled}
