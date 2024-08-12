@@ -35,7 +35,7 @@ describe('unsavedChanges api', () => {
   };
 
   let api: undefined | PublishesUnsavedChanges;
-  beforeEach(async () => {
+  beforeEach(() => {
     key1$.next(lastSavedState.key1);
     key2$.next(lastSavedState.key2);
     ({ api } = initializeUnsavedChanges<TestState>(lastSavedState, parentApi, comparators));

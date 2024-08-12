@@ -74,18 +74,16 @@ export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
   subscriptions.push(
     combineLatest(comparatorSubjects)
       .pipe(
-        combineLatestWith(lastSavedState$),
-        skip(1), // unsaved changes was initialized above - ignore the first emit
         debounceTime(COMPARATOR_SUBJECTS_DEBOUNCE),
-        map(([latestState, lastSavedState]) => ({
-          latestState: comparatorKeys.reduce((acc, key, index) => {
-            acc[key] = latestState[index] as RuntimeState[typeof key];
+        map((latestStates) =>
+          comparatorKeys.reduce((acc, key, index) => {
+            acc[key] = latestStates[index] as RuntimeState[typeof key];
             return acc;
-          }, {} as Partial<RuntimeState>),
-          lastSavedState,
-        }))
+          }, {} as Partial<RuntimeState>)
+        ),
+        combineLatestWith(lastSavedState$)
       )
-      .subscribe(({ latestState, lastSavedState }) => {
+      .subscribe(([latestState, lastSavedState]) => {
         unsavedChanges.next(
           runComparators(comparators, comparatorKeys, lastSavedState, latestState)
         );
