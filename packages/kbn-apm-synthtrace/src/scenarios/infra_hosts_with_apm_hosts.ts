@@ -20,7 +20,7 @@ const scenario: Scenario<InfraDocument | ApmFields> = async ({
   return {
     generate: ({ range, clients: { infraEsClient, apmEsClient } }) => {
       const { numInstances } = scenarioOpts;
-      const transactionName = '240rpm/75% 1000ms';
+      const transactionName = 'GET /host/{id}';
 
       // Only half of the hosts will have have system metrics
       const hostList = times(numInstances / 2).map((index) => infra.host(`host-${index}`));
@@ -56,23 +56,11 @@ const scenario: Scenario<InfraDocument | ApmFields> = async ({
 
         const traces = range.ratePerMinute(throughput).generator((timestamp) => {
           const parentDuration = hasHighDuration ? random(1000, 5000) : random(100, 1000);
-          const generateError = random(1, 4) % 3 === 0;
-          const span = instance
+          return instance
             .transaction({ transactionName })
             .timestamp(timestamp)
-            .duration(parentDuration);
-
-          return !generateError
-            ? span.success()
-            : span.failure().errors(
-                instance
-                  .error({
-                    message: `No handler for ${transactionName}`,
-                    type: 'No handler',
-                    culprit: 'request',
-                  })
-                  .timestamp(timestamp + 50)
-              );
+            .duration(parentDuration)
+            .success();
         });
 
         const cpuPct = random(0, 1);
