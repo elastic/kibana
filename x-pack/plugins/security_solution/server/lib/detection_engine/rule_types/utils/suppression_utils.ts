@@ -82,10 +82,10 @@ export const getSuppressionTerms = ({
 }): SuppressionTerm[] => {
   const suppressedBy = alertSuppression?.groupBy ?? [];
 
-  const suppressedProps = pick(fields ?? event?._source, suppressedBy) as Record<
-    string,
-    string[] | number[] | undefined
-  >;
+  const suppressedProps = pick(
+    fields != null && fields?.length > 0 ? fields : event?._source,
+    suppressedBy
+  ) as Record<string, string[] | number[] | undefined>;
   const suppressionTerms = suppressedBy.map((field) => {
     const value = suppressedProps[field] ?? null;
     const sortedValue = Array.isArray(value) ? (sortBy(value) as string[] | number[]) : value;

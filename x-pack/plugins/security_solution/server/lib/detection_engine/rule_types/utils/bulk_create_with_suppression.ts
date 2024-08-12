@@ -13,6 +13,7 @@ import type {
   AlertWithCommonFieldsLatest,
   SuppressionFieldsLatest,
 } from '@kbn/rule-registry-plugin/common/schemas';
+import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
 
 import { isQueryRule } from '../../../../../common/detection_engine/utils';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
@@ -24,7 +25,6 @@ import type {
 import type { RuleServices } from '../types';
 import { createEnrichEventsFunction } from './enrichments';
 import type { ExperimentalFeatures } from '../../../../../common';
-import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
 import { getNumberOfSuppressedAlerts } from './get_number_of_suppressed_alerts';
 
 export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
