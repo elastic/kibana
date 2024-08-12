@@ -697,12 +697,14 @@ export const UnifiedDataTable = ({
     [dataView, displayedColumns, shouldPrependTimeFieldColumn]
   );
 
+  // When columns are modified, reset the last column to auto width if only absolute
+  // width columns remain, to ensure the columns fill the available grid space
   useDeepCompareEffect(() => {
-    const hasAutowidthColumn = visibleColumns.some(
+    const hasAutoWidthColumn = visibleColumns.some(
       (col) => settings?.columns?.[col]?.width == null
     );
 
-    if (!hasAutowidthColumn) {
+    if (!hasAutoWidthColumn) {
       onResize?.({ columnId: visibleColumns[visibleColumns.length - 1] });
     }
   }, [onResize, visibleColumns]);

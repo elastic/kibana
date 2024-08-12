@@ -12,6 +12,7 @@ import {
   type EuiDataGridColumn,
   type EuiDataGridColumnCellAction,
   EuiScreenReaderOnly,
+  EuiListGroupItemProps,
 } from '@elastic/eui';
 import { type DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
@@ -145,6 +146,20 @@ function buildEuiGridColumn({
     editField &&
     dataViewField &&
     buildEditFieldButton({ hasEditDataViewPermission, dataView, field: dataViewField, editField });
+  const resetWidthButton: EuiListGroupItemProps | undefined =
+    onResize && columnWidth > 0
+      ? {
+          label: i18n.translate('unifiedDataTable.grid.resetColumnWidthButton', {
+            defaultMessage: 'Reset width',
+          }),
+          iconType: 'refresh',
+          size: 'xs',
+          iconProps: { size: 'm' },
+          onClick: () => {
+            onResize({ columnId: columnName });
+          },
+        }
+      : undefined;
 
   const columnDisplayName = getColumnDisplayName(
     columnName,
@@ -196,21 +211,7 @@ function buildEuiGridColumn({
       showMoveLeft: !defaultColumns,
       showMoveRight: !defaultColumns,
       additional: [
-        ...(onResize && columnWidth > 0
-          ? [
-              {
-                label: i18n.translate('unifiedDataTable.resetWidthColumnLabel', {
-                  defaultMessage: 'Reset width',
-                }),
-                iconType: 'refresh',
-                size: 'xs' as 'xs',
-                iconProps: { size: 'm' as 'm' },
-                onClick: () => {
-                  onResize({ columnId: columnName });
-                },
-              },
-            ]
-          : []),
+        ...(resetWidthButton ? [resetWidthButton] : []),
         ...(columnName === '__source'
           ? []
           : [

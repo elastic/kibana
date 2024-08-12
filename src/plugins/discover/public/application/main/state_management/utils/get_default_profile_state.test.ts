@@ -31,7 +31,6 @@ describe('getDefaultProfileState', () => {
       defaultColumns: ['messsage', 'bytes'],
       dataView: dataViewWithTimefieldMock,
       esqlQueryColumns: undefined,
-      records: [],
     });
     expect(appState).toEqual({
       columns: ['message', 'extension', 'bytes'],
@@ -54,11 +53,13 @@ describe('getDefaultProfileState', () => {
       },
       defaultColumns: ['messsage', 'bytes'],
       dataView: emptyDataView,
-      esqlQueryColumns: [{ id: '1', name: 'foo', meta: { type: 'string' } }],
-      records: [],
+      esqlQueryColumns: [
+        { id: '1', name: 'foo', meta: { type: 'string' } },
+        { id: '2', name: 'bar', meta: { type: 'string' } },
+      ],
     });
     expect(appState).toEqual({
-      columns: ['foo'],
+      columns: ['foo', 'bar'],
       grid: {
         columns: {
           foo: {
@@ -79,7 +80,6 @@ describe('getDefaultProfileState', () => {
       defaultColumns: [],
       dataView: dataViewWithTimefieldMock,
       esqlQueryColumns: undefined,
-      records: [],
     });
     expect(appState).toEqual({
       rowHeight: 3,
@@ -96,7 +96,6 @@ describe('getDefaultProfileState', () => {
       defaultColumns: [],
       dataView: dataViewWithTimefieldMock,
       esqlQueryColumns: undefined,
-      records: [],
     });
     expect(appState).toEqual(undefined);
   });
