@@ -669,7 +669,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
     const input = getSelectedOption(newPolicy.inputs, integration);
-    const isSubscriptionValid = useIsSubscriptionStatusValid();
+    const getIsSubscriptionValid = useIsSubscriptionStatusValid();
+    const isSubscriptionValid = !!getIsSubscriptionValid.data;
     const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
       input,
       isAgentlessEnabled,
@@ -724,7 +725,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     });
 
     useEffect(() => {
-      setIsValid(!!isSubscriptionValid);
+      setIsValid(isSubscriptionValid);
     }, [isSubscriptionValid]);
 
     useEffect(() => {

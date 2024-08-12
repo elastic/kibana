@@ -13,7 +13,6 @@ import { TestProvider } from '../../test/test_provider';
 import { ComplianceDashboard, getDefaultTab } from '.';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
-import { useIsSubscriptionStatusValid } from '../../common/hooks/use_subscription_status';
 import { useKspmStatsApi, useCspmStatsApi } from '../../common/api/use_stats_api';
 import {
   CLOUD_DASHBOARD_CONTAINER,
@@ -58,18 +57,12 @@ describe('<ComplianceDashboard />', () => {
       })
     );
 
-    (useIsSubscriptionStatusValid as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: true,
-      })
-    );
-
     (useCspmStatsApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
       })
     );
+
     (useKspmStatsApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
