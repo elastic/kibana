@@ -12,7 +12,6 @@ import {
   EuiCheckbox,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiCopy,
   EuiDataGridCellValueElementProps,
   EuiDataGridToolbarControl,
   EuiPopover,
@@ -25,9 +24,12 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { UseSelectedDocsState } from '../hooks/use_selected_docs';
 import { UnifiedDataTableContext } from '../table_context';
+import { DataTableCopyRowsAsText } from './data_table_copy_rows_as_text';
+import { DataTableCopyRowsAsJson } from './data_table_copy_rows_as_json';
 import { useControlColumn } from '../hooks/use_control_column';
 
 export const SelectButton = (props: EuiDataGridCellValueElementProps) => {
@@ -69,15 +71,17 @@ export const SelectButton = (props: EuiDataGridCellValueElementProps) => {
 
 export const SelectAllButton = () => {
   const { selectedDocsState, pageIndex, pageSize, rows } = useContext(UnifiedDataTableContext);
-  const { getCountOfSelectedDocs, deselectSomeDocs, selectMoreDocs } = selectedDocsState;
+  const { getCountOfFilteredSelectedDocs, deselectSomeDocs, selectMoreDocs } = selectedDocsState;
 
   const docIdsFromCurrentPage = useMemo(() => {
     return getDocIdsForCurrentPage(rows, pageIndex, pageSize);
   }, [rows, pageIndex, pageSize]);
 
   const countOfSelectedDocs = useMemo(() => {
-    return docIdsFromCurrentPage?.length ? getCountOfSelectedDocs(docIdsFromCurrentPage) : 0;
-  }, [docIdsFromCurrentPage, getCountOfSelectedDocs]);
+    return docIdsFromCurrentPage?.length
+      ? getCountOfFilteredSelectedDocs(docIdsFromCurrentPage)
+      : 0;
+  }, [docIdsFromCurrentPage, getCountOfFilteredSelectedDocs]);
 
   const isIndeterminateForCurrentPage = useMemo(() => {
     if (docIdsFromCurrentPage?.length) {
@@ -147,6 +151,8 @@ export function DataTableDocumentToolbarBtn({
   fieldFormats,
   pageIndex,
   pageSize,
+  toastNotifications,
+  columns,
 }: {
   isPlainRecord: boolean;
   isFilterActive: boolean;
@@ -158,56 +164,50 @@ export function DataTableDocumentToolbarBtn({
   fieldFormats: FieldFormatsStart;
   pageIndex: number | undefined;
   pageSize: number | undefined;
+  toastNotifications: ToastsStart;
+  columns: string[];
 }) {
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
-  const { selectAllDocs, clearAllSelectedDocs, isDocSelected, selectedDocIds } = selectedDocsState;
+  const { selectAllDocs, clearAllSelectedDocs, selectedDocsCount, docIdsInSelectionOrder } =
+    selectedDocsState;
+
+  const closePopover = useCallback(() => {
+    setIsSelectionPopoverOpen(false);
+  }, [setIsSelectionPopoverOpen]);
 
   const shouldSuggestToSelectAll = useMemo(() => {
-    const canSelectMore = selectedDocIds.length < rows.length && rows.length > 1;
+    const canSelectMore = selectedDocsCount < rows.length && rows.length > 1;
     if (typeof pageSize !== 'number' || isFilterActive || !canSelectMore) {
       return false;
     }
-    return selectedDocIds.length >= pageSize;
-  }, [rows, pageSize, selectedDocIds.length, isFilterActive]);
+    return selectedDocsCount >= pageSize;
+  }, [rows, pageSize, selectedDocsCount, isFilterActive]);
 
   const getMenuItems = useCallback(() => {
     return [
       // Compare selected documents
-      ...(enableComparisonMode && selectedDocIds.length > 1
+      ...(enableComparisonMode && selectedDocsCount > 1
         ? [
             <DataTableCompareToolbarBtn
               key="compareSelected"
-              selectedDocIds={selectedDocIds}
+              selectedDocIds={docIdsInSelectionOrder}
               setIsCompareActive={setIsCompareActive}
             />,
           ]
         : []),
-      // Copy results to clipboard (JSON)
-      <EuiCopy
-        key="copyJsonWrapper"
-        data-test-subj="dscGridCopySelectedDocumentsJSON"
-        textToCopy={
-          rows
-            ? JSON.stringify(rows.filter((row) => isDocSelected(row.id)).map((row) => row.raw))
-            : ''
-        }
-      >
-        {(copy) => (
-          <EuiContextMenuItem key="copyJSON" icon="copyClipboard" onClick={copy}>
-            {isPlainRecord ? (
-              <FormattedMessage
-                id="unifiedDataTable.copyResultsToClipboardJSON"
-                defaultMessage="Copy results to clipboard (JSON)"
-              />
-            ) : (
-              <FormattedMessage
-                id="unifiedDataTable.copyToClipboardJSON"
-                defaultMessage="Copy documents to clipboard (JSON)"
-              />
-            )}
-          </EuiContextMenuItem>
-        )}
-      </EuiCopy>,
+      // Copy results to clipboard as text
+      <DataTableCopyRowsAsText
+        key="copyRowsAsText"
+        toastNotifications={toastNotifications}
+        columns={columns}
+        onCompleted={closePopover}
+      />,
+      // Copy results to clipboard as JSON
+      <DataTableCopyRowsAsJson
+        key="copyRowsAsJson"
+        toastNotifications={toastNotifications}
+        onCompleted={closePopover}
+      />,
       isFilterActive ? (
         // Show all documents
         <EuiContextMenuItem
@@ -215,7 +215,7 @@ export function DataTableDocumentToolbarBtn({
           key="showAllDocuments"
           icon="eye"
           onClick={() => {
-            setIsSelectionPopoverOpen(false);
+            closePopover();
             setIsFilterActive(false);
           }}
         >
@@ -238,7 +238,7 @@ export function DataTableDocumentToolbarBtn({
           key="showSelectedDocuments"
           icon="eye"
           onClick={() => {
-            setIsSelectionPopoverOpen(false);
+            closePopover();
             setIsFilterActive(true);
           }}
         >
@@ -261,7 +261,7 @@ export function DataTableDocumentToolbarBtn({
         key="clearSelection"
         icon="cross"
         onClick={() => {
-          setIsSelectionPopoverOpen(false);
+          closePopover();
           clearAllSelectedDocs();
           setIsFilterActive(false);
         }}
@@ -272,13 +272,15 @@ export function DataTableDocumentToolbarBtn({
   }, [
     isFilterActive,
     isPlainRecord,
-    rows,
     setIsFilterActive,
-    isDocSelected,
     clearAllSelectedDocs,
-    selectedDocIds,
+    selectedDocsCount,
+    docIdsInSelectionOrder,
     enableComparisonMode,
     setIsCompareActive,
+    toastNotifications,
+    columns,
+    closePopover,
   ]);
 
   const toggleSelectionToolbar = useCallback(
@@ -296,12 +298,12 @@ export function DataTableDocumentToolbarBtn({
           iconSide="left"
           iconType="arrowDown"
           onClick={toggleSelectionToolbar}
-          data-selected-documents={selectedDocIds.length}
+          data-selected-documents={selectedDocsCount}
           data-test-subj="unifiedDataTableSelectionBtn"
           isSelected={isFilterActive}
           badgeContent={fieldFormats
             .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-            .convert(selectedDocIds.length)}
+            .convert(selectedDocsCount)}
           css={css`
             .euiButtonEmpty__content {
               flex-direction: row-reverse;
