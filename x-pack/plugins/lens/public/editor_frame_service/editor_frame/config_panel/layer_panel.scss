@@ -4,7 +4,7 @@
   margin-bottom: $euiSize;
 
   // disable focus ring for mouse clicks, leave it for keyboard users
-  &:focus:not(:focus-visible) {
+  &y:focus:not(:focus-visible) {
     animation: none !important; // sass-lint:disable-line no-important
   }
 }

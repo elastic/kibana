@@ -62,8 +62,9 @@ export function Series({ item, isExpanded, toggleExpanded }: Props) {
         forceState={isExpanded ? 'open' : 'closed'}
         aria-label={ACCORDION_LABEL}
         onToggle={toggleExpanded}
+        buttonElement="div"
         arrowDisplay={!seriesProps.series.dataType ? 'none' : undefined}
-        extraAction={
+        buttonContent={
           <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
