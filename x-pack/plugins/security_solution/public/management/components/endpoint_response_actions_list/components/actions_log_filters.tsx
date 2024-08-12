@@ -55,9 +55,6 @@ export const ActionsLogFilters = memo(
     'data-test-subj'?: string;
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const responseActionsEnabled = useIsExperimentalFeatureEnabled(
-      'endpointResponseActionsEnabled'
-    );
 
     const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
       'responseActionsSentinelOneV1Enabled'
@@ -86,26 +83,24 @@ export const ActionsLogFilters = memo(
             onChangeFilterOptions={onChangeStatusesFilter}
             data-test-subj={dataTestSubj}
           />
-          {isSentinelOneV1Enabled
-            ? responseActionsEnabled && (
-                <ActionsLogFilter
-                  filterName={'types'}
-                  typesFilters={{
-                    agentTypes: { onChangeFilterOptions: onChangeAgentTypesFilter },
-                    actionTypes: { onChangeFilterOptions: onChangeTypeFilter },
-                  }}
-                  isFlyout={isFlyout}
-                  data-test-subj={dataTestSubj}
-                />
-              )
-            : responseActionsEnabled && (
-                <ActionsLogFilter
-                  filterName={'types'}
-                  onChangeFilterOptions={onChangeTypeFilter}
-                  isFlyout={isFlyout}
-                  data-test-subj={dataTestSubj}
-                />
-              )}
+          {isSentinelOneV1Enabled ? (
+            <ActionsLogFilter
+              filterName={'types'}
+              typesFilters={{
+                agentTypes: { onChangeFilterOptions: onChangeAgentTypesFilter },
+                actionTypes: { onChangeFilterOptions: onChangeTypeFilter },
+              }}
+              isFlyout={isFlyout}
+              data-test-subj={dataTestSubj}
+            />
+          ) : (
+            <ActionsLogFilter
+              filterName={'types'}
+              onChangeFilterOptions={onChangeTypeFilter}
+              isFlyout={isFlyout}
+              data-test-subj={dataTestSubj}
+            />
+          )}
         </>
       );
     }, [
@@ -116,7 +111,6 @@ export const ActionsLogFilters = memo(
       dataTestSubj,
       onChangeCommandsFilter,
       onChangeStatusesFilter,
-      responseActionsEnabled,
       onChangeAgentTypesFilter,
       onChangeTypeFilter,
     ]);
