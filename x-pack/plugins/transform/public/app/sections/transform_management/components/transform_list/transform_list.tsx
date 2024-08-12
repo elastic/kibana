@@ -21,6 +21,7 @@ import {
   EuiSearchBar,
   EuiTitle,
 } from '@elastic/eui';
+import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import {
   isReauthorizeActionDisabled,
   ReauthorizeActionModal,
@@ -65,7 +66,6 @@ import { useTableSettings } from './use_table_settings';
 import { useAlertRuleFlyout } from '../../../../../alerting/transform_alerting_flyout';
 import type { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 import { StopActionModal } from '../action_stop/stop_action_modal';
-import type { ListingPageUrlState } from '../../transform_management_section';
 
 type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
 

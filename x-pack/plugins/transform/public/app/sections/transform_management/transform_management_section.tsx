@@ -20,8 +20,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { usePageUrlState } from '@kbn/ml-url-state';
-import { UrlStateProvider } from '@kbn/ml-url-state';
+import {
+  usePageUrlState,
+  UrlStateProvider,
+  type ListingPageUrlState,
+  type PageUrlState,
+} from '@kbn/ml-url-state';
 
 import { useAppDependencies } from '../../app_dependencies';
 import type { TransformListRow } from '../../common';
@@ -52,20 +56,6 @@ import {
   getAlertRuleManageContext,
   TransformAlertFlyoutWrapper,
 } from '../../../alerting/transform_alerting_flyout';
-
-export interface ListingPageUrlState {
-  pageSize: number;
-  pageIndex: number;
-  sortField: string;
-  sortDirection: string;
-  queryText?: string;
-  showPerPageOptions?: boolean;
-}
-
-interface PageUrlState {
-  pageKey: string;
-  pageUrlState: ListingPageUrlState;
-}
 
 const getDefaultTransformListState = (): ListingPageUrlState => ({
   pageIndex: 0,
@@ -375,7 +365,7 @@ export const TransformManagement: FC = () => {
                   transforms={transforms}
                   transformsLoading={transformsWithoutStatsLoading}
                   transformsStatsLoading={transformsStatsLoading}
-                  pageState={transformPageState}
+                  pageState={transformPageState as ListingPageUrlState}
                   updatePageState={setTransformPageState}
                 />
               )}
