@@ -1,6 +1,6 @@
 ## OpenAPI Generator (`kbn-openapi-generator`) Usage Guide
 
-OpenAPI code generator (`kbn-openapi-generator`) could be used to generate runtime types, documentation, server stub implementations, clients, and much more (later just artifacts) given OpenAPI specification. Usually the main goal is to generate Zod schemas and related TypeScript types and integrate them into routes implementation and the other code. This guide focuses on mainly on that topic.
+OpenAPI code generator (`kbn-openapi-generator`) could be used to generate different artifacts like runtime types, documentation, server stub implementations, clients, and much more given OpenAPI specification. Usually the first priority is to generate Zod schemas and related TypeScript types and integrate them into routes implementation and related code. The current guide focuses mainly on that topic.
 
 Any OpenAPI spec files should conform to [OpenAPI Specification 3.0](https://swagger.io/specification/v3/). OpenAPI Generator supports a subset of the specification.
 
