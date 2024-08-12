@@ -58,6 +58,7 @@ export const AssistantTitle: React.FC<{
         `}
       >
         <EuiInlineEditTitle
+          data-test-subj="conversationTitle"
           heading="h2"
           inputAriaLabel="Edit text inline"
           value={newTitle ?? NEW_CHAT}

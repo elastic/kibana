@@ -6,5 +6,13 @@
  */
 
 export const AI_ASSISTANT_BUTTON = '[data-test-subj="assistantHeaderLink"]';
-export const WELCOME_CONNECTOR_SETUP = '[data-test-subj="connector-setup"]';
-export const CHAT_ICON = '[data-test-subj="discuss"]';
+export const WELCOME_SETUP = '[data-test-subj="welcome-setup"]';
+export const CHAT_ICON = '[data-test-subj="newChat"]';
+export const CHAT_ICON_SM = '[data-test-subj="newChatByTitle"]';
+export const CONVERSATION_TITLE = '[data-test-subj="conversationTitle"]';
+export const EMPTY_CONVO = '[data-test-subj="emptyConvo"]';
+export const SYSTEM_PROMPT = '[data-test-subj="systemPromptText"]';
+export const CONNECTOR_SELECTOR = '[data-test-subj="connector-selector"]';
+export const USER_PROMPT = '[data-test-subj="prompt-textarea"]';
+export const PROMPT_CONTEXT_BUTTON = (i: string | number) =>
+  `[data-test-subj="selectedPromptContext-${i}-button"]`;

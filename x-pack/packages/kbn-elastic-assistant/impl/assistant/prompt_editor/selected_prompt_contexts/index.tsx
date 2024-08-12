@@ -45,10 +45,13 @@ const SelectedPromptContextsComponent: React.FC<Props> = ({
     <EuiFlexGroup data-test-subj="selectedPromptContexts" direction="column" gutterSize={'s'}>
       {Object.keys(selectedPromptContexts)
         .sort()
-        .map((id) => (
+        .map((id, i) => (
           <EuiFlexItem data-test-subj={`selectedPromptContext-${id}`} grow={false} key={id}>
             <EuiAccordion
               buttonContent={promptContexts[id]?.description}
+              buttonProps={{
+                'data-test-subj': `selectedPromptContext-${i}-button`,
+              }}
               extraAction={
                 <EuiToolTip content={i18n.REMOVE_CONTEXT}>
                   <EuiButtonIcon
