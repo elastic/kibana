@@ -30,7 +30,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { get, isEmpty, isEqual, isNil, omitBy } from 'lodash';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { BehaviorSubject, switchMap } from 'rxjs';
 import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
 import { VIS_EVENT_TO_TRIGGER } from '../embeddable';
@@ -75,6 +75,10 @@ export const getVisualizeEmbeddableFactory: (deps: {
       () => titlesApi.panelTitle.getValue(),
       state
     );
+    // if it is provided, start the dynamic actions manager
+    console.log('dynamicActionsApi', dynamicActionsApi);
+    const maybeStopDynamicActions = dynamicActionsApi?.startDynamicActions();
+
     const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
 
     const renderCount$ = new BehaviorSubject<number>(0);
@@ -319,7 +323,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
       });
     }
 
-    fetch$(api)
+    const fetchSubscription = fetch$(api)
       .pipe(
         switchMap((data) => {
           return (async () => {
@@ -374,17 +378,20 @@ export const getVisualizeEmbeddableFactory: (deps: {
 
                     if (triggerId === VIS_EVENT_TO_TRIGGER.applyFilter) {
                       context = {
+                        embeddable: api,
                         timeFieldName: currentVis.data.indexPattern?.timeFieldName!,
                         ...event.data,
                       };
                     } else {
                       context = {
+                        embeddable: api,
                         data: {
                           timeFieldName: currentVis.data.indexPattern?.timeFieldName!,
                           ...event.data,
                         },
                       };
                     }
+                    console.log('CONTEXT', context);
                     await getUiActions().getTrigger(triggerId).exec(context);
                   }
                 },
@@ -415,6 +422,13 @@ export const getVisualizeEmbeddableFactory: (deps: {
         const hasRendered = useStateFromPublishingSubject(hasRendered$);
         const domNode = useRef<HTMLDivElement>(null);
         const { error, isLoading } = useExpressionRenderer(domNode, expressionParams);
+
+        useEffect(() => {
+          return () => {
+            fetchSubscription.unsubscribe();
+            maybeStopDynamicActions?.stopDynamicActions();
+          };
+        }, []);
 
         return (
           <div
