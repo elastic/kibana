@@ -22,4 +22,6 @@ export type {
   ServerRoute,
   RouteParamsRT,
   RouteState,
-} from './src/typings';
+  DefaultRouteCreateOptions,
+  DefaultRouteHandlerResources,
+} from '@kbn/server-route-repository-utils';
