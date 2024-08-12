@@ -7,10 +7,10 @@
  */
 import Boom from '@hapi/boom';
 import { formatErrors, strictKeysRt } from '@kbn/io-ts-utils';
+import { RouteParamsRT } from '@kbn/server-route-repository-utils';
 import { isLeft } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
 import { isEmpty, isPlainObject, omitBy } from 'lodash';
-import { RouteParamsRT } from './typings';
 
 interface KibanaRequestParams {
   body: unknown;
