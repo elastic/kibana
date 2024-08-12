@@ -13,7 +13,7 @@ import type {
   SavedObjectsClientContract,
   IRouter,
 } from '@kbn/core/server';
-import { GetSpaceResult } from '@kbn/spaces-plugin/common';
+import type { GetSpaceResult } from '@kbn/spaces-plugin/common';
 
 import type { FleetAuthz } from '../../common/authz';
 import type { AgentClient } from '../services';
