@@ -31,8 +31,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await ml.dashboardEmbeddables.assertDashboardPanelExists(selectedPanelTitle);
 
     await setFarequoteTimerange();
-
-    await dashboardPanelActions.openContextMenuByTitle(selectedPanelTitle);
   }
 
   describe('create jobs from lens', function () {
@@ -69,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboardPreparation(selectedPanelTitle);
 
-      await ml.lensVisualizations.clickCreateMLJobMenuAction();
+      await ml.lensVisualizations.clickCreateMLJobMenuAction(selectedPanelTitle);
 
       await ml.lensVisualizations.assertLayerSelectorExists();
 
@@ -101,7 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboardPreparation(selectedPanelTitle);
 
-      await ml.lensVisualizations.clickCreateMLJobMenuAction();
+      await ml.lensVisualizations.clickCreateMLJobMenuAction(selectedPanelTitle);
 
       await ml.lensVisualizations.assertLayerSelectorExists();
 

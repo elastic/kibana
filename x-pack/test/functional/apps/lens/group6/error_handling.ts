@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
 
-  describe('Lens error handling', () => {
+  describe.only('Lens error handling', () => {
     describe('Index Pattern missing', () => {
       before(async () => {
         await security.testUser.setRoles(
@@ -113,7 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.find('emptyPlaceholder');
 
       await PageObjects.dashboard.switchToEditMode();
-      await dashboardPanelActions.editPanelByTitle();
+      await dashboardPanelActions.clickEdit();
       await PageObjects.timePicker.waitForNoDataPopover();
       await PageObjects.timePicker.ensureHiddenNoDataPopover();
 

@@ -128,7 +128,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await dashboardPreparation(selectedPanelTitle);
 
-      await ml.lensVisualizations.clickCreateMLJobMenuAction();
+      await ml.lensVisualizations.clickCreateMLJobMenuAction(selectedPanelTitle);
 
       await ml.lensVisualizations.assertLayerSelectorExists();
 
@@ -153,7 +153,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await dashboardPreparation(selectedPanelTitle);
 
-      await ml.lensVisualizations.clickCreateMLJobMenuAction();
+      await ml.lensVisualizations.clickCreateMLJobMenuAction(selectedPanelTitle);
 
       await ml.lensVisualizations.assertLayerSelectorExists();
 
@@ -178,7 +178,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await dashboardPreparation(selectedPanelTitle);
 
-      await ml.lensVisualizations.clickCreateMLJobMenuAction();
+      await ml.lensVisualizations.clickCreateMLJobMenuAction(selectedPanelTitle);
 
       await ml.lensVisualizations.assertLayerSelectorExists();
 
@@ -201,7 +201,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await dashboardPreparation(selectedPanelTitle);
 
-      await ml.lensVisualizations.clickCreateMLJobMenuAction();
+      await ml.lensVisualizations.clickCreateMLJobMenuAction(selectedPanelTitle);
 
       await ml.lensVisualizations.assertLayerSelectorExists();
 

@@ -76,9 +76,6 @@ export function createScenarios(
     await PageObjects.canvas.loadFirstWorkpad(title);
   };
 
-  const getSavedSearchPanel = async (savedSearchTitle: string) => {
-    return await testSubjects.find(`embeddablePanelHeading-${savedSearchTitle.replace(' ', '')}`);
-  };
   const tryDashboardGenerateCsvFail = async (savedSearchTitle: string) => {
     await dashboardPanelActions.clickContextMenuItemByTitle(
       GENERATE_CSV_DATA_TEST_SUBJ,

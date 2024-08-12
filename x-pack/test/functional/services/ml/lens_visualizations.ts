@@ -14,10 +14,14 @@ export function MachineLearningLensVisualizationsProvider(
   mlCommonUI: MlCommonUI
 ) {
   const testSubjects = getService('testSubjects');
+  const dashboardPanelActions = getService('dashboardPanelActions');
 
   return {
-    async clickCreateMLJobMenuAction() {
-      await testSubjects.click('embeddablePanelAction-create-ml-ad-job-action');
+    async clickCreateMLJobMenuAction(title = '') {
+      await dashboardPanelActions.clickContextMenuItemByTitle(
+        'embeddablePanelAction-create-ml-ad-job-action',
+        title
+      );
     },
     async clickCreateJob(layerIndex: number) {
       await testSubjects.clickWhenNotDisabledWithoutRetry(
@@ -31,7 +35,9 @@ export function MachineLearningLensVisualizationsProvider(
       await testSubjects.existOrFail('mlFlyoutLayerSelector');
     },
     async assertMLJobMenuActionDoesNotExist() {
-      await testSubjects.missingOrFail('embeddablePanelAction-create-ml-ad-job-action');
+      await dashboardPanelActions.expectMissingPanelAction(
+        'embeddablePanelAction-create-ml-ad-job-action'
+      );
     },
     async assertNumberOfCompatibleLensLayers(numberOfCompatibleLayers: number) {
       const compatibleLayers = await testSubjects.findAll('mlLensLayerCompatible');

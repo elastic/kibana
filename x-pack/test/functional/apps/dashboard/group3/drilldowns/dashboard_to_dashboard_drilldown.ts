@@ -15,7 +15,6 @@ const DRILLDOWN_TO_AREA_CHART_NAME = 'Go to area chart dashboard';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardDrilldownPanelActions = getService('dashboardDrilldownPanelActions');
   const dashboardDrilldownsManage = getService('dashboardDrilldownsManage');
   const PageObjects = getPageObjects([
