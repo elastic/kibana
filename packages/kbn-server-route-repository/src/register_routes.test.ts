@@ -271,7 +271,6 @@ describe('registerRoutes', () => {
       expect(internalRoute.validate).toEqual(makeZodValidationObjectSpy.mock.results[0].value);
     });
 
-    // params come in correctly, but bit odd since it's not being validated?
     it('passes on params', async () => {
       const handler = jest.fn();
       callRegisterRoutes({
