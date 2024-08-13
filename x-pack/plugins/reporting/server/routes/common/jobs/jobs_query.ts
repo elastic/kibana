@@ -53,7 +53,10 @@ export interface JobsQueryFactory {
   delete(deleteIndex: string, id: string): Promise<TransportResult<estypes.DeleteResponse>>;
 }
 
-export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory {
+export function jobsQueryFactory(
+  reportingCore: ReportingCore,
+  { isInternal }: { isInternal: boolean }
+): JobsQueryFactory {
   async function execQuery<
     T extends (client: ElasticsearchClient) => Promise<Awaited<ReturnType<T>> | undefined>
   >(callback: T): Promise<Awaited<ReturnType<T>> | undefined> {
@@ -202,7 +205,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
     },
 
     async getDocumentPayload(doc: ReportApiJSON) {
-      const getDocumentPayload = getDocumentPayloadFactory(reportingCore);
+      const getDocumentPayload = getDocumentPayloadFactory(reportingCore, { isInternal });
       return await getDocumentPayload(doc);
     },
 

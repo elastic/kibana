@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { EntityDefinition, entityLatestSchema } from '@kbn/entities-schema';
+import { entityLatestSchema } from '@kbn/entities-schema';
 import {
   entityDefinition as mockDefinition,
   entityDefinitionWithBackfill as mockBackfillDefinition,
@@ -33,16 +33,35 @@ export default function ({ getService }: FtrProviderContext) {
         const { definitions } = await getInstalledDefinitions(supertest);
         expect(definitions.length).to.eql(2);
         expect(
-          definitions.find((definition: EntityDefinition) => definition.id === mockDefinition.id)
+          definitions.find(
+            (definition) =>
+              definition.id === mockDefinition.id &&
+              definition.state.installed === true &&
+              definition.state.running === true
+          )
         );
         expect(
           definitions.find(
-            (definition: EntityDefinition) => definition.id === mockBackfillDefinition.id
+            (definition) =>
+              definition.id === mockBackfillDefinition.id &&
+              definition.state.installed === true &&
+              definition.state.running === true
           )
         );
 
         await uninstallDefinition(supertest, mockDefinition.id);
         await uninstallDefinition(supertest, mockBackfillDefinition.id);
+      });
+
+      it('does not start transforms when specified', async () => {
+        await installDefinition(supertest, mockDefinition, { installOnly: true });
+
+        const { definitions } = await getInstalledDefinitions(supertest);
+        expect(definitions.length).to.eql(1);
+        expect(definitions[0].state.installed).to.eql(true);
+        expect(definitions[0].state.running).to.eql(false);
+
+        await uninstallDefinition(supertest, mockDefinition.id);
       });
     });
     describe('entity data', () => {

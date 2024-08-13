@@ -3,7 +3,7 @@
 exports[`ConditionalToolTip renders correctly 1`] = `
 <div
   data-test-subj="conditionalTooltipContent-host-01"
-  style="min-width: 200px;"
+  style="min-width: 220px;"
 >
   <div
     style="border-bottom: 1px solid #D3DAE6; border-bottom-color: #98A2B3; padding-bottom: 4px; margin-bottom: 4px;"
@@ -33,7 +33,7 @@ exports[`ConditionalToolTip renders correctly 1`] = `
       class="euiFlexItem eui-textTruncate eui-displayBlock emotion-euiFlexItem-grow-1"
       data-test-subj="conditionalTooltipContent-metric"
     >
-      CPU usage (legacy)
+      CPU usage (Legacy)
     </div>
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -65,6 +65,22 @@ exports[`ConditionalToolTip renders correctly 1`] = `
       class="euiFlexItem eui-textTruncate eui-displayBlock emotion-euiFlexItem-grow-1"
       data-test-subj="conditionalTooltipContent-metric"
     >
+      Inbound traffic
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+      data-test-subj="conditionalTooltipContent-value"
+    >
+      8 Mbit/s
+    </div>
+  </div>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
+  >
+    <div
+      class="euiFlexItem eui-textTruncate eui-displayBlock emotion-euiFlexItem-grow-1"
+      data-test-subj="conditionalTooltipContent-metric"
+    >
       Outbound traffic
     </div>
     <div
@@ -81,7 +97,23 @@ exports[`ConditionalToolTip renders correctly 1`] = `
       class="euiFlexItem eui-textTruncate eui-displayBlock emotion-euiFlexItem-grow-1"
       data-test-subj="conditionalTooltipContent-metric"
     >
-      Inbound traffic
+      Inbound traffic (Legacy)
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+      data-test-subj="conditionalTooltipContent-value"
+    >
+      8 Mbit/s
+    </div>
+  </div>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
+  >
+    <div
+      class="euiFlexItem eui-textTruncate eui-displayBlock emotion-euiFlexItem-grow-1"
+      data-test-subj="conditionalTooltipContent-metric"
+    >
+      Outbound traffic (Legacy)
     </div>
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"
