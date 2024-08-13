@@ -15,112 +15,146 @@ export const Id = Symbol('Id') as interfaces.ServiceIdentifier<PluginOpaqueId>;
 export const Plugin = Symbol('Plugin') as interfaces.ServiceIdentifier<interfaces.Container>;
 export const Scope = Symbol('Scope') as interfaces.ServiceIdentifier<interfaces.Container>;
 
-export const pluginModule = new ContainerModule(
-  (bind, _unbind, _isBound, _rebind, _unbindAsync, onActivation) => {
-    const scopes = new WeakMap<interfaces.Container, Set<PluginOpaqueId>>();
+export class PluginModule extends ContainerModule {
+  static getContext(container: interfaces.Container): interfaces.Container {
+    return container.isBound(Context) ? container.get(Context) : container;
+  }
 
-    bind(Plugin)
-      .toDynamicValue(({ container, currentRequest: { target } }) => {
-        const name = target.getNamedTag()?.value as PluginOpaqueId | undefined;
+  private scopes = new WeakMap<interfaces.Container, Set<PluginOpaqueId>>();
+  private services = new WeakMap<
+    interfaces.Container,
+    Map<interfaces.ServiceIdentifier<unknown>, number>
+  >();
+  private bound = new WeakSet<interfaces.Container>();
 
-        if (!name) {
-          throw new Error('Plugin instance must be named.');
-        }
+  constructor() {
+    super((bind, _unbind, _isBound, _rebind, _unbindAsync, onActivation) => {
+      bind(Plugin).toDynamicValue(this.getScope).inRequestScope();
+      onActivation(Global, this.bindService);
+    });
+  }
 
-        if (!scopes.has(container)) {
-          scopes.set(container, new Set());
-        }
+  protected getScope: interfaces.DynamicValue<interfaces.Container> = ({
+    container,
+    currentRequest: { target },
+  }) => {
+    const name = target.getNamedTag()?.value as PluginOpaqueId | undefined;
 
-        const initialized = scopes.get(container)!;
-        if (!initialized.has(name)) {
-          const parent =
-            container.parent?.getNamed(target.serviceIdentifier as typeof Plugin, name) ??
-            container;
-          const scope = parent.createChild();
+    if (!name) {
+      throw new Error('Plugin instance must be named.');
+    }
 
-          scope.bind(Context).toConstantValue(container);
-          scope.bind(Id).toConstantValue(name);
+    if (!this.isScopeExist(container, name)) {
+      this.createScope(container, name);
+    }
 
-          container
-            .bind(Scope)
-            .toConstantValue(scope)
-            .whenTargetNamed(name)
-            .onDeactivation(() => {
-              initialized.delete(name);
-              scope.unbindAll();
-            });
+    return container.getNamed(Scope, name);
+  };
 
-          initialized.add(name);
-        }
+  protected bindService: interfaces.BindingActivation<interfaces.ServiceIdentifier<unknown>> = (
+    { container: scope },
+    service
+  ) => {
+    const context = scope.get(Context);
+    const name = scope.get(Id);
+    const index = this.getServicesCount(scope, service);
 
-        return container.getNamed(Scope, name);
+    this.incrementServicesCount(scope, service);
+    if (scope.parent !== context) {
+      this.incrementServicesCount(context, service);
+    }
+
+    context
+      .bind(service)
+      .toDynamicValue(({ container: origin }) => {
+        const target = PluginModule.getContext(origin).getNamed(Plugin, name);
+
+        this.bindServices(origin);
+        this.inheritServices(target);
+
+        return this.getServicesCount(scope, service) > 1
+          ? target.getAll(service)[index]
+          : target.get(service);
       })
       .inRequestScope();
 
-    const scoped = new WeakMap<
-      interfaces.Container,
-      Map<interfaces.ServiceIdentifier<unknown>, number>
-    >();
-    const contextual = new WeakMap<
-      interfaces.Container,
-      Map<interfaces.ServiceIdentifier<unknown>, number>
-    >();
-    const bound = new WeakSet<interfaces.Container>();
+    return service;
+  };
 
-    onActivation(Global, ({ container: scope }, service) => {
-      const context = scope.get(Context);
-      const name = scope.get(Id);
+  private isScopeExist(container: interfaces.Container, name: PluginOpaqueId) {
+    return !!this.scopes.get(container)?.has(name);
+  }
 
-      if (!scoped.has(scope)) {
-        scoped.set(scope, new Map());
+  private createScope(container: interfaces.Container, name: PluginOpaqueId) {
+    const parent = container.parent?.getNamed(Plugin, name) ?? container;
+    const scope = parent.createChild();
+
+    scope.bind(Context).toConstantValue(container);
+    scope.bind(Id).toConstantValue(name);
+
+    container
+      .bind(Scope)
+      .toConstantValue(scope)
+      .whenTargetNamed(name)
+      .onDeactivation(() => {
+        this.scopes.get(container)?.delete(name);
+        scope.unbindAll();
+      });
+
+    if (!this.scopes.has(container)) {
+      this.scopes.set(container, new Set());
+    }
+
+    this.scopes.get(container)?.add(name);
+  }
+
+  private getServicesCount(
+    scope: interfaces.Container,
+    service: interfaces.ServiceIdentifier<unknown>
+  ) {
+    return this.services.get(scope)?.get(service) ?? 0;
+  }
+
+  private incrementServicesCount(
+    scope: interfaces.Container,
+    service: interfaces.ServiceIdentifier<unknown>
+  ) {
+    if (!this.services.has(scope)) {
+      this.services.set(scope, new Map());
+    }
+
+    this.services.get(scope)?.set(service, this.getServicesCount(scope, service) + 1);
+  }
+
+  private bindServices(scope: interfaces.Container) {
+    if (this.bound.has(scope)) {
+      return;
+    }
+    this.bound.add(scope);
+
+    if (!scope.isCurrentBound(Global)) {
+      return;
+    }
+    scope.getAll(Global);
+  }
+
+  private inheritServices(scope: interfaces.Container) {
+    if (this.bound.has(scope)) {
+      return;
+    }
+    this.bound.add(scope);
+
+    for (const [service, count] of this.services.get(scope.get(Context)) ?? []) {
+      for (let index = 0; index < count; index++) {
+        scope
+          .bind(service)
+          .toDynamicValue(({ container }) => {
+            const context = container.get(Context);
+
+            return count > 1 ? context.getAll(service)[index] : context.get(service);
+          })
+          .inRequestScope();
       }
-
-      const counter = scoped.get(scope)!;
-      const index = counter.get(service) ?? 0;
-      counter.set(service, index + 1);
-
-      context
-        .bind(service)
-        .toDynamicValue(({ container: origin }) => {
-          const context = origin.isBound(Context) ? origin.get(Context) : origin;
-          const target = context.getNamed(Plugin, name);
-
-          if (!bound.has(origin)) {
-            bound.add(origin);
-            if (origin.isCurrentBound(Global)) {
-              origin.getAll(Global);
-            }
-          }
-
-          if (!bound.has(target) && contextual.has(context)) {
-            bound.add(target);
-            for (const [service, count] of contextual.get(context)!) {
-              for (let index = 0; index < count; index++) {
-                target
-                  .bind(service)
-                  .toDynamicValue(({ container }) => {
-                    const context = container.get(Context);
-
-                    return count > 1 ? context.getAll(service)[index] : context.get(service);
-                  })
-                  .inRequestScope();
-              }
-            }
-          }
-
-          return counter.get(service)! > 1 ? target.getAll(service)[index] : target.get(service);
-        })
-        .inRequestScope();
-
-      if (scope.parent !== context) {
-        if (!contextual.has(context)) {
-          contextual.set(context, new Map());
-        }
-
-        const counter = contextual.get(context)!;
-        counter.set(service, (counter.get(service) ?? 0) + 1);
-      }
-
-      return service;
-    });
-});
+    }
+  }
+}
