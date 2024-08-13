@@ -461,6 +461,18 @@
         "(?<depName>docker\\.elastic\\.co/wolfi/chainguard-base):(?<currentValue>[-a-zA-Z0-9.]+)?(?:@(?<currentDigest>sha256:[a-fA-F0-9]+))?"
       ],
       "datasourceTemplate": "docker"
+    },
+    {
+      "description": "Update pipelib image",
+      "customType": "regex",
+      "fileMatch": [
+        "^\\.buildkite/pipeline-resource-definitions/scripts/validate-pipeline-definition\\.sh$",
+        "^\\.buildkite/scripts/steps/checks/renovate\\.sh$"
+      ],
+      "matchStrings": [
+        "(?<depName>docker\\.elastic\\.co/ci-agent-images/pipelib):(?<currentValue>[-a-zA-Z0-9.]+)?(?:@(?<currentDigest>sha256:[a-fA-F0-9]+))?"
+      ],
+      "datasourceTemplate": "docker"
     }
   ]
 }

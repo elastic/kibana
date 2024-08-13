@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export enum AddWidgetMode {
-  Esql = 'esql',
-  Note = 'note',
-}
+export const investigationKeys = {
+  all: ['investigation'] as const,
+  list: (params: { page: number; perPage: number }) =>
+    [...investigationKeys.all, 'list', params] as const,
+};
+
+export type InvestigationKeys = typeof investigationKeys;
