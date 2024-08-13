@@ -388,7 +388,7 @@ export function getFormStateFromJobConfig(
   const analysisConfig = analyticsJobConfig.analysis[jobType];
 
   for (const key in analysisConfig) {
-    if (analysisConfig.hasOwnProperty(key)) {
+    if (Object.hasOwn(analysisConfig, key)) {
       const camelCased = toCamelCase(key);
       // @ts-ignore
       resultState[camelCased] = analysisConfig[key];

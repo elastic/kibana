@@ -20,7 +20,7 @@ pageLoadAssetSize:
   cloudSecurityPosture: 19109
   console: 46091
   contentManagement: 16254
-  controls: 55082
+  controls: 60000
   core: 435325
   crossClusterReplication: 65408
   customIntegrations: 22034
@@ -144,7 +144,7 @@ pageLoadAssetSize:
   searchprofiler: 67080
   security: 81771
   securitySolution: 98429
-  securitySolutionEss: 16573
+  securitySolutionEss: 31781
   securitySolutionServerless: 62488
   serverless: 16573
   serverlessObservability: 68747

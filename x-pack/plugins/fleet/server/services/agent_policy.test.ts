@@ -23,7 +23,7 @@ import type {
   NewAgentPolicy,
   PreconfiguredAgentPolicy,
 } from '../types';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 
 import { AGENT_POLICY_INDEX, SO_SEARCH_LIMIT } from '../../common';
 
@@ -43,31 +43,62 @@ import type { UninstallTokenServiceInterface } from './security/uninstall_token_
 
 function getSavedObjectMock(agentPolicyAttributes: any) {
   const mock = savedObjectsClientMock.create();
+  const mockPolicy = {
+    type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+    references: [],
+    attributes: agentPolicyAttributes as AgentPolicy,
+  };
   mock.get.mockImplementation(async (type: string, id: string) => {
     return {
-      type,
       id,
-      references: [],
-      attributes: agentPolicyAttributes as AgentPolicy,
+      ...mockPolicy,
+    };
+  });
+  mock.bulkGet.mockImplementation(async (options) => {
+    return {
+      saved_objects: [],
     };
   });
   mock.find.mockImplementation(async (options) => {
-    return {
-      saved_objects: [
-        {
-          id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
-          attributes: {
-            fleet_server_hosts: ['http://fleetserver:8220'],
-          },
-          type: 'ingest_manager_settings',
-          score: 1,
-          references: [],
-        },
-      ],
-      total: 1,
-      page: 1,
-      per_page: 1,
-    };
+    switch (options.type) {
+      case AGENT_POLICY_SAVED_OBJECT_TYPE:
+        return {
+          saved_objects: [
+            {
+              id: 'agent-policy-id',
+              score: 1,
+              ...mockPolicy,
+            },
+          ],
+          total: 1,
+          page: 1,
+          per_page: 1,
+        };
+      case PACKAGE_POLICY_SAVED_OBJECT_TYPE:
+        return {
+          saved_objects: [],
+          total: 0,
+          page: 1,
+          per_page: 1,
+        };
+      default:
+        return {
+          saved_objects: [
+            {
+              id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+              attributes: {
+                fleet_server_hosts: ['http://fleetserver:8220'],
+              },
+              type: 'ingest_manager_settings',
+              score: 1,
+              references: [],
+            },
+          ],
+          total: 1,
+          page: 1,
+          per_page: 1,
+        };
+    }
   });
 
   return mock;
@@ -754,12 +785,12 @@ describe('Agent policy', () => {
         [
           expect.objectContaining({
             attributes: expect.objectContaining({
-              fleet_server_hosts: ['http://fleetserver:8220'],
-              revision: NaN,
-              updated_by: 'system',
+              monitoring_enabled: ['metrics'],
             }),
-            id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
-            type: 'ingest_manager_settings',
+            id: 'agent-policy-id',
+            namespace: undefined,
+            type: 'ingest-agent-policies',
+            version: undefined,
           }),
         ],
         expect.objectContaining({

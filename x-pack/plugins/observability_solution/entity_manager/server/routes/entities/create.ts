@@ -6,7 +6,12 @@
  */
 
 import { RequestHandlerContext } from '@kbn/core/server';
-import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
+import {
+  EntityDefinition,
+  entityDefinitionSchema,
+  createEntityDefinitionQuerySchema,
+  CreateEntityDefinitionQuery,
+} from '@kbn/entities-schema';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { SetupRouteOptions } from '../types';
 import { EntityIdConflict } from '../../lib/entities/errors/entity_id_conflict_error';
@@ -19,11 +24,12 @@ export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
   server,
 }: SetupRouteOptions<T>) {
-  router.post<unknown, unknown, EntityDefinition>(
+  router.post<unknown, CreateEntityDefinitionQuery, EntityDefinition>(
     {
       path: '/internal/entities/definition',
       validate: {
         body: buildRouteValidationWithZod(entityDefinitionSchema.strict()),
+        query: buildRouteValidationWithZod(createEntityDefinitionQuerySchema),
       },
     },
     async (context, req, res) => {
@@ -39,7 +45,9 @@ export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
           definition: req.body,
         });
 
-        await startTransform(esClient, definition, logger);
+        if (!req.query.installOnly) {
+          await startTransform(esClient, definition, logger);
+        }
 
         return res.ok({ body: definition });
       } catch (e) {

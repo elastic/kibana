@@ -8,3 +8,20 @@
 
 export { formatRequest } from './src/format_request';
 export { parseEndpoint } from './src/parse_endpoint';
+
+export type {
+  ServerRouteCreateOptions,
+  ServerRouteHandlerResources,
+  RouteParamsRT,
+  ServerRoute,
+  EndpointOf,
+  ReturnOf,
+  RouteRepositoryClient,
+  RouteState,
+  ClientRequestParamsOf,
+  DecodedRequestParamsOf,
+  ServerRouteRepository,
+  DefaultClientOptions,
+  DefaultRouteCreateOptions,
+  DefaultRouteHandlerResources,
+} from './src/typings';

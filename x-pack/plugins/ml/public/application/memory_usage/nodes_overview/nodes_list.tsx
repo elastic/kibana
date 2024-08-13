@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { usePageUrlState } from '@kbn/ml-url-state';
+import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import type { ModelsBarStats } from '../../components/stats_bar';
 import { StatsBar } from '../../components/stats_bar';
 import type { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
@@ -28,7 +29,6 @@ import { useTableSettings } from '../../data_frame_analytics/pages/analytics_man
 import { ExpandedRow } from './expanded_row';
 import { MemoryPreviewChart } from './memory_preview_chart';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
-import type { ListingPageUrlState } from '../../../../common/types/common';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { useRefresh } from '../../routing/use_refresh';
 
