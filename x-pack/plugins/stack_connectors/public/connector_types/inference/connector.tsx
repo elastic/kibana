@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect, ReactNode, useMemo, useCallback } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import {
   EuiFormRow,
   EuiSpacer,
@@ -17,9 +18,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import {
-  FieldConfig,
   getFieldValidityAndErrorMessage,
   UseField,
+  useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
@@ -32,8 +33,9 @@ import {
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { ConnectorConfigurationFormItems } from '../lib/dynamic_config/connector_configuration_form_items';
 import { getProviders, InferenceProvider } from './get_providers';
+import { getTaskTypes, InferenceTaskType } from './get_task_types';
 import * as i18n from './translations';
-import { DEFAULT_TASK_TYPE, SUPPORTED_TASK_TYPES } from './constants';
+import { DEFAULT_TASK_TYPE, DEFAULT_PROVIDER } from './constants';
 import { ConfigEntryView, ConfigProperties } from '../lib/dynamic_config/types';
 import { Config, Secrets } from './types';
 
@@ -41,6 +43,11 @@ interface ProviderOption {
   value: string;
   label: string;
   prepend?: ReactNode;
+}
+
+interface TaskTypeOption {
+  value: string;
+  label: string;
 }
 
 const { emptyField } = fieldValidators;
@@ -62,39 +69,30 @@ export const getProvidersOptions = (providers: InferenceProvider[]): ProviderOpt
   return options;
 };
 
-const getInferenceConfig = (): FieldConfig => ({
-  label: i18n.PROVIDER,
-  helpText: (
-    <FormattedMessage
-      defaultMessage="Inference API provider service. For more information on the URL, refer to the {inferenceAPIUrlDocs}."
-      id="xpack.stackConnectors.components.inference.inferenceAPIDocumentation"
-      values={{
-        inferenceAPIUrlDocs: (
-          <EuiLink
-            data-test-subj="inference-api-doc"
-            href="https://www.elastic.co/guide/en/elasticsearch/reference/current/put-inference-api.html#put-inference-api-request-body"
-            target="_blank"
-          >
-            {i18n.DOCUMENTATION}
-          </EuiLink>
-        ),
-      }}
-    />
-  ),
-  validations: [
-    {
-      validator: emptyField(i18n.PROVIDER_REQUIRED),
-    },
-  ],
-});
+export const getTaskTypeOptions = (providers: InferenceTaskType[]): TaskTypeOption[] => {
+  const options: ProviderOption[] = [];
+
+  providers.forEach((p: InferenceTaskType) => {
+    options.push({
+      label: p.task_type,
+      value: p.task_type,
+    });
+  });
+  return options;
+};
 
 const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
+  isEdit,
+  // registerPreSubmitValidator
 }) => {
   const { http } = useKibana().services;
+  const { updateFieldValues, setFieldValue } = useFormContext();
   const [{ config, secrets }] = useFormData<ConnectorFormSchema<Config, Secrets>>({
     watch: [
       'config.taskType',
+      'config.taskTypeSchema',
+      'config.taskTypeConfig',
       'config.inferenceId',
       'config.provider',
       'config.providerSchema',
@@ -103,12 +101,20 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
     ],
   });
 
-  const [selectedProvider, setSelectedProvider] = useState<InferenceProvider | undefined>();
+  const [selectedProvider, setSelectedProvider] = useState<string>(DEFAULT_PROVIDER);
   const [providersOptions, setProvidersOptions] = useState<EuiComboBoxOptionOption[]>([]);
+  const [taskTypeOptions, setTaskTypeOptions] = useState<EuiComboBoxOptionOption[]>([]);
   const [providers, setProviders] = useState<InferenceProvider[]>([]);
-  const [selectedTaskType, setSelectedTaskType] = useState<string>(
-    config?.taskType ?? 'completion'
-  );
+  const [taskTypes, setTaskTypes] = useState<InferenceTaskType[]>([]);
+  const [selectedTaskType, setSelectedTaskType] = useState<string>(DEFAULT_TASK_TYPE);
+
+  useEffect(() => {
+    if (!isEdit && config && !config.inferenceId) {
+      config.inferenceId = uuidv4();
+      setFieldValue('config.inferenceId', config.inferenceId);
+      console.log(config.inferenceId);
+    }
+  }, [config, isEdit, setFieldValue, updateFieldValues]);
 
   useEffect(() => {
     const loadProvidersFunction = async () => {
@@ -121,6 +127,17 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
     loadProvidersFunction();
   }, [selectedTaskType, http]);
 
+  useEffect(() => {
+    const loadTaskTypesFunction = async () => {
+      const currentTaskTypes = await getTaskTypes(http!, selectedProvider);
+      if (Array.isArray(currentTaskTypes)) {
+        setTaskTypeOptions(getTaskTypeOptions(currentTaskTypes));
+        setTaskTypes(currentTaskTypes);
+      }
+    };
+    loadTaskTypesFunction();
+  }, [http, selectedProvider]);
+
   const providerForm: ConfigEntryView[] = useMemo(() => {
     const existingConfiguration = (config?.providerSchema ?? []).map((item: ConfigEntryView) => {
       const itemValue = item;
@@ -132,14 +149,15 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       return itemValue;
     });
 
+    const selectedProviderConfig = providers.find((t) => t.provider === selectedProvider);
     const result: ConfigEntryView[] = (
-      config?.providerConfig && secrets?.providerSecrets
+      config?.providerConfig || secrets?.providerSecrets
         ? existingConfiguration
-        : Object.keys(selectedProvider?.configuration ?? []).map((k: string) => ({
+        : Object.keys(selectedProviderConfig?.configuration ?? []).map((k: string) => ({
             key: k,
             isValid: true,
             validationErrors: [],
-            ...(selectedProvider?.configuration[k] as ConfigProperties),
+            ...(selectedProviderConfig?.configuration[k] as ConfigProperties),
           }))
     ).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
@@ -147,20 +165,88 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       config.providerSchema = result;
     }
     return result;
-  }, [config, secrets, selectedProvider]);
+  }, [config, providers, secrets?.providerSecrets, selectedProvider]);
 
-  const onProviderSelect = useCallback(
-    (provider) => {
-      const newProvider = providers.find((p) => p.provider === provider[0].label);
-      setSelectedProvider(newProvider);
+  const getProviderForm = useCallback(
+    (isFirstColumn: boolean) => {
+      const indexToSplit = Math.floor(providerForm.length / 2);
+      const firstHalf = providerForm.slice(0, indexToSplit);
+      const secondHalf = providerForm.slice(indexToSplit);
+      return isFirstColumn ? firstHalf : secondHalf;
+    },
+    [providerForm]
+  );
+
+  const taskTypeForm: ConfigEntryView[] = useMemo(() => {
+    const existingConfiguration = (config?.taskTypeSchema ?? []).map((item: ConfigEntryView) => {
+      if (config?.taskTypeConfig) {
+        item.value = config?.taskTypeConfig[item.key] as any;
+      }
+      return item;
+    });
+
+    const selectedTaskTypeConfig = taskTypes.find((t) => t.task_type === selectedTaskType);
+    const result: ConfigEntryView[] = (
+      config?.taskTypeConfig
+        ? existingConfiguration
+        : Object.keys(selectedTaskTypeConfig?.configuration ?? []).map((k: string) => ({
+            key: k,
+            isValid: true,
+            validationErrors: [],
+            ...(selectedTaskTypeConfig?.configuration[k] as ConfigProperties),
+          }))
+    ).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+    if (config) {
+      config.taskTypeSchema = result;
+    }
+    return result;
+  }, [config, selectedTaskType, taskTypes]);
+
+  const getTaskTypeForm = useCallback(
+    (isFirstColumn: boolean) => {
+      const indexToSplit = Math.ceil(taskTypeForm.length / 2);
+      const firstHalf = taskTypeForm.slice(0, indexToSplit);
+      const secondHalf = taskTypeForm.slice(indexToSplit);
+      return isFirstColumn ? firstHalf : secondHalf;
+    },
+    [taskTypeForm]
+  );
+
+  const onProviderOptionsSelect = useCallback(
+    (providerOptions) => {
+      const provider = providerOptions[0].label;
+      const newProvider = providers.find((p) => p.provider === provider);
+      setSelectedProvider(newProvider?.provider ?? DEFAULT_PROVIDER);
       config.provider = provider;
       config.providerSchema = Object.keys(newProvider?.configuration ?? []).map((k) => ({
         key: k,
         isValid: true,
         ...newProvider?.configuration[k],
       })) as ConfigEntryView[];
+
+      updateFieldValues({
+        config: {
+          provider,
+          providerSchema: config.providerSchema,
+        },
+      });
     },
-    [config, providers]
+    [config, providers, updateFieldValues]
+  );
+
+  const onTaskTypeOptionsSelect = useCallback(
+    (taskType) => {
+      const newTaskType = taskTypes.find((p) => p.task_type === taskType);
+      setSelectedTaskType(newTaskType?.task_type ?? DEFAULT_TASK_TYPE);
+      config.taskType = taskType;
+      config.taskTypeSchema = Object.keys(newTaskType?.configuration ?? []).map((k) => ({
+        key: k,
+        isValid: true,
+        ...newTaskType?.configuration[k],
+      })) as ConfigEntryView[];
+    },
+    [config, taskTypes]
   );
 
   const onSetConfigEntry = useCallback(
@@ -187,21 +273,35 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
 
   return (
     <>
+      <FormattedMessage
+        defaultMessage="Elasticsearch provides access to managed and third party inference providers which are accessible through Inference Endpoint. Learn more about Inference Endpoints {inferenceAPIUrlDocs}."
+        id="xpack.stackConnectors.components.inference.inferenceAPIDocumentation"
+        values={{
+          inferenceAPIUrlDocs: (
+            <EuiLink
+              data-test-subj="inference-api-doc"
+              href="https://www.elastic.co/guide/en/elasticsearch/reference/current/inference-apis"
+              target="_blank"
+            >
+              {i18n.DOCUMENTATION}
+            </EuiLink>
+          ),
+        }}
+      />
+      <EuiSpacer size="m" />
       <UseField
         path="config.taskType"
         component={SelectField}
         defaultValue={DEFAULT_TASK_TYPE}
+        isDisabled={readOnly || isEdit}
         config={{
           label: i18n.TASK_TYPE,
         }}
-        onChange={(taskType: string) => {
-          setSelectedTaskType(taskType);
-          config.taskType = taskType;
-        }}
+        onChange={onTaskTypeOptionsSelect}
         componentProps={{
           euiFieldProps: {
             'data-test-subj': 'taskTypeSelect',
-            options: SUPPORTED_TASK_TYPES,
+            options: taskTypeOptions,
             fullWidth: true,
             readOnly,
           },
@@ -214,8 +314,32 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
         }}
       />
       <EuiSpacer size="m" />
+      <EuiTitle size="xxs" data-test-subj="task-type-details-label">
+        <h4>
+          <FormattedMessage
+            id="xpack.stackConnectors.components.inference.taskTypeDetailsLabel"
+            defaultMessage="Task type details"
+          />
+        </h4>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <ConnectorConfigurationFormItems
+        itemsGrow={false}
+        isLoading={false}
+        items={getTaskTypeForm(true)}
+        setConfigEntry={onSetConfigEntry}
+      />
+      <EuiSpacer size="m" />
+      <ConnectorConfigurationFormItems
+        itemsGrow={false}
+        isLoading={false}
+        items={getTaskTypeForm(false)}
+        setConfigEntry={onSetConfigEntry}
+      />
 
-      <UseField path="config.provider" config={getInferenceConfig()}>
+      <EuiSpacer size="m" />
+
+      <UseField path="config.provider">
         {(field) => {
           const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
@@ -233,12 +357,12 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
               error={errorMessage}
               helpText={
                 <FormattedMessage
-                  defaultMessage="Inference API provider service. For more information on the URL, refer to the {inferenceAPIUrlDocs}."
-                  id="xpack.stackConnectors.components.inference.inferenceAPIDocumentation"
+                  defaultMessage="Inference API provider service. For more information on the URL, refer to the {inferencePutAPIUrlDocs}."
+                  id="xpack.stackConnectors.components.inference.inferencePutAPIDocumentation"
                   values={{
-                    inferenceAPIUrlDocs: (
+                    inferencePutAPIUrlDocs: (
                       <EuiLink
-                        data-test-subj="inference-api-doc"
+                        data-test-subj="inference-put-api-doc"
                         href="https://www.elastic.co/guide/en/elasticsearch/reference/current/put-inference-api.html#put-inference-api-request-body"
                         target="_blank"
                       >
@@ -257,9 +381,13 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
                 options={providersOptions}
                 data-test-subj="providersComboBox"
                 data-testid="providersComboBox"
-                selectedOptions={selectedProvider ? getProvidersOptions([selectedProvider]) : []}
-                isDisabled={readOnly}
-                onChange={onProviderSelect}
+                selectedOptions={
+                  selectedProvider
+                    ? getProvidersOptions(providers.filter((p) => p.provider === selectedProvider))
+                    : []
+                }
+                isDisabled={readOnly || isEdit}
+                onChange={onProviderOptionsSelect}
               />
             </EuiFormRow>
           );
@@ -278,14 +406,14 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       <ConnectorConfigurationFormItems
         itemsGrow={false}
         isLoading={false}
-        items={providerForm.splice(0, providerForm.length / 2)}
+        items={getProviderForm(true)}
         setConfigEntry={onSetConfigEntry}
       />
       <EuiSpacer size="m" />
       <ConnectorConfigurationFormItems
         itemsGrow={false}
         isLoading={false}
-        items={providerForm.splice(providerForm.length / 2 - 1, providerForm.length)}
+        items={getProviderForm(false)}
         setConfigEntry={onSetConfigEntry}
       />
     </>

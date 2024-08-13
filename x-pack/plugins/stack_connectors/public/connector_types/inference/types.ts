@@ -16,8 +16,11 @@ export interface InferenceActionParams {
 }
 
 export interface Config {
-  provider: string;
   taskType: string;
+  taskTypeSchema?: ConfigEntryView[];
+  taskTypeConfig?: Record<string, unknown>;
+  inferenceId: string;
+  provider: string;
   providerConfig?: Record<string, unknown>;
   providerSchema: ConfigEntryView[];
 }

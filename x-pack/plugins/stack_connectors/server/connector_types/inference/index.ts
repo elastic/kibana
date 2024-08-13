@@ -51,21 +51,47 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
     }); */
 
     const esClient = scopedClusterClient?.asCurrentUser;
-    const res = await esClient?.transport.request({
-      path: `/_inference/${config?.taskType}/${config?.inferenceId}`,
-      method: 'PUT',
-      body: {
-        ...config?.providerConfig,
-        ...secrets?.providerSecrets,
-      },
-    });
+    try {
+      const res = await esClient?.transport.request({
+        path: `/_inference/${config?.taskType}/${config?.inferenceId}`,
+        method: 'PUT',
+        body: {
+          ...config?.providerConfig,
+          ...secrets?.providerSecrets,
+        },
+      });
+      console.log(res);
+      logger.info(
+        `Inference endpoint for task type "${config?.taskType}" and inference id ${
+          config?.inferenceId
+        } was successfuly ${isUpdate ? 'update' : 'create'}`
+      );
+    } catch (e) {
+      logger.error(
+        `Failed to ${isUpdate ? 'update' : 'create'} inference endpoint for task type "${
+          config?.taskType
+        }" and inference id ${config?.inferenceId}. Error: ${e.message}`
+      );
+      throw e;
+    }
   },
   postDeleteEventHandler: async ({ config, logger, scopedClusterClient }) => {
     const esClient = scopedClusterClient?.asCurrentUser;
-    const res = await esClient?.transport.request({
-      path: `/_inference/${config?.taskType}/${config?.inferenceId}`,
-      method: 'DELETE',
-    });
+    try {
+      const res = await esClient?.transport.request({
+        path: `/_inference/${config?.taskType}/${config?.inferenceId}`,
+        method: 'DELETE',
+      });
+      console.log(res);
+      logger.info(
+        `Inference endpoint for task type "${config?.taskType}" and inference id ${config?.inferenceId} was successfuly deleted`
+      );
+    } catch (e) {
+      logger.error(
+        `Failed to delete inference endpoint for task type "${config?.taskType}" and inference id ${config?.inferenceId}. Error: ${e.message}`
+      );
+      throw e;
+    }
   },
 });
 

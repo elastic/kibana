@@ -16,7 +16,7 @@ export interface InferenceProvider {
   configuration: ProviderConfiguration;
 }
 
-export const getProviders = (http: HttpSetup, taskType: string): Promise<InferenceProvider[]> => {
+export const getProviders = (http: HttpSetup, taskType?: string): Promise<InferenceProvider[]> => {
   return Promise.resolve([
     {
       provider: 'openai',
@@ -142,5 +142,67 @@ export const getProviders = (http: HttpSetup, taskType: string): Promise<Inferen
         },
       },
     } as InferenceProvider,
+    {
+      provider: 'elasticsearch',
+      logo: 'logoElasticsearch', // openai logo here
+      configuration: {
+        api_key: {
+          display: DisplayType.TEXTBOX,
+          label: 'API Key',
+          order: 1,
+          required: true,
+          sensitive: true,
+          tooltip: `API Key for the provider you're connecting to`,
+          type: FieldType.STRING,
+          validations: [],
+          value: null,
+          ui_restrictions: [],
+          default_value: null,
+          depends_on: [],
+        },
+        model_id: {
+          display: DisplayType.TEXTBOX,
+          label: 'Model ID',
+          order: 2,
+          required: true,
+          sensitive: false,
+          tooltip: `ID of the LLM you're using`,
+          type: FieldType.STRING,
+          validations: [],
+          value: null,
+          ui_restrictions: [],
+          default_value: null,
+          depends_on: [],
+        },
+        organization_id: {
+          display: DisplayType.TEXTBOX,
+          label: 'Organization ID',
+          order: 3,
+          required: false,
+          sensitive: false,
+          tooltip: 'Your OrganizationID from the provider',
+          type: FieldType.STRING,
+          validations: [],
+          value: null,
+          ui_restrictions: [],
+          default_value: null,
+          depends_on: [],
+        },
+        url: {
+          display: DisplayType.TEXTBOX,
+          label: 'URL',
+          order: 4,
+          required: false,
+          sensitive: false,
+          tooltip: '',
+          type: FieldType.STRING,
+          validations: [],
+          value: 'https://api.openai.com/v1/embeddings',
+          ui_restrictions: [],
+          default_value: 'https://api.openai.com/v1/embeddings',
+          depends_on: [],
+        },
+      },
+    },
   ]);
 };

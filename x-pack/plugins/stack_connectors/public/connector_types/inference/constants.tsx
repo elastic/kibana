@@ -11,9 +11,4 @@ export const DEFAULT_CHAT_COMPLETE_BODY = JSON.stringify({
 
 export const DEFAULT_TASK_TYPE = 'completion';
 
-export const SUPPORTED_TASK_TYPES = [
-  {
-    label: 'completion',
-    value: 'completion',
-  },
-];
+export const DEFAULT_PROVIDER = 'elasticsearch';
