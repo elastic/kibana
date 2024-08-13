@@ -4,14 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
-import classNames from 'classnames';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { useTheme } from '../../hooks/use_theme';
 import { InvestigateTextButton } from '../investigate_text_button';
-import { InvestigateWidgetGridItemOverride } from '../investigate_widget_grid';
 
 export const GRID_ITEM_HEADER_HEIGHT = 40;
 
@@ -20,16 +17,9 @@ interface GridItemProps {
   title: string;
   description: string;
   children: React.ReactNode;
-  locked: boolean;
   onCopy: () => void;
-  onTitleChange: (title: string) => void;
   onDelete: () => void;
-  onLockToggle: () => void;
   loading: boolean;
-  faded: boolean;
-  onOverrideRemove: (override: InvestigateWidgetGridItemOverride) => Promise<void>;
-  onEditClick: () => void;
-  overrides: InvestigateWidgetGridItemOverride[];
 }
 
 const editTitleButtonClassName = `investigateGridItemTitleEditButton`;
@@ -43,17 +33,6 @@ const titleItemClassName = css`
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-`;
-
-const fadedClassName = css`
-  opacity: 0.5 !important;
-`;
-
-const lockedControlClassName = css`
-  opacity: 0.9 !important;
-  &:hover {
-    opacity: 1 !important;
   }
 `;
 
@@ -78,28 +57,14 @@ const headerClassName = css`
   height: ${GRID_ITEM_HEADER_HEIGHT}px;
 `;
 
-const changeBadgeClassName = css`
-  max-width: 96px;
-  .euiText {
-    text-overflow: ellipsis;
-    overflow: hidden;
-  }
-`;
-
 export function GridItem({
   id,
   title,
   description,
   children,
-  locked,
-  onLockToggle,
   onDelete,
   onCopy,
   loading,
-  faded,
-  overrides,
-  onOverrideRemove,
-  onEditClick,
 }: GridItemProps) {
   const theme = useTheme();
 
@@ -118,7 +83,7 @@ export function GridItem({
     <EuiFlexGroup
       direction="column"
       gutterSize="none"
-      className={faded ? classNames(containerClassName, fadedClassName) : containerClassName}
+      className={containerClassName}
       alignItems="stretch"
     >
       <EuiFlexItem grow={false}>
@@ -132,33 +97,6 @@ export function GridItem({
             <EuiText size="s" className={titleItemClassName}>
               {title}
             </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {overrides.length ? (
-              <EuiFlexGroup direction="row" gutterSize="xs" justifyContent="flexStart">
-                {overrides.map((override) => (
-                  <EuiFlexItem key={override.id} grow={false}>
-                    <EuiBadge
-                      color="primary"
-                      className={changeBadgeClassName}
-                      iconType="cross"
-                      iconSide="right"
-                      iconOnClick={() => {
-                        onOverrideRemove(override);
-                      }}
-                      iconOnClickAriaLabel={i18n.translate(
-                        'xpack.investigateApp.gridItem.removeOverrideButtonAriaLabel',
-                        {
-                          defaultMessage: 'Remove filter',
-                        }
-                      )}
-                    >
-                      <EuiText size="xs">{override.label}</EuiText>
-                    </EuiBadge>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            ) : null}
           </EuiFlexItem>
           <EuiFlexItem grow={false} className="gridItemControls">
             <EuiFlexGroup
@@ -181,26 +119,6 @@ export function GridItem({
                   iconType="trash"
                   onClick={() => {
                     onDelete();
-                  }}
-                  disabled={loading}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <InvestigateTextButton
-                  iconType="pencil"
-                  onClick={() => {
-                    onEditClick();
-                  }}
-                  disabled={loading}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <InvestigateTextButton
-                  iconType={locked ? 'lock' : 'lockOpen'}
-                  className={locked ? lockedControlClassName : ''}
-                  color={locked ? 'primary' : 'text'}
-                  onClick={() => {
-                    onLockToggle();
                   }}
                   disabled={loading}
                 />

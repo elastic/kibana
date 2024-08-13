@@ -15,17 +15,23 @@ export async function getAllLocations({
   syntheticsMonitorClient,
   savedObjectsClient,
   server,
+  excludeAgentPolicies = false,
 }: {
   server: SyntheticsServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
   savedObjectsClient: SavedObjectsClientContract;
+  excludeAgentPolicies?: boolean;
 }) {
   try {
     const [
       { locations: privateLocations, agentPolicies },
       { locations: publicLocations, throttling },
     ] = await Promise.all([
-      getPrivateLocationsAndAgentPolicies(savedObjectsClient, syntheticsMonitorClient),
+      getPrivateLocationsAndAgentPolicies(
+        savedObjectsClient,
+        syntheticsMonitorClient,
+        excludeAgentPolicies
+      ),
       getServicePublicLocations(server, syntheticsMonitorClient),
     ]);
     return {

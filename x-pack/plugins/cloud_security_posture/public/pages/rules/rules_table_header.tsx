@@ -42,8 +42,6 @@ export const RULES_SELECT_ALL_RULES = 'select-all-rules-button';
 export const RULES_CLEAR_ALL_RULES_SELECTION = 'clear-rules-selection-button';
 export const RULES_DISABLED_FILTER = 'rules-disabled-filter';
 export const RULES_ENABLED_FILTER = 'rules-enabled-filter';
-export const CIS_SECTION_FILTER = 'cis-section-filter';
-export const RULE_NUMBER_FILTER = 'rule-number-filter';
 
 interface RulesTableToolbarProps {
   search: (value: string) => void;

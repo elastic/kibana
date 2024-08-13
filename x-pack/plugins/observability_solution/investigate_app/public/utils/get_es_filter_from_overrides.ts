@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { type BoolQuery, buildEsQuery, type Filter } from '@kbn/es-query';
+import { buildEsQuery, type BoolQuery } from '@kbn/es-query';
 
 export function getEsFilterFromOverrides({
-  filters,
   timeRange,
 }: {
-  filters?: Filter[];
   timeRange?: {
     from: string;
     to: string;
   };
 }): { bool: BoolQuery } {
-  const esFilter = buildEsQuery(undefined, [], filters ?? []);
+  const esFilter = buildEsQuery(undefined, [], []);
 
   if (timeRange) {
     esFilter.bool.filter.push({
