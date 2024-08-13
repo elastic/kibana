@@ -61,11 +61,13 @@ export interface EcsMappingState {
   rawSamples: string[];
   samples: string[];
   formattedSamples: string;
+  sampleChunks: string[];
   exAnswer: string;
   packageName: string;
   dataStreamName: string;
   finalized: boolean;
   currentMapping: object;
+  finalMapping: object;
   currentPipeline: object;
   duplicateFields: string[];
   missingKeys: string[];

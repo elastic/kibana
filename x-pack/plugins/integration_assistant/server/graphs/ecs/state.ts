@@ -1,0 +1,89 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { StateGraphArgs } from '@langchain/langgraph';
+import type { EcsMappingState } from '../../types';
+import { merge } from './chunk';
+
+export const graphState: StateGraphArgs<EcsMappingState>['channels'] = {
+  ecs: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => '',
+  },
+  lastExecutedChain: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => '',
+  },
+  rawSamples: {
+    value: (x: string[], y?: string[]) => y ?? x,
+    default: () => [],
+  },
+  samples: {
+    value: (x: string[], y?: string[]) => y ?? x,
+    default: () => [],
+  },
+  formattedSamples: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => '',
+  },
+  sampleChunks: {
+    value: (x: string[], y?: string[]) => y ?? x,
+    default: () => [],
+  },
+  exAnswer: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => '',
+  },
+  packageName: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => '',
+  },
+  dataStreamName: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => '',
+  },
+  finalized: {
+    value: (x: boolean, y?: boolean) => y ?? x,
+    default: () => false,
+  },
+  currentMapping: {
+    value: (x: object, y?: object) => y ?? x,
+    default: () => ({}),
+  },
+  finalMapping: {
+    reducer: merge,
+    default: () => ({}),
+  },
+  currentPipeline: {
+    value: (x: object, y?: object) => y ?? x,
+    default: () => ({}),
+  },
+  duplicateFields: {
+    value: (x: string[], y?: string[]) => y ?? x,
+    default: () => [],
+  },
+  missingKeys: {
+    value: (x: string[], y?: string[]) => y ?? x,
+    default: () => [],
+  },
+  invalidEcsFields: {
+    value: (x: string[], y?: string[]) => y ?? x,
+    default: () => [],
+  },
+  results: {
+    value: (x: object, y?: object) => y ?? x,
+    default: () => ({}),
+  },
+  logFormat: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => 'json',
+  },
+  ecsVersion: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => '8.11.0',
+  },
+};
