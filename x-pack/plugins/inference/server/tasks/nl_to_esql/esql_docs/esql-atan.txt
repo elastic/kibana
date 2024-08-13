@@ -1,0 +1,15 @@
+## ATAN
+
+The `ATAN` function returns the arctangent of the input numeric expression as an angle, expressed in radians.
+
+### Examples
+
+```esql
+ROW a=12.9
+| EVAL atan = ATAN(a)
+```
+
+```esql
+ROW x=5.0, y=3.0
+| EVAL atan_yx = ATAN(y / x)
+```

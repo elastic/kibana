@@ -1,0 +1,41 @@
+## MV_EXPAND
+
+The `MV_EXPAND` processing command expands multivalued columns into one row per value, duplicating other columns. This command is useful when you need to normalize data that contains multivalued fields, making it easier to perform operations on each individual value. 
+
+### Use Cases
+- **Normalization**: Transform multivalued fields into single-valued rows for easier analysis and processing.
+- **Data Transformation**: Prepare data for further operations like sorting, filtering, or aggregating by expanding multivalued fields.
+- **Data Cleaning**: Simplify complex data structures by breaking down multivalued fields into individual rows.
+
+### Limitations
+- This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+
+### Examples
+
+#### Example 1: Basic Expansion
+Expanding a multivalued column `a` into individual rows.
+
+```esql
+ROW a=[1,2,3], b="b", j=["a","b"]
+| MV_EXPAND a
+```
+
+#### Example 2: Expanding Multiple Columns
+Expanding two multivalued columns `a` and `j` into individual rows.
+
+```esql
+ROW a=[1,2,3], b="b", j=["a","b"]
+| MV_EXPAND a
+| MV_EXPAND j
+```
+
+#### Example 3: Combining with Other Commands
+Expanding a multivalued column and then filtering the results.
+
+```esql
+ROW a=[1,2,3,4,5], b="b"
+| MV_EXPAND a
+| WHERE a > 2
+```
+
+These examples demonstrate different ways to use the `MV_EXPAND` command to transform and analyze data with multivalued fields.

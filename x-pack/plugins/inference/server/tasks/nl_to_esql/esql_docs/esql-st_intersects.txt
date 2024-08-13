@@ -1,0 +1,16 @@
+## ST_INTERSECTS
+
+The `ST_INTERSECTS` function returns true if two geometries intersect. They intersect if they have any point in common, including their interior points (points along lines or within polygons). This is the inverse of the `ST_DISJOINT` function. In mathematical terms: `ST_Intersects(A, B) ⇔ A ⋂ B ≠ ∅`.
+
+### Examples
+
+```esql
+FROM airports
+| WHERE ST_INTERSECTS(location, TO_GEOSHAPE("POLYGON((42 14, 43 14, 43 15, 42 15, 42 14))"))
+```
+
+```esql
+FROM city_boundaries
+| WHERE ST_INTERSECTS(boundary, TO_GEOSHAPE("POLYGON((10 10, 20 10, 20 20, 10 20, 10 10))"))
+| KEEP city_name, boundary
+```

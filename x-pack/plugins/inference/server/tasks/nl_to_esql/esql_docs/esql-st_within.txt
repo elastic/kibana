@@ -1,0 +1,17 @@
+## ST_WITHIN
+
+The `ST_WITHIN` function returns whether the first geometry is within the second geometry. This is the inverse of the `ST_CONTAINS` function.
+
+### Examples
+
+```esql
+FROM airport_city_boundaries
+| WHERE ST_WITHIN(city_boundary, TO_GEOSHAPE("POLYGON((109.1 18.15, 109.6 18.15, 109.6 18.65, 109.1 18.65, 109.1 18.15))"))
+| KEEP abbrev, airport, region, city, city_location
+```
+
+```esql
+FROM parks
+| WHERE ST_WITHIN(park_boundary, TO_GEOSHAPE("POLYGON((40.7128 -74.0060, 40.7128 -73.9352, 40.7306 -73.9352, 40.7306 -74.0060, 40.7128 -74.0060))"))
+| KEEP park_name, park_boundary
+```

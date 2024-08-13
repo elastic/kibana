@@ -6,7 +6,8 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { ActionsClient } from '@kbn/actions-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { Logger } from '@kbn/logging';
 import { isSupportedConnectorType } from '../../common/connectors';
 import { createInferenceRequestError } from '../../common/errors';
 import { createChatCompleteApi } from '../chat_complete';
@@ -16,8 +17,12 @@ import { createOutputApi } from '../../common/output/create_output_api';
 export function createInferenceClient({
   request,
   actions,
-}: { request: KibanaRequest } & Pick<InferenceStartDependencies, 'actions'>): InferenceClient {
-  const chatComplete = createChatCompleteApi({ request, actions });
+  logger,
+}: { request: KibanaRequest; logger: Logger } & Pick<
+  InferenceStartDependencies,
+  'actions'
+>): InferenceClient {
+  const chatComplete = createChatCompleteApi({ request, actions, logger });
   return {
     chatComplete,
     output: createOutputApi(chatComplete),

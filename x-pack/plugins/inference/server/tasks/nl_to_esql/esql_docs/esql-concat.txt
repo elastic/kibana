@@ -1,0 +1,16 @@
+## CONCAT
+
+The `CONCAT` function concatenates two or more strings.
+
+### Examples
+
+```esql
+FROM employees
+| KEEP first_name, last_name
+| EVAL fullname = CONCAT(first_name, " ", last_name)
+```
+
+```esql
+ROW part1 = "Hello", part2 = "World"
+| EVAL greeting = CONCAT(part1, " ", part2)
+```

@@ -1,0 +1,53 @@
+## SORT
+
+The `SORT` processing command in ES|QL is used to sort a table based on one or more columns. This command is essential for organizing data in a specific order, which can be particularly useful for reporting, data analysis, and visualization. The default sort order is ascending, but you can specify descending order using `DESC`. Additionally, you can handle null values explicitly by using `NULLS FIRST` or `NULLS LAST`.
+
+### Use Cases
+- **Organizing Data**: Sort data to make it easier to read and analyze.
+- **Reporting**: Generate reports where data needs to be presented in a specific order.
+- **Data Analysis**: Facilitate data analysis by sorting data based on key metrics.
+- **Visualization**: Prepare data for visualizations that require sorted input.
+
+### Limitations
+- **Multivalued Columns**: When sorting on multivalued columns, the lowest value is used for ascending order and the highest value for descending order.
+- **Null Values**: By default, null values are treated as larger than any other value. This can be changed using `NULLS FIRST` or `NULLS LAST`.
+
+### Examples
+
+#### Basic Sorting
+Sort the `employees` table by the `height` column in ascending order:
+
+```esql
+FROM employees
+| KEEP first_name, last_name, height
+| SORT height
+```
+
+#### Explicit Ascending Order
+Sort the `employees` table by the `height` column in descending order:
+
+```esql
+FROM employees
+| KEEP first_name, last_name, height
+| SORT height DESC
+```
+
+#### Multiple Sort Expressions
+Sort the `employees` table by the `height` column in descending order and use `first_name` as a tie breaker in ascending order:
+
+```esql
+FROM employees
+| KEEP first_name, last_name, height
+| SORT height DESC, first_name ASC
+```
+
+#### Sorting Null Values First
+Sort the `employees` table by the `first_name` column in ascending order, placing null values first:
+
+```esql
+FROM employees
+| KEEP first_name, last_name, height
+| SORT first_name ASC NULLS FIRST
+```
+
+These examples demonstrate the versatility of the `SORT` command in organizing data for various analytical and reporting needs.

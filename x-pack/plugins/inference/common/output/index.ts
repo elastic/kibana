@@ -7,7 +7,7 @@
 
 import { Observable } from 'rxjs';
 import { FromToolSchema, ToolSchema } from '../chat_complete/tool_schema';
-import { InferenceTaskEventBase } from '../tasks';
+import { InferenceTaskEventBase } from '../inference_task';
 
 export enum OutputEventType {
   OutputUpdate = 'output',
@@ -28,6 +28,7 @@ export type OutputCompleteEvent<
 > = InferenceTaskEventBase<OutputEventType.OutputComplete> & {
   id: TId;
   output: TOutput;
+  content?: string;
 };
 
 export type OutputEvent<TId extends string = string, TOutput extends Output = Output> =
@@ -59,11 +60,13 @@ export type OutputAPI = <
 
 export function createOutputCompleteEvent<TId extends string, TOutput extends Output>(
   id: TId,
-  output: TOutput
+  output: TOutput,
+  content?: string
 ): OutputCompleteEvent<TId, TOutput> {
   return {
     id,
     type: OutputEventType.OutputComplete,
     output,
+    content,
   };
 }

@@ -1,0 +1,48 @@
+## ENRICH
+
+ENRICH enables you to add data from existing indices as new columns using an enrich policy. This command is useful for enriching your dataset with additional information from other indices, which can be particularly beneficial for data analysis and reporting. Before using the ENRICH command, you need to create and execute an enrich policy. 
+
+### Use Cases
+- **Data Enrichment**: Add supplementary data to your existing dataset for more comprehensive analysis.
+- **Cross-Cluster Enrichment**: Enrich data across multiple clusters using the `mode` parameter.
+- **Custom Column Names**: Rename columns to avoid conflicts or for better readability.
+
+### Limitations
+- The ENRICH command only supports enrich policies of type `match`.
+- ENRICH only supports enriching on a column of type `keyword`.
+
+### Examples
+
+#### Example 1: Basic Enrichment
+The following example uses the `languages_policy` enrich policy to add a new column for each enrich field defined in the policy. The match is performed using the `match_field` defined in the enrich policy and requires that the input table has a column with the same name (`language_code` in this example).
+
+```esql
+ROW language_code = "1"
+| ENRICH languages_policy
+```
+
+#### Example 2: Using a Different Match Field
+To use a column with a different name than the `match_field` defined in the policy as the match field, use the `ON` parameter.
+
+```esql
+ROW a = "1"
+| ENRICH languages_policy ON a
+```
+
+#### Example 3: Selecting Specific Enrich Fields
+By default, each of the enrich fields defined in the policy is added as a column. To explicitly select the enrich fields that are added, use the `WITH` parameter.
+
+```esql
+ROW a = "1"
+| ENRICH languages_policy ON a WITH language_name
+```
+
+#### Example 4: Renaming Enrich Fields
+You can rename the columns that are added using the `WITH new_name=<field1>` syntax.
+
+```esql
+ROW a = "1"
+| ENRICH languages_policy ON a WITH name = language_name
+```
+
+In case of name collisions, the newly created columns will override existing columns.

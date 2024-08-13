@@ -1,0 +1,147 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { lastValueFrom } from 'rxjs';
+import { remove } from 'lodash';
+import type { EvaluationResult } from './types';
+import { withoutOutputUpdateEvents } from '../../common/output/without_output_update_events';
+import type { OutputAPI } from '../../common/output';
+
+export interface InferenceEvaluationClient {
+  evaluate: (input: string, criteria: string[]) => Promise<EvaluationResult>;
+  getResults: () => EvaluationResult[];
+  onResult: (cb: (result: EvaluationResult) => void) => () => void;
+}
+
+export function createInferenceEvaluationClient({
+  connectorId,
+  suite,
+  outputApi,
+}: {
+  connectorId: string;
+  suite?: Mocha.Suite;
+  outputApi: OutputAPI;
+}): InferenceEvaluationClient {
+  let currentTitle: string = '';
+  let firstSuiteName: string = '';
+
+  if (suite) {
+    suite.beforeEach(function () {
+      const currentTest: Mocha.Test = this.currentTest!;
+      const titles: string[] = [];
+      titles.push(this.currentTest!.title);
+      let parent = currentTest.parent;
+      while (parent) {
+        titles.push(parent.title);
+        parent = parent.parent;
+      }
+      currentTitle = titles.reverse().join(' ');
+      firstSuiteName = titles.filter((item) => item !== '')[0];
+    });
+
+    suite.afterEach(function () {
+      currentTitle = '';
+    });
+  }
+
+  const onResultCallbacks: Array<{
+    callback: (result: EvaluationResult) => void;
+    unregister: () => void;
+  }> = [];
+
+  const results: EvaluationResult[] = [];
+
+  return {
+    evaluate: async (input, criteria) => {
+      const evaluation = await lastValueFrom(
+        outputApi('evaluate', {
+          connectorId,
+          system: `You are a critical assistant for evaluating conversations with the Elastic Observability AI Assistant,
+            which helps our users make sense of their Observability data.
+
+            Your goal is to verify whether a conversation between the user and the assistant matches the given criteria.
+            
+            For each criterion, calculate a score. Explain your score, by describing what the assistant did right, and describing and quoting what the
+            assistant did wrong, where it could improve, and what the root cause was in case of a failure.`,
+          input: `## Criteria
+            
+            ${criteria
+              .map((criterion, index) => {
+                return `${index}: ${criterion}`;
+              })
+              .join('\n')}
+            
+            ## Input
+            
+            ${input}`,
+          schema: {
+            type: 'object',
+            properties: {
+              criteria: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    index: {
+                      type: 'number',
+                      description: 'The number of the criterion',
+                    },
+                    score: {
+                      type: 'number',
+                      description:
+                        'A score of either 0 (criterion failed) or 1 (criterion succeeded)',
+                    },
+                    reasoning: {
+                      type: 'string',
+                      description:
+                        'Your reasoning for the score. Explain your score by mentioning what you expected to happen and what did happen.',
+                    },
+                  },
+                  required: ['index', 'score', 'reasoning'],
+                },
+              },
+            },
+            required: ['criteria'],
+          } as const,
+        }).pipe(withoutOutputUpdateEvents())
+      );
+
+      const scoredCriteria = evaluation.output.criteria;
+
+      const scores = scoredCriteria.map(({ index, score, reasoning }) => {
+        return {
+          criterion: criteria[index],
+          score,
+          reasoning,
+        };
+      });
+
+      const result: EvaluationResult = {
+        name: currentTitle,
+        category: firstSuiteName,
+        input,
+        passed: scoredCriteria.every(({ score }) => score >= 1),
+        scores,
+      };
+
+      results.push(result);
+
+      onResultCallbacks.forEach(({ callback }) => {
+        callback(result);
+      });
+
+      return result;
+    },
+    getResults: () => results,
+    onResult: (callback) => {
+      const unregister = () => {
+        remove(onResultCallbacks, { callback });
+      };
+      onResultCallbacks.push({ callback, unregister });
+      return unregister;
+    },
+  };
+}

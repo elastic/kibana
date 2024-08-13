@@ -1,0 +1,15 @@
+## PI
+
+The `PI` function returns Pi, the ratio of a circle’s circumference to its diameter.
+
+### Examples
+
+```esql
+ROW PI()
+```
+
+```esql
+FROM employees
+| EVAL pi_value = PI()
+| KEEP pi_value
+```

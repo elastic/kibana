@@ -1,0 +1,15 @@
+## TAU
+
+The `TAU` function returns the ratio of a circle’s circumference to its radius.
+
+### Examples
+
+```esql
+ROW TAU()
+```
+
+```esql
+FROM sample_data
+| EVAL tau_value = TAU()
+| KEEP tau_value
+```

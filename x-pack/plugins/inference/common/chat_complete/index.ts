@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { Observable } from 'rxjs';
-import type { InferenceTaskEventBase } from '../tasks';
+import type { InferenceTaskEventBase } from '../inference_task';
 import type { ToolCall, ToolCallsOf, ToolOptions } from './tools';
 
 export enum MessageRole {

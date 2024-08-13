@@ -1,0 +1,71 @@
+## STATS
+
+The `STATS ... BY` processing command in ES|QL groups rows according to a common value and calculates one or more aggregated values over the grouped rows. This command is highly useful for performing statistical analysis and aggregations on datasets. It supports a variety of aggregation functions such as `AVG`, `COUNT`, `COUNT_DISTINCT`, `MAX`, `MEDIAN`, `MIN`, `SUM`, and more. 
+
+### Use Cases
+- **Statistical Analysis**: Calculate average, sum, count, and other statistical measures over grouped data.
+- **Data Aggregation**: Aggregate data based on specific fields to derive meaningful insights.
+- **Time-Series Analysis**: Group data by time intervals to analyze trends over time.
+
+### Limitations
+- **Performance**: `STATS` without any groups is much faster than adding a group. Grouping on a single expression is more optimized than grouping on multiple expressions.
+- **Multivalue Fields**: If the grouping key is multivalued, the input row is included in all groups.
+- **Technical Preview**: Some functions like `PERCENTILE`, `ST_CENTROID_AGG`, `VALUES`, and `WEIGHTED_AVG` are in technical preview and may change in future releases.
+
+### Examples
+
+#### Example 1: Grouping by a Single Column
+Calculate the count of employees grouped by languages:
+
+```esql
+FROM employees
+| STATS count = COUNT(emp_no) BY languages
+| SORT languages
+```
+
+#### Example 2: Aggregation Without Grouping
+Calculate the average number of languages spoken by employees:
+
+```esql
+FROM employees
+| STATS avg_lang = AVG(languages)
+```
+
+#### Example 3: Multiple Aggregations
+Calculate both the average and maximum number of languages spoken by employees:
+
+```esql
+FROM employees
+| STATS avg_lang = AVG(languages), max_lang = MAX(languages)
+```
+
+#### Example 4: Grouping by Multiple Values
+Calculate the average salary grouped by the year of hire and language:
+
+```esql
+FROM employees
+| EVAL hired = DATE_FORMAT("YYYY", hire_date)
+| STATS avg_salary = AVG(salary) BY hired, languages.long
+| EVAL avg_salary = ROUND(avg_salary)
+| SORT hired, languages.long
+```
+
+#### Example 5: Grouping by an Expression
+Group employees by the first letter of their last name and count them:
+
+```esql
+FROM employees
+| STATS my_count = COUNT() BY LEFT(last_name, 1)
+| SORT `LEFT(last_name, 1)`
+```
+
+#### Example 6: Using Multivalue Columns
+Calculate the minimum value of a multivalue column:
+
+```esql
+ROW i=1, a=["a", "b"], b=[2, 3]
+| STATS MIN(i) BY a, b
+| SORT a ASC, b ASC
+```
+
+These examples showcase the versatility and power of the `STATS ... BY` command in performing various types of data aggregations and statistical analyses.

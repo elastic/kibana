@@ -1,0 +1,17 @@
+## CIDR_MATCH
+
+The `CIDR_MATCH` function returns true if the provided IP is contained in one of the provided CIDR blocks.
+
+### Examples
+
+```esql
+FROM hosts
+| WHERE CIDR_MATCH(ip1, "127.0.0.2/32", "127.0.0.3/32")
+| KEEP card, host, ip0, ip1
+```
+
+```esql
+FROM network_logs
+| WHERE CIDR_MATCH(source_ip, "192.168.1.0/24", "10.0.0.0/8")
+| KEEP timestamp, source_ip, destination_ip, action
+```

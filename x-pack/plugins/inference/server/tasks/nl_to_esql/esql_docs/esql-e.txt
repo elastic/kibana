@@ -1,0 +1,15 @@
+## E
+
+The `E` function returns Euler’s number, which is a mathematical constant approximately equal to 2.71828. It is the base of the natural logarithm.
+
+### Examples
+
+```esql
+ROW E()
+```
+
+```esql
+FROM employees
+| EVAL euler_number = E()
+| KEEP euler_number
+```

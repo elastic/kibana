@@ -1,0 +1,15 @@
+## REPEAT
+
+The `REPEAT` function returns a string constructed by concatenating the input string with itself the specified number of times.
+
+### Examples
+
+```esql
+ROW a = "Hello!"
+| EVAL triple_a = REPEAT(a, 3)
+```
+
+```esql
+ROW greeting = "Hi"
+| EVAL repeated_greeting = REPEAT(greeting, 5)
+```

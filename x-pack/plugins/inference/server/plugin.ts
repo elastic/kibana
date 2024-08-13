@@ -41,6 +41,7 @@ export class InferencePlugin
     registerChatCompleteRoute({
       router,
       coreSetup,
+      logger: this.logger.get('chatComplete'),
     });
 
     registerConnectorsRoute({
@@ -53,7 +54,11 @@ export class InferencePlugin
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
     return {
       getClient: ({ request }) => {
-        return createInferenceClient({ request, actions: pluginsStart.actions });
+        return createInferenceClient({
+          request,
+          actions: pluginsStart.actions,
+          logger: this.logger.get('client'),
+        });
       },
     };
   }

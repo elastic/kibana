@@ -1,0 +1,15 @@
+## DATE_EXTRACT
+
+The `DATE_EXTRACT` function extracts specific parts of a date, such as the year, month, day, or hour. It can be used to retrieve various components of a date based on the specified `datePart`.
+
+### Examples
+
+```esql
+ROW date = DATE_PARSE("yyyy-MM-dd", "2022-05-06")
+| EVAL year = DATE_EXTRACT("year", date)
+```
+
+```esql
+FROM sample_data
+| WHERE DATE_EXTRACT("hour_of_day", @timestamp) < 9 AND DATE_EXTRACT("hour_of_day", @timestamp) >= 17
+```

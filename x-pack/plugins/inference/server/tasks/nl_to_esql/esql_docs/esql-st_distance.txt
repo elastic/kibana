@@ -1,0 +1,19 @@
+## ST_DISTANCE
+
+The `ST_DISTANCE` function computes the distance between two points. For cartesian geometries, this is the pythagorean distance in the same units as the original coordinates. For geographic geometries, this is the circular distance along the great circle in meters.
+
+### Examples
+
+```esql
+FROM airports
+| WHERE abbrev == "CPH"
+| EVAL distance = ST_DISTANCE(location, city_location)
+| KEEP abbrev, name, location, city_location, distance
+```
+
+```esql
+FROM airports
+| WHERE abbrev == "JFK"
+| EVAL distance = ST_DISTANCE(location, city_location)
+| KEEP abbrev, name, location, city_location, distance
+```

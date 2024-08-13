@@ -5,30 +5,30 @@
  * 2.0.
  */
 import { run } from '@kbn/dev-cli-runner';
+import { ESQLMessage, EditorError, getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import $, { load } from 'cheerio';
 import { SingleBar } from 'cli-progress';
 import FastGlob from 'fast-glob';
 import Fs from 'fs/promises';
-import { once, partition, compact } from 'lodash';
+import { compact, once, partition } from 'lodash';
 import pLimit from 'p-limit';
 import Path from 'path';
 import git, { SimpleGitProgressEvent } from 'simple-git';
 import yargs, { Argv } from 'yargs';
-import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
-import { validateQuery } from '@kbn/esql-validation-autocomplete';
-import { EditorError, ESQLMessage, getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import { connectorIdOption, elasticsearchOption, kibanaOption } from '../evaluation/cli';
-import { getServiceUrls } from '../evaluation/get_service_urls';
-import { KibanaClient } from '../evaluation/kibana_client';
-import { selectConnector } from '../evaluation/select_connector';
+import { lastValueFrom } from 'rxjs';
+import { INLINE_ESQL_QUERY_REGEX } from '../../common/tasks/nl_to_esql/constants';
+import { correctCommonEsqlMistakes } from '../../common/tasks/nl_to_esql/correct_common_esql_mistakes';
+import { connectorIdOption, elasticsearchOption, kibanaOption } from '../util/cli_options';
+import { getServiceUrls } from '../util/get_service_urls';
+import { KibanaClient } from '../util/kibana_client';
+import { selectConnector } from '../util/select_connector';
 import { extractSections } from './extract_sections';
-import { correctCommonEsqlMistakes } from '../../server/functions/query/correct_common_esql_mistakes';
-import { INLINE_ESQL_QUERY_REGEX } from '../../server/functions/query/constants';
 
 yargs(process.argv.slice(2))
   .command(
     '*',
-    'Extract ES|QL documentation for the Observability AI Assistant',
+    'Extract ES|QL documentation',
     (y: Argv) =>
       y
         .option('logLevel', {
@@ -73,15 +73,13 @@ yargs(process.argv.slice(2))
             log,
           });
 
-          const chatClient = kibanaClient.createChatClient({
-            connectorId: connector.id,
-            evaluationConnectorId: connector.id,
-            persist: false,
+          const chatClient = kibanaClient.createInferenceClient({
+            connectorId: connector.connectorId,
           });
 
-          log.info(`Using connector ${connector.id}`);
+          log.info(`Using connector ${connector.connectorId}`);
 
-          const builtDocsDir = Path.join(__dirname, '../../../../../../../built-docs');
+          const builtDocsDir = Path.join(__dirname, '../../../../../../built-docs');
 
           log.debug(`Looking in ${builtDocsDir} for built-docs repository`);
 
@@ -329,10 +327,7 @@ yargs(process.argv.slice(2))
             return !isOverviewArticle;
           });
 
-          const outDir = Path.join(
-            __dirname,
-            '../../../observability_ai_assistant_app/server/functions/query/esql_docs'
-          );
+          const outDir = Path.join(__dirname, '../../server/tasks/nl_to_esql/esql_docs');
 
           if (!argv.dryRun) {
             log.info(`Writing ${flattened.length} documents to disk to ${outDir}`);
@@ -341,9 +336,12 @@ yargs(process.argv.slice(2))
           if (!argv.only && !argv.dryRun) {
             log.debug(`Clearing ${outDir}`);
 
-            await Fs.rm(outDir, { recursive: true }).catch((error) =>
-              error.code === 'ENOENT' ? Promise.resolve() : error
-            );
+            await Fs.readdir(outDir, { recursive: true })
+              .then((filesInDir) => {
+                const limiter = pLimit(10);
+                return Promise.all(filesInDir.map((file) => limiter(() => Fs.unlink(file))));
+              })
+              .catch((error) => (error.code === 'ENOENT' ? Promise.resolve() : error));
           }
 
           if (!argv.dryRun) {
@@ -428,10 +426,10 @@ yargs(process.argv.slice(2))
 
               return chatLimiter(async () => {
                 try {
-                  const response = await chatClient.chat([
-                    {
-                      role: MessageRole.System,
-                      content: `## System instructions
+                  const response = await lastValueFrom(
+                    chatClient.output('generate_markdown', {
+                      connectorId: chatClient.getConnectorId(),
+                      system: `## System instructions
                     
                     Your job is to generate Markdown documentation off of content that is scraped from the Elasticsearch website.
 
@@ -462,10 +460,7 @@ yargs(process.argv.slice(2))
 
                     ${allContent}
                     `,
-                    },
-                    {
-                      role: MessageRole.User,
-                      content: `Generate Markdown for the following document:
+                      input: `Generate Markdown for the following document:
 
                     ## ${doc.title}
 
@@ -476,8 +471,8 @@ yargs(process.argv.slice(2))
                     ### Content of file
 
                     ${doc.content}`,
-                    },
-                  ]);
+                    })
+                  );
 
                   return fsLimiter(() =>
                     writeFile({ title: doc.title, content: response.content! })

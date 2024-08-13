@@ -1,0 +1,15 @@
+## TO_GEOSHAPE
+
+Converts an input value to a `geo_shape` value. A string will only be successfully converted if it respects the WKT format.
+
+### Examples
+
+```esql
+ROW wkt = "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))"
+| EVAL geom = TO_GEOSHAPE(wkt)
+```
+
+```esql
+ROW wkt = "LINESTRING (30 10, 10 30, 40 40)"
+| EVAL geom = TO_GEOSHAPE(wkt)
+```

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { InferenceTaskEventBase, InferenceTaskEventType } from './tasks';
+import { InferenceTaskEventBase, InferenceTaskEventType } from './inference_task';
 
 export enum InferenceTaskErrorCode {
   internalError = 'internalError',

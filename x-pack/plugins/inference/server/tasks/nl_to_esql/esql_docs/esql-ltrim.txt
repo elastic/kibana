@@ -1,0 +1,19 @@
+## LTRIM
+
+Removes leading whitespaces from a string.
+
+### Examples
+
+```esql
+ROW message = "   some text  ",  color = " red "
+| EVAL message = LTRIM(message)
+| EVAL color = LTRIM(color)
+| EVAL message = CONCAT("'", message, "'")
+| EVAL color = CONCAT("'", color, "'")
+```
+
+```esql
+ROW text = "   example text  "
+| EVAL trimmed_text = LTRIM(text)
+| EVAL formatted_text = CONCAT("Trimmed: '", trimmed_text, "'")
+```

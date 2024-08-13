@@ -12,15 +12,21 @@ import {
 } from '../../../common/chat_complete';
 import { ToolChoiceType } from '../../../common/chat_complete/tools';
 import { chunksIntoMessage } from './chunks_into_message';
+import type { Logger } from '@kbn/logging';
 
 describe('chunksIntoMessage', () => {
   function fromEvents(...events: Array<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent>) {
     return of(...events);
   }
 
+  const logger = {
+    debug: jest.fn(),
+    error: jest.fn(),
+  } as unknown as Logger;
+
   it('concatenates content chunks into a single message', async () => {
     const message = await lastValueFrom(
-      chunksIntoMessage({})(
+      chunksIntoMessage({ logger, toolOptions: {} })(
         fromEvents(
           {
             content: 'Hey',
@@ -51,21 +57,24 @@ describe('chunksIntoMessage', () => {
   it('parses tool calls', async () => {
     const message = await lastValueFrom(
       chunksIntoMessage({
-        toolChoice: ToolChoiceType.auto,
-        tools: {
-          myFunction: {
-            description: 'myFunction',
-            schema: {
-              type: 'object',
-              properties: {
-                foo: {
-                  type: 'string',
-                  const: 'bar',
+        toolOptions: {
+          toolChoice: ToolChoiceType.auto,
+          tools: {
+            myFunction: {
+              description: 'myFunction',
+              schema: {
+                type: 'object',
+                properties: {
+                  foo: {
+                    type: 'string',
+                    const: 'bar',
+                  },
                 },
               },
             },
           },
         },
+        logger,
       })(
         fromEvents(
           {
@@ -135,21 +144,24 @@ describe('chunksIntoMessage', () => {
     async function getMessage() {
       return await lastValueFrom(
         chunksIntoMessage({
-          toolChoice: ToolChoiceType.auto,
-          tools: {
-            myFunction: {
-              description: 'myFunction',
-              schema: {
-                type: 'object',
-                properties: {
-                  foo: {
-                    type: 'string',
-                    const: 'bar',
+          toolOptions: {
+            toolChoice: ToolChoiceType.auto,
+            tools: {
+              myFunction: {
+                description: 'myFunction',
+                schema: {
+                  type: 'object',
+                  properties: {
+                    foo: {
+                      type: 'string',
+                      const: 'bar',
+                    },
                   },
                 },
               },
             },
           },
+          logger,
         })(
           fromEvents({
             content: '',
@@ -177,20 +189,23 @@ describe('chunksIntoMessage', () => {
   it('concatenates multiple tool calls into a single message', async () => {
     const message = await lastValueFrom(
       chunksIntoMessage({
-        toolChoice: ToolChoiceType.auto,
-        tools: {
-          myFunction: {
-            description: 'myFunction',
-            schema: {
-              type: 'object',
-              properties: {
-                foo: {
-                  type: 'string',
+        toolOptions: {
+          toolChoice: ToolChoiceType.auto,
+          tools: {
+            myFunction: {
+              description: 'myFunction',
+              schema: {
+                type: 'object',
+                properties: {
+                  foo: {
+                    type: 'string',
+                  },
                 },
               },
             },
           },
         },
+        logger,
       })(
         fromEvents(
           {

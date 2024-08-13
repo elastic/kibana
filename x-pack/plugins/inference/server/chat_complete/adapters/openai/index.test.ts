@@ -14,6 +14,7 @@ import { pick } from 'lodash';
 import { lastValueFrom, Subject, toArray } from 'rxjs';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
 import { v4 } from 'uuid';
+import type { Logger } from '@kbn/logging';
 
 function createOpenAIChunk({
   delta,
@@ -42,6 +43,11 @@ describe('openAIAdapter', () => {
   const actionsClientMock = {
     execute: jest.fn(),
   } as ActionsClient & { execute: jest.MockedFn<ActionsClient['execute']> };
+
+  const logger = {
+    debug: jest.fn(),
+    error: jest.fn(),
+  } as unknown as Logger;
 
   beforeEach(() => {
     actionsClientMock.execute.mockReset();
@@ -266,7 +272,7 @@ describe('openAIAdapter', () => {
         return {
           actionId: '',
           status: 'ok',
-          data: observableIntoEventSourceStream(source$),
+          data: observableIntoEventSourceStream(source$, logger),
         };
       });
     });

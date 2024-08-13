@@ -7,6 +7,8 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { defer, switchMap, throwError } from 'rxjs';
+import { Logger } from '@kbn/logging';
+import { last } from 'lodash';
 import type { ChatCompleteAPI, ChatCompletionResponse } from '../../common/chat_complete';
 import type { ToolOptions } from '../../common/chat_complete/tools';
 import { InferenceConnectorType } from '../../common/connectors';
@@ -18,9 +20,11 @@ import { openAIAdapter } from './adapters/openai';
 export function createChatCompleteApi({
   request,
   actions,
+  logger,
 }: {
   request: KibanaRequest;
   actions: InferenceStartDependencies['actions'];
+  logger: Pick<Logger, 'debug' | 'trace'>;
 }) {
   const chatCompleteAPI: ChatCompleteAPI = ({
     connectorId,
@@ -37,6 +41,12 @@ export function createChatCompleteApi({
       return { actionsClient, connector };
     }).pipe(
       switchMap(({ actionsClient, connector }) => {
+        const lastMessage = last(messages);
+
+        logger.debug(() => `Sending request: ${JSON.stringify(lastMessage)}`);
+
+        logger.trace(() => JSON.stringify({ messages, toolChoice, tools, system }));
+
         switch (connector.actionTypeId) {
           case InferenceConnectorType.OpenAI:
             return openAIAdapter.chatComplete({
@@ -63,8 +73,11 @@ export function createChatCompleteApi({
         );
       }),
       chunksIntoMessage({
-        toolChoice,
-        tools,
+        toolOptions: {
+          toolChoice,
+          tools,
+        },
+        logger,
       })
     );
   };
