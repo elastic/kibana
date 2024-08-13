@@ -82,6 +82,7 @@ export function useSetupTechnology({
   packageInfo,
   packagePolicy,
   isEditPage,
+  agentPolicies,
 }: {
   setNewAgentPolicy: (policy: NewAgentPolicy) => void;
   newAgentPolicy: NewAgentPolicy;
@@ -90,6 +91,7 @@ export function useSetupTechnology({
   packageInfo?: PackageInfo;
   packagePolicy: NewPackagePolicy;
   isEditPage?: boolean;
+  agentPolicies?: AgentPolicy[];
 }) {
   const { cloud } = useStartServices();
   const { isAgentlessEnabled, isAgentlessCloudEnabled, isAgentlessServerlessEnabled } =
@@ -108,7 +110,8 @@ export function useSetupTechnology({
   );
 
   useEffect(() => {
-    if (isEditPage) {
+    if (isEditPage && agentPolicies && agentPolicies.some((policy) => policy.supports_agentless)) {
+      setSelectedSetupTechnology(SetupTechnology.AGENTLESS);
       return;
     }
     if (isAgentlessCloudEnabled && selectedSetupTechnology === SetupTechnology.AGENTLESS) {
@@ -130,6 +133,8 @@ export function useSetupTechnology({
     selectedSetupTechnology,
     updateAgentPolicies,
     setNewAgentPolicy,
+    agentPolicies,
+    setSelectedSetupTechnology,
   ]);
 
   // tech debt: remove this useEffect when Serverless uses the Agentless API
