@@ -90,10 +90,10 @@ async function runCheck(
       checksFinished.push(result);
 
       if (error) {
-        console.warn(`Failed check: ${script} in ${result.duration}ms`);
+        console.warn(`Failed check: ${script} in ${humanizeTime(result.duration)}`);
         result.success = false;
       } else {
-        console.info(`Passed check: ${script} in ${result.duration}ms`);
+        console.info(`Passed check: ${script} in ${humanizeTime(result.duration)}`);
         result.success = true;
       }
 
@@ -129,9 +129,25 @@ function printDurations(results: Result[]) {
 
   console.log('- Check durations:');
   results.forEach((result) => {
-    console.log(`${result.script}: ${result.duration}ms`);
+    console.log(`${result.script}: ${humanizeTime(result.duration)}`);
   });
-  console.log(`- Total time: ${totalDuration}ms (effective ${Date.now() - startTime}ms)`);
+  const total = humanizeTime(totalDuration);
+  const effective = humanizeTime(Date.now() - startTime);
+  console.log(`- Total time: ${total}, effective: ${effective}`);
+}
+
+function humanizeTime(ms: number) {
+  if (ms < 1000) {
+    return `${ms}ms`;
+  }
+
+  const minutes = Math.floor(ms / 1000 / 60);
+  const seconds = Math.floor((ms - minutes * 60 * 1000) / 1000);
+  if (minutes === 0) {
+    return `${seconds}s`;
+  } else {
+    return `${minutes}m ${seconds}s`;
+  }
 }
 
 export {};
