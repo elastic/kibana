@@ -10,9 +10,9 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { appContextService } from '../app_context';
 
 import {
-  isAgentlessCloudEnabled,
+  isAgentlessApiEnabled,
   isAgentlessEnabled,
-  isAgentlessServerlessEnabled,
+  isDefaultAgentlessPolicyEnabled,
   prependAgentlessApiBasePathToEndpoint,
 } from './agentless';
 
@@ -23,9 +23,10 @@ mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 
-describe('isAgentlessCloudEnabled', () => {
+describe('isAgentlessApiEnabled', () => {
   afterEach(() => {
     jest.clearAllMocks();
+    mockedAppContextService.getConfig.mockReset();
   });
   it('should return false if cloud is not enabled', () => {
     jest.spyOn(appContextService, 'getConfig').mockReturnValue({
@@ -35,7 +36,7 @@ describe('isAgentlessCloudEnabled', () => {
     } as any);
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: false } as any);
 
-    expect(isAgentlessCloudEnabled()).toBe(false);
+    expect(isAgentlessApiEnabled()).toBe(false);
   });
 
   it('should return false if cloud is enabled but agentless is not', () => {
@@ -46,7 +47,7 @@ describe('isAgentlessCloudEnabled', () => {
     } as any);
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
 
-    expect(isAgentlessCloudEnabled()).toBe(false);
+    expect(isAgentlessApiEnabled()).toBe(false);
   });
 
   it('should return true if cloud is enabled and agentless is enabled', () => {
@@ -57,13 +58,14 @@ describe('isAgentlessCloudEnabled', () => {
     } as any);
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
 
-    expect(isAgentlessCloudEnabled()).toBe(true);
+    expect(isAgentlessApiEnabled()).toBe(true);
   });
 });
 
-describe('isAgentlessServerlessEnabled', () => {
+describe('isDefaultAgentlessPolicyEnabled', () => {
   afterEach(() => {
     jest.clearAllMocks();
+    mockedAppContextService.getConfig.mockReset();
   });
 
   it('should return false if serverless is not enabled', () => {
@@ -74,7 +76,7 @@ describe('isAgentlessServerlessEnabled', () => {
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ isServerlessEnabled: false } as any);
 
-    expect(isAgentlessServerlessEnabled()).toBe(false);
+    expect(isDefaultAgentlessPolicyEnabled()).toBe(false);
   });
 
   it('should return false if serverless is enabled but agentless is not', () => {
@@ -83,7 +85,7 @@ describe('isAgentlessServerlessEnabled', () => {
       .mockReturnValue({ agentless: false } as any);
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
-    expect(isAgentlessServerlessEnabled()).toBe(false);
+    expect(isDefaultAgentlessPolicyEnabled()).toBe(false);
   });
 
   it('should return true if serverless is enabled and agentless is enabled', () => {
@@ -92,13 +94,14 @@ describe('isAgentlessServerlessEnabled', () => {
       .mockReturnValue({ agentless: true } as any);
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
-    expect(isAgentlessServerlessEnabled()).toBe(true);
+    expect(isDefaultAgentlessPolicyEnabled()).toBe(true);
   });
 });
 
 describe('isAgentlessEnabled', () => {
   afterEach(() => {
     jest.clearAllMocks();
+    mockedAppContextService.getConfig.mockReset();
   });
 
   it('should return false if cloud and serverless are not enabled', () => {
@@ -138,8 +141,8 @@ describe('isAgentlessEnabled', () => {
 
   it('should return true if cloud is enabled and agentless is enabled', () => {
     jest
-      .spyOn(appContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ agentless: true } as any);
+      .spyOn(appContextService, 'getConfig')
+      .mockReturnValue({ agentless: { enabled: true } } as any);
     jest
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ isCloudEnabled: true, isServerlessEnabled: false } as any);
