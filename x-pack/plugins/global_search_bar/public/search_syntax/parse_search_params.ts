@@ -20,7 +20,11 @@ export const parseSearchParams = (term: string): ParsedSearchParams => {
   let query: Query;
 
   try {
-    query = Query.parse(term);
+    query = Query.parse(term, {
+      schema: {
+        recognizedFields: ['type', 'tag'],
+      },
+    });
   } catch (e) {
     // if the query fails to parse, we just perform the search against the raw search term.
     return {
