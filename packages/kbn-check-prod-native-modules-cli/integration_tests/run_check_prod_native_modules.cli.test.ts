@@ -88,4 +88,54 @@ describe('checkProdNativeModules', () => {
       'No root node_modules folder was found in the project. Impossible to continue'
     );
   });
+
+  it('should return false when no prod native modules are found', async () => {
+    // Use a fixture without native modules
+    const withDevNativeModulesDir = path.join(fixturesDir, 'with_dev_native_modules');
+    const withDevNativeModulesPkgJsonPath = path.join(withDevNativeModulesDir, 'package.json');
+    jest.spyOn(process, 'cwd').mockReturnValue(withDevNativeModulesDir);
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    jest.replaceProperty(require('@kbn/repo-info'), 'REPO_ROOT', withDevNativeModulesDir);
+
+    const withDevNativeModulesPkgJson = JSON.parse(fs.readFileSync(withDevNativeModulesPkgJsonPath, 'utf8'));
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    jest.replaceProperty(require('@kbn/repo-info'), 'kibanaPackageJson', withDevNativeModulesPkgJson);
+
+    const result = await checkProdNativeModules(mockLog);
+
+    expect(result).toBe(false);
+    expect(mockLog.success).toHaveBeenCalledWith(
+      'No production native modules installed were found'
+    );
+  });
+
+  it('should return true and log errors when prod transient native modules are found', async () => {
+    // Use a fixture with native modules
+    const withTransientNativeModulesDir = path.join(fixturesDir, 'with_transient_native_modules');
+    const withTransientNativeModulesPkgJsonPath = path.join(withTransientNativeModulesDir, 'package.json');
+    jest.spyOn(process, 'cwd').mockReturnValue(withTransientNativeModulesDir);
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    jest.replaceProperty(require('@kbn/repo-info'), 'REPO_ROOT', withTransientNativeModulesDir);
+
+    const withTransientNativeModulesPkgJson = JSON.parse(
+      fs.readFileSync(withTransientNativeModulesPkgJsonPath, 'utf8')
+    );
+
+    jest.replaceProperty(
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('@kbn/repo-info'),
+      'kibanaPackageJson',
+      withTransientNativeModulesPkgJson
+    );
+
+    const result = await checkProdNativeModules(mockLog);
+
+    expect(result).toBe(true);
+    expect(mockLog.error).toHaveBeenCalledWith(
+      expect.stringContaining('Production native module detected:')
+    );
+    expect(mockLog.error).toHaveBeenCalledWith(
+      'Production native modules were detected and logged above'
+    );
+  });
 });
