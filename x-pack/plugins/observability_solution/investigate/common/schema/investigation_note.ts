@@ -13,7 +13,7 @@ const investigationNoteResponseSchema = t.type({
   createdBy: t.string,
 });
 
-type investigationNoteResponse = t.OutputOf<typeof investigationNoteResponseSchema>;
+type InvestigationNoteResponse = t.OutputOf<typeof investigationNoteResponseSchema>;
 
 export { investigationNoteResponseSchema };
-export type { investigationNoteResponse };
+export type { InvestigationNoteResponse };
