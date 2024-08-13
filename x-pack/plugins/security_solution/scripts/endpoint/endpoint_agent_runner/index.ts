@@ -65,7 +65,8 @@ export const cli = () => {
         --username          Optional. User name to be used for auth against elasticsearch and
                             kibana (Default: elastic).
         --password          Optional. Password associated with the username (Default: changeme)
-        --apiKey            Optional. A Kibana API key to use for authz
+        --apiKey            Optional. A Kibana API key to use for authz. When defined, 'username'
+                            and 'password' arguments are ignored.
         --kibanaUrl         Optional. The url to Kibana (Default: http://127.0.0.1:5601)
         --elasticUrl        Optional. The url to Elasticsearch (Default: http://127.0.0.1:9200)
       `,
