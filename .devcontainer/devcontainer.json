@@ -10,7 +10,9 @@
         "dbaeumer.vscode-eslint",
         "ms-azuretools.vscode-docker",
         "editorconfig.editorconfig",
-        "timonwong.shellcheck"
+        "timonwong.shellcheck",
+        "eamodio.gitlens",
+        "github.vscode-pull-request-github"
       ]
     }
   },
