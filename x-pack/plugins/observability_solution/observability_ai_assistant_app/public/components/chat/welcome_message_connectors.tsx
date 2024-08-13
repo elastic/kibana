@@ -47,7 +47,7 @@ export function WelcomeMessageConnectors({
       (connectors.error.body as { statusCode: number }).statusCode === 403;
 
     return (
-      <div className={fadeInClassName}>
+      <div className={fadeInClassName} data-test-subj="observabilityAiAssistantConnectorsError">
         <EuiFlexGroup direction="row" alignItems="center" justifyContent="center" gutterSize="xs">
           <EuiFlexItem grow={false}>
             <EuiIcon type="alert" color="danger" />
