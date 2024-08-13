@@ -12,7 +12,7 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import type { JobParamsCsvFromSavedObject } from '@kbn/reporting-export-types-csv-common';
 import type { ReportApiJSON } from '@kbn/reporting-common/types';
 import rison from '@kbn/rison';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const LOGSTASH_DATA_ARCHIVE = 'test/functional/fixtures/es_archiver/logstash_functional';
 const LOGSTASH_SAVED_OBJECTS = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/logs';
