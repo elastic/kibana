@@ -14,3 +14,5 @@ export const deleteEntityDefinitionParamsSchema = z.object({
 export const deleteEntityDefinitionQuerySchema = z.object({
   deleteData: z.optional(z.coerce.boolean().default(false)),
 });
+
+export type DeleteEntityDefinitionQuery = z.infer<typeof deleteEntityDefinitionQuerySchema>;
