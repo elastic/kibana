@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
-
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { MLSavedObjectService } from '../../saved_objects';
 import { getJobDetailsFromTrainedModel } from '../../saved_objects/util';
 import type { JobType } from '../../../common/types/saved_objects';
@@ -500,16 +500,29 @@ export function getMlClient(
     },
     async startTrainedModelDeployment(...p: Parameters<MlClient['startTrainedModelDeployment']>) {
       await modelIdsCheck(p);
-      return mlClient.startTrainedModelDeployment(...p);
+      // TODO use mlClient.startTrainedModelDeployment when esClient is updated
+      const { model_id: modelId, adaptive_allocations: adaptiveAllocations, ...queryParams } = p[0];
+      return client.asInternalUser.transport.request<estypes.MlStartTrainedModelDeploymentResponse>(
+        {
+          method: 'POST',
+          path: `_ml/trained_models/${modelId}/deployment/_start`,
+          ...(isPopulatedObject(queryParams) ? { querystring: queryParams } : {}),
+          ...(isPopulatedObject(adaptiveAllocations)
+            ? { body: { adaptive_allocations: adaptiveAllocations } }
+            : {}),
+        },
+        p[1]
+      );
     },
     async updateTrainedModelDeployment(...p: Parameters<MlClient['updateTrainedModelDeployment']>) {
       await modelIdsCheck(p);
 
-      const { deployment_id: deploymentId, number_of_allocations: numberOfAllocations } = p[0];
+      const { deployment_id: deploymentId, model_id: modelId, ...bodyParams } = p[0];
+      // TODO use mlClient.updateTrainedModelDeployment when esClient is updated
       return client.asInternalUser.transport.request({
         method: 'POST',
         path: `/_ml/trained_models/${deploymentId}/deployment/_update`,
-        body: { number_of_allocations: numberOfAllocations },
+        body: bodyParams,
       });
     },
     async stopTrainedModelDeployment(...p: Parameters<MlClient['stopTrainedModelDeployment']>) {
