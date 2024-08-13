@@ -79,17 +79,26 @@ const getTableColumns = ({
         }
       ),
       render: (_, record) => {
-        return record.kibana.map((kibanaPrivilege) => {
-          if (!kibanaPrivilege.base.length) {
-            return i18n.translate(
-              'xpack.spaces.management.spaceDetails.rolesTable.column.privileges.customPrivilege',
-              {
-                defaultMessage: 'custom',
-              }
-            );
-          }
-          return kibanaPrivilege.base.join(', ');
-        });
+        const uniquePrivilege = new Set(
+          record.kibana.reduce((privilegeBaseTuple, kibanaPrivilege) => {
+            if (!kibanaPrivilege.base.length) {
+              privilegeBaseTuple.push(
+                i18n.translate(
+                  'xpack.spaces.management.spaceDetails.rolesTable.column.privileges.customPrivilege',
+                  {
+                    defaultMessage: 'custom',
+                  }
+                )
+              );
+
+              return privilegeBaseTuple;
+            }
+
+            return privilegeBaseTuple.concat(kibanaPrivilege.base);
+          }, [] as string[])
+        );
+
+        return Array.from(uniquePrivilege).join(',');
       },
     },
     {

@@ -36,7 +36,6 @@ interface Props {
 
 // FIXME: rename to EditSpaceAssignedRoles
 export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features, isReadOnly }) => {
-  // const [showRolesPrivilegeEditor, setShowRolesPrivilegeEditor] = useState(false);
   const [roleAPIClientInitialized, setRoleAPIClientInitialized] = useState(false);
   const [spaceUnallocatedRole, setSpaceUnallocatedRole] = useState<Role[]>([]);
 
@@ -50,6 +49,7 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features, isRe
     overlays,
     theme,
     i18n: i18nStart,
+    notifications,
   } = useViewSpaceServices();
 
   const resolveAPIClients = useCallback(async () => {
@@ -99,7 +99,20 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features, isRe
             {...{
               space,
               features,
-              onSaveClick: () => overlayRef.close(),
+              onSaveCompleted: () => {
+                notifications.toasts.addSuccess(
+                  i18n.translate(
+                    'xpack.spaces.management.spaceDetails.roles.assignmentSuccessMsg',
+                    {
+                      defaultMessage: `Selected roles have been assigned to the {spaceName} space`,
+                      values: {
+                        spaceName: space.name,
+                      },
+                    }
+                  )
+                );
+                overlayRef.close();
+              },
               closeFlyout: () => overlayRef.close(),
               defaultSelected,
               spaceUnallocatedRole,
@@ -115,7 +128,7 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features, isRe
         }
       );
     },
-    [features, i18nStart, overlays, space, spaceUnallocatedRole, theme]
+    [features, i18nStart, notifications.toasts, overlays, space, spaceUnallocatedRole, theme]
   );
 
   return (
