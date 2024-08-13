@@ -12,7 +12,7 @@ import { act, fireEvent } from '@testing-library/react';
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 import { createIntegrationsTestRendererMock } from '../mock';
 
-import { useMultipleAgentPolicies, useStartServices } from '../hooks';
+import { useMultipleAgentPolicies, useStartServices, useLink } from '../hooks';
 
 import { PackagePolicyActionsMenu } from './package_policy_actions_menu';
 
@@ -203,10 +203,34 @@ describe('PackagePolicyActionsMenu', () => {
     const { utils } = renderMenu({ agentPolicies, packagePolicy });
     await act(async () => {
       const editButton = utils.getByTestId('PackagePolicyActionsEditItem');
+      expect(editButton).not.toHaveAttribute('disabled');
+      expect(editButton).toHaveAttribute('href');
+      expect(useLink().getHref as jest.Mock).toHaveBeenCalledWith('edit_integration', {
+        policyId: 'some-uuid1',
+        packagePolicyId: 'some-uuid2',
+      });
       expect(editButton).toHaveAttribute(
         'href',
         '/mock/app/fleet/policies/some-uuid1/edit-integration/some-uuid2'
       );
+    });
+  });
+
+  it('Should show Edit integration with correct href when there is no agent policy', async () => {
+    const packagePolicy = createMockPackagePolicy({
+      policy_ids: [],
+    });
+    const { utils } = renderMenu({
+      agentPolicies: [],
+      packagePolicy,
+    });
+    await act(async () => {
+      const editButton = utils.getByTestId('PackagePolicyActionsEditItem');
+      expect(editButton).not.toHaveAttribute('disabled');
+      expect(editButton).toHaveAttribute('href');
+      expect(useLink().getHref as jest.Mock).toHaveBeenCalledWith('integration_policy_edit', {
+        packagePolicyId: 'some-uuid2',
+      });
     });
   });
 });
