@@ -33,8 +33,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             dataSource: { type: 'esql' },
             query: { esql: 'from my-example-* | sort @timestamp desc' },
           });
-          await PageObjects.common.navigateToApp('discover', {
-            hash: `/?_a=${state}`,
+          await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+            ensureCurrentUrl: false,
           });
           await PageObjects.discover.waitUntilSearchingHasFinished();
           await PageObjects.unifiedFieldList.clickFieldListItemAdd('@timestamp');
@@ -50,8 +50,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             dataSource: { type: 'esql' },
             query: { esql: 'from my-example-logs | sort @timestamp desc' },
           });
-          await PageObjects.common.navigateToApp('discover', {
-            hash: `/?_a=${state}`,
+          await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+            ensureCurrentUrl: false,
           });
           await PageObjects.discover.waitUntilSearchingHasFinished();
           await PageObjects.unifiedFieldList.clickFieldListItemAdd('@timestamp');
@@ -71,8 +71,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             dataSource: { type: 'esql' },
             query: { esql: 'from my-example-* | sort @timestamp desc' },
           });
-          await PageObjects.common.navigateToApp('discover', {
-            hash: `/?_a=${state}`,
+          await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+            ensureCurrentUrl: false,
           });
           await PageObjects.discover.waitUntilSearchingHasFinished();
           await dataGrid.clickRowToggle({ rowIndex: 0 });
@@ -87,8 +87,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             dataSource: { type: 'esql' },
             query: { esql: 'from my-example-logs | sort @timestamp desc' },
           });
-          await PageObjects.common.navigateToApp('discover', {
-            hash: `/?_a=${state}`,
+          await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+            ensureCurrentUrl: false,
           });
           await PageObjects.discover.waitUntilSearchingHasFinished();
           await dataGrid.clickRowToggle({ rowIndex: 0 });
@@ -103,7 +103,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('data view mode', () => {
       describe('cell renderers', () => {
         it('should not render custom @timestamp or log.level', async () => {
-          await PageObjects.common.navigateToApp('discover');
+          await PageObjects.common.navigateToActualUrl('discover', undefined, {
+            ensureCurrentUrl: false,
+          });
           await dataViews.switchTo('my-example-*');
           await PageObjects.discover.waitUntilSearchingHasFinished();
           await PageObjects.unifiedFieldList.clickFieldListItemAdd('@timestamp');
@@ -115,7 +117,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should not render custom @timestamp but should render custom log.level', async () => {
-          await PageObjects.common.navigateToApp('discover');
+          await PageObjects.common.navigateToActualUrl('discover', undefined, {
+            ensureCurrentUrl: false,
+          });
           await dataViews.switchTo('my-example-logs');
           await PageObjects.discover.waitUntilSearchingHasFinished();
           await PageObjects.unifiedFieldList.clickFieldListItemAdd('@timestamp');
@@ -131,7 +135,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('doc viewer extension', () => {
         it('should not render custom doc viewer view', async () => {
-          await PageObjects.common.navigateToApp('discover');
+          await PageObjects.common.navigateToActualUrl('discover', undefined, {
+            ensureCurrentUrl: false,
+          });
           await dataViews.switchTo('my-example-*');
           await PageObjects.discover.waitUntilSearchingHasFinished();
           await dataGrid.clickRowToggle({ rowIndex: 0 });
@@ -142,7 +148,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should render custom doc viewer view', async () => {
-          await PageObjects.common.navigateToApp('discover');
+          await PageObjects.common.navigateToActualUrl('discover', undefined, {
+            ensureCurrentUrl: false,
+          });
           await dataViews.switchTo('my-example-logs');
           await PageObjects.discover.waitUntilSearchingHasFinished();
           await dataGrid.clickRowToggle({ rowIndex: 0 });

@@ -9,8 +9,6 @@ paths:
       x-codegen-enabled: true
       operationId: UpdateEndpointListItem
       summary: Updates an endpoint list item
-      tags:
-        - Endpoint exceptions API
       requestBody:
         description: Exception list item's properties
         required: true

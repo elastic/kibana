@@ -14,13 +14,10 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
-import { TextBasedLanguages } from '@kbn/esql-utils';
 import { ChangeDataView } from './change_dataview';
 import { DataViewSelector } from './data_view_selector';
 import { dataViewMock, dataViewMockEsql } from './mocks/dataview';
 import { DataViewPickerPropsExtended } from './data_view_picker';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
 describe('DataView component', () => {
   const createMockWebStorage = () => ({
@@ -89,7 +86,6 @@ describe('DataView component', () => {
         'data-test-subj': 'dataview-trigger',
       },
       onChangeDataView: jest.fn(),
-      onTextLangQuerySubmit: jest.fn(),
     };
   });
 
@@ -133,39 +129,6 @@ describe('DataView component', () => {
     );
     component.find('[data-test-subj="dataview-create-new"]').first().simulate('click');
     expect(addDataViewSpy).toHaveBeenCalled();
-  });
-
-  it('should render the text based languages panels if languages are given', async () => {
-    const component = mount(
-      wrapDataViewComponentInContext(
-        {
-          ...props,
-          textBasedLanguages: [TextBasedLanguages.ESQL],
-          textBasedLanguage: TextBasedLanguages.ESQL,
-        },
-        false
-      )
-    );
-    findTestSubject(component, 'dataview-trigger').simulate('click');
-    const text = component.find('[data-test-subj="select-text-based-language-panel"]');
-    expect(text.length).not.toBe(0);
-  });
-
-  it('should cleanup the query is on text based mode and add new dataview', async () => {
-    const component = mount(
-      wrapDataViewComponentInContext(
-        {
-          ...props,
-          onDataViewCreated: jest.fn(),
-          textBasedLanguages: [TextBasedLanguages.ESQL],
-          textBasedLanguage: TextBasedLanguages.ESQL,
-        },
-        false
-      )
-    );
-    findTestSubject(component, 'dataview-trigger').simulate('click');
-    component.find('[data-test-subj="dataview-create-new"]').first().simulate('click');
-    expect(props.onTextLangQuerySubmit).toHaveBeenCalled();
   });
 
   it('should properly handle ad hoc data views', async () => {
@@ -232,45 +195,5 @@ describe('DataView component', () => {
         isAdhoc: true,
       },
     ]);
-  });
-
-  describe('test based language switch warning icon', () => {
-    beforeAll(() => {
-      // Enzyme doesn't clean the DOM between tests, so we need to do it manually
-      document.body.innerHTML = '';
-    });
-
-    it('should show text based language switch warning icon', () => {
-      render(
-        wrapDataViewComponentInContext(
-          {
-            ...props,
-            onDataViewCreated: jest.fn(),
-            textBasedLanguages: [TextBasedLanguages.ESQL],
-            textBasedLanguage: TextBasedLanguages.ESQL,
-          },
-          false
-        )
-      );
-      userEvent.click(screen.getByTestId('dataview-trigger'));
-      expect(screen.queryByTestId('textBasedLang-warning')).toBeInTheDocument();
-    });
-
-    it('should not show text based language switch warning icon when shouldShowTextBasedLanguageTransitionModal is false', () => {
-      render(
-        wrapDataViewComponentInContext(
-          {
-            ...props,
-            onDataViewCreated: jest.fn(),
-            textBasedLanguages: [TextBasedLanguages.ESQL],
-            textBasedLanguage: TextBasedLanguages.ESQL,
-            shouldShowTextBasedLanguageTransitionModal: false,
-          },
-          false
-        )
-      );
-      userEvent.click(screen.getByTestId('dataview-trigger'));
-      expect(screen.queryByTestId('textBasedLang-warning')).not.toBeInTheDocument();
-    });
   });
 });

@@ -12,20 +12,20 @@ import {
   type MetricsServiceSetup,
   ServiceStatus,
 } from '@kbn/core/server';
-import { Observable } from 'rxjs';
-import { CollectorSet } from '../collector';
+import type { Observable } from 'rxjs';
+import type { ICollectorSet } from '../collector';
 import { registerUiCountersRoute } from './ui_counters';
 import { registerStatsRoute } from './stats';
 import type { UsageCountersServiceSetup } from '../usage_counters';
 export function setupRoutes({
   router,
-  usageCountersServiceSetup,
+  usageCounters,
   getSavedObjects,
   ...rest
 }: {
   router: IRouter;
   getSavedObjects: () => ISavedObjectsRepository | undefined;
-  usageCountersServiceSetup: UsageCountersServiceSetup;
+  usageCounters: UsageCountersServiceSetup;
   config: {
     allowAnonymous: boolean;
     kibanaIndex: string;
@@ -37,10 +37,10 @@ export function setupRoutes({
       port: number;
     };
   };
-  collectorSet: CollectorSet;
+  collectorSet: ICollectorSet;
   metrics: MetricsServiceSetup;
   overallStatus$: Observable<ServiceStatus>;
 }) {
-  registerUiCountersRoute(router, getSavedObjects, usageCountersServiceSetup);
+  registerUiCountersRoute(router, getSavedObjects, usageCounters);
   registerStatsRoute({ router, ...rest });
 }

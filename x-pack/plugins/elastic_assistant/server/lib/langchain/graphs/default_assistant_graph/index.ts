@@ -57,7 +57,16 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const logger = parentLogger.get('defaultAssistantGraph');
   const isOpenAI = llmType === 'openai';
   const llmClass = getLlmClass(llmType, bedrockChatEnabled);
-  const getLlmInstance = () =>
+
+  /**
+   * Creates a new instance of llmClass.
+   *
+   * This function ensures that a new llmClass instance is created every time it is called.
+   * This is necessary to avoid any potential side effects from shared state. By always
+   * creating a new instance, we prevent other uses of llm from binding and changing
+   * the state unintentionally. For this reason, never assign this value to a variable (ex const llm = createLlmInstance())
+   */
+  const createLlmInstance = () =>
     new llmClass({
       actionsClient,
       connectorId,
@@ -76,8 +85,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       maxRetries: 0,
     });
 
-  const llm = getLlmInstance();
-
   const anonymizationFieldsRes =
     await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({
       perPage: 1000,
@@ -93,7 +100,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const modelExists = await esStore.isModelInstalled();
 
   // Create a chain that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
-  const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever(10));
+  const chain = RetrievalQAChain.fromLLM(createLlmInstance(), esStore.asRetriever(10));
 
   // Check if KB is available
   const isEnabledKnowledgeBase = (await dataClients?.kbDataClient?.isModelDeployed()) ?? false;
@@ -106,7 +113,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     esClient,
     isEnabledKnowledgeBase,
     kbDataClient: dataClients?.kbDataClient,
-    llm,
     logger,
     modelExists,
     onNewReplacements,
@@ -116,26 +122,26 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   };
 
   const tools: StructuredTool[] = assistantTools.flatMap(
-    (tool) => tool.getTool(assistantToolParams) ?? []
+    (tool) => tool.getTool({ ...assistantToolParams, llm: createLlmInstance() }) ?? []
   );
 
   const agentRunnable = isOpenAI
     ? await createOpenAIFunctionsAgent({
-        llm,
+        llm: createLlmInstance(),
         tools,
         prompt: openAIFunctionAgentPrompt,
         streamRunnable: isStream,
       })
     : llmType && ['bedrock', 'gemini'].includes(llmType) && bedrockChatEnabled
-    ? createToolCallingAgent({
-        llm,
+    ? await createToolCallingAgent({
+        llm: createLlmInstance(),
         tools,
         prompt:
           llmType === 'bedrock' ? bedrockToolCallingAgentPrompt : geminiToolCallingAgentPrompt,
         streamRunnable: isStream,
       })
     : await createStructuredChatAgent({
-        llm,
+        llm: createLlmInstance(),
         tools,
         prompt: structuredChatAgentPrompt,
         streamRunnable: isStream,
@@ -147,9 +153,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     agentRunnable,
     conversationId,
     dataClients,
-    llm,
     // we need to pass it like this or streaming does not work for bedrock
-    getLlmInstance,
+    createLlmInstance,
     logger,
     tools,
     responseLanguage,
