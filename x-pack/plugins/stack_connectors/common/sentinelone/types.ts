@@ -6,6 +6,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
+import { Mutable } from 'utility-types';
 import {
   SentinelOneBaseApiResponseSchema,
   SentinelOneConfigSchema,
@@ -137,15 +138,15 @@ export type SentinelOneGetRemoteScriptsResponse = TypeOf<
   typeof SentinelOneGetRemoteScriptsResponseSchema
 >;
 
-export type SentinelOneFetchAgentFilesParams = TypeOf<
-  typeof SentinelOneFetchAgentFilesParamsSchema
+export type SentinelOneFetchAgentFilesParams = Mutable<
+  TypeOf<typeof SentinelOneFetchAgentFilesParamsSchema>
 >;
 export type SentinelOneFetchAgentFilesResponse = TypeOf<
   typeof SentinelOneFetchAgentFilesResponseSchema
 >;
 
-export type SentinelOneDownloadAgentFileParams = TypeOf<
-  typeof SentinelOneDownloadAgentFileParamsSchema
+export type SentinelOneDownloadAgentFileParams = Mutable<
+  TypeOf<typeof SentinelOneDownloadAgentFileParamsSchema>
 >;
 
 export type SentinelOneActivityRecord<TData = unknown> = Omit<
@@ -162,6 +163,8 @@ export type SentinelOneGetActivitiesResponse<TData = unknown> = Omit<
   'data'
 > & { data: Array<SentinelOneActivityRecord<TData>> };
 
-export type SentinelOneIsolateHostParams = TypeOf<typeof SentinelOneIsolateHostParamsSchema>;
+export type SentinelOneIsolateHostParams = Partial<
+  Mutable<TypeOf<typeof SentinelOneIsolateHostParamsSchema>>
+>;
 
 export type SentinelOneActionParams = TypeOf<typeof SentinelOneActionParamsSchema>;
