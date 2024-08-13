@@ -322,10 +322,7 @@ export function InternalDashboardTopNav({
     }
     if (showWriteControls && managed) {
       const badgeProps = {
-        ...getManagedContentBadge(
-          getManagedContentBadge(dashboardManagedBadge.getAriaLabel()).badgeText,
-          false
-        ),
+        ...getManagedContentBadge(dashboardManagedBadge.getAriaLabel(), false),
         onClick: () => setIsPopoverOpen(!isPopoverOpen),
         onClickAriaLabel: dashboardManagedBadge.getAriaLabel(),
         iconOnClick: () => setIsPopoverOpen(!isPopoverOpen),
