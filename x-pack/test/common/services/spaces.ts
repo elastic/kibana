@@ -11,6 +11,7 @@ import Https from 'https';
 import { format as formatUrl } from 'url';
 import util from 'util';
 import Chance from 'chance';
+import Url from 'url';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const chance = new Chance();
@@ -99,17 +100,20 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
     }
 
     public async navigateToHomePage(spaceId: string) {
-      const currentUrl = await browser.getCurrentUrl();
+      log.debug('navigating to space home page');
 
-      const urlMatch = currentUrl.match(/^(https?:\/\/[^/]+)(\/.*)/);
-      let baseUrl = 'http://localhost:5620';
-      if (urlMatch) {
-        baseUrl = urlMatch[1];
-      }
+      const { protocol, hostname, port } = config.get('servers.kibana');
+
+      const spaceHomeUrl = Url.format({
+        protocol,
+        hostname,
+        port,
+        pathname: `/s/${spaceId}`,
+      });
 
       // Using browser.navigateTo instead of common.navigateToUrl to test the redirect from "/"
       // to the correct app. (common.navigateToUrl requires the "app" to be provided).
-      await browser.navigateTo(`${baseUrl}/s/${spaceId}`);
+      await browser.navigateTo(spaceHomeUrl);
     }
   })();
 }
