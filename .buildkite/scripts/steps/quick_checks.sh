@@ -5,6 +5,7 @@ set -euo pipefail
 export DISABLE_BOOTSTRAP_VALIDATION=false
 .buildkite/scripts/bootstrap.sh
 
+ts-node-script ./.buildkite/scripts/steps/quick_checks.ts """
 .buildkite/scripts/steps/checks/precommit_hook.sh
 .buildkite/scripts/steps/checks/ts_projects.sh
 .buildkite/scripts/steps/checks/packages.sh
@@ -24,3 +25,4 @@ export DISABLE_BOOTSTRAP_VALIDATION=false
 .buildkite/scripts/steps/checks/yarn_deduplicate.sh
 .buildkite/scripts/steps/checks/prettier_topology.sh
 .buildkite/scripts/steps/checks/renovate.sh
+"""
