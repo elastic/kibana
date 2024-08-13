@@ -55,6 +55,7 @@
     "lint:es": "node scripts/eslint",
     "lint:style": "node scripts/stylelint",
     "makelogs": "node scripts/makelogs",
+    "quick-checks": ".buildkite/scripts/steps/quick_checks.sh",
     "serverless": "node scripts/kibana --dev --serverless",
     "serverless-es": "node scripts/kibana --dev --serverless=es",
     "serverless-oblt": "node scripts/kibana --dev --serverless=oblt",
@@ -67,8 +68,7 @@
     "test:ftr:server": "node scripts/functional_tests_server",
     "test:jest": "node scripts/jest",
     "test:jest_integration": "node scripts/jest_integration",
-    "test:type_check": "node scripts/type_check",
-    "quick-checks": ".buildkite/scripts/steps/quick_checks.sh"
+    "test:type_check": "node scripts/type_check"
   },
   "repository": {
     "type": "git",
