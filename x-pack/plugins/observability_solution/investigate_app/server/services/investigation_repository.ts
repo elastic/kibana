@@ -78,7 +78,7 @@ export function investigationRepositoryFactory({
     async findByAlertId(alertId: string): Promise<Investigation[]> {
       const response = await soClient.find<StoredInvestigation>({
         type: SO_INVESTIGATION_TYPE,
-        filter: `investigation.attributes.origin.id:(${alertId})`,
+        filter: `investigation.attributes.origin.id:(${alertId}) AND investigation.attributes.status: ongoing`,
       });
 
       if (response.total === 0) {

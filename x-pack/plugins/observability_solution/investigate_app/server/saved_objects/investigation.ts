@@ -26,6 +26,7 @@ export const investigation: SavedObjectsType = {
           id: { type: 'keyword' },
         },
       },
+      status: { type: 'keyword' },
     },
   },
   management: {
