@@ -87,8 +87,21 @@ export const getVisualizeEmbeddableFactory: (deps: {
     const initialVisInstance = await createVisInstance(state.serializedVis);
     const vis$ = new BehaviorSubject<Vis>(initialVisInstance);
 
+    const onUiStateChange = () => {
+      console.log(
+        'onUiStateChange',
+        vis$.getValue().serialize().uiState,
+        serializedVis$.getValue().uiState
+      );
+      serializedVis$.next(vis$.getValue().serialize());
+    };
+    initialVisInstance.uiState.on('change', onUiStateChange);
+    vis$.subscribe((vis) => vis.uiState.on('change', onUiStateChange));
+
     // when the serialized vis changes, update the vis instance
     serializedVis$.subscribe(async (serializedVis) => {
+      const currentVis = vis$.getValue();
+      if (currentVis) currentVis.uiState.off('change', onUiStateChange);
       vis$.next(await createVisInstance(serializedVis));
       await updateExpressionParams();
     });
@@ -299,11 +312,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
             return a === b;
           },
         ],
-        savedObjectProperties: [
-          savedObjectProperties$,
-          (value) => savedObjectProperties$.next(value),
-          isEqual,
-        ],
+        savedObjectProperties: getUnchangingComparator(),
         linkedToLibrary: [linkedToLibrary$, (value) => linkedToLibrary$.next(value)],
       }
     );

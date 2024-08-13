@@ -10,7 +10,7 @@ import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import { extractSearchSourceReferences } from '@kbn/data-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { SerializedTitles } from '@kbn/presentation-publishing';
-import { cloneDeep, omit } from 'lodash';
+import { cloneDeep, isEmpty, omit } from 'lodash';
 import { Reference } from '../../common/content_management';
 import { VisualizationSavedObject } from '../../common';
 import {
@@ -109,6 +109,7 @@ export const deserializeSavedVisState = (
 export const deserializeSavedObjectState = async ({
   savedObjectId,
   enhancements,
+  uiState,
 }: VisualizeSavedObjectInputState) => {
   // Load a saved visualization from the library
   const {
@@ -119,6 +120,7 @@ export const deserializeSavedObjectState = async ({
     searchSourceFields,
     savedSearchId,
     savedSearchRefName,
+    uiStateJSON,
     ...savedObjectProperties
   } = await getSavedVisualization(
     {
@@ -138,6 +140,7 @@ export const deserializeSavedObjectState = async ({
       title,
       type: visState.type,
       params: visState.params,
+      uiState: uiState ?? (uiStateJSON ? JSON.parse(uiStateJSON) : {}),
       data: {
         aggs: visState.aggs,
         searchSource: (searchSource ?? searchSourceFields) as SerializedSearchSourceFields,
@@ -182,6 +185,7 @@ export const serializeState: (props: {
       rawState: {
         savedObjectId: id,
         ...(enhancements ? { enhancements } : {}),
+        ...(!isEmpty(serializedVis.uiState) ? { uiState: serializedVis.uiState } : {}),
       } as VisualizeSavedObjectInputState,
       references,
     };
@@ -219,7 +223,13 @@ export const savedObjectToRuntimeState: (
 ) => VisualizeRuntimeState = (savedObject) => {
   const { references, attributes, id, managed = false } = savedObject;
 
-  const { title, description, visState: visStateJSON, kibanaSavedObjectMeta } = attributes;
+  const {
+    title,
+    description,
+    visState: visStateJSON,
+    kibanaSavedObjectMeta,
+    uiStateJSON,
+  } = attributes;
 
   const visState = JSON.parse(visStateJSON ?? '{}');
   const { searchSourceJSON } = kibanaSavedObjectMeta ?? {};
@@ -237,6 +247,7 @@ export const savedObjectToRuntimeState: (
           description,
           type: visState.type,
           params: visState.params,
+          uiState: uiStateJSON ? JSON.parse(uiStateJSON) : {},
           data: {
             aggs: visState.aggs,
             searchSource,
