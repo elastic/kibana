@@ -35,24 +35,21 @@ export const getSuppressionAlertFields = ({
   suppressionTerms,
   fallbackTimestamp,
   instanceId,
-  event,
 }: {
-  fields: Record<string, string | number | null> | undefined;
+  fields: Record<string, unknown> | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   suppressionTerms: SuppressionTerm[];
   fallbackTimestamp: string;
   instanceId: string;
-  event?: SignalSourceHit;
 }) => {
   console.error(
     `primary timestamp: ${primaryTimestamp}, secondaryTimestamp: ${secondaryTimestamp}, fallbackTimestamp: ${fallbackTimestamp}`
   );
   console.error('WHAT ARE FIELDS', JSON.stringify(fields));
-  console.error('WHAT ARE EVENT', JSON.stringify(event));
   const suppressionTime = new Date(
-    get(fields ?? event?._source, primaryTimestamp) ??
-      (secondaryTimestamp && get(fields ?? event?._source, secondaryTimestamp)) ??
+    get(fields, primaryTimestamp) ??
+      (secondaryTimestamp && get(fields, secondaryTimestamp)) ??
       fallbackTimestamp
   );
 
@@ -75,18 +72,16 @@ export const getSuppressionAlertFields = ({
 export const getSuppressionTerms = ({
   alertSuppression,
   fields,
-  event,
 }: {
   fields: Record<string, unknown> | undefined;
   alertSuppression: AlertSuppressionCamel | undefined;
-  event: SignalSourceHit | undefined;
 }): SuppressionTerm[] => {
   const suppressedBy = alertSuppression?.groupBy ?? [];
 
-  const suppressedProps = pick(
-    fields != null && !isEmpty(fields) ? fields : event?._source,
-    suppressedBy
-  ) as Record<string, string[] | number[] | undefined>;
+  const suppressedProps = pick(fields, suppressedBy) as Record<
+    string,
+    string[] | number[] | undefined
+  >;
   const suppressionTerms = suppressedBy.map((field) => {
     const value = get(suppressedProps, field) ?? null;
     const sortedValue = Array.isArray(value) ? (sortBy(value) as string[] | number[]) : value;

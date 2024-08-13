@@ -45,7 +45,10 @@ import type {
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppressed_alerts_in_memory';
+import {
+  bulkCreateSuppressedAlertsInMemory,
+  bulkCreateSuppressedSequencesInMemory,
+} from '../utils/bulk_create_suppressed_alerts_in_memory';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
 import {
   ALERT_ANCESTORS,
@@ -91,6 +94,7 @@ export const eqlExecutor = async ({
   exceptionFilter,
   unprocessedExceptions,
   wrapSuppressedHits,
+  wrapSuppressedSequences,
   alertTimestampOverride,
   alertWithSuppression,
   isAlertSuppressionActive,
@@ -141,13 +145,6 @@ export const eqlExecutor = async ({
 
       const { events, sequences } = response.hits;
 
-      console.error('SEQUENCES LENGTH', sequences?.length);
-
-      sequences?.forEach((sequence) => {
-        console.error('sequence length', sequence.events?.length);
-        console.error('sequence join keys length', sequence.join_keys?.length);
-      });
-
       if (events) {
         if (isAlertSuppressionActive) {
           await bulkCreateSuppressedAlertsInMemory({
@@ -175,33 +172,45 @@ export const eqlExecutor = async ({
           //   'Suppression is not supported for EQL sequence queries. The rule will proceed without suppression.'
           // );
 
-          const candidateSignals = wrapSequences(sequences, buildReasonMessageForEqlAlert);
-          // partition sequence alert from building block alerts
-          const [sequenceAlerts, buildingBlockAlerts] = partition(
-            candidateSignals,
-            (signal) => signal._source[ALERT_BUILDING_BLOCK_TYPE] == null
-          );
-          console.error(
-            'WHAT ARE THE NEW SIGNALS',
-            sequenceAlerts.map((alert) => alert._source['agent.name'])
-          );
-          await bulkCreateSuppressedAlertsInMemory({
-            enrichedEvents: sequenceAlerts,
-            buildingBlockAlerts,
-            skipWrapping: true,
-            toReturn: result,
-            wrapHits,
-            bulkCreate,
-            services,
-            buildReasonMessage: buildReasonMessageForEqlAlert,
-            ruleExecutionLogger,
-            tuple,
-            alertSuppression: completeRule.ruleParams.alertSuppression,
-            wrapSuppressedHits,
-            alertTimestampOverride,
-            alertWithSuppression,
-            experimentalFeatures,
-          });
+          console.error('how many sequences?', sequences.length);
+
+          /*
+          We are missing the 'fields' property from the sequences.events because
+          we are wrapping the sequences before passing them to the bulk create
+          suppressed function. My hypothesis is to pass the raw sequence data to
+          bulk create suppressed alerts, then do the sequence wrapping
+          within the create suppressed alerts function.
+
+          */
+
+          // commenting out all this code because it needs to happen further down the stack,
+          // where we are no longer relying on fields.
+          // const candidateSignals = wrapSequences(sequences, buildReasonMessageForEqlAlert);
+          // // partition sequence alert from building block alerts
+          // const [sequenceAlerts, buildingBlockAlerts] = partition(
+          //   candidateSignals,
+          //   (signal) => signal._source[ALERT_BUILDING_BLOCK_TYPE] == null
+          // );
+          // console.error('how many potential sequence alerts?', sequenceAlerts.length);
+          try {
+            await bulkCreateSuppressedSequencesInMemory({
+              sequences,
+              toReturn: result,
+              wrapSequences, // TODO: fix type mismatch
+              bulkCreate,
+              services,
+              buildReasonMessage: buildReasonMessageForEqlAlert,
+              ruleExecutionLogger,
+              tuple,
+              alertSuppression: completeRule.ruleParams.alertSuppression,
+              wrapSuppressedHits: wrapSuppressedSequences,
+              alertTimestampOverride,
+              alertWithSuppression,
+              experimentalFeatures,
+            });
+          } catch (exc) {
+            console.error('WHAT IS THE EXC', exc);
+          }
         } else {
           newSignals = wrapSequences(sequences, buildReasonMessageForEqlAlert);
         }

@@ -7,14 +7,18 @@
 
 import { EQL_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import type { EqlHitsSequence } from '@elastic/elasticsearch/lib/api/types';
 
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { EqlRuleParams } from '../../rule_schema';
 import { eqlExecutor } from './eql';
-import type { CreateRuleOptions, SecurityAlertType, SignalSourceHit } from '../types';
+import type { CreateRuleOptions, SecurityAlertType, SignalSource, SignalSourceHit } from '../types';
 import { validateIndexPatterns } from '../utils';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
-import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
+import {
+  wrapSuppressedAlerts,
+  wrapSuppressedSequenceAlerts,
+} from '../utils/wrap_suppressed_alerts';
 import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
 
 export const createEqlAlertType = (
@@ -103,6 +107,23 @@ export const createEqlAlertType = (
           primaryTimestamp,
           secondaryTimestamp,
         });
+      const wrapSuppressedSequences = (
+        sequences: Array<EqlHitsSequence<SignalSource>>,
+        buildReasonMessage: BuildReasonMessage
+      ) =>
+        wrapSuppressedSequenceAlerts({
+          sequences,
+          spaceId,
+          completeRule,
+          mergeStrategy,
+          indicesToQuery: inputIndex,
+          buildReasonMessage,
+          alertTimestampOverride,
+          ruleExecutionLogger,
+          publicBaseUrl,
+          primaryTimestamp,
+          secondaryTimestamp,
+        });
       const isNonSeqAlertSuppressionActive = await getIsAlertSuppressionActive({
         alertSuppression: completeRule.ruleParams.alertSuppression,
         licensing,
@@ -123,6 +144,7 @@ export const createEqlAlertType = (
         exceptionFilter,
         unprocessedExceptions,
         wrapSuppressedHits,
+        wrapSuppressedSequences,
         alertTimestampOverride,
         alertWithSuppression,
         isAlertSuppressionActive: isNonSeqAlertSuppressionActive,

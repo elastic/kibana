@@ -5,7 +5,7 @@
     "https://www.example.com/some-article-about-a-false-positive",
     "some text string about why another condition could be a false positive"
   ],
-  "rule_id": "rule-id-eql-2",
+  "rule_id": "rule-id-eql-1",
   "enabled": true,
   "index": ["auditbeat*", "packetbeat*"],
   "interval": "30s",

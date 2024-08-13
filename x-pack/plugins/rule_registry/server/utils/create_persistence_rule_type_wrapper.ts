@@ -599,12 +599,12 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                     currentTimeOverride,
                   });
 
-                  console.error(
-                    'WHAT IS AUGMENTED ALERT',
-                    augmentedAlerts.map(
-                      (augAlert) => augAlert._source._source['kibana.alert.group.id']
-                    )
-                  );
+                  // console.error(
+                  //   'WHAT IS AUGMENTED ALERT',
+                  //   augmentedAlerts.map(
+                  //     (augAlert) => augAlert._source._source['kibana.alert.group.id']
+                  //   )
+                  // );
 
                   const matchingBuildingBlockAlerts = buildingBlockAlerts?.filter((someAlert) => {
                     // console.error('SOME ALERT GROUP ID', someAlert?._source[ALERT_GROUP_ID]);
@@ -612,7 +612,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
 
                     return (
                       someAlert?._source[ALERT_GROUP_ID] ===
-                      newAlerts[0]?._source._source['kibana.alert.group.id']
+                      newAlerts[0]?._source['kibana.alert.group.id']
                     );
                   });
 

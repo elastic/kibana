@@ -8,6 +8,7 @@
 import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 import sortBy from 'lodash/sortBy';
+import partition from 'lodash/partition';
 
 import { EqlRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
@@ -48,7 +49,7 @@ import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/ut
 
 const getQuery = (id: string) => `any where id == "${id}"`;
 const getSequenceQuery = (id: string) =>
-  `sequence by id [any where id == "${id}"] [any where id == "${id}"]`;
+  `sequence [any where id == "${id}"] [any where id == "${id}"]`;
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -1787,6 +1788,78 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('sequence queries', () => {
+      it.skip('only suppresses alerts within the rule execution', async () => {
+        const id = uuidv4();
+        const timestamp = '2020-10-28T06:45:00.000Z';
+        const laterTimestamp = '2020-10-28T06:50:00.000Z';
+        const timestamp1 = '2020-10-28T06:51:00.000Z';
+        const laterTimestamp2 = '2020-10-28T06:53:00.000Z';
+        const doc1 = {
+          id,
+          '@timestamp': timestamp,
+          host: { name: 'host-a' },
+        };
+        const doc1WithLaterTimestamp = {
+          ...doc1,
+          '@timestamp': laterTimestamp,
+        };
+
+        await indexListOfSourceDocuments([
+          doc1,
+          doc1WithLaterTimestamp,
+          { ...doc1, '@timestamp': timestamp1 },
+          // { ...doc1WithLaterTimestamp, '@timestamp': laterTimestamp2 },
+        ]);
+
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: getSequenceQuery(id),
+          alert_suppression: {
+            group_by: ['host.name'],
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+          invocationCount: 1,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: [ALERT_ORIGINAL_TIME],
+        });
+        // we expect three alerts, two building block and
+        // one sequence alert, let's confirm that
+        expect(previewAlerts.length).toEqual(3);
+        const [sequenceAlert, buildingBlockAlerts] = partition(
+          previewAlerts,
+          (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
+        );
+        expect(buildingBlockAlerts.length).toEqual(2);
+        expect(sequenceAlert.length).toEqual(1);
+        console.error(JSON.stringify(sequenceAlert));
+
+        expect(sequenceAlert[0]?._source).toEqual({
+          ...sequenceAlert[0]?._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: ['host-a'],
+            },
+          ],
+          [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
+          [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
+          [ALERT_ORIGINAL_TIME]: timestamp,
+          [ALERT_SUPPRESSION_START]: timestamp,
+          [ALERT_SUPPRESSION_END]: laterTimestamp, // suppression ends with later timestamp
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+        });
+      });
       it('logs a warning if suppression is configured', async () => {
         const id = uuidv4();
         await indexGeneratedSourceDocuments({

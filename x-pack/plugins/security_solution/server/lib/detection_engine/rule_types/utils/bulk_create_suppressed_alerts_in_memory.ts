@@ -7,12 +7,17 @@
 import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
 
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
-import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
+import type { EqlHitsSequence } from '@elastic/elasticsearch/lib/api/types';
+import { ALERT_BUILDING_BLOCK_TYPE, ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
+import partition from 'lodash/partition';
+
 import type {
   SearchAfterAndBulkCreateParams,
   SearchAfterAndBulkCreateReturnType,
   WrapSuppressedHits,
   SignalSourceHit,
+  SignalSource,
+  WrapSequences,
 } from '../types';
 import { MAX_SIGNALS_SUPPRESSION_MULTIPLIER } from '../constants';
 import { addToSearchAfterReturn } from './utils';
@@ -57,6 +62,29 @@ export interface BulkCreateSuppressedAlertsParams
   maxNumberOfAlertsMultiplier?: number;
   skipWrapping?: boolean;
 }
+
+export interface BulkCreateSuppressedSequencesParams
+  extends Pick<
+    SearchAfterAndBulkCreateSuppressedAlertsParams,
+    | 'bulkCreate'
+    | 'services'
+    | 'buildReasonMessage'
+    | 'ruleExecutionLogger'
+    | 'tuple'
+    | 'alertSuppression'
+    | 'wrapSuppressedHits'
+    | 'alertWithSuppression'
+    | 'alertTimestampOverride'
+  > {
+  wrapSequences: WrapSequences;
+  sequences: Array<EqlHitsSequence<SignalSource>>;
+  buildingBlockAlerts?: Array<WrappedFieldsLatest<BaseFieldsLatest>>;
+  toReturn: SearchAfterAndBulkCreateReturnType;
+  experimentalFeatures: ExperimentalFeatures;
+  mergeSourceAndFields?: boolean;
+  maxNumberOfAlertsMultiplier?: number;
+  skipWrapping?: boolean;
+}
 /**
  * wraps, bulk create and suppress alerts in memory, also takes care of missing fields logic.
  * If parameter alertSuppression.missingFieldsStrategy configured not to be suppressed,
@@ -88,6 +116,11 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
   let suppressibleEvents = enrichedEvents;
   let unsuppressibleWrappedDocs: Array<WrappedFieldsLatest<BaseFieldsLatest>> = [];
 
+  // if (suppressibleEvents?.[0]?.events != null) {
+  //   // then we know that we have received sequences
+  //   // so we must augment the wrapHits
+  // }
+
   if (!suppressOnMissingFields) {
     const partitionedEvents = partitionMissingFieldsEvents(
       enrichedEvents,
@@ -102,19 +135,115 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
   }
 
   // refactor the below into a separate function
-  const suppressibleWrappedDocs = wrapSuppressedHits(
-    suppressibleEvents,
-    buildReasonMessage,
-    skipWrapping
-  );
+  const suppressibleWrappedDocs = wrapSuppressedHits(suppressibleEvents, buildReasonMessage);
 
   console.error(
     'SUPPRESSIBLE WRAPPED instance ids',
     suppressibleWrappedDocs.map((doc) => doc._source[ALERT_INSTANCE_ID])
   );
 
+  // I think we create a separate bulkCreateSuppressedInMemory function
+  // specifically for eql sequences
+  // since sequences act differently from the other alerts.
   return executeBulkCreateAlerts({
     suppressibleWrappedDocs,
+    unsuppressibleWrappedDocs,
+    buildingBlockAlerts,
+    toReturn,
+    bulkCreate,
+    services,
+    ruleExecutionLogger,
+    tuple,
+    alertSuppression,
+    alertWithSuppression,
+    alertTimestampOverride,
+    experimentalFeatures,
+    maxNumberOfAlertsMultiplier,
+  });
+};
+
+/**
+ * wraps, bulk create and suppress alerts in memory, also takes care of missing fields logic.
+ * If parameter alertSuppression.missingFieldsStrategy configured not to be suppressed,
+ * regular alerts will be created for such events without suppression
+ */
+export const bulkCreateSuppressedSequencesInMemory = async ({
+  sequences,
+  toReturn,
+  wrapSequences,
+  bulkCreate,
+  services,
+  buildReasonMessage,
+  ruleExecutionLogger,
+  tuple,
+  alertSuppression,
+  wrapSuppressedHits,
+  alertWithSuppression,
+  alertTimestampOverride,
+  experimentalFeatures,
+  mergeSourceAndFields = false,
+  maxNumberOfAlertsMultiplier,
+}: BulkCreateSuppressedSequencesParams) => {
+  const suppressOnMissingFields =
+    (alertSuppression?.missingFieldsStrategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) ===
+    AlertSuppressionMissingFieldsStrategyEnum.suppress;
+
+  let suppressibleSequences: Array<EqlHitsSequence<SignalSource>> = [];
+  const unsuppressibleWrappedDocs: Array<EqlHitsSequence<SignalSource>> = [];
+
+  if (!suppressOnMissingFields) {
+    sequences.forEach((sequence) => {
+      // if none of the events in the sequence
+      // contain a value, then wrap sequence normally,
+      // otherwise wrap as suppressed
+      // ask product
+      const [eventsWithFields, eventsWithoutFields] = partitionMissingFieldsEvents(
+        sequence.events,
+        alertSuppression?.groupBy || [],
+        ['fields'],
+        mergeSourceAndFields
+      );
+
+      if (eventsWithFields.length === 0) {
+        // unsuppressible sequence alert
+        unsuppressibleWrappedDocs.push(wrapSequences([sequence], buildReasonMessage));
+        console.error('unsuppressible docs', unsuppressibleWrappedDocs.length);
+      } else {
+        suppressibleSequences.push(sequence);
+      }
+    });
+  } else {
+    suppressibleSequences = sequences;
+  }
+
+  // refactor the below into a separate function
+  const suppressibleWrappedDocs = wrapSuppressedHits(suppressibleSequences, buildReasonMessage);
+
+  console.error(
+    'SUPPRESSIBLE WRAPPED instance ids',
+    suppressibleWrappedDocs.map((doc) => doc._source[ALERT_INSTANCE_ID])
+  );
+
+  // once we have wrapped thing similarly to
+  // build alert group from sequence,
+  // we can pass down the suppressibleWrappeDocs (our sequence alerts)
+  // and the building block alerts
+
+  // partition sequence alert from building block alerts
+  const [sequenceAlerts, buildingBlockAlerts] = partition(
+    suppressibleWrappedDocs,
+    (signal) => signal._source[ALERT_BUILDING_BLOCK_TYPE] == null
+  );
+
+  // the code in executeBulkCreateAlerts should
+  // not have to change, and might even allow me to remove
+  // some of my earlier changes where the fields property was not available
+
+  // I think we create a separate bulkCreateSuppressedInMemory function
+  // specifically for eql sequences
+  // since sequences act differently from the other alerts.
+  return executeBulkCreateAlerts({
+    suppressibleWrappedDocs: sequenceAlerts,
     unsuppressibleWrappedDocs,
     buildingBlockAlerts,
     toReturn,
