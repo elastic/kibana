@@ -10,6 +10,7 @@ import { Client } from '@elastic/elasticsearch';
 import { Logger } from '../../lib/utils/create_logger';
 import { RunOptions } from './parse_run_cli_flags';
 import { EntitySynthtraceEsClient } from '../../lib/entity/entity_syntrace_es_client';
+import { getEsClientTlsSettings } from './ssl';
 
 export function getEntityEsClient({
   target,
@@ -21,6 +22,7 @@ export function getEntityEsClient({
 }) {
   const client = new Client({
     node: target,
+    tls: getEsClientTlsSettings(target),
   });
 
   return new EntitySynthtraceEsClient({

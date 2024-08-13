@@ -14,6 +14,7 @@ import {
 import { DataViewAttributes } from '@kbn/data-views-plugin/common';
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 import {
   CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
@@ -25,7 +26,6 @@ import {
 } from '../../common/constants';
 
 const DATA_VIEW_TIME_FIELD = '@timestamp';
-const DEFAULT_SPACE_ID = 'default';
 
 const getDataViewSafe = async (
   soClient: ISavedObjectsRepository,
