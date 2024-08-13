@@ -211,7 +211,19 @@ The most complex case is the `expression` as it can cover a multitude of cases. 
 
 ### Automated testing
 
-Both the validation and autocomplete engine are covered by extensive suites of tests. The test suites are in a state of transition from an older pattern to a newer pattern and so they are more complicated than we would like. We aim to improve and simplify the DX over time.
+Both the validation and autocomplete engine are covered by extensive suites of tests.
+
+#### Running the tests
+
+All the tests can be run using the `yarn jest:tests packages/kbn-esql-validation-autocomplete/path/to/test/file` command at the root of the repository.
+
+To run all autocomplete and validation tests you can specifically run
+
+`yarn test:jest packages/kbn-esql-validation-autocomplete/`
+
+#### Ongoing refactor
+
+The test suites are in a state of transition from an older pattern to a newer pattern and so they are more complicated than we would like. We aim to improve and simplify the DX over time.
 
 The older pattern is
 
@@ -320,7 +332,7 @@ Options is
 
 ```ts
 export interface SuggestOptions {
-  ctx?: EditorContext;
+  triggerCharacter?: string;
   callbacks?: ESQLCallbacks;
 }
 ```
@@ -334,7 +346,7 @@ All the legacy autocomplete tests are found in `packages/kbn-esql-validation-aut
 They look like this
 
 ```ts
-testSuggestions('from a | eval a = 1 year ', [
+testSuggestions('from a | eval a = 1 year /', [
   ',',
   '| ',
   ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
@@ -350,5 +362,4 @@ Its parameters are as follows
 1. the query
 2. the expected suggestions (can be strings or `Partial<SuggestionRawDefinition>`)
 3. the trigger character. This should only be included if the test is intended to validate a "Trigger Character" trigger kind from Monaco ([ref](https://microsoft.github.io/monaco-editor/typedoc/enums/languages.CompletionTriggerKind.html#TriggerCharacter))
-4. the position. This should be included if the test is validating an "Invoke" trigger kind from Monaco ([ref](https://microsoft.github.io/monaco-editor/typedoc/enums/languages.CompletionTriggerKind.html#Invoke)), or if the test is validating a trigger character entered prior to the final occurance of that trigger character in the given query.
-5. custom callback data such as a list of indicies or a field list
+4. custom callback data such as a list of indicies or a field list
