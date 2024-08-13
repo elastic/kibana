@@ -103,6 +103,7 @@ export class ProjectMonitorFormatter {
       server: this.server,
       syntheticsMonitorClient: this.syntheticsMonitorClient,
       savedObjectsClient: this.savedObjectsClient,
+      excludeAgentPolicies: true,
     });
     const existingMonitorsPromise = this.getProjectMonitorsForProject();
 

@@ -40,14 +40,14 @@ export function useInvestigateRouter(): StatefulInvestigateRouter {
       ...investigateRouter,
       push: (...args) => {
         const next = link(...args);
-        navigateToApp('investigate', { path: next, replace: false });
+        navigateToApp('investigations', { path: next, replace: false });
       },
       replace: (path, ...args) => {
         const next = link(path, ...args);
-        navigateToApp('investigate', { path: next, replace: true });
+        navigateToApp('investigations', { path: next, replace: true });
       },
       link: (path, ...args) => {
-        return http.basePath.prepend('/app/investigate' + link(path, ...args));
+        return http.basePath.prepend('/app/investigations' + link(path, ...args));
       },
     }),
     [navigateToApp, http.basePath]

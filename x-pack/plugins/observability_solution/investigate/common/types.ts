@@ -24,11 +24,19 @@ export enum InvestigateWidgetColumnSpan {
 
 export interface Investigation {
   id: string;
-  '@timestamp': number;
+  createdAt: number;
   user: AuthenticatedUser;
   title: string;
   items: InvestigateWidget[];
+  notes: InvestigationNote[];
   parameters: GlobalWidgetParameters;
+}
+
+export interface InvestigationNote {
+  id: string;
+  createdAt: number;
+  createdBy: AuthenticatedUser;
+  content: string;
 }
 
 export interface InvestigateWidget<
