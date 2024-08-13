@@ -1319,7 +1319,7 @@
             }
           },
           {
-            "description": "The identifier for the rule.",
+            "description": "The identifier for the rule. If it is omitted, an ID is randomly generated.",
             "in": "path",
             "name": "id",
             "required": false,
@@ -3784,6 +3784,7 @@
             }
           },
           {
+            "description": "The identifier for the rule.",
             "in": "path",
             "name": "id",
             "required": true,
@@ -3792,7 +3793,11 @@
             }
           }
         ],
-        "responses": {},
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          }
+        },
         "summary": "Mute all alerts",
         "tags": [
           "alerting"
@@ -3826,6 +3831,7 @@
             }
           },
           {
+            "description": "The identifier for the rule.",
             "in": "path",
             "name": "id",
             "required": true,
@@ -3834,7 +3840,11 @@
             }
           }
         ],
-        "responses": {},
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          }
+        },
         "summary": "Unmute all alerts",
         "tags": [
           "alerting"
