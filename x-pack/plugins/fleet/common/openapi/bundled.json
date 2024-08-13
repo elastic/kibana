@@ -3352,7 +3352,7 @@
                       ]
                     }
                   },
-                  "exclude_event_logs": {
+                  "exclude_events_log": {
                     "type": "boolean"
                   }
                 },
