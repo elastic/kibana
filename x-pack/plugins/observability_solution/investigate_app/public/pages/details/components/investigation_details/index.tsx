@@ -11,14 +11,14 @@ import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { keyBy, noop } from 'lodash';
 import React, { useEffect, useMemo, useRef } from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import { useDateRange } from '../../hooks/use_date_range';
-import { useKibana } from '../../hooks/use_kibana';
-import { AddNoteUI } from '../add_note_ui';
-import { AddObservationUI } from '../add_observation_ui';
-import { InvestigateSearchBar } from '../investigate_search_bar';
-import { InvestigateWidgetGrid } from '../investigate_widget_grid';
+import { AddObservationUI } from '../../../../components/add_observation_ui';
+import { InvestigateSearchBar } from '../../../../components/investigate_search_bar';
+import { InvestigateWidgetGrid } from '../../../../components/investigate_widget_grid';
+import { useDateRange } from '../../../../hooks/use_date_range';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { InvestigationNotes } from '../investigation_notes/investigation_notes';
 
-function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
+function InvestigationDetailsWithUser({ user }: { user: AuthenticatedUser }) {
   const {
     dependencies: {
       start: { investigate },
@@ -34,6 +34,8 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
     investigation,
     setGlobalParameters,
     renderableInvestigation,
+    addNote,
+    deleteNote,
   } = investigate.useInvestigation({
     user,
     from: range.start.toISOString(),
@@ -73,18 +75,16 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
     return renderableInvestigation?.items.map((item) => {
       const definitionForType = widgetDefinitionsByType[item.type];
 
-      return (
-        {
-          title: item.title,
-          description: item.description ?? '',
-          id: item.id,
-          element: item.element,
-          columns: item.columns,
-          rows: item.rows,
-          chrome: definitionForType.chrome,
-          loading: item.loading,
-        } ?? []
-      );
+      return {
+        title: item.title,
+        description: item.description ?? '',
+        id: item.id,
+        element: item.element,
+        columns: item.columns,
+        rows: item.rows,
+        chrome: definitionForType.chrome,
+        loading: item.loading,
+      };
     });
   }, [renderableInvestigation, widgetDefinitions]);
 
@@ -142,19 +142,13 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
       </EuiFlexItem>
 
       <EuiFlexItem grow={2}>
-        <AddNoteUI
-          user={user}
-          timeRange={renderableInvestigation.parameters.timeRange}
-          onWidgetAdd={(widget) => {
-            return createWidgetRef.current(widget);
-          }}
-        />
+        <InvestigationNotes notes={investigation.notes} addNote={addNote} deleteNote={deleteNote} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
 
-export function InvestigateView({}: {}) {
+export function InvestigationDetails({}: {}) {
   const {
     core: { security },
   } = useKibana();
@@ -163,5 +157,5 @@ export function InvestigateView({}: {}) {
     return security.authc.getCurrentUser();
   }, [security]);
 
-  return user.value ? <InvestigateViewWithUser user={user.value} /> : null;
+  return user.value ? <InvestigationDetailsWithUser user={user.value} /> : null;
 }
