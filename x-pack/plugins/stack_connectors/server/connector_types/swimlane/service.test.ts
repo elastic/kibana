@@ -14,7 +14,7 @@ import { request, createAxiosResponse } from '@kbn/actions-plugin/server/lib/axi
 import { createExternalService } from './service';
 import { mappings } from './mocks';
 import { ExternalService } from './types';
-import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -57,10 +57,10 @@ describe('Swimlane Service', () => {
   };
 
   const url = config.apiUrl.slice(0, -1);
-  let connectorMetricsCollector: ConnectorMetricsCollector;
+  let connectorUsageCollector: ConnectorUsageCollector;
 
   beforeAll(() => {
-    connectorMetricsCollector = new ConnectorMetricsCollector({
+    connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',
     });
@@ -73,7 +73,7 @@ describe('Swimlane Service', () => {
       },
       logger,
       configurationUtilities,
-      connectorMetricsCollector
+      connectorUsageCollector
     );
   });
   beforeEach(() => {
@@ -95,7 +95,7 @@ describe('Swimlane Service', () => {
           },
           logger,
           configurationUtilities,
-          connectorMetricsCollector
+          connectorUsageCollector
         )
       ).toThrow();
     });
@@ -113,7 +113,7 @@ describe('Swimlane Service', () => {
           },
           logger,
           configurationUtilities,
-          connectorMetricsCollector
+          connectorUsageCollector
         )
       ).toThrow();
     });
@@ -132,7 +132,7 @@ describe('Swimlane Service', () => {
           },
           logger,
           configurationUtilities,
-          connectorMetricsCollector
+          connectorUsageCollector
         )
       ).toThrow();
     });
@@ -149,7 +149,7 @@ describe('Swimlane Service', () => {
           },
           logger,
           configurationUtilities,
-          connectorMetricsCollector
+          connectorUsageCollector
         );
       }).toThrow();
     });
@@ -202,7 +202,7 @@ describe('Swimlane Service', () => {
         url: `${url}/api/app/${config.appId}/record`,
         method: 'post',
         configurationUtilities,
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
     });
 
@@ -286,7 +286,7 @@ describe('Swimlane Service', () => {
         url: `${url}/api/app/${config.appId}/record/${incidentId}`,
         method: 'patch',
         configurationUtilities,
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
     });
 
@@ -366,7 +366,7 @@ describe('Swimlane Service', () => {
         url: `${url}/api/app/${config.appId}/record/${incidentId}/${mappings.commentsConfig.id}/comment`,
         method: 'post',
         configurationUtilities,
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
     });
 

@@ -9,7 +9,7 @@ import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 
 import type { AxiosError } from 'axios';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { isAggregateError, NodeSystemError } from './types';
 import type {
   CrowdstrikeConfig,
@@ -99,7 +99,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
 
   public async executeHostActions(
     { alertIds, ...payload }: CrowdstrikeHostActionsParams,
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ) {
     return this.crowdstrikeApiRequest(
       {
@@ -124,13 +124,13 @@ export class CrowdstrikeConnector extends SubActionConnector<
         paramsSerializer,
         responseSchema: CrowdstrikeHostActionsResponseSchema,
       },
-      connectorMetricsCollector
+      connectorUsageCollector
     );
   }
 
   public async getAgentDetails(
     payload: CrowdstrikeGetAgentsParams,
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ): Promise<CrowdstrikeGetAgentsResponse> {
     return this.crowdstrikeApiRequest(
       {
@@ -142,13 +142,13 @@ export class CrowdstrikeConnector extends SubActionConnector<
         paramsSerializer,
         responseSchema: RelaxedCrowdstrikeBaseApiResponseSchema,
       },
-      connectorMetricsCollector
+      connectorUsageCollector
     ) as Promise<CrowdstrikeGetAgentsResponse>;
   }
 
   public async getAgentOnlineStatus(
     payload: CrowdstrikeGetAgentsParams,
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ): Promise<CrowdstrikeGetAgentOnlineStatusResponse> {
     return this.crowdstrikeApiRequest(
       {
@@ -160,11 +160,11 @@ export class CrowdstrikeConnector extends SubActionConnector<
         paramsSerializer,
         responseSchema: RelaxedCrowdstrikeBaseApiResponseSchema,
       },
-      connectorMetricsCollector
+      connectorUsageCollector
     ) as Promise<CrowdstrikeGetAgentOnlineStatusResponse>;
   }
 
-  private async getTokenRequest(connectorMetricsCollector: ConnectorMetricsCollector) {
+  private async getTokenRequest(connectorUsageCollector: ConnectorUsageCollector) {
     const response = await this.request<CrowdstrikeGetTokenResponse>(
       {
         url: this.urls.getToken,
@@ -176,7 +176,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
         },
         responseSchema: CrowdstrikeGetTokenResponseSchema,
       },
-      connectorMetricsCollector
+      connectorUsageCollector
     );
     const token = response.data?.access_token;
     if (token) {
@@ -193,13 +193,13 @@ export class CrowdstrikeConnector extends SubActionConnector<
 
   private async crowdstrikeApiRequest<R extends RelaxedCrowdstrikeBaseApiResponse>(
     req: SubActionRequestParams<R>,
-    connectorMetricsCollector: ConnectorMetricsCollector,
+    connectorUsageCollector: ConnectorUsageCollector,
     retried?: boolean
   ): Promise<R> {
     try {
       if (!CrowdstrikeConnector.token) {
         CrowdstrikeConnector.token = (await this.getTokenRequest(
-          connectorMetricsCollector
+          connectorUsageCollector
         )) as string;
       }
 
@@ -211,14 +211,14 @@ export class CrowdstrikeConnector extends SubActionConnector<
             Authorization: `Bearer ${CrowdstrikeConnector.token}`,
           },
         },
-        connectorMetricsCollector
+        connectorUsageCollector
       );
 
       return response.data;
     } catch (error) {
       if (error.code === 401 && !retried) {
         CrowdstrikeConnector.token = null;
-        return this.crowdstrikeApiRequest(req, connectorMetricsCollector, true);
+        return this.crowdstrikeApiRequest(req, connectorUsageCollector, true);
       }
       throw new CrowdstrikeError(error.message);
     }

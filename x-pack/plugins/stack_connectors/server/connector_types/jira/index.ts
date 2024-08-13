@@ -102,7 +102,7 @@ async function executor(
     secrets,
     configurationUtilities,
     logger,
-    connectorMetricsCollector,
+    connectorUsageCollector,
   } = execOptions;
   const { subAction, subActionParams } = params as ExecutorParams;
   let data: JiraExecutorResultData | null = null;
@@ -114,7 +114,7 @@ async function executor(
     },
     logger,
     configurationUtilities,
-    connectorMetricsCollector
+    connectorUsageCollector
   );
 
   if (!api[subAction]) {

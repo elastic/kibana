@@ -14,7 +14,7 @@ import {
   throwIfResponseIsNotValid,
 } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { getBodyForEventAction } from './helpers';
 import {
   CreateCommentParams,
@@ -44,7 +44,7 @@ export const createExternalService = (
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities,
-  connectorMetricsCollector: ConnectorMetricsCollector
+  connectorUsageCollector: ConnectorUsageCollector
 ): ExternalService => {
   const { apiUrl: url, appId, mappings } = config as SwimlanePublicConfigurationType;
   const { apiToken } = secrets as SwimlaneSecretConfigurationType;
@@ -94,7 +94,7 @@ export const createExternalService = (
         logger,
         method: 'post',
         url: getPostRecordUrl(appId),
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
 
       throwIfResponseIsNotValid({
@@ -135,7 +135,7 @@ export const createExternalService = (
         logger,
         method: 'patch',
         url: getPostRecordIdUrl(appId, params.incidentId),
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
 
       throwIfResponseIsNotValid({
@@ -185,7 +185,7 @@ export const createExternalService = (
         logger,
         method: 'post',
         url: getPostCommentUrl(appId, incidentId, fieldId),
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
 
       /**

@@ -37,7 +37,7 @@ export const createExternalService: ServiceFactory = ({
   configurationUtilities,
   serviceConfig,
   axiosInstance,
-  connectorMetricsCollector,
+  connectorUsageCollector,
 }): ExternalService => {
   const { config, secrets } = credentials;
   const { table, importSetTable, useImportAPI, appScope } = serviceConfig;
@@ -133,7 +133,7 @@ export const createExternalService: ServiceFactory = ({
         logger,
         configurationUtilities,
         method: 'get',
-        connectorMetricsCollector, // TODO check if this is internal
+        connectorUsageCollector, // TODO check if this is internal
       });
 
       checkInstance(res);
@@ -162,7 +162,7 @@ export const createExternalService: ServiceFactory = ({
         logger,
         configurationUtilities,
         method: 'get',
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
 
       checkInstance(res);
@@ -181,7 +181,7 @@ export const createExternalService: ServiceFactory = ({
         logger,
         params,
         configurationUtilities,
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
 
       checkInstance(res);
@@ -205,7 +205,7 @@ export const createExternalService: ServiceFactory = ({
         method: 'post',
         data: prepareIncident(useTableApi, incident),
         configurationUtilities,
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
 
       checkInstance(res);
@@ -245,7 +245,7 @@ export const createExternalService: ServiceFactory = ({
           ...(useTableApi ? {} : { elastic_incident_id: incidentId }),
         },
         configurationUtilities,
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
 
       checkInstance(res);
@@ -278,7 +278,7 @@ export const createExternalService: ServiceFactory = ({
         method: 'get',
         logger,
         configurationUtilities,
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
 
       checkInstance(res);
@@ -357,7 +357,7 @@ export const createExternalService: ServiceFactory = ({
         url: fieldsUrl,
         logger,
         configurationUtilities,
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
 
       checkInstance(res);
@@ -375,7 +375,7 @@ export const createExternalService: ServiceFactory = ({
         url: getChoicesURL(fields),
         logger,
         configurationUtilities,
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
       checkInstance(res);
       return res.data.result;

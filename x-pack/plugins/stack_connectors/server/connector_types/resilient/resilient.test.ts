@@ -13,7 +13,7 @@ import { ResilientConnector } from './resilient';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { RESILIENT_CONNECTOR_ID } from './constants';
 import { PushToServiceIncidentSchema } from './schema';
-import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
@@ -84,7 +84,7 @@ const mockIncidentUpdate = (withUpdateError = false) => {
     })
   );
 };
-let connectorMetricsCollector: ConnectorMetricsCollector;
+let connectorUsageCollector: ConnectorUsageCollector;
 
 describe('IBM Resilient connector', () => {
   const logger = loggingSystemMock.createLogger();
@@ -110,7 +110,7 @@ describe('IBM Resilient connector', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.setSystemTime(TIMESTAMP);
-    connectorMetricsCollector = new ConnectorMetricsCollector({
+    connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',
     });
@@ -136,12 +136,12 @@ describe('IBM Resilient connector', () => {
     });
 
     it('returns the incident correctly', async () => {
-      const res = await connector.getIncident({ id: '1' }, connectorMetricsCollector);
+      const res = await connector.getIncident({ id: '1' }, connectorUsageCollector);
       expect(res).toEqual(incidentMock);
     });
 
     it('should call request with correct arguments', async () => {
-      await connector.getIncident({ id: '1' }, connectorMetricsCollector);
+      await connector.getIncident({ id: '1' }, connectorUsageCollector);
       expect(requestMock).toHaveBeenCalledWith({
         ...ignoredRequestFields,
         method: 'GET',
@@ -154,7 +154,7 @@ describe('IBM Resilient connector', () => {
         params: {
           text_content_output_format: 'objects_convert',
         },
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
     });
 
@@ -162,7 +162,7 @@ describe('IBM Resilient connector', () => {
       requestMock.mockImplementation(() => {
         throw new Error('An error has occurred');
       });
-      await expect(connector.getIncident({ id: '1' }, connectorMetricsCollector)).rejects.toThrow(
+      await expect(connector.getIncident({ id: '1' }, connectorUsageCollector)).rejects.toThrow(
         'Unable to get incident with id 1. Error: An error has occurred'
       );
     });
@@ -191,7 +191,7 @@ describe('IBM Resilient connector', () => {
     });
 
     it('creates the incident correctly', async () => {
-      const res = await connector.createIncident(incidentMock, connectorMetricsCollector);
+      const res = await connector.createIncident(incidentMock, connectorUsageCollector);
 
       expect(res).toEqual({
         title: '1',
@@ -202,7 +202,7 @@ describe('IBM Resilient connector', () => {
     });
 
     it('should call request with correct arguments', async () => {
-      await connector.createIncident(incidentMock, connectorMetricsCollector);
+      await connector.createIncident(incidentMock, connectorUsageCollector);
 
       expect(requestMock).toHaveBeenCalledWith({
         ...ignoredRequestFields,
@@ -222,7 +222,7 @@ describe('IBM Resilient connector', () => {
           Authorization: `Basic ${token}`,
           'Content-Type': 'application/json',
         },
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
     });
 
@@ -239,7 +239,7 @@ describe('IBM Resilient connector', () => {
             incidentTypes: [1001],
             severityCode: 6,
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         )
       ).rejects.toThrow(
         '[Action][IBM Resilient]: Unable to create incident. Error: An error has occurred'
@@ -249,9 +249,7 @@ describe('IBM Resilient connector', () => {
     it('should throw if the required attributes are not received in response', async () => {
       requestMock.mockImplementation(() => createAxiosResponse({ data: { notRequired: 'test' } }));
 
-      await expect(
-        connector.createIncident(incidentMock, connectorMetricsCollector)
-      ).rejects.toThrow(
+      await expect(connector.createIncident(incidentMock, connectorUsageCollector)).rejects.toThrow(
         '[Action][IBM Resilient]: Unable to create incident. Error: Response validation failed (Error: [id]: expected value of type [number] but got [undefined]).'
       );
     });
@@ -269,7 +267,7 @@ describe('IBM Resilient connector', () => {
     };
     it('updates the incident correctly', async () => {
       mockIncidentUpdate();
-      const res = await connector.updateIncident(req, connectorMetricsCollector);
+      const res = await connector.updateIncident(req, connectorUsageCollector);
 
       expect(res).toEqual({
         title: '1',
@@ -292,7 +290,7 @@ describe('IBM Resilient connector', () => {
             severityCode: 5,
           },
         },
-        connectorMetricsCollector
+        connectorUsageCollector
       );
 
       expect(requestMock.mock.calls[1][0]).toEqual({
@@ -349,14 +347,14 @@ describe('IBM Resilient connector', () => {
             },
           ],
         },
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
     });
 
     it('it should throw an error', async () => {
       mockIncidentUpdate(true);
 
-      await expect(connector.updateIncident(req, connectorMetricsCollector)).rejects.toThrow(
+      await expect(connector.updateIncident(req, connectorUsageCollector)).rejects.toThrow(
         '[Action][IBM Resilient]: Unable to update incident with id 1. Error: An error has occurred'
       );
     });
@@ -379,7 +377,7 @@ describe('IBM Resilient connector', () => {
       );
       requestMock.mockImplementation(() => createAxiosResponse({ data: { notRequired: 'test' } }));
 
-      await expect(connector.updateIncident(req, connectorMetricsCollector)).rejects.toThrow(
+      await expect(connector.updateIncident(req, connectorUsageCollector)).rejects.toThrow(
         '[Action][IBM Resilient]: Unable to update incident with id 1. Error: Response validation failed (Error: [success]: expected value of type [boolean] but got [undefined]).'
       );
     });
@@ -406,7 +404,7 @@ describe('IBM Resilient connector', () => {
     });
 
     it('should call request with correct arguments', async () => {
-      await connector.addComment(req, connectorMetricsCollector);
+      await connector.addComment(req, connectorUsageCollector);
 
       expect(requestMock).toHaveBeenCalledWith({
         ...ignoredRequestFields,
@@ -422,7 +420,7 @@ describe('IBM Resilient connector', () => {
             format: 'text',
           },
         },
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
     });
 
@@ -431,7 +429,7 @@ describe('IBM Resilient connector', () => {
         throw new Error('An error has occurred');
       });
 
-      await expect(connector.addComment(req, connectorMetricsCollector)).rejects.toThrow(
+      await expect(connector.addComment(req, connectorUsageCollector)).rejects.toThrow(
         '[Action][IBM Resilient]: Unable to create comment at incident with id 1. Error: An error has occurred.'
       );
     });
@@ -447,7 +445,7 @@ describe('IBM Resilient connector', () => {
     });
 
     it('should call request with correct arguments', async () => {
-      await connector.getIncidentTypes(undefined, connectorMetricsCollector);
+      await connector.getIncidentTypes(undefined, connectorUsageCollector);
       expect(requestMock).toBeCalledTimes(1);
       expect(requestMock).toHaveBeenCalledWith({
         ...ignoredRequestFields,
@@ -458,12 +456,12 @@ describe('IBM Resilient connector', () => {
           Authorization: `Basic ${token}`,
           'Content-Type': 'application/json',
         },
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
     });
 
     it('returns incident types correctly', async () => {
-      const res = await connector.getIncidentTypes(undefined, connectorMetricsCollector);
+      const res = await connector.getIncidentTypes(undefined, connectorUsageCollector);
 
       expect(res).toEqual([
         { id: '17', name: 'Communication error (fax; email)' },
@@ -476,9 +474,7 @@ describe('IBM Resilient connector', () => {
         throw new Error('An error has occurred');
       });
 
-      await expect(
-        connector.getIncidentTypes(undefined, connectorMetricsCollector)
-      ).rejects.toThrow(
+      await expect(connector.getIncidentTypes(undefined, connectorUsageCollector)).rejects.toThrow(
         '[Action][IBM Resilient]: Unable to get incident types. Error: An error has occurred.'
       );
     });
@@ -488,9 +484,7 @@ describe('IBM Resilient connector', () => {
         createAxiosResponse({ data: { id: '1001', name: 'Custom type' } })
       );
 
-      await expect(
-        connector.getIncidentTypes(undefined, connectorMetricsCollector)
-      ).rejects.toThrow(
+      await expect(connector.getIncidentTypes(undefined, connectorUsageCollector)).rejects.toThrow(
         '[Action][IBM Resilient]: Unable to get incident types. Error: Response validation failed (Error: [values]: expected value of type [array] but got [undefined]).'
       );
     });
@@ -508,7 +502,7 @@ describe('IBM Resilient connector', () => {
     });
 
     it('should call request with correct arguments', async () => {
-      await connector.getSeverity(undefined, connectorMetricsCollector);
+      await connector.getSeverity(undefined, connectorUsageCollector);
       expect(requestMock).toBeCalledTimes(1);
       expect(requestMock).toHaveBeenCalledWith({
         ...ignoredRequestFields,
@@ -519,12 +513,12 @@ describe('IBM Resilient connector', () => {
           Authorization: `Basic ${token}`,
           'Content-Type': 'application/json',
         },
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
     });
 
     it('returns severity correctly', async () => {
-      const res = await connector.getSeverity(undefined, connectorMetricsCollector);
+      const res = await connector.getSeverity(undefined, connectorUsageCollector);
 
       expect(res).toEqual([
         {
@@ -547,7 +541,7 @@ describe('IBM Resilient connector', () => {
         throw new Error('An error has occurred');
       });
 
-      await expect(connector.getSeverity(undefined, connectorMetricsCollector)).rejects.toThrow(
+      await expect(connector.getSeverity(undefined, connectorUsageCollector)).rejects.toThrow(
         '[Action][IBM Resilient]: Unable to get severity. Error: An error has occurred.'
       );
     });
@@ -557,7 +551,7 @@ describe('IBM Resilient connector', () => {
         createAxiosResponse({ data: { id: '10', name: 'Critical' } })
       );
 
-      await expect(connector.getSeverity(undefined, connectorMetricsCollector)).rejects.toThrow(
+      await expect(connector.getSeverity(undefined, connectorUsageCollector)).rejects.toThrow(
         '[Action][IBM Resilient]: Unable to get severity. Error: Response validation failed (Error: [values]: expected value of type [array] but got [undefined]).'
       );
     });
@@ -572,7 +566,7 @@ describe('IBM Resilient connector', () => {
       );
     });
     it('should call request with correct arguments', async () => {
-      await connector.getFields(undefined, connectorMetricsCollector);
+      await connector.getFields(undefined, connectorUsageCollector);
 
       expect(requestMock).toBeCalledTimes(1);
       expect(requestMock).toHaveBeenCalledWith({
@@ -584,12 +578,12 @@ describe('IBM Resilient connector', () => {
           Authorization: `Basic ${token}`,
           'Content-Type': 'application/json',
         },
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
     });
 
     it('returns common fields correctly', async () => {
-      const res = await connector.getFields(undefined, connectorMetricsCollector);
+      const res = await connector.getFields(undefined, connectorUsageCollector);
       expect(res).toEqual(resilientFields);
     });
 
@@ -597,7 +591,7 @@ describe('IBM Resilient connector', () => {
       requestMock.mockImplementation(() => {
         throw new Error('An error has occurred');
       });
-      await expect(connector.getFields(undefined, connectorMetricsCollector)).rejects.toThrow(
+      await expect(connector.getFields(undefined, connectorUsageCollector)).rejects.toThrow(
         'Unable to get fields. Error: An error has occurred'
       );
     });
@@ -605,7 +599,7 @@ describe('IBM Resilient connector', () => {
     it('should throw if the required attributes are not received in response', async () => {
       requestMock.mockImplementation(() => createAxiosResponse({ data: { someField: 'test' } }));
 
-      await expect(connector.getFields(undefined, connectorMetricsCollector)).rejects.toThrow(
+      await expect(connector.getFields(undefined, connectorUsageCollector)).rejects.toThrow(
         '[Action][IBM Resilient]: Unable to get fields. Error: Response validation failed (Error: expected value of type [array] but got [Object]).'
       );
     });

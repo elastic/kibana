@@ -15,12 +15,13 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import {
-  ConnectorMetricsCollector,
   validateConfig,
   validateConnector,
   validateParams,
   validateSecrets,
 } from '@kbn/actions-plugin/server/lib';
+
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { sendEmail } from './send_email';
 import {
   ActionParamsType,
@@ -515,7 +516,7 @@ describe('execute()', () => {
       text: 'Go to Elastic',
     },
   };
-  const connectorMetricsCollector = new ConnectorMetricsCollector({
+  const connectorUsageCollector = new ConnectorUsageCollector({
     logger: mockedLogger,
     connectorId: 'test-connector-id',
   });
@@ -529,7 +530,7 @@ describe('execute()', () => {
     services,
     configurationUtilities: actionsConfigMock.create(),
     logger: mockedLogger,
-    connectorMetricsCollector,
+    connectorUsageCollector,
   };
 
   beforeEach(() => {

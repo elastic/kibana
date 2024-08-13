@@ -740,7 +740,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
             });
 
             const executeEvent = events[1];
-            expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(645);
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(645);
           });
         });
 
@@ -803,7 +803,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
             });
 
             const executeEvent = events[1];
-            expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(429);
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(429);
           });
         });
 
@@ -868,7 +868,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
             });
 
             const executeEvent = events[3];
-            expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(0);
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(0);
           });
         });
       });

@@ -9,13 +9,13 @@ import { AxiosError, AxiosResponse } from 'axios';
 import { Logger } from '@kbn/core/server';
 import { isUndefined } from 'lodash';
 
-interface ConnectorMetrics {
+interface ConnectorUsage {
   requestBodyBytes: number;
 }
 
-export class ConnectorMetricsCollector {
+export class ConnectorUsageCollector {
   private connectorId: string;
-  private metrics: ConnectorMetrics = {
+  private usage: ConnectorUsage = {
     requestBodyBytes: 0,
   };
 
@@ -43,10 +43,10 @@ export class ConnectorMetricsCollector {
       }
     }
 
-    this.metrics.requestBodyBytes = this.metrics.requestBodyBytes + bytes;
+    this.usage.requestBodyBytes = this.usage.requestBodyBytes + bytes;
   }
 
   public getRequestBodyByte() {
-    return this.metrics.requestBodyBytes;
+    return this.usage.requestBodyBytes;
   }
 }

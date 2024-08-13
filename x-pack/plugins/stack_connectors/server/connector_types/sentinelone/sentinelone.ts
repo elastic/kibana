@@ -8,7 +8,7 @@
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { Stream } from 'stream';
 import type {
   SentinelOneConfig,
@@ -160,7 +160,7 @@ export class SentinelOneConnector extends SubActionConnector<
 
   public async fetchAgentFiles(
     { files, agentId, zipPassCode }: SentinelOneFetchAgentFilesParams,
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ) {
     if (!agentId) {
       throw new Error(`'agentId' parameter is required`);
@@ -178,13 +178,13 @@ export class SentinelOneConnector extends SubActionConnector<
         },
         responseSchema: SentinelOneFetchAgentFilesResponseSchema,
       },
-      connectorMetricsCollector
+      connectorUsageCollector
     );
   }
 
   public async downloadAgentFile(
     { agentId, activityId }: SentinelOneDownloadAgentFileParams,
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ) {
     if (!agentId) {
       throw new Error(`'agentId' parameter is required`);
@@ -197,13 +197,13 @@ export class SentinelOneConnector extends SubActionConnector<
         responseType: 'stream',
         responseSchema: SentinelOneDownloadAgentFileResponseSchema,
       },
-      connectorMetricsCollector
+      connectorUsageCollector
     );
   }
 
   public async getActivities(
     queryParams?: SentinelOneGetActivitiesParams,
-    connectorMetricsCollector?: ConnectorMetricsCollector
+    connectorUsageCollector?: ConnectorUsageCollector
   ) {
     return this.sentinelOneApiRequest(
       {
@@ -212,13 +212,13 @@ export class SentinelOneConnector extends SubActionConnector<
         params: queryParams,
         responseSchema: SentinelOneGetActivitiesResponseSchema,
       },
-      connectorMetricsCollector!
+      connectorUsageCollector!
     );
   }
 
   public async executeScript(
     { filter, script }: SentinelOneExecuteScriptParams,
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ) {
     if (!filter.ids && !filter.uuids) {
       throw new Error(`A filter must be defined; either 'ids' or 'uuids'`);
@@ -237,15 +237,15 @@ export class SentinelOneConnector extends SubActionConnector<
         },
         responseSchema: SentinelOneExecuteScriptResponseSchema,
       },
-      connectorMetricsCollector
+      connectorUsageCollector
     );
   }
 
   public async isolateHost(
     { alertIds, ...payload }: SentinelOneIsolateHostParams,
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ) {
-    const response = await this.getAgents(payload, connectorMetricsCollector);
+    const response = await this.getAgents(payload, connectorUsageCollector);
 
     if (response.data.length === 0) {
       const errorMessage = 'No agents found';
@@ -272,15 +272,15 @@ export class SentinelOneConnector extends SubActionConnector<
         },
         responseSchema: SentinelOneIsolateHostResponseSchema,
       },
-      connectorMetricsCollector
+      connectorUsageCollector
     );
   }
 
   public async releaseHost(
     { alertIds, ...payload }: SentinelOneIsolateHostParams,
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ) {
-    const response = await this.getAgents(payload, connectorMetricsCollector);
+    const response = await this.getAgents(payload, connectorUsageCollector);
 
     if (response.data.length === 0) {
       throw new Error('No agents found');
@@ -303,13 +303,13 @@ export class SentinelOneConnector extends SubActionConnector<
         },
         responseSchema: SentinelOneIsolateHostResponseSchema,
       },
-      connectorMetricsCollector
+      connectorUsageCollector
     );
   }
 
   public async getAgents(
     payload: SentinelOneGetAgentsParams,
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ): Promise<SentinelOneGetAgentsResponse> {
     return this.sentinelOneApiRequest(
       {
@@ -319,13 +319,13 @@ export class SentinelOneConnector extends SubActionConnector<
         },
         responseSchema: SentinelOneGetAgentsResponseSchema,
       },
-      connectorMetricsCollector
+      connectorUsageCollector
     );
   }
 
   public async getRemoteScriptStatus(
     payload: SentinelOneGetRemoteScriptStatusParams,
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ): Promise<SentinelOneGetRemoteScriptStatusApiResponse> {
     return this.sentinelOneApiRequest(
       {
@@ -335,13 +335,13 @@ export class SentinelOneConnector extends SubActionConnector<
         },
         responseSchema: SentinelOneGetRemoteScriptStatusResponseSchema,
       },
-      connectorMetricsCollector
+      connectorUsageCollector
     ) as unknown as SentinelOneGetRemoteScriptStatusApiResponse;
   }
 
   public async getRemoteScriptResults(
     { taskIds }: SentinelOneGetRemoteScriptResultsParams,
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ): Promise<SentinelOneGetRemoteScriptResultsApiResponse> {
     return this.sentinelOneApiRequest(
       {
@@ -350,17 +350,17 @@ export class SentinelOneConnector extends SubActionConnector<
         data: { data: { taskIds } },
         responseSchema: SentinelOneGetRemoteScriptResultsResponseSchema,
       },
-      connectorMetricsCollector
+      connectorUsageCollector
     ) as unknown as SentinelOneGetRemoteScriptResultsApiResponse;
   }
 
   public async downloadRemoteScriptResults(
     { taskId }: SentinelOneDownloadRemoteScriptResultsParams,
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ): Promise<Stream> {
     const scriptResultsInfo = await this.getRemoteScriptResults(
       { taskIds: [taskId] },
-      connectorMetricsCollector
+      connectorUsageCollector
     );
 
     this.logger.debug(
@@ -387,7 +387,7 @@ export class SentinelOneConnector extends SubActionConnector<
         responseType: 'stream',
         responseSchema: SentinelOneDownloadRemoteScriptResultsResponseSchema,
       },
-      connectorMetricsCollector
+      connectorUsageCollector
     );
 
     return downloadConnection.data;
@@ -395,7 +395,7 @@ export class SentinelOneConnector extends SubActionConnector<
 
   private async sentinelOneApiRequest<R extends SentinelOneBaseApiResponse>(
     req: SubActionRequestParams<R>,
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ): Promise<R> {
     const response = await this.request<R>(
       {
@@ -405,7 +405,7 @@ export class SentinelOneConnector extends SubActionConnector<
           APIToken: this.secrets.token,
         },
       },
-      connectorMetricsCollector
+      connectorUsageCollector
     );
 
     return response.data;
@@ -435,7 +435,7 @@ export class SentinelOneConnector extends SubActionConnector<
 
   public async getRemoteScripts(
     payload: SentinelOneGetRemoteScriptsParams,
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ): Promise<SentinelOneGetRemoteScriptsResponse> {
     return this.sentinelOneApiRequest(
       {
@@ -446,7 +446,7 @@ export class SentinelOneConnector extends SubActionConnector<
         },
         responseSchema: SentinelOneGetRemoteScriptsResponseSchema,
       },
-      connectorMetricsCollector
+      connectorUsageCollector
     );
   }
 }

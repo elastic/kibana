@@ -12,7 +12,7 @@ import { IncomingMessage } from 'http';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { getGoogleOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_gcp_oauth_access_token';
 import {
-  ConnectorMetricsCollector,
+  ConnectorUsageCollector,
   ConnectorTokenClientContract,
 } from '@kbn/actions-plugin/server/types';
 
@@ -216,7 +216,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
    */
   public async runApi(
     { body, model: reqModel, signal, timeout, raw }: RunActionParams,
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse | RunActionRawResponse> {
     // set model on per request basis
     const currentModel = reqModel ?? this.model;
@@ -236,7 +236,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       responseSchema: raw ? RunActionRawResponseSchema : RunApiResponseSchema,
     } as SubActionRequestParams<RunApiResponse>;
 
-    const response = await this.request(requestArgs, connectorMetricsCollector);
+    const response = await this.request(requestArgs, connectorUsageCollector);
 
     if (raw) {
       return response.data;
@@ -251,7 +251,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
 
   private async streamAPI(
     { body, model: reqModel, signal, timeout }: RunActionParams,
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ): Promise<StreamingResponse> {
     const currentModel = reqModel ?? this.model;
     const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:streamGenerateContent?alt=sse`;
@@ -271,7 +271,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
         signal,
         timeout: timeout ?? DEFAULT_TIMEOUT_MS,
       },
-      connectorMetricsCollector
+      connectorUsageCollector
     );
 
     return response.data.pipe(new PassThrough());
@@ -279,7 +279,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
 
   public async invokeAI(
     { messages, model, temperature = 0, signal, timeout }: InvokeAIActionParams,
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ): Promise<InvokeAIActionResponse> {
     const res = await this.runApi(
       {
@@ -288,7 +288,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
         signal,
         timeout,
       },
-      connectorMetricsCollector
+      connectorUsageCollector
     );
 
     return { message: res.completion, usageMetadata: res.usageMetadata };
@@ -296,7 +296,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
 
   public async invokeAIRaw(
     { messages, model, temperature = 0, signal, timeout, tools }: InvokeAIRawActionParams,
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ): Promise<InvokeAIRawActionResponse> {
     const res = await this.runApi(
       {
@@ -306,7 +306,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
         timeout,
         raw: true,
       },
-      connectorMetricsCollector
+      connectorUsageCollector
     );
 
     return res;
@@ -330,7 +330,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       timeout,
       tools,
     }: InvokeAIActionParams,
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ): Promise<IncomingMessage> {
     return (await this.streamAPI(
       {
@@ -340,7 +340,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
         signal,
         timeout,
       },
-      connectorMetricsCollector
+      connectorUsageCollector
     )) as unknown as IncomingMessage;
   }
 }

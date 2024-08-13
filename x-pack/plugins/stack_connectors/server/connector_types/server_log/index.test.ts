@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ConnectorMetricsCollector, validateParams } from '@kbn/actions-plugin/server/lib';
+import { validateParams } from '@kbn/actions-plugin/server/lib';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { Logger } from '@kbn/core/server';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { getConnectorType, ServerLogConnectorType, ServerLogConnectorTypeExecutorOptions } from '.';
@@ -107,7 +108,7 @@ describe('execute()', () => {
       secrets: {},
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsCollector: new ConnectorMetricsCollector({
+      connectorUsageCollector: new ConnectorUsageCollector({
         logger: mockedLogger,
         connectorId: 'test-connector-id',
       }),

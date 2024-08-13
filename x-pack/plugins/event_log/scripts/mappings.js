@@ -288,7 +288,7 @@ exports.EcsCustomPropertyMappings = {
                   },
                 },
               },
-              metrics: {
+              usage: {
                 properties: {
                   request_body_bytes: {
                     type: 'long',

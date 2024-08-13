@@ -7,7 +7,7 @@
 
 import axios from 'axios';
 import { Logger } from '@kbn/core/server';
-import { ConnectorMetricsCollector, Services } from '@kbn/actions-plugin/server/types';
+import { ConnectorUsageCollector, Services } from '@kbn/actions-plugin/server/types';
 import { validateConfig, validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import { getConnectorType } from '.';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
@@ -39,12 +39,12 @@ const headers = {
 
 let connectorType: SlackApiConnectorType;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
-let connectorMetricsCollector: ConnectorMetricsCollector;
+let connectorUsageCollector: ConnectorUsageCollector;
 
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
   connectorType = getConnectorType();
-  connectorMetricsCollector = new ConnectorMetricsCollector({
+  connectorUsageCollector = new ConnectorUsageCollector({
     logger: mockedLogger,
     connectorId: 'test-connector-id',
   });
@@ -203,7 +203,7 @@ describe('execute', () => {
         params: {} as PostMessageParams,
         configurationUtilities,
         logger: mockedLogger,
-        connectorMetricsCollector,
+        connectorUsageCollector,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"[Action][ExternalService] -> [Slack API] Unsupported subAction type undefined."`
@@ -302,7 +302,7 @@ describe('execute', () => {
       },
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsCollector,
+      connectorUsageCollector,
     });
 
     expect(requestMock).toHaveBeenCalledWith({
@@ -313,7 +313,7 @@ describe('execute', () => {
       method: 'post',
       url: 'https://slack.com/api/chat.postMessage',
       data: { channel: 'general', text: 'some text' },
-      connectorMetricsCollector,
+      connectorUsageCollector,
     });
 
     expect(response).toEqual({
@@ -394,7 +394,7 @@ describe('execute', () => {
       },
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsCollector,
+      connectorUsageCollector,
     });
 
     expect(requestMock).toHaveBeenCalledWith({
@@ -405,7 +405,7 @@ describe('execute', () => {
       method: 'post',
       url: 'https://slack.com/api/chat.postMessage',
       data: { channel: 'LKJHGF345', text: 'some text' },
-      connectorMetricsCollector,
+      connectorUsageCollector,
     });
 
     expect(response).toEqual({
@@ -486,7 +486,7 @@ describe('execute', () => {
       },
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsCollector,
+      connectorUsageCollector,
     });
 
     expect(requestMock).toHaveBeenCalledWith({
@@ -497,7 +497,7 @@ describe('execute', () => {
       method: 'post',
       url: 'https://slack.com/api/chat.postMessage',
       data: { channel: 'LKJHGF345', blocks: testBlock.blocks },
-      connectorMetricsCollector,
+      connectorUsageCollector,
     });
 
     expect(response).toEqual({
@@ -537,7 +537,7 @@ describe('execute', () => {
       },
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsCollector,
+      connectorUsageCollector,
     });
 
     expect(requestMock).toHaveBeenCalledWith({
@@ -547,7 +547,7 @@ describe('execute', () => {
       logger: mockedLogger,
       method: 'get',
       url: 'https://slack.com/api/conversations.info?channel=ZXCVBNM567',
-      connectorMetricsCollector,
+      connectorUsageCollector,
     });
 
     expect(response).toEqual({

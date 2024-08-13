@@ -8,7 +8,7 @@
 import { ServiceParams, CaseConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import { Type } from '@kbn/config-schema';
-import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { SUB_ACTION } from '../../../common/thehive/constants';
 import {
   TheHiveIncidentResponseSchema,
@@ -71,7 +71,7 @@ export class TheHiveConnector extends CaseConnector<
 
   public async createIncident(
     incident: Incident,
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ): Promise<ExternalServiceIncidentResponse> {
     const res = await this.request(
       {
@@ -81,7 +81,7 @@ export class TheHiveConnector extends CaseConnector<
         headers: this.getAuthHeaders(),
         responseSchema: TheHiveIncidentResponseSchema,
       },
-      connectorMetricsCollector
+      connectorUsageCollector
     );
 
     return {
@@ -94,7 +94,7 @@ export class TheHiveConnector extends CaseConnector<
 
   public async addComment(
     { incidentId, comment }: { incidentId: string; comment: string },
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ) {
     await this.request(
       {
@@ -104,7 +104,7 @@ export class TheHiveConnector extends CaseConnector<
         headers: this.getAuthHeaders(),
         responseSchema: TheHiveAddCommentResponseSchema,
       },
-      connectorMetricsCollector
+      connectorUsageCollector
     );
   }
 
@@ -116,7 +116,7 @@ export class TheHiveConnector extends CaseConnector<
       incidentId: string;
       incident: Incident;
     },
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ): Promise<ExternalServiceIncidentResponse> {
     await this.request(
       {
@@ -126,7 +126,7 @@ export class TheHiveConnector extends CaseConnector<
         headers: this.getAuthHeaders(),
         responseSchema: TheHiveUpdateIncidentResponseSchema,
       },
-      connectorMetricsCollector
+      connectorUsageCollector
     );
 
     return {
@@ -139,7 +139,7 @@ export class TheHiveConnector extends CaseConnector<
 
   public async getIncident(
     { id }: { id: string },
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ): Promise<GetIncidentResponse> {
     const res = await this.request(
       {
@@ -147,7 +147,7 @@ export class TheHiveConnector extends CaseConnector<
         headers: this.getAuthHeaders(),
         responseSchema: TheHiveIncidentResponseSchema,
       },
-      connectorMetricsCollector
+      connectorUsageCollector
     );
 
     return res.data;
@@ -155,7 +155,7 @@ export class TheHiveConnector extends CaseConnector<
 
   public async createAlert(
     alert: ExecutorSubActionCreateAlertParams,
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ) {
     await this.request(
       {
@@ -165,7 +165,7 @@ export class TheHiveConnector extends CaseConnector<
         headers: this.getAuthHeaders(),
         responseSchema: TheHiveCreateAlertResponseSchema,
       },
-      connectorMetricsCollector
+      connectorUsageCollector
     );
   }
 }

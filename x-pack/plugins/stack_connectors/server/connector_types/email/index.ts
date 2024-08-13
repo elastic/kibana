@@ -282,7 +282,7 @@ async function executor(
     configurationUtilities,
     services,
     logger,
-    connectorMetricsCollector,
+    connectorUsageCollector,
   } = execOptions;
   const connectorTokenClient = services.connectorTokenClient;
 
@@ -378,7 +378,7 @@ async function executor(
       logger,
       sendEmailOptions,
       connectorTokenClient,
-      connectorMetricsCollector
+      connectorUsageCollector
     );
   } catch (err) {
     const message = i18n.translate('xpack.stackConnectors.email.errorSendingErrorMessage', {

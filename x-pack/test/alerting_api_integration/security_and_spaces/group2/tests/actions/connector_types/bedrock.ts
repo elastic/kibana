@@ -361,7 +361,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             });
 
             const executeEvent = events[1];
-            expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(145);
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(145);
           });
 
           it('should overwrite the model when a model argument is provided', async () => {
@@ -408,7 +408,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             });
 
             const executeEvent = events[3];
-            expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(145);
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(145);
           });
 
           it('should invoke AI with assistant AI body argument formatted to bedrock expectations', async () => {
@@ -474,7 +474,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             });
 
             const executeEvent = events[5];
-            expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(256);
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(256);
           });
 
           describe('Token tracking dashboard', () => {

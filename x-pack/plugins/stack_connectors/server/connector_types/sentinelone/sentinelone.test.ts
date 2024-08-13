@@ -13,17 +13,17 @@ import {
 } from '../../../common/sentinelone/types';
 import { API_PATH } from './sentinelone';
 import { SentinelOneGetActivitiesResponseSchema } from '../../../common/sentinelone/schema';
-import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 describe('SentinelOne Connector', () => {
   let connectorInstance: ReturnType<typeof sentinelOneConnectorMocks.create>;
-  let connectorMetricsCollector: ConnectorMetricsCollector;
+  let connectorUsageCollector: ConnectorUsageCollector;
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
     connectorInstance = sentinelOneConnectorMocks.create();
-    connectorMetricsCollector = new ConnectorMetricsCollector({
+    connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',
     });
@@ -44,7 +44,7 @@ describe('SentinelOne Connector', () => {
       fetchAgentFilesParams.agentId = '';
 
       await expect(
-        connectorInstance.fetchAgentFiles(fetchAgentFilesParams, connectorMetricsCollector)
+        connectorInstance.fetchAgentFiles(fetchAgentFilesParams, connectorUsageCollector)
       ).rejects.toHaveProperty('message', "'agentId' parameter is required");
     });
 
@@ -52,7 +52,7 @@ describe('SentinelOne Connector', () => {
       const fetchFilesUrl = `${connectorInstance.constructorParams.config.url}${API_PATH}/agents/${fetchAgentFilesParams.agentId}/actions/fetch-files`;
       const response = await connectorInstance.fetchAgentFiles(
         fetchAgentFilesParams,
-        connectorMetricsCollector
+        connectorUsageCollector
       );
 
       expect(response).toEqual({ data: { success: true }, errors: null });
@@ -86,13 +86,13 @@ describe('SentinelOne Connector', () => {
     it('should error if called with invalid agent id', async () => {
       downloadAgentFileParams.agentId = '';
       await expect(
-        connectorInstance.downloadAgentFile(downloadAgentFileParams, connectorMetricsCollector)
+        connectorInstance.downloadAgentFile(downloadAgentFileParams, connectorUsageCollector)
       ).rejects.toHaveProperty('message', "'agentId' parameter is required");
     });
 
     it('should call SentinelOne api with expected url', async () => {
       await expect(
-        connectorInstance.downloadAgentFile(downloadAgentFileParams, connectorMetricsCollector)
+        connectorInstance.downloadAgentFile(downloadAgentFileParams, connectorUsageCollector)
       ).resolves.toEqual(connectorInstance.mockResponses.downloadAgentFileApiResponse);
     });
   });
@@ -134,7 +134,7 @@ describe('SentinelOne Connector', () => {
     it('should call SentinelOne api to retrieve task results', async () => {
       await connectorInstance.downloadRemoteScriptResults(
         { taskId: 'task-123' },
-        connectorMetricsCollector
+        connectorUsageCollector
       );
 
       expect(connectorInstance.requestSpy).toHaveBeenCalledWith(
@@ -151,7 +151,7 @@ describe('SentinelOne Connector', () => {
       await expect(
         connectorInstance.downloadRemoteScriptResults(
           { taskId: 'task-123' },
-          connectorMetricsCollector
+          connectorUsageCollector
         )
       ).rejects.toThrow('Download URL for script results of task id [task-123] not found');
     });
@@ -160,7 +160,7 @@ describe('SentinelOne Connector', () => {
       await expect(
         connectorInstance.downloadRemoteScriptResults(
           { taskId: 'task-123' },
-          connectorMetricsCollector
+          connectorUsageCollector
         )
       ).resolves.toEqual(connectorInstance.mockResponses.downloadRemoteScriptResults);
     });

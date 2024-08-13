@@ -3,7 +3,7 @@
 exports[`execute() execute with username/password sends request with basic auth 1`] = `
 Object {
   "axios": undefined,
-  "connectorMetricsCollector": Object {
+  "connectorUsageCollector": Object {
     "connectorId": "test-connector-id",
     "logger": Object {
       "context": Array [],
@@ -29,7 +29,7 @@ Object {
       "trace": [MockFunction],
       "warn": [MockFunction],
     },
-    "metrics": Object {
+    "usage": Object {
       "requestBodyBytes": 0,
     },
   },

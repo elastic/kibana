@@ -536,7 +536,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
           });
 
           const executeEvent = events[1];
-          expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(124);
+          expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(124);
         });
 
         it('should handle creating an incident with other fields', async () => {

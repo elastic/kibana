@@ -278,7 +278,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       });
 
       const executeEvent = events[1];
-      expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(19);
+      expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(19);
     });
 
     it('should support the PUT method against webhook target', async () => {

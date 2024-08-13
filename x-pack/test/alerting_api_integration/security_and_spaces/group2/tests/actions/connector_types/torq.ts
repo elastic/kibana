@@ -177,7 +177,7 @@ export default function torqTest({ getService }: FtrProviderContext) {
       });
 
       const executeEvent = events[1];
-      expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(14);
+      expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(14);
     });
 
     it('should handle a 400 Torq error', async () => {

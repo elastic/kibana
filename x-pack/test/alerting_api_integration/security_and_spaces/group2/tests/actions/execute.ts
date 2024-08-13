@@ -652,7 +652,7 @@ export default function ({ getService }: FtrProviderContext) {
     expect(executeEvent?.message).to.eql(message);
     expect(startExecuteEvent?.message).to.eql(message.replace('executed', 'started'));
 
-    expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.eql(0);
+    expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.eql(0);
 
     if (source) {
       expect(executeEvent?.kibana?.action?.execution?.source).to.eql(source.toLowerCase());

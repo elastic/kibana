@@ -11,10 +11,8 @@ import { Logger } from '@kbn/core/server';
 import { renderMustacheStringNoEscape } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import {
-  combineHeadersWithBasicAuthHeader,
-  ConnectorMetricsCollector,
-} from '@kbn/actions-plugin/server/lib';
+import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { buildConnectorAuth, validateConnectorAuthConfiguration } from '../../../common/auth/utils';
 import { validateAndNormalizeUrl, validateJson } from './validators';
 import {
@@ -42,7 +40,7 @@ export const createExternalService = (
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities,
-  connectorMetricsCollector: ConnectorMetricsCollector
+  connectorUsageCollector: ConnectorUsageCollector
 ): ExternalService => {
   const {
     createCommentJson,
@@ -121,7 +119,7 @@ export const createExternalService = (
         logger,
         configurationUtilities,
         sslOverrides,
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({
@@ -167,7 +165,7 @@ export const createExternalService = (
         data: json,
         configurationUtilities,
         sslOverrides,
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
 
       const { status, statusText, data } = res;
@@ -252,7 +250,7 @@ export const createExternalService = (
         data: json,
         configurationUtilities,
         sslOverrides,
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({
@@ -326,7 +324,7 @@ export const createExternalService = (
         data: json,
         configurationUtilities,
         sslOverrides,
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({

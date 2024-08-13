@@ -17,7 +17,7 @@ import {
 import { Logger } from '@kbn/core/server';
 import { getCustomAgents } from './get_custom_agents';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { ConnectorMetricsCollector, SSLSettings } from '../types';
+import { ConnectorUsageCollector, SSLSettings } from '../types';
 import { combineHeadersWithBasicAuthHeader } from './get_basic_auth_header';
 
 export const request = async <T = unknown>({
@@ -30,7 +30,7 @@ export const request = async <T = unknown>({
   headers,
   sslOverrides,
   timeout,
-  connectorMetricsCollector,
+  connectorUsageCollector,
   ...config
 }: {
   axios: AxiosInstance;
@@ -42,7 +42,7 @@ export const request = async <T = unknown>({
   headers?: Record<string, AxiosHeaderValue>;
   timeout?: number;
   sslOverrides?: SSLSettings;
-  connectorMetricsCollector?: ConnectorMetricsCollector;
+  connectorUsageCollector?: ConnectorUsageCollector;
 } & AxiosRequestConfig): Promise<AxiosResponse> => {
   if (!isEmpty(axios?.defaults?.baseURL ?? '')) {
     throw new Error(
@@ -80,14 +80,14 @@ export const request = async <T = unknown>({
       timeout: Math.max(settingsTimeout, timeout ?? 0),
     });
 
-    if (connectorMetricsCollector) {
-      connectorMetricsCollector.addRequestBodyBytes(result, data);
+    if (connectorUsageCollector) {
+      connectorUsageCollector.addRequestBodyBytes(result, data);
     }
 
     return result;
   } catch (error) {
-    if (connectorMetricsCollector) {
-      connectorMetricsCollector.addRequestBodyBytes(error, data);
+    if (connectorUsageCollector) {
+      connectorUsageCollector.addRequestBodyBytes(error, data);
     }
     throw error;
   }
@@ -99,14 +99,14 @@ export const patch = async <T = unknown>({
   data,
   logger,
   configurationUtilities,
-  connectorMetricsCollector,
+  connectorUsageCollector,
 }: {
   axios: AxiosInstance;
   url: string;
   data: T;
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
-  connectorMetricsCollector?: ConnectorMetricsCollector;
+  connectorUsageCollector?: ConnectorUsageCollector;
 }): Promise<AxiosResponse> => {
   return request({
     axios,
@@ -115,7 +115,7 @@ export const patch = async <T = unknown>({
     method: 'patch',
     data,
     configurationUtilities,
-    connectorMetricsCollector,
+    connectorUsageCollector,
   });
 };
 

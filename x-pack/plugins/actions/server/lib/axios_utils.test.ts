@@ -21,7 +21,7 @@ import {
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { getCustomAgents } from './get_custom_agents';
-import { ConnectorMetricsCollector } from './connector_metrics_collector';
+import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
 
 const TestUrl = 'https://elastic.co/foo/bar/baz';
 
@@ -80,7 +80,7 @@ describe('request', () => {
     });
   });
 
-  test('adds request body bytes from request header on a successful request when connectorMetricsCollector is provided', async () => {
+  test('adds request body bytes from request header on a successful request when connectorUsageCollector is provided', async () => {
     const contentLength = 12;
     axiosMock.mockImplementation(() => ({
       status: 200,
@@ -91,7 +91,7 @@ describe('request', () => {
         getHeader: () => contentLength,
       },
     }));
-    const connectorMetricsCollector = new ConnectorMetricsCollector({
+    const connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',
     });
@@ -101,10 +101,10 @@ describe('request', () => {
       logger,
       data: { test: 12345 },
       configurationUtilities,
-      connectorMetricsCollector,
+      connectorUsageCollector,
     });
 
-    expect(connectorMetricsCollector.getRequestBodyByte()).toBe(contentLength);
+    expect(connectorUsageCollector.getRequestBodyByte()).toBe(contentLength);
   });
 
   test('adds request body bytes from request header on a failed', async () => {
@@ -115,7 +115,7 @@ describe('request', () => {
           headers: { 'Content-Length': contentLength },
         })
     );
-    const connectorMetricsCollector = new ConnectorMetricsCollector({
+    const connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',
     });
@@ -126,15 +126,15 @@ describe('request', () => {
         url: '/test',
         logger,
         configurationUtilities,
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
     } catch (e) {
-      expect(connectorMetricsCollector.getRequestBodyByte()).toBe(contentLength);
+      expect(connectorUsageCollector.getRequestBodyByte()).toBe(contentLength);
     }
   });
 
   test('adds request body bytes from data when request header does not exist', async () => {
-    const connectorMetricsCollector = new ConnectorMetricsCollector({
+    const connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',
     });
@@ -146,10 +146,10 @@ describe('request', () => {
       logger,
       data,
       configurationUtilities,
-      connectorMetricsCollector,
+      connectorUsageCollector,
     });
 
-    expect(connectorMetricsCollector.getRequestBodyByte()).toBe(
+    expect(connectorUsageCollector.getRequestBodyByte()).toBe(
       Buffer.byteLength(JSON.stringify(data), 'utf8')
     );
   });

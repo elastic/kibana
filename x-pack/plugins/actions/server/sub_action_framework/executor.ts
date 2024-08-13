@@ -37,7 +37,7 @@ export const buildExecutor = <
     secrets,
     services,
     request,
-    connectorMetricsCollector,
+    connectorUsageCollector,
   }) => {
     const subAction = params.subAction;
     const subActionParams = params.subActionParams;
@@ -96,7 +96,7 @@ export const buildExecutor = <
       }
     }
 
-    const data = await func.call(service, subActionParams, connectorMetricsCollector);
+    const data = await func.call(service, subActionParams, connectorUsageCollector);
     return { status: 'ok', data: data ?? {}, actionId };
   };
 };

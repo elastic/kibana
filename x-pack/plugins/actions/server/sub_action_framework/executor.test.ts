@@ -21,7 +21,7 @@ import {
 } from './mocks';
 import { IService, ServiceParams } from './types';
 import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { ConnectorMetricsCollector } from '../lib';
+import { ConnectorUsageCollector } from '../usage';
 
 describe('Executor', () => {
   const actionId = 'test-action-id';
@@ -31,7 +31,7 @@ describe('Executor', () => {
   let logger: MockedLogger;
   let services: ReturnType<typeof actionsMock.createServices>;
   let mockedActionsConfig: jest.Mocked<ActionsConfigurationUtilities>;
-  let connectorMetricsCollector: ConnectorMetricsCollector;
+  let connectorUsageCollector: ConnectorUsageCollector;
 
   const createExecutor = (Service: IService<TestConfig, TestSecrets>) => {
     const connector = {
@@ -57,7 +57,7 @@ describe('Executor', () => {
     logger = loggingSystemMock.createLogger();
     services = actionsMock.createServices();
     mockedActionsConfig = actionsConfigMock.create();
-    connectorMetricsCollector = new ConnectorMetricsCollector({
+    connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',
     });
@@ -74,7 +74,7 @@ describe('Executor', () => {
       services,
       configurationUtilities: mockedActionsConfig,
       logger,
-      connectorMetricsCollector,
+      connectorUsageCollector,
     });
 
     expect(res).toEqual({
@@ -97,7 +97,7 @@ describe('Executor', () => {
       services,
       configurationUtilities: mockedActionsConfig,
       logger,
-      connectorMetricsCollector,
+      connectorUsageCollector,
     });
 
     expect(res).toEqual({
@@ -120,7 +120,7 @@ describe('Executor', () => {
       services,
       configurationUtilities: mockedActionsConfig,
       logger,
-      connectorMetricsCollector,
+      connectorUsageCollector,
     });
 
     expect(res).toEqual({
@@ -141,7 +141,7 @@ describe('Executor', () => {
       services,
       configurationUtilities: mockedActionsConfig,
       logger,
-      connectorMetricsCollector,
+      connectorUsageCollector,
     });
 
     expect(res).toEqual({
@@ -163,7 +163,7 @@ describe('Executor', () => {
         services,
         configurationUtilities: mockedActionsConfig,
         logger,
-        connectorMetricsCollector,
+        connectorUsageCollector,
       })
     ).rejects.toThrowError('You should register at least one subAction for your connector type');
   });
@@ -180,7 +180,7 @@ describe('Executor', () => {
         services,
         configurationUtilities: mockedActionsConfig,
         logger,
-        connectorMetricsCollector,
+        connectorUsageCollector,
       })
     ).rejects.toThrowError(
       'Sub action "not-exist" is not registered. Connector id: test-action-id. Connector name: Test. Connector type: .test'
@@ -199,7 +199,7 @@ describe('Executor', () => {
         services,
         configurationUtilities: mockedActionsConfig,
         logger,
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
     } catch (e) {
       expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
@@ -221,7 +221,7 @@ describe('Executor', () => {
         services,
         configurationUtilities: mockedActionsConfig,
         logger,
-        connectorMetricsCollector,
+        connectorUsageCollector,
       })
     ).rejects.toThrowError(
       'Method "not-exist" does not exists in service. Sub action: "testUrl". Connector id: test-action-id. Connector name: Test. Connector type: .test'
@@ -240,7 +240,7 @@ describe('Executor', () => {
         services,
         configurationUtilities: mockedActionsConfig,
         logger,
-        connectorMetricsCollector,
+        connectorUsageCollector,
       })
     ).rejects.toThrowError(
       'Method "notAFunction" must be a function. Connector id: test-action-id. Connector name: Test. Connector type: .test'
@@ -259,14 +259,14 @@ describe('Executor', () => {
         services,
         configurationUtilities: mockedActionsConfig,
         logger,
-        connectorMetricsCollector,
+        connectorUsageCollector,
       })
     ).rejects.toThrowError(
       'Request validation failed (Error: [id]: expected value of type [string] but got [undefined])'
     );
   });
 
-  it('Passes connectorMetricsCollector to the subAction method as a second param', async () => {
+  it('Passes connectorUsageCollector to the subAction method as a second param', async () => {
     let echoSpy;
 
     const subActionParams = { id: 'test-id' };
@@ -300,9 +300,9 @@ describe('Executor', () => {
       services,
       configurationUtilities: mockedActionsConfig,
       logger,
-      connectorMetricsCollector,
+      connectorUsageCollector,
     });
 
-    expect(echoSpy).toHaveBeenCalledWith(subActionParams, connectorMetricsCollector);
+    expect(echoSpy).toHaveBeenCalledWith(subActionParams, connectorUsageCollector);
   });
 });

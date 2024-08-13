@@ -554,7 +554,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
             });
 
             const executeEvent = events[1];
-            expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(21);
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(21);
           });
 
           it('should preserve the alias when it is 512 characters when creating an alert', async () => {

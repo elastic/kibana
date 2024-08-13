@@ -67,9 +67,7 @@ export function getEarlyRecoveredAlerts(
 
     earlyRecoveredAlerts = recoveredAlerts.slice(maxAlerts);
     logger.warn(
-      `Recovered alerts (${
-        recoveredAlerts.length
-      }) have exceeded the max alert limit of ${maxAlerts} : dropping ${
+      `Recovered alerts have exceeded the max alert limit of ${maxAlerts} : dropping ${
         earlyRecoveredAlerts.length
       } ${earlyRecoveredAlerts.length > 1 ? 'alerts' : 'alert'}.`
     );

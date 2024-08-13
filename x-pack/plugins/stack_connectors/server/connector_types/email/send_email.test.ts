@@ -10,7 +10,7 @@ import { Logger } from '@kbn/core/server';
 import { sendEmail } from './send_email';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import nodemailer from 'nodemailer';
-import { ConnectorMetricsCollector, ProxySettings } from '@kbn/actions-plugin/server/types';
+import { ConnectorUsageCollector, ProxySettings } from '@kbn/actions-plugin/server/types';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { CustomHostSettings } from '@kbn/actions-plugin/server/config';
 import { sendEmailGraphApi } from './send_email_graph_api';
@@ -39,7 +39,7 @@ const sendMailMock = jest.fn();
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 const connectorTokenClient = connectorTokenClientMock.create();
-let connectorMetricsCollector: ConnectorMetricsCollector;
+let connectorUsageCollector: ConnectorUsageCollector;
 
 describe('send_email module', () => {
   beforeEach(() => {
@@ -55,7 +55,7 @@ describe('send_email module', () => {
       };
     });
 
-    connectorMetricsCollector = new ConnectorMetricsCollector({
+    connectorUsageCollector = new ConnectorUsageCollector({
       logger: mockLogger,
       connectorId: 'test-connector-id',
     });
@@ -67,7 +67,7 @@ describe('send_email module', () => {
       mockLogger,
       sendEmailOptions,
       connectorTokenClient,
-      connectorMetricsCollector
+      connectorUsageCollector
     );
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
@@ -116,7 +116,7 @@ describe('send_email module', () => {
       mockLogger,
       sendEmailOptions,
       connectorTokenClient,
-      connectorMetricsCollector
+      connectorUsageCollector
     );
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
@@ -175,7 +175,7 @@ describe('send_email module', () => {
       status: 202,
     });
 
-    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient, connectorMetricsCollector);
+    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient, connectorUsageCollector);
     expect(getOAuthClientCredentialsAccessTokenMock).toHaveBeenCalledWith({
       configurationUtilities: sendEmailOptions.configurationUtilities,
       connectorId: '1',
@@ -271,7 +271,7 @@ describe('send_email module', () => {
       status: 202,
     });
 
-    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient, connectorMetricsCollector);
+    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient, connectorUsageCollector);
     expect(getOAuthClientCredentialsAccessTokenMock).toHaveBeenCalledWith({
       configurationUtilities: sendEmailOptions.configurationUtilities,
       connectorId: '1',
@@ -309,7 +309,7 @@ describe('send_email module', () => {
       status: 202,
     });
 
-    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient, connectorMetricsCollector);
+    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient, connectorUsageCollector);
     expect(getOAuthClientCredentialsAccessTokenMock).toHaveBeenCalledWith({
       configurationUtilities: sendEmailOptions.configurationUtilities,
       connectorId: '1',
@@ -339,7 +339,7 @@ describe('send_email module', () => {
     getOAuthClientCredentialsAccessTokenMock.mockReturnValueOnce(null);
 
     await expect(() =>
-      sendEmail(mockLogger, sendEmailOptions, connectorTokenClient, connectorMetricsCollector)
+      sendEmail(mockLogger, sendEmailOptions, connectorTokenClient, connectorUsageCollector)
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Unable to retrieve access token for connectorId: 1"`
     );
@@ -383,7 +383,7 @@ describe('send_email module', () => {
       mockLogger,
       sendEmailOptions,
       connectorTokenClient,
-      connectorMetricsCollector
+      connectorUsageCollector
     );
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
@@ -438,7 +438,7 @@ describe('send_email module', () => {
       mockLogger,
       sendEmailOptions,
       connectorTokenClient,
-      connectorMetricsCollector
+      connectorUsageCollector
     );
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
@@ -493,7 +493,7 @@ describe('send_email module', () => {
       mockLogger,
       sendEmailOptions,
       connectorTokenClient,
-      connectorMetricsCollector
+      connectorUsageCollector
     );
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
@@ -536,7 +536,7 @@ describe('send_email module', () => {
     sendMailMock.mockRejectedValue(new Error('wops'));
 
     await expect(
-      sendEmail(mockLogger, sendEmailOptions, connectorTokenClient, connectorMetricsCollector)
+      sendEmail(mockLogger, sendEmailOptions, connectorTokenClient, connectorUsageCollector)
     ).rejects.toThrow('wops');
   });
 
@@ -562,7 +562,7 @@ describe('send_email module', () => {
       mockLogger,
       sendEmailOptions,
       connectorTokenClient,
-      connectorMetricsCollector
+      connectorUsageCollector
     );
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
@@ -601,7 +601,7 @@ describe('send_email module', () => {
       mockLogger,
       sendEmailOptions,
       connectorTokenClient,
-      connectorMetricsCollector
+      connectorUsageCollector
     );
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
@@ -642,7 +642,7 @@ describe('send_email module', () => {
       mockLogger,
       sendEmailOptions,
       connectorTokenClient,
-      connectorMetricsCollector
+      connectorUsageCollector
     );
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
@@ -681,7 +681,7 @@ describe('send_email module', () => {
       mockLogger,
       sendEmailOptions,
       connectorTokenClient,
-      connectorMetricsCollector
+      connectorUsageCollector
     );
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
@@ -723,7 +723,7 @@ describe('send_email module', () => {
       mockLogger,
       sendEmailOptions,
       connectorTokenClient,
-      connectorMetricsCollector
+      connectorUsageCollector
     );
     expect(result).toBe(sendMailMockResult);
 
@@ -771,7 +771,7 @@ describe('send_email module', () => {
       mockLogger,
       sendEmailOptions,
       connectorTokenClient,
-      connectorMetricsCollector
+      connectorUsageCollector
     );
     expect(result).toBe(sendMailMockResult);
 
@@ -823,7 +823,7 @@ describe('send_email module', () => {
       mockLogger,
       sendEmailOptions,
       connectorTokenClient,
-      connectorMetricsCollector
+      connectorUsageCollector
     );
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
@@ -858,7 +858,7 @@ describe('send_email module', () => {
       'Bearer clienttokentokentoken'
     );
 
-    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient, connectorMetricsCollector);
+    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient, connectorUsageCollector);
     expect(createAxiosInstanceMock).toHaveBeenCalledTimes(1);
     expect(createAxiosInstanceMock).toHaveBeenCalledWith();
     expect(mockAxiosInstanceInterceptor.response.use).toHaveBeenCalledTimes(1);
@@ -901,7 +901,7 @@ describe('send_email module', () => {
       'Bearer clienttokentokentoken'
     );
 
-    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient, connectorMetricsCollector);
+    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient, connectorUsageCollector);
     expect(createAxiosInstanceMock).toHaveBeenCalledTimes(1);
     expect(createAxiosInstanceMock).toHaveBeenCalledWith();
     expect(mockAxiosInstanceInterceptor.response.use).toHaveBeenCalledTimes(1);

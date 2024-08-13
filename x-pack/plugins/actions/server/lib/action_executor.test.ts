@@ -18,7 +18,7 @@ import {
 } from '@kbn/core/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
-import { ActionType as ConnectorType, ConnectorMetricsCollector } from '../types';
+import { ActionType as ConnectorType, ConnectorUsageCollector } from '../types';
 import { actionsAuthorizationMock, actionsMock } from '../mocks';
 import {
   asBackgroundTaskExecutionSource,
@@ -150,7 +150,7 @@ const connectorSavedObject = {
   references: [],
 };
 
-interface ActionMetrics {
+interface ActionUsage {
   request_body_bytes: number;
 }
 
@@ -197,7 +197,7 @@ const getBaseExecuteStartEventLogDoc = (unsecured: boolean) => {
 
 const getBaseExecuteEventLogDoc = (
   unsecured: boolean,
-  actionMetrics: ActionMetrics = { request_body_bytes: 0 }
+  actionUsage: ActionUsage = { request_body_bytes: 0 }
 ) => {
   const base = getBaseExecuteStartEventLogDoc(unsecured);
   return {
@@ -208,7 +208,7 @@ const getBaseExecuteEventLogDoc = (
         ...base.kibana.action,
         execution: {
           ...base.kibana.action.execution,
-          metrics: actionMetrics,
+          usage: actionUsage,
         },
       },
     },
@@ -250,10 +250,7 @@ beforeEach(() => {
   getActionsAuthorizationWithRequest.mockReturnValue(authorizationMock);
 });
 
-const mockGetRequestBodyByte = jest.spyOn(
-  ConnectorMetricsCollector.prototype,
-  'getRequestBodyByte'
-);
+const mockGetRequestBodyByte = jest.spyOn(ConnectorUsageCollector.prototype, 'getRequestBodyByte');
 
 describe('Action Executor', () => {
   for (const executeUnsecure of [false, true]) {
@@ -304,7 +301,7 @@ describe('Action Executor', () => {
         },
         params: { foo: true },
         logger: loggerMock,
-        connectorMetricsCollector: expect.any(ConnectorMetricsCollector),
+        connectorUsageCollector: expect.any(ConnectorUsageCollector),
       });
 
       expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
@@ -379,7 +376,7 @@ describe('Action Executor', () => {
           params: { foo: true },
           logger: loggerMock,
           source: executionSource.source,
-          connectorMetricsCollector: expect.any(ConnectorMetricsCollector),
+          connectorUsageCollector: expect.any(ConnectorUsageCollector),
         });
 
         expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
@@ -459,7 +456,7 @@ describe('Action Executor', () => {
         },
         params: { foo: true },
         logger: loggerMock,
-        connectorMetricsCollector: expect.any(ConnectorMetricsCollector),
+        connectorUsageCollector: expect.any(ConnectorUsageCollector),
       });
 
       expect(loggerMock.debug).toBeCalledWith('executing action test:preconfigured: Preconfigured');
@@ -543,7 +540,7 @@ describe('Action Executor', () => {
           params: { foo: true },
           logger: loggerMock,
           request: {},
-          connectorMetricsCollector: expect.any(ConnectorMetricsCollector),
+          connectorUsageCollector: expect.any(ConnectorUsageCollector),
         });
       }
 
@@ -924,7 +921,7 @@ describe('Action Executor', () => {
         },
         params: { foo: true },
         logger: loggerMock,
-        connectorMetricsCollector: expect.any(ConnectorMetricsCollector),
+        connectorUsageCollector: expect.any(ConnectorUsageCollector),
       });
     });
 
@@ -956,7 +953,7 @@ describe('Action Executor', () => {
         params: { foo: true },
         logger: loggerMock,
         request: {},
-        connectorMetricsCollector: expect.any(ConnectorMetricsCollector),
+        connectorUsageCollector: expect.any(ConnectorUsageCollector),
       });
     });
 
@@ -1025,7 +1022,7 @@ describe('Action Executor', () => {
         },
         params: { foo: true },
         logger: loggerMock,
-        connectorMetricsCollector: expect.any(ConnectorMetricsCollector),
+        connectorUsageCollector: expect.any(ConnectorUsageCollector),
       });
 
       expect(loggerMock.debug).toBeCalledWith('executing action test:preconfigured: Preconfigured');
@@ -1066,7 +1063,7 @@ describe('Action Executor', () => {
             name: 'Preconfigured',
             execution: {
               ...execStartDoc.kibana.action.execution,
-              metrics: {
+              usage: {
                 request_body_bytes: 0,
               },
             },
@@ -1118,7 +1115,7 @@ describe('Action Executor', () => {
         params: { foo: true },
         logger: loggerMock,
         request: {},
-        connectorMetricsCollector: expect.any(ConnectorMetricsCollector),
+        connectorUsageCollector: expect.any(ConnectorUsageCollector),
       });
 
       expect(loggerMock.debug).toBeCalledWith(
@@ -1338,7 +1335,7 @@ describe('Action Executor', () => {
           },
           params: { foo: true },
           logger: loggerMock,
-          connectorMetricsCollector: expect.any(ConnectorMetricsCollector),
+          connectorUsageCollector: expect.any(ConnectorUsageCollector),
         });
       }
     });
@@ -1611,7 +1608,7 @@ describe('Event log', () => {
             gen_ai: {
               usage: mockGenAi.usage,
             },
-            metrics: {
+            usage: {
               request_body_bytes: 0,
             },
           },
@@ -1711,7 +1708,7 @@ describe('Event log', () => {
                 total_tokens: 35,
               },
             },
-            metrics: {
+            usage: {
               request_body_bytes: 0,
             },
           },

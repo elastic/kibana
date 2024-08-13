@@ -6,7 +6,7 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import { ConnectorMetricsCollector, Services } from '@kbn/actions-plugin/server/types';
+import { ConnectorUsageCollector, Services } from '@kbn/actions-plugin/server/types';
 import { validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import axios from 'axios';
 import { getConnectorType, TeamsConnectorType, ConnectorTypeId } from '.';
@@ -34,12 +34,12 @@ const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 
 let connectorType: TeamsConnectorType;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
-let connectorMetricsCollector: ConnectorMetricsCollector;
+let connectorUsageCollector: ConnectorUsageCollector;
 
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
   connectorType = getConnectorType();
-  connectorMetricsCollector = new ConnectorMetricsCollector({
+  connectorUsageCollector = new ConnectorUsageCollector({
     logger: mockedLogger,
     connectorId: 'test-connector-id',
   });
@@ -172,13 +172,13 @@ describe('execute()', () => {
       params: { message: 'this invocation should succeed' },
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsCollector,
+      connectorUsageCollector,
     });
     delete requestMock.mock.calls[0][0].configurationUtilities;
     expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
         "axios": undefined,
-        "connectorMetricsCollector": ConnectorMetricsCollector {
+        "connectorUsageCollector": ConnectorUsageCollector {
           "connectorId": "test-connector-id",
           "logger": Object {
             "context": Array [],
@@ -204,7 +204,7 @@ describe('execute()', () => {
             "trace": [MockFunction],
             "warn": [MockFunction],
           },
-          "metrics": Object {
+          "usage": Object {
             "requestBodyBytes": 0,
           },
         },
@@ -259,13 +259,13 @@ describe('execute()', () => {
       params: { message: 'this invocation should succeed' },
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsCollector,
+      connectorUsageCollector,
     });
     delete requestMock.mock.calls[0][0].configurationUtilities;
     expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
         "axios": undefined,
-        "connectorMetricsCollector": ConnectorMetricsCollector {
+        "connectorUsageCollector": ConnectorUsageCollector {
           "connectorId": "test-connector-id",
           "logger": Object {
             "context": Array [],
@@ -291,7 +291,7 @@ describe('execute()', () => {
             "trace": [MockFunction],
             "warn": [MockFunction],
           },
-          "metrics": Object {
+          "usage": Object {
             "requestBodyBytes": 0,
           },
         },

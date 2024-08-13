@@ -133,7 +133,7 @@ async function executor(
     services,
     configurationUtilities,
     logger,
-    connectorMetricsCollector,
+    connectorUsageCollector,
   } = execOptions;
   const { subAction, subActionParams } = params;
   const connectorTokenClient = services.connectorTokenClient;
@@ -151,7 +151,7 @@ async function executor(
     serviceConfig: externalServiceConfig,
     connectorTokenClient,
     createServiceFn: createService,
-    connectorMetricsCollector,
+    connectorUsageCollector,
   });
 
   const apiAsRecord = api as unknown as Record<string, unknown>;

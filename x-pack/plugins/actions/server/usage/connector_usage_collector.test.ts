@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { ConnectorMetricsCollector } from '../types';
+import { ConnectorUsageCollector } from '../types';
 import { AxiosHeaders, AxiosResponse } from 'axios';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-describe('ConnectorMetricsCollector', () => {
+describe('ConnectorUsageCollector', () => {
   const logger = loggingSystemMock.createLogger();
 
   test('it collects requestBodyBytes from response.request.headers', async () => {
-    const connectorMetricsCollector = new ConnectorMetricsCollector({
+    const connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',
     });
@@ -32,16 +32,16 @@ describe('ConnectorMetricsCollector', () => {
       },
     };
 
-    connectorMetricsCollector.addRequestBodyBytes(axiosResponse, data);
+    connectorUsageCollector.addRequestBodyBytes(axiosResponse, data);
 
-    expect(connectorMetricsCollector.getRequestBodyByte()).toBe(contentLength);
+    expect(connectorUsageCollector.getRequestBodyByte()).toBe(contentLength);
 
-    connectorMetricsCollector.addRequestBodyBytes(axiosResponse, data);
+    connectorUsageCollector.addRequestBodyBytes(axiosResponse, data);
 
-    expect(connectorMetricsCollector.getRequestBodyByte()).toBe(contentLength + contentLength);
+    expect(connectorUsageCollector.getRequestBodyByte()).toBe(contentLength + contentLength);
   });
   test('it collects requestBodyBytes from data when header is is missing', async () => {
-    const connectorMetricsCollector = new ConnectorMetricsCollector({
+    const connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',
     });
@@ -59,17 +59,17 @@ describe('ConnectorMetricsCollector', () => {
       },
     };
 
-    connectorMetricsCollector.addRequestBodyBytes(axiosResponse, data);
+    connectorUsageCollector.addRequestBodyBytes(axiosResponse, data);
 
-    expect(connectorMetricsCollector.getRequestBodyByte()).toBe(contentLength);
+    expect(connectorUsageCollector.getRequestBodyByte()).toBe(contentLength);
 
-    connectorMetricsCollector.addRequestBodyBytes(axiosResponse, data);
+    connectorUsageCollector.addRequestBodyBytes(axiosResponse, data);
 
-    expect(connectorMetricsCollector.getRequestBodyByte()).toBe(contentLength + contentLength);
+    expect(connectorUsageCollector.getRequestBodyByte()).toBe(contentLength + contentLength);
   });
 
   test('it logs an error when the body cannot be stringified ', async () => {
-    const connectorMetricsCollector = new ConnectorMetricsCollector({
+    const connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',
     });
@@ -92,7 +92,7 @@ describe('ConnectorMetricsCollector', () => {
       },
     };
 
-    connectorMetricsCollector.addRequestBodyBytes(axiosResponse, data);
+    connectorUsageCollector.addRequestBodyBytes(axiosResponse, data);
 
     expect(logger.error).toHaveBeenCalledTimes(1);
     expect(logger.error).toHaveBeenCalledWith(

@@ -146,7 +146,7 @@ export async function executor(
   const { webhookIntegrationUrl } = execOptions.config;
   const { body: data } = execOptions.params;
   const configurationUtilities = execOptions.configurationUtilities;
-  const connectorMetricsCollector = execOptions.connectorMetricsCollector;
+  const connectorUsageCollector = execOptions.connectorUsageCollector;
 
   const secrets: ActionTypeSecretsType = execOptions.secrets;
   const token = secrets.token;
@@ -172,7 +172,7 @@ export async function executor(
       configurationUtilities,
       logger: execOptions.logger,
       validateStatus: (status: number) => status >= 200 && status < 300,
-      connectorMetricsCollector,
+      connectorUsageCollector,
     })
   );
 

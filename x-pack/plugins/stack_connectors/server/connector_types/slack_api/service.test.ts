@@ -13,7 +13,7 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { createExternalService } from './service';
 import { SlackApiService } from '../../../common/slack_api/types';
 import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
-import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -29,7 +29,7 @@ jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
 axios.create = jest.fn(() => axios);
 const requestMock = request as jest.Mock;
 const configurationUtilities = actionsConfigMock.create();
-let connectorMetricsCollector: ConnectorMetricsCollector;
+let connectorUsageCollector: ConnectorUsageCollector;
 
 const channel = {
   id: 'channel_id_1',
@@ -119,7 +119,7 @@ describe('Slack API service', () => {
   let service: SlackApiService;
 
   beforeAll(() => {
-    connectorMetricsCollector = new ConnectorMetricsCollector({
+    connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',
     });
@@ -129,7 +129,7 @@ describe('Slack API service', () => {
       },
       logger,
       configurationUtilities,
-      connectorMetricsCollector
+      connectorUsageCollector
     );
   });
 
@@ -146,7 +146,7 @@ describe('Slack API service', () => {
           },
           logger,
           configurationUtilities,
-          connectorMetricsCollector
+          connectorUsageCollector
         )
       ).toThrowErrorMatchingInlineSnapshot(`"[Action][Slack API]: Wrong configuration."`);
     });
@@ -180,7 +180,7 @@ describe('Slack API service', () => {
         configurationUtilities,
         method: 'get',
         url: 'https://slack.com/api/conversations.info?channel=channel_id_1',
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
     });
 
@@ -216,7 +216,7 @@ describe('Slack API service', () => {
         method: 'post',
         url: 'https://slack.com/api/chat.postMessage',
         data: { channel: 'general', text: 'a message' },
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
     });
 
@@ -241,7 +241,7 @@ describe('Slack API service', () => {
         method: 'post',
         url: 'https://slack.com/api/chat.postMessage',
         data: { channel: 'QWEERTYU987', text: 'a message' },
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
     });
 
@@ -262,7 +262,7 @@ describe('Slack API service', () => {
         method: 'post',
         url: 'https://slack.com/api/chat.postMessage',
         data: { channel: 'QWEERTYU987', text: 'a message' },
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
     });
 
@@ -303,7 +303,7 @@ describe('Slack API service', () => {
         method: 'post',
         url: 'https://slack.com/api/chat.postMessage',
         data: { channel: 'general', blocks: testBlock.blocks },
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
     });
 
@@ -328,7 +328,7 @@ describe('Slack API service', () => {
         method: 'post',
         url: 'https://slack.com/api/chat.postMessage',
         data: { channel: 'QWEERTYU987', blocks: testBlock.blocks },
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
     });
 
@@ -352,7 +352,7 @@ describe('Slack API service', () => {
         method: 'post',
         url: 'https://slack.com/api/chat.postMessage',
         data: { channel: 'QWEERTYU987', blocks: testBlock.blocks },
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
     });
 

@@ -24,7 +24,7 @@ import { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
 import { KibanaRequest } from '@kbn/core-http-server';
 import { inspect } from 'util';
-import { ConnectorMetricsCollector } from '../lib';
+import { ConnectorUsageCollector } from '../usage';
 import { assertURL } from './helpers/validators';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { SubAction, SubActionRequestParams } from './types';
@@ -141,7 +141,7 @@ export abstract class SubActionConnector<Config, Secrets> {
       timeout,
       ...config
     }: SubActionRequestParams<R>,
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ): Promise<AxiosResponse<R>> {
     try {
       this.assertURL(url);
@@ -164,7 +164,7 @@ export abstract class SubActionConnector<Config, Secrets> {
         configurationUtilities: this.configurationUtilities,
         headers: this.getHeaders(auth, headers as AxiosHeaders),
         timeout,
-        connectorMetricsCollector,
+        connectorUsageCollector,
       });
 
       this.validateResponse(responseSchema, res.data);

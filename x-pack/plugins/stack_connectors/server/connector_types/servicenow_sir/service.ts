@@ -28,7 +28,7 @@ export const createExternalService: ServiceFactory<ExternalServiceSIR> = ({
   configurationUtilities,
   serviceConfig,
   axiosInstance,
-  connectorMetricsCollector,
+  connectorUsageCollector,
 }): ExternalServiceSIR => {
   const snService = createExternalServiceCommon({
     credentials,
@@ -36,7 +36,7 @@ export const createExternalService: ServiceFactory<ExternalServiceSIR> = ({
     configurationUtilities,
     serviceConfig,
     axiosInstance,
-    connectorMetricsCollector,
+    connectorUsageCollector,
   });
 
   const _addObservable = async (data: Observable | Observable[], url: string) => {
@@ -49,7 +49,7 @@ export const createExternalService: ServiceFactory<ExternalServiceSIR> = ({
       method: 'post',
       data,
       configurationUtilities,
-      connectorMetricsCollector,
+      connectorUsageCollector,
     });
 
     snService.checkInstance(res);

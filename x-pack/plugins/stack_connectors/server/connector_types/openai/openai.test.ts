@@ -19,7 +19,7 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { RunActionResponseSchema, StreamingResponseSchema } from '../../../common/openai/schema';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import { PassThrough, Transform } from 'stream';
-import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
 const mockTee = jest.fn();
 
@@ -47,7 +47,7 @@ jest.mock('openai', () => ({
 describe('OpenAIConnector', () => {
   let mockRequest: jest.Mock;
   let mockError: jest.Mock;
-  let connectorMetricsCollector: ConnectorMetricsCollector;
+  let connectorUsageCollector: ConnectorUsageCollector;
 
   const logger = loggingSystemMock.createLogger();
   const mockResponseString = 'Hello! How can I assist you today?';
@@ -76,7 +76,7 @@ describe('OpenAIConnector', () => {
     },
   };
   beforeEach(() => {
-    connectorMetricsCollector = new ConnectorMetricsCollector({
+    connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',
     });
@@ -123,7 +123,7 @@ describe('OpenAIConnector', () => {
       it('uses the default model if none is supplied', async () => {
         const response = await connector.runApi(
           { body: JSON.stringify(sampleOpenAiBody) },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
@@ -140,7 +140,7 @@ describe('OpenAIConnector', () => {
               'content-type': 'application/json',
             },
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(response).toEqual(mockResponse.data);
       });
@@ -149,7 +149,7 @@ describe('OpenAIConnector', () => {
         const requestBody = { model: 'gpt-3.5-turbo', ...sampleOpenAiBody };
         const response = await connector.runApi(
           { body: JSON.stringify(requestBody) },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
@@ -162,7 +162,7 @@ describe('OpenAIConnector', () => {
               'content-type': 'application/json',
             },
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(response).toEqual(mockResponse.data);
       });
@@ -170,7 +170,7 @@ describe('OpenAIConnector', () => {
       it('the OpenAI API call is successful with correct parameters', async () => {
         const response = await connector.runApi(
           { body: JSON.stringify(sampleOpenAiBody) },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
@@ -187,7 +187,7 @@ describe('OpenAIConnector', () => {
               'content-type': 'application/json',
             },
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(response).toEqual(mockResponse.data);
       });
@@ -209,7 +209,7 @@ describe('OpenAIConnector', () => {
               stream: true,
             }),
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
@@ -225,7 +225,7 @@ describe('OpenAIConnector', () => {
               'content-type': 'application/json',
             },
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(response).toEqual(mockResponse.data);
       });
@@ -235,7 +235,7 @@ describe('OpenAIConnector', () => {
         connector.request = mockError;
 
         await expect(
-          connector.runApi({ body: JSON.stringify(sampleOpenAiBody) }, connectorMetricsCollector)
+          connector.runApi({ body: JSON.stringify(sampleOpenAiBody) }, connectorUsageCollector)
         ).rejects.toThrow('API Error');
       });
     });
@@ -247,7 +247,7 @@ describe('OpenAIConnector', () => {
             body: JSON.stringify(sampleOpenAiBody),
             stream: false,
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
@@ -266,7 +266,7 @@ describe('OpenAIConnector', () => {
               'content-type': 'application/json',
             },
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(response).toEqual(mockResponse.data);
       });
@@ -277,7 +277,7 @@ describe('OpenAIConnector', () => {
             body: JSON.stringify(sampleOpenAiBody),
             stream: true,
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
@@ -297,7 +297,7 @@ describe('OpenAIConnector', () => {
               'content-type': 'application/json',
             },
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(response).toEqual({
           headers: { 'Content-Type': 'dont-compress-this' },
@@ -323,7 +323,7 @@ describe('OpenAIConnector', () => {
             }),
             stream: true,
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
@@ -342,7 +342,7 @@ describe('OpenAIConnector', () => {
               'content-type': 'application/json',
             },
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(response).toEqual({
           headers: { 'Content-Type': 'dont-compress-this' },
@@ -357,7 +357,7 @@ describe('OpenAIConnector', () => {
         await expect(
           connector.streamApi(
             { body: JSON.stringify(sampleOpenAiBody), stream: true },
-            connectorMetricsCollector
+            connectorUsageCollector
           )
         ).rejects.toThrow('API Error');
       });
@@ -383,7 +383,7 @@ describe('OpenAIConnector', () => {
       });
 
       it('the API call is successful with correct request parameters', async () => {
-        await connector.invokeStream(sampleOpenAiBody, connectorMetricsCollector);
+        await connector.invokeStream(sampleOpenAiBody, connectorUsageCollector);
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
@@ -402,13 +402,13 @@ describe('OpenAIConnector', () => {
               'content-type': 'application/json',
             },
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
       });
 
       it('signal is properly passed to streamApi', async () => {
         const signal = jest.fn();
-        await connector.invokeStream({ ...sampleOpenAiBody, signal }, connectorMetricsCollector);
+        await connector.invokeStream({ ...sampleOpenAiBody, signal }, connectorUsageCollector);
 
         expect(mockRequest).toHaveBeenCalledWith(
           {
@@ -428,13 +428,13 @@ describe('OpenAIConnector', () => {
             },
             signal,
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
       });
 
       it('timeout is properly passed to streamApi', async () => {
         const timeout = 180000;
-        await connector.invokeStream({ ...sampleOpenAiBody, timeout }, connectorMetricsCollector);
+        await connector.invokeStream({ ...sampleOpenAiBody, timeout }, connectorUsageCollector);
 
         expect(mockRequest).toHaveBeenCalledWith(
           {
@@ -454,7 +454,7 @@ describe('OpenAIConnector', () => {
             },
             timeout,
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
       });
 
@@ -463,21 +463,21 @@ describe('OpenAIConnector', () => {
         connector.request = mockError;
 
         await expect(
-          connector.invokeStream(sampleOpenAiBody, connectorMetricsCollector)
+          connector.invokeStream(sampleOpenAiBody, connectorUsageCollector)
         ).rejects.toThrow('API Error');
       });
 
       it('responds with a readable stream', async () => {
         // @ts-ignore
         connector.request = mockStream();
-        const response = await connector.invokeStream(sampleOpenAiBody, connectorMetricsCollector);
+        const response = await connector.invokeStream(sampleOpenAiBody, connectorUsageCollector);
         expect(response instanceof PassThrough).toEqual(true);
       });
     });
 
     describe('invokeAI', () => {
       it('the API call is successful with correct parameters', async () => {
-        const response = await connector.invokeAI(sampleOpenAiBody, connectorMetricsCollector);
+        const response = await connector.invokeAI(sampleOpenAiBody, connectorUsageCollector);
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
@@ -493,7 +493,7 @@ describe('OpenAIConnector', () => {
               'content-type': 'application/json',
             },
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(response.message).toEqual(mockResponseString);
         expect(response.usage.total_tokens).toEqual(9);
@@ -501,7 +501,7 @@ describe('OpenAIConnector', () => {
 
       it('signal is properly passed to runApi', async () => {
         const signal = jest.fn();
-        await connector.invokeAI({ ...sampleOpenAiBody, signal }, connectorMetricsCollector);
+        await connector.invokeAI({ ...sampleOpenAiBody, signal }, connectorUsageCollector);
 
         expect(mockRequest).toHaveBeenCalledWith(
           {
@@ -518,13 +518,13 @@ describe('OpenAIConnector', () => {
             },
             signal,
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
       });
 
       it('timeout is properly passed to runApi', async () => {
         const timeout = 180000;
-        await connector.invokeAI({ ...sampleOpenAiBody, timeout }, connectorMetricsCollector);
+        await connector.invokeAI({ ...sampleOpenAiBody, timeout }, connectorUsageCollector);
 
         expect(mockRequest).toHaveBeenCalledWith(
           {
@@ -541,7 +541,7 @@ describe('OpenAIConnector', () => {
             },
             timeout,
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
       });
 
@@ -549,15 +549,15 @@ describe('OpenAIConnector', () => {
         // @ts-ignore
         connector.request = mockError;
 
-        await expect(
-          connector.invokeAI(sampleOpenAiBody, connectorMetricsCollector)
-        ).rejects.toThrow('API Error');
+        await expect(connector.invokeAI(sampleOpenAiBody, connectorUsageCollector)).rejects.toThrow(
+          'API Error'
+        );
       });
     });
 
     describe('invokeAsyncIterator', () => {
       it('the API call is successful with correct request parameters', async () => {
-        await connector.invokeAsyncIterator(sampleOpenAiBody, connectorMetricsCollector);
+        await connector.invokeAsyncIterator(sampleOpenAiBody, connectorUsageCollector);
         expect(mockRequest).toBeCalledTimes(0);
         expect(mockCreate).toHaveBeenCalledWith(
           {
@@ -574,7 +574,7 @@ describe('OpenAIConnector', () => {
         const signal = jest.fn();
         await connector.invokeAsyncIterator(
           { ...sampleOpenAiBody, signal, timeout },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(mockRequest).toBeCalledTimes(0);
         expect(mockCreate).toHaveBeenCalledWith(
@@ -597,7 +597,7 @@ describe('OpenAIConnector', () => {
         });
 
         await expect(
-          connector.invokeAsyncIterator(sampleOpenAiBody, connectorMetricsCollector)
+          connector.invokeAsyncIterator(sampleOpenAiBody, connectorUsageCollector)
         ).rejects.toThrow('API Error');
       });
     });
@@ -690,7 +690,7 @@ describe('OpenAIConnector', () => {
       it('uses the default model if none is supplied', async () => {
         const response = await connector.runApi(
           { body: JSON.stringify(sampleOpenAiBody) },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
@@ -706,7 +706,7 @@ describe('OpenAIConnector', () => {
               'content-type': 'application/json',
             },
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(response).toEqual(mockResponse.data);
       });
@@ -746,7 +746,7 @@ describe('OpenAIConnector', () => {
       it('test the AzureAI API call is successful with correct parameters', async () => {
         const response = await connector.runApi(
           { body: JSON.stringify(sampleAzureAiBody) },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
@@ -759,7 +759,7 @@ describe('OpenAIConnector', () => {
               'content-type': 'application/json',
             },
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(response).toEqual(mockResponse.data);
       });
@@ -777,7 +777,7 @@ describe('OpenAIConnector', () => {
           {
             body: JSON.stringify({ ...body, stream: true }),
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
@@ -790,7 +790,7 @@ describe('OpenAIConnector', () => {
               'content-type': 'application/json',
             },
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(response).toEqual(mockResponse.data);
       });
@@ -800,7 +800,7 @@ describe('OpenAIConnector', () => {
         connector.request = mockError;
 
         await expect(
-          connector.runApi({ body: JSON.stringify(sampleAzureAiBody) }, connectorMetricsCollector)
+          connector.runApi({ body: JSON.stringify(sampleAzureAiBody) }, connectorUsageCollector)
         ).rejects.toThrow('API Error');
       });
     });
@@ -812,7 +812,7 @@ describe('OpenAIConnector', () => {
             body: JSON.stringify(sampleAzureAiBody),
             stream: false,
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
@@ -826,7 +826,7 @@ describe('OpenAIConnector', () => {
               'content-type': 'application/json',
             },
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(response).toEqual(mockResponse.data);
       });
@@ -837,7 +837,7 @@ describe('OpenAIConnector', () => {
             body: JSON.stringify(sampleAzureAiBody),
             stream: true,
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
@@ -852,7 +852,7 @@ describe('OpenAIConnector', () => {
               'content-type': 'application/json',
             },
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(response).toEqual({
           headers: { 'Content-Type': 'dont-compress-this' },
@@ -874,7 +874,7 @@ describe('OpenAIConnector', () => {
             body: JSON.stringify({ ...body, stream: false }),
             stream: true,
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
@@ -892,7 +892,7 @@ describe('OpenAIConnector', () => {
               'content-type': 'application/json',
             },
           },
-          connectorMetricsCollector
+          connectorUsageCollector
         );
         expect(response).toEqual({
           headers: { 'Content-Type': 'dont-compress-this' },
@@ -907,7 +907,7 @@ describe('OpenAIConnector', () => {
         await expect(
           connector.streamApi(
             { body: JSON.stringify(sampleAzureAiBody), stream: true },
-            connectorMetricsCollector
+            connectorUsageCollector
           )
         ).rejects.toThrow('API Error');
       });

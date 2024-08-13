@@ -727,7 +727,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
             });
 
             const executeEvent = events[1];
-            expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(261);
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(261);
           });
         });
 
@@ -791,7 +791,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
             });
 
             const executeEvent = events[1];
-            expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(239);
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(239);
           });
         });
 
@@ -856,7 +856,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
             });
 
             const executeEvent = events[3];
-            expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(0);
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(0);
           });
         });
 
@@ -898,7 +898,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
             });
 
             const executeEvent = events[5];
-            expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(0);
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(0);
           });
         });
       });

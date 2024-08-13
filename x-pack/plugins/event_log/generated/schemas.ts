@@ -228,7 +228,7 @@ export const EventSchema = schema.maybe(
                     ),
                   })
                 ),
-                metrics: schema.maybe(
+                usage: schema.maybe(
                   schema.object({
                     request_body_bytes: ecsStringOrNumber(),
                   })

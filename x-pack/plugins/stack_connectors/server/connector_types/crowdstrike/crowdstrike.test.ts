@@ -10,7 +10,7 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { CROWDSTRIKE_CONNECTOR_ID } from '../../../public/common';
-import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
 const tokenPath = 'https://api.crowdstrike.com/oauth2/token';
 const hostPath = 'https://api.crowdstrike.com/devices/entities/devices/v2';
@@ -27,14 +27,14 @@ describe('CrowdstrikeConnector', () => {
     services: actionsMock.createServices(),
   });
   let mockedRequest: jest.Mock;
-  let connectorMetricsCollector: ConnectorMetricsCollector;
+  let connectorUsageCollector: ConnectorUsageCollector;
 
   beforeEach(() => {
     // @ts-expect-error private static - but I still want to reset it
     CrowdstrikeConnector.token = null;
     // @ts-expect-error
     mockedRequest = connector.request = jest.fn() as jest.Mock;
-    connectorMetricsCollector = new ConnectorMetricsCollector({
+    connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',
     });
@@ -55,7 +55,7 @@ describe('CrowdstrikeConnector', () => {
           command: 'contain',
           ids: ['id1', 'id2'],
         },
-        connectorMetricsCollector
+        connectorUsageCollector
       );
       expect(mockedRequest).toHaveBeenNthCalledWith(
         1,
@@ -69,7 +69,7 @@ describe('CrowdstrikeConnector', () => {
           responseSchema: expect.any(Object),
           url: tokenPath,
         }),
-        connectorMetricsCollector
+        connectorUsageCollector
       );
       expect(mockedRequest).toHaveBeenNthCalledWith(
         2,
@@ -81,7 +81,7 @@ describe('CrowdstrikeConnector', () => {
           paramsSerializer: expect.any(Function),
           responseSchema: expect.any(Object),
         }),
-        connectorMetricsCollector
+        connectorUsageCollector
       );
       expect(result).toEqual({ id: 'testid', path: 'testpath' });
     });
@@ -96,7 +96,7 @@ describe('CrowdstrikeConnector', () => {
 
       const result = await connector.getAgentDetails(
         { ids: ['id1', 'id2'] },
-        connectorMetricsCollector
+        connectorUsageCollector
       );
 
       expect(mockedRequest).toHaveBeenNthCalledWith(
@@ -111,7 +111,7 @@ describe('CrowdstrikeConnector', () => {
           responseSchema: expect.any(Object),
           url: tokenPath,
         }),
-        connectorMetricsCollector
+        connectorUsageCollector
       );
       expect(mockedRequest).toHaveBeenNthCalledWith(
         2,
@@ -125,7 +125,7 @@ describe('CrowdstrikeConnector', () => {
           responseSchema: expect.any(Object),
           url: hostPath,
         }),
-        connectorMetricsCollector
+        connectorUsageCollector
       );
       expect(result).toEqual({ resources: [{}] });
     });
@@ -140,7 +140,7 @@ describe('CrowdstrikeConnector', () => {
 
       const result = await connector.getAgentOnlineStatus(
         { ids: ['id1', 'id2'] },
-        connectorMetricsCollector
+        connectorUsageCollector
       );
 
       expect(mockedRequest).toHaveBeenNthCalledWith(
@@ -155,7 +155,7 @@ describe('CrowdstrikeConnector', () => {
           responseSchema: expect.any(Object),
           url: tokenPath,
         }),
-        connectorMetricsCollector
+        connectorUsageCollector
       );
       expect(mockedRequest).toHaveBeenNthCalledWith(
         2,
@@ -169,7 +169,7 @@ describe('CrowdstrikeConnector', () => {
           responseSchema: expect.any(Object),
           url: onlineStatusPath,
         }),
-        connectorMetricsCollector
+        connectorUsageCollector
       );
       expect(result).toEqual({ resources: [{}] });
     });
@@ -248,7 +248,7 @@ describe('CrowdstrikeConnector', () => {
       mockedRequest.mockResolvedValueOnce(mockResponse);
 
       // @ts-expect-error private method - but I still want to
-      const result = await connector.getTokenRequest(connectorMetricsCollector);
+      const result = await connector.getTokenRequest(connectorUsageCollector);
 
       expect(mockedRequest).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -260,7 +260,7 @@ describe('CrowdstrikeConnector', () => {
             authorization: expect.stringContaining('Basic'),
           },
         }),
-        connectorMetricsCollector
+        connectorUsageCollector
       );
       expect(result).toEqual('testToken');
     });
@@ -270,7 +270,7 @@ describe('CrowdstrikeConnector', () => {
       mockedRequest.mockResolvedValueOnce({ data: { access_token: 'testToken' } });
       mockedRequest.mockResolvedValue(mockResponse);
 
-      await connector.getAgentDetails({ ids: ['id1', 'id2'] }, connectorMetricsCollector);
+      await connector.getAgentDetails({ ids: ['id1', 'id2'] }, connectorUsageCollector);
 
       expect(mockedRequest).toHaveBeenNthCalledWith(
         1,
@@ -284,7 +284,7 @@ describe('CrowdstrikeConnector', () => {
           responseSchema: expect.any(Object),
           url: tokenPath,
         }),
-        connectorMetricsCollector
+        connectorUsageCollector
       );
       expect(mockedRequest).toHaveBeenNthCalledWith(
         2,
@@ -298,10 +298,10 @@ describe('CrowdstrikeConnector', () => {
           responseSchema: expect.any(Object),
           url: hostPath,
         }),
-        connectorMetricsCollector
+        connectorUsageCollector
       );
       expect(mockedRequest).toHaveBeenCalledTimes(2);
-      await connector.getAgentDetails({ ids: ['id1', 'id2'] }, connectorMetricsCollector);
+      await connector.getAgentDetails({ ids: ['id1', 'id2'] }, connectorUsageCollector);
       expect(mockedRequest).toHaveBeenNthCalledWith(
         3,
         expect.objectContaining({
@@ -314,7 +314,7 @@ describe('CrowdstrikeConnector', () => {
           responseSchema: expect.any(Object),
           url: hostPath,
         }),
-        connectorMetricsCollector
+        connectorUsageCollector
       );
       expect(mockedRequest).toHaveBeenCalledTimes(3);
     });
@@ -325,7 +325,7 @@ describe('CrowdstrikeConnector', () => {
       mockedRequest.mockRejectedValueOnce(mockResponse);
 
       await expect(() =>
-        connector.getAgentDetails({ ids: ['id1', 'id2'] }, connectorMetricsCollector)
+        connector.getAgentDetails({ ids: ['id1', 'id2'] }, connectorUsageCollector)
       ).rejects.toThrowError('something goes wrong');
       expect(mockedRequest).toHaveBeenCalledTimes(2);
     });
@@ -336,7 +336,7 @@ describe('CrowdstrikeConnector', () => {
       mockedRequest.mockRejectedValueOnce(mockResponse);
 
       await expect(() =>
-        connector.getAgentDetails({ ids: ['id1', 'id2'] }, connectorMetricsCollector)
+        connector.getAgentDetails({ ids: ['id1', 'id2'] }, connectorUsageCollector)
       ).rejects.toThrowError();
       expect(mockedRequest).toHaveBeenCalledTimes(3);
     });

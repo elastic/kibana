@@ -15,7 +15,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { observables } from '../lib/servicenow/mocks';
 import { snExternalServiceConfig } from '../lib/servicenow/config';
-import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -32,7 +32,7 @@ jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
 axios.create = jest.fn(() => axios);
 const requestMock = utils.request as jest.Mock;
 const configurationUtilities = actionsConfigMock.create();
-let connectorMetricsCollector: ConnectorMetricsCollector;
+let connectorUsageCollector: ConnectorUsageCollector;
 
 const mockApplicationVersion = () =>
   requestMock.mockImplementationOnce(() => ({
@@ -72,7 +72,7 @@ const expectAddObservables = (single: boolean) => {
     configurationUtilities,
     url: 'https://example.com/api/x_elas2_sir_int/elastic_api/health',
     method: 'get',
-    connectorMetricsCollector: expect.any(ConnectorMetricsCollector),
+    connectorUsageCollector: expect.any(ConnectorUsageCollector),
   });
 
   const url = single
@@ -88,7 +88,7 @@ const expectAddObservables = (single: boolean) => {
     url,
     method: 'post',
     data,
-    connectorMetricsCollector: expect.any(ConnectorMetricsCollector),
+    connectorUsageCollector: expect.any(ConnectorUsageCollector),
   });
 };
 
@@ -96,7 +96,7 @@ describe('ServiceNow SIR service', () => {
   let service: ExternalServiceSIR;
 
   beforeEach(() => {
-    connectorMetricsCollector = new ConnectorMetricsCollector({
+    connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',
     });
@@ -109,7 +109,7 @@ describe('ServiceNow SIR service', () => {
       configurationUtilities,
       serviceConfig: snExternalServiceConfig['.servicenow-sir'],
       axiosInstance: axios,
-      connectorMetricsCollector,
+      connectorUsageCollector,
     }) as ExternalServiceSIR;
   });
 

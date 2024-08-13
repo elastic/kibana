@@ -14,7 +14,7 @@ import {
   XmattersConnectorType,
 } from '.';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { ConnectorMetricsCollector, Services } from '@kbn/actions-plugin/server/types';
+import { ConnectorUsageCollector, Services } from '@kbn/actions-plugin/server/types';
 import {
   validateConfig,
   validateConnector,
@@ -45,12 +45,12 @@ const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 
 let connectorType: XmattersConnectorType;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
-let connectorMetricsCollector: ConnectorMetricsCollector;
+let connectorUsageCollector: ConnectorUsageCollector;
 
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
   connectorType = getConnectorType();
-  connectorMetricsCollector = new ConnectorMetricsCollector({
+  connectorUsageCollector = new ConnectorUsageCollector({
     logger: mockedLogger,
     connectorId: 'test-connector-id',
   });
@@ -428,7 +428,7 @@ describe('execute()', () => {
       },
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsCollector,
+      connectorUsageCollector,
     });
 
     const { method, url, headers, data } = requestMock.mock.calls[0][0];
@@ -478,7 +478,7 @@ describe('execute()', () => {
       },
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsCollector,
+      connectorUsageCollector,
     });
     expect(mockedLogger.warn).toBeCalledWith(
       'Error thrown triggering xMatters workflow: maxContentLength size of 1000000 exceeded'
@@ -511,7 +511,7 @@ describe('execute()', () => {
       },
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsCollector,
+      connectorUsageCollector,
     });
 
     const { method, url, headers, data } = requestMock.mock.calls[0][0];

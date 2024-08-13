@@ -199,7 +199,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
       });
 
       const executeEvent = events[1];
-      expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(130);
+      expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(130);
     });
 
     it('should handle a 40x xmatters error', async () => {

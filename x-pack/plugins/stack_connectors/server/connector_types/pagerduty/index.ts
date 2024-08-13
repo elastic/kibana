@@ -206,7 +206,7 @@ async function executor(
     services,
     configurationUtilities,
     logger,
-    connectorMetricsCollector,
+    connectorUsageCollector,
   } = execOptions;
 
   const apiUrl = getPagerDutyApiUrl(config);
@@ -222,7 +222,7 @@ async function executor(
       { apiUrl, data, headers, services },
       logger,
       configurationUtilities,
-      connectorMetricsCollector
+      connectorUsageCollector
     );
   } catch (err) {
     const message = i18n.translate('xpack.stackConnectors.pagerduty.postingErrorMessage', {

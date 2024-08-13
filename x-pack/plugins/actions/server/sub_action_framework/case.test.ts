@@ -12,14 +12,14 @@ import { actionsConfigMock } from '../actions_config.mock';
 import { actionsMock } from '../mocks';
 import { TestCaseConnector } from './mocks';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { ConnectorMetricsCollector } from '../lib';
+import { ConnectorUsageCollector } from '../usage';
 
 describe('CaseConnector', () => {
   let logger: MockedLogger;
   let services: ReturnType<typeof actionsMock.createServices>;
   let mockedActionsConfig: jest.Mocked<ActionsConfigurationUtilities>;
   let service: TestCaseConnector;
-  let connectorMetricsCollector: ConnectorMetricsCollector;
+  let connectorUsageCollector: ConnectorUsageCollector;
   const pushToServiceIncidentParamsSchema = {
     name: schema.string(),
     category: schema.nullable(schema.string()),
@@ -60,7 +60,7 @@ describe('CaseConnector', () => {
       pushToServiceIncidentParamsSchema
     );
 
-    connectorMetricsCollector = new ConnectorMetricsCollector({
+    connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',
     });
@@ -198,7 +198,7 @@ describe('CaseConnector', () => {
 
   describe('pushToService', () => {
     it('should create an incident if externalId is null', async () => {
-      const res = await service.pushToService(pushToServiceParams, connectorMetricsCollector);
+      const res = await service.pushToService(pushToServiceParams, connectorUsageCollector);
       expect(res).toEqual({
         id: 'create-incident',
         title: 'Test incident',
@@ -213,7 +213,7 @@ describe('CaseConnector', () => {
           incident: { ...pushToServiceParams.incident, externalId: 'test-id' },
           comments: [],
         },
-        connectorMetricsCollector
+        connectorUsageCollector
       );
 
       expect(res).toEqual({
@@ -233,7 +233,7 @@ describe('CaseConnector', () => {
             { comment: 'comment-2', commentId: 'comment-id-2' },
           ],
         },
-        connectorMetricsCollector
+        connectorUsageCollector
       );
 
       expect(res).toEqual({
@@ -261,7 +261,7 @@ describe('CaseConnector', () => {
           // @ts-expect-error
           comments,
         },
-        connectorMetricsCollector
+        connectorUsageCollector
       );
 
       expect(res).toEqual({
@@ -278,7 +278,7 @@ describe('CaseConnector', () => {
           ...pushToServiceParams,
           comments: [],
         },
-        connectorMetricsCollector
+        connectorUsageCollector
       );
 
       expect(res).toEqual({

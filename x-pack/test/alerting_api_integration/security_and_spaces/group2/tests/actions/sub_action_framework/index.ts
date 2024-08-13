@@ -167,7 +167,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         });
 
         const executeEvent = events[1];
-        expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.eql(
+        expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.eql(
           Buffer.byteLength(JSON.stringify(subActionParams))
         );
 

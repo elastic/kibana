@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Cases webhook service createComment it should call request with correct arguments when authType=SSL: 
+exports[`Cases webhook service createComment it should call request with correct arguments when authType=SSL:
         Object {
           "axios": [Function],
-          "connectorMetricsCollector": ConnectorMetricsCollector {
+          "connectorUsageCollector": ConnectorUsageCollector {
             "connectorId": "test-connector-id",
             "logger": Object {
               "context": Array [],
@@ -17,7 +17,7 @@ exports[`Cases webhook service createComment it should call request with correct
               "trace": [MockFunction],
               "warn": [MockFunction],
             },
-            "metrics": Object {
+            "usage": Object {
               "requestBodyBytes": 0,
             },
           },
@@ -163,7 +163,7 @@ exports[`Cases webhook service createComment it should call request with correct
        1`] = `
 Object {
   "axios": [Function],
-  "connectorMetricsCollector": ConnectorMetricsCollector {
+  "connectorUsageCollector": ConnectorUsageCollector {
     "connectorId": "test-connector-id",
     "logger": Object {
       "context": Array [],
@@ -177,7 +177,7 @@ Object {
       "trace": [MockFunction],
       "warn": [MockFunction],
     },
-    "metrics": Object {
+    "usage": Object {
       "requestBodyBytes": 0,
     },
   },

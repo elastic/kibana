@@ -267,7 +267,7 @@ export default function d3SecurityTest({ getService }: FtrProviderContext) {
             });
 
             const executeEvent = events[1];
-            expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(99);
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(99);
 
             expect(body).to.eql({
               status: 'ok',

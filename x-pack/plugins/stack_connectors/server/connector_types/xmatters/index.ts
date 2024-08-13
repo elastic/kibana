@@ -247,7 +247,7 @@ function validateConnectorTypeSecrets(
 export async function executor(
   execOptions: XmattersConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const { actionId, configurationUtilities, config, params, logger, connectorMetricsCollector } =
+  const { actionId, configurationUtilities, config, params, logger, connectorUsageCollector } =
     execOptions;
   const { configUrl, usesBasic } = config;
   const data = getPayloadForRequest(params);
@@ -268,7 +268,7 @@ export async function executor(
       { url, data, basicAuth },
       logger,
       configurationUtilities,
-      connectorMetricsCollector
+      connectorUsageCollector
     );
   } catch (err) {
     const message = i18n.translate('xpack.stackConnectors.xmatters.postingErrorMessage', {

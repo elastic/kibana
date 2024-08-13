@@ -9,7 +9,7 @@ import crypto from 'crypto';
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import { AxiosError } from 'axios';
 import { isEmpty } from 'lodash';
-import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { OpsgenieSubActions } from '../../../common';
 import { CreateAlertParamsSchema, CloseAlertParamsSchema, Response } from './schema';
 import { CloseAlertParams, Config, CreateAlertParams, FailureResponseType, Secrets } from './types';
@@ -70,7 +70,7 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
 
   public async createAlert(
     params: CreateAlertParams,
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ) {
     const res = await this.request(
       {
@@ -80,7 +80,7 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
         headers: this.createHeaders(),
         responseSchema: Response,
       },
-      connectorMetricsCollector
+      connectorUsageCollector
     );
 
     return res.data;
@@ -116,7 +116,7 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
 
   public async closeAlert(
     params: CloseAlertParams,
-    connectorMetricsCollector: ConnectorMetricsCollector
+    connectorUsageCollector: ConnectorUsageCollector
   ) {
     const newAlias = OpsgenieConnector.createAlias(params.alias);
 
@@ -133,7 +133,7 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
         headers: this.createHeaders(),
         responseSchema: Response,
       },
-      connectorMetricsCollector
+      connectorUsageCollector
     );
 
     return res.data;

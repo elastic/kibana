@@ -23,7 +23,7 @@ import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/se
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
-import { ConnectorMetricsCollector } from './connector_metrics_collector';
+import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
 import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
 import {
   validateConfig,
@@ -399,7 +399,7 @@ export class ActionExecutor {
         const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
         const logger = this.actionExecutorContext!.logger.get(loggerId);
 
-        const connectorMetricsCollector = new ConnectorMetricsCollector({
+        const connectorUsageCollector = new ConnectorUsageCollector({
           logger,
           connectorId: actionId,
         });
@@ -518,7 +518,7 @@ export class ActionExecutor {
             logger,
             source,
             ...(actionType.isSystemActionType ? { request } : {}),
-            connectorMetricsCollector,
+            connectorUsageCollector,
           });
 
           if (rawResult && rawResult.status === 'error') {
@@ -559,8 +559,8 @@ export class ActionExecutor {
           event.user.id = currentUser?.profile_uid;
           set(
             event,
-            'kibana.action.execution.metrics.request_body_bytes',
-            connectorMetricsCollector.getRequestBodyByte()
+            'kibana.action.execution.usage.request_body_bytes',
+            connectorUsageCollector.getRequestBodyByte()
           );
 
           if (result.status === 'ok') {

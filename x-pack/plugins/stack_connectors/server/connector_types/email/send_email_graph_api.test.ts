@@ -14,7 +14,7 @@ import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { CustomHostSettings } from '@kbn/actions-plugin/server/config';
-import { ConnectorMetricsCollector, ProxySettings } from '@kbn/actions-plugin/server/types';
+import { ConnectorUsageCollector, ProxySettings } from '@kbn/actions-plugin/server/types';
 import { sendEmailGraphApi } from './send_email_graph_api';
 
 const createAxiosInstanceMock = axios.create as jest.Mock;
@@ -28,7 +28,7 @@ describe('sendEmailGraphApi', () => {
   const configurationUtilities = actionsConfigMock.create();
 
   test('email contains the proper message', async () => {
-    const connectorMetricsCollector = new ConnectorMetricsCollector({
+    const connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',
     });
@@ -44,7 +44,7 @@ describe('sendEmailGraphApi', () => {
       },
       logger,
       configurationUtilities,
-      connectorMetricsCollector
+      connectorUsageCollector
     );
     expect(axiosInstanceMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -124,7 +124,7 @@ describe('sendEmailGraphApi', () => {
   });
 
   test('email was sent on behalf of the user "from" mailbox', async () => {
-    const connectorMetricsCollector = new ConnectorMetricsCollector({
+    const connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',
     });
@@ -139,7 +139,7 @@ describe('sendEmailGraphApi', () => {
       },
       logger,
       configurationUtilities,
-      connectorMetricsCollector
+      connectorUsageCollector
     );
     expect(axiosInstanceMock.mock.calls[1]).toMatchInlineSnapshot(`
       Array [
@@ -221,7 +221,7 @@ describe('sendEmailGraphApi', () => {
   });
 
   test('sendMail request was sent to the custom configured Graph API URL', async () => {
-    const connectorMetricsCollector = new ConnectorMetricsCollector({
+    const connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',
     });
@@ -237,7 +237,7 @@ describe('sendEmailGraphApi', () => {
       },
       logger,
       configurationUtilities,
-      connectorMetricsCollector
+      connectorUsageCollector
     );
     expect(axiosInstanceMock.mock.calls[2]).toMatchInlineSnapshot(`
       Array [
@@ -317,7 +317,7 @@ describe('sendEmailGraphApi', () => {
   });
 
   test('throw the exception and log the proper error if message was not sent successfuly', async () => {
-    const connectorMetricsCollector = new ConnectorMetricsCollector({
+    const connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',
     });
@@ -336,7 +336,7 @@ describe('sendEmailGraphApi', () => {
         { options: getSendEmailOptions(), messageHTML: 'test1', headers: {} },
         logger,
         configurationUtilities,
-        connectorMetricsCollector
+        connectorUsageCollector
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       '"{\\"error\\":{\\"code\\":\\"ErrorMimeContentInvalidBase64String\\",\\"message\\":\\"Invalid base64 string for MIME content.\\"}}"'

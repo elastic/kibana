@@ -411,7 +411,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             });
 
             const executeEvent = events[1];
-            expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(2);
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(2);
           });
 
           it('should get webhooks', async () => {
@@ -457,7 +457,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             });
 
             const executeEvent = events[3];
-            expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(2);
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(2);
           });
 
           it('should run the webhook', async () => {
@@ -491,7 +491,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             });
 
             const executeEvent = events[5];
-            expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(8);
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(8);
           });
 
           it('should run the webhook url', async () => {
@@ -531,7 +531,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             });
 
             const executeEvent = events[5];
-            expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(8);
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(8);
           });
         });
 
@@ -589,7 +589,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             });
 
             const executeEvent = events[1];
-            expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(2);
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(2);
           });
 
           it('should return a failure when attempting to get webhooks', async () => {

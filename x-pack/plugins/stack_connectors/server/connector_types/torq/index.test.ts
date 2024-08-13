@@ -11,12 +11,8 @@ import axios from 'axios';
 import { ActionTypeConfigType, getActionType, TorqActionType } from '.';
 
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
-import {
-  ConnectorMetricsCollector,
-  validateConfig,
-  validateParams,
-  validateSecrets,
-} from '@kbn/actions-plugin/server/lib';
+import { validateConfig, validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { Services } from '@kbn/actions-plugin/server/types';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
@@ -42,12 +38,12 @@ const services: Services = actionsMock.createServices();
 let actionType: TorqActionType;
 const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
-let connectorMetricsCollector: ConnectorMetricsCollector;
+let connectorUsageCollector: ConnectorUsageCollector;
 
 beforeAll(() => {
   actionType = getActionType();
   configurationUtilities = actionsConfigMock.create();
-  connectorMetricsCollector = new ConnectorMetricsCollector({
+  connectorUsageCollector = new ConnectorUsageCollector({
     logger: mockedLogger,
     connectorId: 'test-connector-id',
   });
@@ -181,14 +177,14 @@ describe('execute Torq action', () => {
       params: { body: '{"msg": "some data"}' },
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsCollector,
+      connectorUsageCollector,
     });
 
     delete requestMock.mock.calls[0][0].configurationUtilities;
     expect(requestMock.mock.calls[0][0]).toMatchSnapshot({
       axios: expect.any(Function),
-      connectorMetricsCollector: {
-        metrics: {
+      connectorUsageCollector: {
+        usage: {
           requestBodyBytes: 0,
         },
       },
