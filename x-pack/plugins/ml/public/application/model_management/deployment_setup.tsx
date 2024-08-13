@@ -288,7 +288,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
           description={
             <FormattedMessage
               id="xpack.ml.trainedModels.modelsList.startDeployment.adaptiveAllocationHelp"
-              defaultMessage="Automatically adjust the number of allocations based on the load."
+              defaultMessage="Automatically adjust the number of allocations based on current load."
             />
           }
         >
