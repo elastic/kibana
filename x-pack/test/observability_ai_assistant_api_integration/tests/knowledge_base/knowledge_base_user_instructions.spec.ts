@@ -7,27 +7,9 @@
 
 import expect from '@kbn/expect';
 import { kbnTestConfig } from '@kbn/test';
-import { SecurityService } from '@kbn/test-suites-src/common/services/security/security';
 import { sortBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { ObservabilityAIAssistantApiClient } from '../../common/observability_ai_assistant_api_client';
 import { clearKnowledgeBase, createKnowledgeBaseModel, deleteKnowledgeBaseModel } from './helpers';
-
-export async function createUserAndApiClient({
-  getScopedApiClientForUsername,
-  security,
-  username,
-  roles,
-}: {
-  getScopedApiClientForUsername: (username: string) => ObservabilityAIAssistantApiClient;
-  security: SecurityService;
-  username: string;
-  roles: string[];
-}) {
-  const password = kbnTestConfig.getUrlParts().password!;
-  await security.user.create(username, { password, roles });
-  return getScopedApiClientForUsername('editor');
-}
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
@@ -46,9 +28,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await createKnowledgeBaseModel(ml);
 
       await observabilityAIAssistantAPIClient
-        .editorUser({
-          endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-        })
+        .editorUser({ endpoint: 'POST /internal/observability_ai_assistant/kb/setup' })
         .expect(200);
     });
 
@@ -150,6 +130,53 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
           ])
         );
+      });
+    });
+
+    describe('when updating an existing user instructions', () => {
+      before(async () => {
+        await clearKnowledgeBase(es);
+
+        await observabilityAIAssistantAPIClient
+          .editorUser({
+            endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
+            params: {
+              body: {
+                id: 'doc-to-update',
+                text: 'Initial text',
+                public: true,
+              },
+            },
+          })
+          .expect(200);
+
+        await observabilityAIAssistantAPIClient
+          .editorUser({
+            endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
+            params: {
+              body: {
+                id: 'doc-to-update',
+                text: 'Updated text',
+                public: false,
+              },
+            },
+          })
+          .expect(200);
+      });
+
+      it('updates the user instruction', async () => {
+        const res = await observabilityAIAssistantAPIClient.editorUser({
+          endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
+        });
+        const instructions = res.body.userInstructions;
+
+        expect(instructions).to.eql([
+          {
+            doc_id: 'doc-to-update',
+            text: 'Updated text',
+            public: false,
+          },
+        ]);
       });
     });
   });

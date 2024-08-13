@@ -39,5 +39,6 @@ export async function clearKnowledgeBase(es: Client) {
     index: KB_INDEX,
     conflicts: 'proceed',
     query: { match_all: {} },
+    refresh: true,
   });
 }
