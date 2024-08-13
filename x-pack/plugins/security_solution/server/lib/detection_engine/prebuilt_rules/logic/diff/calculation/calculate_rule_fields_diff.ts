@@ -265,8 +265,6 @@ const threatMatchFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableThreatMat
   threat_index: scalarArrayDiffAlgorithm,
   threat_mapping: simpleDiffAlgorithm,
   threat_indicator_path: singleLineStringDiffAlgorithm,
-  concurrent_searches: simpleDiffAlgorithm,
-  items_per_search: simpleDiffAlgorithm,
 };
 
 const calculateThresholdFieldsDiff = (
