@@ -2,8 +2,10 @@
 
 set -euo pipefail
 
-export DISABLE_BOOTSTRAP_VALIDATION=false
-.buildkite/scripts/bootstrap.sh
+if [[ "${CI:-}" =~ /^(1|true)$/ ]]; then
+  export DISABLE_BOOTSTRAP_VALIDATION=false
+  .buildkite/scripts/bootstrap.sh
+fi
 
 ts-node-script ./.buildkite/scripts/steps/quick_checks.ts """
 .buildkite/scripts/steps/checks/precommit_hook.sh
