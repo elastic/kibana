@@ -132,7 +132,7 @@ export function HeaderActions({
   const createOrOpenInvestigation = async () => {
     if (!alert) return;
 
-    if (!investigations || investigations.length === 0) {
+    if (!investigations || investigations.results.length === 0) {
       const paddedAlertTimeRange = getPaddedAlertTimeRange(alertStart!, alertEnd);
 
       const investigationResponse = await createInvestigation({
@@ -155,7 +155,7 @@ export function HeaderActions({
       navigateToApp('investigate', { path: `/${investigationResponse.id}`, replace: false });
     } else {
       navigateToApp('investigate', {
-        path: `/${investigations[0].id}`,
+        path: `/${investigations.results[0].id}`,
         replace: false,
       });
     }
@@ -177,7 +177,7 @@ export function HeaderActions({
                 <EuiText size="s">
                   {i18n.translate('xpack.observability.alertDetails.investigateAlert', {
                     defaultMessage:
-                      !investigations || investigations.length === 0
+                      !investigations || investigations.results.length === 0
                         ? 'Start investigation'
                         : 'Ongoing investigation',
                   })}

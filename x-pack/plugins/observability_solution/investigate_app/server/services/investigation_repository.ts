@@ -14,9 +14,8 @@ import { Paginated, Pagination } from '../models/pagination';
 export interface InvestigationRepository {
   save(investigation: Investigation): Promise<void>;
   findById(id: string): Promise<Investigation>;
-  findByAlertId(alertId: string): Promise<Investigation[]>;
   deleteById(id: string): Promise<void>;
-  search(pagination: Pagination): Promise<Paginated<Investigation>>;
+  search(filter: string, pagination: Pagination): Promise<Paginated<Investigation>>;
 }
 
 export function investigationRepositoryFactory({
@@ -75,26 +74,6 @@ export function investigationRepositoryFactory({
       return investigation;
     },
 
-    async findByAlertId(alertId: string): Promise<Investigation[]> {
-      const response = await soClient.find<StoredInvestigation>({
-        type: SO_INVESTIGATION_TYPE,
-        filter: `investigation.attributes.origin.id:(${alertId}) AND investigation.attributes.status: ongoing`,
-      });
-
-      if (response.total === 0) {
-        return [];
-      }
-
-      const investigations: Investigation[] = [];
-
-      response.saved_objects.forEach((so) => {
-        const investigation = toInvestigation(so.attributes);
-        if (investigation !== undefined) investigations.push(investigation);
-      });
-
-      return investigations;
-    },
-
     async deleteById(id: string): Promise<void> {
       const response = await soClient.find<StoredInvestigation>({
         type: SO_INVESTIGATION_TYPE,
@@ -110,11 +89,12 @@ export function investigationRepositoryFactory({
       await soClient.delete(SO_INVESTIGATION_TYPE, response.saved_objects[0].id);
     },
 
-    async search(pagination: Pagination): Promise<Paginated<Investigation>> {
+    async search(filter: string, pagination: Pagination): Promise<Paginated<Investigation>> {
       const response = await soClient.find<StoredInvestigation>({
         type: SO_INVESTIGATION_TYPE,
         page: pagination.page,
         perPage: pagination.perPage,
+        filter,
       });
 
       return {

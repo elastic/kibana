@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { FindInvestigationsByAlertResponse } from '@kbn/investigate-plugin/common';
+import { FindInvestigationsResponse } from '@kbn/investigate-plugin/common';
 import { useKibana } from '../../../utils/kibana_react';
 
 export interface InvestigationsByAlertParams {
@@ -19,7 +19,7 @@ export interface UseFetchInvestigationsByAlertResponse {
   isRefetching: boolean;
   isSuccess: boolean;
   isError: boolean;
-  data: FindInvestigationsByAlertResponse | undefined;
+  data: FindInvestigationsResponse | undefined;
 }
 
 export function useFetchInvestigationsByAlert({
@@ -33,13 +33,11 @@ export function useFetchInvestigationsByAlert({
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
     queryKey: ['fetchInvestigationsByAlert', alertId],
     queryFn: async ({ signal }) => {
-      return await http.get<FindInvestigationsByAlertResponse>(
-        `/api/observability/investigations/alert/${alertId}`,
-        {
-          version: '2023-10-31',
-          signal,
-        }
-      );
+      return await http.get<FindInvestigationsResponse>('/api/observability/investigations', {
+        query: { alertId },
+        version: '2023-10-31',
+        signal,
+      });
     },
     cacheTime: 0,
     refetchOnWindowFocus: false,

@@ -16,7 +16,7 @@ export async function findInvestigations(
   params: FindInvestigationsParams,
   repository: InvestigationRepository
 ): Promise<FindInvestigationsResponse> {
-  const investigations = await repository.search(toPagination(params));
+  const investigations = await repository.search(toFilter(params), toPagination(params));
 
   return findInvestigationsResponseSchema.encode(investigations);
 }
@@ -28,4 +28,11 @@ function toPagination(params: FindInvestigationsParams) {
     page: params.page ? parseInt(params.page, 10) : DEFAULT_PAGE,
     perPage: params.perPage ? parseInt(params.perPage, 10) : DEFAULT_PER_PAGE,
   };
+}
+
+function toFilter(params: FindInvestigationsParams) {
+  if (params.alertId) {
+    return `investigation.attributes.origin.id:(${params.alertId}) AND investigation.attributes.status: ongoing`;
+  }
+  return '';
 }
