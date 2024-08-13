@@ -155,7 +155,7 @@ const NON_UPGRADABLE_FIELDS: string[] = [
 
 function createRuleUpgradeSpecifierFields() {
   const allUpgradableFields = new Set(
-    Object.values(UPGRADABLE_FIELDS_PAYLOAD_BY_RULE_TYPE).flatMap(fields => fields)
+    Object.values(UPGRADABLE_FIELDS_PAYLOAD_BY_RULE_TYPE).flatMap((fields: string[]) => fields)
   );
 
   NON_UPGRADABLE_FIELDS.forEach(field => allUpgradableFields.delete(field));
