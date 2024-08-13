@@ -35,9 +35,11 @@ import type { Role } from '@kbn/security-plugin-types-common';
 interface ISpaceAssignedRolesTableProps {
   isReadOnly: boolean;
   assignedRoles: Role[];
-  onAssignNewRoleClick: () => Promise<void>;
+  onClickAssignNewRole: () => Promise<void>;
   onClickBulkEdit: (selectedRoles: Role[]) => void;
   onClickBulkRemove: (selectedRoles: Role[]) => void;
+  onClickRowEditAction: (role: Role) => void;
+  onClickRowRemoveAction: (role: Role) => void;
 }
 
 /**
@@ -53,7 +55,14 @@ export const isEditableRole = (role: Role) => {
   );
 };
 
-const getTableColumns = ({ isReadOnly }: Pick<ISpaceAssignedRolesTableProps, 'isReadOnly'>) => {
+const getTableColumns = ({
+  isReadOnly,
+  onClickRowEditAction,
+  onClickRowRemoveAction,
+}: Pick<
+  ISpaceAssignedRolesTableProps,
+  'isReadOnly' | 'onClickRowEditAction' | 'onClickRowRemoveAction'
+>) => {
   const columns: Array<EuiBasicTableColumn<Role>> = [
     {
       field: 'name',
@@ -156,9 +165,7 @@ const getTableColumns = ({ isReadOnly }: Pick<ISpaceAssignedRolesTableProps, 'is
           ),
           showOnHover: true,
           available: (rowRecord) => isEditableRole(rowRecord),
-          onClick: () => {
-            window.alert('Not yet implemented.');
-          },
+          onClick: onClickRowEditAction,
         },
         {
           isPrimary: true,
@@ -179,9 +186,7 @@ const getTableColumns = ({ isReadOnly }: Pick<ISpaceAssignedRolesTableProps, 'is
           ),
           showOnHover: true,
           available: (rowRecord) => isEditableRole(rowRecord),
-          onClick: (rowRecord, event) => {
-            window.alert('Not yet implemented.');
-          },
+          onClick: onClickRowRemoveAction,
         },
       ],
     });
@@ -210,11 +215,16 @@ const getCellProps = (item: Role, column: EuiTableFieldDataColumnType<Role>) => 
 export const SpaceAssignedRolesTable = ({
   isReadOnly,
   assignedRoles,
-  onAssignNewRoleClick,
+  onClickAssignNewRole,
   onClickBulkEdit,
   onClickBulkRemove,
+  onClickRowEditAction,
+  onClickRowRemoveAction,
 }: ISpaceAssignedRolesTableProps) => {
-  const tableColumns = useMemo(() => getTableColumns({ isReadOnly }), [isReadOnly]);
+  const tableColumns = useMemo(
+    () => getTableColumns({ isReadOnly, onClickRowEditAction, onClickRowRemoveAction }),
+    [isReadOnly, onClickRowEditAction, onClickRowRemoveAction]
+  );
   const [rolesInView, setRolesInView] = useState<Role[]>(assignedRoles);
   const [selectedRoles, setSelectedRoles] = useState<Role[]>([]);
   const [isBulkActionContextOpen, setBulkActionContextOpen] = useState(false);
@@ -251,7 +261,7 @@ export const SpaceAssignedRolesTable = ({
         <>
           {!isReadOnly && (
             <EuiFlexItem grow={false} color="primary">
-              <EuiButton iconType="plusInCircle" onClick={onAssignNewRoleClick}>
+              <EuiButton iconType="plusInCircle" onClick={onClickAssignNewRole}>
                 {i18n.translate('xpack.spaces.management.spaceDetails.roles.assign', {
                   defaultMessage: 'Assign role',
                 })}
@@ -261,7 +271,7 @@ export const SpaceAssignedRolesTable = ({
         </>
       ),
     };
-  }, [isReadOnly, onAssignNewRoleClick, onSearchQueryChange]);
+  }, [isReadOnly, onClickAssignNewRole, onSearchQueryChange]);
 
   const tableHeader = useMemo<EuiInMemoryTableProps<Role>['childrenBetween']>(() => {
     const pageSize = pagination.size;

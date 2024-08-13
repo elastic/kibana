@@ -144,10 +144,14 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features, isRe
             isReadOnly={isReadOnly}
             assignedRoles={roles}
             onClickBulkEdit={showRolesPrivilegeEditor}
+            onClickRowEditAction={(rowRecord) => showRolesPrivilegeEditor([rowRecord])}
             onClickBulkRemove={(selectedRoles) => {
               // TODO: add logic to remove selected roles from space
             }}
-            onAssignNewRoleClick={async () => {
+            onClickRowRemoveAction={(rowRecord) => {
+              // TODO: add logic to remove single role from space
+            }}
+            onClickAssignNewRole={async () => {
               if (!roleAPIClientInitialized) {
                 await resolveAPIClients();
               }
