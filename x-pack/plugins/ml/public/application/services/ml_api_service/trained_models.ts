@@ -219,7 +219,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
 
     startModelAllocation(
       modelId: string,
-      queryParams: CommonDeploymentParams,
+      queryParams?: CommonDeploymentParams,
       bodyParams?: AdaptiveAllocationsParams
     ) {
       return httpService.http<{ acknowledge: boolean }>({
