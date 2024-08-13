@@ -100,6 +100,7 @@ export const createGridCell = (
         data-test-subj="lnsTableCellContent"
         className={classNames({
           'lnsTableCell--multiline': fitRowToContent,
+          'lnsTableCell--colored': colorMode !== 'none',
           [`lnsTableCell--${currentAlignment}`]: true,
         })}
       />
