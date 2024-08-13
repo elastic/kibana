@@ -165,9 +165,9 @@ const SCHEMA_ITEMS: FilterItems[] = [
 
 // todo reuse
 const fieldsSelector = (state: DataViewMgmtState) => state.fields;
-// const scriptedFieldsSelector = (state: DataViewMgmtState) => state.scriptedFields;
 const indexedFieldTypeSelector = (state: DataViewMgmtState) => state.indexedFieldTypes;
 const scriptedFieldLangsSelector = (state: DataViewMgmtState) => state.scriptedFieldLangs;
+const scriptedFieldsSelector = (state: DataViewMgmtState) => state.scriptedFields;
 
 export const Tabs: React.FC<TabsProps> = ({
   indexPattern,
@@ -212,7 +212,7 @@ export const Tabs: React.FC<TabsProps> = ({
   const [schemaFieldTypeFilter, setSchemaFieldTypeFilter] = useState<string[]>([]);
   const [isSchemaFilterOpen, setIsSchemaFilterOpen] = useState(false);
   const fields = useStateSelector(dataViewMgmtService.state$, fieldsSelector);
-  // const scriptedFields = useStateSelector(dataViewMgmtService.state$, scriptedFieldsSelector);
+  const scriptedFields = useStateSelector(dataViewMgmtService.state$, scriptedFieldsSelector);
   const indexedFieldTypes = convertToEuiFilterOptions(
     useStateSelector(dataViewMgmtService.state$, indexedFieldTypeSelector)
   );
@@ -505,7 +505,9 @@ export const Tabs: React.FC<TabsProps> = ({
                             ? scriptedFieldLanguageFilter.filter((f) => f !== item.value)
                             : [...scriptedFieldLanguageFilter, item.value]
                         );
-                        updateFilterItem(scriptedFieldLanguages, index, setScriptedFieldLanguages);
+                        // todo
+                        // updateFilterItem(scriptedFieldLanguages, index, setScriptedFieldLanguages);
+                        updateFilterItem(scriptedFieldLanguages, index, () => {});
                       }}
                       data-test-subj={`scriptedFieldLanguageFilterDropdown-option-${item.value}${
                         item.checked ? '-checked' : ''
@@ -661,7 +663,7 @@ export const Tabs: React.FC<TabsProps> = ({
     () =>
       getTabs(
         indexPattern,
-        fields,
+        [...fields, ...scriptedFields],
         fieldFilter,
         relationships.length,
         dataViews.scriptedFieldsEnabled
@@ -671,7 +673,15 @@ export const Tabs: React.FC<TabsProps> = ({
           content: getContent(tab.id),
         };
       }),
-    [fieldFilter, getContent, indexPattern, relationships, dataViews.scriptedFieldsEnabled, fields]
+    [
+      fieldFilter,
+      getContent,
+      indexPattern,
+      relationships,
+      dataViews.scriptedFieldsEnabled,
+      fields,
+      scriptedFields,
+    ]
   );
 
   const [selectedTabId, setSelectedTabId] = useState(euiTabs[0].id);

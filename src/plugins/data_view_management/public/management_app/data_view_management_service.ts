@@ -183,9 +183,7 @@ export class DataViewMgmtService {
   async updateScriptedFields() {
     const dataView = this.state$.getValue().dataView;
     if (dataView) {
-      const scriptedFieldRecords = (
-        await dataView.getFields({ mapped: false, runtime: false, fieldName: ['*'] })
-      ).getFieldMapSorted();
+      const scriptedFieldRecords = dataView.getScriptedFields({ fieldName: ['*'] });
       const scriptedFields = Object.values(scriptedFieldRecords);
 
       const scriptedFieldLangs = Array.from(
@@ -244,6 +242,7 @@ export class DataViewMgmtService {
       tags: await this.getTags(dataView),
       isRefreshing: false,
       conflictFieldsUrl: this.getKbnUrl(dataView.id!),
+      scriptedFields: Object.values(dataView.getScriptedFields({ fieldName: ['*'] })),
     });
   }
 

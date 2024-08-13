@@ -20,6 +20,7 @@ import { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import type {
   DataViewLazy,
+  AbstractDataView,
   DataViewsServicePublic,
   INDEX_PATTERN_TYPE,
   MatchedItem,
@@ -44,7 +45,7 @@ export interface DataViewEditorProps {
    * Handler for the "save" footer button
    * @param indexPattern - newly created index pattern
    */
-  onSave: (dataView: DataViewLazy) => void;
+  onSave: (dataView: AbstractDataView) => void;
   /**
    * Handler for the "cancel" footer button
    */
