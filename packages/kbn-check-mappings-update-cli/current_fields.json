@@ -284,6 +284,7 @@
     "title",
     "version"
   ],
+  "dynamic-config-overrides": [],
   "endpoint:unified-user-artifact-manifest": [
     "artifactIds",
     "policyId",
@@ -435,6 +436,7 @@
     "updated_by",
     "version"
   ],
+  "favorites": [],
   "file": [
     "FileKind",
     "Meta",

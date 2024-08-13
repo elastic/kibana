@@ -1332,6 +1332,30 @@
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_performance_measure_entries.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_performance_measure_entries.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_performance_measure_entries.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_performance_measure_entries.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_performance_measure_entries.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_performance_measure_entries.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
                 "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
               },
               {

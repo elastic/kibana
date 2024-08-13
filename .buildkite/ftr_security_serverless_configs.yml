@@ -97,3 +97,5 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/response_actions/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_endpoint/configs/serverless.endpoint.config.ts
   - x-pack/test/security_solution_endpoint/configs/serverless.integrations.config.ts
+  # serverless config files that run deployment-agnostic tests
+  - x-pack/test/api_integration/deployment_agnostic/security.serverless.config.ts
