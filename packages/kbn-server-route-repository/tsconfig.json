@@ -12,7 +12,6 @@
     "**/*.ts"
   ],
   "kbn_references": [
-    "@kbn/config-schema",
     "@kbn/io-ts-utils",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/core-http-server",
