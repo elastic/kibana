@@ -322,15 +322,22 @@ export function InternalDashboardTopNav({
     }
     if (showWriteControls && managed) {
       const badgeProps = {
-        ...getManagedContentBadge(dashboardManagedBadge.getManagedText(), false),
+        ...getManagedContentBadge(
+          getManagedContentBadge(dashboardManagedBadge.getAriaLabel()).badgeText,
+          false
+        ),
+        onClick: () => setIsPopoverOpen(!isPopoverOpen),
         onClickAriaLabel: dashboardManagedBadge.getAriaLabel(),
         iconOnClick: () => setIsPopoverOpen(!isPopoverOpen),
         iconOnClickAriaLabel: dashboardManagedBadge.getAriaLabel(),
-        onClick: () => setIsPopoverOpen(!isPopoverOpen),
       } as TopNavMenuBadgeProps;
       allBadges.push({
         renderCustomBadge: ({ badgeText }) => {
-          const badgeButton = <EuiBadge {...badgeProps}>{badgeText}</EuiBadge>;
+          const badgeButton = (
+            <EuiBadge {...badgeProps} className="eui-hideFor--s eui-hideFor--xs">
+              {badgeText}
+            </EuiBadge>
+          );
           return (
             <EuiPopover
               button={badgeButton}
