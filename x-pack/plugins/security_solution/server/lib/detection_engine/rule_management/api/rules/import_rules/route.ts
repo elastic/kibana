@@ -12,7 +12,6 @@ import { createPromiseFromStreams } from '@kbn/utils';
 import { chunk } from 'lodash/fp';
 import { extname } from 'path';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { CHUNK_PARSED_OBJECT_SIZE } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import {
   ImportRulesRequestQuery,
   ImportRulesResponse,
@@ -32,6 +31,8 @@ import {
   migrateLegacyActionsIds,
 } from '../../../utils/utils';
 import { RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS } from '../../timeouts';
+
+const CHUNK_PARSED_OBJECT_SIZE = 50;
 
 export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: ConfigType) => {
   router.versioned
