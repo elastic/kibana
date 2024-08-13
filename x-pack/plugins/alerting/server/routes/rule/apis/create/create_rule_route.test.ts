@@ -227,6 +227,7 @@ describe('createRuleRoute', () => {
             ],
             "throttle": "30s",
           },
+          "isFlappingEnabled": true,
           "options": Object {
             "id": undefined,
           },
@@ -343,6 +344,7 @@ describe('createRuleRoute', () => {
             ],
             "throttle": "30s",
           },
+          "isFlappingEnabled": true,
           "options": Object {
             "id": "custom-id",
           },
@@ -460,6 +462,7 @@ describe('createRuleRoute', () => {
             ],
             "throttle": "30s",
           },
+          "isFlappingEnabled": true,
           "options": Object {
             "id": "custom-id",
           },
@@ -577,6 +580,7 @@ describe('createRuleRoute', () => {
             ],
             "throttle": "30s",
           },
+          "isFlappingEnabled": true,
           "options": Object {
             "id": "custom-id",
           },
@@ -732,6 +736,7 @@ describe('createRuleRoute', () => {
               ],
               "throttle": "30s",
             },
+            "isFlappingEnabled": true,
             "options": Object {
               "id": undefined,
             },

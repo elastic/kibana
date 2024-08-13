@@ -297,9 +297,21 @@ export class TaskRunner<
     const queryDelay = await withAlertingSpan('alerting:get-query-delay-settings', () =>
       rulesSettingsClient.queryDelay().get()
     );
-    const flappingSettings = await withAlertingSpan('alerting:get-flapping-settings', () =>
-      rulesSettingsClient.flapping().get()
-    );
+    const flappingSettings = await withAlertingSpan('alerting:get-flapping-settings', async () => {
+      const spaceFlappingSettings = await rulesSettingsClient.flapping().get();
+      const ruleFlappingSettings = rule.flapping
+        ? {
+            enabled: true,
+            ...rule.flapping,
+          }
+        : null;
+
+      if (spaceFlappingSettings.enabled) {
+        return ruleFlappingSettings || spaceFlappingSettings;
+      }
+
+      return spaceFlappingSettings;
+    });
 
     const ruleTypeRunnerContext = {
       alertingEventLogger: this.alertingEventLogger,

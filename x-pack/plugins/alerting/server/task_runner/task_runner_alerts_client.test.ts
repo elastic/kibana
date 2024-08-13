@@ -15,6 +15,7 @@ import {
   AlertInstanceContext,
   Rule,
   RuleAlertData,
+  RawRule,
 } from '../types';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerContext } from './types';
@@ -103,6 +104,7 @@ import {
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { createTaskRunnerLogger } from './lib';
+import { SavedObject } from '@kbn/core/server';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -787,6 +789,113 @@ describe('Task Runner', () => {
         ).toHaveBeenCalled();
         spy1.mockRestore();
         spy2.mockRestore();
+      });
+
+      test('should use rule specific flapping settings if global flapping is enabled', async () => {
+        mockAlertsService.createAlertsClient.mockImplementation(() => mockAlertsClient);
+        mockAlertsClient.getAlertsToSerialize.mockResolvedValue({
+          alertsToReturn: {},
+          recoveredAlertsToReturn: {},
+        });
+
+        const taskRunner = new TaskRunner({
+          ruleType: ruleTypeWithAlerts,
+          internalSavedObjectsRepository,
+          taskInstance: {
+            ...mockedTaskInstance,
+            state: {
+              ...mockedTaskInstance.state,
+              previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+            },
+          },
+          context: taskRunnerFactoryInitializerParams,
+          inMemoryMetrics,
+        });
+
+        const ruleSpecificFlapping = {
+          lookBackWindow: 10,
+          statusChangeThreshold: 10,
+        };
+
+        rulesClient.getAlertFromRaw.mockReturnValue({
+          ...mockedRuleTypeSavedObject,
+          flapping: ruleSpecificFlapping,
+        } as Rule);
+
+        encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+          ...mockedRawRuleSO,
+          flapping: ruleSpecificFlapping,
+        } as SavedObject<RawRule>);
+
+        await taskRunner.run();
+
+        expect(mockAlertsClient.initializeExecution).toHaveBeenCalledWith(
+          expect.objectContaining({
+            flappingSettings: {
+              enabled: true,
+              ...ruleSpecificFlapping,
+            },
+          })
+        );
+      });
+
+      test('should not use rule specific flapping settings if global flapping is disabled', async () => {
+        const modifiedTaskRunnerFactoryInitializerParams = {
+          ...taskRunnerFactoryInitializerParams,
+          getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(
+            rulesSettingsClientMock.create({
+              enabled: false,
+              lookBackWindow: 20,
+              statusChangeThreshold: 20,
+            })
+          ),
+        };
+        mockAlertsService.createAlertsClient.mockImplementation(() => mockAlertsClient);
+        mockAlertsClient.getAlertsToSerialize.mockResolvedValue({
+          alertsToReturn: {},
+          recoveredAlertsToReturn: {},
+        });
+
+        const taskRunner = new TaskRunner({
+          ruleType: ruleTypeWithAlerts,
+          internalSavedObjectsRepository,
+          taskInstance: {
+            ...mockedTaskInstance,
+            state: {
+              ...mockedTaskInstance.state,
+              previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+            },
+          },
+          context: modifiedTaskRunnerFactoryInitializerParams,
+          inMemoryMetrics,
+        });
+
+        const ruleSpecificFlapping = {
+          lookBackWindow: 10,
+          statusChangeThreshold: 10,
+        };
+
+        rulesClient.getAlertFromRaw.mockReturnValue({
+          ...mockedRuleTypeSavedObject,
+          flapping: ruleSpecificFlapping,
+        } as Rule);
+
+        encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+          ...mockedRawRuleSO,
+          flapping: ruleSpecificFlapping,
+        } as SavedObject<RawRule>);
+
+        await taskRunner.run();
+
+        expect(mockAlertsClient.initializeExecution).toHaveBeenCalledWith(
+          expect.objectContaining({
+            flappingSettings: {
+              enabled: false,
+              lookBackWindow: 20,
+              statusChangeThreshold: 20,
+            },
+          })
+        );
       });
     });
 
