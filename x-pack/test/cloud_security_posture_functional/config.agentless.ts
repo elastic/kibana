@@ -25,7 +25,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.agents.fleet_server.hosts=["https://ftr.kibana:8220"]`,
         `--xpack.fleet.internal.fleetServerStandalone=true`,
         `--xpack.fleet.agentless.enabled=true`,
-        `--xpack.fleet.agentless.api.url=http://localhost:8089/agentless-api/api/v1/ess`,
+        `--xpack.fleet.agentless.api.url=http://localhost:8089/agentless-api`,
         `--xpack.fleet.agentless.api.tls.certificate=${KBN_CERT_PATH}`,
         `--xpack.fleet.agentless.api.tls.key=${KBN_KEY_PATH}`,
         `--xpack.fleet.agentless.api.tls.ca=${CA_CERT_PATH}`,
