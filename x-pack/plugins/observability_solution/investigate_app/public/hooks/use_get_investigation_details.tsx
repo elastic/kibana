@@ -34,7 +34,7 @@ export function useFetchInvestigation({
   } = useKibana();
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
-    queryKey: investigationKeys.get(id),
+    queryKey: investigationKeys.fetch({ id }),
     queryFn: async ({ signal }) => {
       return await http.get<GetInvestigationResponse>(`/api/observability/investigations/${id}`, {
         version: '2023-10-31',
