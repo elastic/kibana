@@ -9,6 +9,7 @@
 import React, { useCallback, memo, useEffect, useState } from 'react';
 import { debounce } from 'lodash';
 import { EuiProgress, EuiSplitPanel, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import { EditorContentSpinner, NetworkRequestStatusBar } from '../../components';
 import { Panel, PanelsContainer } from '..';
@@ -102,7 +103,13 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
                 <EditorOutput />
               )}
             </EuiSplitPanel.Inner>
-            <EuiSplitPanel.Inner grow={false} paddingSize="m" color="subdued">
+            <EuiSplitPanel.Inner
+              grow={false}
+              paddingSize="m"
+              css={{
+                backgroundColor: euiThemeVars.euiFormBackgroundColor,
+              }}
+            >
               <EuiFlexGroup gutterSize="none">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
