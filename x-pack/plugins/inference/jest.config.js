@@ -11,7 +11,7 @@ module.exports = {
   roots: [
     '<rootDir>/x-pack/plugins/inference/public',
     '<rootDir>/x-pack/plugins/inference/server',
-    '<rootDir>/x-pack/plugins/inference/common'
+    '<rootDir>/x-pack/plugins/inference/common',
   ],
   setupFiles: [],
   collectCoverage: true,
