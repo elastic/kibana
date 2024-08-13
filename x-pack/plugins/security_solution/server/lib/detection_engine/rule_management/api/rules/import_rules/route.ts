@@ -12,6 +12,7 @@ import { createPromiseFromStreams } from '@kbn/utils';
 import { chunk } from 'lodash/fp';
 import { extname } from 'path';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { CHUNK_PARSED_OBJECT_SIZE } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import {
   ImportRulesRequestQuery,
   ImportRulesResponse,
@@ -23,7 +24,6 @@ import type { BulkError, ImportRuleResponse } from '../../../../routes/utils';
 import { buildSiemResponse, isBulkError, isImportRegular } from '../../../../routes/utils';
 import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
 import { createRulesAndExceptionsStreamFromNdJson } from '../../../logic/import/create_rules_stream_from_ndjson';
-import { getReferencedExceptionLists } from '../../../logic/import/gather_referenced_exceptions';
 import type { RuleExceptionsPromiseFromStreams } from '../../../logic/import/import_rules_utils';
 import { importRules as importRulesHelper } from '../../../logic/import/import_rules_utils';
 import { importRuleExceptions } from '../../../logic/import/import_rule_exceptions';
@@ -32,8 +32,6 @@ import {
   migrateLegacyActionsIds,
 } from '../../../utils/utils';
 import { RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS } from '../../timeouts';
-
-const CHUNK_PARSED_OBJECT_SIZE = 50;
 
 export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: ConfigType) => {
   router.versioned
@@ -143,12 +141,6 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             ? []
             : rulesWithMigratedActions || migratedParsedObjectsWithoutDuplicateErrors;
 
-          // gather all exception lists that the imported rules reference
-          const foundReferencedExceptionLists = await getReferencedExceptionLists({
-            rules: parsedRules,
-            savedObjectsClient,
-          });
-
           const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, parsedRules);
 
           const importRuleResponse: ImportRuleResponse[] = await importRulesHelper({
@@ -156,8 +148,8 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             rulesResponseAcc: [...actionConnectorErrors, ...duplicateIdErrors],
             overwriteRules: request.query.overwrite,
             detectionRulesClient,
-            existingLists: foundReferencedExceptionLists,
             allowMissingConnectorSecrets: !!actionConnectors.length,
+            savedObjectsClient,
           });
 
           const errorsResp = importRuleResponse.filter((resp) => isBulkError(resp)) as BulkError[];
