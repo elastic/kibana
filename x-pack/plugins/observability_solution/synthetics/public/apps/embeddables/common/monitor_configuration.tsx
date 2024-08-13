@@ -103,7 +103,7 @@ export function MonitorConfiguration({
 
             <EuiButton
               data-test-subj="syntheticsMonitorConfigurationSaveButton"
-              isDisabled={!formState.isDirty}
+              isDisabled={!(formState.isDirty || !initialInput)}
               onClick={onConfirmClick}
               fill
             >
