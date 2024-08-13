@@ -9,6 +9,9 @@
 import { exec } from 'child_process';
 import * as os from 'os';
 
+const MAX_PARALLELISM = os.cpus().length - 1;
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 interface Result {
   success: boolean;
   script: string;
@@ -16,11 +19,8 @@ interface Result {
   duration: number;
 }
 
-const MAX_PARALLELISM = os.cpus().length - 1;
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 /**
- * Takes arguments from the command line, runs every command in the array, collects results, and prints a summary.
+ * Takes a multiline string of commands from the CLI args, runs the commands in parallel, collects and prints the results
  */
 async function main() {
   const scriptsToRun = process.argv[2]
@@ -29,7 +29,26 @@ async function main() {
     .map((script) => script.trim());
 
   console.log(`--- Running ${scriptsToRun.length} checks...`, scriptsToRun);
+  const startTime = Date.now();
+  const results = await runAllChecks(scriptsToRun);
 
+  console.log('--- All checks finished.');
+  printDurations(startTime, results);
+  const failedChecks = results.filter((check) => !check.success);
+  if (failedChecks.length > 0) {
+    console.error('--- Failed checks');
+    failedChecks.forEach((check) => {
+      console.error(`--- ❌ ${check.script}:`);
+      console.error(check.output);
+    });
+
+    throw new Error(`Failed ${failedChecks.length} checks.`);
+  } else {
+    return results;
+  }
+}
+
+async function runAllChecks(scriptsToRun: string[]) {
   const checksRunning: Array<Promise<any>> = [];
   const checksFinished: Result[] = [];
 
@@ -39,93 +58,52 @@ async function main() {
       if (!script) {
         continue;
       }
-      const check = runCheckAsync(script, checksRunning, checksFinished);
+
+      const check = runCheckAsync(script);
       checksRunning.push(check);
+      check.then((result) => {
+        checksRunning.splice(checksRunning.indexOf(check), 1);
+        checksFinished.push(result);
+      });
     }
 
     await sleep(1000);
   }
 
-  console.log('--- All checks finished.');
-  printDurations(checksFinished);
-
-  const failedChecks = checksFinished.filter((check) => !check.success);
-  if (failedChecks.length > 0) {
-    console.error('--- Failed checks:');
-    failedChecks.forEach((check) => {
-      console.error(`Failed check: ${check.script} ->`);
-      console.error(check.output);
-    });
-
-    throw new Error(`Failed ${failedChecks.length} checks.`);
-  } else {
-    return checksFinished;
-  }
+  return checksFinished;
 }
 
-async function runCheckAsync(
-  script: string,
-  checksRunning: Array<Promise<any>>,
-  checksFinished: Result[]
-) {
+async function runCheckAsync(script: string): Promise<Result> {
   console.log(`Starting check: ${script}`);
   const startTime = Date.now();
-  const check = new Promise<void>((resolve) => {
-    const result = {
-      success: false,
-      script,
-      output: '',
-      duration: 0,
-    };
 
+  return new Promise((resolve) => {
     const scriptProcess = exec(script);
-
     let output = '';
+    const appendToOutput = (data: string | Buffer) => (output += data);
 
-    scriptProcess.stdout?.on('data', (data) => {
-      output += data;
-    });
-
-    scriptProcess.stderr?.on('data', (data) => {
-      output += data;
-    });
+    scriptProcess.stdout?.on('data', appendToOutput);
+    scriptProcess.stderr?.on('data', appendToOutput);
 
     scriptProcess.on('exit', (code) => {
-      result.output = output;
-      result.duration = Date.now() - startTime;
-      checksRunning.splice(checksRunning.indexOf(check), 1);
-      checksFinished.push(result);
-
+      const result = {
+        success: code === 0,
+        script,
+        output,
+        duration: Date.now() - startTime,
+      };
       if (code === 0) {
         console.info(`Passed check: ${script} in ${humanizeTime(result.duration)}`);
-        result.success = true;
       } else {
         console.warn(`Failed check: ${script} in ${humanizeTime(result.duration)}`);
-        result.success = false;
       }
-      resolve();
+
+      resolve(result);
     });
   });
-
-  return check;
 }
 
-const startTime = Date.now();
-
-main()
-  .then((results) => {
-    console.log('--- All checks passed.');
-
-    process.exit(0);
-  })
-  .catch((error) => {
-    console.error('--- Some quick checks failed.');
-    console.error(error);
-
-    process.exit(1);
-  });
-
-function printDurations(results: Result[]) {
+function printDurations(startTimestamp: number, results: Result[]) {
   const totalDuration = results.reduce((acc, result) => acc + result.duration, 0);
 
   console.log('- Check durations:');
@@ -135,7 +113,7 @@ function printDurations(results: Result[]) {
     );
   });
   const total = humanizeTime(totalDuration);
-  const effective = humanizeTime(Date.now() - startTime);
+  const effective = humanizeTime(Date.now() - startTimestamp);
   console.log(`- Total time: ${total}, effective: ${effective}`);
 }
 
@@ -152,5 +130,18 @@ function humanizeTime(ms: number) {
     return `${minutes}m ${seconds}s`;
   }
 }
+
+main()
+  .then(() => {
+    console.log('--- All checks passed.');
+
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error('--- Some quick checks failed.');
+    console.error(error);
+
+    process.exit(1);
+  });
 
 export {};
