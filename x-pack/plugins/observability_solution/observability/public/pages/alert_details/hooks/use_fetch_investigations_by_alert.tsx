@@ -28,6 +28,7 @@ export function useFetchInvestigationsByAlert({
   const {
     http,
     notifications: { toasts },
+    investigate: investigatePlugin,
   } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
@@ -53,6 +54,7 @@ export function useFetchInvestigationsByAlert({
         title: 'Something went wrong while fetching Investigations',
       });
     },
+    enabled: Boolean(investigatePlugin),
   });
 
   return {

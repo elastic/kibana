@@ -62,7 +62,7 @@ export function HeaderActions({
     triggersActionsUi: { getEditRuleFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
     http,
     application: { navigateToApp },
-    investigate,
+    investigate: investigatePlugin,
   } = useKibana().services;
 
   const { rule, refetch } = useFetchRule({
@@ -164,7 +164,7 @@ export function HeaderActions({
   return (
     <>
       <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
-        {investigate &&
+        {Boolean(investigatePlugin) &&
           alert?.fields[ALERT_RULE_TYPE_ID] === OBSERVABILITY_THRESHOLD_RULE_TYPE_ID && (
             <EuiFlexItem grow={false}>
               <EuiButton

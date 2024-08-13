@@ -9,6 +9,7 @@ import { EuiButton, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ALERT_RULE_CATEGORY } from '@kbn/rule-data-utils/src/default_alerts_as_data';
+import { AlertOrigin } from '@kbn/investigate-plugin/common/schema/origin';
 import { paths } from '../../../common/paths';
 import { useKibana } from '../../hooks/use_kibana';
 import { useFetchInvestigation } from '../../hooks/use_get_investigation_details';
@@ -38,7 +39,7 @@ export function InvestigationDetailsPage() {
     isError: isFetchInvestigationError,
   } = useFetchInvestigation({ id });
 
-  const alertId = investigationDetails?.origin.id ?? '';
+  const alertId = investigationDetails ? (investigationDetails.origin as AlertOrigin).id : '';
 
   const {
     data: alertDetails,

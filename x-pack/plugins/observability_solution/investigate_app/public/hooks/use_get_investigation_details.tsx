@@ -10,7 +10,7 @@ import { GetInvestigationResponse } from '@kbn/investigate-plugin/common/schema/
 import { investigationKeys } from './query_key_factory';
 import { useKibana } from './use_kibana';
 
-export interface InvestigationListParams {
+export interface FetchInvestigationParams {
   id: string;
 }
 
@@ -25,7 +25,7 @@ export interface UseFetchInvestigationResponse {
 
 export function useFetchInvestigation({
   id,
-}: InvestigationListParams): UseFetchInvestigationResponse {
+}: FetchInvestigationParams): UseFetchInvestigationResponse {
   const {
     core: {
       http,
