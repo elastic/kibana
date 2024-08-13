@@ -110,8 +110,6 @@
     "@kbn/license-management-plugin",
     "@kbn/observability-alerting-rule-utils",
     "@kbn/core-ui-settings-server-mocks",
-    "@kbn/investigate-app-plugin",
-    "@kbn/investigate-plugin",
   ],
   "exclude": [
     "target/**/*"
