@@ -6,10 +6,9 @@
  */
 import datemath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import type { InvestigateWidgetCreate } from '@kbn/investigate-plugin/public';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { keyBy, noop } from 'lodash';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { AddObservationUI } from '../../../../components/add_observation_ui';
@@ -59,13 +58,6 @@ function InvestigationDetailsWithUser({
     from: range.start.toISOString(),
     to: range.end.toISOString(),
   });
-
-  const createWidget = (widgetCreate: InvestigateWidgetCreate) => {
-    return addItem(widgetCreate);
-  };
-
-  const createWidgetRef = useRef(createWidget);
-  createWidgetRef.current = createWidget;
 
   useEffect(() => {
     if (
@@ -153,7 +145,7 @@ function InvestigationDetailsWithUser({
           <AddObservationUI
             timeRange={renderableInvestigation.parameters.timeRange}
             onWidgetAdd={(widget) => {
-              return createWidgetRef.current(widget);
+              return addItem(widget);
             }}
           />
         </EuiFlexGroup>
