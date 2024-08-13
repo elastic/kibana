@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
-
-export const cpuTotal: MetricsUIAggregation = {
-  cpuTotal: {
-    avg: {
-      field: 'system.cpu.total.norm.pct',
-    },
-  },
+export const investigationKeys = {
+  all: ['investigation'] as const,
+  list: (params: { page: number; perPage: number }) =>
+    [...investigationKeys.all, 'list', params] as const,
 };
+
+export type InvestigationKeys = typeof investigationKeys;

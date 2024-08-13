@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export enum AddWidgetMode {
-  Esql = 'esql',
-  Note = 'note',
-}
+import { z } from 'zod';
+
+export const createEntityDefinitionQuerySchema = z.object({
+  installOnly: z.optional(z.coerce.boolean()).default(false),
+});
+
+export type CreateEntityDefinitionQuery = z.infer<typeof createEntityDefinitionQuerySchema>;

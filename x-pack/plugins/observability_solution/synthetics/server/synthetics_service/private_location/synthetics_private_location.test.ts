@@ -53,6 +53,7 @@ describe('SyntheticsPrivateLocation', () => {
     'check.request.method': 'GET',
     username: '',
   } as unknown as HeartbeatConfig;
+  const mockBuildPackagePolicy = jest.fn().mockReturnValue(undefined);
 
   const serverMock: SyntheticsServerSetup = {
     syntheticsEsClient: { search: jest.fn() },
@@ -67,7 +68,8 @@ describe('SyntheticsPrivateLocation', () => {
     fleet: {
       packagePolicyService: {
         get: jest.fn().mockReturnValue({}),
-        buildPackagePolicyFromPackage: jest.fn(),
+        buildPackagePolicyFromPackage: mockBuildPackagePolicy,
+        bulkCreate: jest.fn(),
       },
     },
     spaces: {
@@ -80,6 +82,24 @@ describe('SyntheticsPrivateLocation', () => {
       elasticsearch: elasticsearchServiceMock.createStart(),
     },
   } as unknown as SyntheticsServerSetup;
+  beforeEach(() => {
+    mockBuildPackagePolicy.mockReturnValue(undefined);
+  });
+
+  describe('getPolicyNamespace', () => {
+    it('prioritizes config namespace', async () => {
+      const configNamespace = 'nonDefaultSpace';
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const result = await syntheticsPrivateLocation.getPolicyNamespace(configNamespace);
+      expect(result).toEqual(configNamespace);
+    });
+
+    it('falls back to undefined when config namespace and private location namespace are not defined', async () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const result = await syntheticsPrivateLocation.getPolicyNamespace('default');
+      expect(result).toEqual(undefined);
+    });
+  });
 
   it.each([['Unable to create Synthetics package policy template for private location']])(
     'throws errors for create monitor',
