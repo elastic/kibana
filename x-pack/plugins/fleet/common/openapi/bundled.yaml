@@ -2025,7 +2025,7 @@ paths:
                       - type: string
                         enum:
                           - CPU
-                exclude_event_logs:
+                exclude_events_log:
                   type: boolean
                   description: Excludes the event data logs from the diagnostic
       responses:
