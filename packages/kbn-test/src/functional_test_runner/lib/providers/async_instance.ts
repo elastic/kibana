@@ -73,7 +73,7 @@ export const createAsyncInstance = <T>(
     },
 
     get(_, prop, receiver) {
-      if (loadingTarget.hasOwnProperty(prop)) {
+      if (Object.hasOwn(loadingTarget, prop)) {
         return Reflect.get(loadingTarget as any, prop, receiver);
       }
 
@@ -84,7 +84,7 @@ export const createAsyncInstance = <T>(
     },
 
     getOwnPropertyDescriptor(_, prop) {
-      if (loadingTarget.hasOwnProperty(prop)) {
+      if (Object.hasOwn(loadingTarget, prop)) {
         return Reflect.getOwnPropertyDescriptor(loadingTarget, prop);
       }
 
@@ -100,7 +100,7 @@ export const createAsyncInstance = <T>(
     },
 
     has(_, prop) {
-      if (!loadingTarget.hasOwnProperty(prop)) {
+      if (!Object.hasOwn(loadingTarget, prop)) {
         return Reflect.has(loadingTarget, prop);
       }
 

@@ -63,7 +63,6 @@ import {
 import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
 import {
-  canUseMultipleAgentPolicies,
   isSimplifiedCreatePackagePolicyRequest,
   removeFieldsFromInputSchema,
   renameAgentlessAgentPolicy,
@@ -242,19 +241,10 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
   let wasPackageAlreadyInstalled = false;
 
-  if ('output_id' in newPolicy) {
-    // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
-    delete newPolicy.output_id;
-  }
   const spaceId = fleetContext.spaceId;
   try {
     if (!newPolicy.policy_id && (!newPolicy.policy_ids || newPolicy.policy_ids.length === 0)) {
       throw new PackagePolicyRequestError('Either policy_id or policy_ids must be provided');
-    }
-
-    const { canUseReusablePolicies, errorMessage } = canUseMultipleAgentPolicies();
-    if ((newPolicy.policy_ids ?? []).length > 1 && !canUseReusablePolicies) {
-      throw new PackagePolicyRequestError(errorMessage);
     }
 
     let newPackagePolicy: NewPackagePolicy;
@@ -369,11 +359,6 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
 
   try {
     const { force, package: pkg, ...body } = request.body;
-    // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
-    if ('output_id' in body) {
-      delete body.output_id;
-    }
-
     let newData: NewPackagePolicy;
 
     if (
@@ -420,10 +405,6 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       }
     }
     newData.inputs = alignInputsAndStreams(newData.inputs);
-    const { canUseReusablePolicies, errorMessage } = canUseMultipleAgentPolicies();
-    if ((newData.policy_ids ?? []).length > 1 && !canUseReusablePolicies) {
-      throw new PackagePolicyRequestError(errorMessage);
-    }
 
     if (newData.policy_ids && newData.policy_ids.length === 0) {
       throw new PackagePolicyRequestError('At least one agent policy id must be provided');
