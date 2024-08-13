@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export const INLINE_ESQL_QUERY_REGEX = /```esql\s*(.*?)\s*```/gms;
+import { OutputEvent, OutputEventType, OutputUpdateEvent } from '.';
+
+export function isOutputUpdateEvent<TId extends string>(
+  event: OutputEvent
+): event is OutputUpdateEvent<TId> {
+  return event.type === OutputEventType.OutputComplete;
+}

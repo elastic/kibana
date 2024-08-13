@@ -308,6 +308,7 @@ export class ObservabilityAIAssistantClient {
                 logger: this.dependencies.logger,
                 disableFunctions,
                 tracer: completeTracer,
+                connectorId,
               })
             );
           }),

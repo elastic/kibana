@@ -5,16 +5,23 @@
  * 2.0.
  */
 
-import { from, map, merge, of, switchMap } from 'rxjs';
-import { mapValues, pick } from 'lodash';
 import type { Logger } from '@kbn/logging';
-import type { ToolOptions } from '../../../common/chat_complete/tools';
-import type { InferenceClient } from '../../types';
-import { loadDocuments } from './load_documents';
+import { isEmpty, mapValues, pick } from 'lodash';
+import { Observable, from, map, merge, of, switchMap } from 'rxjs';
+import { isChatCompletionMessageEvent } from '../../../common';
+import {
+  ChatCompletionChunkEvent,
+  ChatCompletionMessageEvent,
+  MessageRole,
+} from '../../../common/chat_complete';
+import { ToolChoiceType, type ToolOptions } from '../../../common/chat_complete/tools';
+import { OutputCompleteEvent } from '../../../common/output';
 import { withoutOutputUpdateEvents } from '../../../common/output/without_output_update_events';
-import { OutputEventType } from '../../../common/output';
 import { INLINE_ESQL_QUERY_REGEX } from '../../../common/tasks/nl_to_esql/constants';
 import { correctCommonEsqlMistakes } from '../../../common/tasks/nl_to_esql/correct_common_esql_mistakes';
+import type { InferenceClient } from '../../types';
+import { loadDocuments } from './load_documents';
+import { withoutTokenCountEvents } from '../../../common/chat_complete/without_token_count_events';
 
 export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
   client,
@@ -24,11 +31,17 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
   toolChoice,
   logger,
 }: {
-  client: Pick<InferenceClient, 'output'>;
+  client: Pick<InferenceClient, 'output' | 'chatComplete'>;
   input: string;
   connectorId: string;
   logger: Pick<Logger, 'debug'>;
-} & TToolOptions) {
+} & TToolOptions): Observable<
+  | OutputCompleteEvent<'request_documentation', {}>
+  | ChatCompletionChunkEvent
+  | ChatCompletionMessageEvent<TToolOptions>
+> {
+  const hasTools = !isEmpty(tools) && toolChoice !== ToolChoiceType.none;
+
   return from(loadDocuments()).pipe(
     switchMap(([systemMessage, esqlDocs]) => {
       return client
@@ -45,10 +58,10 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
         Convert a column based on a set of conditionals? Request \`EVAL\` and \`CASE\`.
 
         ${
-          tools?.length
+          hasTools
             ? `### Tools
 
-        Some tools are available to be called in the next step.
+        Some tools are available to be called in the next step, but not this one.
 
         \`\`\`json
         ${JSON.stringify({
@@ -63,15 +76,6 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
 
         ${input}
 
-        ## Documentation
-
-        ${Object.entries(esqlDocs).map(
-          ([name, { data }]) => `### ${name}
-        
-        ${data}
-
-        `
-        )}
       `,
           schema: {
             type: 'object',
@@ -82,15 +86,14 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
                   type: 'string',
                 },
                 description:
-                  'ES|QL source and processing commands mentioned in the documentation you think you might need documentation for',
+                  'ES|QL source and processing commands you want to analyze before generating the query.',
               },
               functions: {
                 type: 'array',
                 items: {
                   type: 'string',
                 },
-                description:
-                  'ES|QL functions mentioned in the documentation you think you might need documentation for',
+                description: 'ES|QL functions you want to analyze before generating the query.',
               },
             },
           },
@@ -106,39 +109,59 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
               'OPERATORS',
             ].map((keyword) => keyword.toUpperCase());
 
-            const messagesToInclude = mapValues(pick(esqlDocs, keywords), ({ data }) => data);
+            const requestedDocumentation = mapValues(pick(esqlDocs, keywords), ({ data }) => data);
 
             return merge(
-              of(documentationEvent),
+              of({
+                ...documentationEvent,
+                output: {
+                  keywords,
+                  requestedDocumentation,
+                },
+              }),
               client
-                .output('answer_with_esql_documentation', {
+                .chatComplete({
                   connectorId,
                   system: systemMessage,
-                  input: `Answer using the attached documentation about ES|QL.
+                  messages: [
+                    {
+                      role: MessageRole.User,
+                      content: `Answer using the attached documentation about ES|QL.
 
-                Format any ES|QL query as follows:
-                \`\`\`esql
-                <query>
-                \`\`\`
+                      Format any ES|QL query as follows:
+                      \`\`\`esql
+                      <query>
+                      \`\`\`
 
-                When generating ES|QL, you must use commands and functions for which you have requested documentation.
-                
-                DO NOT UNDER ANY CIRCUMSTANCES use commands or functions that are not a capability of ES|QL
-                as mentioned in the system message and documentation. When converting queries from one language
-                to ES|QL, make sure that the functions are available and documented in ES|QL.
-                E.g., for SPL's LEN, use LENGTH. For IF, use CASE.
+                      When generating ES|QL, you must use commands and functions for which you have requested documentation.
+                      
+                      DO NOT UNDER ANY CIRCUMSTANCES use commands or functions that are not a capability of ES|QL
+                      as mentioned in the system message and documentation. When converting queries from one language
+                      to ES|QL, make sure that the functions are available and documented in ES|QL.
+                      E.g., for SPL's LEN, use LENGTH. For IF, use CASE.
 
-                # Documentation
+                      ${
+                        hasTools
+                          ? `If appropriate, use one of the tools attached to answer the user.`
+                          : ''
+                      }
 
-                ${Object.values(messagesToInclude).join('\n\n')}
-                
-                # Input
-                
-                ${input}`,
+                      # Documentation
+
+                      ${Object.values(requestedDocumentation).join('\n\n')}
+                      
+                      # Input
+                      
+                      ${input}`,
+                    },
+                  ],
+                  toolChoice,
+                  tools,
                 })
                 .pipe(
+                  withoutTokenCountEvents(),
                   map((generateEvent) => {
-                    if (generateEvent.type === OutputEventType.OutputComplete) {
+                    if (isChatCompletionMessageEvent(generateEvent)) {
                       const correctedContent = generateEvent.content?.replaceAll(
                         INLINE_ESQL_QUERY_REGEX,
                         (_match, query) => {

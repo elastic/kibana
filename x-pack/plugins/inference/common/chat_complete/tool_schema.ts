@@ -13,7 +13,7 @@ interface ToolSchemaFragmentBase {
 
 interface ToolSchemaTypeObject extends ToolSchemaFragmentBase {
   type: 'object';
-  properties: Record<string, ToolSchemaFragment>;
+  properties?: Record<string, ToolSchemaFragment>;
   required?: string[] | readonly string[];
 }
 
@@ -57,16 +57,19 @@ type ToolSchemaType =
 
 type ToolSchemaFragment = ToolSchemaType | ToolSchemaAnyOf | ToolSchemaAllOf;
 
-type FromToolSchemaObject<TToolSchemaObject extends ToolSchemaTypeObject> = Required<
-  {
-    [key in keyof TToolSchemaObject['properties']]?: FromToolSchema<
-      TToolSchemaObject['properties'][key]
-    >;
-  },
-  TToolSchemaObject['required'] extends string[] | readonly string[]
-    ? ValuesType<TToolSchemaObject['required']>
-    : never
->;
+type FromToolSchemaObject<TToolSchemaObject extends ToolSchemaTypeObject> =
+  TToolSchemaObject extends { properties: Record<string, any> }
+    ? Required<
+        {
+          [key in keyof TToolSchemaObject['properties']]?: FromToolSchema<
+            TToolSchemaObject['properties'][key]
+          >;
+        },
+        TToolSchemaObject['required'] extends string[] | readonly string[]
+          ? ValuesType<TToolSchemaObject['required']>
+          : never
+      >
+    : unknown;
 
 type FromToolSchemaArray<TToolSchemaObject extends ToolSchemaTypeArray> = Array<
   FromToolSchema<TToolSchemaObject['items']>

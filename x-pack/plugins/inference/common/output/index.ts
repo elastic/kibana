@@ -14,7 +14,7 @@ export enum OutputEventType {
   OutputComplete = 'complete',
 }
 
-type Output = Record<string, any> | undefined;
+type Output = Record<string, any> | undefined | unknown;
 
 export type OutputUpdateEvent<TId extends string = string> =
   InferenceTaskEventBase<OutputEventType.OutputUpdate> & {

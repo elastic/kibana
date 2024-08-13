@@ -30,7 +30,6 @@
     "@kbn/babel-register",
     "@kbn/expect",
     "@kbn/tooling-log",
-    "@kbn/observability-ai-assistant-plugin",
     "@kbn/es-types",
     "@kbn/field-types",
     "@kbn/expressions-plugin"

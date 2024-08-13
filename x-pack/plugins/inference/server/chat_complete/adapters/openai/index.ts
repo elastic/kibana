@@ -40,7 +40,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
             },
             type: 'function' as const,
           }
-        : undefined;
+        : 'auto';
 
     const stream = true;
 

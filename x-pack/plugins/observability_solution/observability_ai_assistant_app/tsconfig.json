@@ -70,7 +70,8 @@
     "@kbn/cloud-plugin",
     "@kbn/observability-plugin",
     "@kbn/esql-datagrid",
-    "@kbn/alerting-comparators"
+    "@kbn/alerting-comparators",
+    "@kbn/inference-plugin"
   ],
   "exclude": ["target/**/*"]
 }

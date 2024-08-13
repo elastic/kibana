@@ -27,6 +27,7 @@ async function evaluateEsqlQuery({
     naturalLanguageToEsql({
       client: {
         output: chatClient.output,
+        chatComplete: chatClient.chatComplete,
       },
       connectorId: chatClient.getConnectorId(),
       input: question,

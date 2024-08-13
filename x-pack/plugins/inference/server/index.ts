@@ -18,6 +18,8 @@ export { withoutTokenCountEvents } from '../common/chat_complete/without_token_c
 export { withoutChunkEvents } from '../common/chat_complete/without_chunk_events';
 export { withoutOutputUpdateEvents } from '../common/output/without_output_update_events';
 
+export { naturalLanguageToEsql } from './tasks/nl_to_esql';
+
 export type { InferenceServerSetup, InferenceServerStart };
 
 export const plugin: PluginInitializer<
