@@ -8,8 +8,10 @@
 import { CLOSE_FLYOUT } from '../screens/alerts';
 import {
   AI_ASSISTANT_BUTTON,
+  ASSISTANT_CHAT_BODY,
   CHAT_ICON,
   CHAT_ICON_SM,
+  CONNECTOR_SELECT,
   CONNECTOR_SELECTOR,
   CONVERSATION_TITLE,
   EMPTY_CONVO,
@@ -34,7 +36,13 @@ export const openAssistant = (context?: 'rule' | 'alert') => {
 };
 
 export const closeAssistant = () => {
-  cy.get(CLOSE_FLYOUT).click();
+  cy.get(`${ASSISTANT_CHAT_BODY} ${CLOSE_FLYOUT}`).click();
+};
+
+export const selectConnector = (connectorName: string) => {
+  cy.get(CONNECTOR_SELECTOR).click();
+  cy.get(CONNECTOR_SELECT(connectorName)).click();
+  assertConnectorSelected(connectorName);
 };
 
 export const assertConversation = (isWelcome: boolean, title: string) => {

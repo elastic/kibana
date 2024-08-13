@@ -34,5 +34,18 @@ export const azureConnectorAPIPayload = {
   name: 'Azure OpenAI cypress test e2e connector',
 };
 
+export const bedrockConnectorAPIPayload = {
+  actionTypeId: '.bedrock',
+  secrets: {
+    accessKey: '123',
+    secret: '123',
+  },
+  config: {
+    apiUrl: 'https://bedrock.com',
+  },
+  name: 'Bedrock cypress test e2e connector',
+};
+
 export const createSlackConnector = () => createConnector(slackConnectorAPIPayload);
 export const createAzureConnector = () => createConnector(azureConnectorAPIPayload);
+export const createBedrockConnector = () => createConnector(bedrockConnectorAPIPayload);
