@@ -1370,22 +1370,25 @@ describe('autocomplete', () => {
         'FROM a | KEEP doubleFiel/',
         getFieldNamesByType('any').map(attachTriggerCommand)
       );
-      testSuggestions('FROM a | KEEP doubleField/', ['doubleField,', 'doubleField| ']);
+      testSuggestions('FROM a | KEEP doubleField/', ['doubleField, ', 'doubleField | ']);
       testSuggestions('FROM a | KEEP doubleField /', ['| ', ',']);
 
       // Let's get funky with the field names
-      testSuggestions('FROM a | KEEP @timestamp/', ['@timestamp,', '@timestamp| '], undefined, [
+      testSuggestions('FROM a | KEEP @timestamp/', ['@timestamp, ', '@timestamp | '], undefined, [
         [{ name: '@timestamp', type: 'date' }],
       ]);
-      testSuggestions('FROM a | KEEP foo.bar/', ['foo.bar,', 'foo.bar| '], undefined, [
+      testSuggestions('FROM a | KEEP foo.bar/', ['foo.bar, ', 'foo.bar | '], undefined, [
         [{ name: 'foo.bar', type: 'double' }],
       ]);
-      testSuggestions('FROM a | KEEP `foo.bar`/', ['foo.bar,', 'foo.bar| '], undefined, [
+      testSuggestions('FROM a | KEEP `foo.bar`/', ['foo.bar, ', 'foo.bar | '], undefined, [
+        [{ name: 'foo.bar', type: 'double' }],
+      ]);
+      testSuggestions('FROM a | KEEP `foo`.`bar`/', ['foo.bar, ', 'foo.bar | '], undefined, [
         [{ name: 'foo.bar', type: 'double' }],
       ]);
       testSuggestions('FROM a | KEEP `any#Char$Field`/', [
-        '`any#Char$Field`,',
-        '`any#Char$Field`| ',
+        '`any#Char$Field`, ',
+        '`any#Char$Field` | ',
       ]);
 
       // Subsequent fields
@@ -1395,7 +1398,7 @@ describe('autocomplete', () => {
           .filter((s) => s !== 'doubleField')
           .map(attachTriggerCommand)
       );
-      testSuggestions('FROM a | KEEP doubleField, dateField/', ['dateField,', 'dateField| ']);
+      testSuggestions('FROM a | KEEP doubleField, dateField/', ['dateField, ', 'dateField | ']);
     });
   });
 });
