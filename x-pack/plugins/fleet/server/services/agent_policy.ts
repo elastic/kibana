@@ -119,7 +119,7 @@ class AgentPolicyService {
     esClient: ElasticsearchClient,
     action: 'created' | 'updated' | 'deleted',
     agentPolicyId: string,
-    options?: { skipDeploy?: boolean; spaceId?: string }
+    options?: { skipDeploy?: boolean; spaceId?: string; agentPolicy?: AgentPolicy | null }
   ) => {
     return agentPolicyUpdateEventHandler(esClient, action, agentPolicyId, options);
   };
@@ -130,7 +130,11 @@ class AgentPolicyService {
     id: string,
     agentPolicy: Partial<AgentPolicySOAttributes>,
     user?: AuthenticatedUser,
-    options: { bumpRevision: boolean; removeProtection: boolean; skipValidation: boolean } = {
+    options: {
+      bumpRevision: boolean;
+      removeProtection: boolean;
+      skipValidation: boolean;
+    } = {
       bumpRevision: true,
       removeProtection: false,
       skipValidation: false,
@@ -171,7 +175,7 @@ class AgentPolicyService {
         getAllowedOutputTypeForPolicy(existingAgentPolicy)
       );
     }
-    await soClient.update<AgentPolicySOAttributes>(SAVED_OBJECT_TYPE, id, {
+    const newPolicy = {
       ...agentPolicy,
       ...(options.bumpRevision ? { revision: existingAgentPolicy.revision + 1 } : {}),
       ...(options.removeProtection
@@ -179,11 +183,17 @@ class AgentPolicyService {
         : { is_protected: agentPolicy.is_protected }),
       updated_at: new Date().toISOString(),
       updated_by: user ? user.username : 'system',
-    });
+    };
+    await soClient.update<AgentPolicySOAttributes>(SAVED_OBJECT_TYPE, id, newPolicy);
+
+    const newAgentPolicy = await this.get(soClient, id, false);
+
+    newAgentPolicy!.package_policies = existingAgentPolicy.package_policies;
 
     if (options.bumpRevision || options.removeProtection) {
       await this.triggerAgentPolicyUpdatedEvent(esClient, 'updated', id, {
         spaceId: soClient.getCurrentNamespace(),
+        agentPolicy: newAgentPolicy,
       });
     }
     logger.debug(
@@ -191,7 +201,7 @@ class AgentPolicyService {
         options.bumpRevision ? existingAgentPolicy.revision + 1 : existingAgentPolicy.revision
       }`
     );
-    return (await this.get(soClient, id)) as AgentPolicy;
+    return newAgentPolicy as AgentPolicy;
   }
 
   public async ensurePreconfiguredAgentPolicy(
@@ -770,14 +780,12 @@ class AgentPolicyService {
     esClient: ElasticsearchClient,
     id: string,
     options?: { user?: AuthenticatedUser; removeProtection?: boolean }
-  ): Promise<AgentPolicy> {
-    const res = await this._update(soClient, esClient, id, {}, options?.user, {
+  ): Promise<void> {
+    await this._update(soClient, esClient, id, {}, options?.user, {
       bumpRevision: true,
       removeProtection: options?.removeProtection ?? false,
       skipValidation: false,
     });
-
-    return res;
   }
 
   /**
@@ -1091,11 +1099,19 @@ class AgentPolicyService {
     };
   }
 
-  public async deployPolicy(soClient: SavedObjectsClientContract, agentPolicyId: string) {
-    await this.deployPolicies(soClient, [agentPolicyId]);
+  public async deployPolicy(
+    soClient: SavedObjectsClientContract,
+    agentPolicyId: string,
+    agentPolicy?: AgentPolicy | null
+  ) {
+    await this.deployPolicies(soClient, [agentPolicyId], agentPolicy ? [agentPolicy] : undefined);
   }
 
-  public async deployPolicies(soClient: SavedObjectsClientContract, agentPolicyIds: string[]) {
+  public async deployPolicies(
+    soClient: SavedObjectsClientContract,
+    agentPolicyIds: string[],
+    agentPolicies?: AgentPolicy[]
+  ) {
     // Use internal ES client so we have permissions to write to .fleet* indices
     const esClient = appContextService.getInternalUserESClient();
     const defaultOutputId = await outputService.getDefaultDataOutputId(soClient);
@@ -1117,7 +1133,10 @@ class AgentPolicyService {
       // There are some potential performance concerns around using `getFullAgentPolicy` in this context, e.g.
       // re-fetching outputs, settings, and upgrade download source URI data for each policy. This could potentially
       // be a bottleneck in environments with several thousand agent policies being deployed here.
-      (agentPolicyId) => agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId),
+      (agentPolicyId) =>
+        agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
+          agentPolicy: agentPolicies?.find((policy) => policy.id === agentPolicyId),
+        }),
       {
         concurrency: 50,
       }
@@ -1318,7 +1337,7 @@ class AgentPolicyService {
   public async getFullAgentPolicy(
     soClient: SavedObjectsClientContract,
     id: string,
-    options?: { standalone: boolean }
+    options?: { standalone?: boolean; agentPolicy?: AgentPolicy }
   ): Promise<FullAgentPolicy | null> {
     return getFullAgentPolicy(soClient, id, options);
   }

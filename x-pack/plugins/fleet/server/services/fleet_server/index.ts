@@ -113,18 +113,20 @@ export async function checkFleetServerVersionsForSecretsStorage(
   let hasMore = true;
   const policyIds = new Set<string>();
   let page = 1;
+  const perPage = 20;
   while (hasMore) {
     const res = await packagePolicyService.list(soClient, {
       page: page++,
-      perPage: 20,
+      perPage: 200,
       kuery: 'ingest-package-policies.package.name:fleet_server',
+      fields: ['policy_ids'],
     });
 
     for (const item of res.items) {
       item.policy_ids.forEach((id) => policyIds.add(id));
     }
 
-    if (res.items.length === 0) {
+    if (res.items.length < perPage) {
       hasMore = false;
     }
   }
