@@ -10,23 +10,15 @@ import {
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { SYNTHETICS_OVERVIEW_EMBEDDABLE } from '../constants';
+import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
+import { ClientPluginsStart } from '../../../plugin';
+import { COMMON_SYNTHETICS_GROUPING, SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../constants';
 
-export const COMMON_SYNTHETICS_GROUPING = [
-  {
-    id: 'synthetics',
-    getDisplayName: () =>
-      i18n.translate('xpack.synthetics.common.constants.grouping.legacy', {
-        defaultMessage: 'Synthetics',
-      }),
-    getIconType: () => {
-      return 'online';
-    },
-  },
-];
-export const ADD_SYNTHETICS_OVERVIEW_ACTION_ID = 'CREATE_SYNTHETICS_OVERVIEW_EMBEDDABLE';
+export const ADD_SYNTHETICS_OVERVIEW_ACTION_ID = 'CREATE_SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE';
 
-export function createStatusOverviewPanelAction(): UiActionsActionDefinition<EmbeddableApiContext> {
+export function createStatusOverviewPanelAction(
+  getStartServices: StartServicesAccessor<ClientPluginsStart>
+): UiActionsActionDefinition<EmbeddableApiContext> {
   return {
     id: ADD_SYNTHETICS_OVERVIEW_ACTION_ID,
     grouping: COMMON_SYNTHETICS_GROUPING,
@@ -40,16 +32,24 @@ export function createStatusOverviewPanelAction(): UiActionsActionDefinition<Emb
       const { compatibilityCheck } = await import('./compatibility_check');
       if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
       try {
+        const { openMonitorConfiguration } = await import('../common/monitors_open_configuration');
+        const [coreStart, pluginStart] = await getStartServices();
+
+        const initialState = await openMonitorConfiguration({
+          coreStart,
+          pluginStart,
+        });
         embeddable.addNewPanel({
-          panelType: SYNTHETICS_OVERVIEW_EMBEDDABLE,
+          panelType: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
+          initialState,
         });
       } catch (e) {
         return Promise.reject();
       }
     },
     getDisplayName: () =>
-      i18n.translate('xpack.synthetics.syntheticsEmbeddable.ariaLabel', {
-        defaultMessage: 'Synthetics Overview',
+      i18n.translate('xpack.synthetics.syntheticsEmbeddable.stats.ariaLabel', {
+        defaultMessage: 'Monitors stats',
       }),
   };
 }

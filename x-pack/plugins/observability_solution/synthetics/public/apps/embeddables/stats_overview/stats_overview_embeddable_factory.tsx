@@ -16,55 +16,88 @@ import {
   PublishesWritablePanelTitle,
   PublishesPanelTitle,
   SerializedTitles,
+  HasEditCapabilities,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import { SYNTHETICS_OVERVIEW_EMBEDDABLE } from '../constants';
+import { MonitorFilters } from '../monitors_overview/types';
+import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../constants';
 import { ClientPluginsStart } from '../../../plugin';
-import { StatusOverviewComponent } from './status_overview_component';
+import { StatsOverviewComponent } from './stats_overview_component';
 
 export const getOverviewPanelTitle = () =>
-  i18n.translate('xpack.synthetics.statusOverview.displayName', {
-    defaultMessage: 'Synthetics Status Overview',
+  i18n.translate('xpack.synthetics.statusOverview.list.displayName', {
+    defaultMessage: 'Synthetics Stats Overview',
   });
 
-export type OverviewEmbeddableState = SerializedTitles;
+export type OverviewEmbeddableState = SerializedTitles & {
+  filters: MonitorFilters;
+};
 
-export type StatusOverviewApi = DefaultEmbeddableApi<OverviewEmbeddableState> &
+export type StatsOverviewApi = DefaultEmbeddableApi<OverviewEmbeddableState> &
   PublishesWritablePanelTitle &
-  PublishesPanelTitle;
+  PublishesPanelTitle &
+  HasEditCapabilities;
 
-export const getStatusOverviewEmbeddableFactory = (
+export const getStatsOverviewEmbeddableFactory = (
   getStartServices: StartServicesAccessor<ClientPluginsStart>
 ) => {
   const factory: ReactEmbeddableFactory<
     OverviewEmbeddableState,
     OverviewEmbeddableState,
-    StatusOverviewApi
+    StatsOverviewApi
   > = {
-    type: SYNTHETICS_OVERVIEW_EMBEDDABLE,
+    type: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
     deserializeState: (state) => {
       return state.rawState as OverviewEmbeddableState;
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
+      const [coreStart, pluginStart] = await getStartServices();
+
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
       const reload$ = new Subject<boolean>();
+      const filters$ = new BehaviorSubject(state.filters);
 
       const api = buildApi(
         {
           ...titlesApi,
           defaultPanelTitle: defaultTitle$,
+          getTypeDisplayName: () =>
+            i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.typeDisplayName', {
+              defaultMessage: 'filters',
+            }),
+          isEditingEnabled: () => true,
+          onEdit: async () => {
+            try {
+              const { openMonitorConfiguration } = await import(
+                '../common/monitors_open_configuration'
+              );
+
+              const result = await openMonitorConfiguration({
+                coreStart,
+                pluginStart,
+                initialState: {
+                  filters: filters$.getValue(),
+                },
+              });
+              filters$.next(result.filters);
+            } catch (e) {
+              return Promise.reject();
+            }
+          },
           serializeState: () => {
             return {
               rawState: {
                 ...serializeTitles(),
+                filters: filters$.getValue(),
               },
             };
           },
         },
         {
           ...titleComparators,
+          filters: [filters$, (value) => filters$.next(value)],
         }
       );
 
@@ -77,7 +110,7 @@ export const getStatusOverviewEmbeddableFactory = (
       return {
         api,
         Component: () => {
-          const [] = useBatchedPublishingSubjects();
+          const [filters] = useBatchedPublishingSubjects(filters$);
 
           useEffect(() => {
             return () => {
@@ -86,9 +119,12 @@ export const getStatusOverviewEmbeddableFactory = (
           }, []);
           return (
             <div
+              style={{
+                width: '100%',
+              }}
               data-shared-item="" // TODO: Remove data-shared-item and data-rendering-count as part of https://github.com/elastic/kibana/issues/179376
             >
-              <StatusOverviewComponent reload$={reload$} />
+              <StatsOverviewComponent reload$={reload$} filters={filters} />
             </div>
           );
         },
