@@ -1857,16 +1857,15 @@
     "@elastic/react-search-ui-views" "1.20.2"
     "@elastic/search-ui" "1.20.2"
 
-"@elastic/request-converter@^8.15.2":
+"@elastic/request-converter@github:elastic/request-converter#8.15":
   version "8.15.2"
-  resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-8.15.2.tgz#e51cf88d0e89b628314cafcd42d0a536ae66d1be"
-  integrity sha512-dq7EUfNBfJhxRZizOwM0PUpYLVlny2e4vZ/VQXQTCuqrdfOfZ0eTJhboqDBAU85fYgZtlICteMKViDgvY897XQ==
+  resolved "https://codeload.github.com/elastic/request-converter/tar.gz/84bc228a6314216d0dd14b207fbaa51dd2b3c44c"
   dependencies:
     child-process-promise "^2.2.1"
     commander "^12.1.0"
     find-my-way-ts "^0.1.2"
     handlebars "^4.7.8"
-    prettier "^3.3.2"
+    prettier "^2.8.8"
 
 "@elastic/request-crypto@2.0.2":
   version "2.0.2"
@@ -25874,11 +25873,6 @@ prettier@^2.0.0, prettier@^2.8.8:
   version "2.8.8"
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.8.8.tgz#e8c5d7e98a4305ffe3de2e1fc4aca1a71c28b1da"
   integrity sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==
-
-prettier@^3.3.2:
-  version "3.3.3"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.3.3.tgz#30c54fe0be0d8d12e6ae61dbb10109ea00d53105"
-  integrity sha512-i2tDNA0O5IrMO757lfrdQZCc2jPNDVntV0m/+4whiDfWaTKfMNgR7Qz0NAeGz/nRqF4m5/6CLzbP4/liHt12Ew==
 
 pretty-bytes@^5.6.0:
   version "5.6.0"
