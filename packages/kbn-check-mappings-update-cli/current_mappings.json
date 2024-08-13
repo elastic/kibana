@@ -1482,6 +1482,10 @@
       }
     }
   },
+  "favorites": {
+    "dynamic": false,
+    "properties": {}
+  },
   "file": {
     "dynamic": false,
     "properties": {

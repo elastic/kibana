@@ -231,8 +231,10 @@ const convertMetricValue = (metric: SnapshotMetricType, value: number) => {
 };
 const converters: Record<string, (n: number) => number> = {
   cpu: (n) => Number(n) / 100,
-  cpuTotal: (n) => Number(n) / 100,
+  cpuV2: (n) => Number(n) / 100,
   memory: (n) => Number(n) / 100,
   tx: (n) => Number(n) / 8,
   rx: (n) => Number(n) / 8,
+  rxV2: (n) => Number(n) / 8,
+  txV2: (n) => Number(n) / 8,
 };
