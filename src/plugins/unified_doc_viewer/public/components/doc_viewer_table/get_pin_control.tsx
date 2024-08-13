@@ -12,8 +12,10 @@ import {
   EuiDataGridControlColumn,
   EuiScreenReaderOnly,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import type { TableRow } from './table_cell_actions';
 
 interface PinControlCellProps {
@@ -21,34 +23,47 @@ interface PinControlCellProps {
 }
 
 const PinControlCell: React.FC<PinControlCellProps> = React.memo(({ row }) => {
-  const label = row.field.pinned
-    ? i18n.translate('unifiedDocViewer.fieldsTable.unpinControlAriaLabel', {
+  const { euiTheme } = useEuiTheme();
+
+  const isPinned = row.field.pinned;
+  const label = isPinned
+    ? i18n.translate('unifiedDocViewer.docViews.table.unpinFieldLabel', {
         defaultMessage: 'Unpin field',
       })
-    : i18n.translate('unifiedDocViewer.fieldsTable.pinControlAriaLabel', {
+    : i18n.translate('unifiedDocViewer.docViews.table.pinFieldLabel', {
         defaultMessage: 'Pin field',
       });
 
   return (
-    <EuiToolTip content={label} delay="long">
-      <EuiButtonIcon
-        data-test-subj="unifiedDocViewer_pinControl"
-        iconSize="m"
-        iconType={row.field.pinned ? 'pinFilled' : 'pin'}
-        color="text"
-        aria-label={label}
-        onClick={() => {
-          row.field.onTogglePinned(row.field.field);
-        }}
-      />
-    </EuiToolTip>
+    <div
+      className={!isPinned ? 'kbnDocViewer__fieldsGrid__pinAction' : undefined}
+      css={css`
+        margin-left: ${isPinned ? '-1px' : 0}; // to align filled/unfilled pin icons better
+        width: ${euiTheme.size.l};
+        height: ${euiTheme.size.l};
+        overflow: hidden;
+      `}
+    >
+      <EuiToolTip content={label} delay="long">
+        <EuiButtonIcon
+          data-test-subj="unifiedDocViewer_pinControl"
+          iconSize="m"
+          iconType={isPinned ? 'pinFilled' : 'pin'}
+          color="text"
+          aria-label={label}
+          onClick={() => {
+            row.field.onTogglePinned(row.field.field);
+          }}
+        />
+      </EuiToolTip>
+    </div>
   );
 });
 
 export const getPinColumnControl = ({ rows }: { rows: TableRow[] }): EuiDataGridControlColumn => {
   return {
     id: 'pin_field',
-    width: 24,
+    width: 32,
     headerCellRender: () => (
       <EuiScreenReaderOnly>
         <span>
