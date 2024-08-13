@@ -11,6 +11,7 @@ export const WELCOME_SETUP = '[data-test-subj="welcome-setup"]';
 export const CHAT_ICON = '[data-test-subj="newChat"]';
 export const CHAT_ICON_SM = '[data-test-subj="newChatByTitle"]';
 export const CONVERSATION_TITLE = '[data-test-subj="conversationTitle"]';
+export const CONVERSATION_TITLE_SAVE_BUTTON = '[data-test-subj="euiInlineEditModeSaveButton"]';
 export const EMPTY_CONVO = '[data-test-subj="emptyConvo"]';
 export const SYSTEM_PROMPT = '[data-test-subj="systemPromptText"]';
 export const CONNECTOR_SELECTOR = '[data-test-subj="connector-selector"]';
@@ -26,3 +27,4 @@ export const CONVERSATION_MESSAGE_ERROR =
 export const CONVERSATION_SELECT = (c: string) => `[data-test-subj="conversation-select-${c}"]`;
 export const CLEAR_SYSTEM_PROMPT = '[data-test-subj="clearSystemPrompt"]';
 export const CONNECTOR_SELECT = (c: string) => `[data-test-subj="connector-${c}"]`;
+export const NEW_CHAT = '[data-test-subj="newChatFromOverlay"]';

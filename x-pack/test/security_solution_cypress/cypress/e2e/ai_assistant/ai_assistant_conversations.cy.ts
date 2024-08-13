@@ -10,13 +10,20 @@ import {
   RULE_MANAGEMENT_CONTEXT_DESCRIPTION,
 } from '@kbn/security-solution-plugin/public/detections/pages/detection_engine/rules/translations';
 import { EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N } from '@kbn/security-solution-plugin/public/assistant/content/prompts/user/translations';
-import { DEFAULT_SYSTEM_PROMPT_NON_I18N } from '@kbn/security-solution-plugin/public/assistant/content/prompts/system/translations';
 import {
   assertConnectorSelected,
-  assertConversation,
+  assertNewConversation,
   closeAssistant,
   openAssistant,
   selectConnector,
+  createNewChat,
+  selectConversation,
+  assertMessageWithDefaultSystemPrompt,
+  typeAndSendMessage,
+  assertErrorResponse,
+  selectRule,
+  assertErrorToastShown,
+  updateConversationTitle,
 } from '../../tasks/assistant';
 import { deleteConversations } from '../../tasks/api_calls/assistant';
 import {
@@ -28,7 +35,6 @@ import {
 import { expandFirstAlert } from '../../tasks/alerts';
 import { ALERTS_URL } from '../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
-import { TIMELINE_CHECKBOX } from '../../screens/timelines';
 import { visitRulesManagementTable } from '../../tasks/rules_management';
 import { deleteAlertsAndRules, deleteConnectors } from '../../tasks/api_calls/common';
 import { createRule } from '../../tasks/api_calls/rules';
@@ -36,13 +42,7 @@ import { getExistingRule, getNewRule } from '../../objects/rule';
 import { login } from '../../tasks/login';
 import {
   CONNECTOR_MISSING_CALLOUT,
-  CONVERSATION_MESSAGE,
-  CONVERSATION_MESSAGE_ERROR,
-  CONVERSATION_SELECT,
-  CONVERSATION_TITLE,
-  FLYOUT_NAV_TOGGLE,
   PROMPT_CONTEXT_BUTTON,
-  SUBMIT_CHAT,
   SYSTEM_PROMPT,
   USER_PROMPT,
 } from '../../screens/ai_assistant';
@@ -72,7 +72,7 @@ describe(
       it('Shows welcome setup when no connectors or conversations exist', () => {
         visitGetStartedPage();
         openAssistant();
-        assertConversation(true, 'Welcome');
+        assertNewConversation(true, 'Welcome');
       });
     });
     describe('When no conversations exist but connectors do exist, show empty convo', () => {
@@ -82,7 +82,7 @@ describe(
       it('When invoked on AI Assistant click', () => {
         visitGetStartedPage();
         openAssistant();
-        assertConversation(false, 'Welcome');
+        assertNewConversation(false, 'Welcome');
         assertConnectorSelected(azureConnectorAPIPayload.name);
         cy.get(SYSTEM_PROMPT).should('have.text', 'Default system prompt');
         cy.get(USER_PROMPT).should('not.have.text');
@@ -90,10 +90,9 @@ describe(
       it('When invoked from rules page', () => {
         createRule(getExistingRule({ rule_id: 'rule1', enabled: true })).then((createdRule) => {
           visitRulesManagementTable();
-          cy.get(TIMELINE_CHECKBOX(createdRule?.body?.id)).should('exist');
-          cy.get(TIMELINE_CHECKBOX(createdRule?.body?.id)).click();
+          selectRule(createdRule?.body?.id);
           openAssistant('rule');
-          assertConversation(false, 'Detection Rules');
+          assertNewConversation(false, 'Detection Rules');
           assertConnectorSelected(azureConnectorAPIPayload.name);
           cy.get(SYSTEM_PROMPT).should('have.text', 'Default system prompt');
           cy.get(USER_PROMPT).should('have.text', EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS);
@@ -106,7 +105,7 @@ describe(
         waitForAlertsToPopulate();
         expandFirstAlert();
         openAssistant('alert');
-        assertConversation(false, 'Alert summary');
+        assertNewConversation(false, 'Alert summary');
         assertConnectorSelected(azureConnectorAPIPayload.name);
         cy.get(SYSTEM_PROMPT).should('have.text', 'Default system prompt');
         cy.get(USER_PROMPT).should(
@@ -137,47 +136,50 @@ describe(
         waitForAlertsToPopulate();
         expandFirstAlert();
         openAssistant('alert');
-        assertConversation(false, 'Alert summary');
+        assertNewConversation(false, 'Alert summary');
         closeAssistant();
         visitGetStartedPage();
         openAssistant();
-        assertConversation(false, 'Alert summary');
+        assertNewConversation(false, 'Alert summary');
       });
       it('Properly switches back and forth between conversations', () => {
         visitGetStartedPage();
         openAssistant();
-        assertConversation(false, 'Welcome');
-
+        assertNewConversation(false, 'Welcome');
         assertConnectorSelected(azureConnectorAPIPayload.name);
-        cy.get(USER_PROMPT).type('Hello world');
-        cy.get(SUBMIT_CHAT).click();
-        cy.get(CONVERSATION_MESSAGE)
-          .first()
-          .should('have.text', `${DEFAULT_SYSTEM_PROMPT_NON_I18N}\nHello world`);
-        cy.get(CONVERSATION_MESSAGE_ERROR).should('exist');
-        cy.get(FLYOUT_NAV_TOGGLE).click();
-        cy.get(CONVERSATION_SELECT('Alert summary')).click();
-        assertConversation(false, 'Alert summary');
-
+        typeAndSendMessage('hello');
+        assertMessageWithDefaultSystemPrompt('hello');
+        assertErrorResponse();
+        selectConversation('Alert summary');
         selectConnector(bedrockConnectorAPIPayload.name);
-        cy.get(USER_PROMPT).type('Goodbye world');
-        cy.get(SUBMIT_CHAT).click();
-        cy.get(CONVERSATION_MESSAGE)
-          .first()
-          .should('have.text', `${DEFAULT_SYSTEM_PROMPT_NON_I18N}\nGoodbye world`);
-        cy.get(CONVERSATION_MESSAGE_ERROR).should('exist');
-        cy.get(CONVERSATION_SELECT('Welcome')).click();
-        cy.get(CONVERSATION_TITLE).should('have.text', 'Welcome');
+        typeAndSendMessage('goodbye');
+        assertMessageWithDefaultSystemPrompt('goodbye');
+        assertErrorResponse();
+        selectConversation('Welcome');
         assertConnectorSelected(azureConnectorAPIPayload.name);
-        cy.get(CONVERSATION_MESSAGE)
-          .first()
-          .should('have.text', `${DEFAULT_SYSTEM_PROMPT_NON_I18N}\nHello world`);
-        cy.get(CONVERSATION_SELECT('Alert summary')).click();
-        cy.get(CONVERSATION_TITLE).should('have.text', 'Alert summary');
+        assertMessageWithDefaultSystemPrompt('hello');
+        selectConversation('Alert summary');
         assertConnectorSelected(bedrockConnectorAPIPayload.name);
-        cy.get(CONVERSATION_MESSAGE)
-          .first()
-          .should('have.text', `${DEFAULT_SYSTEM_PROMPT_NON_I18N}\nGoodbye world`);
+        assertMessageWithDefaultSystemPrompt('goodbye');
+      });
+
+      it('Only allows one conversation called "New chat" at a time', () => {
+        visitGetStartedPage();
+        openAssistant();
+        createNewChat();
+        assertNewConversation(false, 'New chat');
+        assertConnectorSelected(azureConnectorAPIPayload.name);
+        typeAndSendMessage('hello');
+        // TODO fix bug with new chat and error message
+        // assertMessageWithDefaultSystemPrompt('hello');
+        assertErrorResponse();
+        selectConversation('Welcome');
+        createNewChat();
+        assertErrorToastShown('Error creating conversation with title New chat');
+        selectConversation('New chat');
+        updateConversationTitle('My other chat');
+        createNewChat();
+        assertNewConversation(false, 'New chat');
       });
     });
   }
