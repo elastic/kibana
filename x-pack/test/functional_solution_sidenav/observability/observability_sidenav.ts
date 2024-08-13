@@ -15,6 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('solution navigation', () => {
     let cleanUp: () => Promise<unknown>;
+    let spaceCreated: { id: string } = { id: '' };
 
     before(async () => {
       // Navigate to the spaces management page which will log us in Kibana
@@ -23,7 +24,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       // Create a space with the observability solution and navigate to its home page
-      ({ cleanUp } = await spaces.api.createAndNavigateToSpace({ solution: 'oblt' }));
+      ({ cleanUp, space: spaceCreated } = await spaces.create({ solution: 'oblt' }));
+      spaces.navigateToHomePage(spaceCreated.id);
     });
 
     after(async () => {

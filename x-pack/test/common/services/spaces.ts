@@ -10,12 +10,26 @@ import Axios from 'axios';
 import Https from 'https';
 import { format as formatUrl } from 'url';
 import util from 'util';
+import Chance from 'chance';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function SpacesServiceProvider({ getService }: FtrProviderContext) {
+const chance = new Chance();
+
+interface SpaceCreate {
+  name?: string;
+  id?: string;
+  description?: string;
+  color?: string;
+  initials?: string;
+  solution?: 'es' | 'oblt' | 'security' | 'classic';
+  disabledFeatures?: string[];
+}
+
+export function SpacesServiceProvider({ getService  }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
   const url = formatUrl(config.get('servers.kibana'));
+  const browser = getService('browser');
 
   const certificateAuthorities = config.get('servers.kibana.certificateAuthorities');
   const httpsAgent: Https.Agent | undefined = certificateAuthorities
@@ -35,7 +49,9 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
   });
 
   return new (class SpacesService {
-    public async create(space: any) {
+    public async create(_space?: SpaceCreate) {
+      const space = { id: chance.guid(), name: 'foo', ..._space };
+
       log.debug(`creating space ${space.id}`);
       const { data, status, statusText } = await axios.post('/api/spaces/space', space);
 
@@ -45,6 +61,15 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
         );
       }
       log.debug(`created space ${space.id}`);
+
+      const cleanUp = async () => {
+        return this.delete(space.id);
+      };
+
+      return {
+        cleanUp,
+        space,
+      }
     }
 
     public async delete(spaceId: string) {
@@ -71,6 +96,20 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
       log.debug(`retrieved ${data.length} spaces`);
 
       return data;
+    }
+
+    public async navigateToHomePage(spaceId:string) {
+      const currentUrl = await browser.getCurrentUrl();
+
+      const urlMatch = currentUrl.match(/^(https?:\/\/[^/]+)(\/.*)/);
+      let baseUrl = 'http://localhost:5620';
+      if (urlMatch) {
+        baseUrl = urlMatch[1];
+      }
+
+      // Using browser.navigateTo instead of common.navigateToUrl to test the redirect from "/"
+      // to the correct app. (common.navigateToUrl requires the "app" to be provided).
+      await browser.navigateTo(`${baseUrl}/s/${spaceId}`);
     }
   })();
 }

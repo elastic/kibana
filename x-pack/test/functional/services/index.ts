@@ -70,7 +70,6 @@ import { AiopsProvider } from './aiops';
 import { SampleDataServiceProvider } from './sample_data';
 import { DataStreamProvider } from './data_stream';
 import { SloUiServiceProvider } from './slo';
-import { SpacesProvider } from './spaces';
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
 // only the built-in services will be available
@@ -135,5 +134,4 @@ export const services = {
   slo: kibanaXPackApiIntegrationServices.slo,
   dataViewApi: kibanaXPackApiIntegrationServices.dataViewApi,
   sloUi: SloUiServiceProvider,
-  spaces: SpacesProvider,
 };
