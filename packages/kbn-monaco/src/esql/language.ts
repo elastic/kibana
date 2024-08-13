@@ -102,6 +102,7 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
         );
         const suggestionEntries = await astAdapter.autocomplete(model, position, context);
         return {
+          // @ts-expect-error because of range typing: https://github.com/microsoft/monaco-editor/issues/4638
           suggestions: wrapAsMonacoSuggestions(suggestionEntries.suggestions),
         };
       },
