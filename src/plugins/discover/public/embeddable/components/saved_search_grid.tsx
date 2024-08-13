@@ -117,7 +117,6 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         showColumnTokens
         showFullScreenButton={false}
         className="unifiedDataTable"
-        showDensitySelector={true}
       />
     </SavedSearchEmbeddableBase>
   );

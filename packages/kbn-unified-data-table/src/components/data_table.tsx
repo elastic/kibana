@@ -236,10 +236,6 @@ export interface UnifiedDataTableProps {
    */
   onUpdateRowHeight?: (rowHeight: number) => void;
   /**
-   * Whether or not to show the density selector
-   */
-  showDensitySelector?: boolean;
-  /**
    * Density from state
    */
   dataGridDensityState?: DataGridDensity;
@@ -483,7 +479,6 @@ export const UnifiedDataTable = ({
   cellContext,
   renderCellPopover,
   getRowIndicator,
-  showDensitySelector = false,
   dataGridDensityState,
   onUpdateDataGridDensity,
 }: UnifiedDataTableProps) => {
@@ -1005,7 +1000,7 @@ export const UnifiedDataTable = ({
       allowResetButton: false,
       additionalDisplaySettings: (
         <>
-          {showDensitySelector ? <EuiHorizontalRule margin="s" /> : null}
+          {onUpdateDataGridDensity ? <EuiHorizontalRule margin="s" /> : null}
           <UnifiedDataTableAdditionalDisplaySettings
             rowHeight={rowHeight}
             rowHeightLines={rowHeightLines}
@@ -1036,7 +1031,6 @@ export const UnifiedDataTable = ({
     rowHeight,
     rowHeightLines,
     sampleSizeState,
-    showDensitySelector,
     onUpdateDataGridDensity,
   ]);
 

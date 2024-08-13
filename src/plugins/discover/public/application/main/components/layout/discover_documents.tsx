@@ -455,7 +455,6 @@ function DiscoverDocumentsComponent({
                 customGridColumnsConfiguration={customGridColumnsConfiguration}
                 rowAdditionalLeadingControls={rowAdditionalLeadingControls}
                 additionalFieldGroups={additionalFieldGroups}
-                showDensitySelector={true}
                 dataGridDensityState={density}
                 onUpdateDataGridDensity={onUpdateDensity}
               />
