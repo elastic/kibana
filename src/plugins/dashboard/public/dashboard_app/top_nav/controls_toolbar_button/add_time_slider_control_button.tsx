@@ -10,6 +10,8 @@ import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { EuiContextMenuItem } from '@elastic/eui';
 import type { ControlGroupApi } from '@kbn/controls-plugin/public';
+import { TIME_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
+
 import { apiHasType } from '@kbn/presentation-publishing';
 import {
   getAddTimeSliderControlButtonTitle,
@@ -44,7 +46,7 @@ export const AddTimeSliderControlButton = ({ closePopover, controlGroupApi, ...r
       icon="timeslider"
       onClick={async () => {
         controlGroupApi.addNewPanel({
-          panelType: 'timesliderControl',
+          panelType: TIME_SLIDER_CONTROL,
           initialState: {
             grow: true,
             width: 'large',
