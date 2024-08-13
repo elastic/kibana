@@ -292,11 +292,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       log.info(
         'flaky-test-for-artifacts RESULTS ARE IN',
-        JSON.stringify(
-          { byText: options?.byText, waitABit: options?.waitABit, fails, successes },
-          null,
-          ' '
-        )
+        JSON.stringify({ fails, successes }, null, ' ')
       );
     };
 
