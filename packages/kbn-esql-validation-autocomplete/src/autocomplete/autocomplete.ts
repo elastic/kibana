@@ -97,7 +97,13 @@ import {
   isAggFunctionUsedAlready,
   removeQuoteForSuggestedSources,
 } from './helper';
-import { FunctionParameter, FunctionReturnType, SupportedDataType } from '../definitions/types';
+import {
+  FunctionParameter,
+  FunctionReturnType,
+  SupportedDataType,
+  isParameterType,
+  isReturnType,
+} from '../definitions/types';
 
 type GetSourceFn = () => Promise<SuggestionRawDefinition[]>;
 type GetDataStreamsForIntegrationFn = (
@@ -719,7 +725,7 @@ async function getExpressionSuggestionsByType(
         // ... | STATS a <suggest>
         // ... | EVAL a <suggest>
         const nodeArgType = extractFinalTypeFromArg(nodeArg, references);
-        if (nodeArgType) {
+        if (isParameterType(nodeArgType)) {
           suggestions.push(
             ...getBuiltinCompatibleFunctionDefinition(
               command.name,
@@ -777,7 +783,7 @@ async function getExpressionSuggestionsByType(
             ...getBuiltinCompatibleFunctionDefinition(
               command.name,
               undefined,
-              nodeArgType || 'any',
+              isParameterType(nodeArgType) ? nodeArgType : 'any',
               undefined,
               workoutBuiltinOptions(rightArg, references)
             )
@@ -920,7 +926,7 @@ async function getExpressionSuggestionsByType(
                   ))
                 );
               }
-            } else {
+            } else if (isParameterType(nodeArgType)) {
               // i.e. ... | <COMMAND> field <suggest>
               suggestions.push(
                 ...getBuiltinCompatibleFunctionDefinition(
@@ -1037,7 +1043,7 @@ async function getBuiltinFunctionNextArgument(
       ...getBuiltinCompatibleFunctionDefinition(
         command.name,
         option?.name,
-        nodeArgType || 'any',
+        isParameterType(nodeArgType) ? nodeArgType : 'any',
         undefined,
         workoutBuiltinOptions(nodeArg, references)
       )
@@ -1089,7 +1095,11 @@ async function getBuiltinFunctionNextArgument(
     if (isFnComplete.reason === 'wrongTypes') {
       if (nestedType) {
         // suggest something to complete the builtin function
-        if (nestedType !== argDef.type) {
+        if (
+          nestedType !== argDef.type &&
+          isParameterType(nestedType) &&
+          isReturnType(argDef.type)
+        ) {
           suggestions.push(
             ...getBuiltinCompatibleFunctionDefinition(
               command.name,
