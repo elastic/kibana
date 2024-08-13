@@ -7,6 +7,7 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
+import querystring from 'querystring';
 
 export type InventoryLocator = LocatorPublic<InventoryLocatorParams>;
 
@@ -83,7 +84,7 @@ export class InventoryLocatorDefinition implements LocatorDefinition<InventoryLo
       view: rison.encodeUnknown(params.view ?? 'map'),
     };
 
-    const queryStringParams = rison.encodeUnknown(paramsWithDefaults);
+    const queryStringParams = querystring.stringify(paramsWithDefaults);
     return {
       app: 'metrics',
       path: `/inventory?${queryStringParams}`,

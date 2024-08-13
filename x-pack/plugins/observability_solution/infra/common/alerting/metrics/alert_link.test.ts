@@ -26,7 +26,8 @@ const mockInventoryLocator = {
   getRedirectUrl: jest
     .fn()
     .mockImplementation(
-      (params: InventoryLocatorParams) => `/inventory?${rison.encodeUnknown(params)}`
+      (params: InventoryLocatorParams) =>
+        `/inventory-mock?receivedParams=${rison.encodeUnknown(params)}`
     ),
 } as unknown as jest.Mocked<InventoryLocator>;
 
@@ -35,7 +36,7 @@ const mockAssetDetailsLocator = {
     .fn()
     .mockImplementation(
       ({ assetId, assetType, assetDetails }: AssetDetailsLocatorParams) =>
-        `/node/${assetType}/${assetId}?${rison.encodeUnknown(assetDetails)}`
+        `/node-mock/${assetType}/${assetId}?receivedParams=${rison.encodeUnknown(assetDetails)}`
     ),
 } as unknown as jest.Mocked<AssetDetailsLocator>;
 
@@ -121,7 +122,7 @@ describe('Inventory Threshold Rule', () => {
       });
       expect(mockInventoryLocator.getRedirectUrl).toHaveBeenCalledTimes(1);
       expect(url).toEqual(
-        "/inventory?(customMetric:'(aggregation:avg,field:system.cpu.user.pct,id:alert-custom-metric,type:custom)',metric:'(aggregation:avg,field:system.cpu.user.pct,id:alert-custom-metric,type:custom)',nodeType:host,timestamp:1640995200000)"
+        "/inventory-mock?receivedParams=(customMetric:'(aggregation:avg,field:system.cpu.user.pct,id:alert-custom-metric,type:custom)',metric:'(aggregation:avg,field:system.cpu.user.pct,id:alert-custom-metric,type:custom)',nodeType:host,timestamp:1640995200000)"
       );
     });
     it('should work with non-custom metrics', () => {
@@ -137,7 +138,7 @@ describe('Inventory Threshold Rule', () => {
       });
       expect(mockInventoryLocator.getRedirectUrl).toHaveBeenCalledTimes(1);
       expect(url).toEqual(
-        "/inventory?(customMetric:'',metric:'(type:cpu)',nodeType:host,timestamp:1640995200000)"
+        "/inventory-mock?receivedParams=(customMetric:'',metric:'(type:cpu)',nodeType:host,timestamp:1640995200000)"
       );
     });
 
@@ -155,7 +156,7 @@ describe('Inventory Threshold Rule', () => {
       });
       expect(mockAssetDetailsLocator.getRedirectUrl).toHaveBeenCalledTimes(1);
       expect(url).toEqual(
-        "/node/host/my-host?(dateRange:(from:'2022-01-01T00:00:00.000Z',to:'2022-01-01T00:15:00.000Z'),incomingAlertMetric:cpu)"
+        "/node-mock/host/my-host?receivedParams=(dateRange:(from:'2022-01-01T00:00:00.000Z',to:'2022-01-01T00:15:00.000Z'),incomingAlertMetric:cpu)"
       );
     });
 
@@ -173,7 +174,7 @@ describe('Inventory Threshold Rule', () => {
       });
       expect(mockAssetDetailsLocator.getRedirectUrl).toHaveBeenCalledTimes(1);
       expect(url).toEqual(
-        "/node/container/my-container?(dateRange:(from:'2022-01-01T00:00:00.000Z',to:'2022-01-01T00:15:00.000Z'),incomingAlertMetric:cpu)"
+        "/node-mock/container/my-container?receivedParams=(dateRange:(from:'2022-01-01T00:00:00.000Z',to:'2022-01-01T00:15:00.000Z'),incomingAlertMetric:cpu)"
       );
     });
 
@@ -209,7 +210,7 @@ describe('Inventory Threshold Rule', () => {
       });
       expect(mockInventoryLocator.getRedirectUrl).toHaveBeenCalledTimes(1);
       expect(url).toEqual(
-        "/inventory?(customMetric:'(aggregation:avg,field:system.cpu.user.pct,id:alert-custom-metric,type:custom)',metric:'(aggregation:avg,field:system.cpu.user.pct,id:alert-custom-metric,type:custom)',nodeType:host,timestamp:1640995200000)"
+        "/inventory-mock?receivedParams=(customMetric:'(aggregation:avg,field:system.cpu.user.pct,id:alert-custom-metric,type:custom)',metric:'(aggregation:avg,field:system.cpu.user.pct,id:alert-custom-metric,type:custom)',nodeType:host,timestamp:1640995200000)"
       );
     });
 
@@ -239,7 +240,7 @@ describe('Inventory Threshold Rule', () => {
       });
       expect(mockInventoryLocator.getRedirectUrl).toHaveBeenCalledTimes(1);
       expect(url).toEqual(
-        "/inventory?(customMetric:'',metric:'(type:cpu)',nodeType:host,timestamp:1640995200000)"
+        "/inventory-mock?receivedParams=(customMetric:'',metric:'(type:cpu)',nodeType:host,timestamp:1640995200000)"
       );
     });
   });
@@ -259,7 +260,7 @@ describe('Metrics Rule', () => {
       });
       expect(mockAssetDetailsLocator.getRedirectUrl).toHaveBeenCalledTimes(1);
       expect(url).toEqual(
-        "/node/host/my-host?(dateRange:(from:'2022-01-01T00:00:00.000Z',to:'2022-01-01T00:15:00.000Z'))"
+        "/node-mock/host/my-host?receivedParams=(dateRange:(from:'2022-01-01T00:00:00.000Z',to:'2022-01-01T00:15:00.000Z'))"
       );
     });
 
