@@ -8,6 +8,7 @@
 /* eslint-disable max-classes-per-file */
 import { Entity, Fields } from '../entity';
 import { Serializable } from '../serializable';
+import { k8sNode } from './k8s_node';
 import { pod } from './pod';
 
 interface HostDocument extends Fields {
@@ -115,6 +116,10 @@ class Host extends Entity<HostDocument> {
 
   pod(uid: string) {
     return pod(uid, this.fields['host.hostname']);
+  }
+
+  node(podUid: string) {
+    return k8sNode(this.fields['host.hostname'], podUid);
   }
 }
 

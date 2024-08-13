@@ -18,11 +18,13 @@ interface K8sContainerDocument extends Fields {
   'container.name'?: string;
   'container.image.name'?: string;
   'container.runtime'?: string;
-  'host.name'?: string;
+  'host.name': string;
+  'host.hostname': string;
   'cloud.provider'?: string;
   'cloud.instance.id'?: string;
   'cloud.image.id'?: string;
   'event.dataset'?: string;
+  'agent.id': string;
 }
 
 export class K8sContainer extends Entity<K8sContainerDocument> {
@@ -53,6 +55,8 @@ export function k8sContainer(id: string, uid: string, nodeName: string): K8sCont
     'container.runtime': 'containerd',
     'container.image.name': 'image-1',
     'host.name': 'host-1',
+    'host.hostname': 'host-1',
+    'agent.id': 'synthtrace',
     'cloud.instance.id': 'instance-1',
     'cloud.image.id': 'image-1',
     'cloud.provider': 'aws',
