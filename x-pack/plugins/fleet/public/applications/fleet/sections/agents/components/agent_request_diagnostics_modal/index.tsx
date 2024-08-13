@@ -44,7 +44,7 @@ export const AgentRequestDiagnosticsModal: React.FunctionComponent<Props> = ({
     try {
       setIsSubmitting(true);
       const additionalMetrics = cpuMetricsEnabled ? [RequestDiagnosticsAdditionalMetrics.CPU] : [];
-      const excludeEventsLog = includeEventsLogEnabled ? false : true;
+      const excludeEventsLog = !includeEventsLogEnabled;
 
       const { error } = isSingleAgent
         ? await sendPostRequestDiagnostics((agents[0] as Agent).id, {
