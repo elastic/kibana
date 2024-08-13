@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Task cost checks detects tasks with cost definitions 1`] = `
+Array [
+  Object {
+    "cost": 10,
+    "taskType": "alerting:siem.indicatorRule",
+  },
+]
+`;
