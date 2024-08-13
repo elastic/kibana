@@ -55,16 +55,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('For each artifact list under management', function () {
     targetTags(this, ['@ess', '@serverless']);
-    this.timeout(60_000 * 15);
+    this.timeout(60_000 * 30);
 
     let indexedData: IndexedHostsAndAlertsResponse;
     let policyInfo: PolicyTestResourceInfo;
 
     before(async () => {
-      // indexedData = await endpointTestResources.loadEndpointData();
+      indexedData = await endpointTestResources.loadEndpointData();
     });
     after(async () => {
-      // await endpointTestResources.unloadEndpointData(indexedData);
+      await endpointTestResources.unloadEndpointData(indexedData);
     });
 
     const checkFleetArtifacts = async (
