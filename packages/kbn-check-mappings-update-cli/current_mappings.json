@@ -1482,6 +1482,10 @@
       }
     }
   },
+  "favorites": {
+    "dynamic": false,
+    "properties": {}
+  },
   "file": {
     "dynamic": false,
     "properties": {
@@ -2095,6 +2099,9 @@
         "type": "keyword"
       },
       "namespace": {
+        "type": "keyword"
+      },
+      "output_id": {
         "type": "keyword"
       },
       "overrides": {

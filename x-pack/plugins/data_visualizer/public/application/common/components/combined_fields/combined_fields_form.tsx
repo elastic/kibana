@@ -145,7 +145,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
     }
 
     const mappings = this.parseMappings();
-    return mappings.properties.hasOwnProperty(name);
+    return Object.hasOwn(mappings.properties, name);
   };
 
   render() {
