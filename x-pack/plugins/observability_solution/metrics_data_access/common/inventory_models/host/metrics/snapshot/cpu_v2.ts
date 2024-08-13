@@ -7,8 +7,8 @@
 
 import { MetricsUIAggregation } from '../../../types';
 
-export const cpuTotal: MetricsUIAggregation = {
-  cpuTotal: {
+export const cpuV2: MetricsUIAggregation = {
+  cpuV2: {
     avg: {
       field: 'system.cpu.total.norm.pct',
     },
