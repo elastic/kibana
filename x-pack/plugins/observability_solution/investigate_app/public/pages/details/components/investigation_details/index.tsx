@@ -8,7 +8,7 @@ import datemath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { keyBy, noop } from 'lodash';
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { AddObservationUI } from '../../../../components/add_observation_ui';
@@ -58,26 +58,6 @@ function InvestigationDetailsWithUser({
     from: range.start.toISOString(),
     to: range.end.toISOString(),
   });
-
-  useEffect(() => {
-    if (
-      renderableInvestigation?.parameters.timeRange.from &&
-      renderableInvestigation?.parameters.timeRange.to &&
-      range.start.toISOString() !== renderableInvestigation.parameters.timeRange.from &&
-      range.end.toISOString() !== renderableInvestigation.parameters.timeRange.to
-    ) {
-      setRange({
-        from: renderableInvestigation.parameters.timeRange.from,
-        to: renderableInvestigation.parameters.timeRange.to,
-      });
-    }
-  }, [
-    renderableInvestigation?.parameters.timeRange.from,
-    renderableInvestigation?.parameters.timeRange.to,
-    range.start,
-    range.end,
-    setRange,
-  ]);
 
   const gridItems = useMemo(() => {
     const widgetDefinitionsByType = keyBy(widgetDefinitions, 'type');
