@@ -171,6 +171,33 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         await collapseBtn.click();
         await this.expectSectionClosed(sectionId);
       },
+      async expectPanelExists(sectionId: NavigationId) {
+        log.debug('SolutionNavigation.sidenav.expectPanelExists', sectionId);
+        await testSubjects.existOrFail(`~sideNavPanel-id-${sectionId}`, {
+          timeout: TIMEOUT_CHECK,
+        });
+      },
+      async isPanelOpen(sectionId: NavigationId) {
+        try {
+          const panel = await testSubjects.find(`~sideNavPanel-id-${sectionId}`, TIMEOUT_CHECK);
+          return !!panel;
+        } catch (err) {
+          return false;
+        }
+      },
+      async openPanel(sectionId: NavigationId) {
+        log.debug('SolutionNavigation.sidenav.openPanel', sectionId);
+
+        const isOpen = await this.isPanelOpen(sectionId);
+        if (isOpen) return;
+
+        const panelOpenerBtn = await testSubjects.find(
+          `~panelOpener-id-${sectionId}`,
+          TIMEOUT_CHECK
+        );
+
+        await panelOpenerBtn.click();
+      },
       async isCollapsed() {
         const collapseNavBtn = await testSubjects.find('euiCollapsibleNavButton', TIMEOUT_CHECK);
         return (await collapseNavBtn.getAttribute('aria-expanded')) === 'false';

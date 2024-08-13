@@ -16,6 +16,8 @@ export const SOLUTION_NAME = i18n.translate('xpack.securitySolutionEss.nav.solut
   defaultMessage: 'Security',
 });
 
+let isSolutionNavAdded = false;
+
 export const initSideNavigation = async (services: Services) => {
   const { securitySolution, navigation } = services;
 
@@ -45,14 +47,26 @@ export const initSideNavigation = async (services: Services) => {
     )
   );
 
-  navigation.addSolutionNavigation({
-    id: 'security',
-    homePage: `${SECURITY_UI_APP_ID}:${SecurityPageName.landing}`,
-    title: SOLUTION_NAME,
-    icon: 'logoSecurity',
-    navigationTree$: essNavigationTree$,
-    panelContentProvider,
-    dataTestSubj: 'securitySolutionSideNav',
+  // To avoid a race condition where the navLinks are registered after the solution navigation
+  // we wait to have the getStarted link before adding the solution navigation.
+  // The getStarted deepLink needs to exist to correctly set the logo href link in the header.
+  securitySolution.getNavLinks$().subscribe((navLinks) => {
+    const getStartedLink = navLinks.find((link) => link.id === 'get_started');
+    if (getStartedLink) {
+      if (isSolutionNavAdded) return;
+
+      navigation.addSolutionNavigation({
+        id: 'security',
+        homePage: `${SECURITY_UI_APP_ID}:${SecurityPageName.landing}`,
+        title: SOLUTION_NAME,
+        icon: 'logoSecurity',
+        navigationTree$: essNavigationTree$,
+        panelContentProvider,
+        dataTestSubj: 'securitySolutionSideNav',
+      });
+
+      isSolutionNavAdded = true;
+    }
   });
 };
 
