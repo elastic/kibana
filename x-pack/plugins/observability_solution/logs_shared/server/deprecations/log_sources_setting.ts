@@ -35,20 +35,25 @@ export const getLogSourcesSettingDeprecationInfo = async ({
   if (logView && !logSourcesKibanaAdvancedSettingRT.is(logView.attributes.logIndices)) {
     return [
       {
-        title: i18n.translate('xpack.logsShared.deprecations.migrateLogSourcesSettingTitle', {
-          defaultMessage: 'Log sources setting',
-        }),
+        title: i18n.translate(
+          'xpack.logsShared.deprecations.migrateLogViewSettingsToLogSourcesSetting.title',
+          {
+            defaultMessage: 'Log sources setting',
+          }
+        ),
         level: 'warning',
-        deprecationType: 'config',
-        configPath: '',
-        message: i18n.translate('xpack.logsShared.deprecations.migrateLogSourcesSettingMessage', {
-          defaultMessage:
-            'Indices and Data view options previously provided via the Logs UI settings page are now deprecated. Please migrate to using the Kibana log sources advanced setting.',
-        }),
+        deprecationType: 'feature',
+        message: i18n.translate(
+          'xpack.logsShared.deprecations.migrateLogViewSettingsToLogSourcesSetting.message',
+          {
+            defaultMessage:
+              'Indices and Data view options previously provided via the Logs UI settings page are now deprecated. Please migrate to using the Kibana log sources advanced setting.',
+          }
+        ),
         correctiveActions: {
           manualSteps: [
             i18n.translate(
-              'xpack.logsShared.deprecations.migrateLogSourcesSettingMessage.manualStepMessage',
+              'xpack.logsShared.deprecations.migrateLogViewSettingsToLogSourcesSetting.message.manualStepMessage',
               {
                 defaultMessage:
                   'Update the Log sources Kibana advanced setting (via Management > Advanced Settings) to match the setting previously provided via the Logs UI settings page. Then via the Logs UI settings page use the Kibana log sources advanced setting option.',
