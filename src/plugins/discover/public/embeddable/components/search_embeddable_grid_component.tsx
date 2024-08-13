@@ -137,7 +137,7 @@ export function SearchEmbeddableGridComponent({
       onUpdateSampleSize: (newSampleSize: number | undefined) => {
         stateManager.sampleSize.next(newSampleSize);
       },
-      onUpdateDensity: (newDensity: DataGridDensity | undefined) => {
+      onUpdateDataGridDensity: (newDensity: DataGridDensity | undefined) => {
         stateManager.density.next(newDensity);
       },
     }),

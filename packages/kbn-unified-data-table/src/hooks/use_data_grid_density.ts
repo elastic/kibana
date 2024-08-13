@@ -8,7 +8,7 @@
 
 import type { EuiDataGridStyle } from '@elastic/eui';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import {
   DATA_GRID_STYLE_COMPACT,
   DATA_GRID_STYLE_EXPANDED,
@@ -48,14 +48,13 @@ export const useDataGridDensity = ({
   onUpdateDataGridDensity,
 }: UseDataGridDensityProps) => {
   const storageKey = `${consumer}:${DATA_GRID_DENSITY_STORAGE_KEY}`;
-  const [dataGridDensity, setDensity] = useState<DataGridDensity>(
-    dataGridDensityState ?? storage.get(storageKey) ?? DataGridDensity.COMPACT
-  );
+  const dataGridDensity = useMemo<DataGridDensity>(() => {
+    return dataGridDensityState ?? storage.get(storageKey) ?? DataGridDensity.COMPACT;
+  }, [dataGridDensityState, storage, storageKey]);
 
   const onChangeDataGridDensity = useCallback(
     (gridStyle: EuiDataGridStyle) => {
       const newDensity = getDensityFromStyle(gridStyle);
-      setDensity(newDensity);
       storage.set(storageKey, newDensity);
       onUpdateDataGridDensity?.(newDensity);
     },
