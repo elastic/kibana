@@ -41,7 +41,8 @@ export const installDefinition = async (
 
 export const uninstallDefinition = (supertest: Agent, id: string, deleteData = false) => {
   return supertest
-    .delete(`/internal/entities/definition/${id}${deleteData ? '?deleteData=true' : ''}`)
+    .delete(`/internal/entities/definition/${id}`)
+    .query({ deleteData })
     .set('kbn-xsrf', 'xxx')
     .send()
     .expect(200);
