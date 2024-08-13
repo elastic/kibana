@@ -45,5 +45,5 @@ export const services = {
   slo: SloApiProvider,
   securitySolutionApi: SecuritySolutionApiProvider,
   alertingApi: AlertingApiProvider,
-  sloApi: SloApiProviderNew, // TODO: There was already an slo service here for the slo api tests. Unify SloApiProvider and SloApiProviderNew as part of the slo API migration issue https://github.com/elastic/kibana/issues/183397
+  sloApi: SloApiProviderNew
 };
