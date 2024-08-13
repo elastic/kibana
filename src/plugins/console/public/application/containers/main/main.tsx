@@ -19,15 +19,13 @@ import {
   WelcomePanel,
   HelpPanel,
   SomethingWentWrongCallout,
-  NetworkRequestStatusBar,
 } from '../../components';
 
-import { useServicesContext, useEditorReadContext, useRequestReadContext } from '../../contexts';
+import { useServicesContext, useEditorReadContext } from '../../contexts';
 import { useDataInit } from '../../hooks';
 
 import { getTopNavConfig } from './get_top_nav';
 import type { SenseEditor } from '../../models/sense_editor';
-import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
 
 export interface MainProps {
   hideWelcome?: boolean;
@@ -39,11 +37,6 @@ export function Main({ hideWelcome = false }: MainProps) {
   } = useServicesContext();
 
   const { ready: editorsReady } = useEditorReadContext();
-
-  const {
-    requestInFlight: requestInProgress,
-    lastResult: { data: requestData, error: requestError },
-  } = useRequestReadContext();
 
   const [showWelcome, setShowWelcomePanel] = useState(
     () => storage.get('version_welcome_shown') !== '@@SENSE_REVISION' && !hideWelcome
@@ -69,8 +62,6 @@ export function Main({ hideWelcome = false }: MainProps) {
     );
   }
 
-  const data = getResponseWithMostSevereStatusCode(requestData) ?? requestError;
-
   return (
     <div id="consoleRoot">
       <EuiFlexGroup
@@ -87,35 +78,15 @@ export function Main({ hideWelcome = false }: MainProps) {
               })}
             </h1>
           </EuiTitle>
-          <EuiFlexGroup gutterSize="none">
-            <EuiFlexItem>
-              <TopNavMenu
-                disabled={!done}
-                items={getTopNavConfig({
-                  onClickHistory: () => setShowHistory(!showingHistory),
-                  onClickSettings: () => setShowSettings(true),
-                  onClickHelp: () => setShowHelp(!showHelp),
-                  onClickVariables: () => setShowVariables(!showVariables),
-                })}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} className="conApp__tabsExtension">
-              <NetworkRequestStatusBar
-                requestInProgress={requestInProgress}
-                requestResult={
-                  data
-                    ? {
-                        method: data.request.method.toUpperCase(),
-                        endpoint: data.request.path,
-                        statusCode: data.response.statusCode,
-                        statusText: data.response.statusText,
-                        timeElapsedMs: data.response.timeMs,
-                      }
-                    : undefined
-                }
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <TopNavMenu
+            disabled={!done}
+            items={getTopNavConfig({
+              onClickHistory: () => setShowHistory(!showingHistory),
+                onClickSettings: () => setShowSettings(true),
+                onClickHelp: () => setShowHelp(!showHelp),
+                onClickVariables: () => setShowVariables(!showVariables),
+            })}
+          />
         </EuiFlexItem>
         {showingHistory ? <EuiFlexItem grow={false}>{renderConsoleHistory()}</EuiFlexItem> : null}
         <EuiFlexItem>
