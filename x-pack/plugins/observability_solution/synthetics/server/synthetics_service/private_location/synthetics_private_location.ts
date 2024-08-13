@@ -262,17 +262,18 @@ export class SyntheticsPrivateLocation {
       return {};
     }
 
-    const newPolicyTemplate = await this.buildNewPolicy();
+    const [newPolicyTemplate, existingPolicies] = await Promise.all([
+      this.buildNewPolicy(),
+      this.getExistingPolicies(
+        configs.map(({ config }) => config),
+        allPrivateLocations,
+        spaceId
+      ),
+    ]);
 
     const policiesToUpdate: NewPackagePolicyWithId[] = [];
     const policiesToCreate: NewPackagePolicyWithId[] = [];
     const policiesToDelete: string[] = [];
-
-    const existingPolicies = await this.getExistingPolicies(
-      configs.map(({ config }) => config),
-      allPrivateLocations,
-      spaceId
-    );
 
     for (const { config, globalParams } of configs) {
       const { locations } = config;
