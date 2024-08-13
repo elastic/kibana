@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { GetInvestigationResponse } from '@kbn/investigate-app-plugin/common/schema/get';
 import { useQuery } from '@tanstack/react-query';
+import { GetInvestigationResponse } from '../../common/schema/get';
 import { investigationKeys } from './query_key_factory';
 import { useKibana } from './use_kibana';
 
