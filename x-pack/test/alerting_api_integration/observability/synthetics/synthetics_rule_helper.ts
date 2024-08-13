@@ -70,7 +70,7 @@ export class SyntheticsRuleHelper {
 
   async deleteMonitor(monitorId: string) {
     const res = await this.supertest
-      .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '?id=' + monitorId)
+      .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
       .set('kbn-xsrf', 'true')
       .send();
 

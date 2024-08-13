@@ -106,7 +106,7 @@ export class SyntheticsServices {
       async (monitor: Record<string, any>) => {
         await this.requester.request({
           description: 'delete monitor',
-          path: `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?id=${monitor.config_id}`,
+          path: `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitor.config_id}`,
           method: 'DELETE',
         });
       },

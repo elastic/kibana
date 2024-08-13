@@ -33,6 +33,9 @@ interface AggsResponse {
   monitorTypes: {
     buckets: Buckets;
   };
+  monitorTypeAggs: {
+    buckets: Buckets;
+  };
   monitorIdsAggs: {
     buckets: Array<{
       key: string;
@@ -85,7 +88,7 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
         searchFields: SEARCH_FIELDS,
       });
 
-      const { tagsAggs, locationsAggs, projectsAggs, monitorIdsAggs, monitorTypes } =
+      const { monitorTypeAggs, tagsAggs, locationsAggs, projectsAggs, monitorIdsAggs } =
         (data?.aggregations as AggsResponse) ?? {};
       const allLocationsMap = new Map(allLocations.map((obj) => [obj.id, obj.label]));
 
@@ -114,7 +117,7 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
             count,
           })) ?? [],
         monitorTypes:
-          monitorTypes?.buckets?.map(({ key, doc_count: count }) => ({
+          monitorTypeAggs?.buckets?.map(({ key, doc_count: count }) => ({
             label: key,
             value: key,
             count,
@@ -130,6 +133,13 @@ const aggs = {
   tagsAggs: {
     terms: {
       field: `${monitorAttributes}.${ConfigKey.TAGS}`,
+      size: 10000,
+      exclude: [''],
+    },
+  },
+  monitorTypeAggs: {
+    terms: {
+      field: `${syntheticsMonitorType}.attributes.${ConfigKey.MONITOR_TYPE}.keyword`,
       size: 10000,
       exclude: [''],
     },
