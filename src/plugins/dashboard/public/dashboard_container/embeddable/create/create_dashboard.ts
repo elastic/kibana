@@ -6,23 +6,13 @@
  * Side Public License, v 1.
  */
 
-import {
-  type ControlGroupContainer,
-} from '@kbn/controls-plugin/public';
 import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import {
-  AggregateQuery,
-  Query,
-  TimeRange,
-} from '@kbn/es-query';
+import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import deepEqual from 'fast-deep-equal';
 import { cloneDeep, omit } from 'lodash';
-import {
-  BehaviorSubject,
-  Subject,
-} from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { v4 } from 'uuid';
 import {
   DashboardContainerInput,

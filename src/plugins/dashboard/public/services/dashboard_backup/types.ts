@@ -7,9 +7,9 @@
  */
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 import { UnsavedPanelState } from '../../dashboard_container/types';
 import { SavedDashboardInput } from '../dashboard_content_management/types';
-import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 
 export interface DashboardBackupServiceType {
   clearState: (id?: string) => void;
@@ -24,7 +24,7 @@ export interface DashboardBackupServiceType {
     id: string | undefined,
     dashboardState: Partial<SavedDashboardInput>,
     panels: UnsavedPanelState,
-    controlGroupChanges: Partial<ControlGroupRuntimeState> | undefined,
+    controlGroupChanges: Partial<ControlGroupRuntimeState> | undefined
   ) => void;
   getViewMode: () => ViewMode;
   storeViewMode: (viewMode: ViewMode) => void;

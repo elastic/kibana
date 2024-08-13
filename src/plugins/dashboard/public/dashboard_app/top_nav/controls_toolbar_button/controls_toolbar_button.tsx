@@ -11,11 +11,11 @@ import React from 'react';
 import { EuiContextMenuPanel, useEuiTheme } from '@elastic/eui';
 import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
 
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { getControlButtonTitle } from '../../_dashboard_app_strings';
 import { AddDataControlButton } from './add_data_control_button';
 import { AddTimeSliderControlButton } from './add_time_slider_control_button';
 import { EditControlGroupButton } from './edit_control_group_button';
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
 
 export function ControlsToolbarButton({
   controlGroupApi,

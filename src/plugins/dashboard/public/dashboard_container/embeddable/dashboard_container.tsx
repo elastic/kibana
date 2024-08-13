@@ -8,7 +8,6 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { Reference } from '@kbn/content-management-utils';
-import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { I18nStart, KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
 import {
   type PublishingSubject,
@@ -34,7 +33,7 @@ import {
   type EmbeddableOutput,
   type IEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import { COMPARE_ALL_OPTIONS, compareFilters, type Filter, type Query, type TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
   HasRuntimeChildState,
@@ -53,11 +52,12 @@ import { omit } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
-import { BehaviorSubject, Subject, Subscription, startWith } from 'rxjs';
+import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs';
 import { v4 } from 'uuid';
 import { PublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { apiHasSerializableState } from '@kbn/presentation-containers/interfaces/serialized_state';
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
 import { DashboardAttributes, DashboardContainerInput, DashboardPanelState } from '../../../common';
 import { getReferencesForPanelId } from '../../../common/dashboard_container/persistable_state/dashboard_container_references';
@@ -87,7 +87,10 @@ import {
   showSettings,
 } from './api';
 import { duplicateDashboardPanel } from './api/duplicate_dashboard_panel';
-import { combineDashboardFiltersWithControlGroupFilters, startSyncingDashboardControlGroup } from './create/controls/dashboard_control_group_integration';
+import {
+  combineDashboardFiltersWithControlGroupFilters,
+  startSyncingDashboardControlGroup,
+} from './create/controls/dashboard_control_group_integration';
 import { initializeDashboard } from './create/create_dashboard';
 import {
   DashboardCreationOptions,
@@ -95,7 +98,6 @@ import {
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -151,7 +153,9 @@ export class DashboardContainer
   public integrationSubscriptions: Subscription = new Subscription();
   public publishingSubscription: Subscription = new Subscription();
   public diffingSubscription: Subscription = new Subscription();
-  public controlGroupApi$: PublishingSubject<ControlGroupApi | undefined> = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
+  public controlGroupApi$: PublishingSubject<ControlGroupApi | undefined> = new BehaviorSubject<
+    ControlGroupApi | undefined
+  >(undefined);
   public settings: Record<string, PublishingSubject<boolean | undefined>>;
 
   public searchSessionId?: string;
@@ -160,7 +164,7 @@ export class DashboardContainer
   public reload$ = new Subject<void>();
   public timeRestore$: BehaviorSubject<boolean | undefined>;
   public timeslice$: BehaviorSubject<[number, number] | undefined>;
-  public unifiedSearchFilters$: PublishingSubject<Filter[] | undefined>;
+  public unifiedSearchFilters$?: PublishingSubject<Filter[] | undefined>;
   public locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
 
   public readonly executionContext: KibanaExecutionContext;
@@ -317,38 +321,29 @@ export class DashboardContainer
       DashboardContainerInput
     >(this.publishingSubscription, this, 'lastReloadRequestTime');
 
-    const unifiedSearchFilters$ = new BehaviorSubject<Filter[] | undefined>(this.getInput().filters);
-    this.unifiedSearchFilters$ = unifiedSearchFilters$;
-    this.publishingSubscription.add(this.getInput$().pipe(
-      startWith(this.getInput()),
-      map((input) => input.filters),
-      distinctUntilChanged((previous, current) => {
-        return compareFilters(previous ?? [], current ?? [], COMPARE_ALL_OPTIONS);
-      })
-    ).subscribe(unifiedSearchFilters => {
-      unifiedSearchFilters$.next(unifiedSearchFilters);
-    }));
+    startSyncingDashboardControlGroup(this);
 
     this.executionContext = initialInput.executionContext;
 
     this.dataLoading = new BehaviorSubject<boolean | undefined>(false);
-    this.publishingSubscription.add(combineCompatibleChildrenApis<PublishesDataLoading, boolean | undefined>(
-      this,
-      'dataLoading',
-      apiPublishesDataLoading,
-      undefined,
-      // flatten method
-      (values) => {
-        return values.some((isLoading) => isLoading);
-      }
-    ).subscribe((isAtLeastOneChildLoading) => {
-      (this.dataLoading as BehaviorSubject<boolean | undefined>).next(isAtLeastOneChildLoading);
-    }));
+    this.publishingSubscription.add(
+      combineCompatibleChildrenApis<PublishesDataLoading, boolean | undefined>(
+        this,
+        'dataLoading',
+        apiPublishesDataLoading,
+        undefined,
+        // flatten method
+        (values) => {
+          return values.some((isLoading) => isLoading);
+        }
+      ).subscribe((isAtLeastOneChildLoading) => {
+        (this.dataLoading as BehaviorSubject<boolean | undefined>).next(isAtLeastOneChildLoading);
+      })
+    );
   }
 
   public setControlGroupApi(controlGroupApi: ControlGroupApi) {
     (this.controlGroupApi$ as BehaviorSubject<ControlGroupApi | undefined>).next(controlGroupApi);
-    startSyncingDashboardControlGroup(this, controlGroupApi);
   }
 
   public getAppContext() {
@@ -434,7 +429,10 @@ export class DashboardContainer
       panels,
     } = this.input;
 
-    let combinedFilters = combineDashboardFiltersWithControlGroupFilters(filters, this.controlGroupApi$?.value);
+    const combinedFilters = combineDashboardFiltersWithControlGroupFilters(
+      filters,
+      this.controlGroupApi$?.value
+    );
     const hasCustomTimeRange = Boolean(
       (panels[id]?.explicitInput as Partial<InheritedChildInput>)?.timeRange
     );

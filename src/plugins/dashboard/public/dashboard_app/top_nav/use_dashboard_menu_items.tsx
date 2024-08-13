@@ -144,7 +144,7 @@ export const useDashboardMenuItems = ({
         });
       }, viewMode);
     },
-    [dashboard, dashboardBackup, hasUnsavedChanges, viewMode]
+    [dashboard, dashboardBackup, hasUnsavedChanges, viewMode, isMounted]
   );
 
   /**
@@ -252,6 +252,7 @@ export const useDashboardMenuItems = ({
     dashboardBackup,
     quickSaveDashboard,
     resetChanges,
+    isResetting,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {
@@ -267,7 +268,15 @@ export const useDashboardMenuItems = ({
       isLoading: isResetting,
       run: () => resetChanges(),
     };
-  }, [hasOverlays, lastSavedId, resetChanges, viewMode, isSaveInProgress, hasUnsavedChanges]);
+  }, [
+    hasOverlays,
+    lastSavedId,
+    resetChanges,
+    viewMode,
+    isSaveInProgress,
+    hasUnsavedChanges,
+    isResetting,
+  ]);
 
   /**
    * Build ordered menus for view and edit mode.

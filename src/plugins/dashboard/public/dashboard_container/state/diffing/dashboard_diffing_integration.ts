@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { childrenUnsavedChanges$ } from '@kbn/presentation-containers';
 import { omit } from 'lodash';
 import { AnyAction, Middleware } from 'redux';
-import { combineLatest, debounceTime, Observable, of, startWith, switchMap } from 'rxjs';
+import { combineLatest, debounceTime, of, startWith, switchMap } from 'rxjs';
+import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 import { DashboardContainer, DashboardCreationOptions } from '../..';
 import { DashboardContainerInput } from '../../../../common';
 import { CHANGE_CHECK_DEBOUNCE } from '../../../dashboard_constants';
@@ -17,7 +17,6 @@ import { pluginServices } from '../../../services/plugin_services';
 import { UnsavedPanelState } from '../../types';
 import { dashboardContainerReducers } from '../dashboard_container_reducers';
 import { isKeyEqualAsync, unsavedChangesDiffingFunctions } from './dashboard_diffing_functions';
-import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 
 /**
  * An array of reducers which cannot cause unsaved changes. Unsaved changes only compares the explicit input
@@ -113,10 +112,10 @@ export function startDiffingDashboardState(
       dashboardUnsavedChanges,
       childrenUnsavedChanges$(this.children$),
       this.controlGroupApi$.pipe(
-        switchMap(controlGroupApi => {
+        switchMap((controlGroupApi) => {
           return controlGroupApi ? controlGroupApi.unsavedChanges : of(undefined);
         })
-      )
+      ),
     ]).subscribe(([dashboardChanges, unsavedPanelState, controlGroupChanges]) => {
       // calculate unsaved changes
       const hasUnsavedChanges =
@@ -198,6 +197,6 @@ function backupUnsavedChanges(
       panels: dashboardChanges.panels,
     },
     reactEmbeddableChanges,
-    controlGroupChanges,
+    controlGroupChanges
   );
 }

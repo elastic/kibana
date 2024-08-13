@@ -6,27 +6,50 @@
  * Side Public License, v 1.
  */
 
-import { type Filter } from '@kbn/es-query';
-import { BehaviorSubject, combineLatest, skip } from 'rxjs';
-import { DashboardContainer } from '../../dashboard_container';
+import { COMPARE_ALL_OPTIONS, compareFilters, type Filter } from '@kbn/es-query';
+import {
+  BehaviorSubject,
+  combineLatest,
+  distinctUntilChanged,
+  map,
+  of,
+  skip,
+  startWith,
+  switchMap,
+} from 'rxjs';
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
+import { PublishingSubject } from '@kbn/presentation-publishing';
+import { DashboardContainer } from '../../dashboard_container';
 
-export function startSyncingDashboardControlGroup(dashboard: DashboardContainer, controlGroupApi: ControlGroupApi) {
-  // when control group outputs filters, force a refresh!
-  dashboard.integrationSubscriptions.add(
-    controlGroupApi
-      .filters$
-      .pipe(
-        skip(1) // skip first filter output because it will have been applied in initialize
-      )
-      .subscribe(() => dashboard.forceRefresh(false)) // we should not reload the control group when the control group output changes - otherwise, performance is severely impacted
+export function startSyncingDashboardControlGroup(dashboard: DashboardContainer) {
+  const controlGroupFilters$ = dashboard.controlGroupApi$.pipe(
+    switchMap((controlGroupApi) => (controlGroupApi ? controlGroupApi.filters$ : of(undefined)))
+  );
+  const controlGroupTimeslice$ = dashboard.controlGroupApi$.pipe(
+    switchMap((controlGroupApi) => (controlGroupApi ? controlGroupApi.timeslice$ : of(undefined)))
   );
 
-  dashboard.integrationSubscriptions.add(
-    controlGroupApi
-      .timeslice$
-      .subscribe((timeslice) => {
-        dashboard.dispatch.setTimeslice(timeslice);
+  // --------------------------------------------------------------------------------------
+  // dashboard.unifiedSearchFilters$
+  // --------------------------------------------------------------------------------------
+  const unifiedSearchFilters$ = new BehaviorSubject<Filter[] | undefined>(
+    dashboard.getInput().filters
+  );
+  dashboard.unifiedSearchFilters$ = unifiedSearchFilters$ as PublishingSubject<
+    Filter[] | undefined
+  >;
+  dashboard.publishingSubscription.add(
+    dashboard
+      .getInput$()
+      .pipe(
+        startWith(dashboard.getInput()),
+        map((input) => input.filters),
+        distinctUntilChanged((previous, current) => {
+          return compareFilters(previous ?? [], current ?? [], COMPARE_ALL_OPTIONS);
+        })
+      )
+      .subscribe((unifiedSearchFilters) => {
+        unifiedSearchFilters$.next(unifiedSearchFilters);
       })
   );
 
@@ -36,16 +59,36 @@ export function startSyncingDashboardControlGroup(dashboard: DashboardContainer,
   function getCombinedFilters() {
     return combineDashboardFiltersWithControlGroupFilters(
       dashboard.getInput().filters ?? [],
-      controlGroupApi
+      dashboard.controlGroupApi$.value
     );
   }
 
   const filters$ = new BehaviorSubject<Filter[] | undefined>(getCombinedFilters());
   dashboard.filters$ = filters$;
-  
-  dashboard.integrationSubscriptions.add(
-    combineLatest([dashboard.unifiedSearchFilters$, controlGroupApi.filters$]).subscribe(() => {
+
+  dashboard.publishingSubscription.add(
+    combineLatest([dashboard.unifiedSearchFilters$, controlGroupFilters$]).subscribe(() => {
       filters$.next(getCombinedFilters());
+    })
+  );
+
+  // --------------------------------------------------------------------------------------
+  // when control group outputs filters, force a refresh!
+  // --------------------------------------------------------------------------------------
+  dashboard.integrationSubscriptions.add(
+    controlGroupFilters$
+      .pipe(
+        skip(1) // skip first filter output because it will have been applied in initialize
+      )
+      .subscribe(() => dashboard.forceRefresh(false)) // we should not reload the control group when the control group output changes - otherwise, performance is severely impacted
+  );
+
+  // --------------------------------------------------------------------------------------
+  // when control group outputs timeslice, dispatch timeslice
+  // --------------------------------------------------------------------------------------
+  dashboard.integrationSubscriptions.add(
+    controlGroupTimeslice$.subscribe((timeslice) => {
+      dashboard.dispatch.setTimeslice(timeslice);
     })
   );
 }

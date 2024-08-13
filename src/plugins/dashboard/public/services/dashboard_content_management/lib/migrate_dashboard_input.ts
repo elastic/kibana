@@ -30,7 +30,7 @@ export const migrateDashboardInput = (
   } = pluginServices.getServices();
   let anyMigrationRun = false;
   if (!dashboardInput) return dashboardInput;
-  
+
   const migratedPanels: DashboardContainerInput['panels'] = {};
   for (const [id, panel] of Object.entries(dashboardInput.panels)) {
     // if the panel type is registered in the new embeddable system, we do not need to run migrations for it.

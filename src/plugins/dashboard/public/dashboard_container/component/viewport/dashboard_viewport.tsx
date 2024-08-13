@@ -15,14 +15,18 @@ import { EuiPortal } from '@elastic/eui';
 import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 
+import {
+  ControlGroupApi,
+  ControlGroupRuntimeState,
+  ControlGroupSerializedState,
+} from '@kbn/controls-plugin/public';
+import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { DashboardGrid } from '../grid';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
-import { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
-import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import { getReferencesForControls } from '../../../../common/dashboard_container/persistable_state/dashboard_container_references';
 import { pluginServices } from '../../../services/plugin_services';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
 export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
   const [width, setWidth] = useState<number>(0);
@@ -77,10 +81,12 @@ export const DashboardViewportComponent = () => {
       })}
     >
       {viewMode !== ViewMode.PRINT ? (
-        <div
-          className={hasControls ? 'dshDashboardViewport-controls' : ''}
-        >
-          <ReactEmbeddableRenderer<ControlGroupSerializedState, ControlGroupRuntimeState, ControlGroupApi>
+        <div className={hasControls ? 'dshDashboardViewport-controls' : ''}>
+          <ReactEmbeddableRenderer<
+            ControlGroupSerializedState,
+            ControlGroupRuntimeState,
+            ControlGroupApi
+          >
             key={dashboard.id}
             hidePanelChrome={true}
             type={CONTROL_GROUP_TYPE}
@@ -91,16 +97,16 @@ export const DashboardViewportComponent = () => {
                 getSerializedStateForChild: () => {
                   return {
                     rawState: dashboard.controlGroupInput
-                      ? dashboard.controlGroupInput as ControlGroupSerializedState
+                      ? (dashboard.controlGroupInput as ControlGroupSerializedState)
                       : {
-                        controlStyle: 'oneLine',
-                        chainingSystem: 'HIERARCHICAL',
-                        showApplySelections: false,
-                        panelsJSON: JSON.stringify({}),
-                        ignoreParentSettingsJSON:
-                          '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
-                      },
-                    references: getReferencesForControls(dashboard.savedObjectReferences)
+                          controlStyle: 'oneLine',
+                          chainingSystem: 'HIERARCHICAL',
+                          showApplySelections: false,
+                          panelsJSON: JSON.stringify({}),
+                          ignoreParentSettingsJSON:
+                            '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
+                        },
+                    references: getReferencesForControls(dashboard.savedObjectReferences),
                   };
                 },
                 getRuntimeStateForChild: () => {

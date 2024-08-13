@@ -10,7 +10,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import { apiPublishesDataViews, PublishesDataViews } from '@kbn/presentation-publishing';
 import { uniqBy } from 'lodash';
-import { combineLatest, map, Observable, of, switchMap } from 'rxjs';
+import { combineLatest, Observable, of, switchMap } from 'rxjs';
 import { pluginServices } from '../../../../services/plugin_services';
 import { DashboardContainer } from '../../dashboard_container';
 
@@ -20,7 +20,7 @@ export function startSyncingDashboardDataViews(this: DashboardContainer) {
   } = pluginServices.getServices();
 
   const controlGroupDataViewsPipe: Observable<DataView[] | undefined> = this.controlGroupApi$.pipe(
-    switchMap(controlGroupApi => {
+    switchMap((controlGroupApi) => {
       return controlGroupApi ? controlGroupApi.dataViews : of([]);
     })
   );
