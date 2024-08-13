@@ -15,7 +15,7 @@ export interface TopNavMenuItem {
   description: string;
   onClick: () => void;
   testId: string;
-  isSelected?: boolean;
+  isSelected: boolean;
 }
 
 interface Props {
@@ -34,7 +34,7 @@ export const TopNavMenu: FunctionComponent<Props> = ({ items, disabled }) => {
             onClick={item.onClick}
             title={item.label}
             data-test-subj={item.testId}
-            isSelected={item.isSelected ?? false}
+            isSelected={item.isSelected}
           >
             {item.label}
           </EuiTab>

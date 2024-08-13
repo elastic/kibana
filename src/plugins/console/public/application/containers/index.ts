@@ -7,5 +7,4 @@
  */
 
 export { Main } from './main';
-export { Main as MainNew } from './main_new';
 export { Panel, PanelsContainer } from './split_panel';

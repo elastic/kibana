@@ -8,57 +8,19 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPageTemplate } from '@elastic/eui';
-import { ConsoleHistory } from '../console_history';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPageTemplate, EuiSplitPanel } from '@elastic/eui';
+import type { SenseEditor } from '../../models';
 import { Editor } from '../editor';
-import { Settings } from '../settings';
-import { Variables } from '../variables';
-
-import {
-  TopNavMenu,
-  WelcomePanel,
-  HelpPanel,
-  SomethingWentWrongCallout,
-  NetworkRequestStatusBar,
-} from '../../components';
-
-import { useServicesContext, useEditorReadContext, useRequestReadContext } from '../../contexts';
+import { TopNavMenu, SomethingWentWrongCallout } from '../../components';
 import { useDataInit } from '../../hooks';
-
 import { getTopNavConfig } from './get_top_nav';
-import type { SenseEditor } from '../../models/sense_editor';
-import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
+import { SHELL_TAB_ID } from './tab_ids';
 
-export interface MainProps {
-  hideWelcome?: boolean;
-}
-
-export function Main({ hideWelcome = false }: MainProps) {
-  const {
-    services: { storage },
-  } = useServicesContext();
-
-  const { ready: editorsReady } = useEditorReadContext();
-
-  const {
-    requestInFlight: requestInProgress,
-    lastResult: { data: requestData, error: requestError },
-  } = useRequestReadContext();
-
-  const [showWelcome, setShowWelcomePanel] = useState(
-    () => storage.get('version_welcome_shown') !== '@@SENSE_REVISION' && !hideWelcome
-  );
-
-  const [showingHistory, setShowHistory] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
-  const [showVariables, setShowVariables] = useState(false);
+export function Main() {
+  const [selectedTab, setSelectedTab] = useState(SHELL_TAB_ID);
 
   const [editorInstance, setEditorInstance] = useState<SenseEditor | null>(null);
 
-  const renderConsoleHistory = () => {
-    return editorsReady ? <ConsoleHistory close={() => setShowHistory(false)} /> : null;
-  };
   const { done, error, retry } = useDataInit();
 
   if (error) {
@@ -69,16 +31,9 @@ export function Main({ hideWelcome = false }: MainProps) {
     );
   }
 
-  const data = getResponseWithMostSevereStatusCode(requestData) ?? requestError;
-
   return (
     <div id="consoleRoot">
-      <EuiFlexGroup
-        className="consoleContainer"
-        gutterSize="none"
-        direction="column"
-        responsive={false}
-      >
+      <EuiFlexGroup className="consoleContainer" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle className="euiScreenReaderOnly">
             <h1>
@@ -87,58 +42,26 @@ export function Main({ hideWelcome = false }: MainProps) {
               })}
             </h1>
           </EuiTitle>
-          <EuiFlexGroup gutterSize="none">
-            <EuiFlexItem>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiSplitPanel.Outer grow={true}>
+            <EuiSplitPanel.Inner grow={false} className="consoleTabs">
               <TopNavMenu
                 disabled={!done}
                 items={getTopNavConfig({
-                  onClickHistory: () => setShowHistory(!showingHistory),
-                  onClickSettings: () => setShowSettings(true),
-                  onClickHelp: () => setShowHelp(!showHelp),
-                  onClickVariables: () => setShowVariables(!showVariables),
+                  selectedTab,
+                  setSelectedTab,
                 })}
               />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} className="conApp__tabsExtension">
-              <NetworkRequestStatusBar
-                requestInProgress={requestInProgress}
-                requestResult={
-                  data
-                    ? {
-                        method: data.request.method.toUpperCase(),
-                        endpoint: data.request.path,
-                        statusCode: data.response.statusCode,
-                        statusText: data.response.statusText,
-                        timeElapsedMs: data.response.timeMs,
-                      }
-                    : undefined
-                }
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        {showingHistory ? <EuiFlexItem grow={false}>{renderConsoleHistory()}</EuiFlexItem> : null}
-        <EuiFlexItem>
-          <Editor loading={!done} setEditorInstance={setEditorInstance} />
+            </EuiSplitPanel.Inner>
+            <EuiSplitPanel.Inner paddingSize="none">
+              {selectedTab === SHELL_TAB_ID && (
+                <Editor loading={!done} setEditorInstance={setEditorInstance} />
+              )}
+            </EuiSplitPanel.Inner>
+          </EuiSplitPanel.Outer>
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      {done && showWelcome ? (
-        <WelcomePanel
-          onDismiss={() => {
-            storage.set('version_welcome_shown', '@@SENSE_REVISION');
-            setShowWelcomePanel(false);
-          }}
-        />
-      ) : null}
-
-      {showSettings ? (
-        <Settings onClose={() => setShowSettings(false)} editorInstance={editorInstance} />
-      ) : null}
-
-      {showVariables ? <Variables onClose={() => setShowVariables(false)} /> : null}
-
-      {showHelp ? <HelpPanel onClose={() => setShowHelp(false)} /> : null}
     </div>
   );
 }
