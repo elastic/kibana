@@ -14,7 +14,7 @@ interface KibanaRequestParams {
   params?: unknown;
 }
 
-export function formatParams(params: KibanaRequestParams) {
+export function stripNullishRequestParameters(params: KibanaRequestParams) {
   return omitBy<{ path: any; body: any; query: any }>(
     {
       path: params.params,

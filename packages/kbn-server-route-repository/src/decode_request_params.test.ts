@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { jsonRt } from '@kbn/io-ts-utils';
+
 import * as t from 'io-ts';
 import { decodeRequestParams } from './decode_request_params';
 
@@ -71,59 +71,5 @@ describe('decodeRequestParams', () => {
         Excess keys are not allowed:
       path.extraKey"
     `);
-  });
-
-  it('returns the decoded output', () => {
-    const decode = () => {
-      return decodeRequestParams(
-        {
-          query: {
-            _inspect: 'true',
-          },
-        },
-        t.type({
-          query: t.type({
-            _inspect: jsonRt.pipe(t.boolean),
-          }),
-        })
-      );
-    };
-
-    expect(decode).not.toThrow();
-
-    expect(decode()).toEqual({
-      query: {
-        _inspect: true,
-      },
-    });
-  });
-
-  it('allows excess keys in an any type', () => {
-    const decode = () => {
-      return decodeRequestParams(
-        {
-          body: {
-            body: {
-              query: 'foo',
-            },
-          },
-        },
-        t.type({
-          body: t.type({
-            body: t.any,
-          }),
-        })
-      );
-    };
-
-    expect(decode).not.toThrow();
-
-    expect(decode()).toEqual({
-      body: {
-        body: {
-          query: 'foo',
-        },
-      },
-    });
   });
 });

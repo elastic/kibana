@@ -16,9 +16,9 @@ import {
 import {
   IoTsParamsObject,
   decodeRequestParams,
-  formatParams,
+  stripNullishRequestParameters,
   parseEndpoint,
-  routeValidationObject,
+  passThroughValidationObject,
 } from '@kbn/server-route-repository';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import axios from 'axios';
@@ -61,13 +61,13 @@ export function registerRoutes({ config, repository, core, logger, dependencies 
     (router[method] as RouteRegistrar<typeof method, SloRequestHandlerContext>)(
       {
         path: pathname,
-        validate: routeValidationObject,
+        validate: passThroughValidationObject,
         options,
       },
       async (context, request, response) => {
         try {
           const decodedParams = decodeRequestParams(
-            formatParams({
+            stripNullishRequestParameters({
               params: request.params,
               body: request.body,
               query: request.query,

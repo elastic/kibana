@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { errors } from '@elastic/elasticsearch';
 import { isBoom } from '@hapi/boom';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
@@ -20,8 +21,8 @@ import {
 } from '@kbn/server-route-repository-utils';
 import { isZod } from '@kbn/zod';
 import { merge } from 'lodash';
-import { routeValidationObject } from './route_validation_object';
-import { validateParams } from './validate_params';
+import { passThroughValidationObject, noParamsValidationObject } from './validation_objects';
+import { validateAndDecodeParams } from './validate_and_decode_params';
 import { makeZodValidationObject } from './make_zod_validation_object';
 
 const CLIENT_CLOSED_REQUEST = {
@@ -57,7 +58,7 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
       response: KibanaResponseFactory
     ) => {
       try {
-        const validatedParams = validateParams(request, params);
+        const validatedParams = validateAndDecodeParams(request, params);
 
         const { aborted, result } = await Promise.race([
           handler({
@@ -119,9 +120,14 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
 
     logger.debug(`Registering endpoint ${endpoint}`);
 
-    const validationObject = isZod(params)
-      ? makeZodValidationObject(params as ZodParamsObject)
-      : routeValidationObject;
+    let validationObject;
+    if (params === undefined) {
+      validationObject = noParamsValidationObject;
+    } else if (isZod(params)) {
+      validationObject = makeZodValidationObject(params as ZodParamsObject);
+    } else {
+      validationObject = passThroughValidationObject;
+    }
 
     if (!version) {
       router[method](

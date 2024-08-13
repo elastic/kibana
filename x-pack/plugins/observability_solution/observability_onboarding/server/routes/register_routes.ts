@@ -12,9 +12,9 @@ import {
   IoTsParamsObject,
   ServerRouteRepository,
   decodeRequestParams,
-  formatParams,
+  stripNullishRequestParameters,
   parseEndpoint,
-  routeValidationObject,
+  passThroughValidationObject,
 } from '@kbn/server-route-repository';
 import * as t from 'io-ts';
 import { ObservabilityOnboardingConfig } from '..';
@@ -54,13 +54,13 @@ export function registerRoutes({
     (router[method] as RouteRegistrar<typeof method, ObservabilityOnboardingRequestHandlerContext>)(
       {
         path: pathname,
-        validate: routeValidationObject,
+        validate: passThroughValidationObject,
         options,
       },
       async (context, request, response) => {
         try {
           const decodedParams = decodeRequestParams(
-            formatParams({
+            stripNullishRequestParameters({
               params: request.params,
               body: request.body,
               query: request.query,

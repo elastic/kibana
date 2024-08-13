@@ -9,11 +9,10 @@
 import { KibanaRequest } from '@kbn/core-http-server';
 import { ZodParamsObject, IoTsParamsObject } from '@kbn/server-route-repository-utils';
 import { isZod } from '@kbn/zod';
-import { pick } from 'lodash';
 import { decodeRequestParams } from './decode_request_params';
-import { formatParams } from './format_params';
+import { stripNullishRequestParameters } from './strip_nullish_request_parameters';
 
-export function validateParams(
+export function validateAndDecodeParams(
   request: KibanaRequest,
   paramsSchema: ZodParamsObject | IoTsParamsObject | undefined
 ) {
@@ -21,7 +20,11 @@ export function validateParams(
     return undefined;
   }
 
-  const params = formatParams(pick(request, 'params', 'body', 'query'));
+  const params = stripNullishRequestParameters({
+    params: request.params,
+    body: request.body,
+    query: request.query,
+  });
 
   if (isZod(paramsSchema)) {
     // Already validated by platform

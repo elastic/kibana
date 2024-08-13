@@ -9,12 +9,12 @@
 import { KibanaRequest } from '@kbn/core-http-server';
 import { z } from '@kbn/zod';
 import * as t from 'io-ts';
-import { validateParams } from './validate_params';
+import { validateAndDecodeParams } from './validate_and_decode_params';
 
-describe('validateParams', () => {
+describe('validateAndDecodeParams', () => {
   it('does nothing if no schema is provided', () => {
     const request = {} as KibanaRequest;
-    expect(validateParams(request, undefined)).toEqual(undefined);
+    expect(validateAndDecodeParams(request, undefined)).toEqual(undefined);
   });
 
   it('only does formatting when using zod', () => {
@@ -25,7 +25,7 @@ describe('validateParams', () => {
       query: {},
     } as KibanaRequest;
 
-    expect(validateParams(request, z.object({}))).toEqual({
+    expect(validateAndDecodeParams(request, z.object({}))).toEqual({
       path: {
         my_path_param: 'test',
       },
@@ -46,7 +46,7 @@ describe('validateParams', () => {
       query: {},
     } as KibanaRequest;
 
-    expect(validateParams(validRequest, schema)).toEqual({
+    expect(validateAndDecodeParams(validRequest, schema)).toEqual({
       path: {
         my_path_param: 'test',
       },
@@ -58,7 +58,7 @@ describe('validateParams', () => {
       },
     } as KibanaRequest;
     const shouldThrow = () => {
-      return validateParams(invalidRequest, schema);
+      return validateAndDecodeParams(invalidRequest, schema);
     };
 
     expect(shouldThrow).toThrowErrorMatchingInlineSnapshot(`

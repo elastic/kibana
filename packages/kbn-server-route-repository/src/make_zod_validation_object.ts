@@ -6,12 +6,22 @@
  * Side Public License, v 1.
  */
 
+import { ZodObject, ZodAny } from '@kbn/zod';
 import { ZodParamsObject } from '@kbn/server-route-repository-utils';
+import { noParamsValidationObject } from './validation_objects';
 
 export function makeZodValidationObject(params: ZodParamsObject) {
   return {
-    params: params.shape.path ? params.shape.path : undefined,
-    query: params.shape.query ? params.shape.query : undefined,
-    body: params.shape.body ? params.shape.body : undefined,
+    params: params.shape.path ? asStrict(params.shape.path) : noParamsValidationObject.params,
+    query: params.shape.query ? asStrict(params.shape.query) : noParamsValidationObject.query,
+    body: params.shape.body ? asStrict(params.shape.body) : noParamsValidationObject.body,
   };
+}
+
+function asStrict(schema: ZodAny) {
+  if (schema instanceof ZodObject) {
+    return schema.strict();
+  } else {
+    return schema;
+  }
 }

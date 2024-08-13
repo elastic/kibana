@@ -11,7 +11,7 @@ import { z } from '@kbn/zod';
 import { CoreSetup, kibanaResponseFactory } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { registerRoutes } from './register_routes';
-import { routeValidationObject } from './route_validation_object';
+import { passThroughValidationObject } from './validation_objects';
 import { NEVER } from 'rxjs';
 
 describe('registerRoutes', () => {
@@ -141,7 +141,7 @@ describe('registerRoutes', () => {
     const [internalRoute] = post.mock.calls[0];
     expect(internalRoute.path).toEqual('/internal/app/feature');
     expect(internalRoute.options).toEqual(internalOptions);
-    expect(internalRoute.validate).toEqual(routeValidationObject);
+    expect(internalRoute.validate).toEqual(passThroughValidationObject);
 
     expect(postWithVersion).toHaveBeenCalledTimes(1);
     const [publicRoute] = postWithVersion.mock.calls[0];
@@ -153,7 +153,7 @@ describe('registerRoutes', () => {
     const [versionedRoute] = postAddVersion.mock.calls[0];
     expect(versionedRoute.version).toEqual('version');
     expect(versionedRoute.validate).toEqual({
-      request: routeValidationObject,
+      request: passThroughValidationObject,
     });
   });
 
@@ -190,7 +190,7 @@ describe('registerRoutes', () => {
     expect(internalRoute.path).toEqual('/internal/app/feature_zod');
     expect(internalRoute.options).toEqual(internalOptions);
 
-    expect(internalRoute.validate).not.toEqual(routeValidationObject);
+    expect(internalRoute.validate).not.toEqual(passThroughValidationObject);
     expect(internalRoute.validate).toEqual({
       params: zodParamsRt.shape.path,
       query: zodParamsRt.shape.query,

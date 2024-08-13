@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { formatParams } from './format_params';
+import { stripNullishRequestParameters } from './strip_nullish_request_parameters';
 
-describe('formatParams', () => {
+describe('stripNullishRequestParameters', () => {
   it('translate params to path', () => {
     expect(
-      formatParams({
+      stripNullishRequestParameters({
         params: {
           something: 'test',
         },
@@ -25,7 +25,7 @@ describe('formatParams', () => {
 
   it('removes invalid values', () => {
     expect(
-      formatParams({
+      stripNullishRequestParameters({
         params: undefined,
         query: null,
         body: {},
