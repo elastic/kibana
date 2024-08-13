@@ -62,6 +62,11 @@ export const useFilterUpdate = (
     const newFiltersString = getUpdateFilters(currentFiltersMap, fieldName, values);
     const newExclusionsString = getUpdateFilters(currentExclusionsMap, fieldName, notValues);
 
+    // no new filters to apply
+    if (filters === newFiltersString && excludedFilters === newExclusionsString) {
+      return;
+    }
+
     const update: { [key: string]: string } = {};
 
     addUpdatedField(filters, 'filters', newFiltersString, update);

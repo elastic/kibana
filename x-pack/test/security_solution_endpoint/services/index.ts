@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SvlUserManagerProvider } from '@kbn/test-suites-serverless/shared/services/svl_user_manager';
+import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { SvlCommonApiServiceProvider } from '@kbn/test-suites-serverless/shared/services/svl_common_api';
 import { services as xPackFunctionalServices } from '../../functional/services';
 import { IngestManagerProvider } from '../../common/services/ingest_manager';
@@ -43,7 +43,7 @@ export const svlServices = {
   supertestWithoutAuth: KibanaSupertestWithCertWithoutAuthProvider,
 
   svlCommonApi: SvlCommonApiServiceProvider,
-  svlUserManager: SvlUserManagerProvider,
+  svlUserManager: commonFunctionalServices.samlAuth,
 };
 
 export type Services = typeof services | typeof svlServices;

@@ -213,6 +213,8 @@
     "@kbn/integration-assistant-plugin",
     "@kbn/avc-banner",
     "@kbn/security-solution-common",
-    "@kbn/config",
+    "@kbn/esql-ast",
+    "@kbn/esql-validation-autocomplete",
+    "@kbn/config"
   ]
 }

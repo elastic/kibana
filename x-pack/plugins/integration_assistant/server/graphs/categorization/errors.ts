@@ -9,8 +9,8 @@ import type {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import type { ESProcessorItem, Pipeline } from '../../../common';
-import type { CategorizationState } from '../../types';
+import type { Pipeline } from '../../../common';
+import type { CategorizationState, SimplifiedProcessors, SimplifiedProcessor } from '../../types';
 import { combineProcessors } from '../../util/processors';
 import { CATEGORIZATION_ERROR_PROMPT } from './prompts';
 
@@ -29,9 +29,14 @@ export async function handleErrors(
     errors: JSON.stringify(state.errors, null, 2),
     package_name: state.packageName,
     data_stream_name: state.dataStreamName,
-  })) as ESProcessorItem[];
+  })) as SimplifiedProcessor[];
 
-  const currentPipeline = combineProcessors(state.initialPipeline as Pipeline, currentProcessors);
+  const processors = {
+    type: 'categorization',
+    processors: currentProcessors,
+  } as SimplifiedProcessors;
+
+  const currentPipeline = combineProcessors(state.initialPipeline as Pipeline, processors);
 
   return {
     currentPipeline,

@@ -16,4 +16,5 @@ export * from './get_message_field_with_fallbacks';
 export * from './get_should_show_field_handler';
 export * from './nested_fields';
 export * from './get_field_value';
+export * from './calc_field_counts';
 export { isLegacyTableEnabled } from './is_legacy_table_enabled';
