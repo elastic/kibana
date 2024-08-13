@@ -103,6 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('Rule creation', () => {
       it('creates rule successfully', async () => {
         actionId = await alertingApi.createIndexConnector({
+          roleAuthc,
           name: 'Index Connector: Slo Burn rate API test',
           indexName: ALERT_ACTION_INDEX,
         });
@@ -135,6 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         const dependencyRule = await alertingApi.createRule({
+          roleAuthc,
           tags: ['observability'],
           consumer: expectedConsumer,
           name: 'SLO Burn Rate rule - Dependency',
@@ -207,6 +209,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         const createdRule = await alertingApi.createRule({
+          roleAuthc,
           tags: ['observability'],
           consumer: expectedConsumer,
           name: 'SLO Burn Rate rule',
@@ -309,7 +312,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should find the created rule with correct information about the consumer', async () => {
-        const match = await alertingApi.findRule(ruleId);
+        const match = await alertingApi.findRule(ruleId, roleAuthc);
         expect(match).not.to.be(undefined);
         expect(match.consumer).to.be(expectedConsumer);
       });

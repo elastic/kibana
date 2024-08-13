@@ -10,6 +10,7 @@ import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
 export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProviderContext) {
   const retry = getService('retry');
+  const samlAuth = getService('samlAuth');
   const supertest = getService('supertest');
   const es = getService('es');
   const requestTimeout = 30 * 1000;
@@ -33,7 +34,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
         const response = await supertest
           .get(`/api/alerting/rule/${ruleId}`)
           .set(roleAuthc.apiKeyHeader)
-          .set(roleAuthc.getInternalRequestHeader())
+          .set(samlAuth.getInternalRequestHeader())
           .timeout(requestTimeout);
         const { execution_status: executionStatus } = response.body || {};
         const { status } = executionStatus || {};
@@ -101,12 +102,12 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
     }: {
       name: string;
       indexName: string;
-      roleAuthC: RoleCredentials;
+      roleAuthc: RoleCredentials;
     }) {
       const { body } = await supertest
         .post(`/api/actions/connector`)
         .set(roleAuthc.apiKeyHeader)
-        .set(roleAuthC.getInternalRequestHeader())
+        .set(samlAuth.getInternalRequestHeader())
         .send({
           name,
           config: {
@@ -140,7 +141,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       const { body } = await supertest
         .post(`/api/alerting/rule`)
         .set(roleAuthc.apiKeyHeader)
-        .set(roleAuthC.getInternalRequestHeader())
+        .set(samlAuth.getInternalRequestHeader())
         .send({
           params,
           consumer,
@@ -162,7 +163,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       const response = await supertest
         .get('/api/alerting/rules/_find')
         .set(roleAuthc.apiKeyHeader)
-        .set(roleAuthC.getInternalRequestHeader());
+        .set(samlAuth.getInternalRequestHeader());
       return response.body.data.find((obj: any) => obj.id === ruleId);
     },
   };
