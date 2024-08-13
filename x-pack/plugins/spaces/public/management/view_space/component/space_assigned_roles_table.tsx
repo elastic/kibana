@@ -36,8 +36,8 @@ interface ISpaceAssignedRolesTableProps {
   isReadOnly: boolean;
   assignedRoles: Role[];
   onAssignNewRoleClick: () => Promise<void>;
-  onClickBulkEdit: (selectedRoles: Role[]) => Promise<void>;
-  onClickBulkRemove: (selectedRoles: Role[]) => Promise<void>;
+  onClickBulkEdit: (selectedRoles: Role[]) => void;
+  onClickBulkRemove: (selectedRoles: Role[]) => void;
 }
 
 /**
@@ -268,7 +268,7 @@ export const SpaceAssignedRolesTable = ({
     const pageIndex = pagination.index;
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexGroup direction="column" gutterSize="xs">
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="flexStart" alignItems="center">
             <EuiFlexItem grow={false}>
@@ -297,12 +297,16 @@ export const SpaceAssignedRolesTable = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiPopover
+                isOpen={isBulkActionContextOpen}
+                closePopover={setBulkActionContextOpen.bind(null, false)}
+                anchorPosition="downCenter"
                 button={
                   <EuiButtonEmpty
-                    disabled={!selectedRoles.length}
+                    size="s"
                     iconSide="right"
-                    onClick={setBulkActionContextOpen.bind(null, true)}
                     iconType="arrowDown"
+                    disabled={!selectedRoles.length}
+                    onClick={setBulkActionContextOpen.bind(null, true)}
                   >
                     {i18n.translate(
                       'xpack.spaces.management.spaceDetails.rolesTable.bulkActions.contextMenuOpener',
@@ -312,9 +316,6 @@ export const SpaceAssignedRolesTable = ({
                     )}
                   </EuiButtonEmpty>
                 }
-                isOpen={isBulkActionContextOpen}
-                closePopover={setBulkActionContextOpen.bind(null, false)}
-                anchorPosition="downCenter"
               >
                 <EuiContextMenu
                   size="s"
@@ -333,6 +334,7 @@ export const SpaceAssignedRolesTable = ({
                           ),
                           onClick: async () => {
                             await onClickBulkEdit(selectedRoles);
+                            setBulkActionContextOpen(false);
                           },
                         },
                         {
@@ -347,6 +349,7 @@ export const SpaceAssignedRolesTable = ({
                           ),
                           onClick: async () => {
                             await onClickBulkRemove(selectedRoles);
+                            setBulkActionContextOpen(false);
                           },
                         },
                       ],

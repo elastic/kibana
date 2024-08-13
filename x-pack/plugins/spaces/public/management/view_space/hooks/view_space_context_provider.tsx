@@ -9,24 +9,24 @@ import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext } from 'react';
 
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { HttpStart } from '@kbn/core-http-browser';
-import type { NotificationsStart } from '@kbn/core-notifications-browser';
-import type { OverlayStart } from '@kbn/core-overlays-browser';
-import type { RolesAPIClient } from '@kbn/security-plugin-types-public';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type {
+  PrivilegesAPIClientPublicContract,
+  RolesAPIClient,
+} from '@kbn/security-plugin-types-public';
 
 import type { SpacesManager } from '../../../spaces_manager';
 
 // FIXME: rename to EditSpaceServices
-export interface ViewSpaceServices {
+export interface ViewSpaceServices
+  extends Pick<CoreStart, 'theme' | 'i18n' | 'overlays' | 'http' | 'notifications'> {
   capabilities: ApplicationStart['capabilities'];
   getUrlForApp: ApplicationStart['getUrlForApp'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
   serverBasePath: string;
   spacesManager: SpacesManager;
   getRolesAPIClient: () => Promise<RolesAPIClient>;
-  http: HttpStart;
-  overlays: OverlayStart;
-  notifications: NotificationsStart;
+  getPrivilegesAPIClient: () => Promise<PrivilegesAPIClientPublicContract>;
 }
 
 const ViewSpaceContext = createContext<ViewSpaceServices | null>(null);

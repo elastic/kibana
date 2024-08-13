@@ -72,7 +72,7 @@ export const spacesManagementApp = Object.freeze({
           text: title,
           href: `/`,
         };
-        const { notifications, application, chrome, http, overlays } = coreStart;
+        const { notifications, application, chrome, http, overlays, theme } = coreStart;
 
         chrome.docTitle.change(title);
 
@@ -148,6 +148,8 @@ export const spacesManagementApp = Object.freeze({
               http={http}
               overlays={overlays}
               notifications={notifications}
+              theme={theme}
+              i18n={coreStart.i18n}
               spacesManager={spacesManager}
               spaceId={spaceId}
               onLoadSpace={onLoadSpace}
