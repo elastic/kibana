@@ -97,9 +97,16 @@ describe('checkProdNativeModules', () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     jest.replaceProperty(require('@kbn/repo-info'), 'REPO_ROOT', withDevNativeModulesDir);
 
-    const withDevNativeModulesPkgJson = JSON.parse(fs.readFileSync(withDevNativeModulesPkgJsonPath, 'utf8'));
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    jest.replaceProperty(require('@kbn/repo-info'), 'kibanaPackageJson', withDevNativeModulesPkgJson);
+    const withDevNativeModulesPkgJson = JSON.parse(
+      fs.readFileSync(withDevNativeModulesPkgJsonPath, 'utf8')
+    );
+
+    jest.replaceProperty(
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('@kbn/repo-info'),
+      'kibanaPackageJson',
+      withDevNativeModulesPkgJson
+    );
 
     const result = await checkProdNativeModules(mockLog);
 
@@ -112,7 +119,10 @@ describe('checkProdNativeModules', () => {
   it('should return true and log errors when prod transient native modules are found', async () => {
     // Use a fixture with native modules
     const withTransientNativeModulesDir = path.join(fixturesDir, 'with_transient_native_modules');
-    const withTransientNativeModulesPkgJsonPath = path.join(withTransientNativeModulesDir, 'package.json');
+    const withTransientNativeModulesPkgJsonPath = path.join(
+      withTransientNativeModulesDir,
+      'package.json'
+    );
     jest.spyOn(process, 'cwd').mockReturnValue(withTransientNativeModulesDir);
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     jest.replaceProperty(require('@kbn/repo-info'), 'REPO_ROOT', withTransientNativeModulesDir);
