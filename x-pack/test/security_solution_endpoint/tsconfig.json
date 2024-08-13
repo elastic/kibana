@@ -27,5 +27,6 @@
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/test",
     "@kbn/test-subj-selector",
+    "@kbn/ftr-common-functional-services",
   ]
 }

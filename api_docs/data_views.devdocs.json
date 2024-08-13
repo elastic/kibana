@@ -14055,6 +14055,10 @@
                 "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
               {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/react_controls/controls/data_controls/options_list_control/options_list_fetch_cache.ts"
+              },
+              {
                 "plugin": "@kbn/lens-embeddable-utils",
                 "path": "packages/kbn-lens-embeddable-utils/config_builder/columns/breakdown.ts"
               },

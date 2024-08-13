@@ -20,39 +20,26 @@ import { createLazyObservabilityPageTemplate } from './components/page_template'
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
 import { registerProfilingComponent } from './components/profiling/helpers/component_registry';
 import {
-  type AssetDetailsFlyoutLocator,
   AssetDetailsFlyoutLocatorDefinition,
-} from './locators/infra/asset_details_flyout_locator';
-import {
-  type AssetDetailsLocator,
   AssetDetailsLocatorDefinition,
-} from './locators/infra/asset_details_locator';
-import { type HostsLocator, HostsLocatorDefinition } from './locators/infra/hosts_locator';
-import {
-  type InventoryLocator,
+  HostsLocatorDefinition,
   InventoryLocatorDefinition,
-} from './locators/infra/inventory_locator';
-import {
-  type FlamegraphLocator,
   FlamegraphLocatorDefinition,
-} from './locators/profiling/flamegraph_locator';
-import {
-  type StacktracesLocator,
   StacktracesLocatorDefinition,
-} from './locators/profiling/stacktraces_locator';
-import {
-  type TopNFunctionsLocator,
   TopNFunctionsLocatorDefinition,
-} from './locators/profiling/topn_functions_locator';
-import {
-  type ServiceOverviewLocator,
   ServiceOverviewLocatorDefinition,
-} from './locators/apm/service_overview_locator';
-import { updateGlobalNavigation } from './services/update_global_navigation';
-import {
-  type TransactionDetailsByNameLocator,
   TransactionDetailsByNameLocatorDefinition,
-} from './locators/apm/transaction_details_by_name_locator';
+  type AssetDetailsFlyoutLocator,
+  type AssetDetailsLocator,
+  type InventoryLocator,
+  type HostsLocator,
+  type FlamegraphLocator,
+  type StacktracesLocator,
+  type TopNFunctionsLocator,
+  type ServiceOverviewLocator,
+  type TransactionDetailsByNameLocator,
+} from '../common';
+import { updateGlobalNavigation } from './services/update_global_navigation';
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }

@@ -20,8 +20,19 @@ export class LogViewsService {
     };
   }
 
-  public start({ dataViews, http, search }: LogViewsServiceStartDeps): LogViewsServiceStart {
-    const client = new LogViewsClient(dataViews, http, search.search, this.logViewsStaticConfig);
+  public start({
+    dataViews,
+    http,
+    search,
+    logSourcesService,
+  }: LogViewsServiceStartDeps): LogViewsServiceStart {
+    const client = new LogViewsClient(
+      dataViews,
+      logSourcesService,
+      http,
+      search.search,
+      this.logViewsStaticConfig
+    );
 
     return {
       client,

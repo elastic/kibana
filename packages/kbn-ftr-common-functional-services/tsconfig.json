@@ -14,7 +14,11 @@
     "@kbn/core-saved-objects-server",
     "@kbn/tooling-log",
     "@kbn/es-archiver",
-    "@kbn/test"
+    "@kbn/test",
+    "@kbn/expect",
+    "@kbn/repo-info",
+    "@kbn/es",
+    "@kbn/mock-idp-utils"
   ],
   "exclude": [
     "target/**/*",

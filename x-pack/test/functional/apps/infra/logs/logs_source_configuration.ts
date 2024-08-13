@@ -76,6 +76,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.header.waitUntilLoadingHasFinished();
 
+        await infraSourceConfigurationForm.selectIndicesPanel();
+
         const nameInput = await infraSourceConfigurationForm.getNameInput();
         await nameInput.clearValueWithKeyboard({ charByChar: true });
         await nameInput.type('Modified Source');
