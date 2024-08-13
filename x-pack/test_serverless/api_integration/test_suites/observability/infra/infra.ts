@@ -56,7 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
           const infraHosts = await fetchInfraHosts(
             {
               limit: 100,
-              metrics: ['rxV2', 'txV2', 'memory', 'cpuTotal', 'diskSpaceUsage', 'memoryFree'],
+              metrics: ['rxV2', 'txV2', 'memory', 'cpuV2', 'diskSpaceUsage', 'memoryFree'],
               query: {
                 bool: {
                   must: [],
@@ -104,7 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
                   value: 0.9490000000000001,
                 },
                 {
-                  name: 'cpuTotal',
+                  name: 'cpuV2',
                   value: 0.124,
                 },
                 {
