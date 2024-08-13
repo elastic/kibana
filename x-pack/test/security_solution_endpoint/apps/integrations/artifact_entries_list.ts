@@ -61,10 +61,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     let policyInfo: PolicyTestResourceInfo;
 
     before(async () => {
-      indexedData = await endpointTestResources.loadEndpointData();
+      // indexedData = await endpointTestResources.loadEndpointData();
     });
     after(async () => {
-      await endpointTestResources.unloadEndpointData(indexedData);
+      // await endpointTestResources.unloadEndpointData(indexedData);
     });
 
     const checkFleetArtifacts = async (
@@ -252,19 +252,52 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       actions: ArtifactActionsType,
       options?: { policyId?: string; suffix?: string }
     ) => {
-      // Opens edit flyout
-      await pageObjects.artifactEntriesList.clickCardActionMenu(actions.pagePrefix);
-      await testSubjects.click(`${actions.pagePrefix}-card-cardEditAction`);
+      let successes = 0;
+      let fails = 0;
 
-      await performActions(actions.update.formFields);
+      for (let i = 0; i < 100; i++) {
+        // Opens edit flyout
+        await pageObjects.artifactEntriesList.clickCardActionMenu(actions.pagePrefix);
+        await testSubjects.click(`${actions.pagePrefix}-card-cardEditAction`);
 
-      if (options?.policyId) {
-        await testSubjects.click(`${actions.pageObject}-form-effectedPolicies-perPolicy`);
-        await testSubjects.click(`policy-${options.policyId}-checkbox`);
+        await performActions(actions.update.formFields);
+
+        if (options?.policyId) {
+          await testSubjects.click(`${actions.pageObject}-form-effectedPolicies-perPolicy`);
+          await testSubjects.click(`policy-${options.policyId}-checkbox`);
+        }
+
+        let hasFailed = false;
+        try {
+          await find.byCssSelector(
+            ':not([disabled])[data-test-subj="EventFiltersListPage-flyout-submitButton"]',
+            2000
+          );
+        } catch (e) {
+          hasFailed = true;
+        }
+
+        if (hasFailed) {
+          fails++;
+        } else {
+          successes++;
+        }
+        log.info(
+          'flaky-test-for-artifacts IN PROGRESS',
+          JSON.stringify({ hasFailed, fails, successes }, null, ' ')
+        );
+
+        await testSubjects.click(`${actions.pagePrefix}-flyout-cancelButton`);
       }
 
-      // Submit edit artifact form
-      await testSubjects.click(`${actions.pagePrefix}-flyout-submitButton`);
+      log.info(
+        'flaky-test-for-artifacts RESULTS ARE IN',
+        JSON.stringify(
+          { byText: options?.byText, waitABit: options?.waitABit, fails, successes },
+          null,
+          ' '
+        )
+      );
     };
 
     for (const testData of [[...getArtifactsListTestsData()][1]]) {
@@ -284,8 +317,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         // eslint-disable-next-line ban/ban
-        it.only('flaky test for clicking by css selector', async () => {
+        it.only('flaky test for input instead of click - create', async () => {
           await createArtifact(testData, { policyId: policyInfo.packagePolicy.id });
+        });
+        // eslint-disable-next-line ban/ban
+        it.only('flaky test for input instead of click - update', async () => {
+          await endpointArtifactsTestResources.createArtifact(testData.listId, testData.createBody);
+          await browser.refresh();
+          await updateArtifact(testData, { policyId: policyInfo.packagePolicy.id });
         });
         // eslint-disable-next-line ban/ban
         it.only('fail so logs are reported', () => {
