@@ -7,7 +7,7 @@
     "openapi:generate": "node scripts/generate_oas",
     "openapi:serve": "node scripts/serve_oas_ui"
   },
-  "devDependencies": {
+  "dependencies": {
     "express": "^4.19.2",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
