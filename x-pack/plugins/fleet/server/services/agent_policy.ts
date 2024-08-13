@@ -175,7 +175,8 @@ class AgentPolicyService {
         getAllowedOutputTypeForPolicy(existingAgentPolicy)
       );
     }
-    const newPolicy = {
+
+    await soClient.update<AgentPolicySOAttributes>(SAVED_OBJECT_TYPE, id, {
       ...agentPolicy,
       ...(options.bumpRevision ? { revision: existingAgentPolicy.revision + 1 } : {}),
       ...(options.removeProtection
@@ -183,8 +184,7 @@ class AgentPolicyService {
         : { is_protected: agentPolicy.is_protected }),
       updated_at: new Date().toISOString(),
       updated_by: user ? user.username : 'system',
-    };
-    await soClient.update<AgentPolicySOAttributes>(SAVED_OBJECT_TYPE, id, newPolicy);
+    });
 
     const newAgentPolicy = await this.get(soClient, id, false);
 
