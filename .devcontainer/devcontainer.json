@@ -9,7 +9,8 @@
       "extensions": [
         "dbaeumer.vscode-eslint",
         "ms-azuretools.vscode-docker",
-        "editorconfig.editorconfig"
+        "editorconfig.editorconfig",
+        "timonwong.shellcheck"
       ]
     }
   },
