@@ -897,6 +897,7 @@ export const ModelsList: FC<Props> = ({
                   }
                   checked={!!pageState.showAll}
                   onChange={(e) => updatePageState({ showAll: e.target.checked })}
+                  data-test-subj="mlModelsShowAllSwitch"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
