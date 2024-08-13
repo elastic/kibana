@@ -14,9 +14,16 @@
  *   version: 2023-10-31
  */
 
-import type { z } from 'zod';
+import { z } from 'zod';
 
-import { SuccessResponse } from '../../model/schema/common.gen';
+export type ActionStateSuccessResponse = z.infer<typeof ActionStateSuccessResponse>;
+export const ActionStateSuccessResponse = z.object({
+  body: z.object({
+    data: z.object({
+      canEncrypt: z.boolean().optional(),
+    }),
+  }),
+});
 
 export type EndpointGetActionsStateResponse = z.infer<typeof EndpointGetActionsStateResponse>;
-export const EndpointGetActionsStateResponse = SuccessResponse;
+export const EndpointGetActionsStateResponse = ActionStateSuccessResponse;
