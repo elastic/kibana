@@ -26,11 +26,11 @@ import {
   AgentNotFoundError,
   FleetUnauthorizedError,
 } from '../../errors';
-
 import { auditLoggingService } from '../audit_logging';
+import { isAgentInNamespace } from '../spaces/agent_namespaces';
+import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
-
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
 import { getLatestAvailableAgentVersion } from './versions';
 
@@ -404,6 +404,10 @@ export async function getAgentById(
 
   if ('notFound' in agentHit) {
     throw new AgentNotFoundError(`Agent ${agentId} not found`);
+  }
+
+  if (!isAgentInNamespace(agentHit, getCurrentNamespace(soClient))) {
+    throw new AgentNotFoundError(`${agentHit.id} not found in namespace`);
   }
 
   return agentHit;

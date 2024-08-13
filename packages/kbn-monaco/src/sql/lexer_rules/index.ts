@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { lexerRules } from './sql';
+export { lexerRules, keywords, builtinFunctions } from './sql';

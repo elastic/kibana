@@ -12,28 +12,28 @@ import { fetchInferenceEndpoints } from './fetch_inference_endpoints';
 describe('fetch indices', () => {
   const mockInferenceEndpointsResponse = [
     {
-      inference_id: 'my-elser-model-03',
+      model_id: 'my-elser-model-03',
       task_type: 'sparse_embedding',
       service: 'elser',
       service_settings: { num_allocations: 1, num_threads: 1, model_id: '.elser_model_2' },
       task_settings: {},
     },
     {
-      inference_id: 'my-elser-model-04',
+      model_id: 'my-elser-model-04',
       task_type: 'sparse_embedding',
       service: 'elser',
       service_settings: { num_allocations: 1, num_threads: 1, model_id: '.elser_model_2' },
       task_settings: {},
     },
     {
-      inference_id: 'my-elser-model-05',
+      model_id: 'my-elser-model-05',
       task_type: 'sparse_embedding',
       service: 'elser',
       service_settings: { num_allocations: 1, num_threads: 1, model_id: '.elser_model_2' },
       task_settings: {},
     },
     {
-      inference_id: 'my-elser-model-06',
+      model_id: 'my-elser-model-06',
       task_type: 'sparse_embedding',
       service: 'elser',
       service_settings: { num_allocations: 1, num_threads: 1, model_id: '.elser_model_2' },

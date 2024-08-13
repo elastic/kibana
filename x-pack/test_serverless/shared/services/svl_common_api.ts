@@ -22,10 +22,11 @@ export type InternalRequestHeader = typeof INTERNAL_REQUEST_HEADERS;
 
 export function SvlCommonApiServiceProvider({}: FtrProviderContext) {
   return {
+    // call it from 'samlAuth' service when tests are migrated to deployment-agnostic
     getCommonRequestHeader() {
       return COMMON_REQUEST_HEADERS;
     },
-
+    // call it from 'samlAuth' service when tests are migrated to deployment-agnostic
     getInternalRequestHeader(): InternalRequestHeader {
       return INTERNAL_REQUEST_HEADERS;
     },

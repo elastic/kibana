@@ -7,7 +7,7 @@
 
 import { createMockStore, kibanaMock, mockGlobalState } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineStatus } from '../../../../common/api/timeline';
+import { TimelineStatusEnum } from '../../../../common/api/timeline';
 import { persistTimeline } from '../../containers/api';
 import { ensureTimelineIsSaved } from './helpers';
 
@@ -58,7 +58,7 @@ describe('Timeline middleware helpers', () => {
       });
 
       expect(returnedTimeline.savedObjectId).toBe(mockSavedObjectId);
-      expect(returnedTimeline.status).toBe(TimelineStatus.draft);
+      expect(returnedTimeline.status).toBe(TimelineStatusEnum.draft);
     });
   });
 });

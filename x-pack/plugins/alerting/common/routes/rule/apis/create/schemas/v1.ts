@@ -194,7 +194,7 @@ export const createParamsSchema = schema.object({
   id: schema.maybe(
     schema.string({
       meta: {
-        description: 'The identifier for the rule.',
+        description: 'The identifier for the rule. If it is omitted, an ID is randomly generated.',
       },
     })
   ),
