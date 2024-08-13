@@ -11,17 +11,16 @@ import type {
 } from '@kbn/langchain/server/language_models';
 import { END, START, StateGraph, Send } from '@langchain/langgraph';
 import type { EcsMappingState } from '../../types';
-
 import { modelInput, modelOutput, modelSubOutput } from './model';
 import { handleDuplicates } from './duplicates';
 import { handleInvalidEcs } from './invalid';
 import { handleEcsMapping } from './mapping';
 import { handleMissingKeys } from './missing';
-
 import { handleValidateMappings } from './validate';
 import { graphState } from './state';
 
 const handleCreateMappingChunks = async (state: EcsMappingState) => {
+  // Cherrypick a shallow copy of state to pass to subgraph
   const stateParams = {
     exAnswer: state.exAnswer,
     ecs: state.ecs,
@@ -52,6 +51,7 @@ function chainRouter(state: EcsMappingState): string {
   return END;
 }
 
+// This is added as a separate graph to be able to run these steps concurrently from handleCreateMappingChunks
 async function getEcsSubGraph(model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel) {
   const workflow = new StateGraph({
     channels: graphState,
