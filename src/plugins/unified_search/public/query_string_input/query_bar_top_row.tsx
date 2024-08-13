@@ -770,6 +770,7 @@ export const QueryBarTopRow = React.memo(
                 padding: ${isQueryLangSelected && !props.disableExternalPadding
                   ? euiTheme.size.s
                   : 0};
+                padding-bottom: 0;
               `}
               justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
               wrap

@@ -11,7 +11,7 @@ import { AssetTypeRT } from '../shared/asset_type';
 
 export const InfraMetricTypeRT = rt.keyof({
   cpu: null,
-  cpuTotal: null,
+  cpuV2: null,
   normalizedLoad1m: null,
   diskSpaceUsage: null,
   memory: null,

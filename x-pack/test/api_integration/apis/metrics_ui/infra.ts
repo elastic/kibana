@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
     limit: 10,
     metrics: [
       'cpu',
-      'cpuTotal',
+      'cpuV2',
       'diskSpaceUsage',
       'memory',
       'memoryFree',
@@ -79,8 +79,8 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             metrics: [
               { name: 'cpu', value: 0.44708333333333333 },
-              { name: 'cpuTotal', value: null },
-              { name: 'diskSpaceUsage', value: null },
+              { name: 'cpuV2', value: 0 },
+              { name: 'diskSpaceUsage', value: 0 },
               { name: 'memory', value: 0.4563333333333333 },
               { name: 'memoryFree', value: 8573890560 },
               { name: 'normalizedLoad1m', value: 0.7375000000000002 },
@@ -138,7 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 3 hosts when filtered by "host.os.name=CentOS Linux"', async () => {
         const body: GetInfraMetricsRequestBodyPayloadClient = {
           ...basePayload,
-          metrics: ['cpuTotal'],
+          metrics: ['cpuV2'],
           query: { bool: { filter: [{ term: { 'host.os.name': 'CentOS Linux' } }] } },
         };
         const response = await makeRequest({ body, expectedHTTPCode: 200 });
@@ -154,7 +154,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 0 hosts when filtered by "host.os.name=Ubuntu"', async () => {
         const body: GetInfraMetricsRequestBodyPayloadClient = {
           ...basePayload,
-          metrics: ['cpuTotal'],
+          metrics: ['cpuV2'],
           query: { bool: { filter: [{ term: { 'host.os.name': 'Ubuntu' } }] } },
         };
         const response = await makeRequest({ body, expectedHTTPCode: 200 });
@@ -167,7 +167,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return 0 hosts when filtered by not "host.name=gke-observability-8--observability-8--bc1afd95-nhhw"', async () => {
       const body: GetInfraMetricsRequestBodyPayloadClient = {
         ...basePayload,
-        metrics: ['cpuTotal'],
+        metrics: ['cpuV2'],
         query: {
           bool: {
             must_not: [
@@ -218,7 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await makeRequest({ invalidBody, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
-          '[request body]: Failed to validate: in metrics/0: "any" does not match expected type "cpu" | "cpuTotal" | "normalizedLoad1m" | "diskSpaceUsage" | "memory" | "memoryFree" | "rx" | "tx" | "rxV2" | "txV2"'
+          '[request body]: Failed to validate: in metrics/0: "any" does not match expected type "cpu" | "cpuV2" | "normalizedLoad1m" | "diskSpaceUsage" | "memory" | "memoryFree" | "rx" | "tx" | "rxV2" | "txV2"'
         );
       });
 

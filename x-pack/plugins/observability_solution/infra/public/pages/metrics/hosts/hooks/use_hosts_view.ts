@@ -26,13 +26,13 @@ import {
 import { StringDateRange } from './use_unified_search_url_state';
 
 const HOST_TABLE_METRICS: InfraAssetMetricType[] = [
-  'cpuTotal',
+  'cpuV2',
   'diskSpaceUsage',
   'memory',
   'memoryFree',
   'normalizedLoad1m',
-  'rx',
-  'tx',
+  'rxV2',
+  'txV2',
 ];
 
 const BASE_INFRA_METRICS_PATH = '/api/metrics/infra';

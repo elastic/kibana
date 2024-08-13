@@ -108,8 +108,8 @@ export const getAllHosts = async ({
         return isAMonitored ? -1 : 1;
       }
 
-      const aValue = getMetricValue(a?.cpuTotal) ?? 0;
-      const bValue = getMetricValue(b?.cpuTotal) ?? 0;
+      const aValue = getMetricValue(a?.cpuV2) ?? 0;
+      const bValue = getMetricValue(b?.cpuV2) ?? 0;
 
       return bValue - aValue;
     })

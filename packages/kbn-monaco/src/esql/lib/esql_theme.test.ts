@@ -116,6 +116,7 @@ describe('ESQL Theme', () => {
       'closing_metrics_line_comment',
       'closing_metrics_multiline_comment',
       'closing_metrics_ws',
+      'match_operator',
     ];
 
     // First, check that every valid exception is actually valid
