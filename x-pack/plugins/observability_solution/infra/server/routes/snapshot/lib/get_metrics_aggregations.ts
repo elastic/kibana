@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { JsonObject } from '@kbn/utility-types';
 import {
   InventoryItemType,
+  hasAggregations,
   MetricsUIAggregation,
-  MetricsUIAggregationRT,
 } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { networkTraffic } from '@kbn/metrics-data-access-plugin/common';
@@ -54,7 +54,7 @@ export const getMetricsAggregations = (
   const { metrics } = options;
   return metrics.reduce((aggs, metric, index) => {
     const aggregation = metricToAggregation(options.nodeType, metric, index);
-    if (!MetricsUIAggregationRT.is(aggregation)) {
+    if (!hasAggregations(aggregation)) {
       throw new Error(
         i18n.translate('xpack.infra.snapshot.missingSnapshotMetricError', {
           defaultMessage: 'The aggregation for {metric} for {nodeType} is not available.',

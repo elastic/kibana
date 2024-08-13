@@ -8,16 +8,16 @@
 import { has } from 'lodash';
 import {
   MetricsUIAggregation,
-  MetricsUIAggregationRT,
+  hasAggregations,
   ESSumBucketAggRT,
-  ESTermsWithAggregationRT,
+  // ESTermsWithAggregationRT,
   ESDerivativeAggRT,
   ESBasicMetricAggRT,
 } from '@kbn/metrics-data-access-plugin/common';
 import { SnapshotCustomMetricInput } from '../../../../../common/http_api';
 
 export const isMetricRate = (metric: MetricsUIAggregation | undefined): boolean => {
-  if (!MetricsUIAggregationRT.is(metric)) {
+  if (hasAggregations(metric) || metric === undefined) {
     return false;
   }
   const values = Object.values(metric);
@@ -32,12 +32,12 @@ export const isCustomMetricRate = (customMetric: SnapshotCustomMetricInput) => {
 };
 
 export const isInterfaceRateAgg = (metric: MetricsUIAggregation | undefined) => {
-  if (!MetricsUIAggregationRT.is(metric)) {
+  if (hasAggregations(metric) || metric === undefined) {
     return false;
   }
   const values = Object.values(metric);
   return (
-    values.some((agg) => ESTermsWithAggregationRT.is(agg)) &&
+    // values.some((agg) => ESTermsWithAggregationRT.is(agg)) && REPLACEEEEE
     values.some((agg) => ESSumBucketAggRT.is(agg))
   );
 };

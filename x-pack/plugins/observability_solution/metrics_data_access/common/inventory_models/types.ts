@@ -11,6 +11,7 @@ import type {
   LensConfig,
 } from '@kbn/lens-embeddable-utils/config_builder';
 import * as rt from 'io-ts';
+import { estypes } from '@elastic/elasticsearch';
 
 export const ItemTypeRT = rt.keyof({
   host: null,
@@ -322,30 +323,13 @@ export interface SnapshotTermsWithAggregation {
   aggregations: MetricsUIAggregation;
 }
 
-export const ESTermsWithAggregationRT: rt.Type<SnapshotTermsWithAggregation> = rt.recursion(
-  'SnapshotModelRT',
-  () =>
-    rt.type({
-      terms: rt.type({ field: rt.string }),
-      aggregations: MetricsUIAggregationRT,
-    })
-);
+export type MetricsUIAggregation = Record<string, estypes.AggregationsAggregate>;
 
-export const ESAggregationRT = rt.union([
-  ESBasicMetricAggRT,
-  ESPercentileAggRT,
-  ESBucketScriptAggRT,
-  ESCumulativeSumAggRT,
-  ESDerivativeAggRT,
-  ESSumBucketAggRT,
-  ESTermsWithAggregationRT,
-  ESCaridnalityAggRT,
-  ESTopMetricsAggRT,
-  ESMaxPeriodFilterExistsAggRT,
-]);
-
-export const MetricsUIAggregationRT = rt.record(rt.string, ESAggregationRT);
-export type MetricsUIAggregation = rt.TypeOf<typeof MetricsUIAggregationRT>;
+export const hasAggregations = (
+  aggregations?: Record<string, estypes.AggregationsAggregate>,
+): aggregations is Record<string, estypes.AggregationsAggregate> => {
+  return !!(aggregations as Record<string, estypes.AggregationsAggregate>);
+}
 
 export const SnapshotMetricTypeKeys = {
   count: null,

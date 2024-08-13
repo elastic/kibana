@@ -7,7 +7,7 @@
 
 import { identity } from 'lodash';
 import {
-  MetricsUIAggregationRT,
+  hasAggregations,
   networkTraffic,
   findInventoryModel,
 } from '@kbn/metrics-data-access-plugin/common';
@@ -24,7 +24,7 @@ export const transformSnapshotMetricsToMetricsAPIMetrics = (
     .map((metric, index) => {
       const inventoryModel = findInventoryModel(snapshotRequest.nodeType);
       const aggregations = inventoryModel.metrics.snapshot?.[metric.type];
-      if (MetricsUIAggregationRT.is(aggregations)) {
+      if (hasAggregations(aggregations)) {
         return { id: metric.type, aggregations };
       }
       if (SnapshotCustomMetricInputRT.is(metric)) {
