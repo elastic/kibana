@@ -8,7 +8,6 @@
 import { createStatefulTestConfig } from './default_configs/stateful.config.base';
 
 export default createStatefulTestConfig({
-  serverlessProject: 'oblt',
   testFiles: [require.resolve('./oblt.index.ts')],
   junit: {
     reportName: 'Stateful Observability - Deployment-agnostic API Integration Tests',
