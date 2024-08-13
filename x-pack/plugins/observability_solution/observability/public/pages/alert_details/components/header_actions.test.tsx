@@ -34,6 +34,10 @@ const mockHttp = {
   },
 };
 
+const mockNavigateToApp = {
+  mockNavigateToApp: jest.fn(),
+};
+
 const mockGetEditRuleFlyout = jest.fn(() => (
   <div data-test-subj="edit-rule-flyout">mocked component</div>
 ));
@@ -48,6 +52,7 @@ const mockKibana = () => {
       },
       cases: mockCases,
       http: mockHttp,
+      application: mockNavigateToApp,
     },
   });
 };
