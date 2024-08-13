@@ -1792,7 +1792,19 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     pkgName: string,
     logger?: Logger
   ): Promise<NewPackagePolicy | undefined> {
-    const pkgInstall = await getInstallation({ savedObjectsClient: soClient, pkgName, logger });
+    let pkgInstall = await getInstallation({ savedObjectsClient: soClient, pkgName, logger });
+    if (!pkgInstall) {
+      const esClient = await appContextService.getInternalUserESClient();
+
+      const result = await ensureInstalledPackage({
+        esClient,
+        pkgName,
+        savedObjectsClient: soClient,
+      });
+      if (result.package) {
+        pkgInstall = result.package;
+      }
+    }
     if (pkgInstall) {
       const packageInfo = await getPackageInfo({
         savedObjectsClient: soClient,
