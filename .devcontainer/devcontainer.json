@@ -18,7 +18,6 @@
     9200,
     5601
   ],
-  "postCreateCommand": "/workspaces/kibana/.devcontainer/scripts/post_create.sh",
   "postStartCommand": "/workspaces/kibana/.devcontainer/scripts/post_start.sh",
   "remoteUser": "vscode",
   "features": {
