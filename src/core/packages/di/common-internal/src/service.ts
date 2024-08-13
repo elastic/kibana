@@ -12,14 +12,10 @@ import type { PluginOpaqueId } from '@kbn/core-base-common';
 import { Global } from '@kbn/core-di-common';
 import type { InternalCoreDiServiceSetup, InternalCoreDiServiceStart } from './contracts';
 import { InternalDiSetupService, InternalDiService } from './services';
-import { Context, Plugin, Scope, pluginModule } from './modules/plugin';
+import { Plugin, PluginModule, Scope } from './modules/plugin';
 
 /** @internal */
 export class CoreInjectionService {
-  private static getContext(container: interfaces.Container): interfaces.Container {
-    return container.isBound(Context) ? container.get(Context) : container;
-  }
-
   private root = new Container({ defaultScope: 'Singleton', skipBaseClassChecks: true });
 
   constructor() {
@@ -36,7 +32,7 @@ export class CoreInjectionService {
   }
 
   protected dispose(container: interfaces.Container): void {
-    const context = CoreInjectionService.getContext(container);
+    const context = PluginModule.getContext(container);
     if (context === this.root && container !== this.root) {
       // to prevent accidental disposal outside of the internal contract
       throw new Error('The root container can only be explicitly disposed');
@@ -49,7 +45,7 @@ export class CoreInjectionService {
     id?: PluginOpaqueId,
     container: interfaces.Container = this.root
   ): interfaces.Container {
-    const fork = CoreInjectionService.getContext(container).createChild();
+    const fork = PluginModule.getContext(container).createChild();
 
     return this.getContainer(id, fork);
   }
@@ -58,7 +54,7 @@ export class CoreInjectionService {
     const contract = {
       getContainer: this.getContainer,
     };
-    this.root.load(pluginModule);
+    this.root.load(new PluginModule());
     this.root.bind(InternalDiSetupService).toConstantValue(contract);
 
     return contract;
