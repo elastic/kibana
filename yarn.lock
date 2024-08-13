@@ -1857,9 +1857,10 @@
     "@elastic/react-search-ui-views" "1.20.2"
     "@elastic/search-ui" "1.20.2"
 
-"@elastic/request-converter@github:elastic/request-converter#8.15":
-  version "8.15.2"
-  resolved "https://codeload.github.com/elastic/request-converter/tar.gz/84bc228a6314216d0dd14b207fbaa51dd2b3c44c"
+"@elastic/request-converter@^8.15.3":
+  version "8.15.3"
+  resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-8.15.3.tgz#0d2753e689a8e5c1f1167a883f8beb863b31b3f0"
+  integrity sha512-sUhVQReQ1VPn4qRlsYyjDOp340LZxYmaQCcu1HgKSYr1NR7pdSUhbSxmEbl/sH4HXh7Avq4bRf14vBvtHi19kA==
   dependencies:
     child-process-promise "^2.2.1"
     commander "^12.1.0"
