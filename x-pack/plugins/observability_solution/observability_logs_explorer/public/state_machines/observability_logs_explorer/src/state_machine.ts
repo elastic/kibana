@@ -11,6 +11,8 @@ import { CreateLogsExplorerController } from '@kbn/logs-explorer-plugin/public';
 import { actions, createMachine, InterpreterFrom } from 'xstate';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
+import { AllDatasetSelection } from '@kbn/logs-explorer-plugin/common';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
   ObservabilityLogsExplorerContext,
@@ -42,7 +44,16 @@ export const createPureObservabilityLogsExplorerStateMachine = (
       initial: 'uninitialized',
       states: {
         uninitialized: {
-          always: 'initializingFromTimeFilterService',
+          always: 'initializeAllSelection',
+        },
+        initializeAllSelection: {
+          invoke: {
+            src: 'initializeAllSelection',
+            onDone: {
+              target: 'initializingFromTimeFilterService',
+              actions: ['storeAllSelection'],
+            },
+          },
         },
         initializingFromTimeFilterService: {
           invoke: {
@@ -119,6 +130,13 @@ export const createPureObservabilityLogsExplorerStateMachine = (
             ? { controller: event.controller }
             : {};
         }),
+        storeAllSelection: actions.assign((context, event) => {
+          return 'data' in event
+            ? {
+                allSelection: event.data,
+              }
+            : {};
+        }),
         storeInitialTimeFilter: actions.assign((context, event) => {
           return 'time' in event &&
             'refreshInterval' in event &&
@@ -162,6 +180,7 @@ export interface ObservabilityLogsExplorerStateMachineDependencies {
   toasts: IToasts;
   urlStateStorageContainer: IKbnUrlStateStorage;
   analytics: AnalyticsServiceStart;
+  logSourcesService: LogSourcesService;
 }
 
 export const createObservabilityLogsExplorerStateMachine = ({
@@ -171,6 +190,7 @@ export const createObservabilityLogsExplorerStateMachine = ({
   createLogsExplorerController,
   timeFilterService,
   analytics,
+  logSourcesService,
 }: ObservabilityLogsExplorerStateMachineDependencies) =>
   createPureObservabilityLogsExplorerStateMachine(initialContext).withConfig({
     actions: {
@@ -181,6 +201,11 @@ export const createObservabilityLogsExplorerStateMachine = ({
       createController: createController({ createLogsExplorerController }),
       initializeFromTimeFilterService: initializeFromTimeFilterService({ timeFilterService }),
       initializeFromUrl: initializeFromUrl({ urlStateStorageContainer, toastsService: toasts }),
+      initializeAllSelection: async (context) => {
+        const logSources = await logSourcesService.getLogSources();
+        const indices = logSources.map((logSource) => logSource.indexPattern).join(',');
+        return AllDatasetSelection.create({ indices });
+      },
       subscribeToLogsExplorerState,
       subscribeToLogsExplorerPublicEvents,
     },

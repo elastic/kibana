@@ -14,8 +14,11 @@ import {
 import { AllDatasetSelection } from '../../../../common/data_source_selection';
 import { DefaultLogsExplorerControllerState } from './types';
 
+export const DEFAULT_ALL_SELECTION = AllDatasetSelection.create({ indices: 'logs-*-*' });
+
 export const DEFAULT_CONTEXT: DefaultLogsExplorerControllerState = {
-  dataSourceSelection: AllDatasetSelection.create(),
+  dataSourceSelection: DEFAULT_ALL_SELECTION,
+  allSelection: DEFAULT_ALL_SELECTION,
   grid: {
     columns: DEFAULT_COLUMNS,
     rows: {
