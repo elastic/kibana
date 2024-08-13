@@ -38,6 +38,10 @@ const graphState: StateGraphArgs<EcsMappingState>['channels'] = {
     value: (x: string[], y?: string[]) => y ?? x,
     default: () => [],
   },
+  parsedRawSamples: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => '',
+  },
   formattedSamples: {
     value: (x: string, y?: string) => y ?? x,
     default: () => '',
@@ -113,6 +117,7 @@ function modelOutput(state: EcsMappingState): Partial<EcsMappingState> {
     results: {
       mapping: state.currentMapping,
       pipeline: currentPipeline,
+      parsedRawSamples: JSON.stringify(state.rawSamples),
     },
   };
 }

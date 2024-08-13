@@ -47,6 +47,7 @@ export interface EcsMappingState {
   lastExecutedChain: string;
   rawSamples: string[];
   samples: string[];
+  parsedRawSamples: string;
   formattedSamples: string;
   exAnswer: string;
   packageName: string;

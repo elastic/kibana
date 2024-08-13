@@ -16,10 +16,16 @@ components:
       minLength: 1
       description: DataStream name for the integration to be built.
 
-    RawSamples:
+    EncodedRawSamples:
       type: string
       format: binary
       description: Blob containing the RawSamples.
+
+    RawSamples:
+      type: array
+      items: 
+        type: string
+      description: Array of raw samples.
 
     Mapping:
       type: object

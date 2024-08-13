@@ -13,7 +13,7 @@ import {
   LangSmithOptions,
   Mapping,
   PackageName,
-  RawSamples,
+  EncodedRawSamples,
 } from '../model/common_attributes';
 import { EcsMappingAPIResponse } from '../model/response_schemas';
 
@@ -21,7 +21,7 @@ export type EcsMappingRequestBody = z.infer<typeof EcsMappingRequestBody>;
 export const EcsMappingRequestBody = z.object({
   packageName: PackageName,
   dataStreamName: DataStreamName,
-  rawSamples: RawSamples,
+  encodedRawSamples: EncodedRawSamples,
   mapping: Mapping.optional(),
   connectorId: Connector,
   langSmithOptions: LangSmithOptions.optional(),

@@ -15,7 +15,6 @@ import type { LogTypeDetectionState } from '../../types';
 import { LOG_TYPE_JSON } from './constants';
 import { LogType } from '../../constants';
 import { handleLogTypeDetection } from './detection';
-import { handleUnsupported } from './unsupported';
 
 const graphState: StateGraphArgs<LogTypeDetectionState>['channels'] = {
   lastExecutedChain: {
@@ -94,18 +93,15 @@ export async function getLogTypeDetectionGraph(
     // .addNode('handleKVGraph', (state: LogTypeDetectionState) => getCompiledKvGraph(state, model))
     // .addNode('handleUnstructuredGraph', (state: LogTypeDetectionState) => getCompiledUnstructuredGraph(state, model))
     // .addNode('handleCsvGraph', (state: LogTypeDetectionState) => getCompiledCsvGraph(state, model))
-    .addNode('handleUnsupported', (state: LogTypeDetectionState) => handleUnsupported(state, model))
     .addEdge(START, 'modelInput')
+    .addEdge('modelInput', 'handleLogTypeDetection')
     .addEdge('modelOutput', END)
-    .addEdge('handleUnsupported', END)
     .addConditionalEdges('handleLogTypeDetection', logTypeRouter, {
       // TODO: Add structured, unstructured, csv nodes
       // structured: 'handleKVGraph',
       // unstructured: 'handleUnstructuredGraph',
       // csv: 'handleCsvGraph',
-      unsupported: 'handleUnsupported',
-      // modelOutput shall be connected to the sub graphs [ structured, unstructured, csv ]
-      modelOutput: 'modelOutput',
+      unsupported: 'modelOutput',
     });
 
   const compiledLogTypeDetectionGraph = workflow.compile();

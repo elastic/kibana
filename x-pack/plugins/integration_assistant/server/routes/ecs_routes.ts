@@ -13,14 +13,14 @@ import {
 } from '@kbn/langchain/server/language_models';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
-import { isPlainObject } from 'lodash/fp';
 import { ECS_GRAPH_PATH, EcsMappingRequestBody, EcsMappingResponse } from '../../common';
-import { ROUTE_HANDLER_TIMEOUT } from '../constants';
+import { LogType, ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getEcsGraph } from '../graphs/ecs';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { getLogTypeDetectionGraph } from '../graphs/log_type_detection/graph';
+import { decodeRawSamples, parseSamples } from '../util/parse';
 
 export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   router.versioned
@@ -43,7 +43,8 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
         },
       },
       withAvailability(async (context, req, res): Promise<IKibanaResponse<EcsMappingResponse>> => {
-        const { packageName, dataStreamName, rawSamples, mapping, langSmithOptions } = req.body;
+        const { packageName, dataStreamName, encodedRawSamples, mapping, langSmithOptions } =
+          req.body;
         const { getStartServices, logger } = await context.integrationAssistant;
 
         const [, { actions: actionsPlugin }] = await getStartServices();
@@ -72,18 +73,8 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
             streaming: false,
           });
 
-          const { isJSON, error, logsSampleParsed } = parseLogsContent(rawSamples);
-          if (error) {
-            return res.customError({ statusCode: 500, body: { message: error } });
-          }
-
-          const parameters = {
-            packageName,
-            dataStreamName,
-            logsSampleParsed,
-            ...(mapping && { mapping }),
-          };
-
+          let graph;
+          let ecsMappingResults;
           const options = {
             callbacks: [
               new APMTracer({ projectName: langSmithOptions?.projectName ?? 'default' }, logger),
@@ -91,79 +82,53 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
             ],
           };
 
-          let graph;
-          let results;
-          if (isJSON) {
-            graph = await getEcsGraph(model);
-            results = await graph.invoke(parameters, options);
-          } else {
-            graph = await getLogTypeDetectionGraph(model);
-            // const { jsonSamples, additionalProcessors } = await graph.invoke(parameters, options);
-            // parameters = {
-            //   packageName,
-            //   dataStreamName,
-            //   logsSampleParsed,
-            //   jsonSamples,
-            //   additionalProcessors,
-            //   ...(mapping && { mapping }),
-            // };
-            // graph = await getEcsGraph(model);
-            results = await graph.invoke(parameters, options);
-          }
+          const logsSampleDecoded = decodeRawSamples(encodedRawSamples);
+          const { isJSON, parsedSamples } = parseSamples(logsSampleDecoded);
 
-          return res.ok({ body: EcsMappingResponse.parse(results) });
+          if (isJSON) {
+            const ecsParameters = {
+              packageName,
+              dataStreamName,
+              rawSamples: parsedSamples,
+              ...(mapping && { mapping }),
+            };
+            graph = await getEcsGraph(model);
+            ecsMappingResults = await graph.invoke(ecsParameters, options);
+          } else {
+            // Non JSON log samples. Could be some syslog structured / unstructured logs
+            const logTypeParameters = {
+              packageName,
+              dataStreamName,
+              rawSamples: parsedSamples,
+            };
+            graph = await getLogTypeDetectionGraph(model);
+            const logTypeDetectionResults = await graph.invoke(logTypeParameters, options);
+
+            if (
+              logTypeDetectionResults.logType === LogType.UNSUPPORTED ||
+              logTypeDetectionResults.logType === LogType.CSV ||
+              logTypeDetectionResults.logType === LogType.STRUCTURED ||
+              logTypeDetectionResults.logType === LogType.UNSTRUCTURED
+            ) {
+              return res.customError({
+                statusCode: 501,
+                body: { message: 'Unsupported log type' },
+              });
+            }
+
+            const ecsParameters = {
+              packageName,
+              dataStreamName,
+              rawSamples: parsedSamples,
+              ...(mapping && { mapping }),
+            };
+            graph = await getEcsGraph(model);
+            ecsMappingResults = await graph.invoke(ecsParameters, options);
+          }
+          return res.ok({ body: EcsMappingResponse.parse(ecsMappingResults) });
         } catch (e) {
           return res.badRequest({ body: e });
         }
       })
     );
-}
-
-function parseLogsContent(fileContent: string): {
-  isJSON?: boolean;
-  error?: string;
-  logsSampleParsed?: string[];
-} {
-  let parsedContent: string[];
-  let isJSON = false;
-  const base64encodedContent = fileContent.split('base64,')[1];
-  const decodedFileContent = Buffer.from(base64encodedContent, 'base64').toString('utf-8');
-  try {
-    parsedContent = decodedFileContent
-      .split('\n')
-      .filter((line) => line.trim() !== '')
-      .map((line) => JSON.parse(line));
-
-    // Special case for files that can be parsed as both JSON and NDJSON:
-    //   for a one-line array [] -> extract its contents
-    //   for a one-line object {} -> do nothing
-    if (
-      Array.isArray(parsedContent) &&
-      parsedContent.length === 1 &&
-      Array.isArray(parsedContent[0])
-    ) {
-      parsedContent = parsedContent[0];
-      isJSON = true;
-    }
-  } catch (parseNDJSONError) {
-    try {
-      parsedContent = JSON.parse(decodedFileContent);
-      isJSON = true;
-    } catch (parseJSONError) {
-      parsedContent = decodedFileContent.split('\n').filter((line) => line.trim() !== '');
-    }
-  }
-
-  if (!Array.isArray(parsedContent)) {
-    return { error: 'The logs sample file is not an array' };
-  }
-  if (parsedContent.length === 0) {
-    return { error: 'The logs sample file is empty' };
-  }
-
-  if (parsedContent.some((log) => !isPlainObject(log))) {
-    return { error: 'The logs sample file contains non-object entries' };
-  }
-
-  return { logsSampleParsed: parsedContent, isJSON };
 }

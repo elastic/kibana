@@ -23,6 +23,7 @@ export const EcsMappingAPIResponse = z.object({
   results: z.object({
     mapping: Mapping,
     pipeline: Pipeline,
+    parsedRawSamples: z.string(),
   }),
 });
 

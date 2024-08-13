@@ -14,4 +14,5 @@ export enum LogType {
   STRUCTURED = 'structured',
   UNSTRUCTURED = 'unstructured',
   CSV = 'csv',
+  UNSUPPORTED = 'unsupported',
 }

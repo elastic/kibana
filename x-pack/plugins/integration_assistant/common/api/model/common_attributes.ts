@@ -24,8 +24,14 @@ export const DataStreamName = z.string().min(1);
 /**
  * String array containing the json raw samples.
  */
+export type EncodedRawSamples = z.infer<typeof EncodedRawSamples>;
+export const EncodedRawSamples = z.string();
+
+/**
+ * String array containing the json raw samples.
+ */
 export type RawSamples = z.infer<typeof RawSamples>;
-export const RawSamples = z.string();
+export const RawSamples = z.array(z.string());
 
 /**
  * mapping object to ECS Mapping Request.

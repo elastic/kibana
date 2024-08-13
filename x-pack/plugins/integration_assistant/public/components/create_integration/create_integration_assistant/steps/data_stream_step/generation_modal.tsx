@@ -86,7 +86,7 @@ export const useGeneration = ({
         const ecsRequest: EcsMappingRequestBody = {
           packageName: integrationSettings.name ?? '',
           dataStreamName: integrationSettings.dataStreamName ?? '',
-          rawSamples: integrationSettings.logsSampleParsed ?? [],
+          encodedRawSamples: integrationSettings.logsSampleParsed ?? '',
           connectorId: connector.id,
           langSmithOptions: getLangSmithOptions(),
         };
@@ -99,7 +99,11 @@ export const useGeneration = ({
           return;
         }
         const categorizationRequest: CategorizationRequestBody = {
-          ...ecsRequest,
+          packageName: integrationSettings.name ?? '',
+          dataStreamName: integrationSettings.dataStreamName ?? '',
+          rawSamples: JSON.parse(ecsGraphResult.results.parsedRawSamples), // Unstringified JSON
+          connectorId: connector.id,
+          langSmithOptions: getLangSmithOptions(),
           currentPipeline: ecsGraphResult.results.pipeline,
         };
 
