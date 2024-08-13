@@ -28,7 +28,6 @@ export const WelcomeSetup: React.FC<Props> = ({
         <EuiPanel
           hasShadow={false}
           css={css`
-            max-width: 400px;
             text-align: center;
           `}
         >
@@ -42,7 +41,12 @@ export const WelcomeSetup: React.FC<Props> = ({
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText color="subdued">
+              <EuiText
+                color="subdued"
+                css={css`
+                  max-width: 400px;
+                `}
+              >
                 <p>{i18n.WELCOME_SCREEN_DESCRIPTION}</p>
               </EuiText>
             </EuiFlexItem>
