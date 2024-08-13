@@ -25,7 +25,7 @@ interface SpaceCreate {
   disabledFeatures?: string[];
 }
 
-export function SpacesServiceProvider({ getService  }: FtrProviderContext) {
+export function SpacesServiceProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
   const url = formatUrl(config.get('servers.kibana'));
@@ -69,7 +69,7 @@ export function SpacesServiceProvider({ getService  }: FtrProviderContext) {
       return {
         cleanUp,
         space,
-      }
+      };
     }
 
     public async delete(spaceId: string) {
@@ -98,7 +98,7 @@ export function SpacesServiceProvider({ getService  }: FtrProviderContext) {
       return data;
     }
 
-    public async navigateToHomePage(spaceId:string) {
+    public async navigateToHomePage(spaceId: string) {
       const currentUrl = await browser.getCurrentUrl();
 
       const urlMatch = currentUrl.match(/^(https?:\/\/[^/]+)(\/.*)/);
