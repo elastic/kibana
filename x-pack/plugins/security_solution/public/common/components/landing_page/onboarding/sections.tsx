@@ -14,18 +14,18 @@ import { AlertsButton } from './step_links/alerts_link';
 import { AddElasticRulesButton } from './step_links/add_elastic_rules_button';
 import { DashboardButton } from './step_links/dashboard_button';
 import overviewVideo from './images/overview_video.svg';
-import { Video } from './card_step/content/video';
-import { OverviewVideoDescription } from './card_step/content/overview_video_description';
+import { Video } from './card_wrapper/content/video';
+import { OverviewVideoDescription } from './card_wrapper/content/overview_video_description';
 import { ManageProjectsButton } from './step_links/manage_projects_button';
-import { EnableRuleImage } from './card_step/content/enable_rule_image';
+import { EnableRuleImage } from './card_wrapper/content/enable_rule_image';
 import {
   autoCheckAddIntegrationsStepCompleted,
   autoCheckPrebuildRuleStepCompleted,
-} from './card_step/helpers';
-import { ViewDashboardImage } from './card_step/content/view_dashboard_image';
-import { AddIntegrationsImage } from './card_step/content/add_integration_image';
-import { CreateProjectImage } from './card_step/content/create_project_step_image';
-import { ViewAlertsImage } from './card_step/content/view_alerts_image';
+} from './card_wrapper/helpers';
+import { ViewDashboardImage } from './card_wrapper/content/view_dashboard_image';
+import { AddIntegrationsImage } from './card_wrapper/content/add_integration_image';
+import { CreateProjectImage } from './card_wrapper/content/create_project_step_image';
+import { ViewAlertsImage } from './card_wrapper/content/view_alerts_image';
 
 export const sections: Section[] = [
   {

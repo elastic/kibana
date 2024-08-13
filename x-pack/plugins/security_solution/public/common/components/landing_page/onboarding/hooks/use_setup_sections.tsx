@@ -11,115 +11,101 @@ import React, { useCallback } from 'react';
 import { css } from '@emotion/css';
 import type {
   ActiveSections,
-  CardId,
-  ExpandedCards,
   ToggleTaskCompleteStatus,
   OnCardClicked,
   SectionId,
+  Section,
+  Card,
+  CardId,
 } from '../types';
 
-import { getSections } from '../sections';
-import { CardStep } from '../card_step';
+import { getCardById, getSectionById } from '../sections';
+import { CardWrapper } from '../card_wrapper';
 
 export const useSetUpSections = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => {
   const setUpCards = useCallback(
     ({
-      activeSections,
-      expandedCards,
-      finishedCardIds,
+      activeCardIds,
       toggleTaskCompleteStatus,
       onCardClicked,
       sectionId,
     }: {
-      activeSections: ActiveSections | null;
-      expandedCards: ExpandedCards;
-      finishedCardIds: Set<CardId>;
+      activeCardIds: CardId[];
       toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
       onCardClicked: OnCardClicked;
       sectionId: SectionId;
-    }) => {
-      const section = activeSections?.[sectionId];
-      return section
-        ? Object.values(section)?.map<React.ReactNode>((cardItem) => (
-            <EuiFlexItem key={cardItem.id}>
-              <CardStep
-                card={cardItem}
-                expandedCards={expandedCards}
-                finishedCardIds={finishedCardIds}
-                toggleTaskCompleteStatus={toggleTaskCompleteStatus}
-                onCardClicked={onCardClicked}
-                sectionId={sectionId}
-              />
-            </EuiFlexItem>
-          ))
-        : null;
-    },
+    }) =>
+      activeCardIds.map<React.ReactNode>((cardId) => {
+        const cardItem = getCardById(cardId) as Card;
+        return (
+          <EuiFlexItem key={cardItem.id}>
+            <CardWrapper
+              card={cardItem}
+              toggleTaskCompleteStatus={toggleTaskCompleteStatus}
+              onCardClicked={onCardClicked}
+              sectionId={sectionId}
+            />
+          </EuiFlexItem>
+        );
+      }),
     []
   );
 
   const setUpSections = useCallback(
     ({
       activeSections,
-      expandedCards,
-      finishedCardIds,
       toggleTaskCompleteStatus,
       onCardClicked,
     }: {
       activeSections: ActiveSections | null;
-      expandedCards: ExpandedCards;
-      finishedCardIds: Set<CardId>;
       toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
       onCardClicked: OnCardClicked;
     }) =>
-      getSections().reduce<React.ReactNode[]>((acc, currentSection) => {
+      Object.entries(activeSections ?? {}).map<React.ReactNode>(([sectionId, cardIds]) => {
+        const currentSection = getSectionById(sectionId as SectionId) as Section;
         const cardNodes = setUpCards({
-          activeSections,
-          expandedCards,
-          finishedCardIds,
+          activeCardIds: cardIds,
           toggleTaskCompleteStatus,
           onCardClicked,
           sectionId: currentSection.id,
         });
-        if (cardNodes && cardNodes.length > 0) {
-          acc.push(
-            <EuiPanel
-              color="plain"
-              element="div"
-              grow={false}
-              paddingSize="none"
-              hasShadow={false}
-              borderRadius="none"
+        return (
+          <EuiPanel
+            color="plain"
+            element="div"
+            grow={false}
+            paddingSize="none"
+            hasShadow={false}
+            borderRadius="none"
+            css={css`
+              margin: ${euiTheme.size.l} 0;
+              padding-top: 4px;
+              background-color: ${euiTheme.colors.lightestShade};
+            `}
+            key={sectionId}
+            id={sectionId}
+            data-test-subj={`section-${sectionId}`}
+          >
+            <h2
               css={css`
-                margin: ${euiTheme.size.l} 0;
-                padding-top: 4px;
-                background-color: ${euiTheme.colors.lightestShade};
+                font-size: ${euiTheme.base * 1.375}px;
+                font-weight: ${euiTheme.font.weight.bold};
               `}
-              key={currentSection.id}
-              id={currentSection.id}
-              data-test-subj={`section-${currentSection.id}`}
             >
-              <h2
-                css={css`
-                  font-size: ${euiTheme.base * 1.375}px;
-                  font-weight: ${euiTheme.font.weight.bold};
-                `}
-              >
-                {currentSection.title}
-              </h2>
-              <EuiSpacer size="l" />
-              <EuiFlexGroup
-                gutterSize="none"
-                direction="column"
-                css={css`
-                  gap: ${euiTheme.size.base};
-                `}
-              >
-                {cardNodes}
-              </EuiFlexGroup>
-            </EuiPanel>
-          );
-        }
-        return acc;
+              {currentSection.title}
+            </h2>
+            <EuiSpacer size="l" />
+            <EuiFlexGroup
+              gutterSize="none"
+              direction="column"
+              css={css`
+                gap: ${euiTheme.size.base};
+              `}
+            >
+              {cardNodes}
+            </EuiFlexGroup>
+          </EuiPanel>
+        );
       }, []),
     [
       euiTheme.base,

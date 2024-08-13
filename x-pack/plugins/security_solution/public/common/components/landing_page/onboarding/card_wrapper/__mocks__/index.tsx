@@ -6,6 +6,6 @@
  */
 import React from 'react';
 
-export const CardStep = jest
+export const CardWrapper = jest
   .fn()
   .mockReturnValue(({ title }: { title: string }) => <div>{title}</div>);

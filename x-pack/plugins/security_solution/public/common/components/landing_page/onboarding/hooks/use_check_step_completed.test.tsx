@@ -6,13 +6,7 @@
  */
 import { renderHook } from '@testing-library/react-hooks';
 import { useCheckStepCompleted } from './use_check_step_completed';
-import {
-  EnablePrebuiltRulesSteps,
-  GetStartedWithAlertsCardsId,
-  OverviewSteps,
-  QuickStartSectionCardsId,
-  SectionId,
-} from '../types';
+import { CardId, SectionId } from '../types';
 
 jest.mock('../../../../lib/kibana');
 
@@ -24,7 +18,6 @@ describe('useCheckStepCompleted', () => {
     const { result } = renderHook(() =>
       useCheckStepCompleted({
         indicesExist: true,
-        stepId: OverviewSteps.getToKnowElasticSecurity,
         cardId: CardId.watchTheOverviewVideo,
         sectionId: SectionId.quickStart,
         toggleTaskCompleteStatus: jest.fn(),
@@ -40,10 +33,9 @@ describe('useCheckStepCompleted', () => {
     const { waitFor } = renderHook(() =>
       useCheckStepCompleted({
         autoCheckIfCardCompleted: mockAutoCheck,
-        cardId: GetStartedWithAlertsCardsId.enablePrebuiltRules,
+        cardId: CardId.enablePrebuiltRules,
         indicesExist: true,
         sectionId: SectionId.getStartedWithAlerts,
-        stepId: EnablePrebuiltRulesSteps.enablePrebuiltRules,
         toggleTaskCompleteStatus: mockToggleTask,
       })
     );
@@ -52,8 +44,7 @@ describe('useCheckStepCompleted', () => {
       expect(mockAutoCheck).toHaveBeenCalled();
       expect(mockToggleTask).toHaveBeenCalledWith({
         sectionId: SectionId.getStartedWithAlerts,
-        stepId: EnablePrebuiltRulesSteps.enablePrebuiltRules,
-        cardId: GetStartedWithAlertsCardsId.enablePrebuiltRules,
+        cardId: CardId.enablePrebuiltRules,
         undo: false,
         trigger: 'auto_check',
       });
@@ -70,10 +61,9 @@ describe('useCheckStepCompleted', () => {
     const { waitFor } = renderHook(() =>
       useCheckStepCompleted({
         autoCheckIfCardCompleted: mockAutoCheck,
-        cardId: GetStartedWithAlertsCardsId.enablePrebuiltRules,
+        cardId: CardId.enablePrebuiltRules,
         indicesExist: true,
         sectionId: SectionId.getStartedWithAlerts,
-        stepId: EnablePrebuiltRulesSteps.enablePrebuiltRules,
         toggleTaskCompleteStatus: mockToggleTask,
       })
     );

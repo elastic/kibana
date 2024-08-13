@@ -12,7 +12,7 @@ import type { IconType } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import { useKibana } from '../../../../lib/kibana/kibana_react';
 import { CardId } from '../types';
-import { useStepContext } from '../context/step_context';
+import { useStepContext } from '../context/card_context';
 import { IntegrationsPageName } from './types';
 
 const SEE_INTEGRATIONS = i18n.translate(

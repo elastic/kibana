@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { setupActiveSections, updateActiveSections } from './helpers';
+import { setupActiveSections } from './helpers';
 import type { ReducerActions } from './types';
 import { type CardId, type TogglePanelReducer, OnboardingActions } from './types';
 
 export const reducer = (state: TogglePanelReducer, action: ReducerActions): TogglePanelReducer => {
   if (action.type === OnboardingActions.AddFinishedCard) {
-    const finishedCardIds: Set<CardId> = new Set(...state.finishedCardIds) as Set<CardId>;
+    const finishedCardIds: Set<CardId> = new Set([...state.finishedCardIds, action.payload.cardId]);
 
-    finishedCardIds.add(action.payload.cardId);
-
-    const activeSections = setupActiveSections(finishedCardIds, state.onboardingSteps);
+    const activeSections = setupActiveSections(state.onboardingSteps);
 
     return {
       ...state,
+      finishedCardIds,
       activeSections,
     };
   }
@@ -28,10 +27,7 @@ export const reducer = (state: TogglePanelReducer, action: ReducerActions): Togg
 
     finishedCardIds.delete(action.payload.cardId);
 
-    const activeSections = updateActiveSections({
-      finishedCardIds,
-      onboardingSteps: state.onboardingSteps,
-    });
+    const activeSections = setupActiveSections(state.onboardingSteps);
 
     return {
       ...state,
@@ -46,21 +42,28 @@ export const reducer = (state: TogglePanelReducer, action: ReducerActions): Togg
   ) {
     // It allows Only One step open at a time
     if (action.payload.isCardExpanded === true && action.payload.cardId != null) {
-      const expandedCards: Set<CardId> = new Set<CardId>();
+      const expandedCardIds: Set<CardId> = new Set<CardId>();
 
-      expandedCards.add(action.payload.cardId);
+      expandedCardIds.add(action.payload.cardId);
+
+      const activeSections = setupActiveSections(state.onboardingSteps);
       return {
         ...state,
-        expandedCards,
+        activeSections,
+        expandedCardIds,
       };
     }
 
     if (action.payload.isCardExpanded === false) {
-      const expandedCards: Set<CardId> = new Set(...state.expandedCards) as Set<CardId>;
-      expandedCards.delete(action.payload.cardId);
+      const expandedCardIds: Set<CardId> = new Set(...state.expandedCardIds) as Set<CardId>;
+      expandedCardIds.delete(action.payload.cardId);
+
+      const activeSections = setupActiveSections(state.onboardingSteps);
+
       return {
         ...state,
-        expandedCards,
+        activeSections,
+        expandedCardIds,
       };
     }
   }
@@ -69,9 +72,7 @@ export const reducer = (state: TogglePanelReducer, action: ReducerActions): Togg
 };
 
 export const getActiveSectionsInitialStates = ({
-  finishedCardIds,
   onboardingSteps,
 }: {
-  finishedCardIds: Set<CardId>;
   onboardingSteps: CardId[];
-}) => setupActiveSections(finishedCardIds, onboardingSteps);
+}) => setupActiveSections(onboardingSteps);

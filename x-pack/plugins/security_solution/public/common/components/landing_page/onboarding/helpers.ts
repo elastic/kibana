@@ -16,8 +16,13 @@ export const DEFAULT_FINISHED_CARDS: CardId[] = [CardId.createFirstProject];
 export const isDefaultFinishedCard = (cardId: CardId, onboardingSteps: CardId[]) =>
   DEFAULT_FINISHED_CARDS.indexOf(cardId) >= 0 && onboardingSteps?.includes(cardId);
 
-export const getActiveCards = (cards: Card[] | undefined, onboardingSteps: CardId[]) =>
-  cards?.filter((card) => onboardingSteps.includes(card.id));
+export const getActiveCardIds = (cards: Card[] | undefined, onboardingSteps: CardId[]) =>
+  cards?.reduce<CardId[]>((acc, card) => {
+    if (onboardingSteps.includes(card.id)) {
+      acc.push(card.id);
+    }
+    return acc;
+  }, []);
 
 export const findCardSectionByCardId = (
   cardId: string
@@ -33,29 +38,11 @@ export const findCardSectionByCardId = (
   return { matchedCard, matchedSection };
 };
 
-export const setupActiveSections = (finishedCardsId: Set<CardId>, onboardingSteps: CardId[]) =>
+export const setupActiveSections = (onboardingSteps: CardId[]) =>
   getSections().reduce<ActiveSections>((acc, section) => {
-    const activeCards = getActiveCards(section.cards, onboardingSteps);
-
+    const activeCards = getActiveCardIds(section.cards, onboardingSteps);
     if (activeCards && Object.keys(activeCards).length > 0) {
-      acc[section.id] = activeCards.reduce<Partial<Record<CardId, Card>>>((accCards, card) => {
-        const isCompleted = finishedCardsId.has(card.id);
-        accCards[card.id] = {
-          ...card,
-          isCompleted,
-        };
-        return accCards;
-      }, {});
+      acc[section.id] = activeCards;
     }
     return acc;
   }, {});
-
-export const updateActiveSections = ({
-  finishedCardIds,
-  onboardingSteps,
-}: {
-  finishedCardIds: Set<CardId>;
-  onboardingSteps: CardId[];
-}): ActiveSections => {
-  return setupActiveSections(finishedCardIds, onboardingSteps);
-};

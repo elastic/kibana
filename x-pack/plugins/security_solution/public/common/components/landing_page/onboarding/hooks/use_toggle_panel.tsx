@@ -32,16 +32,16 @@ const syncExpandedCardStepsToStorageFromURL = (
 
   if (matchedCard) {
     onboardingStorage.resetAllExpandedCardsToStorage();
-    onboardingStorage.addExpandedCardStepToStorage(matchedCard.id);
+    onboardingStorage.addExpandedCardToStorage(matchedCard.id);
   }
 };
 
 const syncExpandedCardStepsFromStorageToURL = (
-  expandedCards: ExpandedCards,
+  expandedCardIds: ExpandedCards,
   callback: ({ matchedCard }: { matchedCard: Card | null }) => void
 ) => {
-  if (expandedCards) {
-    const { matchedCard } = findCardSectionByCardId([...expandedCards][0]);
+  if (expandedCardIds) {
+    const { matchedCard } = findCardSectionByCardId([...expandedCardIds][0]);
 
     callback?.({ matchedCard });
   }
@@ -63,7 +63,7 @@ export const useTogglePanel = ({
   const onboardingStorage = useMemo(() => new OnboardingStorage(spaceId), [spaceId]);
   const {
     getAllFinishedCardsFromStorage,
-    addExpandedCardStepToStorage,
+    addExpandedCardToStorage,
     addFinishedCardToStorage,
     removeFinishedCardFromStorage,
     removeExpandedCardFromStorage,
@@ -76,27 +76,26 @@ export const useTogglePanel = ({
     [getAllFinishedCardsFromStorage]
   );
 
-  const activeSectionsInitialStates = useMemo(
-    () =>
-      getActiveSectionsInitialStates({
-        finishedCardIds: finishedCardIdsInitialStates,
-        onboardingSteps,
-      }),
-    [finishedCardIdsInitialStates, onboardingSteps]
-  );
-
   const expandedCardsInitialStates: ExpandedCards = useMemo(() => {
     if (stepIdFromHash) {
       syncExpandedCardStepsToStorageFromURL(onboardingStorage, stepIdFromHash);
     }
 
-    const expandedCards = getAllExpandedCardsFromStorage();
-    return new Set(expandedCards);
+    const expandedCardIds = getAllExpandedCardsFromStorage();
+    return new Set(expandedCardIds);
   }, [stepIdFromHash, getAllExpandedCardsFromStorage, onboardingStorage]);
+
+  const activeSectionsInitialStates = useMemo(
+    () =>
+      getActiveSectionsInitialStates({
+        onboardingSteps,
+      }),
+    [onboardingSteps]
+  );
 
   const [state, dispatch] = useReducer(reducer, {
     activeSections: activeSectionsInitialStates,
-    expandedCards: expandedCardsInitialStates,
+    expandedCardIds: expandedCardsInitialStates,
     finishedCardIds: finishedCardIdsInitialStates,
     onboardingSteps,
   });
@@ -111,7 +110,7 @@ export const useTogglePanel = ({
       if (isExpanded) {
         // It allows Only One step open at a time
         resetAllExpandedCardsToStorage();
-        addExpandedCardStepToStorage(cardId);
+        addExpandedCardToStorage(cardId);
         telemetry.reportOnboardingHubStepOpen({
           cardId,
           trigger,
@@ -121,7 +120,7 @@ export const useTogglePanel = ({
       }
     },
     [
-      addExpandedCardStepToStorage,
+      addExpandedCardToStorage,
       removeExpandedCardFromStorage,
       resetAllExpandedCardsToStorage,
       telemetry,
@@ -129,10 +128,10 @@ export const useTogglePanel = ({
   );
 
   const toggleTaskCompleteStatus: ToggleTaskCompleteStatus = useCallback(
-    ({ stepLinkId, cardId, sectionId, undo, trigger }) => {
+    ({ stepLinkId, cardId, undo, trigger }) => {
       dispatch({
         type: undo ? OnboardingActions.RemoveFinishedCard : OnboardingActions.AddFinishedCard,
-        payload: { cardId, sectionId },
+        payload: { cardId },
       });
       if (undo) {
         removeFinishedCardFromStorage(cardId, state.onboardingSteps);
@@ -152,7 +151,7 @@ export const useTogglePanel = ({
      **/
     if (!stepIdFromHash) {
       // If all steps are collapsed, do nothing
-      if (Object.values(state.expandedCards).every((c) => !c.isExpanded)) {
+      if (Object.values(state.expandedCardIds).every((c) => !c.isExpanded)) {
         return;
       }
 
@@ -167,7 +166,7 @@ export const useTogglePanel = ({
         }
       );
     }
-  }, [expandedCardsInitialStates, navigateTo, state.expandedCards, stepIdFromHash]);
+  }, [expandedCardsInitialStates, navigateTo, state.expandedCardIds, stepIdFromHash]);
 
   useEffect(() => {
     /** Handle hash change and expand the target step.
@@ -177,7 +176,7 @@ export const useTogglePanel = ({
       const { matchedCard, matchedSection } = findCardSectionByCardId(stepIdFromHash);
       if (matchedCard && matchedSection) {
         // If the step is already expanded, do nothing
-        if (state.expandedCards.has(matchedCard.id)) {
+        if (state.expandedCardIds.has(matchedCard.id)) {
           return;
         }
 
@@ -196,7 +195,7 @@ export const useTogglePanel = ({
         });
       }
     }
-  }, [navigateTo, onCardClicked, state.expandedCards, stepIdFromHash]);
+  }, [navigateTo, onCardClicked, state.expandedCardIds, stepIdFromHash]);
 
   return {
     state,

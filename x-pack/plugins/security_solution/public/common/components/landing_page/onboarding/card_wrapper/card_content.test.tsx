@@ -6,27 +6,26 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import { CardContent } from './step_content';
-import { QuickStartSectionCardsId, SectionId } from '../types';
-import { overviewVideoSteps } from '../sections';
+import { CardContent } from './card_content';
+import type { Card } from '../types';
+import { CardId, SectionId } from '../types';
+import { getCardById } from '../sections';
 
-jest.mock('../context/step_context');
+jest.mock('../context/card_context');
 jest.mock('../../../../lib/kibana');
 
 describe('CardContent', () => {
   const toggleTaskCompleteStatus = jest.fn();
 
   const props = {
-    cardId: CardId.watchTheOverviewVideo,
     indicesExist: false,
     sectionId: SectionId.quickStart,
-    step: overviewVideoSteps[0],
+    card: getCardById(CardId.watchTheOverviewVideo) as Card<CardId>,
     toggleTaskCompleteStatus,
   };
 
-  it('renders step content when hasStepContent is true and isExpandedStep is true', () => {
-    const mockProps = { ...props, hasStepContent: true, isExpandedStep: true };
-    const { getByTestId, getByText } = render(<CardContent {...mockProps} />);
+  it('renders card content', () => {
+    const { getByTestId, getByText } = render(<CardContent {...props} />);
 
     const splitPanelElement = getByTestId('split-panel');
 

@@ -57,13 +57,11 @@ export interface Card<T = CardId> {
   splitPanel?: React.ReactNode;
   title?: string;
   icon?: EuiIconProps;
-  isExpanded?: boolean;
-  isCompleted?: boolean;
 }
 
 export type ExpandedCards = Set<CardId>;
 
-export type ActiveSections = Partial<Record<SectionId, Partial<Record<CardId, Card>>>>;
+export type ActiveSections = Partial<Record<SectionId, CardId[]>>;
 
 export enum SectionId {
   quickStart = 'quick_start',
@@ -82,19 +80,19 @@ export enum CardId {
 
 export interface TogglePanelReducer {
   activeSections: ActiveSections | null;
-  expandedCards: Set<CardId>;
+  expandedCardIds: Set<CardId>;
   finishedCardIds: Set<CardId>;
   onboardingSteps: CardId[];
 }
 
 export interface AddFinishedCardAction {
   type: OnboardingActions.AddFinishedCard;
-  payload: { cardId: CardId; sectionId: SectionId };
+  payload: { cardId: CardId };
 }
 
 export interface RemoveFinishedCardAction {
   type: OnboardingActions.RemoveFinishedCard;
-  payload: { cardId: CardId; sectionId: SectionId };
+  payload: { cardId: CardId };
 }
 
 export interface ToggleCardAction {

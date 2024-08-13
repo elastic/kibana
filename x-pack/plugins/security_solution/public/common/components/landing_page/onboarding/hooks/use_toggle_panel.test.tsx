@@ -7,21 +7,7 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useTogglePanel } from './use_toggle_panel';
 
-import type { StepId } from '../types';
-import {
-  QuickStartSectionCardsId,
-  SectionId,
-  CreateProjectSteps,
-  OverviewSteps,
-  AddAndValidateYourDataCardsId,
-  AddIntegrationsSteps,
-  ViewDashboardSteps,
-  GetStartedWithAlertsCardsId,
-  ViewAlertsSteps,
-  EnablePrebuiltRulesSteps,
-} from '../types';
-import type { SecurityProductTypes } from '../configs';
-import { ProductLine } from '../configs';
+import { SectionId, CardId } from '../types';
 import { OnboardingStorage } from '../storage';
 import * as mockStorage from '../__mocks__/storage';
 
@@ -52,18 +38,13 @@ jest.mock('../../../../lib/kibana', () => ({
 }));
 
 describe('useTogglePanel', () => {
-  const productTypes = [
-    { product_line: 'security', product_tier: 'essentials' },
-    { product_line: 'endpoint', product_tier: 'complete' },
-  ] as SecurityProductTypes;
-
-  const onboardingSteps: StepId[] = [
-    CreateProjectSteps.createFirstProject,
-    OverviewSteps.getToKnowElasticSecurity,
-    AddIntegrationsSteps.connectToDataSources,
-    ViewDashboardSteps.analyzeData,
-    EnablePrebuiltRulesSteps.enablePrebuiltRules,
-    ViewAlertsSteps.viewAlerts,
+  const onboardingSteps: CardId[] = [
+    CardId.createFirstProject,
+    CardId.watchTheOverviewVideo,
+    CardId.addIntegrations,
+    CardId.viewDashboards,
+    CardId.enablePrebuiltRules,
+    CardId.viewAlerts,
   ];
 
   const spaceId = 'testSpaceId';
@@ -72,225 +53,27 @@ describe('useTogglePanel', () => {
     jest.clearAllMocks();
 
     (OnboardingStorage as jest.Mock).mockImplementation(() => ({
-      getAllFinishedStepsFromStorage: mockStorage.mockGetAllFinishedStepsFromStorage,
-      getFinishedStepsFromStorageByCardId: mockStorage.mockGetFinishedStepsFromStorageByCardId,
-      getActiveProductsFromStorage: mockStorage.mockGetActiveProductsFromStorage,
-      toggleActiveProductsInStorage: mockStorage.mockToggleActiveProductsInStorage,
-      resetAllExpandedCardStepsToStorage: mockStorage.mockResetAllExpandedCardStepsToStorage,
-      addFinishedStepToStorage: mockStorage.mockAddFinishedStepToStorage,
-      removeFinishedStepFromStorage: mockStorage.mockRemoveFinishedStepFromStorage,
-      addExpandedCardStepToStorage: mockStorage.mockAddExpandedCardStepToStorage,
-      removeExpandedCardStepFromStorage: mockStorage.mockRemoveExpandedCardStepFromStorage,
-      getAllExpandedStepsFromStorage: mockStorage.mockGetAllExpandedCardStepsFromStorage,
+      getAllFinishedCardsFromStorage: mockStorage.mockGetAllFinishedCardsFromStorage,
+      resetAllExpandedCardsToStorage: mockStorage.mockResetAllExpandedCardToStorage,
+      addFinishedCardToStorage: mockStorage.mockAddFinishedCardToStorage,
+      removeFinishedCardFromStorage: mockStorage.mockRemoveFinishedCardFromStorage,
+      addExpandedCardToStorage: mockStorage.mockAddExpandedCardToStorage,
+      removeExpandedCardFromStorage: mockStorage.mockRemoveExpandedCardFromStorage,
+      getAllExpandedCardsFromStorage: mockStorage.mockGetAllExpandedCardsFromStorage,
     }));
 
-    (mockStorage.mockGetAllFinishedStepsFromStorage as jest.Mock).mockReturnValue({
-      [QuickStartSectionCardsId.createFirstProject]: new Set([
-        CreateProjectSteps.createFirstProject,
-      ]),
-    });
-    (mockStorage.mockGetActiveProductsFromStorage as jest.Mock).mockReturnValue([
-      ProductLine.security,
-      ProductLine.cloud,
-      ProductLine.endpoint,
+    (mockStorage.mockGetAllFinishedCardsFromStorage as jest.Mock).mockReturnValue([
+      CardId.createFirstProject,
     ]);
   });
 
-  test('should initialize state with correct initial values - when no active products from local storage', () => {
-    (mockStorage.mockGetActiveProductsFromStorage as jest.Mock).mockReturnValue([]);
-
-    const { result } = renderHook(() => useTogglePanel({ productTypes, onboardingSteps, spaceId }));
-
-    const { state } = result.current;
-
-    expect(state.activeProducts).toEqual(new Set([ProductLine.security, ProductLine.endpoint]));
-    expect(state.finishedCards).toEqual({
-      [QuickStartSectionCardsId.createFirstProject]: new Set([
-        CreateProjectSteps.createFirstProject,
-      ]),
-    });
-
-    expect(state.activeSections).toEqual(
-      expect.objectContaining({
-        [SectionId.quickStart]: {
-          [QuickStartSectionCardsId.createFirstProject]: {
-            id: QuickStartSectionCardsId.createFirstProject,
-            timeInMins: 0,
-            stepsLeft: 0,
-            activeStepIds: [CreateProjectSteps.createFirstProject],
-          },
-          [CardId.watchTheOverviewVideo]: {
-            id: CardId.watchTheOverviewVideo,
-            timeInMins: 0,
-            stepsLeft: 1,
-            activeStepIds: [OverviewSteps.getToKnowElasticSecurity],
-          },
-        },
-        [SectionId.addAndValidateYourData]: {
-          [AddAndValidateYourDataCardsId.addIntegrations]: {
-            id: AddAndValidateYourDataCardsId.addIntegrations,
-            timeInMins: 0,
-            stepsLeft: 1,
-            activeStepIds: [AddIntegrationsSteps.connectToDataSources],
-          },
-          [AddAndValidateYourDataCardsId.viewDashboards]: {
-            id: AddAndValidateYourDataCardsId.viewDashboards,
-            timeInMins: 0,
-            stepsLeft: 1,
-            activeStepIds: [ViewDashboardSteps.analyzeData],
-          },
-        },
-        [SectionId.getStartedWithAlerts]: {
-          [GetStartedWithAlertsCardsId.enablePrebuiltRules]: {
-            id: EnablePrebuiltRulesSteps.enablePrebuiltRules,
-            timeInMins: 0,
-            stepsLeft: 1,
-            activeStepIds: [EnablePrebuiltRulesSteps.enablePrebuiltRules],
-          },
-          [GetStartedWithAlertsCardsId.viewAlerts]: {
-            id: GetStartedWithAlertsCardsId.viewAlerts,
-            timeInMins: 0,
-            stepsLeft: 1,
-            activeStepIds: [ViewAlertsSteps.viewAlerts],
-          },
-        },
-      })
-    );
-  });
-
-  test('should initialize state with correct initial values - when all products active', () => {
-    const { result } = renderHook(() => useTogglePanel({ productTypes, onboardingSteps, spaceId }));
-
-    const { state } = result.current;
-
-    expect(state.activeProducts).toEqual(
-      new Set([ProductLine.security, ProductLine.cloud, ProductLine.endpoint])
-    );
-    expect(state.finishedCards).toEqual({
-      [QuickStartSectionCardsId.createFirstProject]: new Set([
-        CreateProjectSteps.createFirstProject,
-      ]),
-    });
-
-    expect(state.activeSections).toEqual(
-      expect.objectContaining({
-        [SectionId.quickStart]: {
-          [QuickStartSectionCardsId.createFirstProject]: {
-            id: QuickStartSectionCardsId.createFirstProject,
-            timeInMins: 0,
-            stepsLeft: 0,
-            activeStepIds: [CreateProjectSteps.createFirstProject],
-          },
-          [CardId.watchTheOverviewVideo]: {
-            id: CardId.watchTheOverviewVideo,
-            timeInMins: 0,
-            stepsLeft: 1,
-            activeStepIds: [OverviewSteps.getToKnowElasticSecurity],
-          },
-        },
-        [SectionId.addAndValidateYourData]: {
-          [AddAndValidateYourDataCardsId.addIntegrations]: {
-            id: AddAndValidateYourDataCardsId.addIntegrations,
-            timeInMins: 0,
-            stepsLeft: 1,
-            activeStepIds: [AddIntegrationsSteps.connectToDataSources],
-          },
-          [AddAndValidateYourDataCardsId.viewDashboards]: {
-            id: AddAndValidateYourDataCardsId.viewDashboards,
-            timeInMins: 0,
-            stepsLeft: 1,
-            activeStepIds: [ViewDashboardSteps.analyzeData],
-          },
-        },
-        [SectionId.getStartedWithAlerts]: {
-          [GetStartedWithAlertsCardsId.enablePrebuiltRules]: {
-            id: EnablePrebuiltRulesSteps.enablePrebuiltRules,
-            timeInMins: 0,
-            stepsLeft: 1,
-            activeStepIds: [EnablePrebuiltRulesSteps.enablePrebuiltRules],
-          },
-          [GetStartedWithAlertsCardsId.viewAlerts]: {
-            id: GetStartedWithAlertsCardsId.viewAlerts,
-            timeInMins: 0,
-            stepsLeft: 1,
-            activeStepIds: [ViewAlertsSteps.viewAlerts],
-          },
-        },
-      })
-    );
-  });
-
-  test('should initialize state with correct initial values - when security product active', () => {
-    (mockStorage.mockGetActiveProductsFromStorage as jest.Mock).mockReturnValue([
-      ProductLine.security,
-    ]);
-    const { result } = renderHook(() => useTogglePanel({ productTypes, onboardingSteps, spaceId }));
-
-    const { state } = result.current;
-
-    expect(state.activeProducts).toEqual(new Set([ProductLine.security]));
-    expect(state.finishedCards).toEqual({
-      [QuickStartSectionCardsId.createFirstProject]: new Set([
-        CreateProjectSteps.createFirstProject,
-      ]),
-    });
-
-    expect(state.activeSections).toEqual(
-      expect.objectContaining({
-        [SectionId.quickStart]: {
-          [QuickStartSectionCardsId.createFirstProject]: {
-            id: QuickStartSectionCardsId.createFirstProject,
-            timeInMins: 0,
-            stepsLeft: 0,
-            activeStepIds: [CreateProjectSteps.createFirstProject],
-          },
-          [CardId.watchTheOverviewVideo]: {
-            id: CardId.watchTheOverviewVideo,
-            timeInMins: 0,
-            stepsLeft: 1,
-            activeStepIds: [OverviewSteps.getToKnowElasticSecurity],
-          },
-        },
-        [SectionId.addAndValidateYourData]: {
-          [AddAndValidateYourDataCardsId.addIntegrations]: {
-            id: AddAndValidateYourDataCardsId.addIntegrations,
-            timeInMins: 0,
-            stepsLeft: 1,
-            activeStepIds: [AddIntegrationsSteps.connectToDataSources],
-          },
-          [AddAndValidateYourDataCardsId.viewDashboards]: {
-            id: AddAndValidateYourDataCardsId.viewDashboards,
-            timeInMins: 0,
-            stepsLeft: 1,
-            activeStepIds: [ViewDashboardSteps.analyzeData],
-          },
-        },
-        [SectionId.getStartedWithAlerts]: {
-          [GetStartedWithAlertsCardsId.enablePrebuiltRules]: {
-            id: EnablePrebuiltRulesSteps.enablePrebuiltRules,
-            timeInMins: 0,
-            stepsLeft: 1,
-            activeStepIds: [EnablePrebuiltRulesSteps.enablePrebuiltRules],
-          },
-          [GetStartedWithAlertsCardsId.viewAlerts]: {
-            id: GetStartedWithAlertsCardsId.viewAlerts,
-            timeInMins: 0,
-            stepsLeft: 1,
-            activeStepIds: [ViewAlertsSteps.viewAlerts],
-          },
-        },
-      })
-    );
-  });
-
-  test('should reset all the card steps in storage when a step is expanded. (As it allows only one step open at a time)', () => {
-    const { result } = renderHook(() => useTogglePanel({ productTypes, onboardingSteps, spaceId }));
+  test('should reset other cards in storage when a card is expanded. (As it allows only one step open at a time)', () => {
+    const { result } = renderHook(() => useTogglePanel({ onboardingSteps, spaceId }));
 
     const { onCardClicked } = result.current;
 
     act(() => {
       onCardClicked({
-        stepId: OverviewSteps.getToKnowElasticSecurity,
         cardId: CardId.watchTheOverviewVideo,
         sectionId: SectionId.quickStart,
         isExpanded: true,
@@ -298,19 +81,18 @@ describe('useTogglePanel', () => {
       });
     });
 
-    expect(mockStorage.mockResetAllExpandedCardStepsToStorage).toHaveBeenCalledTimes(1);
+    expect(mockStorage.mockResetAllExpandedCardToStorage).toHaveBeenCalledTimes(1);
   });
 
   test('should add the current step to storage when it is expanded', () => {
     const { result } = renderHook(() =>
-      useTogglePanel({ productTypes, onboardingSteps, spaceId: 'testSpaceId' })
+      useTogglePanel({ onboardingSteps, spaceId: 'testSpaceId' })
     );
 
     const { onCardClicked } = result.current;
 
     act(() => {
       onCardClicked({
-        stepId: OverviewSteps.getToKnowElasticSecurity,
         cardId: CardId.watchTheOverviewVideo,
         sectionId: SectionId.quickStart,
         isExpanded: true,
@@ -318,21 +100,19 @@ describe('useTogglePanel', () => {
       });
     });
 
-    expect(mockStorage.mockAddExpandedCardStepToStorage).toHaveBeenCalledTimes(1);
-    expect(mockStorage.mockAddExpandedCardStepToStorage).toHaveBeenCalledWith(
-      CardId.watchTheOverviewVideo,
-      OverviewSteps.getToKnowElasticSecurity
+    expect(mockStorage.mockAddExpandedCardToStorage).toHaveBeenCalledTimes(1);
+    expect(mockStorage.mockAddExpandedCardToStorage).toHaveBeenCalledWith(
+      CardId.watchTheOverviewVideo
     );
   });
 
   test('should remove the current step from storage when it is collapsed', () => {
-    const { result } = renderHook(() => useTogglePanel({ productTypes, onboardingSteps, spaceId }));
+    const { result } = renderHook(() => useTogglePanel({ onboardingSteps, spaceId }));
 
     const { onCardClicked } = result.current;
 
     act(() => {
       onCardClicked({
-        stepId: OverviewSteps.getToKnowElasticSecurity,
         cardId: CardId.watchTheOverviewVideo,
         sectionId: SectionId.quickStart,
         isExpanded: false,
@@ -340,42 +120,38 @@ describe('useTogglePanel', () => {
       });
     });
 
-    expect(mockStorage.mockRemoveExpandedCardStepFromStorage).toHaveBeenCalledTimes(1);
-    expect(mockStorage.mockRemoveExpandedCardStepFromStorage).toHaveBeenCalledWith(
-      CardId.watchTheOverviewVideo,
-      OverviewSteps.getToKnowElasticSecurity
+    expect(mockStorage.mockRemoveExpandedCardFromStorage).toHaveBeenCalledTimes(1);
+    expect(mockStorage.mockRemoveExpandedCardFromStorage).toHaveBeenCalledWith(
+      CardId.watchTheOverviewVideo
     );
   });
 
   test('should call addFinishedStepToStorage when toggleTaskCompleteStatus is executed', () => {
-    const { result } = renderHook(() => useTogglePanel({ productTypes, onboardingSteps, spaceId }));
+    const { result } = renderHook(() => useTogglePanel({ onboardingSteps, spaceId }));
 
     const { toggleTaskCompleteStatus } = result.current;
 
     act(() => {
       toggleTaskCompleteStatus({
-        stepId: OverviewSteps.getToKnowElasticSecurity,
         cardId: CardId.watchTheOverviewVideo,
         sectionId: SectionId.quickStart,
         trigger: 'click',
       });
     });
 
-    expect(mockStorage.mockAddFinishedStepToStorage).toHaveBeenCalledTimes(1);
-    expect(mockStorage.mockAddFinishedStepToStorage).toHaveBeenCalledWith(
-      CardId.watchTheOverviewVideo,
-      OverviewSteps.getToKnowElasticSecurity
+    expect(mockStorage.mockAddFinishedCardToStorage).toHaveBeenCalledTimes(1);
+    expect(mockStorage.mockAddFinishedCardToStorage).toHaveBeenCalledWith(
+      CardId.watchTheOverviewVideo
     );
   });
 
   test('should call removeFinishedStepToStorage when toggleTaskCompleteStatus is executed with undo equals to true', () => {
-    const { result } = renderHook(() => useTogglePanel({ productTypes, onboardingSteps, spaceId }));
+    const { result } = renderHook(() => useTogglePanel({ onboardingSteps, spaceId }));
 
     const { toggleTaskCompleteStatus } = result.current;
 
     act(() => {
       toggleTaskCompleteStatus({
-        stepId: OverviewSteps.getToKnowElasticSecurity,
         cardId: CardId.watchTheOverviewVideo,
         sectionId: SectionId.quickStart,
         undo: true,
@@ -383,26 +159,10 @@ describe('useTogglePanel', () => {
       });
     });
 
-    expect(mockStorage.mockRemoveFinishedStepFromStorage).toHaveBeenCalledTimes(1);
-    expect(mockStorage.mockRemoveFinishedStepFromStorage).toHaveBeenCalledWith(
+    expect(mockStorage.mockRemoveFinishedCardFromStorage).toHaveBeenCalledTimes(1);
+    expect(mockStorage.mockRemoveFinishedCardFromStorage).toHaveBeenCalledWith(
       CardId.watchTheOverviewVideo,
-      OverviewSteps.getToKnowElasticSecurity,
       onboardingSteps
-    );
-  });
-
-  test('should call toggleActiveProductsInStorage when onProductSwitchChanged is executed', () => {
-    const { result } = renderHook(() => useTogglePanel({ productTypes, onboardingSteps, spaceId }));
-
-    const { onProductSwitchChanged } = result.current;
-
-    act(() => {
-      onProductSwitchChanged({ id: ProductLine.security, label: 'Analytics' });
-    });
-
-    expect(mockStorage.mockToggleActiveProductsInStorage).toHaveBeenCalledTimes(1);
-    expect(mockStorage.mockToggleActiveProductsInStorage).toHaveBeenCalledWith(
-      ProductLine.security
     );
   });
 });

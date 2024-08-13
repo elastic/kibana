@@ -9,7 +9,7 @@ import { LinkButton } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 
 import React, { useCallback } from 'react';
-import { useStepContext } from '../context/step_context';
+import { useStepContext } from '../context/card_context';
 import { CardId, SectionId } from '../types';
 import { AddIntegrationCallout } from './add_integration_callout';
 import { VIEW_ALERTS, VIEW_ALERTS_CALLOUT_TITLE } from './translations';

@@ -9,36 +9,25 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 
 import { useSetUpSections } from './hooks/use_setup_sections';
-
 import type { ActiveSections } from './types';
-import { useStepContext } from './context/step_context';
+import { useStepContext } from './context/card_context';
 
 const TogglePanelComponent: React.FC<{
   activeSections: ActiveSections | null;
 }> = ({ activeSections }) => {
   const { euiTheme } = useEuiTheme();
 
-  const { expandedCards, finishedCardIds, toggleTaskCompleteStatus, onCardClicked } =
-    useStepContext();
+  const { toggleTaskCompleteStatus, onCardClicked } = useStepContext();
 
   const { setUpSections } = useSetUpSections({ euiTheme });
   const sectionNodes = useMemo(
     () =>
       setUpSections({
         activeSections,
-        expandedCards,
-        finishedCardIds,
         toggleTaskCompleteStatus,
         onCardClicked,
       }),
-    [
-      activeSections,
-      expandedCards,
-      finishedCardIds,
-      onCardClicked,
-      setUpSections,
-      toggleTaskCompleteStatus,
-    ]
+    [activeSections, onCardClicked, setUpSections, toggleTaskCompleteStatus]
   );
 
   return (

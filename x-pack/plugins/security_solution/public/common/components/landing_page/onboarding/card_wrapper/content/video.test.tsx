@@ -9,11 +9,11 @@ import { render, fireEvent, screen } from '@testing-library/react';
 import { Video } from './video';
 import { CardId, SectionId } from '../../types';
 import type { EuiFlexGroupProps } from '@elastic/eui';
-import { useStepContext } from '../../context/step_context';
+import { useStepContext } from '../../context/card_context';
 import { WATCH_VIDEO_BUTTON_TITLE } from '../../translations';
 import { defaultExpandedCards } from '../../storage';
 
-jest.mock('../../context/step_context');
+jest.mock('../../context/card_context');
 jest.mock('./content_wrapper');
 
 jest.mock('@elastic/eui', () => ({
@@ -49,7 +49,6 @@ describe('Video Component', () => {
     const overlay = getByTestId('watch-video-overlay');
     fireEvent.click(overlay);
     expect(toggleTaskCompleteStatus).toHaveBeenCalledWith({
-      stepId: CardId.watchTheOverviewVideo,
       cardId: CardId.watchTheOverviewVideo,
       sectionId: SectionId.quickStart,
       undo: false,
@@ -63,12 +62,10 @@ describe('Video Component', () => {
     expect(overlayAfterClick).not.toBeInTheDocument();
   });
 
-  it('renders video if step is completed', () => {
+  it('renders video if card is completed', () => {
     (useStepContext as jest.Mock).mockReturnValue({
-      expandedCards: defaultExpandedCards,
-      finishedCards: {
-        [CardId.watchTheOverviewVideo]: new Set([CardId.watchTheOverviewVideo]),
-      },
+      expandedCardIds: defaultExpandedCards,
+      finishedCardIds: new Set([CardId.watchTheOverviewVideo]),
       onCardClicked: jest.fn(),
       toggleTaskCompleteStatus: jest.fn(),
     });

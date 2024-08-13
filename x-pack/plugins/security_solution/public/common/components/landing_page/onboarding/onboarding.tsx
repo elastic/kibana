@@ -12,7 +12,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { TogglePanel } from './toggle_panel';
 
 import { useTogglePanel } from './hooks/use_toggle_panel';
-import { StepContextProvider } from './context/step_context';
+import { CardContextProvider } from './context/card_context';
 import { CONTENT_WIDTH } from './helpers';
 import { WelcomeHeader } from './welcome_header';
 import { DataIngestionHubHeader } from './data_ingestion_hub/header';
@@ -43,7 +43,7 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
   const {
     onCardClicked,
     toggleTaskCompleteStatus,
-    state: { activeSections, finishedCardIds, expandedCards },
+    state: { activeSections, finishedCardIds, expandedCardIds },
   } = useTogglePanel({ onboardingSteps, spaceId });
   const productTier = useMemo(
     () =>
@@ -97,8 +97,8 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
         paddingSize="none"
         className={stepsSectionStyles}
       >
-        <StepContextProvider
-          expandedCards={expandedCards}
+        <CardContextProvider
+          expandedCardIds={expandedCardIds}
           finishedCardIds={finishedCardIds}
           indicesExist={!!indicesExist}
           onCardClicked={onCardClicked}
@@ -106,7 +106,7 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
           toggleTaskCompleteStatus={toggleTaskCompleteStatus}
         >
           <TogglePanel activeSections={activeSections} />
-        </StepContextProvider>
+        </CardContextProvider>
       </KibanaPageTemplate.Section>
       <KibanaPageTemplate.Section grow={true} restrictWidth={CONTENT_WIDTH} paddingSize="none">
         <Footer />

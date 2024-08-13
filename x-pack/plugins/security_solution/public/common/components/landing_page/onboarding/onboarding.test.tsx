@@ -6,18 +6,13 @@
  */
 import React from 'react';
 import { OnboardingComponent } from './onboarding';
-import {
-  AddIntegrationsSteps,
-  EnablePrebuiltRulesSteps,
-  OverviewSteps,
-  ViewAlertsSteps,
-  ViewDashboardSteps,
-} from './types';
+
 import { ProductLine, ProductTier } from './configs';
 import { useCurrentUser, useKibana } from '../../../lib/kibana';
 import type { AppContextTestRender } from '../../../mock/endpoint';
 import { createAppRootMockRenderer } from '../../../mock/endpoint';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
+import { CardId } from './types';
 
 jest.mock('./toggle_panel');
 jest.mock('../../../lib/kibana');
@@ -34,11 +29,11 @@ describe('OnboardingComponent', () => {
     indicesExist: true,
     productTypes: [{ product_line: ProductLine.security, product_tier: ProductTier.complete }],
     onboardingSteps: [
-      OverviewSteps.getToKnowElasticSecurity,
-      AddIntegrationsSteps.connectToDataSources,
-      ViewDashboardSteps.analyzeData,
-      EnablePrebuiltRulesSteps.enablePrebuiltRules,
-      ViewAlertsSteps.viewAlerts,
+      CardId.watchTheOverviewVideo,
+      CardId.addIntegrations,
+      CardId.viewDashboards,
+      CardId.enablePrebuiltRules,
+      CardId.viewAlerts,
     ],
     spaceId: 'spaceId',
   };

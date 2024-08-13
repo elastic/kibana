@@ -18,39 +18,32 @@ import React, { useCallback } from 'react';
 import classnames from 'classnames';
 import { useNavigateTo, SecurityPageName } from '@kbn/security-solution-navigation';
 
-import type { CardId, OnCardClicked, ToggleTaskCompleteStatus, SectionId, Card } from '../types';
+import type { OnCardClicked, ToggleTaskCompleteStatus, SectionId, Card } from '../types';
 import { ALL_DONE_TEXT, EXPAND_STEP_BUTTON_LABEL } from '../translations';
 
-import { CardContent } from './step_content';
+import { CardContent } from './card_content';
 import { useCheckStepCompleted } from '../hooks/use_check_step_completed';
-import { useStepContext } from '../context/step_context';
+import { useStepContext } from '../context/card_context';
 import { useCardStepStyles } from '../styles/card_step.styles';
 import { useCardItemStyles } from '../styles/card_item.styles';
 
-const CardStepComponent: React.FC<{
+const CardWrapperComponent: React.FC<{
   card: Card;
-  expandedCards: Set<CardId>;
-  finishedCardIds: Set<CardId>;
+
   toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
   onCardClicked: OnCardClicked;
   sectionId: SectionId;
-}> = ({
-  card,
-  expandedCards,
-  finishedCardIds = new Set(),
-  toggleTaskCompleteStatus,
-  onCardClicked,
-  sectionId,
-}) => {
+}> = ({ card, toggleTaskCompleteStatus, onCardClicked, sectionId }) => {
   const { navigateTo } = useNavigateTo();
-
-  const isExpandedStep = expandedCards.has(card.id);
 
   const cardItemPanelStyle = useCardItemStyles();
 
-  const { id: stepId, title, description, splitPanel, icon, autoCheckIfCardCompleted } = card;
+  const { id: cardId, title, description, splitPanel, icon, autoCheckIfCardCompleted } = card;
   const hasCardContent = description != null || splitPanel != null;
-  const { indicesExist } = useStepContext();
+  const { indicesExist, expandedCardIds, finishedCardIds } = useStepContext();
+
+  const isExpandedCard = expandedCardIds?.has(card.id);
+  const isDone = finishedCardIds?.has(card.id);
 
   useCheckStepCompleted({
     autoCheckIfCardCompleted,
@@ -61,12 +54,10 @@ const CardStepComponent: React.FC<{
     toggleTaskCompleteStatus,
   });
 
-  const isDone = finishedCardIds.has(stepId);
-
   const toggleStep = useCallback(
     (e) => {
       e.preventDefault();
-      const newStatus = !isExpandedStep;
+      const newStatus = !isExpandedCard;
 
       if (hasCardContent) {
         // Toggle step and sync the expanded card step to storage & reducer
@@ -74,11 +65,11 @@ const CardStepComponent: React.FC<{
 
         navigateTo({
           deepLinkId: SecurityPageName.landing,
-          path: newStatus ? `#${stepId}` : undefined,
+          path: newStatus ? `#${cardId}` : undefined,
         });
       }
     },
-    [isExpandedStep, hasCardContent, onCardClicked, card.id, sectionId, navigateTo, stepId]
+    [isExpandedCard, hasCardContent, onCardClicked, card.id, sectionId, navigateTo, cardId]
   );
 
   const {
@@ -102,7 +93,7 @@ const CardStepComponent: React.FC<{
 
   const panelClassNames = classnames(
     {
-      'card-panel-collapsed': !isExpandedStep,
+      'card-panel-collapsed': !isExpandedCard,
     },
     stepPanelStyles
   );
@@ -110,7 +101,7 @@ const CardStepComponent: React.FC<{
   const cardClassNames = classnames(
     'card-item',
     {
-      'card-expanded': isExpandedStep,
+      'card-expanded': isExpandedCard,
     },
     cardItemPanelStyle,
     panelClassNames
@@ -124,7 +115,7 @@ const CardStepComponent: React.FC<{
       hasShadow={false}
       borderRadius="none"
       paddingSize="none"
-      id={stepId}
+      id={cardId}
     >
       <EuiFlexGroup gutterSize="none" className={stepGroundStyles}>
         <EuiFlexItem grow={false} onClick={toggleStep} className={stepItemStyles}>
@@ -146,9 +137,9 @@ const CardStepComponent: React.FC<{
               className="eui-displayInlineBlock toggle-button"
               color="primary"
               onClick={toggleStep}
-              iconType={isExpandedStep ? 'arrowUp' : 'arrowDown'}
+              iconType={isExpandedCard ? 'arrowUp' : 'arrowDown'}
               aria-label={EXPAND_STEP_BUTTON_LABEL(title ?? '')}
-              aria-expanded={isExpandedStep}
+              aria-expanded={isExpandedCard}
               size="xs"
               css={toggleButtonStyles}
               isDisabled={!hasCardContent}
@@ -156,11 +147,11 @@ const CardStepComponent: React.FC<{
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {expandedCards.has(card.id) && hasCardContent && (
+      {isExpandedCard && hasCardContent && (
         <div className="cardContentWrapper">
           <div className="cardContent">
             <CardContent
-              autoCheckIfCardCompleted={isExpandedStep ? autoCheckIfCardCompleted : undefined}
+              autoCheckIfCardCompleted={isExpandedCard ? autoCheckIfCardCompleted : undefined}
               card={card}
               indicesExist={indicesExist}
               sectionId={sectionId}
@@ -173,4 +164,4 @@ const CardStepComponent: React.FC<{
   );
 };
 
-export const CardStep = React.memo(CardStepComponent);
+export const CardWrapper = React.memo(CardWrapperComponent);

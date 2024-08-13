@@ -11,7 +11,7 @@ import { DEFAULT_FINISHED_CARDS, isDefaultFinishedCard } from './helpers';
 import { storage } from '../../../lib/local_storage';
 
 export const FINISHED_CARDS_STORAGE_KEY = 'securitySolution.onboarding.finishedCards';
-export const EXPANDED_CARDS_STORAGE_KEY = 'securitySolution.onboarding.expandedCards';
+export const EXPANDED_CARDS_STORAGE_KEY = 'securitySolution.onboarding.expandedCardIds';
 
 export const getStorageKeyBySpace = (storageKey: string, spaceId: string | null | undefined) => {
   if (spaceId == null) {
@@ -80,11 +80,12 @@ export class OnboardingStorage {
 
     storage.set(expandedCardsStorageKey, defaultExpandedCards);
   };
-  public addExpandedCardStepToStorage = (cardId: CardId) => {
-    const expandedCards: string[] = this.getAllExpandedCardsFromStorage();
+  public addExpandedCardToStorage = (cardId: CardId) => {
+    const expandedCardIds: string[] = this.getAllExpandedCardsFromStorage();
     const expandedCardsStorageKey = this.expandedCardsStorageKey;
 
-    const cards = expandedCards.indexOf(cardId) < 0 ? [...expandedCards, cardId] : expandedCards;
+    const cards =
+      expandedCardIds.indexOf(cardId) < 0 ? [...expandedCardIds, cardId] : expandedCardIds;
 
     storage.set(expandedCardsStorageKey, cards);
   };

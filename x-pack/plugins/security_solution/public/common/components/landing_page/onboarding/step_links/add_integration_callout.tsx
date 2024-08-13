@@ -14,7 +14,7 @@ import classnames from 'classnames';
 import { useAddIntegrationsCalloutStyles } from '../styles/add_integrations_callout.styles';
 import { ADD_INTEGRATIONS_STEP } from './translations';
 import { CardId } from '../types';
-import { useStepContext } from '../context/step_context';
+import { useStepContext } from '../context/card_context';
 import { AddIntegrationCalloutStepLinkId } from './types';
 
 const AddIntegrationsCalloutComponent = ({

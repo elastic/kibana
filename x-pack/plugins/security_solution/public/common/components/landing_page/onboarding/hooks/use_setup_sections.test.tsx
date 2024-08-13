@@ -8,8 +8,8 @@
 import { renderHook } from '@testing-library/react-hooks';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { useSetUpSections } from './use_setup_sections';
-import type { ActiveSections, CardId, ExpandedCards, StepId } from '../types';
-import { CreateProjectSteps, QuickStartSectionCardsId, SectionId } from '../types';
+import type { ActiveSections } from '../types';
+import { SectionId, CardId } from '../types';
 
 const mockEuiTheme: EuiThemeComputed = {
   size: {
@@ -19,11 +19,7 @@ const mockEuiTheme: EuiThemeComputed = {
   colors: {},
   font: { weight: { bold: 700 } },
 } as EuiThemeComputed;
-const finishedCards = {
-  [QuickStartSectionCardsId.createFirstProject]: new Set<StepId>([
-    CreateProjectSteps.createFirstProject,
-  ]),
-} as Record<CardId, Set<StepId>>;
+
 describe('useSetUpSections', () => {
   const onCardClicked = jest.fn();
   const toggleTaskCompleteStatus = jest.fn();
@@ -32,21 +28,13 @@ describe('useSetUpSections', () => {
     const { result } = renderHook(() => useSetUpSections({ euiTheme: mockEuiTheme }));
 
     const activeSections = {
-      [SectionId.quickStart]: {
-        [QuickStartSectionCardsId.createFirstProject]: {
-          id: QuickStartSectionCardsId.createFirstProject,
-          timeInMins: 3,
-          stepsLeft: 1,
-        },
-      },
+      [SectionId.quickStart]: [CardId.createFirstProject],
     } as ActiveSections;
 
     const sections = result.current.setUpSections({
       activeSections,
-      expandedCards: {} as ExpandedCards,
       onCardClicked,
       toggleTaskCompleteStatus,
-      finishedCards,
     });
 
     expect(sections).toHaveLength(1);
@@ -59,10 +47,8 @@ describe('useSetUpSections', () => {
 
     const sections = result.current.setUpSections({
       activeSections,
-      expandedCards: {} as ExpandedCards,
       onCardClicked,
       toggleTaskCompleteStatus,
-      finishedCards,
     });
 
     expect(sections.length).toEqual(0);

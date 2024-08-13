@@ -10,7 +10,7 @@ import { EuiIcon } from '@elastic/eui';
 import { MANAGE_PROJECTS } from './translations';
 import { useProjectsUrl } from '../hooks/use_projects_url';
 import { LinkButton } from '../../../links';
-import { useStepContext } from '../context/step_context';
+import { useStepContext } from '../context/card_context';
 import { CardId } from '../types';
 import { ManageProjectsStepLinkId } from './types';
 

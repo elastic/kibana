@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
 import { VIDEO_SOURCE } from '../../../../empty_prompt/constants';
-import { useStepContext } from '../../context/step_context';
+import { useStepContext } from '../../context/card_context';
 import { WATCH_VIDEO_BUTTON_TITLE } from '../../translations';
 import { CardId, SectionId } from '../../types';
 import { ContentWrapper } from './content_wrapper';

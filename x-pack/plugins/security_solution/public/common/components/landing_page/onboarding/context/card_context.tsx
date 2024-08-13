@@ -11,7 +11,7 @@ import type { OnboardingHubStepLinkClickedParams } from '../../../../lib/telemet
 import type { ToggleTaskCompleteStatus, CardId, ExpandedCards, OnCardClicked } from '../types';
 
 export interface StepContextType {
-  expandedCards: ExpandedCards;
+  expandedCardIds: ExpandedCards;
   finishedCardIds: Set<CardId>;
   indicesExist: boolean;
   onCardClicked: OnCardClicked;
@@ -19,19 +19,19 @@ export interface StepContextType {
   toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
 }
 
-const StepContext = React.createContext<StepContextType | null>(null);
+const CardContext = React.createContext<StepContextType | null>(null);
 
-export const StepContextProvider: React.FC<PropsWithChildren<StepContextType>> = ({
+export const CardContextProvider: React.FC<PropsWithChildren<StepContextType>> = ({
   children,
   ...others
 }) => {
-  return <StepContext.Provider value={others}>{children}</StepContext.Provider>;
+  return <CardContext.Provider value={others}>{children}</CardContext.Provider>;
 };
 
 export const useStepContext = () => {
-  const context = React.useContext(StepContext);
+  const context = React.useContext(CardContext);
   if (!context) {
-    throw new Error('useStepContext must be used within a StepContextProvider');
+    throw new Error('useStepContext must be used within a CardContextProvider');
   }
   return context;
 };
