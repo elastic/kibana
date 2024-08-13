@@ -60,12 +60,18 @@ export async function waitForDocumentInIndex<T>({
   docCountTarget = 1,
   retryService,
   logger,
+  timeout = TIMEOUT,
+  retries = RETRIES,
+  retryDelay = RETRY_DELAY,
 }: {
   esClient: Client;
   indexName: string;
   docCountTarget?: number;
   retryService: RetryService;
   logger: ToolingLog;
+  timeout?: number;
+  retries?: number;
+  retryDelay?: number;
 }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
   return await retry<SearchResponse<T, Record<string, AggregationsAggregate>>>({
     test: async () => {
@@ -86,9 +92,9 @@ export async function waitForDocumentInIndex<T>({
     utilityName: `waiting for documents in ${indexName} index`,
     logger,
     retryService,
-    timeout: TIMEOUT,
-    retries: RETRIES,
-    retryDelay: RETRY_DELAY,
+    timeout,
+    retries,
+    retryDelay,
   });
 }
 
