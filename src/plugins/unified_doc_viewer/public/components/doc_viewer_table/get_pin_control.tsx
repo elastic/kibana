@@ -25,6 +25,7 @@ interface PinControlCellProps {
 const PinControlCell: React.FC<PinControlCellProps> = React.memo(({ row }) => {
   const { euiTheme } = useEuiTheme();
 
+  const fieldName = row.field.field;
   const isPinned = row.field.pinned;
   const label = isPinned
     ? i18n.translate('unifiedDocViewer.docViews.table.unpinFieldLabel', {
@@ -36,6 +37,7 @@ const PinControlCell: React.FC<PinControlCellProps> = React.memo(({ row }) => {
 
   return (
     <div
+      data-test-subj={`unifiedDocViewer_pinControl_${fieldName}`}
       className={!isPinned ? 'kbnDocViewer__fieldsGrid__pinAction' : undefined}
       css={css`
         margin-left: ${isPinned ? '-1px' : 0}; // to align filled/unfilled pin icons better
@@ -46,13 +48,13 @@ const PinControlCell: React.FC<PinControlCellProps> = React.memo(({ row }) => {
     >
       <EuiToolTip content={label} delay="long">
         <EuiButtonIcon
-          data-test-subj="unifiedDocViewer_pinControl"
+          data-test-subj={`unifiedDocViewer_pinControlButton_${fieldName}`}
           iconSize="m"
           iconType={isPinned ? 'pinFilled' : 'pin'}
           color="text"
           aria-label={label}
           onClick={() => {
-            row.field.onTogglePinned(row.field.field);
+            row.field.onTogglePinned(fieldName);
           }}
         />
       </EuiToolTip>
