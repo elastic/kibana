@@ -12,9 +12,11 @@ export async function handleValidatePipeline(
   state: CategorizationState | RelatedState,
   client: IScopedClusterClient
 ): Promise<Partial<CategorizationState> | Partial<RelatedState>> {
+  const previousError = JSON.stringify(state.errors, null, 2);
   const results = await testPipeline(state.rawSamples, state.currentPipeline, client);
   return {
     errors: results.errors,
+    previousError,
     pipelineResults: results.pipelineResults,
     lastExecutedChain: 'validate_pipeline',
   };

@@ -141,7 +141,7 @@ paths:
       tags:
         - Security Solution Exceptions API
     get:
-      operationId: GetExceptionList
+      operationId: ReadExceptionList
       parameters:
         - description: Either `id` or `list_id` must be specified
           in: query
@@ -810,7 +810,7 @@ paths:
       tags:
         - Security Solution Exceptions API
     get:
-      operationId: GetExceptionListItem
+      operationId: ReadExceptionListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
           in: query
@@ -1188,7 +1188,7 @@ paths:
         - Security Solution Exceptions API
   /api/exception_lists/summary:
     get:
-      operationId: GetExceptionListSummary
+      operationId: ReadExceptionListSummary
       parameters:
         - description: Exception list's identifier generated upon creation
           in: query

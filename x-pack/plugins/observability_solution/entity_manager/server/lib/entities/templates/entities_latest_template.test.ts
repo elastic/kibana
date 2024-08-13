@@ -10,7 +10,7 @@ import { getEntitiesLatestIndexTemplateConfig } from './entities_latest_template
 
 describe('getEntitiesLatestIndexTemplateConfig(definitionId)', () => {
   it('should generate a valid index template', () => {
-    const template = getEntitiesLatestIndexTemplateConfig(entityDefinition.id);
+    const template = getEntitiesLatestIndexTemplateConfig(entityDefinition);
     expect(template).toMatchSnapshot();
   });
 });
