@@ -594,6 +594,13 @@ export const BULK_EDIT_FLYOUT_FORM_ADD_ALERT_SUPPRESSION_HELP_TEXT = i18n.transl
   }
 );
 
+export const BULK_EDIT_FLYOUT_FORM_ALERT_SUPPRESSION_GROUP_BY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addAlertSuppressionComboboxHelpText',
+  {
+    defaultMessage: 'Suppress alerts by',
+  }
+);
+
 export const BULK_EDIT_FLYOUT_FORM_ADD_ALERT_SUPPRESSION_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addAlertSuppressionTitle',
   {
@@ -621,6 +628,50 @@ export const BULK_EDIT_FLYOUT_FORM_DELETE_ALERT_SUPPRESSION_TITLE = i18n.transla
     defaultMessage: 'Delete alert suppression',
   }
 );
+
+export const BULK_EDIT_FLYOUT_FORM_ALERT_SUPPRESSION_MISSING_FIELDS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.suppressionMissingFieldsLabel',
+  {
+    defaultMessage: 'If a suppression field is missing',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ALERT_SUPPRESSION_PER_RULE_EXECUTION_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.perRuleExecutionLabel',
+  {
+    defaultMessage: 'Per rule execution',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ALERT_SUPPRESSION_PER_TIME_PERIOD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.perTimePeriodLabel',
+  {
+    defaultMessage: 'Per time period',
+  }
+);
+export const BULK_EDIT_FLYOUT_FORM_ALERT_SUPPRESSION_INFO = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.infoText',
+  {
+    defaultMessage:
+      'Bulk editing will not show the existing suppression on the selected rules. The message after editing has been applied will indicate the amount of changes that have been made on your selection.',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ALERT_SUPPRESSION_SUPPRESS_MISSING_FIELDS_OPTION =
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.alertSuppressionMissingFieldsSuppressLabel',
+    {
+      defaultMessage: 'Suppress and group alerts for events with missing fields',
+    }
+  );
+
+export const BULK_EDIT_FLYOUT_FORM_ALERT_SUPPRESSION_DO_NOT_SUPPRESS_MISSING_FIELDS_OPTION =
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.alertSuppressionMissingFieldsDoNotSuppressLabel',
+    {
+      defaultMessage: 'Do not suppress alerts for events with missing fields',
+    }
+  );
 
 export const EXPORT_FILENAME = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.exportFilenameTitle',
