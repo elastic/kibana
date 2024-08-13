@@ -75,7 +75,7 @@ const mockHostNode: InfraAssetMetricsItem[] = [
     ],
     name: 'host-0',
     alertsCount: 0,
-    monitored: true,
+    hasSystemMetrics: true,
   },
   {
     metrics: [
@@ -114,7 +114,7 @@ const mockHostNode: InfraAssetMetricsItem[] = [
     ],
     name: 'host-1',
     alertsCount: 0,
-    monitored: true,
+    hasSystemMetrics: true,
   },
 ];
 

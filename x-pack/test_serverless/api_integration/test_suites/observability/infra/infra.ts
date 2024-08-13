@@ -116,7 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
                   value: 1753829376,
                 },
               ],
-              monitored: true,
+              hasSystemMetrics: true,
               name: 'serverless-host',
             });
           } else {

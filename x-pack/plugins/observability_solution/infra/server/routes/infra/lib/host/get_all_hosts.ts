@@ -60,7 +60,7 @@ export const getAllHosts = async ({
             },
           },
         },
-        allHostsMetrics: {
+        allHostMetrics: {
           terms: {
             field: HOST_NAME_FIELD,
             size: limit,
@@ -95,17 +95,17 @@ export const getAllHosts = async ({
     },
   });
 
-  const monitoredHosts = new Set(
+  const systemIntegrationHosts = new Set(
     response.aggregations?.monitoredHosts.names.buckets.map((p) => p.key) ?? []
   );
 
-  const result = (response.aggregations?.allHostsMetrics.buckets ?? [])
+  const result = (response.aggregations?.allHostMetrics.buckets ?? [])
     .sort((a, b) => {
-      const isAMonitored = monitoredHosts.has(a?.key as string);
-      const isBMonitored = monitoredHosts.has(b?.key as string);
+      const hasASystemMetrics = systemIntegrationHosts.has(a?.key as string);
+      const hasBSystemMetrics = systemIntegrationHosts.has(b?.key as string);
 
-      if (isAMonitored !== isBMonitored) {
-        return isAMonitored ? -1 : 1;
+      if (hasASystemMetrics !== hasBSystemMetrics) {
+        return hasASystemMetrics ? -1 : 1;
       }
 
       const aValue = getMetricValue(a?.cpuV2) ?? 0;
@@ -129,7 +129,7 @@ export const getAllHosts = async ({
           name: metric,
           value: getMetricValue(bucket[metric]) || null,
         })),
-        monitored: monitoredHosts.has(hostName),
+        hasSystemMetrics: systemIntegrationHosts.has(hostName),
       };
     });
 

@@ -18,6 +18,7 @@ The response includes:
 - hosts: array of metrics and metadata
 - metrics: object containing name of the metric and value
 - metadata: object containing name of the metadata and value
+- hasSystemMetrics: boolean - true if host comes from system integration docs; false otherwise
 
 ### Examples:
 
@@ -86,6 +87,7 @@ Response
                "value":66640704.099216014
             },
          ],
+         "hasSystemMetrics": true,
          "name":"host-0"
       }
    ]

@@ -58,7 +58,7 @@ export const InfraAssetMetricsItemRT = rt.intersection([
     name: rt.string,
     metrics: rt.array(InfraAssetMetricsRT),
     metadata: rt.array(InfraAssetMetadataRT),
-    monitored: rt.boolean,
+    hasSystemMetrics: rt.boolean,
   }),
   rt.partial({
     alertsCount: rt.number,

@@ -22,7 +22,7 @@ const scenario: Scenario<InfraDocument | ApmFields> = async ({
       const { numInstances } = scenarioOpts;
       const transactionName = 'GET /host/{id}';
 
-      // Only half of the hosts will have have system metrics
+      // Only half of the hosts will have system metrics
       const hostList = times(numInstances / 2).map((index) => infra.host(`host-${index}`));
 
       const hosts = range

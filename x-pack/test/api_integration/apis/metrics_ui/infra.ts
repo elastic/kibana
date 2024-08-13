@@ -87,7 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
               { name: 'rx', value: null },
               { name: 'tx', value: null },
             ],
-            monitored: true,
+            hasSystemMetrics: true,
             name: 'gke-observability-8--observability-8--bc1afd95-f0zc',
           },
         ]);
@@ -109,7 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
               { name: 'host.ip', value: null },
             ],
             metrics: [{ name: 'memory', value: 0.4563333333333333 }],
-            monitored: true,
+            hasSystemMetrics: true,
             name: 'gke-observability-8--observability-8--bc1afd95-f0zc',
           },
           {
@@ -119,7 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
               { name: 'host.ip', value: null },
             ],
             metrics: [{ name: 'memory', value: 0.32066666666666666 }],
-            monitored: true,
+            hasSystemMetrics: true,
             name: 'gke-observability-8--observability-8--bc1afd95-ngmh',
           },
           {
@@ -129,7 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
               { name: 'host.ip', value: null },
             ],
             metrics: [{ name: 'memory', value: 0.2346666666666667 }],
-            monitored: true,
+            hasSystemMetrics: true,
             name: 'gke-observability-8--observability-8--bc1afd95-nhhw',
           },
         ]);
