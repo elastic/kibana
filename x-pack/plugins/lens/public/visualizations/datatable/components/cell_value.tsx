@@ -6,7 +6,7 @@
  */
 
 import React, { useContext, useEffect } from 'react';
-import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { EuiDataGridCellValueElementProps, EuiLink } from '@elastic/eui';
 import classNames from 'classnames';
 import { PaletteOutput } from '@kbn/coloring';
 import { CustomPaletteState } from '@kbn/charts-plugin/common';
@@ -42,6 +42,7 @@ export const createGridCell = (
     const currentAlignment = alignments && alignments[columnId];
 
     useEffect(() => {
+      let colorSet = false;
       if (colorMode !== 'none' && (palette || colorMapping)) {
         const color = getCellColor(columnId, palette, colorMapping)(rowValue);
 
@@ -50,23 +51,44 @@ export const createGridCell = (
           if (colorMode === 'cell' && color) {
             style.color = getContrastColor(color, isDarkMode);
           }
+          colorSet = true;
           setCellProps({ style });
         }
       }
 
       // Clean up styles when something changes, this avoids cell's styling to stick forever
       // Checks isExpanded to prevent clearing style after expanding cell
-      return () => {
-        if (colorMode !== 'none' && !isExpanded) {
+      if (colorMode !== 'none' && colorSet && !isExpanded) {
+        return () => {
           setCellProps({
             style: {
               backgroundColor: undefined,
               color: undefined,
             },
           });
-        }
-      };
+        };
+      }
     }, [rowValue, columnId, setCellProps, colorMode, palette, colorMapping, isExpanded]);
+
+    if (filterOnClick) {
+      return (
+        <div
+          data-test-subj="lnsTableCellContent"
+          className={classNames({
+            'lnsTableCell--multiline': fitRowToContent,
+            [`lnsTableCell--${currentAlignment}`]: true,
+          })}
+        >
+          <EuiLink
+            onClick={() => {
+              handleFilterClick?.(columnId, rowValue, colIndex, rowIndex);
+            }}
+          >
+            {content}
+          </EuiLink>
+        </div>
+      );
+    }
 
     return (
       <div

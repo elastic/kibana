@@ -37,7 +37,7 @@ function mockFrame(): FramePublicAPI {
 
 const datatableVisualization = getDatatableVisualization({
   paletteService: chartPluginMock.createPaletteRegistry(),
-  theme: themeServiceMock.createStartContract(),
+  kibanaTheme: themeServiceMock.createStartContract(),
 });
 
 describe('Datatable Visualization', () => {
@@ -431,7 +431,7 @@ describe('Datatable Visualization', () => {
                 columnId: 'b',
                 palette: {
                   type: 'palette' as const,
-                  name: '',
+                  name: 'custom',
                   params: { stops: [{ color: 'blue', stop: 0 }] },
                 },
               },
@@ -453,8 +453,9 @@ describe('Datatable Visualization', () => {
       });
 
       it('does include palette for accessor config if the values are numeric and palette exists', () => {
+        params.state.columns[0].colorMode = 'cell';
         expect(datatableVisualization.getConfiguration(params).groups[2].accessors).toEqual([
-          { columnId: 'b', palette: ['blue'], triggerIconType: 'colorBy' },
+          { columnId: 'b', palette: ['blue', 'yellow'], triggerIconType: 'colorBy' },
         ]);
       });
       it('does not include palette for accessor config if the values are not numeric and palette exists', () => {

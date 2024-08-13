@@ -10,13 +10,15 @@ import { DataContext } from './table_basic';
 import { createGridCell } from './cell_value';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/public';
-import { coreMock } from '@kbn/core/public/mocks';
-import { DatatableArgs, DatatableColumnConfigArgs } from '../../../../common/expressions';
+import { DatatableArgs } from '../../../../common/expressions';
 import { DataContextType } from './types';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { render, screen } from '@testing-library/react';
 
 describe('datatable cell renderer', () => {
+  const innerCellColorFnMock = jest.fn().mockReturnValue('blue');
+  const cellColorFnMock = jest.fn().mockReturnValue(innerCellColorFnMock);
+  const setCellProps = jest.fn();
+
   const table: Datatable = {
     type: 'datatable',
     columns: [
@@ -30,17 +32,15 @@ describe('datatable cell renderer', () => {
     ],
     rows: [{ a: 123 }],
   };
-  const { theme: setUpMockTheme } = coreMock.createSetup();
   const CellRenderer = createGridCell(
     {
       a: { convert: (x) => `formatted ${x}` } as FieldFormat,
     },
     { columns: [], sortingColumnId: '', sortingDirection: 'none' },
     DataContext,
-    setUpMockTheme
+    false,
+    cellColorFnMock
   );
-
-  const setCellProps = jest.fn();
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -101,7 +101,8 @@ describe('datatable cell renderer', () => {
       },
       { columns: [], sortingColumnId: '', sortingDirection: 'none' },
       DataContext,
-      setUpMockTheme,
+      false,
+      cellColorFnMock,
       true
     );
     render(
@@ -137,7 +138,8 @@ describe('datatable cell renderer', () => {
         sortingDirection: 'none',
       },
       DataContext,
-      setUpMockTheme,
+      false,
+      cellColorFnMock,
       true
     );
     render(
@@ -156,9 +158,6 @@ describe('datatable cell renderer', () => {
   });
 
   describe('dynamic coloring', () => {
-    const paletteRegistry = chartPluginMock.createPaletteRegistry();
-    const customPalette = paletteRegistry.get('custom');
-
     function getCellRenderer(columnConfig: DatatableArgs) {
       return createGridCell(
         {
@@ -166,7 +165,8 @@ describe('datatable cell renderer', () => {
         },
         columnConfig,
         DataContext,
-        setUpMockTheme
+        false,
+        cellColorFnMock
       );
     }
     function getColumnConfiguration(): DatatableArgs {
@@ -189,7 +189,7 @@ describe('datatable cell renderer', () => {
               },
             },
             type: 'lens_datatable_column',
-          } as DatatableColumnConfigArgs,
+          },
         ],
         sortingColumnId: '',
         sortingDirection: 'none',
@@ -216,8 +216,7 @@ describe('datatable cell renderer', () => {
         {
           wrapper: DataContextProviderWrapper({
             table,
-            minMaxByColumnId: { a: { min: 12, max: 155 /* > 123 */ } },
-            getColorForValue: customPalette.getColorForValue,
+            minMaxByColumnId: { a: { min: 12, max: 155 } },
             ...context,
           }),
         }
@@ -252,14 +251,23 @@ describe('datatable cell renderer', () => {
       });
     });
 
-    it('should not color the cell when the value is an array', () => {
+    it('should not color the cell when color function returns null', () => {
       setCellProps.mockClear();
+      innerCellColorFnMock.mockReturnValueOnce(null);
       const columnConfig = getColumnConfiguration();
       columnConfig.columns[0].colorMode = 'cell';
 
-      renderCellComponent(columnConfig, {
-        table: { ...table, rows: [{ a: [10, 123] }] },
-      });
+      renderCellComponent(columnConfig, {});
+
+      expect(setCellProps).not.toHaveBeenCalled();
+    });
+
+    it('should not color the cell when color function returns empty string', () => {
+      innerCellColorFnMock.mockReturnValueOnce('');
+      const columnConfig = getColumnConfiguration();
+      columnConfig.columns[0].colorMode = 'cell';
+
+      renderCellComponent(columnConfig, {});
 
       expect(setCellProps).not.toHaveBeenCalled();
     });

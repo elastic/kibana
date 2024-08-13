@@ -93,7 +93,7 @@ export function computeSummaryRowForColumn(
   defaultFormatter: FieldFormat
 ) {
   const summaryValue = computeFinalValue(columnArgs.summaryRow, columnArgs.columnId, table.rows);
-  // ignore the coluymn formatter for the count case
+  // ignore the column formatter for the count case
   if (columnArgs.summaryRow === 'count') {
     return defaultFormatter.convert(summaryValue);
   }

@@ -28,6 +28,7 @@ describe('data table dimension editor', () => {
   let setState: (newState: DatatableVisualizationState) => void;
   let props: VisualizationDimensionEditorProps<DatatableVisualizationState> & {
     paletteService: PaletteRegistry;
+    isDarkMode: boolean;
   };
 
   function testState(): DatatableVisualizationState {
@@ -72,6 +73,7 @@ describe('data table dimension editor', () => {
       layerId: 'first',
       state,
       setState,
+      isDarkMode: false,
       paletteService: chartPluginMock.createPaletteRegistry(),
       panelRef: React.createRef(),
       addLayer: jest.fn(),
@@ -200,8 +202,8 @@ describe('data table dimension editor', () => {
     expect(screen.getByTestId('lns-palettePanelFlyout')).toBeInTheDocument();
   });
 
-  it('should not show the dynamic coloring option for a bucketed operation', () => {
-    frame.activeData!.first.columns[0].meta.type = 'number';
+  it('should not show the dynamic coloring option for a dates', () => {
+    frame.activeData!.first.columns[0].meta.type = 'date';
     const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
     datasourceLayers.first.getOperationForColumnId = jest.fn(
       () => ({ isBucketed: true } as OperationDescriptor)

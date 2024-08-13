@@ -173,7 +173,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
-     * Changes the specified dimension to the specified operation and (optinally) field.
+     * Changes the specified dimension to the specified operation and optionally the field.
      *
      * @param opts.dimension - the selector of the dimension being changed
      * @param opts.operation - the desired operation ID for the dimension
