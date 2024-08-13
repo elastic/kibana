@@ -143,57 +143,20 @@ describe('eqlQueryDiffAlgorithm', () => {
   });
 
   describe('if all three versions are different - scenario ABC', () => {
-    it('returns a computated merged version with a solvable conflict if 3-way query field merge is possible', () => {
+    it('returns the current_version with a non-solvable conflict', () => {
       const mockVersions: ThreeVersionsOf<RuleEqlQuery> = {
         base_version: {
-          query: 'My description.\f\nThis is a second\u2001 line.\f\nThis is a third line.',
+          query: 'query where false',
           language: 'eql',
           filters: [],
         },
         current_version: {
-          query: 'My GREAT description.\f\nThis is a second\u2001 line.\f\nThis is a third line.',
+          query: 'query where true',
           language: 'eql',
           filters: [],
         },
         target_version: {
-          query: 'My description.\f\nThis is a second\u2001 line.\f\nThis is a GREAT line.',
-          language: 'eql',
-          filters: [],
-        },
-      };
-
-      const expectedMergedVersion: RuleEqlQuery = {
-        query: `My GREAT description.\f\nThis is a second\u2001 line.\f\nThis is a GREAT line.`,
-        language: 'eql',
-        filters: [],
-      };
-
-      const result = eqlQueryDiffAlgorithm(mockVersions);
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          merged_version: expectedMergedVersion,
-          diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Merged,
-          conflict: ThreeWayDiffConflict.SOLVABLE,
-        })
-      );
-    });
-
-    it('returns the current_version with a non-solvable conflict if 3-way query field merge is not possible', () => {
-      const mockVersions: ThreeVersionsOf<RuleEqlQuery> = {
-        base_version: {
-          query: 'My description.\nThis is a second line.',
-          language: 'eql',
-          filters: [],
-        },
-        current_version: {
-          query: 'My GREAT description.\nThis is a third line.',
-          language: 'eql',
-          filters: [],
-        },
-        target_version: {
-          query: 'My EXCELLENT description.\nThis is a fourth.',
+          query: 'query two where false',
           language: 'eql',
           filters: [],
         },
@@ -211,7 +174,7 @@ describe('eqlQueryDiffAlgorithm', () => {
       );
     });
 
-    it('returns the current_version with a non-solvable conflict if non-mergeable fields are different', () => {
+    it('returns the current_version with a non-solvable conflict if one subfield has an ABA scenario and another has an AAB', () => {
       const mockVersions: ThreeVersionsOf<RuleEqlQuery> = {
         base_version: {
           query: 'query where false',
@@ -224,9 +187,9 @@ describe('eqlQueryDiffAlgorithm', () => {
           filters: [{ field: 'some query' }],
         },
         target_version: {
-          query: 'query where false',
+          query: 'query where true',
           language: 'eql',
-          filters: [{ field: 'a different query' }],
+          filters: [],
         },
       };
 

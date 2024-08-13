@@ -131,51 +131,18 @@ describe('esqlQueryDiffAlgorithm', () => {
   });
 
   describe('if all three versions are different - scenario ABC', () => {
-    it('returns a computated merged version with a solvable conflict if 3-way query field merge is possible', () => {
+    it('returns the current_version with a non-solvable conflict', () => {
       const mockVersions: ThreeVersionsOf<RuleEsqlQuery> = {
         base_version: {
-          query: 'My description.\f\nThis is a second\u2001 line.\f\nThis is a third line.',
+          query: 'query where true',
           language: 'esql',
         },
         current_version: {
-          query: 'My GREAT description.\f\nThis is a second\u2001 line.\f\nThis is a third line.',
+          query: 'query where false',
           language: 'esql',
         },
         target_version: {
-          query: 'My description.\f\nThis is a second\u2001 line.\f\nThis is a GREAT line.',
-          language: 'esql',
-        },
-      };
-
-      const expectedMergedVersion: RuleEsqlQuery = {
-        query: `My GREAT description.\f\nThis is a second\u2001 line.\f\nThis is a GREAT line.`,
-        language: 'esql',
-      };
-
-      const result = esqlQueryDiffAlgorithm(mockVersions);
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          merged_version: expectedMergedVersion,
-          diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Merged,
-          conflict: ThreeWayDiffConflict.SOLVABLE,
-        })
-      );
-    });
-
-    it('returns the current_version with a non-solvable conflict if 3-way query field merge is not possible', () => {
-      const mockVersions: ThreeVersionsOf<RuleEsqlQuery> = {
-        base_version: {
-          query: 'My description.\nThis is a second line.',
-          language: 'esql',
-        },
-        current_version: {
-          query: 'My GREAT description.\nThis is a third line.',
-          language: 'esql',
-        },
-        target_version: {
-          query: 'My EXCELLENT description.\nThis is a fourth.',
+          query: 'different query where true',
           language: 'esql',
         },
       };

@@ -316,64 +316,23 @@ describe('kqlQueryDiffAlgorithm', () => {
     });
 
     describe('if all versions are inline query type', () => {
-      it('returns a computated merged version with a solvable conflict if 3-way query field merge is possible', () => {
+      it('returns the current_version with a non-solvable conflict', () => {
         const mockVersions: ThreeVersionsOf<RuleKqlQuery> = {
           base_version: {
             type: KqlQueryType.inline_query,
-            query: `My description.\f\nThis is a second\u2001 line.\f\nThis is a third line.`,
+            query: 'query string = true',
             language: KqlQueryLanguageEnum.kuery,
             filters: [],
           },
           current_version: {
             type: KqlQueryType.inline_query,
-            query: `My GREAT description.\f\nThis is a second\u2001 line.\f\nThis is a third line.`,
+            query: 'query string = false',
             language: KqlQueryLanguageEnum.kuery,
             filters: [],
           },
           target_version: {
             type: KqlQueryType.inline_query,
-            query: `My description.\f\nThis is a second\u2001 line.\f\nThis is a GREAT line.`,
-            language: KqlQueryLanguageEnum.kuery,
-            filters: [],
-          },
-        };
-
-        const expectedMergedVersion: RuleKqlQuery = {
-          type: KqlQueryType.inline_query,
-          query: `My GREAT description.\f\nThis is a second\u2001 line.\f\nThis is a GREAT line.`,
-          language: KqlQueryLanguageEnum.kuery,
-          filters: [],
-        };
-
-        const result = kqlQueryDiffAlgorithm(mockVersions);
-
-        expect(result).toEqual(
-          expect.objectContaining({
-            merged_version: expectedMergedVersion,
-            diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-            merge_outcome: ThreeWayMergeOutcome.Merged,
-            conflict: ThreeWayDiffConflict.SOLVABLE,
-          })
-        );
-      });
-
-      it('returns the current_version with a non-solvable conflict if 3-way query field merge is not possible', () => {
-        const mockVersions: ThreeVersionsOf<RuleKqlQuery> = {
-          base_version: {
-            type: KqlQueryType.inline_query,
-            query: 'My description.\nThis is a second line.',
-            language: KqlQueryLanguageEnum.kuery,
-            filters: [],
-          },
-          current_version: {
-            type: KqlQueryType.inline_query,
-            query: 'My GREAT description.\nThis is a third line.',
-            language: KqlQueryLanguageEnum.kuery,
-            filters: [],
-          },
-          target_version: {
-            type: KqlQueryType.inline_query,
-            query: 'My EXCELLENT description.\nThis is a fourth.',
+            query: 'query string two = true',
             language: KqlQueryLanguageEnum.kuery,
             filters: [],
           },
@@ -391,7 +350,7 @@ describe('kqlQueryDiffAlgorithm', () => {
         );
       });
 
-      it('returns the current_version with a non-solvable conflict if non-mergeable fields are not equal', () => {
+      it('returns the current_version with a non-solvable conflict if one subfield has an ABA scenario and another has an AAB', () => {
         const mockVersions: ThreeVersionsOf<RuleKqlQuery> = {
           base_version: {
             type: KqlQueryType.inline_query,
@@ -401,7 +360,7 @@ describe('kqlQueryDiffAlgorithm', () => {
           },
           current_version: {
             type: KqlQueryType.inline_query,
-            query: 'query string = false',
+            query: 'query string = true',
             language: KqlQueryLanguageEnum.kuery,
             filters: [],
           },
