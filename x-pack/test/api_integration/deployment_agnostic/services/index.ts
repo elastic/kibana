@@ -28,3 +28,4 @@ export const services = {
 };
 
 export type SupertestWithRoleScopeType = SupertestWithRoleScope;
+export type DeploymentAgnosticCommonServices = typeof services;
