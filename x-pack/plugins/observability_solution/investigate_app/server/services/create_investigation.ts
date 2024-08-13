@@ -8,6 +8,11 @@
 import { CreateInvestigationInput, CreateInvestigationResponse } from '../../common/schema/create';
 import { InvestigationRepository } from './investigation_repository';
 
+enum InvestigationStatus {
+  ongoing = 'ongoing',
+  closed = 'closed',
+}
+
 export async function createInvestigation(
   params: CreateInvestigationInput,
   repository: InvestigationRepository
@@ -16,7 +21,7 @@ export async function createInvestigation(
     ...params,
     createdAt: Date.now(),
     createdBy: 'elastic',
-    status: 'ongoing' as const,
+    status: InvestigationStatus.ongoing,
   };
   await repository.save(investigation);
 
