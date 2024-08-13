@@ -686,6 +686,12 @@ async function getExpressionSuggestionsByType(
               filterText: textToUse,
               text: textToUse + s.text,
               command: TRIGGER_SUGGESTION_COMMAND,
+              range: {
+                startColumn: innerText.length - lastWord.length + 1,
+                endColumn: innerText.length,
+                startLineNumber: 1,
+                endLineNumber: 1,
+              },
             }));
           }
         }

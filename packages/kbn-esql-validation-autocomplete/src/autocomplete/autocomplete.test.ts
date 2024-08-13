@@ -1370,16 +1370,34 @@ describe('autocomplete', () => {
         'FROM a | KEEP doubleFiel/',
         getFieldNamesByType('any').map(attachTriggerCommand)
       );
-      testSuggestions('FROM a | KEEP doubleField/', ['doubleField, ', 'doubleField | ']);
+      testSuggestions(
+        'FROM a | KEEP doubleField/',
+        ['doubleField, ', 'doubleField | '].map((text) => ({
+          text,
+          range: { startColumn: 14, endColumn: 25, startLineNumber: 1, endLineNumber: 1 },
+        }))
+      );
       testSuggestions('FROM a | KEEP doubleField /', ['| ', ',']);
 
       // Let's get funky with the field names
-      testSuggestions('FROM a | KEEP @timestamp/', ['@timestamp, ', '@timestamp | '], undefined, [
-        [{ name: '@timestamp', type: 'date' }],
-      ]);
-      testSuggestions('FROM a | KEEP foo.bar/', ['foo.bar, ', 'foo.bar | '], undefined, [
-        [{ name: 'foo.bar', type: 'double' }],
-      ]);
+      testSuggestions(
+        'FROM a | KEEP @timestamp/',
+        ['@timestamp, ', '@timestamp | '].map((text) => ({
+          text,
+          range: { startColumn: 14, endColumn: 24, startLineNumber: 1, endLineNumber: 1 },
+        })),
+        undefined,
+        [[{ name: '@timestamp', type: 'date' }]]
+      );
+      testSuggestions(
+        'FROM a | KEEP foo.bar/',
+        ['foo.bar, ', 'foo.bar | '].map((text) => ({
+          text,
+          range: { startColumn: 14, endColumn: 21, startLineNumber: 1, endLineNumber: 1 },
+        })),
+        undefined,
+        [[{ name: 'foo.bar', type: 'double' }]]
+      );
       testSuggestions('FROM a | KEEP `foo.bar`/', ['foo.bar, ', 'foo.bar | '], undefined, [
         [{ name: 'foo.bar', type: 'double' }],
       ]);
