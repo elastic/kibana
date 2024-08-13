@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { ALERT_REASON, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ObservabilityRuleTypeFormatter } from '@kbn/observability-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type {
   AssetDetailsLocatorParams,
   InventoryLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
-import { SupportedAssetTypes } from '../../../common/asset_details/types';
 import { getInventoryViewInAppUrl } from '../../../common/alerting/metrics/alert_link';
 
 export const getFormatReason = ({
@@ -24,16 +23,10 @@ export const getFormatReason = ({
 }): ObservabilityRuleTypeFormatter => {
   return ({ fields }) => {
     const reason = fields[ALERT_REASON] ?? '-';
-    const nodeType = fields[ALERT_RULE_PARAMETERS]?.nodeType ?? '';
-
-    const supportsAssetDetails = Object.values(SupportedAssetTypes).includes(
-      nodeType as SupportedAssetTypes
-    );
-    const locator = supportsAssetDetails ? assetDetailsLocator : inventoryLocator;
 
     return {
       reason,
-      link: getInventoryViewInAppUrl({ fields, locator }),
+      link: getInventoryViewInAppUrl({ fields, assetDetailsLocator, inventoryLocator }),
       hasBasePath: true,
     };
   };
