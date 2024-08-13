@@ -212,6 +212,8 @@ export class InfraServerPlugin
       metrics: new InfraMetricsDomain(new KibanaMetricsAdapter(framework)),
     };
 
+    // Instead of passing plugins individually to `libs` on a necessity basis,
+    // this provides an object with all plugins infra depends on
     const libsPlugins = mapValues(plugins, (value, key) => {
       return {
         setup: value,

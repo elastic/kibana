@@ -143,11 +143,15 @@ export const createMetricThresholdExecutor =
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
 
     const groupBy = castArray<string>(params.groupBy);
+    // creates an object of asset details supported assetType by their assetId field name
     const assetTypeByAssetId = Object.values(SupportedAssetTypes).reduce((acc, curr) => {
       acc[findInventoryModel(curr).fields.id] = curr;
       return acc;
     }, {} as Record<string, InventoryItemType>);
+
+    // detemines if the groupBy has a field that the asset details supports
     const supportedAssetId = groupBy.find((field) => !!assetTypeByAssetId[field]);
+    // assigns a nodeType if the groupBy field is supported by asset details
     const nodeType = supportedAssetId ? assetTypeByAssetId[supportedAssetId] : undefined;
 
     const logger = createScopedLogger(libs.logger, 'metricThresholdRule', {
