@@ -76,7 +76,7 @@ paths:
       tags:
         - Security Solution Lists API
     get:
-      operationId: GetList
+      operationId: ReadList
       parameters:
         - description: List's `id` value
           in: query
@@ -500,7 +500,7 @@ paths:
       tags:
         - Security Solution Lists API
     get:
-      operationId: GetListIndex
+      operationId: ReadListIndex
       responses:
         '200':
           content:
@@ -682,7 +682,7 @@ paths:
       tags:
         - Security Solution Lists API
     get:
-      operationId: GetListItem
+      operationId: ReadListItem
       parameters:
         - description: Required if `list_id` and `value` are not specified
           in: query
@@ -1237,7 +1237,7 @@ paths:
         - Security Solution Lists API
   /api/lists/privileges:
     get:
-      operationId: GetListPrivileges
+      operationId: ReadListPrivileges
       responses:
         '200':
           content:

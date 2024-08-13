@@ -21,16 +21,14 @@ const emptyPreview = css`
   padding: 36px 0px 36px 0px;
 `;
 
-export function AddObservationUI({ onWidgetAdd, timeRange, filters }: Props) {
+export function AddObservationUI({ onWidgetAdd, timeRange }: Props) {
   const [isOpen, setIsOpen] = React.useState(false);
 
-  const [isExpanded, setIsExpanded] = React.useState(false);
   const [query, setQuery] = React.useState({ esql: '' });
   const [submittedQuery, setSubmittedQuery] = React.useState({ esql: '' });
   const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
 
   const resetState = () => {
-    setIsExpanded(false);
     setIsPreviewOpen(false);
     setQuery({ esql: '' });
     setSubmittedQuery({ esql: '' });
@@ -83,11 +81,6 @@ export function AddObservationUI({ onWidgetAdd, timeRange, filters }: Props) {
                   }}
                   errors={undefined}
                   warning={undefined}
-                  expandCodeEditor={(expanded: boolean) => {
-                    setIsExpanded(() => expanded);
-                  }}
-                  isCodeEditorExpanded={isExpanded}
-                  hideMinimizeButton={false}
                   editorIsInline={false}
                   hideRunQueryText
                   isLoading={false}
@@ -118,7 +111,6 @@ export function AddObservationUI({ onWidgetAdd, timeRange, filters }: Props) {
                 </EuiFlexGroup>
               ) : (
                 <EsqlWidgetPreview
-                  filters={filters}
                   esqlQuery={submittedQuery.esql}
                   timeRange={timeRange}
                   onWidgetAdd={(widget) => {
