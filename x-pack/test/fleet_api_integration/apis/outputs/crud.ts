@@ -815,7 +815,7 @@ export default function (providerContext: FtrProviderContext) {
 
         // Create package policies with default output under agent policies not using default output
         // to ensure that those agent policies still get bumped
-        const [packagePolicy1, packagePolicy2] = await Promise.all([
+        await Promise.all([
           createPackagePolicy([policy2.item.id], undefined, defaultOutputId),
           createPackagePolicy([policy4.item.id], TEST_SPACE_ID, defaultOutputId),
         ]);
@@ -870,7 +870,7 @@ export default function (providerContext: FtrProviderContext) {
 
         // Create package policies under agent policies using default output to ensure those
         // agent policies still get bumped
-        const [packagePolicy1, packagePolicy2] = await Promise.all([
+        await Promise.all([
           createPackagePolicy([policy1.item.id], undefined, nonDefaultOutput.item.id),
           createPackagePolicy([policy3.item.id], TEST_SPACE_ID, nonDefaultOutput.item.id),
         ]);
