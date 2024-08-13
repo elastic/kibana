@@ -9,7 +9,7 @@ import snakecaseKeys from 'snakecase-keys';
 import type { CamelCasedPropertiesDeep, SnakeCasedPropertiesDeep } from 'type-fest';
 
 export const convertObjectKeysToCamelCase = <T extends Record<string, unknown>>(obj: T) => {
-  return camelcaseKeys(obj, { deep: true }) as unknown as CamelCasedPropertiesDeep<T>;
+  return camelcaseKeys(obj, { deep: true }) as CamelCasedPropertiesDeep<T>;
 };
 
 export const convertObjectKeysToSnakeCase = <T extends Record<string, unknown>>(obj: T) => {
