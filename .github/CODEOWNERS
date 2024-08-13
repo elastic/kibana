@@ -100,6 +100,8 @@ packages/kbn-config-schema @elastic/kibana-core
 src/plugins/console @elastic/kibana-management
 packages/content-management/content_editor @elastic/appex-sharedux
 examples/content_management_examples @elastic/appex-sharedux
+packages/content-management/favorites/favorites_public @elastic/appex-sharedux
+packages/content-management/favorites/favorites_server @elastic/appex-sharedux
 src/plugins/content_management @elastic/appex-sharedux
 packages/content-management/tabbed_table_list_view @elastic/appex-sharedux
 packages/content-management/table_list_view @elastic/appex-sharedux
