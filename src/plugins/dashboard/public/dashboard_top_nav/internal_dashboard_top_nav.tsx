@@ -330,17 +330,12 @@ export function InternalDashboardTopNav({
       } as TopNavMenuBadgeProps;
       allBadges.push({
         renderCustomBadge: ({ badgeText }) => {
-          const badgeButton = (
-            <EuiBadge {...badgeProps} className="eui-hideFor--s eui-hideFor--xs">
-              {badgeText}
-            </EuiBadge>
-          );
+          const badgeButton = <EuiBadge {...badgeProps}>{badgeText}</EuiBadge>;
           return (
             <EuiPopover
               button={badgeButton}
               isOpen={isPopoverOpen}
               closePopover={() => setIsPopoverOpen(false)}
-              className="eui-hideFor--s eui-hideFor--xs"
               panelStyle={{ maxWidth: 350 }}
             >
               <EuiText size="s">{dashboardManagedBadge.getText()}</EuiText>
