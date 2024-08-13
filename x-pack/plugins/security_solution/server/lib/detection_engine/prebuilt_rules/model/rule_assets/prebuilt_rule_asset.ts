@@ -108,19 +108,7 @@ export const PrebuiltRuleAsset = PrebuiltAssetBaseProps.and(TypeSpecificFields).
   })
 );
 
-/**
- * Creates a Map of the fields payloads to be passed to the `upgradePrebuiltRules()` method during the
- * Upgrade workflow (`/upgrade/_perform` endpoint) by type.
- *
- * Creating this Map dynamically, based on BaseCreateProps and TypeSpecificFields, ensures that we don't need to:
- *  - manually add rule types to this Map if they are created
- *  - manually add or remove any fields if they are added or removed to a specific rule type
- *  - manually add or remove any fields if we decide that they should not be part of the upgradable fields.
- *
- * Notice that this Map includes, for each rule type, all fields that are part of the BaseCreateProps and all fields that
- * are part of the TypeSpecificFields, including those that are not part of RuleUpgradeSpecifierFields schema, where
- * the user of the /upgrade/_perform endpoint can specify which fields to upgrade during the upgrade workflow.
- */
+
 function createUpgradableRuleFieldsPayloadByType() {
   const baseFields = Object.keys(PrebuiltAssetBaseProps.shape);
 
@@ -134,9 +122,27 @@ function createUpgradableRuleFieldsPayloadByType() {
   );
 }
 
+/**
+ * Map of the fields payloads to be passed to the `upgradePrebuiltRules()` method during the
+ * Upgrade workflow (`/upgrade/_perform` endpoint) by type.
+ *
+ * Creating this Map dynamically, based on BaseCreateProps and TypeSpecificFields, ensures that we don't need to:
+ *  - manually add rule types to this Map if they are created
+ *  - manually add or remove any fields if they are added or removed to a specific rule type
+ *  - manually add or remove any fields if we decide that they should not be part of the upgradable fields.
+ *
+ * Notice that this Map includes, for each rule type, all fields that are part of the BaseCreateProps and all fields that
+ * are part of the TypeSpecificFields, including those that are not part of RuleUpgradeSpecifierFields schema, where
+ * the user of the /upgrade/_perform endpoint can specify which fields to upgrade during the upgrade workflow.
+ */
 export const UPGRADABLE_FIELDS_PAYLOAD_BY_RULE_TYPE = createUpgradableRuleFieldsPayloadByType();
 
-const FIELDS_NOT_UPGRADABLE: string[] = [
+
+/**
+ * Fields which are not part of the RuleUpgradeSpecifierFields schema, and are handled
+ * manually during the upgrade workflow.
+ */
+const NON_UPGRADABLE_FIELDS: string[] = [
   'alert_suppression',
   'author',
   'license',
@@ -144,15 +150,27 @@ const FIELDS_NOT_UPGRADABLE: string[] = [
   'items_per_search',
   'version',
   'type',
+  'to'
 ];
+
 function createRuleUpgradeSpecifierFields() {
-  const allUpgradableFields = new Set();
-  for (const [_, upgradableFields] of UPGRADABLE_FIELDS_PAYLOAD_BY_RULE_TYPE) {
-    upgradableFields.forEach((field) => allUpgradableFields.add(field));
-  }
-  FIELDS_NOT_UPGRADABLE.forEach((field) => allUpgradableFields.delete(field));
+  const allUpgradableFields = new Set(
+    Object.values(UPGRADABLE_FIELDS_PAYLOAD_BY_RULE_TYPE).flatMap(fields => fields)
+  );
+
+  NON_UPGRADABLE_FIELDS.forEach(field => allUpgradableFields.delete(field));
 
   return allUpgradableFields;
 }
 
+/**
+ * List of fields that are part of the RuleUpgradeSpecifierFields schema, which is part of the
+ * /upgrade/_perform endpoint request payload. This list is used to test that all upgradable fields from
+ * the PrebuiltRuleAsset are part of the RuleUpgradeSpecifierFields schema.
+ *
+ * Note that some of the fields of the PrebuiltRuleAsset schema are not upgradable in the update workflow
+ * of the /upgrade/_perform endpoint (and therefore nor part of RuleUpgradeSpecifierFields) so they are
+ * manually excluded from the list of upgradable fields.
+ * 
+ */
 export const RULE_UPGRADE_SPECIFIER_FIELDS = createRuleUpgradeSpecifierFields();

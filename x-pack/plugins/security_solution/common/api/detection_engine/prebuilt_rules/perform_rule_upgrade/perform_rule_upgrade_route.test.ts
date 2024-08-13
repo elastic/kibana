@@ -42,7 +42,7 @@ describe('Perform Rule Upgrade Route Schemas', () => {
   });
 
   describe('RuleUpgradeSpecifierFields', () => {
-    it.only('accepts all upgradable fields from the Prebuilt Rule Asset', () => {
+    it('accepts all upgradable fields from the Prebuilt Rule Asset', () => {
       const upgradeSpecifierFields = new Set(Object.keys(RuleUpgradeSpecifierFields.shape));
 
       expect(upgradeSpecifierFields).toEqual(RULE_UPGRADE_SPECIFIER_FIELDS);
