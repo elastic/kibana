@@ -11,8 +11,8 @@ import { i18n } from '@kbn/i18n';
 import {
   CreateInvestigationInput,
   CreateInvestigationResponse,
-} from '@kbn/investigate-app-plugin/common/schema/create';
-import { FindInvestigationsResponse } from '@kbn/investigate-app-plugin/common/schema/find';
+} from '@kbn/investigate-plugin/common';
+import { FindInvestigationsResponse } from '@kbn/investigate-plugin/common';
 import { useKibana } from '../../../utils/kibana_react';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;

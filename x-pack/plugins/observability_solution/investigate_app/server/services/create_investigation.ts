@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { CreateInvestigationInput, CreateInvestigationResponse } from '../../common/schema/create';
+import {
+  CreateInvestigationInput,
+  CreateInvestigationResponse,
+} from '@kbn/investigate-plugin/common';
 import { InvestigationRepository } from './investigation_repository';
 
 enum InvestigationStatus {

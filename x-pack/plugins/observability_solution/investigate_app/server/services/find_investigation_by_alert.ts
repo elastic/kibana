@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { FindInvestigationsByAlertResponse } from '@kbn/investigate-plugin/common';
 import {
   FindInvestigationsByAlertParams,
-  FindInvestigationsByAlertResponse,
   findInvestigationsByAlertResponseSchema,
-} from '../../common/schema/find_by_alert';
+} from '@kbn/investigate-plugin/common/schema/find_by_alert';
 import { InvestigationRepository } from './investigation_repository';
 
 export async function findInvestigationsByAlert(

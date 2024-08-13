@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { FindInvestigationsByAlertResponse } from '@kbn/investigate-app-plugin/common/schema/find_by_alert';
+import { FindInvestigationsByAlertResponse } from '@kbn/investigate-plugin/common';
 import { useKibana } from '../../../utils/kibana_react';
 
 export interface InvestigationsByAlertParams {

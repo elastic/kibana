@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { findInvestigationsByAlertParamsSchema } from '../../common/schema/find_by_alert';
-import { findInvestigationsParamsSchema } from '../../common/schema/find';
-import { createInvestigationParamsSchema } from '../../common/schema/create';
+import { findInvestigationsByAlertParamsSchema } from '@kbn/investigate-plugin/common';
+import { createInvestigationParamsSchema } from '@kbn/investigate-plugin/common';
+import { findInvestigationsParamsSchema } from '@kbn/investigate-plugin/common';
+import { getInvestigationParamsSchema } from '@kbn/investigate-plugin/common';
 import { createInvestigation } from '../services/create_investigation';
 import { investigationRepositoryFactory } from '../services/investigation_repository';
 import { createInvestigateAppServerRoute } from './create_investigate_app_server_route';
 import { findInvestigations } from '../services/find_investigations';
-import { getInvestigationParamsSchema } from '../../common/schema/get';
 import { getInvestigation } from '../services/get_investigation';
 import { findInvestigationsByAlert } from '../services/find_investigation_by_alert';
 
