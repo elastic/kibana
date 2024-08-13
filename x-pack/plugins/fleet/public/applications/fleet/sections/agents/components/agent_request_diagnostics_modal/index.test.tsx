@@ -101,4 +101,6 @@ describe('AgentRequestDiagnosticsModal', () => {
       agents: ['agent1', 'agent2'],
     });
   });
+
+  // TODO Create test
 });

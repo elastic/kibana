@@ -21,6 +21,8 @@ post:
                   - type: string
                     enum:
                       - "CPU"
+            exclude_event_logs:
+              type: boolean
   responses:
     '200':
       description: OK

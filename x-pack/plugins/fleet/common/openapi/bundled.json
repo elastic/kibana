@@ -3246,6 +3246,9 @@
                         }
                       ]
                     }
+                  },
+                  "exclude_event_logs": {
+                    "type": "boolean"
                   }
                 }
               }
@@ -3348,6 +3351,9 @@
                         }
                       ]
                     }
+                  },
+                  "exclude_event_logs": {
+                    "type": "boolean"
                   }
                 },
                 "required": [

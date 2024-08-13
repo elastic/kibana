@@ -88,3 +88,5 @@ describe('request diagnostics handler', () => {
     });
   });
 });
+
+// TODO Add test
