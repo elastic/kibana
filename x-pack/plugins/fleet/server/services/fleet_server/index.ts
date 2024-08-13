@@ -117,7 +117,7 @@ export async function checkFleetServerVersionsForSecretsStorage(
   while (hasMore) {
     const res = await packagePolicyService.list(soClient, {
       page: page++,
-      perPage: 200,
+      perPage,
       kuery: 'ingest-package-policies.package.name:fleet_server',
       fields: ['policy_ids'],
     });
