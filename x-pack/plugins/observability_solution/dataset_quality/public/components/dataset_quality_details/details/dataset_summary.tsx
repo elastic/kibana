@@ -16,7 +16,7 @@ import {
   integrationNameText,
   integrationVersionText,
 } from '../../../../common/translations';
-import { FieldsList, FieldsListLoading } from './fields_list';
+import { FieldsList } from './fields_list';
 import { useDatasetQualityDetailsState } from '../../../hooks';
 import { IntegrationIcon } from '../../common';
 
@@ -40,64 +40,56 @@ export function DatasetSummary() {
     : '-';
 
   return (
-    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
-      {dataStreamDetailsLoading && dataStreamSettingsLoading && integrationDetailsLoadings ? (
-        <DatasetSummaryLoading />
-      ) : (
-        <Fragment>
-          <FieldsList
-            fields={[
-              ...(integrationDetails?.integration
-                ? [
-                    {
-                      fieldTitle: integrationNameText,
-                      fieldValue: (
-                        <EuiBadge
-                          color="hollow"
-                          css={css`
-                            width: fit-content;
-                          `}
-                        >
-                          <EuiFlexGroup gutterSize="xs" alignItems="center">
-                            <IntegrationIcon integration={integrationDetails.integration} />
-                            <EuiText size="s">{integrationDetails.integration?.name}</EuiText>
-                          </EuiFlexGroup>
-                        </EuiBadge>
-                      ),
-                      actionsMenu: (
-                        <IntegrationActionsMenu
-                          integration={integrationDetails.integration}
-                          dashboards={integrationDetails.dashboard}
-                          dashboardsLoading={integrationDashboardsLoading}
-                        />
-                      ),
-                      isLoading: integrationDetailsLoadings,
-                    },
-                    {
-                      fieldTitle: integrationVersionText,
-                      fieldValue: integrationDetails.integration?.version,
-                      isLoading: integrationDetailsLoadings,
-                    },
-                  ]
-                : []),
-              {
-                fieldTitle: datasetLastActivityText,
-                fieldValue: formattedLastActivity,
-                isLoading: dataStreamDetailsLoading,
-              },
-              {
-                fieldTitle: datasetCreatedOnText,
-                fieldValue: formattedCreatedOn,
-                isLoading: dataStreamSettingsLoading,
-              },
-            ]}
-          />
-        </Fragment>
-      )}
+    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
+      <Fragment>
+        <FieldsList
+          fields={[
+            ...(integrationDetails?.integration
+              ? [
+                  {
+                    fieldTitle: integrationNameText,
+                    fieldValue: (
+                      <EuiBadge
+                        color="hollow"
+                        css={css`
+                          width: fit-content;
+                        `}
+                      >
+                        <EuiFlexGroup gutterSize="xs" alignItems="center">
+                          <IntegrationIcon integration={integrationDetails.integration} />
+                          <EuiText size="s">{integrationDetails.integration?.name}</EuiText>
+                        </EuiFlexGroup>
+                      </EuiBadge>
+                    ),
+                    actionsMenu: (
+                      <IntegrationActionsMenu
+                        integration={integrationDetails.integration}
+                        dashboards={integrationDetails.dashboard}
+                        dashboardsLoading={integrationDashboardsLoading}
+                      />
+                    ),
+                    isLoading: integrationDetailsLoadings,
+                  },
+                  {
+                    fieldTitle: integrationVersionText,
+                    fieldValue: integrationDetails.integration?.version,
+                    isLoading: integrationDetailsLoadings,
+                  },
+                ]
+              : []),
+            {
+              fieldTitle: datasetLastActivityText,
+              fieldValue: formattedLastActivity,
+              isLoading: dataStreamDetailsLoading,
+            },
+            {
+              fieldTitle: datasetCreatedOnText,
+              fieldValue: formattedCreatedOn,
+              isLoading: dataStreamSettingsLoading,
+            },
+          ]}
+        />
+      </Fragment>
     </EuiPanel>
   );
-}
-
-export function DatasetSummaryLoading() {
-  return <FieldsListLoading />;
 }

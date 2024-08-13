@@ -6,12 +6,12 @@
  */
 
 import {
+  DEFAULT_DATEPICKER_REFRESH,
   DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
   DEFAULT_DEGRADED_FIELD_SORT_FIELD,
+  DEFAULT_TIME_RANGE,
 } from '../../../common/constants';
 import { DefaultDatasetQualityDetailsContext } from './types';
-
-const ONE_MINUTE_IN_MS = 60 * 1000;
 
 export const DEFAULT_CONTEXT: DefaultDatasetQualityDetailsContext = {
   degradedFields: {
@@ -26,11 +26,7 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityDetailsContext = {
   },
   isIndexNotFoundError: false,
   timeRange: {
-    from: 'now-24h',
-    to: 'now',
-    refresh: {
-      pause: true,
-      value: ONE_MINUTE_IN_MS,
-    },
+    ...DEFAULT_TIME_RANGE,
+    refresh: DEFAULT_DATEPICKER_REFRESH,
   },
 };

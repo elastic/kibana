@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { DetailsHeader } from './header';
 import { DatasetSummary } from './dataset_summary';
 
@@ -13,6 +14,7 @@ export function Details() {
   return (
     <>
       <DetailsHeader />
+      <EuiSpacer />
       <DatasetSummary />
     </>
   );
