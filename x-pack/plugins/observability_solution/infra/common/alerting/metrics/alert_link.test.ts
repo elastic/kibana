@@ -7,13 +7,42 @@
 
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
+import rison from '@kbn/rison';
 import {
   getInventoryViewInAppUrl,
   flatAlertRuleParams,
   getMetricsViewInAppUrl,
 } from './alert_link';
+import {
+  InventoryLocator,
+  AssetDetailsLocator,
+  InventoryLocatorParams,
+  AssetDetailsLocatorParams,
+} from '@kbn/observability-shared-plugin/common';
+
+jest.mock('@kbn/observability-shared-plugin/common');
+
+const mockInventoryLocator = {
+  getRedirectUrl: jest
+    .fn()
+    .mockImplementation(
+      (params: InventoryLocatorParams) => `/inventory?${rison.encodeUnknown(params)}`
+    ),
+} as unknown as jest.Mocked<InventoryLocator>;
+
+const mockAssetDetailsLocator = {
+  getRedirectUrl: jest
+    .fn()
+    .mockImplementation(
+      ({ assetId, assetType, assetDetails }: AssetDetailsLocatorParams) =>
+        `/node/${assetType}/${assetId}?${rison.encodeUnknown(assetDetails)}`
+    ),
+} as unknown as jest.Mocked<AssetDetailsLocator>;
 
 describe('Inventory Threshold Rule', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
   describe('flatAlertRuleParams', () => {
     it('flat ALERT_RULE_PARAMETERS', () => {
       expect(
@@ -85,9 +114,14 @@ describe('Inventory Threshold Rule', () => {
         [`${ALERT_RULE_PARAMETERS}.criteria.customMetric.aggregation`]: ['avg'],
         [`${ALERT_RULE_PARAMETERS}.criteria.customMetric.field`]: ['system.cpu.user.pct'],
       } as unknown as ParsedTechnicalFields & Record<string, any>;
-      const url = getInventoryViewInAppUrl(fields);
+      const url = getInventoryViewInAppUrl({
+        fields,
+        inventoryLocator: mockInventoryLocator,
+        assetDetailsLocator: mockAssetDetailsLocator,
+      });
+      expect(mockInventoryLocator.getRedirectUrl).toHaveBeenCalledTimes(1);
       expect(url).toEqual(
-        '/app/metrics/link-to/inventory?customMetric=%28aggregation%3Aavg%2Cfield%3Asystem.cpu.user.pct%2Cid%3Aalert-custom-metric%2Ctype%3Acustom%29&metric=%28aggregation%3Aavg%2Cfield%3Asystem.cpu.user.pct%2Cid%3Aalert-custom-metric%2Ctype%3Acustom%29&nodeType=h&timestamp=1640995200000'
+        "/inventory?(customMetric:'(aggregation:avg,field:system.cpu.user.pct,id:alert-custom-metric,type:custom)',metric:'(aggregation:avg,field:system.cpu.user.pct,id:alert-custom-metric,type:custom)',nodeType:host,timestamp:1640995200000)"
       );
     });
     it('should work with non-custom metrics', () => {
@@ -96,22 +130,50 @@ describe('Inventory Threshold Rule', () => {
         [`${ALERT_RULE_PARAMETERS}.nodeType`]: 'host',
         [`${ALERT_RULE_PARAMETERS}.criteria.metric`]: ['cpu'],
       } as unknown as ParsedTechnicalFields & Record<string, any>;
-      const url = getInventoryViewInAppUrl(fields);
+      const url = getInventoryViewInAppUrl({
+        fields,
+        inventoryLocator: mockInventoryLocator,
+        assetDetailsLocator: mockAssetDetailsLocator,
+      });
+      expect(mockInventoryLocator.getRedirectUrl).toHaveBeenCalledTimes(1);
       expect(url).toEqual(
-        '/app/metrics/link-to/inventory?customMetric=&metric=%28type%3Acpu%29&nodeType=h&timestamp=1640995200000'
+        "/inventory?(customMetric:'',metric:'(type:cpu)',nodeType:host,timestamp:1640995200000)"
       );
     });
 
-    it('should point to host-details when host.name is present', () => {
+    it('should point to asset details when nodeType is host and host.name is present', () => {
       const fields = {
         [TIMESTAMP]: '2022-01-01T00:00:00.000Z',
-        [`${ALERT_RULE_PARAMETERS}.nodeType`]: 'kubernetes',
+        [`${ALERT_RULE_PARAMETERS}.nodeType`]: 'host',
         [`${ALERT_RULE_PARAMETERS}.criteria.metric`]: ['cpu'],
         [`host.name`]: ['my-host'],
       } as unknown as ParsedTechnicalFields & Record<string, any>;
-      const url = getInventoryViewInAppUrl(fields);
+      const url = getInventoryViewInAppUrl({
+        fields,
+        inventoryLocator: mockInventoryLocator,
+        assetDetailsLocator: mockAssetDetailsLocator,
+      });
+      expect(mockAssetDetailsLocator.getRedirectUrl).toHaveBeenCalledTimes(1);
       expect(url).toEqual(
-        '/app/metrics/link-to/host-detail/my-host?from=1640995200000&to=1640996100000'
+        "/node/host/my-host?(dateRange:(from:'2022-01-01T00:00:00.000Z',to:'2022-01-01T00:15:00.000Z'),incomingAlertMetric:cpu)"
+      );
+    });
+
+    it('should point to asset details when nodeType is container and container.id is present', () => {
+      const fields = {
+        [TIMESTAMP]: '2022-01-01T00:00:00.000Z',
+        [`${ALERT_RULE_PARAMETERS}.nodeType`]: 'container',
+        [`${ALERT_RULE_PARAMETERS}.criteria.metric`]: ['cpu'],
+        [`container.id`]: ['my-container'],
+      } as unknown as ParsedTechnicalFields & Record<string, any>;
+      const url = getInventoryViewInAppUrl({
+        fields,
+        inventoryLocator: mockInventoryLocator,
+        assetDetailsLocator: mockAssetDetailsLocator,
+      });
+      expect(mockAssetDetailsLocator.getRedirectUrl).toHaveBeenCalledTimes(1);
+      expect(url).toEqual(
+        "/node/container/my-container?(dateRange:(from:'2022-01-01T00:00:00.000Z',to:'2022-01-01T00:15:00.000Z'),incomingAlertMetric:cpu)"
       );
     });
 
@@ -140,9 +202,14 @@ describe('Inventory Threshold Rule', () => {
         _id: 'eaa439aa-a4bb-4e7c-b7f8-fbe532ca7366',
         _index: '.internal.alerts-observability.metrics.alerts-default-000001',
       } as unknown as ParsedTechnicalFields & Record<string, any>;
-      const url = getInventoryViewInAppUrl(fields);
+      const url = getInventoryViewInAppUrl({
+        fields,
+        inventoryLocator: mockInventoryLocator,
+        assetDetailsLocator: mockAssetDetailsLocator,
+      });
+      expect(mockInventoryLocator.getRedirectUrl).toHaveBeenCalledTimes(1);
       expect(url).toEqual(
-        '/app/metrics/link-to/inventory?customMetric=%28aggregation%3Aavg%2Cfield%3Asystem.cpu.user.pct%2Cid%3Aalert-custom-metric%2Ctype%3Acustom%29&metric=%28aggregation%3Aavg%2Cfield%3Asystem.cpu.user.pct%2Cid%3Aalert-custom-metric%2Ctype%3Acustom%29&nodeType=host&timestamp=1640995200000'
+        "/inventory?(customMetric:'(aggregation:avg,field:system.cpu.user.pct,id:alert-custom-metric,type:custom)',metric:'(aggregation:avg,field:system.cpu.user.pct,id:alert-custom-metric,type:custom)',nodeType:host,timestamp:1640995200000)"
       );
     });
 
@@ -165,9 +232,14 @@ describe('Inventory Threshold Rule', () => {
         _id: 'eaa439aa-a4bb-4e7c-b7f8-fbe532ca7366',
         _index: '.internal.alerts-observability.metrics.alerts-default-000001',
       } as unknown as ParsedTechnicalFields & Record<string, any>;
-      const url = getInventoryViewInAppUrl(fields);
+      const url = getInventoryViewInAppUrl({
+        fields,
+        inventoryLocator: mockInventoryLocator,
+        assetDetailsLocator: mockAssetDetailsLocator,
+      });
+      expect(mockInventoryLocator.getRedirectUrl).toHaveBeenCalledTimes(1);
       expect(url).toEqual(
-        '/app/metrics/link-to/inventory?customMetric=&metric=%28type%3Acpu%29&nodeType=host&timestamp=1640995200000'
+        "/inventory?(customMetric:'',metric:'(type:cpu)',nodeType:host,timestamp:1640995200000)"
       );
     });
   });
@@ -180,9 +252,14 @@ describe('Metrics Rule', () => {
         [TIMESTAMP]: '2022-01-01T00:00:00.000Z',
         [`host.name`]: ['my-host'],
       } as unknown as ParsedTechnicalFields & Record<string, any>;
-      const url = getMetricsViewInAppUrl(fields);
+      const url = getMetricsViewInAppUrl({
+        fields,
+        assetDetailsLocator: mockAssetDetailsLocator,
+        nodeType: 'host',
+      });
+      expect(mockAssetDetailsLocator.getRedirectUrl).toHaveBeenCalledTimes(1);
       expect(url).toEqual(
-        '/app/metrics/link-to/host-detail/my-host?from=1640995200000&to=1640996100000'
+        "/node/host/my-host?(dateRange:(from:'2022-01-01T00:00:00.000Z',to:'2022-01-01T00:15:00.000Z'))"
       );
     });
 
@@ -190,7 +267,7 @@ describe('Metrics Rule', () => {
       const fields = {
         [TIMESTAMP]: '2022-01-01T00:00:00.000Z',
       } as unknown as ParsedTechnicalFields & Record<string, any>;
-      const url = getMetricsViewInAppUrl(fields);
+      const url = getMetricsViewInAppUrl({ fields });
       expect(url).toEqual('/app/metrics/explorer');
     });
   });

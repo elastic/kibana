@@ -27,7 +27,6 @@ import type {
   InventoryLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { SupportedAssetTypes } from '../../../../common/asset_details/types';
 import {
   ALERT_RULE_PARAMETERS_NODE_TYPE,
   getInventoryViewInAppUrl,
@@ -162,16 +161,13 @@ export const getInventoryViewInAppUrlWithSpaceId = ({
     [HOST_NAME]: hostName,
   };
 
-  const locator = Object.values(SupportedAssetTypes).includes(nodeType as SupportedAssetTypes)
-    ? assetDetailsLocator
-    : inventoryLocator;
-
   return addSpaceIdToPath(
     basePath.publicBaseUrl,
     spaceId,
     getInventoryViewInAppUrl({
       fields: parseTechnicalFields(fields, true),
-      locator,
+      assetDetailsLocator,
+      inventoryLocator,
     })
   );
 };
