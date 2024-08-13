@@ -85,7 +85,7 @@ export const TryInConsoleButton = ({
     'aria-label': getAriaLabel(),
     onClick,
   };
-  const iconType = showIcon ? 'popout' : undefined;
+  const iconType = showIcon ? 'play' : undefined;
 
   switch (type) {
     case 'link':
