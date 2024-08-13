@@ -67,7 +67,8 @@
     "test:ftr:server": "node scripts/functional_tests_server",
     "test:jest": "node scripts/jest",
     "test:jest_integration": "node scripts/jest_integration",
-    "test:type_check": "node scripts/type_check"
+    "test:type_check": "node scripts/type_check",
+    "quick-checks": ".buildkite/scripts/steps/quick_checks.sh"
   },
   "repository": {
     "type": "git",
