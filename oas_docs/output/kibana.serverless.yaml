@@ -1436,7 +1436,7 @@ paths:
         Apply a bulk action, such as bulk edit, duplicate, or delete, to
         multiple detection rules. The bulk action is applied to all rules that
         match the query or to the rules listed by their IDs.
-      operationId: PerformBulkAction
+      operationId: PerformRulesBulkAction
       parameters:
         - description: Enables dry run mode for the request call.
           in: query
@@ -2703,7 +2703,7 @@ paths:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: >-
-                  #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_ActionStatusSuccessResponse
           description: OK
       summary: Get Actions status schema
       tags:
@@ -2922,7 +2922,7 @@ paths:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: >-
-                  #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_ActionStateSuccessResponse
           description: OK
       summary: Get Action State schema
       tags:
@@ -6754,7 +6754,7 @@ paths:
       description: >-
         The bulk action is applied to all anonymization fields that match the
         filter or to the list of anonymization fields by their IDs.
-      operationId: PerformBulkAction
+      operationId: PerformAnonymizationFieldsBulkAction
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
@@ -7173,7 +7173,7 @@ paths:
       description: >-
         The bulk action is applied to all prompts that match the filter or to
         the list of prompts by their IDs.
-      operationId: PerformBulkAction
+      operationId: PerformPromptsBulkAction
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
@@ -22069,6 +22069,43 @@ components:
         start_date:
           $ref: >-
             #/components/schemas/Security_Solution_Endpoint_Management_API_StartDate
+    Security_Solution_Endpoint_Management_API_ActionStateSuccessResponse:
+      type: object
+      properties:
+        body:
+          type: object
+          properties:
+            data:
+              type: object
+              properties:
+                canEncrypt:
+                  type: boolean
+          required:
+            - data
+      required:
+        - body
+    Security_Solution_Endpoint_Management_API_ActionStatusSuccessResponse:
+      type: object
+      properties:
+        body:
+          type: object
+          properties:
+            data:
+              type: object
+              properties:
+                agent_id:
+                  $ref: >-
+                    #/components/schemas/Security_Solution_Endpoint_Management_API_AgentId
+                pending_actions:
+                  $ref: >-
+                    #/components/schemas/Security_Solution_Endpoint_Management_API_PendingActionsSchema
+              required:
+                - agent_id
+                - pending_actions
+          required:
+            - data
+      required:
+        - body
     Security_Solution_Endpoint_Management_API_AgentId:
       description: Agent ID
       type: string
@@ -22382,6 +22419,41 @@ components:
     Security_Solution_Endpoint_Management_API_Parameters:
       description: Optional parameters object
       type: object
+    Security_Solution_Endpoint_Management_API_PendingActionDataType:
+      type: integer
+    Security_Solution_Endpoint_Management_API_PendingActionsSchema:
+      oneOf:
+        - type: object
+          properties:
+            execute:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_PendingActionDataType
+            get-file:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_PendingActionDataType
+            isolate:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_PendingActionDataType
+            kill-process:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_PendingActionDataType
+            running-processes:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_PendingActionDataType
+            scan:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_PendingActionDataType
+            suspend-process:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_PendingActionDataType
+            unisolate:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_PendingActionDataType
+            upload:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_PendingActionDataType
+        - additionalProperties: true
+          type: object
     Security_Solution_Endpoint_Management_API_ProtectionUpdatesNoteResponse:
       type: object
       properties:
