@@ -100,8 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return;
         }
 
-        // expected 'Request copied to clipboard as curl' to equal 'Request copied to clipboard as javascript'
-        expect(toastText).to.be('Request copied to clipboard as javascript');
+        expect(toastText).to.be('Request copied to clipboard as JavaScript');
 
         const canReadClipboard = await browser.checkBrowserPermission('clipboard-read');
         if (canReadClipboard) {
