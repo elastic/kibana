@@ -14,10 +14,11 @@ import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-
 import { AlertsGrouping } from '@kbn/alerts-grouping';
+
 import { renderGroupPanel } from './grouping/render_group_panel';
 import { rulesLocatorID } from '../../../common';
+import { ALERT_STATUS_FILTER } from '../../components/alert_search_bar/constants';
 import { AlertsByGroupingAgg } from '../../components/alerts_table/types';
 import { ObservabilityAlertSearchBar } from '../../components/alert_search_bar/alert_search_bar';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
@@ -254,7 +255,7 @@ function InternalAlertsPage() {
             {esQuery && (
               <AlertsGrouping<AlertsByGroupingAgg>
                 featureIds={observabilityAlertFeatureIds}
-                defaultFilters={[]}
+                defaultFilters={ALERT_STATUS_FILTER[alertSearchBarStateProps.status] ?? []}
                 from={alertSearchBarStateProps.rangeFrom}
                 to={alertSearchBarStateProps.rangeTo}
                 globalFilters={alertSearchBarStateProps.filters}
