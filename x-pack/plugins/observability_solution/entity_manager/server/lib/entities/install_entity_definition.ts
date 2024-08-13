@@ -129,7 +129,7 @@ export async function installBuiltInEntityDefinitions({
   installOnly,
 }: Omit<InstallDefinitionParams, 'definition'> & {
   definitions: EntityDefinition[];
-  installOnly;
+  installOnly?: boolean;
 }): Promise<EntityDefinition[]> {
   if (definitions.length === 0) return [];
 
