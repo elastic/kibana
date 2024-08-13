@@ -9,7 +9,10 @@ import { schema } from '@kbn/config-schema';
 import moment from 'moment';
 import semverIsValid from 'semver/functions/valid';
 
-import { RequestDiagnosticsAdditionalMetrics } from '../../../common/types';
+import {
+  RequestDiagnosticsAdditionalMetrics,
+  RequestDiagnosticExclude,
+ } from '../../../common/types';
 
 import { SO_SEARCH_LIMIT, AGENTS_PREFIX, AGENT_MAPPINGS } from '../../constants';
 
@@ -170,6 +173,7 @@ export const PostRequestDiagnosticsActionRequestSchema = {
       additional_metrics: schema.maybe(
         schema.arrayOf(schema.oneOf([schema.literal(RequestDiagnosticsAdditionalMetrics.CPU)]))
       ),
+      exclude_events_log: schema.maybe(schema.boolean()),
     })
   ),
 };
@@ -181,6 +185,7 @@ export const PostBulkRequestDiagnosticsActionRequestSchema = {
     additional_metrics: schema.maybe(
       schema.arrayOf(schema.oneOf([schema.literal(RequestDiagnosticsAdditionalMetrics.CPU)]))
     ),
+    exclude_events_log: schema.maybe(schema.boolean()),
   }),
 };
 

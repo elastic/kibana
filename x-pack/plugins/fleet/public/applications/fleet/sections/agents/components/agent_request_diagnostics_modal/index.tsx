@@ -19,6 +19,7 @@ import {
   useStartServices,
   useLink,
 } from '../../../../hooks';
+import { RequestDiagnosticExclude } from '../../../../../../../common/types/rest_spec/agent';
 
 interface Props {
   onClose: () => void;
@@ -37,19 +38,23 @@ export const AgentRequestDiagnosticsModal: React.FunctionComponent<Props> = ({
   const { getPath } = useLink();
   const history = useHistory();
   const [cpuMetricsEnabled, setCPUMetricsEnabled] = useState(false);
+  const [includeEventsLogEnabled, setIncludeEventsLog] = useState(false);
 
   async function onSubmit() {
     try {
       setIsSubmitting(true);
       const additionalMetrics = cpuMetricsEnabled ? [RequestDiagnosticsAdditionalMetrics.CPU] : [];
+      const excludeEventsLog = includeEventsLogEnabled ? false : true;
 
       const { error } = isSingleAgent
         ? await sendPostRequestDiagnostics((agents[0] as Agent).id, {
             additional_metrics: additionalMetrics,
+            exclude_events_log: excludeEventsLog,
           })
         : await sendPostBulkRequestDiagnostics({
             agents: typeof agents === 'string' ? agents : agents.map((agent) => agent.id),
             additional_metrics: additionalMetrics,
+            exclude_events_log: excludeEventsLog,
           });
       if (error) {
         throw error;
@@ -135,6 +140,15 @@ export const AgentRequestDiagnosticsModal: React.FunctionComponent<Props> = ({
           label="Collect additional CPU metrics"
           checked={cpuMetricsEnabled}
           onChange={() => setCPUMetricsEnabled(!cpuMetricsEnabled)}
+        />
+      </p>
+      <p>
+        <EuiCheckbox
+          id="includeEventsLogCheckbox"
+          data-test-subj="includeEventsLogCheckbox"
+          label="Include Events Logs (might contain sensible information)"
+          checked={includeEventsLogEnabled}
+          onChange={() => setIncludeEventsLog(!includeEventsLogEnabled)}
         />
       </p>
     </EuiConfirmModal>

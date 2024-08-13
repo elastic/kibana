@@ -164,6 +164,7 @@ export enum RequestDiagnosticsAdditionalMetrics {
 export interface PostRequestDiagnosticsRequest {
   body: {
     additional_metrics: RequestDiagnosticsAdditionalMetrics[];
+    exclude_events_log?: boolean;
   };
 }
 
@@ -175,6 +176,7 @@ export interface PostRequestBulkDiagnosticsRequest {
     agents: string[] | string;
     batchSize?: number;
     additional_metrics: RequestDiagnosticsAdditionalMetrics[];
+    exclude_events_log?: boolean;
   };
 }
 
