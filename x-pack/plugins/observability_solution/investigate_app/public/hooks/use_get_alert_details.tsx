@@ -19,7 +19,7 @@ export interface UseFetchAlertResponse {
   isRefetching: boolean;
   isSuccess: boolean;
   isError: boolean;
-  data: EcsFieldsResponse | undefined;
+  data: EcsFieldsResponse | undefined | null;
 }
 
 export function useFetchAlert({ id }: AlertParams): UseFetchAlertResponse {
@@ -33,6 +33,8 @@ export function useFetchAlert({ id }: AlertParams): UseFetchAlertResponse {
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
     queryKey: ['fetchAlert', id],
     queryFn: async ({ signal }) => {
+      if (id === '') return null;
+
       return await http.get<EcsFieldsResponse>(BASE_RAC_ALERTS_API_PATH, {
         query: {
           id,
