@@ -8,40 +8,43 @@
 
 import { z } from '@kbn/zod';
 import { makeZodValidationObject } from './make_zod_validation_object';
+import { noParamsValidationObject } from './validation_objects';
 
 describe('makeZodValidationObject', () => {
   it('translate path to params', () => {
     const schema = z.object({
       path: z.object({}),
     });
-    expect(makeZodValidationObject(schema)).toStrictEqual({
-      params: schema.shape.path,
-      query: undefined,
-      body: undefined,
+
+    expect(makeZodValidationObject(schema)).toMatchObject({
+      params: expect.anything(),
     });
   });
 
-  it('creates validator functions for all properties', () => {
+  it('makes all object types strict', () => {
     const schema = z.object({
       path: z.object({}),
       query: z.object({}),
-      body: z.object({}),
+      body: z.string(),
     });
 
-    expect(makeZodValidationObject(schema)).toStrictEqual({
-      params: schema.shape.path,
-      query: schema.shape.query,
+    const pathStrictSpy = jest.spyOn(schema.shape.path, 'strict');
+    const queryStrictSpy = jest.spyOn(schema.shape.query, 'strict');
+
+    expect(makeZodValidationObject(schema)).toEqual({
+      params: pathStrictSpy.mock.results[0].value,
+      query: queryStrictSpy.mock.results[0].value,
       body: schema.shape.body,
     });
   });
 
-  it('sets all to undefined if schema is missing key', () => {
+  it('sets key to strict empty if schema is missing key', () => {
     const schema = z.object({});
 
     expect(makeZodValidationObject(schema)).toStrictEqual({
-      params: undefined,
-      query: undefined,
-      body: undefined,
+      params: noParamsValidationObject.params,
+      query: noParamsValidationObject.query,
+      body: noParamsValidationObject.body,
     });
   });
 });

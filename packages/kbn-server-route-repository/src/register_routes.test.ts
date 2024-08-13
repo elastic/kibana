@@ -6,15 +6,18 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
-import { z } from '@kbn/zod';
 import { CoreSetup, kibanaResponseFactory } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
+import { z } from '@kbn/zod';
+import * as t from 'io-ts';
+import { NEVER } from 'rxjs';
+import * as makeZodValidationObject from './make_zod_validation_object';
 import { registerRoutes } from './register_routes';
 import { passThroughValidationObject } from './validation_objects';
-import { NEVER } from 'rxjs';
 
 describe('registerRoutes', () => {
+  const makeZodValidationObjectSpy = jest.spyOn(makeZodValidationObject, 'makeZodValidationObject');
+
   const post = jest.fn();
 
   const postAddVersion = jest.fn();
@@ -190,12 +193,8 @@ describe('registerRoutes', () => {
     expect(internalRoute.path).toEqual('/internal/app/feature_zod');
     expect(internalRoute.options).toEqual(internalOptions);
 
-    expect(internalRoute.validate).not.toEqual(passThroughValidationObject);
-    expect(internalRoute.validate).toEqual({
-      params: zodParamsRt.shape.path,
-      query: zodParamsRt.shape.query,
-      body: zodParamsRt.shape.body,
-    });
+    expect(makeZodValidationObjectSpy).toHaveBeenCalledWith(zodParamsRt);
+    expect(internalRoute.validate).toEqual(makeZodValidationObjectSpy.mock.results[0].value);
   });
 
   it('calls the route handler with all dependencies when using zod', async () => {
