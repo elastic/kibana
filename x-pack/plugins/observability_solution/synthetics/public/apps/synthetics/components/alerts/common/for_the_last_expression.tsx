@@ -62,7 +62,6 @@ const OPTIONS: Option[] = [
 
 export const DEFAULT_CONDITION: StatusRuleCondition = {
   window: { numberOfChecks: 5 },
-  alertOnNoData: true,
   groupByLocation: true,
   downThreshold: 5,
 };

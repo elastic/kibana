@@ -6,10 +6,9 @@
  */
 
 import React, { useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { Filter } from '@kbn/es-query';
-import { EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { FieldFilters } from './common/field_filters';
 import { AlertSearchBar } from './query_bar';
 import { StatusRuleExpression } from './status_rule_expression';
@@ -34,20 +33,6 @@ export const StatusRuleComponent: React.FC<{
       <EuiSpacer size="m" />
       <FieldFilters ruleParams={ruleParams} setRuleParams={setRuleParams} />
       <StatusRuleExpression ruleParams={ruleParams} setRuleParams={setRuleParams} />
-      <EuiSpacer size="m" />
-      <EuiSwitch
-        compressed
-        label={i18n.translate('xpack.synthetics.statusRuleComponent.euiSwitch.alertMeIfALabel', {
-          defaultMessage: 'Alert me if a monitor stops reporting data.',
-        })}
-        checked={ruleParams.condition?.alertOnNoData ?? true}
-        onChange={(evt) => {
-          setRuleParams('condition', {
-            ...ruleParams.condition!,
-            alertOnNoData: evt.target.checked,
-          });
-        }}
-      />
       <EuiSpacer size="m" />
     </>
   );

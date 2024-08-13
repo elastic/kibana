@@ -34,7 +34,6 @@ export default function ({ getService }: FtrProviderContext) {
           window: {
             numberOfChecks: 5,
           },
-          alertOnNoData: true,
           groupByLocation: true,
           downThreshold: 5,
         },
@@ -131,7 +130,6 @@ export default function ({ getService }: FtrProviderContext) {
             window: {
               percentOfLocations: 100,
             },
-            alertOnNoData: true,
             groupByLocation: true,
             downThreshold: 1,
           },
@@ -232,7 +230,6 @@ export default function ({ getService }: FtrProviderContext) {
             window: {
               percentOfLocations: 50,
             },
-            alertOnNoData: true,
             groupByLocation: true,
             downThreshold: 1,
           },
@@ -299,7 +296,6 @@ export default function ({ getService }: FtrProviderContext) {
                 size: 10,
               },
             },
-            alertOnNoData: true,
             groupByLocation: true,
             downThreshold: 5,
           },

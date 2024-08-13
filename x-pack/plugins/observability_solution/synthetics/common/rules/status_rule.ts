@@ -27,7 +27,6 @@ export const NumberOfChecksSchema = schema.object({
 
 export const StatusRuleConditionSchema = schema.object({
   groupByLocation: schema.maybe(schema.boolean()),
-  alertOnNoData: schema.maybe(schema.boolean()),
   downThreshold: schema.maybe(schema.number()),
   window: schema.oneOf([
     schema.object({

@@ -84,7 +84,7 @@ export const registerSyntheticsStatusCheckRule = (
         options
       );
 
-      const { downConfigs, staleDownConfigs, upConfigs, monitorLocationsMap, pendingConfigs } =
+      const { downConfigs, staleDownConfigs, upConfigs, monitorLocationsMap } =
         await statusRule.getDownChecks(ruleState.meta?.downConfigs as StatusConfigs);
 
       const isCustomRule = !isEmpty(params);
@@ -178,36 +178,11 @@ export const registerSyntheticsStatusCheckRule = (
         }
       }
 
-      if (params.condition?.alertOnNoData && Object.keys(pendingConfigs).length > 0) {
-        const { lastFoundRuns } = await statusRule.getLastRunForPendingMonitors(pendingConfigs);
-        Object.entries(pendingConfigs).forEach(([idWithLocation, pendingConfig]) => {
-          const { monitorQueryId, locationId } = pendingConfig;
-          const lastRun = lastFoundRuns.find(
-            (run) => run.monitorQueryId === monitorQueryId && locationId === run.locationId
-          );
-          const monitorSummary = statusRule.getPendingMonitorSummary({
-            pendingConfig,
-            lastRunPing: lastRun?.ping,
-          });
-          const alertId = `${idWithLocation}_pending`;
-          if (monitorSummary) {
-            statusRule.scheduleAlert({
-              idWithLocation,
-              alertId,
-              monitorSummary,
-              statusConfig: pendingConfig,
-              downThreshold,
-            });
-          }
-        });
-      }
-
       setRecoveredAlertsContext({
         alertsClient,
         basePath,
         spaceId,
         staleDownConfigs,
-        pendingConfigs,
         upConfigs,
         dateFormat,
         tz,
