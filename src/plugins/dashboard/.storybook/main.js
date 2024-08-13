@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { defaultConfig } from '@kbn/storybook';
-
-module.exports = defaultConfig;
+module.exports = require('@kbn/storybook').defaultConfig;

@@ -84,7 +84,6 @@
     "@kbn/lens-embeddable-utils",
     "@kbn/lens-plugin",
     "@kbn/recently-accessed",
-    "@kbn/storybook",
     "@kbn/content-management-favorites-public",
     "@kbn/core-http-browser-mocks"
   ],
