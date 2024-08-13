@@ -32,7 +32,7 @@ export const dashboardManagedBadge = {
     }),
   getDuplicateText: () =>
     i18n.translate('dashboard.managedContentPopoverFooterText', {
-      defaultMessage: 'Duplicate this dashboard to make changes',
+      defaultMessage: 'Duplicate',
     }),
   getAriaLabel: () =>
     i18n.translate('dashboard.managedContentBadge.ariaLabel', {
