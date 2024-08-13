@@ -95,8 +95,8 @@ import { InstallPrepackedTimelinesRequestBodyInput } from '@kbn/security-solutio
 import { PatchRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
 import { PatchTimelineRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/patch_timelines/patch_timeline_route.gen';
 import {
-  PerformBulkActionRequestQueryInput,
-  PerformBulkActionRequestBodyInput,
+  PerformRulesBulkActionRequestQueryInput,
+  PerformRulesBulkActionRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route.gen';
 import { PersistFavoriteRouteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/persist_favorite/persist_favorite_route.gen';
 import { PersistNoteRouteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/persist_note/persist_note_route.gen';
@@ -797,7 +797,7 @@ finalize it.
     /**
      * Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
      */
-    performBulkAction(props: PerformBulkActionProps) {
+    performRulesBulkAction(props: PerformRulesBulkActionProps) {
       return supertest
         .post('/api/detection_engine/rules/_bulk_action')
         .set('kbn-xsrf', 'true')
@@ -1204,9 +1204,9 @@ export interface PatchRuleProps {
 export interface PatchTimelineProps {
   body: PatchTimelineRequestBodyInput;
 }
-export interface PerformBulkActionProps {
-  query: PerformBulkActionRequestQueryInput;
-  body: PerformBulkActionRequestBodyInput;
+export interface PerformRulesBulkActionProps {
+  query: PerformRulesBulkActionRequestQueryInput;
+  body: PerformRulesBulkActionRequestBodyInput;
 }
 export interface PersistFavoriteRouteProps {
   body: PersistFavoriteRouteRequestBodyInput;
