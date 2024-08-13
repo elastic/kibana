@@ -13,6 +13,7 @@ import {
   RuleName,
   RuleTagArray,
   RuleDescription,
+  IsRuleEnabled,
   Severity,
   SeverityMapping,
   RiskScore,
@@ -41,6 +42,7 @@ import {
   RuleFilterArray,
   SavedQueryId,
   KqlQueryLanguage,
+  InvestigationFields,
 } from '../../model/rule_schema/common_attributes.gen';
 import {
   MachineLearningJobId,
@@ -78,6 +80,56 @@ const createUpgradeFieldSchema = <T extends z.ZodType>(fieldSchema: T) =>
     ])
     .optional();
 
+export const RuleUpgradeSpecifierFields = z
+  .object({
+    name: createUpgradeFieldSchema(RuleName),
+    tags: createUpgradeFieldSchema(RuleTagArray),
+    description: createUpgradeFieldSchema(RuleDescription),
+    severity: createUpgradeFieldSchema(Severity),
+    severity_mapping: createUpgradeFieldSchema(SeverityMapping),
+    enabled: createUpgradeFieldSchema(IsRuleEnabled),
+    risk_score: createUpgradeFieldSchema(RiskScore),
+    risk_score_mapping: createUpgradeFieldSchema(RiskScoreMapping),
+    references: createUpgradeFieldSchema(RuleReferenceArray),
+    false_positives: createUpgradeFieldSchema(RuleFalsePositiveArray),
+    threat: createUpgradeFieldSchema(ThreatArray),
+    note: createUpgradeFieldSchema(InvestigationGuide),
+    setup: createUpgradeFieldSchema(SetupGuide),
+    investigation_fields: createUpgradeFieldSchema(InvestigationFields),
+    related_integrations: createUpgradeFieldSchema(RelatedIntegrationArray),
+    required_fields: createUpgradeFieldSchema(RequiredFieldArray),
+    max_signals: createUpgradeFieldSchema(MaxSignals),
+    building_block_type: createUpgradeFieldSchema(BuildingBlockType),
+    from: createUpgradeFieldSchema(RuleIntervalFrom),
+    interval: createUpgradeFieldSchema(RuleInterval),
+    exceptions_list: createUpgradeFieldSchema(RuleExceptionList),
+    rule_name_override: createUpgradeFieldSchema(RuleNameOverride),
+    timestamp_override: createUpgradeFieldSchema(TimestampOverride),
+    timestamp_override_fallback_disabled: createUpgradeFieldSchema(
+      TimestampOverrideFallbackDisabled
+    ),
+    timeline_id: createUpgradeFieldSchema(TimelineTemplateId),
+    timeline_title: createUpgradeFieldSchema(TimelineTemplateTitle),
+    index: createUpgradeFieldSchema(IndexPatternArray),
+    data_view_id: createUpgradeFieldSchema(DataViewId),
+    query: createUpgradeFieldSchema(RuleQuery),
+    language: createUpgradeFieldSchema(QueryLanguage),
+    filters: createUpgradeFieldSchema(RuleFilterArray),
+    saved_id: createUpgradeFieldSchema(SavedQueryId),
+    machine_learning_job_id: createUpgradeFieldSchema(MachineLearningJobId),
+    anomaly_threshold: createUpgradeFieldSchema(AnomalyThreshold),
+    threat_query: createUpgradeFieldSchema(ThreatQuery),
+    threat_mapping: createUpgradeFieldSchema(ThreatMapping),
+    threat_index: createUpgradeFieldSchema(ThreatIndex),
+    threat_filters: createUpgradeFieldSchema(ThreatFilters),
+    threat_indicator_path: createUpgradeFieldSchema(ThreatIndicatorPath),
+    threat_language: createUpgradeFieldSchema(KqlQueryLanguage),
+    new_terms_fields: createUpgradeFieldSchema(NewTermsFields),
+    history_window_start: createUpgradeFieldSchema(HistoryWindowStart),
+  });
+
+  RuleUpgradeSpecifierFields.shape
+
 export type RuleUpgradeSpecifier = z.infer<typeof RuleUpgradeSpecifier>;
 export const RuleUpgradeSpecifier = z.object({
   rule_id: RuleSignatureId,
@@ -86,52 +138,7 @@ export const RuleUpgradeSpecifier = z.object({
   pick_version: PickVersionValues.optional(),
   // Fields that can be customized during the upgrade workflow
   // as decided in: https://github.com/elastic/kibana/issues/186544
-  fields: z
-    .object({
-      name: createUpgradeFieldSchema(RuleName),
-      tags: createUpgradeFieldSchema(RuleTagArray),
-      description: createUpgradeFieldSchema(RuleDescription),
-      severity: createUpgradeFieldSchema(Severity),
-      severity_mapping: createUpgradeFieldSchema(SeverityMapping),
-      risk_score: createUpgradeFieldSchema(RiskScore),
-      risk_score_mapping: createUpgradeFieldSchema(RiskScoreMapping),
-      references: createUpgradeFieldSchema(RuleReferenceArray),
-      false_positives: createUpgradeFieldSchema(RuleFalsePositiveArray),
-      threat: createUpgradeFieldSchema(ThreatArray),
-      note: createUpgradeFieldSchema(InvestigationGuide),
-      setup: createUpgradeFieldSchema(SetupGuide),
-      related_integrations: createUpgradeFieldSchema(RelatedIntegrationArray),
-      required_fields: createUpgradeFieldSchema(RequiredFieldArray),
-      max_signals: createUpgradeFieldSchema(MaxSignals),
-      building_block_type: createUpgradeFieldSchema(BuildingBlockType),
-      from: createUpgradeFieldSchema(RuleIntervalFrom),
-      interval: createUpgradeFieldSchema(RuleInterval),
-      exceptions_list: createUpgradeFieldSchema(RuleExceptionList),
-      rule_name_override: createUpgradeFieldSchema(RuleNameOverride),
-      timestamp_override: createUpgradeFieldSchema(TimestampOverride),
-      timestamp_override_fallback_disabled: createUpgradeFieldSchema(
-        TimestampOverrideFallbackDisabled
-      ),
-      timeline_id: createUpgradeFieldSchema(TimelineTemplateId),
-      timeline_title: createUpgradeFieldSchema(TimelineTemplateTitle),
-      index: createUpgradeFieldSchema(IndexPatternArray),
-      data_view_id: createUpgradeFieldSchema(DataViewId),
-      query: createUpgradeFieldSchema(RuleQuery),
-      language: createUpgradeFieldSchema(QueryLanguage),
-      filters: createUpgradeFieldSchema(RuleFilterArray),
-      saved_id: createUpgradeFieldSchema(SavedQueryId),
-      machine_learning_job_id: createUpgradeFieldSchema(MachineLearningJobId),
-      anomaly_threshold: createUpgradeFieldSchema(AnomalyThreshold),
-      threat_query: createUpgradeFieldSchema(ThreatQuery),
-      threat_mapping: createUpgradeFieldSchema(ThreatMapping),
-      threat_index: createUpgradeFieldSchema(ThreatIndex),
-      threat_filters: createUpgradeFieldSchema(ThreatFilters),
-      threat_indicator_path: createUpgradeFieldSchema(ThreatIndicatorPath),
-      threat_language: createUpgradeFieldSchema(KqlQueryLanguage),
-      new_terms_fields: createUpgradeFieldSchema(NewTermsFields),
-      history_window_start: createUpgradeFieldSchema(HistoryWindowStart),
-    })
-    .optional(),
+  fields: RuleUpgradeSpecifierFields.optional()
 });
 
 export type UpgradeSpecificRulesRequest = z.infer<typeof UpgradeSpecificRulesRequest>;

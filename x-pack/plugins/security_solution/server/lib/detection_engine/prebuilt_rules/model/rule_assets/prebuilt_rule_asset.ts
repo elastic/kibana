@@ -109,21 +109,50 @@ export const PrebuiltRuleAsset = PrebuiltAssetBaseProps.and(TypeSpecificFields).
 );
 
 /**
- * Creates a Map of the fields that are upgradable during the Upgrade workflow, by type.
+ * Creates a Map of the fields payloads to be passed to the `upgradePrebuiltRules()` method during the
+ * Upgrade workflow (`/upgrade/_perform` endpoint) by type.
+ *
  * Creating this Map dynamically, based on BaseCreateProps and TypeSpecificFields, ensures that we don't need to:
  *  - manually add rule types to this Map if they are created
  *  - manually add or remove any fields if they are added or removed to a specific rule type
  *  - manually add or remove any fields if we decide that they should not be part of the upgradable fields.
+ *
+ * Notice that this Map includes, for each rule type, all fields that are part of the BaseCreateProps and all fields that
+ * are part of the TypeSpecificFields, including those that are not part of RuleUpgradeSpecifierFields schema, where
+ * the user of the /upgrade/_perform endpoint can specify which fields to upgrade during the upgrade workflow.
  */
-function createUpgradableRuleFieldsByTypeMap() {
-  const baseFields = [...Object.keys(PrebuiltAssetBaseProps.shape), 'version', 'rule_id'];
+function createUpgradableRuleFieldsPayloadByType() {
+  const baseFields = Object.keys(PrebuiltAssetBaseProps.shape);
 
   return new Map(
     TypeSpecificFields.options.map((option) => {
       const typeName = option.shape.type.value;
-      return [typeName, [...baseFields, ...Object.keys(option.shape)]];
+      const typeSpecificFieldsForType = Object.keys(option.shape);
+
+      return [typeName, [...baseFields, ...typeSpecificFieldsForType]];
     })
   );
 }
 
-export const UPGRADABLE_RULES_FIELDS_BY_TYPE_MAP = createUpgradableRuleFieldsByTypeMap();
+export const UPGRADABLE_FIELDS_PAYLOAD_BY_RULE_TYPE = createUpgradableRuleFieldsPayloadByType();
+
+const FIELDS_NOT_UPGRADABLE: string[] = [
+  'alert_suppression',
+  'author',
+  'license',
+  'concurrent_searches',
+  'items_per_search',
+  'version',
+  'type',
+];
+function createRuleUpgradeSpecifierFields() {
+  const allUpgradableFields = new Set();
+  for (const [_, upgradableFields] of UPGRADABLE_FIELDS_PAYLOAD_BY_RULE_TYPE) {
+    upgradableFields.forEach((field) => allUpgradableFields.add(field));
+  }
+  FIELDS_NOT_UPGRADABLE.forEach((field) => allUpgradableFields.delete(field));
+
+  return allUpgradableFields;
+}
+
+export const RULE_UPGRADE_SPECIFIER_FIELDS = createRuleUpgradeSpecifierFields();
