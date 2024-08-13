@@ -8,10 +8,10 @@
 import expect from '@kbn/expect';
 import { kbnTestConfig } from '@kbn/test';
 import { SecurityService } from '@kbn/test-suites-src/common/services/security/security';
+import { sortBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { ObservabilityAIAssistantApiClient } from '../../common/observability_ai_assistant_api_client';
 import { clearKnowledgeBase, createKnowledgeBaseModel, deleteKnowledgeBaseModel } from './helpers';
-import { sortBy } from 'lodash';
 
 export async function createUserAndApiClient({
   getScopedApiClientForUsername,
