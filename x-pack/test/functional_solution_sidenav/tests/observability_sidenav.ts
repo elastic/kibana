@@ -32,7 +32,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('sidenav & breadcrumbs', () => {
-      it('renders the correct nav and navigate to links (smoke tests)', async () => {
+      it('renders the correct nav and navigate to links', async () => {
         const expectNoPageReload = await solutionNavigation.createNoPageReloadCheck();
 
         await solutionNavigation.expectExists();
