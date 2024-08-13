@@ -13,10 +13,6 @@ RUN apt-get update && apt-get install -y curl git zsh locales docker.io perl mak
 
 RUN locale-gen en_US.UTF-8
 
-# YQ setup
-RUN wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq &&\
-  chmod +x /usr/bin/yq
-
 # Oh My Zsh setup
 RUN if [ ! -d "$HOME/.oh-my-zsh" ]; then \
   sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"; \
