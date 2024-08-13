@@ -72,10 +72,7 @@ export class ESQLAstAdapter {
     const offset = monacoPositionToOffset(fullText, position);
     const suggestionEntries = await suggest(fullText, offset, context, getAstFn, this.callbacks);
     return {
-      suggestions: suggestionEntries.map((suggestion) => ({
-        ...suggestion,
-        range: undefined as unknown as monaco.IRange,
-      })),
+      suggestions: suggestionEntries,
     };
   }
 

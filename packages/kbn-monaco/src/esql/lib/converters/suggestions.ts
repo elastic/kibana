@@ -14,7 +14,18 @@ export function wrapAsMonacoSuggestions(
   suggestions: SuggestionRawDefinition[]
 ): MonacoAutocompleteCommandDefinition[] {
   return suggestions.map<MonacoAutocompleteCommandDefinition>(
-    ({ label, text, asSnippet, kind, detail, documentation, sortText, filterText, command }) => {
+    ({
+      label,
+      text,
+      asSnippet,
+      kind,
+      detail,
+      documentation,
+      sortText,
+      filterText,
+      command,
+      range,
+    }) => {
       const monacoSuggestion: MonacoAutocompleteCommandDefinition = {
         label,
         insertText: text,
@@ -30,7 +41,7 @@ export function wrapAsMonacoSuggestions(
         insertTextRules: asSnippet
           ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
           : undefined,
-        range: undefined as unknown as monaco.IRange,
+        range,
       };
       return monacoSuggestion;
     }

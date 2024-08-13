@@ -19,7 +19,6 @@ export type MonacoAutocompleteCommandDefinition = Pick<
   | 'sortText'
   | 'insertTextRules'
   | 'command'
-  | 'range'
->;
+> & { range?: monaco.IRange };
 
 export type MonacoCodeAction = monaco.languages.CodeAction;
