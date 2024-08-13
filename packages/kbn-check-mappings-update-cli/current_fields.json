@@ -284,6 +284,7 @@
     "title",
     "version"
   ],
+  "dynamic-config-overrides": [],
   "endpoint:unified-user-artifact-manifest": [
     "artifactIds",
     "policyId",
