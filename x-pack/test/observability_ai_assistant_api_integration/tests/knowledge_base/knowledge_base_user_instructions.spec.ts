@@ -11,6 +11,7 @@ import { SecurityService } from '@kbn/test-suites-src/common/services/security/s
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { ObservabilityAIAssistantApiClient } from '../../common/observability_ai_assistant_api_client';
 import { clearKnowledgeBase, createKnowledgeBaseModel, deleteKnowledgeBaseModel } from './helpers';
+import { sortBy } from 'lodash';
 
 export async function createUserAndApiClient({
   getScopedApiClientForUsername,
@@ -36,7 +37,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('Knowledge base user instructions', () => {
-    const secondaryUser = 'another-editor';
+    const secondaryUser = 'john';
 
     before(async () => {
       // create user
@@ -57,75 +58,98 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await clearKnowledgeBase(es);
     });
 
-    describe('when creating a private user instruction', () => {
-      const knowledgeBaseEntry = {
-        id: 'my-doc-id-1',
-        text: 'My private user instruction',
-        public: false,
-      };
-
+    describe('when creating private and public user instructions', () => {
       before(async () => {
-        await observabilityAIAssistantAPIClient
-          .editorUser({
+        await clearKnowledgeBase(es);
+
+        const promises = [
+          {
+            username: 'editor',
+            isPublic: true,
+          },
+          {
+            username: 'editor',
+            isPublic: false,
+          },
+          {
+            username: 'john',
+            isPublic: true,
+          },
+          {
+            username: 'john',
+            isPublic: false,
+          },
+        ].map(async ({ username, isPublic }) => {
+          const visibility = isPublic ? 'Public' : 'Private';
+          await getScopedApiClientForUsername(username)({
             endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
-            params: { body: knowledgeBaseEntry },
-          })
-          .expect(200);
+            params: {
+              body: {
+                id: `${visibility.toLowerCase()}-doc-from-${username}`,
+                text: `${visibility} user instruction from "${username}"`,
+                public: isPublic,
+              },
+            },
+          }).expect(200);
+        });
+
+        await Promise.all(promises);
       });
 
-      it('can be retrieved by the author', async () => {
+      it('"editor" can retrieve their own private instructions and the public instruction', async () => {
         const res = await observabilityAIAssistantAPIClient.editorUser({
           endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
         });
-        const entry = res.body.userInstructions[0];
-        expect(entry.doc_id).to.equal(knowledgeBaseEntry.id);
-        expect(entry.text).to.equal(knowledgeBaseEntry.text);
+        const instructions = res.body.userInstructions;
+
+        const sortByDocId = (data: any) => sortBy(data, 'doc_id');
+        expect(sortByDocId(instructions)).to.eql(
+          sortByDocId([
+            {
+              doc_id: 'private-doc-from-editor',
+              public: false,
+              text: 'Private user instruction from "editor"',
+            },
+            {
+              doc_id: 'public-doc-from-editor',
+              public: true,
+              text: 'Public user instruction from "editor"',
+            },
+            {
+              doc_id: 'public-doc-from-john',
+              public: true,
+              text: 'Public user instruction from "john"',
+            },
+          ])
+        );
       });
 
-      it('cannot be retrieved by another user', async () => {
-        const apiClient = getScopedApiClientForUsername(secondaryUser);
-        const res = await apiClient({
+      it('"john" can retrieve their own private instructions and the public instruction', async () => {
+        const res = await getScopedApiClientForUsername('john')({
           endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
         });
+        const instructions = res.body.userInstructions;
 
-        expect(res.body.userInstructions.length).to.equal(0);
-      });
-    });
-
-    describe('when creating a public user instruction', () => {
-      const knowledgeBaseEntry = {
-        id: 'my-doc-id-2',
-        text: 'My public user instruction',
-        public: true,
-      };
-
-      before(async () => {
-        await observabilityAIAssistantAPIClient
-          .editorUser({
-            endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
-            params: { body: knowledgeBaseEntry },
-          })
-          .expect(200);
-      });
-
-      it('can be retrieved by the author', async () => {
-        const res = await observabilityAIAssistantAPIClient.editorUser({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
-        });
-        const entry = res.body.userInstructions[0];
-        expect(entry.doc_id).to.equal(knowledgeBaseEntry.id);
-        expect(entry.text).to.equal(knowledgeBaseEntry.text);
-      });
-
-      it('can be retrieved by another user', async () => {
-        const apiClient = getScopedApiClientForUsername(secondaryUser);
-        const res = await apiClient({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
-        });
-
-        const entry = res.body.userInstructions[0];
-        expect(entry.doc_id).to.equal(knowledgeBaseEntry.id);
-        expect(entry.text).to.equal(knowledgeBaseEntry.text);
+        const sortByDocId = (data: any) => sortBy(data, 'doc_id');
+        expect(sortByDocId(instructions)).to.eql(
+          sortByDocId([
+            {
+              doc_id: 'public-doc-from-editor',
+              public: true,
+              text: 'Public user instruction from "editor"',
+            },
+            {
+              doc_id: 'public-doc-from-john',
+              public: true,
+              text: 'Public user instruction from "john"',
+            },
+            {
+              doc_id: 'private-doc-from-john',
+              public: false,
+              text: 'Private user instruction from "john"',
+            },
+          ])
+        );
       });
     });
   });
