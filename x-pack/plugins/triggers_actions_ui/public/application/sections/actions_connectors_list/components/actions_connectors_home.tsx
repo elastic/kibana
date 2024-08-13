@@ -66,7 +66,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
     } catch (e) {
       toasts.addDanger({
         title: i18n.translate(
-          'xpack.triggersActionsUI.sections.actionsConnectorsList.unableToLoadActionsMessage',
+          'xpack.triggersActionsUI.sections.connector.home.unableToLoadActionsMessage',
           {
             defaultMessage: 'Unable to load connectors',
           }
