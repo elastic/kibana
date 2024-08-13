@@ -1364,4 +1364,20 @@ describe('autocomplete', () => {
       ).map((s) => (s.text.toLowerCase().includes('null') ? s : attachTriggerCommand(s)))
     );
   });
+
+  describe('Replacement ranges are attached when needed', () => {
+    testSuggestions('FROM a | WHERE doubleField IS NOT N/', ['IS NOT NULL']);
+    testSuggestions('FROM a | WHERE doubleField IS N/', ['IS NOT NULL']);
+    testSuggestions('FROM a | KEEP field.nam/', ['field.name'], undefined, [
+      [{ name: 'field.name', type: 'double' }],
+    ]);
+    // multi-line
+    testSuggestions(
+      `FROM a 
+| KEEP field.nam/`,
+      ['field.name'],
+      undefined,
+      [[{ name: 'field.name', type: 'double' }]]
+    );
+  });
 });
