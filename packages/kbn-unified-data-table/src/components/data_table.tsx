@@ -1141,6 +1141,8 @@ export const UnifiedDataTable = ({
             />
           ) : (
             <EuiDataGridMemoized
+              // Using this as the `key` is a workaround for https://github.com/elastic/eui/issues/7962. This forces a re-render if the density is changed.
+              key={dataGridDensity}
               id={dataGridId}
               aria-describedby={randomId}
               aria-labelledby={ariaLabelledBy}
