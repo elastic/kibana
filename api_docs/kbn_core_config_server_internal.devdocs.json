@@ -22,9 +22,9 @@
           "() => ",
           {
             "pluginId": "@kbn/config",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnConfigPluginApi",
-            "section": "def-common.ConfigDeprecation",
+            "section": "def-server.ConfigDeprecation",
             "text": "ConfigDeprecation"
           },
           "[]"

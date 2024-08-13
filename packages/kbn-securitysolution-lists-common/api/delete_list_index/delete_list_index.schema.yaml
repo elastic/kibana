@@ -9,8 +9,6 @@ paths:
       operationId: DeleteListIndex
       x-codegen-enabled: true
       summary: Deletes list data streams
-      tags:
-        - List API
       responses:
         200:
           description: Successful response

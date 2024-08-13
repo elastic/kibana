@@ -57,7 +57,6 @@ export const persistConversationChanges = async ({
     const langChainMessages = getLangChainMessages(state.conversation.messages ?? []);
     const messages = langChainMessages.slice(0, -1); // all but the last message
     return {
-      ...state,
       conversation: state.conversation,
       messages,
     };
@@ -78,7 +77,7 @@ export const persistConversationChanges = async ({
   });
   if (!updatedConversation) {
     logger.debug('Not updated conversation');
-    return { ...state, conversation: undefined, messages: [] };
+    return { conversation: undefined, messages: [] };
   }
 
   logger.debug(`conversationId: ${conversationId}`);
@@ -86,7 +85,6 @@ export const persistConversationChanges = async ({
   const messages = langChainMessages.slice(0, -1); // all but the last message
 
   return {
-    ...state,
     conversation: updatedConversation,
     messages,
   };

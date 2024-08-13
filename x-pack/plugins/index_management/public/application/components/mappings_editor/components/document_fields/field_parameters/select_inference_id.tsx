@@ -89,17 +89,13 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
   value,
 }) => {
   const {
-    core: { application },
+    core: { application, http },
     docLinks,
     plugins: { ml },
   } = useAppContext();
   const config = getFieldConfig('inference_id');
 
-  const getMlTrainedModelPageUrl = useCallback(async () => {
-    return await ml?.locator?.getUrl({
-      page: 'trained_models',
-    });
-  }, [ml]);
+  const inferenceEndpointsPageLink = `${http.basePath.get()}/app/enterprise_search/relevance/inference_endpoints`;
 
   const [isInferenceFlyoutVisible, setIsInferenceFlyoutVisible] = useState<boolean>(false);
   const [availableTrainedModels, setAvailableTrainedModels] = useState<
@@ -250,10 +246,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
           size="s"
           data-test-subj="manageInferenceEndpointButton"
           onClick={async () => {
-            const mlTrainedPageUrl = await getMlTrainedModelPageUrl();
-            if (typeof mlTrainedPageUrl === 'string') {
-              application.navigateToUrl(mlTrainedPageUrl);
-            }
+            application.navigateToUrl(inferenceEndpointsPageLink);
           }}
         >
           {i18n.translate(

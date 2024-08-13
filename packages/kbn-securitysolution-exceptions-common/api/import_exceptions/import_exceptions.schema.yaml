@@ -10,8 +10,6 @@ paths:
       x-codegen-enabled: true
       summary: Imports an exception list
       description: Imports an exception list and associated items
-      tags:
-        - Exceptions API
       requestBody:
         required: true
         content:

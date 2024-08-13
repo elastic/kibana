@@ -50,7 +50,6 @@
     "@kbn/calculate-auto",
     "@kbn/discover-plugin",
     "@kbn/shared-ux-prompt-no-data-views-types",
-    "@kbn/ebt",
     "@kbn/ebt-tools",
     "@kbn/fields-metadata-plugin",
     "@kbn/server-route-repository-utils",

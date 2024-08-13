@@ -27,12 +27,12 @@ export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
       'This definition extracts service entities from common data streams by looking for the ECS field service.name',
     type: 'service',
     managed: true,
-    filter: '@timestamp >= now-10m',
     indexPatterns: ['logs-*', 'filebeat*', 'metrics-apm.service_transaction.1m*'],
     history: {
       timestampField: '@timestamp',
       interval: '1m',
       settings: {
+        lookbackPeriod: '10m',
         frequency: '2m',
         syncDelay: '2m',
       },

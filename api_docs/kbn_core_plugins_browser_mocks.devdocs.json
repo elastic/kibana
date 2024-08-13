@@ -79,9 +79,9 @@
               "(config?: unknown, { buildFlavor }?: { buildFlavor?: ",
               {
                 "pluginId": "@kbn/config",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnConfigPluginApi",
-                "section": "def-common.BuildFlavor",
+                "section": "def-server.BuildFlavor",
                 "text": "BuildFlavor"
               },
               " | undefined; }) => ",
@@ -124,9 +124,9 @@
                   "{ buildFlavor?: ",
                   {
                     "pluginId": "@kbn/config",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnConfigPluginApi",
-                    "section": "def-common.BuildFlavor",
+                    "section": "def-server.BuildFlavor",
                     "text": "BuildFlavor"
                   },
                   " | undefined; }"

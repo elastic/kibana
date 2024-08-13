@@ -12,7 +12,6 @@
     ],
     "optionalPlugins": [
       "cloud",
-      "serverless",
       "usageCollection"
     ]
   }

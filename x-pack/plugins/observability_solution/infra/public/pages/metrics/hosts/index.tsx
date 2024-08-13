@@ -11,9 +11,11 @@ import { useTrackPageview, FeatureFeedbackButton } from '@kbn/observability-shar
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { OnboardingFlow } from '../../../components/shared/templates/no_data_config';
+import { InfraPageTemplate } from '../../../components/shared/templates/infra_page_template';
+import { SYSTEM_INTEGRATION } from '../../../../common/constants';
 import { useKibanaEnvironmentContext } from '../../../hooks/use_kibana';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
-import { MetricsPageTemplate } from '../page_template';
 import { hostsTitle } from '../../../translations';
 import { fullHeightContentStyles } from '../../../page_template.styles';
 import { HostContainer } from './components/hosts_container';
@@ -21,6 +23,8 @@ import { BetaBadge } from '../../../components/beta_badge';
 
 const HOSTS_FEEDBACK_LINK =
   'https://docs.google.com/forms/d/e/1FAIpQLScRHG8TIVb1Oq8ZhD4aks3P1TmgiM58TY123QpDCcBz83YC6w/viewform';
+
+const DATA_AVAILABILITY_MODULES = [SYSTEM_INTEGRATION];
 
 export const HostsPage = () => {
   const { kibanaVersion, isCloudEnv, isServerlessEnv } = useKibanaEnvironmentContext();
@@ -37,7 +41,9 @@ export const HostsPage = () => {
   return (
     <EuiErrorBoundary>
       <div className={APP_WRAPPER_CLASS}>
-        <MetricsPageTemplate
+        <InfraPageTemplate
+          dataAvailabilityModules={DATA_AVAILABILITY_MODULES}
+          onboardingFlow={OnboardingFlow.Hosts}
           pageHeader={{
             alignItems: 'center',
             pageTitle: (
@@ -74,7 +80,7 @@ export const HostsPage = () => {
           }}
         >
           <HostContainer />
-        </MetricsPageTemplate>
+        </InfraPageTemplate>
       </div>
     </EuiErrorBoundary>
   );

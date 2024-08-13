@@ -135,6 +135,7 @@ export const SummarySection = ({
         button: (
           <EuiButtonEmpty
             iconType="search"
+            data-test-subj="dashboard-view-all-resources"
             onClick={() => {
               navToFindings(getPolicyTemplateQuery(dashboardType), [
                 FINDINGS_GROUPING_OPTIONS.RESOURCE_NAME,

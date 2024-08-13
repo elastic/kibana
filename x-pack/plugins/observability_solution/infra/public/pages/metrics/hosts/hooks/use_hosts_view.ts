@@ -26,13 +26,13 @@ import {
 import { StringDateRange } from './use_unified_search_url_state';
 
 const HOST_TABLE_METRICS: Array<{ type: InfraAssetMetricType }> = [
-  { type: 'cpu' },
+  { type: 'cpuV2' },
   { type: 'diskSpaceUsage' },
   { type: 'memory' },
   { type: 'memoryFree' },
   { type: 'normalizedLoad1m' },
-  { type: 'rx' },
-  { type: 'tx' },
+  { type: 'rxV2' },
+  { type: 'txV2' },
 ];
 
 const BASE_INFRA_METRICS_PATH = '/api/metrics/infra';
@@ -43,13 +43,15 @@ export const useHostsView = () => {
   } = useKibanaContextForPlugin();
   const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
 
-  const baseRequest = useMemo(
+  const payload = useMemo(
     () =>
-      createInfraMetricsRequest({
-        dateRange: parsedDateRange,
-        esQuery: buildQuery(),
-        limit: searchCriteria.limit,
-      }),
+      JSON.stringify(
+        createInfraMetricsRequest({
+          dateRange: parsedDateRange,
+          esQuery: buildQuery(),
+          limit: searchCriteria.limit,
+        })
+      ),
     [buildQuery, parsedDateRange, searchCriteria.limit]
   );
 
@@ -60,7 +62,7 @@ export const useHostsView = () => {
         BASE_INFRA_METRICS_PATH,
         {
           method: 'POST',
-          body: JSON.stringify(baseRequest),
+          body: payload,
         }
       );
       const duration = performance.now() - start;
@@ -72,7 +74,7 @@ export const useHostsView = () => {
       );
       return metricsResponse;
     },
-    [baseRequest, searchCriteria.limit, telemetry]
+    [payload, searchCriteria.limit, telemetry]
   );
 
   return {

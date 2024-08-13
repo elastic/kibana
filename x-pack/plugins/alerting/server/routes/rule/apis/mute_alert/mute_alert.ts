@@ -24,6 +24,7 @@ export const muteAlertRoute = (
       options: {
         access: 'public',
         summary: `Mute an alert`,
+        tags: ['oas-tag:alerting'],
       },
       validate: {
         request: {

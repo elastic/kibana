@@ -34,6 +34,7 @@ export const updateRuleRoute = (
       options: {
         access: 'public',
         summary: `Update a rule`,
+        tags: ['oas-tag:alerting'],
       },
       validate: {
         request: {

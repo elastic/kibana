@@ -25,6 +25,7 @@ export const enableRuleRoute = (
       options: {
         access: 'public',
         summary: 'Enable a rule',
+        tags: ['oas-tag:alerting'],
       },
       validate: {
         request: {

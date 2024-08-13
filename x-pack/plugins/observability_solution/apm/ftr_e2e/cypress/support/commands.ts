@@ -133,16 +133,6 @@ Cypress.Commands.add('updateAdvancedSettings', (settings: Record<string, unknown
   });
 });
 
-Cypress.Commands.add('dismissServiceGroupsTour', () => {
-  window.localStorage.setItem(
-    'apm.serviceGroupsTour',
-    JSON.stringify({
-      createGroup: false,
-      editGroup: false,
-    })
-  );
-});
-
 Cypress.Commands.add('withHidden', (selector, callback) => {
   cy.get(selector).invoke('attr', 'style', 'display: none');
   callback();

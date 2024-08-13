@@ -71,7 +71,7 @@ export const getLinksEmbeddableFactory = () => {
     deserializeState: async (serializedState) => {
       // Clone the state to avoid an object not extensible error when injecting references
       const state = cloneDeep(serializedState.rawState);
-      const { title, description } = serializedState.rawState;
+      const { title, description, hidePanelTitles } = serializedState.rawState;
 
       if (linksSerializeStateIsByReference(state)) {
         const linksSavedObject = await linksClient.get(state.savedObjectId);
@@ -80,6 +80,7 @@ export const getLinksEmbeddableFactory = () => {
           ...runtimeState,
           title,
           description,
+          hidePanelTitles,
         };
       }
 
@@ -93,6 +94,7 @@ export const getLinksEmbeddableFactory = () => {
       return {
         title,
         description,
+        hidePanelTitles,
         links: resolvedLinks,
         layout: attributesWithInjectedIds.layout,
         defaultPanelTitle: attributesWithInjectedIds.title,
@@ -175,21 +177,18 @@ export const getLinksEmbeddableFactory = () => {
             savedObjectId$.next(undefined);
           },
           onEdit: async () => {
-            try {
-              const { openEditorFlyout } = await import('../editor/open_editor_flyout');
-              const newState = await openEditorFlyout({
-                initialState: api.snapshotRuntimeState(),
-                parentDashboard: parentApi,
-              });
-              if (newState) {
-                links$.next(newState.links);
-                layout$.next(newState.layout);
-                defaultPanelTitle.next(newState.defaultPanelTitle);
-                defaultPanelDescription.next(newState.defaultPanelDescription);
-                savedObjectId$.next(newState.savedObjectId);
-              }
-            } catch {
-              // do nothing, user cancelled
+            const { openEditorFlyout } = await import('../editor/open_editor_flyout');
+            const newState = await openEditorFlyout({
+              initialState: api.snapshotRuntimeState(),
+              parentDashboard: parentApi,
+            });
+
+            if (newState) {
+              links$.next(newState.links);
+              layout$.next(newState.layout);
+              defaultPanelTitle.next(newState.defaultPanelTitle);
+              defaultPanelDescription.next(newState.defaultPanelDescription);
+              savedObjectId$.next(newState.savedObjectId);
             }
           },
         },

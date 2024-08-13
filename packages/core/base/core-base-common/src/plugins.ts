@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ConfigPath } from '@kbn/config';
+import type { ConfigPath } from '@kbn/config';
 
 /**
  * Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays

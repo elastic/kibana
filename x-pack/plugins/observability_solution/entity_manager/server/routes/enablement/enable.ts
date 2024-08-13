@@ -6,6 +6,11 @@
  */
 
 import { RequestHandlerContext } from '@kbn/core/server';
+import {
+  CreateEntityDefinitionQuery,
+  createEntityDefinitionQuerySchema,
+} from '@kbn/entities-schema';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { SetupRouteOptions } from '../types';
 import {
   canEnableEntityDiscovery,
@@ -18,7 +23,7 @@ import {
 } from '../../lib/auth';
 import { builtInDefinitions } from '../../lib/entities/built_in';
 import { installBuiltInEntityDefinitions } from '../../lib/entities/install_entity_definition';
-import { ERROR_API_KEY_SERVICE_DISABLED, ERROR_USER_NOT_AUTHORIZED } from '../../../common/errors';
+import { ERROR_API_KEY_SERVICE_DISABLED } from '../../../common/errors';
 import { EntityDiscoveryApiKeyType } from '../../saved_objects';
 
 export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
@@ -26,10 +31,12 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
   server,
   logger,
 }: SetupRouteOptions<T>) {
-  router.put<unknown, unknown, unknown>(
+  router.put<unknown, CreateEntityDefinitionQuery, unknown>(
     {
       path: '/internal/entities/managed/enablement',
-      validate: false,
+      validate: {
+        query: buildRouteValidationWithZod(createEntityDefinitionQuerySchema),
+      },
     },
     async (context, req, res) => {
       try {
@@ -48,10 +55,8 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
         const canEnable = await canEnableEntityDiscovery(esClient);
         if (!canEnable) {
-          return res.ok({
+          return res.forbidden({
             body: {
-              success: false,
-              reason: ERROR_USER_NOT_AUTHORIZED,
               message:
                 'Current Kibana user does not have the required permissions to enable entity discovery',
             },
@@ -75,7 +80,6 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
         }
 
         const apiKey = await generateEntityDiscoveryAPIKey(server, req);
-
         if (apiKey === undefined) {
           return res.customError({
             statusCode: 500,
@@ -90,6 +94,7 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
           builtInDefinitions,
           esClient,
           soClient,
+          installOnly: req.query.installOnly,
         });
 
         return res.ok({ body: { success: true } });
