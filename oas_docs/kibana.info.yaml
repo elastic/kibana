@@ -7,15 +7,15 @@ info:
     Each request that you make happens in isolation from other calls and must include all of the necessary information for Kibana to fulfill the
     request.
     API requests return JSON output, which is a format that is machine-readable and works well for automation.
-    
+
     To interact with Kibana APIs, use the following operations:
-    
+
     - GET: Fetches the information.
     - PATCH: Applies partial modifications to the existing information.
     - POST: Adds new information.
     - PUT: Updates the existing information.
     - DELETE: Removes the information.
-    
+
     You can prepend any Kibana API endpoint with `kbn:` and run the request in **Dev Tools → Console**.
     For example:
 
@@ -24,26 +24,26 @@ info:
     ```
 
     For more information about the console, refer to [Run API requests](https://www.elastic.co/guide/en/kibana/current/console-kibana.html).
-  version: "1.0.2"
+  version: '1.0.2'
   license:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
-  contact: 
+  contact:
     name: Kibana Team
-# servers:
-#   - url: https://{kibana_url}
-#     variables:
-#       kibana_url:
-#         default: localhost:5601
-# security:
-#   - apiKeyAuth: []
-# components:
-#   securitySchemes:
-#     apiKeyAuth:
-#       type: apiKey
-#       in: header
-#       name: Authorization
-#       description: >
-#         These APIs use key-based authentication.
-#         You must create an API key and use the encoded value in the request header.
-#         For example: `Authorization: ApiKey base64AccessApiKey`
+servers:
+  - url: https://{kibana_url}
+    variables:
+      kibana_url:
+        default: localhost:5601
+security:
+  - apiKeyAuth: []
+components:
+  securitySchemes:
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: >
+        These APIs use key-based authentication.
+        You must create an API key and use the encoded value in the request header.
+        For example: `Authorization: ApiKey base64AccessApiKey`
