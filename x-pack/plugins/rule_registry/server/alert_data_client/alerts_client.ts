@@ -22,7 +22,6 @@ import {
   ALERT_END,
   ALERT_STATUS_ACTIVE,
   ALERT_CASE_IDS,
-  ALERT_INVESTIGATION_IDS,
   MAX_CASES_PER_ALERT,
   AlertConsumers,
 } from '@kbn/rule-data-utils';
@@ -113,11 +112,6 @@ export interface BulkUpdateOptions<Params extends RuleTypeParams> {
 interface MgetAndAuditAlert {
   id: string;
   index: string;
-}
-
-export interface UpdateInvestigaionOptions {
-  alert: MgetAndAuditAlert;
-  investigationIds: string[];
 }
 
 export interface BulkUpdateCasesOptions {
@@ -600,18 +594,6 @@ export class AlertsClient {
       this.logger.error(`error in ensureAllAlertsAuthorized ${exc}`);
       throw exc;
     }
-  }
-
-  private getAlertInvestigationIdsFieldUpdate(
-    source: ParsedTechnicalFields | undefined,
-    investigationIds: string[]
-  ) {
-    const uniqueInvestigationIds = new Set([
-      ...(source?.[ALERT_INVESTIGATION_IDS] ?? []),
-      ...investigationIds,
-    ]);
-
-    return { [ALERT_INVESTIGATION_IDS]: Array.from(uniqueInvestigationIds.values()) };
   }
 
   public async ensureAllAlertsAuthorizedRead({ alerts }: { alerts: MgetAndAuditAlert[] }) {
@@ -1262,13 +1244,5 @@ export class AlertsClient {
     });
 
     return fields;
-  }
-
-  public async updateInvestigationIds({ alert, investigationIds }: UpdateInvestigaionOptions) {
-    return this.mgetAlertsAuditOperate({
-      alerts: [alert],
-      operation: WriteOperations.Update,
-      fieldToUpdate: (source) => this.getAlertInvestigationIdsFieldUpdate(source, investigationIds),
-    });
   }
 }

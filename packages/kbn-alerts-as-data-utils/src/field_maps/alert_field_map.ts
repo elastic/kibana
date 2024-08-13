@@ -46,7 +46,6 @@ import {
   EVENT_KIND,
   EVENT_ORIGINAL,
   TAGS,
-  ALERT_INVESTIGATION_IDS,
 } from '@kbn/rule-data-utils';
 import { MultiField } from './types';
 
@@ -257,11 +256,6 @@ export const alertFieldMap = {
   },
   [VERSION]: {
     type: 'version',
-    array: false,
-    required: false,
-  },
-  [ALERT_INVESTIGATION_IDS]: {
-    type: 'keyword',
     array: false,
     required: false,
   },
