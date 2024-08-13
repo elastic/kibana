@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
+import { useCspSetupStatusApi } from '@kbn/cloud-security-posture';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
@@ -45,6 +46,14 @@ export const HostPanelContent = ({
   isPreviewMode,
 }: HostPanelContentProps) => {
   const observedFields = useObservedHostFields(observedHost);
+  const getSetupStatus = useCspSetupStatusApi({
+    refetchInterval: 10000,
+  });
+
+  const cspNoInstallation =
+    getSetupStatus.data?.cspm?.status === 'not-installed' &&
+    getSetupStatus.data?.kspm?.status === 'not-installed' &&
+    getSetupStatus.data?.vuln_mgmt?.status === 'not-installed';
   return (
     <FlyoutBody>
       {riskScoreState.isModuleEnabled && riskScoreState.data?.length !== 0 && (
@@ -72,7 +81,7 @@ export const HostPanelContent = ({
         queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}
       />
       <EuiHorizontalRule />
-      <InsightEntity hostName={hostName} />
+      {!cspNoInstallation && <InsightEntity hostName={hostName} />}
     </FlyoutBody>
   );
 };

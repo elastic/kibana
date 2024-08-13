@@ -10,6 +10,18 @@ export const getFindingsCountAggQuery = () => ({
   count: { terms: { field: 'result.evaluation' } },
 });
 
+export const getFindingsCountAggQueryMisconfigurationPreview = () => ({
+  count: {
+    filters: {
+      other_bucket_key: 'other_messages',
+      filters: {
+        passed: { match: { 'result.evaluation': 'passed' } },
+        failed: { match: { 'result.evaluation': 'failed' } },
+      },
+    },
+  },
+});
+
 export const getAggregationCount = (
   buckets: Array<estypes.AggregationsStringRareTermsBucketKeys | undefined>
 ) => {
@@ -19,5 +31,19 @@ export const getAggregationCount = (
   return {
     passed: passed?.doc_count || 0,
     failed: failed?.doc_count || 0,
+  };
+};
+
+export const getMisconfigurationAggregationCount = (
+  buckets: Array<estypes.AggregationsStringRareTermsBucketKeys | undefined>
+) => {
+  const passed = buckets.find((bucket) => bucket?.key === 'passed');
+  const failed = buckets.find((bucket) => bucket?.key === 'failed');
+  const noStatus = buckets.find((bucket) => bucket?.key === 'other_messages');
+
+  return {
+    passed: passed?.doc_count || 0,
+    failed: failed?.doc_count || 0,
+    no_status: noStatus?.doc_count || 0,
   };
 };

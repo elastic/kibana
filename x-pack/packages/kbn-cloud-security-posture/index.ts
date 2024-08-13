@@ -8,5 +8,5 @@
 export * from './type';
 export { useMisconfigurationPreview } from './src/hooks/use_misconfiguration_preview';
 export { useGetCspBenchmarkRulesStatesApi } from './src/hooks/use_get_benchmark_rules_state_api';
-// export { useKibana } from './src/hooks/use_kibana';
+export { useCspSetupStatusApi } from './src/hooks/use_csp_setup_status_api';
 export { getAggregationCount, getFindingsCountAggQuery } from './src/utils/utils';

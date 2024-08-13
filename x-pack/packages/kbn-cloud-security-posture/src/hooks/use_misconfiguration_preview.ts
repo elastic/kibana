@@ -4,14 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { number } from 'io-ts';
+import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import type { Pagination } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { buildDataTableRecord } from '@kbn/discover-utils';
-import { EsHitRecord } from '@kbn/discover-utils/types';
 import {
   CSP_LATEST_FINDINGS_DATA_VIEW,
   LATEST_FINDINGS_RETENTION_POLICY,
@@ -24,7 +21,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { CspClientPluginStartDeps } from '../../type';
 import type { FindingsBaseEsQuery } from '../../type';
-import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
+import {
+  getFindingsCountAggQueryMisconfigurationPreview,
+  getMisconfigurationAggregationCount,
+} from '../utils/utils';
 import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_state_api';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
@@ -58,7 +58,7 @@ export const getFindingsQuery = (
     index: CSP_LATEST_FINDINGS_DATA_VIEW,
     sort: getMultiFieldsSort(sort),
     size: MAX_FINDINGS_TO_LOAD,
-    aggs: getFindingsCountAggQuery(),
+    aggs: getFindingsCountAggQueryMisconfigurationPreview(),
     ignore_unavailable: false,
     query: {
       ...query,
@@ -127,42 +127,31 @@ export const useMisconfigurationPreview = (options: UseFindingsOptions) => {
   } = useKibana<CoreStart & CspClientPluginStartDeps>().services;
   const { data: rulesStates } = useGetCspBenchmarkRulesStatesApi();
 
-  /**
-   * We're using useInfiniteQuery in this case to allow the user to fetch more data (if available and up to 10k)
-   * useInfiniteQuery differs from useQuery because it accumulates and caches a chunk of data from the previous fetches into an array
-   * it uses the getNextPageParam to know if there are more pages to load and retrieve the position of
-   * the last loaded record to be used as a from parameter to fetch the next chunk of data.
-   */
-  return useInfiniteQuery(
+  return useQuery(
     ['csp_findings', { params: options }, rulesStates],
     async ({ pageParam }) => {
       const {
-        rawResponse: { hits, aggregations },
+        rawResponse: { aggregations },
       } = await lastValueFrom(
         data.search.search<LatestFindingsRequest, LatestFindingsResponse>({
-          params: getFindingsQuery(options, rulesStates!, pageParam), // ruleStates always exists since it under the `enabled` dependency.
+          params: getFindingsQuery(options, rulesStates!, pageParam),
         })
       );
-      if (!aggregations) throw new Error('expected aggregations to be an defined');
-      if (!Array.isArray(aggregations.count.buckets))
-        throw new Error('expected buckets to be an array');
+      if (!aggregations) throw new Error('expected aggregations to be defined'); // Failed here
 
       return {
-        page: hits.hits.map((hit) => buildDataTableRecord(hit as EsHitRecord)),
-        total: number.is(hits.total) ? hits.total : 0,
-        count: getAggregationCount(aggregations.count.buckets),
+        count: getMisconfigurationAggregationCount(
+          Object.entries(aggregations.count.buckets).map(([key, value]) => ({
+            key,
+            doc_count: value.doc_count || 0,
+          }))
+        ),
       };
     },
     {
       enabled: options.enabled && !!rulesStates,
       keepPreviousData: true,
       onError: (err: Error) => showErrorToast(toasts, err),
-      getNextPageParam: (lastPage, allPages) => {
-        if (lastPage.page.length < options.pageSize) {
-          return undefined;
-        }
-        return allPages.length * options.pageSize;
-      },
     }
   );
 };

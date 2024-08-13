@@ -10,7 +10,6 @@ import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
-// import { useLatestFindings } from '@kbn/cloud-security-posture-plugin/public';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { ExpandablePanel } from '../../../../shared/components/expandable_panel';
@@ -38,8 +37,8 @@ export const MisconfigurationsOverview = ({ hostName }: { hostName: string }) =>
     pageSize: 1,
   });
 
-  const passedFindings = data?.pages[0].count.passed || 0;
-  const failedFindings = data?.pages[0].count.failed || 0;
+  const passedFindings = data?.count.passed || 0;
+  const failedFindings = data?.count.failed || 0;
   const { euiTheme } = useEuiTheme();
   const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
     if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
