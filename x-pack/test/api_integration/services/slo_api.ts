@@ -10,8 +10,8 @@ import {
   FetchHistoricalSummaryResponse,
 } from '@kbn/slo-schema';
 import * as t from 'io-ts';
+import { RoleCredentials } from '@kbn/test-suites-serverless/shared/services';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
-import { RoleCredentials } from '../../../test_serverless/shared/services';
 
 type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M';
 

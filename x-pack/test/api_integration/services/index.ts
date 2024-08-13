@@ -45,5 +45,5 @@ export const services = {
   slo: SloApiProvider,
   securitySolutionApi: SecuritySolutionApiProvider,
   alertingApi: AlertingApiProvider,
-  sloApi: SloApiProviderNew
+  sloApi: SloApiProviderNew,
 };
