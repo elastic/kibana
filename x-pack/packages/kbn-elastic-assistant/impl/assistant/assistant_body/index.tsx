@@ -13,7 +13,14 @@ import React, {
   useMemo,
   useRef,
 } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingLogo,
+  EuiPanel,
+  EuiText,
+} from '@elastic/eui';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
@@ -33,6 +40,7 @@ interface Props {
   isAssistantEnabled: boolean;
   isSettingsModalVisible: boolean;
   isWelcomeSetup: boolean;
+  isLoading: boolean;
   refetchCurrentUserConversations: () => Promise<
     QueryObserverResult<Record<string, Conversation>, unknown>
   >;
@@ -50,6 +58,7 @@ export const AssistantBody: FunctionComponent<Props> = ({
   setCurrentSystemPromptId,
   http,
   isAssistantEnabled,
+  isLoading,
   isSettingsModalVisible,
   isWelcomeSetup,
   refetchCurrentUserConversations,
@@ -103,7 +112,12 @@ export const AssistantBody: FunctionComponent<Props> = ({
   return (
     <EuiFlexGroup direction="column" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
-        {isWelcomeSetup ? (
+        {isLoading ? (
+          <EuiEmptyPrompt
+            data-test-subj="animatedLogo"
+            icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
+          />
+        ) : isWelcomeSetup ? (
           <WelcomeSetup
             currentConversation={currentConversation}
             handleOnConversationSelected={handleOnConversationSelected}

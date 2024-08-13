@@ -145,6 +145,18 @@ const AssistantComponent: React.FC<Props> = ({
       Object.keys(conversations).length > 0,
   });
 
+  const isInitialLoad = useMemo(() => {
+    return (
+      (!isFetchedAnonymizationFields && !isFetchedCurrentUserConversations && !isFetchedPrompts) ||
+      !(currentConversation && currentConversation?.id !== '')
+    );
+  }, [
+    currentConversation,
+    isFetchedAnonymizationFields,
+    isFetchedCurrentUserConversations,
+    isFetchedPrompts,
+  ]);
+
   // Welcome setup state
   const isWelcomeSetup = useMemo(
     () =>
@@ -158,7 +170,10 @@ const AssistantComponent: React.FC<Props> = ({
         : (connectors?.length ?? 0) === 0,
     [connectors?.length, conversations]
   );
-  const isDisabled = isWelcomeSetup || !isAssistantEnabled;
+  const isDisabled = useMemo(
+    () => isWelcomeSetup || !isAssistantEnabled || isInitialLoad,
+    [isWelcomeSetup, isAssistantEnabled, isInitialLoad]
+  );
 
   // Settings modal state (so it isn't shared between assistant instances like Timeline)
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
@@ -438,6 +453,7 @@ const AssistantComponent: React.FC<Props> = ({
             >
               <EuiFlyoutHeader hasBorder>
                 <AssistantHeader
+                  isLoading={isInitialLoad}
                   selectedConversation={currentConversation}
                   defaultConnector={defaultConnector}
                   isDisabled={isDisabled || isLoadingChatSend}
@@ -502,6 +518,7 @@ const AssistantComponent: React.FC<Props> = ({
                   handleOnConversationSelected={handleOnConversationSelected}
                   http={http}
                   isAssistantEnabled={isAssistantEnabled}
+                  isLoading={isInitialLoad}
                   isSettingsModalVisible={isSettingsModalVisible}
                   isWelcomeSetup={isWelcomeSetup}
                   refetchCurrentUserConversations={refetchCurrentUserConversations}
