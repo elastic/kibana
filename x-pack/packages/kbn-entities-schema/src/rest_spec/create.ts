@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
+import { z } from 'zod';
 
-export const cpuTotal: MetricsUIAggregation = {
-  cpuTotal: {
-    avg: {
-      field: 'system.cpu.total.norm.pct',
-    },
-  },
-};
+export const createEntityDefinitionQuerySchema = z.object({
+  installOnly: z.optional(z.coerce.boolean()).default(false),
+});
+
+export type CreateEntityDefinitionQuery = z.infer<typeof createEntityDefinitionQuerySchema>;
