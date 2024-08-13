@@ -121,9 +121,6 @@ export class OptionsListFetchCache {
   }
 
   public clearCache = () => {
-    this.cache = new LRUCache<string, OptionsListSuccessResponse>({
-      max: REQUEST_CACHE_SIZE,
-      maxAge: REQUEST_CACHE_TTL,
-    });
+    this.cache.reset();
   };
 }
