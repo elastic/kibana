@@ -8,6 +8,7 @@
 import { Agent } from 'supertest';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { EntityDefinitionWithState } from '@kbn/entityManager-plugin/server/lib/entities/types';
+
 export interface Auth {
   username: string;
   password: string;
@@ -25,9 +26,14 @@ export const getInstalledDefinitions = async (
   return response.body;
 };
 
-export const installDefinition = async (supertest: Agent, definition: EntityDefinition) => {
+export const installDefinition = async (
+  supertest: Agent,
+  definition: EntityDefinition,
+  query: Record<string, any> = {}
+) => {
   return supertest
     .post('/internal/entities/definition')
+    .query(query)
     .set('kbn-xsrf', 'xxx')
     .send(definition)
     .expect(200);

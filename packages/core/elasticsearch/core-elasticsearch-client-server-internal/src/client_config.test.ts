@@ -80,7 +80,7 @@ describe('parseClientOptions', () => {
     it('`customHeaders` take precedence to default kibana headers', () => {
       const customHeader: Record<string, string> = {};
       for (const header in defaultHeaders) {
-        if (defaultHeaders.hasOwnProperty(header)) {
+        if (Object.hasOwn(defaultHeaders, header)) {
           customHeader[header] = 'foo';
         }
       }
