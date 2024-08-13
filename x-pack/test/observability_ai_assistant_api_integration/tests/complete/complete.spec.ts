@@ -7,7 +7,7 @@
 import { Response } from 'supertest';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { omit, pick } from 'lodash';
-import { PassThrough, Readable } from 'stream';
+import { PassThrough } from 'stream';
 import expect from '@kbn/expect';
 import {
   ChatCompletionChunkEvent,
@@ -17,11 +17,20 @@ import {
   StreamingChatResponseEvent,
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
-import type OpenAI from 'openai';
 import { ObservabilityAIAssistantScreenContextRequest } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { createLlmProxy, LlmProxy, LlmResponseSimulator } from '../../common/create_llm_proxy';
+import {
+  createLlmProxy,
+  isFunctionTitleRequest,
+  LlmProxy,
+  LlmResponseSimulator,
+} from '../../common/create_llm_proxy';
 import { createOpenAiChunk } from '../../common/create_openai_chunk';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import {
+  decodeEvents,
+  getConversationCreatedEvent,
+  getConversationUpdatedEvent,
+} from '../conversations/helpers';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -390,20 +399,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let conversationCreatedEvent: ConversationCreateEvent;
       let conversationUpdatedEvent: ConversationUpdateEvent;
 
-      function getConversationCreatedEvent(body: Readable | string) {
-        const decodedEvents = decodeEvents(body);
-        return decodedEvents.find(
-          (event) => event.type === StreamingChatResponseEventType.ConversationCreate
-        ) as ConversationCreateEvent;
-      }
-
-      function getConversationUpdatedEvent(body: Readable | string) {
-        const decodedEvents = decodeEvents(body);
-        return decodedEvents.find(
-          (event) => event.type === StreamingChatResponseEventType.ConversationUpdate
-        ) as ConversationUpdateEvent;
-      }
-
       before(async () => {
         proxy
           .intercept('conversation_title', (body) => isFunctionTitleRequest(body), [
@@ -510,17 +505,4 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     // todo
     it.skip('executes a function', async () => {});
   });
-}
-
-function decodeEvents(body: Readable | string) {
-  return String(body)
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => JSON.parse(line) as StreamingChatResponseEvent);
-}
-
-function isFunctionTitleRequest(body: string) {
-  const parsedBody = JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
-  return parsedBody.tools?.find((fn) => fn.function.name === 'title_conversation') !== undefined;
 }

@@ -9,6 +9,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import http, { type Server } from 'http';
 import { once, pull } from 'lodash';
+import OpenAI from 'openai';
 import { createOpenAiChunk } from './create_openai_chunk';
 
 type Request = http.IncomingMessage;
@@ -85,6 +86,21 @@ export class LlmProxy {
 
   waitForAllInterceptorsSettled() {
     return Promise.all(this.interceptors);
+  }
+
+  interceptConversation(response: string) {
+    return this.intercept('conversation', (body) => !isFunctionTitleRequest(body), response);
+  }
+
+  interceptConversationTitle(title: string) {
+    return this.intercept('conversation_title', (body) => isFunctionTitleRequest(body), [
+      {
+        function_call: {
+          name: 'title_conversation',
+          arguments: JSON.stringify({ title }),
+        },
+      },
+    ]);
   }
 
   intercept<
@@ -195,4 +211,9 @@ async function getRequestBody(request: http.IncomingMessage): Promise<string> {
       reject(error);
     });
   });
+}
+
+export function isFunctionTitleRequest(body: string) {
+  const parsedBody = JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
+  return parsedBody.tools?.find((fn) => fn.function.name === 'title_conversation') !== undefined;
 }

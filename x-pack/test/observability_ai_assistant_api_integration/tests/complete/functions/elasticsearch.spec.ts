@@ -32,6 +32,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     before(async () => {
       ({ connectorId, proxy } = await createLLMProxyConnector({ log, supertest }));
+
+      // intercept the LLM request and return a fixed response
+      proxy.intercept('conversation', () => true, 'Hello from LLM Proxy').completeAfterIntercept();
+
       await generateApmData(apmSynthtraceEsClient);
 
       const responseBody = await invokeChatCompleteWithFunctionRequest({
@@ -63,7 +67,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await deleteLLMProxyConnector({ supertest, connectorId, proxy });
+      await deleteLLMProxyConnector({ supertest, connectorId, proxy, log });
       await apmSynthtraceEsClient.clean();
     });
 

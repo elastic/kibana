@@ -38,48 +38,57 @@ export async function createLLMProxyConnector({
   log: ToolingLog;
   supertest: Agent;
 }) {
-  const proxy = await createLlmProxy(log);
+  try {
+    const proxy = await createLlmProxy(log);
 
-  // intercept the LLM request and return a fixed response
-  proxy.intercept('conversation', () => true, 'Hello from LLM Proxy').completeAfterIntercept();
+    const response = await supertest
+      .post('/api/actions/connector')
+      .set('kbn-xsrf', 'foo')
+      .send({
+        name: 'OpenAI Proxy',
+        connector_type_id: '.gen-ai',
+        config: {
+          apiProvider: 'OpenAI',
+          apiUrl: `http://localhost:${proxy.getPort()}`,
+        },
+        secrets: {
+          apiKey: 'my-api-key',
+        },
+      })
+      .expect(200);
 
-  const response = await supertest
-    .post('/api/actions/connector')
-    .set('kbn-xsrf', 'foo')
-    .send({
-      name: 'OpenAI Proxy',
-      connector_type_id: '.gen-ai',
-      config: {
-        apiProvider: 'OpenAI',
-        apiUrl: `http://localhost:${proxy.getPort()}`,
-      },
-      secrets: {
-        apiKey: 'my-api-key',
-      },
-    })
-    .expect(200);
-
-  return {
-    proxy,
-    connectorId: response.body.id,
-  };
+    return {
+      proxy,
+      connectorId: response.body.id,
+    };
+  } catch (e) {
+    log.error(`Failed to create LLM proxy connector due to: ${e}`);
+    throw e;
+  }
 }
 
 export async function deleteLLMProxyConnector({
   supertest,
   connectorId,
   proxy,
+  log,
 }: {
   supertest: Agent;
   connectorId: string;
   proxy: LlmProxy;
+  log: ToolingLog;
 }) {
-  await supertest
-    .delete(`/api/actions/connector/${connectorId}`)
-    .set('kbn-xsrf', 'foo')
-    .expect(204);
+  try {
+    await supertest
+      .delete(`/api/actions/connector/${connectorId}`)
+      .set('kbn-xsrf', 'foo')
+      .expect(204);
 
-  proxy.close();
+    proxy.close();
+  } catch (e) {
+    log.error(`Failed to delete LLM proxy connector with id ${connectorId} due to: ${e}`);
+    throw e;
+  }
 }
 
 export async function invokeChatCompleteWithFunctionRequest({

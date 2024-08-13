@@ -14,7 +14,12 @@ import { type StreamingChatResponseEvent } from '@kbn/observability-ai-assistant
 import { pick } from 'lodash';
 import type OpenAI from 'openai';
 import { type AdHocInstruction } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { createLlmProxy, LlmProxy, LlmResponseSimulator } from '../../common/create_llm_proxy';
+import {
+  createLlmProxy,
+  isFunctionTitleRequest,
+  LlmProxy,
+  LlmResponseSimulator,
+} from '../../common/create_llm_proxy';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -308,9 +313,4 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
   });
-}
-
-function isFunctionTitleRequest(body: string) {
-  const parsedBody = JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
-  return parsedBody.tools?.find((fn) => fn.function.name === 'title_conversation') !== undefined;
 }

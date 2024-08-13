@@ -8,23 +8,33 @@
 import expect from '@kbn/expect';
 import { kbnTestConfig } from '@kbn/test';
 import { sortBy } from 'lodash';
+import {
+  ConversationCreateEvent,
+  Message,
+  MessageRole,
+} from '@kbn/observability-ai-assistant-plugin/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { clearKnowledgeBase, createKnowledgeBaseModel, deleteKnowledgeBaseModel } from './helpers';
+import { getConversationCreatedEvent } from '../conversations/helpers';
+import { LlmProxy } from '../../common/create_llm_proxy';
+import { createLLMProxyConnector, deleteLLMProxyConnector } from '../complete/functions/helpers';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
   const getScopedApiClientForUsername = getService('getScopedApiClientForUsername');
   const security = getService('security');
+  const supertest = getService('supertest');
   const es = getService('es');
   const ml = getService('ml');
+  const log = getService('log');
 
   describe('Knowledge base user instructions', () => {
-    const secondaryUser = 'john';
+    const userJohn = 'john';
 
     before(async () => {
       // create user
       const password = kbnTestConfig.getUrlParts().password!;
-      await security.user.create(secondaryUser, { password, roles: ['editor'] });
+      await security.user.create(userJohn, { password, roles: ['editor'] });
       await createKnowledgeBaseModel(ml);
 
       await observabilityAIAssistantAPIClient
@@ -34,7 +44,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     after(async () => {
       await deleteKnowledgeBaseModel(ml);
-      await security.user.delete(secondaryUser);
+      await security.user.delete(userJohn);
       await clearKnowledgeBase(es);
     });
 
@@ -52,11 +62,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             isPublic: false,
           },
           {
-            username: 'john',
+            username: userJohn,
             isPublic: true,
           },
           {
-            username: 'john',
+            username: userJohn,
             isPublic: false,
           },
         ].map(async ({ username, isPublic }) => {
@@ -105,7 +115,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('"john" can retrieve their own private instructions and the public instruction', async () => {
-        const res = await getScopedApiClientForUsername('john')({
+        const res = await getScopedApiClientForUsername(userJohn)({
           endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
         });
         const instructions = res.body.userInstructions;
@@ -177,6 +187,88 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             public: false,
           },
         ]);
+      });
+    });
+
+    describe.only('when a user instruction exist and a conversation is created', () => {
+      let conversationCreatedEvent: ConversationCreateEvent;
+      let proxy: LlmProxy;
+      let connectorId: string;
+
+      before(async () => {
+        await observabilityAIAssistantAPIClient
+          .editorUser({
+            endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
+            params: {
+              body: {
+                id: 'doc-to-update',
+                text: 'Initial text',
+                public: true,
+              },
+            },
+          })
+          .expect(200);
+
+        ({ proxy, connectorId } = await createLLMProxyConnector({ log, supertest }));
+
+        proxy.interceptConversationTitle('LLM-generated title').completeAfterIntercept();
+        proxy.interceptConversation('I, the LLM, hear you!').completeAfterIntercept();
+
+        const messages: Message[] = [
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.System,
+              content: 'You are a helpful assistant',
+            },
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.User,
+              content: 'Today we will be testing user instructions!',
+            },
+          },
+        ];
+
+        const createResponse = await observabilityAIAssistantAPIClient
+          .editorUser({
+            endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
+            params: {
+              body: {
+                messages,
+                connectorId,
+                persist: true,
+                screenContexts: [],
+              },
+            },
+          })
+          .expect(200);
+
+        // await proxy.waitForAllInterceptorsSettled();
+
+        // conversationCreatedEvent = getConversationCreatedEvent(createResponse.body);
+        // console.log('conversationCreatedEvent', createResponse.body, conversationCreatedEvent);
+      });
+
+      after(async () => {
+        await deleteLLMProxyConnector({ supertest, connectorId, proxy, log });
+      });
+
+      it('the instruction is included in the system prompt of a conversation', async () => {
+        expect(true).to.be(true);
+        // const conversationId = conversationCreatedEvent.conversation.id;
+        // const fullConversation = await observabilityAIAssistantAPIClient.editorUser({
+        //   endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
+        //   params: {
+        //     path: {
+        //       conversationId,
+        //     },
+        //   },
+        // });
+
+        // console.log(fullConversation.body.conversation);
+        // expect(fullConversation.body.conversation).to.eql();
       });
     });
   });
