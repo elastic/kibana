@@ -16,6 +16,7 @@ import {
   EuiPanel,
   EuiConfirmModal,
   EuiToolTip,
+  EuiSkeletonTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -33,6 +34,7 @@ interface OwnProps {
   selectedConversation: Conversation | undefined;
   defaultConnector?: AIConnector;
   isDisabled: boolean;
+  isLoading: boolean;
   isSettingsModalVisible: boolean;
   onToggleShowAnonymizedValues: () => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
@@ -62,6 +64,7 @@ export const AssistantHeader: React.FC<Props> = ({
   selectedConversation,
   defaultConnector,
   isDisabled,
+  isLoading,
   isSettingsModalVisible,
   onToggleShowAnonymizedValues,
   setIsSettingsModalVisible,
@@ -145,6 +148,7 @@ export const AssistantHeader: React.FC<Props> = ({
   return (
     <>
       <FlyoutNavigation
+        isLoading={isLoading}
         isExpanded={!!chatHistoryVisible}
         setIsExpanded={setChatHistoryVisible}
         onConversationCreate={onConversationCreate}
@@ -197,11 +201,15 @@ export const AssistantHeader: React.FC<Props> = ({
               overflow: hidden;
             `}
           >
-            <AssistantTitle
-              title={selectedConversation?.title}
-              selectedConversation={selectedConversation}
-              refetchCurrentUserConversations={refetchCurrentUserConversations}
-            />
+            {isLoading ? (
+              <EuiSkeletonTitle data-test-subj="skeletonTitle" size="xs" />
+            ) : (
+              <AssistantTitle
+                title={selectedConversation?.title}
+                selectedConversation={selectedConversation}
+                refetchCurrentUserConversations={refetchCurrentUserConversations}
+              />
+            )}
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
@@ -241,6 +249,7 @@ export const AssistantHeader: React.FC<Props> = ({
                   button={
                     <EuiButtonIcon
                       aria-label="test"
+                      isDisabled={isDisabled}
                       iconType="boxesVertical"
                       onClick={onButtonClick}
                       data-test-subj="chat-context-menu"

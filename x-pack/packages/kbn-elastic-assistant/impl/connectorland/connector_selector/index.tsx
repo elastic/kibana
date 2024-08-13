@@ -78,6 +78,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
               <EuiButtonEmpty
                 data-test-subj="addNewConnectorButton"
                 href="#"
+                isDisabled={localIsDisabled}
                 iconType="plus"
                 size="xs"
               >
@@ -91,7 +92,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
           </EuiFlexGroup>
         ),
       };
-    }, []);
+    }, [localIsDisabled]);
 
     const connectorOptions = useMemo(
       () =>
@@ -188,6 +189,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
           <EuiButtonEmpty
             data-test-subj="addNewConnectorButton"
             iconType="plusInCircle"
+            isDisabled={localIsDisabled}
             size="xs"
             onClick={() => setIsConnectorModalVisible(true)}
           >

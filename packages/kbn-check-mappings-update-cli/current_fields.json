@@ -436,6 +436,7 @@
     "updated_by",
     "version"
   ],
+  "favorites": [],
   "file": [
     "FileKind",
     "Meta",
@@ -629,6 +630,7 @@
     "is_managed",
     "name",
     "namespace",
+    "output_id",
     "overrides",
     "package",
     "package.name",

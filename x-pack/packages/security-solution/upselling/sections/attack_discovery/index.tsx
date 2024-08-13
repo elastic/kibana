@@ -5,15 +5,27 @@
  * 2.0.
  */
 
-import { AssistantAvatar, UpgradeButtons, useAssistantContext } from '@kbn/elastic-assistant';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
+import { AssistantAvatar } from './assistant_avatar/assistant_avatar';
 import * as i18n from './translations';
 
-const UpgradeComponent: React.FC = () => {
-  const { http } = useAssistantContext();
+interface Props {
+  actions?: React.ReactNode;
+  availabilityMessage: string;
+  upgradeMessage: string;
+}
 
+/**
+ * This `section` component handles (just) the styling of the upselling message
+ * (by itself, without the page wrapper)
+ */
+const AttackDiscoveryUpsellingSectionComponent: React.FC<Props> = ({
+  actions,
+  availabilityMessage,
+  upgradeMessage,
+}) => {
   const title = useMemo(
     () => (
       <EuiFlexGroup alignItems="center" direction="column" gutterSize="none">
@@ -38,33 +50,24 @@ const UpgradeComponent: React.FC = () => {
     () => (
       <EuiFlexGroup alignItems="center" direction="column" gutterSize="none">
         <EuiFlexItem grow={false}>
-          <EuiText color="subdued" data-test-subj="attackDiscoveryIsAvailable">
-            {i18n.ATTACK_DISCOVERY_IS_AVAILABLE}
+          <EuiText color="subdued" data-test-subj="availabilityMessage">
+            {availabilityMessage}
           </EuiText>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiText color="subdued" data-test-subj="pleaseUpgrade">
-            {i18n.PLEASE_UPGRADE}
+          <EuiText color="subdued" data-test-subj="upgradeMessage">
+            {upgradeMessage}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    []
-  );
-
-  const actions = useMemo(
-    () => (
-      <EuiFlexGroup justifyContent="center" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <UpgradeButtons basePath={http.basePath.get()} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-    [http.basePath]
+    [availabilityMessage, upgradeMessage]
   );
 
   return <EuiEmptyPrompt actions={actions} body={body} data-test-subj="upgrade" title={title} />;
 };
 
-export const Upgrade = React.memo(UpgradeComponent);
+AttackDiscoveryUpsellingSectionComponent.displayName = 'AttackDiscoveryUpsellingSection';
+
+export const AttackDiscoveryUpsellingSection = React.memo(AttackDiscoveryUpsellingSectionComponent);

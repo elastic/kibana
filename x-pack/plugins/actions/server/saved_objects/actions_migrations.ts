@@ -42,7 +42,7 @@ export function getActionsMigrations(
   const migrationActionsTen = createEsoMigration(
     encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
-      doc.attributes.config?.hasOwnProperty('casesConfiguration') ||
+      Object.hasOwn(doc.attributes.config ?? {}, 'casesConfiguration') ||
       doc.attributes.actionTypeId === '.email',
     pipeMigrations(renameCasesConfigurationObject, addHasAuthConfigurationObject)
   );
@@ -50,8 +50,8 @@ export function getActionsMigrations(
   const migrationActionsEleven = createEsoMigration(
     encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
-      doc.attributes.config?.hasOwnProperty('isCaseOwned') ||
-      doc.attributes.config?.hasOwnProperty('incidentConfiguration') ||
+      Object.hasOwn(doc.attributes.config ?? {}, 'isCaseOwned') ||
+      Object.hasOwn(doc.attributes.config ?? {}, 'incidentConfiguration') ||
       doc.attributes.actionTypeId === '.webhook',
     pipeMigrations(removeCasesFieldMappings, addHasAuthConfigurationObject)
   );
@@ -142,8 +142,8 @@ function removeCasesFieldMappings(
   doc: SavedObjectUnsanitizedDoc<RawAction>
 ): SavedObjectUnsanitizedDoc<RawAction> {
   if (
-    !doc.attributes.config?.hasOwnProperty('isCaseOwned') &&
-    !doc.attributes.config?.hasOwnProperty('incidentConfiguration')
+    !Object.hasOwn(doc.attributes.config ?? {}, 'isCaseOwned') &&
+    !Object.hasOwn(doc.attributes.config ?? {}, 'incidentConfiguration')
   ) {
     return doc;
   }

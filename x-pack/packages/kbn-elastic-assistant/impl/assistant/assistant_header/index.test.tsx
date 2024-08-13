@@ -26,6 +26,7 @@ const testProps = {
     ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
     DOC_LINK_VERSION: 'master',
   },
+  isLoading: false,
   isDisabled: false,
   isSettingsModalVisible: false,
   onConversationSelected,
