@@ -79,8 +79,8 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             metrics: [
               { name: 'cpu', value: 0.44708333333333333 },
-              { name: 'cpuV2', value: 0 },
-              { name: 'diskSpaceUsage', value: 0 },
+              { name: 'cpuV2', value: null },
+              { name: 'diskSpaceUsage', value: null },
               { name: 'memory', value: 0.4563333333333333 },
               { name: 'memoryFree', value: 8573890560 },
               { name: 'normalizedLoad1m', value: 0.7375000000000002 },
