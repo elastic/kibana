@@ -7,7 +7,6 @@
 
 import { services as kibanaApiIntegrationServices } from '@kbn/test-suites-src/api_integration/services';
 import { services as kibanaCommonServices } from '@kbn/test-suites-src/common/services';
-import { commonFunctionalUIServices } from '@kbn/ftr-common-functional-ui-services';
 import { InfraLogViewsServiceProvider } from './infra_log_views';
 import { SpacesServiceProvider } from './spaces';
 import { BsearchSecureService } from './bsearch_secure';
@@ -16,7 +15,6 @@ import { InfraSynthtraceKibanaClientProvider } from './infra_synthtrace_kibana_c
 
 export const services = {
   ...kibanaCommonServices,
-  ...commonFunctionalUIServices,
   infraLogViews: InfraLogViewsServiceProvider,
   supertest: kibanaApiIntegrationServices.supertest,
   spaces: SpacesServiceProvider,

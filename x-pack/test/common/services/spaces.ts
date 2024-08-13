@@ -30,7 +30,6 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
   const url = formatUrl(config.get('servers.kibana'));
-  const browser = getService('browser');
 
   const certificateAuthorities = config.get('servers.kibana.certificateAuthorities');
   const httpsAgent: Https.Agent | undefined = certificateAuthorities
@@ -99,7 +98,7 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
       return data;
     }
 
-    public async navigateToHomePage(spaceId: string) {
+    public async navigateToHomePage(spaceId: string, navigateTo: (url: string) => Promise<void>) {
       log.debug('navigating to space home page');
 
       const { protocol, hostname, port } = config.get('servers.kibana');
@@ -113,7 +112,7 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
 
       // Using browser.navigateTo instead of common.navigateToUrl to test the redirect from "/"
       // to the correct app. (common.navigateToUrl requires the "app" to be provided).
-      await browser.navigateTo(spaceHomeUrl);
+      await navigateTo(spaceHomeUrl);
     }
   })();
 }

@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { common, solutionNavigation } = getPageObjects(['common', 'solutionNavigation']);
   const spaces = getService('spaces');
+  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
 
   describe('security solution', () => {
@@ -24,7 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       // Create a space with the security solution and navigate to its home page
       ({ cleanUp, space: spaceCreated } = await spaces.create({ solution: 'security' }));
-      spaces.navigateToHomePage(spaceCreated.id);
+      spaces.navigateToHomePage(spaceCreated.id, browser.navigateTo.bind(browser));
     });
 
     after(async () => {
