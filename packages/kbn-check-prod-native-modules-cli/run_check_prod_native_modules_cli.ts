@@ -14,7 +14,9 @@ run(
   async ({ log }) => {
     const foundProdNativeModules = await checkProdNativeModules(log);
     if (foundProdNativeModules) {
-      throw createFailError('Failed: check all previous errors before continuing');
+      throw createFailError(
+        'Failed: check all previous errors before continuing. Chat with the Kibana Operations Team if you do need help.'
+      );
     }
   },
   {
