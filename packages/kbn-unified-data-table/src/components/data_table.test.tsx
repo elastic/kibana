@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { ReactWrapper } from 'enzyme';
 import {
   EuiButton,
@@ -30,7 +30,7 @@ import {
   testTrailingControlColumns,
 } from '../../__mocks__/external_control_columns';
 import { DatatableColumnType } from '@kbn/expressions-plugin/common';
-import { render, screen } from '@testing-library/react';
+import { queryByRole, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CELL_CLASS } from '../utils/get_render_cell_value';
 
@@ -89,6 +89,37 @@ const DataTable = (props: Partial<UnifiedDataTableProps>) => (
     <UnifiedDataTable {...getProps()} {...props} />
   </KibanaContextProvider>
 );
+
+const renderDataTable = (props: Partial<UnifiedDataTableProps>) => {
+  const DataTableWrapped = () => {
+    const [columns, setColumns] = useState(props.columns);
+    const [settings, setSettings] = useState(props.settings);
+
+    return (
+      <IntlProvider locale="en">
+        <DataTable
+          {...props}
+          columns={columns}
+          onSetColumns={setColumns}
+          settings={settings}
+          onResize={({ columnId, width }) => {
+            setSettings({
+              ...settings,
+              columns: {
+                ...settings?.columns,
+                [columnId]: {
+                  width,
+                },
+              },
+            });
+          }}
+        />
+      </IntlProvider>
+    );
+  };
+
+  render(<DataTableWrapped />);
+};
 
 async function getComponent(props: UnifiedDataTableProps = getProps()) {
   const component = mountWithIntl(<DataTable {...props} />);
@@ -789,14 +820,6 @@ describe('UnifiedDataTable', () => {
   });
 
   describe('document comparison', () => {
-    const renderDataTable = (props: Partial<UnifiedDataTableProps>) => {
-      render(
-        <IntlProvider locale="en">
-          <DataTable {...props} />
-        </IntlProvider>
-      );
-    };
-
     const getSelectedDocumentsButton = () => screen.queryByTestId('unifiedDataTableSelectionBtn');
 
     const selectDocument = (document: EsHitRecord) =>
@@ -914,6 +937,53 @@ describe('UnifiedDataTable', () => {
       });
 
       expect(findTestSubject(component, 'dataGridHeaderCell-colorIndicator').exists()).toBeFalsy();
+    });
+  });
+
+  describe('columns', () => {
+    // Default column width in EUI is hardcoded to 100px for Jest envs
+    const EUI_DEFAULT_COLUMN_WIDTH = '100px';
+    const getColumnHeader = (name: string) => screen.getByRole('columnheader', { name });
+    const queryColumnHeader = (name: string) => screen.queryByRole('columnheader', { name });
+    const getButton = (name: string) => screen.getByRole('button', { name });
+
+    it('should reset the last column to auto width when removing the only auto width column', async () => {
+      renderDataTable({
+        columns: ['message', 'extension', 'bytes'],
+        settings: {
+          columns: {
+            extension: { width: 50 },
+            bytes: { width: 50 },
+          },
+        },
+      });
+      expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
+      expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
+      expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
+      userEvent.click(getButton('message'));
+      userEvent.click(getButton('Remove column'), undefined, { skipPointerEventsCheck: true });
+      expect(queryColumnHeader('message')).not.toBeInTheDocument();
+      expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
+      expect(getColumnHeader('bytes')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
+    });
+
+    it('should not reset the last column to auto width when there are multiple auto width columns', async () => {
+      renderDataTable({
+        columns: ['message', 'extension', 'bytes'],
+        settings: {
+          columns: {
+            bytes: { width: 50 },
+          },
+        },
+      });
+      expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
+      expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
+      expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
+      userEvent.click(getButton('message'));
+      userEvent.click(getButton('Remove column'), undefined, { skipPointerEventsCheck: true });
+      expect(queryColumnHeader('message')).not.toBeInTheDocument();
+      expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
+      expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
     });
   });
 });

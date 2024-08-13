@@ -45,7 +45,7 @@ import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AdditionalFieldGroups } from '@kbn/unified-field-list';
-import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
+import { isEqual } from 'lodash';
 import {
   UnifiedDataTableSettings,
   ValueToStringConverter,
@@ -697,18 +697,6 @@ export const UnifiedDataTable = ({
     [dataView, displayedColumns, shouldPrependTimeFieldColumn]
   );
 
-  // When columns are modified, reset the last column to auto width if only absolute
-  // width columns remain, to ensure the columns fill the available grid space
-  useDeepCompareEffect(() => {
-    const hasAutoWidthColumn = visibleColumns.some(
-      (col) => settings?.columns?.[col]?.width == null
-    );
-
-    if (!hasAutoWidthColumn) {
-      onResize?.({ columnId: visibleColumns[visibleColumns.length - 1] });
-    }
-  }, [onResize, visibleColumns]);
-
   const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
     (fieldName, rowIndex) =>
       displayedRows[rowIndex % displayedRows.length].flattened[fieldName] as Serializable,
@@ -828,6 +816,26 @@ export const UnifiedDataTable = ({
     }),
     [visibleColumns, onSetColumns, shouldPrependTimeFieldColumn]
   );
+
+  // When columns are modified, reset the last column to auto width if only absolute
+  // width columns remain, to ensure the columns fill the available grid space
+  const prevColumns = useRef<string[]>();
+
+  useEffect(() => {
+    if (isEqual(prevColumns.current, visibleColumns)) {
+      return;
+    }
+
+    prevColumns.current = visibleColumns;
+
+    const hasAutoWidthColumn = visibleColumns.some(
+      (colId) => euiGridColumns.find((col) => col.id === colId)?.initialWidth == null
+    );
+
+    if (!hasAutoWidthColumn) {
+      onResize?.({ columnId: visibleColumns[visibleColumns.length - 1] });
+    }
+  }, [euiGridColumns, onResize, visibleColumns]);
 
   /**
    * Sorting
