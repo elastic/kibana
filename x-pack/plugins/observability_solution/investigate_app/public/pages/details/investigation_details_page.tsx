@@ -16,7 +16,7 @@ import { useInvestigateParams } from '../../hooks/use_investigate_params';
 import { useFetchAlert } from '../../hooks/use_get_alert_details';
 import { InvestigationDetails } from './components/investigation_details';
 
-export function InvestigateDetailsPage() {
+export function InvestigationDetailsPage() {
   const {
     core: {
       http: { basePath },
