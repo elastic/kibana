@@ -38,7 +38,6 @@ export type SharedDashboardState = Partial<
  * A partially parsed version of the Dashboard Attributes used for inject and extract logic for both the Dashboard Container and the Dashboard Saved Object.
  */
 export type ParsedDashboardAttributesWithType = EmbeddableStateWithType & {
-  controlGroupInput?: DashboardAttributes['controlGroupInput'] | undefined;
   panels: DashboardPanelMap;
   type: 'dashboard';
 };

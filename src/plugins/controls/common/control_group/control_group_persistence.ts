@@ -103,32 +103,6 @@ const getPanelsAreEqual = (
   return true;
 };
 
-export const controlGroupInputToRawControlGroupAttributes = (
-  controlGroupInput: Omit<ControlGroupInput, 'id'>
-): RawControlGroupAttributes => {
-  return {
-    controlStyle: controlGroupInput.controlStyle,
-    chainingSystem: controlGroupInput.chainingSystem,
-    showApplySelections: controlGroupInput.showApplySelections,
-    panelsJSON: JSON.stringify(controlGroupInput.panels),
-    ignoreParentSettingsJSON: JSON.stringify(controlGroupInput.ignoreParentSettings),
-  };
-};
-
-export const generateNewControlIds = (controlGroupInput?: PersistableControlGroupInput) => {
-  if (!controlGroupInput?.panels) return;
-
-  const newPanelsMap: ControlsPanels = {};
-  for (const panel of Object.values(controlGroupInput.panels)) {
-    const newId = v4();
-    newPanelsMap[newId] = {
-      ...panel,
-      explicitInput: { ...panel.explicitInput, id: newId },
-    };
-  }
-  return { ...controlGroupInput, panels: newPanelsMap };
-};
-
 export const rawControlGroupAttributesToControlGroupInput = (
   rawControlGroupAttributes: RawControlGroupAttributes
 ): PersistableControlGroupInput | undefined => {

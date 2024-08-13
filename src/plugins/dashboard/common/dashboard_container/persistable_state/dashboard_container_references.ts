@@ -23,8 +23,8 @@ export const getReferencesForPanelId = (id: string, references: Reference[]): Re
 };
 
 export const getReferencesForControls = (references: Reference[]): Reference[] => {
-  return references.filter(reference => reference.name.startsWith(controlGroupReferencePrefix));
-}
+  return references.filter((reference) => reference.name.startsWith(controlGroupReferencePrefix));
+};
 
 export const prefixReferencesFromPanel = (id: string, references: Reference[]): Reference[] => {
   const prefix = `${id}:`;
