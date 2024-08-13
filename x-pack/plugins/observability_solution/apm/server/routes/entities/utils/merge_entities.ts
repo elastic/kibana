@@ -36,6 +36,7 @@ function mergeFunc(entity: ServiceEntities, existingEntity?: MergedServiceEntiti
       environments: compact([entity?.environment]),
       latestTimestamp: entity.entity.latestTimestamp,
       metrics: [entity.entity.metrics],
+      hasLogMetrics: entity.entity.hasLogMetrics,
     };
   }
   return {
@@ -45,5 +46,6 @@ function mergeFunc(entity: ServiceEntities, existingEntity?: MergedServiceEntiti
     environments: uniq(compact([...existingEntity?.environments, entity?.environment])),
     latestTimestamp: entity.entity.latestTimestamp,
     metrics: [...existingEntity?.metrics, entity.entity.metrics],
+    hasLogMetrics: entity.entity.hasLogMetrics || existingEntity.hasLogMetrics,
   };
 }

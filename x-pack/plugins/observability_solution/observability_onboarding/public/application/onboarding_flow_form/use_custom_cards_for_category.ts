@@ -23,11 +23,7 @@ export function useCustomCardsForCategory(
   const history = useHistory();
   const location = useLocation();
   const {
-    services: {
-      application,
-      http,
-      context: { isServerless },
-    },
+    services: { application, http },
   } = useKibana<ObservabilityOnboardingAppServices>();
   const getUrlForApp = application?.getUrlForApp;
 
@@ -132,7 +128,7 @@ export function useCustomCardsForCategory(
           integration: '',
         },
         toFeaturedCard('docker'),
-        isServerless ? toFeaturedCard('prometheus') : otelCard,
+        otelCard,
         {
           id: 'azure-virtual',
           type: 'virtual',
@@ -213,7 +209,7 @@ export function useCustomCardsForCategory(
           version: '',
           integration: '',
         },
-        isServerless ? toFeaturedCard('nginx') : otelCard,
+        otelCard,
         {
           id: 'azure-logs-virtual',
           type: 'virtual',
