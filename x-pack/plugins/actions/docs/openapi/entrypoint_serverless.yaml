@@ -25,15 +25,15 @@ paths:
     $ref: paths/api@actions@connectors.yaml
   '/api/actions/connector_types':
     $ref: paths/api@actions@connector_types.yaml
-components:
-  securitySchemes:
-    apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: >
-        Serverless APIs support only key-based authentication.
-        You must create an API key and use the encoded value in the request header.
-        For example: 'Authorization: ApiKey base64AccessApiKey'.
-security:
-  - apiKeyAuth: []
+# components:
+#   securitySchemes:
+#     apiKeyAuth:
+#       type: apiKey
+#       in: header
+#       name: Authorization
+#       description: >
+#         Serverless APIs support only key-based authentication.
+#         You must create an API key and use the encoded value in the request header.
+#         For example: 'Authorization: ApiKey base64AccessApiKey'.
+# security:
+#   - apiKeyAuth: []

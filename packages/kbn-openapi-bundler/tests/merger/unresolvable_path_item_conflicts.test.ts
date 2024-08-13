@@ -120,8 +120,12 @@ describe('OpenAPI Merger - unresolvable path item object conflicts', () => {
     const spec2 = createOASDocument({
       paths: {
         '/api/my/endpoint': {
-          // PathItemDefinition definition is omitted for brivity since it's not validated by the merger
           $ref: '#/components/schemas/PathItemDefinition',
+        },
+      },
+      components: {
+        schemas: {
+          PathItemDefinition: {},
         },
       },
     });

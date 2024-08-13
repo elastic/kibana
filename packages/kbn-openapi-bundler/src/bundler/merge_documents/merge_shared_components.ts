@@ -10,8 +10,9 @@ import chalk from 'chalk';
 import deepEqual from 'fast-deep-equal';
 import { OpenAPIV3 } from 'openapi-types';
 import { ResolvedDocument } from '../ref_resolver/resolved_document';
-import { extractByJsonPointer } from '../../utils/extract_by_json_pointer';
+import { extractObjectByJsonPointer } from '../../utils/extract_by_json_pointer';
 import { logger } from '../../logger';
+import { MergeOptions } from './merge_options';
 
 const MERGEABLE_COMPONENT_TYPES = [
   'schemas',
@@ -26,15 +27,20 @@ const MERGEABLE_COMPONENT_TYPES = [
 ] as const;
 
 export function mergeSharedComponents(
-  bundledDocuments: ResolvedDocument[]
+  bundledDocuments: ResolvedDocument[],
+  options: MergeOptions
 ): OpenAPIV3.ComponentsObject {
   const mergedComponents: Record<string, unknown> = {};
 
   for (const componentsType of MERGEABLE_COMPONENT_TYPES) {
+    if (options.skipSecurity && componentsType === 'securitySchemes') {
+      continue;
+    }
+
     const mergedTypedComponents = mergeObjects(bundledDocuments, `/components/${componentsType}`);
 
     if (Object.keys(mergedTypedComponents).length === 0) {
-      // Nothing was merged for this components type, go to the next component type
+      // Nothing was merged for that components type, go to the next component type
       continue;
     }
 
@@ -63,26 +69,21 @@ function mergeObjects(
       const componentToAdd = object[name];
       const existingComponent = merged[name];
 
-      if (existingComponent) {
+      // Bundled documents may contain explicit references duplicates. For example
+      // shared schemas from `@kbn/openapi-common` has `NonEmptyString` which is
+      // widely used. After bundling references into a document (i.e. making them
+      // local references) we will have duplicates. This is why we need to check
+      // for exact match via `deepEqual()` to check whether components match.
+      if (existingComponent && !deepEqual(componentToAdd, existingComponent)) {
         const existingSchemaLocation = componentNameSourceLocationMap.get(name);
 
-        if (deepEqual(componentToAdd, existingComponent)) {
-          logger.warning(
-            `Found a duplicate component ${chalk.yellow(
-              `${sourcePointer}/${name}`
-            )} defined in ${chalk.blue(resolvedDocument.absolutePath)} and in ${chalk.magenta(
-              existingSchemaLocation
-            )}.`
-          );
-        } else {
-          throw new Error(
-            `❌  Unable to merge documents due to conflicts in referenced ${mergedEntityName}. Component ${chalk.yellow(
-              `${sourcePointer}/${name}`
-            )} is defined in ${chalk.blue(resolvedDocument.absolutePath)} and in ${chalk.magenta(
-              existingSchemaLocation
-            )} but has not matching definitions.`
-          );
-        }
+        throw new Error(
+          `❌  Unable to merge documents due to conflicts in referenced ${mergedEntityName}. Component ${chalk.yellow(
+            `${sourcePointer}/${name}`
+          )} is defined in ${chalk.blue(resolvedDocument.absolutePath)} and in ${chalk.magenta(
+            existingSchemaLocation
+          )} but definitions DO NOT match.`
+        );
       }
 
       merged[name] = componentToAdd;
@@ -98,9 +99,9 @@ function extractObjectToMerge(
   sourcePointer: string
 ): Record<string, unknown> | undefined {
   try {
-    return extractByJsonPointer(resolvedDocument.document, sourcePointer);
+    return extractObjectByJsonPointer(resolvedDocument.document, sourcePointer);
   } catch (e) {
-    logger.debug(
+    logger.verbose(
       `JSON pointer "${sourcePointer}" is not resolvable in ${resolvedDocument.absolutePath}`
     );
     return;

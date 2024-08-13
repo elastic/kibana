@@ -7,7 +7,7 @@
  */
 
 import type { EMSClient } from '@elastic/ems-client';
-import { BuildFlavor } from '@kbn/config/src/types';
+import type { BuildFlavor } from '@kbn/config';
 import type { EMSSettings } from '../../common';
 
 let lazyLoaded: (emsSettings: EMSSettings, version: string, buildFlavor: BuildFlavor) => EMSClient;

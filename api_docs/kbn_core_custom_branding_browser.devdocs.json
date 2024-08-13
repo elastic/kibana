@@ -3,26 +3,10 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-custom-branding-browser",
-        "id": "def-common.CustomBrandingSetup",
+        "id": "def-public.CustomBrandingSetup",
         "type": "Interface",
         "tags": [],
         "label": "CustomBrandingSetup",
@@ -33,7 +17,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-custom-branding-browser",
-            "id": "def-common.CustomBrandingSetup.customBranding$",
+            "id": "def-public.CustomBrandingSetup.customBranding$",
             "type": "Object",
             "tags": [],
             "label": "customBranding$",
@@ -56,7 +40,7 @@
           },
           {
             "parentPluginId": "@kbn/core-custom-branding-browser",
-            "id": "def-common.CustomBrandingSetup.hasCustomBranding$",
+            "id": "def-public.CustomBrandingSetup.hasCustomBranding$",
             "type": "Object",
             "tags": [],
             "label": "hasCustomBranding$",
@@ -74,7 +58,7 @@
       },
       {
         "parentPluginId": "@kbn/core-custom-branding-browser",
-        "id": "def-common.CustomBrandingSetupDeps",
+        "id": "def-public.CustomBrandingSetupDeps",
         "type": "Interface",
         "tags": [],
         "label": "CustomBrandingSetupDeps",
@@ -85,7 +69,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-custom-branding-browser",
-            "id": "def-common.CustomBrandingSetupDeps.injectedMetadata",
+            "id": "def-public.CustomBrandingSetupDeps.injectedMetadata",
             "type": "Object",
             "tags": [],
             "label": "injectedMetadata",
@@ -102,7 +86,7 @@
       },
       {
         "parentPluginId": "@kbn/core-custom-branding-browser",
-        "id": "def-common.CustomBrandingStart",
+        "id": "def-public.CustomBrandingStart",
         "type": "Interface",
         "tags": [],
         "label": "CustomBrandingStart",
@@ -113,7 +97,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-custom-branding-browser",
-            "id": "def-common.CustomBrandingStart.customBranding$",
+            "id": "def-public.CustomBrandingStart.customBranding$",
             "type": "Object",
             "tags": [],
             "label": "customBranding$",
@@ -136,7 +120,7 @@
           },
           {
             "parentPluginId": "@kbn/core-custom-branding-browser",
-            "id": "def-common.CustomBrandingStart.hasCustomBranding$",
+            "id": "def-public.CustomBrandingStart.hasCustomBranding$",
             "type": "Object",
             "tags": [],
             "label": "hasCustomBranding$",
@@ -153,6 +137,22 @@
         "initialIsOpen": false
       }
     ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

@@ -9,16 +9,13 @@ import { omit, union } from 'lodash/fp';
 
 import { isEmpty } from 'lodash';
 import type { EuiDataGridColumn } from '@elastic/eui';
-import type { ExpandedDetail, ExpandedDetailType } from '../../common/types/detail_panel';
 import type { ColumnHeaderOptions, SessionViewConfig, SortColumnTable } from '../../common/types';
-import type { TableToggleDetailPanel } from './actions';
 import type { DataTablePersistInput, TableById } from './types';
 import type { DataTableModelSettings } from './model';
 
 import { getDataTableManageDefaults, tableDefaults } from './defaults';
 import { DEFAULT_TABLE_COLUMN_MIN_WIDTH } from '../../components/data_table/constants';
 
-export const isNotNull = <T>(value: T | null): value is T => value !== null;
 export type Maybe<T> = T | null;
 
 /** The minimum width of a resized column */
@@ -435,22 +432,6 @@ export const setSelectedTableEvents = ({
       selectedEventIds,
       isSelectAllChecked,
     },
-  };
-};
-
-export const updateTableDetailsPanel = (action: TableToggleDetailPanel): ExpandedDetail => {
-  const { tabType, id, ...expandedDetails } = action;
-
-  const panelViewOptions = new Set(['eventDetail', 'hostDetail', 'networkDetail', 'userDetail']);
-  const expandedTabType = tabType ?? 'query';
-  const newExpandDetails = {
-    params: expandedDetails.params ? { ...expandedDetails.params } : {},
-    panelView: expandedDetails.panelView,
-  } as ExpandedDetailType;
-  return {
-    [expandedTabType]: panelViewOptions.has(expandedDetails.panelView ?? '')
-      ? newExpandDetails
-      : {},
   };
 };
 

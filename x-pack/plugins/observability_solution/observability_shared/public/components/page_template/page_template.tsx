@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSideNavItemType, EuiPageSectionProps } from '@elastic/eui';
+import { EuiSideNavItemType, EuiPageSectionProps, EuiEmptyPromptProps } from '@elastic/eui';
 import { _EuiPageBottomBarProps } from '@elastic/eui/src/components/page_template/bottom_bar/page_bottom_bar';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -39,7 +39,7 @@ export type WrappedPageTemplateProps = Pick<
   bottomBar?: React.ReactNode;
   bottomBarProps?: _EuiPageBottomBarProps;
   topSearchBar?: React.ReactNode;
-};
+} & Pick<EuiEmptyPromptProps, 'paddingSize'>;
 
 export interface NavigationEntry {
   // the label of the menu entry, should be translated

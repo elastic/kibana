@@ -5,7 +5,13 @@
  * 2.0.
  */
 
+export const ENTITY = 'entity';
 export const LAST_SEEN = 'entity.lastSeenTimestamp';
 export const FIRST_SEEN = 'entity.firstSeenTimestamp';
-
-export const ENTITY = 'entity';
+export const ENTITY_ID = 'entity.id';
+export const ENTITY_METRICS_LATENCY = 'entity.metrics.latency';
+export const ENTITY_METRICS_LOG_ERROR_RATE = 'entity.metrics.logErrorRate';
+export const ENTITY_METRICS_LOG_RATE = 'entity.metrics.logRate';
+export const ENTITY_METRICS_THROUGHPUT = 'entity.metrics.throughput';
+export const ENTITY_METRICS_FAILED_TRANSACTION_RATE = 'entity.metrics.failedTransactionRate';
+export const ENTITY_TYPE = 'entity.type';

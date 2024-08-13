@@ -105,7 +105,7 @@ export class ModelsProvider {
 
   private getNodeId(
     elementOriginalId: string,
-    nodeType: typeof JOB_MAP_NODE_TYPES[keyof typeof JOB_MAP_NODE_TYPES]
+    nodeType: (typeof JOB_MAP_NODE_TYPES)[keyof typeof JOB_MAP_NODE_TYPES]
   ): string {
     return `${elementOriginalId}-${nodeType}`;
   }
@@ -476,6 +476,7 @@ export class ModelsProvider {
       const modelDefinitionResponse = {
         ...def,
         ...(recommended ? { recommended } : {}),
+        supported: !!def.default || recommended,
         model_id: modelId,
       };
 

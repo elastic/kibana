@@ -11,8 +11,8 @@ import type {
   FindCspBenchmarkRuleResponse,
 } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 
+import { createPackagePolicy } from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/helper';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { createPackagePolicy } from '../../../../../test/api_integration/apis/cloud_security_posture/helper'; // eslint-disable-line @kbn/imports/no_boundary_crossing
 import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {

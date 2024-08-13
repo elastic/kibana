@@ -14,7 +14,7 @@ import {
   EndpointIsolateSuccess,
   HostIsolationPanel,
 } from '../../../common/components/endpoint/host_isolation';
-import { useHostIsolationTools } from '../../../timelines/components/side_panel/event_details/use_host_isolation_tools';
+import { useHostIsolation } from '../shared/hooks/use_host_isolation';
 import { useIsolateHostPanelContext } from './context';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 
@@ -26,8 +26,7 @@ export const PanelContent: FC = () => {
   const { dataFormattedForFieldBrowser, eventId, scopeId, indexName, isolateAction } =
     useIsolateHostPanelContext();
 
-  const { isIsolateActionSuccessBannerVisible, handleIsolationActionSuccess } =
-    useHostIsolationTools();
+  const { isIsolateActionSuccessBannerVisible, handleIsolationActionSuccess } = useHostIsolation();
 
   const { alertId, hostName } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 

@@ -79,7 +79,7 @@ export class AIAssistantService {
 
   constructor(private readonly options: AIAssistantServiceOpts) {
     this.initialized = false;
-    this.getElserId = createGetElserId(options.ml);
+    this.getElserId = createGetElserId(options.ml.trainedModelsProvider);
     this.conversationsDataStream = this.createDataStream({
       resource: 'conversations',
       kibanaVersion: options.kibanaVersion,

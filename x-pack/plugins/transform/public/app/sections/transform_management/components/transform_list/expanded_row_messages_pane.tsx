@@ -81,7 +81,7 @@ export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ tran
         ''
       ),
       render: (message: TransformMessage) => (
-        <div css={{ marginLeft: `-${euiTheme.base * 1.75}px` }}>
+        <div css={{ margin: 'auto' }}>
           <JobIcon message={message} />
         </div>
       ),

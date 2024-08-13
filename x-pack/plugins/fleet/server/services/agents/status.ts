@@ -19,9 +19,11 @@ import { agentStatusesToSummary } from '../../../common/services';
 
 import { AGENTS_INDEX } from '../../constants';
 import type { AgentStatus } from '../../types';
-import { FleetUnauthorizedError } from '../../errors';
+import { FleetError, FleetUnauthorizedError } from '../../errors';
 
 import { appContextService } from '../app_context';
+
+import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
 
 import { getAgentById, removeSOAttributes } from './crud';
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
@@ -104,28 +106,34 @@ export async function getAgentStatusForAgentPolicy(
   let response;
 
   try {
-    response = await esClient.search<
-      null,
-      { status: AggregationsTermsAggregateBase<AggregationsStatusTermsBucketKeys> }
-    >({
-      index: AGENTS_INDEX,
-      size: 0,
-      query,
-      fields: Object.keys(runtimeFields),
-      runtime_mappings: runtimeFields,
-      aggregations: {
-        status: {
-          terms: {
-            field: 'status',
-            size: Object.keys(statuses).length,
+    response = await retryTransientEsErrors(
+      () =>
+        esClient.search<
+          null,
+          { status: AggregationsTermsAggregateBase<AggregationsStatusTermsBucketKeys> }
+        >({
+          index: AGENTS_INDEX,
+          size: 0,
+          query,
+          fields: Object.keys(runtimeFields),
+          runtime_mappings: runtimeFields,
+          aggregations: {
+            status: {
+              terms: {
+                field: 'status',
+                size: Object.keys(statuses).length,
+              },
+            },
           },
-        },
-      },
-      ignore_unavailable: true,
-    });
+          ignore_unavailable: true,
+        }),
+      { logger }
+    );
   } catch (error) {
     logger.debug(`Error getting agent statuses: ${error}`);
-    throw error;
+    throw new FleetError(
+      `Unable to retrive agent statuses for policy ${agentPolicyId} due to error: ${error.message}`
+    );
   }
 
   const buckets = (response?.aggregations?.status?.buckets ||
@@ -153,11 +161,14 @@ export async function getAgentStatusForAgentPolicy(
     total: allActive,
   };
 }
+
 export async function getIncomingDataByAgentsId(
   esClient: ElasticsearchClient,
   agentsIds: string[],
   returnDataPreview: boolean = false
 ) {
+  const logger = appContextService.getLogger();
+
   try {
     const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
       body: {
@@ -169,46 +180,51 @@ export async function getIncomingDataByAgentsId(
         ],
       },
     });
+
     if (!hasAllPrivileges) {
       throw new FleetUnauthorizedError('Missing permissions to read data streams indices');
     }
 
-    const searchResult = await esClient.search({
-      index: DATA_STREAM_INDEX_PATTERN,
-      allow_partial_search_results: true,
-      _source: returnDataPreview,
-      timeout: '5s',
-      size: returnDataPreview ? MAX_AGENT_DATA_PREVIEW_SIZE : 0,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  'agent.id': agentsIds,
-                },
-              },
-              {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-5m',
-                    lte: 'now',
+    const searchResult = await retryTransientEsErrors(
+      () =>
+        esClient.search({
+          index: DATA_STREAM_INDEX_PATTERN,
+          allow_partial_search_results: true,
+          _source: returnDataPreview,
+          timeout: '5s',
+          size: returnDataPreview ? MAX_AGENT_DATA_PREVIEW_SIZE : 0,
+          body: {
+            query: {
+              bool: {
+                filter: [
+                  {
+                    terms: {
+                      'agent.id': agentsIds,
+                    },
                   },
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: 'now-5m',
+                        lte: 'now',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            aggs: {
+              agent_ids: {
+                terms: {
+                  field: 'agent.id',
+                  size: agentsIds.length,
                 },
               },
-            ],
-          },
-        },
-        aggs: {
-          agent_ids: {
-            terms: {
-              field: 'agent.id',
-              size: agentsIds.length,
             },
           },
-        },
-      },
-    });
+        }),
+      { logger }
+    );
 
     if (!searchResult.aggregations?.agent_ids) {
       return {
@@ -231,7 +247,10 @@ export async function getIncomingDataByAgentsId(
     );
 
     return { items, dataPreview };
-  } catch (e) {
-    throw new Error(e);
+  } catch (error) {
+    logger.debug(`Error getting incoming data for agents: ${error}`);
+    throw new FleetError(
+      `Unable to retrive incoming data for agents due to error: ${error.message}`
+    );
   }
 }

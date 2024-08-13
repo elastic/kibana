@@ -139,7 +139,7 @@ export function usePackagePolicySteps({
 
   const { selectedSetupTechnology } = useSetupTechnology({
     newAgentPolicy,
-    updateNewAgentPolicy,
+    setNewAgentPolicy,
     updateAgentPolicies,
     setSelectedPolicyTab,
     packageInfo,

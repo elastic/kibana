@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import { type EuiBasicTableColumn, useEuiTheme } from '@elastic/eui';
 import { EuiSpacer, EuiInMemoryTable, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -41,6 +41,7 @@ export const JobMessages: FC<JobMessagesProps> = ({
   refreshMessage,
   actionHandler,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { showNodeInfo } = useEnabledFeatures();
   const columns: Array<EuiBasicTableColumn<JobMessage>> = useMemo(() => {
     const cols: Array<EuiBasicTableColumn<JobMessage>> = [
@@ -65,7 +66,7 @@ export const JobMessages: FC<JobMessagesProps> = ({
           ''
         ),
         render: (message: JobMessage) => <JobIcon message={message} />,
-        width: '6%',
+        width: `${euiTheme.size.l}`,
       },
       {
         field: 'timestamp',
@@ -130,7 +131,7 @@ export const JobMessages: FC<JobMessagesProps> = ({
     }
 
     return cols;
-  }, [showNodeInfo, refreshMessage, actionHandler]);
+  }, [showNodeInfo, refreshMessage, actionHandler, euiTheme]);
 
   const defaultSorting = {
     sort: {

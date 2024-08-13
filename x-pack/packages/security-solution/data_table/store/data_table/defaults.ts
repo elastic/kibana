@@ -64,7 +64,6 @@ export const tableDefaults: SubsetDataTableModel = {
   defaultColumns: defaultHeaders,
   dataViewId: null,
   deletedEventIds: [],
-  expandedDetail: {},
   filters: [],
   indexNames: [],
   isSelectAllChecked: false,

@@ -10,6 +10,9 @@ import { renderHook } from '@testing-library/react-hooks';
 import { QueryParams } from '../components/all_inference_endpoints/types';
 import { useTableData } from './use_table_data';
 import { INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES } from '../components/all_inference_endpoints/types';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
+import { TRAINED_MODEL_STATS_QUERY_KEY } from '../../common/constants';
 
 const inferenceEndpoints = [
   {
@@ -59,17 +62,23 @@ const filterOptions = {
   type: ['sparse_embedding', 'text_embedding'],
 } as any;
 
-const deploymentStatus = {
-  '.elser_model_2': 'deployed',
-  lang_ident_model_1: 'not_deployed',
-} as any;
-
 const searchKey = 'my';
 
 describe('useTableData', () => {
+  const queryClient = new QueryClient();
+  const wrapper = ({ children }: { children: React.ReactNode }) => {
+    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  };
+
+  beforeEach(() => {
+    queryClient.setQueryData([TRAINED_MODEL_STATS_QUERY_KEY], {
+      trained_model_stats: [{ model_id: '.elser_model_2', deployment_stats: { state: 'started' } }],
+    });
+  });
   it('should return correct pagination', () => {
-    const { result } = renderHook(() =>
-      useTableData(inferenceEndpoints, queryParams, filterOptions, searchKey, deploymentStatus)
+    const { result } = renderHook(
+      () => useTableData(inferenceEndpoints, queryParams, filterOptions, searchKey),
+      { wrapper }
     );
 
     expect(result.current.pagination).toEqual({
@@ -81,8 +90,9 @@ describe('useTableData', () => {
   });
 
   it('should return correct sorting', () => {
-    const { result } = renderHook(() =>
-      useTableData(inferenceEndpoints, queryParams, filterOptions, searchKey, deploymentStatus)
+    const { result } = renderHook(
+      () => useTableData(inferenceEndpoints, queryParams, filterOptions, searchKey),
+      { wrapper }
     );
 
     expect(result.current.sorting).toEqual({
@@ -94,8 +104,9 @@ describe('useTableData', () => {
   });
 
   it('should return correctly sorted data', () => {
-    const { result } = renderHook(() =>
-      useTableData(inferenceEndpoints, queryParams, filterOptions, searchKey, deploymentStatus)
+    const { result } = renderHook(
+      () => useTableData(inferenceEndpoints, queryParams, filterOptions, searchKey),
+      { wrapper }
     );
 
     const expectedSortedData = [...inferenceEndpoints].sort((a, b) =>
@@ -113,8 +124,9 @@ describe('useTableData', () => {
       provider: ['elser'],
       type: ['text_embedding'],
     } as any;
-    const { result } = renderHook(() =>
-      useTableData(inferenceEndpoints, queryParams, filterOptions2, searchKey, deploymentStatus)
+    const { result } = renderHook(
+      () => useTableData(inferenceEndpoints, queryParams, filterOptions2, searchKey),
+      { wrapper }
     );
 
     const filteredData = result.current.sortedTableData;
@@ -129,16 +141,18 @@ describe('useTableData', () => {
 
   it('should filter data based on searchKey', () => {
     const searchKey2 = 'model-05';
-    const { result } = renderHook(() =>
-      useTableData(inferenceEndpoints, queryParams, filterOptions, searchKey2, deploymentStatus)
+    const { result } = renderHook(
+      () => useTableData(inferenceEndpoints, queryParams, filterOptions, searchKey2),
+      { wrapper }
     );
     const filteredData = result.current.sortedTableData;
     expect(filteredData.every((item) => item.endpoint.model_id.includes(searchKey))).toBeTruthy();
   });
 
   it('should update deployment status based on deploymentStatus object', () => {
-    const { result } = renderHook(() =>
-      useTableData(inferenceEndpoints, queryParams, filterOptions, searchKey, deploymentStatus)
+    const { result } = renderHook(
+      () => useTableData(inferenceEndpoints, queryParams, filterOptions, searchKey),
+      { wrapper }
     );
 
     const updatedData = result.current.sortedTableData;

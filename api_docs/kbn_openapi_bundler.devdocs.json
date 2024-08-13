@@ -46,7 +46,7 @@
             "id": "def-common.bundle.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  sourceGlob,\n  outputFilePath = 'bundled-{version}.schema.yaml',\n  options,\n}",
+            "label": "{\n  sourceGlob,\n  outputFilePath = 'bundled_{version}.schema.yaml',\n  options,\n}",
             "description": [],
             "signature": [
               {
@@ -74,7 +74,7 @@
         "label": "merge",
         "description": [],
         "signature": [
-          "({ sourceGlobs, outputFilePath, mergedSpecInfo, }: ",
+          "({ sourceGlobs, outputFilePath, options, }: ",
           {
             "pluginId": "@kbn/openapi-bundler",
             "scope": "common",
@@ -93,7 +93,7 @@
             "id": "def-common.merge.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  sourceGlobs,\n  outputFilePath = 'merged.schema.yaml',\n  mergedSpecInfo,\n}",
+            "label": "{\n  sourceGlobs,\n  outputFilePath = 'merged.schema.yaml',\n  options,\n}",
             "description": [],
             "signature": [
               {
@@ -203,15 +203,13 @@
           },
           {
             "parentPluginId": "@kbn/openapi-bundler",
-            "id": "def-common.MergerConfig.mergedSpecInfo",
+            "id": "def-common.MergerConfig.options",
             "type": "Object",
             "tags": [],
-            "label": "mergedSpecInfo",
+            "label": "options",
             "description": [],
             "signature": [
-              "Partial<",
-              "OpenAPIV3",
-              ".InfoObject> | undefined"
+              "MergerOptions | undefined"
             ],
             "path": "packages/kbn-openapi-bundler/src/openapi_merger.ts",
             "deprecated": false,

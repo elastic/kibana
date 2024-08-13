@@ -23,7 +23,7 @@ jest.mock('../ai_assistant_data_clients/conversations', () => ({
   AIAssistantConversationsDataClient: jest.fn(),
 }));
 
-let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
+let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
 const SimulateTemplateResponse = {

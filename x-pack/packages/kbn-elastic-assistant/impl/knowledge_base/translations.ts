@@ -87,6 +87,13 @@ export const SETUP_KNOWLEDGE_BASE_BUTTON = i18n.translate(
   }
 );
 
+export const SETUP_KNOWLEDGE_BASE_BUTTON_TOOLTIP = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.setupKnowledgeBaseButtonToolTip',
+  {
+    defaultMessage: 'Knowledge Base unavailable, please see documentation for more details.',
+  }
+);
+
 export const KNOWLEDGE_BASE_TOOLTIP = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.knowledgeBaseTooltip',
   {

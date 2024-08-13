@@ -11,6 +11,7 @@ import { DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 import { buildAlertDetailPath } from '../../../../../common/utils/alert_detail_path';
 import { useAppUrl } from '../../../../common/lib/kibana/hooks';
 
+// TODO: MOVE TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
 export const useGetAlertDetailsFlyoutLink = ({
   _id,
   _index,

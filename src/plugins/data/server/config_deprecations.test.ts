@@ -61,6 +61,7 @@ describe('Config Deprecations', () => {
     expect(messages).toMatchInlineSnapshot(`
       Array [
         "Setting \\"xpack.data_enhanced.search.sessions\\" has been replaced by \\"data.search.sessions\\"",
+        "Configuring \\"data.search.sessions.enabled\\" is deprecated and will be removed in 9.0.0.",
       ]
     `);
   });
@@ -101,6 +102,7 @@ describe('Config Deprecations', () => {
         "You no longer need to configure \\"data.search.sessions.expireInterval\\".",
         "You no longer need to configure \\"data.search.sessions.monitoringTaskTimeout\\".",
         "You no longer need to configure \\"data.search.sessions.notTouchedInProgressTimeout\\".",
+        "Configuring \\"data.search.sessions.enabled\\" is deprecated and will be removed in 9.0.0.",
       ]
     `);
   });
@@ -144,6 +146,7 @@ describe('Config Deprecations', () => {
         "You no longer need to configure \\"data.search.sessions.expireInterval\\".",
         "You no longer need to configure \\"data.search.sessions.monitoringTaskTimeout\\".",
         "You no longer need to configure \\"data.search.sessions.notTouchedInProgressTimeout\\".",
+        "Configuring \\"data.search.sessions.enabled\\" is deprecated and will be removed in 9.0.0.",
       ]
     `);
   });

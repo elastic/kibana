@@ -31,7 +31,7 @@ export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
           page: req.query.page ?? 1,
           perPage: req.query.perPage ?? 10,
         });
-        return res.ok({ body: definitions });
+        return res.ok({ body: { definitions } });
       } catch (e) {
         return res.customError({ body: e, statusCode: 500 });
       }

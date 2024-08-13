@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-import { ErrorRaw } from '../raw/error_raw';
-import { Agent } from './fields/agent';
-
-export interface APMError extends ErrorRaw {
-  agent: Agent;
-}
+export type { APMError } from '@kbn/apm-types/es_schemas_ui';

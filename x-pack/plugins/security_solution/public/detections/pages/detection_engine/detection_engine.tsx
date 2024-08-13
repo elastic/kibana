@@ -70,7 +70,7 @@ import {
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../components/alerts_table/default_config';
-import { ChartPanels } from './chart_panels';
+import { ChartPanels } from '../../components/alerts_kpis/chart_panels';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useSignalHelpers } from '../../../sourcerer/containers/use_signal_helpers';
 

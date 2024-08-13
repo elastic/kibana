@@ -49,6 +49,7 @@ export const FlashMessagesLogic = kea<
     historyListener: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setHistoryListener: (_, { historyListener }) => historyListener,
       },
     ],
@@ -56,6 +57,7 @@ export const FlashMessagesLogic = kea<
       [],
       {
         clearFlashMessages: () => [],
+        // @ts-expect-error upgrade typescript v5.1.6
         setFlashMessages: (_, { messages }) => messages,
       },
     ],
@@ -64,6 +66,7 @@ export const FlashMessagesLogic = kea<
       [],
       {
         clearQueuedMessages: () => [],
+        // @ts-expect-error upgrade typescript v5.1.6
         setQueuedMessages: (_, { messages }) => messages,
       },
     ],

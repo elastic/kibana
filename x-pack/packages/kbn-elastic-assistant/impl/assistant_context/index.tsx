@@ -66,7 +66,6 @@ export interface AssistantProviderProps {
   getComments: (commentArgs: {
     abortStream: () => void;
     currentConversation?: Conversation;
-    isEnabledLangChain: boolean;
     isFetchingResponse: boolean;
     refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
     regenerateMessage: (conversationId: string) => void;
@@ -106,7 +105,6 @@ export interface UseAssistantContext {
   getComments: (commentArgs: {
     abortStream: () => void;
     currentConversation?: Conversation;
-    isEnabledLangChain: boolean;
     isFetchingResponse: boolean;
     refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
     regenerateMessage: () => void;

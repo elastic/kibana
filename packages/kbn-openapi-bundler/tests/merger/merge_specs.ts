@@ -27,7 +27,7 @@ jest.mock('../../src/logger');
 
 export async function mergeSpecs(
   oasSpecs: Record<string, OpenAPIV3.Document>,
-  mergedSpecInfo?: MergerConfig['mergedSpecInfo']
+  options?: MergerConfig['options']
 ): Promise<Record<string, OpenAPIV3.Document>> {
   const randomStr = (Math.random() + 1).toString(36).substring(7);
   const folderToMergePath = join(ROOT_PATH, 'target', 'oas-test', randomStr);
@@ -36,7 +36,7 @@ export async function mergeSpecs(
 
   dumpSpecs(folderToMergePath, oasSpecs);
 
-  await mergeFolder(folderToMergePath, mergedFilePathTemplate, mergedSpecInfo);
+  await mergeFolder(folderToMergePath, mergedFilePathTemplate, options);
 
   return readMergedSpecs(resultFolderPath);
 }
@@ -75,11 +75,11 @@ export function readMergedSpecs(folderPath: string): Record<string, OpenAPIV3.Do
 export async function mergeFolder(
   folderToMergePath: string,
   mergedFilePathTemplate: string,
-  mergedSpecInfo?: MergerConfig['mergedSpecInfo']
+  options?: MergerConfig['options']
 ): Promise<void> {
   await merge({
     sourceGlobs: [join(folderToMergePath, '*.schema.yaml')],
     outputFilePath: mergedFilePathTemplate,
-    mergedSpecInfo,
+    options,
   });
 }

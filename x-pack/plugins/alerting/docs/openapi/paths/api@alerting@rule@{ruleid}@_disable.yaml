@@ -1,0 +1,28 @@
+post:
+  summary: Disable a rule
+  operationId: disableRule
+  description: >
+    You must have `all` privileges for the appropriate Kibana features,
+    depending on the `consumer` and `rule_type_id` of the rule. For example, the
+    **Management > Stack Rules** feature, **Analytics > Discover** and
+    **Machine Learning** features, **Observability**, and **Security** features.
+  tags:
+    - alerting
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+    - $ref: '../components/parameters/rule_id.yaml'
+  responses:
+    '204':
+      description: Indicates a successful call.
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '404':
+      description: Object is not found.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'

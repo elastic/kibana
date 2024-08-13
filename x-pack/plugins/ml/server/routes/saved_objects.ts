@@ -84,8 +84,11 @@ export function savedObjectsRoutes(
           'access:ml:canCreateJob',
           'access:ml:canCreateDataFrameAnalytics',
           'access:ml:canCreateTrainedModels',
+          'oas-tag:machine learning',
         ],
       },
+      description:
+        'Synchronizes Kibana saved objects for machine learning jobs and trained models. This API runs automatically when you start Kibana and periodically thereafter.',
     })
     .addVersion(
       {

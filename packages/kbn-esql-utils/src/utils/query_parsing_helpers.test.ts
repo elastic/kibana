@@ -150,12 +150,12 @@ describe('esql query helpers', () => {
     });
 
     it('should return the time field if there is at least one time param', () => {
-      expect(getTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?earliest')).toBe(
+      expect(getTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?t_start')).toBe(
         'time'
       );
     });
 
-    it('should return undefined if there is one named param but is not ?earliest or ?latest', () => {
+    it('should return undefined if there is one named param but is not ?t_start or ?t_end', () => {
       expect(
         getTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?late')
       ).toBeUndefined();
@@ -163,14 +163,14 @@ describe('esql query helpers', () => {
 
     it('should return undefined if there is one named param but is used without a time field', () => {
       expect(
-        getTimeFieldFromESQLQuery('from a | eval b = DATE_TRUNC(1 day, ?earliest)')
+        getTimeFieldFromESQLQuery('from a | eval b = DATE_TRUNC(1 day, ?t_start)')
       ).toBeUndefined();
     });
 
     it('should return the time field if there is at least one time param in the bucket function', () => {
       expect(
         getTimeFieldFromESQLQuery(
-          'from a | stats meow = avg(bytes) by bucket(event.timefield, 200, ?earliest, ?latest)'
+          'from a | stats meow = avg(bytes) by bucket(event.timefield, 200, ?t_start, ?t_end)'
         )
       ).toBe('event.timefield');
     });

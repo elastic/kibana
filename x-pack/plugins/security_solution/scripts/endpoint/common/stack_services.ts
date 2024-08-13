@@ -9,7 +9,6 @@ import { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
-import type { StatusResponse } from '@kbn/core-status-common-internal';
 import pRetry from 'p-retry';
 import type { ReqOptions } from '@kbn/test/src/kbn_client/kbn_client_requester';
 import { type AxiosResponse } from 'axios';
@@ -17,8 +16,11 @@ import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { omit } from 'lodash';
+import {
+  fetchKibanaStatus,
+  isServerlessKibanaFlavor,
+} from '../../../common/endpoint/utils/kibana_status';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
-import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 import { isLocalhost } from './is_localhost';
 import { getLocalhostRealIp } from './network_services';
 import { createSecuritySuperuser } from './security_user_services';
@@ -313,10 +315,6 @@ export const fetchStackVersion = async (kbnClient: KbnClient): Promise<string> =
   return status.version.number;
 };
 
-export const fetchKibanaStatus = async (kbnClient: KbnClient): Promise<StatusResponse> => {
-  return (await kbnClient.status.get().catch(catchAxiosErrorFormatAndThrow)) as StatusResponse;
-};
-
 /**
  * Checks to ensure Kibana is up and running
  * @param kbnClient
@@ -334,27 +332,4 @@ export const waitForKibana = async (kbnClient: KbnClient): Promise<void> => {
     },
     { maxTimeout: 10000 }
   );
-};
-
-/**
- * Checks to see if Kibana/ES is running in serverless mode
- * @param client
- */
-export const isServerlessKibanaFlavor = async (client: KbnClient | Client): Promise<boolean> => {
-  if (client instanceof KbnClient) {
-    const kbnStatus = await fetchKibanaStatus(client);
-
-    // If we don't have status for plugins, then error
-    // the Status API will always return something (its an open API), but if auth was successful,
-    // it will also return more data.
-    if (!kbnStatus?.status?.plugins) {
-      throw new Error(
-        `Unable to retrieve Kibana plugins status (likely an auth issue with the username being used for kibana)`
-      );
-    }
-
-    return kbnStatus.status.plugins?.serverless?.level === 'available';
-  } else {
-    return (await client.info()).version.build_flavor === 'serverless';
-  }
 };

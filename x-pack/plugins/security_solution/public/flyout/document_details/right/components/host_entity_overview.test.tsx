@@ -87,7 +87,7 @@ const renderHostEntityContent = () =>
 describe('<HostEntityContent />', () => {
   beforeAll(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
   });
 
   describe('license is valid', () => {
@@ -184,7 +184,7 @@ describe('<HostEntityContent />', () => {
     it('should open host preview when clicking on title when feature flag is on', () => {
       mockUseHostDetails.mockReturnValue([false, { hostDetails: hostData }]);
       mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
 
       const { getByTestId } = renderHostEntityContent();
 

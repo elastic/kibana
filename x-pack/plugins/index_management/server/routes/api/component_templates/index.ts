@@ -12,13 +12,17 @@ import { registerCreateRoute } from './register_create_route';
 import { registerUpdateRoute } from './register_update_route';
 import { registerDeleteRoute } from './register_delete_route';
 import { registerPrivilegesRoute } from './register_privileges_route';
-import { registerGetDatastreams } from './register_datastream_route';
+import {
+  registerGetDatastreams,
+  registerReferencedIndexTemplateMeta,
+} from './register_datastream_route';
 
 export function registerComponentTemplateRoutes(dependencies: RouteDependencies) {
   registerGetAllRoute(dependencies);
   registerCreateRoute(dependencies);
   registerUpdateRoute(dependencies);
   registerGetDatastreams(dependencies);
+  registerReferencedIndexTemplateMeta(dependencies);
   registerDeleteRoute(dependencies);
   registerPrivilegesRoute(dependencies);
 }

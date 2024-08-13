@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "shared-server",
   "id": "@kbn/core-saved-objects-import-export-server-internal",
   "owner": "@elastic/kibana-core"
 }

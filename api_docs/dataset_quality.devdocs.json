@@ -265,19 +265,25 @@
           "DatasetQualityRouteCreateOptions",
           "; }[TEndpoint] extends { endpoint: any; params?: infer TRouteParamsRT extends ",
           {
-            "pluginId": "@kbn/server-route-repository",
+            "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
             "section": "def-common.RouteParamsRT",
             "text": "RouteParamsRT"
           },
           " | undefined | undefined; handler: ({}: any) => Promise<any>; } & ",
-          "ServerRouteCreateOptions",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRouteCreateOptions",
+            "text": "ServerRouteCreateOptions"
+          },
           " ? TRouteParamsRT extends ",
           {
-            "pluginId": "@kbn/server-route-repository",
+            "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
             "section": "def-common.RouteParamsRT",
             "text": "RouteParamsRT"
           },
@@ -419,13 +425,19 @@
           " & { params: { query: { type?: \"metrics\" | \"synthetics\" | \"traces\" | \"logs\" | \"profiling\" | undefined; } & { datasetQuery?: string | undefined; }; }; }) => Promise<{ datasetUserPrivileges: { canMonitor: boolean; } & { canRead: boolean; canViewIntegrations: boolean; }; dataStreamsStats: ({ name: string; userPrivileges: { canMonitor: boolean; }; } & { size?: string | undefined; sizeBytes?: number | undefined; lastActivity?: number | undefined; integration?: string | undefined; totalDocs?: number | null | undefined; })[]; }>; } & ",
           "DatasetQualityRouteCreateOptions",
           "; }[TEndpoint] extends { endpoint: any; params?: any; handler: ({}: any) => Promise<infer TReturnType>; } & ",
-          "ServerRouteCreateOptions",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRouteCreateOptions",
+            "text": "ServerRouteCreateOptions"
+          },
           " ? TReturnType extends ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IKibanaResponse",
+            "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
           "<infer TWrappedResponseType extends string | Record<string, any> | Error | Buffer | ",
@@ -433,9 +445,9 @@
           " | { message: string | Error; attributes?: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.ResponseErrorAttributes",
+            "section": "def-server.ResponseErrorAttributes",
             "text": "ResponseErrorAttributes"
           },
           " | undefined; } | undefined> ? TWrappedResponseType : TReturnType : never"
@@ -456,9 +468,9 @@
           "Omit<",
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpFetchOptions",
+            "section": "def-public.HttpFetchOptions",
             "text": "HttpFetchOptions"
           },
           ", \"body\"> & { pathname: string; method?: string | undefined; body?: any; }"

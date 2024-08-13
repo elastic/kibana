@@ -62,7 +62,7 @@ export async function openEditorFlyout({
       ? parentDashboard.savedObjectId.value
       : undefined;
 
-  return new Promise((resolve, reject) => {
+  return new Promise<LinksRuntimeState | undefined>((resolve) => {
     const flyoutId = `linksEditorFlyout-${uuidv4()}`;
 
     const closeEditorFlyout = (editorFlyout: OverlayRef) => {
@@ -96,11 +96,13 @@ export async function openEditorFlyout({
           options: { references },
         });
         resolve(newState);
+        closeEditorFlyout(editorFlyout);
       } else {
         const saveResult = await runSaveToLibrary(newState);
         resolve(saveResult);
+        // If saveResult is undefined, the user cancelled the save as modal and we should not close the flyout
+        if (saveResult) closeEditorFlyout(editorFlyout);
       }
-      closeEditorFlyout(editorFlyout);
     };
 
     const onAddToDashboard = (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => {
@@ -114,7 +116,7 @@ export async function openEditorFlyout({
     };
 
     const onCancel = () => {
-      reject();
+      resolve(undefined);
       closeEditorFlyout(editorFlyout);
     };
 

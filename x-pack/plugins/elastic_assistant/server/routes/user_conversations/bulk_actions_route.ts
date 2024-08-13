@@ -11,9 +11,9 @@ import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/s
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
-  BulkActionSkipResult,
-  BulkCrudActionResponse,
-  BulkCrudActionResults,
+  ConversationsBulkActionSkipResult,
+  ConversationsBulkCrudActionResponse,
+  ConversationsBulkCrudActionResults,
   BulkCrudActionSummary,
   PerformBulkActionRequestBody,
   PerformBulkActionResponse,
@@ -61,9 +61,9 @@ const buildBulkResponse = (
     updated?: ConversationResponse[];
     created?: ConversationResponse[];
     deleted?: string[];
-    skipped?: BulkActionSkipResult[];
+    skipped?: ConversationsBulkActionSkipResult[];
   }
-): IKibanaResponse<BulkCrudActionResponse> => {
+): IKibanaResponse<ConversationsBulkCrudActionResponse> => {
   const numSucceeded = updated.length + created.length + deleted.length;
   const numSkipped = skipped.length;
   const numFailed = errors.length;
@@ -75,7 +75,7 @@ const buildBulkResponse = (
     total: numSucceeded + numFailed + numSkipped,
   };
 
-  const results: BulkCrudActionResults = {
+  const results: ConversationsBulkCrudActionResults = {
     updated,
     created,
     deleted,
@@ -83,7 +83,7 @@ const buildBulkResponse = (
   };
 
   if (numFailed > 0) {
-    return response.custom<BulkCrudActionResponse>({
+    return response.custom<ConversationsBulkCrudActionResponse>({
       headers: { 'content-type': 'application/json' },
       body: {
         message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
@@ -101,7 +101,7 @@ const buildBulkResponse = (
     });
   }
 
-  const responseBody: BulkCrudActionResponse = {
+  const responseBody: ConversationsBulkCrudActionResponse = {
     success: true,
     conversations_count: summary.total,
     attributes: { results, summary },
@@ -182,7 +182,8 @@ export const bulkActionConversationsRoute = (
               perPage: 100,
               page: 1,
               filter: `users:{ ${userFilter} } AND (${body.create
-                .map((c) => `title:${c.title}`)
+                // without stringify, special characters in the title can break this filter
+                .map((c) => `title:${JSON.stringify(c.title)}`)
                 .join(' OR ')})`,
               fields: ['title'],
             });

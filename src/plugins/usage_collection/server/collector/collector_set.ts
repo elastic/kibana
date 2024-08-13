@@ -16,8 +16,8 @@ import type {
   ExecutionContextSetup,
 } from '@kbn/core/server';
 import { Collector } from './collector';
-import type { ICollector, CollectorOptions, CollectorFetchContext } from './types';
-import { UsageCollector, UsageCollectorOptions } from './usage_collector';
+import type { ICollector, CollectorOptions, CollectorFetchContext, ICollectorSet } from './types';
+import { UsageCollector, type UsageCollectorOptions } from './usage_collector';
 import { DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S } from '../../common/constants';
 import { createPerformanceObsHook, perfTimerify } from './measure_duration';
 import { usageCollectorsStatsCollector } from './collector_stats';
@@ -44,7 +44,7 @@ export interface CollectorSetConfig {
   collectors?: AnyCollector[];
 }
 
-export class CollectorSet {
+export class CollectorSet implements ICollectorSet {
   private readonly logger: Logger;
   private readonly executionContext: ExecutionContextSetup;
   private readonly maximumWaitTimeForAllCollectorsInS: number;

@@ -31,6 +31,7 @@ const setupTestParams = (dataView: DataView | undefined) => {
   discoverState.appState.update = jest.fn();
   discoverState.internalState.transitions = {
     setIsDataViewLoading: jest.fn(),
+    setResetDefaultProfileState: jest.fn(),
   } as unknown as Readonly<PureTransitionsToTransitions<InternalStateTransitions>>;
   return {
     services,
@@ -70,5 +71,15 @@ describe('changeDataView', () => {
     expect(params.appState.update).not.toHaveBeenCalled();
     expect(params.internalState.transitions.setIsDataViewLoading).toHaveBeenNthCalledWith(1, true);
     expect(params.internalState.transitions.setIsDataViewLoading).toHaveBeenNthCalledWith(2, false);
+  });
+
+  it('should call setResetDefaultProfileState correctly when switching data view', async () => {
+    const params = setupTestParams(dataViewComplexMock);
+    expect(params.internalState.transitions.setResetDefaultProfileState).not.toHaveBeenCalled();
+    await changeDataView(dataViewComplexMock.id!, params);
+    expect(params.internalState.transitions.setResetDefaultProfileState).toHaveBeenCalledWith({
+      columns: true,
+      rowHeight: true,
+    });
   });
 });

@@ -40,6 +40,18 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return div.getAttribute('title');
     },
 
+    async getAssetDetailsKPIMissingFieldMessageExists(type: string) {
+      const element = await testSubjects.find(`infraAssetDetailsKPI${type}`);
+      const badge = await element.findByTestSubject('lens-message-list-trigger');
+
+      await badge.click();
+
+      await testSubjects.existOrFail('lens-message-list-warning');
+      await testSubjects.existOrFail('infraLensCustomErrorHanlderText');
+
+      await badge.click();
+    },
+
     async overviewAlertsTitleExists() {
       return testSubjects.existOrFail('infraAssetDetailsAlertsTitle');
     },

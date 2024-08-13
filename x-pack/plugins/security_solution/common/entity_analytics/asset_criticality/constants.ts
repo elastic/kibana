@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-export const ASSET_CRITICALITY_INTERNAL_URL = `/internal/asset_criticality` as const;
+const ASSET_CRITICALITY_INTERNAL_URL = `/internal/asset_criticality` as const;
 export const ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL =
   `${ASSET_CRITICALITY_INTERNAL_URL}/privileges` as const;
 export const ASSET_CRITICALITY_INTERNAL_STATUS_URL =
   `${ASSET_CRITICALITY_INTERNAL_URL}/status` as const;
-export const ASSET_CRITICALITY_INTERNAL_CSV_UPLOAD_URL =
-  `${ASSET_CRITICALITY_INTERNAL_URL}/upload_csv` as const;
 
 export const ASSET_CRITICALITY_PUBLIC_URL = `/api/asset_criticality` as const;
 export const ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL =

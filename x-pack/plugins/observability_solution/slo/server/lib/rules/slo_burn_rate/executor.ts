@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
+import { getEcsGroups } from '@kbn/observability-alerting-rule-utils';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -184,6 +185,7 @@ export const getRuleExecutor = ({
               [SLO_ID_FIELD]: slo.id,
               [SLO_REVISION_FIELD]: slo.revision,
               [SLO_INSTANCE_ID_FIELD]: instanceId,
+              ...getEcsGroups(groups),
             },
           });
 

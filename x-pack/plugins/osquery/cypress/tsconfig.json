@@ -19,9 +19,7 @@
     "resolveJsonModule": true,
   },
   "kbn_references": [
-    {
-      "path": "../../../test_serverless/tsconfig.json"
-    },
+    "@kbn/test-suites-serverless",
     {
       "path": "../../../test/security_solution_cypress/cypress/tsconfig.json"
     },
@@ -37,5 +35,6 @@
     "@kbn/fleet-plugin",
     "@kbn/cases-plugin",
     "@kbn/security-solution-plugin/public/management/cypress",
+    "@kbn/test-suites-xpack/security_solution_cypress/cypress",
   ]
 }

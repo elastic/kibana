@@ -10,6 +10,8 @@
 import { OpenAPIV3 } from 'openapi-types';
 import {
   getRequestValidation,
+  type RouteMethod,
+  type RouteConfigOptions,
   type RouteConfigOptionsBody,
   type RouterRoute,
   type RouteValidatorConfig,
@@ -141,4 +143,23 @@ export const mergeResponseContent = (
     ...(b ?? {}),
   };
   return { ...(Object.keys(mergedContent).length ? { content: mergedContent } : {}) };
+};
+
+export const getXsrfHeaderForMethod = (
+  method: RouteMethod,
+  options?: RouteConfigOptions<RouteMethod>
+): OpenAPIV3.ParameterObject[] => {
+  if (method === 'get' || method === 'options' || options?.xsrfRequired === false) return [];
+  return [
+    {
+      description: 'A required header to protect against CSRF attacks',
+      in: 'header',
+      name: 'kbn-xsrf',
+      required: true,
+      schema: {
+        example: 'true',
+        type: 'string',
+      },
+    },
+  ];
 };

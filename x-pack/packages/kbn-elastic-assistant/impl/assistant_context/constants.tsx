@@ -24,7 +24,5 @@ export const ANONYMIZATION_TABLE_SESSION_STORAGE_KEY = 'anonymizationTable';
 export const DEFAULT_LATEST_ALERTS = 20;
 
 export const DEFAULT_KNOWLEDGE_BASE_SETTINGS: KnowledgeBaseConfig = {
-  isEnabledRAGAlerts: false,
-  isEnabledKnowledgeBase: false,
   latestAlerts: DEFAULT_LATEST_ALERTS,
 };

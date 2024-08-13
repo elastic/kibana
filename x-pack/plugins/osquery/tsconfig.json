@@ -76,6 +76,8 @@
     "@kbn/code-editor",
     "@kbn/search-types",
     "@kbn/react-kibana-context-render",
-    "@kbn/zod-helpers"
+    "@kbn/zod-helpers",
+    "@kbn/openapi-bundler",
+    "@kbn/repo-info"
   ]
 }

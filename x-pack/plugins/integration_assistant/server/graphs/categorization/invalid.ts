@@ -9,8 +9,8 @@ import type {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import type { ESProcessorItem, Pipeline } from '../../../common';
-import type { CategorizationState } from '../../types';
+import type { Pipeline } from '../../../common';
+import type { CategorizationState, SimplifiedProcessors, SimplifiedProcessor } from '../../types';
 import { combineProcessors } from '../../util/processors';
 import { ECS_EVENT_TYPES_PER_CATEGORY } from './constants';
 import { CATEGORIZATION_VALIDATION_PROMPT } from './prompts';
@@ -29,9 +29,14 @@ export async function handleInvalidCategorization(
     invalid_categorization: JSON.stringify(state.invalidCategorization, null, 2),
     ex_answer: state.exAnswer,
     compatible_types: JSON.stringify(ECS_EVENT_TYPES_PER_CATEGORY, null, 2),
-  })) as ESProcessorItem[];
+  })) as SimplifiedProcessor[];
 
-  const currentPipeline = combineProcessors(state.initialPipeline as Pipeline, currentProcessors);
+  const processors = {
+    type: 'categorization',
+    processors: currentProcessors,
+  } as SimplifiedProcessors;
+
+  const currentPipeline = combineProcessors(state.initialPipeline as Pipeline, processors);
 
   return {
     currentPipeline,

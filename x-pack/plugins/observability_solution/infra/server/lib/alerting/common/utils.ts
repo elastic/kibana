@@ -19,6 +19,7 @@ import {
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { set } from '@kbn/safer-lodash-set';
 import { Alert } from '@kbn/alerts-as-data-utils';
+import { type Group } from '@kbn/observability-alerting-rule-utils';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 import {
   getInventoryViewInAppUrl,
@@ -28,7 +29,6 @@ import {
   AlertExecutionDetails,
   InventoryMetricConditions,
 } from '../../../../common/alerting/metrics/types';
-import { Group } from '../../../../common/alerting/types';
 
 const ALERT_CONTEXT_CONTAINER = 'container';
 const ALERT_CONTEXT_ORCHESTRATOR = 'orchestrator';

@@ -41,6 +41,7 @@ export const SyntheticsSharedContext: React.FC<SyntheticsAppProps> = ({
         share: startPlugins.share,
         unifiedSearch: startPlugins.unifiedSearch,
         embeddable: startPlugins.embeddable,
+        slo: startPlugins.slo,
       }}
     >
       <EuiThemeProvider darkMode={darkMode}>

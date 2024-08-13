@@ -47,11 +47,24 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
           },
         });
       },
+
+      async expectInSession(key: string, value: string | undefined): Promise<void> {
+        const session = (await browser.getLocalStorageItem(SESSION_KEY)) || '{}';
+        const state = JSON.parse(session);
+        expect(state[key]).to.be(value);
+      },
     },
     PlaygroundStartChatPage: {
       async expectPlaygroundStartChatPageComponentsToExist() {
         await testSubjects.existOrFail('setupPage');
         await testSubjects.existOrFail('connectLLMButton');
+      },
+
+      async expectPlaygroundLLMConnectorOptionsExists() {
+        await testSubjects.existOrFail('create-connector-flyout');
+        await testSubjects.existOrFail('.gemini-card');
+        await testSubjects.existOrFail('.bedrock-card');
+        await testSubjects.existOrFail('.gen-ai-card');
       },
 
       async expectPlaygroundStartChatPageIndexButtonExists() {
@@ -142,6 +155,20 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
 
         await testSubjects.existOrFail('editContextPanel');
         await testSubjects.existOrFail('summarizationPanel');
+      },
+
+      async updatePrompt(prompt: string) {
+        await testSubjects.setValue('instructionsPrompt', prompt);
+      },
+
+      async updateQuestion(question: string) {
+        await testSubjects.setValue('questionInput', question);
+      },
+
+      async expectQuestionInputToBeEmpty() {
+        const questionInput = await testSubjects.find('questionInput');
+        const question = await questionInput.getAttribute('value');
+        expect(question).to.be.empty();
       },
 
       async sendQuestion() {

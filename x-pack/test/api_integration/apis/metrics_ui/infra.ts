@@ -31,6 +31,9 @@ export default function ({ getService }: FtrProviderContext) {
         type: 'cpu',
       },
       {
+        type: 'cpuV2',
+      },
+      {
         type: 'diskSpaceUsage',
       },
       {
@@ -54,7 +57,6 @@ export default function ({ getService }: FtrProviderContext) {
       to: new Date(DATES['8.0.0'].logs_and_metrics.max).toISOString(),
     },
     query: { bool: { must_not: [], filter: [], should: [], must: [] } },
-    sourceId: 'default',
   };
 
   const makeRequest = async ({
@@ -96,6 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             metrics: [
               { name: 'cpu', value: 0.44708333333333333 },
+              { name: 'cpuV2', value: 0 },
               { name: 'diskSpaceUsage', value: 0 },
               { name: 'memory', value: 0.4563333333333333 },
               { name: 'memoryFree', value: 8573890560 },
@@ -156,7 +159,7 @@ export default function ({ getService }: FtrProviderContext) {
           ...basePayload,
           metrics: [
             {
-              type: 'cpu',
+              type: 'cpuV2',
             },
           ],
           query: { bool: { filter: [{ term: { 'host.os.name': 'CentOS Linux' } }] } },
@@ -165,8 +168,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         const names = (response.body as GetInfraMetricsResponsePayload).nodes.map((p) => p.name);
         expect(names).eql([
-          'gke-observability-8--observability-8--bc1afd95-ngmh',
           'gke-observability-8--observability-8--bc1afd95-f0zc',
+          'gke-observability-8--observability-8--bc1afd95-ngmh',
           'gke-observability-8--observability-8--bc1afd95-nhhw',
         ]);
       });
@@ -176,7 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
           ...basePayload,
           metrics: [
             {
-              type: 'cpu',
+              type: 'cpuV2',
             },
           ],
           query: { bool: { filter: [{ term: { 'host.os.name': 'Ubuntu' } }] } },
@@ -193,7 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
         ...basePayload,
         metrics: [
           {
-            type: 'cpu',
+            type: 'cpuV2',
           },
         ],
         query: {
@@ -208,9 +211,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       const names = (response.body as GetInfraMetricsResponsePayload).nodes.map((p) => p.name);
       expect(names).eql([
-        'gke-observability-8--observability-8--bc1afd95-ngmh',
         'gke-observability-8--observability-8--bc1afd95-f0zc',
-        ,
+        'gke-observability-8--observability-8--bc1afd95-ngmh',
       ]);
     });
 
@@ -247,7 +249,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await makeRequest({ invalidBody, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
-          '[request body]: Failed to validate: in metrics/0/type: "any" does not match expected type "cpu" | "normalizedLoad1m" | "diskSpaceUsage" | "memory" | "memoryFree" | "rx" | "tx"'
+          '[request body]: Failed to validate: in metrics/0/type: "any" does not match expected type "cpu" | "cpuV2" | "normalizedLoad1m" | "diskSpaceUsage" | "memory" | "memoryFree" | "rx" | "tx" | "rxV2" | "txV2"'
         );
       });
 

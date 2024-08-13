@@ -35,9 +35,6 @@ import type {
   ResponseActionGetFileParameters,
   SentinelOneGetFileRequestMeta,
   KillOrSuspendProcessRequestBody,
-  KillProcessActionOutputContent,
-  ResponseActionParametersWithProcessName,
-  SentinelOneKillProcessRequestMeta,
 } from '../../../../../../common/endpoint/types';
 import type { SearchHit, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
@@ -113,7 +110,7 @@ describe('SentinelOneActionsClient class', () => {
         params: {
           subAction: 'isolateHost',
           subActionParams: {
-            uuid: '1-2-3',
+            ids: '1-2-3',
           },
         },
       });
@@ -247,7 +244,7 @@ describe('SentinelOneActionsClient class', () => {
         params: {
           subAction: 'releaseHost',
           subActionParams: {
-            uuid: '1-2-3',
+            ids: '1-2-3',
           },
         },
       });
@@ -375,6 +372,22 @@ describe('SentinelOneActionsClient class', () => {
   describe('#processPendingActions()', () => {
     let abortController: AbortController;
     let processPendingActionsOptions: ProcessPendingActionsMethodOptions;
+
+    const setGetRemoteScriptStatusConnectorResponse = (
+      response: SentinelOneGetRemoteScriptStatusApiResponse
+    ): void => {
+      const executeMockFn = (connectorActionsMock.execute as jest.Mock).getMockImplementation();
+
+      (connectorActionsMock.execute as jest.Mock).mockImplementation(async (options) => {
+        if (options.params.subAction === SUB_ACTION.GET_REMOTE_SCRIPT_STATUS) {
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: response,
+          });
+        }
+
+        return executeMockFn!(options);
+      });
+    };
 
     beforeEach(() => {
       abortController = new AbortController();
@@ -746,42 +759,23 @@ describe('SentinelOneActionsClient class', () => {
       });
     });
 
-    describe('for kill-process response action', () => {
-      let actionRequestsSearchResponse: SearchResponse<
-        LogsEndpointAction<
-          ResponseActionParametersWithProcessName,
-          KillProcessActionOutputContent,
-          SentinelOneKillProcessRequestMeta
-        >
-      >;
-
-      const setGetRemoteScriptStatusConnectorResponse = (
-        response: SentinelOneGetRemoteScriptStatusApiResponse
-      ): void => {
-        const executeMockFn = (connectorActionsMock.execute as jest.Mock).getMockImplementation();
-
-        (connectorActionsMock.execute as jest.Mock).mockImplementation(async (options) => {
-          if (options.params.subAction === SUB_ACTION.GET_REMOTE_SCRIPT_STATUS) {
-            return responseActionsClientMock.createConnectorActionExecuteResponse({
-              data: response,
-            });
-          }
-
-          return executeMockFn!(options);
-        });
-      };
+    // The following response actions use SentinelOne's remote execution scripts, thus they can be
+    // tested the same
+    describe.each`
+      actionName             | requestData                                                         | responseOutputContent
+      ${'kill-process'}      | ${{ command: 'kill-process', parameters: { process_name: 'foo' } }} | ${{ code: 'ok', command: 'kill-process', process_name: 'foo' }}
+      ${'running-processes'} | ${{ command: 'running-processes', parameters: undefined }}          | ${{ code: '', entries: [] }}
+    `('for $actionName response action', ({ actionName, requestData, responseOutputContent }) => {
+      let actionRequestsSearchResponse: SearchResponse<LogsEndpointAction>;
 
       beforeEach(() => {
         const s1DataGenerator = new SentinelOneDataGenerator('seed');
+
         actionRequestsSearchResponse = s1DataGenerator.toEsSearchResponse([
-          s1DataGenerator.generateActionEsHit<
-            ResponseActionParametersWithProcessName,
-            KillProcessActionOutputContent,
-            SentinelOneKillProcessRequestMeta
-          >({
+          s1DataGenerator.generateActionEsHit({
             agent: { id: 'agent-uuid-1' },
             EndpointActions: {
-              data: { command: 'kill-process', parameters: { process_name: 'foo' } },
+              data: requestData,
             },
             meta: {
               agentId: 's1-agent-a',
@@ -810,6 +804,7 @@ describe('SentinelOneActionsClient class', () => {
       });
 
       it('should create response at error if request has no parentTaskId', async () => {
+        // @ts-expect-error
         actionRequestsSearchResponse.hits.hits[0]!._source!.meta!.parentTaskId = '';
         await s1ActionsClient.processPendingActions(processPendingActionsOptions);
 
@@ -819,7 +814,7 @@ describe('SentinelOneActionsClient class', () => {
             action_id: '1d6e6796-b0af-496f-92b0-25fcb06db499',
             completed_at: expect.any(String),
             data: {
-              command: 'kill-process',
+              command: requestData.command,
               comment: '',
             },
             input_type: 'sentinel_one',
@@ -881,11 +876,7 @@ describe('SentinelOneActionsClient class', () => {
                   data: expect.objectContaining({
                     output: {
                       type: 'json',
-                      content: {
-                        code: 'ok',
-                        command: 'kill-process',
-                        process_name: 'foo',
-                      },
+                      content: responseOutputContent,
                     },
                   }),
                 }),
@@ -944,7 +935,7 @@ describe('SentinelOneActionsClient class', () => {
         params: {
           subAction: SUB_ACTION.FETCH_AGENT_FILES,
           subActionParams: {
-            agentUUID: '1-2-3',
+            agentId: '1-2-3',
             files: [getFileReqOptions.parameters.path],
             zipPassCode: RESPONSE_ACTIONS_ZIP_PASSCODE.sentinel_one,
           },
@@ -1039,7 +1030,7 @@ describe('SentinelOneActionsClient class', () => {
     it('should query for the activity log entry record after successful submit of action', async () => {
       await s1ActionsClient.getFile(getFileReqOptions);
 
-      expect(connectorActionsMock.execute).toHaveBeenNthCalledWith(3, {
+      expect(connectorActionsMock.execute).toHaveBeenCalledWith({
         params: {
           subAction: SUB_ACTION.GET_ACTIVITIES,
           subActionParams: {
@@ -1049,7 +1040,7 @@ describe('SentinelOneActionsClient class', () => {
             sortOrder: 'asc',
             // eslint-disable-next-line @typescript-eslint/naming-convention
             createdAt__gte: expect.any(String),
-            agentIds: '1845174760470303882',
+            agentIds: '1-2-3',
           },
         },
       });
@@ -1132,6 +1123,25 @@ describe('SentinelOneActionsClient class', () => {
 
   describe('#getFileInfo()', () => {
     beforeEach(() => {
+      const s1DataGenerator = new SentinelOneDataGenerator('seed');
+      const actionRequestsSearchResponse = s1DataGenerator.toEsSearchResponse([
+        s1DataGenerator.generateActionEsHit({
+          agent: { id: '123' },
+          EndpointActions: { data: { command: 'get-file' } },
+          meta: {
+            agentId: 's1-agent-a',
+            agentUUID: 'agent-uuid-1',
+            hostName: 's1-host-name',
+          },
+        }),
+      ]);
+
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient,
+        index: ENDPOINT_ACTIONS_INDEX,
+        response: actionRequestsSearchResponse,
+      });
+
       // @ts-expect-error updating readonly attribute
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
         true;
@@ -1151,11 +1161,16 @@ describe('SentinelOneActionsClient class', () => {
       applyEsClientSearchMock({
         esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
         index: ENDPOINT_ACTIONS_INDEX,
-        response: SentinelOneDataGenerator.toEsSearchResponse([]),
+        response: SentinelOneDataGenerator.toEsSearchResponse([
+          new SentinelOneDataGenerator('seed').generateActionEsHit({
+            agent: { id: '123' },
+            EndpointActions: { data: { command: 'get-file' }, input_type: 'endpoint' },
+          }),
+        ]),
       });
 
       await expect(s1ActionsClient.getFileInfo('abc', '123')).rejects.toThrow(
-        'Action id [abc] not found with an agent type of [sentinel_one]'
+        'Action id [abc] with agent type of [sentinel_one] not found'
       );
     });
 
@@ -1198,6 +1213,24 @@ describe('SentinelOneActionsClient class', () => {
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
         true;
 
+      const actionRequestsSearchResponse = s1DataGenerator.toEsSearchResponse([
+        s1DataGenerator.generateActionEsHit({
+          agent: { id: '123' },
+          EndpointActions: { data: { command: 'get-file' } },
+          meta: {
+            agentId: 's1-agent-a',
+            agentUUID: 'agent-uuid-1',
+            hostName: 's1-host-name',
+          },
+        }),
+      ]);
+
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient,
+        index: ENDPOINT_ACTIONS_INDEX,
+        response: actionRequestsSearchResponse,
+      });
+
       const esHit = s1DataGenerator.generateResponseEsHit({
         agent: { id: '123' },
         EndpointActions: { data: { command: 'get-file' } },
@@ -1231,6 +1264,9 @@ describe('SentinelOneActionsClient class', () => {
       // @ts-expect-error updating readonly attribute
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
         false;
+      // @ts-expect-error updating readonly attribute
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneProcessesEnabled =
+        false;
 
       await expect(s1ActionsClient.getFileDownload('acb', '123')).rejects.toThrow(
         'File downloads are not supported for sentinel_one agent type. Feature disabled'
@@ -1241,11 +1277,16 @@ describe('SentinelOneActionsClient class', () => {
       applyEsClientSearchMock({
         esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
         index: ENDPOINT_ACTIONS_INDEX,
-        response: SentinelOneDataGenerator.toEsSearchResponse([]),
+        response: SentinelOneDataGenerator.toEsSearchResponse([
+          s1DataGenerator.generateActionEsHit({
+            agent: { id: '123' },
+            EndpointActions: { data: { command: 'get-file' }, input_type: 'endpoint' },
+          }),
+        ]),
       });
 
       await expect(s1ActionsClient.getFileDownload('abc', '123')).rejects.toThrow(
-        'Action id [abc] not found with an agent type of [sentinel_one]'
+        'Action id [abc] with agent type of [sentinel_one] not found'
       );
     });
 
@@ -1286,7 +1327,7 @@ describe('SentinelOneActionsClient class', () => {
           subAction: 'downloadAgentFile',
           subActionParams: {
             activityId: 'activity-1',
-            agentUUID: '123',
+            agentId: '123',
           },
         },
       });
@@ -1296,7 +1337,7 @@ describe('SentinelOneActionsClient class', () => {
       (connectorActionsMock.execute as jest.Mock).mockReturnValue({ data: undefined });
 
       await expect(s1ActionsClient.getFileDownload('abc', '123')).rejects.toThrow(
-        'Unable to establish a readable stream for file with SentinelOne'
+        'Unable to establish a file download Readable stream with SentinelOne for response action [get-file] [abc]'
       );
     });
 
@@ -1403,7 +1444,7 @@ describe('SentinelOneActionsClient class', () => {
         params: {
           subAction: 'executeScript',
           subActionParams: {
-            filter: { uuids: '1-2-3' },
+            filter: { ids: '1-2-3' },
             script: {
               inputParams: '--terminate --processes "foo" --force',
               outputDestination: 'SentinelCloud',
@@ -1547,7 +1588,7 @@ describe('SentinelOneActionsClient class', () => {
         params: {
           subAction: 'executeScript',
           subActionParams: {
-            filter: { uuids: '1-2-3' },
+            filter: { ids: '1-2-3' },
             script: {
               inputParams: '',
               outputDestination: 'SentinelCloud',

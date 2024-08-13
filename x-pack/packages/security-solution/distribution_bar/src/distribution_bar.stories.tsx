@@ -14,33 +14,35 @@ const mockStatsFindings = [
     key: 'passed',
     count: 90,
     color: euiThemeVars.euiColorVis0,
+    label: 'Passed',
   },
   {
     key: 'failed',
     count: 10,
     color: euiThemeVars.euiColorVis9,
+    label: <>{'Failed'}</>,
   },
 ];
 
 const mockStatsAlerts = [
   {
     key: 'low',
-    count: 30,
+    count: 1000,
     color: euiThemeVars.euiColorVis0,
   },
   {
     key: 'medium',
-    count: 30,
+    count: 800,
     color: euiThemeVars.euiColorVis5,
   },
   {
     key: 'high',
-    count: 10,
+    count: 300,
     color: euiThemeVars.euiColorVis7,
   },
   {
     key: 'critical',
-    count: 10,
+    count: 50,
     color: euiThemeVars.euiColorVis9,
   },
 ];
@@ -52,22 +54,28 @@ export default {
 
 export const DistributionBar = () => {
   return [
-    <EuiTitle size={'xs'}>
-      <h4>{'Findings'}</h4>
-    </EuiTitle>,
-    <EuiSpacer size={'s'} />,
-    <DistributionBarComponent stats={mockStatsFindings} />,
-    <EuiSpacer size={'m'} />,
-    <EuiTitle size={'xs'}>
-      <h4>{'Alerts'}</h4>
-    </EuiTitle>,
-    <EuiSpacer size={'s'} />,
-    <DistributionBarComponent stats={mockStatsAlerts} />,
-    <EuiSpacer size={'m'} />,
-    <EuiTitle size={'xs'}>
-      <h4>{'Empty state'}</h4>
-    </EuiTitle>,
-    <EuiSpacer size={'s'} />,
-    <DistributionBarComponent stats={[]} />,
+    <React.Fragment key={'findings'}>
+      <EuiTitle size={'xs'}>
+        <h4>{'Findings'}</h4>
+      </EuiTitle>
+      <EuiSpacer size={'s'} />
+      <DistributionBarComponent stats={mockStatsFindings} />
+      <EuiSpacer size={'m'} />
+    </React.Fragment>,
+    <React.Fragment key={'alerts'}>
+      <EuiTitle size={'xs'}>
+        <h4>{'Alerts'}</h4>
+      </EuiTitle>
+      <EuiSpacer size={'s'} />
+      <DistributionBarComponent stats={mockStatsAlerts} />
+      <EuiSpacer size={'m'} />
+    </React.Fragment>,
+    <React.Fragment key={'empty'}>
+      <EuiTitle size={'xs'}>
+        <h4>{'Empty state'}</h4>
+      </EuiTitle>
+      <EuiSpacer size={'s'} />
+      <DistributionBarComponent stats={[]} />
+    </React.Fragment>,
   ];
 };

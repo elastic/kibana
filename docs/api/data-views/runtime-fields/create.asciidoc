@@ -4,7 +4,7 @@
 <titleabbrev>Create runtime field</titleabbrev>
 ++++
 
-experimental[] Create a runtime field
+Create a runtime field
 
 [[data-views-runtime-field-create-request]]
 ==== Request

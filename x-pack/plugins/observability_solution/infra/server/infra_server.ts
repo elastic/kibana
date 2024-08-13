@@ -31,7 +31,7 @@ import { initNodeDetailsRoute } from './routes/node_details';
 import { initOverviewRoute } from './routes/overview';
 import { initProcessListRoute } from './routes/process_list';
 import { initSnapshotRoute } from './routes/snapshot';
-import { initInfraMetricsRoute } from './routes/infra';
+import { initInfraAssetRoutes } from './routes/infra';
 import { initMetricsExplorerViewRoutes } from './routes/metrics_explorer_views';
 import { initProfilingRoutes } from './routes/profiling';
 import { initServicesRoute } from './routes/services';
@@ -67,7 +67,7 @@ export const initInfraServer = (
   initGetLogAlertsChartPreviewDataRoute(libs);
   initProcessListRoute(libs);
   initOverviewRoute(libs);
-  initInfraMetricsRoute(libs);
+  initInfraAssetRoutes(libs);
   initProfilingRoutes(libs);
   initServicesRoute(libs);
   initCustomDashboardsRoutes(libs.framework);
