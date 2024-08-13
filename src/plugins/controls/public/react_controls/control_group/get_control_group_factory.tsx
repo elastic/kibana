@@ -23,6 +23,7 @@ import {
   PublishesDataViews,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
+import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { ControlStyle, ParentIgnoreSettings } from '../..';
 import {
   ControlGroupChainingSystem,
@@ -205,6 +206,7 @@ export const getControlGroupEmbeddableFactory = (services: {
         saveNotification$: apiHasSaveNotification(parentApi)
           ? parentApi.saveNotification$
           : undefined,
+        reload$: apiPublishesReload(parentApi) ? parentApi.reload$ : undefined,
       });
 
       /** Subscribe to all children's output data views, combine them, and output them */
