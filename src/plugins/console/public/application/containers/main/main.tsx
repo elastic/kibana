@@ -9,7 +9,6 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPageTemplate, EuiSplitPanel } from '@elastic/eui';
-import type { SenseEditor } from '../../models';
 import { Editor } from '../editor';
 import { TopNavMenu, SomethingWentWrongCallout } from '../../components';
 import { useDataInit } from '../../hooks';
@@ -18,8 +17,6 @@ import { SHELL_TAB_ID } from './tab_ids';
 
 export function Main() {
   const [selectedTab, setSelectedTab] = useState(SHELL_TAB_ID);
-
-  const [editorInstance, setEditorInstance] = useState<SenseEditor | null>(null);
 
   const { done, error, retry } = useDataInit();
 
@@ -56,7 +53,7 @@ export function Main() {
             </EuiSplitPanel.Inner>
             <EuiSplitPanel.Inner paddingSize="none">
               {selectedTab === SHELL_TAB_ID && (
-                <Editor loading={!done} setEditorInstance={setEditorInstance} />
+                <Editor loading={!done} setEditorInstance={() => {}} />
               )}
             </EuiSplitPanel.Inner>
           </EuiSplitPanel.Outer>

@@ -178,7 +178,7 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
             {isOpen ? (
               <div className="embeddableConsole__content" data-test-subj="consoleEmbeddedBody">
                 <EuiWindowEvent event="keydown" handler={onKeyDown} />
-                <Main hideWelcome />
+                <Main />
               </div>
             ) : (
               <span />
