@@ -110,10 +110,7 @@ export function OpenTelemetryInstructions({ apmServerUrl, secretToken }: Props) 
                 target="_blank"
                 href="https://github.com/open-telemetry/opentelemetry-specification/blob/v1.10.0/specification/protocol/exporter.md"
               >
-                {i18n.translate(
-                  'xpack.apm.openTelemetryInstructions.otelexporterotlpendpointLinkLabel',
-                  { defaultMessage: 'OTEL_EXPORTER_OTLP_ENDPOINT' }
-                )}
+                OTEL_EXPORTER_OTLP_ENDPOINT
               </EuiLink>
             ),
             otelExporterOtlpHeaders: (
@@ -122,10 +119,7 @@ export function OpenTelemetryInstructions({ apmServerUrl, secretToken }: Props) 
                 target="_blank"
                 href="https://github.com/open-telemetry/opentelemetry-specification/blob/v1.10.0/specification/protocol/exporter.md"
               >
-                {i18n.translate(
-                  'xpack.apm.openTelemetryInstructions.otelexporterotlpheadersLinkLabel',
-                  { defaultMessage: 'OTEL_EXPORTER_OTLP_HEADERS' }
-                )}
+                OTEL_EXPORTER_OTLP_HEADERS
               </EuiLink>
             ),
             otelResourceAttributes: (
@@ -134,10 +128,7 @@ export function OpenTelemetryInstructions({ apmServerUrl, secretToken }: Props) 
                 target="_blank"
                 href="https://github.com/open-telemetry/opentelemetry-specification/blob/v1.10.0/specification/resource/sdk.md"
               >
-                {i18n.translate(
-                  'xpack.apm.openTelemetryInstructions.otelresourceattributesLinkLabel',
-                  { defaultMessage: 'OTEL_RESOURCE_ATTRIBUTES' }
-                )}
+                OTEL_RESOURCE_ATTRIBUTES
               </EuiLink>
             ),
           }}
