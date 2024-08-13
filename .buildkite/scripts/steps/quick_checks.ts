@@ -7,6 +7,7 @@
  */
 
 import { exec } from 'child_process';
+import * as os from 'os';
 
 interface Result {
   success: boolean;
@@ -16,7 +17,7 @@ interface Result {
   duration: number;
 }
 
-const MAX_PARALLELISM = 6;
+const MAX_PARALLELISM = os.cpus().length - 1;
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
