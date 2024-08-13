@@ -78,9 +78,11 @@ interface CreateRuntimeServicesOptions {
 class KbnClientExtended extends KbnClient {
   private readonly apiKey: string | undefined;
 
-  constructor({ apiKey, url, ...options }: KbnClientOptions & { apiKey?: string }) {
+  constructor(protected readonly options: KbnClientOptions & { apiKey?: string }) {
+    const { apiKey, url, ...opt } = options;
+
     super({
-      ...options,
+      ...opt,
       url: apiKey ? buildUrlWithCredentials(url, '', '') : url,
     });
 
@@ -94,6 +96,7 @@ class KbnClientExtended extends KbnClient {
 
     if (this.apiKey) {
       headers.Authorization = `ApiKey ${this.apiKey}`;
+      this.options.log.verbose(`Adding API key header to request header 'Authorization'`);
     }
 
     return super.request({
@@ -322,7 +325,7 @@ export const fetchStackVersion = async (kbnClient: KbnClient): Promise<string> =
 export const waitForKibana = async (kbnClient: KbnClient): Promise<void> => {
   await pRetry(
     async () => {
-      const response = await kbnClient.status.get();
+      const response = await fetchKibanaStatus(kbnClient);
 
       if (response.status.overall.level !== 'available') {
         throw new Error(
