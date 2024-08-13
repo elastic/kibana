@@ -174,9 +174,9 @@ export const getControlGroupEmbeddableFactory = (services: {
                 panelType: controlType,
                 initialState: options?.controlInputTransform
                   ? options.controlInputTransform(
-                    initialState as Partial<ControlGroupSerializedState>,
-                    controlType
-                  )
+                      initialState as Partial<ControlGroupSerializedState>,
+                      controlType
+                    )
                   : initialState,
               });
               options?.onSave?.();

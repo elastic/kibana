@@ -51,7 +51,6 @@ export const AddTimeSliderControlButton = ({ closePopover, controlGroupApi, ...r
             grow: true,
             width: 'large',
             id: uuidv4(),
-            title: 'Time slider',
           },
         });
         dashboard.scrollToTop();
