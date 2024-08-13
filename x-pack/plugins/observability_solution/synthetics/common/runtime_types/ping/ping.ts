@@ -16,7 +16,7 @@ export const PingErrorType = t.intersection([
   t.partial({
     code: t.string,
     id: t.string,
-    stack_trace: t.string,
+    stack_trace: t.union([t.string, t.null]),
     type: t.string,
   }),
   t.type({

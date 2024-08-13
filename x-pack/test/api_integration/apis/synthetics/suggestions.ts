@@ -173,6 +173,18 @@ export default function ({ getService }: FtrProviderContext) {
               value: project,
             },
           ],
+          monitorTypes: [
+            {
+              count: 20,
+              label: 'http',
+              value: 'http',
+            },
+            {
+              count: 2,
+              label: 'icmp',
+              value: 'icmp',
+            },
+          ],
           tags: expect.arrayContaining([
             {
               count: 21,
@@ -254,6 +266,18 @@ export default function ({ getService }: FtrProviderContext) {
               count: 2,
               label: project,
               value: project,
+            },
+          ],
+          monitorTypes: [
+            // {
+            //   count: 20,
+            //   label: 'http',
+            //   value: 'http',
+            // },
+            {
+              count: 2,
+              label: 'icmp',
+              value: 'icmp',
             },
           ],
           tags: expect.arrayContaining([

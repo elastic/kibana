@@ -69,7 +69,7 @@ describe('createBrowserConfig', () => {
       exposedConfigKeys: {
         exposed1: 'string',
         'nested.exposed2': 'boolean',
-        'nested.exposed3': 'number',
+        'nested.exposed3': 'number?',
         // notExposed4 is not present
       },
     });
@@ -182,7 +182,7 @@ describe('createBrowserConfig', () => {
       exposedConfigKeys: {
         exposed1: 'string',
         'deeply.exposed2': 'boolean',
-        'deeply.nested.exposed3': 'number',
+        'deeply.nested.exposed3': 'number?',
         'deeply.nested.structure.exposed4': 'string',
         // notExposed5, notExposed6, notExposed7, and notExposed8 are not present
       },
