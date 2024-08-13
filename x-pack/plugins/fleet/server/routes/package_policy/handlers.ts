@@ -243,10 +243,6 @@ export const createPackagePolicyHandler: FleetRequestHandler<
 
   const spaceId = fleetContext.spaceId;
   try {
-    if (!newPolicy.policy_id && (!newPolicy.policy_ids || newPolicy.policy_ids.length === 0)) {
-      throw new PackagePolicyRequestError('Either policy_id or policy_ids must be provided');
-    }
-
     let newPackagePolicy: NewPackagePolicy;
     if (isSimplifiedCreatePackagePolicyRequest(newPolicy)) {
       if (!pkg) {
@@ -390,7 +386,6 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         name: restOfBody.name ?? packagePolicy.name,
         description: restOfBody.description ?? packagePolicy.description,
         namespace: restOfBody.namespace ?? packagePolicy?.namespace,
-        policy_id: restOfBody.policy_id ?? packagePolicy.policy_id,
         enabled:
           'enabled' in restOfBody
             ? restOfBody.enabled ?? packagePolicy.enabled
@@ -405,10 +400,6 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       }
     }
     newData.inputs = alignInputsAndStreams(newData.inputs);
-
-    if (newData.policy_ids && newData.policy_ids.length === 0) {
-      throw new PackagePolicyRequestError('At least one agent policy id must be provided');
-    }
 
     await renameAgentlessAgentPolicy(soClient, esClient, packagePolicy, newData.name);
 
