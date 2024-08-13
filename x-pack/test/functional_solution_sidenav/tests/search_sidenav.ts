@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-/* eslint-disable import/no-default-export */
-
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { common, solutionNavigation } = getPageObjects(['common', 'solutionNavigation']);
   const spaces = getService('spaces');
 
-  describe('solution navigation', () => {
+  describe('search solution', () => {
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
 
@@ -33,7 +31,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cleanUp();
     });
 
-    describe('search sidenav & breadcrumbs', () => {
+    describe('sidenav & breadcrumbs', () => {
       it('renders the correct nav and navigate to links (smoke tests)', async () => {
         const expectNoPageReload = await solutionNavigation.createNoPageReloadCheck();
 

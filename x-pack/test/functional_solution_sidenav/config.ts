@@ -17,7 +17,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...functionalConfig.getAll(),
-    testFiles: [require.resolve('./observability'), require.resolve('./search')],
+    testFiles: [require.resolve('.')],
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
