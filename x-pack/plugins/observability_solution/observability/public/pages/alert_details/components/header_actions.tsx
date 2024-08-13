@@ -40,7 +40,7 @@ import type { TopAlert } from '../../../typings/alerts';
 import { paths } from '../../../../common/locators/paths';
 import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
 import { useCreateInvestigation } from '../hooks/use_create_investigation';
-import { useFetchInvestigationsByAlert } from '../hooks/use_get_investigation_details';
+import { useFetchInvestigationsByAlert } from '../hooks/use_fetch_investigations_by_alert';
 
 export interface HeaderActionsProps {
   alert: TopAlert | null;
