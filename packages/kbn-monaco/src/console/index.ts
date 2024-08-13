@@ -19,6 +19,7 @@ import {
   consoleOutputLexerRules,
   consoleOutputLanguageConfiguration,
 } from './lexer_rules';
+import { foldingRangeProvider } from './folding_range_provider';
 
 export { CONSOLE_LANG_ID, CONSOLE_OUTPUT_LANG_ID, CONSOLE_THEME_ID } from './constants';
 
@@ -28,12 +29,14 @@ export const ConsoleLang: LangModuleType = {
   ID: CONSOLE_LANG_ID,
   lexerRules,
   languageConfiguration,
+  foldingRangeProvider,
 };
 
 export const ConsoleOutputLang: LangModuleType = {
   ID: CONSOLE_OUTPUT_LANG_ID,
   lexerRules: consoleOutputLexerRules,
   languageConfiguration: consoleOutputLanguageConfiguration,
+  foldingRangeProvider,
 };
 
 export type { ParsedRequest } from './types';

@@ -77,6 +77,10 @@
       "type": "counter_double"
     },
     {
+      "name": "dateNanosField",
+      "type": "date_nanos"
+    },
+    {
       "name": "any#Char$Field",
       "type": "double"
     },
@@ -2248,28 +2252,28 @@
     {
       "query": "from index | project ",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}"
       ],
       "warning": []
     },
     {
       "query": "from index | project textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}"
       ],
       "warning": []
     },
     {
       "query": "from index | PROJECT textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
+        "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}"
       ],
       "warning": []
     },
     {
       "query": "from index | project missingField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}"
       ],
       "warning": []
     },
@@ -4390,6 +4394,46 @@
       "warning": []
     },
     {
+      "query": "from a_index | where dateNanosField IS NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateNanosField IS null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateNanosField is null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateNanosField is NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateNanosField IS NOT NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateNanosField IS NOT null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateNanosField IS not NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateNanosField Is nOt NuLL",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | where textField == \"a\" or null",
       "error": [],
       "warning": []
@@ -5112,6 +5156,41 @@
     },
     {
       "query": "from a_index | eval counterDoubleField IS not NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateNanosField IS NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateNanosField IS null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateNanosField is null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateNanosField is NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateNanosField IS NOT NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateNanosField IS NOT null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateNanosField IS not NULL",
       "error": [],
       "warning": []
     },
@@ -12503,6 +12582,16 @@
       "warning": []
     },
     {
+      "query": "row var = date_trunc(1 day, to_datetime(\"2021-01-01T00:00:00Z\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row date_trunc(1 day, to_datetime(\"2021-01-01T00:00:00Z\"))",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = e()",
       "error": [],
       "warning": []
@@ -16245,6 +16334,21 @@
       "warning": []
     },
     {
+      "query": "from a_index | where mv_count(dateNanosField) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_count(dateNanosField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_count(dateNanosField)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = mv_dedupe(true)",
       "error": [],
       "warning": []
@@ -17208,6 +17312,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval var = mv_first(dateNanosField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_first(dateNanosField)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = mv_last(true)",
       "error": [],
       "warning": []
@@ -17697,6 +17811,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval var = mv_last(dateNanosField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_last(dateNanosField)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = mv_max(true)",
       "error": [],
       "warning": []
@@ -18013,6 +18137,16 @@
     },
     {
       "query": "from a_index | eval mv_max(concat(\"20\", \"22\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_max(dateNanosField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_max(dateNanosField)",
       "error": [],
       "warning": []
     },
@@ -18483,6 +18617,16 @@
     },
     {
       "query": "from a_index | eval mv_min(concat(\"20\", \"22\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_min(dateNanosField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_min(dateNanosField)",
       "error": [],
       "warning": []
     },
