@@ -136,22 +136,22 @@ const TestFileFtrConfigSchema = schema.object(
 
 export type SecuritySolutionDescribeBlockFtrConfig = TypeOf<typeof TestFileFtrConfigSchema>;
 
-export const getBeforeSpecFunction = (module: unknown, beforeSpecFilePath: string): Function => {
+export const getOnBeforeHook = (module: unknown, beforeSpecFilePath: string): Function => {
   if (typeof module !== 'object' || module === null) {
     throw new Error(
       `${chalk.bold(
         beforeSpecFilePath
-      )} expected to explicitly export function member named "beforeSpec"`
+      )} expected to explicitly export function member named "onBeforeHook"`
     );
   }
 
-  if (!('beforeSpec' in module) || typeof module.beforeSpec !== 'function') {
+  if (!('onBeforeHook' in module) || typeof module.onBeforeHook !== 'function') {
     throw new Error(
-      `${chalk.bold('beforeSpec')} exported from ${chalk.bold(
+      `${chalk.bold('onBeforeHook')} exported from ${chalk.bold(
         beforeSpecFilePath
       )} is not a function`
     );
   }
 
-  return module.beforeSpec;
+  return module.onBeforeHook;
 };
