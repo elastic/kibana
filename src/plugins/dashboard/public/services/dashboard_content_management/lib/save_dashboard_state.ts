@@ -16,7 +16,7 @@ import {
   persistableControlGroupInputIsEqual,
 } from '@kbn/controls-plugin/common';
 import { extractSearchSourceReferences, RefreshInterval } from '@kbn/data-plugin/public';
-import { isFilterPinned } from '@kbn/es-query';
+// import { isFilterPinned } from '@kbn/es-query';
 
 import { convertPanelMapToSavedPanels, extractReferences } from '../../../../common';
 import { DashboardAttributes, DashboardCrudTypes } from '../../../../common/content_management';
@@ -119,10 +119,7 @@ export const saveDashboardState = async ({
    */
   const { searchSourceJSON, searchSourceReferences } = await (async () => {
     const searchSource = await dataSearchService.searchSource.create();
-    searchSource.setField(
-      'filter', // save only unpinned filters
-      filters.filter((filter) => !isFilterPinned(filter))
-    );
+    searchSource.setField('filter', filters);
     searchSource.setField('query', query);
 
     const rawSearchSourceFields = searchSource.getSerializedFields();
