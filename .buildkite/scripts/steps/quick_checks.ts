@@ -15,11 +15,14 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
  * Takes arguments from the command line, runs every command in the array, collects results, and prints a summary.
  */
 async function main() {
-  const scriptsToRun = process.argv[2].trim().split("\n").map((script) => script.trim());
+  const scriptsToRun = process.argv[2]
+    .trim()
+    .split('\n')
+    .map((script) => script.trim());
 
   console.log(`Running ${scriptsToRun.length} checks...`, scriptsToRun);
 
-  const checksRunning: Promise<any>[] = [];
+  const checksRunning: Array<Promise<any>> = [];
   const checksFinished: any[] = [];
 
   while (scriptsToRun.length > 0 || checksRunning.length > 0) {
@@ -50,26 +53,30 @@ async function main() {
   }
 }
 
-async function runCheck(script: string, checksRunning: Promise<any>[], checksFinished: any[]) {
+async function runCheck(script: string, checksRunning: Array<Promise<any>>, checksFinished: any[]) {
   console.log(`Starting check: ${script}`);
+  const startTime = Date.now();
   const check = new Promise((resolve, reject) => {
     const result = {
       success: false,
       script,
       stdout: '',
       stderr: '',
+      duration: 0,
     };
     exec(script, (error, stdout, stderr) => {
+      result.stderr = stderr;
+      result.stdout = stdout;
+      result.duration = Date.now() - startTime;
+
       checksRunning.splice(checksRunning.indexOf(check), 1);
       checksFinished.push(result);
       if (error) {
-        console.warn(`Failed check: ${script}`);
-        result.stderr = stderr;
+        console.warn(`Failed check: ${script} in ${result.duration}ms`);
         result.success = false;
         resolve(error);
       } else {
-        console.info(`Passed check: ${script}`);
-        result.stdout = stdout;
+        console.info(`Passed check: ${script} in ${result.duration}ms`);
         result.success = true;
         resolve(stdout);
       }
@@ -79,9 +86,11 @@ async function runCheck(script: string, checksRunning: Promise<any>[], checksFin
   return check;
 }
 
-main().then(() => {}).catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+main()
+  .then(() => {})
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
 
 export {};
