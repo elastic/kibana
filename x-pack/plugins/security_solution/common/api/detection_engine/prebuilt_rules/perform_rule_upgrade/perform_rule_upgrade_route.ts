@@ -59,9 +59,6 @@ import {
 } from '../../model/rule_schema/specific_attributes/new_terms_attributes.gen';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import { AggregatedPrebuiltRuleError } from '../model';
-import {
-  PrebuiltRuleAssetFieldsDictionary,
-} from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/model/rule_assets/prebuilt_rule_asset';
 
 export type PickVersionValues = z.infer<typeof PickVersionValues>;
 export const PickVersionValues = z.enum(['BASE', 'CURRENT', 'TARGET', 'MERGED']);
@@ -81,56 +78,12 @@ const createUpgradeFieldSchema = <T extends z.ZodType>(fieldSchema: T) =>
     ])
     .optional();
 
-
-const createRuleSpecifierFieldsSchema = () => {
-  const entries = Object.entries(PrebuiltRuleAssetFieldsDictionary.shape).map(([fieldName, fieldSchema]) => {
-    return [fieldName, createUpgradeFieldSchema(fieldSchema)];
-  });
-
-  debugger;
-  return z.object(Object.fromEntries(entries));
-};
-
-const test: RuleUpgradeSpecifier = {
-  rule_id: 'rule-1',
-  revision: 1,
-  version: 1,
-  pick_version: 'BASE',
-  // @xcrzx dynamically generated version confuses TS
-  fieldsTest: {
-    name: {
-      pick_version: 'RESOLVED',
-      resolved_value: false
-    },
-    description: {
-      pick_version: 'TARGET',
-    },
-    unknown_field: {
-      pick_version: 'BASE',
-    },
-  },
-  // @xcrzx hardcoded version works as expected
-  fields: {
-    name: {
-      pick_version: 'BASE',
-    },
-    unknown_field: {
-      pick_version: 'BASE',
-    },
-    description: {
-      pick_version: 'RESOLVED',
-      resolved_value: 'false'
-    },
-  },
-};
-
 export type RuleUpgradeSpecifier = z.infer<typeof RuleUpgradeSpecifier>;
 export const RuleUpgradeSpecifier = z.object({
   rule_id: RuleSignatureId,
   revision: z.number(),
   version: RuleVersion,
   pick_version: PickVersionValues.optional(),
-  fieldsTest: createRuleSpecifierFieldsSchema(),
   // Fields that can be customized during the upgrade workflow
   // as decided in: https://github.com/elastic/kibana/issues/186544
   fields: z

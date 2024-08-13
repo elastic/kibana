@@ -22,11 +22,6 @@ import {
   ThresholdRuleCreateFields,
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
 
-export type PickVersionValues = z.infer<typeof PickVersionValues>;
-export const PickVersionValues = z.enum(['BASE', 'CURRENT', 'TARGET', 'MERGED']);
-export type PickVersionValuesEnum = typeof PickVersionValues.enum;
-export const PickVersionValuesEnum = PickVersionValues.enum;
-
 function zodMaskFor<T>() {
   return function <U extends keyof T>(props: U[]): Record<U, true> {
     type PropObject = Record<string, boolean>;
@@ -132,57 +127,3 @@ function createUpgradableRuleFieldsByTypeMap() {
 }
 
 export const UPGRADABLE_RULES_FIELDS_BY_TYPE_MAP = createUpgradableRuleFieldsByTypeMap();
-
-///-------------- Alternative 1 --- "flatten" all props
-
-function getAllFields<T extends z.ZodTypeAny>(schema: T): T {
-  if (schema instanceof z.ZodIntersection) {
-    return {
-      ...getAllFields(schema._def.left),
-      ...getAllFields(schema._def.right),
-    } as T;
-  } else if (schema instanceof z.ZodObject) {
-    return schema.shape as T;
-  } else if (schema instanceof z.ZodDiscriminatedUnion) {
-    return schema.options.reduce((acc: Partial<T>, option: z.ZodObject<any>) => {
-      const { type, ...rest } = option.shape;
-      return { ...acc, ...rest };
-    }, {}) as T;
-  }
-  return {} as T;
-}
-
-export const PrebuiltRuleAllFields = getAllFields(PrebuiltRuleAsset);
-PrebuiltRuleAllFields._output;
-
-//// ---------------  Alternative 2 -- 
-// uses .merge() instead of .and() since it returns a more useful ZodObject
-// instead of a ZodIntersection
-
-const allTypeSpecificFields = TypeSpecificFields.options.reduce<z.ZodRawShape>((acc, option) => {
-  return { ...acc, ...option.shape };
-}, {});
-
-export const PrebuiltRuleAsset2 = PrebuiltAssetBaseProps.merge(
-  z.object(allTypeSpecificFields)
-).merge(
-  z.object({
-    rule_id: RuleSignatureId,
-    version: RuleVersion,
-  })
-);
-
-export const test = PrebuiltRuleAsset2.keyof();
-export const test2 = PrebuiltRuleAsset2.shape;
-
-
-
-// ----------   Alternative 3 --- @xcrzx this works in runtime but TS doesn't understand the types
-
-export const PrebuiltRuleAssetFieldsDictionary = z
-  .object({
-    ...PrebuiltAssetBaseProps.shape,
-    ...TypeSpecificFields.options.reduce((acc, option) => ({ ...acc, ...option.shape }), {}),
-    rule_id: RuleSignatureId,
-    version: RuleVersion,
-  });
