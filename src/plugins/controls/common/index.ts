@@ -22,14 +22,12 @@ export {
   persistableControlGroupInputKeys,
 } from './control_group/types';
 export {
-  controlGroupInputToRawControlGroupAttributes,
   rawControlGroupAttributesToControlGroupInput,
   rawControlGroupAttributesToSerializable,
   serializableToRawControlGroupAttributes,
   getDefaultControlGroupPersistableInput,
   persistableControlGroupInputIsEqual,
   getDefaultControlGroupInput,
-  generateNewControlIds,
 } from './control_group/control_group_persistence';
 
 export {
