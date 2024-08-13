@@ -749,12 +749,18 @@ export default ({ getService }: FtrProviderContext) => {
                     created_at: response.body.rules[0].created_at,
                     revision: 0,
                     scheduled_task_id: response.body.rules[0].scheduled_task_id,
+                    ...(response.body.rules[0].last_run
+                      ? { last_run: response.body.rules[0].last_run }
+                      : {}),
                     execution_status: {
                       last_duration: 0,
                       last_execution_date:
                         response.body.rules[0].execution_status.last_execution_date,
                       status: 'pending',
                     },
+                    ...(response.body.rules[0].next_run
+                      ? { next_run: response.body.rules[0].next_run }
+                      : {}),
                     monitoring: response.body.rules[0].monitoring,
                   },
                 ],
