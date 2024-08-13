@@ -32,11 +32,15 @@ export const dashboardManagedBadge = {
     }),
   getDuplicateText: () =>
     i18n.translate('dashboard.managedContentPopoverFooterText', {
-      defaultMessage: 'Duplicate',
+      defaultMessage: ' this dashboard to make changes.',
     }),
   getAriaLabel: () =>
     i18n.translate('dashboard.managedContentBadge.ariaLabel', {
       defaultMessage: 'Elastic manages this dashboard. Duplicate it to make changes.',
+    }),
+  getDuplicate: () =>
+    i18n.translate('dashboard.managedContentBadge.duplicate', {
+      defaultMessage: 'Duplicate',
     }),
 };
 

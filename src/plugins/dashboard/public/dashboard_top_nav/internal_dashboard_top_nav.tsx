@@ -19,13 +19,13 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import {
   EuiBreadcrumb,
-  EuiButtonEmpty,
   EuiHorizontalRule,
   EuiIcon,
   EuiText,
   EuiToolTipProps,
   EuiPopover,
   EuiBadge,
+  EuiLink,
 } from '@elastic/eui';
 import { MountPoint } from '@kbn/core/public';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
@@ -339,16 +339,17 @@ export function InternalDashboardTopNav({
               panelStyle={{ maxWidth: 350 }}
             >
               <EuiText size="s">{dashboardManagedBadge.getText()}</EuiText>
-              <EuiButtonEmpty
-                flush="both"
-                size="xs"
-                aria-label={dashboardManagedBadge.getDuplicateText()}
-                onClick={() => {
-                  dashboard.runInteractiveSave(viewMode);
-                }}
-              >
-                <EuiText size="s">{dashboardManagedBadge.getDuplicateText()}</EuiText>
-              </EuiButtonEmpty>
+              <EuiText size="s">
+                <EuiLink
+                  aria-label={dashboardManagedBadge.getDuplicateText()}
+                  onClick={() => {
+                    dashboard.runInteractiveSave(viewMode);
+                  }}
+                >
+                  {dashboardManagedBadge.getDuplicate()}
+                </EuiLink>
+                {dashboardManagedBadge.getDuplicateText()}
+              </EuiText>
             </EuiPopover>
           );
         },
