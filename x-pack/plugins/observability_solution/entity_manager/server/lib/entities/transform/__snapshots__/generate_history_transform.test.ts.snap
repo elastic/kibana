@@ -133,6 +133,11 @@ Object {
               },
             },
           },
+          Object {
+            "exists": Object {
+              "field": "log.logger",
+            },
+          },
         ],
       },
     },
@@ -273,6 +278,11 @@ Object {
     "query": Object {
       "bool": Object {
         "filter": Array [
+          Object {
+            "exists": Object {
+              "field": "log.logger",
+            },
+          },
           Object {
             "range": Object {
               "@timestamp": Object {

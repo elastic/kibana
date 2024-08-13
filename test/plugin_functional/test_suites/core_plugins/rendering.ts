@@ -328,6 +328,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.security.roleManagementEnabled (any)',
         'xpack.spaces.maxSpaces (number)',
         'xpack.spaces.allowFeatureVisibility (any)',
+        'xpack.spaces.allowSolutionVisibility (any)',
         'xpack.securitySolution.enableExperimental (array)',
         'xpack.securitySolution.prebuiltRulesPackageVersion (string)',
         'xpack.securitySolution.offeringSettings (record)',

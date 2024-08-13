@@ -24,7 +24,8 @@
     "*/plugins/**/*",
     "*/packages/**/*",
     "*/*/packages/**/*",
-    "security_solution_api_integration/**/*"
+    "security_solution_api_integration/**/*",
+    "security_solution_endpoint/**/*"
   ],
   "kbn_references": [
     "@kbn/test-suites-src",
@@ -166,7 +167,6 @@
     "@kbn/alerting-state-types",
     "@kbn/reporting-server",
     "@kbn/data-quality-plugin",
-    "@kbn/securitysolution-io-ts-list-types",
     "@kbn/ml-trained-models-utils",
     "@kbn/openapi-common",
     "@kbn/securitysolution-lists-common",
@@ -176,6 +176,7 @@
     "@kbn/osquery-plugin",
     "@kbn/entities-schema",
     "@kbn/actions-simulators-plugin",
-    "@kbn/cases-api-integration-test-plugin"
+    "@kbn/cases-api-integration-test-plugin",
+    "@kbn/mock-idp-utils"
   ]
 }

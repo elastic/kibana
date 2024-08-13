@@ -129,9 +129,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                     }
                   : { disabled: true })}
               >
-                <span className="eui-textTruncate" title={value}>
-                  {value}
-                </span>
+                <span className="eui-textTruncate">{value}</span>
                 {packagePolicy.description ? (
                   <span>
                     &nbsp;

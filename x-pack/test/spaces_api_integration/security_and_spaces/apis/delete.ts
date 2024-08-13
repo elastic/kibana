@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SuperTest } from 'supertest';
 import { AUTHENTICATION } from '../../common/lib/authentication';
 import { SPACES } from '../../common/lib/spaces';
 import { deleteTestSuiteFactory } from '../../common/suites/delete';
@@ -22,7 +23,7 @@ export default function deleteSpaceTestSuite({ getService }: FtrProviderContext)
     expectEmptyResult,
     expectNotFound,
     expectReservedSpaceResult,
-  } = deleteTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
+  } = deleteTestSuiteFactory(es, esArchiver, supertestWithoutAuth as unknown as SuperTest<any>);
 
   describe('delete', () => {
     [

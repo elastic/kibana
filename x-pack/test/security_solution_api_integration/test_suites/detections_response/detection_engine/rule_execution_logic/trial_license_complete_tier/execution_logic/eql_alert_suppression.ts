@@ -64,6 +64,7 @@ export default ({ getService }: FtrProviderContext) => {
     log,
   });
 
+  // NOTE: Add to second quality gate after feature is GA
   describe('@ess @serverless Alert Suppression for EQL rules', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');

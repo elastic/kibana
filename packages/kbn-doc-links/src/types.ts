@@ -336,6 +336,7 @@ export interface DocLinks {
     readonly configureAlertSuppression: string;
   };
   readonly securitySolution: {
+    readonly aiAssistant: string;
     readonly artifactControl: string;
     readonly avcResults: string;
     readonly trustedApps: string;
@@ -441,6 +442,7 @@ export interface DocLinks {
     syntheticsProjectMonitors: string;
     syntheticsMigrateFromIntegration: string;
     sloBurnRateRule: string;
+    aiAssistant: string;
   }>;
   readonly alerting: Readonly<{
     guide: string;

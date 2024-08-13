@@ -11,9 +11,17 @@ import { isErr, tryAsResult } from './lib/result_type';
 import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import { DecoratedError } from './task_running';
 
+export const DEFAULT_TIMEOUT = '5m';
+
 export enum TaskPriority {
   Low = 1,
   Normal = 50,
+}
+
+export enum TaskCost {
+  Tiny = 1,
+  Normal = 2,
+  ExtraLarge = 10,
 }
 
 /*
@@ -128,6 +136,10 @@ export const taskDefinitionSchema = schema.object(
      */
     priority: schema.maybe(schema.number()),
     /**
+     * Cost to run this task type. Defaults to "Normal".
+     */
+    cost: schema.number({ defaultValue: TaskCost.Normal }),
+    /**
      * An optional more detailed description of what this task does.
      */
     description: schema.maybe(schema.string()),
@@ -138,7 +150,7 @@ export const taskDefinitionSchema = schema.object(
      * the task will be re-attempted.
      */
     timeout: schema.string({
-      defaultValue: '5m',
+      defaultValue: DEFAULT_TIMEOUT,
     }),
     /**
      * Up to how many times the task should retry when it fails to run. This will
@@ -172,7 +184,7 @@ export const taskDefinitionSchema = schema.object(
     paramsSchema: schema.maybe(schema.any()),
   },
   {
-    validate({ timeout, priority }) {
+    validate({ timeout, priority, cost }) {
       if (!isInterval(timeout) || isErr(tryAsResult(() => parseIntervalAsMillisecond(timeout)))) {
         return `Invalid timeout "${timeout}". Timeout must be of the form "{number}{cadance}" where number is an integer. Example: 5m.`;
       }
@@ -181,6 +193,12 @@ export const taskDefinitionSchema = schema.object(
         return `Invalid priority "${priority}". Priority must be one of ${Object.keys(TaskPriority)
           .filter((key) => isNaN(Number(key)))
           .map((key) => `${key} => ${TaskPriority[key as keyof typeof TaskPriority]}`)}`;
+      }
+
+      if (cost && (!isNumber(cost) || !(cost in TaskCost))) {
+        return `Invalid cost "${cost}". Cost must be one of ${Object.keys(TaskCost)
+          .filter((key) => isNaN(Number(key)))
+          .map((key) => `${key} => ${TaskCost[key as keyof typeof TaskCost]}`)}`;
       }
     },
   }

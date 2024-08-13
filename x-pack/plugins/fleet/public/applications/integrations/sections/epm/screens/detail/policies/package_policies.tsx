@@ -58,13 +58,13 @@ interface InMemoryPackagePolicyAndAgentPolicy {
 
 const IntegrationDetailsLink = memo<{
   packagePolicy: InMemoryPackagePolicyAndAgentPolicy['packagePolicy'];
+  agentPolicies: InMemoryPackagePolicyAndAgentPolicy['agentPolicies'];
 }>(({ packagePolicy }) => {
   const { getHref } = useLink();
   return (
     <EuiLink
       className="eui-textTruncate"
       data-test-subj="integrationNameLink"
-      title={packagePolicy.name}
       href={getHref('integration_policy_edit', {
         packagePolicyId: packagePolicy.id,
       })}
@@ -182,8 +182,10 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.name', {
           defaultMessage: 'Integration policy',
         }),
-        render(_, { packagePolicy }) {
-          return <IntegrationDetailsLink packagePolicy={packagePolicy} />;
+        render(_, { agentPolicies, packagePolicy }) {
+          return (
+            <IntegrationDetailsLink packagePolicy={packagePolicy} agentPolicies={agentPolicies} />
+          );
         },
       },
       {

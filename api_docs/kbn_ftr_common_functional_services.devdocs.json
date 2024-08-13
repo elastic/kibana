@@ -434,7 +434,64 @@
       }
     ],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ftr-common-functional-services",
+        "id": "def-common.RoleCredentials",
+        "type": "Interface",
+        "tags": [],
+        "label": "RoleCredentials",
+        "description": [],
+        "path": "packages/kbn-ftr-common-functional-services/services/saml_auth/saml_auth_provider.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.RoleCredentials.apiKey",
+            "type": "Object",
+            "tags": [],
+            "label": "apiKey",
+            "description": [],
+            "signature": [
+              "{ id: string; name: string; }"
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/saml_auth/saml_auth_provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.RoleCredentials.apiKeyHeader",
+            "type": "Object",
+            "tags": [],
+            "label": "apiKeyHeader",
+            "description": [],
+            "signature": [
+              "{ Authorization: string; }"
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/saml_auth/saml_auth_provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.RoleCredentials.cookieHeader",
+            "type": "Object",
+            "tags": [],
+            "label": "cookieHeader",
+            "description": [],
+            "signature": [
+              "{ Cookie: string; }"
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/saml_auth/saml_auth_provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {
@@ -529,7 +586,61 @@
             "section": "def-common.RetryService",
             "text": "RetryService"
           },
-          "; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
+          "; supertestWithoutAuth: ({ getService }: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => ",
+          "node_modules/@types/supertest/lib/agent",
+          "<",
+          "SuperTestStatic",
+          ".Test>; samlAuth: ({ getService }: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => Promise<{ getInteractiveUserSessionCookieWithRoleScope(role: string): Promise<string>; getM2MApiCredentialsWithRoleScope(role: string): Promise<{ Cookie: string; }>; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
+          "UserProfile",
+          ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.RoleCredentials",
+            "text": "RoleCredentials"
+          },
+          ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.RoleCredentials",
+            "text": "RoleCredentials"
+          },
+          ">; invalidateM2mApiKeyWithRoleScope(roleCredentials: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.RoleCredentials",
+            "text": "RoleCredentials"
+          },
+          "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.InternalRequestHeader",
+            "text": "InternalRequestHeader"
+          },
+          "; DEFAULT_ROLE: string; }>; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
             "scope": "common",
@@ -579,9 +690,78 @@
             "section": "def-common.RetryService",
             "text": "RetryService"
           },
-          "; }>, ProvidedTypeMap<{}>>"
+          "; supertestWithoutAuth: ({ getService }: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => ",
+          "node_modules/@types/supertest/lib/agent",
+          "<",
+          "SuperTestStatic",
+          ".Test>; samlAuth: ({ getService }: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => Promise<{ getInteractiveUserSessionCookieWithRoleScope(role: string): Promise<string>; getM2MApiCredentialsWithRoleScope(role: string): Promise<{ Cookie: string; }>; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
+          "UserProfile",
+          ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.RoleCredentials",
+            "text": "RoleCredentials"
+          },
+          ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.RoleCredentials",
+            "text": "RoleCredentials"
+          },
+          ">; invalidateM2mApiKeyWithRoleScope(roleCredentials: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.RoleCredentials",
+            "text": "RoleCredentials"
+          },
+          "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.InternalRequestHeader",
+            "text": "InternalRequestHeader"
+          },
+          "; DEFAULT_ROLE: string; }>; }>, ProvidedTypeMap<{}>>"
         ],
         "path": "packages/kbn-ftr-common-functional-services/services/ftr_provider_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ftr-common-functional-services",
+        "id": "def-common.InternalRequestHeader",
+        "type": "Type",
+        "tags": [],
+        "label": "InternalRequestHeader",
+        "description": [],
+        "signature": [
+          "{ 'kbn-xsrf': string; } | { 'x-elastic-internal-origin': string; 'kbn-xsrf': string; }"
+        ],
+        "path": "packages/kbn-ftr-common-functional-services/services/saml_auth/default_request_headers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -601,6 +781,24 @@
             "section": "def-common.KbnClient",
             "text": "KbnClient"
           }
+        ],
+        "path": "packages/kbn-ftr-common-functional-services/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ftr-common-functional-services",
+        "id": "def-common.SupertestWithoutAuthProviderType",
+        "type": "Type",
+        "tags": [],
+        "label": "SupertestWithoutAuthProviderType",
+        "description": [],
+        "signature": [
+          "node_modules/@types/supertest/lib/agent",
+          "<",
+          "SuperTestStatic",
+          ".Test>"
         ],
         "path": "packages/kbn-ftr-common-functional-services/index.ts",
         "deprecated": false,
@@ -709,7 +907,61 @@
                     "section": "def-common.RetryService",
                     "text": "RetryService"
                   },
-                  "; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; samlAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<{ getInteractiveUserSessionCookieWithRoleScope(role: string): Promise<string>; getM2MApiCredentialsWithRoleScope(role: string): Promise<{ Cookie: string; }>; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
+                  "UserProfile",
+                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; invalidateM2mApiKeyWithRoleScope(roleCredentials: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.InternalRequestHeader",
+                    "text": "InternalRequestHeader"
+                  },
+                  "; DEFAULT_ROLE: string; }>; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -759,7 +1011,61 @@
                     "section": "def-common.RetryService",
                     "text": "RetryService"
                   },
-                  "; }>, ProvidedTypeMap<{}>>"
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; samlAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<{ getInteractiveUserSessionCookieWithRoleScope(role: string): Promise<string>; getM2MApiCredentialsWithRoleScope(role: string): Promise<{ Cookie: string; }>; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
+                  "UserProfile",
+                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; invalidateM2mApiKeyWithRoleScope(roleCredentials: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.InternalRequestHeader",
+                    "text": "InternalRequestHeader"
+                  },
+                  "; DEFAULT_ROLE: string; }>; }>, ProvidedTypeMap<{}>>"
                 ],
                 "path": "packages/kbn-ftr-common-functional-services/services/es.ts",
                 "deprecated": false,
@@ -862,7 +1168,61 @@
                     "section": "def-common.RetryService",
                     "text": "RetryService"
                   },
-                  "; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; samlAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<{ getInteractiveUserSessionCookieWithRoleScope(role: string): Promise<string>; getM2MApiCredentialsWithRoleScope(role: string): Promise<{ Cookie: string; }>; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
+                  "UserProfile",
+                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; invalidateM2mApiKeyWithRoleScope(roleCredentials: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.InternalRequestHeader",
+                    "text": "InternalRequestHeader"
+                  },
+                  "; DEFAULT_ROLE: string; }>; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -912,7 +1272,61 @@
                     "section": "def-common.RetryService",
                     "text": "RetryService"
                   },
-                  "; }>, ProvidedTypeMap<{}>>"
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; samlAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<{ getInteractiveUserSessionCookieWithRoleScope(role: string): Promise<string>; getM2MApiCredentialsWithRoleScope(role: string): Promise<{ Cookie: string; }>; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
+                  "UserProfile",
+                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; invalidateM2mApiKeyWithRoleScope(roleCredentials: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.InternalRequestHeader",
+                    "text": "InternalRequestHeader"
+                  },
+                  "; DEFAULT_ROLE: string; }>; }>, ProvidedTypeMap<{}>>"
                 ],
                 "path": "packages/kbn-ftr-common-functional-services/services/kibana_server/kibana_server.ts",
                 "deprecated": false,
@@ -1015,7 +1429,61 @@
                     "section": "def-common.RetryService",
                     "text": "RetryService"
                   },
-                  "; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; samlAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<{ getInteractiveUserSessionCookieWithRoleScope(role: string): Promise<string>; getM2MApiCredentialsWithRoleScope(role: string): Promise<{ Cookie: string; }>; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
+                  "UserProfile",
+                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; invalidateM2mApiKeyWithRoleScope(roleCredentials: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.InternalRequestHeader",
+                    "text": "InternalRequestHeader"
+                  },
+                  "; DEFAULT_ROLE: string; }>; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -1065,7 +1533,61 @@
                     "section": "def-common.RetryService",
                     "text": "RetryService"
                   },
-                  "; }>, ProvidedTypeMap<{}>>"
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; samlAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<{ getInteractiveUserSessionCookieWithRoleScope(role: string): Promise<string>; getM2MApiCredentialsWithRoleScope(role: string): Promise<{ Cookie: string; }>; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
+                  "UserProfile",
+                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; invalidateM2mApiKeyWithRoleScope(roleCredentials: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.InternalRequestHeader",
+                    "text": "InternalRequestHeader"
+                  },
+                  "; DEFAULT_ROLE: string; }>; }>, ProvidedTypeMap<{}>>"
                 ],
                 "path": "packages/kbn-ftr-common-functional-services/services/es_archiver.ts",
                 "deprecated": false,
@@ -1093,6 +1615,552 @@
             "path": "packages/kbn-ftr-common-functional-services/services/all.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.services.supertestWithoutAuth",
+            "type": "Function",
+            "tags": [],
+            "label": "supertestWithoutAuth",
+            "description": [],
+            "signature": [
+              "({ getService }: ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                "section": "def-common.FtrProviderContext",
+                "text": "FtrProviderContext"
+              },
+              ") => ",
+              "node_modules/@types/supertest/lib/agent",
+              "<",
+              "SuperTestStatic",
+              ".Test>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/all.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-services",
+                "id": "def-common.services.supertestWithoutAuth.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GenericFtrProviderContext",
+                    "text": "GenericFtrProviderContext"
+                  },
+                  "<{ es: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "default",
+                  "; kibanaServer: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.KbnClient",
+                    "text": "KbnClient"
+                  },
+                  "; esArchiver: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/es-archiver",
+                    "scope": "common",
+                    "docId": "kibKbnEsArchiverPluginApi",
+                    "section": "def-common.EsArchiver",
+                    "text": "EsArchiver"
+                  },
+                  "; retry: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RetryService",
+                    "text": "RetryService"
+                  },
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; samlAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<{ getInteractiveUserSessionCookieWithRoleScope(role: string): Promise<string>; getM2MApiCredentialsWithRoleScope(role: string): Promise<{ Cookie: string; }>; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
+                  "UserProfile",
+                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; invalidateM2mApiKeyWithRoleScope(roleCredentials: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.InternalRequestHeader",
+                    "text": "InternalRequestHeader"
+                  },
+                  "; DEFAULT_ROLE: string; }>; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "default",
+                  "; kibanaServer: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.KbnClient",
+                    "text": "KbnClient"
+                  },
+                  "; esArchiver: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/es-archiver",
+                    "scope": "common",
+                    "docId": "kibKbnEsArchiverPluginApi",
+                    "section": "def-common.EsArchiver",
+                    "text": "EsArchiver"
+                  },
+                  "; retry: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RetryService",
+                    "text": "RetryService"
+                  },
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; samlAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<{ getInteractiveUserSessionCookieWithRoleScope(role: string): Promise<string>; getM2MApiCredentialsWithRoleScope(role: string): Promise<{ Cookie: string; }>; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
+                  "UserProfile",
+                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; invalidateM2mApiKeyWithRoleScope(roleCredentials: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.InternalRequestHeader",
+                    "text": "InternalRequestHeader"
+                  },
+                  "; DEFAULT_ROLE: string; }>; }>, ProvidedTypeMap<{}>>"
+                ],
+                "path": "packages/kbn-ftr-common-functional-services/services/supertest_without_auth.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.services.samlAuth",
+            "type": "Function",
+            "tags": [],
+            "label": "samlAuth",
+            "description": [],
+            "signature": [
+              "({ getService }: ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                "section": "def-common.FtrProviderContext",
+                "text": "FtrProviderContext"
+              },
+              ") => Promise<{ getInteractiveUserSessionCookieWithRoleScope(role: string): Promise<string>; getM2MApiCredentialsWithRoleScope(role: string): Promise<{ Cookie: string; }>; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
+              "UserProfile",
+              ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+              {
+                "pluginId": "@kbn/ftr-common-functional-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                "section": "def-common.RoleCredentials",
+                "text": "RoleCredentials"
+              },
+              ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+              {
+                "pluginId": "@kbn/ftr-common-functional-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                "section": "def-common.RoleCredentials",
+                "text": "RoleCredentials"
+              },
+              ">; invalidateM2mApiKeyWithRoleScope(roleCredentials: ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                "section": "def-common.RoleCredentials",
+                "text": "RoleCredentials"
+              },
+              "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                "section": "def-common.InternalRequestHeader",
+                "text": "InternalRequestHeader"
+              },
+              "; DEFAULT_ROLE: string; }>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/all.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-services",
+                "id": "def-common.services.samlAuth.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GenericFtrProviderContext",
+                    "text": "GenericFtrProviderContext"
+                  },
+                  "<{ es: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "default",
+                  "; kibanaServer: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.KbnClient",
+                    "text": "KbnClient"
+                  },
+                  "; esArchiver: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/es-archiver",
+                    "scope": "common",
+                    "docId": "kibKbnEsArchiverPluginApi",
+                    "section": "def-common.EsArchiver",
+                    "text": "EsArchiver"
+                  },
+                  "; retry: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RetryService",
+                    "text": "RetryService"
+                  },
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; samlAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<{ getInteractiveUserSessionCookieWithRoleScope(role: string): Promise<string>; getM2MApiCredentialsWithRoleScope(role: string): Promise<{ Cookie: string; }>; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
+                  "UserProfile",
+                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; invalidateM2mApiKeyWithRoleScope(roleCredentials: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.InternalRequestHeader",
+                    "text": "InternalRequestHeader"
+                  },
+                  "; DEFAULT_ROLE: string; }>; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "default",
+                  "; kibanaServer: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.KbnClient",
+                    "text": "KbnClient"
+                  },
+                  "; esArchiver: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/es-archiver",
+                    "scope": "common",
+                    "docId": "kibKbnEsArchiverPluginApi",
+                    "section": "def-common.EsArchiver",
+                    "text": "EsArchiver"
+                  },
+                  "; retry: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RetryService",
+                    "text": "RetryService"
+                  },
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; samlAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<{ getInteractiveUserSessionCookieWithRoleScope(role: string): Promise<string>; getM2MApiCredentialsWithRoleScope(role: string): Promise<{ Cookie: string; }>; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
+                  "UserProfile",
+                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; invalidateM2mApiKeyWithRoleScope(roleCredentials: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.InternalRequestHeader",
+                    "text": "InternalRequestHeader"
+                  },
+                  "; DEFAULT_ROLE: string; }>; }>, ProvidedTypeMap<{}>>"
+                ],
+                "path": "packages/kbn-ftr-common-functional-services/services/saml_auth/saml_auth_provider.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false

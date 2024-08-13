@@ -126,11 +126,12 @@ export const LOGS_SAMPLE_ERROR = {
       defaultMessage: 'Failed to read the logs sample file',
     }
   ),
-  FORMAT: (fileType: string) =>
-    i18n.translate('xpack.integrationAssistant.step.dataStream.logsSample.errorFormat', {
-      values: { fileType },
-      defaultMessage: 'The logs sample file has not a valid {fileType} format',
-    }),
+  CAN_NOT_PARSE: i18n.translate(
+    'xpack.integrationAssistant.step.dataStream.logsSample.errorCanNotParse',
+    {
+      defaultMessage: 'Cannot parse the logs sample file as either a JSON or NDJSON file',
+    }
+  ),
   NOT_ARRAY: i18n.translate('xpack.integrationAssistant.step.dataStream.logsSample.errorNotArray', {
     defaultMessage: 'The logs sample file is not an array',
   }),

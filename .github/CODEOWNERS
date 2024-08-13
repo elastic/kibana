@@ -50,7 +50,6 @@ packages/kbn-apm-types @elastic/obs-ux-infra_services-team
 packages/kbn-apm-utils @elastic/obs-ux-infra_services-team
 test/plugin_functional/plugins/app_link_test @elastic/kibana-core
 x-pack/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
-x-pack/plugins/observability_solution/assets_data_access @elastic/obs-knowledge-team
 x-pack/test/security_api_integration/plugins/audit_log @elastic/kibana-security
 packages/kbn-avc-banner @elastic/security-defend-workflows
 packages/kbn-axe-config @elastic/kibana-qa
@@ -99,6 +98,8 @@ packages/kbn-config-schema @elastic/kibana-core
 src/plugins/console @elastic/kibana-management
 packages/content-management/content_editor @elastic/appex-sharedux
 examples/content_management_examples @elastic/appex-sharedux
+packages/content-management/favorites/favorites_public @elastic/appex-sharedux
+packages/content-management/favorites/favorites_server @elastic/appex-sharedux
 src/plugins/content_management @elastic/appex-sharedux
 packages/content-management/tabbed_table_list_view @elastic/appex-sharedux
 packages/content-management/table_list_view @elastic/appex-sharedux
@@ -392,8 +393,9 @@ src/plugins/embeddable @elastic/kibana-presentation
 x-pack/examples/embedded_lens_example @elastic/kibana-visualizations
 x-pack/plugins/encrypted_saved_objects @elastic/kibana-security
 x-pack/plugins/enterprise_search @elastic/search-kibana
-x-pack/packages/kbn-entities-schema @elastic/obs-knowledge-team
-x-pack/plugins/observability_solution/entity_manager @elastic/obs-knowledge-team
+x-pack/plugins/observability_solution/entities_data_access @elastic/obs-entities
+x-pack/packages/kbn-entities-schema @elastic/obs-entities
+x-pack/plugins/observability_solution/entity_manager @elastic/obs-entities
 examples/error_boundary @elastic/appex-sharedux
 packages/kbn-es @elastic/kibana-operations
 packages/kbn-es-archiver @elastic/kibana-operations @elastic/appex-qa
@@ -501,6 +503,7 @@ x-pack/packages/index-management @elastic/kibana-management
 x-pack/plugins/index_management @elastic/kibana-management
 test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
 x-pack/packages/ml/inference_integration_flyout @elastic/ml-ui
+x-pack/plugins/inference @elastic/kibana-core
 x-pack/packages/kbn-infra-forge @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/infra @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
 x-pack/plugins/ingest_pipelines @elastic/kibana-management
@@ -777,6 +780,7 @@ packages/kbn-securitysolution-t-grid @elastic/security-detection-engine
 packages/kbn-securitysolution-utils @elastic/security-detection-engine
 packages/kbn-server-http-tools @elastic/kibana-core
 packages/kbn-server-route-repository @elastic/obs-knowledge-team
+packages/kbn-server-route-repository-client @elastic/obs-knowledge-team
 packages/kbn-server-route-repository-utils @elastic/obs-knowledge-team
 x-pack/plugins/serverless @elastic/appex-sharedux
 packages/serverless/settings/common @elastic/appex-sharedux @elastic/kibana-management
@@ -863,6 +867,7 @@ packages/kbn-stdio-dev-helpers @elastic/kibana-operations
 packages/kbn-storybook @elastic/kibana-operations
 x-pack/plugins/observability_solution/synthetics/e2e @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/synthetics @elastic/obs-ux-management-team
+x-pack/packages/kbn-synthetics-private-location @elastic/obs-ux-management-team
 x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
 x-pack/test/plugin_api_perf/plugins/task_manager_performance @elastic/response-ops
 x-pack/plugins/task_manager @elastic/response-ops
@@ -1275,6 +1280,10 @@ x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /x-pack/test_serverless/functional/test_suites/security/ftr/ @elastic/appex-qa
 /x-pack/test_serverless/functional/test_suites/common/home_page/  @elastic/appex-qa
 /x-pack/test_serverless/**/services/ @elastic/appex-qa
+/packages/kbn-es/src/stateful_resources/roles.yml @elastic/appex-qa
+x-pack/test/api_integration/deployment_agnostic/default_configs/ @elastic/appex-qa
+x-pack/test/api_integration/deployment_agnostic/services/ @elastic/appex-qa
+x-pack/test/**/deployment_agnostic/ @elastic/appex-qa #temporarily to monitor tests migration
 
 # Core
 /config/ @elastic/kibana-core
@@ -1289,6 +1298,7 @@ x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /x-pack/test_serverless/**/test_suites/common/saved_objects_management/ @elastic/kibana-core
 /x-pack/test_serverless/api_integration/test_suites/common/core/ @elastic/kibana-core
 /x-pack/test_serverless/api_integration/test_suites/**/telemetry/ @elastic/kibana-core
+/x-pack/plugins/inference @elastic/kibana-core @elastic/obs-ai-assistant @elastic/security-generative-ai
 #CC# /src/core/server/csp/ @elastic/kibana-core
 #CC# /src/plugins/saved_objects/ @elastic/kibana-core
 #CC# /x-pack/plugins/cloud/ @elastic/kibana-core
@@ -1520,18 +1530,18 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 
 ## Generative AI owner connectors
 # OpenAI
-/x-pack/plugins/stack_connectors/public/connector_types/openai @elastic/security-generative-ai @elastic/obs-knowledge-team
-/x-pack/plugins/stack_connectors/server/connector_types/openai @elastic/security-generative-ai @elastic/obs-knowledge-team
-/x-pack/plugins/stack_connectors/common/openai @elastic/security-generative-ai @elastic/obs-knowledge-team
+/x-pack/plugins/stack_connectors/public/connector_types/openai @elastic/security-generative-ai @elastic/obs-ai-assistant
+/x-pack/plugins/stack_connectors/server/connector_types/openai @elastic/security-generative-ai @elastic/obs-ai-assistant
+/x-pack/plugins/stack_connectors/common/openai @elastic/security-generative-ai @elastic/obs-ai-assistant
 # Bedrock
-/x-pack/plugins/stack_connectors/public/connector_types/bedrock @elastic/security-generative-ai
-/x-pack/plugins/stack_connectors/server/connector_types/bedrock @elastic/security-generative-ai
-/x-pack/plugins/stack_connectors/common/bedrock @elastic/security-generative-ai
+/x-pack/plugins/stack_connectors/public/connector_types/bedrock @elastic/security-generative-ai @elastic/obs-ai-assistant
+/x-pack/plugins/stack_connectors/server/connector_types/bedrock @elastic/security-generative-ai @elastic/obs-ai-assistant
+/x-pack/plugins/stack_connectors/common/bedrock @elastic/security-generative-ai @elastic/obs-ai-assistant
 
 # Gemini
-/x-pack/plugins/stack_connectors/public/connector_types/gemini @elastic/security-generative-ai
-/x-pack/plugins/stack_connectors/server/connector_types/gemini @elastic/security-generative-ai
-/x-pack/plugins/stack_connectors/common/gemini @elastic/security-generative-ai
+/x-pack/plugins/stack_connectors/public/connector_types/gemini @elastic/security-generative-ai @elastic/obs-ai-assistant
+/x-pack/plugins/stack_connectors/server/connector_types/gemini @elastic/security-generative-ai @elastic/obs-ai-assistant
+/x-pack/plugins/stack_connectors/common/gemini @elastic/security-generative-ai @elastic/obs-ai-assistant
 
 ## Defend Workflows owner connectors
 /x-pack/plugins/stack_connectors/public/connector_types/sentinelone @elastic/security-defend-workflows

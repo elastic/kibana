@@ -9,8 +9,6 @@ paths:
       x-codegen-enabled: true
       operationId: FindEndpointListItems
       summary: Finds endpoint list items
-      tags:
-        - Endpoint exceptions API
       parameters:
         - name: filter
           in: query

@@ -31,6 +31,16 @@ export interface Dictionary<TValue> {
   [id: string]: TValue;
 }
 
+export interface ListingPageUrlState {
+  pageSize: number;
+  pageIndex: number;
+  sortField: string;
+  sortDirection: string;
+  queryText?: string;
+  showPerPageOptions?: boolean;
+  showAll?: boolean;
+}
+
 export type Accessor = '_a' | '_g';
 export type SetUrlState = (
   accessor: Accessor,
@@ -241,7 +251,7 @@ export class PageUrlStateService<T> {
   }
 }
 
-interface PageUrlState {
+export interface PageUrlState {
   pageKey: string;
   pageUrlState: object;
 }
