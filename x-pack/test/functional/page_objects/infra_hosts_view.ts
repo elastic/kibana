@@ -247,17 +247,17 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     // Sorting
-    getCpuUsageHeader() {
-      return testSubjects.find('tableHeaderCell_cpu_3');
+    getMemoryHeader() {
+      return testSubjects.find('tableHeaderCell_memory_5');
     },
 
     getTitleHeader() {
       return testSubjects.find('tableHeaderCell_title_2');
     },
 
-    async sortByCpuUsage() {
-      const diskLatency = await this.getCpuUsageHeader();
-      const button = await testSubjects.findDescendant('tableHeaderSortButton', diskLatency);
+    async sortByMemoryUsage() {
+      const memory = await this.getMemoryHeader();
+      const button = await testSubjects.findDescendant('tableHeaderSortButton', memory);
       await button.click();
     },
 

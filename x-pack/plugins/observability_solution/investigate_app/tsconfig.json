@@ -47,10 +47,10 @@
     "@kbn/unified-search-plugin",
     "@kbn/es-query",
     "@kbn/server-route-repository",
-    "@kbn/management-settings-ids",
     "@kbn/security-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/esql-datagrid",
     "@kbn/server-route-repository-utils",
+    "@kbn/core-saved-objects-server",
   ],
 }

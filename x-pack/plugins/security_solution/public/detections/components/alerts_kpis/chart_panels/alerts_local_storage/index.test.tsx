@@ -10,10 +10,6 @@ import React from 'react';
 
 import { useAlertsLocalStorage } from '.';
 import { TestProviders } from '../../../../../common/mock';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
-jest.mock('../../../../../common/hooks/use_experimental_features');
 
 describe('useAlertsLocalStorage', () => {
   const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -21,7 +17,6 @@ describe('useAlertsLocalStorage', () => {
   );
 
   test('it returns the expected defaults', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     const { result } = renderHook(() => useAlertsLocalStorage(), { wrapper });
 
     const defaults = Object.fromEntries(
