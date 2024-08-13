@@ -10,6 +10,8 @@ import { ToolingLog } from '@kbn/tooling-log';
 import type { ScriptInferenceClient, KibanaClient } from '../../util/kibana_client';
 import { InferenceEvaluationClient } from '../evaluation_client';
 
+// make services globals so they can more easily be used in the tests
+
 function createErrorThrowingProxy(name: string): any {
   return new Proxy(
     {},

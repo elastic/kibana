@@ -8,7 +8,7 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/inference/public', '<rootDir>/x-pack/plugins/inference/server'],
+  roots: ['<rootDir>/x-pack/plugins/inference/public', '<rootDir>/x-pack/plugins/inference/server', '<rootDir>/x-pack/plugins/inference/common'],
   setupFiles: [],
   collectCoverage: true,
   collectCoverageFrom: [
