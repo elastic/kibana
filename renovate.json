@@ -21,6 +21,12 @@
       "enabled": false
     },
     {
+      "matchPackageNames": [
+        "docker.elastic.co/wolfi/chainguard-base"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "GitHub actions",
       "matchManagers": ["github-actions"],
       "reviewers": ["team:kibana-operations"],
@@ -119,6 +125,15 @@
     {
       "groupName": "typescript-eslint",
       "matchDepPatterns": ["^@typescript-eslint"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "eslint-plugin-depend",
+      "matchDepPatterns": ["eslint-plugin-depend"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
@@ -443,7 +458,19 @@
         "^src/dev/build/tasks/os_packages/docker_generator/run\\.ts$"
       ],
       "matchStrings": [
-        "docker\\.elastic\\.co/wolfi/chainguard-base:(?<currentValue>[-a-zA-Z0-9.]+)?(?:@(?<currentDigest>sha256:[a-fA-F0-9]+))?"
+        "(?<depName>docker\\.elastic\\.co/wolfi/chainguard-base):(?<currentValue>[-a-zA-Z0-9.]+)?(?:@(?<currentDigest>sha256:[a-fA-F0-9]+))?"
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "description": "Update pipelib image",
+      "customType": "regex",
+      "fileMatch": [
+        "^\\.buildkite/pipeline-resource-definitions/scripts/validate-pipeline-definition\\.sh$",
+        "^\\.buildkite/scripts/steps/checks/renovate\\.sh$"
+      ],
+      "matchStrings": [
+        "(?<depName>docker\\.elastic\\.co/ci-agent-images/pipelib):(?<currentValue>[-a-zA-Z0-9.]+)?(?:@(?<currentDigest>sha256:[a-fA-F0-9]+))?"
       ],
       "datasourceTemplate": "docker"
     }

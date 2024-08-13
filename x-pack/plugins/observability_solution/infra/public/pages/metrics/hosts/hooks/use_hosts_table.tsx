@@ -287,10 +287,10 @@ export const useHostsTable = () => {
           />
         ),
         width: metricColumnsWidth,
-        field: 'cpuTotal',
+        field: 'cpuV2',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-cpuUsage',
-        render: (avg: number) => formatMetric('cpuTotal', avg),
+        render: (avg: number) => formatMetric('cpuV2', avg),
         align: 'right',
       },
       {
@@ -362,7 +362,7 @@ export const useHostsTable = () => {
           />
         ),
         width: '12%',
-        field: 'rx',
+        field: 'rxV2',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-rx',
         render: (avg: number) => formatMetric('rx', avg),
@@ -377,7 +377,7 @@ export const useHostsTable = () => {
           />
         ),
         width: '12%',
-        field: 'tx',
+        field: 'txV2',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-tx',
         render: (avg: number) => formatMetric('tx', avg),
