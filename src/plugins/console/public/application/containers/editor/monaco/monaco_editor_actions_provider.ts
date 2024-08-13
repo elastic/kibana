@@ -409,11 +409,6 @@ export class MonacoEditorActionsProvider {
       return null;
     }
 
-    // if no end offset, the request is invalid, no autocomplete
-    if (!currentRequest.endOffset) {
-      return null;
-    }
-
     // if not on the 1st line of the request, suggest request body
     return AutocompleteType.BODY;
   }
