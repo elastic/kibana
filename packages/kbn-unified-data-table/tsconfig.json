@@ -37,5 +37,6 @@
     "@kbn/react-field",
     "@kbn/shared-ux-utility",
     "@kbn/unified-field-list",
+    "@kbn/core-notifications-browser",
   ]
 }

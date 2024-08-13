@@ -11,6 +11,7 @@ import fetch from 'node-fetch';
 import pRetry from 'p-retry';
 import { Logger } from '../utils/create_logger';
 import { kibanaHeaders } from '../shared/client_headers';
+import { getFetchAgent } from '../../cli/utils/ssl';
 
 export class InfraSynthtraceKibanaClient {
   private readonly logger: Logger;
@@ -30,6 +31,7 @@ export class InfraSynthtraceKibanaClient {
     const response = await fetch(fleetPackageApiUrl, {
       method: 'GET',
       headers: kibanaHeaders(),
+      agent: getFetchAgent(fleetPackageApiUrl),
     });
 
     const responseJson = await response.json();
@@ -54,6 +56,7 @@ export class InfraSynthtraceKibanaClient {
         method: 'POST',
         headers: kibanaHeaders(),
         body: '{"force":true}',
+        agent: getFetchAgent(url),
       });
     });
 
