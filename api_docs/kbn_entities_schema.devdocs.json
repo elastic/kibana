@@ -51,6 +51,72 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/entities-schema",
+        "id": "def-common.entitiesAliasPattern",
+        "type": "Function",
+        "tags": [],
+        "label": "entitiesAliasPattern",
+        "description": [],
+        "signature": [
+          "({\n  type,\n  dataset,\n}: AliasPatternOptions<TDataset>) => `entities-${string}-${TDataset}`"
+        ],
+        "path": "x-pack/packages/kbn-entities-schema/src/schema/patterns.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/entities-schema",
+            "id": "def-common.entitiesAliasPattern.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  type,\n  dataset,\n}",
+            "description": [],
+            "signature": [
+              "AliasPatternOptions<TDataset>"
+            ],
+            "path": "x-pack/packages/kbn-entities-schema/src/schema/patterns.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/entities-schema",
+        "id": "def-common.entitiesIndexPattern",
+        "type": "Function",
+        "tags": [],
+        "label": "entitiesIndexPattern",
+        "description": [],
+        "signature": [
+          "({\n  schemaVersion,\n  dataset,\n  definitionId,\n}: IndexPatternOptions<TDataset>) => `.entities.v${number}.${TDataset}.${string}`"
+        ],
+        "path": "x-pack/packages/kbn-entities-schema/src/schema/patterns.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/entities-schema",
+            "id": "def-common.entitiesIndexPattern.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  schemaVersion,\n  dataset,\n  definitionId,\n}",
+            "description": [],
+            "signature": [
+              "IndexPatternOptions<TDataset>"
+            ],
+            "path": "x-pack/packages/kbn-entities-schema/src/schema/patterns.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],
@@ -69,6 +135,66 @@
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "@kbn/entities-schema",
+        "id": "def-common.ENTITY_BASE_PREFIX",
+        "type": "string",
+        "tags": [],
+        "label": "ENTITY_BASE_PREFIX",
+        "description": [],
+        "signature": [
+          "\"entities\""
+        ],
+        "path": "x-pack/packages/kbn-entities-schema/src/schema/patterns.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/entities-schema",
+        "id": "def-common.ENTITY_HISTORY",
+        "type": "string",
+        "tags": [],
+        "label": "ENTITY_HISTORY",
+        "description": [],
+        "signature": [
+          "\"history\""
+        ],
+        "path": "x-pack/packages/kbn-entities-schema/src/schema/patterns.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/entities-schema",
+        "id": "def-common.ENTITY_LATEST",
+        "type": "string",
+        "tags": [],
+        "label": "ENTITY_LATEST",
+        "description": [],
+        "signature": [
+          "\"latest\""
+        ],
+        "path": "x-pack/packages/kbn-entities-schema/src/schema/patterns.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/entities-schema",
+        "id": "def-common.ENTITY_SCHEMA_VERSION_V1",
+        "type": "string",
+        "tags": [],
+        "label": "ENTITY_SCHEMA_VERSION_V1",
+        "description": [],
+        "signature": [
+          "\"v1\""
+        ],
+        "path": "x-pack/packages/kbn-entities-schema/src/schema/patterns.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/entities-schema",
         "id": "def-common.EntityDefinition",

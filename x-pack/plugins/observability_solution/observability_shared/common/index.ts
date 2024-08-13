@@ -147,3 +147,39 @@ export { getInspectResponse } from './utils/get_inspect_response';
 
 export const LOGS_ONBOARDING_FEEDBACK_LINK = 'https://ela.st/logs-onboarding-feedback';
 export const LOGS_EXPLORER_FEEDBACK_LINK = 'https://ela.st/explorer-feedback';
+
+export type {
+  ServiceOverviewParams,
+  ServiceOverviewLocator,
+  TransactionDetailsByNameParams,
+  TransactionDetailsByNameLocator,
+  AssetDetailsFlyoutLocator,
+  AssetDetailsFlyoutLocatorParams,
+  AssetDetailsLocator,
+  AssetDetailsLocatorParams,
+  HostsLocator,
+  HostsLocatorParams,
+  InventoryLocator,
+  InventoryLocatorParams,
+  FlamegraphLocatorParams,
+  FlamegraphLocator,
+  StacktracesLocatorParams,
+  StacktracesLocator,
+  TopNFunctionsLocatorParams,
+  TopNFunctionsLocator,
+} from './locators';
+
+export {
+  ServiceOverviewLocatorDefinition,
+  TransactionDetailsByNameLocatorDefinition,
+  ASSET_DETAILS_FLYOUT_LOCATOR_ID,
+  AssetDetailsFlyoutLocatorDefinition,
+  ASSET_DETAILS_LOCATOR_ID,
+  AssetDetailsLocatorDefinition,
+  HostsLocatorDefinition,
+  INVENTORY_LOCATOR_ID,
+  InventoryLocatorDefinition,
+  FlamegraphLocatorDefinition,
+  StacktracesLocatorDefinition,
+  TopNFunctionsLocatorDefinition,
+} from './locators';
