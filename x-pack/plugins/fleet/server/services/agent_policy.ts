@@ -540,16 +540,12 @@ class AgentPolicyService {
             (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicySO.id)) || [];
         }
         if (options.withAgentCount) {
-          await getAgentsByKuery(
-            appContextService.getInternalUserESClient(),
-            appContextService.getInternalUserSOClientForSpaceId(agentPolicy.space_ids?.[0]),
-            {
-              showInactive: true,
-              perPage: 0,
-              page: 1,
-              kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
-            }
-          ).then(({ total }) => (agentPolicy.agents = total));
+          await getAgentsByKuery(appContextService.getInternalUserESClient(), soClient, {
+            showInactive: true,
+            perPage: 0,
+            page: 1,
+            kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
+          }).then(({ total }) => (agentPolicy.agents = total));
         } else {
           agentPolicy.agents = 0;
         }
@@ -1413,15 +1409,18 @@ class AgentPolicyService {
     );
   }
 
-  public async getInactivityTimeouts(
-    soClient: SavedObjectsClientContract
-  ): Promise<Array<{ policyIds: string[]; inactivityTimeout: number }>> {
-    const findRes = await soClient.find<AgentPolicySOAttributes>({
+  public async getInactivityTimeouts(): Promise<
+    Array<{ policyIds: string[]; inactivityTimeout: number }>
+  > {
+    const internalSoClientWithoutSpaceExtension =
+      appContextService.getInternalUserSOClientWithoutSpaceExtension();
+    const findRes = await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
       type: SAVED_OBJECT_TYPE,
       page: 1,
       perPage: SO_SEARCH_LIMIT,
       filter: `${SAVED_OBJECT_TYPE}.attributes.inactivity_timeout > 0`,
       fields: [`inactivity_timeout`],
+      namespaces: ['*'],
     });
 
     const groupedResults = groupBy(findRes.saved_objects, (so) => so.attributes.inactivity_timeout);

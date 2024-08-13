@@ -188,7 +188,7 @@ export default function (providerContext: FtrProviderContext) {
               description: 'tata',
               space_ids: ['default'],
             }),
-          /400 Bad Request No enough permissions to remove policies fromspace test1/
+          /400 Bad Request No enough permissions to remove policies from space test1/
         );
       });
     });
