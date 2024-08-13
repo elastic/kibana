@@ -130,8 +130,8 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         }
       },
       async expectSectionExists(sectionId: NavigationId) {
-        log.debug('ServerlessCommonNavigation.sidenav.expectSectionExists', sectionId);
-        await testSubjects.existOrFail(getSectionIdTestSubj(sectionId));
+        log.debug('SolutionNavigation.sidenav.expectSectionExists', sectionId);
+        await testSubjects.existOrFail(getSectionIdTestSubj(sectionId), { timeout: TIMEOUT_CHECK });
       },
       async isSectionOpen(sectionId: NavigationId) {
         await this.expectSectionExists(sectionId);
@@ -140,7 +140,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         return isExpanded === 'true';
       },
       async expectSectionOpen(sectionId: NavigationId) {
-        log.debug('ServerlessCommonNavigation.sidenav.expectSectionOpen', sectionId);
+        log.debug('SolutionNavigation.sidenav.expectSectionOpen', sectionId);
         await this.expectSectionExists(sectionId);
         await retry.waitFor(`section ${sectionId} to be open`, async () => {
           const isOpen = await this.isSectionOpen(sectionId);
@@ -155,7 +155,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         });
       },
       async openSection(sectionId: NavigationId) {
-        log.debug('ServerlessCommonNavigation.sidenav.openSection', sectionId);
+        log.debug('SolutionNavigation.sidenav.openSection', sectionId);
         await this.expectSectionExists(sectionId);
         const isOpen = await this.isSectionOpen(sectionId);
         if (isOpen) return;
@@ -187,7 +187,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
 
         if (currentlyCollapsed !== shouldBeCollapsed) {
           log.debug(
-            'ServerlessCommonNavigation.sidenav.toggle',
+            'SolutionNavigation.sidenav.toggle',
             shouldBeCollapsed ? 'Collapsing' : 'Expanding'
           );
 
@@ -215,10 +215,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         }
       },
       async expectBreadcrumbExists(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
-        log.debug(
-          'ServerlessCommonNavigation.breadcrumbs.expectBreadcrumbExists',
-          JSON.stringify(by)
-        );
+        log.debug('SolutionNavigation.breadcrumbs.expectBreadcrumbExists', JSON.stringify(by));
         if ('deepLinkId' in by) {
           await testSubjects.existOrFail(`~breadcrumb-deepLinkId-${by.deepLinkId}`, {
             timeout: TIMEOUT_CHECK,
@@ -242,7 +239,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       },
       async expectBreadcrumbTexts(expectedBreadcrumbTexts: string[]) {
         log.debug(
-          'ServerlessCommonNavigation.breadcrumbs.expectBreadcrumbTexts',
+          'SolutionNavigation.breadcrumbs.expectBreadcrumbTexts',
           JSON.stringify(expectedBreadcrumbTexts)
         );
         await retry.try(async () => {
