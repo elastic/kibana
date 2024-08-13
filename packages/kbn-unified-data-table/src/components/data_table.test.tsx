@@ -30,9 +30,10 @@ import {
   testTrailingControlColumns,
 } from '../../__mocks__/external_control_columns';
 import { DatatableColumnType } from '@kbn/expressions-plugin/common';
-import { queryByRole, render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CELL_CLASS } from '../utils/get_render_cell_value';
+import { defaultTimeColumnWidth } from '../constants';
 
 const mockUseDataGridColumnsCellActions = jest.fn((prop: unknown) => []);
 jest.mock('@kbn/cell-actions', () => ({
@@ -92,7 +93,7 @@ const DataTable = (props: Partial<UnifiedDataTableProps>) => (
 
 const renderDataTable = (props: Partial<UnifiedDataTableProps>) => {
   const DataTableWrapped = () => {
-    const [columns, setColumns] = useState(props.columns);
+    const [columns, setColumns] = useState(props.columns ?? []);
     const [settings, setSettings] = useState(props.settings);
 
     return (
@@ -296,34 +297,19 @@ describe('UnifiedDataTable', () => {
 
   describe('edit field button', () => {
     it('should render the edit field button if onFieldEdited is provided', async () => {
-      const component = await getComponent({
-        ...getProps(),
-        columns: ['message'],
-        onFieldEdited: jest.fn(),
-      });
-      expect(findTestSubject(component, 'dataGridHeaderCellActionGroup-message').exists()).toBe(
-        false
-      );
-      findTestSubject(component, 'dataGridHeaderCell-message').find('button').simulate('click');
-      expect(findTestSubject(component, 'dataGridHeaderCellActionGroup-message').exists()).toBe(
-        true
-      );
-      expect(findTestSubject(component, 'gridEditFieldButton').exists()).toBe(true);
+      renderDataTable({ columns: ['message'], onFieldEdited: jest.fn() });
+      expect(screen.queryByTestId('dataGridHeaderCellActionGroup-message')).not.toBeInTheDocument();
+      userEvent.click(screen.getByRole('button', { name: 'message' }));
+      expect(screen.getByTestId('dataGridHeaderCellActionGroup-message')).toBeInTheDocument();
+      expect(screen.getByTestId('gridEditFieldButton')).toBeInTheDocument();
     });
 
     it('should not render the edit field button if onFieldEdited is not provided', async () => {
-      const component = await getComponent({
-        ...getProps(),
-        columns: ['message'],
-      });
-      expect(findTestSubject(component, 'dataGridHeaderCellActionGroup-message').exists()).toBe(
-        false
-      );
-      findTestSubject(component, 'dataGridHeaderCell-message').find('button').simulate('click');
-      expect(findTestSubject(component, 'dataGridHeaderCellActionGroup-message').exists()).toBe(
-        true
-      );
-      expect(findTestSubject(component, 'gridEditFieldButton').exists()).toBe(false);
+      renderDataTable({ columns: ['message'] });
+      expect(screen.queryByTestId('dataGridHeaderCellActionGroup-message')).not.toBeInTheDocument();
+      userEvent.click(screen.getByRole('button', { name: 'message' }));
+      expect(screen.getByTestId('dataGridHeaderCellActionGroup-message')).toBeInTheDocument();
+      expect(screen.queryByTestId('gridEditFieldButton')).not.toBeInTheDocument();
     });
   });
 
@@ -946,6 +932,7 @@ describe('UnifiedDataTable', () => {
     const getColumnHeader = (name: string) => screen.getByRole('columnheader', { name });
     const queryColumnHeader = (name: string) => screen.queryByRole('columnheader', { name });
     const getButton = (name: string) => screen.getByRole('button', { name });
+    const queryButton = (name: string) => screen.queryByRole('button', { name });
 
     it('should reset the last column to auto width when removing the only auto width column', async () => {
       renderDataTable({
@@ -984,6 +971,29 @@ describe('UnifiedDataTable', () => {
       expect(queryColumnHeader('message')).not.toBeInTheDocument();
       expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
       expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
+    });
+
+    it('should show the reset width button only for absolute width columns, and allow resetting to default width', async () => {
+      renderDataTable({
+        columns: ['message', 'extension'],
+        settings: {
+          columns: {
+            '@timestamp': { width: 50 },
+            extension: { width: 50 },
+          },
+        },
+      });
+      expect(getColumnHeader('@timestamp')).toHaveStyle({ width: '50px' });
+      userEvent.click(getButton('@timestamp'));
+      userEvent.click(getButton('Reset width'), undefined, { skipPointerEventsCheck: true });
+      expect(getColumnHeader('@timestamp')).toHaveStyle({ width: `${defaultTimeColumnWidth}px` });
+      expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
+      userEvent.click(getButton('message'));
+      expect(queryButton('Reset width')).not.toBeInTheDocument();
+      expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
+      userEvent.click(getButton('extension'));
+      userEvent.click(getButton('Reset width'), undefined, { skipPointerEventsCheck: true });
+      expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
     });
   });
 });

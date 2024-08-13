@@ -149,6 +149,11 @@ function buildEuiGridColumn({
   const resetWidthButton: EuiListGroupItemProps | undefined =
     onResize && columnWidth > 0
       ? {
+          // @ts-expect-error
+          // We need to force a key here because EuiListGroup uses the array index as a key by default,
+          // which causes re-render issues with conditional items like this one, and can result in
+          // incorrect attributes (e.g. title) on the HTML element as well as test failures
+          key: 'reset-width',
           label: i18n.translate('unifiedDataTable.grid.resetColumnWidthButton', {
             defaultMessage: 'Reset width',
           }),
