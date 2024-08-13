@@ -6,6 +6,11 @@
  */
 
 import { RequestHandlerContext } from '@kbn/core/server';
+import {
+  CreateEntityDefinitionQuery,
+  createEntityDefinitionQuerySchema,
+} from '@kbn/entities-schema';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { SetupRouteOptions } from '../types';
 import {
   canEnableEntityDiscovery,
@@ -26,10 +31,12 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
   server,
   logger,
 }: SetupRouteOptions<T>) {
-  router.put<unknown, unknown, unknown>(
+  router.put<unknown, CreateEntityDefinitionQuery, unknown>(
     {
       path: '/internal/entities/managed/enablement',
-      validate: false,
+      validate: {
+        query: buildRouteValidationWithZod(createEntityDefinitionQuerySchema),
+      },
     },
     async (context, req, res) => {
       try {
@@ -87,6 +94,7 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
           builtInDefinitions,
           esClient,
           soClient,
+          installOnly: req.query.installOnly,
         });
 
         return res.ok({ body: { success: true } });
