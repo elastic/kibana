@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { findInvestigationsByAlertParamsSchema } from '../../common/schema/find_by_alert';
 import { findInvestigationsParamsSchema } from '../../common/schema/find';
 import { createInvestigationParamsSchema } from '../../common/schema/create';
 import { createInvestigation } from '../services/create_investigation';
@@ -13,6 +14,7 @@ import { createInvestigateAppServerRoute } from './create_investigate_app_server
 import { findInvestigations } from '../services/find_investigations';
 import { getInvestigationParamsSchema } from '../../common/schema/get';
 import { getInvestigation } from '../services/get_investigation';
+import { findInvestigationsByAlert } from '../services/find_investigation_by_alert';
 
 const createInvestigationRoute = createInvestigateAppServerRoute({
   endpoint: 'POST /api/observability/investigations 2023-10-31',
@@ -42,6 +44,20 @@ const findInvestigationsRoute = createInvestigateAppServerRoute({
   },
 });
 
+const findInvestigationsByAlertRoute = createInvestigateAppServerRoute({
+  endpoint: 'GET /api/observability/investigations/alert/{alertId} 2023-10-31',
+  options: {
+    tags: [],
+  },
+  params: findInvestigationsByAlertParamsSchema,
+  handler: async (params) => {
+    const soClient = (await params.context.core).savedObjects.client;
+    const repository = investigationRepositoryFactory({ soClient, logger: params.logger });
+
+    return await findInvestigationsByAlert(params.params.path, repository);
+  },
+});
+
 const getInvestigationRoute = createInvestigateAppServerRoute({
   endpoint: 'GET /api/observability/investigations/{id} 2023-10-31',
   options: {
@@ -61,6 +77,7 @@ export function getGlobalInvestigateAppServerRouteRepository() {
     ...createInvestigationRoute,
     ...findInvestigationsRoute,
     ...getInvestigationRoute,
+    ...findInvestigationsByAlertRoute,
   };
 }
 

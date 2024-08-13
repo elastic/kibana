@@ -25,7 +25,6 @@ import {
   ALERT_RULE_UUID,
   ALERT_STATUS_ACTIVE,
   ALERT_UUID,
-  ALERT_INVESTIGATION_IDS,
   ALERT_RULE_CATEGORY,
   ALERT_START,
   ALERT_END,
@@ -41,7 +40,7 @@ import type { TopAlert } from '../../../typings/alerts';
 import { paths } from '../../../../common/locators/paths';
 import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
 import { useCreateInvestigation } from '../hooks/use_create_investigation';
-import { useUpdateInvestigationIds } from '../hooks/use_update_investigation_ids';
+import { useFetchInvestigationsByAlert } from '../hooks/use_get_investigation_details';
 
 export interface HeaderActionsProps {
   alert: TopAlert | null;
@@ -70,7 +69,9 @@ export function HeaderActions({
     ruleId: alert?.fields[ALERT_RULE_UUID] || '',
   });
 
-  const investigationId = alert?.fields[ALERT_INVESTIGATION_IDS] ?? 'new';
+  const { data: investigations } = useFetchInvestigationsByAlert({
+    alertId: alert?.fields[ALERT_UUID] ?? '',
+  });
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [ruleConditionsFlyoutOpen, setRuleConditionsFlyoutOpen] = useState<boolean>(false);
@@ -124,7 +125,6 @@ export function HeaderActions({
   };
 
   const { mutateAsync: createInvestigation } = useCreateInvestigation();
-  const { mutateAsync: updateInvestigationIds } = useUpdateInvestigationIds();
 
   const alertStart = alert?.fields[ALERT_START];
   const alertEnd = alert?.fields[ALERT_END];
@@ -132,7 +132,7 @@ export function HeaderActions({
   const createOrOpenInvestigation = async () => {
     if (!alert) return;
 
-    if (!alert.fields[ALERT_INVESTIGATION_IDS]) {
+    if (!investigations || investigations.length === 0) {
       const paddedAlertTimeRange = getPaddedAlertTimeRange(alertStart!, alertEnd);
 
       const investigationResponse = await createInvestigation({
@@ -152,16 +152,10 @@ export function HeaderActions({
         },
       });
 
-      updateInvestigationIds({
-        index: alertIndex ?? '',
-        alertUuid: alert.fields[ALERT_UUID],
-        investigationIds: [investigationResponse.id],
-      });
-
       navigateToApp('investigate', { path: `/${investigationResponse.id}`, replace: false });
     } else {
       navigateToApp('investigate', {
-        path: `/${alert?.fields[ALERT_INVESTIGATION_IDS]}`,
+        path: `/${investigations[0].id}`,
         replace: false,
       });
     }
@@ -183,7 +177,9 @@ export function HeaderActions({
                 <EuiText size="s">
                   {i18n.translate('xpack.observability.alertDetails.investigateAlert', {
                     defaultMessage:
-                      investigationId === 'new' ? 'Start investigation' : 'Ongoing investigation',
+                      !investigations || investigations.length === 0
+                        ? 'Start investigation'
+                        : 'Ongoing investigation',
                   })}
                 </EuiText>
               </EuiButton>
