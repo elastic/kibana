@@ -349,8 +349,8 @@ function getSourcesRetriever(resourceRetriever?: ESQLCallbacks) {
     return buildSourcesDefinitions(
       list
         .filter(({ hidden }) => !hidden)
-        .map(({ name, dataStreams, title }) => {
-          return { name, isIntegration: Boolean(dataStreams && dataStreams.length), title };
+        .map(({ name, dataStreams, title, type }) => {
+          return { name, isIntegration: Boolean(dataStreams && dataStreams.length), title, type };
         })
     );
   };
