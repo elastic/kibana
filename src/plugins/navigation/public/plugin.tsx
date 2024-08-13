@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { of, ReplaySubject, take, map, Observable } from 'rxjs';
+import { of, ReplaySubject, take, map, Observable, switchMap } from 'rxjs';
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -123,9 +123,14 @@ export class NavigationPublicPlugin
         if (!this.isSolutionNavEnabled) return;
         this.addSolutionNavigation(solutionNavigation);
       },
-      isSolutionNavEnabled$: activeSpace$.pipe(
-        map((activeSpace) => {
-          return this.isSolutionNavEnabled && getIsProjectNav(activeSpace?.solution);
+      isSolutionNavEnabled$: of(this.getIsUnauthenticated(core.http)).pipe(
+        switchMap((isUnauthenticated) => {
+          if (isUnauthenticated) return of(false);
+          return activeSpace$.pipe(
+            map((activeSpace) => {
+              return this.isSolutionNavEnabled && getIsProjectNav(activeSpace?.solution);
+            })
+          );
         })
       ),
     };
