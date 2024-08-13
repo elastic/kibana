@@ -1,6 +1,6 @@
-extends: ["spectral:oas"]
+extends: ['spectral:oas']
 rules:
-# Built-in rules
+  # Built-in rules
   # Descriptions
   oas3-parameter-description: warn
   oas2-parameter-description: warn
@@ -13,10 +13,10 @@ rules:
   oas3-valid-media-example: false
   oas3-valid-schema-example: false
   oas2-valid-media-example: false
-  # Operations 
-  operation-operationId: warn
-  operation-operationId-unique: warn
-  operation-operationId-valid-in-url: warn
+  # Operations
+  operation-operationId: error
+  operation-operationId-unique: error
+  operation-operationId-valid-in-url: error
   operation-tag-defined: warn
   operation-tags: warn
   # Responses
@@ -25,28 +25,30 @@ rules:
   oas3-schema: error
   oas2-schema: error
   array-items: false
+  # Bump.sh handles $ref siblings. Documentation wise it's convenient to have properties like descriptions next to $ref.
+  no-$ref-siblings: off
   # Tags
   openapi-tags: warn
   openapi-tags-alphabetical: info
   # Turn off some built-in rules
   operation-description: false
   operation-singular-tag: false
-# Custom rules
+  # Custom rules
   # Descriptions
   avoid-problematic-words:
     description: Ban certain words from descriptions
-    message: "Use appropriate replacements for problematic terms"
+    message: 'Use appropriate replacements for problematic terms'
     severity: warn
-    given: "$..*.description"
+    given: '$..*.description'
     then:
       function: pattern
       functionOptions:
         notMatch: /(blacklist|whitelist|execute|kill)/i
   # Examples
   operation-success-examples:
-    formats: ["oas3_1"]
+    formats: ['oas3_1']
     description: Response code 200 should have at least one example.
-    message: "Each response body should have a realistic example. It must not contain any sensitive or confidential data."
+    message: 'Each response body should have a realistic example. It must not contain any sensitive or confidential data.'
     severity: info
     given: $.paths[*][*].responses.[200].content.[application/json]
     then:
@@ -55,7 +57,7 @@ rules:
   # Extensions
   internal-extension:
     description: Operations should not have x-internal extension.
-    message: "Do not publish x-internal operations"
+    message: 'Do not publish x-internal operations'
     severity: error
     given: $.paths[*][*]
     then:
@@ -64,16 +66,16 @@ rules:
   # Operations
   operation-summary:
     description: Operations should have summaries.
-    message: "Each operation should have a summary"
+    message: 'Each operation should have a summary'
     severity: error
     recommended: true
     given: $.paths[*][*]
     then:
       field: summary
-      function: defined   
+      function: defined
   operation-summary-length:
     description: Operation summary should be between 5 and 45 characters
-    given: "$.paths[*][*]"
+    given: '$.paths[*][*]'
     then:
       field: summary
       function: length
@@ -83,14 +85,14 @@ rules:
     severity: warn
   simple-verbs-in-summary:
     given:
-      - "$.paths[*][*].summary"
+      - '$.paths[*][*].summary'
     then:
       function: pattern
       functionOptions:
-        notMatch: "Retrieve|Return|List *"
+        notMatch: 'Retrieve|Return|List *'
     severity: warn
     description: Summaries should use common verbs.
-    message: "Summaries should use common verbs like Get, Update, Delete whenever possible"
+    message: 'Summaries should use common verbs like Get, Update, Delete whenever possible'
   # NOTE: This one hiccups on acronyms so perhaps too noisy
   # docs-operation-summary-sentence-case:
   #   description: Operation summary should be sentence cased
@@ -101,4 +103,3 @@ rules:
   #     functionOptions:
   #       match: /^[A-Z]+[^A-Z]+$/
   #   severity: warn
-
