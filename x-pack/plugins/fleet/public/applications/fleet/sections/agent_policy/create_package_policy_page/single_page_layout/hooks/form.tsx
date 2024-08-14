@@ -386,9 +386,13 @@ export function useOnSubmit({
       if (!error) {
         setSavedPackagePolicy(data!.item);
 
+        const newAgentlessPolicy = agentPolicies.find(
+          (policy: AgentPolicy) => policy?.supports_agentless === true
+        );
+
         const promptForAgentEnrollment =
           !(agentCount && agentPolicies.length > 0) &&
-          !isAgentlessPackagePolicy(data!.item) &&
+          !isAgentlessAgentPolicy(newAgentlessPolicy) &&
           hasFleetAddAgentsPrivileges;
 
         if (promptForAgentEnrollment && hasAzureArmTemplate) {
