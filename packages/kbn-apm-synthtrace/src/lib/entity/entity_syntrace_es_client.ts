@@ -10,23 +10,62 @@ import { Client } from '@elastic/elasticsearch';
 import { PassThrough, Readable, Transform, pipeline } from 'stream';
 import { ESDocumentWithOperation } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';
+import fetch from 'node-fetch';
 import { SynthtraceEsClient } from '../shared/base_client';
 import { Logger } from '../utils/create_logger';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
 import { getDedotTransform } from '../shared/get_dedot_transform';
 import { createEntityLatestAggregator } from './aggregators/create_entity_aggregator';
 import { fork } from '../utils/stream_utils';
+import { kibanaHeaders } from '../shared/client_headers';
+import { getFetchAgent } from '../../cli/utils/ssl';
+
+interface EntityDefinitionResponse {
+  definitions: Array<{ type: string; state: { installed: boolean; running: boolean } }>;
+}
 
 export class EntitySynthtraceEsClient extends SynthtraceEsClient<any> {
-  constructor(options: { client: Client; logger: Logger } & any) {
+  private kibanaTarget: string;
+
+  constructor({
+    kibanaTarget,
+    ...options
+  }: { client: Client; logger: Logger; kibanaTarget: string } & any) {
     super({
       ...options,
       pipeline: entityPipeline(),
     });
+    this.kibanaTarget = kibanaTarget;
     this.indices = [
       '.entities.v1.history.builtin_services*',
       '.entities.v1.latest.builtin_services*',
     ];
+  }
+
+  async installEntityIndexPatterns() {
+    const url = `${this.kibanaTarget}/internal/entities/definition`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: kibanaHeaders(),
+      agent: getFetchAgent(url),
+    });
+    const entityDefinition: EntityDefinitionResponse = await response.json();
+
+    const hasServiceEntityDefinition = entityDefinition.definitions.find(
+      (definition) => definition.type === 'service'
+    )?.state.installed;
+
+    if (hasServiceEntityDefinition === true) {
+      this.logger.debug('Service Entity is already defined');
+    } else {
+      this.logger.debug('Installing Service Entity definition');
+      const entityEnablementUrl = `${this.kibanaTarget}/internal/entities/managed/enablement?installOnly=true`;
+      await fetch(entityEnablementUrl, {
+        method: 'PUT',
+        headers: kibanaHeaders(),
+        agent: getFetchAgent(url),
+      });
+    }
   }
 }
 

@@ -19,6 +19,9 @@ const scenario: Scenario<Partial<EntityFields>> = async (runOptions) => {
   const SYNTH_NODE_TRACES_LOGS_ENTITY_ID = generateShortId();
 
   return {
+    bootstrap: async ({ entityEsClient }) => {
+      await entityEsClient.installEntityIndexPatterns();
+    },
     generate: ({ range, clients: { entityEsClient } }) => {
       const entityHistoryTimestamps = range.interval('1m').rate(1);
 

@@ -30,7 +30,16 @@ export async function startLiveDataUpload({
   );
 
   const scenario = await getScenario({ file, logger });
-  const { generate } = await scenario({ ...runOptions, logger });
+  const { generate, bootstrap: scenarioBootsrap } = await scenario({ ...runOptions, logger });
+
+  if (scenarioBootsrap) {
+    await scenarioBootsrap({
+      apmEsClient,
+      logsEsClient,
+      infraEsClient,
+      entityEsClient,
+    });
+  }
 
   const bucketSizeInMs = 1000 * 60;
   let requestedUntil = start;

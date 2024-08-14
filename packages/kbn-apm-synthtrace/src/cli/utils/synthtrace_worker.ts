@@ -25,9 +25,10 @@ export interface WorkerData {
   workerId: string;
   esUrl: string;
   version: string;
+  kibanaUrl: string;
 }
 
-const { bucketFrom, bucketTo, runOptions, esUrl, version } = workerData as WorkerData;
+const { bucketFrom, bucketTo, runOptions, esUrl, version, kibanaUrl } = workerData as WorkerData;
 
 async function start() {
   const logger = loggerProxy;
@@ -36,6 +37,7 @@ async function start() {
     concurrency: runOptions.concurrency,
     target: esUrl,
     logger,
+    kibanaTarget: kibanaUrl,
   });
 
   const apmEsClient = getApmEsClient({

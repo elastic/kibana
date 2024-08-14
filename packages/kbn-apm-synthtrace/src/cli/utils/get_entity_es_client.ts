@@ -16,8 +16,10 @@ export function getEntityEsClient({
   target,
   logger,
   concurrency,
+  kibanaTarget,
 }: Pick<RunOptions, 'concurrency'> & {
   target: string;
+  kibanaTarget: string;
   logger: Logger;
 }) {
   const client = new Client({
@@ -30,5 +32,6 @@ export function getEntityEsClient({
     logger,
     concurrency,
     refreshAfterIndex: true,
+    kibanaTarget,
   });
 }

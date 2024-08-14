@@ -57,6 +57,7 @@ export async function bootstrap(runOptions: RunOptions) {
 
   const entityEsClient = getEntityEsClient({
     target: esUrl,
+    kibanaTarget: kibanaUrl,
     logger,
     concurrency: runOptions.concurrency,
   });
