@@ -23,7 +23,8 @@ export const isAgentlessEnabled = () => {
   return isAgentlessApiEnabled() || isDefaultAgentlessPolicyEnabled();
 };
 
-const AGENTLESS_API_BASE_PATH = '/api/v1/ess';
+const AGENTLESS_ESS_API_BASE_PATH = '/api/v1/ess';
+const AGENTLESS_SERVERLESS_API_BASE_PATH = '/api/v1/serverless';
 
 type AgentlessApiEndpoints = '/deployments' | `/deployments/${string}`;
 
@@ -31,5 +32,9 @@ export const prependAgentlessApiBasePathToEndpoint = (
   agentlessConfig: FleetConfigType['agentless'],
   endpoint: AgentlessApiEndpoints
 ) => {
-  return `${agentlessConfig.api.url}${AGENTLESS_API_BASE_PATH}${endpoint}`;
+  const cloudSetup = appContextService.getCloud();
+  const endpointPrefix = cloudSetup?.isServerlessEnabled
+    ? AGENTLESS_SERVERLESS_API_BASE_PATH
+    : AGENTLESS_ESS_API_BASE_PATH;
+  return `${agentlessConfig.api.url}${endpointPrefix}${endpoint}`;
 };

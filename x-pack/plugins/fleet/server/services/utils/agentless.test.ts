@@ -166,7 +166,10 @@ describe('prependAgentlessApiBasePathToEndpoint', () => {
     jest.clearAllMocks();
   });
 
-  it('should prepend the agentless api base path to the endpoint', () => {
+  it('should prepend the agentless api base path to the endpoint with ess if in cloud', () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isCloudEnabled: true, isServerlessEnabled: false } as any);
     const agentlessConfig = {
       api: {
         url: 'https://agentless-api.com',
@@ -179,7 +182,27 @@ describe('prependAgentlessApiBasePathToEndpoint', () => {
     );
   });
 
+  it('should prepend the agentless api base path to the endpoint with serverless if in serverless', () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isCloudEnabled: false, isServerlessEnabled: true } as any);
+    const agentlessConfig = {
+      api: {
+        url: 'https://agentless-api.com',
+      },
+    } as any;
+    const endpoint = '/deployments';
+
+    expect(prependAgentlessApiBasePathToEndpoint(agentlessConfig, endpoint)).toBe(
+      'https://agentless-api.com/api/v1/serverless/deployments'
+    );
+  });
+
   it('should prepend the agentless api base path to the endpoint with a dynamic path', () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isCloudEnabled: true, isServerlessEnabled: false } as any);
+
     const agentlessConfig = {
       api: {
         url: 'https://agentless-api.com',
