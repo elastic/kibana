@@ -28,11 +28,11 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
     expandFirstAlertHostFlyout();
   });
 
-  it('should display Misconfiguration preview under Insights Entities', () => {
-    cy.log('check if Misconfiguration preview section is rendered');
-    cy.get(HOST_INSIGHT_MISCONFIGURATION).should('exist');
+  it('should not display Misconfiguration preview under Insights Entities when all Indices is empty', () => {
+    cy.log('check if Misconfiguration preview section is not rendered');
+    cy.get(HOST_INSIGHT_MISCONFIGURATION).should('not.exist');
 
-    cy.log('check if Misconfiguration preview title is shown');
-    cy.get(HOST_INSIGHT_MISCONFIGURATION_TITLE).should('exist');
+    cy.log('check if Misconfiguration preview title is not shown');
+    cy.get(HOST_INSIGHT_MISCONFIGURATION_TITLE).should('not.exist');
   });
 });
