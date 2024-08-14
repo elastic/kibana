@@ -29,6 +29,7 @@ import {
 } from '@elastic/eui';
 import { MountPoint } from '@kbn/core/public';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -339,17 +340,26 @@ export function InternalDashboardTopNav({
               panelStyle={{ maxWidth: 350 }}
             >
               <EuiText size="s">{dashboardManagedBadge.getText()}</EuiText>
-              <EuiText size="s">
-                <EuiLink
-                  aria-label={dashboardManagedBadge.getDuplicateText()}
-                  onClick={() => {
-                    dashboard.runInteractiveSave(viewMode);
-                  }}
-                >
-                  {dashboardManagedBadge.getDuplicate()}
-                </EuiLink>
-                {dashboardManagedBadge.getDuplicateText()}
-              </EuiText>
+              <FormattedMessage
+                id="dashboard.managedContentPopoverButton"
+                defaultMessage="{Duplicate} it to make changes."
+                values={{
+                  Duplicate: (
+                    <EuiLink
+                      id="dashboardManagedContentPopoverButton"
+                      onClick={() => {
+                        dashboard.runInteractiveSave(viewMode);
+                      }}
+                      aria-label={dashboardManagedBadge.getDuplicateText()}
+                    >
+                      <FormattedMessage
+                        id="dashboard.managedContentPopoverButtonText"
+                        defaultMessage="Duplicate"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
             </EuiPopover>
           );
         },
