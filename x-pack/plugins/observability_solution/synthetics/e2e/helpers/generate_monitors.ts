@@ -8,23 +8,34 @@
 import axios from 'axios';
 import moment from 'moment';
 
-const NUMBER_OF_MONITORS = 10;
+const UP_MONITORS = 0;
+const DOWN_MONITORS = 10;
 
 export const generateMonitors = async () => {
   // eslint-disable-next-line no-console
-  console.log(`Generating ${NUMBER_OF_MONITORS} monitors`);
-  for (let i = 0; i < NUMBER_OF_MONITORS; i++) {
-    const { data } = await axios.request({
-      data: getHttpMonitor(),
-      method: 'post',
-      url: 'http://127.0.0.1:5601/test/api/synthetics/monitors',
-      auth: { username: 'elastic', password: 'jdpAyka8HBiq81dFAIB86Nkp' },
-      headers: { 'kbn-xsrf': 'true', 'elastic-api-version': '2023-10-31' },
-    });
+  console.log(`Generating ${UP_MONITORS} up monitors`);
+  for (let i = 0; i < UP_MONITORS; i++) {
+    await createMonitor(getHttpMonitor());
+  }
+
+  // eslint-disable-next-line no-console
+  console.log(`Generating ${DOWN_MONITORS} down monitors`);
+  for (let i = 0; i < DOWN_MONITORS; i++) {
+    await createMonitor(getHttpMonitor(true));
   }
 };
 
-const getHttpMonitor = () => {
+const createMonitor = async (monitor: any) => {
+  const { data } = await axios.request({
+    data: monitor,
+    method: 'post',
+    url: 'http://127.0.0.1:5601/test/api/synthetics/monitors',
+    auth: { username: 'elastic', password: 'jdpAyka8HBiq81dFAIB86Nkp' },
+    headers: { 'kbn-xsrf': 'true', 'elastic-api-version': '2023-10-31' },
+  });
+};
+
+const getHttpMonitor = (isDown?: boolean) => {
   return {
     type: 'http',
     form_monitor_type: 'http',
@@ -50,14 +61,14 @@ const getHttpMonitor = () => {
     max_attempts: 2,
     revision: 1,
     __ui: { is_tls_enabled: false },
-    urls: 'https://elastic.co',
+    urls: 'https://www.google.com',
     max_redirects: '0',
     'url.port': null,
     password: '',
     proxy_url: '',
     proxy_headers: {},
     'check.response.body.negative': [],
-    'check.response.body.positive': [],
+    'check.response.body.positive': isDown ? ["i don't exist"] : [],
     'check.response.json': [],
     'response.include_body': 'on_error',
     'check.response.headers': {},
