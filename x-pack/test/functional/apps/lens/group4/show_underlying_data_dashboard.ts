@@ -125,6 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.switchToWindow(discoverWindowHandle);
 
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
 
       await retry.waitFor('filter count to be correct', async () => {
         const filterCount = await filterBarService.getFilterCount();
