@@ -23,13 +23,14 @@ const handleCreateMappingChunks = async (state: EcsMappingState) => {
   // Cherrypick a shallow copy of state to pass to subgraph
   const stateParams = {
     exAnswer: state.exAnswer,
+    prefixedSamples: state.prefixedSamples,
     ecs: state.ecs,
     dataStreamName: state.dataStreamName,
     packageName: state.packageName,
   };
   if (Object.keys(state.currentMapping).length === 0) {
     return state.sampleChunks.map((chunk) => {
-      return new Send('subGraph', { ...stateParams, formattedSamples: chunk });
+      return new Send('subGraph', { ...stateParams, combinedSamples: chunk });
     });
   }
   return 'modelOutput';

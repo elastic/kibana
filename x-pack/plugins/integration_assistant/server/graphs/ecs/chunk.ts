@@ -45,7 +45,8 @@ export function merge(target: NestedObject, source: NestedObject): NestedObject 
 // Takes an array of JSON strings and merges them into a single object.
 // The resulting object will be a combined object that includes all unique fields from the input samples.
 // While merging the samples, the function will prioritize non-empty values over empty values.
-export function chunkSamples(objects: string[]): string[] {
+// The function then splits the combined object into chunks of a given size, to be used in the ECS mapping subgraph.
+export function mergeAndChunkSamples(objects: string[], chunkSize: number): string[] {
   let result: NestedObject = {};
 
   for (const obj of objects) {
@@ -53,15 +54,15 @@ export function chunkSamples(objects: string[]): string[] {
     result = merge(result, sample);
   }
 
-  const chunks = generateChunks(result, 5);
+  const chunks = generateChunks(result, chunkSize);
 
-  // Each chunk goes into formattedSamples for the subgraph, which should be a nicely formatted string
+  // Each chunk is used for the combinedSamples state when passed to the subgraph, which should be a nicely formatted string
   return chunks.map((chunk) => JSON.stringify(chunk));
 }
 
 // This function takes the already merged array of samples, and splits it up into chunks of a given size.
 // Size is determined by the count of fields with an actual value (not nested objects etc).
-// This is to be able to run the ECS mapping sub graph concurrently with a larger number of unique fields without getting confused.
+// This is to be able to run the ECS mapping sub graph concurrently with a larger number of total unique fields without getting confused.
 function generateChunks(mergedSamples: NestedObject, chunkSize: number): NestedObject[] {
   const chunks: NestedObject[] = [];
   let currentChunk: NestedObject = {};

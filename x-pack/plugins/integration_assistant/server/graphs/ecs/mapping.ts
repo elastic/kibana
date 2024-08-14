@@ -21,11 +21,10 @@ export async function handleEcsMapping(
 
   const currentMapping = await ecsMainGraph.invoke({
     ecs: state.ecs,
-    formatted_samples: state.formattedSamples,
+    combined_samples: state.combinedSamples,
     package_name: state.packageName,
     data_stream_name: state.dataStreamName,
     ex_answer: state.exAnswer,
   });
-
   return { currentMapping, lastExecutedChain: 'ecsMapping' };
 }

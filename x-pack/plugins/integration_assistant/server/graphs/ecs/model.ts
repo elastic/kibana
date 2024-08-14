@@ -7,7 +7,7 @@
 import { modifySamples } from '../../util/samples';
 import { ECS_EXAMPLE_ANSWER, ECS_FIELDS } from './constants';
 import { createPipeline } from './pipeline';
-import { chunkSamples } from './chunk';
+import { mergeAndChunkSamples } from './chunk';
 import type { EcsMappingState } from '../../types';
 
 export function modelSubOutput(state: EcsMappingState): Partial<EcsMappingState> {
@@ -18,12 +18,12 @@ export function modelSubOutput(state: EcsMappingState): Partial<EcsMappingState>
 }
 
 export function modelInput(state: EcsMappingState): Partial<EcsMappingState> {
-  const samples = modifySamples(state);
-  const sampleChunks = chunkSamples(samples);
+  const prefixedSamples = modifySamples(state);
+  const sampleChunks = mergeAndChunkSamples(prefixedSamples, state.chunkSize);
   return {
     exAnswer: JSON.stringify(ECS_EXAMPLE_ANSWER, null, 2),
     ecs: JSON.stringify(ECS_FIELDS, null, 2),
-    samples,
+    prefixedSamples,
     sampleChunks,
     finalized: false,
     lastExecutedChain: 'modelInput',

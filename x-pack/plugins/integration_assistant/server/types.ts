@@ -57,10 +57,11 @@ export interface CategorizationState {
 
 export interface EcsMappingState {
   ecs: string;
+  chunkSize: number;
   lastExecutedChain: string;
   rawSamples: string[];
-  samples: string[];
-  formattedSamples: string;
+  prefixedSamples: string[];
+  combinedSamples: string;
   sampleChunks: string[];
   exAnswer: string;
   packageName: string;

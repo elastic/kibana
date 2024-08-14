@@ -14,6 +14,10 @@ export const graphState: StateGraphArgs<EcsMappingState>['channels'] = {
     value: (x: string, y?: string) => y ?? x,
     default: () => '',
   },
+  chunkSize: {
+    value: (x: number, y?: number) => y ?? x,
+    default: () => 10,
+  },
   lastExecutedChain: {
     value: (x: string, y?: string) => y ?? x,
     default: () => '',
@@ -22,11 +26,11 @@ export const graphState: StateGraphArgs<EcsMappingState>['channels'] = {
     value: (x: string[], y?: string[]) => y ?? x,
     default: () => [],
   },
-  samples: {
+  prefixedSamples: {
     value: (x: string[], y?: string[]) => y ?? x,
     default: () => [],
   },
-  formattedSamples: {
+  combinedSamples: {
     value: (x: string, y?: string) => y ?? x,
     default: () => '',
   },
