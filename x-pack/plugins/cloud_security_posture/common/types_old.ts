@@ -13,7 +13,6 @@ import type { CspBenchmarkRuleMetadata } from './types/latest';
 
 export type {
   CspFinding,
-  CspStatusCode,
   IndexStatus,
   IndexDetails,
   BaseCspSetupBothPolicy,
@@ -203,3 +202,12 @@ export interface AggFieldBucket {
     doc_count?: string;
   }>;
 }
+
+export type CspStatusCode =
+  | 'indexed' // latest findings index exists and has results
+  | 'indexing' // index timeout was not surpassed since installation, assumes data is being indexed
+  | 'unprivileged' // user lacks privileges for the latest findings index
+  | 'index-timeout' // index timeout was surpassed since installation
+  | 'not-deployed' // no healthy agents were deployed
+  | 'not-installed' // number of installed csp integrations is 0;
+  | 'waiting_for_results'; // have healthy agents but no findings at all, assumes data is being indexed for the 1st time
