@@ -6,10 +6,11 @@
  */
 
 import { v4 } from 'uuid';
+
 import {
   CreateInvestigationNoteInput,
   CreateInvestigationNoteResponse,
-} from '../../common/schema/create_notes';
+} from '@kbn/investigate-plugin/common/schema/create_notes';
 import { InvestigationRepository } from './investigation_repository';
 
 export async function createInvestigationNote(
