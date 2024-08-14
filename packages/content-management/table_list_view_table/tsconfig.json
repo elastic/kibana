@@ -35,7 +35,8 @@
     "@kbn/core-user-profile-browser",
     "@kbn/react-kibana-mount",
     "@kbn/content-management-user-profiles",
-    "@kbn/recently-accessed"
+    "@kbn/recently-accessed",
+    "@kbn/content-management-favorites-public"
   ],
   "exclude": [
     "target/**/*"

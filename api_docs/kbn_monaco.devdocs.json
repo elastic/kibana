@@ -581,6 +581,21 @@
           },
           {
             "parentPluginId": "@kbn/monaco",
+            "id": "def-common.LangModuleType.foldingRangeProvider",
+            "type": "Object",
+            "tags": [],
+            "label": "foldingRangeProvider",
+            "description": [],
+            "signature": [
+              "languages",
+              ".FoldingRangeProvider | undefined"
+            ],
+            "path": "packages/kbn-monaco/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
             "id": "def-common.LangModuleType.getSuggestionProvider",
             "type": "Object",
             "tags": [],
