@@ -210,6 +210,7 @@ export const getDatasetQualityTableColumns = ({
     {
       name: nameColumnName,
       field: 'title',
+      'data-test-subj': 'datasetQualityNameColumn',
       sortable: true,
       render: (title: string, dataStreamStat: DataStreamStat) => {
         const { integration, name } = dataStreamStat;
@@ -232,6 +233,7 @@ export const getDatasetQualityTableColumns = ({
     {
       name: namespaceColumnName,
       field: 'namespace',
+      'data-test-subj': 'datasetQualityNamespaceColumn',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
         <EuiBadge color="hollow">{dataStreamStat.namespace}</EuiBadge>
@@ -244,6 +246,7 @@ export const getDatasetQualityTableColumns = ({
             name: sizeColumnName,
             field: 'sizeBytes',
             sortable: true,
+            'data-test-subj': 'datasetQualitySizeColumn',
             render: (_: any, dataStreamStat: DataStreamStat) => {
               return (
                 <PrivilegesWarningIconWrapper
@@ -278,6 +281,7 @@ export const getDatasetQualityTableColumns = ({
         </EuiToolTip>
       ),
       field: 'degradedDocs.percentage',
+      'data-test-subj': 'datasetQualityQualityColumn',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
         <DatasetQualityIndicator isLoading={loadingDegradedStats} dataStreamStat={dataStreamStat} />
@@ -294,6 +298,7 @@ export const getDatasetQualityTableColumns = ({
         </EuiToolTip>
       ),
       field: 'degradedDocs.percentage',
+      'data-test-subj': 'datasetQualityPercentageColumn',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
         <DegradedDocsPercentageLink
@@ -309,6 +314,7 @@ export const getDatasetQualityTableColumns = ({
           {
             name: lastActivityColumnName,
             field: 'lastActivity',
+            'data-test-subj': 'datasetQualityLastActivityColumn',
             render: (timestamp: number, { userPrivileges, title }: DataStreamStat) => (
               <PrivilegesWarningIconWrapper
                 title={`lastActivity-${title}`}
@@ -342,6 +348,7 @@ export const getDatasetQualityTableColumns = ({
       : []),
     {
       name: actionsColumnName,
+      'data-test-subj': 'datasetQualityActionsColumn',
       render: (dataStreamStat: DataStreamStat) => (
         <RedirectLink
           dataStreamStat={dataStreamStat}
