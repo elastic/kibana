@@ -15,10 +15,7 @@ import {
   DEPLOYMENT_STATE,
   TRAINED_MODEL_TYPE,
 } from '@kbn/ml-trained-models-utils';
-import {
-  ELASTIC_MODEL_TAG,
-  MODEL_STATE,
-} from '@kbn/ml-trained-models-utils/src/constants/trained_models';
+import { MODEL_STATE } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import {
   getAnalysisType,
   type DataFrameAnalysisConfigType,
@@ -409,10 +406,7 @@ export function useModelActions({
         icon: 'download',
         type: 'icon',
         isPrimary: true,
-        available: (item) =>
-          canCreateTrainedModels &&
-          item.tags.includes(ELASTIC_MODEL_TAG) &&
-          item.state === MODEL_STATE.NOT_DOWNLOADED,
+        available: (item) => canCreateTrainedModels && item.state === MODEL_STATE.NOT_DOWNLOADED,
         enabled: (item) => !isLoading,
         onClick: async (item) => {
           onModelDownloadRequest(item.model_id);

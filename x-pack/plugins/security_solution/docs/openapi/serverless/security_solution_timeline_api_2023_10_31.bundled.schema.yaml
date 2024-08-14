@@ -1028,27 +1028,55 @@ components:
           type: boolean
         type:
           type: string
+    DataProviderQueryMatch:
+      type: object
+      properties:
+        enabled:
+          nullable: true
+          type: boolean
+        excluded:
+          nullable: true
+          type: boolean
+        id:
+          nullable: true
+          type: string
+        kqlQuery:
+          nullable: true
+          type: string
+        name:
+          nullable: true
+          type: string
+        queryMatch:
+          $ref: '#/components/schemas/QueryMatchResult'
     DataProviderResult:
       type: object
       properties:
         and:
           items:
-            $ref: '#/components/schemas/DataProviderResult'
+            $ref: '#/components/schemas/DataProviderQueryMatch'
+          nullable: true
           type: array
         enabled:
+          nullable: true
           type: boolean
         excluded:
+          nullable: true
           type: boolean
         id:
+          nullable: true
           type: string
         kqlQuery:
+          nullable: true
           type: string
         name:
+          nullable: true
           type: string
         queryMatch:
           $ref: '#/components/schemas/QueryMatchResult'
+          nullable: true
         type:
           $ref: '#/components/schemas/DataProviderType'
+          nullable: true
     DataProviderType:
       description: >-
         The type of data provider to create. Valid values are `default` and
@@ -1235,14 +1263,19 @@ components:
       type: object
       properties:
         displayField:
+          nullable: true
           type: string
         displayValue:
+          nullable: true
           type: string
         field:
+          nullable: true
           type: string
         operator:
+          nullable: true
           type: string
         value:
+          nullable: true
           type: string
     Readable:
       type: object
@@ -1295,8 +1328,10 @@ components:
       type: object
       properties:
         columns:
-          $ref: '#/components/schemas/ColumnHeaderResult'
+          items:
+            $ref: '#/components/schemas/ColumnHeaderResult'
           nullable: true
+          type: array
         created:
           nullable: true
           type: number
@@ -1331,10 +1366,22 @@ components:
           type: object
           properties:
             eventCategoryField:
+              nullable: true
               type: string
+            query:
+              nullable: true
+              type: string
+            size:
+              oneOf:
+                - nullable: true
+                  type: string
+                - nullable: true
+                  type: number
             tiebreakerField:
+              nullable: true
               type: string
             timestampField:
+              nullable: true
               type: string
         eventType:
           nullable: true
@@ -1403,18 +1450,37 @@ components:
       type: object
       properties:
         filterQuery:
+          nullable: true
           type: object
           properties:
             kuery:
+              nullable: true
               type: object
               properties:
                 expression:
+                  nullable: true
                   type: string
                 kind:
+                  nullable: true
                   type: string
             serializedQuery:
+              nullable: true
               type: string
     Sort:
+      oneOf:
+        - $ref: '#/components/schemas/SortObject'
+        - items:
+            $ref: '#/components/schemas/SortObject'
+          type: array
+    SortFieldTimeline:
+      description: The field to sort the timelines by.
+      enum:
+        - title
+        - description
+        - updated
+        - created
+      type: string
+    SortObject:
       type: object
       properties:
         columnId:
@@ -1426,14 +1492,6 @@ components:
         sortDirection:
           nullable: true
           type: string
-    SortFieldTimeline:
-      description: The field to sort the timelines by.
-      enum:
-        - title
-        - description
-        - updated
-        - created
-      type: string
     TimelineResponse:
       allOf:
         - $ref: '#/components/schemas/SavedTimeline'

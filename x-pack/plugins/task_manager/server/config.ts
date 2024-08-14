@@ -8,8 +8,12 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 export const MAX_WORKERS_LIMIT = 100;
+export const DEFAULT_CAPACITY = 10;
+export const MAX_CAPACITY = 50;
+export const MIN_CAPACITY = 5;
 export const DEFAULT_MAX_WORKERS = 10;
 export const DEFAULT_POLL_INTERVAL = 3000;
+export const MGET_DEFAULT_POLL_INTERVAL = 500;
 export const DEFAULT_VERSION_CONFLICT_THRESHOLD = 80;
 export const DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY = MAX_WORKERS_LIMIT;
 
@@ -64,6 +68,8 @@ const requestTimeoutsConfig = schema.object({
 export const configSchema = schema.object(
   {
     allow_reading_invalid_state: schema.boolean({ defaultValue: true }),
+    /* The number of normal cost tasks that this Kibana instance will run simultaneously */
+    capacity: schema.maybe(schema.number({ min: MIN_CAPACITY, max: MAX_CAPACITY })),
     ephemeral_tasks: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
       /* How many requests can Task Manager buffer before it rejects new requests. */
@@ -81,11 +87,12 @@ export const configSchema = schema.object(
       min: 1,
     }),
     /* The maximum number of tasks that this Kibana instance will run simultaneously. */
-    max_workers: schema.number({
-      defaultValue: DEFAULT_MAX_WORKERS,
-      // disable the task manager rather than trying to specify it with 0 workers
-      min: 1,
-    }),
+    max_workers: schema.maybe(
+      schema.number({
+        // disable the task manager rather than trying to specify it with 0 workers
+        min: 1,
+      })
+    ),
     /* The interval at which monotonically increasing metrics counters will reset */
     metrics_reset_interval: schema.number({
       defaultValue: DEFAULT_METRICS_RESET_INTERVAL,
@@ -127,10 +134,18 @@ export const configSchema = schema.object(
       default: taskExecutionFailureThresholdSchema,
     }),
     /* How often, in milliseconds, the task manager will look for more work. */
-    poll_interval: schema.number({
-      defaultValue: DEFAULT_POLL_INTERVAL,
-      min: 100,
-    }),
+    poll_interval: schema.conditional(
+      schema.siblingRef('claim_strategy'),
+      CLAIM_STRATEGY_MGET,
+      schema.number({
+        defaultValue: MGET_DEFAULT_POLL_INTERVAL,
+        min: 100,
+      }),
+      schema.number({
+        defaultValue: DEFAULT_POLL_INTERVAL,
+        min: 100,
+      })
+    ),
     /* How many requests can Task Manager buffer before it rejects new requests. */
     request_capacity: schema.number({
       // a nice round contrived number, feel free to change as we learn how it behaves

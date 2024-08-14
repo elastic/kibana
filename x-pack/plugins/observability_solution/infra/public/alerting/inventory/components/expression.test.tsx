@@ -128,7 +128,7 @@ describe('Expression', () => {
     const ruleParams = {
       criteria: [
         {
-          metric: 'cpu',
+          metric: 'cpuV2',
           timeSize: 1,
           timeUnit: 'm',
           threshold: [10],

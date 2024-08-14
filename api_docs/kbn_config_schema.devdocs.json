@@ -1056,7 +1056,7 @@
           {
             "parentPluginId": "@kbn/config-schema",
             "id": "def-common.Type.internalSchema",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [
               "type"
             ],
@@ -1066,6 +1066,28 @@
             ],
             "signature": [
               "AnySchema",
+              "<any> | ",
+              "ArraySchema",
+              "<any> | ",
+              "AlternativesSchema",
+              "<any> | ",
+              "BinarySchema",
+              "<any> | ",
+              "BooleanSchema",
+              "<any> | ",
+              "DateSchema",
+              "<any> | ",
+              "FunctionSchema",
+              "<any> | ",
+              "NumberSchema",
+              "<any> | ",
+              "ObjectSchema",
+              "<any> | ",
+              "StringSchema",
+              "<any> | ",
+              "LinkSchema",
+              "<any> | ",
+              "SymbolSchema",
               "<any>"
             ],
             "path": "packages/kbn-config-schema/src/types/type.ts",
@@ -1089,12 +1111,12 @@
               {
                 "parentPluginId": "@kbn/config-schema",
                 "id": "def-common.Type.Unnamed.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "AnySchema",
+                  "Schema",
                   "<any>"
                 ],
                 "path": "packages/kbn-config-schema/src/types/type.ts",
@@ -1268,7 +1290,7 @@
             "description": [],
             "signature": [
               "() => ",
-              "AnySchema",
+              "Schema",
               "<any>"
             ],
             "path": "packages/kbn-config-schema/src/types/type.ts",
