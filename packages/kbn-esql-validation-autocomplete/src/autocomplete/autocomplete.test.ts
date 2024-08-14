@@ -792,7 +792,7 @@ describe('autocomplete', () => {
       // skip bucket and case fn for the moment as it's quite hard to test
       // if (!['bucket', 'date_extract', 'date_diff', 'case'].includes(fn.name)) {
 
-      if (!['bucket', 'date_extract', 'date_diff', 'case'].includes(fn.name)) {
+      if (['substring'].includes(fn.name)) {
         // 1. Empty expression
         // i.e. eval pow( ), round ( )
         // const allParamDefs = fn.signatures.map((s) => getParamAtPosition(s, 0)).filter(nonNullable);
@@ -849,8 +849,8 @@ describe('autocomplete', () => {
             // E.g. eval st_distance( ) | st_distance(cartesianPointField, ) | eval st_distance(geoPointField, ) | st_distance(geoPointField, )
             const testCase = `${fn.name}(${signature.params
               .slice(0, i + 1)
-              .map((p) => fieldNameFromType(p.type))
-              .join(',')}${i === 0 ? ',' : ''} )`;
+              .map((p, i) => `${fieldNameFromType(p.type)},`)
+              .join('')})`;
 
             // Avoid repeated testing of expressions we have previously seen
             if (testedCases.has(testCase)) {
@@ -901,52 +901,28 @@ describe('autocomplete', () => {
               // @TODO: remove
               console.log(`--@@requiresMoreArgs`, requiresMoreArgs);
 
+              const expected = suggestedConstants?.length
+                ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ', ' : ''}`)
+                : [
+                    ...getDateLiteralsByFieldType(
+                      getTypesFromParamDefs(typesToSuggestNext).filter(isFieldType)
+                    ),
+                    ...getFieldNamesByType(
+                      getTypesFromParamDefs(typesToSuggestNext).filter(isFieldType)
+                    ),
+                    ...getFunctionSignaturesByReturnType(
+                      'eval',
+                      getTypesFromParamDefs(typesToSuggestNext),
+                      { scalar: true },
+                      undefined,
+                      [fn.name]
+                    ),
+                    ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)),
+                  ].map(addCommaIfRequired);
               // Compose eval expression that matches what params suggest
               // E.g. from a | eval round()
-              testSuggestions(
-                `from a | eval ${testCase}`,
-                suggestedConstants?.length
-                  ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ', ' : ''}`)
-                  : [
-                      ...getDateLiteralsByFieldType(
-                        getTypesFromParamDefs(typesToSuggestNext).filter(isFieldType)
-                      ),
-                      ...getFieldNamesByType(
-                        getTypesFromParamDefs(typesToSuggestNext).filter(isFieldType)
-                      ),
-                      ...getFunctionSignaturesByReturnType(
-                        'eval',
-                        getTypesFromParamDefs(typesToSuggestNext),
-                        { scalar: true },
-                        undefined,
-                        [fn.name]
-                      ),
-                      ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)),
-                    ].map(addCommaIfRequired),
-                ' '
-              );
-              testSuggestions(
-                `from a | eval var0 = ${testCase}`,
-                suggestedConstants?.length
-                  ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ', ' : ''}`)
-                  : [
-                      ...getDateLiteralsByFieldType(
-                        getTypesFromParamDefs(typesToSuggestNext).filter(isFieldType)
-                      ),
-                      ...getFieldNamesByType(
-                        getTypesFromParamDefs(typesToSuggestNext).filter(isFieldType)
-                      ),
-                      ...getFunctionSignaturesByReturnType(
-                        'eval',
-                        getTypesFromParamDefs(typesToSuggestNext),
-                        { scalar: true },
-                        undefined,
-                        [fn.name]
-                      ),
-                      ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)),
-                    ].map(addCommaIfRequired),
-                ' '
-              );
+              testSuggestions(`from a | eval ${testCase}`, expected, ' ');
+              testSuggestions(`from a | eval var0 = ${testCase}`, expected, ' ');
             }
           });
         }

@@ -1382,6 +1382,14 @@ async function getFunctionArgsSuggestions(
       )
     );
 
+    // @TODO: remove
+    // @TODO: remove
+    console.log(`--@@paramDefsWhichSupportFields`, paramDefsWhichSupportFields);
+    console.log(
+      `--@@getTypesFromParamDefs(paramDefsWhichSupportFields)`,
+      getTypesFromParamDefs(paramDefsWhichSupportFields)
+    );
+
     // Fields
     suggestions.push(
       ...pushItUpInTheList(
@@ -1390,6 +1398,21 @@ async function getFunctionArgsSuggestions(
           advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
         }),
         true
+      )
+    );
+    // @TODO: remove
+    console.log(
+      `--@@getCompatibleFunctionDefinition(
+        command.name,
+        option?.name,
+        getTypesFromParamDefs(paramDefsWhichSupportFields) as string[],
+        fnToIgnore
+      )`,
+      getCompatibleFunctionDefinition(
+        command.name,
+        option?.name,
+        getTypesFromParamDefs(paramDefsWhichSupportFields) as string[],
+        fnToIgnore
       )
     );
 
@@ -1433,7 +1456,7 @@ async function getFunctionArgsSuggestions(
       }
     }
 
-    if (hasMoreMandatoryArgs || canHaveMoreArgs) {
+    if (hasMoreMandatoryArgs) {
       // suggest a comma if there's another argument for the function
       suggestions.push(commaCompleteItem);
     }
