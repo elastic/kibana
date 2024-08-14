@@ -35,6 +35,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     version: '1.14.0',
   };
 
+  const defaultDataStreamPrivileges = {
+    datasetUserPrivileges: { canRead: true, canMonitor: true, canViewIntegrations: true },
+  };
+
   async function callApiAs(user: DatasetQualityApiClientKey, dataStream: string) {
     return await datasetQualityApiClient[user]({
       endpoint: 'GET /internal/dataset_quality/data_streams/{dataStream}/settings',
@@ -99,11 +103,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(err.res.body.message.indexOf(expectedMessage)).to.greaterThan(-1);
       });
 
-      it('returns {} if matching data stream is not available', async () => {
+      it('returns only privileges if matching data stream is not available', async () => {
         const nonExistentDataSet = 'Non-existent';
         const nonExistentDataStream = `${type}-${nonExistentDataSet}-${namespace}`;
         const resp = await callApiAs('datasetQualityLogsUser', nonExistentDataStream);
-        expect(resp.body).empty();
+        expect(resp.body).eql(defaultDataStreamPrivileges);
       });
 
       it('returns "createdOn" correctly', async () => {
@@ -136,6 +140,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
         expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
         expect(resp.body.integration).to.be('apache');
+        expect(resp.body.datasetUserPrivileges).to.eql(
+          defaultDataStreamPrivileges.datasetUserPrivileges
+        );
       });
 
       after(async () => {

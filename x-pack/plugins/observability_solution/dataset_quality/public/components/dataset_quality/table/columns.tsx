@@ -37,6 +37,7 @@ import { PrivilegesWarningIconWrapper, IntegrationIcon } from '../../common';
 import { useRedirectLink } from '../../../hooks';
 import { FlyoutDataset } from '../../../state_machines/dataset_quality_controller';
 import { DegradedDocsPercentageLink } from './degraded_docs_percentage_link';
+import { TimeRangeConfig } from '../../../../common/types';
 
 const expandDatasetAriaLabel = i18n.translate('xpack.datasetQuality.expandLabel', {
   defaultMessage: 'Expand',
@@ -167,6 +168,7 @@ export const getDatasetQualityTableColumns = ({
   showFullDatasetNames,
   isSizeStatsAvailable,
   isActiveDataset,
+  timeRange,
 }: {
   fieldFormats: FieldFormatsStart;
   canUserMonitorDataset: boolean;
@@ -178,6 +180,7 @@ export const getDatasetQualityTableColumns = ({
   isSizeStatsAvailable: boolean;
   openFlyout: (selectedDataset: FlyoutDataset) => void;
   isActiveDataset: (lastActivity: number) => boolean;
+  timeRange: TimeRangeConfig;
 }): Array<EuiBasicTableColumn<DataStreamStat>> => {
   return [
     {
@@ -296,6 +299,7 @@ export const getDatasetQualityTableColumns = ({
         <DegradedDocsPercentageLink
           isLoading={loadingDegradedStats}
           dataStreamStat={dataStreamStat}
+          timeRange={timeRange}
         />
       ),
       width: '140px',
@@ -339,7 +343,11 @@ export const getDatasetQualityTableColumns = ({
     {
       name: actionsColumnName,
       render: (dataStreamStat: DataStreamStat) => (
-        <RedirectLink dataStreamStat={dataStreamStat} title={openActionName} />
+        <RedirectLink
+          dataStreamStat={dataStreamStat}
+          title={openActionName}
+          timeRange={timeRange}
+        />
       ),
       width: '100px',
     },
@@ -349,13 +357,16 @@ export const getDatasetQualityTableColumns = ({
 const RedirectLink = ({
   dataStreamStat,
   title,
+  timeRange,
 }: {
   dataStreamStat: DataStreamStat;
   title: string;
+  timeRange: TimeRangeConfig;
 }) => {
   const redirectLinkProps = useRedirectLink({
     dataStreamStat,
     telemetry: { page: 'main', navigationSource: NavigationSource.Table },
+    timeRangeConfig: timeRange,
   });
 
   return (
