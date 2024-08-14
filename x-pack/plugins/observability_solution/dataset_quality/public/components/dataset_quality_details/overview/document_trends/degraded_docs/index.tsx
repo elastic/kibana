@@ -109,7 +109,7 @@ export default function DegradedDocs({ lastReloadTime }: { lastReloadTime: numbe
       <EuiAccordion
         id={accordionId}
         buttonContent={accordionTitle}
-        paddingSize="m"
+        paddingSize="none"
         initialIsOpen={true}
         data-test-subj="datasetQualityDetailsOverviewDocumentTrends"
       >

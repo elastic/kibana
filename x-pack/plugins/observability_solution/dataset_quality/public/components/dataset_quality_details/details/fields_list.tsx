@@ -33,7 +33,7 @@ export function FieldsList({
         {fields.map(({ fieldTitle, fieldValue, isLoading: isFieldLoading, actionsMenu }, index) => (
           <Fragment key={index + fieldTitle}>
             <EuiFlexGroup>
-              <EuiFlexItem grow={2}>
+              <EuiFlexItem grow={1}>
                 <EuiTitle size="xxs">
                   <span>{fieldTitle}</span>
                 </EuiTitle>

@@ -56,7 +56,7 @@ export function DegradedFields() {
       <EuiAccordion
         id={accordionId}
         buttonContent={accordionTitle}
-        paddingSize="m"
+        paddingSize="none"
         initialIsOpen={true}
         data-test-subj="datasetQualityDetailsOverviewDocumentTrends"
       >
