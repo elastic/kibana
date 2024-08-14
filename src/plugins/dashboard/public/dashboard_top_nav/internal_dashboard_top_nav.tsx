@@ -336,7 +336,7 @@ export function InternalDashboardTopNav({
               button={badgeButton}
               isOpen={isPopoverOpen}
               closePopover={() => setIsPopoverOpen(false)}
-              panelStyle={{ maxWidth: 350 }}
+              panelStyle={{ maxWidth: 250 }}
             >
               <FormattedMessage
                 id="dashboard.managedContentPopoverButton"
