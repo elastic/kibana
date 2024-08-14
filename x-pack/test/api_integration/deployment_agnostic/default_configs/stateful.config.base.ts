@@ -90,7 +90,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail=${MOCK_IDP_ATTRIBUTE_EMAIL}`,
         ],
         files: [
-          // SAML realm roles for stateful
+          // Passing the roles that are equivalent to the ones we have in serverless
           path.resolve(REPO_ROOT, STATEFUL_ROLES_ROOT_PATH, 'roles.yml'),
         ],
       },

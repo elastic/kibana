@@ -18,9 +18,8 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { BASE_PATH, ES_CONFIG, ES_KEYSTORE_BIN } from '../paths';
 import { Artifact } from '../artifact';
 import { parseSettings, SettingsFilter } from '../settings';
-import { log as defaultLog } from '../utils/log';
+import { log as defaultLog, isFile, copyFileSync } from '../utils';
 import { InstallArchiveOptions } from './types';
-import { isFile, copyFileSync } from '../utils/extract_config_files';
 
 const isHttpUrl = (str: string) => {
   try {
@@ -89,13 +88,17 @@ export async function installArchive(archive: string, options?: InstallArchiveOp
   // copy resources to ES config directory
   if (resources) {
     resources.forEach((resource) => {
-      if (isFile(resource)) {
-        const filename = path.basename(resource);
-        const destPath = path.resolve(installPath, 'config', filename);
-
-        copyFileSync(resource, destPath);
-        log.info('moved %s in config to %s', resource, destPath);
+      if (!isFile(resource)) {
+        throw new Error(
+          `Invalid resource: '${resource}'.\nOnly valid files can be copied to ES config directory`
+        );
       }
+
+      const filename = path.basename(resource);
+      const destPath = path.resolve(installPath, 'config', filename);
+
+      copyFileSync(resource, destPath);
+      log.info('moved %s in config to %s', resource, destPath);
     });
   }
 
