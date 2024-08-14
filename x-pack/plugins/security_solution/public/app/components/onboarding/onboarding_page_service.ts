@@ -8,24 +8,24 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import type { SecurityProductTypes } from '../../../common/components/landing_page/onboarding/configs';
-import type { StepId } from '../../../common/components/landing_page/onboarding/types';
+import type { CardId } from '../../../common/components/landing_page/onboarding/types';
 
 export class OnboardingPageService {
   private productTypesSubject$: BehaviorSubject<SecurityProductTypes | undefined>;
   private projectsUrlSubject$: BehaviorSubject<string | undefined>;
   private projectFeaturesUrlSubject$: BehaviorSubject<string | undefined>;
-  private availableStepsSubject$: BehaviorSubject<StepId[]>;
+  private availableStepsSubject$: BehaviorSubject<CardId[]>;
 
   public productTypes$: Observable<SecurityProductTypes | undefined>;
   public projectsUrl$: Observable<string | undefined>;
   public projectFeaturesUrl$: Observable<string | undefined>;
-  public availableSteps$: Observable<StepId[]>;
+  public availableSteps$: Observable<CardId[]>;
 
   constructor() {
     this.productTypesSubject$ = new BehaviorSubject<SecurityProductTypes | undefined>(undefined);
     this.projectsUrlSubject$ = new BehaviorSubject<string | undefined>(undefined);
     this.projectFeaturesUrlSubject$ = new BehaviorSubject<string | undefined>(undefined);
-    this.availableStepsSubject$ = new BehaviorSubject<StepId[]>([]);
+    this.availableStepsSubject$ = new BehaviorSubject<CardId[]>([]);
 
     this.productTypes$ = this.productTypesSubject$.asObservable();
     this.projectsUrl$ = this.projectsUrlSubject$.asObservable();
@@ -42,7 +42,7 @@ export class OnboardingPageService {
   setProjectsUrl(projectsUrl: string | undefined) {
     this.projectsUrlSubject$.next(projectsUrl);
   }
-  setAvailableSteps(availableSteps: StepId[]) {
+  setAvailableSteps(availableSteps: CardId[]) {
     this.availableStepsSubject$.next(availableSteps);
   }
 }
