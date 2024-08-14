@@ -39,7 +39,7 @@ export const useSave = (params: UseSaveParameters) => {
       await saveChanges(changes, params.scope);
       params.clearChanges();
       const requiresReload = params.fields.some(
-        (setting) => changes.hasOwnProperty(setting.id) && setting.requiresPageReload
+        (setting) => Object.hasOwn(changes, setting.id) && setting.requiresPageReload
       );
       if (requiresReload) {
         showReloadPagePrompt();

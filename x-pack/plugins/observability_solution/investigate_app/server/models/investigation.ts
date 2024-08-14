@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { alertOriginSchema, blankOriginSchema } from '@kbn/investigate-plugin/common/schema/origin';
 import * as t from 'io-ts';
 
 export const investigationSchema = t.type({
@@ -12,9 +13,11 @@ export const investigationSchema = t.type({
   title: t.string,
   createdAt: t.number,
   createdBy: t.string,
-  parameters: t.type({
+  params: t.type({
     timeRange: t.type({ from: t.number, to: t.number }),
   }),
+  origin: t.union([alertOriginSchema, blankOriginSchema]),
+  status: t.union([t.literal('ongoing'), t.literal('closed')]),
 });
 
 export type Investigation = t.TypeOf<typeof investigationSchema>;

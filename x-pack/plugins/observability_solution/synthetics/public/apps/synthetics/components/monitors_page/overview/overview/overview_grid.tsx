@@ -14,7 +14,10 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
   EuiText,
+  EuiProgress,
 } from '@elastic/eui';
+import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../embeddables/constants';
+import { AddToDashboard } from '../../../common/components/add_to_dashboard';
 import { useOverviewStatus } from '../../hooks/use_overview_status';
 import { useInfiniteScroll } from './use_infinite_scroll';
 import { GridItemsByGroup } from './grid_by_group/grid_items_by_group';
@@ -40,6 +43,7 @@ export const OverviewGrid = memo(() => {
     data: { monitors },
     flyoutConfig,
     loaded,
+    loading,
     pageState,
     groupBy: { field: groupField },
   } = useSelector(selectOverviewState);
@@ -76,7 +80,7 @@ export const OverviewGrid = memo(() => {
     <>
       <EuiFlexGroup
         justifyContent="spaceBetween"
-        alignItems="baseline"
+        alignItems="center"
         responsive={false}
         wrap={true}
       >
@@ -88,13 +92,19 @@ export const OverviewGrid = memo(() => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
+          <AddToDashboard type={SYNTHETICS_MONITORS_EMBEDDABLE} asButton />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
           <SortFields onSortChange={() => setPage(1)} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <GroupFields />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
+      {loading && <EuiProgress size="xs" color="accent" />}
+      <EuiSpacer size="s" />
       <>
         {groupField === 'none' ? (
           loaded && currentMonitors.length ? (
