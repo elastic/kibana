@@ -17,6 +17,7 @@ export interface InstallSourceOptions {
   installPath?: string;
   log?: ToolingLog;
   esArgs?: string[];
+  resources?: string[];
 }
 
 export interface DownloadSnapshotOptions {
