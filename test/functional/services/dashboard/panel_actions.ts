@@ -31,6 +31,7 @@ export class DashboardPanelActionsService extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
+  private readonly find = this.ctx.getService('find');
   private readonly inspector = this.ctx.getService('inspector');
   private readonly testSubjects = this.ctx.getService('testSubjects');
 
@@ -354,9 +355,9 @@ export class DashboardPanelActionsService extends FtrService {
     await this.expectMissingPanelAction(REMOVE_PANEL_DATA_TEST_SUBJ, title);
   }
 
-  async getPanelHeading(title: string) {
+  async getPanelHeading(title = '') {
     this.log.debug(`getPanelHeading(${title})`);
-    if (!title) return await this.testSubjects.find('embeddablePanelHeading');
+    if (!title) return await this.find.byClassName('embPanel__header');
     return await this.testSubjects.find(`embeddablePanelHeading-${title.replace(/\s/g, '')}`);
   }
 

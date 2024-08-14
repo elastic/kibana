@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const dashboardName = 'Dashboard Panel Controls Test';
 
-  describe('dashboard panel context menu', function viewEditModeTests() {
+  describe.only('dashboard panel context menu', function viewEditModeTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
