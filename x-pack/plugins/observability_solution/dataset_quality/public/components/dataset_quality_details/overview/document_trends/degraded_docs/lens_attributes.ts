@@ -6,13 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { GenericIndexPatternColumn, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { GenericIndexPatternColumn, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
   flyoutDegradedDocsPercentageText,
   flyoutDegradedDocsTrendText,
-} from '../../../../common/translations';
+} from '../../../../../../common/translations';
 
 enum DatasetQualityLensColumn {
   Date = 'date_column',
@@ -268,7 +268,7 @@ function getChartColumns(breakdownField?: string): Record<string, GenericIndexPa
 }
 
 const getFlyoutDegradedDocsTopNText = (count: number, fieldName: string) =>
-  i18n.translate('xpack.datasetQuality.flyoutDegradedDocsTopNValues', {
+  i18n.translate('xpack.datasetQuality.details.degradedDocsTopNValues', {
     defaultMessage: 'Top {count} values of {fieldName}',
     values: { count, fieldName },
     description:
