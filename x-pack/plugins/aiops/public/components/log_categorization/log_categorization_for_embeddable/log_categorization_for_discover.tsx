@@ -391,7 +391,9 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
         forceRefresh();
       }
     },
-    [forceRefresh, input.lastReloadRequestTime]
+    // stop infinite loop from forceRefresh dependency
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [input.lastReloadRequestTime]
   );
   const style = css({
     overflowY: 'auto',
