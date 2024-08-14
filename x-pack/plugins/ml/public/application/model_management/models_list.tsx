@@ -401,7 +401,7 @@ export const ModelsList: FC<Props> = ({
         });
 
         const elasticModels = models.filter((model) =>
-          ELASTIC_MODEL_DEFINITIONS.hasOwnProperty(model.model_id)
+          Object.hasOwn(ELASTIC_MODEL_DEFINITIONS, model.model_id)
         );
         if (elasticModels.length > 0) {
           for (const model of elasticModels) {
