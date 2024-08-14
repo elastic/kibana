@@ -10,7 +10,12 @@ import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
-import { EmbeddableStart, ReactEmbeddableFactory, ViewMode } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddableStart,
+  ReactEmbeddableFactory,
+  SELECT_RANGE_TRIGGER,
+  ViewMode,
+} from '@kbn/embeddable-plugin/public';
 import { ExpressionRendererParams, useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { apiPublishesDataView, apiPublishesSettings } from '@kbn/presentation-containers';
@@ -157,7 +162,11 @@ export const getVisualizeEmbeddableFactory: (deps: {
         defaultPanelTitle,
         dataLoading: dataLoading$,
         dataViews: new BehaviorSubject<DataView[] | undefined>(initialDataViews),
-        supportedTriggers: () => [ACTION_CONVERT_TO_LENS, APPLY_FILTER_TRIGGER],
+        supportedTriggers: () => [
+          ACTION_CONVERT_TO_LENS,
+          APPLY_FILTER_TRIGGER,
+          SELECT_RANGE_TRIGGER,
+        ],
         serializeState: () => {
           const savedObjectProperties = savedObjectProperties$.getValue();
           return serializeState({
