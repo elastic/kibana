@@ -36,9 +36,7 @@ import {
   SYSTEM_PROMPT_TITLE_INPUT,
   SYSTEM_PROMPT_BODY_INPUT,
   CONVERSATION_MULTI_SELECTOR,
-  SELECT_CONVERSATION_FROM_MULTI_SELECTOR,
   MODAL_SAVE_BUTTON,
-  SYSTEM_PROMPT_SETTINGS_TITLE,
 } from '../screens/ai_assistant';
 import { TOASTER } from '../screens/alerts_detection_rules';
 
@@ -140,14 +138,11 @@ export const createSystemPrompt = (
   cy.get(SYSTEM_PROMPT_TITLE_INPUT).type(`${title}{enter}`);
   cy.get(SYSTEM_PROMPT_BODY_INPUT).type(prompt);
   if (defaultConversations && defaultConversations.length) {
-    cy.get(CONVERSATION_MULTI_SELECTOR).click();
     defaultConversations.forEach((conversation) => {
-      cy.get(SELECT_CONVERSATION_FROM_MULTI_SELECTOR(conversation)).click();
+      cy.get(CONVERSATION_MULTI_SELECTOR).type(`${conversation}{enter}`);
     });
-    cy.get(SYSTEM_PROMPT_SETTINGS_TITLE).click();
   }
   cy.get(MODAL_SAVE_BUTTON).click();
-  // assertSystemPrompt(title);
 };
 
 export const assertConnectorSelected = (connectorName: string) => {
