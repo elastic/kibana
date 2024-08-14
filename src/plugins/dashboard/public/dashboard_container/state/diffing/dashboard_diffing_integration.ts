@@ -8,8 +8,7 @@
 import { childrenUnsavedChanges$ } from '@kbn/presentation-containers';
 import { omit } from 'lodash';
 import { AnyAction, Middleware } from 'redux';
-import { combineLatest, debounceTime, of, skipWhile, startWith, switchMap } from 'rxjs';
-import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
+import { combineLatest, debounceTime, skipWhile, startWith, switchMap } from 'rxjs';
 import { DashboardContainer, DashboardCreationOptions } from '../..';
 import { DashboardContainerInput } from '../../../../common';
 import { CHANGE_CHECK_DEBOUNCE } from '../../../dashboard_constants';
@@ -134,10 +133,7 @@ export function startDiffingDashboardState(
         if (controlGroupChanges) {
           reactEmbeddableChanges[PANELS_CONTROL_GROUP_KEY] = controlGroupChanges;
         }
-        backupUnsavedChanges.bind(this)(
-          dashboardChanges,
-          reactEmbeddableChanges
-        );
+        backupUnsavedChanges.bind(this)(dashboardChanges, reactEmbeddableChanges);
       }
     })
   );
@@ -189,7 +185,7 @@ export async function getDashboardUnsavedChanges(
 function backupUnsavedChanges(
   this: DashboardContainer,
   dashboardChanges: Partial<DashboardContainerInput>,
-  reactEmbeddableChanges: UnsavedPanelState,
+  reactEmbeddableChanges: UnsavedPanelState
 ) {
   const { dashboardBackup } = pluginServices.getServices();
   const dashboardStateToBackup = omit(dashboardChanges, keysToOmitFromSessionStorage);
@@ -200,6 +196,6 @@ function backupUnsavedChanges(
       ...dashboardStateToBackup,
       panels: dashboardChanges.panels,
     },
-    reactEmbeddableChanges,
+    reactEmbeddableChanges
   );
 }

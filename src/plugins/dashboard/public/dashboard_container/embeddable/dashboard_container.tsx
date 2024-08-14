@@ -60,7 +60,10 @@ import { apiHasSerializableState } from '@kbn/presentation-containers/interfaces
 import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
 import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
 import { DashboardAttributes, DashboardContainerInput, DashboardPanelState } from '../../../common';
-import { getReferencesForControls, getReferencesForPanelId } from '../../../common/dashboard_container/persistable_state/dashboard_container_references';
+import {
+  getReferencesForControls,
+  getReferencesForPanelId,
+} from '../../../common/dashboard_container/persistable_state/dashboard_container_references';
 import {
   DASHBOARD_APP_ID,
   DASHBOARD_UI_METRIC_ID,
@@ -878,14 +881,14 @@ export class DashboardContainer
     return {
       rawState: this.controlGroupInput
         ? (this.controlGroupInput as ControlGroupSerializedState)
-        : {
+        : ({
             controlStyle: 'oneLine',
             chainingSystem: 'HIERARCHICAL',
             showApplySelections: false,
             panelsJSON: JSON.stringify({}),
             ignoreParentSettingsJSON:
               '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
-          } as ControlGroupSerializedState,
+          } as ControlGroupSerializedState),
       references: getReferencesForControls(this.savedObjectReferences),
     };
   };

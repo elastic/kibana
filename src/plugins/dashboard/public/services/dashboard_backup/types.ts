@@ -21,7 +21,7 @@ export interface DashboardBackupServiceType {
   setState: (
     id: string | undefined,
     dashboardState: Partial<SavedDashboardInput>,
-    panels: UnsavedPanelState,
+    panels: UnsavedPanelState
   ) => void;
   getViewMode: () => ViewMode;
   storeViewMode: (viewMode: ViewMode) => void;

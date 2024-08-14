@@ -9,7 +9,6 @@
 import deepEqual from 'fast-deep-equal';
 import { SerializableRecord } from '@kbn/utility-types';
 
-import { v4 } from 'uuid';
 import { pick, omit, xor } from 'lodash';
 
 import {
@@ -23,7 +22,6 @@ import {
 } from './control_group_panel_diff_system';
 import { ControlGroupInput } from '..';
 import {
-  ControlsPanels,
   PersistableControlGroupInput,
   persistableControlGroupInputKeys,
   RawControlGroupAttributes,

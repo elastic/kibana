@@ -85,7 +85,7 @@ export const DashboardViewportComponent = () => {
             ControlGroupRuntimeState,
             ControlGroupApi
           >
-            key={dashboard.id}
+            key={dashboard.getDashboardSavedObjectId()}
             hidePanelChrome={true}
             type={CONTROL_GROUP_TYPE}
             maybeId={'control_group'}
@@ -94,7 +94,8 @@ export const DashboardViewportComponent = () => {
                 ...dashboard,
                 getSerializedStateForChild: dashboard.getSerializedStateForControlGroup,
                 getRuntimeStateForChild: dashboard.getRuntimeStateForControlGroup,
-            }}}
+              };
+            }}
             onApiAvailable={(api) => dashboard.setControlGroupApi(api)}
           />
         </div>
