@@ -1368,16 +1368,35 @@ describe('autocomplete', () => {
   describe('Replacement ranges are attached when needed', () => {
     testSuggestions('FROM a | WHERE doubleField IS NOT N/', ['IS NOT NULL']);
     testSuggestions('FROM a | WHERE doubleField IS N/', ['IS NOT NULL']);
-    testSuggestions('FROM a | KEEP field.nam/', ['field.name'], undefined, [
-      [{ name: 'field.name', type: 'double' }],
-    ]);
-    // multi-line
-    testSuggestions(
-      `FROM a 
-| KEEP field.nam/`,
-      ['field.name'],
-      undefined,
-      [[{ name: 'field.name', type: 'double' }]]
-    );
+    describe('dot-separated field names', () => {
+      testSuggestions(
+        'FROM a | KEEP field.nam/',
+        [{ text: 'field.name', rangeToReplace: { start: 15, end: 23 } }],
+        undefined,
+        [[{ name: 'field.name', type: 'double' }]]
+      );
+      // multi-line
+      testSuggestions(
+        'FROM a\n| KEEP field.nam/',
+        [{ text: 'field.name', rangeToReplace: { start: 15, end: 23 } }],
+        undefined,
+        [[{ name: 'field.name', type: 'double' }]]
+      );
+      // triple separator
+      testSuggestions(
+        'FROM a\n| KEEP field.name.f/',
+        [{ text: 'field.name.foo', rangeToReplace: { start: 15, end: 26 } }],
+        undefined,
+        [[{ name: 'field.name.foo', type: 'double' }]]
+      );
+      // whitespace — we can't support this case yet because
+      // we are relying on string checking instead of the AST :(
+      testSuggestions.skip(
+        'FROM a | KEEP field . n/',
+        [{ text: 'field . name', rangeToReplace: { start: 15, end: 23 } }],
+        undefined,
+        [[{ name: 'field.name', type: 'double' }]]
+      );
+    });
   });
 });

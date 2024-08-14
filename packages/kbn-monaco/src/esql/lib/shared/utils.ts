@@ -39,10 +39,11 @@ export const offsetRangeToMonacoRange = (
 } => {
   let startColumn = 0;
   let endColumn = 0;
-  let startLineNumber = 0;
-  let endLineNumber = 0;
   let currentOffset = 0;
-  let currentLine = 0;
+
+  let startLineNumber = 1;
+  let endLineNumber = 1;
+  let currentLine = 1;
 
   for (let i = 0; i < expression.length; i++) {
     if (expression[i] === '\n') {
