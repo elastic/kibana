@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { TIMELINE_PREPACKAGED_URL } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContextWithSpaces } from '../../../../../../ftr_provider_context_with_spaces';
-import { deleteAllTimelines, waitFor } from '../../../utils';
+import { deleteAllTimelines } from '../../../utils';
 
 export default ({ getService }: FtrProviderContextWithSpaces): void => {
   const supertest = getService('supertest');
@@ -22,7 +22,6 @@ export default ({ getService }: FtrProviderContextWithSpaces): void => {
         await deleteAllTimelines(es);
       });
 
-      // TODO: Fix or update the tests
       it('should contain timelines_installed, and timelines_updated', async () => {
         const { body } = await supertest
           .post(TIMELINE_PREPACKAGED_URL)
@@ -30,7 +29,20 @@ export default ({ getService }: FtrProviderContextWithSpaces): void => {
           .send()
           .expect(200);
 
-        expect(Object.keys(body)).to.eql(['timelines_installed', 'timelines_updated']);
+        expect(Object.keys(body)).to.eql([
+          'success',
+          'success_count',
+          'errors',
+          'timelines_installed',
+          'timelines_updated',
+        ]);
+        expect(body).to.eql({
+          success: true,
+          success_count: 10,
+          errors: [],
+          timelines_installed: 10,
+          timelines_updated: 0,
+        });
       });
 
       it('should create the prepackaged timelines and return a count greater than zero', async () => {
@@ -53,29 +65,16 @@ export default ({ getService }: FtrProviderContextWithSpaces): void => {
         expect(body.timelines_updated).to.eql(0);
       });
 
-      // TODO: Fix or update the tests
       it('should be possible to call the API twice and the second time the number of timelines installed should be zero', async () => {
         await supertest.post(TIMELINE_PREPACKAGED_URL).set('kbn-xsrf', 'true').send().expect(200);
 
-        await waitFor(
-          async () => {
-            const { body } = await supertest
-              .get(`${TIMELINE_PREPACKAGED_URL}/_status`)
-              .set('kbn-xsrf', 'true')
-              .expect(200);
-            return body.timelines_not_installed === 0;
-          },
-          `${TIMELINE_PREPACKAGED_URL}/_status`,
-          log
-        );
-
-        const { body } = await supertest
+        const { body: timelinePrepackagedResponseBody } = await supertest
           .post(TIMELINE_PREPACKAGED_URL)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
 
-        expect(body.timelines_installed).to.eql(0);
+        expect(timelinePrepackagedResponseBody.timelines_installed).to.eql(0);
       });
     });
   });
