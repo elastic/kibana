@@ -212,7 +212,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
           console.log('capabilities', capabilities);
           if (isByValue)
             return Boolean(
-              capabilities.dashboard?.showWriteControls && capabilities.visualize?.open
+              capabilities.dashboard?.showWriteControls && capabilities.visualize?.show
             );
           else return Boolean(capabilities.visualize?.save);
         },
