@@ -57,8 +57,7 @@ export function createPluginSetupModule(context: CoreSetup): interfaces.Containe
           >;
 
           register(route, async (_context, request, response) => {
-            const injection = container.get(DiService);
-            const scope = injection.fork();
+            const scope = container.get(DiService).fork();
 
             scope.bind(RequestToken).toConstantValue(request);
             scope.bind(ResponseToken).toConstantValue(response);
@@ -68,7 +67,7 @@ export function createPluginSetupModule(context: CoreSetup): interfaces.Containe
             try {
               return await scope.get<IRouteHandler>(route).handle();
             } finally {
-              injection.dispose(scope);
+              scope.unbindAll();
             }
           });
         });

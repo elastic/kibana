@@ -161,7 +161,6 @@ export function createPluginStartContext<
       },
     },
     injection: {
-      dispose: deps.injection.dispose,
       fork: deps.injection.fork.bind(deps.injection, plugin.opaqueId),
       getContainer: deps.injection.getContainer.bind(deps.injection, plugin.opaqueId),
     },
