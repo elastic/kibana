@@ -14,7 +14,6 @@ import { AddObservationUI } from '../../../../components/add_observation_ui';
 import { InvestigateSearchBar } from '../../../../components/investigate_search_bar';
 import { InvestigateWidgetGrid } from '../../../../components/investigate_widget_grid';
 import { useAddInvestigationNote } from '../../../../hooks/use_add_investigation_note';
-import { useDateRange } from '../../../../hooks/use_date_range';
 import { useFetchInvestigation } from '../../../../hooks/use_fetch_investigation';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { InvestigationNotes } from '../investigation_notes/investigation_notes';
@@ -32,9 +31,8 @@ function InvestigationDetailsWithUser({
     },
   } = useKibana();
   const widgetDefinitions = investigate.getWidgetDefinitions();
-  const [range, setRange] = useDateRange();
-
   const { data: investigationData } = useFetchInvestigation({ id: investigationId });
+
   const { mutateAsync: addInvestigationNote } = useAddInvestigationNote();
   const handleAddInvestigationNote = async (note: string) => {
     await addInvestigationNote({ investigationId, note: { content: note } });
@@ -52,8 +50,7 @@ function InvestigationDetailsWithUser({
     deleteNote,
   } = investigate.useInvestigation({
     user,
-    from: range.start.toISOString(),
-    to: range.end.toISOString(),
+    investigationData,
   });
 
   const gridItems = useMemo(() => {
@@ -86,8 +83,16 @@ function InvestigationDetailsWithUser({
           <EuiFlexGroup direction="column" gutterSize="m">
             <EuiFlexItem>
               <InvestigateSearchBar
-                rangeFrom={range.from}
-                rangeTo={range.to}
+                dateRangeFrom={
+                  investigationData
+                    ? new Date(investigationData.params.timeRange.from).toISOString()
+                    : undefined
+                }
+                dateRangeTo={
+                  investigationData
+                    ? new Date(investigationData.params.timeRange.to).toISOString()
+                    : undefined
+                }
                 onQuerySubmit={async ({ dateRange }) => {
                   const nextDateRange = {
                     from: datemath.parse(dateRange.from)!.toISOString(),
@@ -97,8 +102,6 @@ function InvestigationDetailsWithUser({
                     ...renderableInvestigation.parameters,
                     timeRange: nextDateRange,
                   });
-
-                  setRange(nextDateRange);
                 }}
               />
             </EuiFlexItem>
@@ -130,7 +133,7 @@ function InvestigationDetailsWithUser({
 
       <EuiFlexItem grow={2}>
         <InvestigationNotes
-          notes={investigationData.notes}
+          notes={investigation.notes}
           addNote={handleAddInvestigationNote}
           deleteNote={deleteNote}
         />

@@ -6,6 +6,7 @@
  */
 import type { AuthenticatedUser, NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { GetInvestigationResponse } from '@kbn/investigation-shared';
 import { pull } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -18,7 +19,7 @@ import {
   UseInvestigateWidgetApi,
 } from '../use_investigate_widget';
 import { useLocalStorage } from '../use_local_storage';
-import { createNewInvestigation } from './create_new_investigation';
+import { createNewInvestigation, fromInvestigationResponse } from './create_new_investigation';
 import { StatefulInvestigation, createInvestigationStore } from './investigation_store';
 
 export type RenderableInvestigateWidget = InvestigateWidget & {
@@ -47,29 +48,20 @@ function useInvestigationWithoutContext({
   user,
   notifications,
   widgetDefinitions,
-  from,
-  to,
+  investigationData,
 }: {
   user: AuthenticatedUser;
   notifications: NotificationsStart;
   widgetDefinitions: WidgetDefinition[];
-  from: string;
-  to: string;
+  investigationData?: GetInvestigationResponse;
 }): UseInvestigationApi {
   const [investigationStore, _] = useState(() =>
     createInvestigationStore({
       user,
       widgetDefinitions,
-      investigation: createNewInvestigation({
-        user,
-        id: v4(),
-        globalWidgetParameters: {
-          timeRange: {
-            from,
-            to,
-          },
-        },
-      }),
+      investigation: investigationData
+        ? fromInvestigationResponse(investigationData)
+        : createNewInvestigation(),
     })
   );
 
@@ -258,13 +250,18 @@ export function createUseInvestigation({
   notifications: NotificationsStart;
   widgetDefinitions: WidgetDefinition[];
 }) {
-  return ({ user, from, to }: { user: AuthenticatedUser; from: string; to: string }) => {
+  return ({
+    user,
+    investigationData,
+  }: {
+    user: AuthenticatedUser;
+    investigationData?: GetInvestigationResponse;
+  }) => {
     return useInvestigationWithoutContext({
       user,
       notifications,
       widgetDefinitions,
-      from,
-      to,
+      investigationData,
     });
   };
 }

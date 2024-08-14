@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 import type { AuthenticatedUser } from '@kbn/core/public';
 import type { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/public';
+import type { GetInvestigationResponse } from '@kbn/investigation-shared';
 import type { FromSchema } from 'json-schema-to-ts';
 import type { InvestigateWidget } from '../common';
 import type { GlobalWidgetParameters, InvestigateWidgetCreate } from '../common/types';
@@ -80,7 +81,6 @@ export interface InvestigatePublicStart {
   getWidgetDefinitions: () => WidgetDefinition[];
   useInvestigation: ({}: {
     user: AuthenticatedUser;
-    from: string;
-    to: string;
+    investigationData?: GetInvestigationResponse;
   }) => UseInvestigationApi;
 }

@@ -25,7 +25,6 @@ export enum InvestigateWidgetColumnSpan {
 export interface Investigation {
   id: string;
   createdAt: number;
-  user: AuthenticatedUser;
   title: string;
   items: InvestigateWidget[];
   notes: InvestigationNote[];
