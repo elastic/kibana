@@ -562,7 +562,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.timePicker.setCommonlyUsedTime('Last_15 minutes');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.addRuntimeField('runtime-message-field', `emit('mock-message')`);
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      let documentCell = await dataGrid.getCellElement(0, 3);
+      let firstRowContent = await documentCell.getVisibleText();
+      expect(firstRowContent.includes('runtime-message-fieldmock-message')).to.be.equal(true);
 
       // create an alert
       await openDiscoverAlertFlyout();
@@ -578,8 +583,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const selectedDataView = await dataViews.getSelectedName();
       expect(selectedDataView).to.be.equal('search-source-*');
 
-      const documentCell = await dataGrid.getCellElement(0, 3);
-      const firstRowContent = await documentCell.getVisibleText();
+      documentCell = await dataGrid.getCellElement(0, 3);
+      firstRowContent = await documentCell.getVisibleText();
       expect(firstRowContent.includes('runtime-message-fieldmock-message')).to.be.equal(true);
 
       expect(await dataGrid.getDocCount()).to.be(5);
