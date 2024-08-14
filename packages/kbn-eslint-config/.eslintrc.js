@@ -312,5 +312,9 @@ module.exports = {
     '@kbn/imports/uniform_imports': 'error',
     '@kbn/imports/no_unused_imports': 'error',
     '@kbn/imports/no_boundary_crossing': 'error',
+
+    'no-new-func': 'error',
+    'no-implied-eval': 'error',
+    'no-prototype-builtins': 'error',
   },
 };
