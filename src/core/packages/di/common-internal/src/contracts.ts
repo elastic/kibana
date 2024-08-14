@@ -17,7 +17,5 @@ export interface InternalCoreDiServiceSetup {
 
 /** @internal */
 export interface InternalCoreDiServiceStart extends InternalCoreDiServiceSetup {
-  dispose(container?: interfaces.Container): void;
-
   fork(id?: PluginOpaqueId, container?: interfaces.Container): interfaces.Container;
 }
