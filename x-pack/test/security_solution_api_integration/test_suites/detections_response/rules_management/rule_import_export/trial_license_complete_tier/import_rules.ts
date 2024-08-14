@@ -1624,13 +1624,29 @@ export default ({ getService }: FtrProviderContext): void => {
             error: { message: 'rule_id: Required', status_code: 400 },
           });
         });
-
-        it('installs prebuilt rules package if it is not installed');
       });
 
       describe('calculation of the rule_source fields', () => {
         it('calculates a version of 1 for custom rules');
-        it('rejects a prebuilt rule with an unspecified version');
+
+        // TODO enable feature flag for this one
+        it.skip('rejects a prebuilt rule with an unspecified version', async () => {
+          const rule = getCustomQueryRuleParams();
+          delete rule.version;
+          const ndjson = combineToNdJson(rule);
+
+          const { body } = await supertest
+            .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .attach('file', Buffer.from(ndjson), 'rules.ndjson')
+            .expect(200);
+
+          expect(body.errors).toHaveLength(1);
+          expect(body.errors[0]).toMatchObject({
+            error: { message: 'version: Required', status_code: 400 },
+          });
+        });
       });
     });
   });

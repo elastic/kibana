@@ -18,6 +18,7 @@ import type { ImportRuleResponse } from '../../../routes/utils';
 import { createBulkErrorObject } from '../../../routes/utils';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
 import type { IDetectionRulesClient } from '../detection_rules_client/detection_rules_client_interface';
+import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 
 export type PromiseFromStreams = RuleToImport | Error;
 export interface RuleExceptionsPromiseFromStreams {
@@ -46,6 +47,7 @@ export const importRules = async ({
   overwriteRules,
   detectionRulesClient,
   existingLists,
+  prebuiltRuleAssets,
   allowMissingConnectorSecrets,
   allowPrebuiltRules,
 }: {
@@ -54,6 +56,7 @@ export const importRules = async ({
   overwriteRules: boolean;
   detectionRulesClient: IDetectionRulesClient;
   existingLists: Record<string, ExceptionListSchema>;
+  prebuiltRuleAssets?: PrebuiltRuleAsset[];
   allowMissingConnectorSecrets?: boolean;
   allowPrebuiltRules?: boolean;
 }) => {
@@ -99,6 +102,25 @@ export const importRules = async ({
               );
 
               return null;
+            }
+
+            if (allowPrebuiltRules) {
+              if (parsedRule.rule_id && !parsedRule.version) {
+                resolve(
+                  createBulkErrorObject({
+                    statusCode: 400,
+                    message: i18n.translate(
+                      'xpack.securitySolution.detectionEngine.rules.cannotImportPrebuiltRuleWithoutVersion',
+                      {
+                        defaultMessage: 'Prebuilt rules must specify a "version" to be imported.',
+                      }
+                    ),
+                    ruleId: parsedRule.rule_id,
+                  })
+                );
+              }
+
+              // TODO rule_source calculated here
             }
 
             try {
