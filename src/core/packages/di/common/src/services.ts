@@ -10,12 +10,31 @@
 import type { interfaces } from 'inversify';
 import type { CoreDiServiceSetup, CoreDiServiceStart } from './contracts';
 
+type Lifecycle = 'setup' | 'start';
+
+export interface GlobalServiceWithOptions {
+  /**
+   * The name of the service to be exposed in the lifecycle contracts.
+   */
+  name?: string;
+
+  /**
+   * Target service identifier.
+   */
+  service: interfaces.ServiceIdentifier<unknown>;
+
+  /**
+   * The stage of the lifecycle where the service should be exposed.
+   */
+  stage?: Lifecycle;
+}
+
+export type GlobalService = GlobalServiceWithOptions | GlobalServiceWithOptions['service'];
+
 /**
  * The service identifier for the global service references.
  */
-export const Global = Symbol.for('Global') as interfaces.ServiceIdentifier<
-  interfaces.ServiceIdentifier<unknown>
->;
+export const Global = Symbol.for('Global') as interfaces.ServiceIdentifier<GlobalService>;
 
 export const DiSetupService = Symbol.for(
   'DiSetupService'
@@ -24,3 +43,13 @@ export const DiSetupService = Symbol.for(
 export const DiService = Symbol.for(
   'DiService'
 ) as interfaces.ServiceIdentifier<CoreDiServiceStart>;
+
+/**
+ * Plugin's setup contract.
+ */
+export const Setup = Symbol.for('Setup') as interfaces.ServiceIdentifier<Record<string, unknown>>;
+
+/**
+ * Plugin's start contract.
+ */
+export const Start = Symbol.for('Start') as interfaces.ServiceIdentifier<Record<string, unknown>>;
