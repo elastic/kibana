@@ -21,7 +21,6 @@ import {
   EuiBreadcrumb,
   EuiHorizontalRule,
   EuiIcon,
-  EuiText,
   EuiToolTipProps,
   EuiPopover,
   EuiBadge,
@@ -339,10 +338,10 @@ export function InternalDashboardTopNav({
               closePopover={() => setIsPopoverOpen(false)}
               panelStyle={{ maxWidth: 350 }}
             >
-              <EuiText size="s">{dashboardManagedBadge.getText()}</EuiText>
               <FormattedMessage
                 id="dashboard.managedContentPopoverButton"
-                defaultMessage="{Duplicate} it to make changes."
+                defaultMessage="Elastic manages this dashboard.
+                {Duplicate} it to make changes."
                 values={{
                   Duplicate: (
                     <EuiLink
