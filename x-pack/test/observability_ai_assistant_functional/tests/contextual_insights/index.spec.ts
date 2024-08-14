@@ -123,9 +123,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       it('should show the contextual insight component on the APM error details page', async () => {
         await navigateToError();
 
-        const interceptor = proxy.intercept(
-          'conversation',
-          (body) => !isFunctionTitleRequest(body),
+        const interceptor = proxy.interceptConversationTitle(
           'This error is nothing to worry about. Have a nice day!'
         );
 
@@ -140,9 +138,4 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       });
     });
   });
-}
-
-function isFunctionTitleRequest(body: string) {
-  const parsedBody = JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
-  return parsedBody.functions?.find((fn) => fn.name === 'title_conversation') !== undefined;
 }
