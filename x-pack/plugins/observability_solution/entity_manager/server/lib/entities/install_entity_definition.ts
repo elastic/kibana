@@ -160,8 +160,10 @@ export async function installBuiltInEntityDefinitions({
   soClient,
   logger,
   builtInDefinitions,
+  installOnly,
 }: Omit<InstallDefinitionParams, 'definition'> & {
   builtInDefinitions: EntityDefinition[];
+  installOnly?: boolean;
 }): Promise<EntityDefinition[]> {
   if (builtInDefinitions.length === 0) return [];
 
@@ -179,6 +181,7 @@ export async function installBuiltInEntityDefinitions({
         esClient,
         soClient,
         logger,
+        installOnly,
       });
     }
 
@@ -192,6 +195,7 @@ export async function installBuiltInEntityDefinitions({
         esClient,
         soClient,
         logger,
+        installOnly,
       });
     }
 
@@ -205,8 +209,12 @@ export async function installBuiltInEntityDefinitions({
   return await Promise.all(installPromises);
 }
 
-async function installAndStartDefinition(params: InstallDefinitionParams) {
+async function installAndStartDefinition(
+  params: InstallDefinitionParams & { installOnly?: boolean }
+) {
   const definition = await installEntityDefinition(params);
-  await startTransform(params.esClient, definition, params.logger);
+  if (!params.installOnly) {
+    await startTransform(params.esClient, definition, params.logger);
+  }
   return definition;
 }
