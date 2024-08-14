@@ -50,9 +50,7 @@ export class SupertestWithRoleScope {
     const { withInternalHeaders, withCommonHeaders, withCustomHeaders } = this.options;
 
     if (!this.roleAuthc) {
-      throw new Error(
-        `'roleAuthc' is not set, most likely it was invalidated or the instance was destroyed.`
-      );
+      throw new Error('The instance has already been destroyed.');
     }
     // set role-based API key by default
     agent.set(this.roleAuthc.apiKeyHeader);
