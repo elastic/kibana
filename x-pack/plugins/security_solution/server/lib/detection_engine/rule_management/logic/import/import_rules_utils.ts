@@ -121,6 +121,12 @@ export const importRules = async ({
               }
 
               // TODO rule_source calculated here
+              // const ruleSource = calculateRuleSource({
+              //   rule: parsedRule,
+              //   prebuiltRuleAssets,
+              // });
+
+              // parsedRule.rule_source = ruleSource;
             }
 
             try {
