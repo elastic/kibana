@@ -48,8 +48,6 @@ jest.mock('./actions_connectors_event_log_list_table', () => {
 const queryClient = new QueryClient();
 
 describe('ActionsConnectorsHome', () => {
-  beforeEach(() => {});
-
   it('renders Actions connectors list component', async () => {
     const props: RouteComponentProps<MatchParams> = {
       history: createMemoryHistory({
@@ -153,7 +151,7 @@ describe('ActionsConnectorsHome', () => {
       location: createLocation('/logs'),
       match: {
         isExact: true,
-        path: `/logs`,
+        path: '/logs',
         url: '',
         params: {
           section: 'logs',

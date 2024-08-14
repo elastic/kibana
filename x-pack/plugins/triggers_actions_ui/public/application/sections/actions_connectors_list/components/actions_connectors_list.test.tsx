@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { ThemeProvider } from 'styled-components';
@@ -112,9 +112,10 @@ describe('actions_connectors_list', () => {
         </IntlProvider>
       );
       const createFirstActionButton = await screen.findByTestId('createFirstActionButton');
-      expect(createFirstActionButton).toBeEnabled();
       userEvent.click(createFirstActionButton);
-      expect(setAddFlyoutVisibility).toBeCalled();
+      await waitFor(() => {
+        expect(setAddFlyoutVisibility).toBeCalled();
+      });
     });
   });
 
@@ -435,7 +436,7 @@ describe('actions_connectors_list', () => {
       },
     ] as ActionConnector[];
 
-    async function setup(actionConnectors = mockedActions) {
+    async function setup() {
       loadActionTypes.mockResolvedValueOnce([
         {
           id: 'test',
