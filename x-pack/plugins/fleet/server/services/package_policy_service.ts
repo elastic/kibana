@@ -220,6 +220,18 @@ export interface PackagePolicyClient {
   }>;
 
   /**
+   * Remove an output from all package policies that are using it, and replace the output by the default ones.
+   * @param soClient
+   * @param esClient
+   * @param outputId
+   */
+  removeOutputFromAll(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    outputId: string
+  ): Promise<void>;
+
+  /**
    * Returns an `AsyncIterable` for retrieving all integration policy IDs
    * @param soClient
    * @param options
