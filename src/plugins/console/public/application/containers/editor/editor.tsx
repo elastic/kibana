@@ -15,7 +15,7 @@ import { EditorContentSpinner, NetworkRequestStatusBar } from '../../components'
 import { Panel, PanelsContainer } from '..';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
 import { getAutocompleteInfo, StorageKeys } from '../../../services';
-import { useEditorReadContext, useServicesContext, useRequestReadContext } from '../../contexts';
+import { useEditorReadContext, useServicesContext, useRequestReadContext, useRequestActionContext } from '../../contexts';
 import type { SenseEditor } from '../../models';
 import { MonacoEditor, MonacoEditorOutput } from './monaco';
 import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
@@ -39,6 +39,8 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
     requestInFlight,
     lastResult: { data: requestData, error: requestError }
   } = useRequestReadContext();
+
+  const dispatch = useRequestActionContext();
 
   const [fetchingMappings, setFetchingMappings] = useState(false);
 
@@ -115,7 +117,7 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
                   <EuiButtonEmpty
                     size="xs"
                     color="primary"
-                    onClick={() => {}}
+                    onClick={() => dispatch({ type: 'cleanRequest', payload: undefined })}
                   >
                     Clear this output
                   </EuiButtonEmpty>
