@@ -580,7 +580,7 @@ describe('actions_connectors_list', () => {
       expect(wrapper.find('[defaultMessage="No permissions to create connectors"]')).toHaveLength(
         1
       );
-      expect(wrapper.find('[data-test-subj="createActionButton"]')).toHaveLength(0);
+      expect(wrapper.find('[data-test-subj="createConnectorButton"]')).toHaveLength(0);
     });
   });
 
