@@ -15,25 +15,42 @@ interface Props {
   setRuleParams: StatusRuleParamsProps['setRuleParams'];
 }
 
-export const FROM_LAST_CHECKS = i18n.translate(
-  'xpack.synthetics.fromLastExpression.whenPopoverTitleLabel',
+export const WITHIN_TOTAL_CHECKS_LABEL = i18n.translate(
+  'xpack.synthetics.monitorStatusRule.withinTotalChecks.label',
   {
-    defaultMessage: 'From last',
+    defaultMessage: 'Within total checks',
   }
 );
 
-export const FOR_LAST_TIME = i18n.translate('xpack.synthetics.forTheLastExpression.label', {
-  defaultMessage: 'For last time',
-});
+export const WITHIN_TOTAL_CHECKS_EXPRESSION = i18n.translate(
+  'xpack.synthetics.monitorStatusRule.withinTotalChecks.expression',
+  {
+    defaultMessage: 'Within the last',
+  }
+);
 
-export const FROM_LOCATIONS = i18n.translate(
-  'xpack.synthetics.forTheLastExpression.fromLocationsPopoverTitleLabel',
+export const WITHIN_TIMERANGE_EXPRESSION = i18n.translate(
+  'xpack.synthetics.monitorStatusRule.withinTimerange.expression',
+  {
+    defaultMessage: 'Within the last',
+  }
+);
+
+export const WITHIN_TIMERANGE_LABEL = i18n.translate(
+  'xpack.synthetics.monitorStatusRule.withinTimerange.label',
+  {
+    defaultMessage: 'Within timerange',
+  }
+);
+
+export const FROM_LOCATIONS_LABEL = i18n.translate(
+  'xpack.synthetics.monitorStatusRule.fromLocations.label',
   {
     defaultMessage: 'From locations',
   }
 );
 
-export const FROM_LOCATIONS_TITLE = i18n.translate(
+export const FROM_LOCATIONS_EXPRESSION = i18n.translate(
   'xpack.synthetics.forTheLastExpression.fromLocationsPopoverLabel',
   {
     defaultMessage: 'From',
@@ -41,21 +58,22 @@ export const FROM_LOCATIONS_TITLE = i18n.translate(
 );
 
 interface Option {
+  expression: string;
   label: string;
   key: 'checksWindow' | 'timeWindow' | 'locations';
 }
 
 const OPTIONS: Option[] = [
   {
-    label: FROM_LAST_CHECKS,
+    label: WITHIN_TOTAL_CHECKS_LABEL,
     key: 'checksWindow',
   },
   {
-    label: FOR_LAST_TIME,
+    label: WITHIN_TIMERANGE_LABEL,
     key: 'timeWindow',
   },
   {
-    label: FROM_LOCATIONS,
+    label: FROM_LOCATIONS_LABEL,
     key: 'locations',
   },
 ];
@@ -109,12 +127,16 @@ export const ForTheLastExpression = ({ ruleParams, setRuleParams }: Props) => {
 
   return (
     <EuiPopover
-      id="cehckPopover"
+      id="checkPopover"
       panelPaddingSize="s"
       button={
         <EuiExpression
           description={
-            isLocationBased ? FROM_LOCATIONS_TITLE : isTimeWindow ? FOR_LAST_TIME : FROM_LAST_CHECKS
+            isLocationBased
+              ? FROM_LOCATIONS_EXPRESSION
+              : isTimeWindow
+              ? WITHIN_TIMERANGE_EXPRESSION
+              : WITHIN_TOTAL_CHECKS_EXPRESSION
           }
           isActive={isOpen}
           onClick={() => setIsOpen(!isOpen)}
