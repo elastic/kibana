@@ -15,7 +15,7 @@ import { reassignAgent, reassignAgents } from './reassign';
 import { createClientMock } from './action.mock';
 
 describe('reassignAgent', () => {
-  let mocks: ReturnType<createClientMock>;
+  let mocks: ReturnType<typeof createClientMock>;
 
   beforeEach(async () => {
     mocks = createClientMock();

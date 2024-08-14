@@ -16,13 +16,13 @@ import moment from 'moment';
 import type { Agent } from '../../types';
 import { appContextService } from '..';
 import { SO_SEARCH_LIMIT } from '../../../common/constants';
+import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
 
 import { getAgentActions } from './actions';
 import { closePointInTime, getAgentsByKuery } from './crud';
 import type { BulkActionsResolver } from './bulk_actions_resolver';
 import type { RetryParams } from './retry_helper';
 import { getRetryParams, MAX_RETRY_COUNT } from './retry_helper';
-import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
 
 export interface ActionParams {
   kuery: string;
@@ -186,7 +186,7 @@ export abstract class ActionRunner {
       }
     }
 
-    return await this.processAgents(agents).catch(console.log);
+    return await this.processAgents(agents);
   }
 
   async processAgentsInBatches(): Promise<{ actionId: string }> {
