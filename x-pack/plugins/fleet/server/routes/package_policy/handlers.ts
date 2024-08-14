@@ -10,7 +10,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RequestHandler } from '@kbn/core/server';
 
-import { groupBy, isEqual, keyBy } from 'lodash';
+import { groupBy, isEmpty, isEqual, keyBy } from 'lodash';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
@@ -429,8 +429,12 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       throw new PackagePolicyRequestError('At least one agent policy id must be provided');
     }
 
-    if (!isEqual(newData.policy_ids, packagePolicy.policy_ids)) {
-      const agentPolicy = await agentPolicyService.get(soClient, newData.policy_ids[0]);
+    if (
+      newData.policy_ids &&
+      !isEmpty(packagePolicy.policy_ids) &&
+      !isEqual(newData.policy_ids, packagePolicy.policy_ids)
+    ) {
+      const agentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_ids[0]);
       if (agentPolicy?.supports_agentless) {
         throw new PackagePolicyRequestError(
           'Cannot change agent policies of an agentless integration'
