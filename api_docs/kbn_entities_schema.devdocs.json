@@ -137,6 +137,36 @@
     "misc": [
       {
         "parentPluginId": "@kbn/entities-schema",
+        "id": "def-common.CreateEntityDefinitionQuery",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateEntityDefinitionQuery",
+        "description": [],
+        "signature": [
+          "{ installOnly: boolean; }"
+        ],
+        "path": "x-pack/packages/kbn-entities-schema/src/rest_spec/create.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/entities-schema",
+        "id": "def-common.DeleteEntityDefinitionQuery",
+        "type": "Type",
+        "tags": [],
+        "label": "DeleteEntityDefinitionQuery",
+        "description": [],
+        "signature": [
+          "{ deleteData?: boolean | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-entities-schema/src/rest_spec/delete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/entities-schema",
         "id": "def-common.ENTITY_BASE_PREFIX",
         "type": "string",
         "tags": [],
@@ -339,6 +369,21 @@
           "; filter?: string | undefined; }>"
         ],
         "path": "x-pack/packages/kbn-entities-schema/src/schema/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/entities-schema",
+        "id": "def-common.createEntityDefinitionQuerySchema",
+        "type": "Object",
+        "tags": [],
+        "label": "createEntityDefinitionQuerySchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ installOnly: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodBoolean>>; }, \"strip\", Zod.ZodTypeAny, { installOnly: boolean; }, { installOnly?: boolean | undefined; }>"
+        ],
+        "path": "x-pack/packages/kbn-entities-schema/src/rest_spec/create.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

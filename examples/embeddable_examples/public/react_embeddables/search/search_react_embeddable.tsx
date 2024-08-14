@@ -111,10 +111,10 @@ export const getSearchEmbeddableFactory = (services: Services) => {
         )
         .subscribe((next) => {
           dataLoading$.next(false);
-          if (next && next.hasOwnProperty('count') && next.count !== undefined) {
+          if (next && Object.hasOwn(next, 'count') && next.count !== undefined) {
             count$.next(next.count);
           }
-          if (next && next.hasOwnProperty('error')) {
+          if (next && Object.hasOwn(next, 'error')) {
             blockingError$.next(next.error);
           }
         });
