@@ -44,4 +44,4 @@ export const isAccordionNode = (
   node: Pick<ChromeProjectNavigationNode, 'renderAs' | 'defaultIsCollapsed' | 'isCollapsible'>
 ) =>
   node.renderAs === 'accordion' ||
-  ['defaultIsCollapsed', 'isCollapsible'].some((prop) => node.hasOwnProperty(prop));
+  ['defaultIsCollapsed', 'isCollapsible'].some((prop) => Object.hasOwn(node, prop));

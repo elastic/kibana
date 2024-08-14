@@ -34,7 +34,7 @@ const defaultLicenseMessage = (
 const platinumLicenseMessage = (
   <FormattedMessage
     id="xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.description"
-    defaultMessage="{label} Add a field to your mapping and choose 'semantic_text' to get started.'"
+    defaultMessage="{label} Add a field to your mapping and choose 'Semantic text' to get started."
     values={{
       label: (
         <strong>

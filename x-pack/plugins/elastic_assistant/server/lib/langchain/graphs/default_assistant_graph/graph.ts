@@ -129,6 +129,7 @@ export const getDefaultAssistantGraph = ({
       generateChatTitle({
         ...nodeParams,
         model: createLlmInstance(),
+        llmType,
         state,
         responseLanguage,
       });
