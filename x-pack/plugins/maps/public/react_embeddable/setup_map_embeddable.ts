@@ -26,9 +26,7 @@ export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
     onAdd: (container, savedObject) => {
       container.addNewPanel({
         panelType: MAP_SAVED_OBJECT_TYPE,
-        initialState: savedObject.managed
-          ? { attributes: savedObject.attributes }
-          : { savedObjectId: savedObject.id },
+        initialState: { savedObjectId: savedObject.id },
       });
     },
     embeddableType: MAP_SAVED_OBJECT_TYPE,
