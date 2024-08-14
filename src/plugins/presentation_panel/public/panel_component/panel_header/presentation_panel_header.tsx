@@ -78,10 +78,7 @@ export const PresentationPanelHeader = <
 
   if (!showPanelBar) {
     return (
-      <div
-        data-test-subj={`embeddablePanelHeading-${(panelTitle || '').replace(/\s/g, '')}`}
-        className={headerClasses}
-      >
+      <div data-test-subj={`embeddablePanelHeading`} className={headerClasses}>
         {contextMenuElement}
         {ariaLabelElement}
       </div>

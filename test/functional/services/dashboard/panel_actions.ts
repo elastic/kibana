@@ -356,6 +356,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async getPanelHeading(title: string) {
     this.log.debug(`getPanelHeading(${title})`);
+    if (!title) return await this.testSubjects.find('embeddablePanelHeading');
     return await this.testSubjects.find(`embeddablePanelHeading-${title.replace(/\s/g, '')}`);
   }
 
