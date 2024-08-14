@@ -27,9 +27,16 @@
       "enabled": true
     },
     {
-      "groupName": "GitHub actions",
+      "groupName": "operations actions",
       "matchManagers": ["github-actions"],
-      "matchPackageNames": ["actions/checkout"],
+      "matchPackageNames": [
+        "actions/checkout",
+        "elastic/github-actions/project-assigner",
+        "hmarr/auto-approve-action",
+        "octokit/graphql-action",
+        "sergeysova/jq-action",
+        "sourenlouv/backport"
+      ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "backport:all-open", "release_note:skip"],
