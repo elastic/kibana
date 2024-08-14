@@ -8,11 +8,8 @@
 import expect from '@kbn/expect';
 import { kbnTestConfig } from '@kbn/test';
 import { sortBy } from 'lodash';
-import {
-  ConversationCreateEvent,
-  Message,
-  MessageRole,
-} from '@kbn/observability-ai-assistant-plugin/common';
+import { Conversation, Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { clearKnowledgeBase, createKnowledgeBaseModel, deleteKnowledgeBaseModel } from './helpers';
 import { getConversationCreatedEvent } from '../conversations/helpers';
@@ -190,10 +187,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.only('when a user instruction exist and a conversation is created', () => {
-      let conversationCreatedEvent: ConversationCreateEvent;
+    describe('when a user instruction exist and a conversation is created', () => {
       let proxy: LlmProxy;
       let connectorId: string;
+      let conversation: Conversation;
+
+      const userInstructionText =
+        'Be polite and use language that is easy to understand. Never disagree with the user.';
 
       before(async () => {
         await observabilityAIAssistantAPIClient
@@ -201,9 +201,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
             params: {
               body: {
-                id: 'doc-to-update',
-                text: 'Initial text',
-                public: true,
+                id: 'private-instruction-about-language',
+                text: userInstructionText,
+                public: false,
               },
             },
           })
@@ -212,7 +212,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ({ proxy, connectorId } = await createLLMProxyConnector({ log, supertest }));
 
         proxy.interceptConversationTitle('LLM-generated title').completeAfterIntercept();
-        proxy.interceptConversation('I, the LLM, hear you!').completeAfterIntercept();
+        proxy
+          .interceptConversation({ name: 'conversation', response: 'I, the LLM, hear you!' })
+          .completeAfterIntercept();
+        proxy
+          .interceptConversation({ name: 'context', response: 'Responding to context' })
+          .completeAfterIntercept();
 
         const messages: Message[] = [
           {
@@ -245,30 +250,45 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        // await proxy.waitForAllInterceptorsSettled();
+        await proxy.waitForAllInterceptorsSettled();
+        const conversationCreatedEvent = getConversationCreatedEvent(createResponse.body);
 
-        // conversationCreatedEvent = getConversationCreatedEvent(createResponse.body);
-        // console.log('conversationCreatedEvent', createResponse.body, conversationCreatedEvent);
+        const conversationId = conversationCreatedEvent.conversation.id;
+
+        const res = await observabilityAIAssistantAPIClient.editorUser({
+          endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
+          params: {
+            path: {
+              conversationId,
+            },
+          },
+        });
+
+        conversation = res.body;
       });
 
       after(async () => {
         await deleteLLMProxyConnector({ supertest, connectorId, proxy, log });
       });
 
-      it('the instruction is included in the system prompt of a conversation', async () => {
-        expect(true).to.be(true);
-        // const conversationId = conversationCreatedEvent.conversation.id;
-        // const fullConversation = await observabilityAIAssistantAPIClient.editorUser({
-        //   endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
-        //   params: {
-        //     path: {
-        //       conversationId,
-        //     },
-        //   },
-        // });
+      it('adds the instruction to the system prompt', async () => {
+        const systemMessage = conversation.messages.find(
+          (message) => message.message.role === MessageRole.System
+        );
+        expect(systemMessage?.message.content).to.contain(userInstructionText);
+      });
 
-        // console.log(fullConversation.body.conversation);
-        // expect(fullConversation.body.conversation).to.eql();
+      it('does not add the instruction to the context', async () => {
+        const contextMessage = conversation.messages.find(
+          (message) => message.message.name === CONTEXT_FUNCTION_NAME
+        );
+
+        // there should be no suggestions with the user instruction
+        expect(contextMessage?.message.content).to.not.contain(userInstructionText);
+        expect(contextMessage?.message.data).to.not.contain(userInstructionText);
+
+        // there should be no suggestions at all
+        expect(JSON.parse(contextMessage?.message.data!).suggestions.length).to.be(0);
       });
     });
   });

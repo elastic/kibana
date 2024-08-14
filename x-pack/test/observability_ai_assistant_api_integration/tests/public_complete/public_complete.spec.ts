@@ -217,7 +217,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     describe('after adding an instruction', async () => {
-      let body: string;
+      let body: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
 
       before(async () => {
         await getEvents(
@@ -241,9 +241,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('includes the instruction in the system message', async () => {
-        const request = JSON.parse(body) as OpenAI.ChatCompletionCreateParams;
-
-        expect(request.messages[0].content).to.contain('This is a random instruction');
+        expect(body.messages[0].content).to.contain('This is a random instruction');
       });
     });
 

@@ -23,16 +23,30 @@ export function decodeEvents(body: Readable | string) {
 
 export function getConversationCreatedEvent(body: Readable | string) {
   const decodedEvents = decodeEvents(body);
-
-  console.log('decodedEvents', decodedEvents);
-  return decodedEvents.find(
+  const conversationCreatedEvent = decodedEvents.find(
     (event) => event.type === StreamingChatResponseEventType.ConversationCreate
   ) as ConversationCreateEvent;
+
+  if (!conversationCreatedEvent) {
+    throw new Error(
+      `No conversation created event found: ${JSON.stringify(decodedEvents, null, 2)}`
+    );
+  }
+
+  return conversationCreatedEvent;
 }
 
 export function getConversationUpdatedEvent(body: Readable | string) {
   const decodedEvents = decodeEvents(body);
-  return decodedEvents.find(
+  const conversationUpdatedEvent = decodedEvents.find(
     (event) => event.type === StreamingChatResponseEventType.ConversationUpdate
   ) as ConversationUpdateEvent;
+
+  if (!conversationUpdatedEvent) {
+    throw new Error(
+      `No conversation created event found: ${JSON.stringify(decodedEvents, null, 2)}`
+    );
+  }
+
+  return conversationUpdatedEvent;
 }

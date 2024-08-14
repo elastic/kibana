@@ -360,6 +360,9 @@ export class KnowledgeBaseService {
             namespace,
           }),
           ...getCategoryQuery({ categories }),
+
+          // exclude user instructions
+          { bool: { must_not: { term: { type: KnowledgeBaseType.UserInstruction } } } },
         ],
       },
     };
@@ -429,6 +432,13 @@ export class KnowledgeBaseService {
         return [];
       }),
     ]);
+
+    this.dependencies.logger.debug(
+      `documentsFromKb: ${JSON.stringify(documentsFromKb.slice(0, 5), null, 2)}`
+    );
+    this.dependencies.logger.debug(
+      `documentsFromConnectors: ${JSON.stringify(documentsFromConnectors.slice(0, 5), null, 2)}`
+    );
 
     const sortedEntries = orderBy(
       documentsFromKb.concat(documentsFromConnectors),
