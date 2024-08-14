@@ -105,7 +105,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "fleet-agent-policies": "f57d3b70e4175a19a18f18ee72a379ceec82e1fc",
         "fleet-fleet-server-host": "69be15f6b6f2a2875ad3c7050ddea7a87f505417",
         "fleet-message-signing-keys": "93421f43fed2526b59092a4e3c65d64bc2266c0f",
-        "fleet-package-policies": "fa9f19f6b2b874e51b4c29f82e9c68abefb802c0",
+        "fleet-package-policies": "2f4d524adb49a5281d3af0b66bb3003ba0ff2e44",
         "fleet-preconfiguration-deletion-record": "c52ea1e13c919afe8a5e8e3adbb7080980ecc08e",
         "fleet-proxy": "6cb688f0d2dd856400c1dbc998b28704ff70363d",
         "fleet-setup-lock": "0dc784792c79b5af5a6e6b5dcac06b0dbaa90bde",
