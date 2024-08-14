@@ -18,8 +18,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await browser.setWindowSize(1200, 800);
       await PageObjects.common.navigateToApp('console');
-      // Ensure that the text area can be interacted with
-      await PageObjects.console.collapseHelp();
     });
 
     beforeEach(async () => {

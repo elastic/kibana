@@ -15,7 +15,11 @@ import { useDataInit } from '../../hooks';
 import { getTopNavConfig } from './get_top_nav';
 import { SHELL_TAB_ID } from './tab_ids';
 
-export function Main() {
+interface MainProps {
+  isEmbeddable?: boolean;
+}
+
+export function Main({ isEmbeddable = false }: MainProps) {
   const [selectedTab, setSelectedTab] = useState(SHELL_TAB_ID);
 
   const { done, error, retry } = useDataInit();
@@ -30,7 +34,11 @@ export function Main() {
 
   return (
     <div id="consoleRoot">
-      <EuiFlexGroup className="consoleContainer" gutterSize="m" responsive={false}>
+      <EuiFlexGroup
+        className={`consoleContainer${isEmbeddable ? '--embeddable' : ''}`}
+        gutterSize="m"
+        responsive={false}
+      >
         <EuiFlexItem grow={false}>
           <EuiTitle className="euiScreenReaderOnly">
             <h1>
@@ -41,7 +49,7 @@ export function Main() {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiSplitPanel.Outer grow={true}>
+          <EuiSplitPanel.Outer grow={true} borderRadius={isEmbeddable ? 'none' : 'm'}>
             <EuiSplitPanel.Inner grow={false} className="consoleTabs">
               <TopNavMenu
                 disabled={!done}

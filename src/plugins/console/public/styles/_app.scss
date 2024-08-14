@@ -10,6 +10,11 @@
 
 .consoleContainer {
   padding: $euiSizeS;
+
+  &--embeddable {
+    padding: 0;
+    gap: 0;
+  }
 }
 
 .consoleTabs {
