@@ -22,6 +22,7 @@ import { closePointInTime, getAgentsByKuery } from './crud';
 import type { BulkActionsResolver } from './bulk_actions_resolver';
 import type { RetryParams } from './retry_helper';
 import { getRetryParams, MAX_RETRY_COUNT } from './retry_helper';
+import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
 
 export interface ActionParams {
   kuery: string;
@@ -29,6 +30,7 @@ export interface ActionParams {
   batchSize?: number;
   total?: number;
   actionId?: string;
+  spaceId?: string;
   // additional parameters specific to an action e.g. reassign to new policy id
   [key: string]: any;
 }
@@ -184,7 +186,7 @@ export abstract class ActionRunner {
       }
     }
 
-    return await this.processAgents(agents);
+    return await this.processAgents(agents).catch(console.log);
   }
 
   async processAgentsInBatches(): Promise<{ actionId: string }> {
@@ -195,15 +197,21 @@ export abstract class ActionRunner {
 
     appContextService.getLogger().debug('kuery: ' + this.actionParams.kuery);
 
-    const getAgents = () =>
-      getAgentsByKuery(this.esClient, this.soClient, {
-        kuery: this.actionParams.kuery,
+    const getAgents = () => {
+      const namespaceFilter = agentsKueryNamespaceFilter(this.actionParams.spaceId);
+      const kuery = namespaceFilter
+        ? `${namespaceFilter} AND ${this.actionParams.kuery}`
+        : this.actionParams.kuery;
+
+      return getAgentsByKuery(this.esClient, this.soClient, {
+        kuery,
         showInactive: this.actionParams.showInactive ?? false,
         page: 1,
         perPage,
         pitId,
         searchAfter: this.retryParams.searchAfter,
       });
+    };
 
     const res = await getAgents();
 

@@ -54,19 +54,27 @@ export default function (providerContext: FtrProviderContext) {
     let defaultSpaceAgent2: string;
     let testSpaceAgent1: string;
     let testSpaceAgent2: string;
+    let testSpaceAgent3: string;
 
     async function createAgents() {
-      const [_defaultSpaceAgent1, _defaultSpaceAgent2, _testSpaceAgent1, _testSpaceAgent2] =
-        await Promise.all([
-          createFleetAgent(esClient, defaultSpacePolicy1.item.id, 'default'),
-          createFleetAgent(esClient, defaultSpacePolicy2.item.id),
-          createFleetAgent(esClient, spaceTest1Policy1.item.id, TEST_SPACE_1),
-          createFleetAgent(esClient, spaceTest1Policy2.item.id, TEST_SPACE_1),
-        ]);
+      const [
+        _defaultSpaceAgent1,
+        _defaultSpaceAgent2,
+        _testSpaceAgent1,
+        _testSpaceAgent2,
+        _testSpaceAgent3,
+      ] = await Promise.all([
+        createFleetAgent(esClient, defaultSpacePolicy1.item.id, 'default'),
+        createFleetAgent(esClient, defaultSpacePolicy2.item.id),
+        createFleetAgent(esClient, spaceTest1Policy1.item.id, TEST_SPACE_1),
+        createFleetAgent(esClient, spaceTest1Policy2.item.id, TEST_SPACE_1),
+        createFleetAgent(esClient, spaceTest1Policy1.item.id, TEST_SPACE_1),
+      ]);
       defaultSpaceAgent1 = _defaultSpaceAgent1;
       defaultSpaceAgent2 = _defaultSpaceAgent2;
       testSpaceAgent1 = _testSpaceAgent1;
       testSpaceAgent2 = _testSpaceAgent2;
+      testSpaceAgent3 = _testSpaceAgent3;
     }
 
     before(async () => {
@@ -88,7 +96,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('GET /agent', () => {
       it('should return agents in a specific space', async () => {
         const agents = await apiClient.getAgents(TEST_SPACE_1);
-        expect(agents.total).to.eql(2);
+        expect(agents.total).to.eql(3);
         const agentIds = agents.items?.map((item) => item.id);
         expect(agentIds).to.contain(testSpaceAgent1);
         expect(agentIds).to.contain(testSpaceAgent2);
@@ -277,7 +285,7 @@ export default function (providerContext: FtrProviderContext) {
       }
 
       it('should only upgrade agents in the same space when passing a list of agent ids', async () => {
-        makeAgentsUpgradeable(
+        await makeAgentsUpgradeable(
           esClient,
           [defaultSpaceAgent1, defaultSpaceAgent2, testSpaceAgent1, testSpaceAgent2],
           '8.14.0'
@@ -295,6 +303,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(agentStatus).to.eql({
           [testSpaceAgent1]: 'online',
           [testSpaceAgent2]: 'online',
+          [testSpaceAgent3]: 'online',
         });
 
         await apiClient.bulkUpgradeAgents(
@@ -318,11 +327,12 @@ export default function (providerContext: FtrProviderContext) {
         expect(agentStatus).to.eql({
           [testSpaceAgent1]: 'updating',
           [testSpaceAgent2]: 'online',
+          [testSpaceAgent3]: 'online',
         });
       });
 
       it('should only upgrade agents in the same space when passing a kuery', async () => {
-        makeAgentsUpgradeable(
+        await makeAgentsUpgradeable(
           esClient,
           [defaultSpaceAgent1, defaultSpaceAgent2, testSpaceAgent1, testSpaceAgent2],
           '8.14.0'
@@ -340,6 +350,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(agentStatus).to.eql({
           [testSpaceAgent1]: 'online',
           [testSpaceAgent2]: 'online',
+          [testSpaceAgent3]: 'online',
         });
 
         await apiClient.bulkUpgradeAgents(
@@ -363,11 +374,16 @@ export default function (providerContext: FtrProviderContext) {
         expect(agentStatus).to.eql({
           [testSpaceAgent1]: 'updating',
           [testSpaceAgent2]: 'updating',
+          [testSpaceAgent3]: 'updating',
         });
       });
     });
 
     describe('POST /agents/{agentId}/reassign', () => {
+      beforeEach(async () => {
+        await cleanFleetAgents(esClient);
+        await createAgents();
+      });
       it('should allow reassigning an agent in the current space to a policy in the current space', async () => {
         let agent = await apiClient.getAgent(defaultSpaceAgent1);
         expect(agent.item.policy_id).to.eql(defaultSpacePolicy1.item.id);
@@ -411,6 +427,10 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('POST /agents/bulk_reassign', () => {
+      beforeEach(async () => {
+        await cleanFleetAgents(esClient);
+        await createAgents();
+      });
       function getAgentPolicyIds(agents: GetAgentsResponse) {
         return agents.items?.reduce((acc, item) => {
           acc[item.id] = item.policy_id;
@@ -467,6 +487,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(agentPolicyIds).to.eql({
           [testSpaceAgent1]: spaceTest1Policy1.item.id,
           [testSpaceAgent2]: spaceTest1Policy2.item.id,
+          [testSpaceAgent3]: spaceTest1Policy1.item.id,
         });
 
         await apiClient.bulkReassignAgents(
@@ -488,9 +509,71 @@ export default function (providerContext: FtrProviderContext) {
         expect(agentPolicyIds).to.eql({
           [testSpaceAgent1]: spaceTest1Policy2.item.id,
           [testSpaceAgent2]: spaceTest1Policy2.item.id,
+          [testSpaceAgent3]: spaceTest1Policy2.item.id,
         });
 
         await apiClient.reassignAgent(testSpaceAgent1, spaceTest1Policy1.item.id, TEST_SPACE_1);
+        await apiClient.reassignAgent(testSpaceAgent2, spaceTest1Policy1.item.id, TEST_SPACE_1);
+      });
+
+      it('should reassign agents in the same space by kuery in batches', async () => {
+        let agents = await apiClient.getAgents();
+        let agentPolicyIds = getAgentPolicyIds(agents);
+        expect(agentPolicyIds).to.eql({
+          [defaultSpaceAgent1]: defaultSpacePolicy1.item.id,
+          [defaultSpaceAgent2]: defaultSpacePolicy2.item.id,
+        });
+        agents = await apiClient.getAgents(TEST_SPACE_1);
+        agentPolicyIds = getAgentPolicyIds(agents);
+        expect(agentPolicyIds).to.eql({
+          [testSpaceAgent1]: spaceTest1Policy1.item.id,
+          [testSpaceAgent2]: spaceTest1Policy2.item.id,
+          [testSpaceAgent3]: spaceTest1Policy1.item.id,
+        });
+
+        const res = await apiClient.bulkReassignAgents(
+          {
+            agents: `not fleet-agents.policy_id:"${spaceTest1Policy2.item.id}"`,
+            policy_id: spaceTest1Policy2.item.id,
+            batchSize: 1,
+          },
+          TEST_SPACE_1
+        );
+
+        const verifyActionResult = async () => {
+          const { body: result } = await supertest
+            .get(`/s/${TEST_SPACE_1}/api/fleet/agents`)
+            .set('kbn-xsrf', 'xxx');
+          expect(result.total).to.eql(3);
+          result.items.forEach((agent: any) => {
+            expect(agent.policy_id).to.eql(spaceTest1Policy2.item.id);
+          });
+        };
+
+        await new Promise((resolve, reject) => {
+          let attempts = 0;
+          const intervalId = setInterval(async () => {
+            if (attempts > 20) {
+              clearInterval(intervalId);
+              reject(new Error('action timed out'));
+            }
+            ++attempts;
+            const {
+              body: { items: actionStatuses },
+            } = await supertest
+              .get(`/s/${TEST_SPACE_1}/api/fleet/agents/action_status`)
+              .set('kbn-xsrf', 'xxx');
+
+            const action = actionStatuses.find((a: any) => a.actionId === res.actionId);
+            if (action && action.nbAgentsActioned === action.nbAgentsActionCreated) {
+              clearInterval(intervalId);
+              await verifyActionResult();
+              resolve({});
+            }
+          }, 1000);
+        }).catch((e) => {
+          throw e;
+        });
       });
     });
   });

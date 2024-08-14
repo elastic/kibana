@@ -116,6 +116,7 @@ export async function sendUpgradeAgentsActions(
           ...options,
           batchSize,
           total: res.total,
+          spaceId: currentNameSpace,
         },
         { pitId: await openPointInTime(esClient) }
       ).runActionAsyncWithRetry();

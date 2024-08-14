@@ -216,11 +216,13 @@ export class SpaceTestApiClient {
       .expect(200);
   }
   async bulkReassignAgents(data: any, spaceId?: string) {
-    await this.supertest
+    const { body: res } = await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/bulk_reassign`)
       .set('kbn-xsrf', 'xxxx')
       .send(data)
       .expect(200);
+
+    return res;
   }
   async upgradeAgent(agentId: string, data: any, spaceId?: string) {
     await this.supertest

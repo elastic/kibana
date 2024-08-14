@@ -49,6 +49,8 @@ export class BulkActionsResolver {
         [BulkActionTaskType.REQUEST_DIAGNOSTICS_RETRY]: RequestDiagnosticsActionRunner,
       };
 
+      console.log(taskInstance);
+
       return createRetryTask(
         taskInstance,
         getDeps,

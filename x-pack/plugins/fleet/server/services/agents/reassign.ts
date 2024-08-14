@@ -138,6 +138,7 @@ export async function reassignAgents(
         soClient,
         {
           ...options,
+          spaceId: currentNameSpace,
           batchSize,
           total: res.total,
           newAgentPolicyId,
@@ -148,11 +149,9 @@ export async function reassignAgents(
   }
 
   return await reassignBatch(
-    soClient,
     esClient,
-    { newAgentPolicyId },
+    { newAgentPolicyId, spaceId: currentNameSpace },
     givenAgents,
-    outgoingErrors,
-    currentNameSpace
+    outgoingErrors
   );
 }

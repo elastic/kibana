@@ -22,7 +22,7 @@ import { BulkActionTaskType } from './bulk_action_types';
 
 export class ReassignActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
-    return await reassignBatch(this.soClient, this.esClient, this.actionParams! as any, agents, {});
+    return await reassignBatch(this.esClient, this.actionParams! as any, agents, {});
   }
 
   protected getTaskType() {
@@ -35,17 +35,18 @@ export class ReassignActionRunner extends ActionRunner {
 }
 
 export async function reassignBatch(
-  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   options: {
     newAgentPolicyId: string;
     actionId?: string;
     total?: number;
+    spaceId?: string;
   },
   givenAgents: Agent[],
-  outgoingErrors: Record<Agent['id'], Error>,
-  spaceId?: string
+  outgoingErrors: Record<Agent['id'], Error>
 ): Promise<{ actionId: string }> {
+  const spaceId = options.spaceId;
+  const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
   const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
