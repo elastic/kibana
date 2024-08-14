@@ -14,6 +14,7 @@ import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EuiDataGridCustomBodyProps, EuiDataGridProps } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { DocumentDetailsProps } from '../../../../../flyout/document_details/shared/types';
 import { ESQLDetailsPanelKey } from '../../../../../flyout/esql_details/constants';
 import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
 import { useOnExpandableFlyoutClose } from '../../../../../flyout/shared/hooks/use_on_expandable_flyout_close';
@@ -40,7 +41,8 @@ import {
   UnifiedTimelineGlobalStyles,
 } from '../styles';
 import { timelineActions } from '../../../../store';
-import { transformTimelineItemToUnifiedRows } from '../utils';
+import type { TimelineDataTableRecord } from '../utils';
+import { areTimelineRecords, isTimelineRecord, transformDataToUnifiedRows } from '../utils';
 import { TimelineEventDetailRow } from './timeline_event_detail_row';
 import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
@@ -56,7 +58,7 @@ type CommonDataTableProps = {
   timelineId: string;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
-  events: TimelineItem[];
+  events: TimelineItem[] | DataTableRecord[];
   refetch: inputsModel.Refetch;
   onFieldEdited: () => void;
   totalCount: number;
@@ -131,7 +133,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       },
     } = useKibana();
 
-    const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
+    const [expandedDoc, setExpandedDoc] = useState<TimelineDataTableRecord | DataTableRecord>();
     const [fetchedPage, setFechedPage] = useState<number>(0);
 
     const onCloseExpandableFlyout = useCallback((id: string) => {
@@ -147,20 +149,30 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       selectTimelineById(state, timelineId)
     );
 
-    // TODO: Test just passing events instead of the transform util for the text based query
     const { tableRows, tableStylesOverride } = useMemo(
-      () => transformTimelineItemToUnifiedRows({ events, dataView, isTextBasedQuery }),
-      [events, dataView, isTextBasedQuery]
+      () => transformDataToUnifiedRows({ events, dataView }),
+      [events, dataView]
     );
 
     const handleOnEventDetailPanelOpened = useCallback(
-      (eventData: DataTableRecord & TimelineItem) => {
-        const params = {
-          scopeId: timelineId,
-          id: isTextBasedQuery ? eventData?.raw?._id : eventData._id,
-          indexName: isTextBasedQuery ? eventData?.raw?._index : eventData?.ecs?._index,
-        };
+      (eventData: TimelineDataTableRecord | DataTableRecord) => {
+        const params = { scopeId: timelineId } as Partial<Required<DocumentDetailsProps>['params']>;
+        /**
+         * We want to be able to show the security flyout if _id and _index metadata are available in the ESQL context
+         * Since the data is structured differently, we access the _id and _index fields based on the record type
+         */
+        if (isTimelineRecord(eventData)) {
+          params.id = eventData._id;
+          params.indexName = eventData?.ecs?._index;
+        } else {
+          params.id = eventData?.raw?._id;
+          params.indexName = eventData?.raw?._index;
+        }
 
+        /**
+         * If id and index are available we will open the default security flyout. Otherwise if we are in an ESQL mode (isTextBasedQuery === true)
+         * we will open a simple flyout with the table and json tabs for rendering the field value pairs returned
+         */
         if (params.id && params.indexName) {
           openFlyout({
             right: {
@@ -168,7 +180,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
               params,
             },
           });
-        } else {
+        } else if (isTextBasedQuery) {
           openFlyout({
             shouldSync: false,
             right: {
@@ -180,6 +192,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             },
           });
         }
+
         telemetry.reportDetailsFlyoutOpened({
           location: timelineId,
           panel: 'right',
@@ -235,14 +248,14 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
     const customColumnRenderers = useMemo(
       () =>
-        isTextBasedQuery
-          ? undefined
-          : getFormattedFields({
+        areTimelineRecords(tableRows)
+          ? getFormattedFields({
               dataTableRows: tableRows,
               scopeId: 'timeline',
               headers: columns,
-            }),
-      [columns, tableRows, isTextBasedQuery]
+            })
+          : undefined,
+      [columns, tableRows]
     );
 
     const handleFetchMoreRecords = useCallback(() => {
@@ -323,7 +336,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           // the automatic width/heights calculated by EuiDataGrid
           rowCellRender: (props) => {
             const { rowIndex, ...restProps } = props;
-            return (
+            return areTimelineRecords(tableRows) ? (
               <TimelineEventDetailRow
                 event={tableRows[rowIndex]}
                 rowIndex={rowIndex}
@@ -331,7 +344,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
                 enabledRowRenderers={enabledRowRenderers}
                 {...restProps}
               />
-            );
+            ) : null;
           },
         },
       ],

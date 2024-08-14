@@ -27,6 +27,7 @@ import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { isEqual } from 'lodash';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import type { TimelineItem } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -98,7 +99,7 @@ type Props = {
   itemsPerPage: number;
   itemsPerPageOptions: number[];
   sort: SortColumnTimeline[];
-  events: TimelineItem[];
+  events: TimelineItem[] | DataTableRecord[];
   refetch: inputsModel.Refetch;
   totalCount: number;
   onChangePage: OnChangePage;

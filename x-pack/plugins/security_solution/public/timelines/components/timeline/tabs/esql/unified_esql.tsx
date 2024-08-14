@@ -16,6 +16,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingLogo } from '@elastic/eui';
 import { getESQLHasKeepClause, getESQLSourceCommand } from '@kbn/securitysolution-utils';
+import { noop } from 'lodash/fp';
 import { useGetAdHocDataViewWithESQLQuery } from '../../../../../sourcerer/containers/use_get_ad_hoc_data_view_with_esql_query';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
@@ -114,13 +115,13 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
   });
 
   const {
-    services: { customDataService, expressions, dataViews },
+    services: { expressions, dataViews },
   } = useKibana();
 
   const { data: esqlDataView } = useQuery<DataView | undefined>({
     queryKey: ['timeline', 'esql', 'dataView', esqlDataViewId ?? -1],
     queryFn: () => {
-      return esqlDataViewId ? dataViews.get(esqlDataViewId) : undefined;
+      return esqlDataViewId ? dataViews.get(esqlDataViewId) : null;
     },
   });
 
@@ -138,6 +139,7 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
     data,
     refetch,
     isLoading: isEventFetchInProgress,
+    dataUpdatedAt,
   } = useESQLBasedEvents({
     query: esqlQuery,
     dataView: esqlDataView,
@@ -326,6 +328,8 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
             dataView={esqlDataView ?? securityDataView}
             textBasedDataViewFields={esqlColumnsWithMeta.dataViewFields}
             columnsMeta={esqlColumnsWithMeta.columnsMeta}
+            onChangePage={noop}
+            updatedAt={dataUpdatedAt}
             onVisibleColumnsChange={onVisibleColumnsChange}
           />
         </EuiFlexItem>

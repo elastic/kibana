@@ -286,7 +286,6 @@ export const defaultTimelineToTimelineModel = (
         esql: timeline.esqlOptions?.query ?? timelineDefaults.esqlOptions.query.esql,
       },
       sort: timeline.esqlOptions?.sort ?? timelineDefaults.esqlOptions.sort,
-      queryValidation: timelineDefaults.esqlOptions.queryValidation,
     },
   };
   return Object.entries(timelineEntries).reduce(

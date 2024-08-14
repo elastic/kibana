@@ -13,29 +13,37 @@ import { GRID_STYLE } from '@kbn/unified-data-table/src/constants';
 import type { TimelineItem } from '../../../../../common/search_strategy';
 import { getEventTypeRowClassName } from './data_table/get_event_type_row_classname';
 
-type TransformTimelineItemToUnifiedRows =
-  | {
-      events: TimelineItem[];
-      dataView: DataView;
-      isTextBasedQuery: false;
-    }
-  | {
-      events: DataTableRecord;
-      dataView: DataView;
-      isTextBasedQuery: true;
-    };
+export type TimelineDataTableRecord = DataTableRecord & TimelineItem;
 
-export interface TransformTimelineItemToUnifiedRowsReturn {
-  tableRows: Array<DataTableRecord & TimelineItem> | DataTableRecord;
+export interface TransformDataToUnfiedRowsBase<T> {
+  events: DataTableRecord[] | TimelineItem[];
+  dataView: DataView;
+}
+
+/**
+ * @description - This and the `areTimelineRecords` function are TEMPORARY checks that should be made removed when
+ * the Timeline 'data' and 'ecs' usage in the UI is replaced by the default DataTableRecord 'raw' and 'flattened' formats.
+ * @param record - Either default timeline formatted data or unified data table formatted data
+ * @returns whether or not the record is valid timeline formatted data
+ */
+export const isTimelineRecord = (record: TimelineItem | DataTableRecord): record is TimelineItem =>
+  'ecs' in record && 'data' in record;
+
+export const areTimelineRecords = (
+  records: TimelineItem[] | DataTableRecord[]
+): records is TimelineItem[] => records[0] && isTimelineRecord(records[0]);
+
+export interface TransformDataToUnifiedRowsReturn {
+  tableRows: TimelineDataTableRecord[] | DataTableRecord[];
   tableStylesOverride: EuiDataGridStyle;
 }
 
-export function transformTimelineItemToUnifiedRows(
-  args: TransformTimelineItemToUnifiedRows
-): TransformTimelineItemToUnifiedRowsReturn {
-  const { events, dataView, isTextBasedQuery } = args;
+export function transformDataToUnifiedRows<T>(
+  args: TransformDataToUnfiedRowsBase<T>
+): TransformDataToUnifiedRowsReturn {
+  const { events = [], dataView } = args;
 
-  if (isTextBasedQuery) {
+  if (!areTimelineRecords(events)) {
     return { tableRows: events, tableStylesOverride: GRID_STYLE };
   }
 

@@ -23,7 +23,7 @@ import {
   mockESQLTimelineData,
   mockESQLTimelineNoResultResponse,
 } from '../../../../../common/containers/use_esql_based_query_events/test.data';
-import { useGetAdHocDataViewWithESQLQuery } from '../../../../../common/containers/sourcerer/use_get_ad_hoc_data_view_with_esql_query';
+import { useGetAdHocDataViewWithESQLQuery } from '../../../../../sourcerer/containers/use_get_ad_hoc_data_view_with_esql_query';
 import { useESQLBasedEvents } from '../../../../../common/containers/use_esql_based_query_events';
 import { useGetStatefulQueryBar } from './use_get_stateful_query_bar';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
@@ -32,8 +32,8 @@ import { allowedExperimentalValues } from '../../../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { timelineDefaults } from '../../../../store/defaults';
 import { defaultUdtHeaders } from '../../unified_components/default_headers';
-import { mockSourcererScope } from '../../../../../common/containers/sourcerer/mocks';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
+import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
 
 jest.mock('./use_get_stateful_query_bar');
 jest.mock('../../../../../common/containers/use_esql_based_query_events');
@@ -84,10 +84,6 @@ const globalStateWithESQL: typeof mockGlobalState = {
               sortDirection: 'desc',
             },
           ],
-          queryValidation: {
-            hasKeepClause: false,
-            sourceCommand: 'from',
-          },
           query: {
             esql: 'from some_query | keep "some columns"',
           },

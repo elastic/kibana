@@ -33,8 +33,13 @@ const ESQLDetailsCallout = (
   >
     <FormattedMessage
       id="xpack.securitySolution.flyout.basic.right.header.esqlMetadataCallout.body"
-      defaultMessage="To access the full document flyout, please add {codeBlock} to the FROM clause in your query"
-      values={{ codeBlock: <EuiCode>{'METADATA _id, _index'}</EuiCode> }}
+      defaultMessage="To access the full document flyout, please add {metadataBlock} to the {fromBlock} clause in your query and if you currently have a {keepBlock} clause, please add {keepFields} there as well"
+      values={{
+        metadataBlock: <EuiCode>{'METADATA _id, _index'}</EuiCode>,
+        fromBlock: <EuiCode>{'FROM'}</EuiCode>,
+        keepBlock: <EuiCode>{'KEEP'}</EuiCode>,
+        keepFields: <EuiCode>{'_id, _index'}</EuiCode>,
+      }}
     />
   </EuiCallOut>
 );
