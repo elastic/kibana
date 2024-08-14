@@ -40,6 +40,7 @@ const productFeature = {
 };
 const mockGetFeature = jest.fn().mockReturnValue(productFeature);
 jest.mock('@kbn/security-solution-features/product_features', () => ({
+  getAttackDiscoveryFeature: () => mockGetFeature(),
   getAssistantFeature: () => mockGetFeature(),
   getCasesFeature: () => mockGetFeature(),
   getSecurityFeature: () => mockGetFeature(),
@@ -54,8 +55,8 @@ describe('ProductFeaturesService', () => {
     const experimentalFeatures = {} as ExperimentalFeatures;
     new ProductFeaturesService(loggerMock.create(), experimentalFeatures);
 
-    expect(mockGetFeature).toHaveBeenCalledTimes(3);
-    expect(MockedProductFeatures).toHaveBeenCalledTimes(3);
+    expect(mockGetFeature).toHaveBeenCalledTimes(4);
+    expect(MockedProductFeatures).toHaveBeenCalledTimes(4);
   });
 
   it('should init all ProductFeatures when initialized', () => {
@@ -86,8 +87,10 @@ describe('ProductFeaturesService', () => {
     const mockSecurityConfig = new Map() as ProductFeaturesConfig<SecuritySubFeatureId>;
     const mockCasesConfig = new Map() as ProductFeaturesConfig<CasesSubFeatureId>;
     const mockAssistantConfig = new Map() as ProductFeaturesConfig<AssistantSubFeatureId>;
+    const mockAttackDiscoveryConfig = new Map() as ProductFeaturesConfig;
 
     const configurator: ProductFeaturesConfigurator = {
+      attackDiscovery: jest.fn(() => mockAttackDiscoveryConfig),
       security: jest.fn(() => mockSecurityConfig),
       cases: jest.fn(() => mockCasesConfig),
       securityAssistant: jest.fn(() => mockAssistantConfig),
@@ -97,6 +100,7 @@ describe('ProductFeaturesService', () => {
     expect(configurator.security).toHaveBeenCalled();
     expect(configurator.cases).toHaveBeenCalled();
     expect(configurator.securityAssistant).toHaveBeenCalled();
+    expect(configurator.attackDiscovery).toHaveBeenCalled();
 
     expect(MockedProductFeatures.mock.instances[0].setConfig).toHaveBeenCalledWith(
       mockSecurityConfig
@@ -104,6 +108,9 @@ describe('ProductFeaturesService', () => {
     expect(MockedProductFeatures.mock.instances[1].setConfig).toHaveBeenCalledWith(mockCasesConfig);
     expect(MockedProductFeatures.mock.instances[2].setConfig).toHaveBeenCalledWith(
       mockAssistantConfig
+    );
+    expect(MockedProductFeatures.mock.instances[3].setConfig).toHaveBeenCalledWith(
+      mockAttackDiscoveryConfig
     );
   });
 
@@ -127,8 +134,12 @@ describe('ProductFeaturesService', () => {
     const mockAssistantConfig = new Map([
       [ProductFeatureKey.assistant, {}],
     ]) as ProductFeaturesConfig<AssistantSubFeatureId>;
+    const mockAttackDiscoveryConfig = new Map([
+      [ProductFeatureKey.attackDiscovery, {}],
+    ]) as ProductFeaturesConfig;
 
     const configurator: ProductFeaturesConfigurator = {
+      attackDiscovery: jest.fn(() => mockAttackDiscoveryConfig),
       security: jest.fn(() => mockSecurityConfig),
       cases: jest.fn(() => mockCasesConfig),
       securityAssistant: jest.fn(() => mockAssistantConfig),
@@ -139,6 +150,7 @@ describe('ProductFeaturesService', () => {
     expect(productFeaturesService.isEnabled(ProductFeatureKey.endpointExceptions)).toEqual(true);
     expect(productFeaturesService.isEnabled(ProductFeatureKey.casesConnectors)).toEqual(true);
     expect(productFeaturesService.isEnabled(ProductFeatureKey.assistant)).toEqual(true);
+    expect(productFeaturesService.isEnabled(ProductFeatureKey.attackDiscovery)).toEqual(true);
     expect(productFeaturesService.isEnabled(ProductFeatureKey.externalRuleActions)).toEqual(false);
   });
 

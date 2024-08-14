@@ -35,7 +35,10 @@ import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 import type { FleetConfigType } from '../../common/types';
-import type { ExperimentalFeatures } from '../../common/experimental_features';
+import {
+  allowedExperimentalValues,
+  type ExperimentalFeatures,
+} from '../../common/experimental_features';
 import type {
   ExternalCallback,
   ExternalCallbacksStorage,
@@ -61,7 +64,7 @@ class AppContextService {
   private encryptedSavedObjectsStart: EncryptedSavedObjectsPluginStart | undefined;
   private data: DataPluginStart | undefined;
   private esClient: ElasticsearchClient | undefined;
-  private experimentalFeatures?: ExperimentalFeatures;
+  private experimentalFeatures: ExperimentalFeatures = allowedExperimentalValues;
   private securityCoreStart: SecurityServiceStart | undefined;
   private securitySetup: SecurityPluginSetup | undefined;
   private securityStart: SecurityPluginStart | undefined;
@@ -168,9 +171,6 @@ class AppContextService {
   }
 
   public getExperimentalFeatures() {
-    if (!this.experimentalFeatures) {
-      throw new Error('experimentalFeatures not set.');
-    }
     return this.experimentalFeatures;
   }
 

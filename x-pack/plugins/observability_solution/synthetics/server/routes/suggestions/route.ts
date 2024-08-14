@@ -30,6 +30,9 @@ interface AggsResponse {
   projectsAggs: {
     buckets: Buckets;
   };
+  monitorTypeAggs: {
+    buckets: Buckets;
+  };
   monitorIdsAggs: {
     buckets: Array<{
       key: string;
@@ -82,7 +85,7 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
         searchFields: SEARCH_FIELDS,
       });
 
-      const { tagsAggs, locationsAggs, projectsAggs, monitorIdsAggs } =
+      const { monitorTypeAggs, tagsAggs, locationsAggs, projectsAggs, monitorIdsAggs } =
         (data?.aggregations as AggsResponse) ?? {};
       const allLocationsMap = new Map(allLocations.map((obj) => [obj.id, obj.label]));
 
@@ -110,6 +113,12 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
             value: key,
             count,
           })) ?? [],
+        monitorTypes:
+          monitorTypeAggs?.buckets?.map(({ key, doc_count: count }) => ({
+            label: key,
+            value: key,
+            count,
+          })) ?? [],
       };
     } catch (error) {
       logger.error(`Failed to fetch synthetics suggestions: ${error}`);
@@ -121,6 +130,13 @@ const aggs = {
   tagsAggs: {
     terms: {
       field: `${syntheticsMonitorType}.attributes.${ConfigKey.TAGS}`,
+      size: 10000,
+      exclude: [''],
+    },
+  },
+  monitorTypeAggs: {
+    terms: {
+      field: `${syntheticsMonitorType}.attributes.${ConfigKey.MONITOR_TYPE}.keyword`,
       size: 10000,
       exclude: [''],
     },
