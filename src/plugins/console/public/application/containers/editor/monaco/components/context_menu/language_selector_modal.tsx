@@ -94,8 +94,13 @@ export const LanguageSelectorModal = ({
     onSubmit(language);
   };
 
+  const onCloseModal = () => {
+    changeDefaultLanguage(selectedLanguage);
+    closeModal();
+  };
+
   return (
-    <EuiModal aria-labelledby={modalTitleId} onClose={closeModal}>
+    <EuiModal aria-labelledby={modalTitleId} onClose={onCloseModal}>
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
@@ -121,7 +126,7 @@ export const LanguageSelectorModal = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={closeModal} data-test-subj="closeCopyAsModal">
+        <EuiButtonEmpty onClick={onCloseModal} data-test-subj="closeCopyAsModal">
           <FormattedMessage
             id="console.requestPanel.contextMenu.languageSelectorModalCancel"
             defaultMessage="Cancel"
