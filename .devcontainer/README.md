@@ -1,1 +1,1 @@
-Make a copy of .env.template and edit as you see fit
+See the [dev docs](https://docs.elastic.dev/kibana-dev-docs/getting-started/setup-dev-env#using-the-kibana-dev-container-optional) for information on using the Kibana Dev Container.
