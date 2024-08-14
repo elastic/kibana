@@ -6,6 +6,7 @@
  */
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+
 import { appContextService } from '..';
 
 import type { PreconfiguredOutput } from '../../../common/types';
@@ -31,6 +32,9 @@ const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
 jest.mock('../app_context', () => ({
   appContextService: {
     getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
+    getExperimentalFeatures: () => ({
+      useSpaceAwareness: true,
+    }),
     getLogger: () =>
       new Proxy(
         {},
@@ -59,6 +63,9 @@ describe('output preconfiguration', () => {
       page: 0,
       per_page: 0,
       total: 0,
+    });
+    internalSoClientWithoutSpaceExtension.bulkGet.mockResolvedValue({
+      saved_objects: [],
     });
     mockedOutputService.create.mockReset();
     mockedOutputService.update.mockReset();

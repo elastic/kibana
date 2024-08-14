@@ -1767,10 +1767,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@95.6.0":
-  version "95.6.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-95.6.0.tgz#432845333bd0d64aa816222d192db4715cc75987"
-  integrity sha512-OnErgFixCcYcDpH3iu1fIG5FxoJ+mmHtKOVI/aqeC0beEeJJSZd8uqcLh4iJf9tfCEb+ApykTIuRGi6XTcpvjw==
+"@elastic/eui@95.7.0":
+  version "95.7.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-95.7.0.tgz#50edc43d3aac1a1ea87ec56a04ec0bc91e7e32a1"
+  integrity sha512-T6tihdAtE3JhXaTMHagidXWB5Sv6c++5vHdPj7kyYGjT1fDPpJ/fuTZTfH2GJLc56g63zBdDNMkLnXZYb0ld4Q==
   dependencies:
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -3657,6 +3657,14 @@
   uid ""
 
 "@kbn/content-management-examples-plugin@link:examples/content_management_examples":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-management-favorites-public@link:packages/content-management/favorites/favorites_public":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-management-favorites-server@link:packages/content-management/favorites/favorites_server":
   version "0.0.0"
   uid ""
 

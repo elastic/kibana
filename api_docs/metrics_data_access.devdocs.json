@@ -745,7 +745,7 @@
         "label": "hostSnapshotMetricTypes",
         "description": [],
         "signature": [
-          "(\"memory\" | \"logRate\" | \"rx\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"cpu\" | \"cpuTotal\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"rxV2\" | \"txV2\")[]"
+          "(\"memory\" | \"logRate\" | \"rx\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"cpu\" | \"cpuV2\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"rxV2\" | \"txV2\")[]"
         ],
         "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/host/metrics/index.ts",
         "deprecated": false,
@@ -1522,7 +1522,7 @@
         "label": "SnapshotMetricType",
         "description": [],
         "signature": [
-          "\"count\" | \"memory\" | \"custom\" | \"logRate\" | \"rx\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"cpu\" | \"s3BucketSize\" | \"s3NumberOfObjects\" | \"s3TotalRequests\" | \"s3UploadBytes\" | \"s3DownloadBytes\" | \"cpuTotal\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"rxV2\" | \"txV2\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\" | \"rdsLatency\" | \"rdsConnections\" | \"rdsQueriesExecuted\" | \"rdsActiveTransactions\" | \"sqsMessagesVisible\" | \"sqsMessagesDelayed\" | \"sqsMessagesEmpty\" | \"sqsMessagesSent\" | \"sqsOldestMessage\""
+          "\"count\" | \"memory\" | \"custom\" | \"logRate\" | \"rx\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"cpu\" | \"s3BucketSize\" | \"s3NumberOfObjects\" | \"s3TotalRequests\" | \"s3UploadBytes\" | \"s3DownloadBytes\" | \"cpuV2\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"rxV2\" | \"txV2\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\" | \"rdsLatency\" | \"rdsConnections\" | \"rdsQueriesExecuted\" | \"rdsActiveTransactions\" | \"sqsMessagesVisible\" | \"sqsMessagesDelayed\" | \"sqsMessagesEmpty\" | \"sqsMessagesSent\" | \"sqsOldestMessage\""
         ],
         "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
@@ -2066,10 +2066,10 @@
           },
           {
             "parentPluginId": "metricsDataAccess",
-            "id": "def-common.SnapshotMetricTypeKeys.cpuTotal",
+            "id": "def-common.SnapshotMetricTypeKeys.cpuV2",
             "type": "Uncategorized",
             "tags": [],
-            "label": "cpuTotal",
+            "label": "cpuV2",
             "description": [],
             "signature": [
               "null"
@@ -2510,7 +2510,7 @@
         "description": [],
         "signature": [
           "KeyofC",
-          "<{ count: null; cpuTotal: null; cpu: null; diskLatency: null; diskSpaceUsage: null; load: null; memory: null; memoryFree: null; memoryTotal: null; normalizedLoad1m: null; tx: null; rx: null; txV2: null; rxV2: null; logRate: null; diskIOReadBytes: null; diskIOWriteBytes: null; s3TotalRequests: null; s3NumberOfObjects: null; s3BucketSize: null; s3DownloadBytes: null; s3UploadBytes: null; rdsConnections: null; rdsQueriesExecuted: null; rdsActiveTransactions: null; rdsLatency: null; sqsMessagesVisible: null; sqsMessagesDelayed: null; sqsMessagesSent: null; sqsMessagesEmpty: null; sqsOldestMessage: null; custom: null; }>"
+          "<{ count: null; cpuV2: null; cpu: null; diskLatency: null; diskSpaceUsage: null; load: null; memory: null; memoryFree: null; memoryTotal: null; normalizedLoad1m: null; tx: null; rx: null; txV2: null; rxV2: null; logRate: null; diskIOReadBytes: null; diskIOWriteBytes: null; s3TotalRequests: null; s3NumberOfObjects: null; s3BucketSize: null; s3DownloadBytes: null; s3UploadBytes: null; rdsConnections: null; rdsQueriesExecuted: null; rdsActiveTransactions: null; rdsLatency: null; sqsMessagesVisible: null; sqsMessagesDelayed: null; sqsMessagesSent: null; sqsMessagesEmpty: null; sqsOldestMessage: null; custom: null; }>"
         ],
         "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
