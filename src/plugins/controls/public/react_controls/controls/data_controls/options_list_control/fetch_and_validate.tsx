@@ -11,12 +11,15 @@ import {
   combineLatest,
   debounceTime,
   Observable,
+  of,
+  startWith,
   switchMap,
   tap,
   withLatestFrom,
 } from 'rxjs';
 
 import { PublishingSubject } from '@kbn/presentation-publishing';
+import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { OptionsListSuccessResponse } from '../../../../../common/options_list/types';
 import { isValidSearch } from '../../../../../common/options_list/is_valid_search';
 import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
@@ -57,6 +60,12 @@ export function fetchAndValidate$({
     stateManager.searchTechnique,
     // cannot use requestSize directly, because we need to be able to reset the size to the default without refetching
     api.loadMoreSubject.pipe(debounceTime(100)), // debounce load more so "loading" state briefly shows
+    apiPublishesReload(api.parentApi)
+      ? api.parentApi.reload$.pipe(
+          tap(() => requestCache.clearCache()),
+          startWith(undefined)
+        )
+      : of(undefined),
   ]).pipe(
     tap(() => {
       // abort any in progress requests

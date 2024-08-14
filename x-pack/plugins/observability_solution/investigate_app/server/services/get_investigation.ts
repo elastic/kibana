@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { GetInvestigationParams, GetInvestigationResponse } from '../../common/schema/get';
+import { GetInvestigationParams } from '@kbn/investigate-plugin/common';
+import { GetInvestigationResponse } from '@kbn/investigate-plugin/common/schema/get';
 import { InvestigationRepository } from './investigation_repository';
 
 export async function getInvestigation(
