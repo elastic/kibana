@@ -31,7 +31,7 @@ export const DocumentViewModeToggle = ({
   isEsqlMode: boolean;
   prepend?: ReactElement;
   stateContainer: DiscoverStateContainer;
-  setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
+  setDiscoverViewMode: (viewMode: VIEW_MODE) => Promise<VIEW_MODE>;
   patternCount?: number;
   dataView: DataView;
 }) => {

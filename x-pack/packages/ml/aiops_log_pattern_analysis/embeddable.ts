@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 export interface EmbeddablePatternAnalysisInput {
   dataView: DataView;
   savedSearch?: SavedSearch | null;
   embeddingOrigin?: string;
-  switchToDocumentView?: () => void;
+  switchToDocumentView?: () => Promise<VIEW_MODE>;
   lastReloadRequestTime?: number;
 }

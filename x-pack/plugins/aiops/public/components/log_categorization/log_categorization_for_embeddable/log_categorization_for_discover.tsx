@@ -54,7 +54,7 @@ export interface LogCategorizationEmbeddableProps {
 
 const BAR_TARGET = 20;
 
-export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> = ({
+export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = ({
   input,
   renderViewModeToggle,
 }) => {
@@ -168,11 +168,10 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
       }
       filter.query = values.query;
       if (typeof input.switchToDocumentView === 'function') {
-        input.switchToDocumentView();
+        input.switchToDocumentView().finally(() => {
+          filterManager.addFilters([filter]);
+        });
       }
-      setTimeout(() => {
-        filterManager.addFilters([filter]);
-      }, 500);
     },
     [dataView.id, filterManager, input]
   );
@@ -468,4 +467,4 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
 };
 
 // eslint-disable-next-line import/no-default-export
-export default LogCategorizationEmbeddable;
+export default LogCategorizationDiscover;
