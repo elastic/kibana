@@ -11,24 +11,35 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { PublishesDataViews, PublishingSubject } from '@kbn/presentation-publishing';
-import { combineLatest, lastValueFrom, Observable, switchMap, tap } from 'rxjs';
+import { combineLatest, lastValueFrom, Observable, of, startWith, switchMap, tap } from 'rxjs';
+import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { ControlFetchContext } from '../../../control_group/control_fetch';
+import { ControlGroupApi } from '../../../control_group/types';
 
 export function minMax$({
   controlFetch$,
+  controlGroupApi,
   data,
   dataViews$,
   fieldName$,
   setIsLoading,
 }: {
   controlFetch$: Observable<ControlFetchContext>;
+  controlGroupApi: ControlGroupApi;
   data: DataPublicPluginStart;
   dataViews$: PublishesDataViews['dataViews'];
   fieldName$: PublishingSubject<string>;
   setIsLoading: (isLoading: boolean) => void;
 }) {
   let prevRequestAbortController: AbortController | undefined;
-  return combineLatest([controlFetch$, dataViews$, fieldName$]).pipe(
+  return combineLatest([
+    controlFetch$,
+    dataViews$,
+    fieldName$,
+    apiPublishesReload(controlGroupApi)
+      ? controlGroupApi.reload$.pipe(startWith(undefined))
+      : of(undefined),
+  ]).pipe(
     tap(() => {
       if (prevRequestAbortController) {
         prevRequestAbortController.abort();
