@@ -69,7 +69,7 @@ test('convertSavedDashboardPanelToPanelState does not include undefined id', () 
   };
 
   const converted = convertSavedDashboardPanelToPanelState(savedDashboardPanel);
-  expect(converted.hasOwnProperty('savedObjectId')).toBe(false);
+  expect(Object.hasOwn(converted, 'savedObjectId')).toBe(false);
 });
 
 test('convertPanelStateToSavedDashboardPanel', () => {
@@ -123,7 +123,7 @@ test('convertPanelStateToSavedDashboardPanel will not add an undefined id when n
   };
 
   const converted = convertPanelStateToSavedDashboardPanel(dashboardPanel);
-  expect(converted.hasOwnProperty('id')).toBe(false);
+  expect(Object.hasOwn(converted, 'id')).toBe(false);
 });
 
 test('convertPanelStateToSavedDashboardPanel will not leave title as part of embeddable config', () => {
@@ -143,7 +143,7 @@ test('convertPanelStateToSavedDashboardPanel will not leave title as part of emb
   };
 
   const converted = convertPanelStateToSavedDashboardPanel(dashboardPanel);
-  expect(converted.embeddableConfig.hasOwnProperty('title')).toBe(false);
+  expect(Object.hasOwn(converted.embeddableConfig, 'title')).toBe(false);
   expect(converted.title).toBe('title');
 });
 
