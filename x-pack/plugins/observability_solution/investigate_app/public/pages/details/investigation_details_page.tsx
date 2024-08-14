@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { ALERT_RULE_CATEGORY } from '@kbn/rule-data-utils/src/default_alerts_as_data';
+import { AlertOrigin } from '@kbn/investigate-plugin/common/schema/origin';
 import { paths } from '../../../common/paths';
 import { useKibana } from '../../hooks/use_kibana';
+import { useFetchInvestigation } from '../../hooks/use_get_investigation_details';
+import { useInvestigateParams } from '../../hooks/use_investigate_params';
+import { useFetchAlert } from '../../hooks/use_get_alert_details';
 import { InvestigationDetails } from './components/investigation_details';
 
 export function InvestigationDetailsPage() {
@@ -22,7 +27,45 @@ export function InvestigationDetailsPage() {
     },
   } = useKibana();
 
+  const {
+    path: { id },
+  } = useInvestigateParams('/{id}');
+
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
+
+  const {
+    data: investigationDetails,
+    isLoading: isFetchInvestigationLoading,
+    isError: isFetchInvestigationError,
+  } = useFetchInvestigation({ id });
+
+  const alertId = investigationDetails ? (investigationDetails.origin as AlertOrigin).id : '';
+
+  const {
+    data: alertDetails,
+    isLoading: isFetchAlertLoading,
+    isError: isFetchAlertError,
+  } = useFetchAlert({ id: alertId });
+
+  if (isFetchInvestigationLoading || isFetchAlertLoading) {
+    return (
+      <h1>
+        {i18n.translate('xpack.investigateApp.fetchInvestigation.loadingLabel', {
+          defaultMessage: 'Loading...',
+        })}
+      </h1>
+    );
+  }
+
+  if (isFetchInvestigationError || isFetchAlertError) {
+    return (
+      <h1>
+        {i18n.translate('xpack.investigateApp.fetchInvestigation.errorLabel', {
+          defaultMessage: 'Error while fetching investigation',
+        })}
+      </h1>
+    );
+  }
 
   return (
     <ObservabilityPageTemplate
@@ -40,12 +83,26 @@ export function InvestigationDetailsPage() {
             }),
           },
         ],
-        pageTitle: i18n.translate('xpack.investigateApp.detailsPage.title', {
-          defaultMessage: 'New investigation',
-        }),
+        pageTitle: (
+          <>
+            {alertDetails && (
+              <EuiButtonEmpty
+                data-test-subj="investigationDetailsAlertLink"
+                iconType="arrowLeft"
+                size="xs"
+                href={basePath.prepend(`/app/observability/alerts/${alertId}`)}
+              >
+                <EuiText size="s">
+                  {`[Alert] ${alertDetails?.[ALERT_RULE_CATEGORY]} breached`}
+                </EuiText>
+              </EuiButtonEmpty>
+            )}
+            {investigationDetails && <div>{investigationDetails.title}</div>}
+          </>
+        ),
         rightSideItems: [
-          <EuiButton fill data-test-subj="investigateAppInvestigateDetailsPageEscalateButton">
-            {i18n.translate('xpack.investigateApp.investigateDetailsPage.escalateButtonLabel', {
+          <EuiButton fill data-test-subj="investigationDetailsEscalateButton">
+            {i18n.translate('xpack.investigateApp.investigationDetails.escalateButtonLabel', {
               defaultMessage: 'Escalate',
             })}
           </EuiButton>,
