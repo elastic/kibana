@@ -1085,7 +1085,9 @@ export const sendAlertToTimelineAction = async ({
           });
         }
       }
-    } catch {
+    } catch (error) {
+      /* eslint-disable-next-line no-console */
+      console.error(error);
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
       return createTimeline({
         from,
