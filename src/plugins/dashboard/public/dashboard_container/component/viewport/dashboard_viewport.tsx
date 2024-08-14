@@ -25,8 +25,6 @@ import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { DashboardGrid } from '../grid';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
-import { getReferencesForControls } from '../../../../common/dashboard_container/persistable_state/dashboard_container_references';
-import { pluginServices } from '../../../services/plugin_services';
 
 export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
   const [width, setWidth] = useState<number>(0);
@@ -94,27 +92,9 @@ export const DashboardViewportComponent = () => {
             getParentApi={() => {
               return {
                 ...dashboard,
-                getSerializedStateForChild: () => {
-                  return {
-                    rawState: dashboard.controlGroupInput
-                      ? (dashboard.controlGroupInput as ControlGroupSerializedState)
-                      : {
-                          controlStyle: 'oneLine',
-                          chainingSystem: 'HIERARCHICAL',
-                          showApplySelections: false,
-                          panelsJSON: JSON.stringify({}),
-                          ignoreParentSettingsJSON:
-                            '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
-                        },
-                    references: getReferencesForControls(dashboard.savedObjectReferences),
-                  };
-                },
-                getRuntimeStateForChild: () => {
-                  const { dashboardBackup } = pluginServices.getServices();
-                  return dashboardBackup.getState(dashboard.id)?.controlGroupChanges;
-                },
-              };
-            }}
+                getSerializedStateForChild: dashboard.getSerializedStateForControlGroup,
+                getRuntimeStateForChild: dashboard.getRuntimeStateForControlGroup,
+            }}}
             onApiAvailable={(api) => dashboard.setControlGroupApi(api)}
           />
         </div>

@@ -57,10 +57,10 @@ import { distinctUntilChanged, map } from 'rxjs';
 import { v4 } from 'uuid';
 import { PublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { apiHasSerializableState } from '@kbn/presentation-containers/interfaces/serialized_state';
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
+import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
 import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
 import { DashboardAttributes, DashboardContainerInput, DashboardPanelState } from '../../../common';
-import { getReferencesForPanelId } from '../../../common/dashboard_container/persistable_state/dashboard_container_references';
+import { getReferencesForControls, getReferencesForPanelId } from '../../../common/dashboard_container/persistable_state/dashboard_container_references';
 import {
   DASHBOARD_APP_ID,
   DASHBOARD_UI_METRIC_ID,
@@ -98,6 +98,7 @@ import {
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
+import { PANELS_CONTROL_GROUP_KEY } from '../../services/dashboard_backup/dashboard_backup_service';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -873,6 +874,22 @@ export class DashboardContainer
     };
   };
 
+  public getSerializedStateForControlGroup = () => {
+    return {
+      rawState: this.controlGroupInput
+        ? (this.controlGroupInput as ControlGroupSerializedState)
+        : {
+            controlStyle: 'oneLine',
+            chainingSystem: 'HIERARCHICAL',
+            showApplySelections: false,
+            panelsJSON: JSON.stringify({}),
+            ignoreParentSettingsJSON:
+              '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
+          } as ControlGroupSerializedState,
+      references: getReferencesForControls(this.savedObjectReferences),
+    };
+  };
+
   private restoredRuntimeState: UnsavedPanelState | undefined = undefined;
   public setRuntimeStateForChild = (childId: string, state: object) => {
     const runtimeState = this.restoredRuntimeState ?? {};
@@ -881,6 +898,10 @@ export class DashboardContainer
   };
   public getRuntimeStateForChild = (childId: string) => {
     return this.restoredRuntimeState?.[childId];
+  };
+
+  public getRuntimeStateForControlGroup = () => {
+    return this.getRuntimeStateForChild(PANELS_CONTROL_GROUP_KEY);
   };
 
   public removePanel(id: string) {

@@ -8,7 +8,7 @@
 import { childrenUnsavedChanges$ } from '@kbn/presentation-containers';
 import { omit } from 'lodash';
 import { AnyAction, Middleware } from 'redux';
-import { combineLatest, debounceTime, of, startWith, switchMap } from 'rxjs';
+import { combineLatest, debounceTime, of, skipWhile, startWith, switchMap } from 'rxjs';
 import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 import { DashboardContainer, DashboardCreationOptions } from '../..';
 import { DashboardContainerInput } from '../../../../common';
@@ -17,6 +17,7 @@ import { pluginServices } from '../../../services/plugin_services';
 import { UnsavedPanelState } from '../../types';
 import { dashboardContainerReducers } from '../dashboard_container_reducers';
 import { isKeyEqualAsync, unsavedChangesDiffingFunctions } from './dashboard_diffing_functions';
+import { PANELS_CONTROL_GROUP_KEY } from '../../../services/dashboard_backup/dashboard_backup_service';
 
 /**
  * An array of reducers which cannot cause unsaved changes. Unsaved changes only compares the explicit input
@@ -112,8 +113,9 @@ export function startDiffingDashboardState(
       dashboardUnsavedChanges,
       childrenUnsavedChanges$(this.children$),
       this.controlGroupApi$.pipe(
+        skipWhile((controlGroupApi) => !controlGroupApi),
         switchMap((controlGroupApi) => {
-          return controlGroupApi ? controlGroupApi.unsavedChanges : of(undefined);
+          return controlGroupApi!.unsavedChanges;
         })
       ),
     ]).subscribe(([dashboardChanges, unsavedPanelState, controlGroupChanges]) => {
@@ -128,10 +130,13 @@ export function startDiffingDashboardState(
 
       // backup unsaved changes if configured to do so
       if (creationOptions?.useSessionStorageIntegration) {
+        const reactEmbeddableChanges = unsavedPanelState ? { ...unsavedPanelState } : {};
+        if (controlGroupChanges) {
+          reactEmbeddableChanges[PANELS_CONTROL_GROUP_KEY] = controlGroupChanges;
+        }
         backupUnsavedChanges.bind(this)(
           dashboardChanges,
-          unsavedPanelState ? unsavedPanelState : {},
-          controlGroupChanges
+          reactEmbeddableChanges
         );
       }
     })
@@ -185,7 +190,6 @@ function backupUnsavedChanges(
   this: DashboardContainer,
   dashboardChanges: Partial<DashboardContainerInput>,
   reactEmbeddableChanges: UnsavedPanelState,
-  controlGroupChanges: Partial<ControlGroupRuntimeState> | undefined
 ) {
   const { dashboardBackup } = pluginServices.getServices();
   const dashboardStateToBackup = omit(dashboardChanges, keysToOmitFromSessionStorage);
@@ -197,6 +201,5 @@ function backupUnsavedChanges(
       panels: dashboardChanges.panels,
     },
     reactEmbeddableChanges,
-    controlGroupChanges
   );
 }
