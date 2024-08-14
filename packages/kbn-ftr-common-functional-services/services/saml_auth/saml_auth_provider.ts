@@ -20,13 +20,13 @@ export interface RoleCredentials {
   cookieHeader: { Cookie: string };
 }
 
-export async function SamlAuthProvider({ getService }: FtrProviderContext) {
+export function SamlAuthProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const log = getService('log');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const isCloud = !!process.env.TEST_CLOUD;
 
-  const authRoleProvider = await getAuthProvider({ config, log });
+  const authRoleProvider = getAuthProvider({ config });
   const supportedRoleDescriptors = authRoleProvider.getSupportedRoleDescriptors();
   const supportedRoles = Object.keys(supportedRoleDescriptors);
 

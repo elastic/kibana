@@ -50,5 +50,6 @@
     "@kbn/search-types",
     "@kbn/security-plugin",
     "@kbn/test-suites-src",
+    "@kbn/repo-info",
   ]
 }

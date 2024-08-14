@@ -18,6 +18,9 @@ import {
   systemIndicesSuperuser,
   FtrConfigProviderContext,
 } from '@kbn/test';
+import path from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
 import { services } from '../services';
 
 interface CreateTestConfigOptions {
@@ -74,6 +77,10 @@ export function createStatefulTestConfig(options: CreateTestConfigOptions) {
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.groups=${MOCK_IDP_ATTRIBUTE_ROLES}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name=${MOCK_IDP_ATTRIBUTE_NAME}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail=${MOCK_IDP_ATTRIBUTE_EMAIL}`,
+        ],
+        files: [
+          // SAML realm roles for stateful
+          path.resolve(REPO_ROOT, STATEFUL_ROLES_ROOT_PATH, 'roles.yml'),
         ],
       },
 

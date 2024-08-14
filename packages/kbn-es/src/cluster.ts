@@ -18,6 +18,7 @@ import { promisify } from 'util';
 import { CA_CERT_PATH, ES_NOPASSWORD_P12_PATH, extract } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
 import treeKill from 'tree-kill';
+import { MOCK_IDP_REALM_NAME, ensureSAMLRoleMapping } from '@kbn/mock-idp-utils';
 import { downloadSnapshot, installSnapshot, installSource, installArchive } from './install';
 import { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } from './paths';
 import {
@@ -312,7 +313,7 @@ export class Cluster {
    */
   private exec(installPath: string, opts: EsClusterExecOptions) {
     const {
-      skipNativeRealmSetup = false,
+      skipSecuritySetup = false,
       reportTime = () => {},
       startTime,
       skipReadyCheck,
@@ -437,8 +438,8 @@ export class Cluster {
         });
       }
 
-      // once the cluster is ready setup the native realm
-      if (!skipNativeRealmSetup) {
+      // once the cluster is ready setup the realm
+      if (!skipSecuritySetup) {
         const nativeRealm = new NativeRealm({
           log: this.log,
           elasticPassword: options.password,
@@ -446,8 +447,11 @@ export class Cluster {
         });
 
         await nativeRealm.setPasswords(options);
-      }
 
+        if (args.some((arg) => arg.includes(MOCK_IDP_REALM_NAME))) {
+          await ensureSAMLRoleMapping(client);
+        }
+      }
       this.log.success('kbn/es setup complete');
     });
 
