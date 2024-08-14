@@ -37,7 +37,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await await pageObjects.cspSecurity.logout();
+      await pageObjects.cspSecurity.logout();
       mockApiServer.close();
     });
 
