@@ -34,7 +34,6 @@ interface InvestigationStore {
   asObservable: () => Observable<{
     investigation: StatefulInvestigation;
   }>;
-  getInvestigation: () => Promise<Readonly<StatefulInvestigation>>;
   setGlobalParameters: (globalWidgetParameters: GlobalWidgetParameters) => Promise<void>;
   setTitle: (title: string) => Promise<void>;
   destroy: () => void;
@@ -113,7 +112,6 @@ export function createInvestigationStore({
       });
     },
     asObservable: () => asObservable,
-    getInvestigation: async () => Object.freeze(observable$.value.investigation),
     destroy: () => {
       return controller.abort();
     },
