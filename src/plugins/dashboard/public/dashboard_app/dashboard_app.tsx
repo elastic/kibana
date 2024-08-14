@@ -78,6 +78,7 @@ export function DashboardApp({
   useMount(() => {
     (async () => {
       setShowNoDataPage(await isDashboardAppInNoDataState());
+      // if given a shareable URL with an expanded panel, this is needed to open to the expanded panel when the dashboard loads
       const state: DashboardContainerInput | null = kbnUrlStateStorage.get(
         DASHBOARD_STATE_STORAGE_KEY
       );
