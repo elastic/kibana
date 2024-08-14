@@ -41,6 +41,31 @@ import { RuleAttributes } from '../../../../data/rule/types';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
 
+const validateCanUpdateFlapping = (
+  isFlappingEnabled: boolean,
+  originalFlapping: RuleAttributes['flapping'],
+  updateFlapping: UpdateRuleParams['data']['flapping']
+) => {
+  // If flapping is enabled, allow rule flapping to be updated and do nothing
+  if (isFlappingEnabled) {
+    return;
+  }
+
+  // If both versions are falsy, allow it even if its changing between undefined and null
+  if (!originalFlapping && !updateFlapping) {
+    return;
+  }
+
+  // If both values are equal, allow it because it's essentially not changing anything
+  if (isEqual(originalFlapping, updateFlapping)) {
+    return;
+  }
+
+  throw Boom.badRequest(
+    `Error updating rule: can not update rule flapping if global flapping is disabled`
+  );
+};
+
 type ShouldIncrementRevision = (params?: RuleParams) => boolean;
 
 export interface UpdateRuleParams<Params extends RuleParams = never> {
@@ -126,6 +151,8 @@ async function updateWithOCC<Params extends RuleParams = never>(
     apiKeyCreatedByUser,
     flapping: originalFlapping,
   } = originalRuleSavedObject.attributes;
+
+  validateCanUpdateFlapping(isFlappingEnabled, originalFlapping, initialData.flapping);
 
   if (!isFlappingEnabled && !isEqual(originalFlapping, initialData.flapping)) {
     throw Boom.badRequest(
