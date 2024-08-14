@@ -50,7 +50,7 @@ export const registerConvertRequestRoute = ({
           // We dont care about newlines in the data passed to the request-converter
           // since the library will format the data anyway.
           // This is specifically important as they rely requests using the ndjson format.
-          devtoolsScript += request.data.map(data => data.replaceAll('\n', ' ')).join('\n');
+          devtoolsScript += request.data.map((data) => data.replaceAll('\n', ' ')).join('\n');
         }
       });
 
