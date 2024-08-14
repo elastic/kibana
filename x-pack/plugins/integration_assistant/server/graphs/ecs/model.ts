@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { modifySamples } from '../../util/samples';
+import { prefixSamples } from '../../util/samples';
 import { ECS_EXAMPLE_ANSWER, ECS_FIELDS } from './constants';
 import { createPipeline } from './pipeline';
 import { mergeAndChunkSamples } from './chunk';
@@ -18,7 +18,7 @@ export function modelSubOutput(state: EcsMappingState): Partial<EcsMappingState>
 }
 
 export function modelInput(state: EcsMappingState): Partial<EcsMappingState> {
-  const prefixedSamples = modifySamples(state);
+  const prefixedSamples = prefixSamples(state);
   const sampleChunks = mergeAndChunkSamples(prefixedSamples, state.chunkSize);
   return {
     exAnswer: JSON.stringify(ECS_EXAMPLE_ANSWER, null, 2),

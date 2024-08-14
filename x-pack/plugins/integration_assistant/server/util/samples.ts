@@ -23,7 +23,7 @@ interface Field {
   fields?: Field[];
 }
 
-export function modifySamples(
+export function prefixSamples(
   state: EcsMappingState | CategorizationState | RelatedState
 ): string[] {
   const modifiedSamples: string[] = [];
