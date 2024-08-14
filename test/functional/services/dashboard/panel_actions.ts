@@ -61,6 +61,12 @@ export class DashboardPanelActionsService extends FtrService {
     await toggleMenuItem.click(DASHBOARD_TOP_OFFSET);
   }
 
+  async toggleContextMenuByTitle(title = '') {
+    this.log.debug(`toggleContextMenu(${title})`);
+    const header = await this.getPanelHeading(title);
+    await this.toggleContextMenu(header);
+  }
+
   async expectContextMenuToBeOpen() {
     this.log.debug('expectContextMenuToBeOpen');
     await this.testSubjects.existOrFail('embeddablePanelContextMenuOpen');
@@ -162,8 +168,8 @@ export class DashboardPanelActionsService extends FtrService {
    */
   async editPanelByTitle(title = '') {
     this.log.debug(`editPanelByTitle(${title})`);
-    const panelOptions = await this.getPanelHeading(title);
-    await this.clickEdit(panelOptions);
+    const header = await this.getPanelHeading(title);
+    await this.clickEdit(header);
   }
 
   async clickExpandPanelToggle() {
@@ -198,8 +204,8 @@ export class DashboardPanelActionsService extends FtrService {
 
   async clonePanelByTitle(title = '') {
     this.log.debug(`clonePanel(${title})`);
-    const panelOptions = await this.getPanelHeading(title);
-    await this.clickContextMenuItem(CLONE_PANEL_DATA_TEST_SUBJ, panelOptions);
+    const header = await this.getPanelHeading(title);
+    await this.clickContextMenuItem(CLONE_PANEL_DATA_TEST_SUBJ, header);
     await this.dashboard.waitForRenderComplete();
   }
 
@@ -324,13 +330,13 @@ export class DashboardPanelActionsService extends FtrService {
 
   async expectMissingPanelAction(testSubject: string, title = '') {
     this.log.debug('expectMissingPanelAction', testSubject, title);
-    await this.openContextMenu();
+    await this.openContextMenuByTitle(title);
     await this.testSubjects.missingOrFail(testSubject);
     if (await this.hasContextMenuMoreItem()) {
       await this.clickContextMenuMoreItem();
       await this.testSubjects.missingOrFail(testSubject);
     }
-    await this.toggleContextMenu();
+    await this.toggleContextMenuByTitle(title);
   }
 
   async expectMissingEditPanelAction(title = '') {
