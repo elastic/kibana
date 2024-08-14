@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
-import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
 
