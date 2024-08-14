@@ -154,7 +154,7 @@ export const getChangePointChartEmbeddableFactory = (
           dataLoading,
           blockingError,
           dataViews: dataViews$,
-          serializeState: () => {
+          serializeState: (runtimeState) => {
             const dataViewId = changePointControlsApi.dataViewId.getValue();
             const references: Reference[] = dataViewId
               ? [
@@ -168,9 +168,7 @@ export const getChangePointChartEmbeddableFactory = (
             return {
               rawState: {
                 timeRange: undefined,
-                ...serializeTitles(),
-                ...serializeTimeRange(),
-                ...serializeChangePointChartState(),
+                ...runtimeState,
               },
               references,
             };

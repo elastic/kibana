@@ -12,10 +12,16 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { apiHasSerializableState, SerializedPanelState } from '@kbn/presentation-containers';
+import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
+import {
+  apiHasInPlaceLibraryTransforms,
+  apiHasLibraryTransforms,
+} from '@kbn/presentation-publishing';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 import { batch } from 'react-redux';
+import { v4 as uuidv4 } from 'uuid';
 import {
   DashboardContainerInput,
   DashboardPanelMap,
@@ -29,12 +35,13 @@ import {
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardSaveOptions, DashboardStateFromSaveModal } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
-import { getByValuePanelState } from './duplicate_dashboard_panel';
+import { duplicateLegacyInput } from './duplicate_dashboard_panel';
 import { extractTitleAndCount } from './lib/extract_title_and_count';
 import { DashboardSaveModal } from './overlays/save_modal';
 
 const serializeAllPanelState = async (
-  dashboard: DashboardContainer
+  dashboard: DashboardContainer,
+  serializeByValue?: boolean
 ): Promise<{ panels: DashboardContainerInput['panels']; references: Reference[] }> => {
   const {
     embeddable: { reactEmbeddableRegistryHasKey },
@@ -49,10 +56,17 @@ const serializeAllPanelState = async (
     if (!reactEmbeddableRegistryHasKey(panel.type)) continue;
     const api = dashboard.children$.value[uuid];
 
-    if (api && apiHasSerializableState(api)) {
+    if (api && apiHasSerializableState(api) && apiHasSnapshottableState(api)) {
       serializePromises.push(
         (async () => {
-          const serialized = await api.serializeState();
+          const serialized = await api.serializeState(
+            serializeByValue && apiHasInPlaceLibraryTransforms(api)
+              ? api.getByValueRuntimeSnapshot()
+              : apiHasLibraryTransforms(api)
+              ? api.getByValueState()
+              : api.snapshotRuntimeState()
+          );
+          console.log('serialized', serialized);
           return { uuid, serialized };
         })()
       );
@@ -120,6 +134,7 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
         timefilter: { timefilter },
       },
     },
+    embeddable: { reactEmbeddableRegistryHasKey },
     savedObjectsTagging: { hasApi: hasSavedObjectsTagging },
     dashboardContentManagement: { checkForDuplicateDashboardTitle, saveDashboardState },
   } = pluginServices.getServices();
@@ -193,19 +208,65 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
           };
         }
 
-        const { panels: nextPanels, references } = await serializeAllPanelState(this);
+        const { panels: newPanels, references } = await serializeAllPanelState(this, managed);
 
-        const newPanels = await (async () => {
-          if (!managed) return nextPanels;
-          // this is a managed dashboard - unlink all by reference embeddables on clone
-          const unlinkedPanels: DashboardPanelMap = {};
-          for (const [panelId, panel] of Object.entries(nextPanels)) {
-            const duplicatedPanelState = await getByValuePanelState(this, panelId, panel);
-            unlinkedPanels[panelId] = { ...panel, ...duplicatedPanelState };
-          }
-          return unlinkedPanels;
-        })();
+        // const newPanels = await (async () => {
+        //   if (!managed) return nextPanels;
+        //   // this is a managed dashboard - unlink all by reference embeddables on clone
+        //   const unlinkedPanels: DashboardPanelMap = {};
+        //   for (const [panelId, panel] of Object.entries(nextPanels)) {
+        //     const duplicatedPanelState = await (async () => {
+        //       if (reactEmbeddableRegistryHasKey(panel.type)) {
+        //         const child = this.children$.value[panelId];
 
+        //         if (apiHasLibraryTransforms(child)) {
+        //           const byValueSerializedState = child.getByValueState();
+        //           if (panel.references) {
+        //             references.push(...prefixReferencesFromPanel(panelId, panel.references));
+        //           }
+        //           console.log('byValueSerializedStat', byValueSerializedState);
+        //           return {
+        //             type: panel.type,
+        //             explicitInput: {
+        //               ...byValueSerializedState,
+        //               title: newTitle,
+        //               id: panelId,
+        //             },
+        //           };
+        //         }
+
+        //         const runtimeSnapshot = (() => {
+        //           if (apiHasInPlaceLibraryTransforms(child))
+        //             return child.getByValueRuntimeSnapshot();
+        //           return apiHasSnapshottableState(child) ? child.snapshotRuntimeState() : {};
+        //         })();
+        //         const byValueSerializedState = apiHasSerializableState(child)
+        //           ? await child.serializeState(runtimeSnapshot)
+        //           : { rawState: {}, references: [] };
+        //         if (byValueSerializedState.references) {
+        //           references.push(
+        //             ...prefixReferencesFromPanel(panelId, byValueSerializedState.references)
+        //           );
+        //         }
+        //         return {
+        //           type: panel.type,
+        //           explicitInput: {
+        //             ...byValueSerializedState.rawState,
+        //             title: newTitle,
+        //             id: panelId,
+        //           },
+        //         };
+        //       } else {
+        //         return await duplicateLegacyInput(this, panel, panelId);
+        //       }
+        //     })();
+        //     // const duplicatedPanelState = await getByValuePanelState(this, panelId, panel);
+        //     unlinkedPanels[panelId] = { ...panel, ...duplicatedPanelState };
+        //   }
+        //   return unlinkedPanels;
+        // })();
+
+        console.log('new panels', newPanels, 'references', references);
         const beforeAddTime = window.performance.now();
 
         const saveResult = await saveDashboardState({

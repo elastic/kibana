@@ -60,6 +60,7 @@ export const getSearchEmbeddableFactory = ({
   > = {
     type: SEARCH_EMBEDDABLE_TYPE,
     deserializeState: async (serializedState) => {
+      console.log('deserialize', serializedState);
       return deserializeState({ serializedState, discoverServices });
     },
     buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
@@ -174,16 +175,14 @@ export const getSearchEmbeddableFactory = ({
             defaultPanelTitle$.next(undefined);
             defaultPanelDescription$.next(undefined);
           },
-          serializeState: async () =>
-            serializeState({
+          serializeState: async (runtimeState) => {
+            return serializeState({
               uuid,
-              initialState,
+              runtimeState,
               savedSearch: searchEmbeddable.api.savedSearch$.getValue(),
-              serializeTitles,
-              serializeTimeRange: timeRange.serialize,
-              savedObjectId: savedObjectId$.getValue(),
               discoverServices,
-            }),
+            });
+          },
         },
         {
           ...titleComparators,

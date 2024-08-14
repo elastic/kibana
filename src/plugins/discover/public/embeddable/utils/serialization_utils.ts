@@ -72,21 +72,17 @@ export const deserializeState = async ({
 
 export const serializeState = async ({
   uuid,
-  initialState,
+  runtimeState,
   savedSearch,
-  serializeTitles,
-  serializeTimeRange,
-  savedObjectId,
   discoverServices,
 }: {
   uuid: string;
-  initialState: SearchEmbeddableRuntimeState;
   savedSearch: SavedSearch;
-  serializeTitles: () => SerializedTitles;
-  serializeTimeRange: () => SerializedTimeRange;
-  savedObjectId?: string;
+  runtimeState: SearchEmbeddableRuntimeState;
   discoverServices: DiscoverServices;
 }): Promise<SerializedPanelState<SearchEmbeddableSerializedState>> => {
+  const { savedObjectId } = runtimeState;
+
   const searchSource = savedSearch.searchSource;
   const { searchSourceJSON, references: originalReferences } = searchSource.serialize();
   const savedSearchAttributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
@@ -107,8 +103,7 @@ export const serializeState = async ({
       rawState: {
         savedObjectId,
         // Serialize the current dashboard state into the panel state **without** updating the saved object
-        ...serializeTitles(),
-        ...serializeTimeRange(),
+        ...runtimeState,
         ...overwriteState,
       },
       // No references to extract for by-reference embeddable since all references are stored with by-reference saved object
@@ -124,11 +119,11 @@ export const serializeState = async ({
       references: originalReferences,
     },
   });
+  console.log('references 2', references);
 
   return {
     rawState: {
-      ...serializeTitles(),
-      ...serializeTimeRange(),
+      ...runtimeState,
       ...(state as unknown as SavedSearchAttributes),
     },
     references,

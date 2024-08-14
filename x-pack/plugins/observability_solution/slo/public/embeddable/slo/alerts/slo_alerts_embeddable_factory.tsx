@@ -65,7 +65,7 @@ export function getAlertsEmbeddableFactory(
         }
       }
 
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+      const { titlesApi, titleComparators } = initializeTitles(state);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getAlertsPanelTitle());
       const slos$ = new BehaviorSubject(state.slos);
       const showAllGroupByInstances$ = new BehaviorSubject(state.showAllGroupByInstances);
@@ -81,15 +81,6 @@ export function getAlertsEmbeddableFactory(
           isEditingEnabled: () => true,
           onEdit: async () => {
             onEdit();
-          },
-          serializeState: () => {
-            return {
-              rawState: {
-                ...serializeTitles(),
-                slos: slos$.getValue(),
-                showAllGroupByInstances: showAllGroupByInstances$.getValue(),
-              },
-            };
           },
           getSloAlertsConfig: () => {
             return {

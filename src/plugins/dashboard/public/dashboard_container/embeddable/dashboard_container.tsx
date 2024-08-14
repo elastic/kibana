@@ -54,7 +54,10 @@ import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs';
 import { v4 } from 'uuid';
 import { PublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
-import { apiHasSerializableState } from '@kbn/presentation-containers/interfaces/serialized_state';
+import {
+  apiHasSerializableState,
+  apiHasSnapshottableState,
+} from '@kbn/presentation-containers/interfaces/serialized_state';
 import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
 import { DashboardContainerInput, DashboardPanelState } from '../../../common';
 import { getReferencesForPanelId } from '../../../common/dashboard_container/persistable_state/dashboard_container_references';
@@ -583,7 +586,9 @@ export class DashboardContainer
       const child = this.children$.value[panelId];
       if (!child) throw new PanelNotFoundError();
       const serialized = apiHasSerializableState(child)
-        ? await child.serializeState()
+        ? await child.serializeState(
+            apiHasSnapshottableState(child) ? child.snapshotRuntimeState() : {} // TODO: What to do when not snapshottable?
+          )
         : { rawState: {} };
       return {
         type: panel.type,
@@ -842,6 +847,7 @@ export class DashboardContainer
     const { id, ...serializedState } = rawState;
     if (!rawState || Object.keys(serializedState).length === 0) return;
     const references = getReferencesForPanelId(childId, this.savedObjectReferences);
+    console.log('getseraizlied', childId, references);
     return {
       rawState,
       references,

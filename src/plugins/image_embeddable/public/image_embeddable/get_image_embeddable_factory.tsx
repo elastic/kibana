@@ -73,12 +73,11 @@ export const getImageEmbeddableFactory = ({
             i18n.translate('imageEmbeddable.imageEmbeddableFactory.displayName.edit', {
               defaultMessage: 'image',
             }),
-          serializeState: () => {
+          serializeState: (runtimeState) => {
             return {
               rawState: {
-                ...serializeTitles(),
+                ...runtimeState,
                 ...(dynamicActionsApi?.serializeDynamicActions() ?? {}),
-                imageConfig: imageConfig$.getValue(),
               },
             };
           },

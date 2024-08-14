@@ -128,7 +128,9 @@ export const getLinksEmbeddableFactory = () => {
             delete snapshot.savedObjectId;
             return snapshot;
           },
-          serializeState: async (): Promise<SerializedPanelState<LinksSerializedState>> => {
+          serializeState: async (
+            runtimeState
+          ): Promise<SerializedPanelState<LinksSerializedState>> => {
             if (savedObjectId$.value !== undefined) {
               const linksByReferenceState: LinksByReferenceSerializedState = {
                 savedObjectId: savedObjectId$.value,
@@ -136,7 +138,6 @@ export const getLinksEmbeddableFactory = () => {
               };
               return { rawState: linksByReferenceState, references: [] };
             }
-            const runtimeState = api.snapshotRuntimeState();
             const { attributes, references } = serializeLinksAttributes(runtimeState);
             const linksByValueState: LinksByValueSerializedState = {
               attributes,

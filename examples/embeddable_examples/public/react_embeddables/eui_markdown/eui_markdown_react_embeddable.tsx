@@ -40,7 +40,7 @@ export const markdownEmbeddableFactory: ReactEmbeddableFactory<
     /**
      * initialize state (source of truth)
      */
-    const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+    const { titlesApi, titleComparators } = initializeTitles(state);
     const content$ = new BehaviorSubject(state.content);
 
     /**
@@ -51,14 +51,6 @@ export const markdownEmbeddableFactory: ReactEmbeddableFactory<
     const api = buildApi(
       {
         ...titlesApi,
-        serializeState: () => {
-          return {
-            rawState: {
-              ...serializeTitles(),
-              content: content$.getValue(),
-            },
-          };
-        },
       },
 
       /**

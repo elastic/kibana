@@ -24,17 +24,7 @@ export const factory: ReactEmbeddableFactory<{}, {}, Api> = {
     return {};
   },
   buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
-    const api = buildApi(
-      {
-        serializeState: () => {
-          return {
-            rawState: {},
-            references: [],
-          };
-        },
-      },
-      {}
-    );
+    const api = buildApi({}, {});
 
     return {
       api,

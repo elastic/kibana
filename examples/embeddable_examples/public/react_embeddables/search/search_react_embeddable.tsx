@@ -52,14 +52,6 @@ export const getSearchEmbeddableFactory = (services: Services) => {
           blockingError: blockingError$,
           dataViews: dataViews$,
           dataLoading: dataLoading$,
-          serializeState: () => {
-            return {
-              rawState: {
-                ...timeRange.serialize(),
-              },
-              references: [],
-            };
-          },
         },
         {
           ...timeRange.comparators,

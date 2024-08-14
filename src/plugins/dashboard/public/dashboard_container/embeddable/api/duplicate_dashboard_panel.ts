@@ -27,7 +27,7 @@ import { pluginServices } from '../../../services/plugin_services';
 import { placeClonePanel } from '../../panel_placement';
 import { DashboardContainer } from '../dashboard_container';
 
-const duplicateLegacyInput = async (
+export const duplicateLegacyInput = async (
   dashboard: DashboardContainer,
   panelToClone: DashboardPanelState,
   idToDuplicate: string
