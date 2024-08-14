@@ -28,13 +28,11 @@ export const useAgentless = () => {
   const { cloud } = useStartServices();
   const isServerless = !!cloud?.isServerlessEnabled;
   const isCloud = !!cloud?.isCloudEnabled;
-  const agentlessAPIUrl = config.agentless?.api.url;
 
-  const isAgentlessEnabled =
-    agentlessExperimentalFeatureEnabled && (isServerless || (isCloud && !!agentlessAPIUrl));
+  const isAgentlessCloudEnabled = isCloud && !!config.agentless?.enabled;
+  const isAgentlessServerlessEnabled = isServerless && agentlessExperimentalFeatureEnabled;
 
-  const isAgentlessCloudEnabled = isCloud && isAgentlessEnabled && !!agentlessAPIUrl;
-  const isAgentlessServerlessEnabled = isServerless && isAgentlessEnabled;
+  const isAgentlessEnabled = isAgentlessCloudEnabled || isAgentlessServerlessEnabled;
 
   const isAgentlessAgentPolicy = (agentPolicy: AgentPolicy | undefined) => {
     if (!agentPolicy) return false;
@@ -64,7 +62,6 @@ export const useAgentless = () => {
     return isAgentlessEnabled && packagePolicy.policy_ids.includes(AGENTLESS_POLICY_ID);
   };
   return {
-    agentlessAPIUrl,
     isAgentlessCloudEnabled,
     isAgentlessServerlessEnabled,
     isAgentlessEnabled,
@@ -91,7 +88,6 @@ export function useSetupTechnology({
   packagePolicy: NewPackagePolicy;
   isEditPage?: boolean;
 }) {
-  const { cloud } = useStartServices();
   const { isAgentlessEnabled, isAgentlessCloudEnabled, isAgentlessServerlessEnabled } =
     useAgentless();
 
@@ -144,12 +140,10 @@ export function useSetupTechnology({
       }
     };
 
-    if (isAgentlessEnabled) {
-      if (cloud?.isServerlessEnabled) {
-        fetchAgentlessPolicy();
-      }
+    if (isAgentlessServerlessEnabled) {
+      fetchAgentlessPolicy();
     }
-  }, [isAgentlessEnabled, cloud]);
+  }, [isAgentlessServerlessEnabled]);
 
   const handleSetupTechnologyChange = useCallback(
     (setupTechnology: SetupTechnology) => {

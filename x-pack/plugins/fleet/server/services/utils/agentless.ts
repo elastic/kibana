@@ -6,12 +6,11 @@
  */
 
 import { appContextService } from '..';
+import type { FleetConfigType } from '../../config';
 
 export const isAgentlessCloudEnabled = () => {
   const cloudSetup = appContextService.getCloud();
-  return Boolean(
-    cloudSetup?.isCloudEnabled && appContextService.getExperimentalFeatures().agentless
-  );
+  return Boolean(cloudSetup?.isCloudEnabled && appContextService.getConfig()?.agentless?.enabled);
 };
 export const isAgentlessServerlessEnabled = () => {
   const cloudSetup = appContextService.getCloud();
@@ -21,4 +20,15 @@ export const isAgentlessServerlessEnabled = () => {
 };
 export const isAgentlessEnabled = () => {
   return isAgentlessCloudEnabled() || isAgentlessServerlessEnabled();
+};
+
+const AGENTLESS_API_BASE_PATH = '/api/v1/ess';
+
+type AgentlessApiEndpoints = '/deployments' | `/deployments/${string}`;
+
+export const prependAgentlessApiBasePathToEndpoint = (
+  agentlessConfig: FleetConfigType['agentless'],
+  endpoint: AgentlessApiEndpoints
+) => {
+  return `${agentlessConfig.api.url}${AGENTLESS_API_BASE_PATH}${endpoint}`;
 };
