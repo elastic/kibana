@@ -209,8 +209,11 @@ export const getVisualizeEmbeddableFactory: (deps: {
           if (readOnly) return false;
           const capabilities = getCapabilities();
           const isByValue = !savedObjectId$.getValue();
+          console.log('capabilities', capabilities);
           if (isByValue)
-            return Boolean(capabilities.dashboard?.save && capabilities.visualize?.open);
+            return Boolean(
+              capabilities.dashboard?.showWriteControls && capabilities.visualize?.open
+            );
           else return Boolean(capabilities.visualize?.save);
         },
         updateVis: async (visUpdates) => {
