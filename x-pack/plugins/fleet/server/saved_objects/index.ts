@@ -540,6 +540,7 @@ export const getSavedObjectTypes = (
           is_managed: { type: 'boolean' },
           policy_id: { type: 'keyword' },
           policy_ids: { type: 'keyword' },
+          output_id: { type: 'keyword' },
           package: {
             properties: {
               name: { type: 'keyword' },
@@ -695,6 +696,16 @@ export const getSavedObjectTypes = (
             {
               type: 'data_backfill',
               backfillFn: packagePolicyV13AdvancedFields,
+            },
+          ],
+        },
+        '14': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                output_id: { type: 'keyword' },
+              },
             },
           ],
         },

@@ -24,6 +24,7 @@ jest.mock('../agent_policy_update');
 jest.mock('../output');
 jest.mock('../epm/packages/bundled_packages');
 jest.mock('../epm/archive');
+jest.mock('../settings');
 
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
 
@@ -32,7 +33,11 @@ jest.mock('../app_context', () => ({
     getExperimentalFeatures: jest.fn().mockReturnValue({
       useSpaceAwareness: false,
     }),
+    getInternalUserSOClient: jest.fn(),
     getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
+    getExperimentalFeatures: () => ({
+      useSpaceAwareness: true,
+    }),
     getLogger: () =>
       new Proxy(
         {},
@@ -61,6 +66,9 @@ describe('output preconfiguration', () => {
       page: 0,
       per_page: 0,
       total: 0,
+    });
+    internalSoClientWithoutSpaceExtension.bulkGet.mockResolvedValue({
+      saved_objects: [],
     });
     mockedOutputService.create.mockReset();
     mockedOutputService.update.mockReset();

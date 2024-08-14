@@ -29,11 +29,12 @@ export const filterFieldEntries = (
 ): Array<[string, FieldsType]> => {
   return fieldEntries.filter(([fieldsKey, fieldsValue]: [string, FieldsType]) => {
     return (
+      // TODO: Look at not filtering this and instead transform it so it can be inserted correctly in the strategies which does an overwrite of everything from fields
       !isEqlBug77152(fieldsKey) &&
       !isIgnored(fieldsKey, ignoreFields) &&
       !isInvalidKey(fieldsKey) &&
       !isMultiField(fieldsKey, fieldEntries) &&
-      !isTypeObject(fieldsValue) // TODO: Look at not filtering this and instead transform it so it can be inserted correctly in the strategies which does an overwrite of everything from fields
+      !isTypeObject(fieldsValue)
     );
   });
 };

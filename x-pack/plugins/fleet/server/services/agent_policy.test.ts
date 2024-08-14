@@ -23,9 +23,13 @@ import type {
   NewAgentPolicy,
   PreconfiguredAgentPolicy,
 } from '../types';
-import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
+import {
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '../constants';
 
-import { AGENT_POLICY_INDEX, AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../common';
+import { AGENT_POLICY_INDEX, SO_SEARCH_LIMIT } from '../../common';
 
 import { agentPolicyService } from './agent_policy';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
@@ -46,31 +50,62 @@ jest.mock('./spaces/helpers');
 
 function getSavedObjectMock(agentPolicyAttributes: any) {
   const mock = savedObjectsClientMock.create();
+  const mockPolicy = {
+    type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+    references: [],
+    attributes: agentPolicyAttributes as AgentPolicy,
+  };
   mock.get.mockImplementation(async (type: string, id: string) => {
     return {
-      type,
       id,
-      references: [],
-      attributes: agentPolicyAttributes as AgentPolicy,
+      ...mockPolicy,
+    };
+  });
+  mock.bulkGet.mockImplementation(async (options) => {
+    return {
+      saved_objects: [],
     };
   });
   mock.find.mockImplementation(async (options) => {
-    return {
-      saved_objects: [
-        {
-          id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
-          attributes: {
-            fleet_server_hosts: ['http://fleetserver:8220'],
-          },
-          type: 'ingest_manager_settings',
-          score: 1,
-          references: [],
-        },
-      ],
-      total: 1,
-      page: 1,
-      per_page: 1,
-    };
+    switch (options.type) {
+      case LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE:
+        return {
+          saved_objects: [
+            {
+              id: 'agent-policy-id',
+              score: 1,
+              ...mockPolicy,
+            },
+          ],
+          total: 1,
+          page: 1,
+          per_page: 1,
+        };
+      case LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE:
+        return {
+          saved_objects: [],
+          total: 0,
+          page: 1,
+          per_page: 1,
+        };
+      default:
+        return {
+          saved_objects: [
+            {
+              id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+              attributes: {
+                fleet_server_hosts: ['http://fleetserver:8220'],
+              },
+              type: 'ingest_manager_settings',
+              score: 1,
+              references: [],
+            },
+          ],
+          total: 1,
+          page: 1,
+          per_page: 1,
+        };
+    }
   });
 
   return mock;
@@ -363,10 +398,10 @@ describe('Agent policy', () => {
     });
 
     it('should create a policy with is_managed true if agentless feature flag is set and in cloud env', async () => {
-      jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ agentless: true } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { enabled: true },
+      } as any);
 
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -399,12 +434,38 @@ describe('Agent policy', () => {
     });
 
     it('should throw error when attempting to create policy with supports_agentless true on cloud environment that does not support the agentless feature', async () => {
-      jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ agentless: true } as any);
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { enabled: false },
+      } as any);
+
       jest
         .spyOn(appContextService, 'getCloud')
-        .mockReturnValue({ isCloudEnabled: false, isServerlessEnabled: false } as any);
+        .mockReturnValue({ isCloudEnabled: true, isServerlessEnabled: false } as any);
+
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await expect(
+        agentPolicyService.create(soClient, esClient, {
+          name: 'test',
+          namespace: 'default',
+          supports_agentless: true,
+        })
+      ).rejects.toThrowError(
+        new AgentPolicyInvalidError(
+          'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
+        )
+      );
+    });
+
+    it('should throw error when attempting to create policy with supports_agentless true on serverless environment that does not support the agentless feature', async () => {
+      jest
+        .spyOn(appContextService, 'getExperimentalFeatures')
+        .mockReturnValue({ agentless: false } as any);
+
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isCloudEnabled: false, isServerlessEnabled: true } as any);
 
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -800,12 +861,12 @@ describe('Agent policy', () => {
         [
           expect.objectContaining({
             attributes: expect.objectContaining({
-              fleet_server_hosts: ['http://fleetserver:8220'],
-              revision: NaN,
-              updated_by: 'system',
+              monitoring_enabled: ['metrics'],
             }),
-            id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
-            type: 'ingest_manager_settings',
+            id: 'agent-policy-id',
+            namespace: undefined,
+            type: 'ingest-agent-policies',
+            version: undefined,
           }),
         ],
         expect.objectContaining({
@@ -1136,9 +1197,9 @@ describe('Agent policy', () => {
     });
 
     it('should not throw AgentPolicyInvalidError if support_agentless is defined in stateful', async () => {
-      jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ agentless: true } as any);
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { enabled: true },
+      } as any);
       jest
         .spyOn(appContextService, 'getCloud')
         .mockReturnValue({ isServerlessEnabled: false, isCloudEnabled: true } as any);
