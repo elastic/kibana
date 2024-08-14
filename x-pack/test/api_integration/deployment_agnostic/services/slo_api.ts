@@ -34,12 +34,6 @@ interface Dependency {
   actionGroupsToSuppressOn: string[];
 }
 
-export interface SloBurnRateRuleParams {
-  sloId: string;
-  windows: WindowSchema[];
-  dependencies?: Dependency[];
-}
-
 interface SloParams {
   id?: string;
   name: string;

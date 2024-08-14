@@ -5,8 +5,20 @@
  * 2.0.
  */
 
+import type {
+  AggregationsAggregate,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/metrics';
+import { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
+
+export interface SloBurnRateRuleParams {
+  sloId: string;
+  windows: WindowSchema[];
+  dependencies?: Dependency[];
+}
 
 export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProviderContext) {
   const retry = getService('retry');
