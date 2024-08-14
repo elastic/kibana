@@ -8,11 +8,11 @@ import React from 'react';
 import Chance from 'chance';
 import { Vulnerabilities } from './vulnerabilities';
 import { CSP_LATEST_FINDINGS_DATA_VIEW } from '@kbn/cloud-security-posture-common';
+import { useCspSetupStatusApi } from '@kbn/cloud-security-posture';
 import {
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useDataView } from '../../common/api/use_data_view';
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
@@ -29,7 +29,7 @@ import { useLicenseManagementLocatorApi } from '../../common/api/use_license_man
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 
 jest.mock('../../common/api/use_data_view');
-jest.mock('../../common/api/use_setup_status_api');
+jest.mock('@kbn/cloud-security-posture'); // Mock use_setup_status_api
 jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('../../common/hooks/use_subscription_status');
 jest.mock('../../common/navigation/use_navigate_to_cis_integration_policies');

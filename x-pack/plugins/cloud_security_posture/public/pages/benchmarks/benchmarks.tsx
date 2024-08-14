@@ -21,6 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { useCspSetupStatusApi } from '@kbn/cloud-security-posture';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../../common/constants';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
@@ -36,7 +37,6 @@ import {
   NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS,
 } from '../../common/constants';
 import { usePageSize } from '../../common/hooks/use_page_size';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { NoFindingsStates } from '../../components/no_findings_states';
 import { useKibana } from '../../common/hooks/use_kibana';
 

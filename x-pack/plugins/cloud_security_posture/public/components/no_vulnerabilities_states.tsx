@@ -21,10 +21,10 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { useCspSetupStatusApi } from '@kbn/cloud-security-posture';
 import { VULN_MGMT_POLICY_TEMPLATE } from '../../common/constants';
 import { FullSizeCenteredPage } from './full_size_centered_page';
 import { CloudPosturePage } from './cloud_posture_page';
-import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
 import type { IndexDetails } from '../../common/types_old';
 import {
   NO_VULNERABILITIES_STATUS_TEST_SUBJ,

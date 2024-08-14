@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
+import { IndexDetails } from '@kbn/cloud-security-posture-common';
 
 export const getFindingsCountAggQuery = () => ({
   count: { terms: { field: 'result.evaluation' } },
@@ -46,4 +47,9 @@ export const getMisconfigurationAggregationCount = (
     failed: failed?.doc_count || 0,
     no_status: noStatus?.doc_count || 0,
   };
+};
+
+export const isAllIndicesEmpty = (indices: Array<IndexDetails | undefined>) => {
+  const notEmptyIndices = indices.find((indice) => indice?.status !== 'empty');
+  return notEmptyIndices ? false : true;
 };

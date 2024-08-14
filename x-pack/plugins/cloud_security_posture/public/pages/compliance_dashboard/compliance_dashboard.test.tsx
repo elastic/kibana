@@ -11,7 +11,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { render, screen } from '@testing-library/react';
 import { TestProvider } from '../../test/test_provider';
 import { ComplianceDashboard, getDefaultTab } from '.';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { useCspSetupStatusApi } from '@kbn/cloud-security-posture';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { useKspmStatsApi, useCspmStatsApi } from '../../common/api/use_stats_api';
@@ -40,7 +40,7 @@ import {
 import { cloudPosturePages } from '../../common/navigation/constants';
 import { MemoryRouter } from 'react-router-dom';
 
-jest.mock('../../common/api/use_setup_status_api');
+jest.mock('@kbn/cloud-security-posture'); // Mock use_setup_status_api
 jest.mock('../../common/api/use_stats_api');
 jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('../../common/hooks/use_subscription_status');
