@@ -20,11 +20,13 @@ const MaxLogsSampleRows = 10;
  */
 const parseLogsContent = (
   fileContent: string | undefined
-): { error?: string; isTruncated?: boolean; logsSampleParsed?: string[] } => {
+): { error?: string; isTruncated?: boolean; logsSampleParsed?: string[]; logType?: string } => {
   if (fileContent == null) {
     return { error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_READ };
   }
   let parsedContent;
+  let logType;
+
   try {
     parsedContent = fileContent
       .split('\n')
@@ -32,18 +34,22 @@ const parseLogsContent = (
       .map((line) => JSON.parse(line));
 
     // Special case for files that can be parsed as both JSON and NDJSON:
-    //   for a one-line array [] -> extract its contents
-    //   for a one-line object {} -> do nothing
+    //   for a one-line array [] -> extract its contents (it's a JSON)
+    //   for a one-line object {} -> do nothing (keep NDJSON)
     if (
       Array.isArray(parsedContent) &&
       parsedContent.length === 1 &&
       Array.isArray(parsedContent[0])
     ) {
       parsedContent = parsedContent[0];
+      logType = 'json';
+    } else {
+      logType = 'ndjson';
     }
   } catch (parseNDJSONError) {
     try {
       parsedContent = JSON.parse(fileContent);
+      logType = 'json';
     } catch (parseJSONError) {
       return { error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_PARSE };
     }
@@ -67,7 +73,7 @@ const parseLogsContent = (
   }
 
   const logsSampleParsed = parsedContent.map((log) => JSON.stringify(log));
-  return { isTruncated, logsSampleParsed };
+  return { isTruncated, logsSampleParsed, logType };
 };
 
 interface SampleLogsInputProps {
@@ -84,18 +90,26 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
       const logsSampleFile = files?.[0];
       if (logsSampleFile == null) {
         setSampleFileError(undefined);
-        setIntegrationSettings({ ...integrationSettings, logsSampleParsed: undefined });
+        setIntegrationSettings({
+          ...integrationSettings,
+          logsSampleParsed: undefined,
+          logType: undefined,
+        });
         return;
       }
 
       const reader = new FileReader();
       reader.onload = function (e) {
         const fileContent = e.target?.result as string | undefined; // We can safely cast to string since we call `readAsText` to load the file.
-        const { error, isTruncated, logsSampleParsed } = parseLogsContent(fileContent);
+        const { error, isTruncated, logsSampleParsed, logType } = parseLogsContent(fileContent);
         setIsParsing(false);
         setSampleFileError(error);
         if (error) {
-          setIntegrationSettings({ ...integrationSettings, logsSampleParsed: undefined });
+          setIntegrationSettings({
+            ...integrationSettings,
+            logsSampleParsed: undefined,
+            logType: undefined,
+          });
           return;
         }
 
@@ -106,6 +120,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
         setIntegrationSettings({
           ...integrationSettings,
           logsSampleParsed,
+          logType,
         });
       };
       setIsParsing(true);
