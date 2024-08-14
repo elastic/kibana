@@ -35,11 +35,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const esClient = getService('es');
   const supertest = getService('supertest');
-  const find = getService('find');
   const toasts = getService('toasts');
   const policyTestResources = getService('policyTestResources');
   const unzipPromisify = promisify(unzip);
-  const log = getService('log');
 
   const removeAllArtifacts = async () => {
     for (const listId of ENDPOINT_ARTIFACT_LIST_IDS) {
@@ -55,7 +53,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('For each artifact list under management', function () {
     targetTags(this, ['@ess', '@serverless']);
-    this.timeout(60_000 * 30);
+    this.timeout(60_000 * 5);
 
     let indexedData: IndexedHostsAndAlertsResponse;
     let policyInfo: PolicyTestResourceInfo;
@@ -151,12 +149,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       suffix?: string
     ) => {
       for (const formAction of actions) {
-        if (formAction.type === 'customClick') {
-          await find.clickByCssSelector(
-            `button[title="${formAction.selector}"]`,
-            testSubjects.FIND_TIME
-          );
-        } else if (formAction.type === 'click') {
+        if (formAction.type === 'click') {
           await testSubjects.click(formAction.selector);
         } else if (formAction.type === 'input') {
           const newValue = (formAction.value || '') + (suffix ? suffix : '');
@@ -170,8 +163,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await (
             await (await testSubjects.find(formAction.selector)).findByCssSelector('button')
           ).click();
-        } else if (formAction.type === 'wait') {
-          await new Promise((resolve) => setTimeout(resolve, +formAction.selector));
         }
       }
     };
@@ -185,118 +176,46 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     const createArtifact = async (
       actions: ArtifactActionsType | MultipleArtifactActionsType,
-      options?: {
-        policyId?: string;
-        suffix?: string;
-        createButton?: string;
-        byText?: boolean;
-        waitABit?: boolean;
-      }
+      options?: { policyId?: string; suffix?: string; createButton?: string }
     ) => {
-      let successes = 0;
-      let fails = 0;
-
-      for (let i = 0; i < 100; i++) {
-        // Opens add flyout
-        if (options?.createButton) {
-          await testSubjects.click(`${actions.pagePrefix}-${options.createButton}`);
-        } else {
-          await testSubjects.click(`${actions.pagePrefix}-emptyState-addButton`);
-        }
-
-        await performActions(actions.create.formFields, options?.suffix);
-
-        if (options?.policyId) {
-          await testSubjects.click(`${actions.pageObject}-form-effectedPolicies-perPolicy`);
-          await testSubjects.click(`policy-${options.policyId}-checkbox`);
-        }
-
-        let hasFailed = false;
-        try {
-          await find.byCssSelector(
-            ':not([disabled])[data-test-subj="EventFiltersListPage-flyout-submitButton"]',
-            2000
-          );
-        } catch (e) {
-          hasFailed = true;
-        }
-
-        if (hasFailed) {
-          fails++;
-        } else {
-          successes++;
-        }
-        log.info(
-          'flaky-test-for-artifacts IN PROGRESS',
-          JSON.stringify(
-            { byText: options?.byText, waitABit: options?.waitABit, hasFailed, fails, successes },
-            null,
-            ' '
-          )
-        );
-
-        await testSubjects.click(`${actions.pagePrefix}-flyout-cancelButton`);
+      // Opens add flyout
+      if (options?.createButton) {
+        await testSubjects.click(`${actions.pagePrefix}-${options.createButton}`);
+      } else {
+        await testSubjects.click(`${actions.pagePrefix}-emptyState-addButton`);
       }
 
-      log.info(
-        'flaky-test-for-artifacts RESULTS ARE IN',
-        JSON.stringify(
-          { byText: options?.byText, waitABit: options?.waitABit, fails, successes },
-          null,
-          ' '
-        )
-      );
+      await performActions(actions.create.formFields, options?.suffix);
+
+      if (options?.policyId) {
+        await testSubjects.click(`${actions.pageObject}-form-effectedPolicies-perPolicy`);
+        await testSubjects.click(`policy-${options.policyId}-checkbox`);
+      }
+
+      // Submit create artifact form
+      await testSubjects.click(`${actions.pagePrefix}-flyout-submitButton`);
     };
 
     const updateArtifact = async (
       actions: ArtifactActionsType,
       options?: { policyId?: string; suffix?: string }
     ) => {
-      let successes = 0;
-      let fails = 0;
+      // Opens edit flyout
+      await pageObjects.artifactEntriesList.clickCardActionMenu(actions.pagePrefix);
+      await testSubjects.click(`${actions.pagePrefix}-card-cardEditAction`);
 
-      for (let i = 0; i < 100; i++) {
-        // Opens edit flyout
-        await pageObjects.artifactEntriesList.clickCardActionMenu(actions.pagePrefix);
-        await testSubjects.click(`${actions.pagePrefix}-card-cardEditAction`);
+      await performActions(actions.update.formFields);
 
-        await performActions(actions.update.formFields);
-
-        if (options?.policyId) {
-          await testSubjects.click(`${actions.pageObject}-form-effectedPolicies-perPolicy`);
-          await testSubjects.click(`policy-${options.policyId}-checkbox`);
-        }
-
-        let hasFailed = false;
-        try {
-          await find.byCssSelector(
-            ':not([disabled])[data-test-subj="EventFiltersListPage-flyout-submitButton"]',
-            2000
-          );
-        } catch (e) {
-          hasFailed = true;
-        }
-
-        if (hasFailed) {
-          fails++;
-        } else {
-          successes++;
-        }
-        log.info(
-          'flaky-test-for-artifacts IN PROGRESS',
-          JSON.stringify({ hasFailed, fails, successes }, null, ' ')
-        );
-
-        await testSubjects.click(`${actions.pagePrefix}-flyout-cancelButton`);
+      if (options?.policyId) {
+        await testSubjects.click(`${actions.pageObject}-form-effectedPolicies-perPolicy`);
+        await testSubjects.click(`policy-${options.policyId}-checkbox`);
       }
 
-      log.info(
-        'flaky-test-for-artifacts RESULTS ARE IN',
-        JSON.stringify({ fails, successes }, null, ' ')
-      );
+      // Submit edit artifact form
+      await testSubjects.click(`${actions.pagePrefix}-flyout-submitButton`);
     };
 
-    for (const testData of [[...getArtifactsListTestsData()][1]]) {
+    for (const testData of getArtifactsListTestsData()) {
       describe(`When on the ${testData.title} entries list`, function () {
         beforeEach(async () => {
           policyInfo = await policyTestResources.createPolicy();
@@ -310,21 +229,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           if (policyInfo) {
             await policyInfo.cleanup();
           }
-        });
-
-        // eslint-disable-next-line ban/ban
-        it.only('flaky test for input instead of click - create', async () => {
-          await createArtifact(testData, { policyId: policyInfo.packagePolicy.id });
-        });
-        // eslint-disable-next-line ban/ban
-        it.only('flaky test for input instead of click - update', async () => {
-          await endpointArtifactsTestResources.createArtifact(testData.listId, testData.createBody);
-          await browser.refresh();
-          await updateArtifact(testData, { policyId: policyInfo.packagePolicy.id });
-        });
-        // eslint-disable-next-line ban/ban
-        it.only('fail so logs are reported', () => {
-          expect(2 * 2).to.equal(5);
         });
 
         it(`should not show page title if there is no ${testData.title} entry`, async () => {

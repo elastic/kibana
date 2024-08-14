@@ -264,10 +264,6 @@ export const getArtifactsListTestsData = () => [
           selector: 'fieldAutocompleteComboBox',
           value: 'agent.id',
         },
-        // {
-        //   type: 'customClick',
-        //   selector: 'button[title="agent.id"]',
-        // },
         {
           type: 'input',
           selector: 'valuesAutocompleteMatch',
