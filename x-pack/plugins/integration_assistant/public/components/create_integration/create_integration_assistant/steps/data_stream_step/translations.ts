@@ -108,12 +108,7 @@ export const LOGS_SAMPLE_DESCRIPTION = i18n.translate(
     defaultMessage: 'Drag and drop a file or Browse files.',
   }
 );
-export const LOGS_SAMPLE_DESCRIPTION_2 = i18n.translate(
-  'xpack.integrationAssistant.step.dataStream.logsSample.description2',
-  {
-    defaultMessage: 'JSON/NDJSON format',
-  }
-);
+
 export const LOGS_SAMPLE_TRUNCATED = (maxRows: number) =>
   i18n.translate('xpack.integrationAssistant.step.dataStream.logsSample.truncatedWarning', {
     values: { maxRows },
@@ -142,6 +137,12 @@ export const LOGS_SAMPLE_ERROR = {
     'xpack.integrationAssistant.step.dataStream.logsSample.errorNotObject',
     {
       defaultMessage: 'The logs sample file contains non-object entries',
+    }
+  ),
+  LOGS_SAMPLE_FILE_TOO_LARGE: i18n.translate(
+    'xpack.integrationAssistant.step.dataStream.logsSample.fileTooLarge',
+    {
+      defaultMessage: 'Logs Sample file is too large. Please upload a file smaller than 9MB.',
     }
   ),
 };

@@ -22,7 +22,7 @@ export type DataStreamName = z.infer<typeof DataStreamName>;
 export const DataStreamName = z.string().min(1);
 
 /**
- * String array containing the json raw samples.
+ * Blob containing the RawSamples.
  */
 export type EncodedRawSamples = z.infer<typeof EncodedRawSamples>;
 export const EncodedRawSamples = z.string();

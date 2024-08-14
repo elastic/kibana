@@ -25,7 +25,6 @@ Here is some context for you to reference for your task, read it carefully as yo
 - If the syslog samples have header and structured body then classify it as "structured".
 - If the syslog samples have header and unstructured body then classify it as "unstructured".
 - If the syslog samples follow a csv format then classify it as "csv".
-- If the syslog samples are in json or ndjson format then classify them as "json".
 - If you do not find the log format in any of the above categories then classify it as "unsupported".
 - Do not respond with anything except the updated current mapping JSON object enclosed with 3 backticks (\`). See example response below.
 </guidelines>

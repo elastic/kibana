@@ -22,6 +22,8 @@ import { withAvailability } from './with_availability';
 import { getLogTypeDetectionGraph } from '../graphs/log_type_detection/graph';
 import { decodeRawSamples, parseSamples } from '../util/parse';
 
+const MaxLogsSampleRows = 10;
+
 export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   router.versioned
     .post({
@@ -78,6 +80,8 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
 
           let graph;
           let ecsMappingResults;
+          let isJSON = false;
+          let parsedSamples;
           const options = {
             callbacks: [
               new APMTracer({ projectName: langSmithOptions?.projectName ?? 'default' }, logger),
@@ -86,7 +90,12 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
           };
 
           const logsSampleDecoded = decodeRawSamples(encodedRawSamples);
-          const { isJSON, parsedSamples } = parseSamples(logsSampleDecoded);
+          ({ isJSON, parsedSamples } = parseSamples(logsSampleDecoded));
+
+          // Truncate samples to 10 lines
+          if (parsedSamples.length > MaxLogsSampleRows) {
+            parsedSamples = parsedSamples.slice(0, MaxLogsSampleRows);
+          }
 
           if (isJSON) {
             const ecsParameters = {
@@ -108,7 +117,7 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
             const logTypeDetectionResults = await graph.invoke(logTypeParameters, options);
 
             if (
-              logTypeDetectionResults.logType === LogType.UNSUPPORTED ||
+              logTypeDetectionResults.logType === LogType.UNSUPPORTED || // Rest of the conditions shall be removed once the respective graphs are implemented.
               logTypeDetectionResults.logType === LogType.CSV ||
               logTypeDetectionResults.logType === LogType.STRUCTURED ||
               logTypeDetectionResults.logType === LogType.UNSTRUCTURED

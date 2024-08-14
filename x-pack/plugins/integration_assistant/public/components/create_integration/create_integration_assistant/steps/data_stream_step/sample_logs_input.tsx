@@ -28,13 +28,20 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
         return;
       }
 
+      if (logsSampleFile.size > 9000000) {
+        // File size limited to 9 MegaBytes
+        setSampleFileError(i18n.LOGS_SAMPLE_ERROR.LOGS_SAMPLE_FILE_TOO_LARGE);
+        setIntegrationSettings({ ...integrationSettings, logsSampleParsed: undefined });
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = function (e) {
         const logsSampleParsed = e.target?.result as string | undefined; // We can safely cast to string since we call `readAsDataURL` to load the file.
         setIsParsing(false);
 
         if (logsSampleParsed === undefined) {
-          setSampleFileError('Empty Logs Sample file.');
+          setSampleFileError(i18n.LOGS_SAMPLE_ERROR.EMPTY);
           setIntegrationSettings({ ...integrationSettings, logsSampleParsed: undefined });
           return;
         }

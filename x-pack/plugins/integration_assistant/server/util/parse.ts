@@ -11,7 +11,7 @@ export function decodeRawSamples(encodedContent: string): string {
   return logsSampleParsed;
 }
 
-export function parseSamples(fileContent: string): { isJSON: boolean; parsedSamples?: string[] } {
+export function parseSamples(fileContent: string): { isJSON: boolean; parsedSamples: string[] } {
   let parsedContent;
   try {
     // NDJSON
