@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { RouteComponentProps } from 'react-router-dom';
 import { Router } from '@kbn/shared-ux-router';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -171,10 +171,7 @@ describe('ActionsConnectorsHome', () => {
 
     const documentationButton = await screen.findByRole('link', { name: 'Documentation' });
     expect(documentationButton).toBeEnabled();
-
-    await waitFor(() => {
-      expect(screen.queryByRole('button', { name: 'Create connector' })).not.toBeInTheDocument();
-    });
+    expect(screen.queryByRole('button', { name: 'Create connector' })).not.toBeInTheDocument();
   });
 
   it('show "Select a connector" flyout when "Create connector" button pressed', async () => {
