@@ -191,7 +191,7 @@ export const ResultsLinks: FC<Props> = ({
       fieldStats &&
       typeof fieldStats === 'object' &&
       timeFieldName !== undefined &&
-      fieldStats.hasOwnProperty(timeFieldName) &&
+      Object.hasOwn(fieldStats, timeFieldName) &&
       fieldStats[timeFieldName].earliest !== undefined &&
       fieldStats[timeFieldName].latest !== undefined
     ) {

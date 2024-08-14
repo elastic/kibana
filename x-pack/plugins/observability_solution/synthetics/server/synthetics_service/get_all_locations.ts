@@ -34,14 +34,12 @@ export async function getAllLocations({
       ),
       getServicePublicLocations(server, syntheticsMonitorClient),
     ]);
+    const pvtLocations = toClientContract({ locations: privateLocations }, agentPolicies);
     return {
       publicLocations,
-      privateLocations,
+      privateLocations: pvtLocations,
       throttling,
-      allLocations: [
-        ...publicLocations,
-        ...toClientContract({ locations: privateLocations }, agentPolicies),
-      ],
+      allLocations: [...publicLocations, ...pvtLocations],
     };
   } catch (e) {
     server.logger.error(e);

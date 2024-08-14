@@ -16,7 +16,7 @@ import type {
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsClientContract,
-  SavedObjectsFindResult,
+  SavedObject,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
@@ -41,6 +41,7 @@ import {
 import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
 import {
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENTS_PREFIX,
   FLEET_AGENT_POLICIES_SCHEMA_VERSION,
@@ -56,6 +57,7 @@ import type {
   NewAgentPolicy,
   NewPackagePolicy,
   PackagePolicy,
+  PackagePolicySOAttributes,
   PostAgentPolicyCreateCallback,
   PostAgentPolicyUpdateCallback,
   PreconfiguredAgentPolicy,
@@ -876,7 +878,7 @@ class AgentPolicyService {
   private async _bumpPolicies(
     internalSoClientWithoutSpaceExtension: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    savedObjectsResults: Array<SavedObjectsFindResult<AgentPolicySOAttributes>>,
+    savedObjectsResults: Array<SavedObject<AgentPolicySOAttributes>>,
     options?: { user?: AuthenticatedUser }
   ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
     const bumpedPolicies = savedObjectsResults.map(
@@ -938,10 +940,12 @@ class AgentPolicyService {
     outputId: string,
     options?: { user?: AuthenticatedUser }
   ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
+    const { useSpaceAwareness } = appContextService.getExperimentalFeatures();
     const internalSoClientWithoutSpaceExtension =
       appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
-    const currentPolicies =
+    // All agent policies directly using output
+    const agentPoliciesUsingOutput =
       await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
         type: SAVED_OBJECT_TYPE,
         fields: ['revision', 'data_output_id', 'monitoring_output_id', 'namespaces'],
@@ -950,10 +954,47 @@ class AgentPolicyService {
         perPage: SO_SEARCH_LIMIT,
         namespaces: ['*'],
       });
+
+    // All package policies directly using output
+    const packagePoliciesUsingOutput =
+      await internalSoClientWithoutSpaceExtension.find<PackagePolicySOAttributes>({
+        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        fields: ['output_id', 'namespaces', 'policy_ids'],
+        searchFields: ['output_id'],
+        search: escapeSearchQueryPhrase(outputId),
+        perPage: SO_SEARCH_LIMIT,
+        namespaces: ['*'],
+      });
+
+    const agentPolicyIdsDirectlyUsingOutput = agentPoliciesUsingOutput.saved_objects.map(
+      (agentPolicySO) => agentPolicySO.id
+    );
+    const agentPolicyIdsOfPackagePoliciesUsingOutput =
+      packagePoliciesUsingOutput.saved_objects.reduce((acc: Set<string>, packagePolicySO) => {
+        const newIds = packagePolicySO.attributes.policy_ids.filter((policyId) => {
+          return !agentPolicyIdsDirectlyUsingOutput.includes(policyId);
+        });
+        return new Set([...acc, ...newIds]);
+      }, new Set<string>());
+
+    // Agent policies of the identified package policies, excluding ones already retrieved directly
+    const agentPoliciesOfPackagePoliciesUsingOutput =
+      await internalSoClientWithoutSpaceExtension.bulkGet<AgentPolicySOAttributes>(
+        [...agentPolicyIdsOfPackagePoliciesUsingOutput].map((id) => ({
+          type: SAVED_OBJECT_TYPE,
+          id,
+          fields: ['revision', 'data_output_id', 'monitoring_output_id', 'namespaces'],
+          ...(useSpaceAwareness ? { namespaces: ['*'] } : {}),
+        }))
+      );
+
     return this._bumpPolicies(
       internalSoClientWithoutSpaceExtension,
       esClient,
-      currentPolicies.saved_objects,
+      [
+        ...agentPoliciesUsingOutput.saved_objects,
+        ...agentPoliciesOfPackagePoliciesUsingOutput.saved_objects,
+      ],
       options
     );
   }

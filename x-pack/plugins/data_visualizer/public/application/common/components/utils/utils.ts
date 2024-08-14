@@ -58,7 +58,7 @@ export function readFile(file: File): Promise<{ fileContents: string; data: Arra
 export function createUrlOverrides(overrides: InputOverrides, originalSettings: InputOverrides) {
   const formattedOverrides: InputOverrides = {};
   for (const o in overrideDefaults) {
-    if (overrideDefaults.hasOwnProperty(o)) {
+    if (Object.hasOwn(overrideDefaults, o)) {
       let value = overrides[o];
       if (
         (Array.isArray(value) && isEqual(value, originalSettings[o])) ||
