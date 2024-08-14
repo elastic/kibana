@@ -5,24 +5,25 @@
  * 2.0.
  */
 
+import { GetInvestigationResponse } from '@kbn/investigation-shared';
 import { useQuery } from '@tanstack/react-query';
-import { BASE_RAC_ALERTS_API_PATH, EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
+import { investigationKeys } from './query_key_factory';
 import { useKibana } from './use_kibana';
 
-export interface AlertParams {
-  id?: string;
+export interface Params {
+  id: string;
 }
 
-export interface UseFetchAlertResponse {
+export interface UseFetchInvestigationResponse {
   isInitialLoading: boolean;
   isLoading: boolean;
   isRefetching: boolean;
   isSuccess: boolean;
   isError: boolean;
-  data: EcsFieldsResponse | undefined | null;
+  data: GetInvestigationResponse | undefined;
 }
 
-export function useFetchAlert({ id }: AlertParams): UseFetchAlertResponse {
+export function useFetchInvestigation({ id }: Params): UseFetchInvestigationResponse {
   const {
     core: {
       http,
@@ -31,22 +32,19 @@ export function useFetchAlert({ id }: AlertParams): UseFetchAlertResponse {
   } = useKibana();
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
-    queryKey: ['fetchAlert', id],
+    queryKey: investigationKeys.fetch({ id }),
     queryFn: async ({ signal }) => {
-      return await http.get<EcsFieldsResponse>(BASE_RAC_ALERTS_API_PATH, {
-        query: {
-          id,
-        },
+      return await http.get<GetInvestigationResponse>(`/api/observability/investigations/${id}`, {
+        version: '2023-10-31',
         signal,
       });
     },
     refetchOnWindowFocus: false,
     onError: (error: Error) => {
       toasts.addError(error, {
-        title: 'Something went wrong while fetching alert',
+        title: 'Something went wrong while fetching Investigations',
       });
     },
-    enabled: Boolean(id),
   });
 
   return {

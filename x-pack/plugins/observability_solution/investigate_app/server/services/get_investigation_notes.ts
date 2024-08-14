@@ -6,17 +6,16 @@
  */
 
 import {
-  GetInvestigationParams,
-  GetInvestigationResponse,
-  getInvestigationResponseSchema,
+  GetInvestigationNotesResponse,
+  getInvestigationNotesResponseSchema,
 } from '@kbn/investigation-shared';
 import { InvestigationRepository } from './investigation_repository';
 
-export async function getInvestigation(
-  params: GetInvestigationParams,
+export async function getInvestigationNotes(
+  investigationId: string,
   repository: InvestigationRepository
-): Promise<GetInvestigationResponse> {
-  const investigation = await repository.findById(params.id);
+): Promise<GetInvestigationNotesResponse> {
+  const investigation = await repository.findById(investigationId);
 
-  return getInvestigationResponseSchema.encode(investigation);
+  return getInvestigationNotesResponseSchema.encode(investigation.notes);
 }
