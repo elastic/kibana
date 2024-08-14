@@ -154,6 +154,11 @@ describe('Cloud Plugin', () => {
         });
         expect(setup.serverless.projectType).toBe('security');
       });
+
+      it('exposes CSP', () => {
+        const { setup } = setupPlugin({ csp: 'aws' });
+        expect(setup.csp).toBe('aws');
+      });
     });
   });
 
