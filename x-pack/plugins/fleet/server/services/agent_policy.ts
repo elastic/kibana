@@ -136,10 +136,12 @@ class AgentPolicyService {
       bumpRevision: boolean;
       removeProtection: boolean;
       skipValidation: boolean;
+      returnUpdatedPolicy?: boolean;
     } = {
       bumpRevision: true,
       removeProtection: false,
       skipValidation: false,
+      returnUpdatedPolicy: true,
     }
   ): Promise<AgentPolicy> {
     auditLoggingService.writeCustomSoAuditLog({
@@ -203,6 +205,9 @@ class AgentPolicyService {
         options.bumpRevision ? existingAgentPolicy.revision + 1 : existingAgentPolicy.revision
       }`
     );
+    if (options.returnUpdatedPolicy) {
+      return (await this.get(soClient, id)) as AgentPolicy;
+    }
     return newAgentPolicy as AgentPolicy;
   }
 
@@ -787,6 +792,7 @@ class AgentPolicyService {
       bumpRevision: true,
       removeProtection: options?.removeProtection ?? false,
       skipValidation: false,
+      returnUpdatedPolicy: false,
     });
   }
 
