@@ -76,11 +76,12 @@ export const PresentationPanelHeader = <
     <PresentationPanelContextMenu {...{ index, api, getActions, actionPredicate }} />
   );
 
-  const dataTestSubj = `embeddablePanelHeading-${(panelTitle || '').replace(/\s/g, '')}`;
-
   if (!showPanelBar) {
     return (
-      <div data-test-subj={dataTestSubj} className={headerClasses}>
+      <div
+        data-test-subj={`embeddablePanelHeading-${(panelTitle || '').replace(/\s/g, '')}`}
+        className={headerClasses}
+      >
         {contextMenuElement}
         {ariaLabelElement}
       </div>
@@ -88,7 +89,10 @@ export const PresentationPanelHeader = <
   }
 
   return (
-    <figcaption className={headerClasses} data-test-subj={dataTestSubj}>
+    <figcaption
+      className={headerClasses}
+      data-test-subj={`embeddablePanelHeading-${(panelTitle || '').replace(/\s/g, '')}`}
+    >
       <h2 data-test-subj="dashboardPanelTitle" className={titleClasses}>
         {ariaLabelElement}
         <PresentationPanelTitle
