@@ -44,7 +44,6 @@ type KQLCustomIndicator = t.OutputOf<typeof kqlCustomIndicatorSchema>;
 type KqlWithFiltersSchema = t.TypeOf<typeof kqlWithFiltersSchema>;
 type QuerySchema = t.TypeOf<typeof querySchema>;
 type FiltersSchema = t.TypeOf<typeof filtersSchema>;
-
 type GroupingsSchema = t.TypeOf<typeof groupingsSchema>;
 
 export type {
