@@ -383,6 +383,7 @@ export function getDiscoverStateContainer({
     const queryString = getInitialESQLQuery(dataView);
     appStateContainer.update({
       query: { esql: queryString },
+      filters: [],
       dataSource: {
         type: DataSourceType.Esql,
       },

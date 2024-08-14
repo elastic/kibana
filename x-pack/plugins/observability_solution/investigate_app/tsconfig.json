@@ -52,5 +52,7 @@
     "@kbn/esql-datagrid",
     "@kbn/server-route-repository-utils",
     "@kbn/core-saved-objects-server",
+    "@kbn/rule-registry-plugin",
+    "@kbn/rule-data-utils",
   ],
 }
