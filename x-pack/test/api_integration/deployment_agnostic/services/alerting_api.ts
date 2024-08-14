@@ -11,10 +11,11 @@ import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProviderContext) {
   const retry = getService('retry');
   const samlAuth = getService('samlAuth');
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
+  const config = getService('config');
+  const retryTimeout = config.get('timeouts.try');
   const requestTimeout = 30 * 1000;
-  const retryTimeout = 120 * 1000;
   const logger = getService('log');
 
   return {
@@ -31,7 +32,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
         throw new Error(`'ruleId' is undefined`);
       }
       return await retry.tryForTime(retryTimeout, async () => {
-        const response = await supertest
+        const response = await supertestWithoutAuth
           .get(`/api/alerting/rule/${ruleId}`)
           .set(roleAuthc.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
@@ -104,7 +105,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       indexName: string;
       roleAuthc: RoleCredentials;
     }) {
-      const { body } = await supertest
+      const { body } = await supertestWithoutAuth
         .post(`/api/actions/connector`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
@@ -138,7 +139,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       consumer: string;
       roleAuthc: RoleCredentials;
     }) {
-      const { body } = await supertest
+      const { body } = await supertestWithoutAuth
         .post(`/api/alerting/rule`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
@@ -160,7 +161,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       if (!ruleId) {
         throw new Error(`'ruleId' is undefined`);
       }
-      const response = await supertest
+      const response = await supertestWithoutAuth
         .get('/api/alerting/rules/_find')
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader());
