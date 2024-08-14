@@ -37,7 +37,7 @@ export const getImageEmbeddableFactory = ({
     type: IMAGE_EMBEDDABLE_TYPE,
     deserializeState: (state) => state.rawState,
     buildEmbeddable: async (initialState, buildApi, uuid) => {
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
+      const { titlesApi, titleComparators } = initializeTitles(initialState);
 
       const dynamicActionsApi = embeddableEnhanced?.initializeReactEmbeddableDynamicActions(
         uuid,

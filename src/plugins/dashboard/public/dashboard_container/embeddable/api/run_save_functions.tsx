@@ -21,12 +21,7 @@ import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 import { batch } from 'react-redux';
-import { v4 as uuidv4 } from 'uuid';
-import {
-  DashboardContainerInput,
-  DashboardPanelMap,
-  prefixReferencesFromPanel,
-} from '../../../../common';
+import { DashboardContainerInput, prefixReferencesFromPanel } from '../../../../common';
 import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../../dashboard_constants';
 import {
   SaveDashboardReturn,
@@ -35,7 +30,6 @@ import {
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardSaveOptions, DashboardStateFromSaveModal } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
-import { duplicateLegacyInput } from './duplicate_dashboard_panel';
 import { extractTitleAndCount } from './lib/extract_title_and_count';
 import { DashboardSaveModal } from './overlays/save_modal';
 

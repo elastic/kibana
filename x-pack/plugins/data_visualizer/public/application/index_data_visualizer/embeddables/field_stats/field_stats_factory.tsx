@@ -138,13 +138,9 @@ export const getFieldStatsChartEmbeddableFactory = (
         fieldFormats,
         ...startServices,
       };
-      const {
-        api: timeRangeApi,
-        comparators: timeRangeComparators,
-        serialize: serializeTimeRange,
-      } = initializeTimeRange(state);
+      const { api: timeRangeApi, comparators: timeRangeComparators } = initializeTimeRange(state);
 
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+      const { titlesApi, titleComparators } = initializeTitles(state);
 
       const {
         fieldStatsControlsApi,
