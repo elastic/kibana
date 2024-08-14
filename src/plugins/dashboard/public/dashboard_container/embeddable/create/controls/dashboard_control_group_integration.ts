@@ -17,8 +17,7 @@ import {
   startWith,
   switchMap,
 } from 'rxjs';
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import { PublishesFilters, PublishingSubject } from '@kbn/presentation-publishing';
 import { DashboardContainer } from '../../dashboard_container';
 
 export function startSyncingDashboardControlGroup(dashboard: DashboardContainer) {
@@ -95,7 +94,7 @@ export function startSyncingDashboardControlGroup(dashboard: DashboardContainer)
 
 export const combineDashboardFiltersWithControlGroupFilters = (
   dashboardFilters: Filter[],
-  controlGroupApi?: ControlGroupApi
+  controlGroupApi?: PublishesFilters
 ): Filter[] => {
   return [...dashboardFilters, ...(controlGroupApi?.filters$.value ?? [])];
 };
