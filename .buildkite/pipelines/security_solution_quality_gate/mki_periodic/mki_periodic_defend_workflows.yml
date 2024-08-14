@@ -105,6 +105,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
+            - exit_status: "-1"
+              limit: 1
             - exit_status: "1"
               limit: 1
 
@@ -122,6 +124,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
+            - exit_status: "-1"
+              limit: 1
             - exit_status: "1"
               limit: 1
 
@@ -139,5 +143,7 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
+            - exit_status: "-1"
+              limit: 1
             - exit_status: "1"
               limit: 1
