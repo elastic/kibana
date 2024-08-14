@@ -14,6 +14,7 @@ import {
   GlobalWidgetParameters,
   InvestigateWidgetCreate,
   Investigation,
+  InvestigationNote,
 } from '../../../common/types';
 import { WidgetDefinition } from '../../types';
 import { regenerateItem } from './regenerate_item';
@@ -37,7 +38,7 @@ interface InvestigationStore {
   setGlobalParameters: (globalWidgetParameters: GlobalWidgetParameters) => Promise<void>;
   setTitle: (title: string) => Promise<void>;
   destroy: () => void;
-  addNote: (note: string) => Promise<void>;
+  addNote: (note: InvestigationNote) => Promise<void>;
   deleteNote: (id: string) => Promise<void>;
 }
 
@@ -152,16 +153,11 @@ export function createInvestigationStore({
         return { ...prevInvestigation, title };
       });
     },
-    addNote: async (note: string) => {
+    addNote: async (note: InvestigationNote) => {
       return updateInvestigationInPlace((prevInvestigation) => {
         return {
           ...prevInvestigation,
-          notes: prevInvestigation.notes.concat({
-            id: v4(),
-            createdAt: Date.now(),
-            createdBy: user.username,
-            content: note,
-          }),
+          notes: prevInvestigation.notes.concat(note),
         };
       });
     },

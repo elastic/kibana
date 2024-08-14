@@ -34,8 +34,8 @@ function InvestigationDetailsWithUser({
   const { data: investigationData } = useFetchInvestigation({ id: investigationId });
 
   const { mutateAsync: addInvestigationNote } = useAddInvestigationNote();
-  const handleAddInvestigationNote = async (note: string) => {
-    await addInvestigationNote({ investigationId, note: { content: note } });
+  const handleAddInvestigationNote = async (content: string) => {
+    const note = await addInvestigationNote({ investigationId, note: { content } });
     await addNote(note);
   };
 
