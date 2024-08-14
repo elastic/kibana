@@ -11,8 +11,8 @@ import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { useDatasetQualityDegradedField } from '../../../hooks';
 import { getDegradedFieldsColumns } from './columns';
 import {
-  flyoutDegradedFieldsTableLoadingText,
-  flyoutDegradedFieldsTableNoData,
+  overviewDegradedFieldsTableLoadingText,
+  overviewDegradedFieldsTableNoData,
 } from '../../../../common/translations';
 
 export const DegradedFieldTable = () => {
@@ -38,12 +38,12 @@ export const DegradedFieldTable = () => {
       }}
       noItemsMessage={
         isLoading ? (
-          flyoutDegradedFieldsTableLoadingText
+          overviewDegradedFieldsTableLoadingText
         ) : (
           <EuiEmptyPrompt
             data-test-subj="datasetQualityFlyoutDegradedTableNoData"
             layout="vertical"
-            title={<h2>{flyoutDegradedFieldsTableNoData}</h2>}
+            title={<h2>{overviewDegradedFieldsTableNoData}</h2>}
             hasBorder={false}
             titleSize="m"
           />
