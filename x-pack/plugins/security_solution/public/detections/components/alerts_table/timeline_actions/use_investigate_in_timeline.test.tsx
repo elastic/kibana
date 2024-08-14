@@ -84,7 +84,7 @@ const getEcsDataWithRuleTypeAndTimelineTemplate = (ruleType: string, ecsData: Ec
   } as Ecs;
 };
 
-const getNonEcsDataWithRuleType = (
+const getNonEcsDataWithRuleTypeAndTimelineTemplate = (
   ruleType: string,
   nonEcsData: TimelineEventsDetailsItem[] = nonECSRowData
 ) => {
@@ -135,7 +135,7 @@ const mockTimelineTemplateResponse = {
         {
           and: [],
           enabled: true,
-          id: 'event-field-default-timeline-1-host_name-0-jatins-macbook-pro_local',
+          id: 'some-random-id',
           name: 'host.name',
           excluded: false,
           kqlQuery: '',
@@ -233,9 +233,9 @@ const RULE_TYPES_TO_BE_TESTED = [
   'query',
   'esql',
   'eql',
+  'machine_learning',
   /* TODO: Complete test suites for below rule types */
   // 'new_terms',
-  // 'machine_learning',
   // 'eql',
   // 'threshold',
   // 'threat_match',
@@ -258,7 +258,9 @@ const renderContextMenu = (items: AlertTableContextMenuItem[]) => {
 
 describe('useInvestigateInTimeline', () => {
   let mockSearchStrategyClient = {
-    search: jest.fn().mockReturnValue(of({ data: getNonEcsDataWithRuleType('query') })),
+    search: jest
+      .fn()
+      .mockReturnValue(of({ data: getNonEcsDataWithRuleTypeAndTimelineTemplate('query') })),
   };
   beforeEach(() => {
     (getTimelineTemplate as jest.Mock).mockResolvedValue(mockTimelineTemplateResponse);
@@ -275,7 +277,7 @@ describe('useInvestigateInTimeline', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
-  test('it creates a component and click handler', () => {
+  test('creates a component and click handler', () => {
     const { result } = renderHook(() => useInvestigateInTimeline(props), {
       wrapper: TestProviders,
     });
@@ -300,9 +302,11 @@ describe('useInvestigateInTimeline', () => {
 
   describe('investigate an alert with timeline template', () => {
     describe.each(RULE_TYPES_TO_BE_TESTED)('Rule type : %s', (ruleType: string) => {
-      it('should copy columns over from template', async () => {
+      test('should copy columns over from template', async () => {
         mockSearchStrategyClient = {
-          search: jest.fn().mockReturnValue(of({ data: getNonEcsDataWithRuleType(ruleType) })),
+          search: jest
+            .fn()
+            .mockReturnValue(of({ data: getNonEcsDataWithRuleTypeAndTimelineTemplate(ruleType) })),
         };
         const ecsData = getEcsDataWithRuleTypeAndTimelineTemplate(ruleType);
         const { result } = renderHook(
@@ -345,9 +349,11 @@ describe('useInvestigateInTimeline', () => {
           );
         });
       });
-      it('should copy dataProviders over from template', async () => {
+      test('should copy dataProviders over from template', async () => {
         mockSearchStrategyClient = {
-          search: jest.fn().mockReturnValue(of({ data: getNonEcsDataWithRuleType(ruleType) })),
+          search: jest
+            .fn()
+            .mockReturnValue(of({ data: getNonEcsDataWithRuleTypeAndTimelineTemplate(ruleType) })),
         };
         const ecsData: Ecs = getEcsDataWithRuleTypeAndTimelineTemplate(ruleType);
         const { result } = renderHook(
@@ -361,7 +367,7 @@ describe('useInvestigateInTimeline', () => {
           {
             and: [],
             enabled: true,
-            id: 'event-field-default-timeline-1-host_name-0-jatins-macbook-pro_local',
+            id: 'some-random-id',
             name: 'some host name',
             excluded: false,
             kqlQuery: '',
