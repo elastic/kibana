@@ -22,24 +22,21 @@ import {
   ControlGroupSerializedState,
 } from '../../react_controls/control_group/types';
 import { ControlGroupInputBuilder, controlGroupInputBuilder } from './control_group_input_builder';
-import {
-  AwaitingControlGroupApi,
-  ControlGroupCreationOptions,
-  ControlGroupRendererState,
-} from './types';
+import { AwaitingControlGroupApi, ControlGroupCreationOptions } from './types';
 
 export interface ControlGroupRendererProps {
   getCreationOptions?: (
-    initialInput: Partial<ControlGroupRendererState>,
+    initialState: Partial<ControlGroupRuntimeState>,
     builder: ControlGroupInputBuilder
   ) => Promise<Partial<ControlGroupCreationOptions>>;
+  viewMode?: ViewModeType;
   filters?: Filter[];
   timeRange?: TimeRange;
   query?: Query;
 }
 
 export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlGroupRendererProps>(
-  ({ getCreationOptions, filters, timeRange, query }, ref) => {
+  ({ getCreationOptions, filters, timeRange, query, viewMode }, ref) => {
     const id = useMemo(() => uuidv4(), []);
     const [apiLoading, setApiLoading] = useState<boolean>(true);
     const [controlGroup, setControlGroup] = useState<ControlGroupApi | undefined>();
@@ -54,24 +51,26 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
     const [serializedState, setSerializedState] = useState<
       ControlGroupSerializedState | undefined
     >();
-    const viewMode$ = useMemo(() => new BehaviorSubject<ViewModeType>(ViewMode.VIEW), []);
+    const viewMode$ = useMemo(
+      () => new BehaviorSubject<ViewModeType>(viewMode ?? ViewMode.VIEW),
+      []
+    );
 
     // onMount
     useEffect(() => {
       let cancelled = false;
       (async () => {
-        const { initialInput, settings } =
+        const { initialState, settings } =
           (await getCreationOptions?.(getDefaultControlGroupInput(), controlGroupInputBuilder)) ??
           {};
         if (!cancelled) {
           const state = {
-            ...omit(initialInput, ['panels', 'ignoreParentSettings']),
+            ...omit(initialState, ['panels', 'ignoreParentSettings']),
             settings,
-            panelsJSON: JSON.stringify(initialInput?.panels ?? {}),
-            ignoreParentSettingsJSON: JSON.stringify(initialInput?.ignoreParentSettings ?? {}),
+            panelsJSON: JSON.stringify(initialState?.panels ?? {}),
+            ignoreParentSettingsJSON: JSON.stringify(initialState?.ignoreParentSettings ?? {}),
           } as ControlGroupSerializedState;
           setSerializedState(state);
-          if (initialInput?.viewMode) viewMode$.next(initialInput.viewMode);
           setApiLoading(false);
         }
       })();

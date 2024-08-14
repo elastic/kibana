@@ -130,15 +130,15 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
         />
         <ControlGroupRenderer
           filters={filters}
-          getCreationOptions={async (initialInput, builder) => {
-            await builder.addDataControlFromField(initialInput, {
+          getCreationOptions={async (initialState, builder) => {
+            await builder.addDataControlFromField(initialState, {
               dataViewId: dataView.id!,
               title: 'Destintion country',
               fieldName: 'geo.dest',
               width: 'medium',
               grow: false,
             });
-            await builder.addDataControlFromField(initialInput, {
+            await builder.addDataControlFromField(initialState, {
               dataViewId: dataView.id!,
               fieldName: 'bytes',
               width: 'medium',
@@ -146,10 +146,8 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
               title: 'Bytes',
             });
             return {
-              initialInput: {
-                ...initialInput,
-                viewMode: ViewMode.VIEW,
-              },
+              initialState,
+              viewMode: ViewMode.VIEW,
             };
           }}
           query={query}

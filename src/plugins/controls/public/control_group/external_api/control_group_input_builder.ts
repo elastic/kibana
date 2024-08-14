@@ -16,6 +16,7 @@ import {
 } from '../..';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../common';
 import {
+  ControlGroupRuntimeState,
   ControlPanelState,
   ControlPanelsState,
   SerializedControlPanelState,
@@ -25,7 +26,6 @@ import { RangeValue } from '../../react_controls/controls/data_controls/range_sl
 import { DefaultDataControlState } from '../../react_controls/controls/data_controls/types';
 import { pluginServices } from '../../services';
 import { getDataControlFieldRegistry } from '../editor/data_control_editor_tools';
-import { ControlGroupRendererState } from './types';
 
 export interface AddDataControlProps {
   controlId?: string;
@@ -46,7 +46,7 @@ export type ControlGroupInputBuilder = typeof controlGroupInputBuilder;
 
 export const controlGroupInputBuilder = {
   addDataControlFromField: async (
-    initialInput: Partial<ControlGroupRendererState>,
+    initialInput: Partial<ControlGroupRuntimeState>,
     controlProps: AddDataControlProps
   ) => {
     const panelState = await getDataControlPanelState(initialInput, controlProps);
@@ -56,7 +56,7 @@ export const controlGroupInputBuilder = {
     };
   },
   addOptionsListControl: (
-    initialInput: Partial<ControlGroupRendererState>,
+    initialInput: Partial<ControlGroupRuntimeState>,
     controlProps: AddOptionsListControlProps
   ) => {
     const panelState = getOptionsListPanelState(initialInput, controlProps);
@@ -66,7 +66,7 @@ export const controlGroupInputBuilder = {
     };
   },
   addRangeSliderControl: (
-    initialInput: Partial<ControlGroupRendererState>,
+    initialInput: Partial<ControlGroupRuntimeState>,
     controlProps: AddRangeSliderControlProps
   ) => {
     const panelState = getRangeSliderPanelState(initialInput, controlProps);
@@ -75,7 +75,7 @@ export const controlGroupInputBuilder = {
       [panelState.explicitInput.id]: panelState,
     };
   },
-  addTimeSliderControl: (initialInput: Partial<ControlGroupRendererState>) => {
+  addTimeSliderControl: (initialInput: Partial<ControlGroupRuntimeState>) => {
     const panelState = getTimeSliderPanelState(initialInput);
     initialInput.panels = {
       ...initialInput.panels,
@@ -85,7 +85,7 @@ export const controlGroupInputBuilder = {
 };
 
 export async function getDataControlPanelState(
-  input: Partial<ControlGroupRendererState>,
+  input: Partial<ControlGroupRuntimeState>,
   controlProps: AddDataControlProps
 ) {
   const { controlId, dataViewId, fieldName, title } = controlProps;
@@ -102,7 +102,7 @@ export async function getDataControlPanelState(
 }
 
 export function getOptionsListPanelState(
-  input: Partial<ControlGroupRendererState>,
+  input: Partial<ControlGroupRuntimeState>,
   controlProps: AddOptionsListControlProps
 ) {
   const { controlId, dataViewId, fieldName, title, ...rest } = controlProps;
@@ -120,7 +120,7 @@ export function getOptionsListPanelState(
 }
 
 export function getRangeSliderPanelState(
-  input: Partial<ControlGroupRendererState>,
+  input: Partial<ControlGroupRuntimeState>,
   controlProps: AddRangeSliderControlProps
 ) {
   const { controlId, dataViewId, fieldName, title, ...rest } = controlProps;
@@ -137,7 +137,7 @@ export function getRangeSliderPanelState(
   } as SerializedControlPanelState<DefaultDataControlState>;
 }
 
-export function getTimeSliderPanelState(input: Partial<ControlGroupRendererState>) {
+export function getTimeSliderPanelState(input: Partial<ControlGroupRuntimeState>) {
   return {
     type: TIME_SLIDER_CONTROL,
     order: getNextPanelOrder(input.panels),
@@ -153,7 +153,7 @@ export function getTimeSliderPanelState(input: Partial<ControlGroupRendererState
 }
 
 function getPanelState(
-  input: Partial<ControlGroupRendererState>,
+  input: Partial<ControlGroupRuntimeState>,
   controlProps: AddDataControlProps
 ) {
   return {
@@ -162,18 +162,6 @@ function getPanelState(
     width: controlProps.width ?? input.defaultControlWidth ?? DEFAULT_CONTROL_WIDTH,
   };
 }
-
-export const getNextPanelOrder = (panels?: ControlPanelsState<ControlPanelState>) => {
-  let nextOrder = 0;
-  if (Object.keys(panels ?? {}).length > 0) {
-    nextOrder =
-      Object.values(panels ?? {}).reduce((highestSoFar, panel) => {
-        if (panel.order > highestSoFar) highestSoFar = panel.order;
-        return highestSoFar;
-      }, 0) + 1;
-  }
-  return nextOrder;
-};
 
 export const getCompatibleControlType = async ({
   dataViewId,

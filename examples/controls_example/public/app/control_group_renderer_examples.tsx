@@ -12,7 +12,6 @@ import useAsync from 'react-use/lib/useAsync';
 import { EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { SearchExample } from './control_group_renderer_examples/search_example';
 import { EditExample } from './control_group_renderer_examples/edit_example';
-import { AddButtonExample } from './control_group_renderer_examples/add_button_example';
 import { ControlsExampleStartDeps } from '../plugin';
 
 export const ControlGroupRendererExamples = ({
@@ -34,9 +33,6 @@ export const ControlGroupRendererExamples = ({
       <SearchExample dataView={dataViews[0]} navigation={navigation} data={data} />
       <EuiSpacer size="xl" />
       <EditExample />
-      <EuiSpacer size="xl" />
-      {/* TODO: Remove add button? No one uses it */}
-      <AddButtonExample dataViewId={dataViews[0].id!} />{' '}
     </>
   ) : (
     <EuiText>{'Install web logs sample data to run controls examples.'}</EuiText>

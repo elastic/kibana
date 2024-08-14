@@ -189,14 +189,14 @@ export const EditExample = () => {
         ) : null}
         <ControlGroupRenderer
           ref={setControlGroupAPI}
-          getCreationOptions={async (initialInput, builder) => {
-            const persistedInput = await onLoad();
+          getCreationOptions={async (initialState, builder) => {
+            const persistedState = await onLoad();
             return {
-              initialInput: {
-                ...initialInput,
-                ...persistedInput,
-                viewMode: ViewMode.EDIT,
+              initialState: {
+                ...initialState,
+                ...persistedState,
               },
+              viewMode: ViewMode.EDIT,
             };
           }}
         />

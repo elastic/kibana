@@ -44,9 +44,10 @@ export const deserializeControlGroup = (
     autoApplySelections:
       typeof state.rawState.showApplySelections === 'boolean'
         ? !state.rawState.showApplySelections
-        : false, // Rename "showApplySelections" to "autoApplySelections"
+        : true, // Rename "showApplySelections" to "autoApplySelections"
     labelPosition: state.rawState.controlStyle, // Rename "controlStyle" to "labelPosition"
     defaultControlGrow: DEFAULT_CONTROL_GROW,
     defaultControlWidth: DEFAULT_CONTROL_WIDTH,
+    settings: state.rawState.settings,
   };
 };

@@ -116,6 +116,7 @@ export interface ControlGroupRuntimeState<State extends DefaultControlState = De
    * - remove after https://github.com/elastic/kibana/issues/189939 is resolved
    */
   settings?: ControlGroupSettings;
+  // getEditorConfig: () => ControlGroupEditorConfig | undefined;
 }
 
 export interface ControlGroupSerializedState
