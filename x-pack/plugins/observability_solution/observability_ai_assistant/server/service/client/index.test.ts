@@ -423,8 +423,8 @@ describe('Observability AI Assistant client', () => {
               last_updated: expect.any(String),
               token_count: {
                 completion: 6,
-                prompt: 230,
-                total: 236,
+                prompt: 229,
+                total: 235,
               },
             },
             type: StreamingChatResponseEventType.ConversationCreate,
@@ -441,8 +441,8 @@ describe('Observability AI Assistant client', () => {
                 title: 'An auto-generated title',
                 token_count: {
                   completion: 6,
-                  prompt: 230,
-                  total: 236,
+                  prompt: 229,
+                  total: 235,
                 },
               },
               labels: {},
