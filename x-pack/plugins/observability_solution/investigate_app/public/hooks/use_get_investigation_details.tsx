@@ -41,15 +41,7 @@ export function useFetchInvestigation({
         signal,
       });
     },
-    cacheTime: 0,
     refetchOnWindowFocus: false,
-    retry: (failureCount, error) => {
-      if (String(error) === 'Error: Forbidden') {
-        return false;
-      }
-
-      return failureCount < 3;
-    },
     onError: (error: Error) => {
       toasts.addError(error, {
         title: 'Something went wrong while fetching Investigation',

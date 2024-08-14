@@ -9,9 +9,4 @@ import * as t from 'io-ts';
 const blankOriginSchema = t.type({ type: t.literal('blank') });
 const alertOriginSchema = t.type({ type: t.literal('alert'), id: t.string });
 
-type AlertOrigin = t.OutputOf<typeof alertOriginSchema>;
-type BlankOrigin = t.OutputOf<typeof blankOriginSchema>;
-
 export { alertOriginSchema, blankOriginSchema };
-
-export type { AlertOrigin, BlankOrigin };

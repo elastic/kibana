@@ -9,7 +9,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { keyBy, noop } from 'lodash';
 import React, { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { AddObservationUI } from '../../../../components/add_observation_ui';
 import { InvestigateSearchBar } from '../../../../components/investigate_search_bar';
@@ -18,7 +17,6 @@ import { useAddInvestigationNote } from '../../../../hooks/use_add_investigation
 import { useDateRange } from '../../../../hooks/use_date_range';
 import { useFetchInvestigation } from '../../../../hooks/use_fetch_investigation';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { InvestigationDetailsPathParams } from '../../types';
 import { InvestigationNotes } from '../investigation_notes/investigation_notes';
 
 function InvestigationDetailsWithUser({
@@ -142,12 +140,10 @@ function InvestigationDetailsWithUser({
   );
 }
 
-export function InvestigationDetails() {
+export function InvestigationDetails({ investigationId }: { investigationId: string }) {
   const {
     core: { security },
   } = useKibana();
-
-  const { investigationId } = useParams<InvestigationDetailsPathParams>();
 
   const user = useAsync(() => {
     return security.authc.getCurrentUser();
