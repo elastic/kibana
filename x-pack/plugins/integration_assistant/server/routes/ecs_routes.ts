@@ -14,7 +14,7 @@ import {
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { ECS_GRAPH_PATH, EcsMappingRequestBody, EcsMappingResponse } from '../../common';
-import { LogType, ROUTE_HANDLER_TIMEOUT } from '../constants';
+import { LogType, ROUTE_HANDLER_TIMEOUT, MAX_IMPORT_PAYLOAD_BYTES } from '../constants';
 import { getEcsGraph } from '../graphs/ecs';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { buildRouteValidationWithZod } from '../util/route_validation';
@@ -28,6 +28,9 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
       path: ECS_GRAPH_PATH,
       access: 'internal',
       options: {
+        body: {
+          maxBytes: MAX_IMPORT_PAYLOAD_BYTES,
+        },
         timeout: {
           idleSocket: ROUTE_HANDLER_TIMEOUT,
         },

@@ -14,7 +14,7 @@ import {
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { RELATED_GRAPH_PATH, RelatedRequestBody, RelatedResponse } from '../../common';
-import { ROUTE_HANDLER_TIMEOUT } from '../constants';
+import { ROUTE_HANDLER_TIMEOUT, MAX_IMPORT_PAYLOAD_BYTES } from '../constants';
 import { getRelatedGraph } from '../graphs/related';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { buildRouteValidationWithZod } from '../util/route_validation';
@@ -26,6 +26,9 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
       path: RELATED_GRAPH_PATH,
       access: 'internal',
       options: {
+        body: {
+          maxBytes: MAX_IMPORT_PAYLOAD_BYTES,
+        },
         timeout: {
           idleSocket: ROUTE_HANDLER_TIMEOUT,
         },
