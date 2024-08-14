@@ -205,7 +205,7 @@ class AgentPolicyService {
         options.bumpRevision ? existingAgentPolicy.revision + 1 : existingAgentPolicy.revision
       }`
     );
-    if (options.returnUpdatedPolicy) {
+    if (options.returnUpdatedPolicy !== false) {
       return (await this.get(soClient, id)) as AgentPolicy;
     }
     return newAgentPolicy as AgentPolicy;
