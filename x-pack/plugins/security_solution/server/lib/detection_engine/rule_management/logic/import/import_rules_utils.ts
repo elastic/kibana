@@ -17,6 +17,7 @@ import type { RuleToImport } from '../../../../../../common/api/detection_engine
 import type { ImportRuleResponse } from '../../../routes/utils';
 import { createBulkErrorObject } from '../../../routes/utils';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
+import { calculateRuleSourceForImport } from './calculate_rule_source_for_import';
 import type { IDetectionRulesClient } from '../detection_rules_client/detection_rules_client_interface';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 
@@ -121,12 +122,13 @@ export const importRules = async ({
               }
 
               // TODO rule_source calculated here
-              // const ruleSource = calculateRuleSource({
-              //   rule: parsedRule,
-              //   prebuiltRuleAssets,
-              // });
+              const ruleSource = calculateRuleSourceForImport({
+                rule: parsedRule,
+                prebuiltRuleAssets,
+                installedRuleIds: [], // TODO
+              });
 
-              // parsedRule.rule_source = ruleSource;
+              parsedRule.rule_source = ruleSource;
             }
 
             try {
