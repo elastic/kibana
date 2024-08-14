@@ -36,7 +36,7 @@ import { agentPolicyService } from './agent_policy';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 
 import { getAgentsByKuery } from './agents';
-import { packagePolicyService } from './package_policy';
+import { getPackagePolicySavedObjectType, packagePolicyService } from './package_policy';
 import { appContextService } from './app_context';
 import { outputService } from './output';
 import { downloadSourceService } from './download_source';
@@ -159,6 +159,9 @@ describe('Agent policy', () => {
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
     mockedAppContextService.getExperimentalFeatures.mockReturnValue({ agentless: false } as any);
     jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+    jest
+      .mocked(getPackagePolicySavedObjectType)
+      .mockResolvedValue(LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE);
   });
 
   afterEach(() => {

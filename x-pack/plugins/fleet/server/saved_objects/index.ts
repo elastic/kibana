@@ -744,6 +744,7 @@ export const getSavedObjectTypes = (
           is_managed: { type: 'boolean' },
           policy_id: { type: 'keyword' },
           policy_ids: { type: 'keyword' },
+          output_id: { type: 'keyword' },
           package: {
             properties: {
               name: { type: 'keyword' },

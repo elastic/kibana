@@ -481,6 +481,7 @@
     "monitoring_output_id",
     "name",
     "namespace",
+    "output_id",
     "overrides",
     "revision",
     "schema_version",
