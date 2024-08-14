@@ -30,7 +30,7 @@ export const StatusRuleConditionSchema = schema.object({
   downThreshold: schema.maybe(schema.number()),
   window: schema.oneOf([
     schema.object({
-      percentOfLocations: schema.number(),
+      numberOfLocations: schema.number(),
     }),
     schema.object({
       time: TimeWindowSchema,
@@ -55,7 +55,7 @@ export type StatusRuleCondition = TypeOf<typeof StatusRuleConditionSchema>;
 
 export const getConditionType = (condition?: StatusRuleCondition) => {
   let numberOfChecks = 1;
-  const isLocationBased = condition && 'percentOfLocations' in condition.window;
+  const isLocationBased = condition && 'numberOfLocations' in condition.window;
   const isTimeWindow = condition && 'time' in condition.window;
   const isChecksBased = condition && 'numberOfChecks' in condition.window;
 
@@ -68,17 +68,17 @@ export const getConditionType = (condition?: StatusRuleCondition) => {
     numberOfChecks = condition?.downThreshold ?? 1;
   }
 
-  const percentOfLocations =
-    condition && 'percentOfLocations' in condition.window
-      ? condition.window.percentOfLocations ?? 100
-      : 100;
+  const numberOfLocations =
+    condition && 'numberOfLocations' in condition.window
+      ? condition.window.numberOfLocations ?? 1
+      : 1;
 
   return {
     isLocationBased,
     isTimeWindow,
     isChecksBased,
     numberOfChecks,
-    percentOfLocations,
+    numberOfLocations,
     downThreshold: condition?.downThreshold ?? 1,
   };
 };

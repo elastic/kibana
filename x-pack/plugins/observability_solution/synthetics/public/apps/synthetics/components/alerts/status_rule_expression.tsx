@@ -31,7 +31,7 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
   const condition = ruleParams.condition;
   const downThreshold =
     condition && 'downThreshold' in condition ? condition.downThreshold ?? 5 : 5;
-  const locBased = (condition && 'percentOfLocations' in condition.window) ?? false;
+  const locBased = (condition && 'numberOfLocations' in condition.window) ?? false;
 
   const onThresholdChange = useCallback(
     (value: number) => {

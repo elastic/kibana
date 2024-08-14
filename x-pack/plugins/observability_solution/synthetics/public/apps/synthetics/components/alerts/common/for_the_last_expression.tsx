@@ -170,7 +170,7 @@ export const ForTheLastExpression = ({ ruleParams, setRuleParams }: Props) => {
               setRuleParams('condition', {
                 ...ruleParams.condition,
                 downThreshold: 1,
-                window: { percentOfLocations: 100 },
+                window: { numberOfLocations: 1 },
               });
               break;
             default:

@@ -60,22 +60,22 @@ export const WindowValueExpression = ({ ruleParams, setRuleParams }: Props) => {
     (value: number) => {
       setRuleParams('condition', {
         ...ruleParams.condition,
-        window: { percentOfLocations: value },
+        window: { numberOfLocations: value },
       });
     },
     [ruleParams.condition, setRuleParams]
   );
 
   if (isLocationBased) {
-    const percentOfLocations =
-      condition && 'percentOfLocations' in condition.window
-        ? condition.window.percentOfLocations ?? 100
-        : 100;
+    const numberOfLocations =
+      condition && 'numberOfLocations' in condition.window
+        ? condition.window.numberOfLocations ?? 1
+        : 1;
     return (
       <PopoverExpression
         value={i18n.translate('xpack.synthetics.windowValueExpression.percentLabel', {
-          defaultMessage: '{percentOfLocations}% of locations',
-          values: { percentOfLocations: percentOfLocations ?? 100 },
+          defaultMessage: '{numberOfLocations} locations',
+          values: { numberOfLocations: numberOfLocations ?? 1 },
         })}
       >
         <EuiPopoverTitle>
@@ -88,7 +88,7 @@ export const WindowValueExpression = ({ ruleParams, setRuleParams }: Props) => {
           min={1}
           max={100}
           compressed
-          value={percentOfLocations}
+          value={numberOfLocations}
           onChange={(evt) => onPercentageChange(Number(evt.target.value))}
         />
       </PopoverExpression>
