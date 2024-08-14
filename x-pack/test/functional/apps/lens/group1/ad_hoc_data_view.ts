@@ -233,8 +233,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const [lensHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(lensHandle);
     });
-
-    // Failing: See https://github.com/elastic/kibana/issues/164623
     it('should navigate to discover from embeddable correctly', async () => {
       const [lensHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(lensHandle);
