@@ -35,9 +35,6 @@ jest.mock('../app_context', () => ({
     }),
     getInternalUserSOClient: jest.fn(),
     getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
-    getExperimentalFeatures: () => ({
-      useSpaceAwareness: true,
-    }),
     getLogger: () =>
       new Proxy(
         {},

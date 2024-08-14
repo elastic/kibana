@@ -11,6 +11,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
+import { LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../common/constants';
+
 import {
   PackagePolicyRestrictionRelatedError,
   FleetUnauthorizedError,
@@ -26,7 +28,6 @@ import type {
 import {
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
-  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../constants';
 
 import { AGENT_POLICY_INDEX, SO_SEARCH_LIMIT } from '../../common';

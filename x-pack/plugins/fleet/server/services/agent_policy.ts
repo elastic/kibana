@@ -1019,7 +1019,7 @@ class AgentPolicyService {
     const agentPoliciesOfPackagePoliciesUsingOutput =
       await internalSoClientWithoutSpaceExtension.bulkGet<AgentPolicySOAttributes>(
         [...agentPolicyIdsOfPackagePoliciesUsingOutput].map((id) => ({
-          type: SAVED_OBJECT_TYPE,
+          type: savedObjectType,
           id,
           fields: ['revision', 'data_output_id', 'monitoring_output_id', 'namespaces'],
           ...(useSpaceAwareness ? { namespaces: ['*'] } : {}),
