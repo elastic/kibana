@@ -27,9 +27,11 @@ setup_fips() {
 
 setup_shell() {
   if [ -n "$SHELL" ] && [ -x "$SHELL" ]; then
-    sudo chsh -s "$SHELL" vscode
+    current_shell=$(ps -p $$ -o comm=)
+    desired_shell=$(basename "$SHELL")
 
-    if [ "$0" != "$SHELL" ]; then
+    if [ "$current_shell" != "$desired_shell" ]; then
+      sudo chsh -s "$SHELL" vscode
       exec "$SHELL"
     fi
   else
