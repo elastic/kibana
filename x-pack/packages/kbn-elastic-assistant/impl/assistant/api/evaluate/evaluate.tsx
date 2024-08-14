@@ -33,35 +33,31 @@ export const postEvaluation = async ({
   http,
   evalParams,
   signal,
-}: PostEvaluationParams): Promise<PostEvaluateResponse | IHttpFetchError> => {
-  try {
-    const path = `/internal/elastic_assistant/evaluate`;
-    const query = {
-      agents: evalParams?.agents.sort()?.join(','),
-      datasetName: evalParams?.datasetName,
-      evaluationType: evalParams?.evaluationType.sort()?.join(','),
-      evalModel: evalParams?.evalModel.sort()?.join(','),
-      outputIndex: evalParams?.outputIndex,
-      models: evalParams?.models.sort()?.join(','),
-      projectName: evalParams?.projectName,
-      runName: evalParams?.runName,
-    };
+}: PostEvaluationParams): Promise<PostEvaluateResponse> => {
+  const path = `/internal/elastic_assistant/evaluate`;
+  const query = {
+    agents: evalParams?.agents.sort()?.join(','),
+    datasetName: evalParams?.datasetName,
+    evaluationType: evalParams?.evaluationType.sort()?.join(','),
+    evalModel: evalParams?.evalModel.sort()?.join(','),
+    outputIndex: evalParams?.outputIndex,
+    models: evalParams?.models.sort()?.join(','),
+    projectName: evalParams?.projectName,
+    runName: evalParams?.runName,
+  };
 
-    return await http.post<PostEvaluateResponse>(path, {
-      body: JSON.stringify({
-        dataset: JSON.parse(evalParams?.dataset ?? '[]'),
-        evalPrompt: evalParams?.evalPrompt ?? '',
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      query,
-      signal,
-      version: API_VERSIONS.internal.v1,
-    });
-  } catch (error) {
-    return error as IHttpFetchError;
-  }
+  return http.post<PostEvaluateResponse>(path, {
+    body: JSON.stringify({
+      dataset: JSON.parse(evalParams?.dataset ?? '[]'),
+      evalPrompt: evalParams?.evalPrompt ?? '',
+    }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    query,
+    signal,
+    version: API_VERSIONS.internal.v1,
+  });
 };
 
 export interface GetEvaluationParams {

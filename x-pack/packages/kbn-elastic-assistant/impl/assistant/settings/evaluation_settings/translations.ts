@@ -65,27 +65,6 @@ export const EVALUATION_DETAILS_DESCRIPTION = i18n.translate(
   }
 );
 
-export const PROJECT_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.evaluationSettings.projectLabel',
-  {
-    defaultMessage: 'Project',
-  }
-);
-
-export const PROJECT_DESCRIPTION = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.evaluationSettings.projectDescription',
-  {
-    defaultMessage: 'LangSmith project to write results to.',
-  }
-);
-
-export const PROJECT_PLACEHOLDER = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.evaluationSettings.projectPlaceholder',
-  {
-    defaultMessage: '8.12 Testing',
-  }
-);
-
 export const RUN_NAME_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.evaluationSettings.runNameLabel',
   {
@@ -103,7 +82,7 @@ export const RUN_NAME_DESCRIPTION = i18n.translate(
 export const RUN_NAME_PLACEHOLDER = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.evaluationSettings.runNamePlaceholder',
   {
-    defaultMessage: '8.12 ESQL Query Generation',
+    defaultMessage: '8.16 Streaming Regression',
   }
 );
 
@@ -121,17 +100,17 @@ export const CONNECTORS_DESCRIPTION = i18n.translate(
   }
 );
 
-export const AGENTS_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.evaluationSettings.agentsLabel',
+export const GRAPHS_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.evaluationSettings.graphsLabel',
   {
-    defaultMessage: 'Agents',
+    defaultMessage: 'Graphs',
   }
 );
 
-export const AGENTS_DESCRIPTION = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.evaluationSettings.agentsDescription',
+export const GRAPHS_DESCRIPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.evaluationSettings.graphsDescription',
   {
-    defaultMessage: 'Select the agents (RAG algorithms) to evaluate the dataset against.',
+    defaultMessage: 'Select the different graphs to evaluate the dataset against.',
   }
 );
 
@@ -294,18 +273,5 @@ export const PERFORM_EVALUATION = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.evaluationSettings.performEvaluationTitle',
   {
     defaultMessage: 'Perform evaluation...',
-  }
-);
-
-export const EVALUATOR_FUN_FACT_DISCOVER_LINK = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.evaluationSettings.evaluatorFunFactDiscoverLinkText',
-  {
-    defaultMessage: 'Discover',
-  }
-);
-export const EVALUATOR_FUN_FACT_APM_LINK = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.evaluationSettings.evaluatorFunFactApmLinkText',
-  {
-    defaultMessage: 'APM',
   }
 );

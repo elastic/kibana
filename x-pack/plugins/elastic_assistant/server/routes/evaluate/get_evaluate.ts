@@ -17,8 +17,8 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 import { EVALUATE } from '../../../common/constants';
-import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
-import { AGENT_EXECUTOR_MAP } from '../../lib/langchain/executors';
+import { performChecks } from '../helpers';
+import { ASSISTANT_GRAPH_MAP } from '../../lib/langchain/graphs';
 
 export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
   router.versioned
@@ -41,22 +41,25 @@ export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerC
         },
       },
       async (context, request, response): Promise<IKibanaResponse<GetEvaluateResponse>> => {
-        const assistantContext = await context.elasticAssistant;
-        const logger = assistantContext.logger;
+        const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+        const assistantContext = ctx.elasticAssistant;
+        const logger = assistantContext.logger.get('evaluate');
 
-        // Validate evaluation feature is enabled
-        const pluginName = getPluginNameFromRequest({
+        // Perform license, authenticated user and evaluation FF checks
+        const checkResponse = performChecks({
+          authenticatedUser: true,
+          capability: 'assistantModelEvaluation',
+          context: ctx,
+          license: true,
           request,
-          defaultPluginName: DEFAULT_PLUGIN_NAME,
-          logger,
+          response,
         });
-        const registeredFeatures = assistantContext.getRegisteredFeatures(pluginName);
-        if (!registeredFeatures.assistantModelEvaluation) {
-          return response.notFound();
+        if (checkResponse) {
+          return checkResponse;
         }
 
         try {
-          return response.ok({ body: { agentExecutors: Object.keys(AGENT_EXECUTOR_MAP) } });
+          return response.ok({ body: { agentExecutors: Object.keys(ASSISTANT_GRAPH_MAP) } });
         } catch (err) {
           logger.error(err);
           const error = transformError(err);

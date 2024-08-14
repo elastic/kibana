@@ -28,14 +28,13 @@ import {
 
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { GetEvaluateResponse, PostEvaluateResponse } from '@kbn/elastic-assistant-common';
+import type { GetEvaluateResponse } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../../assistant_context';
 import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
 import { getActionTypeTitle, getGenAiConfig } from '../../../connectorland/helpers';
 import { PRECONFIGURED_CONNECTOR } from '../../../connectorland/translations';
 import { usePerformEvaluation } from '../../api/evaluate/use_perform_evaluation';
-import { getApmLink, getDiscoverLink } from './utils';
 import { useEvaluationData } from '../../api/evaluate/use_evaluation_data';
 
 const DEFAULT_EVAL_TYPES_OPTIONS = [
@@ -49,7 +48,7 @@ const DEFAULT_OUTPUT_INDEX = '.kibana-elastic-ai-assistant-evaluation-results';
  * Evaluation Settings -- development-only feature for evaluating models
  */
 export const EvaluationSettings: React.FC = React.memo(() => {
-  const { actionTypeRegistry, basePath, http, setTraceOptions, traceOptions } =
+  const { actionTypeRegistry, basePath, http, setTraceOptions, toasts, traceOptions } =
     useAssistantContext();
   const { data: connectors } = useLoadConnectors({ http });
   const {
@@ -58,22 +57,15 @@ export const EvaluationSettings: React.FC = React.memo(() => {
     isLoading: isPerformingEvaluation,
   } = usePerformEvaluation({
     http,
+    toasts,
   });
   const { data: evalData } = useEvaluationData({ http });
-  const defaultAgents = useMemo(
+  const defaultGraphs = useMemo(
     () => (evalData as GetEvaluateResponse)?.agentExecutors ?? [],
     [evalData]
   );
 
   // Run Details
-  // Project Name
-  const [projectName, setProjectName] = useState();
-  const onProjectNameChange = useCallback(
-    (e) => {
-      setProjectName(e.target.value);
-    },
-    [setProjectName]
-  );
   // Run Name
   const [runName, setRunName] = useState();
   const onRunNameChange = useCallback(
@@ -191,17 +183,17 @@ export const EvaluationSettings: React.FC = React.memo(() => {
     );
   }, [actionTypeRegistry, connectors, visColorsBehindText]);
 
-  // Agents
-  const [selectedAgentOptions, setSelectedAgentOptions] = useState<
+  // Graphs
+  const [selectedGraphOptions, setSelectedGraphOptions] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >([]);
-  const onAgentOptionsChange = useCallback(
-    (agentOptions: Array<EuiComboBoxOptionOption<string>>) => {
-      setSelectedAgentOptions(agentOptions);
+  const onGraphOptionsChange = useCallback(
+    (graphOptions: Array<EuiComboBoxOptionOption<string>>) => {
+      setSelectedGraphOptions(graphOptions);
     },
-    [setSelectedAgentOptions]
+    [setSelectedGraphOptions]
   );
-  const onAgentOptionsCreate = useCallback(
+  const onGraphOptionsCreate = useCallback(
     (searchValue: string) => {
       const normalizedSearchValue = searchValue.trim();
 
@@ -209,13 +201,13 @@ export const EvaluationSettings: React.FC = React.memo(() => {
         return;
       }
 
-      setSelectedAgentOptions([...selectedAgentOptions, { label: normalizedSearchValue }]);
+      setSelectedGraphOptions([...selectedGraphOptions, { label: normalizedSearchValue }]);
     },
-    [selectedAgentOptions]
+    [selectedGraphOptions]
   );
-  const agentOptions = useMemo(() => {
-    return defaultAgents.map((label) => ({ label }));
-  }, [defaultAgents]);
+  const graphOptions = useMemo(() => {
+    return defaultGraphs.map((label) => ({ label }));
+  }, [defaultGraphs]);
 
   // Evaluation
   // Evaluation Type
@@ -268,21 +260,20 @@ export const EvaluationSettings: React.FC = React.memo(() => {
   // Required fields by eval API
   const isPerformEvaluationDisabled =
     selectedModelOptions.length === 0 ||
-    selectedAgentOptions.length === 0 ||
+    selectedGraphOptions.length === 0 ||
     outputIndex.length === 0;
 
   // Perform Evaluation Button
   const handlePerformEvaluation = useCallback(async () => {
     const evalParams = {
       models: selectedModelOptions.flatMap((option) => option.key ?? []),
-      agents: selectedAgentOptions.map((option) => option.label),
+      agents: selectedGraphOptions.map((option) => option.label),
       dataset: useLangSmithDataset ? undefined : datasetText,
       datasetName: useLangSmithDataset ? datasetName : undefined,
       evalModel: selectedEvaluatorModelOptions.flatMap((option) => option.key ?? []),
       evalPrompt,
       evaluationType: selectedEvaluationType.map((option) => option.label),
       outputIndex,
-      projectName,
       runName,
     };
     performEvaluation(evalParams);
@@ -292,24 +283,13 @@ export const EvaluationSettings: React.FC = React.memo(() => {
     evalPrompt,
     outputIndex,
     performEvaluation,
-    projectName,
     runName,
-    selectedAgentOptions,
+    selectedGraphOptions,
     selectedEvaluationType,
     selectedEvaluatorModelOptions,
     selectedModelOptions,
     useLangSmithDataset,
   ]);
-
-  const discoverLink = useMemo(
-    () => getDiscoverLink(basePath, (evalResponse as PostEvaluateResponse)?.evaluationId ?? ''),
-    [basePath, evalResponse]
-  );
-
-  const apmLink = useMemo(
-    () => getApmLink(basePath, (evalResponse as PostEvaluateResponse)?.evaluationId ?? ''),
-    [basePath, evalResponse]
-  );
 
   const getSection = (title: string, description: string) => (
     <div>
@@ -363,21 +343,6 @@ export const EvaluationSettings: React.FC = React.memo(() => {
         paddingSize="s"
       >
         <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFormRow
-              display="rowCompressed"
-              label={i18n.PROJECT_LABEL}
-              helpText={i18n.PROJECT_DESCRIPTION}
-            >
-              <EuiFieldText
-                aria-label="project-textfield"
-                compressed
-                onChange={onProjectNameChange}
-                placeholder={i18n.PROJECT_PLACEHOLDER}
-                value={projectName}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
           <EuiFlexItem>
             <EuiFormRow
               display="rowCompressed"
@@ -518,16 +483,16 @@ export const EvaluationSettings: React.FC = React.memo(() => {
 
         <EuiFormRow
           display="rowCompressed"
-          label={i18n.AGENTS_LABEL}
-          helpText={i18n.AGENTS_DESCRIPTION}
+          label={i18n.GRAPHS_LABEL}
+          helpText={i18n.GRAPHS_DESCRIPTION}
         >
           <EuiComboBox
-            aria-label={'agent-selector'}
+            aria-label={'graph-selector'}
             compressed
-            onCreateOption={onAgentOptionsCreate}
-            options={agentOptions}
-            selectedOptions={selectedAgentOptions}
-            onChange={onAgentOptionsChange}
+            onCreateOption={onGraphOptionsCreate}
+            options={graphOptions}
+            selectedOptions={selectedGraphOptions}
+            onChange={onGraphOptionsChange}
           />
         </EuiFormRow>
       </EuiAccordion>
@@ -608,20 +573,8 @@ export const EvaluationSettings: React.FC = React.memo(() => {
         <EuiFlexItem>
           <EuiText color={'subdued'} size={'xs'}>
             <FormattedMessage
-              defaultMessage="Closing this dialog will cancel the evaluation. You can watch the Kibana server logs for progress, and view results in {discover} {apm}. Can take many minutes for large datasets."
+              defaultMessage="Closing this dialog will cancel the evaluation. You can watch the Kibana server logs for progress. Can take many minutes for large datasets."
               id="xpack.elasticAssistant.assistant.settings.evaluationSettings.evaluatorFunFactText"
-              values={{
-                discover: (
-                  <EuiLink external href={discoverLink} target="_blank">
-                    {i18n.EVALUATOR_FUN_FACT_DISCOVER_LINK}
-                  </EuiLink>
-                ),
-                apm: (
-                  <EuiLink external href={apmLink} target="_blank">
-                    {i18n.EVALUATOR_FUN_FACT_APM_LINK}
-                  </EuiLink>
-                ),
-              }}
             />
           </EuiText>
         </EuiFlexItem>

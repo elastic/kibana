@@ -6,7 +6,7 @@
  */
 
 import { useMutation } from '@tanstack/react-query';
-import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import { postEvaluation } from './evaluate';
@@ -18,6 +18,14 @@ export interface UsePerformEvaluationParams {
   toasts?: IToasts;
 }
 
+export interface ResponseError {
+  statusCode: number;
+  success: boolean;
+  message: {
+    error: string;
+  };
+}
+
 export interface PerformEvaluationParams {
   agents: string[];
   dataset: string | undefined;
@@ -27,7 +35,7 @@ export interface PerformEvaluationParams {
   evaluationType: string[];
   models: string[];
   outputIndex: string;
-  projectName: string | undefined;
+  projectName?: string | undefined;
   runName: string | undefined;
 }
 
@@ -48,10 +56,10 @@ export const usePerformEvaluation = ({ http, toasts }: UsePerformEvaluationParam
       return postEvaluation({ http, evalParams: evalParams ?? undefined });
     },
     {
-      onError: (error: IHttpFetchError<ResponseErrorBody>) => {
+      onError: (error: IHttpFetchError<ResponseError>) => {
         if (error.name !== 'AbortError') {
           toasts?.addError(
-            error.body && error.body.message ? new Error(error.body.message) : error,
+            error?.body?.message?.error ? new Error(error.body.message.error) : error,
             {
               title: i18n.translate('xpack.elasticAssistant.evaluation.evaluationError', {
                 defaultMessage: 'Error performing evaluation...',
