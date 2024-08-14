@@ -18,19 +18,18 @@ api-docs: ## Generate Serverless and ESS Kibana OpenAPI bundles with kbn-openapi
 	@node scripts/merge_serverless_oas.js
 	@node scripts/merge_ess_oas.js
 
-.PHONY: api-docs-redocly
-api-docs-redocly: ## Generate kibana.serverless.yaml and kibana.yaml with Redocly CLI
-	@npx @redocly/cli join "kibana.info.serverless.yaml" "../x-pack/plugins/observability_solution/apm/docs/openapi/apm.yaml" "../x-pack/plugins/actions/docs/openapi/bundled_serverless.yaml" "../src/plugins/data_views/docs/openapi/bundled.yaml" "../x-pack/plugins/ml/common/openapi/ml_apis_serverless.yaml" "../packages/core/saved-objects/docs/openapi/bundled_serverless.yaml" "../x-pack/plugins/observability_solution/slo/docs/openapi/slo/bundled.yaml"  "bundle.serverless.json" -o "output/kibana.serverless.yaml" --prefix-components-with-info-prop title
-	@npx @redocly/cli join "kibana.info.yaml" "../x-pack/plugins/alerting/docs/openapi/bundled.yaml" "../x-pack/plugins/observability_solution/apm/docs/openapi/apm.yaml"  "../x-pack/plugins/cases/docs/openapi/bundled.yaml" "../x-pack/plugins/actions/docs/openapi/bundled.yaml" "../src/plugins/data_views/docs/openapi/bundled.yaml" "../x-pack/plugins/ml/common/openapi/ml_apis.yaml" "../packages/core/saved-objects/docs/openapi/bundled.yaml"  "bundle.json" -o "output/kibana.yaml" --prefix-components-with-info-prop title
+.PHONY: api-docs-staging
+api-docs-staging: ## Generate Serverless and ESS Kibana OpenAPI bundles with kbn-openapi-bundler
+	@node scripts/merge_serverless_oas_staging.js
+	@node scripts/merge_ess_oas_staging.js
 
 .PHONY: api-docs-stateful
 api-docs-stateful: ## Generate only kibana.yaml
-	@npx @redocly/cli join "kibana.info.yaml" "../x-pack/plugins/alerting/docs/openapi/bundled.yaml" "../x-pack/plugins/observability_solution/apm/docs/openapi/apm.yaml" "../x-pack/plugins/cases/docs/openapi/bundled.yaml" "../x-pack/plugins/actions/docs/openapi/bundled.yaml" "../src/plugins/data_views/docs/openapi/bundled.yaml" "../x-pack/plugins/ml/common/openapi/ml_apis.yaml" "../packages/core/saved-objects/docs/openapi/bundled.yaml" "bundle.json" -o "output/kibana.yaml" --prefix-components-with-info-prop title
-# Temporarily omit "../x-pack/plugins/fleet/common/openapi/bundled.yaml" due to internals tag and tag sorting
+	@node scripts/merge_ess_oas.js
 
 .PHONY: api-docs-serverless
 api-docs-serverless: ## Generate only kibana.serverless.yaml
-	@npx @redocly/cli join "kibana.info.serverless.yaml" "../x-pack/plugins/observability_solution/apm/docs/openapi/apm.yaml" "../x-pack/plugins/actions/docs/openapi/bundled_serverless.yaml" "../src/plugins/data_views/docs/openapi/bundled.yaml" "../x-pack/plugins/ml/common/openapi/ml_apis_serverless.yaml" "../packages/core/saved-objects/docs/openapi/bundled_serverless.yaml" "../x-pack/plugins/observability_solution/slo/docs/openapi/slo/bundled.yaml" "bundle.serverless.json" -o "output/kibana.serverless.yaml" --prefix-components-with-info-prop title
+	@node scripts/merge_serverless_oas.js
 	
 .PHONY: api-docs-lint
 api-docs-lint: ## Run spectral API docs linter 

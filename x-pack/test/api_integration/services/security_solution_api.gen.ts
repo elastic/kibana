@@ -212,6 +212,9 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Bulk upsert up to 1000 asset criticality records, creating or updating them as needed.
+     */
     bulkUpsertAssetCriticalityRecords(props: BulkUpsertAssetCriticalityRecordsProps) {
       return supertest
         .post('/api/asset_criticality/bulk')
@@ -252,6 +255,9 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Create or update a criticality record for a specific asset.
+     */
     createAssetCriticalityRecord(props: CreateAssetCriticalityRecordProps) {
       return supertest
         .post('/api/asset_criticality')
@@ -296,6 +302,9 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+     * Delete the asset criticality record for a specific asset if it exists.
+     */
     deleteAssetCriticalityRecord(props: DeleteAssetCriticalityRecordProps) {
       return supertest
         .delete('/api/asset_criticality')
@@ -575,9 +584,12 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * List asset criticality records, paging, sorting and filtering as needed.
+     */
     findAssetCriticalityRecords(props: FindAssetCriticalityRecordsProps) {
       return supertest
-        .post('/api/asset_criticality/list')
+        .get('/api/asset_criticality/list')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -602,6 +614,9 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Get the criticality record for a specific asset.
+     */
     getAssetCriticalityRecord(props: GetAssetCriticalityRecordProps) {
       return supertest
         .get('/api/asset_criticality')

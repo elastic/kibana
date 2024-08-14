@@ -472,9 +472,9 @@
     }, this.createAnchor = function(row, column) {
       return new Anchor(this, row, column)
     }, this.$split = 0 === "aaa".split(/a/).length ? function(text) {
-      return text.replace(/\r\n|\r/g, "\n").split("\n")
+      return text.replace(/\r\n|\r/g, "\n").split("\n");
     } : function(text) {
-      return text.split(/\r\n|\r|\n/)
+      return text.split(/\r\n|\r|\n/);
     }, this.$detectNewLine = function(text) {
       var match = text.match(/^.*?(\r\n|\r|\n)/m);
       this.$autoNewLine = match ? match[1] : "\n", this._signal("changeNewLineMode")
@@ -711,9 +711,9 @@
   }, exports.arrayRemove = function(array, value) {
     for (var i = 0; array.length >= i; i++) value === array[i] && array.splice(i, 1)
   }, exports.escapeRegExp = function(str) {
-    return str.replace(/([.*+?^${}()|[\]\/\\])/g, "\\$1")
+    return str.replace(/([.*+?^${}()|[\]\/\\])/g, "\\$1");
   }, exports.escapeHTML = function(str) {
-    return str.replace(/&/g, "&#38;").replace(/"/g, "&#34;").replace(/'/g, "&#39;").replace(/</g, "&#60;")
+    return str.replace(/&/g, "&#38;").replace(/"/g, "&#34;").replace(/'/g, "&#39;").replace(/</g, "&#60;");
   }, exports.getMatchOffsets = function(string, regExp) {
     var matches = [];
     return string.replace(regExp, function(str) {

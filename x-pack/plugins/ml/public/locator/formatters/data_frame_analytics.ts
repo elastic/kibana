@@ -10,6 +10,7 @@
  */
 import { isEmpty } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { formatGenericMlUrl } from './common';
 import type {
   DataFrameAnalyticsExplorationQueryState,
@@ -21,7 +22,7 @@ import type {
 } from '../../../common/types/locator';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { getGroupQueryText, getJobQueryText } from '../../../common/util/string_utils';
-import type { AppPageState, ListingPageUrlState } from '../../../common/types/common';
+import type { AppPageState } from '../../../common/types/common';
 
 export function formatDataFrameAnalyticsJobManagementUrl(
   appBasePath: string,
