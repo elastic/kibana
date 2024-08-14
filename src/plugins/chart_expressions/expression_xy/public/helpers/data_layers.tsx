@@ -53,10 +53,10 @@ type GetSeriesPropsFn = (config: {
   colorAssignments: ColorAssignments;
   columnToLabelMap: Record<string, string>;
   paletteService: PaletteRegistry;
-  syncColors?: boolean;
   yAxis?: GroupsConfiguration[number];
   xAxis?: GroupsConfiguration[number];
-  timeZone?: string;
+  syncColors: boolean;
+  timeZone: string;
   emphasizeFitting?: boolean;
   fillOpacity?: number;
   formattedDatatableInfo: DatatableWithFormatInfo;
@@ -324,7 +324,7 @@ const getColor: GetColorFn = (
   series,
   { layer, colorAssignments, paletteService, syncColors, getSeriesNameFn },
   uiState,
-  singleTable
+  isSingleTable
 ) => {
   const overwriteColor = getSeriesColor(layer, series.yAccessor as string);
   if (overwriteColor !== null) {
@@ -344,7 +344,7 @@ const getColor: GetColorFn = (
     {
       name,
       totalSeriesAtDepth: colorAssignment.totalSeriesCount,
-      rankAtDepth: colorAssignment.getRank(singleTable ? 'commonLayerId' : layer.layerId, name),
+      rankAtDepth: colorAssignment.getRank(isSingleTable ? 'commonLayerId' : layer.layerId, name),
     },
   ];
   return paletteService.get(layer.palette.name).getCategoricalColor(

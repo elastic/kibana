@@ -55,3 +55,9 @@ export const SPECIAL_TOKENS_STRING_CONVERSION = new Map([
     }),
   ],
 ]);
+
+/**
+ * Returns special string for sake of color mapping/syncing
+ */
+export const getSpecialString = (value: string) =>
+  SPECIAL_TOKENS_STRING_CONVERSION.get(value) ?? value;

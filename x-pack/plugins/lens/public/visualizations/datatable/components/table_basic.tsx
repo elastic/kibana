@@ -148,7 +148,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   const hasAtLeastOneRowClickAction = props.rowHasRowClickTriggerActions?.some((x) => x);
 
-  const { getType, dispatchEvent, renderMode, formatFactory } = props;
+  const { getType, dispatchEvent, renderMode, formatFactory, syncColors } = props;
 
   const formatters: Record<string, ReturnType<FormatFactory>> = useMemo(
     () =>
@@ -423,6 +423,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         data,
         isNumeric,
         isDarkMode,
+        syncColors,
         palette,
         colorMapping
       );
@@ -447,6 +448,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     props.paletteService,
     firstLocalTable,
     minMaxByColumnId,
+    syncColors,
   ]);
 
   const columnVisibility = useMemo(

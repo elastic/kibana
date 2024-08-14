@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { ColorMappingInputData, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
+import {
+  ColorMappingInputData,
+  PaletteOutput,
+  PaletteRegistry,
+  getSpecialString,
+} from '@kbn/coloring';
 import { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { getColorAccessorFn } from './color_mapping_accessor';
 
@@ -16,6 +21,7 @@ export function getCellColorFn(
   data: ColorMappingInputData,
   isNumeric: boolean,
   isDarkMode: boolean,
+  syncColors: boolean,
   palette?: PaletteOutput<CustomPaletteState>,
   colorMapping?: string
 ): CellColorFn {
@@ -40,7 +46,7 @@ export function getCellColorFn(
         return paletteService.get(palette.name).getCategoricalColor(
           [
             {
-              name: category,
+              name: getSpecialString(category), // needed to sync special categories (i.e. '')
               rankAtDepth: Math.max(
                 data.categories.findIndex((v) => v === category),
                 0
@@ -52,7 +58,7 @@ export function getCellColorFn(
             maxDepth: 1,
             totalSeries: data.categories.length || 1,
             behindText: false,
-            syncColors: true,
+            syncColors,
           },
           palette?.params ?? { colors: [] }
         );
