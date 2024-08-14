@@ -8,7 +8,7 @@
 import {
   GetInvestigationNotesResponse,
   getInvestigationNotesResponseSchema,
-} from '@kbn/investigate-plugin/common/schema/get_notes';
+} from '@kbn/investigation-schema';
 import { InvestigationRepository } from './investigation_repository';
 
 export async function getInvestigationNotes(

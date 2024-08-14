@@ -5320,6 +5320,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/investigation-schema@link:packages/kbn-investigation-schema":
+  version "0.0.0"
+  uid ""
+
 "@kbn/io-ts-utils@link:packages/kbn-io-ts-utils":
   version "0.0.0"
   uid ""

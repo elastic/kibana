@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { v4 } from 'uuid';
-
 import {
   CreateInvestigationNoteInput,
   CreateInvestigationNoteResponse,
-} from '@kbn/investigate-plugin/common/schema/create_notes';
+} from '@kbn/investigation-schema';
+import { v4 } from 'uuid';
 import { InvestigationRepository } from './investigation_repository';
 
 export async function createInvestigationNote(

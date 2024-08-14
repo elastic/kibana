@@ -6,13 +6,13 @@
  */
 
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import { QueryKey, useMutation } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import {
   CreateInvestigationInput,
   CreateInvestigationResponse,
-} from '@kbn/investigate-plugin/common';
-import { FindInvestigationsResponse } from '@kbn/investigate-plugin/common';
+  FindInvestigationsResponse,
+} from '@kbn/investigation-schema';
+import { QueryKey, useMutation } from '@tanstack/react-query';
 import { useKibana } from '../../../utils/kibana_react';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;

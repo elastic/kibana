@@ -6,13 +6,13 @@
  */
 
 import {
+  createInvestigationNoteParamsSchema,
   createInvestigationParamsSchema,
+  deleteInvestigationParamsSchema,
   findInvestigationsParamsSchema,
+  getInvestigationNotesParamsSchema,
   getInvestigationParamsSchema,
-} from '@kbn/investigate-plugin/common';
-import { createInvestigationNoteParamsSchema } from '@kbn/investigate-plugin/common/schema/create_notes';
-import { deleteInvestigationParamsSchema } from '@kbn/investigate-plugin/common/schema/delete';
-import { getInvestigationNotesParamsSchema } from '@kbn/investigate-plugin/common/schema/get_notes';
+} from '@kbn/investigation-schema';
 import { createInvestigation } from '../services/create_investigation';
 import { createInvestigationNote } from '../services/create_investigation_note';
 import { deleteInvestigation } from '../services/delete_investigation';

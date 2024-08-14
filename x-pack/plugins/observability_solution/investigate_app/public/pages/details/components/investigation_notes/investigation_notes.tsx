@@ -16,8 +16,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { InvestigationNote } from '@kbn/investigate-plugin/common';
 import React from 'react';
+import { InvestigationNote } from '@kbn/investigate-plugin/common';
 import { useTheme } from '../../../../hooks/use_theme';
 import { ResizableTextInput } from './resizable_text_input';
 import { TimelineMessage } from './timeline_message';

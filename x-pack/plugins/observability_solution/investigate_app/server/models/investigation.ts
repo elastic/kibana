@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { alertOriginSchema, blankOriginSchema } from '@kbn/investigate-plugin/common/schema/origin';
+import { alertOriginSchema, blankOriginSchema } from '@kbn/investigation-schema';
 import * as t from 'io-ts';
 import { investigationNoteSchema } from './investigation_note';
 

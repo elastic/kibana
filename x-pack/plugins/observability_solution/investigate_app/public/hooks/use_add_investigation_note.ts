@@ -10,7 +10,7 @@ import { useMutation } from '@tanstack/react-query';
 import {
   CreateInvestigationNoteInput,
   CreateInvestigationNoteResponse,
-} from '@kbn/investigate-plugin/common';
+} from '@kbn/investigation-schema';
 import { useKibana } from './use_kibana';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;

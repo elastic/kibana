@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { GetInvestigationParams } from '@kbn/investigate-plugin/common';
 import {
+  GetInvestigationParams,
   GetInvestigationResponse,
   getInvestigationResponseSchema,
-} from '@kbn/investigate-plugin/common/schema/get';
+} from '@kbn/investigation-schema';
 import { InvestigationRepository } from './investigation_repository';
 
 export async function getInvestigation(
