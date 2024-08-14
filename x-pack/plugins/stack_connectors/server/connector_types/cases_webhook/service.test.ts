@@ -1084,7 +1084,7 @@ describe('Cases webhook service', () => {
 
       // irrelevant snapshot content
       delete requestMock.mock.calls[0][0].configurationUtilities;
-      expect(requestMock.mock.calls[0][0]).toMatchSnapshot(`
+      expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
         Object {
           "axios": [Function],
           "connectorUsageCollector": ConnectorUsageCollector {
