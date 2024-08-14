@@ -180,6 +180,12 @@ export class ConsolePageObject extends FtrService {
     isA11yOverlayVisible: async () => {
       return await this.testSubjects.exists('codeEditorAccessibilityOverlay');
     },
+    hasSuccessBadge: async () => {
+      return await this.find.existsByCssSelector('.monaco__status_badge--success');
+    },
+    hasWarningBadge: async () => {
+      return await this.find.existsByCssSelector('.monaco__status_badge--warning');
+    },
   };
 
   public async getVisibleTextFromAceEditor(editor: WebElementWrapper) {
