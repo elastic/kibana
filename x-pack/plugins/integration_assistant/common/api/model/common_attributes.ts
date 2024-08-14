@@ -128,6 +128,10 @@ export const DataStream = z.object({
    * The documents of the dataStream.
    */
   docs: Docs,
+  /**
+   * The log type of the dataStream, e.g. ndjson.
+   */
+  logType: z.string().optional(),
 });
 
 /**
