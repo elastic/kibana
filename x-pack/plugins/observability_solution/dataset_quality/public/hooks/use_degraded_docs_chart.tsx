@@ -14,12 +14,12 @@ import { useEuiTheme } from '@elastic/eui';
 import { type DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { DEFAULT_LOGS_DATA_VIEW } from '../../common/constants';
-import { getLensAttributes } from '../components/flyout/degraded_docs_trend/lens_attributes';
 import { useCreateDataView } from './use_create_dataview';
 import { useRedirectLink } from './use_redirect_link';
 import { useDatasetQualityFlyout } from './use_dataset_quality_flyout';
 import { useKibanaContextForPlugin } from '../utils';
 import { useDatasetDetailsTelemetry } from './use_telemetry';
+import { getLensAttributes } from '../components/dataset_quality_details/overview/document_trends/degraded_docs/lens_attributes';
 
 const exploreDataInLogsExplorerText = i18n.translate(
   'xpack.datasetQuality.flyoutChartExploreDataInLogsExplorerText',

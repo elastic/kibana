@@ -3699,6 +3699,10 @@
                 "path": "x-pack/plugins/actions/server/routes/legacy/list_action_types.ts"
               },
               {
+                "plugin": "@kbn/content-management-favorites-server",
+                "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts"
+              },
+              {
                 "plugin": "share",
                 "path": "src/plugins/share/server/url_service/http/short_urls/register_get_route.ts"
               },
@@ -6361,6 +6365,14 @@
                 "path": "x-pack/plugins/actions/server/routes/get_global_execution_kpi.ts"
               },
               {
+                "plugin": "@kbn/content-management-favorites-server",
+                "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts"
+              },
+              {
+                "plugin": "@kbn/content-management-favorites-server",
+                "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts"
+              },
+              {
                 "plugin": "contentManagement",
                 "path": "src/plugins/content_management/server/rpc/routes/routes.ts"
               },
@@ -7355,10 +7367,6 @@
               {
                 "plugin": "console",
                 "path": "src/plugins/console/server/routes/api/console/proxy/index.ts"
-              },
-              {
-                "plugin": "contentManagement",
-                "path": "src/plugins/content_management/server/plugin.test.ts"
               },
               {
                 "plugin": "contentManagement",
