@@ -18,7 +18,7 @@ import {
   selectConnector,
   createNewChat,
   selectConversation,
-  assertMessageWithDefaultSystemPrompt,
+  assertMessageSent,
   typeAndSendMessage,
   assertErrorResponse,
   selectRule,
@@ -148,19 +148,19 @@ describe(
         assertNewConversation(false, 'Welcome');
         assertConnectorSelected(azureConnectorAPIPayload.name);
         typeAndSendMessage('hello');
-        assertMessageWithDefaultSystemPrompt('hello');
+        assertMessageSent('hello', true);
         assertErrorResponse();
         selectConversation('Alert summary');
         selectConnector(bedrockConnectorAPIPayload.name);
         typeAndSendMessage('goodbye');
-        assertMessageWithDefaultSystemPrompt('goodbye');
+        assertMessageSent('goodbye', true);
         assertErrorResponse();
         selectConversation('Welcome');
         assertConnectorSelected(azureConnectorAPIPayload.name);
-        assertMessageWithDefaultSystemPrompt('hello');
+        assertMessageSent('hello', true);
         selectConversation('Alert summary');
         assertConnectorSelected(bedrockConnectorAPIPayload.name);
-        assertMessageWithDefaultSystemPrompt('goodbye');
+        assertMessageSent('goodbye', true);
       });
 
       it('Only allows one conversation called "New chat" at a time', () => {
@@ -171,7 +171,7 @@ describe(
         assertConnectorSelected(azureConnectorAPIPayload.name);
         typeAndSendMessage('hello');
         // TODO fix bug with new chat and error message
-        // assertMessageWithDefaultSystemPrompt('hello');
+        // assertMessageSent('hello', true);
         assertErrorResponse();
         selectConversation('Welcome');
         createNewChat();

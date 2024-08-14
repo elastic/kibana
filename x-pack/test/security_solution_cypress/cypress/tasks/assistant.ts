@@ -26,6 +26,10 @@ import {
   SUBMIT_CHAT,
   CONVERSATION_MESSAGE_ERROR,
   CONVERSATION_TITLE_SAVE_BUTTON,
+  CLEAR_SYSTEM_PROMPT,
+  CHAT_CONTEXT_MENU,
+  CLEAR_CHAT,
+  CONFIRM_CLEAR_CHAT,
 } from '../screens/ai_assistant';
 import { TOASTER } from '../screens/alerts_detection_rules';
 
@@ -69,10 +73,22 @@ export const assertNewConversation = (isWelcome: boolean, title: string) => {
   cy.get(CONVERSATION_TITLE + ' h2').should('have.text', title);
 };
 
-export const assertMessageWithDefaultSystemPrompt = (message: string) => {
+export const assertMessageSent = (message: string, hasDefaultPrompt = false) => {
   cy.get(CONVERSATION_MESSAGE)
     .first()
-    .should('have.text', `${DEFAULT_SYSTEM_PROMPT_NON_I18N}\n${message}`);
+    .should(
+      'have.text',
+      hasDefaultPrompt ? `${DEFAULT_SYSTEM_PROMPT_NON_I18N}\n${message}` : message
+    );
+};
+export const clearSystemPrompt = () => {
+  cy.get(CLEAR_SYSTEM_PROMPT).click();
+};
+export const resetConversation = () => {
+  cy.get(CHAT_CONTEXT_MENU).click();
+  cy.get(CLEAR_CHAT).click();
+  cy.get(CONFIRM_CLEAR_CHAT).click();
+  cy.get(EMPTY_CONVO).should('exist');
 };
 export const typeAndSendMessage = (message: string) => {
   cy.get(USER_PROMPT).type(message);

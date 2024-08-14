@@ -28,3 +28,6 @@ export const CONVERSATION_SELECT = (c: string) => `[data-test-subj="conversation
 export const CLEAR_SYSTEM_PROMPT = '[data-test-subj="clearSystemPrompt"]';
 export const CONNECTOR_SELECT = (c: string) => `[data-test-subj="connector-${c}"]`;
 export const NEW_CHAT = '[data-test-subj="newChatFromOverlay"]';
+export const CHAT_CONTEXT_MENU = '[data-test-subj="chat-context-menu"]';
+export const CLEAR_CHAT = '[data-test-subj="clear-chat"]';
+export const CONFIRM_CLEAR_CHAT = '[data-test-subj="confirmModalConfirmButton"]';
