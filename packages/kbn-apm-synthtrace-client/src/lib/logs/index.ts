@@ -100,7 +100,7 @@ class Log extends Serializable<LogDocument> {
 
   logLevel(level: string) {
     this.fields['log.level'] = level;
-    this.fields['is_failure'] = level === 'error';
+    this.fields.is_failure = level === 'error';
     return this;
   }
 
@@ -121,7 +121,7 @@ class Log extends Serializable<LogDocument> {
 
   timestamp(time: number) {
     super.timestamp(time);
-    this.fields['hour_of_day'] = new Date(time).getHours();
+    this.fields.hour_of_day = new Date(time).getHours();
     return this;
   }
 }
