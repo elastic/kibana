@@ -7,13 +7,20 @@
  */
 import { LogDocument, log, generateShortId, generateLongId } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
+import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
 import { withClient } from '../lib/utils/with_client';
+import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
 
 const MORE_THAN_1024_CHARS =
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?';
 
 const scenario: Scenario<LogDocument> = async (runOptions) => {
+  const { isLogsDb } = parseLogsScenarioOpts(runOptions.scenarioOpts);
+
   return {
+    bootstrap: async ({ logsEsClient }) => {
+      if (isLogsDb) await logsEsClient.createIndexTemplate(IndexTemplateName.LogsDb);
+    },
     generate: ({ range, clients: { logsEsClient } }) => {
       const { logger } = runOptions;
 
@@ -48,7 +55,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
               const serviceName = SERVICE_NAMES[index];
 
               return log
-                .create()
+                .create({ isLogsDb })
                 .message(message.replace('<random>', generateShortId()))
                 .logLevel(level)
                 .service(serviceName)
@@ -80,7 +87,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
             .map(() => {
               const index = Math.floor(Math.random() * 3);
               return log
-                .create()
+                .create({ isLogsDb })
                 .service(SERVICE_NAMES[index])
                 .defaults({
                   'trace.id': generateShortId(),
@@ -111,7 +118,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
             .map(() => {
               const index = Math.floor(Math.random() * 3);
               return log
-                .create()
+                .create({ isLogsDb })
                 .logLevel(MESSAGE_LOG_LEVELS[index].level)
                 .service(SERVICE_NAMES[index])
                 .defaults({
@@ -144,7 +151,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
             .map(() => {
               const index = Math.floor(Math.random() * 3);
               return log
-                .create()
+                .create({ isLogsDb })
                 .logLevel(MESSAGE_LOG_LEVELS[index].level)
                 .service(SERVICE_NAMES[index])
                 .defaults({
@@ -177,7 +184,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
             .map(() => {
               const index = Math.floor(Math.random() * 3);
               return log
-                .create()
+                .create({ isLogsDb })
                 .logLevel(MESSAGE_LOG_LEVELS[index].level)
                 .service(SERVICE_NAMES[index])
                 .defaults({
@@ -209,7 +216,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
             .map(() => {
               const index = Math.floor(Math.random() * 3);
               return log
-                .create()
+                .create({ isLogsDb })
                 .message(MESSAGE_LOG_LEVELS[index].message)
                 .logLevel(MORE_THAN_1024_CHARS)
                 .service(SERVICE_NAMES[index])

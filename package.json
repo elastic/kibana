@@ -220,6 +220,8 @@
     "@kbn/console-plugin": "link:src/plugins/console",
     "@kbn/content-management-content-editor": "link:packages/content-management/content_editor",
     "@kbn/content-management-examples-plugin": "link:examples/content_management_examples",
+    "@kbn/content-management-favorites-public": "link:packages/content-management/favorites/favorites_public",
+    "@kbn/content-management-favorites-server": "link:packages/content-management/favorites/favorites_server",
     "@kbn/content-management-plugin": "link:src/plugins/content_management",
     "@kbn/content-management-tabbed-table-list-view": "link:packages/content-management/tabbed_table_list_view",
     "@kbn/content-management-table-list-view": "link:packages/content-management/table_list_view",
