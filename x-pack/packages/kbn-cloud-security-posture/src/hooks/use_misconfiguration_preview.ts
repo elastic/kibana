@@ -7,7 +7,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
-import type { Pagination } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
@@ -33,11 +32,6 @@ interface UseFindingsOptions extends FindingsBaseEsQuery {
   pageSize: number;
 }
 
-export interface FindingsGroupByNoneQuery {
-  pageIndex: Pagination['pageIndex'];
-  sort: any;
-}
-
 type LatestFindingsRequest = IKibanaSearchRequest<estypes.SearchRequest>;
 type LatestFindingsResponse = IKibanaSearchResponse<
   estypes.SearchResponse<CspFinding, FindingsAggs>
@@ -56,7 +50,6 @@ export const getFindingsQuery = (
 
   return {
     index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
-    sort: getMultiFieldsSort(sort),
     size: MAX_FINDINGS_TO_LOAD,
     aggs: getFindingsCountAggQueryMisconfigurationPreview(),
     ignore_unavailable: false,
@@ -82,44 +75,6 @@ export const getFindingsQuery = (
   };
 };
 
-const getMultiFieldsSort = (sort: string[][]) => {
-  return sort.map(([id, direction]) => {
-    return {
-      ...getSortField({ field: id, direction }),
-    };
-  });
-};
-
-/**
- * By default, ES will sort keyword fields in case-sensitive format, the
- * following fields are required to have a case-insensitive sorting.
- */
-const fieldsRequiredSortingByPainlessScript = [
-  'rule.section',
-  'resource.name',
-  'resource.sub_type',
-];
-
-/**
- * Generates Painless sorting if the given field is matched or returns default sorting
- * This painless script will sort the field in case-insensitive manner
- */
-const getSortField = ({ field, direction }: { field: string; direction: string }) => {
-  if (fieldsRequiredSortingByPainlessScript.includes(field)) {
-    return {
-      _script: {
-        type: 'string',
-        order: direction,
-        script: {
-          source: `doc["${field}"].value.toLowerCase()`,
-          lang: 'painless',
-        },
-      },
-    };
-  }
-  return { [field]: direction };
-};
-
 export const useMisconfigurationPreview = (options: UseFindingsOptions) => {
   const {
     data,
@@ -137,7 +92,7 @@ export const useMisconfigurationPreview = (options: UseFindingsOptions) => {
           params: getFindingsQuery(options, rulesStates!, pageParam),
         })
       );
-      if (!aggregations) throw new Error('expected aggregations to be defined'); // Failed here
+      if (!aggregations) throw new Error('expected aggregations to be defined');
 
       return {
         count: getMisconfigurationAggregationCount(
