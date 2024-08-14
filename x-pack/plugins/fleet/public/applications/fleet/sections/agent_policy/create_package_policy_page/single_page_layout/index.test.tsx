@@ -780,6 +780,7 @@ describe('When on the package policy create page', () => {
       beforeEach(async () => {
         (useConfig as jest.MockedFunction<any>).mockReturnValue({
           agentless: {
+            enabled: true,
             api: {
               url: 'http://agentless-api-url',
             },
