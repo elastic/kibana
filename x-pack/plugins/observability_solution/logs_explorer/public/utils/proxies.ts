@@ -33,4 +33,4 @@ export const createPropertyGetProxy = <Target extends object, Key extends keyof 
 const hasKey = <T extends object, K extends keyof T>(
   obj: T,
   key: string | number | symbol
-): key is K => obj.hasOwnProperty(key);
+): key is K => Object.hasOwn(obj, key);

@@ -63,6 +63,7 @@ export type PostDeletePackagePoliciesResponse = Array<{
   package?: PackagePolicyPackage;
   policy_id?: string;
   policy_ids?: string[];
+  output_id?: string;
   // Support generic errors
   statusCode?: number;
   body?: {

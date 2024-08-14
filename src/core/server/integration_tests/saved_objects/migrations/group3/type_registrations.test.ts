@@ -60,6 +60,7 @@ const previouslyRegisteredTypes = [
   'event_loop_delays_daily',
   'exception-list',
   'exception-list-agnostic',
+  'favorites',
   'file',
   'fileShare',
   'file-upload-telemetry',

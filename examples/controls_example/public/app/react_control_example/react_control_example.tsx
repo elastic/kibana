@@ -99,6 +99,9 @@ export const ReactControlExample = ({
   const saveNotification$ = useMemo(() => {
     return new Subject<void>();
   }, []);
+  const reload$ = useMemo(() => {
+    return new Subject<void>();
+  }, []);
   const [dataLoading, timeRange, viewMode] = useBatchedPublishingSubjects(
     dataLoading$,
     timeRange$,
@@ -138,6 +141,7 @@ export const ReactControlExample = ({
       },
       lastUsedDataViewId: new BehaviorSubject<string>(WEB_LOGS_DATA_VIEW_ID),
       saveNotification$,
+      reload$,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -380,6 +384,9 @@ export const ReactControlExample = ({
             from: start,
             to: end,
           });
+        }}
+        onRefresh={() => {
+          reload$.next();
         }}
       />
       <EuiSpacer size="m" />
