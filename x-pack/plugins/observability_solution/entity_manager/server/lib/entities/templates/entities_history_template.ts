@@ -21,7 +21,7 @@ import {
 } from '../../../../common/constants_entities';
 import { getCustomHistoryTemplateComponents } from '../../../templates/components/helpers';
 
-export const getEntitiesHistoryIndexTemplateConfig = (
+export const generateEntitiesHistoryIndexTemplateConfig = (
   definition: EntityDefinition
 ): IndicesPutIndexTemplateRequest => ({
   name: generateHistoryIndexTemplateId(definition),

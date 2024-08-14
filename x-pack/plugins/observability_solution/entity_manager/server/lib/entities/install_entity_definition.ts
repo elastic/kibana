@@ -39,8 +39,8 @@ import {
 } from './stop_and_delete_transform';
 import { isBackfillEnabled } from './helpers/is_backfill_enabled';
 import { deleteTemplate, upsertTemplate } from '../manage_index_templates';
-import { getEntitiesLatestIndexTemplateConfig } from './templates/entities_latest_template';
-import { getEntitiesHistoryIndexTemplateConfig } from './templates/entities_history_template';
+import { generateEntitiesLatestIndexTemplateConfig } from './templates/entities_latest_template';
+import { generateEntitiesHistoryIndexTemplateConfig } from './templates/entities_history_template';
 import { EntityIdConflict } from './errors/entity_id_conflict_error';
 import { EntityDefinitionNotFound } from './errors/entity_not_found';
 import { EntityDefinitionWithState } from './types';
@@ -196,12 +196,12 @@ async function install({
     upsertTemplate({
       esClient,
       logger,
-      template: getEntitiesHistoryIndexTemplateConfig(definition),
+      template: generateEntitiesHistoryIndexTemplateConfig(definition),
     }),
     upsertTemplate({
       esClient,
       logger,
-      template: getEntitiesLatestIndexTemplateConfig(definition),
+      template: generateEntitiesLatestIndexTemplateConfig(definition),
     }),
   ]).then(throwIfRejected);
 

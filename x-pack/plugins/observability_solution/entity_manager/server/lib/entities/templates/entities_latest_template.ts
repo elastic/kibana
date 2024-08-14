@@ -21,7 +21,7 @@ import {
 } from '../../../../common/constants_entities';
 import { getCustomLatestTemplateComponents } from '../../../templates/components/helpers';
 
-export const getEntitiesLatestIndexTemplateConfig = (
+export const generateEntitiesLatestIndexTemplateConfig = (
   definition: EntityDefinition
 ): IndicesPutIndexTemplateRequest => ({
   name: generateLatestIndexTemplateId(definition),
