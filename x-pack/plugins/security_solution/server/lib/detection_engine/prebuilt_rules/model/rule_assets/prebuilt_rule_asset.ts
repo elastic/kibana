@@ -7,11 +7,11 @@
 
 import * as z from '@kbn/zod';
 import type { IsEqual } from 'type-fest';
+import type { TypeSpecificCreateProps } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import {
   RuleSignatureId,
   RuleVersion,
   BaseCreateProps,
-  TypeSpecificCreateProps,
   EqlRuleCreateFields,
   EsqlRuleCreateFields,
   MachineLearningRuleCreateFields,
