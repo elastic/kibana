@@ -256,7 +256,7 @@ const renderContextMenu = (items: AlertTableContextMenuItem[]) => {
   );
 };
 
-describe('use investigate in timeline hook', () => {
+describe('useInvestigateInTimeline', () => {
   let mockSearchStrategyClient = {
     search: jest.fn().mockReturnValue(of({ data: getNonEcsDataWithRuleType('query') })),
   };
@@ -298,9 +298,9 @@ describe('use investigate in timeline hook', () => {
     });
   });
 
-  describe('investigate a alert with timeline template', () => {
+  describe('investigate an alert with timeline template', () => {
     describe.each(RULE_TYPES_TO_BE_TESTED)('Rule type : %s', (ruleType: string) => {
-      it(`columns should copied over`, async () => {
+      it('should copy columns over from template', async () => {
         mockSearchStrategyClient = {
           search: jest.fn().mockReturnValue(of({ data: getNonEcsDataWithRuleType(ruleType) })),
         };
@@ -345,7 +345,7 @@ describe('use investigate in timeline hook', () => {
           );
         });
       });
-      it(`data providers should copied over`, async () => {
+      it('should copy dataProviders over from template', async () => {
         mockSearchStrategyClient = {
           search: jest.fn().mockReturnValue(of({ data: getNonEcsDataWithRuleType(ruleType) })),
         };
