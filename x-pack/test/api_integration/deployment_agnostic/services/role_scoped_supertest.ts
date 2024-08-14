@@ -21,9 +21,9 @@ export interface RequestHeadersOptions {
 
 export class SupertestWithRoleScope {
   private roleAuthc: RoleCredentials | null;
-  private supertestWithoutAuth: SupertestWithoutAuthProviderType;
+  private readonly supertestWithoutAuth: SupertestWithoutAuthProviderType;
   private samlAuth: SamlAuthProviderType;
-  private options: RequestHeadersOptions;
+  private readonly options: RequestHeadersOptions;
   private destroyed = false;
 
   constructor(
