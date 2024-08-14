@@ -286,7 +286,7 @@ export function getPolicyFields(policyName: string) {
 }
 
 export interface SuggestOptions {
-  ctx?: EditorContext;
+  triggerCharacter?: string;
   callbacks?: ESQLCallbacks;
 }
 
@@ -301,9 +301,10 @@ export const setup = async (caret = '/') => {
     const pos = query.indexOf(caret);
     if (pos < 0) throw new Error(`User cursor/caret "${caret}" not found in query: ${query}`);
     const querySansCaret = query.slice(0, pos) + query.slice(pos + 1);
-    const ctx =
-      opts.ctx ??
-      (pos > 0 ? { triggerKind: 1, triggerCharacter: query[pos - 1] } : { triggerKind: 0 });
+    const ctx: EditorContext = opts.triggerCharacter
+      ? { triggerKind: 1, triggerCharacter: opts.triggerCharacter }
+      : { triggerKind: 0 };
+
     return await autocomplete.suggest(
       querySansCaret,
       pos,

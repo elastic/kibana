@@ -94,7 +94,7 @@ export class UiSettingsService
     registerInternalRoutes(router);
 
     // Register public routes by default unless the publicApiEnabled config setting is set to false
-    if (!config.hasOwnProperty('publicApiEnabled') || config.publicApiEnabled === true) {
+    if (!Object.hasOwn(config, 'publicApiEnabled') || config.publicApiEnabled === true) {
       registerRoutes(router);
     }
 

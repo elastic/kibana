@@ -10,7 +10,7 @@ import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-ty
 import type { Pagination } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  CSP_LATEST_FINDINGS_DATA_VIEW,
+  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
   LATEST_FINDINGS_RETENTION_POLICY,
   MAX_FINDINGS_TO_LOAD,
   CspBenchmarkRulesStates,
@@ -55,7 +55,7 @@ export const getFindingsQuery = (
   const mutedRulesFilterQuery = buildMutedRulesFilter(rulesStates);
 
   return {
-    index: CSP_LATEST_FINDINGS_DATA_VIEW,
+    index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
     sort: getMultiFieldsSort(sort),
     size: MAX_FINDINGS_TO_LOAD,
     aggs: getFindingsCountAggQueryMisconfigurationPreview(),

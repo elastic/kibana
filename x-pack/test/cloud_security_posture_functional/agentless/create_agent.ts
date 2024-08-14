@@ -31,11 +31,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     before(async () => {
       cisIntegration = pageObjects.cisAddIntegration;
-      mockApiServer = await mockAgentlessApiService.listen(8089); // Start the usage api mock server on port 8081
+      mockApiServer = mockAgentlessApiService.listen(8089); // Start the usage api mock server on port 8089
     });
 
     after(async () => {
-      await await pageObjects.cspSecurity.logout();
+      await pageObjects.cspSecurity.logout();
       mockApiServer.close();
     });
 

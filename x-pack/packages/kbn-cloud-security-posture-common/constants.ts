@@ -6,7 +6,11 @@
  */
 export const KSPM_POLICY_TEMPLATE = 'kspm';
 export const CSPM_POLICY_TEMPLATE = 'cspm';
-export const CSP_LATEST_FINDINGS_DATA_VIEW = 'logs-cloud_security_posture.findings_latest-*';
+export const CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN =
+  'logs-cloud_security_posture.findings_latest-default';
+export const CDR_LATEST_THIRD_PARTY_MISCONFIGURATIONS_INDEX_PATTERN =
+  'logs-*_latest_misconfigurations_cdr';
+export const CDR_MISCONFIGURATIONS_INDEX_PATTERN = `${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN},${CDR_LATEST_THIRD_PARTY_MISCONFIGURATIONS_INDEX_PATTERN}`;
 export const LATEST_FINDINGS_RETENTION_POLICY = '26h';
 export const MAX_FINDINGS_TO_LOAD = 500;
 export const CSP_GET_BENCHMARK_RULES_STATE_ROUTE_PATH =

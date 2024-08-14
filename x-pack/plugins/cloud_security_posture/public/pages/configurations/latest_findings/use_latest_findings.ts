@@ -14,7 +14,7 @@ import { EsHitRecord } from '@kbn/discover-utils/types';
 import {
   buildMutedRulesFilter,
   showErrorToast,
-  CSP_LATEST_FINDINGS_DATA_VIEW,
+  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
   LATEST_FINDINGS_RETENTION_POLICY,
   MAX_FINDINGS_TO_LOAD,
   CspBenchmarkRulesStates,
@@ -52,7 +52,7 @@ export const getFindingsQuery = (
   const mutedRulesFilterQuery = buildMutedRulesFilter(rulesStates);
 
   return {
-    index: CSP_LATEST_FINDINGS_DATA_VIEW,
+    index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
     sort: getMultiFieldsSort(sort),
     size: MAX_FINDINGS_TO_LOAD,
     aggs: getFindingsCountAggQuery(),

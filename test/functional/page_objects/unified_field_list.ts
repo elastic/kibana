@@ -36,6 +36,7 @@ export class UnifiedFieldListPageObject extends FtrService {
   }
 
   public async getSidebarAriaDescription(): Promise<string> {
+    await this.header.waitUntilLoadingHasFinished();
     return (
       (await (
         await this.testSubjects.find('fieldListGrouped__ariaDescription')
