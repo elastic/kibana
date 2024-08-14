@@ -113,9 +113,9 @@ export interface SelectedDataView {
    */
   runtimeMappings: SourcererDataView['runtimeMappings'];
   /**
-   * @deprecated use sourcererDataView.title or sourcererDataView.matchedIndices
-   * all selected patterns from SourcererScope['selectedPatterns'] */
-  selectedPatterns: SourcererScope['selectedPatterns'];
+   * Computed from dataViewSpec title
+   */
+  selectedPatterns: string[];
   /**
    * @deprecated use sourcererDataView.title or sourcererDataView.matchedIndices
    * active patterns when dataViewId == null
