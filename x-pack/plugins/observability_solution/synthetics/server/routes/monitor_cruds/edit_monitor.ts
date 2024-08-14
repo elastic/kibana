@@ -252,7 +252,6 @@ export const syncEditedMonitor = async ({
           decryptedPreviousMonitor,
         },
       ],
-      routeContext,
       allPrivateLocations,
       spaceId
     );

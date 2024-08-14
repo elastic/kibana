@@ -25,7 +25,7 @@ function tableResponseHandler(table, dimensions) {
       const splitValue = row[splitColumn.id];
       const formattedValue = splitColumnFormatter.convert(splitValue);
 
-      if (!splitMap.hasOwnProperty(splitValue)) {
+      if (!Object.hasOwn(splitMap, splitValue)) {
         splitMap[splitValue] = splitIndex++;
         const tableGroup = {
           $parent: converted,
