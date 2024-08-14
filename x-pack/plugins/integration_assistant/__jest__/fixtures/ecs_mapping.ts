@@ -441,6 +441,7 @@ export const ecsTestState = {
   ecs: 'teststring',
   exAnswer: 'testanswer',
   finalized: false,
+  chunkSize: 30,
   currentPipeline: { test: 'testpipeline' },
   duplicateFields: [],
   missingKeys: [],
@@ -451,8 +452,8 @@ export const ecsTestState = {
   currentMapping: { test1: 'test1' },
   lastExecutedChain: 'testchain',
   rawSamples: ['{"test1": "test1"}'],
-  samples: ['{ "test1": "test1" }'],
+  prefixedSamples: ['{ "test1": "test1" }'],
   packageName: 'testpackage',
   dataStreamName: 'testDataStream',
-  formattedSamples: '{"test1": "test1"}',
+  combinedSamples: '{"test1": "test1"}',
 };
