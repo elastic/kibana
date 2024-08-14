@@ -31,6 +31,7 @@ export const fieldTypes = [
   'counter_long',
   'counter_double',
   'unsupported',
+  'date_nanos',
 ] as const;
 
 export type FieldType = (typeof fieldTypes)[number];

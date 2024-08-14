@@ -45,6 +45,7 @@ export const DashboardListing = ({
     savedObjectsTagging,
     coreContext: { executionContext },
     userProfile,
+    dashboardFavorites,
   } = pluginServices.getServices();
 
   useExecutionContext(executionContext, {
@@ -84,6 +85,7 @@ export const DashboardListing = ({
           },
           savedObjectsTagging: savedObjectsTaggingFakePlugin,
           FormattedRelative,
+          favorites: dashboardFavorites,
         }}
       >
         <TableListView<DashboardSavedObjectUserContent> {...tableListViewTableProps}>
