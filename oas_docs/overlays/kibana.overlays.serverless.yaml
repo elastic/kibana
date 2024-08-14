@@ -42,7 +42,18 @@ actions:
   - target: "$.paths['/api/observability_ai_assistant/chat/complete']['post']"
     description: Add operation identifier
     update:
-      operationId: observabilityAiAssistantChatComplete  
+      operationId: observabilityAiAssistantChatComplete
+  # Add missing tags
+  - target: "$.paths['/api/observability_ai_assistant/chat/complete']['post']"
+    description: Add operation tag
+    update:
+      tags:
+        - observabilityAiAssistant
+  - target: '$.tags'
+    description: Add displayName
+    update:
+      - name: observabilityAiAssistant
+        x-displayName: "Elastic AI Assistant for Observability"
   # Add some tag descriptions and displayNames
   - target: '$.tags[?(@.name=="connectors")]'
     description: Change tag description and displayName
@@ -76,7 +87,3 @@ actions:
       x-displayName: "System"
       description: >
         Get information about the system status, resource usage, and installed plugins.
-  - target: '$.tags[?(@.name=="api_other")]'
-    description: Change displayName
-    update:
-      x-displayName: "Elastic AI Assistant for Observability"

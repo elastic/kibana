@@ -22,6 +22,7 @@ const { REPO_ROOT } = require('@kbn/repo-info');
       // Observability Solution
       `${REPO_ROOT}/x-pack/plugins/observability_solution/apm/docs/openapi/apm.yaml`,
       `${REPO_ROOT}/x-pack/plugins/observability_solution/slo/docs/openapi/slo/bundled.yaml`,
+      `${REPO_ROOT}/x-pack/plugins/observability_solution/observability_ai_assistant/docs/openapi/api.yaml`,
 
       // Security solution
     ],
