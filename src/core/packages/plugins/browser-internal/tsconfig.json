@@ -40,7 +40,7 @@
     "@kbn/core-security-browser-mocks",
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/core-di-common",
-    "@kbn/core-di-common-internal",
+    "@kbn/core-di-mocks",
   ],
   "exclude": [
     "target/**/*",
