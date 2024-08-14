@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { MappingTypeMapping, Metadata } from '@elastic/elasticsearch/lib/api/types';
+import {
+  IndicesGetMappingResponse,
+  IndicesStatsResponse,
+  Metadata,
+} from '@elastic/elasticsearch/lib/api/types';
 
 export interface DatasetIndexPattern {
   pattern: string;
@@ -19,19 +23,26 @@ export interface IndexBasicInfo {
   name: string;
   latestIndex?: string;
   meta?: Metadata;
-  mapping?: MappingTypeMapping;
+  mapping?: IndicesGetMappingResponse;
   namespace?: string;
 }
 
-export interface DataStreamStatsByNamespace {
+export interface DataStreamStatsPerNamespace {
   patternName: string;
-  namespace: string;
+  namespace?: string;
   totalDocuments: number;
   totalSize: number;
   totalIndices: number;
   failureStoreDocuments: number;
   failureStoreIndices: number;
   meta?: Metadata;
+  mapping?: IndicesGetMappingResponse;
+  stats: IndicesStatsResponse;
+}
+
+export interface DataStreamFieldStatsPerNamespace extends DataStreamStatsPerNamespace {
+  uniqueFields: string[];
+  fieldsCount: Record<string, number>;
 }
 
 export interface DataStreamStats {
@@ -42,6 +53,8 @@ export interface DataStreamStats {
   failureStoreIndices: number;
   totalSize: number;
   totalIndices: number;
+  totalFields: number;
+  fieldsCount: Record<string, number>;
   managedBy: string[];
   packageName: string[];
   beat: string[];
@@ -53,6 +66,8 @@ export interface DataTelemetryEvent {
   failure_store_doc_count: number;
   index_count: number;
   namespace_count: number;
+  field_count: number;
+  field_existence: Record<string, number>;
   size_in_bytes: number;
   managed_by: string[];
   package_name: string[];

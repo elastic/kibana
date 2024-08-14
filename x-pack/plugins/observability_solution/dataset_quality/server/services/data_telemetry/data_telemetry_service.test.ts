@@ -5,19 +5,23 @@
  * 2.0.
  */
 
+import { cloneDeep, unset } from 'lodash';
+
+import { set } from '@kbn/safer-lodash-set';
 import { ElasticsearchClient, type Logger } from '@kbn/core/server';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import { TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 
-import { DataTelemetryService } from './data_telemetry_service';
+import { DataTelemetryEvent } from './types';
 import {
   STARTUP_DELAY,
   TELEMETRY_INTERVAL,
   BREATHE_DELAY_MEDIUM,
   MAX_STREAMS_TO_REPORT,
 } from './constants';
+import { DataTelemetryService } from './data_telemetry_service';
 
-// Mock the constants module
+// Mock the constants module to speed up and simplify the tests
 jest.mock('./constants', () => ({
   ...jest.requireActual('./constants'),
   STARTUP_DELAY: 1000,
@@ -52,210 +56,271 @@ describe('DataTelemetryService', () => {
   let mockTelemetryStart: jest.Mocked<TelemetryPluginStart>;
   let mockLogger: jest.Mocked<Logger>;
 
-  beforeEach(async () => {
-    mockEsClient = {
-      indices: {
-        stats: jest.fn().mockImplementation((params) => {
-          switch (params.index) {
-            case 'logs-postgresql.log-default':
-              return MOCK_POSTGRES_DEFAULT_STATS;
-            case 'logs-postgresql.log-non-default':
-              return MOCK_POSTGRES_NON_DEFAULT_STATS;
-            case 'logs-active-mq.fleet':
-              return MOCK_ACTIVE_MQ_DEFAULT_STATS;
-            default:
-              return { _all: {} };
-          }
-        }),
-        getDataStream: jest.fn().mockResolvedValue({
-          data_streams: [
-            ...MOCK_POSTGRES_DATA_STREAMS,
-            ...MOCK_SYNTH_DATA_STREAMS,
-            ...MOCK_ACTIVE_MQ_FLEET_DATA_STREAMS,
-          ],
-        }),
-        get: jest.fn().mockResolvedValue(MOCK_INDICES),
-        getMapping: jest.fn().mockImplementation((params) => {
-          const genericMapping = MOCK_APACHE_GENERIC_INDEX_MAPPING;
-          switch (params.index) {
-            case '.ds-logs-postgresql.log-default-2024.08.31-000002':
-              return MOCK_POSTGRES_DEFAULT_MAPPINGS;
-            case '.ds-logs-postgresql.log-non-default-2024.07.31-000001':
-              return MOCK_POSTGRES_NON_DEFAULT_MAPPINGS;
-            case '.ds-logs-active-mq.fleet-2024.07.31-000001':
-              return MOCK_ACTIVE_MQ_DEFAULT_MAPPINGS;
-            default:
-              return genericMapping;
-          }
-        }),
-      },
-      info: jest.fn().mockResolvedValue({}),
-      transport: {
-        request: jest.fn().mockImplementation((params) => {
-          if (
-            params.path?.includes('_stats') &&
-            params.path?.includes('logs-active-mq') &&
-            params?.querystring?.failure_store === 'only'
-          ) {
-            return MOCK_ACTIVE_MQ_FAILURE_STATS;
-          }
+  describe('Docs Info', () => {
+    beforeEach(async () => {
+      const mocks = setupMocks();
+      mockEsClient = mocks.mockEsClient;
+      mockLogger = mocks.mockLogger;
+      mockAnalyticsSetup = mocks.mockAnalyticsSetup;
+      mockTelemetryStart = mocks.mockTelemetryStart;
 
-          return { _all: {} };
-        }),
-      },
-    } as unknown as jest.Mocked<ElasticsearchClient>;
+      service = new DataTelemetryService(mockLogger);
+      service.setup(mockAnalyticsSetup);
+      await service.start(mockTelemetryStart, {
+        elasticsearch: { client: { asInternalUser: mockEsClient } },
+      } as any);
 
-    mockLogger = {
-      debug: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-    } as unknown as jest.Mocked<Logger>;
-
-    mockAnalyticsSetup = {
-      getTelemetryUrl: jest.fn().mockResolvedValue(new URL('https://telemetry.elastic.co')),
-    } as unknown as jest.Mocked<AnalyticsServiceSetup>;
-
-    mockTelemetryStart = {
-      getIsOptedIn: jest.fn().mockResolvedValue(true),
-    } as unknown as jest.Mocked<TelemetryPluginStart>;
-
-    service = new DataTelemetryService(mockLogger);
-    service.setup(mockAnalyticsSetup);
-    await service.start(mockTelemetryStart, {
-      elasticsearch: { client: { asInternalUser: mockEsClient } },
-    } as any);
-
-    jest.spyOn(service as any, 'isTelemetryOptedIn').mockResolvedValue(true);
-  });
-
-  afterEach(() => {
-    jest.clearAllTimers();
-    jest.clearAllMocks();
-  });
-
-  it(
-    'should collect and send telemetry after startup and every interval',
-    async () => {
-      const collectAndSendSpy = jest.spyOn(service as any, 'collectAndSend');
-
-      await new Promise((resolve) => setTimeout(resolve, STARTUP_DELAY));
-      expect(collectAndSendSpy).toHaveBeenCalledTimes(1);
-
-      await new Promise((resolve) => setTimeout(resolve, BREATHE_DELAY_MEDIUM * 25));
-      expect(mockEsClient.indices.getMapping).toHaveBeenCalledTimes(4);
-
-      await new Promise((resolve) => setTimeout(resolve, TELEMETRY_INTERVAL));
-      expect(collectAndSendSpy).toHaveBeenCalledTimes(2);
-
-      await new Promise((resolve) => setTimeout(resolve, BREATHE_DELAY_MEDIUM * 25));
-      expect(mockEsClient.indices.getMapping).toHaveBeenCalledTimes(8);
-
-      // getMapping should not be called for non logs data streams e.g. logs-synth
-      MOCK_SYNTH_DATA_STREAMS[0].indices.forEach((index) => {
-        expect(mockEsClient.indices.getMapping).not.toHaveBeenCalledWith({
-          index: index.index_name,
-        });
-      });
-    },
-    TEST_TIMEOUT
-  );
-
-  it(
-    'should stop collecting and sending telemetry if stopped',
-    async () => {
-      const collectAndSendSpy = jest.spyOn(service as any, 'collectAndSend');
-
-      await new Promise((resolve) => setTimeout(resolve, STARTUP_DELAY));
-      expect(collectAndSendSpy).toHaveBeenCalledTimes(1);
-
-      service.stop();
-
-      await new Promise((resolve) => setTimeout(resolve, TELEMETRY_INTERVAL));
-      await new Promise((resolve) => setTimeout(resolve, BREATHE_DELAY_MEDIUM));
-      expect(collectAndSendSpy).toHaveBeenCalledTimes(1);
-    },
-    TEST_TIMEOUT
-  );
-
-  it(
-    'should not collect data if telemetry is not opted in',
-    async () => {
-      jest.spyOn(service as any, 'isTelemetryOptedIn').mockResolvedValue(false);
-
-      const collectAndSendSpy = jest.spyOn(service as any, 'collectAndSend');
-
-      await new Promise((resolve) => setTimeout(resolve, STARTUP_DELAY));
-      expect(collectAndSendSpy).not.toHaveBeenCalled();
-
-      await new Promise((resolve) => setTimeout(resolve, TELEMETRY_INTERVAL));
-      expect(collectAndSendSpy).not.toHaveBeenCalled();
-
-      // Assert that logger.debug is called with appropriate message
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        '[Logs Data Telemetry] Telemetry is not opted-in.'
-      );
-    },
-    TEST_TIMEOUT
-  );
-
-  it(
-    'should not collect if number of data streams exceed MAX_STREAMS_TO_REPORT',
-    async () => {
-      (mockEsClient.indices.getDataStream as unknown as jest.Mock).mockResolvedValue({
-        data_streams: Array.from({ length: MAX_STREAMS_TO_REPORT + 1 }, (_, i) => ({
-          name: `logs-postgresql.log-default-${i}`,
-          indices: [
-            {
-              index_name: `.ds-logs-postgresql.log-default-${i}-000001`,
-            },
-          ],
-          _meta: {
-            managed: true,
-            description: 'default logs template installed by x-pack',
-          },
-        })),
-      });
-
-      await new Promise((resolve) => setTimeout(resolve, STARTUP_DELAY));
-      await new Promise((resolve) => setTimeout(resolve, TELEMETRY_INTERVAL));
-      await new Promise((resolve) =>
-        setTimeout(resolve, 2 * (MAX_STREAMS_TO_REPORT + 1) * BREATHE_DELAY_MEDIUM)
-      );
-
-      expect(mockEsClient.indices.getMapping).not.toHaveBeenCalled();
-    },
-    TEST_TIMEOUT
-  );
-
-  it(
-    'creates and sends the telemetry events',
-    async () => {
       jest.spyOn(service as any, 'isTelemetryOptedIn').mockResolvedValue(true);
+    });
 
-      const reportEventsSpy = jest.spyOn(service as any, 'reportEvents');
+    afterEach(() => {
+      jest.clearAllTimers();
+      jest.clearAllMocks();
+    });
 
-      await new Promise((resolve) => setTimeout(resolve, STARTUP_DELAY));
-      await new Promise((resolve) => setTimeout(resolve, TELEMETRY_INTERVAL));
+    it(
+      'should collect and send telemetry after startup and every interval',
+      async () => {
+        const collectAndSendSpy = jest.spyOn(service as any, 'collectAndSend');
 
-      expect(reportEventsSpy).toHaveBeenCalledTimes(1);
-      expect(reportEventsSpy.mock?.lastCall?.[0]).toEqual([
-        expect.objectContaining({
-          doc_count: 4000 + 500 + 200,
-          failure_store_doc_count: 300,
-          index_count: 2 + 1 + 1,
-          failure_store_index_count: 1,
-          namespace_count: 1 + 1,
-          size_in_bytes: 10089898 + 800000 + 500000,
-          pattern_name: 'test',
-          managed_by: ['fleet'],
-          package_name: ['activemq'],
-          beat: [],
-        }),
-      ]);
-    },
-    TEST_TIMEOUT
-  );
+        await new Promise((resolve) => setTimeout(resolve, STARTUP_DELAY));
+        expect(collectAndSendSpy).toHaveBeenCalledTimes(1);
+
+        await new Promise((resolve) => setTimeout(resolve, BREATHE_DELAY_MEDIUM * 25));
+        expect(mockEsClient.indices.getMapping).toHaveBeenCalledTimes(4);
+
+        await new Promise((resolve) => setTimeout(resolve, TELEMETRY_INTERVAL));
+        expect(collectAndSendSpy).toHaveBeenCalledTimes(2);
+
+        await new Promise((resolve) => setTimeout(resolve, BREATHE_DELAY_MEDIUM * 25));
+        expect(mockEsClient.indices.getMapping).toHaveBeenCalledTimes(8);
+
+        // getMapping should not be called for non logs data streams e.g. logs-synth
+        MOCK_SYNTH_DATA_STREAMS[0].indices.forEach((index) => {
+          expect(mockEsClient.indices.getMapping).not.toHaveBeenCalledWith({
+            index: index.index_name,
+          });
+        });
+      },
+      TEST_TIMEOUT
+    );
+
+    it(
+      'should stop collecting and sending telemetry if stopped',
+      async () => {
+        const collectAndSendSpy = jest.spyOn(service as any, 'collectAndSend');
+
+        await new Promise((resolve) => setTimeout(resolve, STARTUP_DELAY));
+        expect(collectAndSendSpy).toHaveBeenCalledTimes(1);
+
+        service.stop();
+
+        await new Promise((resolve) => setTimeout(resolve, TELEMETRY_INTERVAL));
+        await new Promise((resolve) => setTimeout(resolve, BREATHE_DELAY_MEDIUM));
+        expect(collectAndSendSpy).toHaveBeenCalledTimes(1);
+      },
+      TEST_TIMEOUT
+    );
+
+    it(
+      'should not collect data if telemetry is not opted in',
+      async () => {
+        jest.spyOn(service as any, 'isTelemetryOptedIn').mockResolvedValue(false);
+
+        const collectAndSendSpy = jest.spyOn(service as any, 'collectAndSend');
+
+        await new Promise((resolve) => setTimeout(resolve, STARTUP_DELAY));
+        expect(collectAndSendSpy).not.toHaveBeenCalled();
+
+        await new Promise((resolve) => setTimeout(resolve, TELEMETRY_INTERVAL));
+        expect(collectAndSendSpy).not.toHaveBeenCalled();
+
+        // Assert that logger.debug is called with appropriate message
+        expect(mockLogger.debug).toHaveBeenCalledWith(
+          '[Logs Data Telemetry] Telemetry is not opted-in.'
+        );
+      },
+      TEST_TIMEOUT
+    );
+
+    it(
+      'should not collect if number of data streams exceed MAX_STREAMS_TO_REPORT',
+      async () => {
+        (mockEsClient.indices.getDataStream as unknown as jest.Mock).mockResolvedValue({
+          data_streams: Array.from({ length: MAX_STREAMS_TO_REPORT + 1 }, (_, i) => ({
+            name: `logs-postgresql.log-default-${i}`,
+            indices: [
+              {
+                index_name: `.ds-logs-postgresql.log-default-${i}-000001`,
+              },
+            ],
+            _meta: {
+              managed: true,
+              description: 'default logs template installed by x-pack',
+            },
+          })),
+        });
+
+        await new Promise((resolve) => setTimeout(resolve, STARTUP_DELAY));
+        await new Promise((resolve) => setTimeout(resolve, TELEMETRY_INTERVAL));
+        await new Promise((resolve) =>
+          setTimeout(resolve, 2 * (MAX_STREAMS_TO_REPORT + 1) * BREATHE_DELAY_MEDIUM)
+        );
+
+        expect(mockEsClient.indices.getMapping).not.toHaveBeenCalled();
+      },
+      TEST_TIMEOUT
+    );
+
+    it(
+      'creates and sends the telemetry events',
+      async () => {
+        jest.spyOn(service as any, 'isTelemetryOptedIn').mockResolvedValue(true);
+
+        const reportEventsSpy = jest.spyOn(service as any, 'reportEvents');
+
+        await new Promise((resolve) => setTimeout(resolve, STARTUP_DELAY));
+        await new Promise((resolve) => setTimeout(resolve, TELEMETRY_INTERVAL));
+
+        expect(reportEventsSpy).toHaveBeenCalledTimes(1);
+        expect(reportEventsSpy.mock?.lastCall?.[0]).toEqual([
+          expect.objectContaining({
+            doc_count: 4000 + 500 + 200,
+            failure_store_doc_count: 300,
+            index_count: 2 + 1 + 1,
+            failure_store_index_count: 1,
+            namespace_count: 1 + 1,
+            size_in_bytes: 10089898 + 800000 + 500000,
+            pattern_name: 'test',
+            managed_by: ['fleet'],
+            package_name: ['activemq'],
+            beat: [],
+          }),
+        ]);
+      },
+      TEST_TIMEOUT
+    );
+  });
+
+  describe('Fields Info', () => {
+    beforeEach(async () => {
+      const mocks = setupMocks();
+      mockEsClient = mocks.mockEsClient;
+      mockLogger = mocks.mockLogger;
+      mockAnalyticsSetup = mocks.mockAnalyticsSetup;
+      mockTelemetryStart = mocks.mockTelemetryStart;
+
+      service = new DataTelemetryService(mockLogger);
+      service.setup(mockAnalyticsSetup);
+      await service.start(mockTelemetryStart, {
+        elasticsearch: { client: { asInternalUser: mockEsClient } },
+      } as any);
+
+      jest.spyOn(service as any, 'isTelemetryOptedIn').mockResolvedValue(true);
+    });
+
+    afterEach(() => {
+      jest.clearAllTimers();
+      jest.clearAllMocks();
+    });
+
+    it(
+      'should correctly calculate total fields and count of resource fields',
+      async () => {
+        jest.spyOn(service as any, 'isTelemetryOptedIn').mockResolvedValue(true);
+
+        const reportEventsSpy = jest.spyOn(service as any, 'reportEvents');
+
+        await new Promise((resolve) => setTimeout(resolve, STARTUP_DELAY));
+        await new Promise((resolve) => setTimeout(resolve, TELEMETRY_INTERVAL));
+
+        expect(reportEventsSpy).toHaveBeenCalledTimes(1);
+        const lastCall = reportEventsSpy.mock?.lastCall?.[0] as [Partial<DataTelemetryEvent>];
+        expect(lastCall?.[0]?.field_count).toBe(8);
+        expect(lastCall?.[0]?.field_existence).toEqual({
+          'container.id': 520 + 470,
+          'host.name': 520 + 470,
+          message: 520,
+          '@timestamp': 520 + 470,
+          'data_stream.dataset': 520 + 470,
+          'data_stream.namespace': 520 + 470,
+          'data_stream.type': 520 + 470,
+        });
+      },
+      TEST_TIMEOUT
+    );
+  });
 });
+
+function setupMocks() {
+  const mockEsClient = {
+    indices: {
+      stats: jest.fn().mockImplementation((params) => {
+        switch (params.index) {
+          case 'logs-postgresql.log-default':
+            return MOCK_POSTGRES_DEFAULT_STATS;
+          case 'logs-postgresql.log-non-default':
+            return MOCK_POSTGRES_NON_DEFAULT_STATS;
+          case 'logs-active-mq.fleet':
+            return MOCK_ACTIVE_MQ_DEFAULT_STATS;
+          default:
+            return { _all: {} };
+        }
+      }),
+      getDataStream: jest.fn().mockResolvedValue({
+        data_streams: [
+          ...MOCK_POSTGRES_DATA_STREAMS,
+          ...MOCK_SYNTH_DATA_STREAMS,
+          ...MOCK_ACTIVE_MQ_FLEET_DATA_STREAMS,
+        ],
+      }),
+      get: jest.fn().mockResolvedValue(MOCK_INDICES),
+      getMapping: jest.fn().mockImplementation((params) => {
+        const genericMapping = MOCK_APACHE_GENERIC_INDEX_MAPPING;
+        switch (params.index) {
+          case '.ds-logs-postgresql.log-default-2024.08.31-000002':
+            return MOCK_POSTGRES_DEFAULT_MAPPINGS;
+          case '.ds-logs-postgresql.log-non-default-2024.07.31-000001':
+            return MOCK_POSTGRES_NON_DEFAULT_MAPPINGS;
+          case '.ds-logs-active-mq.fleet-2024.07.31-000001':
+            return MOCK_ACTIVE_MQ_DEFAULT_MAPPINGS;
+          default:
+            return genericMapping;
+        }
+      }),
+    },
+    info: jest.fn().mockResolvedValue({}),
+    transport: {
+      request: jest.fn().mockImplementation((params) => {
+        if (
+          params.path?.includes('_stats') &&
+          params.path?.includes('logs-active-mq') &&
+          params?.querystring?.failure_store === 'only'
+        ) {
+          return MOCK_ACTIVE_MQ_FAILURE_STATS;
+        }
+
+        return { _all: {} };
+      }),
+    },
+  } as unknown as jest.Mocked<ElasticsearchClient>;
+
+  const mockLogger = {
+    debug: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  } as unknown as jest.Mocked<Logger>;
+
+  const mockAnalyticsSetup = {
+    getTelemetryUrl: jest.fn().mockResolvedValue(new URL('https://telemetry.elastic.co')),
+  } as unknown as jest.Mocked<AnalyticsServiceSetup>;
+
+  const mockTelemetryStart = {
+    getIsOptedIn: jest.fn().mockResolvedValue(true),
+  } as unknown as jest.Mocked<TelemetryPluginStart>;
+
+  return { mockEsClient, mockLogger, mockAnalyticsSetup, mockTelemetryStart };
+}
 
 const MOCK_INDICES = {
   'apache-generic-index': {},
@@ -309,7 +374,18 @@ const MOCK_POSTGRES_DEFAULT_STATS = {
   },
   indices: {
     '.ds-logs-postgresql.log-default-2024.07.31-000001': {},
-    '.ds-logs-postgresql.log-default-2024.08.31-000002': {},
+    '.ds-logs-postgresql.log-default-2024.08.31-000002': {
+      primaries: {
+        docs: {
+          count: 520,
+          deleted: 0,
+          total_size_in_bytes: 870000,
+        },
+        store: {
+          size_in_bytes: 870000,
+        },
+      },
+    },
   },
 };
 
@@ -327,7 +403,18 @@ const MOCK_POSTGRES_NON_DEFAULT_STATS = {
     },
   },
   indices: {
-    '.ds-logs-postgresql.log-non-default-2024.07.31-000001': {},
+    '.ds-logs-postgresql.log-non-default-2024.07.31-000001': {
+      primaries: {
+        docs: {
+          count: 470,
+          deleted: 0,
+          total_size_in_bytes: 810000,
+        },
+        store: {
+          size_in_bytes: 810000,
+        },
+      },
+    },
   },
 };
 
@@ -338,6 +425,22 @@ const MOCK_POSTGRES_DEFAULT_MAPPINGS = {
         '@timestamp': {
           type: 'date',
           ignore_malformed: false,
+        },
+        container: {
+          properties: {
+            id: {
+              type: 'text',
+              fields: {
+                keyword: {
+                  type: 'keyword',
+                  ignore_above: 256,
+                },
+              },
+            },
+          },
+        },
+        custom_field_01: {
+          type: 'float',
         },
         data_stream: {
           properties: {
@@ -355,18 +458,45 @@ const MOCK_POSTGRES_DEFAULT_MAPPINGS = {
             },
           },
         },
+        host: {
+          properties: {
+            name: {
+              type: 'text',
+              fields: {
+                keyword: {
+                  type: 'keyword',
+                  ignore_above: 256,
+                },
+              },
+            },
+          },
+        },
+        message: {
+          type: 'text',
+        },
       },
     },
   },
 };
 
 const MOCK_POSTGRES_NON_DEFAULT_MAPPINGS = {
-  '.ds-logs-postgresql.log-non-default-2024.07.31-000001':
-    MOCK_POSTGRES_DEFAULT_MAPPINGS['.ds-logs-postgresql.log-default-2024.08.31-000002'],
+  '.ds-logs-postgresql.log-non-default-2024.07.31-000001': cloneDeep(
+    MOCK_POSTGRES_DEFAULT_MAPPINGS['.ds-logs-postgresql.log-default-2024.08.31-000002']
+  ),
 };
-MOCK_POSTGRES_NON_DEFAULT_MAPPINGS[
-  '.ds-logs-postgresql.log-non-default-2024.07.31-000001'
-].mappings.properties.data_stream.properties.namespace.value = 'non-default';
+
+// Set namespace to non-default
+set(
+  MOCK_POSTGRES_NON_DEFAULT_MAPPINGS,
+  "['.ds-logs-postgresql.log-non-default-2024.07.31-000001'].mappings.properties.data_stream.properties.namespace.value",
+  'non-default'
+);
+
+// Remove message field to test different field count
+unset(
+  MOCK_POSTGRES_NON_DEFAULT_MAPPINGS,
+  "['.ds-logs-postgresql.log-non-default-2024.07.31-000001'].mappings.properties.message"
+);
 
 const MOCK_SYNTH_DATA_STREAMS = [
   {

@@ -40,6 +40,7 @@ import {
   groupStatsByPatternName,
   getIndexBasicStats,
   indexStatsToTelemetryEvents,
+  getIndexFieldStats,
 } from './helpers';
 
 import { DataTelemetryEvent } from './types';
@@ -138,6 +139,13 @@ export class DataTelemetryService {
             esClient: this.esClient!,
             indices: infoWithNamespace,
             breatheDelay: BREATHE_DELAY_MEDIUM,
+          });
+        }),
+        delay(BREATHE_DELAY_SHORT),
+        switchMap((infoWithStats) => {
+          return getIndexFieldStats({
+            basicStats: infoWithStats,
+            breatheDelay: BREATHE_DELAY_SHORT,
           });
         }),
         delay(BREATHE_DELAY_SHORT),

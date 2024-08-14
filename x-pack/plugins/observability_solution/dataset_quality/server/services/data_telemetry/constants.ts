@@ -55,3 +55,28 @@ export const LOGS_DATASET_INDEX_PATTERNS = LOGS_INDEX_PATTERN_NAMES.reduce<Datas
   },
   []
 );
+
+export const DATA_TELEMETRY_FIELDS = [
+  'container.id',
+  'log.level',
+  'container.name',
+  'host.name',
+  'host.hostname',
+  'kubernetes.pod.name',
+  'kubernetes.pod.uid',
+  'cloud.provider',
+  'agent.type',
+  'event.dataset',
+  'event.category',
+  'event.module',
+  'service.name',
+  'service.type',
+  'service.version',
+  'message',
+  'event.original',
+  'error.message',
+  '@timestamp',
+  'data_stream.dataset',
+  'data_stream.namespace',
+  'data_stream.type',
+];

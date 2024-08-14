@@ -6,16 +6,20 @@
  */
 
 import { from, of, Observable, concatMap, delay, map, toArray, forkJoin } from 'rxjs';
-import { MappingTypeMapping, MappingPropertyBase } from '@elastic/elasticsearch/lib/api/types';
+import {
+  MappingPropertyBase,
+  IndicesGetMappingResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { DatasetIndexPattern } from './types';
+import type { DataStreamFieldStatsPerNamespace, DatasetIndexPattern } from './types';
 
 import {
   IndexBasicInfo,
-  DataStreamStatsByNamespace,
+  DataStreamStatsPerNamespace,
   DataStreamStats,
   DataTelemetryEvent,
 } from './types';
+import { DATA_TELEMETRY_FIELDS } from './constants';
 
 /**
  * Retrieves all indices and data streams for each stream of logs.
@@ -143,8 +147,9 @@ export function addNamespace({
   );
 }
 
-export function groupStatsByPatternName(dataStreamsStats: DataStreamStatsByNamespace[]) {
+export function groupStatsByPatternName(dataStreamsStats: DataStreamFieldStatsPerNamespace[]) {
   const uniqueNamespaces = new Set<string>();
+  const uniqueFields = new Set<string>();
   const statsByStream = dataStreamsStats.reduce<Map<string, DataStreamStats>>((acc, stats) => {
     if (!stats.patternName) {
       return acc;
@@ -159,6 +164,8 @@ export function groupStatsByPatternName(dataStreamsStats: DataStreamStatsByNames
         failureStoreIndices: 0,
         totalSize: 0,
         totalIndices: 0,
+        totalFields: 0,
+        fieldsCount: {},
         managedBy: [],
         packageName: [],
         beat: [],
@@ -167,16 +174,25 @@ export function groupStatsByPatternName(dataStreamsStats: DataStreamStatsByNames
 
     const streamStats = acc.get(stats.patternName)!;
 
+    // Track unique namespaces
     if (stats.namespace) {
       uniqueNamespaces.add(stats.namespace);
     }
     streamStats.totalNamespaces = uniqueNamespaces.size;
+
+    // Track unique fields
+    stats.uniqueFields.forEach((field) => uniqueFields.add(field));
+    streamStats.totalFields = uniqueFields.size;
 
     streamStats.totalDocuments += stats.totalDocuments;
     streamStats.totalIndices += stats.totalIndices;
     streamStats.failureStoreDocuments += stats.failureStoreDocuments;
     streamStats.failureStoreIndices += stats.failureStoreIndices;
     streamStats.totalSize += stats.totalSize;
+
+    for (const [field, count] of Object.entries(stats.fieldsCount)) {
+      streamStats.fieldsCount[field] = (streamStats.fieldsCount[field] ?? 0) + count;
+    }
 
     if (stats.meta?.managed_by) {
       streamStats.managedBy.push(stats.meta.managed_by);
@@ -212,6 +228,20 @@ export function getIndexBasicStats({
   );
 }
 
+export function getIndexFieldStats({
+  basicStats,
+  breatheDelay,
+}: {
+  basicStats: DataStreamStatsPerNamespace[];
+  breatheDelay: number;
+}): Observable<DataStreamFieldStatsPerNamespace[]> {
+  return from(basicStats).pipe(
+    delay(breatheDelay),
+    map((stats) => getFieldStats(stats, DATA_TELEMETRY_FIELDS)),
+    toArray()
+  );
+}
+
 export function indexStatsToTelemetryEvents(stats: DataStreamStats[]): DataTelemetryEvent[] {
   return stats.map((stat) => ({
     pattern_name: stat.streamName,
@@ -220,6 +250,8 @@ export function indexStatsToTelemetryEvents(stats: DataStreamStats[]): DataTelem
     failure_store_doc_count: stat.failureStoreDocuments,
     failure_store_index_count: stat.failureStoreIndices,
     namespace_count: stat.totalNamespaces,
+    field_count: stat.totalFields,
+    field_existence: stat.fieldsCount,
     size_in_bytes: stat.totalSize,
     managed_by: Array.from(new Set(stat.managedBy)),
     package_name: Array.from(new Set(stat.packageName)),
@@ -265,14 +297,23 @@ async function getIndicesInfoForPattern({
     index: pattern.pattern,
   });
 
-  return Object.entries(resp).map(([index, indexInfo]) => ({
-    patternName: pattern.patternName,
-    isDataStream: false,
-    name: index,
-    latestIndex: index,
-    mapping: indexInfo.mappings,
-    meta: indexInfo.mappings?._meta,
-  }));
+  return Object.entries(resp).map(([index, indexInfo]) => {
+    // This is needed to keep the format same for data streams and indices
+    const indexMapping: IndicesGetMappingResponse | undefined = indexInfo.mappings
+      ? {
+          [index]: { mappings: indexInfo.mappings },
+        }
+      : undefined;
+
+    return {
+      patternName: pattern.patternName,
+      isDataStream: false,
+      name: index,
+      latestIndex: index,
+      mapping: indexMapping,
+      meta: indexInfo.mappings?._meta,
+    };
+  });
 }
 
 async function getIndexMapping({
@@ -283,12 +324,12 @@ async function getIndexMapping({
   esClient: ElasticsearchClient;
   indexName: string;
   latestIndex?: string;
-}): Promise<MappingTypeMapping> {
+}): Promise<IndicesGetMappingResponse> {
   const resp = await esClient.indices.getMapping({
     index: latestIndex ?? indexName,
   });
 
-  return resp[latestIndex ?? indexName].mappings;
+  return resp;
 }
 
 /**
@@ -298,8 +339,8 @@ async function getIndexMapping({
  * @returns {string} - The namespace of the data stream found in the mapping.
  */
 function getIndexNamespace(indexInfo: IndexBasicInfo) {
-  const dataStreamMapping: MappingPropertyBase | undefined =
-    indexInfo?.mapping?.properties?.data_stream;
+  const indexMapping = indexInfo.mapping?.[indexInfo.latestIndex ?? indexInfo.name]?.mappings;
+  const dataStreamMapping: MappingPropertyBase | undefined = indexMapping?.properties?.data_stream;
 
   return (dataStreamMapping?.properties?.namespace as { value?: string })?.value;
 }
@@ -307,8 +348,8 @@ function getIndexNamespace(indexInfo: IndexBasicInfo) {
 export async function getIndexStats(
   esClient: ElasticsearchClient,
   info: IndexBasicInfo
-): Promise<DataStreamStatsByNamespace> {
-  const resp = await esClient.indices.stats({
+): Promise<DataStreamStatsPerNamespace> {
+  const stats = await esClient.indices.stats({
     index: info.name,
   });
 
@@ -316,19 +357,21 @@ export async function getIndexStats(
     ? await getFailureStoreStats({ esClient, indexName: info.name })
     : { docCount: 0, indexCount: 0 };
 
-  const totalDocs = resp._all.primaries?.docs?.count;
-  const totalSize = resp._all.primaries?.store?.size_in_bytes;
-  const totalIndices = Object.keys(resp.indices ?? []).length;
+  const totalDocs = stats._all.primaries?.docs?.count;
+  const totalSize = stats._all.primaries?.store?.size_in_bytes;
+  const totalIndices = Object.keys(stats.indices ?? []).length;
 
   return {
     patternName: info.patternName,
-    namespace: info.namespace ?? '',
+    namespace: info.namespace,
     totalDocuments: totalDocs ?? 0,
     totalSize: totalSize ?? 0,
     totalIndices,
     failureStoreDocuments: failureStoreStats.docCount,
     failureStoreIndices: failureStoreStats.indexCount,
     meta: info.meta,
+    mapping: info.mapping,
+    stats,
   };
 }
 
@@ -357,4 +400,74 @@ async function getFailureStoreStats({
     // Failure store API may not be available
     return { docCount: 0, indexCount: 0 };
   }
+}
+
+function getFieldStats(
+  stats: DataStreamStatsPerNamespace,
+  fieldsToCheck: string[]
+): DataStreamFieldStatsPerNamespace {
+  const uniqueFields = new Set<string>();
+
+  // Loop through each index and get the number of fields and gather how many documents have that field
+  const resourceFieldCounts: Record<string, number> = {};
+  const indexNames = Object.keys(stats.stats.indices ?? {});
+  for (const backingIndex of indexNames) {
+    const indexStats = stats.stats.indices?.[backingIndex];
+    const indexMapping = stats.mapping?.[backingIndex]?.mappings;
+    if (!indexMapping) {
+      continue;
+    }
+
+    // Get all fields from the mapping
+    const indexFields = getFieldsListFromMapping(indexMapping);
+    indexFields.forEach((field) => uniqueFields.add(field));
+
+    if (!indexStats?.primaries?.docs?.count) {
+      continue;
+    }
+
+    for (const field of fieldsToCheck) {
+      if (doesFieldExistInMapping(field, indexMapping)) {
+        resourceFieldCounts[field] =
+          (resourceFieldCounts[field] ?? 0) + indexStats?.primaries?.docs?.count ?? 0;
+      }
+    }
+  }
+
+  return {
+    ...stats,
+    uniqueFields: Array.from(uniqueFields),
+    fieldsCount: resourceFieldCounts,
+  };
+}
+
+function getFieldsListFromMapping(mapping: MappingPropertyBase): string[] {
+  const fields: string[] = [];
+
+  for (const [fieldName, field] of Object.entries(mapping.properties ?? {})) {
+    if (field.hasOwnProperty('properties')) {
+      fields.push(...getFieldsListFromMapping(field).map((subField) => `${fieldName}.${subField}`));
+    } else {
+      fields.push(fieldName);
+    }
+  }
+
+  return fields;
+}
+
+/**
+ * Splits the field path and recursively checks if the field exists in the mapping.
+ */
+function doesFieldExistInMapping(fieldPath: string, mapping: MappingPropertyBase): boolean {
+  const [field, ...rest] = fieldPath.split('.');
+
+  if (!mapping?.properties) {
+    return false;
+  }
+
+  if (rest.length === 0) {
+    return !!mapping.properties[field];
+  }
+
+  return doesFieldExistInMapping(rest.join('.'), mapping.properties[field]);
 }
