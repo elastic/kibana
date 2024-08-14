@@ -26,10 +26,11 @@ export interface MetricsAPIRequest {
   metrics: MetricsAPIMetric[];
   includeTimeseries: boolean | undefined;
   groupBy?: Array<string | null | undefined>;
+  groupInstance?: Array<string | null | undefined>;
   modules?: string[];
   afterKey?: Record<string, string | null> | null;
   limit?: number | null;
-  filters?: unknown[];
+  filters?: Array<Record<string, unknown>>;
   dropPartialBuckets?: boolean;
   alignDataToEnd?: boolean;
 }
