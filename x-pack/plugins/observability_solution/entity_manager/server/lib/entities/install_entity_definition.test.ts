@@ -52,7 +52,7 @@ const assertHasCreatedDefinition = (
     id: generateHistoryIngestPipelineId(builtInServicesFromLogsEntityDefinition),
     processors: expect.anything(),
     _meta: {
-      definitionVersion: '0.1.0',
+      definitionVersion: '1.0.0',
       managed: true,
     },
   });
@@ -60,7 +60,7 @@ const assertHasCreatedDefinition = (
     id: generateLatestIngestPipelineId(builtInServicesFromLogsEntityDefinition),
     processors: expect.anything(),
     _meta: {
-      definitionVersion: '0.1.0',
+      definitionVersion: '1.0.0',
       managed: true,
     },
   });

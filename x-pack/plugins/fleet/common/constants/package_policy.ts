@@ -13,3 +13,5 @@ export const inputsFormat = {
   Simplified: 'simplified',
   Legacy: 'legacy',
 } as const;
+
+export const LICENCE_FOR_MULTIPLE_AGENT_POLICIES = 'enterprise';
