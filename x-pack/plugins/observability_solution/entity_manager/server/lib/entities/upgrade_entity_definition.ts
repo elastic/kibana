@@ -7,6 +7,7 @@
 
 import { EntityDefinition } from '@kbn/entities-schema';
 import { installBuiltInEntityDefinitions } from './install_entity_definition';
+import { startTransform } from './start_transform';
 import { EntityManagerServerSetup } from '../../types';
 import { checkIfEntityDiscoveryAPIKeyIsValid, readEntityDiscoveryAPIKey } from '../auth';
 import { getClientsFromAPIKey } from '../utils';
@@ -43,5 +44,10 @@ export async function upgradeBuiltInEntityDefinitions({
     definitions,
     logger,
   });
+
+  await Promise.all(
+    upgradedDefinitions.map((definition) => startTransform(esClient, definition, logger))
+  );
+
   return { success: true, definitions: upgradedDefinitions };
 }

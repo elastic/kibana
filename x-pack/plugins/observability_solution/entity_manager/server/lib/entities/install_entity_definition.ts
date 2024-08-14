@@ -32,7 +32,6 @@ import {
   saveEntityDefinition,
   updateEntityDefinition,
 } from './save_entity_definition';
-import { startTransform } from './start_transform';
 import {
   stopAndDeleteHistoryBackfillTransform,
   stopAndDeleteHistoryTransform,
@@ -126,10 +125,8 @@ export async function installBuiltInEntityDefinitions({
   soClient,
   logger,
   definitions,
-  installOnly,
 }: Omit<InstallDefinitionParams, 'definition'> & {
   definitions: EntityDefinition[];
-  installOnly?: boolean;
 }): Promise<EntityDefinition[]> {
   if (definitions.length === 0) return [];
 
@@ -142,51 +139,33 @@ export async function installBuiltInEntityDefinitions({
     });
 
     if (installedDefinitions.length === 0) {
-      return await installAndStartDefinition({
+      return await installEntityDefinition({
         definition: builtInDefinition,
         esClient,
         soClient,
         logger,
-        installOnly,
       });
     }
 
     // verify existing installation
     const installedDefinition = installedDefinitions[0];
     if (!shouldReinstall(installedDefinition, builtInDefinition)) {
-      if (!installedDefinition.state.running) {
-        logger.debug(`Starting transforms for definition [${installedDefinition.id}]`);
-        await startTransform(esClient, installedDefinition, logger);
-      }
       return installedDefinition;
     }
 
     logger.debug(
       `Detected failed or outdated installation of definition [${installedDefinition.id}] v${installedDefinition.version}, installing v${builtInDefinition.version}`
     );
-    await reinstall({
+    return await reinstall({
       soClient,
       esClient,
       logger,
       definition: installedDefinition,
       latestDefinition: builtInDefinition,
     });
-    await startTransform(esClient, builtInDefinition, logger);
-
-    return builtInDefinition;
   });
 
   return await Promise.all(installPromises);
-}
-
-async function installAndStartDefinition(
-  params: InstallDefinitionParams & { installOnly?: boolean }
-) {
-  const definition = await installEntityDefinition(params);
-  if (!params.installOnly) {
-    await startTransform(params.esClient, definition, params.logger);
-  }
-  return definition;
 }
 
 // perform installation of an entity definition including all
@@ -243,7 +222,7 @@ async function install({
 
   await updateEntityDefinition(soClient, definition.id, { installStatus: 'installed' });
 
-  return entityDefinition;
+  return { ...entityDefinition, installStatus: 'installed' };
 }
 
 // stop and delete the current transforms and reinstall all the components
@@ -274,14 +253,12 @@ async function reinstall({
       stopAndDeleteLatestTransform(esClient, definition, logger),
     ]);
 
-    await install({
+    return await install({
       esClient,
       soClient,
       logger,
       definition: latestDefinition,
     });
-
-    return latestDefinition;
   } catch (err) {
     await updateEntityDefinition(soClient, latestDefinition.id, {
       installStatus: 'failed',
