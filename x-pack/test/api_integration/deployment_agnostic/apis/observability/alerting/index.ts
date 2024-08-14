@@ -9,7 +9,6 @@ import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_cont
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('Slo - Burn rate rule', function () {
-    this.tags(['ess', 'serverless']);
     loadTestFile(require.resolve('./burn_rate_rule'));
   });
 }
