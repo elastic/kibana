@@ -7,7 +7,11 @@
 
 import { sendGetAgentPolicies, sendGetPackagePolicies, sendGetAgents } from '../../../hooks';
 import type { Output } from '../../../types';
-import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../constants';
+import {
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+} from '../../../constants';
 
 export async function getAgentAndPolicyCountForOutput(output: Output) {
   let agentPolicyKuery = `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${output.id}" or ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.monitoring_output_id:"${output.id}"`;
