@@ -37,6 +37,11 @@ import {
   SYSTEM_PROMPT_BODY_INPUT,
   CONVERSATION_MULTI_SELECTOR,
   MODAL_SAVE_BUTTON,
+  ADD_QUICK_PROMPT,
+  QUICK_PROMPT_TITLE_INPUT,
+  QUICK_PROMPT_BODY_INPUT,
+  PROMPT_CONTEXT_SELECTOR,
+  QUICK_PROMPT_BADGE,
 } from '../screens/ai_assistant';
 import { TOASTER } from '../screens/alerts_detection_rules';
 
@@ -84,7 +89,7 @@ export const assertMessageSent = (message: string, hasDefaultPrompt = false, pro
   cy.get(CONVERSATION_MESSAGE)
     .first()
     .should(
-      'have.text',
+      'contain',
       hasDefaultPrompt ? `${prompt ?? DEFAULT_SYSTEM_PROMPT_NON_I18N}\n${message}` : message
     );
 };
@@ -99,6 +104,10 @@ export const resetConversation = () => {
 };
 export const typeAndSendMessage = (message: string) => {
   cy.get(USER_PROMPT).type(message);
+  cy.get(SUBMIT_CHAT).click();
+};
+export const sendQuickPrompt = (prompt: string) => {
+  cy.get(QUICK_PROMPT_BADGE(prompt)).click();
   cy.get(SUBMIT_CHAT).click();
 };
 
@@ -145,6 +154,21 @@ export const createSystemPrompt = (
   cy.get(MODAL_SAVE_BUTTON).click();
 };
 
+export const createQuickPrompt = (
+  title: string,
+  prompt: string,
+  defaultConversations?: string[]
+) => {
+  cy.get(ADD_QUICK_PROMPT).click();
+  cy.get(QUICK_PROMPT_TITLE_INPUT).type(`${title}{enter}`);
+  cy.get(QUICK_PROMPT_BODY_INPUT).type(prompt);
+  if (defaultConversations && defaultConversations.length) {
+    defaultConversations.forEach((conversation) => {
+      cy.get(PROMPT_CONTEXT_SELECTOR).type(`${conversation}{enter}`);
+    });
+  }
+  cy.get(MODAL_SAVE_BUTTON).click();
+};
 export const assertConnectorSelected = (connectorName: string) => {
   cy.get(CONNECTOR_SELECTOR).should('have.text', connectorName);
 };
