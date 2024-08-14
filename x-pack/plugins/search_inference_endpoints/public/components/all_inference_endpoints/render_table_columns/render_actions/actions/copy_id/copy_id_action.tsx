@@ -11,22 +11,22 @@ import React from 'react';
 import { useKibana } from '../../../../../../hooks/use_kibana';
 
 interface CopyIDActionProps {
-  inferenceId: string;
+  modelId: string;
 }
 
-export const CopyIDAction = ({ inferenceId }: CopyIDActionProps) => {
+export const CopyIDAction = ({ modelId }: CopyIDActionProps) => {
   const {
     services: { notifications },
   } = useKibana();
   const toasts = notifications?.toasts;
 
   return (
-    <EuiCopy textToCopy={inferenceId}>
+    <EuiCopy textToCopy={modelId}>
       {(copy) => (
         <EuiButtonIcon
           aria-label={i18n.translate('xpack.searchInferenceEndpoints.actions.copyID', {
-            defaultMessage: 'Copy inference endpoint ID {inferenceId}',
-            values: { inferenceId },
+            defaultMessage: 'Copy inference endpoint ID {modelId}',
+            values: { modelId },
           })}
           data-test-subj="inference-endpoints-action-copy-id-label"
           iconType="copyClipboard"
@@ -34,8 +34,8 @@ export const CopyIDAction = ({ inferenceId }: CopyIDActionProps) => {
             copy();
             toasts?.addSuccess({
               title: i18n.translate('xpack.searchInferenceEndpoints.actions.copyIDSuccess', {
-                defaultMessage: 'Inference endpoint ID {inferenceId} copied',
-                values: { inferenceId },
+                defaultMessage: 'Inference endpoint ID {modelId} copied',
+                values: { modelId },
               }),
             });
           }}

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+export type { ICollectorSet } from './types';
 export { CollectorSet } from './collector_set';
 export type {
   AllowedSchemaTypes,

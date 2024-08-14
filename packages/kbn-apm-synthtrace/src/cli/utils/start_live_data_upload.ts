@@ -10,11 +10,11 @@ import { timerange } from '@kbn/apm-synthtrace-client';
 import { castArray } from 'lodash';
 import { PassThrough, Readable, Writable } from 'stream';
 import { isGeneratorObject } from 'util/types';
+import { SynthtraceEsClient } from '../../lib/shared/base_client';
 import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
 import { bootstrap } from './bootstrap';
 import { getScenario } from './get_scenario';
 import { RunOptions } from './parse_run_cli_flags';
-import { SynthtraceEsClient } from '../../lib/utils/with_client';
 
 export async function startLiveDataUpload({
   runOptions,
@@ -36,6 +36,7 @@ export async function startLiveDataUpload({
   let requestedUntil = start;
 
   let currentStreams: PassThrough[] = [];
+  // @ts-expect-error upgrade typescript v4.9.5
   const cachedStreams: WeakMap<SynthtraceEsClient, PassThrough> = new WeakMap();
 
   process.on('SIGINT', () => closeStreams());

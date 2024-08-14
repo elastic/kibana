@@ -94,7 +94,8 @@ describe('react embeddable renderer', () => {
         expect.any(Function),
         expect.any(String),
         expect.any(Object),
-        expect.any(Function)
+        expect.any(Function),
+        { bork: 'blorp?' }
       );
     });
   });
@@ -120,7 +121,8 @@ describe('react embeddable renderer', () => {
         expect.any(Function),
         '12345',
         expect.any(Object),
-        expect.any(Function)
+        expect.any(Function),
+        { bork: 'blorp?' }
       );
     });
   });
@@ -142,7 +144,8 @@ describe('react embeddable renderer', () => {
         expect.any(Function),
         expect.any(String),
         parentApi,
-        expect.any(Function)
+        expect.any(Function),
+        { bork: 'blorp?' }
       );
     });
   });

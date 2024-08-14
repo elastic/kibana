@@ -212,7 +212,21 @@ export class SpaceSelectorPageObject extends FtrService {
     await this.testSubjects.setValue('descriptionSpaceText', descriptionSpace);
   }
 
+  async clickSwitchSpaceButton(spaceName: string) {
+    const collapsedButtonSelector = '[data-test-subj=euiCollapsedItemActionsButton]';
+    // open context menu
+    await this.find.clickByCssSelector(`#${spaceName}-actions ${collapsedButtonSelector}`);
+    // click context menu item
+    await this.find.clickByCssSelector(
+      `.euiContextMenuItem[data-test-subj="${spaceName}-switchSpace"]` // can not use testSubj: multiple elements exist with the same data-test-subj
+    );
+  }
+
   async clickOnDeleteSpaceButton(spaceName: string) {
+    const collapsedButtonSelector = '[data-test-subj=euiCollapsedItemActionsButton]';
+    // open context menu
+    await this.find.clickByCssSelector(`#${spaceName}-actions ${collapsedButtonSelector}`);
+    // click context menu item
     await this.testSubjects.click(`${spaceName}-deleteSpace`);
   }
 

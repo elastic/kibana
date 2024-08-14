@@ -192,6 +192,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             'You are a fireman in london that helps answering question-answering tasks.'
           );
         });
+
+        it("saves a session to localstorage when it's updated", async () => {
+          await pageObjects.searchPlayground.session.setSession();
+          await browser.refresh();
+          await pageObjects.searchPlayground.PlaygroundChatPage.navigateToChatPage();
+          await pageObjects.searchPlayground.PlaygroundChatPage.updatePrompt("You're a doctor");
+          await pageObjects.searchPlayground.PlaygroundChatPage.updateQuestion('i have back pain');
+          await pageObjects.searchPlayground.session.expectInSession('prompt', "You're a doctor");
+          await pageObjects.searchPlayground.session.expectInSession('question', undefined);
+        });
       });
 
       after(async () => {

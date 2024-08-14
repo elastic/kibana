@@ -107,7 +107,7 @@ const formSerializer = (field: FieldFormInternal): Field => {
 };
 
 const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) => {
-  const { namesNotAllowed, fieldTypeToProcess, fieldName$, subfields$ } = useFieldEditorContext();
+  const { fieldTypeToProcess, fieldName$, subfields$, dataView } = useFieldEditorContext();
   const {
     params: { update: updatePreviewParams },
     fieldPreview$,
@@ -121,7 +121,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
 
   const { submit, isValid: isFormValid, isSubmitted, getFields, isSubmitting } = form;
 
-  const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
+  const nameFieldConfig = getNameFieldConfig(dataView, field);
 
   const [formData] = useFormData<FieldFormInternal>({ form });
   const isFormModified = useFormIsModified({

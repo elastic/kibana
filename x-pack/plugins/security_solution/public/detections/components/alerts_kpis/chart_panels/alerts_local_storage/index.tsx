@@ -27,14 +27,12 @@ import {
 import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../../common/config';
 import type { AlertsSettings } from './types';
 import type { AlertViewSelection } from '../chart_select/helpers';
-import { CHARTS_ID, TREND_ID } from '../chart_select/helpers';
+import { CHARTS_ID } from '../chart_select/helpers';
 import type { GroupBySelection } from '../../alerts_progress_bar_panel/types';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 export const useAlertsLocalStorage = (): AlertsSettings => {
-  const isAlertsPageChartsEnabled = useIsExperimentalFeatureEnabled('alertsPageChartsEnabled');
   const [alertViewSelection, setAlertViewSelection] = useLocalStorage<AlertViewSelection>({
-    defaultValue: isAlertsPageChartsEnabled ? CHARTS_ID : TREND_ID,
+    defaultValue: CHARTS_ID,
     key: getSettingKey({
       category: VIEW_CATEGORY,
       page: ALERTS_PAGE,

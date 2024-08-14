@@ -51,18 +51,19 @@ import {
   DataTableColumnsMeta,
   CustomCellRenderer,
   CustomGridColumnsConfiguration,
-  CustomControlColumnConfiguration,
+  RowControlColumn,
 } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
 import { getRowsPerPageOptions } from '../utils/rows_per_page';
 import { getRenderCellValueFn } from '../utils/get_render_cell_value';
 import {
-  getAllControlColumns,
   getEuiGridColumns,
   getLeadControlColumns,
   getVisibleColumns,
   canPrependTimeFieldColumn,
+  SELECT_ROW,
+  OPEN_DETAILS,
 } from './data_table_columns';
 import { UnifiedDataTableContext } from '../table_context';
 import { getSchemaDetectors } from './data_table_schema';
@@ -85,7 +86,10 @@ import { useSelectedDocs } from '../hooks/use_selected_docs';
 import {
   getColorIndicatorControlColumn,
   type ColorIndicatorControlColumnParams,
+  getAdditionalRowControlColumns,
 } from './custom_control_columns';
+
+const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
 
 export type SortOrder = [string, string];
 
@@ -290,9 +294,20 @@ export interface UnifiedDataTableProps {
    */
   maxDocFieldsDisplayed?: number;
   /**
+   * @deprecated Use only `rowAdditionalLeadingControls` instead
    * Optional value for providing EuiDataGridControlColumn list of the additional leading control columns. UnifiedDataTable includes two control columns: Open Details and Select.
    */
   externalControlColumns?: EuiDataGridControlColumn[];
+  /**
+   * An optional list of the EuiDataGridControlColumn type for setting trailing control columns standard for EuiDataGrid.
+   * We recommend to rather position all controls in the beginning of rows and use `rowAdditionalLeadingControls` for that
+   * as number of columns can be dynamically changed and we don't want the controls to become hidden due to horizontal scroll.
+   */
+  trailingControlColumns?: EuiDataGridControlColumn[];
+  /**
+   * Optional value to extend the list of default row actions
+   */
+  rowAdditionalLeadingControls?: RowControlColumn[];
   /**
    * Number total hits from ES
    */
@@ -328,10 +343,6 @@ export interface UnifiedDataTableProps {
    */
   renderCustomToolbar?: UnifiedDataTableRenderCustomToolbar;
   /**
-   * An optional list of the EuiDataGridControlColumn type for setting trailing control columns standard for EuiDataGrid.
-   */
-  trailingControlColumns?: EuiDataGridControlColumn[];
-  /**
    * An optional value for a custom number of the visible cell actions in the table. By default is up to 3.
    **/
   visibleCellActions?: number;
@@ -347,10 +358,6 @@ export interface UnifiedDataTableProps {
    * An optional settings for customising the column
    */
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
-  /**
-   * An optional settings to control which columns to render as trailing and leading control columns
-   */
-  customControlColumnsConfiguration?: CustomControlColumnConfiguration;
   /**
    * Name of the UnifiedDataTable consumer component or application
    */
@@ -396,8 +403,6 @@ export interface UnifiedDataTableProps {
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
 
-const CONTROL_COLUMN_IDS_DEFAULT = ['openDetails', 'select'];
-
 export const UnifiedDataTable = ({
   ariaLabelledBy,
   columns,
@@ -407,6 +412,7 @@ export const UnifiedDataTable = ({
   headerRowHeightState,
   onUpdateHeaderRowHeight,
   controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
+  rowAdditionalLeadingControls,
   dataView,
   loadingState,
   onFilter,
@@ -437,7 +443,8 @@ export const UnifiedDataTable = ({
   services,
   renderCustomGridBody,
   renderCustomToolbar,
-  trailingControlColumns,
+  externalControlColumns, // TODO: deprecate in favor of rowAdditionalLeadingControls
+  trailingControlColumns, // TODO: deprecate in favor of rowAdditionalLeadingControls
   totalHits,
   onFetchMoreRecords,
   renderDocumentView,
@@ -446,7 +453,6 @@ export const UnifiedDataTable = ({
   configRowHeight,
   showMultiFields = true,
   maxDocFieldsDisplayed = 50,
-  externalControlColumns,
   externalAdditionalControls,
   rowsPerPageOptions,
   visibleCellActions,
@@ -458,7 +464,6 @@ export const UnifiedDataTable = ({
   rowLineHeightOverride,
   cellActionsMetadata,
   customGridColumnsConfiguration,
-  customControlColumnsConfiguration,
   enableComparisonMode,
   cellContext,
   renderCellPopover,
@@ -475,7 +480,13 @@ export const UnifiedDataTable = ({
   const docMap = useMemo(() => new Map(rows?.map((row) => [row.id, row]) ?? []), [rows]);
   const getDocById = useCallback((id: string) => docMap.get(id), [docMap]);
   const selectedDocsState = useSelectedDocs(docMap);
-  const { isDocSelected, hasSelectedDocs, selectedDocIds, replaceSelectedDocs } = selectedDocsState;
+  const {
+    isDocSelected,
+    hasSelectedDocs,
+    selectedDocsCount,
+    replaceSelectedDocs,
+    docIdsInSelectionOrder,
+  } = selectedDocsState;
 
   useEffect(() => {
     if (!hasSelectedDocs && isFilterActive) {
@@ -575,14 +586,15 @@ export const UnifiedDataTable = ({
       valueToStringConverter,
       componentsTourSteps,
       isPlainRecord,
-      pageIndex: paginationObj?.pageIndex,
-      pageSize: paginationObj?.pageSize,
+      pageIndex: isPaginationEnabled ? paginationObj?.pageIndex : 0,
+      pageSize: isPaginationEnabled ? paginationObj?.pageSize : displayedRows.length,
     }),
     [
       componentsTourSteps,
       darkMode,
       dataView,
       isPlainRecord,
+      isPaginationEnabled,
       displayedRows,
       expandedDoc,
       onFilter,
@@ -846,10 +858,19 @@ export const UnifiedDataTable = ({
   const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
 
   const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
-    const internalControlColumns = getLeadControlColumns(canSetExpandedDoc).filter(({ id }) =>
-      controlColumnIds.includes(id)
-    );
-    const leadingColumns = externalControlColumns
+    const defaultControlColumns = getLeadControlColumns(canSetExpandedDoc);
+    const internalControlColumns = controlColumnIds
+      ? // reorder the default controls as per controlColumnIds
+        controlColumnIds.reduce((acc, id) => {
+          const controlColumn = defaultControlColumns.find((col) => col.id === id);
+          if (controlColumn) {
+            acc.push(controlColumn);
+          }
+          return acc;
+        }, [] as EuiDataGridControlColumn[])
+      : defaultControlColumns;
+
+    const leadingColumns: EuiDataGridControlColumn[] = externalControlColumns
       ? [...internalControlColumns, ...externalControlColumns]
       : internalControlColumns;
 
@@ -860,26 +881,27 @@ export const UnifiedDataTable = ({
       leadingColumns.unshift(colorIndicatorControlColumn);
     }
 
+    if (rowAdditionalLeadingControls?.length) {
+      leadingColumns.push(...getAdditionalRowControlColumns(rowAdditionalLeadingControls));
+    }
+
     return leadingColumns;
-  }, [canSetExpandedDoc, controlColumnIds, externalControlColumns, getRowIndicator]);
-
-  const controlColumnsConfig = customControlColumnsConfiguration?.({
-    controlColumns: getAllControlColumns(),
-  });
-
-  const customLeadingControlColumn =
-    controlColumnsConfig?.leadingControlColumns ?? leadingControlColumns;
-  const customTrailingControlColumn =
-    controlColumnsConfig?.trailingControlColumns ?? trailingControlColumns;
+  }, [
+    canSetExpandedDoc,
+    controlColumnIds,
+    externalControlColumns,
+    getRowIndicator,
+    rowAdditionalLeadingControls,
+  ]);
 
   const additionalControls = useMemo(() => {
-    if (!externalAdditionalControls && !selectedDocIds.length) {
+    if (!externalAdditionalControls && !selectedDocsCount) {
       return null;
     }
 
     return (
       <>
-        {Boolean(selectedDocIds.length) && (
+        {Boolean(selectedDocsCount) && (
           <DataTableDocumentToolbarBtn
             isPlainRecord={isPlainRecord}
             isFilterActive={isFilterActive}
@@ -891,13 +913,15 @@ export const UnifiedDataTable = ({
             fieldFormats={fieldFormats}
             pageIndex={unifiedDataTableContextValue.pageIndex}
             pageSize={unifiedDataTableContextValue.pageSize}
+            toastNotifications={toastNotifications}
+            columns={visibleColumns}
           />
         )}
         {externalAdditionalControls}
       </>
     );
   }, [
-    selectedDocIds,
+    selectedDocsCount,
     selectedDocsState,
     externalAdditionalControls,
     isPlainRecord,
@@ -908,6 +932,8 @@ export const UnifiedDataTable = ({
     fieldFormats,
     unifiedDataTableContextValue.pageIndex,
     unifiedDataTableContextValue.pageSize,
+    toastNotifications,
+    visibleColumns,
   ]);
 
   const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
@@ -1064,7 +1090,7 @@ export const UnifiedDataTable = ({
               isPlainRecord={isPlainRecord}
               selectedFieldNames={visibleColumns}
               additionalFieldGroups={additionalFieldGroups}
-              selectedDocIds={selectedDocIds}
+              selectedDocIds={docIdsInSelectionOrder}
               schemaDetectors={schemaDetectors}
               forceShowAllFields={defaultColumns}
               showFullScreenButton={showFullScreenButton}
@@ -1081,7 +1107,7 @@ export const UnifiedDataTable = ({
               columns={euiGridColumns}
               columnVisibility={columnsVisibility}
               data-test-subj="docTable"
-              leadingControlColumns={customLeadingControlColumn}
+              leadingControlColumns={leadingControlColumns}
               onColumnResize={onResize}
               pagination={paginationObj}
               renderCellValue={renderCellValue}
@@ -1095,7 +1121,7 @@ export const UnifiedDataTable = ({
               gridStyle={gridStyleOverride ?? GRID_STYLE}
               renderCustomGridBody={renderCustomGridBody}
               renderCustomToolbar={renderCustomToolbarFn}
-              trailingControlColumns={customTrailingControlColumn}
+              trailingControlColumns={trailingControlColumns}
               cellContext={cellContext}
               renderCellPopover={renderCustomPopover}
             />

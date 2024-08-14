@@ -13,6 +13,7 @@ export interface SearchNotebooksPluginSetup {}
 
 export interface SearchNotebooksPluginStart {
   setNotebookList: (value: NotebookListValue) => void;
+  setSelectedNotebook: (notebookId: string) => void;
 }
 
 export interface SearchNotebooksPluginStartDependencies {

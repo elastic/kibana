@@ -97,7 +97,7 @@ export const fetchIndexInfo = async ({
 
   return {
     keywordFieldCandidates: fieldCandidates?.selectedKeywordFieldCandidates.sort() ?? [],
-    textFieldCandidates: fieldCandidates?.textFieldCandidates.sort() ?? [],
+    textFieldCandidates: fieldCandidates?.selectedTextFieldCandidates.sort() ?? [],
     baselineTotalDocCount,
     deviationTotalDocCount,
     zeroDocsFallback: baselineTotalDocCount === 0 || deviationTotalDocCount === 0,
