@@ -40,6 +40,7 @@ import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data
 import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
 import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
 import { syncUnifiedSearchState } from './unified_search/sync_dashboard_unified_search_state';
+import { PANELS_CONTROL_GROUP_KEY } from '../../../services/dashboard_backup/dashboard_backup_service';
 
 /**
  * Builds a new Dashboard from scratch.
@@ -437,6 +438,13 @@ export const initializeDashboard = async ({
   // Set restored runtime state for react embeddables.
   // --------------------------------------------------------------------------------------
   untilDashboardReady().then((dashboardContainer) => {
+    if (overrideInput?.controlGroupInput) {
+      dashboardContainer.setRuntimeStateForChild(
+        PANELS_CONTROL_GROUP_KEY,
+        overrideInput.controlGroupInput
+      );
+    }
+
     for (const idWithRuntimeState of Object.keys(runtimePanelsToRestore)) {
       const restoredRuntimeStateForChild = runtimePanelsToRestore[idWithRuntimeState];
       if (!restoredRuntimeStateForChild) continue;

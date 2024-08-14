@@ -191,18 +191,18 @@ describe('dashboard locator', () => {
       useHashedUrl: false,
       getDashboardFilterFields: async (dashboardId: string) => [],
     });
-    const controlGroupChanges = {
+    const controlGroupInput = {
       autoApplySelections: false,
     };
     const location = await definition.getLocation({
-      controlGroupChanges,
+      controlGroupInput,
     });
 
     expect(location).toMatchObject({
       app: 'dashboards',
       path: `#/create?_g=()`,
       state: {
-        controlGroupChanges,
+        controlGroupInput,
       },
     });
   });

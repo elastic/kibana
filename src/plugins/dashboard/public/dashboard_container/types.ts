@@ -127,5 +127,5 @@ export type DashboardLocatorParams = Partial<
   /**
    * Control group changes
    */
-  controlGroupChanges?: Partial<ControlGroupRuntimeState> & SerializableRecord; // used SerializableRecord here to force the GridData type to be read as serializable
+  controlGroupInput?: Partial<ControlGroupRuntimeState> & SerializableRecord; // used SerializableRecord here to force the GridData type to be read as serializable
 };

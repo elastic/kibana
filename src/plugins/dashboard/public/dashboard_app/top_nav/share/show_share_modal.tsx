@@ -169,9 +169,9 @@ export function ShowShareModal({
     unsavedStateForLocator = {
       query: unsavedDashboardState.query,
       filters: unsavedDashboardState.filters,
-      controlGroupChanges: panelModifications?.[
+      controlGroupInput: panelModifications?.[
         PANELS_CONTROL_GROUP_KEY
-      ] as DashboardLocatorParams['controlGroupChanges'],
+      ] as DashboardLocatorParams['controlGroupInput'],
       panels: allUnsavedPanels as DashboardLocatorParams['panels'],
 
       // options
