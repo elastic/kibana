@@ -39,6 +39,15 @@ export interface EsDocSearchProps {
    * Records fetched from text based query
    */
   textBasedHits?: DataTableRecord[];
+  /**
+   * An optional callback that will be called before fetching the doc
+   */
+  onBeforeFetch?: () => Promise<void>;
+  /**
+   * An optional callback that will be called after fetching the doc
+   * @param record
+   */
+  onProcessRecord?: (record: DataTableRecord) => DataTableRecord;
 }
 
 /**
@@ -50,6 +59,8 @@ export function useEsDocSearch({
   dataView,
   requestSource,
   textBasedHits,
+  onBeforeFetch,
+  onProcessRecord,
 }: EsDocSearchProps): [ElasticRequestState, DataTableRecord | null, () => void] {
   const [status, setStatus] = useState(ElasticRequestState.Loading);
   const [hit, setHit] = useState<DataTableRecord | null>(null);
@@ -63,6 +74,9 @@ export function useEsDocSearch({
 
     const singleDocFetchingStartTime = window.performance.now();
     try {
+      if (onBeforeFetch) {
+        await onBeforeFetch();
+      }
       const result = await lastValueFrom(
         data.search.search({
           params: {
@@ -77,7 +91,8 @@ export function useEsDocSearch({
 
       if (hits?.hits?.[0]) {
         setStatus(ElasticRequestState.Found);
-        setHit(buildDataTableRecord(hits.hits[0], dataView));
+        const record = buildDataTableRecord(hits?.hits?.[0], dataView);
+        setHit(onProcessRecord ? onProcessRecord(record) : record);
       } else {
         setStatus(ElasticRequestState.NotFound);
       }
@@ -98,7 +113,17 @@ export function useEsDocSearch({
         duration: singleDocFetchingDuration,
       });
     }
-  }, [analytics, data.search, dataView, id, index, useNewFieldsApi, requestSource]);
+  }, [
+    analytics,
+    data.search,
+    dataView,
+    id,
+    index,
+    useNewFieldsApi,
+    requestSource,
+    onBeforeFetch,
+    onProcessRecord,
+  ]);
 
   useEffect(() => {
     if (textBasedHits) {
