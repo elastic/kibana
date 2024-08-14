@@ -42,13 +42,9 @@ export function InvestigationDetailsPage() {
     ? investigationDetails?.origin.id
     : undefined;
 
-  const {
-    data: alertDetails,
-    isLoading: isFetchAlertLoading,
-    isError: isFetchAlertError,
-  } = useFetchAlert({ id: alertId });
+  const { data: alertDetails } = useFetchAlert({ id: alertId });
 
-  if (isFetchInvestigationLoading || isFetchAlertLoading) {
+  if (isFetchInvestigationLoading) {
     return (
       <h1>
         {i18n.translate('xpack.investigateApp.fetchInvestigation.loadingLabel', {
@@ -58,7 +54,7 @@ export function InvestigationDetailsPage() {
     );
   }
 
-  if (isFetchInvestigationError || isFetchAlertError) {
+  if (isFetchInvestigationError) {
     return (
       <h1>
         {i18n.translate('xpack.investigateApp.fetchInvestigation.errorLabel', {
