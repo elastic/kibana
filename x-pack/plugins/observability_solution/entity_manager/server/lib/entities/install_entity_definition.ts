@@ -71,9 +71,9 @@ export async function installEntityDefinition({
   definition,
   logger,
 }: InstallDefinitionParams): Promise<EntityDefinition> {
-  try {
-    validateDefinitionCanCreateValidTransformIds(definition);
+  validateDefinitionCanCreateValidTransformIds(definition);
 
+  try {
     if (await entityDefinitionExists(soClient, definition.id)) {
       throw new EntityIdConflict(
         `Entity definition with [${definition.id}] already exists.`,
@@ -93,7 +93,9 @@ export async function installEntityDefinition({
 
     await Promise.all([
       stopAndDeleteHistoryTransform(esClient, definition, logger),
-      stopAndDeleteHistoryBackfillTransform(esClient, definition, logger),
+      isBackfillEnabled(definition)
+        ? stopAndDeleteHistoryBackfillTransform(esClient, definition, logger)
+        : Promise.resolve(),
       stopAndDeleteLatestTransform(esClient, definition, logger),
     ]);
 
