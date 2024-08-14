@@ -991,6 +991,7 @@ const fieldTypesToConstants: Record<SupportedDataType, string> = {
   // by the ES function definitions. Just making types happy
   time_literal: '1 day',
   unsupported: '',
+  date_nanos: '1420070400000',
 };
 
 const supportedTypesAndFieldNames = fieldTypes.map((type) => ({

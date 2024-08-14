@@ -7,7 +7,7 @@
 import type { AuthenticatedUser, NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { pull } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { v4 } from 'uuid';
 import type { GlobalWidgetParameters } from '../..';
@@ -31,8 +31,6 @@ export type RenderableInvestigation = Omit<StatefulInvestigation, 'items'> & {
 };
 
 export interface UseInvestigationApi {
-  startNewInvestigation: (id: string) => void;
-  loadInvestigation: (id: string) => void;
   investigations: Investigation[];
   investigation?: StatefulInvestigation;
   renderableInvestigation?: RenderableInvestigation;
@@ -41,7 +39,8 @@ export interface UseInvestigationApi {
   addItem: (options: InvestigateWidgetCreate) => Promise<void>;
   setGlobalParameters: (parameters: GlobalWidgetParameters) => Promise<void>;
   setTitle: (title: string) => Promise<void>;
-  deleteInvestigation: (id: string) => Promise<void>;
+  addNote: (note: string) => Promise<void>;
+  deleteNote: (id: string) => Promise<void>;
 }
 
 function useInvestigationWithoutContext({
@@ -57,7 +56,7 @@ function useInvestigationWithoutContext({
   from: string;
   to: string;
 }): UseInvestigationApi {
-  const [investigationStore, setInvestigationStore] = useState(() =>
+  const [investigationStore, _] = useState(() =>
     createInvestigationStore({
       user,
       widgetDefinitions,
@@ -77,15 +76,23 @@ function useInvestigationWithoutContext({
   const investigation$ = investigationStore.asObservable();
   const investigation = useObservable(investigation$)?.investigation;
 
-  const deleteItem = useCallback(
-    async (id: string) => {
-      return investigationStore.deleteItem(id);
-    },
-    [investigationStore]
-  );
+  const addItem = async (widget: InvestigateWidgetCreate) => {
+    try {
+      const id = v4();
+      await investigationStore.addItem(id, widget);
+    } catch (error) {
+      notifications.showErrorDialog({
+        title: i18n.translate('xpack.investigate.failedToAddWidget', {
+          defaultMessage: 'Failed to add widget',
+        }),
+        error,
+      });
+    }
+  };
 
-  const deleteItemRef = useRef(deleteItem);
-  deleteItemRef.current = deleteItem;
+  const deleteItem = async (id: string) => {
+    return investigationStore.deleteItem(id);
+  };
 
   const widgetComponentsById = useRef<
     Record<string, React.ComponentType<{ widget: InvestigateWidget }>>
@@ -101,7 +108,7 @@ function useInvestigationWithoutContext({
           const id = item.id;
           const api: UseInvestigateWidgetApi = {
             onWidgetAdd: async (create) => {
-              return addItemRef.current(create);
+              return investigationStore.addItem(item.id, create);
             },
           };
 
@@ -143,27 +150,6 @@ function useInvestigationWithoutContext({
     return nextItemsWithContext;
   }, [investigation?.items, widgetDefinitions, investigationStore]);
 
-  const addItem = useCallback(
-    async (widget: InvestigateWidgetCreate) => {
-      try {
-        const id = v4();
-
-        await investigationStore.addItem(id, widget);
-      } catch (error) {
-        notifications.showErrorDialog({
-          title: i18n.translate('xpack.investigate.failedToAddWidget', {
-            defaultMessage: 'Failed to add widget',
-          }),
-          error,
-        });
-      }
-    },
-    [notifications, investigationStore]
-  );
-
-  const addItemRef = useRef(addItem);
-  addItemRef.current = addItem;
-
   const renderableInvestigation = useMemo(() => {
     return investigation
       ? {
@@ -179,25 +165,6 @@ function useInvestigationWithoutContext({
       : undefined;
   }, [investigation, itemsWithContext]);
 
-  const startNewInvestigation = useCallback(
-    async (id: string) => {
-      const prevInvestigation = await investigationStore.getInvestigation();
-
-      const createdInvestigationStore = createInvestigationStore({
-        investigation: createNewInvestigation({
-          globalWidgetParameters: prevInvestigation.parameters,
-          user,
-          id,
-        }) as StatefulInvestigation,
-        user,
-        widgetDefinitions,
-      });
-
-      setInvestigationStore(createdInvestigationStore);
-    },
-    [user, widgetDefinitions, investigationStore]
-  );
-
   const { copyItem, setGlobalParameters, setTitle } = investigationStore;
 
   const { storedItem: investigations, setStoredItem: setInvestigations } = useLocalStorage<
@@ -205,29 +172,7 @@ function useInvestigationWithoutContext({
   >('experimentalInvestigations', []);
 
   const investigationsRef = useRef(investigations);
-
   investigationsRef.current = investigations;
-
-  const loadInvestigation = useCallback(
-    async (id: string) => {
-      const investigationsFromStorage = investigationsRef.current;
-      const nextInvestigation = investigationsFromStorage.find(
-        (investigationAtIndex) => investigationAtIndex.id === id
-      );
-
-      if (!nextInvestigation) {
-        throw new Error('Could not find investigation for id ' + id);
-      }
-      setInvestigationStore(() =>
-        createInvestigationStore({
-          investigation: nextInvestigation as StatefulInvestigation,
-          user,
-          widgetDefinitions,
-        })
-      );
-    },
-    [widgetDefinitions, user]
-  );
 
   useEffect(() => {
     function attemptToStoreInvestigations(next: Investigation[]) {
@@ -284,37 +229,25 @@ function useInvestigationWithoutContext({
     };
   }, [investigation$, setInvestigations, notifications]);
 
-  const deleteInvestigation = useCallback(
-    async (id: string) => {
-      const nextInvestigations = investigationsRef.current.filter(
-        (investigationAtIndex) => investigationAtIndex.id !== id
-      );
-      setInvestigations(nextInvestigations);
-      if (investigation?.id === id) {
-        const nextInvestigation = nextInvestigations[0];
+  const addNote = async (note: string) => {
+    await investigationStore.addNote(note);
+  };
 
-        if (nextInvestigation) {
-          loadInvestigation(nextInvestigation.id);
-        } else {
-          startNewInvestigation(v4());
-        }
-      }
-    },
-    [loadInvestigation, startNewInvestigation, setInvestigations, investigation?.id]
-  );
+  const deleteNote = async (id: string) => {
+    await investigationStore.deleteNote(id);
+  };
 
   return {
+    addNote,
+    deleteNote,
     addItem,
     copyItem,
     deleteItem,
     investigation,
-    loadInvestigation,
     renderableInvestigation,
     setGlobalParameters,
     setTitle,
-    startNewInvestigation,
     investigations,
-    deleteInvestigation,
   };
 }
 

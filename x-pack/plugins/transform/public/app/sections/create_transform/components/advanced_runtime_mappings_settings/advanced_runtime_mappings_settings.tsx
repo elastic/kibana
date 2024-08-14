@@ -56,7 +56,7 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
     const previousConfig = runtimeMappings;
 
     const isFieldDeleted = (field: string) =>
-      previousConfig?.hasOwnProperty(field) && !nextConfig.hasOwnProperty(field);
+      Object.hasOwn(previousConfig ?? {}, field) && !Object.hasOwn(nextConfig, field);
 
     applyRuntimeMappingsEditorChanges();
 
@@ -66,8 +66,8 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
       const groupBy = groupByList[groupByKey];
       if (
         isPivotGroupByConfigWithUiSupport(groupBy) &&
-        previousConfig?.hasOwnProperty(groupBy.field) &&
-        !nextConfig.hasOwnProperty(groupBy.field)
+        Object.hasOwn(previousConfig ?? {}, groupBy.field) &&
+        !Object.hasOwn(nextConfig, groupBy.field)
       ) {
         deleteGroupBy(groupByKey);
       }
