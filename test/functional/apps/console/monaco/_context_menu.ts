@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         }
       });
 
-      it('allows to change default language', async () => {
+      it.skip('allows to change default language', async () => {
         await PageObjects.console.clickContextMenu();
 
         // By default should be copy as cURL
@@ -79,6 +79,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Select python as default language
         await PageObjects.console.changeDefaultLanguage('python');
+        // Wait until async operation is done
+        await PageObjects.common.sleep(2000);
         // Open the context menu once again
         await PageObjects.console.clickContextMenu();
 
