@@ -81,6 +81,8 @@ export interface NewPackagePolicy {
   /** @deprecated */
   policy_id?: string;
   policy_ids: string[];
+  // Nullable to allow user to reset to default outputs
+  output_id?: string | null;
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];
   vars?: PackagePolicyConfigRecord;
