@@ -9,17 +9,13 @@
 import type { Reference } from '@kbn/content-management-utils';
 import type { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import {
-  EmbeddableInput,
-  isReferenceOrValueEmbeddable,
-  ViewMode,
-} from '@kbn/embeddable-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { apiHasSerializableState, SerializedPanelState } from '@kbn/presentation-containers';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 import { batch } from 'react-redux';
-import { i18n } from '@kbn/i18n';
 import {
   DashboardContainerInput,
   DashboardPanelMap,
@@ -33,6 +29,7 @@ import {
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardSaveOptions, DashboardStateFromSaveModal } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
+import { getByValuePanelState } from './duplicate_dashboard_panel';
 import { extractTitleAndCount } from './lib/extract_title_and_count';
 import { DashboardSaveModal } from './overlays/save_modal';
 
@@ -200,24 +197,11 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
 
         const newPanels = await (async () => {
           if (!managed) return nextPanels;
-
           // this is a managed dashboard - unlink all by reference embeddables on clone
           const unlinkedPanels: DashboardPanelMap = {};
           for (const [panelId, panel] of Object.entries(nextPanels)) {
-            const child = this.getChild(panelId);
-            if (
-              child &&
-              isReferenceOrValueEmbeddable(child) &&
-              child.inputIsRefType(child.getInput() as EmbeddableInput)
-            ) {
-              const valueTypeInput = await child.getInputAsValueType();
-              unlinkedPanels[panelId] = {
-                ...panel,
-                explicitInput: valueTypeInput,
-              };
-              continue;
-            }
-            unlinkedPanels[panelId] = panel;
+            const duplicatedPanelState = await getByValuePanelState(this, panelId, panel);
+            unlinkedPanels[panelId] = { ...panel, ...duplicatedPanelState };
           }
           return unlinkedPanels;
         })();
