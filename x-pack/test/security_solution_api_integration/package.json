@@ -383,7 +383,11 @@
 
 
     "investigations:basic:timeline:server:ess": "npm run initialize-server:investigations:basic_essentials timeline ess",
+    "investigations:basic:timeline:server:serverless": "npm run initialize-server:investigations:basic_essentials timeline serverless",
     "investigations:basic:timeline:runner:ess": "npm run run-tests:investigations:basic_essentials timeline ess essEnv",
+    "investigations:basic:timeline:runner:serverless": "npm run run-tests:investigations:basic_essentials timeline serverless serverlessEnv",
+    "investigations:basic:timeline:runner:qa:serverless": "npm run run-tests:investigations:basic_essentials timeline serverless qaPeriodicEnv",
+    "investigations:basic:timeline:runner:qa:serverless:release": "npm run run-tests:investigations:basic_essentials timeline serverless qaEnv",
 
     "investigations:saved-objects:server:serverless": "npm run initialize-server:investigations saved_objects serverless",
     "investigations:saved-objects:runner:serverless": "npm run run-tests:investigations saved_objects serverless serverlessEnv",
