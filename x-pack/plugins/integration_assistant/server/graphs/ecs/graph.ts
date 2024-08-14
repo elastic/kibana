@@ -76,9 +76,9 @@ async function getEcsSubGraph(model: ActionsClientChatOpenAI | ActionsClientSimp
     })
     .addEdge('modelSubOutput', END);
 
-  const compiledEcsGraph = workflow.compile();
+  const compiledEcsSubGraph = workflow.compile();
 
-  return compiledEcsGraph;
+  return compiledEcsSubGraph;
 }
 
 export async function getEcsGraph(model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel) {
