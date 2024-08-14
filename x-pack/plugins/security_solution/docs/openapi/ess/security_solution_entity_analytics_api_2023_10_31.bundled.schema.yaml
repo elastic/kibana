@@ -13,6 +13,7 @@ servers:
 paths:
   /api/asset_criticality:
     delete:
+      description: Delete the asset criticality record for a specific asset if it exists.
       operationId: DeleteAssetCriticalityRecord
       parameters:
         - description: The ID value of the asset.
@@ -45,11 +46,12 @@ paths:
                 properties:
                   deleted:
                     description: >-
-                      If the record was deleted. If false the record did not
-                      exist.
+                      True if the record was deleted or false if the record did
+                      not exist.
                     type: boolean
                   record:
                     $ref: '#/components/schemas/AssetCriticalityRecord'
+                    description: The deleted record if it existed.
                 required:
                   - deleted
           description: Successful response
@@ -59,6 +61,7 @@ paths:
       tags:
         - Security Solution Entity Analytics API
     get:
+      description: Get the criticality record for a specific asset.
       operationId: GetAssetCriticalityRecord
       parameters:
         - description: The ID value of the asset.
@@ -89,6 +92,7 @@ paths:
       tags:
         - Security Solution Entity Analytics API
     post:
+      description: Create or update a criticality record for a specific asset.
       operationId: CreateAssetCriticalityRecord
       requestBody:
         content:
@@ -115,11 +119,14 @@ paths:
           description: Successful response
         '400':
           description: Invalid request
-      summary: Create Criticality Record
+      summary: Upsert Criticality Record
       tags:
         - Security Solution Entity Analytics API
   /api/asset_criticality/bulk:
     post:
+      description: >-
+        Bulk upsert up to 1000 asset criticality records, creating or updating
+        them as needed.
       operationId: BulkUpsertAssetCriticalityRecords
       requestBody:
         content:
@@ -170,13 +177,12 @@ paths:
           description: Bulk upload successful
         '413':
           description: File too large
-      summary: >-
-        Bulk upsert asset criticality data, creating or updating records as
-        needed
+      summary: Bulk Upsert Asset Criticality Records
       tags:
         - Security Solution Entity Analytics API
   /api/asset_criticality/list:
-    post:
+    get:
+      description: 'List asset criticality records, paging, sorting and filtering as needed.'
       operationId: FindAssetCriticalityRecords
       parameters:
         - description: The field to sort by.
@@ -247,7 +253,7 @@ paths:
                   - per_page
                   - total
           description: Bulk upload successful
-      summary: 'List asset criticality data, filtering and sorting as needed'
+      summary: List Asset Criticality Records
       tags:
         - Security Solution Entity Analytics API
 components:

@@ -389,7 +389,7 @@ export class KnowledgeBaseService {
     categories?: string[];
     user?: { name: string };
     namespace: string;
-    esClient: { asCurrentUser: ElasticsearchClient };
+    esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient };
     uiSettingsClient: IUiSettingsClient;
   }): Promise<{
     entries: RecalledEntry[];
@@ -417,6 +417,7 @@ export class KnowledgeBaseService {
         uiSettingsClient,
         queries,
         modelId,
+        logger: this.dependencies.logger,
       }).catch((error) => {
         this.dependencies.logger.debug('Error getting data from search indices');
         this.dependencies.logger.debug(error);
