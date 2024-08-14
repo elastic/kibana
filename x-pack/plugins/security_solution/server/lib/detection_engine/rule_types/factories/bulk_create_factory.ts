@@ -35,8 +35,7 @@ export const bulkCreateFactory =
     alertWithPersistence: PersistenceAlertService,
     refreshForBulkCreate: RefreshTypes,
     ruleExecutionLogger: IRuleExecutionLogForExecutors,
-    experimentalFeatures?: ExperimentalFeatures,
-    currentTimeOverride?: Date
+    experimentalFeatures?: ExperimentalFeatures
   ) =>
   async <T extends BaseFieldsLatest>(
     wrappedDocs: Array<WrappedFieldsLatest<T>>,
@@ -87,8 +86,7 @@ export const bulkCreateFactory =
       })),
       refreshForBulkCreate,
       maxAlerts,
-      enrichAlertsWrapper,
-      currentTimeOverride
+      enrichAlertsWrapper
     );
 
     const end = performance.now();

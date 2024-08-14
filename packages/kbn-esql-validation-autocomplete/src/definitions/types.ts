@@ -31,6 +31,7 @@ export const fieldTypes = [
   'counter_long',
   'counter_double',
   'unsupported',
+  'date_nanos',
 ] as const;
 
 export type FieldType = (typeof fieldTypes)[number];
@@ -147,6 +148,10 @@ export interface CommandBaseDefinition {
   name: string;
   alias?: string;
   description: string;
+  /**
+   * Whether to show or hide in autocomplete suggestion list
+   */
+  hidden?: boolean;
   signature: {
     multipleParams: boolean;
     // innerType here is useful to drill down the type in case of "column"

@@ -21,6 +21,18 @@ export interface IntegrationAssistantPluginStartDependencies {
   licensing: LicensingPluginStart;
 }
 
+export interface SimplifiedProcessor {
+  if?: string;
+  field: string;
+  value_from?: string;
+  value?: string;
+}
+
+export interface SimplifiedProcessors {
+  type: string;
+  processors: SimplifiedProcessor[];
+}
+
 export interface CategorizationState {
   rawSamples: string[];
   samples: string[];
@@ -32,12 +44,14 @@ export interface CategorizationState {
   packageName: string;
   dataStreamName: string;
   errors: object;
+  previousError: string;
   pipelineResults: object[];
   finalized: boolean;
   reviewed: boolean;
   currentPipeline: object;
   currentProcessors: object[];
-  invalidCategorization: object;
+  invalidCategorization: object[];
+  previousInvalidCategorization: string;
   initialPipeline: object;
   results: object;
 }
@@ -83,6 +97,7 @@ export interface RelatedState {
   packageName: string;
   dataStreamName: string;
   errors: object;
+  previousError: string;
   pipelineResults: object[];
   finalized: boolean;
   reviewed: boolean;

@@ -15,7 +15,7 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import { HttpStart } from '@kbn/core-http-browser';
 import { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useAlertDataView } from '../..';
+import { useAlertsDataView } from '../..';
 import { FilterGroupLoading } from './loading';
 import { DEFAULT_CONTROLS } from './constants';
 import { FilterGroup } from './filter_group';
@@ -94,7 +94,7 @@ export const AlertFilterControls = (props: AlertFilterControlsProps) => {
     ...restFilterItemGroupProps
   } = props;
   const [loadingPageFilters, setLoadingPageFilters] = useState(true);
-  const { dataViews: alertDataViews, loading: loadingDataViews } = useAlertDataView({
+  const { dataView, isLoading: isLoadingDataView } = useAlertsDataView({
     featureIds,
     dataViewsService: dataViews,
     http,
@@ -102,14 +102,14 @@ export const AlertFilterControls = (props: AlertFilterControlsProps) => {
   });
 
   useEffect(() => {
-    if (!loadingDataViews) {
+    if (!isLoadingDataView) {
       // If a data view spec is provided, create a new data view
       if (dataViewSpec?.id) {
         (async () => {
           // Creates an adhoc data view starting from the alert data view
           // and applying the overrides specified in the dataViewSpec
           const spec = {
-            ...(alertDataViews?.[0] ?? {}),
+            ...(dataView ?? {}),
             ...(dataViewSpec ?? {}),
           } as DataViewSpec;
           await dataViews.create(spec);
@@ -121,7 +121,7 @@ export const AlertFilterControls = (props: AlertFilterControlsProps) => {
     }
 
     return () => dataViews.clearInstanceCache();
-  }, [dataViewSpec, alertDataViews, dataViews, loadingDataViews]);
+  }, [dataView, dataViewSpec, dataViews, isLoadingDataView]);
 
   const handleFilterChanges = useCallback(
     (newFilters: Filter[]) => {
