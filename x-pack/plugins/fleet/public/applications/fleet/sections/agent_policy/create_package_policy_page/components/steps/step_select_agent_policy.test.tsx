@@ -104,8 +104,6 @@ describe('step select agent policy', () => {
     await act(async () => {
       const select = renderResult.container.querySelector('[data-test-subj="agentPolicySelect"]');
       expect((select as any)?.value).toEqual('');
-
-      expect(renderResult.getByText('At least one agent policy is required.')).toBeVisible();
     });
   });
 
@@ -177,8 +175,6 @@ describe('step select agent policy', () => {
           '[data-test-subj="agentPolicyMultiSelect"]'
         );
         expect((select as any)?.value).toEqual(undefined);
-
-        expect(renderResult.getByText('At least one agent policy is required.')).toBeVisible();
       });
     });
 

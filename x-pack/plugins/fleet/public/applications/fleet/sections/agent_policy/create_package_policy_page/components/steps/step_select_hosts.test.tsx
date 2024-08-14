@@ -155,7 +155,7 @@ describe('StepSelectHosts', () => {
     ).toContain('Agent policy 1');
   });
 
-  it('should display dropdown without preselected value when Existing hosts selected with mulitple agent policies', () => {
+  it('should display dropdown without preselected value when Existing hosts selected with mulitple agent policies', async () => {
     (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
       data: {
         items: [
@@ -174,8 +174,9 @@ describe('StepSelectHosts', () => {
       fireEvent.click(renderResult.getByText('Existing hosts').closest('button')!);
     });
 
-    waitFor(() => {
-      expect(renderResult.getByText('At least one agent policy is required.')).toBeInTheDocument();
+    await act(async () => {
+      const select = renderResult.container.querySelector('[data-test-subj="agentPolicySelect"]');
+      expect((select as any)?.value).toEqual('');
     });
   });
 });

@@ -174,15 +174,17 @@ export function usePackagePolicyWithRelatedData(
           throw packagePolicyError;
         }
 
-        const { data, error: agentPolicyError } = await sendBulkGetAgentPolicies(
-          packagePolicyData!.item.policy_ids
-        );
+        if (packagePolicyData!.item.policy_ids && packagePolicyData!.item.policy_ids.length > 0) {
+          const { data, error: agentPolicyError } = await sendBulkGetAgentPolicies(
+            packagePolicyData!.item.policy_ids
+          );
 
-        if (agentPolicyError) {
-          throw agentPolicyError;
+          if (agentPolicyError) {
+            throw agentPolicyError;
+          }
+
+          setAgentPolicies(data?.items ?? []);
         }
-
-        setAgentPolicies(data?.items ?? []);
 
         const { data: upgradePackagePolicyDryRunData, error: upgradePackagePolicyDryRunError } =
           await sendUpgradePackagePolicyDryRun([packagePolicyId]);

@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { isEmpty } from 'lodash';
 import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -485,7 +484,7 @@ export const EditPackagePolicyForm = memo<{
       <EuiErrorBoundary>
         {isLoadingData ? (
           <Loading />
-        ) : loadingError || isEmpty(existingAgentPolicies) || !packageInfo ? (
+        ) : loadingError || !packageInfo ? (
           <ErrorComponent
             title={
               <FormattedMessage
