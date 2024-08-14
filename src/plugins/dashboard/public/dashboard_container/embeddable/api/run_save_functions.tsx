@@ -60,7 +60,6 @@ const serializeAllPanelState = async (
               ? api.getByValueState()
               : api.snapshotRuntimeState()
           );
-          console.log('serialized', serialized);
           return { uuid, serialized };
         })()
       );
