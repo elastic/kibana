@@ -28,9 +28,12 @@ export const IndexPriorityField: FunctionComponent<Props> = ({ phase }) => {
 
   const initialToggleValue = useMemo<boolean>(() => {
     return (
-      isNewPolicy || // enable index priority for new policies
-      !policy.phases[phase]?.actions || // enable index priority for new phases
-      policy.phases[phase]?.actions?.set_priority != null // enable index priority if it's set
+      // enable index priority for new policies
+      isNewPolicy ||
+      // enable index priority for new phases:
+      !policy.phases[phase]?.actions ||
+      // enable index priority if it's set:
+      policy.phases[phase]?.actions?.set_priority != null
     );
   }, [isNewPolicy, policy.phases, phase]);
 
