@@ -90,6 +90,7 @@ interface Props {
 }
 
 const SHOW_MANAGED_POLICIES_BY_DEFAULT = 'ILM_SHOW_MANAGED_POLICIES_BY_DEFAULT';
+const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
   const [query, setQuery] = useState('');
@@ -104,7 +105,6 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
   );
   const { setListAction } = usePolicyListContext();
 
-  const PAGE_SIZE_OPTIONS = [10, 25, 50];
   const { pageSize, sorting, onTableChange } = useEuiTablePersist<PolicyFromES>({
     tableId: 'ilmPolicies',
     initialPageSize: 25,

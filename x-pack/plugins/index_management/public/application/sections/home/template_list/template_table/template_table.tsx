@@ -30,6 +30,8 @@ interface Props {
   history: ScopedHistory;
 }
 
+const PAGE_SIZE_OPTIONS = [10, 20, 50];
+
 export const TemplateTable: React.FunctionComponent<Props> = ({
   templates,
   reload,
@@ -189,7 +191,6 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     },
   ];
 
-  const PAGE_SIZE_OPTIONS = [10, 20, 50];
   const { pageSize, sorting, onTableChange } = useEuiTablePersist<TemplateListItem>({
     tableId: 'indexTemplates',
     initialPageSize: 20,

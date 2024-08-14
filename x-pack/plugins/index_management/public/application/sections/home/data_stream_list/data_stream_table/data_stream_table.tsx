@@ -46,6 +46,7 @@ interface Props {
 }
 
 const INFINITE_AS_ICON = true;
+const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
 export const DataStreamTable: React.FunctionComponent<Props> = ({
   dataStreams,
@@ -271,7 +272,6 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     ],
   };
 
-  const PAGE_SIZE_OPTIONS = [10, 20, 50];
   const { pageSize, sorting, onTableChange } = useEuiTablePersist<TableDataStream>({
     tableId: 'dataStreams',
     initialPageSize: 20,

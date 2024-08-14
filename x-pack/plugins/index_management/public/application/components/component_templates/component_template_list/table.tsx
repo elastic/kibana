@@ -60,6 +60,8 @@ export interface Props {
   history: ScopedHistory;
 }
 
+const PAGE_SIZE_OPTIONS = [10, 20, 50];
+
 export const ComponentTable: FunctionComponent<Props> = ({
   componentTemplates,
   defaultFilter,
@@ -89,7 +91,6 @@ export const ComponentTable: FunctionComponent<Props> = ({
 
   const [selection, setSelection] = useState<ComponentTemplateListItem[]>([]);
 
-  const PAGE_SIZE_OPTIONS = [10, 20, 50];
   const { pageSize, sorting, onTableChange } = useEuiTablePersist<ComponentTemplateListItem>({
     tableId: 'componentTemplates',
     initialPageSize: 10,

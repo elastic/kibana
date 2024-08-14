@@ -74,6 +74,8 @@ const defaultFilterOptions: EuiSelectableOption[] = [
   },
 ];
 
+const PAGE_SIZE_OPTIONS = [10, 20, 50];
+
 interface FilterQueryParams {
   [key: string]: 'unset' | 'on' | 'off';
 }
@@ -116,7 +118,6 @@ export const PipelineTable: FunctionComponent<Props> = ({
   const { history } = useKibana().services;
   const [selection, setSelection] = useState<Pipeline[]>([]);
 
-  const PAGE_SIZE_OPTIONS = [10, 20, 50];
   const { pageSize, sorting, onTableChange } = useEuiTablePersist<Pipeline>({
     tableId: 'ingestPipelines',
     initialPageSize: 10,

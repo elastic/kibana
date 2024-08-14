@@ -20,16 +20,14 @@ export const validatePersistData = (data: any, pageSizeOptions: number[]) => {
   let validatedPageSize = pageSize;
   let validatedSort = sort;
 
-  if (pageSize) {
-    if (typeof pageSize !== 'number' || !pageSizeOptions.includes(pageSize)) {
-      validatedPageSize = undefined;
-    }
+  if (pageSize && !pageSizeOptions.includes(pageSize)) {
+    validatedPageSize = undefined;
   }
 
   if (sort) {
     const field = sort.field;
     const direction = sort.direction;
-    if (!(typeof field === 'string') || !(direction === 'asc' || direction === 'desc')) {
+    if (typeof field !== 'string' || !['asc', 'desc'].includes(direction)) {
       validatedSort = undefined;
     }
   }

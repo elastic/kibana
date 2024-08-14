@@ -6,26 +6,21 @@
  * Side Public License, v 1.
  */
 
+import { useState, useCallback } from 'react';
 import { Criteria } from '@elastic/eui';
-import { PropertySort } from '@elastic/eui/src/services/sort/property_sort';
-import {
-  DEFAULT_INITIAL_PAGE_SIZE,
-  LOCAL_STORAGE_PREFIX,
-  DEFAULT_PAGE_SIZE_OPTIONS,
-} from './constants';
+import { DEFAULT_INITIAL_PAGE_SIZE, DEFAULT_PAGE_SIZE_OPTIONS } from './constants';
 import { createStorage } from './storage';
 import { validatePersistData } from './validate_persist_data';
-import { PersistData } from './types';
+import { PersistData, PropertySort } from './types';
 
-interface EuiTablePersistProps<T> {
+export interface EuiTablePersistProps<T> {
   /** A unique id that will be included in the local storage variable for this table. */
   tableId: string;
   /** (Optional) Specifies a custom onTableChange handler. */
   customOnTableChange?: (change: Criteria<T>) => void;
   /** (Optional) Specifies a custom initial table sorting. */
   initialSort?: PropertySort;
-  /** (Optional) Specifies a custom initial page size for the table.
-   * Defaults to {@link DEFAULT_INITIAL_PAGE_SIZE} */
+  /** (Optional) Specifies a custom initial page size for the table. Defaults to 50. */
   initialPageSize?: number;
   /** (Optional) Specifies custom page size options for the table.
    * Defaults to {@link DEFAULT_PAGE_SIZE_OPTIONS} */
@@ -44,11 +39,7 @@ export const useEuiTablePersist = <T extends object>({
   initialPageSize,
   pageSizeOptions,
 }: EuiTablePersistProps<T>) => {
-  const storage = createStorage({
-    engine: window.localStorage,
-    prefix: LOCAL_STORAGE_PREFIX,
-  });
-
+  const storage = createStorage();
   const storedPersistData = storage.get(tableId, undefined);
 
   const { pageSize: storagePageSize, sort: storageSort }: PersistData<T> = validatePersistData(
@@ -56,26 +47,41 @@ export const useEuiTablePersist = <T extends object>({
     pageSizeOptions ?? DEFAULT_PAGE_SIZE_OPTIONS
   );
 
-  const pageSize = storagePageSize ?? initialPageSize ?? DEFAULT_INITIAL_PAGE_SIZE;
-  const sort = storageSort ?? initialSort;
+  const [pageSize, setPageSize] = useState<number>(
+    storagePageSize ?? initialPageSize ?? DEFAULT_INITIAL_PAGE_SIZE
+  );
+  const [sort, setSort] = useState<PropertySort | undefined>(storageSort ?? initialSort);
   const sorting = sort && { sort };
 
-  const onTableChange = (nextValues: Criteria<T>) => {
-    if (customOnTableChange) {
-      customOnTableChange(nextValues);
-    }
-    const newPersistData: PersistData<T> = {};
-    newPersistData.pageSize = nextValues.page?.size ?? storagePageSize;
-    const newSort = nextValues?.sort;
-    newPersistData.sort = newSort?.field
-      ? newSort
-      : newSort?.direction
-      ? undefined // If field is an empty string and direction has value, it means sort is removed
-      : storageSort; // If both field and direction are undefined, there is no change on sort so use the stored one
-    if (newPersistData.pageSize !== storagePageSize || newPersistData.sort !== storageSort) {
-      storage.set(tableId, newPersistData);
-    }
-  };
+  const onTableChange = useCallback(
+    (nextValues: Criteria<T>) => {
+      if (customOnTableChange) {
+        customOnTableChange(nextValues);
+      }
+
+      let nextSort: PropertySort | undefined;
+      if (nextValues.sort?.field && nextValues.sort?.direction) {
+        // Both field and direction are needed for a valid sort criteria
+        nextSort = nextValues.sort;
+      } else if (!nextValues.sort?.field && !nextValues.sort?.direction) {
+        // If both field and direction are undefined, there is no change on sort so use the current one
+        nextSort = sort;
+      }
+
+      const nextPageSize = nextValues.page?.size ?? pageSize;
+
+      if (nextPageSize !== storagePageSize || nextSort !== storageSort) {
+        setPageSize(nextPageSize);
+        setSort(nextSort);
+        const nextPersistData: PersistData<T> = {
+          pageSize: nextPageSize,
+          sort: nextSort,
+        };
+        storage.set(tableId, nextPersistData);
+      }
+    },
+    [customOnTableChange, pageSize, sort, storage, storagePageSize, storageSort, tableId]
+  );
 
   return { pageSize, sorting, onTableChange };
 };

@@ -6,10 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { LOCAL_STORAGE_PREFIX } from './constants';
+
 type IStorageEngine = typeof window.localStorage;
 
-export class Storage {
-  constructor(private readonly engine: IStorageEngine, private readonly prefix: string) {}
+class Storage {
+  engine: IStorageEngine = window.localStorage;
+  prefix: string = LOCAL_STORAGE_PREFIX;
 
   encode(val: unknown) {
     return JSON.stringify(val);
@@ -43,6 +46,6 @@ export class Storage {
   }
 }
 
-export function createStorage(deps: { engine: IStorageEngine; prefix: string }) {
-  return new Storage(deps.engine, deps.prefix);
+export function createStorage() {
+  return new Storage();
 }
