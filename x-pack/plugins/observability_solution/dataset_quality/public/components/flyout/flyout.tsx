@@ -19,14 +19,16 @@ import {
   EuiPanel,
   EuiSkeletonRectangle,
 } from '@elastic/eui';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { flyoutCancelText } from '../../../common/translations';
 import { useDatasetQualityFlyout, useDatasetDetailsTelemetry } from '../../hooks';
 import { DatasetSummary, DatasetSummaryLoading } from './dataset_summary';
 import { Header } from './header';
-import { IntegrationSummary } from './integration_summary';
 import { FlyoutProps } from './types';
-import { FlyoutSummary } from './flyout_summary/flyout_summary';
 import { BasicDataStream } from '../../../common/types';
+
+const FlyoutSummary = dynamic(() => import('./flyout_summary/flyout_summary'));
+const IntegrationSummary = dynamic(() => import('./integration_summary'));
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
@@ -74,6 +76,7 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
             linkDetails={linkDetails}
             loading={!loadingState.datasetIntegrationDone}
             title={title}
+            timeRange={timeRange}
           />
           <EuiFlyoutBody css={flyoutBodyStyles} data-test-subj="datasetQualityFlyoutBody">
             <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
