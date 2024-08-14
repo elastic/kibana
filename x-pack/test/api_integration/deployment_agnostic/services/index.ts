@@ -24,3 +24,5 @@ export const services = {
   sloApi: SloApiProvider,
   // create a new deployment-agnostic service and load here
 };
+
+export type DeploymentAgnosticCommonServices = typeof services;

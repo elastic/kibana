@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import {
   flyoutIntegrationDetailsText,
   flyoutIntegrationNameText,
-  flyoutIntegrationVersionText,
+  integrationVersionText,
 } from '../../../common/translations';
 import { IntegrationIcon } from '../common';
 import { FieldsList } from './fields_list';
@@ -19,7 +19,9 @@ import { IntegrationActionsMenu } from './integration_actions_menu';
 import { Integration } from '../../../common/data_streams_stats/integration';
 import { Dashboard } from '../../../common/api_types';
 
-export function IntegrationSummary({
+// Allow for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default function IntegrationSummary({
   integration,
   dashboards,
   dashboardsLoading,
@@ -60,7 +62,7 @@ export function IntegrationSummary({
           isLoading: false,
         },
         {
-          fieldTitle: flyoutIntegrationVersionText,
+          fieldTitle: integrationVersionText,
           fieldValue: version,
           isLoading: false,
         },
