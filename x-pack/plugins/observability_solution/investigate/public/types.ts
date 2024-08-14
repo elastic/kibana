@@ -11,7 +11,6 @@ import type { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugi
 import type { FromSchema } from 'json-schema-to-ts';
 import type { InvestigateWidget } from '../common';
 import type { GlobalWidgetParameters, InvestigateWidgetCreate } from '../common/types';
-import type { UseInvestigateWidgetApi } from './hooks/use_investigate_widget';
 import type { UseInvestigationApi } from './hooks/use_investigation';
 
 export enum ChromeOption {
@@ -84,5 +83,4 @@ export interface InvestigatePublicStart {
     from: string;
     to: string;
   }) => UseInvestigationApi;
-  useInvestigateWidget: () => UseInvestigateWidgetApi | undefined;
 }

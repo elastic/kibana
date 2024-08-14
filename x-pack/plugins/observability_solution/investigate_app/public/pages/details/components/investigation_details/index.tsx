@@ -38,7 +38,6 @@ function InvestigationDetailsWithUser({
   const { mutateAsync: addInvestigationNote } = useAddInvestigationNote();
   const handleAddInvestigationNote = async (note: string) => {
     await addInvestigationNote({ investigationId, note: { content: note } });
-    // todo: move following to mutate hook
     await addNote(note);
   };
 
