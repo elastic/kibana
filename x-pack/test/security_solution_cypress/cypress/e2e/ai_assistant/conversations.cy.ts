@@ -24,6 +24,7 @@ import {
   selectRule,
   assertErrorToastShown,
   updateConversationTitle,
+  assertSystemPrompt,
 } from '../../tasks/assistant';
 import { deleteConversations } from '../../tasks/api_calls/assistant';
 import {
@@ -43,7 +44,6 @@ import { login } from '../../tasks/login';
 import {
   CONNECTOR_MISSING_CALLOUT,
   PROMPT_CONTEXT_BUTTON,
-  SYSTEM_PROMPT,
   USER_PROMPT,
 } from '../../screens/ai_assistant';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
@@ -84,7 +84,7 @@ describe(
         openAssistant();
         assertNewConversation(false, 'Welcome');
         assertConnectorSelected(azureConnectorAPIPayload.name);
-        cy.get(SYSTEM_PROMPT).should('have.text', 'Default system prompt');
+        assertSystemPrompt('Default system prompt');
         cy.get(USER_PROMPT).should('not.have.text');
       });
       it('When invoked from rules page', () => {
@@ -94,7 +94,7 @@ describe(
           openAssistant('rule');
           assertNewConversation(false, 'Detection Rules');
           assertConnectorSelected(azureConnectorAPIPayload.name);
-          cy.get(SYSTEM_PROMPT).should('have.text', 'Default system prompt');
+          assertSystemPrompt('Default system prompt');
           cy.get(USER_PROMPT).should('have.text', EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS);
           cy.get(PROMPT_CONTEXT_BUTTON(0)).should('have.text', RULE_MANAGEMENT_CONTEXT_DESCRIPTION);
         });
@@ -107,7 +107,7 @@ describe(
         openAssistant('alert');
         assertNewConversation(false, 'Alert summary');
         assertConnectorSelected(azureConnectorAPIPayload.name);
-        cy.get(SYSTEM_PROMPT).should('have.text', 'Default system prompt');
+        assertSystemPrompt('Default system prompt');
         cy.get(USER_PROMPT).should(
           'have.text',
           EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N

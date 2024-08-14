@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FindConversationsResponse } from '@kbn/elastic-assistant-common';
+import { FindConversationsResponse, FindPromptsResponse } from '@kbn/elastic-assistant-common';
 import { getSpaceUrl } from '../space';
 import { rootRequest } from './common';
 
@@ -25,7 +25,6 @@ export const deleteConversations = () => {
           return conversation.id;
         });
 
-        //  /api/security_ai_assistant/current_user/conversations/_bulk_action
         if (ids.length) {
           rootRequest({
             method: 'POST',
@@ -40,6 +39,38 @@ export const deleteConversations = () => {
               'x-elastic-internal-origin': 'security-solution',
               'elastic-api-version': '1',
             },
+            body: {
+              delete: { ids },
+            },
+          });
+        }
+      }
+    });
+  });
+};
+
+export const getPrompts = (spaceId?: string) =>
+  rootRequest<FindPromptsResponse>({
+    method: 'GET',
+    url: spaceId
+      ? getSpaceUrl(spaceId, `api/security_ai_assistant/prompts/_find`)
+      : `api/security_ai_assistant/prompts/_find`,
+  });
+
+export const deletePrompts = () => {
+  cy.currentSpace().then((spaceId) => {
+    getPrompts(spaceId).then(($response) => {
+      if ($response.body) {
+        const ids = $response.body.data.map((prompt) => {
+          return prompt.id;
+        });
+
+        if (ids.length) {
+          rootRequest({
+            method: 'POST',
+            url: spaceId
+              ? getSpaceUrl(spaceId, `api/security_ai_assistant/prompts/_bulk_action`)
+              : `api/security_ai_assistant/prompts/_bulk_action`,
             body: {
               delete: { ids },
             },

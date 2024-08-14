@@ -30,6 +30,15 @@ import {
   CHAT_CONTEXT_MENU,
   CLEAR_CHAT,
   CONFIRM_CLEAR_CHAT,
+  SYSTEM_PROMPT_SELECT,
+  SYSTEM_PROMPT,
+  CREATE_SYSTEM_PROMPT,
+  SYSTEM_PROMPT_TITLE_INPUT,
+  SYSTEM_PROMPT_BODY_INPUT,
+  CONVERSATION_MULTI_SELECTOR,
+  SELECT_CONVERSATION_FROM_MULTI_SELECTOR,
+  MODAL_SAVE_BUTTON,
+  SYSTEM_PROMPT_SETTINGS_TITLE,
 } from '../screens/ai_assistant';
 import { TOASTER } from '../screens/alerts_detection_rules';
 
@@ -73,12 +82,12 @@ export const assertNewConversation = (isWelcome: boolean, title: string) => {
   cy.get(CONVERSATION_TITLE + ' h2').should('have.text', title);
 };
 
-export const assertMessageSent = (message: string, hasDefaultPrompt = false) => {
+export const assertMessageSent = (message: string, hasDefaultPrompt = false, prompt?: string) => {
   cy.get(CONVERSATION_MESSAGE)
     .first()
     .should(
       'have.text',
-      hasDefaultPrompt ? `${DEFAULT_SYSTEM_PROMPT_NON_I18N}\n${message}` : message
+      hasDefaultPrompt ? `${prompt ?? DEFAULT_SYSTEM_PROMPT_NON_I18N}\n${message}` : message
     );
 };
 export const clearSystemPrompt = () => {
@@ -109,6 +118,36 @@ export const selectConversation = (conversationName: string) => {
   cy.get(CONVERSATION_SELECT(conversationName)).click();
   cy.get(CONVERSATION_TITLE + ' h2').should('have.text', conversationName);
   cy.get(FLYOUT_NAV_TOGGLE).click();
+};
+
+export const assertSystemPrompt = (systemPrompt: string) => {
+  cy.get(SYSTEM_PROMPT).should('have.text', systemPrompt);
+};
+
+export const selectSystemPrompt = (systemPrompt: string) => {
+  cy.get(SYSTEM_PROMPT).click();
+  cy.get(SYSTEM_PROMPT_SELECT(systemPrompt)).click();
+  assertSystemPrompt(systemPrompt);
+};
+
+export const createSystemPrompt = (
+  title: string,
+  prompt: string,
+  defaultConversations?: string[]
+) => {
+  cy.get(SYSTEM_PROMPT).click();
+  cy.get(CREATE_SYSTEM_PROMPT).click();
+  cy.get(SYSTEM_PROMPT_TITLE_INPUT).type(`${title}{enter}`);
+  cy.get(SYSTEM_PROMPT_BODY_INPUT).type(prompt);
+  if (defaultConversations && defaultConversations.length) {
+    cy.get(CONVERSATION_MULTI_SELECTOR).click();
+    defaultConversations.forEach((conversation) => {
+      cy.get(SELECT_CONVERSATION_FROM_MULTI_SELECTOR(conversation)).click();
+    });
+    cy.get(SYSTEM_PROMPT_SETTINGS_TITLE).click();
+  }
+  cy.get(MODAL_SAVE_BUTTON).click();
+  // assertSystemPrompt(title);
 };
 
 export const assertConnectorSelected = (connectorName: string) => {

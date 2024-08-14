@@ -31,3 +31,14 @@ export const NEW_CHAT = '[data-test-subj="newChatFromOverlay"]';
 export const CHAT_CONTEXT_MENU = '[data-test-subj="chat-context-menu"]';
 export const CLEAR_CHAT = '[data-test-subj="clear-chat"]';
 export const CONFIRM_CLEAR_CHAT = '[data-test-subj="confirmModalConfirmButton"]';
+export const SYSTEM_PROMPT_SELECT = (c: string) => `[data-test-subj="systemPrompt-${c}"]`;
+export const CREATE_SYSTEM_PROMPT = '[data-test-subj="addSystemPrompt"]';
+export const SYSTEM_PROMPT_TITLE_INPUT =
+  '[data-test-subj="systemPromptSelector"] [data-test-subj="comboBoxSearchInput"]';
+export const SYSTEM_PROMPT_BODY_INPUT = '[data-test-subj="systemPromptModalPromptText"]';
+export const CONVERSATION_MULTI_SELECTOR =
+  '[data-test-subj="conversationMultiSelector"] [data-test-subj="comboBoxSearchInput"]';
+export const SELECT_CONVERSATION_FROM_MULTI_SELECTOR = (c: string) =>
+  `[data-test-subj="conversationMultiSelectorOption-${c}"]`;
+export const SYSTEM_PROMPT_SETTINGS_TITLE = `h2[data-test-subj="systemPromptSettingsTitle"]`;
+export const MODAL_SAVE_BUTTON = '[data-test-subj="save-button"]';
