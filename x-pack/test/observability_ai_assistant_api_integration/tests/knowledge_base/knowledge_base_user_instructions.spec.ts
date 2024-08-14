@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { kbnTestConfig } from '@kbn/test';
 import { sortBy } from 'lodash';
-import { Conversation, Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import { Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { clearKnowledgeBase, createKnowledgeBaseModel, deleteKnowledgeBaseModel } from './helpers';
@@ -190,12 +190,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('when a user instruction exist and a conversation is created', () => {
       let proxy: LlmProxy;
       let connectorId: string;
-      let conversation: Conversation;
 
       const userInstructionText =
         'Be polite and use language that is easy to understand. Never disagree with the user.';
 
-      before(async () => {
+      async function getConversationForUser(username: string) {
+        const apiClient = getScopedApiClientForUsername(username);
+
+        // the user instruction is always created by "editor" user
         await observabilityAIAssistantAPIClient
           .editorUser({
             endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
@@ -236,26 +238,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
         ];
 
-        const createResponse = await observabilityAIAssistantAPIClient
-          .editorUser({
-            endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
-            params: {
-              body: {
-                messages,
-                connectorId,
-                persist: true,
-                screenContexts: [],
-              },
+        const createResponse = await apiClient({
+          endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
+          params: {
+            body: {
+              messages,
+              connectorId,
+              persist: true,
+              screenContexts: [],
             },
-          })
-          .expect(200);
+          },
+        }).expect(200);
 
         await proxy.waitForAllInterceptorsSettled();
         const conversationCreatedEvent = getConversationCreatedEvent(createResponse.body);
-
         const conversationId = conversationCreatedEvent.conversation.id;
 
-        const res = await observabilityAIAssistantAPIClient.editorUser({
+        const res = await apiClient({
           endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
           params: {
             path: {
@@ -264,21 +263,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
         });
 
-        conversation = res.body;
-      });
+        const conversation = res.body;
+        return conversation;
+      }
 
       after(async () => {
         await deleteLLMProxyConnector({ supertest, connectorId, proxy, log });
       });
 
       it('adds the instruction to the system prompt', async () => {
+        const conversation = await getConversationForUser('editor');
         const systemMessage = conversation.messages.find(
           (message) => message.message.role === MessageRole.System
-        );
-        expect(systemMessage?.message.content).to.contain(userInstructionText);
+        )!;
+        expect(systemMessage.message.content).to.contain(userInstructionText);
       });
 
       it('does not add the instruction to the context', async () => {
+        const conversation = await getConversationForUser('editor');
         const contextMessage = conversation.messages.find(
           (message) => message.message.name === CONTEXT_FUNCTION_NAME
         );
@@ -289,6 +291,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         // there should be no suggestions at all
         expect(JSON.parse(contextMessage?.message.data!).suggestions.length).to.be(0);
+      });
+
+      it('does not add the instruction conversation for other users', async () => {
+        const conversation = await getConversationForUser('john');
+        const systemMessage = conversation.messages.find(
+          (message) => message.message.role === MessageRole.System
+        )!;
+
+        expect(systemMessage.message.content).to.not.contain(userInstructionText);
+        expect(conversation.messages.length).to.be(5);
       });
     });
   });
