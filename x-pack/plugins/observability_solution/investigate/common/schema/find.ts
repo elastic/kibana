@@ -9,6 +9,7 @@ import { investigationResponseSchema } from './investigation';
 
 const findInvestigationsParamsSchema = t.partial({
   query: t.partial({
+    alertId: t.string,
     page: t.string,
     perPage: t.string,
   }),
