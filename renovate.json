@@ -210,8 +210,8 @@
     {
       "groupName": "CodeQL",
       "matchDepNames": [
-        github/codeql-action/analyze,
-        github/codeql-action/init
+        "github/codeql-action/analyze",
+        "github/codeql-action/init"
       ],
       "reviewers": ["team:kibana-security"],
       "matchBaseBranches": ["main"],
