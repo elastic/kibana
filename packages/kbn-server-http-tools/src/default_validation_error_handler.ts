@@ -43,7 +43,7 @@ export function defaultValidationErrorHandler(
   //
   // The Hapi code we're 'overwriting' can be found here:
   //     https://github.com/hapijs/hapi/blob/master/lib/validation.js#L102
-  if (err && err.name === 'ValidationError' && err.hasOwnProperty('output')) {
+  if (err && err.name === 'ValidationError' && Object.hasOwn(err, 'output')) {
     const validationError: HapiValidationError = err as HapiValidationError;
     const validationKeys: string[] = [];
 
