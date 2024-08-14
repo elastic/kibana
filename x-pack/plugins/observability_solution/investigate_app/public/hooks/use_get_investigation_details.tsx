@@ -6,30 +6,26 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { FindInvestigationsResponse } from '@kbn/investigate-plugin/common';
+import { GetInvestigationResponse } from '@kbn/investigate-plugin/common/schema/get';
 import { investigationKeys } from './query_key_factory';
 import { useKibana } from './use_kibana';
 
-const DEFAULT_PAGE_SIZE = 25;
-
-export interface InvestigationListParams {
-  page?: number;
-  perPage?: number;
+export interface FetchInvestigationParams {
+  id: string;
 }
 
-export interface UseFetchInvestigationListResponse {
+export interface UseFetchInvestigationResponse {
   isInitialLoading: boolean;
   isLoading: boolean;
   isRefetching: boolean;
   isSuccess: boolean;
   isError: boolean;
-  data: FindInvestigationsResponse | undefined;
+  data: GetInvestigationResponse | undefined;
 }
 
-export function useFetchInvestigationList({
-  page = 1,
-  perPage = DEFAULT_PAGE_SIZE,
-}: InvestigationListParams = {}): UseFetchInvestigationListResponse {
+export function useFetchInvestigation({
+  id,
+}: FetchInvestigationParams): UseFetchInvestigationResponse {
   const {
     core: {
       http,
@@ -38,17 +34,10 @@ export function useFetchInvestigationList({
   } = useKibana();
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
-    queryKey: investigationKeys.list({
-      page,
-      perPage,
-    }),
+    queryKey: investigationKeys.fetch({ id }),
     queryFn: async ({ signal }) => {
-      return await http.get<FindInvestigationsResponse>(`/api/observability/investigations`, {
+      return await http.get<GetInvestigationResponse>(`/api/observability/investigations/${id}`, {
         version: '2023-10-31',
-        query: {
-          ...(page !== undefined && { page }),
-          ...(perPage !== undefined && { perPage }),
-        },
         signal,
       });
     },
@@ -63,7 +52,7 @@ export function useFetchInvestigationList({
     },
     onError: (error: Error) => {
       toasts.addError(error, {
-        title: 'Something went wrong while fetching Investigations',
+        title: 'Something went wrong while fetching Investigation',
       });
     },
   });

@@ -6,30 +6,23 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { FindInvestigationsResponse } from '@kbn/investigate-plugin/common';
-import { investigationKeys } from './query_key_factory';
+import { BASE_RAC_ALERTS_API_PATH, EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import { useKibana } from './use_kibana';
 
-const DEFAULT_PAGE_SIZE = 25;
-
-export interface InvestigationListParams {
-  page?: number;
-  perPage?: number;
+export interface AlertParams {
+  id: string;
 }
 
-export interface UseFetchInvestigationListResponse {
+export interface UseFetchAlertResponse {
   isInitialLoading: boolean;
   isLoading: boolean;
   isRefetching: boolean;
   isSuccess: boolean;
   isError: boolean;
-  data: FindInvestigationsResponse | undefined;
+  data: EcsFieldsResponse | undefined | null;
 }
 
-export function useFetchInvestigationList({
-  page = 1,
-  perPage = DEFAULT_PAGE_SIZE,
-}: InvestigationListParams = {}): UseFetchInvestigationListResponse {
+export function useFetchAlert({ id }: AlertParams): UseFetchAlertResponse {
   const {
     core: {
       http,
@@ -38,16 +31,11 @@ export function useFetchInvestigationList({
   } = useKibana();
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
-    queryKey: investigationKeys.list({
-      page,
-      perPage,
-    }),
+    queryKey: ['fetchAlert', id],
     queryFn: async ({ signal }) => {
-      return await http.get<FindInvestigationsResponse>(`/api/observability/investigations`, {
-        version: '2023-10-31',
+      return await http.get<EcsFieldsResponse>(BASE_RAC_ALERTS_API_PATH, {
         query: {
-          ...(page !== undefined && { page }),
-          ...(perPage !== undefined && { perPage }),
+          id,
         },
         signal,
       });
@@ -63,9 +51,10 @@ export function useFetchInvestigationList({
     },
     onError: (error: Error) => {
       toasts.addError(error, {
-        title: 'Something went wrong while fetching Investigations',
+        title: 'Something went wrong while fetching alert',
       });
     },
+    enabled: Boolean(id),
   });
 
   return {

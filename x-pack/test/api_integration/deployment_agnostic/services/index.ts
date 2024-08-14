@@ -10,6 +10,7 @@ import { deploymentAgnosticServices } from './deployment_agnostic_services';
 import { DataViewApiProvider } from './data_view_api';
 import { SloApiProvider } from './slo_api';
 import { AlertingApiProvider } from './alerting_api';
+import { RoleScopedSupertestProvider, SupertestWithRoleScope } from './role_scoped_supertest';
 
 export type {
   InternalRequestHeader,
@@ -24,7 +25,9 @@ export const services = {
   alertingApi: AlertingApiProvider,
   dataViewApi: DataViewApiProvider,
   sloApi: SloApiProvider,
+  roleScopedSupertest: RoleScopedSupertestProvider,
   // create a new deployment-agnostic service and load here
 };
 
+export type SupertestWithRoleScopeType = SupertestWithRoleScope;
 export type DeploymentAgnosticCommonServices = typeof services;
