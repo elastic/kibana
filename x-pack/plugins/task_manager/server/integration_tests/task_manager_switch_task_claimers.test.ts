@@ -93,14 +93,14 @@ describe('switch task claiming strategies', () => {
     const setupResultMget = await setupKibanaServer({
       xpack: {
         task_manager: {
-          claim_strategy: 'unsafe_mget',
+          claim_strategy: 'mget',
         },
       },
     });
     kibanaServer = setupResultMget.kibanaServer;
 
     taskClaimingOpts = TaskClaimingMock.mock.calls[1][0];
-    expect(taskClaimingOpts.strategy).toBe('unsafe_mget');
+    expect(taskClaimingOpts.strategy).toBe('mget');
 
     // inject a task to run and ensure it is claimed and run
     const id2 = uuidV4();
@@ -136,7 +136,7 @@ describe('switch task claiming strategies', () => {
     const setupResultMget = await setupTestServers({
       xpack: {
         task_manager: {
-          claim_strategy: 'unsafe_mget',
+          claim_strategy: 'mget',
         },
       },
     });
@@ -144,7 +144,7 @@ describe('switch task claiming strategies', () => {
     let kibanaServer = setupResultMget.kibanaServer;
     let taskClaimingOpts: TaskClaimingOpts = TaskClaimingMock.mock.calls[0][0];
 
-    expect(taskClaimingOpts.strategy).toBe('unsafe_mget');
+    expect(taskClaimingOpts.strategy).toBe('mget');
 
     mockTaskTypeRunFn.mockImplementation(() => {
       return { state: {} };
@@ -255,14 +255,14 @@ describe('switch task claiming strategies', () => {
     const setupResultMget = await setupKibanaServer({
       xpack: {
         task_manager: {
-          claim_strategy: 'unsafe_mget',
+          claim_strategy: 'mget',
         },
       },
     });
     kibanaServer = setupResultMget.kibanaServer;
 
     taskClaimingOpts = TaskClaimingMock.mock.calls[1][0];
-    expect(taskClaimingOpts.strategy).toBe('unsafe_mget');
+    expect(taskClaimingOpts.strategy).toBe('mget');
 
     // task doc should still exist and be running
     const task = await kibanaServer.coreStart.elasticsearch.client.asInternalUser.get<{
@@ -294,7 +294,7 @@ describe('switch task claiming strategies', () => {
     const setupResultMget = await setupTestServers({
       xpack: {
         task_manager: {
-          claim_strategy: 'unsafe_mget',
+          claim_strategy: 'mget',
         },
       },
     });
@@ -302,7 +302,7 @@ describe('switch task claiming strategies', () => {
     let kibanaServer = setupResultMget.kibanaServer;
     let taskClaimingOpts: TaskClaimingOpts = TaskClaimingMock.mock.calls[0][0];
 
-    expect(taskClaimingOpts.strategy).toBe('unsafe_mget');
+    expect(taskClaimingOpts.strategy).toBe('mget');
 
     mockTaskTypeRunFn.mockImplementation(async () => {
       await new Promise((resolve) => setTimeout(resolve, 2000));
