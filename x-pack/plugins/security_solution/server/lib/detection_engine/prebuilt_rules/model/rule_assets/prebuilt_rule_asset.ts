@@ -108,7 +108,6 @@ export const PrebuiltRuleAsset = PrebuiltAssetBaseProps.and(TypeSpecificFields).
   })
 );
 
-
 function createUpgradableRuleFieldsPayloadByType() {
   const baseFields = Object.keys(PrebuiltAssetBaseProps.shape);
 
@@ -137,7 +136,6 @@ function createUpgradableRuleFieldsPayloadByType() {
  */
 export const UPGRADABLE_FIELDS_PAYLOAD_BY_RULE_TYPE = createUpgradableRuleFieldsPayloadByType();
 
-
 /**
  * Fields which are not part of the RuleUpgradeSpecifierFields schema, and are handled
  * manually during the upgrade workflow.
@@ -150,7 +148,7 @@ const NON_UPGRADABLE_FIELDS: string[] = [
   'items_per_search',
   'version',
   'type',
-  'to'
+  'to',
 ];
 
 function createRuleUpgradeSpecifierFields() {
@@ -158,7 +156,7 @@ function createRuleUpgradeSpecifierFields() {
     Object.values(UPGRADABLE_FIELDS_PAYLOAD_BY_RULE_TYPE).flatMap((fields: string[]) => fields)
   );
 
-  NON_UPGRADABLE_FIELDS.forEach(field => allUpgradableFields.delete(field));
+  NON_UPGRADABLE_FIELDS.forEach((field) => allUpgradableFields.delete(field));
 
   return allUpgradableFields;
 }
@@ -171,6 +169,6 @@ function createRuleUpgradeSpecifierFields() {
  * Note that some of the fields of the PrebuiltRuleAsset schema are not upgradable in the update workflow
  * of the /upgrade/_perform endpoint (and therefore nor part of RuleUpgradeSpecifierFields) so they are
  * manually excluded from the list of upgradable fields.
- * 
+ *
  */
 export const RULE_UPGRADE_SPECIFIER_FIELDS = createRuleUpgradeSpecifierFields();
