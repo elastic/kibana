@@ -1619,9 +1619,6 @@
       "namespace": {
         "type": "keyword"
       },
-      "output_id": {
-        "type": "keyword"
-      },
       "overrides": {
         "index": false,
         "type": "flattened"
@@ -1706,6 +1703,9 @@
         "type": "keyword"
       },
       "namespace": {
+        "type": "keyword"
+      },
+      "output_id": {
         "type": "keyword"
       },
       "overrides": {
