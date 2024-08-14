@@ -16,7 +16,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('compression', () => {
     before(async () => {
       supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
-        withInternalHeaders: true,
         withCustomHeaders: { 'accept-encoding': 'gzip' },
       });
     });
