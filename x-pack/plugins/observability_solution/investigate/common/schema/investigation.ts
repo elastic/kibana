@@ -5,15 +5,18 @@
  * 2.0.
  */
 import * as t from 'io-ts';
+import { alertOriginSchema, blankOriginSchema } from './origin';
 
 const investigationResponseSchema = t.type({
   id: t.string,
   title: t.string,
   createdAt: t.number,
   createdBy: t.string,
-  parameters: t.type({
+  params: t.type({
     timeRange: t.type({ from: t.number, to: t.number }),
   }),
+  origin: t.union([alertOriginSchema, blankOriginSchema]),
+  status: t.union([t.literal('ongoing'), t.literal('closed')]),
 });
 
 type InvestigationResponse = t.OutputOf<typeof investigationResponseSchema>;
