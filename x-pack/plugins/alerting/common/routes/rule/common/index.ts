@@ -11,10 +11,6 @@ export {
   ruleExecutionStatusValues,
   ruleExecutionStatusErrorReason,
   ruleExecutionStatusWarningReason,
-  MIN_LOOK_BACK_WINDOW,
-  MAX_LOOK_BACK_WINDOW,
-  MIN_STATUS_CHANGE_THRESHOLD,
-  MAX_STATUS_CHANGE_THRESHOLD,
 } from './constants/latest';
 
 export { flappingSchema } from './flapping/schemas/latest';
@@ -35,10 +31,6 @@ export {
   ruleExecutionStatusValues as ruleExecutionStatusValuesV1,
   ruleExecutionStatusErrorReason as ruleExecutionStatusErrorReasonV1,
   ruleExecutionStatusWarningReason as ruleExecutionStatusWarningReasonV1,
-  MIN_LOOK_BACK_WINDOW as MIN_LOOK_BACK_WINDOW_V1,
-  MAX_LOOK_BACK_WINDOW as MAX_LOOK_BACK_WINDOW_V1,
-  MIN_STATUS_CHANGE_THRESHOLD as MIN_STATUS_CHANGE_THRESHOLD_V1,
-  MAX_STATUS_CHANGE_THRESHOLD as MAX_STATUS_CHANGE_THRESHOLD_V1,
 } from './constants/v1';
 
 export { flappingSchema as flappingSchemaV1 } from './flapping/schemas/v1';

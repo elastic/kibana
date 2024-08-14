@@ -17,7 +17,7 @@ import {
   MAX_STATUS_CHANGE_THRESHOLD,
   MIN_LOOK_BACK_WINDOW,
   MIN_STATUS_CHANGE_THRESHOLD,
-} from '../../../common/routes/rule/common/constants/latest';
+} from '@kbn/alerting-types/flapping/v1';
 import {
   RulesSettings,
   RulesSettingsFlapping,

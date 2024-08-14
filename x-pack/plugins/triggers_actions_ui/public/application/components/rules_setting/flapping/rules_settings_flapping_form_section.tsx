@@ -15,7 +15,7 @@ import {
   MAX_STATUS_CHANGE_THRESHOLD,
   MIN_LOOK_BACK_WINDOW,
   MIN_STATUS_CHANGE_THRESHOLD,
-} from '@kbn/alerting-plugin/common';
+} from '@kbn/alerting-types/flapping/latest';
 import { RulesSettingsRange } from '../rules_settings_range';
 
 type OnChangeKey = keyof Omit<RulesSettingsFlappingProperties, 'enabled'>;

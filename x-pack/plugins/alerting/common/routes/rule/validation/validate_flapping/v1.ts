@@ -6,11 +6,11 @@
  */
 
 import {
-  MIN_LOOK_BACK_WINDOW_V1,
-  MAX_LOOK_BACK_WINDOW_V1,
-  MIN_STATUS_CHANGE_THRESHOLD_V1,
-  MAX_STATUS_CHANGE_THRESHOLD_V1,
-} from '../../common';
+  MIN_LOOK_BACK_WINDOW as MIN_LOOK_BACK_WINDOW_V1,
+  MAX_LOOK_BACK_WINDOW as MAX_LOOK_BACK_WINDOW_V1,
+  MIN_STATUS_CHANGE_THRESHOLD as MIN_STATUS_CHANGE_THRESHOLD_V1,
+  MAX_STATUS_CHANGE_THRESHOLD as MAX_STATUS_CHANGE_THRESHOLD_V1,
+} from '@kbn/alerting-types/flapping/v1';
 
 export const validateFlapping = (flapping: {
   look_back_window: number;

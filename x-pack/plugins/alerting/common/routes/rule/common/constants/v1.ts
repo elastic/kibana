@@ -43,11 +43,6 @@ export const ruleExecutionStatusWarningReason = {
   MAX_QUEUED_ACTIONS: 'maxQueuedActions',
 } as const;
 
-export const MIN_LOOK_BACK_WINDOW = 2;
-export const MAX_LOOK_BACK_WINDOW = 20;
-export const MIN_STATUS_CHANGE_THRESHOLD = 2;
-export const MAX_STATUS_CHANGE_THRESHOLD = 20;
-
 export type RuleNotifyWhen = (typeof ruleNotifyWhen)[keyof typeof ruleNotifyWhen];
 export type RuleLastRunOutcomeValues =
   (typeof ruleLastRunOutcomeValues)[keyof typeof ruleLastRunOutcomeValues];

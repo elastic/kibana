@@ -40,13 +40,6 @@ export * from './rule_circuit_breaker_error_message';
 export * from './maintenance_window_scoped_query_error_message';
 export * from './action_ref_prefix';
 
-export {
-  MIN_LOOK_BACK_WINDOW,
-  MAX_LOOK_BACK_WINDOW,
-  MIN_STATUS_CHANGE_THRESHOLD,
-  MAX_STATUS_CHANGE_THRESHOLD,
-} from './routes/rule/common';
-
 export type {
   MaintenanceWindowModificationMetadata,
   DateRange,

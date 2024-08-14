@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { rRuleRequestSchemaV1 } from '../../../r_rule';
-import { validateSnoozeSchedule } from '../../validation/validate_snooze_schedule/v1';
+import { validateSnoozeScheduleV1 } from '../../validation';
 
 export const ruleSnoozeScheduleSchema = schema.object(
   {
@@ -15,5 +15,5 @@ export const ruleSnoozeScheduleSchema = schema.object(
     duration: schema.number(),
     rRule: rRuleRequestSchemaV1,
   },
-  { validate: validateSnoozeSchedule }
+  { validate: validateSnoozeScheduleV1 }
 );

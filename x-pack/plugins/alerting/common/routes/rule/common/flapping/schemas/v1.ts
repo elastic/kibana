@@ -11,8 +11,8 @@ import {
   MAX_LOOK_BACK_WINDOW as MAX_LOOK_BACK_WINDOW_V1,
   MIN_STATUS_CHANGE_THRESHOLD as MIN_STATUS_CHANGE_THRESHOLD_V1,
   MAX_STATUS_CHANGE_THRESHOLD as MAX_STATUS_CHANGE_THRESHOLD_V1,
-} from '../../constants/v1';
-import { validateFlappingV1 } from '../../../validation';
+} from '@kbn/alerting-types/flapping/v1';
+import { validateFlapping as validateFlappingV1 } from '../../../validation/validate_flapping/v1';
 
 export const flappingSchema = schema.object(
   {
