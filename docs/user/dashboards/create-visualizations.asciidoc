@@ -51,10 +51,10 @@ Use one of the editors to create visualizations of your data. Each editor varies
 
 .3+| Observability
 | SLO overview
-| 
+| Visualize a selected SLO’s health, including name, current SLI value, target, and status.
 
 | SLO Alerts
-| 
+| Visualize one or more SLO alerts, including status, rule name, duration, and reason. In addition, configure and update alerts, or create cases directly from the panel.
 
 | SLO Error Budget
 | 
@@ -87,7 +87,8 @@ There are also some common options that you can configure on the various types o
 [[save-to-visualize-library]]
 === Save to the Visualize Library
 
-To use a panel on other dashboards and *Canvas* workpads, you can save it to the *Visualize Library*. When panels are saved in the *Visualize Library*, image:dashboard/images/visualize-library-icon.png[Visualize Library icon] appears in the panel header.
+To use a panel on other dashboards and *Canvas* workpads, you can save it to the *Visualize Library*. 
+//When panels are saved in the *Visualize Library*, image:dashboard/images/visualize-library-icon.png[Visualize Library icon] appears in the panel header.
 
 If you created the panel from the dashboard:
 

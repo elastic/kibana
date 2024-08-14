@@ -225,7 +225,8 @@ When enabled, provides access to the experimental *Labs* features for *Canvas*.
 
 [[labs-dashboard-defer-below-fold]]`labs:dashboard:deferBelowFold`::
 When enabled, the panels that appear below the fold are loaded when they become visible on the dashboard.
-_Below the fold_ refers to panels that are not immediately visible when you open a dashboard, but become visible as you scroll. For additional information, refer to <<dashboard-troubleshooting,Improve dashboard loading time>>.
+_Below the fold_ refers to panels that are not immediately visible when you open a dashboard, but become visible as you scroll. 
+//For additional information, refer to <<dashboard-troubleshooting,Improve dashboard loading time>>.
 
 [[labs-dashboard-enable-ui]]`labs:dashboard:enable_ui`::
 When enabled, provides access to the experimental *Labs* features for *Dashboard*.

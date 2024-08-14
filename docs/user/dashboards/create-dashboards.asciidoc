@@ -12,12 +12,12 @@ TIP: If you don't have data at hand and still want to explore dashboards, you ca
 
 * have sufficient permissions on the **Dashboard** feature. If that's not the case, you might get a read-only indicator. A {kib} administrator can <<kibana-privileges,grant you the required privileges>>.
 
-include::dashboard-best-practices.asciidoc[]
+//include::dashboard-best-practices.asciidoc[]
 
 [[create-dashboard]]
 == Create a dashboard
 
-To make your dashboard experience as good as possible for you and users who will view it, check the <<dashboard-best-practices,dashboard best practices>>. 
+//To make your dashboard experience as good as possible for you and users who will view it, check the <<dashboard-best-practices,dashboard best practices>>. 
 
 . Open the *Dashboard* page in {kib}.
 
@@ -27,7 +27,7 @@ When you create a dashboard, you are automatically in edit mode and can make cha
 [[create-panels-with-lens]]
 . Add content to the dashboard. You have several options covered in more details in the <<panels-editors,Visualizations section>>:
 ** **Create visualization**. This option is a shortcut to create a chart using **Lens**, the default visualization editor in {kib}.
-** **Add panel**. Choose one of the available editors to add and configure content to your dashboard.
+** **Add panel**. Choose one of the available panels to add and configure content to your dashboard.
 ** **Add from library**. Select existing content that has already been configured and saved to the **Visualize Library**.
 +
 NOTE: When you add search results from *Discover* to dashboards, the results are not aggregated.
@@ -43,8 +43,8 @@ NOTE: When you add search results from *Discover* to dashboards, the results are
 *** *Use margins between panels* &mdash; Adds a margin of space between each panel.
 *** *Show panel titles* &mdash; Displays the titles in the panel headers.
 *** *Sync color palettes across panels* &mdash; Applies the same color palette to all panels on the dashboard.
-*** *Sync cursor across panels* &mdash; When you hover your cursor over a *Lens*, *TSVB*, aggregation-based, or *Timelion* XY or heatmap chart, the cursor on all other related dashboard charts automatically appears.
-*** *Sync tooltips across panels* &mdash; When you hover your cursor over a *Lens*, *TSVB*, aggregation-based, or *Timelion* XY chart, the tooltips on all other related dashboard charts automatically appears.
+*** *Sync cursor across panels* &mdash; When you hover your cursor over a time series chart or a heatmap, the cursor on all other related dashboard charts automatically appears.
+*** *Sync tooltips across panels* &mdash; When you hover your cursor over a *Lens* chart, the tooltips on all other related dashboard charts automatically appears.
 
 .. Click *Apply*. 
 
@@ -64,7 +64,6 @@ TIP: When looking for a specific dashboard, you can filter them by tag or by cre
 . When you open an existing dashboard, you are in view mode. To make changes to the dashboard, click *Edit* in the toolbar. 
 
 . Make the changes you need to the dashboard.
-
 [[save-dashboards]]
 . **Save** the dashboard. You can then leave the **Edit** mode and *Switch to view mode*. 
 
@@ -72,7 +71,9 @@ TIP: When looking for a specific dashboard, you can filter them by tag or by cre
 [[reset-the-dashboard]]
 === Reset dashboard changes
 
-To remove any dashboard changes you've made, reset the dashboard to the last saved changes.
+When editing a dashboard, you can revert any changes you've made since the last save using **Reset dashboards**.
+
+NOTE: Once changes are saved, you can no longer revert them in one click, and instead have to edit the dashboard manually.
 
 . In the toolbar, click *Reset*.
 
@@ -98,7 +99,9 @@ In the toolbar, click *Edit*, then use the following options:
 
 * To resize, click the resize control, then drag to the new dimensions.
 
-* To maximize to fullscreen, open the panel menu, then click *More > Maximize panel*.
+* To maximize to full screen, open the panel menu, then click *More > Maximize panel*.
++
+TIP: If you <<share-the-dashboard,share>> a dashboard while viewing a full screen panel, the generated link will directly open the same panel in full screen mode.
 
 [[duplicate-panels]]
 === Duplicate panels
@@ -115,8 +118,6 @@ Cloned panels appear next to the original panel, and move the other panels to pr
 . In the toolbar, click *Edit*.
 
 . Open the panel menu, then select *Clone panel*. 
-+
-When cloned panels are saved in the *Visualize Library*, image:dashboard/images/visualize-library-icon.png[Visualize Library icon] appears in the header.
 
 [float]
 [[copy-to-dashboard]]

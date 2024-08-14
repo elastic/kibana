@@ -1,11 +1,12 @@
-= Use dashboards
+= Use and filter dashboards
 
 [float]
 [[search-or-filter-your-data]]
 == Search and filter your dashboard data
 
-{kib} supports several ways to search your data and apply {es} filters. You can combine the filters with any panel
-filter to display the data want to you see.
+{kib} supports several ways to search and filter the data displayed in a dashboard. 
+
+//You can combine the filters with any panel filter to display the data want to you see.
 
 For more information about {kib} and {es} filters, refer to <<kibana-concepts-analysts,{kib} concepts>>.
 
@@ -51,6 +52,61 @@ When you download visualization panels with multiple layers, each layer produces
 
 .. To view the requests in *Console*, click *Request*, then click *Open in Console*.
 
+[float]
+== Use available controls
+
+Dashboard authors can <<add-controls,add various types of additional controls>> to help you filter the data that you want to visualize.
+
+[float]
+[[filter-the-data-with-options-list-controls]]
+=== Filter the data with Options list controls
+Filter the data with one or more options that you select.
+
+. Open the Options list dropdown.
+
+. Select the available options.
++
+The *Exists* query returns all documents that contain an indexed value for the field. 
+
+. Select how to filter the options.
+
+* To display only the data for the options you selected, click *Include*.
+
+* To exclude the data for the options you selected, click *Exclude*.
+
+. To clear the selections, click image:images/dashboard_controlsClearSelections_8.3.0.png[The icon to clear all selected options in the Options list].
+
+. To display only the options you selected in the dropdown, click image:images/dashboard_showOnlySelectedOptions_8.3.0.png[The icon to display only the options you have selected in the Options list].
+
+[float]
+[[filter-the-data-with-range-slider-controls]]
+=== Filter the data with Range slider controls
+Filter the data within a specified range of values.
+
+. On the Range slider, click a value.
+
+. Move the sliders to specify the values you want to display.
++
+The dashboard displays only the data for the range of values you specified.
+
+. To clear the specified values, click image:images/dashboard_controlsClearSelections_8.3.0.png[The icon to clear all specified values in the Range slider].
+
+[float]
+[[filter-the-data-with-time-slider-controls]]
+=== Filter the data with time slider controls
+Filter the data within a specified range of time.
+
+. To view a different time range, click the time slider, then move the sliders to specify the time range you want to display.
+
+. To advance the time range forward, click image:images/dashboard_timeSliderControl_advanceForward_8.5.0.png[The icon to advance the time range forward].
+
+. To advance the time range backward, click image:images/dashboard_timeSliderControl_advanceBackward_8.5.0.png[The icon to advance the time range backward].
+
+. To animate the data changes over time, click image:images/dashboard_timeSliderControl_animate_8.5.0.png[The icon to clear all specified values in the Range slider].
+
+. To clear the specified values, click image:images/dashboard_controlsClearSelections_8.3.0.png[The icon to clear all specified values in the Range slider].
+
+[float]
 == Full screen mode
 
 Full screen mode is awesome, it should be documented.
