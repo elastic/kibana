@@ -455,4 +455,5 @@ export const ecsTestState = {
   packageName: 'testpackage',
   dataStreamName: 'testDataStream',
   formattedSamples: '{"test1": "test1"}',
+  parsedRawSamples: '{"test1": "test1"}',
 };
