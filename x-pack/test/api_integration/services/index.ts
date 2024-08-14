@@ -22,7 +22,6 @@ import { IngestPipelinesProvider } from './ingest_pipelines';
 import { IndexManagementProvider } from './index_management';
 import { DataViewApiProvider } from './data_view_api';
 import { SloApiProvider } from './slo';
-import { SloApiProvider as SloApiProviderNew } from './slo_api';
 import { AlertingApiProvider } from './alerting_api';
 import { SecuritySolutionApiProvider } from './security_solution_api.gen';
 
@@ -45,5 +44,4 @@ export const services = {
   slo: SloApiProvider,
   securitySolutionApi: SecuritySolutionApiProvider,
   alertingApi: AlertingApiProvider,
-  sloApi: SloApiProviderNew,
 };
