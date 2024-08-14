@@ -82,7 +82,12 @@ describe('TaskPool', () => {
     });
 
     test('uses WorkerCapacity to calculate capacity when strategy is default', () => {
-      new TaskPool({ capacity$: of(20), definitions, logger, strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY });
+      new TaskPool({
+        capacity$: of(20),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY,
+      });
 
       expect(CostCapacityModule.CostCapacity).not.toHaveBeenCalled();
       expect(WorkerCapacityModule.WorkerCapacity).toHaveBeenCalledTimes(1);
