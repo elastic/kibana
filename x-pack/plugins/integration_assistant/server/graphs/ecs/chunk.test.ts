@@ -5,32 +5,9 @@
  * 2.0.
  */
 
-import { merge, mergeAndChunkSamples } from './chunk';
+import { mergeAndChunkSamples } from './chunk';
 
 describe('test chunks', () => {
-  it('merge()', async () => {
-    const target = {
-      a: 1,
-      b: 2,
-      c: {
-        d: 3,
-      },
-    };
-    const source = {
-      a: 2,
-      b: 3,
-      e: 4,
-    };
-    const result = merge(target, source);
-    expect(result).toEqual({
-      a: 1,
-      b: 2,
-      c: {
-        d: 3,
-      },
-      e: 4,
-    });
-  });
   it('mergeAndChunkSamples()', async () => {
     const objects = ['{"a": 1, "b": 2, "c": {"d": 3}}', '{"a": 2, "b": 3, "e": 4}'];
     const chunkSize = 2;

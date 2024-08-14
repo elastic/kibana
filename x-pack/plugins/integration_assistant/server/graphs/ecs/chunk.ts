@@ -6,40 +6,10 @@
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { merge } from '../../util/samples';
+
 interface NestedObject {
   [key: string]: any;
-}
-
-function isEmptyValue(value: unknown): boolean {
-  return (
-    value === null ||
-    value === undefined ||
-    (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0) ||
-    (Array.isArray(value) && value.length === 0)
-  );
-}
-
-export function merge(target: NestedObject, source: NestedObject): NestedObject {
-  for (const [key, sourceValue] of Object.entries(source)) {
-    const targetValue = target[key];
-    if (Array.isArray(sourceValue)) {
-      // Directly assign arrays
-      target[key] = sourceValue;
-    } else if (
-      typeof sourceValue === 'object' &&
-      sourceValue !== null &&
-      !Array.isArray(targetValue)
-    ) {
-      if (typeof targetValue !== 'object' || isEmptyValue(targetValue)) {
-        target[key] = merge({}, sourceValue);
-      } else {
-        target[key] = merge(targetValue, sourceValue);
-      }
-    } else if (!(key in target) || (isEmptyValue(targetValue) && !isEmptyValue(sourceValue))) {
-      target[key] = sourceValue;
-    }
-  }
-  return target;
 }
 
 // Takes an array of JSON strings and merges them into a single object.

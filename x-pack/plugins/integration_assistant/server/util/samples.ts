@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as yaml from 'js-yaml';
 import type { CategorizationState, EcsMappingState, RelatedState } from '../types';
 
@@ -159,4 +160,53 @@ export function generateFields(mergedDocs: string): string {
     .map((key) => recursiveParse(doc[key], [key]));
 
   return yaml.dump(fieldsStructure, { sortKeys: false });
+}
+
+function isEmptyValue(value: unknown): boolean {
+  return (
+    value === null ||
+    value === undefined ||
+    (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0) ||
+    (Array.isArray(value) && value.length === 0)
+  );
+}
+
+export function merge(
+  target: Record<string, any>,
+  source: Record<string, any>
+): Record<string, unknown> {
+  for (const [key, sourceValue] of Object.entries(source)) {
+    const targetValue = target[key];
+    if (Array.isArray(sourceValue)) {
+      // Directly assign arrays
+      target[key] = sourceValue;
+    } else if (
+      typeof sourceValue === 'object' &&
+      sourceValue !== null &&
+      !Array.isArray(targetValue)
+    ) {
+      if (typeof targetValue !== 'object' || isEmptyValue(targetValue)) {
+        target[key] = merge({}, sourceValue);
+      } else {
+        target[key] = merge(targetValue, sourceValue);
+      }
+    } else if (!(key in target) || (isEmptyValue(targetValue) && !isEmptyValue(sourceValue))) {
+      target[key] = sourceValue;
+    }
+  }
+  return target;
+}
+
+export function mergeSamples(objects: any[]): string {
+  let result: Record<string, unknown> = {};
+
+  for (const obj of objects) {
+    let sample: Record<string, unknown> = obj;
+    if (typeof obj === 'string') {
+      sample = JSON.parse(obj);
+    }
+    result = merge(result, sample);
+  }
+
+  return JSON.stringify(result, null, 2);
 }
