@@ -15,7 +15,7 @@ export {
   removeDirSync,
 } from './files';
 
-export { generateFields, mergeSamples } from './samples';
+export { generateFields } from './samples';
 export { deepCopy, generateUniqueId } from './util';
 export { testPipeline } from './pipeline';
 export { combineProcessors } from './processors';
