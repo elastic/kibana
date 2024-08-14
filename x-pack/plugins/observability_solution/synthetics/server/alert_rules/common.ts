@@ -37,7 +37,7 @@ import {
 } from '../../common/runtime_types/alert_rules/common';
 import { getSyntheticsErrorRouteFromMonitorId } from '../../common/utils/get_synthetics_monitor_url';
 import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';
-import { AlertOverviewStatus, PendingConfigs } from './status_rule/status_rule_executor';
+import { AlertOverviewStatus } from './status_rule/status_rule_executor';
 import type { MonitorSummaryStatusRule } from './status_rule/types';
 
 export const updateState = (
@@ -165,7 +165,6 @@ export const setRecoveredAlertsContext = ({
   basePath,
   spaceId,
   staleDownConfigs,
-  pendingConfigs,
   upConfigs,
   dateFormat,
   tz,
@@ -182,7 +181,6 @@ export const setRecoveredAlertsContext = ({
   upConfigs: AlertOverviewStatus['upConfigs'];
   dateFormat: string;
   tz: string;
-  pendingConfigs: PendingConfigs;
 }) => {
   const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
   for (const recoveredAlert of recoveredAlerts) {
