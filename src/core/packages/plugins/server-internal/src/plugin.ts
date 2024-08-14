@@ -24,6 +24,7 @@ import type {
   PrebootPlugin,
 } from '@kbn/core-plugins-server';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
+import { Setup, Start } from '@kbn/core-di-common';
 import {
   createPluginInitializerModule,
   createPluginSetupModule,
@@ -76,6 +77,7 @@ export class PluginWrapper<
   private instance?:
     | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
     | PrebootPlugin<TSetup, TPluginsSetup>;
+  private container?: interfaces.Container;
 
   private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
   public readonly startDependencies = firstValueFrom(this.startDependencies$);
@@ -137,14 +139,16 @@ export class PluginWrapper<
     }
 
     if (this.definition.module) {
-      const container = (setupContext as CoreSetup).injection.getContainer();
-
-      container.load(this.definition.module);
-      container.load(createPluginInitializerModule(this.initializerContext));
-      container.load(createPluginSetupModule(setupContext as CoreSetup));
+      this.container = (setupContext as CoreSetup).injection.getContainer();
+      this.container.load(this.definition.module);
+      this.container.load(createPluginInitializerModule(this.initializerContext));
+      this.container.load(createPluginSetupModule(setupContext as CoreSetup));
     }
 
-    return this.instance?.setup(setupContext as CoreSetup<TPluginsStart, TStart>, plugins);
+    return (
+      this.instance?.setup(setupContext as CoreSetup<TPluginsStart, TStart>, plugins) ??
+      (this.container?.getAsync(Setup) as TSetup)
+    );
   }
 
   /**
@@ -166,23 +170,18 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" is a preboot plugin and cannot be started.`);
     }
 
-    if (this.definition.module) {
-      startContext.injection.getContainer()?.load(createPluginStartModule(startContext));
-    }
+    this.container?.load(createPluginStartModule(startContext));
 
-    if (!this.instance) {
-      return;
-    }
-
-    const startContract = this.instance.start(startContext, plugins);
-    if (isPromise(startContract)) {
-      return startContract.then((resolvedContract) => {
+    const contract =
+      this.instance?.start(startContext, plugins) ?? (this.container?.getAsync(Start) as TStart);
+    if (isPromise(contract)) {
+      return contract.then((resolvedContract) => {
         this.startDependencies$.next([startContext, plugins, resolvedContract]);
-        return resolvedContract;
+        return resolvedContract!;
       });
     } else {
-      this.startDependencies$.next([startContext, plugins, startContract]);
-      return startContract;
+      this.startDependencies$.next([startContext, plugins, contract]);
+      return contract;
     }
   }
 
@@ -194,11 +193,10 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" can't be stopped since it isn't set up.`);
     }
 
-    if (typeof this.instance?.stop === 'function') {
-      await this.instance.stop();
-    }
-
+    await this.instance?.stop?.();
+    this.container?.unbindAll();
     this.instance = undefined;
+    this.container = undefined;
   }
 
   public getConfigDescriptor(): PluginConfigDescriptor | null {
