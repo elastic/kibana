@@ -9,7 +9,12 @@
 
 import { mockInitializer, mockPlugin, mockPluginReader } from './plugin.test.mocks';
 
+import { type interfaces, ContainerModule } from 'inversify';
 import { DiscoveredPlugin, PluginType } from '@kbn/core-base-common';
+import { PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
+import { Contract } from '@kbn/core-di-internal';
+import { injectionServiceMock } from '@kbn/core-di-mocks';
+import { CoreSetup, CoreStart, PluginInitializer } from '@kbn/core-di-browser';
 import { createPluginInitializerContextMock } from './test_helpers';
 import { PluginWrapper } from './plugin';
 
@@ -32,6 +37,8 @@ function createManifest(
   } as DiscoveredPlugin;
 }
 
+let mockContainerModuleCallback: jest.MockedFunction<interfaces.ContainerModuleCallBack>;
+let pluginModule: interfaces.ContainerModule;
 let plugin: PluginWrapper<unknown, Record<string, unknown>>;
 const opaqueId = Symbol();
 const initializerContext = createPluginInitializerContextMock();
@@ -41,6 +48,8 @@ beforeEach(() => {
   mockPlugin.setup.mockClear();
   mockPlugin.start.mockClear();
   mockPlugin.stop.mockClear();
+  mockContainerModuleCallback = jest.fn();
+  pluginModule = new ContainerModule(mockContainerModuleCallback);
   plugin = new PluginWrapper(createManifest('plugin-a'), opaqueId, initializerContext);
 });
 
@@ -69,6 +78,25 @@ describe('PluginWrapper', () => {
     const deps = { otherDep: 'value' };
     await plugin.setup(context, deps);
     expect(mockPlugin.setup).toHaveBeenCalledWith(context, deps);
+  });
+
+  test('`setup` initializes the plugin container module', () => {
+    mockPluginReader.mockReturnValueOnce({ module: pluginModule });
+    mockContainerModuleCallback.mockImplementationOnce((bind) => {
+      bind(Contract)
+        .toConstantValue({ contract: 'yes' })
+        .whenTargetNamed(Setup as symbol);
+    });
+    const injection = injectionServiceMock.createInternalSetupContract();
+    const deps = { otherDep: 'value' };
+
+    expect(plugin.setup({ injection } as any, deps)).toEqual({ contract: 'yes' });
+    expect(mockContainerModuleCallback).toHaveBeenCalledTimes(1);
+
+    const container = injection.getContainer();
+    expect(container.get(PluginInitializer('opaqueId'))).toBe(initializerContext.opaqueId);
+    expect(container.get(CoreSetup('injection'))).toBeDefined();
+    expect(container.get(PluginSetup('otherDep'))).toBe('value');
   });
 
   test('`start` fails if setup is not called first', () => {
@@ -114,6 +142,28 @@ describe('PluginWrapper', () => {
     await startDependenciesCheck;
   });
 
+  test('`start` loads start dependencies into the plugin container', () => {
+    mockPluginReader.mockReturnValueOnce({ module: pluginModule });
+    mockContainerModuleCallback.mockImplementationOnce((bind) => {
+      bind(Contract)
+        .toConstantValue({})
+        .whenTargetNamed(Setup as symbol);
+
+      bind(Contract)
+        .toConstantValue({ contract: 'yes' })
+        .whenTargetNamed(Start as symbol);
+    });
+    const injection = injectionServiceMock.createInternalSetupContract();
+    const deps = { otherDep: 'value' };
+
+    plugin.setup({ injection } as any, {});
+
+    expect(plugin.start({ injection } as any, deps)).toEqual({ contract: 'yes' });
+    const container = injection.getContainer();
+    expect(container.get(CoreStart('injection'))).toBeDefined();
+    expect(container.get(PluginStart('otherDep'))).toBe('value');
+  });
+
   test('`stop` fails if plugin is not setup up', async () => {
     expect(() => plugin.stop()).toThrowErrorMatchingInlineSnapshot(
       `"Plugin \\"plugin-a\\" can't be stopped since it isn't set up."`
@@ -130,5 +180,27 @@ describe('PluginWrapper', () => {
     mockInitializer.mockReturnValueOnce({ setup: jest.fn(), start: jest.fn() } as any);
     await plugin.setup({} as any, {} as any);
     expect(() => plugin.stop()).not.toThrow();
+  });
+
+  test('`stop` cleans up the plugin container', () => {
+    mockPluginReader.mockReturnValueOnce({ module: pluginModule });
+    mockContainerModuleCallback.mockImplementationOnce((bind) => {
+      bind(Contract)
+        .toConstantValue({})
+        .whenTargetNamed(Setup as symbol);
+
+      bind(Contract)
+        .toConstantValue({ contract: 'yes' })
+        .whenTargetNamed(Start as symbol);
+    });
+    const injection = injectionServiceMock.createInternalSetupContract();
+    const container = injection.getContainer();
+
+    plugin.setup({ injection } as any, {});
+    plugin.start({ injection } as any, {});
+
+    expect(container.isBound(CoreSetup('injection'))).toBe(true);
+    plugin.stop();
+    expect(container.isBound(CoreSetup('injection'))).toBe(false);
   });
 });

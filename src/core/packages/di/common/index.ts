@@ -9,4 +9,12 @@
 
 export type { CoreDiServiceSetup, CoreDiServiceStart } from './src/contracts';
 export type { ServiceType } from './src/interfaces';
-export { Global, DiService, DiSetupService } from './src/services';
+export {
+  Global,
+  type GlobalService,
+  type GlobalServiceWithOptions,
+  DiService,
+  DiSetupService,
+  Setup,
+  Start,
+} from './src/services';

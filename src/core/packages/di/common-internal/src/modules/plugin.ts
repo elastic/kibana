@@ -6,14 +6,26 @@
  * Side Public License, v 1.
  */
 
+import { isObject } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { ContainerModule, type interfaces } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
-import { Global } from '@kbn/core-di-common';
+import {
+  Global,
+  type GlobalService,
+  type GlobalServiceWithOptions,
+  Setup,
+  Start,
+} from '@kbn/core-di-common';
 
 export const Context = Symbol('Context') as interfaces.ServiceIdentifier<interfaces.Container>;
 export const Id = Symbol('Id') as interfaces.ServiceIdentifier<PluginOpaqueId>;
 export const Plugin = Symbol('Plugin') as interfaces.ServiceIdentifier<interfaces.Container>;
 export const Scope = Symbol('Scope') as interfaces.ServiceIdentifier<interfaces.Container>;
+
+function isGlobalServiceWithOptions(service: GlobalService): service is GlobalServiceWithOptions {
+  return isObject(service) && Object.hasOwnProperty.call(service, 'service');
+}
 
 export class PluginModule extends ContainerModule {
   static getContext(container: interfaces.Container): interfaces.Container {
@@ -30,9 +42,24 @@ export class PluginModule extends ContainerModule {
   constructor() {
     super((bind, _unbind, _isBound, _rebind, _unbindAsync, onActivation) => {
       bind(Plugin).toDynamicValue(this.getScope).inRequestScope();
+      bind(Setup).toDynamicValue(this.getContract).inSingletonScope();
+      bind(Start).toDynamicValue(this.getContract).inSingletonScope();
       onActivation(Global, this.bindService);
     });
   }
+
+  protected getContract: interfaces.DynamicValue<Record<string, unknown>> = ({
+    container,
+    currentRequest: { target },
+  }) => {
+    const contract = target.serviceIdentifier === Setup ? 'setup' : 'start';
+    const globals = container.isCurrentBound(Global) ? container.getAll(Global) : [];
+
+    return globals
+      .filter(isGlobalServiceWithOptions)
+      .filter(({ name, stage }) => name && stage === contract)
+      .reduce((result, { name, service }) => set(result, name!, container.get(service)), {});
+  };
 
   protected getScope: interfaces.DynamicValue<interfaces.Container> = ({
     container,
@@ -51,10 +78,11 @@ export class PluginModule extends ContainerModule {
     return container.getNamed(Scope, name);
   };
 
-  protected bindService: interfaces.BindingActivation<interfaces.ServiceIdentifier<unknown>> = (
+  protected bindService: interfaces.BindingActivation<GlobalService> = (
     { container: scope },
-    service
+    definition
   ) => {
+    const service = isGlobalServiceWithOptions(definition) ? definition.service : definition;
     const context = scope.get(Context);
     const name = scope.get(Id);
     const index = this.getServicesCount(scope, service);
