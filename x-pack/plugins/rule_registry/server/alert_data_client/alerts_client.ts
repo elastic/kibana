@@ -1008,6 +1008,7 @@ export class AlertsClient {
       }
 
       const alertsSearchResponse = await this.searchAlerts({
+        featureIds,
         query,
         aggs,
         _source,
