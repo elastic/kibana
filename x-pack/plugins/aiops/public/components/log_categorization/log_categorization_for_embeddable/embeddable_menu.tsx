@@ -36,9 +36,9 @@ interface Props {
   reload: () => void;
 }
 
-const minimumTimeRangeOptions = Object.keys(MINIMUM_TIME_RANGE).map((value) => ({
-  inputDisplay: value,
-  value: value as MinimumTimeRangeOption,
+const minimumTimeRangeOptions = Object.entries(MINIMUM_TIME_RANGE).map(([key, { label }]) => ({
+  inputDisplay: label,
+  value: key as MinimumTimeRangeOption,
 }));
 
 export const EmbeddableMenu: FC<Props> = ({
@@ -62,7 +62,7 @@ export const EmbeddableMenu: FC<Props> = ({
         size="s"
         iconType="controlsHorizontal"
         onClick={() => togglePopover()}
-        // @ts-ignore - subdued does work
+        // @ts-expect-error - subdued does work
         color="subdued"
         aria-label={i18n.translate('xpack.aiops.logCategorization.embeddableMenu.aria', {
           defaultMessage: 'Pattern analysis options',
