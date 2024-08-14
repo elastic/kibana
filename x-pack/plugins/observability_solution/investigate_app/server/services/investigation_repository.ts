@@ -15,7 +15,7 @@ export interface InvestigationRepository {
   save(investigation: Investigation): Promise<void>;
   findById(id: string): Promise<Investigation>;
   deleteById(id: string): Promise<void>;
-  search(pagination: Pagination): Promise<Paginated<Investigation>>;
+  search(filter: string, pagination: Pagination): Promise<Paginated<Investigation>>;
 }
 
 export function investigationRepositoryFactory({
@@ -89,11 +89,12 @@ export function investigationRepositoryFactory({
       await soClient.delete(SO_INVESTIGATION_TYPE, response.saved_objects[0].id);
     },
 
-    async search(pagination: Pagination): Promise<Paginated<Investigation>> {
+    async search(filter: string, pagination: Pagination): Promise<Paginated<Investigation>> {
       const response = await soClient.find<StoredInvestigation>({
         type: SO_INVESTIGATION_TYPE,
         page: pagination.page,
         perPage: pagination.perPage,
+        filter,
       });
 
       return {
