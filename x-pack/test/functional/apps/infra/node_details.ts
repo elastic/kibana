@@ -659,24 +659,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               });
             });
 
-            [{ metric: 'cpuTotal' }, { metric: 'rxV2' }, { metric: 'txV2' }].forEach(
-              ({ metric }) => {
-                it(`Should not show for: ${metric}`, async () => {
-                  await navigateToNodeDetails('Jennys-MBP.fritz.box', 'host', {
-                    name: 'Jennys-MBP.fritz.box',
-                    incomingAlertMetric: metric,
-                  });
-
-                  await pageObjects.header.waitUntilLoadingHasFinished();
-
-                  await retry.try(async () => {
-                    expect(await pageObjects.assetDetails.legacyMetricAlertCalloutExists()).to.be(
-                      false
-                    );
-                  });
+            [{ metric: 'cpuV2' }, { metric: 'rxV2' }, { metric: 'txV2' }].forEach(({ metric }) => {
+              it(`Should not show for: ${metric}`, async () => {
+                await navigateToNodeDetails('Jennys-MBP.fritz.box', 'host', {
+                  name: 'Jennys-MBP.fritz.box',
+                  incomingAlertMetric: metric,
                 });
-              }
-            );
+
+                await pageObjects.header.waitUntilLoadingHasFinished();
+
+                await retry.try(async () => {
+                  expect(await pageObjects.assetDetails.legacyMetricAlertCalloutExists()).to.be(
+                    false
+                  );
+                });
+              });
+            });
           });
         });
       });
