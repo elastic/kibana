@@ -20,6 +20,7 @@ import {
   EuiLink,
   EuiCallOut,
   EuiSpacer,
+  EuiSelect,
 } from '@elastic/eui';
 
 import styled from 'styled-components';
@@ -32,6 +33,7 @@ import { isAdvancedVar } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
 
 import { PackagePolicyInputVarField } from './components';
+import { useOutputs } from './components/hooks';
 
 // on smaller screens, fields should be displayed in one column
 const FormGroupResponsiveFields = styled(EuiDescribedFormGroup)`
@@ -81,6 +83,14 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       });
     }
 
+    // Outputs
+    const {
+      isLoading: isOutputsLoading,
+      canUseOutputPerIntegration,
+      allowedOutputs,
+    } = useOutputs(packageInfo.name);
+
+    // Managed policy
     const isManaged = packagePolicy.is_managed;
 
     return validationResults ? (
@@ -245,6 +255,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
             {isShowingAdvanced ? (
               <EuiFlexItem>
                 <EuiFlexGroup direction="column" gutterSize="m">
+                  {/* Namespace  */}
                   <EuiFlexItem>
                     <EuiFormRow
                       isInvalid={!!validationResults.namespace}
@@ -264,7 +275,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                         ) : (
                           <FormattedMessage
                             id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLabel"
-                            defaultMessage="Change the default namespace inherited from the selected Agent policy. This setting changes the name of the integration's data stream. {learnMore}."
+                            defaultMessage="Change the default namespace inherited from the parent agent policy. This setting changes the name of the integration's data stream. {learnMore}."
                             values={{
                               learnMore: (
                                 <EuiLink
@@ -304,6 +315,49 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       />
                     </EuiFormRow>
                   </EuiFlexItem>
+
+                  {/* Output */}
+                  {canUseOutputPerIntegration && (
+                    <EuiFlexItem>
+                      <EuiFormRow
+                        label={
+                          <FormattedMessage
+                            id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyOutputInputLabel"
+                            defaultMessage="Output"
+                          />
+                        }
+                        helpText={
+                          <FormattedMessage
+                            id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyOutputHelpLabel"
+                            defaultMessage="Change the default output inherited from the parent agent policy. This setting changes where the integration's data is sent."
+                          />
+                        }
+                      >
+                        <EuiSelect
+                          data-test-subj="packagePolicyOutputInput"
+                          isLoading={isOutputsLoading}
+                          options={[
+                            {
+                              value: '',
+                              text: '',
+                            },
+                            ...allowedOutputs.map((output) => ({
+                              value: output.id,
+                              text: output.name,
+                            })),
+                          ]}
+                          value={packagePolicy.output_id || ''}
+                          onChange={(e) => {
+                            updatePackagePolicy({
+                              output_id: e.target.value.trim() || null,
+                            });
+                          }}
+                        />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                  )}
+
+                  {/* Data retention settings info */}
                   <EuiFlexItem>
                     <EuiFormRow
                       label={
