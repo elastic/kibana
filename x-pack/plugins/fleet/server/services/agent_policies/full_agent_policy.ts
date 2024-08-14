@@ -25,6 +25,7 @@ import type {
   FullAgentPolicyOutput,
   FleetProxy,
   FleetServerHost,
+  AgentPolicy,
 } from '../../types';
 import type {
   FullAgentPolicyMonitoring,
@@ -67,11 +68,17 @@ async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
   id: string,
-  options?: { standalone: boolean }
+  options?: { standalone?: boolean; agentPolicy?: AgentPolicy }
 ): Promise<FullAgentPolicy | null> {
   const standalone = options?.standalone ?? false;
 
-  const agentPolicy = await fetchAgentPolicy(soClient, id);
+  let agentPolicy: AgentPolicy | null;
+  if (options?.agentPolicy?.package_policies) {
+    agentPolicy = options.agentPolicy;
+  } else {
+    agentPolicy = await fetchAgentPolicy(soClient, id);
+  }
+
   if (!agentPolicy) {
     return null;
   }
