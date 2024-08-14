@@ -12,7 +12,7 @@ import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { omit } from 'lodash';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { ENABLE_ESQL, getIndexForESQLQuery, getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { showOpenSearchPanel } from './show_open_search_panel';
@@ -87,27 +87,30 @@ export const getTopNavLinks = ({
       : i18n.translate('discover.localMenu.esqlTooltipLabel', {
           defaultMessage: `ES|QL is Elastic's powerful new piped query language.`,
         }),
-    run: () => {
-      if (dataView) {
-        if (isEsqlMode) {
-          services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:back_to_classic_clicked`);
-          /**
-           * Display the transition modal if:
-           * - the user has not dismissed the modal
-           * - the user has opened and applied changes to the saved search
-           */
-          if (
-            shouldShowESQLToDataViewTransitionModal &&
-            !services.storage.get(ESQL_TRANSITION_MODAL_KEY)
-          ) {
-            state.internalState.transitions.setIsESQLToDataViewTransitionModalVisible(true);
-          } else {
-            state.actions.transitionFromESQLToDataView(dataView.id ?? '');
-          }
+    run: async () => {
+      if (isEsqlMode) {
+        services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:back_to_classic_clicked`);
+        /**
+         * Display the transition modal if:
+         * - the user has not dismissed the modal
+         * - the user has opened and applied changes to the saved search
+         */
+        if (
+          shouldShowESQLToDataViewTransitionModal &&
+          !services.storage.get(ESQL_TRANSITION_MODAL_KEY)
+        ) {
+          state.internalState.transitions.setIsESQLToDataViewTransitionModalVisible(true);
         } else {
-          state.actions.transitionFromDataViewToESQL(dataView);
-          services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:try_btn_clicked`);
+          state.actions.transitionFromESQLToDataView(dataView?.id ?? '');
         }
+      } else {
+        let dv = dataView;
+        if (!dv) {
+          const indexName = await getIndexForESQLQuery({ dataViews: services.dataViews });
+          dv = await getESQLAdHocDataview(`from ${indexName ?? '*'}`, services.dataViews);
+        }
+        state.actions.transitionFromDataViewToESQL(dv);
+        services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:try_btn_clicked`);
       }
     },
     testId: isEsqlMode ? 'switch-to-dataviews' : 'select-text-based-language-btn',
