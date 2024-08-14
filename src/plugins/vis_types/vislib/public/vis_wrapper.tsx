@@ -65,21 +65,20 @@ const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWra
     [handlers, visConfig]
   );
 
-  const renderChart = useMemo(
-    () =>
-      debounce(() => {
-        if (visController.current) {
-          visController.current.render(
-            visData,
-            visConfig,
-            handlers,
-            skipRenderComplete.current ? undefined : renderComplete
-          );
-        }
-        skipRenderComplete.current = true;
-      }, 100),
-    [handlers, renderComplete, skipRenderComplete, visConfig, visData]
-  );
+  const renderChart = useMemo(() => {
+    const shouldSkip = skipRenderComplete.current;
+    return debounce(() => {
+      if (visController.current) {
+        visController.current.render(
+          visData,
+          visConfig,
+          handlers,
+          shouldSkip ? undefined : renderComplete
+        );
+      }
+      skipRenderComplete.current = true;
+    }, 100);
+  }, [handlers, renderComplete, visConfig, visData]);
 
   const onResize: EuiResizeObserverProps['onResize'] = useCallback(() => {
     renderChart();
