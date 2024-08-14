@@ -2921,6 +2921,7 @@ describe('Package policy service', () => {
       version: 'WzYyMzcsMV0=',
       name: 'my-cis_kubernetes_benchmark',
       namespace: 'default',
+      output_id: null,
       description: '',
       package: {
         name: 'cis_kubernetes_benchmark',
@@ -5093,6 +5094,61 @@ describe('Package policy service', () => {
           sortOrder: 'desc',
           filter: 'one=two',
         })
+      );
+    });
+  });
+
+  describe('removeOutputFromAll', () => {
+    it('should update policies using deleted output', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const updateSpy = jest.spyOn(packagePolicyService, 'update');
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'package-policy-1',
+            attributes: {
+              name: 'policy1',
+              enabled: true,
+              policy_ids: ['agent-policy-1'],
+              output_id: 'output-id-123',
+              inputs: [],
+              package: { name: 'test-package', version: '1.0.0' },
+            },
+          },
+        ],
+      } as any);
+      soClient.get.mockImplementation((type, id, options): any => {
+        if (id === 'package-policy-1') {
+          return Promise.resolve({
+            id,
+            attributes: {
+              name: 'policy1',
+              enabled: true,
+              policy_ids: ['agent-policy-1'],
+              output_id: 'output-id-123',
+              inputs: [],
+              package: { name: 'test-package', version: '1.0.0' },
+            },
+          });
+        }
+      });
+
+      await packagePolicyService.removeOutputFromAll(soClient, esClient, 'output-id-123');
+
+      expect(updateSpy).toHaveBeenCalledTimes(1);
+      expect(updateSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'package-policy-1',
+        {
+          name: 'policy1',
+          enabled: true,
+          policy_id: 'agent-policy-1',
+          policy_ids: ['agent-policy-1'],
+          output_id: null,
+          inputs: [],
+        }
       );
     });
   });
