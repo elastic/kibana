@@ -1052,7 +1052,7 @@ describe('autocomplete', () => {
     ]);
 
     // GROK field
-    testSuggestions('FROM index1 | GROK f/', getFieldNamesByType(ESQL_STRING_TYPES), undefined, 20);
+    testSuggestions('FROM index1 | GROK f/', getFieldNamesByType(ESQL_STRING_TYPES), undefined);
 
     // KEEP (first field)
     testSuggestions('FROM index1 | KEEP f/', getFieldNamesByType('any'));
