@@ -8,11 +8,14 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { FieldSpec } from '@kbn/data-plugin/common';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getFieldFormat } from '../utils/get_field_format';
 import type { EventFieldsData } from '../../../../common/components/event_details/types';
 import { OverflowField } from '../../../../common/components/tables/helpers';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { MESSAGE_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
+import { FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID } from './test_ids';
+import { hasPreview, PreviewLink } from '../../shared/components/preview_link';
 
 export interface FieldValueCellProps {
   /**
@@ -53,6 +56,7 @@ export const TableFieldValueCell = memo(
     getLinkValue,
     values,
   }: FieldValueCellProps) => {
+    const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
     if (values == null) {
       return null;
     }
@@ -78,6 +82,12 @@ export const TableFieldValueCell = memo(
             <EuiFlexItem grow={false} key={`${i}-${value}`}>
               {data.field === MESSAGE_FIELD_NAME ? (
                 <OverflowField value={value} />
+              ) : isPreviewEnabled && hasPreview(data.field) ? (
+                <PreviewLink
+                  field={data.field}
+                  value={value}
+                  data-test-subj={`${FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID}-${i}`}
+                />
               ) : (
                 <FormattedFieldValue
                   contextId={`${contextId}-${eventId}-${data.field}-${i}-${value}`}

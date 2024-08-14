@@ -9,7 +9,6 @@ import React, { memo, useCallback } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import { useEuiTheme } from '@elastic/eui';
 import type { NetworkExpandableFlyoutProps } from './network_details';
-import { NetworkPanel, NetworkPanelKey } from './network_details';
 import { Flyouts } from './document_details/shared/constants/flyouts';
 import {
   DocumentDetailsIsolateHostPanelKey,
@@ -41,6 +40,7 @@ import type { HostPanelExpandableFlyoutProps } from './entity_details/host_right
 import { HostPanel, HostPanelKey, HostPreviewPanelKey } from './entity_details/host_right';
 import type { HostDetailsExpandableFlyoutProps } from './entity_details/host_details_left';
 import { HostDetailsPanel, HostDetailsPanelKey } from './entity_details/host_details_left';
+import { NetworkPanel, NetworkPanelKey } from './network_details';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
