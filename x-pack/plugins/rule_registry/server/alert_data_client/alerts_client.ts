@@ -26,7 +26,9 @@ import {
   AlertConsumers,
 } from '@kbn/rule-data-utils';
 
-import type {
+import {
+  AggregateName,
+  AggregationsAggregate,
   AggregationsMultiBucketAggregateBase,
   InlineScript,
   MappingRuntimeFields,
@@ -283,7 +285,7 @@ export class AlertsClient {
   /**
    * Searches alerts by id or query and audits the results
    */
-  private async searchAlerts({
+  private async searchAlerts<TAggregations = Record<AggregateName, AggregationsAggregate>>({
     id,
     query,
     aggs,
@@ -339,7 +341,7 @@ export class AlertsClient {
         };
       }
 
-      const result = await this.esClient.search<ParsedTechnicalFields>({
+      const result = await this.esClient.search<ParsedTechnicalFields, TAggregations>({
         index: index ?? '.alerts-*',
         ignore_unavailable: true,
         body: queryBody,
@@ -979,7 +981,10 @@ export class AlertsClient {
     }
   }
 
-  public async find<Params extends RuleTypeParams = never>({
+  public async find<
+    Params extends RuleTypeParams = never,
+    TAggregations = Record<AggregateName, AggregationsAggregate>
+  >({
     aggs,
     featureIds,
     index,
@@ -1011,7 +1016,7 @@ export class AlertsClient {
         }
       }
 
-      const alertsSearchResponse = await this.searchAlerts({
+      const alertsSearchResponse = await this.searchAlerts<TAggregations>({
         query,
         aggs,
         _source,
@@ -1090,7 +1095,10 @@ export class AlertsClient {
         `The number of documents is too high. Paginating through more than ${MAX_PAGINATED_ALERTS} documents is not possible.`
       );
     }
-    const searchResult = await this.find({
+    const searchResult = await this.find<
+      never,
+      { groupByFields: AggregationsMultiBucketAggregateBase<{ key: string }> }
+    >({
       featureIds,
       aggs: {
         groupByFields: {
@@ -1144,17 +1152,18 @@ export class AlertsClient {
       _source: false,
     });
     // Replace artificial uuid values with '--' in null-value buckets and mark them with `isNullGroup = true`
-    const groupsAggregation = searchResult.aggregations
-      ?.groupByFields as AggregationsMultiBucketAggregateBase<{ key: string }>;
-    const buckets = Array.isArray(groupsAggregation?.buckets)
-      ? groupsAggregation.buckets
-      : Object.values(groupsAggregation?.buckets ?? {});
-    buckets.forEach((bucket) => {
-      if (bucket.key === uniqueValue) {
-        bucket.key = '--';
-        (bucket as { isNullGroup?: boolean }).isNullGroup = true;
-      }
-    });
+    const groupsAggregation = searchResult.aggregations?.groupByFields;
+    if (groupsAggregation) {
+      const buckets = Array.isArray(groupsAggregation?.buckets)
+        ? groupsAggregation.buckets
+        : Object.values(groupsAggregation?.buckets ?? {});
+      buckets.forEach((bucket) => {
+        if (bucket.key === uniqueValue) {
+          bucket.key = '--';
+          (bucket as { isNullGroup?: boolean }).isNullGroup = true;
+        }
+      });
+    }
     return searchResult;
   }
 
