@@ -6,14 +6,16 @@
  */
 import * as t from 'io-ts';
 import { investigationResponseSchema } from './investigation';
+import { alertOriginSchema, blankOriginSchema } from './origin';
 
 const createInvestigationParamsSchema = t.type({
   body: t.type({
     id: t.string,
     title: t.string,
-    parameters: t.type({
+    params: t.type({
       timeRange: t.type({ from: t.number, to: t.number }),
     }),
+    origin: t.union([alertOriginSchema, blankOriginSchema]),
   }),
 });
 
