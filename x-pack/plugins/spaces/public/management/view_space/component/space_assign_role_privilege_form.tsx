@@ -86,27 +86,22 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
   const [assigningToRole, setAssigningToRole] = useState(false);
   const [privileges, setPrivileges] = useState<[RawKibanaPrivileges] | null>(null);
 
-  const selectedRolesHasPrivilegeConflict = useMemo(() => {
-    let privilegeAnchor: string;
-
-    return selectedRoles.reduce((result, selectedRole) => {
-      let rolePrivilege: string;
-
-      selectedRole.value!.kibana.forEach(({ spaces, base }) => {
-        // TODO: consider wildcard situations
-        if (spaces.includes(space.id!) && base.length) {
-          rolePrivilege = base[0];
+  const selectedRolesHasSpacePrivilegeConflict = useMemo(() => {
+    const combinedPrivilege = new Set(
+      selectedRoles.reduce((result, selectedRole) => {
+        let match: string[] = [];
+        for (let i = 0; i < selectedRole.value!.kibana.length; i++) {
+          if (selectedRole.value!.kibana[i].spaces.includes(space.id!)) {
+            match = selectedRole.value!.kibana[i].base;
+            break;
+          }
         }
 
-        if (!privilegeAnchor) {
-          setRoleSpacePrivilege(
-            (privilegeAnchor = rolePrivilege === '*' ? 'custom' : rolePrivilege)
-          );
-        }
-      });
+        return result.concat(match);
+      }, [] as string[])
+    );
 
-      return result || privilegeAnchor !== rolePrivilege;
-    }, false);
+    return combinedPrivilege.size > 1;
   }, [selectedRoles, space.id]);
 
   useEffect(() => {
@@ -134,20 +129,28 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
     }
   }, [onSaveCompleted, roleAPIClient, selectedRoles]);
 
-  useEffect(() => {
-    setSelectedRoles((prevSelectedRoles) => {
-      return structuredClone(prevSelectedRoles).map((selectedRole) => {
-        for (let i = 0; i < selectedRole.value!.kibana.length; i++) {
-          if (selectedRole.value!.kibana[i].spaces.includes(space.id!)) {
-            selectedRole.value!.kibana[i].base = [roleSpacePrivilege];
-            break;
-          }
-        }
+  const updateRoleSpacePrivilege = useCallback(
+    (spacePrivilege: KibanaRolePrivilege) => {
+      // persist select privilege for UI
+      setRoleSpacePrivilege(spacePrivilege);
 
-        return selectedRole;
+      // update preselected roles with new privilege
+      setSelectedRoles((prevSelectedRoles) => {
+        return structuredClone(prevSelectedRoles).map((selectedRole) => {
+          for (let i = 0; i < selectedRole.value!.kibana.length; i++) {
+            if (selectedRole.value!.kibana[i].spaces.includes(space.id!)) {
+              selectedRole.value!.kibana[i].base =
+                spacePrivilege === 'custom' ? [] : [spacePrivilege];
+              break;
+            }
+          }
+
+          return selectedRole;
+        });
       });
-    });
-  }, [roleSpacePrivilege, space.id]);
+    },
+    [space.id]
+  );
 
   const getForm = () => {
     return (
@@ -189,7 +192,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
           />
         </EuiFormRow>
         <>
-          {selectedRolesHasPrivilegeConflict && (
+          {selectedRolesHasSpacePrivilegeConflict && (
             <EuiFormRow>
               <EuiCallOut
                 color="warning"
@@ -254,7 +257,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
             }))}
             color="primary"
             idSelected={roleSpacePrivilege}
-            onChange={(id) => setRoleSpacePrivilege(id as KibanaRolePrivilege)}
+            onChange={(id) => updateRoleSpacePrivilege(id as KibanaRolePrivilege)}
             buttonSize="compressed"
             isFullWidth
           />

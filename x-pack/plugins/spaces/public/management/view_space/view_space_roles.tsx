@@ -78,9 +78,10 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features, isRe
       const spaceUnallocatedRoles = systemRoles.filter(
         (role) =>
           !role.metadata?._reserved &&
-          role.kibana.some((privileges) => {
-            return !privileges.spaces.includes(space.id) && !privileges.spaces.includes('*');
-          })
+          (!role.kibana.length ||
+            role.kibana.some((privileges) => {
+              return !privileges.spaces.includes(space.id) && !privileges.spaces.includes('*');
+            }))
       );
 
       setSpaceUnallocatedRole(spaceUnallocatedRoles);
@@ -131,6 +132,42 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features, isRe
     [features, i18nStart, notifications.toasts, overlays, space, spaceUnallocatedRole, theme]
   );
 
+  const removeRole = useCallback(
+    async (payload: Role[]) => {
+      const updateDoc = structuredClone(payload).map((roleDef) => {
+        roleDef.kibana = roleDef.kibana.filter(({ spaces }) => {
+          let spaceIdIndex: number;
+
+          if (spaces.length && (spaceIdIndex = spaces.indexOf(space.id)) > -1) {
+            if (spaces.length > 1) {
+              spaces.splice(spaceIdIndex, 1);
+              return true;
+            } else {
+              return false;
+            }
+          }
+          return true;
+        });
+
+        return roleDef;
+      });
+
+      await rolesAPIClient.current?.bulkUpdateRoles({ rolesUpdate: updateDoc }).then(() =>
+        notifications.toasts.addSuccess(
+          i18n.translate('xpack.spaces.management.spaceDetails.roles.removalSuccessMsg', {
+            defaultMessage:
+              'Removed {count, plural, one {role} other {{count} roles}} from {spaceName} space',
+            values: {
+              spaceName: space.name,
+              count: updateDoc.length,
+            },
+          })
+        )
+      );
+    },
+    [notifications.toasts, space.id, space.name]
+  );
+
   return (
     <React.Fragment>
       <EuiFlexGroup direction="column">
@@ -158,11 +195,11 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features, isRe
             assignedRoles={roles}
             onClickBulkEdit={showRolesPrivilegeEditor}
             onClickRowEditAction={(rowRecord) => showRolesPrivilegeEditor([rowRecord])}
-            onClickBulkRemove={(selectedRoles) => {
-              // TODO: add logic to remove selected roles from space
+            onClickBulkRemove={async (selectedRoles) => {
+              await removeRole(selectedRoles);
             }}
-            onClickRowRemoveAction={(rowRecord) => {
-              // TODO: add logic to remove single role from space
+            onClickRowRemoveAction={async (rowRecord) => {
+              await removeRole([rowRecord]);
             }}
             onClickAssignNewRole={async () => {
               if (!roleAPIClientInitialized) {
