@@ -209,64 +209,6 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
         }
 
         const { panels: newPanels, references } = await serializeAllPanelState(this, managed);
-
-        // const newPanels = await (async () => {
-        //   if (!managed) return nextPanels;
-        //   // this is a managed dashboard - unlink all by reference embeddables on clone
-        //   const unlinkedPanels: DashboardPanelMap = {};
-        //   for (const [panelId, panel] of Object.entries(nextPanels)) {
-        //     const duplicatedPanelState = await (async () => {
-        //       if (reactEmbeddableRegistryHasKey(panel.type)) {
-        //         const child = this.children$.value[panelId];
-
-        //         if (apiHasLibraryTransforms(child)) {
-        //           const byValueSerializedState = child.getByValueState();
-        //           if (panel.references) {
-        //             references.push(...prefixReferencesFromPanel(panelId, panel.references));
-        //           }
-        //           console.log('byValueSerializedStat', byValueSerializedState);
-        //           return {
-        //             type: panel.type,
-        //             explicitInput: {
-        //               ...byValueSerializedState,
-        //               title: newTitle,
-        //               id: panelId,
-        //             },
-        //           };
-        //         }
-
-        //         const runtimeSnapshot = (() => {
-        //           if (apiHasInPlaceLibraryTransforms(child))
-        //             return child.getByValueRuntimeSnapshot();
-        //           return apiHasSnapshottableState(child) ? child.snapshotRuntimeState() : {};
-        //         })();
-        //         const byValueSerializedState = apiHasSerializableState(child)
-        //           ? await child.serializeState(runtimeSnapshot)
-        //           : { rawState: {}, references: [] };
-        //         if (byValueSerializedState.references) {
-        //           references.push(
-        //             ...prefixReferencesFromPanel(panelId, byValueSerializedState.references)
-        //           );
-        //         }
-        //         return {
-        //           type: panel.type,
-        //           explicitInput: {
-        //             ...byValueSerializedState.rawState,
-        //             title: newTitle,
-        //             id: panelId,
-        //           },
-        //         };
-        //       } else {
-        //         return await duplicateLegacyInput(this, panel, panelId);
-        //       }
-        //     })();
-        //     // const duplicatedPanelState = await getByValuePanelState(this, panelId, panel);
-        //     unlinkedPanels[panelId] = { ...panel, ...duplicatedPanelState };
-        //   }
-        //   return unlinkedPanels;
-        // })();
-
-        console.log('new panels', newPanels, 'references', references);
         const beforeAddTime = window.performance.now();
 
         const saveResult = await saveDashboardState({

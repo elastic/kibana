@@ -847,7 +847,6 @@ export class DashboardContainer
     const { id, ...serializedState } = rawState;
     if (!rawState || Object.keys(serializedState).length === 0) return;
     const references = getReferencesForPanelId(childId, this.savedObjectReferences);
-    console.log('getseraizlied', childId, references);
     return {
       rawState,
       references,

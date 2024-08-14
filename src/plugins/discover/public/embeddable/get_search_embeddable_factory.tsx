@@ -60,7 +60,6 @@ export const getSearchEmbeddableFactory = ({
   > = {
     type: SEARCH_EMBEDDABLE_TYPE,
     deserializeState: async (serializedState) => {
-      console.log('deserialize', serializedState);
       return deserializeState({ serializedState, discoverServices });
     },
     buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {

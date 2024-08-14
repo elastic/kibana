@@ -11,7 +11,6 @@ import deepEqual from 'react-fast-compare';
 
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { SerializedPanelState } from '@kbn/presentation-containers';
-import { SerializedTimeRange, SerializedTitles } from '@kbn/presentation-publishing';
 import {
   SavedSearch,
   SavedSearchAttributes,
@@ -119,7 +118,6 @@ export const serializeState = async ({
       references: originalReferences,
     },
   });
-  console.log('references 2', references);
 
   return {
     rawState: {

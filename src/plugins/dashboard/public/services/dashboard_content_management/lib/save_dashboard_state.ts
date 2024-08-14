@@ -104,7 +104,6 @@ export const saveDashboardState = async ({
 
   let { panels, controlGroupInput } = currentState;
   let prefixedPanelReferences = panelReferences;
-  console.log('panelReferences', panelReferences);
   if (saveOptions.saveAsCopy) {
     const { panels: newPanels, references: newPanelReferences } = generateNewPanelIds(
       panels,
