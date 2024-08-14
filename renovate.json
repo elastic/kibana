@@ -455,7 +455,7 @@
       "matchDepNames": ["express", "swagger-jsdoc", "swagger-ui-express"],
       "reviewers": ["team:obs-entities"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "Team:obs-entities"],
+      "labels": ["release_note:skip", "team:obs-entities"],
       "enabled": true
     }
   ],
