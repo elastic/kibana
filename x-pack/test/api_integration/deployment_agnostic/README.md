@@ -105,6 +105,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
     after(async () => {
+      // always invalidate API key for the scoped role in the end
       await supertestWithAdminScope.destroy();
     });
     describe('against an application page', () => {

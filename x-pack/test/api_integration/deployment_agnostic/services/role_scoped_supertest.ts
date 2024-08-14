@@ -24,7 +24,6 @@ export class SupertestWithRoleScope {
   private readonly supertestWithoutAuth: SupertestWithoutAuthProviderType;
   private samlAuth: SamlAuthProviderType;
   private readonly options: RequestHeadersOptions;
-  private destroyed = false;
 
   constructor(
     roleAuthc: RoleCredentials,
@@ -42,7 +41,6 @@ export class SupertestWithRoleScope {
     if (this.roleAuthc) {
       await this.samlAuth.invalidateM2mApiKeyWithRoleScope(this.roleAuthc);
       this.roleAuthc = null;
-      this.destroyed = true;
     }
   }
 
@@ -71,7 +69,7 @@ export class SupertestWithRoleScope {
   }
 
   private request(method: 'post' | 'get' | 'put' | 'delete', url: string): Test {
-    if (this.destroyed) {
+    if (!this.roleAuthc) {
       throw new Error('Instance has been destroyed and cannot be used for making requests.');
     }
     const agent = this.supertestWithoutAuth[method](url);
