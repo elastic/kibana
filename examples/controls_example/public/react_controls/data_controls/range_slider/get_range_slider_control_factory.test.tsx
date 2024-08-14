@@ -7,22 +7,19 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, of } from 'rxjs';
+import { of } from 'rxjs';
 
 import { estypes } from '@elastic/elasticsearch';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { TimeRange } from '@kbn/es-query';
 import { SerializedPanelState } from '@kbn/presentation-containers';
-import { StateComparators } from '@kbn/presentation-publishing';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 
-import { ControlFetchContext } from '../../control_group/control_fetch';
-import { ControlGroupApi } from '../../control_group/types';
-import { ControlApiRegistration } from '../../types';
+import { getMockedBuildApi, getMockedControlGroupApi } from '../../mocks/control_mocks';
 import { getRangesliderControlFactory } from './get_range_slider_control_factory';
-import { RangesliderControlApi, RangesliderControlState } from './types';
+import { RangesliderControlState } from './types';
 
 const DEFAULT_TOTAL_RESULTS = 20;
 const DEFAULT_MIN = 0;
@@ -30,14 +27,9 @@ const DEFAULT_MAX = 1000;
 
 describe('RangesliderControlApi', () => {
   const uuid = 'myControl1';
-  const dashboardApi = {
-    timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
-  };
-  const controlGroupApi = {
-    controlFetch$: () => new BehaviorSubject<ControlFetchContext>({}),
-    ignoreParentSettings$: new BehaviorSubject(undefined),
-    parentApi: dashboardApi,
-  } as unknown as ControlGroupApi;
+
+  const controlGroupApi = getMockedControlGroupApi();
+
   const dataStartServiceMock = dataPluginMock.createStartContract();
   let totalResults = DEFAULT_TOTAL_RESULTS;
   let min: estypes.AggregationsSingleMetricAggregateBase['value'] = DEFAULT_MIN;
@@ -62,8 +54,8 @@ describe('RangesliderControlApi', () => {
     };
   });
   const mockDataViews = dataViewPluginMocks.createStartContract();
-  // @ts-ignore
-  mockDataViews.get = async (id: string): Promise<DataView> => {
+
+  mockDataViews.get = jest.fn().mockImplementation(async (id: string): Promise<DataView> => {
     if (id !== 'myDataViewId') {
       throw new Error(`no data view found for id ${id}`);
     }
@@ -74,7 +66,8 @@ describe('RangesliderControlApi', () => {
           {
             displayName: 'My field name',
             name: 'myFieldName',
-            type: 'string',
+            type: 'number',
+            toSpec: jest.fn(),
           },
         ].find((field) => fieldName === field.name);
       },
@@ -86,7 +79,8 @@ describe('RangesliderControlApi', () => {
         };
       },
     } as unknown as DataView;
-  };
+  });
+
   const factory = getRangesliderControlFactory({
     core: coreMock.createStart(),
     data: dataStartServiceMock,
@@ -99,28 +93,14 @@ describe('RangesliderControlApi', () => {
     max = DEFAULT_MAX;
   });
 
-  function buildApiMock(
-    api: ControlApiRegistration<RangesliderControlApi>,
-    nextComparitors: StateComparators<RangesliderControlState>
-  ) {
-    return {
-      ...api,
-      uuid,
-      parentApi: controlGroupApi,
-      unsavedChanges: new BehaviorSubject<Partial<RangesliderControlState> | undefined>(undefined),
-      resetUnsavedChanges: () => {},
-      type: factory.type,
-    };
-  }
-
-  describe('on initialize', () => {
+  describe('filters$', () => {
     test('should not set filters$ when value is not provided', async () => {
       const { api } = await factory.buildControl(
         {
           dataViewId: 'myDataView',
           fieldName: 'myFieldName',
         },
-        buildApiMock,
+        getMockedBuildApi(uuid, factory, controlGroupApi),
         uuid,
         controlGroupApi
       );
@@ -134,7 +114,7 @@ describe('RangesliderControlApi', () => {
           fieldName: 'myFieldName',
           value: ['5', '10'],
         },
-        buildApiMock,
+        getMockedBuildApi(uuid, factory, controlGroupApi),
         uuid,
         controlGroupApi
       );
@@ -169,7 +149,7 @@ describe('RangesliderControlApi', () => {
           fieldName: 'myFieldName',
           value: ['5', '10'],
         },
-        buildApiMock,
+        getMockedBuildApi(uuid, factory, controlGroupApi),
         uuid,
         controlGroupApi
       );
@@ -191,7 +171,7 @@ describe('RangesliderControlApi', () => {
           fieldName: 'myFieldName',
           value: ['5', '10'],
         },
-        buildApiMock,
+        getMockedBuildApi(uuid, factory, controlGroupApi),
         uuid,
         controlGroupApi
       );
@@ -209,7 +189,7 @@ describe('RangesliderControlApi', () => {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
         },
-        buildApiMock,
+        getMockedBuildApi(uuid, factory, controlGroupApi),
         uuid,
         controlGroupApi
       );
@@ -230,7 +210,7 @@ describe('RangesliderControlApi', () => {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
         },
-        buildApiMock,
+        getMockedBuildApi(uuid, factory, controlGroupApi),
         uuid,
         controlGroupApi
       );
@@ -245,7 +225,7 @@ describe('RangesliderControlApi', () => {
           fieldName: 'myFieldName',
           step: 1024,
         },
-        buildApiMock,
+        getMockedBuildApi(uuid, factory, controlGroupApi),
         uuid,
         controlGroupApi
       );
@@ -259,9 +239,11 @@ describe('RangesliderControlApi', () => {
       const CustomSettings = factory.CustomOptionsComponent!;
       const component = render(
         <CustomSettings
-          currentState={{}}
+          initialState={{} as RangesliderControlState}
+          field={{} as DataViewField}
           updateState={jest.fn()}
           setControlEditorValid={jest.fn()}
+          parentApi={controlGroupApi}
         />
       );
       expect(
@@ -274,9 +256,11 @@ describe('RangesliderControlApi', () => {
       const CustomSettings = factory.CustomOptionsComponent!;
       const component = render(
         <CustomSettings
-          currentState={{}}
+          initialState={{} as RangesliderControlState}
+          field={{} as DataViewField}
           updateState={jest.fn()}
           setControlEditorValid={setControlEditorValid}
+          parentApi={controlGroupApi}
         />
       );
 
@@ -285,7 +269,7 @@ describe('RangesliderControlApi', () => {
       });
       expect(setControlEditorValid).toBeCalledWith(false);
       fireEvent.change(component.getByTestId('rangeSliderControl__stepAdditionalSetting'), {
-        target: { value: '' },
+        target: { value: undefined },
       });
       expect(setControlEditorValid).toBeCalledWith(false);
       fireEvent.change(component.getByTestId('rangeSliderControl__stepAdditionalSetting'), {

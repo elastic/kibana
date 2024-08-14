@@ -24,6 +24,11 @@ import type {
 import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { UPGRADE_AGENT_FOR_RESPONDER } from '../../../../../common/translations';
 import type { CommandDefinition } from '../../../console';
+import { useUserPrivileges as _useUserPrivileges } from '../../../../../common/components/user_privileges';
+
+jest.mock('../../../../../common/components/user_privileges');
+
+const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
 describe('When using processes action from response actions console', () => {
   let mockedContext: AppContextTestRender;
@@ -35,6 +40,7 @@ describe('When using processes action from response actions console', () => {
   >;
   let consoleSelectors: ReturnType<typeof getConsoleSelectorsAndActionMock>;
   let consoleCommands: CommandDefinition[];
+  let userAuthzMock: ReturnType<AppContextTestRender['getUserPrivilegesMockSetter']>;
 
   const setConsoleCommands = (
     capabilities: EndpointCapabilities[] = [...ENDPOINT_CAPABILITIES],
@@ -56,6 +62,7 @@ describe('When using processes action from response actions console', () => {
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
+    userAuthzMock = mockedContext.getUserPrivilegesMockSetter(useUserPrivilegesMock);
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
     setConsoleCommands();
 
@@ -245,6 +252,20 @@ describe('When using processes action from response actions console', () => {
     beforeEach(() => {
       mockedContext.setExperimentalFlag({ responseActionsSentinelOneProcessesEnabled: true });
       setConsoleCommands([], 'sentinel_one');
+
+      const processesResponse = apiMocks.responseProvider.processes();
+      processesResponse.data.agentType = 'sentinel_one';
+      apiMocks.responseProvider.processes.mockReturnValue(processesResponse);
+      apiMocks.responseProvider.processes.mockClear();
+
+      const actionDetails = apiMocks.responseProvider.actionDetails({
+        path: '/api/endpoint/action/1.2.3',
+      });
+      actionDetails.data.agentType = 'sentinel_one';
+      apiMocks.responseProvider.actionDetails.mockReturnValue(actionDetails);
+      apiMocks.responseProvider.actionDetails.mockClear();
+
+      userAuthzMock.set({ canGetRunningProcesses: true });
     });
 
     it('should display processes command --help', async () => {
@@ -293,7 +314,7 @@ describe('When using processes action from response actions console', () => {
 
       await waitFor(() => {
         expect(renderResult.getByTestId('getProcessesSuccessCallout').textContent).toEqual(
-          'Click here to download(ZIP file passcode: elastic).' +
+          'Click here to download(ZIP file passcode: Elastic@123).' +
             'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
         );
       });

@@ -152,6 +152,7 @@ server.versioned.strictClientVersionCheck: false
 # Enforce single "default" space and disable feature visibility controls
 xpack.spaces.maxSpaces: 1
 xpack.spaces.allowFeatureVisibility: false
+xpack.spaces.allowSolutionVisibility: false
 
 # Only display console autocomplete suggestions for ES endpoints that are available in serverless
 console.autocompleteDefinitions.endpointsAvailability: serverless

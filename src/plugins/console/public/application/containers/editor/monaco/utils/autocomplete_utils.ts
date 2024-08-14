@@ -121,43 +121,50 @@ export const getUrlPathCompletionItems = (
     endColumn: column,
   });
 
+  // flag to only suggest index names
+  let onlyIndexNames = false;
   // get the method and previous url parts for context
   const { method, urlPathTokens } = parseLine(lineContent);
   // if the line ends with /, then we use all url path tokens for autocomplete suggestions
-  // otherwise, we want to ignore the last token
+  // otherwise, we don't use the last token for populating the autocomplete context
   if (!lineContent.trim().endsWith('/')) {
-    urlPathTokens.pop();
+    const lastToken = urlPathTokens.pop();
+    // if the last token contains a comma, only suggest index names
+    if (lastToken?.includes(',')) {
+      onlyIndexNames = true;
+    }
   }
-  const { autoCompleteSet } = populateContextForMethodAndUrl(method, urlPathTokens);
-
+  let { autoCompleteSet } = populateContextForMethodAndUrl(method, urlPathTokens);
+  autoCompleteSet = autoCompleteSet ?? [];
+  // filter out non index names items if needed
+  if (onlyIndexNames) {
+    autoCompleteSet = autoCompleteSet.filter((term) => term.meta === 'index');
+  }
   const wordUntilPosition = model.getWordUntilPosition(position);
   const range = {
-    startLineNumber: position.lineNumber,
+    startLineNumber: lineNumber,
     // replace the whole word with the suggestion
     startColumn: lineContent.endsWith('.')
       ? // if there is a dot at the end of the content, it's ignored in the wordUntilPosition
         wordUntilPosition.startColumn - 1
       : wordUntilPosition.startColumn,
-    endLineNumber: position.lineNumber,
-    endColumn: position.column,
+    endLineNumber: lineNumber,
+    endColumn: column,
   };
-  if (autoCompleteSet && autoCompleteSet.length > 0) {
-    return (
-      filterTermsWithoutName(autoCompleteSet)
-        // map autocomplete items to completion items
-        .map((item) => {
-          return {
-            label: item.name + '',
-            insertText: item.name + '',
-            detail: item.meta ?? i18nTexts.endpoint,
-            // the kind is only used to configure the icon
-            kind: monaco.languages.CompletionItemKind.Constant,
-            range,
-          };
-        })
-    );
-  }
-  return [];
+  return (
+    filterTermsWithoutName(autoCompleteSet)
+      // map autocomplete items to completion items
+      .map((item) => {
+        return {
+          label: item.name + '',
+          insertText: item.name + '',
+          detail: item.meta ?? i18nTexts.endpoint,
+          // the kind is only used to configure the icon
+          kind: monaco.languages.CompletionItemKind.Constant,
+          range,
+        };
+      })
+  );
 };
 
 /*
@@ -336,7 +343,16 @@ const getInsertText = (
   }
   let insertText = '';
   if (typeof name === 'string') {
-    insertText = bodyContent.endsWith('"') ? '' : '"';
+    const bodyContentLines = bodyContent.split('\n');
+    const currentContentLine = bodyContentLines[bodyContentLines.length - 1];
+    const incompleteFieldRegex = /.*"[^"]*$/;
+    if (incompleteFieldRegex.test(currentContentLine)) {
+      // The cursor is after an unmatched quote (e.g. '..."abc', '..."')
+      insertText = '';
+    } else {
+      // The cursor is at the beginning of a field so the insert text should start with a quote
+      insertText = '"';
+    }
     if (insertValue && insertValue !== '{' && insertValue !== '[') {
       insertText += `${insertValue}"`;
     } else {

@@ -27,7 +27,7 @@
         "label": "TryInConsoleButton",
         "description": [],
         "signature": [
-          "({ request, application, consolePlugin, sharePlugin, content, showIcon, link, }: ",
+          "({ request, application, consolePlugin, sharePlugin, content, showIcon, type, }: ",
           "TryInConsoleButtonProps",
           ") => JSX.Element | null"
         ],
@@ -40,7 +40,7 @@
             "id": "def-common.TryInConsoleButton.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  request,\n  application,\n  consolePlugin,\n  sharePlugin,\n  content,\n  showIcon = true,\n  link = false,\n}",
+            "label": "{\n  request,\n  application,\n  consolePlugin,\n  sharePlugin,\n  content = TRY_IN_CONSOLE,\n  showIcon = true,\n  type = 'emptyButton',\n}",
             "description": [],
             "signature": [
               "TryInConsoleButtonProps"

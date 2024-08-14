@@ -50,7 +50,7 @@ export const EMPTY_ALERT_TABLE = '[data-test-subj="alertsStateTableEmptyState"]'
 
 export const EXPAND_ALERT_BTN = '[data-test-subj="expand-event"]';
 
-export const TAKE_ACTION_BTN = '[data-test-subj="take-action-dropdown-btn"]';
+export const TAKE_ACTION_BTN = '[data-test-subj="securitySolutionFlyoutFooterDropdownButton"]';
 
 export const TAKE_ACTION_MENU = '[data-test-subj="takeActionPanelMenu"]';
 
@@ -225,7 +225,8 @@ export const FILTER_BY_ASSIGNEES_BUTTON = '[data-test-subj="filter-popover-butto
 export const ALERT_DETAILS_ASSIGN_BUTTON =
   '[data-test-subj="securitySolutionFlyoutHeaderAssigneesAddButton"]';
 
-export const ALERT_DETAILS_TAKE_ACTION_BUTTON = '[data-test-subj="take-action-dropdown-btn"]';
+export const ALERT_DETAILS_TAKE_ACTION_BUTTON =
+  '[data-test-subj="securitySolutionFlyoutFooterDropdownButton"]';
 
 export const USER_COLUMN = '[data-gridcell-column-id="user.name"]';
 export const TOOLTIP = '[data-test-subj="message-tool-tip"]';

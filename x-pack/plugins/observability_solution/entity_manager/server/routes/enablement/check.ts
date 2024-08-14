@@ -16,6 +16,7 @@ import {
 } from '../../../common/errors';
 import { findEntityDefinitions } from '../../lib/entities/find_entity_definition';
 import { builtInDefinitions } from '../../lib/entities/built_in';
+import { getClientsFromAPIKey } from '../../lib/utils';
 
 export function checkEntityDiscoveryEnabledRoute<T extends RequestHandlerContext>({
   router,
@@ -43,8 +44,7 @@ export function checkEntityDiscoveryEnabledRoute<T extends RequestHandlerContext
           return res.ok({ body: { enabled: false, reason: ERROR_API_KEY_NOT_VALID } });
         }
 
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-        const soClient = (await context.core).savedObjects.client;
+        const { esClient, soClient } = getClientsFromAPIKey({ apiKey, server });
 
         const entityDiscoveryState = await Promise.all(
           builtInDefinitions.map(async (builtInDefinition) => {

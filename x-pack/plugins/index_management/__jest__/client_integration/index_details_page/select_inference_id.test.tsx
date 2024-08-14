@@ -23,7 +23,14 @@ const mockDispatch = jest.fn();
 
 jest.mock('../../../public/application/app_context', () => ({
   useAppContext: jest.fn().mockReturnValue({
-    core: { application: {} },
+    core: {
+      application: {},
+      http: {
+        basePath: {
+          get: jest.fn().mockReturnValue('/base-path'),
+        },
+      },
+    },
     docLinks: {
       links: {
         enterpriseSearch: {

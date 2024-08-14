@@ -23,7 +23,6 @@ import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { publicConfigKeys } from '../common/plugin_config_types';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
 import { initInfraServer } from './infra_server';
-import { FrameworkFieldsAdapter } from './lib/adapters/fields/framework_fields_adapter';
 import { InfraServerPluginSetupDeps, InfraServerPluginStartDeps } from './lib/adapters/framework';
 import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapter';
 import { KibanaMetricsAdapter } from './lib/adapters/metrics/kibana_metrics_adapter';
@@ -33,7 +32,6 @@ import {
   LOGS_RULES_ALERT_CONTEXT,
   METRICS_RULES_ALERT_CONTEXT,
 } from './lib/alerting/register_rule_types';
-import { InfraFieldsDomain } from './lib/domains/fields_domain';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
 import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
 import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
@@ -210,9 +208,6 @@ export class InfraServerPlugin
     // and make them available via the request context so we can do away with
     // the wrapper classes
     const domainLibs: InfraDomainLibs = {
-      fields: new InfraFieldsDomain(new FrameworkFieldsAdapter(framework), {
-        sources,
-      }),
       logEntries: plugins.logsShared.logEntries,
       metrics: new InfraMetricsDomain(new KibanaMetricsAdapter(framework)),
     };

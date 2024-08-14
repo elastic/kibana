@@ -379,6 +379,254 @@
           },
           {
             "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.Walker.find",
+            "type": "Function",
+            "tags": [],
+            "label": "find",
+            "description": [
+              "\nFinds and returns the first node that matches the search criteria.\n"
+            ],
+            "signature": [
+              "(node: ",
+              "WalkerAstNode",
+              ", predicate: (node: ",
+              "ESQLProperNode",
+              ") => boolean) => ",
+              "ESQLProperNode",
+              " | undefined"
+            ],
+            "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.Walker.find.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "node",
+                "description": [
+                  "AST node to start the search from."
+                ],
+                "signature": [
+                  "WalkerAstNode"
+                ],
+                "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.Walker.find.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "predicate",
+                "description": [
+                  "A function that returns true if the node matches the search criteria."
+                ],
+                "signature": [
+                  "(node: ",
+                  "ESQLProperNode",
+                  ") => boolean"
+                ],
+                "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The first node that matches the search criteria."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.Walker.findAll",
+            "type": "Function",
+            "tags": [],
+            "label": "findAll",
+            "description": [
+              "\nFinds and returns all nodes that match the search criteria.\n"
+            ],
+            "signature": [
+              "(node: ",
+              "WalkerAstNode",
+              ", predicate: (node: ",
+              "ESQLProperNode",
+              ") => boolean) => ",
+              "ESQLProperNode",
+              "[]"
+            ],
+            "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.Walker.findAll.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "node",
+                "description": [
+                  "AST node to start the search from."
+                ],
+                "signature": [
+                  "WalkerAstNode"
+                ],
+                "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.Walker.findAll.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "predicate",
+                "description": [
+                  "A function that returns true if the node matches the search criteria."
+                ],
+                "signature": [
+                  "(node: ",
+                  "ESQLProperNode",
+                  ") => boolean"
+                ],
+                "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "All nodes that match the search criteria."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.Walker.match",
+            "type": "Function",
+            "tags": [],
+            "label": "match",
+            "description": [
+              "\nMatches a single node against a template object. Returns the first node\nthat matches the template.\n"
+            ],
+            "signature": [
+              "(node: ",
+              "WalkerAstNode",
+              ", template: ",
+              "NodeMatchTemplate",
+              ") => ",
+              "ESQLProperNode",
+              " | undefined"
+            ],
+            "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.Walker.match.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "node",
+                "description": [
+                  "AST node to match against the template."
+                ],
+                "signature": [
+                  "WalkerAstNode"
+                ],
+                "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.Walker.match.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "template",
+                "description": [
+                  "Template object to match against the node."
+                ],
+                "signature": [
+                  "NodeMatchTemplate"
+                ],
+                "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The first node that matches the template"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.Walker.matchAll",
+            "type": "Function",
+            "tags": [],
+            "label": "matchAll",
+            "description": [
+              "\nMatches all nodes against a template object. Returns all nodes that match\nthe template.\n"
+            ],
+            "signature": [
+              "(node: ",
+              "WalkerAstNode",
+              ", template: ",
+              "NodeMatchTemplate",
+              ") => ",
+              "ESQLProperNode",
+              "[]"
+            ],
+            "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.Walker.matchAll.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "node",
+                "description": [
+                  "AST node to match against the template."
+                ],
+                "signature": [
+                  "WalkerAstNode"
+                ],
+                "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.Walker.matchAll.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "template",
+                "description": [
+                  "Template object to match against the node."
+                ],
+                "signature": [
+                  "NodeMatchTemplate"
+                ],
+                "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "All nodes that match the template"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
             "id": "def-common.Walker.findFunction",
             "type": "Function",
             "tags": [],
@@ -2555,6 +2803,44 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.WalkerOptions.visitAny",
+            "type": "Function",
+            "tags": [],
+            "label": "visitAny",
+            "description": [
+              "\nCalled for any node type that does not have a specific visitor.\n"
+            ],
+            "signature": [
+              "((node: ",
+              "ESQLProperNode",
+              ") => void) | undefined"
+            ],
+            "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.WalkerOptions.visitAny.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "node",
+                "description": [
+                  "Any valid AST node."
+                ],
+                "signature": [
+                  "ESQLProperNode"
+                ],
+                "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2746,7 +3032,9 @@
         "label": "ESQLLiteral",
         "description": [],
         "signature": [
-          "ESQLNumberLiteral",
+          "ESQLDecimalLiteral",
+          " | ",
+          "ESQLIntegerLiteral",
           " | ",
           "ESQLBooleanLiteral",
           " | ",

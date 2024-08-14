@@ -6,6 +6,7 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
+import { EntityManagerUnauthorizedError } from './errors';
 import { IEntityClient } from '../types';
 import {
   ManagedEntityEnabledResponse,
@@ -21,10 +22,24 @@ export class EntityClient implements IEntityClient {
   }
 
   async enableManagedEntityDiscovery(): Promise<EnableManagedEntityResponse> {
-    return await this.http.put('/internal/entities/managed/enablement');
+    try {
+      return await this.http.put('/internal/entities/managed/enablement');
+    } catch (err) {
+      if (err.body?.statusCode === 403) {
+        throw new EntityManagerUnauthorizedError(err.body.message);
+      }
+      throw err;
+    }
   }
 
   async disableManagedEntityDiscovery(): Promise<DisableManagedEntityResponse> {
-    return await this.http.delete('/internal/entities/managed/enablement');
+    try {
+      return await this.http.delete('/internal/entities/managed/enablement');
+    } catch (err) {
+      if (err.body?.statusCode === 403) {
+        throw new EntityManagerUnauthorizedError(err.body.message);
+      }
+      throw err;
+    }
   }
 }

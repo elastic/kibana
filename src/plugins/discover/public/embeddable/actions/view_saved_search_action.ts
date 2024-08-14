@@ -7,39 +7,14 @@
  */
 
 import type { ApplicationStart } from '@kbn/core/public';
-import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import {
-  apiCanAccessViewMode,
-  apiHasType,
-  apiIsOfType,
-  CanAccessViewMode,
-  EmbeddableApiContext,
-  getInheritedViewMode,
-  HasType,
-} from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 
 import type { DiscoverAppLocator } from '../../../common';
-import { PublishesSavedSearch, apiPublishesSavedSearch } from '../types';
 import { getDiscoverLocatorParams } from '../utils/get_discover_locator_params';
 
 export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';
-
-type ViewSavedSearchActionApi = CanAccessViewMode & HasType & PublishesSavedSearch;
-
-const compatibilityCheck = (
-  api: EmbeddableApiContext['embeddable']
-): api is ViewSavedSearchActionApi => {
-  return (
-    apiCanAccessViewMode(api) &&
-    getInheritedViewMode(api) === ViewMode.VIEW &&
-    apiHasType(api) &&
-    apiIsOfType(api, SEARCH_EMBEDDABLE_TYPE) &&
-    apiPublishesSavedSearch(api)
-  );
-};
 
 export class ViewSavedSearchAction implements Action<EmbeddableApiContext> {
   public id = ACTION_VIEW_SAVED_SEARCH;
@@ -51,6 +26,7 @@ export class ViewSavedSearchAction implements Action<EmbeddableApiContext> {
   ) {}
 
   async execute({ embeddable }: EmbeddableApiContext): Promise<void> {
+    const { compatibilityCheck } = await import('./view_saved_search_compatibility_check');
     if (!compatibilityCheck(embeddable)) {
       return;
     }
@@ -73,6 +49,9 @@ export class ViewSavedSearchAction implements Action<EmbeddableApiContext> {
     const { capabilities } = this.application;
     const hasDiscoverPermissions =
       (capabilities.discover.show as boolean) || (capabilities.discover.save as boolean);
-    return compatibilityCheck(embeddable) && hasDiscoverPermissions;
+
+    if (!hasDiscoverPermissions) return false; // early return to delay async import until absolutely necessary
+    const { compatibilityCheck } = await import('./view_saved_search_compatibility_check');
+    return compatibilityCheck(embeddable);
   }
 }

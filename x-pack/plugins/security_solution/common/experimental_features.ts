@@ -99,16 +99,6 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionScanEnabled: false,
 
   /**
-   * Enables top charts on Alerts Page
-   */
-  alertsPageChartsEnabled: true,
-
-  /**
-   * Enables the alert type column in KPI visualizations on Alerts Page
-   */
-  alertTypeEnabled: false,
-
-  /**
    * Enables new notes
    */
   securitySolutionNotesEnabled: false,
@@ -131,7 +121,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Assistant BedrockChat Langchain model, introduced in `8.15.0`.
    */
-  assistantBedrockChat: false,
+  assistantBedrockChat: true,
 
   /**
    * Enables the Managed User section inside the new user details flyout.
@@ -243,6 +233,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Adds a new option to filter descendants of a process for Management / Event Filters
    */
   filterProcessDescendantsForEventFiltersEnabled: false,
+
+  /**
+   * Enables the new data ingestion hub
+   */
+  dataIngestionHubEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

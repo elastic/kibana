@@ -9,8 +9,6 @@ paths:
       x-codegen-enabled: true
       operationId: ReadEndpointListItem
       summary: Reads an endpoint list item
-      tags:
-        - Endpoint exceptions API
       parameters:
         - name: id
           in: query

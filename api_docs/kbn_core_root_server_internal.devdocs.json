@@ -67,9 +67,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnConfigPluginApi",
-                    "section": "def-common.RawConfigurationProvider",
+                    "section": "def-server.RawConfigurationProvider",
                     "text": "RawConfigurationProvider"
                   }
                 ],
@@ -88,9 +88,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnConfigPluginApi",
-                    "section": "def-common.Env",
+                    "section": "def-server.Env",
                     "text": "Env"
                   }
                 ],

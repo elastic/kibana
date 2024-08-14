@@ -133,6 +133,11 @@ Object {
               },
             },
           },
+          Object {
+            "exists": Object {
+              "field": "log.logger",
+            },
+          },
         ],
       },
     },
@@ -270,6 +275,24 @@ Object {
     "index": Array [
       "kbn-data-forge-fake_stack.*",
     ],
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "exists": Object {
+              "field": "log.logger",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "now-1h",
+              },
+            },
+          },
+        ],
+      },
+    },
   },
   "sync": Object {
     "time": Object {

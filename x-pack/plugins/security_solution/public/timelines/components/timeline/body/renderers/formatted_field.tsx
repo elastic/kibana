@@ -12,8 +12,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isEmpty, isNumber } from 'lodash/fp';
 import React from 'react';
 import { css } from '@emotion/css';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 
-import type { BrowserField } from '../../../../../common/containers/source';
 import {
   ALERT_HOST_CRITICALITY,
   ALERT_USER_CRITICALITY,
@@ -71,7 +71,7 @@ const FormattedFieldValueComponent: React.FC<{
   isObjectArray?: boolean;
   isUnifiedDataTable?: boolean;
   fieldFormat?: string;
-  fieldFromBrowserField?: Partial<BrowserField>;
+  fieldFromBrowserField?: Partial<FieldSpec>;
   fieldName: string;
   fieldType?: string;
   isButton?: boolean;

@@ -7,5 +7,4 @@ schema:
     - closed
     - in-progress
     - open
-  examples:
-    - open
+example: open

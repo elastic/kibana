@@ -68,13 +68,14 @@ export function timeSeriesExplorerServiceFactory(
   const mlForecastService = forecastServiceFactory(mlApiServices);
   const mlTimeSeriesSearchService = timeSeriesSearchServiceFactory(mlResultsService, mlApiServices);
 
-  function getAutoZoomDuration(selectedJob: Job) {
+  function getAutoZoomDuration(bucketSpan: Job['analysis_config']['bucket_span']) {
+    // function getAutoZoomDuration(selectedJob: Job) {
     // Calculate the 'auto' zoom duration which shows data at bucket span granularity.
     // Get the minimum bucket span of selected jobs.
     let autoZoomDuration;
-    if (selectedJob.analysis_config.bucket_span) {
-      const bucketSpan = parseInterval(selectedJob.analysis_config.bucket_span);
-      const bucketSpanSeconds = bucketSpan!.asSeconds();
+    if (bucketSpan) {
+      const parsedBucketSpan = parseInterval(bucketSpan);
+      const bucketSpanSeconds = parsedBucketSpan!.asSeconds();
 
       // In most cases the duration can be obtained by simply multiplying the points target
       // Check that this duration returns the bucket span when run back through the

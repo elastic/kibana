@@ -105,6 +105,8 @@ The 8.14.3 release includes the following bug fixes and known issues.
 
 include::CHANGELOG.asciidoc[tag=known-issue-186969]
 
+include::CHANGELOG.asciidoc[tag=known-issue-189394]
+
 [discrete]
 [[known-185691]]
 .When using the Observability AI Assistant with the OpenAI connector, function calling will result in an error
@@ -146,6 +148,8 @@ The 8.14.2 release includes the following bug fixes and known issues.
 
 include::CHANGELOG.asciidoc[tag=known-issue-186969]
 
+include::CHANGELOG.asciidoc[tag=known-issue-189394]
+
 [float]
 [[fixes-v8.14.2]]
 === Bug Fixes
@@ -169,6 +173,8 @@ The 8.14.1 release includes the following bug fixes and known issues.
 === Known issues
 
 include::CHANGELOG.asciidoc[tag=known-issue-186969]
+
+include::CHANGELOG.asciidoc[tag=known-issue-189394]
 
 [float]
 [[fixes-v8.14.1]]
@@ -194,7 +200,6 @@ For information about the {kib} 8.14.0 release, review the following information
 === Known issues
 
 // tag::known-issue-186969[]
-[discrete]
 .Creating or editing APM, {observability} and {stack-monitor-app} rules fails
 [%collapsible]
 ====
@@ -208,8 +213,32 @@ This known issue impacts only {observability}, {stack-monitor-app}, and APM and 
 *Workaround* +
 To work around this issue for {observability} and APM and {user-experience} rules, create them from the {observability} *Alerts* page.
 Refer to <<apm-alerts>> and {observability-guide}/create-alerts-rules.html[Create and manage {observability} rules].
+
+*Resolved* +
+This issue is resolved in 8.15.0.
 ====
 // end::known-issue-186969[]
+
+// tag::known-issue-189394[]
+.{webhook-cm} connector fails to send HTTP headers
+[%collapsible]
+====
+*Details* +
+If you configured the {webhook-cm} connector to send key-value pairs as headers, that information is not sent unles you have also enabled the basic authentication option for the connector.
+Refer to https://github.com/elastic/kibana/issues/189394[#189394].
+
+*Impact* +
+The impact of this issue will vary depending on the purpose of your headers.
+For example, if you added an `ApiKey` authorization header, you might receive a `401` authorization error since it's no longer sent by the connector.
+
+*Workaround* +
+To work around this issue, enable the *Require authentication for this webhook* option, which is the `hasAuth` property in the API.
+You must then provide a username and password for authentication.
+
+*Resolved* +
+This issue is resolved in 8.15.0.
+====
+// end::known-issue-189394[]
 
 [float]
 [[breaking-changes-8.14.0]]
@@ -3824,7 +3853,7 @@ Review the following information about the {kib} 8.6.0 release.
 When you attempt to create an APM latency threshold rule in **Observability** > **Alerts** > **Rules** for all services or all transaction types, the request will fail with a `params invalid` error.
 
 *Impact* +
-This known issue only impacts the Observability Rules page. To work around this issue, create APM latency threshold rules in the APM Alerts and Rules dialog. See {kibana-ref}/apm-alerts.html[Alerts and rules] for detailed instructions.
+This known issue only impacts the Observability Rules page. To work around this issue, create APM latency threshold rules in the APM Alerts and Rules dialog. See {observability-guide}/apm-alerts.html[Alerts and rules] for detailed instructions.
 ====
 
 [float]
@@ -5414,7 +5443,7 @@ you make the necessary updates after you upgrade to 8.3.0.
 Removes the `apm_user` role. For more information, check {kibana-pull}132790[#132790].
 
 *Impact* +
-In the link:https://www.elastic.co/guide/en/kibana/8.3/xpack-apm.html[APM documentation], the `apm_user`role is replaced with the `viewer` and `editor` built-in roles.
+The `apm_user`role is replaced with the `viewer` and `editor` built-in roles.
 ====
 
 [discrete]

@@ -187,7 +187,7 @@ this setting stores part of the URL in your browser session to keep the URL
 short.
 
 [[theme-darkmode]]`theme:darkMode`::
-The UI theme that the {kib} UI should use. 
+The UI theme that the {kib} UI should use.
 Set to `enabled` or `disabled` to enable or disable the dark theme.
 Set to `system` to have the {kib} UI theme follow the system theme.
 You must refresh the page to apply the setting.
@@ -418,7 +418,7 @@ beta:[] Enables the usage of service transaction metrics, which are low cardinal
 
 [[observability-apm-labs]]`observability:apmLabsButton`::
 Enable or disable the APM Labs button -- a quick way to enable and disable technical preview features in APM.
-See <<apm-labs>> to learn more.
+// See <<apm-labs>> to learn more.
 
 [[observability-apm-critical-path]]`observability:apmEnableCriticalPath`::
 When enabled, displays the critical path of a trace.
@@ -453,7 +453,7 @@ preview:[] Display Amazon Lambda metrics in the service metrics tab.
 Shows the Uptime app even if there is no recent Heartbeat data.
 
 [[observability-apm-enable-comparison]]`observability:enableComparisonByDefault`::
-Determines whether the <<service-time-comparison, comparison feature>> is enabled or disabled by default in the APM app.
+Determines whether the comparison feature is enabled or disabled by default in the APM app.
 
 [[observability-apm-enable-infra-view]]`observability:enableInfrastructureView`::
 Enables the Infrastructure view in the APM app.

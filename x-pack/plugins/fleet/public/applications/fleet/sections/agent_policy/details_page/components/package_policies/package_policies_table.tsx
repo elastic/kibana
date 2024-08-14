@@ -119,8 +119,18 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem data-test-subj="PackagePoliciesTableName" grow={false}>
               <EuiLink
-                title={value}
-                {...(canReadIntegrationPolicies
+                title={
+                  agentPolicy.supports_agentless
+                    ? i18n.translate(
+                        'xpack.fleet.policyDetails.packagePoliciesTable.disabledEditTitle',
+                        {
+                          defaultMessage:
+                            'Editing an agentless integration is not supported. Add a new integration if needed.',
+                        }
+                      )
+                    : value
+                }
+                {...(canReadIntegrationPolicies && !agentPolicy.supports_agentless
                   ? {
                       href: getHref('edit_integration', {
                         policyId: agentPolicy.id,
@@ -129,9 +139,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                     }
                   : { disabled: true })}
               >
-                <span className="eui-textTruncate" title={value}>
-                  {value}
-                </span>
+                <span className="eui-textTruncate">{value}</span>
                 {packagePolicy.description ? (
                   <span>
                     &nbsp;

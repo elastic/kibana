@@ -41,7 +41,11 @@ export function PlayButton(props: Props) {
     />
   );
   return props.disablePlayButton ? (
-    <EuiToolTip content={TimeSliderStrings.control.getPlayButtonDisabledTooltip()}>
+    <EuiToolTip
+      display="block"
+      anchorClassName="timeSlider-playToggle"
+      content={TimeSliderStrings.control.getPlayButtonDisabledTooltip()}
+    >
       {Button}
     </EuiToolTip>
   ) : (

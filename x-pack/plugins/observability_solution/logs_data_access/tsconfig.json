@@ -9,7 +9,6 @@
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
-    "@kbn/observability-plugin",
     "@kbn/calculate-auto",
     "@kbn/es-types",
     "@kbn/core-http-server",
@@ -20,6 +19,8 @@
     "@kbn/core-saved-objects-server",
     "@kbn/core-ui-settings-server",
     "@kbn/core-ui-settings-browser",
-    "@kbn/logging"
+    "@kbn/logging",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/es-query"
   ]
 }

@@ -21,7 +21,7 @@ interface Props {
   max: number | undefined;
   min: number | undefined;
   onChange: (value: RangeValue | undefined) => void;
-  step: number | undefined;
+  step: number;
   value: RangeValue | undefined;
   uuid: string;
   controlPanelClassName?: string;

@@ -15,7 +15,7 @@ import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution
 import { useSignalIndex } from '../../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import type { Status } from '../../../../../../common/api/detection_engine';
 import { useFetchIndex } from '../../../../../common/containers/source';
-import { entryHasListType, entryHasNonEcsType } from './utils';
+import { shouldDisableBulkClose } from './utils';
 import * as i18n from './translations';
 import type { AlertData } from '../../../utils/types';
 
@@ -103,9 +103,7 @@ const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
   useEffect((): void => {
     if (isSignalIndexPatternLoading === false && isSignalIndexLoading === false) {
       onDisableBulkClose(
-        entryHasListType(exceptionListItems) ||
-          entryHasNonEcsType(exceptionListItems, signalIndexPatterns) ||
-          exceptionListItems.every((item) => item.entries.length === 0)
+        shouldDisableBulkClose({ items: exceptionListItems, signalIndexPatterns })
       );
     }
   }, [
