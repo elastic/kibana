@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { randomInt } from 'crypto';
 import { Fields } from '../entity';
 import { Serializable } from '../serializable';
 
@@ -55,6 +56,12 @@ export type LogDocument = Fields &
     'error.exception.stacktrace'?: string;
     'error.log.stacktrace'?: string;
     'log.custom': Record<string, unknown>;
+    'host.geo.location': number[];
+    'host.ip': string;
+    bytes: number;
+    hour_of_day: number;
+    is_published: boolean;
+    is_failure: boolean;
   }>;
 
 class Log extends Serializable<LogDocument> {
@@ -93,11 +100,28 @@ class Log extends Serializable<LogDocument> {
 
   logLevel(level: string) {
     this.fields['log.level'] = level;
+    this.fields['is_failure'] = level === 'error';
     return this;
   }
 
   message(message: string) {
     this.fields.message = message;
+    return this;
+  }
+
+  setGeoLocation(geoCoordinates: number[]) {
+    this.fields['host.geo.location'] = geoCoordinates;
+    return this;
+  }
+
+  setHostIp(hostIp: string) {
+    this.fields['host.ip'] = hostIp;
+    return this;
+  }
+
+  timestamp(time: number) {
+    super.timestamp(time);
+    this.fields['hour_of_day'] = new Date(time).getHours();
     return this;
   }
 }
@@ -109,6 +133,8 @@ function create(logsOptions: LogsOptions = defaultLogsOptions): Log {
       'data_stream.namespace': 'default',
       'data_stream.type': 'logs',
       'host.name': 'synth-host',
+      bytes: randomInt(500, 10000),
+      is_published: Math.random() < 0.5,
     },
     logsOptions
   ).dataset('synth');
