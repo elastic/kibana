@@ -9,6 +9,16 @@
 import { Fields } from '../entity';
 import { Serializable } from '../serializable';
 
+const LOGSDB_DATASET_PREFIX = 'logsdb.';
+
+interface LogsOptions {
+  isLogsDb: boolean;
+}
+
+const defaultLogsOptions: LogsOptions = {
+  isLogsDb: false,
+};
+
 export type LogDocument = Fields &
   Partial<{
     'input.type': string;
@@ -48,6 +58,12 @@ export type LogDocument = Fields &
   }>;
 
 class Log extends Serializable<LogDocument> {
+  constructor(fields: LogDocument, private logsOptions: LogsOptions) {
+    super({
+      ...fields,
+    });
+  }
+
   service(name: string) {
     this.fields['service.name'] = name;
     return this;
@@ -69,8 +85,9 @@ class Log extends Serializable<LogDocument> {
   }
 
   dataset(value: string) {
-    this.fields['data_stream.dataset'] = value;
-    this.fields['event.dataset'] = value;
+    const dataset = `${this.logsOptions.isLogsDb ? LOGSDB_DATASET_PREFIX : ''}${value}`;
+    this.fields['data_stream.dataset'] = dataset;
+    this.fields['event.dataset'] = dataset;
     return this;
   }
 
@@ -85,15 +102,16 @@ class Log extends Serializable<LogDocument> {
   }
 }
 
-function create(): Log {
-  return new Log({
-    'input.type': 'logs',
-    'data_stream.namespace': 'default',
-    'data_stream.type': 'logs',
-    'data_stream.dataset': 'synth',
-    'event.dataset': 'synth',
-    'host.name': 'synth-host',
-  });
+function create(logsOptions: LogsOptions = defaultLogsOptions): Log {
+  return new Log(
+    {
+      'input.type': 'logs',
+      'data_stream.namespace': 'default',
+      'data_stream.type': 'logs',
+      'host.name': 'synth-host',
+    },
+    logsOptions
+  ).dataset('synth');
 }
 
 export const log = {
