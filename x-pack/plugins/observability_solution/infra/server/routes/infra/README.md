@@ -28,7 +28,7 @@ curl --location -u elastic:changeme 'http://0.0.0.0:5601/ftw/api/metrics/infra' 
 --header 'kbn-xsrf: xxxx' \
 --header 'Content-Type: application/json' \
 --data '{
-   "type": 'host',
+   "type": "host",
    "limit": 100,
    "metrics": [
       {
@@ -44,11 +44,11 @@ curl --location -u elastic:changeme 'http://0.0.0.0:5601/ftw/api/metrics/infra' 
          "type": "cpu"
       },
       {
-         type: 'diskSpaceUsage',
+         "type": "diskSpaceUsage"
       },
       {
-         type: 'memoryFree',
-      },
+         "type": "memoryFree"
+      }
    ],
    "query": {
       "bool": {
@@ -59,8 +59,8 @@ curl --location -u elastic:changeme 'http://0.0.0.0:5601/ftw/api/metrics/infra' 
       }
    },
    "range": {
-      "from": "2023-04-18T11:15:31.407Z",
-      "to":   "2023-04-18T11:30:31.407Z"
+      "from": "2024-08-14T12:15:31.407Z",
+      "to":   "2024-08-14T12:30:31.407Z"
    },
    "sourceId": "default"
 }'

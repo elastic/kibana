@@ -10,7 +10,7 @@ import {
   MetricsUIAggregation,
   hasAggregations,
   ESSumBucketAggRT,
-  // ESTermsWithAggregationRT,
+  hasSnapshotTermsWithAggregation,
   ESDerivativeAggRT,
   ESBasicMetricAggRT,
 } from '@kbn/metrics-data-access-plugin/common';
@@ -37,7 +37,7 @@ export const isInterfaceRateAgg = (metric: MetricsUIAggregation | undefined) => 
   }
   const values = Object.values(metric);
   return (
-    // values.some((agg) => ESTermsWithAggregationRT.is(agg)) && REPLACEEEEE
+    values.some((agg) => hasSnapshotTermsWithAggregation(agg)) &&
     values.some((agg) => ESSumBucketAggRT.is(agg))
   );
 };

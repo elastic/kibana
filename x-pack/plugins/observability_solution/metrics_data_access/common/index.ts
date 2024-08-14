@@ -28,11 +28,10 @@ export {
   ItemTypeRT,
   SnapshotMetricTypeRT,
   ESSumBucketAggRT,
-  // ESTermsWithAggregationRT,
   ESDerivativeAggRT,
-  // MetricsUIAggregationRT, - //TODO change
   ESBasicMetricAggRT,
   SnapshotMetricTypeKeys,
+  hasSnapshotTermsWithAggregation,
   hasAggregations,
 } from './inventory_models/types';
 

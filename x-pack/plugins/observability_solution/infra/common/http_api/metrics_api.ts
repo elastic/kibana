@@ -5,35 +5,38 @@
  * 2.0.
  */
 
-import { createLiteralValueFromUndefinedRT } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
-import { MetricsUIAggregationRT } from '@kbn/metrics-data-access-plugin/common';
+import { MetricsUIAggregation } from '@kbn/metrics-data-access-plugin/common';
 import { afterKeyObjectRT, timeRangeRT } from './metrics_explorer';
 
-const groupByRT = rt.union([rt.string, rt.null, rt.undefined]);
+export interface TimeRange {
+  from: number;
+  to: number;
+  interval: string;
+}
 
-export const MetricsAPIMetricRT = rt.type({
-  id: rt.string,
-  aggregations: MetricsUIAggregationRT,
-});
+export interface MetricsAPIMetric {
+  id: string;
+  aggregations: MetricsUIAggregation;
+}
 
-export const MetricsAPIRequestRT = rt.intersection([
-  rt.type({
-    timerange: timeRangeRT,
-    indexPattern: rt.string,
-    metrics: rt.array(MetricsAPIMetricRT),
-    includeTimeseries: rt.union([rt.boolean, createLiteralValueFromUndefinedRT(true)]),
-  }),
-  rt.partial({
-    groupBy: rt.array(groupByRT),
-    modules: rt.array(rt.string),
-    afterKey: rt.union([rt.null, afterKeyObjectRT]),
-    limit: rt.union([rt.number, rt.null]),
-    filters: rt.array(rt.UnknownRecord),
-    dropPartialBuckets: rt.boolean,
-    alignDataToEnd: rt.boolean,
-  }),
-]);
+export interface MetricsAPIRequest {
+  timerange: TimeRange;
+  indexPattern: string;
+  metrics: MetricsAPIMetric[];
+  includeTimeseries: boolean | undefined;
+  groupBy?: Array<string | null | undefined>;
+  modules?: string[];
+  afterKey?: Record<string, string | null> | null;
+  limit?: number | null;
+  filters?: unknown[];
+  dropPartialBuckets?: boolean;
+  alignDataToEnd?: boolean;
+}
+
+export const isMetricsAPIRequest = (request?: any): request is MetricsAPIRequest => {
+  return !!(request as MetricsAPIRequest);
+};
 
 export const MetricsAPIPageInfoRT = rt.intersection([
   rt.type({
@@ -88,8 +91,6 @@ export type MetricsAPITimerange = rt.TypeOf<typeof timeRangeRT>;
 
 export type MetricsAPIColumnType = rt.TypeOf<typeof MetricsAPIColumnTypeRT>;
 
-export type MetricsAPIMetric = rt.TypeOf<typeof MetricsAPIMetricRT>;
-
 export type MetricsAPIPageInfo = rt.TypeOf<typeof MetricsAPIPageInfoRT>;
 
 export type MetricsAPIColumn = rt.TypeOf<typeof MetricsAPIColumnRT>;
@@ -97,7 +98,5 @@ export type MetricsAPIColumn = rt.TypeOf<typeof MetricsAPIColumnRT>;
 export type MetricsAPIRow = rt.TypeOf<typeof MetricsAPIRowRT>;
 
 export type MetricsAPISeries = rt.TypeOf<typeof MetricsAPISeriesRT>;
-
-export type MetricsAPIRequest = rt.TypeOf<typeof MetricsAPIRequestRT>;
 
 export type MetricsAPIResponse = rt.TypeOf<typeof MetricsAPIResponseRT>;
