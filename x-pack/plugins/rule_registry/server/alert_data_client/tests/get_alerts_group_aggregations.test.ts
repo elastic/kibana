@@ -72,7 +72,7 @@ beforeEach(() => {
 describe('getGroupAggregations()', () => {
   test('calls find() with the correct params', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    alertsClient.find = jest.fn();
+    alertsClient.find = jest.fn().mockResolvedValue({ aggregations: {} });
 
     const featureIds = [AlertConsumers.STACK_ALERTS];
     const groupByField = 'kibana.alert.rule.name';
@@ -174,24 +174,24 @@ describe('getGroupAggregations()', () => {
   test('rejects with invalid pagination options', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
 
-    expect(() =>
+    await expect(() =>
       alertsClient.getGroupAggregations({
         featureIds: ['apm', 'infrastructure', 'logs', 'observability', 'slo', 'uptime'],
         groupByField: 'kibana.alert.rule.name',
         pageIndex: 101,
         pageSize: 50,
       })
-    ).toThrowErrorMatchingInlineSnapshot(
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"The provided pageIndex value is too high. The maximum allowed pageIndex value is 100."`
     );
-    expect(() =>
+    await expect(() =>
       alertsClient.getGroupAggregations({
         featureIds: ['apm', 'infrastructure', 'logs', 'observability', 'slo', 'uptime'],
         groupByField: 'kibana.alert.rule.name',
         pageIndex: 10,
         pageSize: 5000,
       })
-    ).toThrowErrorMatchingInlineSnapshot(
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"The number of documents is too high. Paginating through more than 10000 documents is not possible."`
     );
   });
