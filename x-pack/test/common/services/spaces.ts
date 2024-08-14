@@ -98,21 +98,16 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
       return data;
     }
 
-    public async navigateToHomePage(spaceId: string, navigateTo: (url: string) => Promise<void>) {
-      log.debug('navigating to space home page');
-
+    /** Return the full URL that points to the root of the space */
+    public getRootUrl(spaceId: string) {
       const { protocol, hostname, port } = config.get('servers.kibana');
 
-      const spaceHomeUrl = Url.format({
+      return Url.format({
         protocol,
         hostname,
         port,
         pathname: `/s/${spaceId}`,
       });
-
-      // Using browser.navigateTo instead of common.navigateToUrl to test the redirect from "/"
-      // to the correct app. (common.navigateToUrl requires the "app" to be provided).
-      await navigateTo(spaceHomeUrl);
     }
   })();
 }

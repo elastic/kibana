@@ -24,7 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       // Create a space with the observability solution and navigate to its home page
       ({ cleanUp, space: spaceCreated } = await spaces.create({ solution: 'oblt' }));
-      spaces.navigateToHomePage(spaceCreated.id, browser.navigateTo.bind(browser));
+      await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
     });
 
     after(async () => {
