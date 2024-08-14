@@ -9,7 +9,10 @@ import { useEffect } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
 import rison from '@kbn/rison';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { ASSET_DETAILS_LOCATOR_ID } from '@kbn/observability-shared-plugin/public';
+import {
+  ASSET_DETAILS_LOCATOR_ID,
+  type AssetDetailsLocatorParams,
+} from '@kbn/observability-shared-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { AssetDetailsUrlState } from '../../components/asset_details/types';
 import { ASSET_DETAILS_URL_STATE_KEY } from '../../components/asset_details/constants';
@@ -66,7 +69,7 @@ export const RedirectToNodeDetail = () => {
     services: { share },
   } = useKibanaContextForPlugin();
   const location = useLocation();
-  const baseLocator = share.url.locators.get(ASSET_DETAILS_LOCATOR_ID);
+  const baseLocator = share.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
 
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
