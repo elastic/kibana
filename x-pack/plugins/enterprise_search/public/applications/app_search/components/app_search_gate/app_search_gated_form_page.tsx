@@ -31,7 +31,7 @@ export const AppSearchGatePage: React.FC<PageTemplateProps> = ({ isLoading }) =>
         description: (
           <FormattedMessage
             id="xpack.enterpriseSearch.appSearch.gateForm.description"
-            defaultMessage="(NEEDS COPY) The standalone App Search product remains available in maintenance mode, and is not recommended for new search experiences. Instead, we recommend using our set of Elasticsearch-native tools, which our team is actively developing and improving, for your workplace search use case. These tools offer the flexibility and composability of working directly with Elasticsearch indices. Learn more about the context for this refocus in this {blogUrl}. To help choose which of these tools best suit your use case, we’ve created this recommendation wizard. Let us know what features you need, and we'll guide you to the best solutions. If you still want to go ahead and use the standalone App Search product at this point, you can do so after submitting the form."
+            defaultMessage="The standalone App Search product remains available in maintenance mode, but is not recommended for new search experiences. We recommend using native Elasticsearch tools, which offer flexibility and composability, and include exciting new search features. Learn more in this blog. To help you choose the tools best suited for your use case, we’ve created this recommendation wizard. Select the features you need, and we'll point you to corresponding Elasticsearch features. If you still want to use the standalone App Search product, you can do so after submitting the form."
             values={{
               blogUrl: (
                 <EuiLink

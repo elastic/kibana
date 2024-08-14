@@ -35,21 +35,25 @@ const featuresList = {
     actionLabel: i18n.translate(
       'xpack.enterpriseSearch.appSearch.gateForm.webCrawler.featureButtonLabel',
       {
-        defaultMessage: 'Web Crawler Label',
+        defaultMessage: 'Try Open Crawler',
       }
     ),
-    actionLink: './web-crawler',
+    actionLink: 'https://github.com/elastic/crawler?tab=readme-ov-file#setup',
     addOnLearnMoreLabel: undefined,
     addOnLearnMoreUrl: undefined,
     description: i18n.translate(
       'xpack.enterpriseSearch.appSearch.gateForm.webCrawler.featureDescription',
       {
         defaultMessage:
-          "Web crawler description",
+          "Ingest web content into Elasticsearch using a web crawler",
       }
     ),
     id: 'webCrawler',
-    learnMore: 'https://www.elastic.co/',
+    learnMore: 'https://github.com/elastic/crawler#readme ',
+    panelText: i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.webCrawler.panelText', {
+      defaultMessage:
+        'Did you know the new self-managed Elastic open crawler is now available? You can keep your web content in sync with your search-optimized indices!',
+    }),
     title: i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.webCrawler.featureName', {
       defaultMessage: 'Web Crawler',
     }),
@@ -58,143 +62,179 @@ const featuresList = {
     actionLabel: i18n.translate(
       'xpack.enterpriseSearch.appSearch.gateForm.analyticsAndLogs.featureButtonLabel',
       {
-        defaultMessage: 'analyticsAndLogs Label',
+        defaultMessage: 'Add Search Analytics',
       }
     ),
-    actionLink: './analyticsAndLogs',
+    actionLink: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/behavioral-analytics-event.html',
     addOnLearnMoreLabel: undefined,
     addOnLearnMoreUrl: undefined,
     description: i18n.translate(
       'xpack.enterpriseSearch.appSearch.gateForm.analyticsAndLogs.featureDescription',
       {
         defaultMessage:
-          "analyticsAndLogs description",
+          "Add and view analytics and logs for your search application",
       }
     ),
     id: 'analyticsAndLogs',
-    learnMore: 'https://www.elastic.co/',
+    learnMore: undefined,
+    panelText: i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.analyticsAndLogs.panelText', {
+      defaultMessage:
+        'You can track and analyze users\' searching and clicking behavior with Behavioral Analytics. Instrument your website or application to track relevant user actions.',
+    }),
     title: i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.analyticsAndLogs.featureName', {
-      defaultMessage: 'analyticsAndLogs',
+      defaultMessage: 'Search Analytics and Logs',
     }),
   },
   synonyms: {
     actionLabel: i18n.translate(
       'xpack.enterpriseSearch.appSearch.gateForm.synonyms.featureButtonLabel',
       {
-        defaultMessage: 'synonyms Label',
+        defaultMessage: 'Search with Synonyms',
       }
     ),
-    actionLink: './synonyms',
+    actionLink: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/synonyms-apis.html',
     addOnLearnMoreLabel: undefined,
     addOnLearnMoreUrl: undefined,
     description: i18n.translate(
       'xpack.enterpriseSearch.appSearch.gateForm.synonyms.featureDescription',
       {
         defaultMessage:
-          "synonyms description",
+          "Perform search with synonym based query expansion",
       }
     ),
     id: 'synonyms',
-    learnMore: 'https://www.elastic.co/',
+    learnMore: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/search-with-synonyms.html',
+    panelText: i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.synonyms.panelText', {
+      defaultMessage:
+        'Use the Elasticsearch Synonyms APIs to easily create and manage synonym sets.',
+    }),
     title: i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.synonyms.featureName', {
-      defaultMessage: 'synonyms',
+      defaultMessage: 'Search with Synonyms',
     }),
   },
   relevanceTuning: {
     actionLabel: i18n.translate(
       'xpack.enterpriseSearch.appSearch.gateForm.relevanceTuning.featureButtonLabel',
       {
-        defaultMessage: 'relevanceTuning Label',
+        defaultMessage: 'Tune Search Relevancy',
       }
     ),
-    actionLink: './relevanceTuning',
+    actionLink: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/search-with-elasticsearch.html',
     addOnLearnMoreLabel: undefined,
     addOnLearnMoreUrl: undefined,
     description: i18n.translate(
       'xpack.enterpriseSearch.appSearch.gateForm.relevanceTuning.featureDescription',
       {
         defaultMessage:
-          "relevanceTuning description",
+          "Tune the relevancy of your results using ranking and boosting methods",
       }
     ),
     id: 'relevanceTuning',
-    learnMore: 'https://www.elastic.co/',
+    learnMore: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-boosting-query.html',
+    panelText: i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.relevanceTuning.panelText', {
+      defaultMessage:
+        'Elasticsearch\'s query DSL provides an in-depth set of relevance tools.',
+    }),
     title: i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.relevanceTuning.featureName', {
-      defaultMessage: 'relevanceTuning',
+      defaultMessage: 'Relevance Tuning',
     }),
   },
   curations: {
     actionLabel: i18n.translate(
       'xpack.enterpriseSearch.appSearch.gateForm.curations.featureButtonLabel',
       {
-        defaultMessage: 'curations Label',
+        defaultMessage: 'Use query rules',
       }
     ),
-    actionLink: './curations',
+    actionLink: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/search-using-query-rules.html',
     addOnLearnMoreLabel: undefined,
     addOnLearnMoreUrl: undefined,
     description: i18n.translate(
       'xpack.enterpriseSearch.appSearch.gateForm.curations.featureDescription',
       {
         defaultMessage:
-          "curations description",
+          "Curate and pin results for specific queries",
       }
     ),
     id: 'curations',
-    learnMore: 'https://www.elastic.co/',
+    learnMore: 'https://www.elastic.co/blog/introducing-query-rules-elasticsearch-8-10',
+    panelText: i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.curations.panelText', {
+      defaultMessage:
+        'Query rules provide a more robust set of tools to customize your search results for queries that match specific criteria and metadata.',
+    }),
     title: i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.curations.featureName', {
-      defaultMessage: 'curations',
+      defaultMessage: 'Curate Results',
     }),
   },
   searchManagementUis: {
     actionLabel: i18n.translate(
       'xpack.enterpriseSearch.appSearch.gateForm.searchManagementUis.featureButtonLabel',
       {
-        defaultMessage: 'searchManagementUis Label',
+        defaultMessage: 'Build a search experience with Search UI',
       }
     ),
-    actionLink: './searchManagementUis',
+    actionLink: 'https://www.elastic.co/docs/current/search-ui/overview',
     addOnLearnMoreLabel: undefined,
     addOnLearnMoreUrl: undefined,
     description: i18n.translate(
       'xpack.enterpriseSearch.appSearch.gateForm.searchManagementUis.featureDescription',
       {
         defaultMessage:
-          "searchManagementUis description",
+          "Use user interfaces to manage your search and application experience",
       }
     ),
     id: 'searchManagementUis',
-    learnMore: 'https://www.elastic.co/',
+    learnMore: 'https://www.elastic.co/docs/current/search-ui/tutorials/elasticsearch',
+    panelText: i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.searchManagementUis.panelText', {
+      defaultMessage:
+        'Search UI provides the components needed to build a modern search experience.',
+    }),
     title: i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.searchManagementUis.featureName', {
-      defaultMessage: 'searchManagementUis',
+      defaultMessage: 'Search and Management UIs',
     }),
   },
   credentials: {
     actionLabel: i18n.translate(
       'xpack.enterpriseSearch.appSearch.gateForm.credentials.featureButtonLabel',
       {
-        defaultMessage: 'credentials Label',
+        defaultMessage: 'Secure with Elasticsearch',
       }
     ),
-    actionLink: './credentials',
+    actionLink: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/document-level-security.html',
     addOnLearnMoreLabel: undefined,
     addOnLearnMoreUrl: undefined,
     description: i18n.translate(
       'xpack.enterpriseSearch.appSearch.gateForm.credentials.featureDescription',
       {
         defaultMessage:
-          "credentials description",
+          "Manage your users and roles, and credentials for accessing your search endpoints",
       }
     ),
     id: 'credentials',
-    learnMore: 'https://www.elastic.co/',
+    learnMore: 'https://www.elastic.co/search-labs/blog/dls-internal-knowledge-search',
+    panelText: i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.credentials.panelText', {
+      defaultMessage:
+        'Elasticsearch provides a comprehensive set of security features, including document-level security and role-based access control.',
+    }),
     title: i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.credentials.featureName', {
-      defaultMessage: 'Credentials',
+      defaultMessage: 'Credentials and Roles',
     }),
   },
 };
 
-const getFeature = (id: string) => {
+type FeatureOption = {
+  id: string;
+  title: string;
+  description: string;
+  learnMore: string | undefined;
+  actionLabel: string;
+  actionLink: string;
+  panelText: string;
+  addOnLearnMoreLabel?: string;
+  addOnLearnMoreUrl?: string;
+};
+
+const getFeature = (id: string): (FeatureOption | undefined) => {
   switch (id) {
     case featuresList.webCrawler.id:
       return featuresList.webCrawler;
@@ -210,6 +250,8 @@ const getFeature = (id: string) => {
       return featuresList.searchManagementUis;
     case featuresList.credentials.id:
       return featuresList.credentials;
+    default:
+      return undefined;
   }
 };
 
@@ -299,7 +341,7 @@ const EducationPanel: React.FC<{ featureContent: string }> = ({ featureContent }
                     {i18n.translate(
                       'xpack.enterpriseSearch.workplaceSearch.gateForm.educationalPanel.subTitle',
                       {
-                        defaultMessage: 'Based on your selection we recommend you',
+                        defaultMessage: 'Based on your selection we recommend:',
                       }
                     )}
                   </p>
@@ -311,26 +353,28 @@ const EducationPanel: React.FC<{ featureContent: string }> = ({ featureContent }
         <EuiSpacer />
 
         <EuiCallOut title={feature.title} color="success" iconType="checkInCircleFilled">
-          <p>{feature.description}</p>
+          <p>{feature.panelText}</p>
           <EuiFlexGroup gutterSize="m" wrap alignItems="baseline">
             {feature.actionLink !== undefined && feature.actionLabel !== undefined && (
               <EuiFlexItem grow={false}>
-                <EuiButton href={feature.actionLink} iconType="sortRight" iconSide="right">
+                <EuiButton href={feature.actionLink} target="_blank" iconType="sortRight" iconSide="right">
                   {feature.actionLabel}
                 </EuiButton>
               </EuiFlexItem>
             )}
 
-            <EuiFlexItem grow={false}>
-              <EuiLink href={feature.learnMore} target="_blank">
-                {i18n.translate(
-                  'xpack.enterpriseSearch.workplaceSearch.gateForm.educationalPanel.learnMore',
-                  {
-                    defaultMessage: 'Learn More',
-                  }
-                )}
-              </EuiLink>
-            </EuiFlexItem>
+            {feature.learnMore != undefined && (
+              <EuiFlexItem grow={false}>
+                <EuiLink href={feature.learnMore} target="_blank">
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.workplaceSearch.gateForm.educationalPanel.learnMore',
+                    {
+                      defaultMessage: 'Learn More',
+                    }
+                  )}
+                </EuiLink>
+              </EuiFlexItem>
+            )}
 
             {feature.addOnLearnMoreLabel !== undefined &&
               feature.addOnLearnMoreUrl !== undefined && (
