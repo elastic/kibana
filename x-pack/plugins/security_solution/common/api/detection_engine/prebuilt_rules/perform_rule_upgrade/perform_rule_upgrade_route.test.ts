@@ -17,7 +17,6 @@ import {
 } from './perform_rule_upgrade_route';
 import { RULE_UPGRADE_SPECIFIER_FIELDS } from '../../../../../server/lib/detection_engine/prebuilt_rules/model/rule_assets/prebuilt_rule_asset';
 
-
 describe('Perform Rule Upgrade Route Schemas', () => {
   describe('PickVersionValues', () => {
     test('validates correct enum values', () => {
@@ -46,9 +45,8 @@ describe('Perform Rule Upgrade Route Schemas', () => {
       const upgradeSpecifierFields = new Set(Object.keys(RuleUpgradeSpecifierFields.shape));
 
       expect(upgradeSpecifierFields).toEqual(RULE_UPGRADE_SPECIFIER_FIELDS);
-
-    })
-  })
+    });
+  });
 
   describe('RuleUpgradeSpecifier', () => {
     const validSpecifier = {
