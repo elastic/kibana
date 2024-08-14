@@ -48,7 +48,7 @@ describe(
       assertMessageSent('hello', true);
     });
 
-    it.only('Deselecting default system prompt prevents prompt from being sent. When conversation is then cleared, the prompt is reset.', () => {
+    it('Deselecting default system prompt prevents prompt from being sent. When conversation is then cleared, the prompt is reset.', () => {
       visitGetStartedPage();
       openAssistant();
       clearSystemPrompt();
