@@ -448,7 +448,8 @@ export class Cluster {
 
         await nativeRealm.setPasswords(options);
 
-        if (args.some((arg) => arg.includes(MOCK_IDP_REALM_NAME))) {
+        const samlRealmConfigPrefix = `authc.realms.saml.${MOCK_IDP_REALM_NAME}.`;
+        if (args.some((arg) => arg.includes(samlRealmConfigPrefix))) {
           await ensureSAMLRoleMapping(client);
         }
       }
