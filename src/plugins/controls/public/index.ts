@@ -82,6 +82,8 @@ export {
   type ControlGroupRendererProps,
 } from './control_group';
 
+export type { ControlGroupRendererApi } from './control_group/external_api/types';
+
 /** TODO: Remove this once it is no longer needed in the examples plugin */
 export { CONTROL_WIDTH_OPTIONS } from './control_group/editor/editor_constants';
 

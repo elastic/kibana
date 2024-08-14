@@ -31,7 +31,7 @@ import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publ
 import { Observable } from 'rxjs';
 import { ControlFetchContext } from './control_fetch/control_fetch';
 import { DefaultControlState, PublishesControlDisplaySettings } from '../controls/types';
-// import { FieldFilterPredicate } from './external_api/types';
+import { FieldFilterPredicate } from '../../control_group/types';
 
 /**
  * ----------------------------------------------------------------
@@ -96,7 +96,7 @@ export interface ControlGroupEditorConfig {
   hideDataViewSelector?: boolean;
   hideWidthSettings?: boolean;
   hideAdditionalSettings?: boolean;
-  // fieldFilterPredicate?: FieldFilterPredicate;
+  fieldFilterPredicate?: FieldFilterPredicate;
 }
 
 export interface ControlGroupRuntimeState<State extends DefaultControlState = DefaultControlState>
@@ -116,7 +116,6 @@ export interface ControlGroupRuntimeState<State extends DefaultControlState = De
    * - remove after https://github.com/elastic/kibana/issues/189939 is resolved
    */
   settings?: ControlGroupSettings;
-  // getEditorConfig: () => ControlGroupEditorConfig | undefined;
 }
 
 export interface ControlGroupSerializedState

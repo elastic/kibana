@@ -17,8 +17,6 @@ import {
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../common';
 import {
   ControlGroupRuntimeState,
-  ControlPanelState,
-  ControlPanelsState,
   SerializedControlPanelState,
 } from '../../react_controls/control_group/types';
 import { OptionsListControlState } from '../../react_controls/controls/data_controls/options_list_control/types';
@@ -26,6 +24,7 @@ import { RangeValue } from '../../react_controls/controls/data_controls/range_sl
 import { DefaultDataControlState } from '../../react_controls/controls/data_controls/types';
 import { pluginServices } from '../../services';
 import { getDataControlFieldRegistry } from '../editor/data_control_editor_tools';
+import { getNextPanelOrder } from '../embeddable/control_group_helpers';
 
 export interface AddDataControlProps {
   controlId?: string;

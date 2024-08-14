@@ -6,13 +6,21 @@
  * Side Public License, v 1.
  */
 
-import type { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
-import { ControlGroupSettings } from '@kbn/controls-plugin/public/control_group/types';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { ControlGroupApi } from '../../react_controls/control_group/types';
+import {
+  ControlGroupApi,
+  ControlGroupRuntimeState,
+  ControlGroupSettings,
+} from '../../react_controls/control_group/types';
+// import { AddOptionsListControlProps } from './control_group_input_builder';
 
-export type AwaitingControlGroupApi = ControlGroupApi | null;
+export type ControlGroupRendererApi = ControlGroupApi & {
+  save: () => void;
+  reload: () => void;
+  // addOptionsListControl: (controlProps: AddOptionsListControlProps) => void;
+};
 export type FieldFilterPredicate = (f: DataViewField) => boolean;
+export type AwaitingControlGroupApi = ControlGroupRendererApi | null;
 
 export interface ControlGroupCreationOptions {
   initialState?: Partial<ControlGroupRuntimeState>;

@@ -21,8 +21,17 @@ import {
   ControlGroupRuntimeState,
   ControlGroupSerializedState,
 } from '../../react_controls/control_group/types';
-import { ControlGroupInputBuilder, controlGroupInputBuilder } from './control_group_input_builder';
-import { AwaitingControlGroupApi, ControlGroupCreationOptions } from './types';
+import {
+  AddOptionsListControlProps,
+  ControlGroupInputBuilder,
+  controlGroupInputBuilder,
+  getOptionsListPanelState,
+} from './control_group_input_builder';
+import {
+  AwaitingControlGroupApi,
+  ControlGroupCreationOptions,
+  ControlGroupRendererApi,
+} from './types';
 
 export interface ControlGroupRendererProps {
   getCreationOptions?: (
@@ -39,38 +48,43 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
   ({ getCreationOptions, filters, timeRange, query, viewMode }, ref) => {
     const id = useMemo(() => uuidv4(), []);
     const [apiLoading, setApiLoading] = useState<boolean>(true);
-    const [controlGroup, setControlGroup] = useState<ControlGroupApi | undefined>();
-    useImperativeHandle(ref, () => controlGroup as ControlGroupApi, [controlGroup]);
+    const [controlGroup, setControlGroup] = useState<ControlGroupRendererApi | undefined>();
+    useImperativeHandle(ref, () => controlGroup as ControlGroupRendererApi, [controlGroup]);
 
     const searchApi = useSearchApi({
       filters,
       query,
       timeRange,
     });
-
-    const [serializedState, setSerializedState] = useState<
-      ControlGroupSerializedState | undefined
-    >();
     const viewMode$ = useMemo(
       () => new BehaviorSubject<ViewModeType>(viewMode ?? ViewMode.VIEW),
       []
     );
+    const reload$ = useMemo(() => new BehaviorSubject<void>(undefined), []);
+    const saveNotification$ = useMemo(() => new BehaviorSubject<void>(undefined), []);
+
+    const [serializedState, setSerializedState] = useState<
+      ControlGroupSerializedState | undefined
+    >();
 
     // onMount
     useEffect(() => {
       let cancelled = false;
       (async () => {
-        const { initialState, settings } =
+        const test =
           (await getCreationOptions?.(getDefaultControlGroupInput(), controlGroupInputBuilder)) ??
           {};
+        console.log('initialState', test);
+        const { initialState, settings } = test;
+        const state = {
+          ...omit(initialState, ['panels', 'ignoreParentSettings']),
+          settings,
+          panelsJSON: JSON.stringify(initialState?.panels ?? {}),
+          ignoreParentSettingsJSON: JSON.stringify(initialState?.ignoreParentSettings ?? {}),
+        };
         if (!cancelled) {
-          const state = {
-            ...omit(initialState, ['panels', 'ignoreParentSettings']),
-            settings,
-            panelsJSON: JSON.stringify(initialState?.panels ?? {}),
-            ignoreParentSettingsJSON: JSON.stringify(initialState?.ignoreParentSettings ?? {}),
-          } as ControlGroupSerializedState;
-          setSerializedState(state);
+          console.log('state', state);
+          setSerializedState(state as ControlGroupSerializedState);
           setApiLoading(false);
         }
       })();
@@ -91,11 +105,20 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
         type={CONTROL_GROUP_TYPE}
         getParentApi={() => ({
           ...searchApi,
+          reload$,
           viewMode: viewMode$,
+          saveNotification$,
           getSerializedStateForChild: () => ({ rawState: serializedState! }),
         })}
         onApiAvailable={(childApi) => {
-          setControlGroup(childApi);
+          setControlGroup({
+            ...childApi,
+            reload: () => reload$.next(),
+            save: () => saveNotification$.next(),
+            // addOptionsListControl: (controlProps) => {
+            //   const panelState = getOptionsListPanelState(childApi.serializeState(), controlProps);
+            // },
+          });
         }}
         hidePanelChrome
       />
