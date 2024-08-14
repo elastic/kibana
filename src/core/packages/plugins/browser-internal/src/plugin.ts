@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { interfaces } from 'inversify';
 import { firstValueFrom, Subject } from 'rxjs';
 import type { DiscoveredPlugin, PluginOpaqueId } from '@kbn/core-base-common';
 import type { CoreStart, CoreSetup } from '@kbn/core-lifecycle-browser';
@@ -15,6 +16,7 @@ import type {
   PluginInitializer,
   PluginInitializerContext,
 } from '@kbn/core-plugins-browser';
+import { Setup, Start } from '@kbn/core-di-common';
 import { type PluginDefinition, read } from './plugin_reader';
 import {
   createPluginInitializerModule,
@@ -41,6 +43,7 @@ export class PluginWrapper<
   public readonly runtimePluginDependencies: DiscoveredPlugin['runtimePluginDependencies'];
   private definition?: PluginDefinition;
   private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+  private container?: interfaces.Container;
 
   private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
   public readonly startDependencies = firstValueFrom(this.startDependencies$);
@@ -72,14 +75,15 @@ export class PluginWrapper<
     this.instance = this.createPluginInstance();
 
     if (this.definition.module) {
-      const container = setupContext.injection.getContainer();
-
-      container.load(this.definition.module);
-      container.load(createPluginInitializerModule(this.initializerContext));
-      container.load(createPluginSetupModule(setupContext));
+      this.container = setupContext.injection.getContainer();
+      this.container.load(this.definition.module);
+      this.container.load(createPluginInitializerModule(this.initializerContext));
+      this.container.load(createPluginSetupModule(setupContext));
     }
 
-    return this.instance?.setup(setupContext, plugins);
+    return (
+      this.instance?.setup(setupContext, plugins) ?? (this.container?.getAsync(Setup) as TSetup)
+    );
   }
 
   /**
@@ -94,17 +98,15 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
 
-    if (this.definition.module) {
-      startContext.injection.getContainer()?.load(createPluginStartModule(startContext));
+    this.container?.load(createPluginStartModule(startContext));
+    const contract =
+      this.instance?.start(startContext, plugins) ?? (this.container?.getAsync(Start) as TStart);
+
+    if (contract) {
+      this.startDependencies$.next([startContext, plugins, contract]);
     }
 
-    if (!this.instance) {
-      return;
-    }
-
-    const startContract = this.instance.start(startContext, plugins);
-    this.startDependencies$.next([startContext, plugins, startContract]);
-    return startContract;
+    return contract;
   }
 
   /**
@@ -115,11 +117,10 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" can't be stopped since it isn't set up.`);
     }
 
-    if (typeof this.instance?.stop === 'function') {
-      this.instance.stop();
-    }
-
+    this.instance?.stop?.();
+    this.container?.unbindAll();
     this.instance = undefined;
+    this.container = undefined;
   }
 
   private createPluginInstance() {
