@@ -62,8 +62,8 @@ const throwIfRejected = (values: Array<PromiseFulfilledResult<any> | PromiseReje
   return values;
 };
 
-// install an entity definition and all its required components after
-// validating that the definition id is valid and available.
+// install an entity definition from scratch with all its required components
+// after verifying that the definition id is valid and available.
 // attempt to remove all installed components if the installation fails.
 export async function installEntityDefinition({
   esClient,
@@ -81,16 +81,15 @@ export async function installEntityDefinition({
       );
     }
 
-    return await install({ esClient, soClient, definition, logger });
+    const entityDefinition = await saveEntityDefinition(soClient, {
+      ...definition,
+      installStatus: 'installing',
+      installStartedAt: new Date().toISOString(),
+    });
+
+    return await install({ esClient, soClient, logger, definition: entityDefinition });
   } catch (e) {
     logger.error(`Failed to install entity definition ${definition.id}: ${e}`);
-
-    await deleteEntityDefinition(soClient, definition).catch((err) => {
-      if (err instanceof EntityDefinitionNotFound) {
-        return;
-      }
-      throw err;
-    });
 
     await Promise.all([
       stopAndDeleteHistoryTransform(esClient, definition, logger),
@@ -115,6 +114,13 @@ export async function installEntityDefinition({
         name: generateLatestIndexTemplateId(definition),
       }),
     ]);
+
+    await deleteEntityDefinition(soClient, definition).catch((err) => {
+      if (err instanceof EntityDefinitionNotFound) {
+        return;
+      }
+      throw err;
+    });
 
     throw e;
   }
@@ -168,8 +174,8 @@ export async function installBuiltInEntityDefinitions({
   return await Promise.all(installPromises);
 }
 
-// perform installation of an entity definition including all
-// the necessary components
+// perform installation of an entity definition components.
+// assume definition saved object is already persisted
 async function install({
   esClient,
   soClient,
@@ -184,12 +190,6 @@ async function install({
         2
       )}`
   );
-
-  const entityDefinition = await saveEntityDefinition(soClient, {
-    ...definition,
-    installStatus: 'installing',
-    installStartedAt: new Date().toISOString(),
-  });
 
   logger.debug(`Installing index templates for definition ${definition.id}`);
   await Promise.allSettled([
@@ -222,7 +222,7 @@ async function install({
 
   await updateEntityDefinition(soClient, definition.id, { installStatus: 'installed' });
 
-  return { ...entityDefinition, installStatus: 'installed' };
+  return { ...definition, installStatus: 'installed' };
 }
 
 // stop and delete the current transforms and reinstall all the components
@@ -240,7 +240,7 @@ async function reinstall({
   try {
     await updateEntityDefinition(soClient, latestDefinition.id, {
       ...latestDefinition,
-      installStatus: 'installing',
+      installStatus: 'upgrading',
       installStartedAt: new Date().toISOString(),
     });
 
@@ -276,7 +276,7 @@ const shouldReinstall = (
   const { installStatus, installStartedAt } = definition;
 
   const isStale =
-    installStatus === 'installing' &&
+    (installStatus === 'installing' || installStatus === 'upgrading') &&
     Date.now() - Date.parse(installStartedAt!) >= INSTALLATION_TIMEOUT;
   const isOutdated =
     installStatus === 'installed' && semver.neq(definition.version, latestDefinition.version);

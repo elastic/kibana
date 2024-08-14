@@ -49,7 +49,12 @@ export const entityDefinitionSchema = z.object({
     })
   ),
   installStatus: z.optional(
-    z.union([z.literal('installed'), z.literal('installing'), z.literal('failed')])
+    z.union([
+      z.literal('installing'),
+      z.literal('upgrading'),
+      z.literal('installed'),
+      z.literal('failed'),
+    ])
   ),
   installStartedAt: z.optional(z.string()),
 });
