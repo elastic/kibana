@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FindInvestigationsResponse } from '@kbn/investigation-schema';
+import { FindInvestigationsResponse } from '@kbn/investigation-shared';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../../../utils/kibana_react';
 

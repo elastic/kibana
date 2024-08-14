@@ -1,5 +1,5 @@
 {
   "type": "shared-common",
-  "id": "@kbn/investigation-schema",
+  "id": "@kbn/investigation-shared",
   "owner": "@elastic/obs-ux-management-team"
 }

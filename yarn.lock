@@ -5320,7 +5320,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/investigation-schema@link:packages/kbn-investigation-schema":
+"@kbn/investigation-shared@link:packages/kbn-investigation-shared":
   version "0.0.0"
   uid ""
 

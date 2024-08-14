@@ -54,6 +54,6 @@
     "@kbn/rule-registry-plugin",
     "@kbn/rule-data-utils",
     "@kbn/shared-ux-router",
-    "@kbn/investigation-schema",
+    "@kbn/investigation-shared",
   ],
 }

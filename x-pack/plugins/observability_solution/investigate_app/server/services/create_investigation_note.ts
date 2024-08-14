@@ -8,7 +8,7 @@
 import {
   CreateInvestigationNoteInput,
   CreateInvestigationNoteResponse,
-} from '@kbn/investigation-schema';
+} from '@kbn/investigation-shared';
 import { v4 } from 'uuid';
 import { InvestigationRepository } from './investigation_repository';
 

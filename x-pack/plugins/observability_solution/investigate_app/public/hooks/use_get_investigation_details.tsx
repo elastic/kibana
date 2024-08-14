@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { GetInvestigationResponse } from '@kbn/investigation-schema';
+import { GetInvestigationResponse } from '@kbn/investigation-shared';
 import { investigationKeys } from './query_key_factory';
 import { useKibana } from './use_kibana';
 

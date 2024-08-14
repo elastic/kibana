@@ -9,7 +9,7 @@ import {
   FindInvestigationsParams,
   FindInvestigationsResponse,
   findInvestigationsResponseSchema,
-} from '@kbn/investigation-schema';
+} from '@kbn/investigation-shared';
 import { InvestigationRepository } from './investigation_repository';
 
 export async function findInvestigations(

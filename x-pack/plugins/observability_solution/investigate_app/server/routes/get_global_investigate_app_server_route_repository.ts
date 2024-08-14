@@ -12,7 +12,7 @@ import {
   findInvestigationsParamsSchema,
   getInvestigationNotesParamsSchema,
   getInvestigationParamsSchema,
-} from '@kbn/investigation-schema';
+} from '@kbn/investigation-shared';
 import { createInvestigation } from '../services/create_investigation';
 import { createInvestigationNote } from '../services/create_investigation_note';
 import { deleteInvestigation } from '../services/delete_investigation';

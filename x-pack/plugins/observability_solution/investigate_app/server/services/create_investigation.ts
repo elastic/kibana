@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateInvestigationInput, CreateInvestigationResponse } from '@kbn/investigation-schema';
+import { CreateInvestigationInput, CreateInvestigationResponse } from '@kbn/investigation-shared';
 import { InvestigationRepository } from './investigation_repository';
 
 enum InvestigationStatus {
