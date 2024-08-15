@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-
+import { mapValues } from 'lodash';
 import {
   AnomalyThreshold,
   EventCategoryOverride,
@@ -203,21 +203,79 @@ const DiffableRule = z.intersection(
   ])
 );
 
+// TODO: Add unit test to assert that types match between DiffableRules
+// and this schema
+type DiffableRuleTypes = z.infer<typeof DiffableRuleTypes>;
+const DiffableRuleTypes = z.union([
+  DiffableCustomQueryFields.shape.type,
+  DiffableSavedQueryFields.shape.type,
+  DiffableEqlFields.shape.type,
+  DiffableEsqlFields.shape.type,
+  DiffableThreatMatchFields.shape.type,
+  DiffableThresholdFields.shape.type,
+  DiffableMachineLearningFields.shape.type,
+  DiffableNewTermsFields.shape.type,
+]);
+
 /**
  * This is a merge of all fields from all rule types into a single TS type.
  * This is NOT a union discriminated by rule type, as DiffableRule is.
  */
-export type DiffableAllFields = DiffableCommonFields &
-  Omit<DiffableCustomQueryFields, 'type'> &
-  Omit<DiffableSavedQueryFields, 'type'> &
-  Omit<DiffableEqlFields, 'type'> &
-  Omit<DiffableEsqlFields, 'type'> &
-  Omit<DiffableThreatMatchFields, 'type'> &
-  Omit<DiffableThresholdFields, 'type'> &
-  Omit<DiffableMachineLearningFields, 'type'> &
-  Omit<DiffableNewTermsFields, 'type'> &
-  DiffableRuleTypeField;
+// export type DiffableAllFields = DiffableCommonFields &
+//   Omit<DiffableCustomQueryFields, 'type'> &
+//   Omit<DiffableSavedQueryFields, 'type'> &
+//   Omit<DiffableEqlFields, 'type'> &
+//   Omit<DiffableEsqlFields, 'type'> &
+//   Omit<DiffableThreatMatchFields, 'type'> &
+//   Omit<DiffableThresholdFields, 'type'> &
+//   Omit<DiffableMachineLearningFields, 'type'> &
+//   Omit<DiffableNewTermsFields, 'type'> &
+//   DiffableRuleTypeField;
 
-interface DiffableRuleTypeField {
-  type: DiffableRule['type'];
-}
+type DiffableAllFields = z.infer<typeof DiffableAllFields>;
+const DiffableAllFields = DiffableCommonFields.merge(DiffableCustomQueryFields.omit({ type: true }))
+  .merge(DiffableSavedQueryFields.omit({ type: true }))
+  .merge(DiffableEqlFields.omit({ type: true }))
+  .merge(DiffableEsqlFields.omit({ type: true }))
+  .merge(DiffableThreatMatchFields.omit({ type: true }))
+  .merge(DiffableThresholdFields.omit({ type: true }))
+  .merge(DiffableMachineLearningFields.omit({ type: true }))
+  .merge(DiffableNewTermsFields.omit({ type: true }))
+  .merge(z.object({ type: DiffableRuleTypes }));
+
+type DiffableUpgradableFields = z.infer<typeof DiffableUpgradableFields>;
+const DiffableUpgradableFields = DiffableAllFields.omit({
+  type: true,
+  rule_id: true,
+  version: true,
+});
+
+export type PickVersionValues = z.infer<typeof PickVersionValues>;
+export const PickVersionValues = z.enum(['BASE', 'CURRENT', 'TARGET', 'MERGED']);
+
+type FieldUpgradeSpecifier<T> = z.infer<ReturnType<typeof fieldUpgradeSpecifier<z.ZodType<T>>>>;
+const fieldUpgradeSpecifier = <T extends z.ZodTypeAny>(fieldSchema: T) =>
+  z.discriminatedUnion('pick_version', [
+    z.object({
+      pick_version: PickVersionValues,
+    }),
+    z.object({
+      pick_version: z.literal('RESOLVED'),
+      resolved_value: fieldSchema,
+    }),
+  ]);
+
+type FieldUpgradeSpecifiers<TFields> = Required<{
+  [Field in keyof TFields]: FieldUpgradeSpecifier<TFields[Field]>;
+}>;
+
+type RuleFieldsToUpgrade = FieldUpgradeSpecifiers<DiffableUpgradableFields>;
+const RuleFieldsToUpgrade = z
+  .object(
+    mapValues(DiffableUpgradableFields.shape, (fieldSchema) => {
+      return fieldUpgradeSpecifier(fieldSchema);
+    })
+  )
+  .strict();
+//TODO: Add units tests
+// TODO: Make sure that only the expected fields are listed inRuleFieldsToUpgrade

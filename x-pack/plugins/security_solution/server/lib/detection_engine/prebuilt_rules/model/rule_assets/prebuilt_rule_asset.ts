@@ -141,7 +141,6 @@ export const UPGRADABLE_FIELDS_PAYLOAD_BY_RULE_TYPE = createUpgradableRuleFields
  * manually during the upgrade workflow.
  */
 const NON_UPGRADABLE_FIELDS: string[] = [
-  'alert_suppression',
   'author',
   'license',
   'concurrent_searches',
