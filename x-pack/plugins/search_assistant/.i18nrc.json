@@ -1,0 +1,9 @@
+{
+  "prefix": "SearchAssistant",
+  "paths": {
+    "SearchAssistant": "."
+  },
+  "translations": [
+    "translations/ja-JP.json"
+  ]
+}

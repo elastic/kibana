@@ -6187,6 +6187,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/search-assistant@link:x-pack/plugins/search_assistant":
+  version "0.0.0"
+  uid ""
+
 "@kbn/search-connectors-plugin@link:x-pack/plugins/search_connectors":
   version "0.0.0"
   uid ""
