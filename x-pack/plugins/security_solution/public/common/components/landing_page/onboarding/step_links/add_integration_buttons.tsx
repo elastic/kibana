@@ -155,8 +155,8 @@ const AddIntegrationPanel: React.FC<{
 AddIntegrationPanel.displayName = 'AddIntegrationPanel';
 
 export const AddIntegrationButtons: React.FC = React.memo(() => {
-  const { integrationAssistant } = useKibana().services;
-  const { CreateIntegrationCardButton } = integrationAssistant?.components ?? {};
+  const { integrationImport } = useKibana().services;
+  const { CreateIntegrationCardButton } = integrationImport?.components ?? {};
   return (
     <EuiFlexGroup direction="column" className="step-paragraph" gutterSize="m">
       <EuiFlexItem grow={false}>

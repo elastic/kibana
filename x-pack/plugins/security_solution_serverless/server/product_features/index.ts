@@ -49,8 +49,8 @@ export const registerProductFeatures = (
   });
 
   // set availability for the integration assistant plugin based on the product features
-  pluginsSetup.integrationAssistant?.setIsAvailable(
-    enabledProductFeatureKeys.includes(ProductFeatureKey.integrationAssistant)
+  pluginsSetup.integrationImport?.setIsAvailable(
+    enabledProductFeatureKeys.includes(ProductFeatureKey.integrationImport)
   );
 };
 

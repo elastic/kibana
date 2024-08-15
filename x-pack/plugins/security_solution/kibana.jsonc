@@ -71,7 +71,7 @@
       "osquery",
       "savedObjectsTaggingOss",
       "guidedOnboarding",
-      "integrationAssistant"
+      "integrationImport"
     ],
     "requiredBundles": [
       "esUiShared",

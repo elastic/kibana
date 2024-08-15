@@ -53,7 +53,7 @@
     "xpack.logsShared": "plugins/observability_solution/logs_shared",
     "xpack.fleet": "plugins/fleet",
     "xpack.ingestPipelines": "plugins/ingest_pipelines",
-    "xpack.integrationAssistant": "plugins/integration_assistant",
+    "xpack.integrationImport": "plugins/integration_import",
     "xpack.inference": "plugins/inference",
     "xpack.investigate": "plugins/observability_solution/investigate",
     "xpack.investigateApp": "plugins/observability_solution/investigate_app",
