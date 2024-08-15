@@ -28,9 +28,37 @@ export const parseNDJSON = (fileContent: string, multiline: boolean = false): un
   const separator = multiline ? /\n(?=\{)/ : '\n';
 
   return fileContent
-    .split(separator) // For multiline, split at newline followed by '{'
-    .filter((entry) => entry.trim() !== '') // Remove empty entries
+    .split(separator) // For multiline, split at newline followed by '{'.
+    .filter((entry) => entry.trim() !== '') // Remove empty entries.
     .map((entry) => JSON.parse(entry)); // Parse each entry as JSON.
+};
+
+/**
+ * Parse the logs sample file content as a JSON, find an array of entries there.
+ *
+ * Returns both the parsed entries and the path to the entries in the JSON object.
+ * If the JSON object can be parsed, but is not an array, we try to find a candidate
+ * among the dictionary keys. If we fail, we return an error.
+ */
+export const parseJSONArray = (
+  fileContent: string
+): { entries: unknown[]; pathToEntries: string; errorNoArrayFound: boolean } => {
+  const jsonContent = JSON.parse(fileContent);
+  if (Array.isArray(jsonContent)) {
+    return { entries: jsonContent, pathToEntries: '', errorNoArrayFound: false };
+  }
+  if (typeof jsonContent === 'object' && jsonContent !== null) {
+    const arrayKeys = Object.keys(jsonContent).filter((key) => Array.isArray(jsonContent[key]));
+    if (arrayKeys.length === 1) {
+      const key = arrayKeys[0];
+      return {
+        entries: jsonContent[key],
+        pathToEntries: `.${key}`,
+        errorNoArrayFound: false,
+      };
+    }
+  }
+  return { errorNoArrayFound: true, entries: [], pathToEntries: '' };
 };
 
 /**
@@ -42,7 +70,7 @@ const parseLogsContent = (
   if (fileContent == null) {
     return { error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_READ };
   }
-  let parsedContent;
+  let parsedContent: unknown[];
   let logFormat;
 
   try {
@@ -51,33 +79,30 @@ const parseLogsContent = (
     // Special case for files that can be parsed as both JSON and NDJSON:
     //   for a one-line array [] -> extract its contents (it's a JSON)
     //   for a one-line object {} -> do nothing (keep as NDJSON)
-    if (
-      Array.isArray(parsedContent) &&
-      parsedContent.length === 1 &&
-      Array.isArray(parsedContent[0])
-    ) {
+    if (parsedContent.length === 1 && Array.isArray(parsedContent[0])) {
       parsedContent = parsedContent[0];
-      logFormat = 'json';
+      logFormat = 'json[]';
     } else {
       logFormat = 'ndjson';
     }
   } catch (parseNDJSONError) {
     try {
-      parsedContent = JSON.parse(fileContent);
-      logFormat = 'json';
+      const { entries, pathToEntries, errorNoArrayFound } = parseJSONArray(fileContent);
+      if (errorNoArrayFound) {
+        return { error: i18n.LOGS_SAMPLE_ERROR.NOT_ARRAY };
+      }
+      parsedContent = entries;
+      logFormat = `json[]${pathToEntries}`;
     } catch (parseJSONError) {
       try {
         parsedContent = parseNDJSON(fileContent, true);
         logFormat = 'ndjson+multiline';
-      } catch (parseNDMJSONError) {
+      } catch (parseMultilineNDJSONError) {
         return { error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_PARSE };
       }
     }
   }
 
-  if (!Array.isArray(parsedContent)) {
-    return { error: i18n.LOGS_SAMPLE_ERROR.NOT_ARRAY };
-  }
   if (parsedContent.length === 0) {
     return { error: i18n.LOGS_SAMPLE_ERROR.EMPTY };
   }

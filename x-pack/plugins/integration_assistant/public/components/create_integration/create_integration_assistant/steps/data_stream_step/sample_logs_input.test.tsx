@@ -8,7 +8,7 @@
 import React from 'react';
 import { act, fireEvent, render, waitFor, type RenderResult } from '@testing-library/react';
 import { TestProvider } from '../../../../../mocks/test_provider';
-import { parseNDJSON, SampleLogsInput } from './sample_logs_input';
+import { parseNDJSON, parseJSONArray, SampleLogsInput } from './sample_logs_input';
 import { ActionsProvider } from '../../state';
 import { mockActions } from '../../mocks/state';
 import { mockServices } from '../../../../../services/mocks/services';
@@ -27,19 +27,15 @@ const changeFile = async (input: HTMLElement, file: File) => {
   });
 };
 
+const simpleNDJSON = `{"message":"test message 1"}\n{"message":"test message 2"}`;
+const multilineNDJSON = `{"message":"test message 1"}\n\n{\n  "message":\n  "test message 2"\n}\n\n`;
+const splitNDJSON = simpleNDJSON.split('\n');
+const complexEventsJSON = `{"events":[\n{"message":"test message 1"},\n{"message":"test message 2"}\n]}`;
+
 describe('parseNDJSON', () => {
   const content = [{ message: 'test message 1' }, { message: 'test message 2' }];
-  const simpleNDJSON = '{"message":"test message 1"}\n{ "message": "test message 2" }';
   const validNDJSONWithSpaces = `{"message":"test message 1"}
                                  {"message":"test message 2"}`;
-  const multilineNDJSON = `{
-                             "message":"test message 1"
-                           }\n{ 
-                             "message"
-                               :
-                             "test message 2"
-                           }
-  `;
   const singlelineArray = '[{"message":"test message 1"}, {"message":"test message 2"}]';
   const multilineArray = '[{"message":"test message 1"},\n{"message":"test message 2"}]';
 
@@ -91,6 +87,49 @@ describe('parseNDJSON', () => {
   });
 });
 
+describe('parseJSONArray', () => {
+  const content = [{ message: 'test message 1' }, { message: 'test message 2' }];
+  const singlelineArray = '[{"message":"test message 1"},{"message":"test message 2"}]';
+  const multilineArray = '[{"message":"test message 1"},\n{"message":"test message 2"}]';
+  const multilineWithSpacesArray =
+    '   [ \n\n{"message":  "test message 1"},\n{"message"   :\n\n"test message 2"}\n]\n';
+  const malformedJSON = '[{"message":"test message 1"}';
+
+  it('should parse valid JSON array', () => {
+    const expected = {
+      entries: content,
+      pathToEntries: '',
+      errorNoArrayFound: false,
+    };
+    expect(parseJSONArray(singlelineArray)).toEqual(expected);
+    expect(parseJSONArray(multilineArray)).toEqual(expected);
+    expect(parseJSONArray(multilineWithSpacesArray)).toEqual(expected);
+  });
+
+  it('should parse valid JSON object with array entries', () => {
+    const expected = {
+      entries: content,
+      pathToEntries: '.events',
+      errorNoArrayFound: false,
+    };
+    expect(parseJSONArray(complexEventsJSON)).toEqual(expected);
+  });
+
+  it('should return error for JSON that does not contain an array', () => {
+    const fileContent = '{"records" : {"message": "test message 1"}}';
+    const expected = {
+      entries: [],
+      pathToEntries: '',
+      errorNoArrayFound: true,
+    };
+    expect(parseJSONArray(fileContent)).toEqual(expected);
+  });
+
+  it('should throw an error for invalid JSON object', () => {
+    expect(() => parseJSONArray(malformedJSON)).toThrow();
+  });
+});
+
 describe('SampleLogsInput', () => {
   let result: RenderResult;
   let input: HTMLElement;
@@ -113,7 +152,7 @@ describe('SampleLogsInput', () => {
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
           logsSampleParsed: logsSampleRaw.split(','),
-          logFormat: 'json',
+          logFormat: 'json[]',
         });
       });
 
@@ -126,13 +165,26 @@ describe('SampleLogsInput', () => {
         it('should truncate the logs sample', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
             logsSampleParsed: tooLargeLogsSample.split(',').slice(0, 10),
-            logFormat: 'json',
+            logFormat: 'json[]',
           });
         });
         it('should add a notification toast', () => {
           expect(mockServices.notifications.toasts.addInfo).toBeCalledWith(
             `The logs sample has been truncated to 10 rows.`
           );
+        });
+      });
+    });
+
+    describe('when the file is a json array under a key', () => {
+      beforeEach(async () => {
+        await changeFile(input, new File([complexEventsJSON], 'test.json', { type }));
+      });
+
+      it('should set the integrationSetting correctly', () => {
+        expect(mockActions.setIntegrationSettings).toBeCalledWith({
+          logsSampleParsed: splitNDJSON,
+          logFormat: 'json[].events',
         });
       });
     });
@@ -168,20 +220,19 @@ describe('SampleLogsInput', () => {
     const type = 'application/x-ndjson';
 
     describe('when the file is valid ndjson', () => {
-      const logsSampleRaw = `{"message":"test message 1"}\n{"message":"test message 2"}`;
       beforeEach(async () => {
-        await changeFile(input, new File([logsSampleRaw], 'test.json', { type }));
+        await changeFile(input, new File([simpleNDJSON], 'test.json', { type }));
       });
 
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
-          logsSampleParsed: logsSampleRaw.split('\n'),
+          logsSampleParsed: splitNDJSON,
           logFormat: 'ndjson',
         });
       });
 
       describe('when the file has too many rows', () => {
-        const tooLargeLogsSample = Array(6).fill(logsSampleRaw).join('\n'); // 12 entries
+        const tooLargeLogsSample = Array(6).fill(simpleNDJSON).join('\n'); // 12 entries
         beforeEach(async () => {
           await changeFile(input, new File([tooLargeLogsSample], 'test.json', { type }));
         });
@@ -196,6 +247,19 @@ describe('SampleLogsInput', () => {
           expect(mockServices.notifications.toasts.addInfo).toBeCalledWith(
             `The logs sample has been truncated to 10 rows.`
           );
+        });
+      });
+    });
+
+    describe('when the file is multiline ndjson', () => {
+      beforeEach(async () => {
+        await changeFile(input, new File([multilineNDJSON], 'test.json', { type }));
+      });
+
+      it('should set the integrationSetting correctly', () => {
+        expect(mockActions.setIntegrationSettings).toBeCalledWith({
+          logsSampleParsed: splitNDJSON,
+          logFormat: 'ndjson+multiline',
         });
       });
     });
