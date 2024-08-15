@@ -239,6 +239,16 @@ OK response oas-test-version-2",
               "type": "string",
             },
           },
+          Object {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": Object {
+              "example": "true",
+              "type": "string",
+            },
+          },
         ],
         "requestBody": undefined,
         "responses": Object {
@@ -414,6 +424,16 @@ OK response oas-test-version-2",
             },
           },
           Object {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": Object {
+              "example": "true",
+              "type": "string",
+            },
+          },
+          Object {
             "description": "id",
             "in": "path",
             "name": "id",
@@ -542,6 +562,94 @@ OK response oas-test-version-2",
         "tags": Array [
           "bar",
         ],
+      },
+    },
+    "/no-xsrf/{id}/{path*}": Object {
+      "post": Object {
+        "operationId": "/no-xsrf/{id}/{path*}#1",
+        "parameters": Array [
+          Object {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": Object {
+              "default": "oas-test-version-2",
+              "enum": Array [
+                "oas-test-version-1",
+                "oas-test-version-2",
+              ],
+              "type": "string",
+            },
+          },
+        ],
+        "requestBody": Object {
+          "content": Object {
+            "application/json; Elastic-Api-Version=oas-test-version-1": Object {
+              "schema": Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "deprecatedFoo": Object {
+                    "deprecated": true,
+                    "description": "deprecated foo",
+                    "type": "string",
+                  },
+                  "foo": Object {
+                    "type": "string",
+                  },
+                },
+                "required": Array [
+                  "foo",
+                ],
+                "type": "object",
+              },
+            },
+            "application/json; Elastic-Api-Version=oas-test-version-2": Object {
+              "schema": Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "foo": Object {
+                    "type": "string",
+                  },
+                },
+                "required": Array [
+                  "foo",
+                ],
+                "type": "object",
+              },
+            },
+          },
+        },
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "application/json; Elastic-Api-Version=oas-test-version-1": Object {
+                "schema": Object {
+                  "additionalProperties": false,
+                  "description": "fooResponse",
+                  "properties": Object {
+                    "fooResponseWithDescription": Object {
+                      "type": "string",
+                    },
+                  },
+                  "required": Array [
+                    "fooResponseWithDescription",
+                  ],
+                  "type": "object",
+                },
+              },
+              "application/octet-stream; Elastic-Api-Version=oas-test-version-2": Object {
+                "schema": Object {
+                  "description": "stream response",
+                  "type": "object",
+                },
+              },
+            },
+            "description": "OK response oas-test-version-1
+OK response oas-test-version-2",
+          },
+        },
+        "summary": "",
+        "tags": Array [],
       },
     },
   },
