@@ -17,7 +17,12 @@ export const AVAILABLE_TEMPLATES = ['zod_operation_schema'] as const;
 export type TemplateName = (typeof AVAILABLE_TEMPLATES)[number];
 
 export interface ITemplateService {
-  compileTemplate: (templateName: TemplateName, context: GenerationContext) => string;
+  compileTemplate: (
+    templateName: TemplateName,
+    context: GenerationContext & {
+      sources: Array<{ sourcePath: string; generationContext: GenerationContext }>;
+    }
+  ) => string;
 }
 
 /**

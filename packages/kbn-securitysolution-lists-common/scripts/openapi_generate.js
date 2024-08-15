@@ -34,4 +34,18 @@ const ROOT = resolve(__dirname, '..');
       ),
     },
   });
+
+  await generate({
+    title: 'Lists API client for quickstart',
+    rootDir: ROOT,
+    sourceGlob: './api/**/*.schema.yaml',
+    templateName: 'api_client_quickstart',
+    skipLinting: true,
+    bundle: {
+      outFile: join(
+        REPO_ROOT,
+        'packages/kbn-securitysolution-lists-common/api/quickstart_client.gen.ts'
+      ),
+    },
+  });
 })();

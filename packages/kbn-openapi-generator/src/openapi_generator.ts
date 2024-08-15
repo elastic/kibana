@@ -94,6 +94,7 @@ export const generate = async (config: GeneratorConfig) => {
 
     const result = TemplateService.compileTemplate(templateName, {
       operations,
+      sources: parsedSources,
       components: {},
       info: {
         title,
@@ -108,7 +109,10 @@ export const generate = async (config: GeneratorConfig) => {
   } else {
     await Promise.all(
       parsedSources.map(async ({ sourcePath, generationContext }) => {
-        const result = TemplateService.compileTemplate(templateName, generationContext);
+        const result = TemplateService.compileTemplate(templateName, {
+          ...generationContext,
+          sources: [{ sourcePath, generationContext }],
+        });
 
         // Write the generation result to disk
         await fs.writeFile(getGeneratedFilePath(sourcePath), result);
