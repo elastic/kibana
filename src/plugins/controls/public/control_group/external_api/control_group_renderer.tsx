@@ -7,7 +7,14 @@
  */
 
 import { omit } from 'lodash';
-import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -47,6 +54,10 @@ export interface ControlGroupRendererProps {
 export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlGroupRendererProps>(
   ({ getCreationOptions, filters, timeRange, query, viewMode }, ref) => {
     const id = useMemo(() => uuidv4(), []);
+    const [regenerateId, setRegenerateId] = useState(uuidv4());
+    const lastInput = useRef<Partial<ControlGroupRuntimeState> | null>(null);
+    const input$ = useMemo(() => new BehaviorSubject<ControlGroupRuntimeState | null>(null), []);
+
     const [apiLoading, setApiLoading] = useState<boolean>(true);
     const [controlGroup, setControlGroup] = useState<ControlGroupRendererApi | undefined>();
     useImperativeHandle(ref, () => controlGroup as ControlGroupRendererApi, [controlGroup]);
@@ -102,20 +113,34 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
         ControlGroupRuntimeState,
         ControlGroupApi
       >
+        key={regenerateId} // forces unmount + mount when `updateInput` is called
         maybeId={id}
         type={CONTROL_GROUP_TYPE}
+        onAnyStateChange={(newState) => {
+          input$.next(newState);
+        }}
         getParentApi={() => ({
           ...searchApi,
           reload$,
           viewMode: viewMode$,
           saveNotification$,
-          getSerializedStateForChild: () => ({ rawState: serializedState! }),
+          getSerializedStateForChild: () => ({
+            rawState: serializedState!,
+          }),
+          getRuntimeStateForChild: () => {
+            return lastInput.current;
+          },
         })}
-        onApiAvailable={(childApi) => {
+        onApiAvailable={(controlGroupApi) => {
           setControlGroup({
-            ...childApi,
+            ...controlGroupApi,
             reload: () => reload$.next(),
             save: () => saveNotification$.next(),
+            updateInput: (newInput) => {
+              lastInput.current = newInput;
+              setRegenerateId(uuidv4());
+            },
+            getInput$: () => input$,
             // addOptionsListControl: (controlProps) => {
             //   const panelState = getOptionsListPanelState(childApi.serializeState(), controlProps);
             // },

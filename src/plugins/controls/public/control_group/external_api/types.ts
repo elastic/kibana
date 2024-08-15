@@ -12,11 +12,15 @@ import {
   ControlGroupRuntimeState,
   ControlGroupSettings,
 } from '../../react_controls/control_group/types';
+import { BehaviorSubject } from 'rxjs';
 // import { AddOptionsListControlProps } from './control_group_input_builder';
 
 export type ControlGroupRendererApi = ControlGroupApi & {
   save: () => void;
   reload: () => void;
+  getInput$: () => BehaviorSubject<ControlGroupRuntimeState | null>;
+  updateInput: (input: Partial<ControlGroupRuntimeState>) => void;
+
   // addOptionsListControl: (controlProps: AddOptionsListControlProps) => void;
 };
 export type FieldFilterPredicate = (f: DataViewField) => boolean;

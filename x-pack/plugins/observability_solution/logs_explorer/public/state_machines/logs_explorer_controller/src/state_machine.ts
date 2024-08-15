@@ -225,6 +225,11 @@ export const createPureLogsExplorerControllerStateMachine = (
                     src: 'subscribeControlGroup',
                   },
                   on: {
+                    INITIALIZE_CONTROL_GROUP_API: {
+                      target: 'idle',
+                      cond: 'controlGroupAPIExists',
+                      actions: ['storeControlGroupAPI'],
+                    },
                     DATA_VIEW_UPDATED: {
                       target: 'updatingControlPanels',
                     },
@@ -283,9 +288,10 @@ export const createPureLogsExplorerControllerStateMachine = (
             ? { discoverStateContainer: event.discoverStateContainer }
             : {}
         ),
-        storeControlGroupAPI: actions.assign((_context, event) =>
-          'controlGroupAPI' in event ? { controlGroupAPI: event.controlGroupAPI } : {}
-        ),
+        storeControlGroupAPI: actions.assign((_context, event) => {
+          console.log('STORE CONTROL GROUP API', event);
+          return 'controlGroupAPI' in event ? { controlGroupAPI: event.controlGroupAPI } : {};
+        }),
         storeControlPanels: actions.assign((_context, event) =>
           'data' in event && ControlPanelRT.is(event.data) ? { controlPanels: event.data } : {}
         ),
