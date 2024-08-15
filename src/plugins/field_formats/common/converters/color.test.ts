@@ -28,10 +28,10 @@ describe('Color Format', () => {
 
       expect(colorer.convert(99, HTML_CONTEXT_TYPE)).toBe('99');
       expect(colorer.convert(100, HTML_CONTEXT_TYPE)).toBe(
-        '<span style="color:blue;background-color:yellow">100</span>'
+        '<span class="euiBadge css-aai6qf-euiBadge" style="--euiBadgeBackgroundColor:yellow;--euiBadgeTextColor:#000;color:blue"><span class="euiBadge__content css-1yj2yi7-euiBadge__content"><span class="euiBadge__text css-1vg55k4-euiBadge__text">100</span></span></span>'
       );
       expect(colorer.convert(150, HTML_CONTEXT_TYPE)).toBe(
-        '<span style="color:blue;background-color:yellow">150</span>'
+        '<span class="euiBadge css-aai6qf-euiBadge" style="--euiBadgeBackgroundColor:yellow;--euiBadgeTextColor:#000;color:blue"><span class="euiBadge__content css-1yj2yi7-euiBadge__content"><span class="euiBadge__text css-1vg55k4-euiBadge__text">150</span></span></span>'
       );
       expect(colorer.convert(151, HTML_CONTEXT_TYPE)).toBe('151');
     });
@@ -72,25 +72,18 @@ describe('Color Format', () => {
       );
       const converter = colorer.getConverterFor(HTML_CONTEXT_TYPE) as Function;
 
+      const checkResult = (text: string) =>
+        `<span class="euiBadge css-aai6qf-euiBadge" style="--euiBadgeBackgroundColor:yellow;--euiBadgeTextColor:#000;color:blue"><span class="euiBadge__content css-1yj2yi7-euiBadge__content"><span class="euiBadge__text css-1vg55k4-euiBadge__text">${text}</span></span></span>`;
+
       expect(converter('B', HTML_CONTEXT_TYPE)).toBe('B');
-      expect(converter('AAA', HTML_CONTEXT_TYPE)).toBe(
-        '<span style="color:blue;background-color:yellow">AAA</span>'
-      );
-      expect(converter('AB', HTML_CONTEXT_TYPE)).toBe(
-        '<span style="color:blue;background-color:yellow">AB</span>'
-      );
+      expect(converter('AAA', HTML_CONTEXT_TYPE)).toBe(checkResult('AAA'));
+      expect(converter('AB', HTML_CONTEXT_TYPE)).toBe(checkResult('AB'));
       expect(converter('a', HTML_CONTEXT_TYPE)).toBe('a');
 
       expect(converter('B', HTML_CONTEXT_TYPE)).toBe('B');
-      expect(converter('AAA', HTML_CONTEXT_TYPE)).toBe(
-        '<span style="color:blue;background-color:yellow">AAA</span>'
-      );
-      expect(converter('AB', HTML_CONTEXT_TYPE)).toBe(
-        '<span style="color:blue;background-color:yellow">AB</span>'
-      );
-      expect(converter('AB <', HTML_CONTEXT_TYPE)).toBe(
-        '<span style="color:blue;background-color:yellow">AB &lt;</span>'
-      );
+      expect(converter('AAA', HTML_CONTEXT_TYPE)).toBe(checkResult('AAA'));
+      expect(converter('AB', HTML_CONTEXT_TYPE)).toBe(checkResult('AB'));
+      expect(converter('AB <', HTML_CONTEXT_TYPE)).toBe(checkResult('AB &amp;lt;'));
       expect(converter('a', HTML_CONTEXT_TYPE)).toBe('a');
     });
 

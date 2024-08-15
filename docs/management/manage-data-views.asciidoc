@@ -246,9 +246,11 @@ NOTE: For numeric fields the default field formatters are based on the `meta.uni
 [[string-field-formatters]]
 ==== String field formatters
 
-String fields support *String* and *Url* formatters.
+String fields support *String*, *Color*, and *Url* formatters.
 
 include::field-formatters/string-formatter.asciidoc[]
+
+include::field-formatters/color-formatter-string.asciidoc[]
 
 include::field-formatters/url-formatter.asciidoc[]
 
