@@ -87,6 +87,7 @@ export const DashboardViewportComponent = () => {
           >
             key={dashboard.getDashboardSavedObjectId()}
             hidePanelChrome={true}
+            panelProps={{ hideLoader: true }}
             type={CONTROL_GROUP_TYPE}
             maybeId={'control_group'}
             getParentApi={() => {

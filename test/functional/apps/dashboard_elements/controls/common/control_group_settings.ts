@@ -39,8 +39,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         fieldName: 'sound.keyword',
       });
       await dashboardControls.adjustControlsLayout('twoLine');
-      const controlGroupWrapper = await testSubjects.find('controls-group-wrapper');
-      expect(await controlGroupWrapper.elementHasClass('controlsWrapper--twoLine')).to.be(true);
+      const controlGroupWrapper = await testSubjects.find('controls-group-floating-actions');
+      expect(await controlGroupWrapper.elementHasClass('controlFrameFloatingActions--twoLine')).to.be(true);
     });
 
     describe('apply new default width and grow', async () => {

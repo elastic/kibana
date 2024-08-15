@@ -149,6 +149,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
         viewMode={viewMode}
         disabledActions={[]}
         isEnabled={true}
+        data-test-subjects="controls-group-floating-actions"
       >
         <EuiFormRow
           data-test-subj="control-frame-title"
