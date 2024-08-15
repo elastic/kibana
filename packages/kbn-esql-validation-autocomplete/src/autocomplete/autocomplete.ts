@@ -660,7 +660,7 @@ async function getExpressionSuggestionsByType(
       if ((!nodeArg || isNewExpression) && !endsWithNot) {
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(
-            [argDef.innerType || 'any'],
+            argDef.innerTypes ?? ['any'],
             command.name,
             option?.name,
             getFieldsByType,
@@ -906,7 +906,7 @@ async function getExpressionSuggestionsByType(
       }
     }
     if (argDef.type === 'source') {
-      if (argDef.innerType === 'policy') {
+      if (argDef.innerTypes?.includes('policy')) {
         // ... | ENRICH <suggest>
         const policies = await getPolicies();
         suggestions.push(...(policies.length ? policies : [buildNoPoliciesAvailableDefinition()]));

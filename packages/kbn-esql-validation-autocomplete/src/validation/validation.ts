@@ -873,18 +873,21 @@ function validateColumnForCommand(
     if (getColumnExists(column, references)) {
       const commandDef = getCommandDefinition(commandName);
       const columnParamsWithInnerTypes = commandDef.signature.params.filter(
-        ({ type, innerType }) => type === 'column' && innerType
+        ({ type, innerTypes }) => type === 'column' && innerTypes
       );
       // this should be guaranteed by the columnCheck above
       const columnRef = lookupColumn(column, references)!;
 
       if (columnParamsWithInnerTypes.length) {
-        const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(({ innerType }) => {
-          if (innerType === 'string' && isStringType(columnRef.type)) return false;
-          return innerType !== 'any' && innerType !== columnRef.type;
+        const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(({ innerTypes }) => {
+          if (innerTypes?.includes('string') && isStringType(columnRef.type)) return false;
+          return innerTypes && !innerTypes.includes('any') && !innerTypes.includes(columnRef.type);
         });
         if (hasSomeWrongInnerTypes) {
-          const supportedTypes = columnParamsWithInnerTypes.map(({ innerType }) => innerType);
+          const supportedTypes: string[] = columnParamsWithInnerTypes
+            .map(({ innerTypes }) => innerTypes)
+            .flat()
+            .filter((type) => type !== undefined) as string[];
 
           messages.push(
             getMessageFromId({
