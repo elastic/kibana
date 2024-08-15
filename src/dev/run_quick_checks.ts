@@ -184,7 +184,7 @@ function printResults(startTimestamp: number, results: CheckResult[]) {
     if (result.success) {
       logger.debug(result.output);
     } else {
-      logger.warn(result.output);
+      logger.warning(result.output);
     }
   });
 }
