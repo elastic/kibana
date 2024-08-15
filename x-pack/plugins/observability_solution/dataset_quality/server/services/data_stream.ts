@@ -11,8 +11,6 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { streamPartsToIndexPattern } from '../../common/utils';
-
 class DataStreamService {
   public async getMatchingDataStreams(
     esClient: ElasticsearchClient,
@@ -24,31 +22,6 @@ class DataStreamService {
       });
 
       return dataStreamsInfo;
-    } catch (e) {
-      if (e.statusCode === 404) {
-        return [];
-      }
-      throw e;
-    }
-  }
-
-  public async getMatchingDataStreamsStats(
-    esClient: ElasticsearchClient,
-    dataStreamParts: {
-      dataset: string;
-      type: string;
-    }
-  ): Promise<IndicesDataStreamsStatsDataStreamsStatsItem[]> {
-    try {
-      const { data_streams: dataStreamsStats } = await esClient.indices.dataStreamsStats({
-        name: streamPartsToIndexPattern({
-          typePattern: dataStreamParts.type,
-          datasetPattern: dataStreamParts.dataset,
-        }),
-        human: true,
-      });
-
-      return dataStreamsStats;
     } catch (e) {
       if (e.statusCode === 404) {
         return [];

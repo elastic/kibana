@@ -12,11 +12,11 @@ import React from 'react';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TestProviders } from '../../../common/mock';
 import {
-  DataProviderType,
   IS_OPERATOR,
   EXISTS_OPERATOR,
   IS_ONE_OF_OPERATOR,
 } from '../timeline/data_providers/data_provider';
+import { DataProviderTypeEnum } from '../../../../common/api/timeline';
 
 import { StatefulEditDataProvider } from '.';
 
@@ -393,7 +393,7 @@ describe('StatefulEditDataProvider', () => {
           providerId={`hosts-table-hostName-${value}`}
           timelineId={timelineId}
           value={value}
-          type={DataProviderType.template}
+          type={DataProviderTypeEnum.template}
         />
       </TestProviders>
     );

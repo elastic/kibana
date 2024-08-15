@@ -408,7 +408,46 @@
           }
         ],
         "returnComment": [
-          "whether arg is of type SignificantItem"
+          "Return whether arg is of type SignificantItem"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.isSignificantItemGroup",
+        "type": "Function",
+        "tags": [],
+        "label": "isSignificantItemGroup",
+        "description": [
+          "\nType guard to check if the given argument is a SignificantItemGroup."
+        ],
+        "signature": [
+          "(arg: unknown) => boolean"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/type_guards.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.isSignificantItemGroup.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "arg",
+            "description": [
+              "The unknown type to be evaluated"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/type_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Return whether arg is of type SignificantItemGroup"
         ],
         "initialIsOpen": false
       },
@@ -2080,7 +2119,14 @@
               "\nAn array of data points, each represented by a NumericDataItem."
             ],
             "signature": [
-              "NumericDataItem[]"
+              {
+                "pluginId": "@kbn/ml-agg-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAggUtilsPluginApi",
+                "section": "def-common.NumericDataItem",
+                "text": "NumericDataItem"
+              },
+              "[]"
             ],
             "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
@@ -2198,6 +2244,66 @@
               "The maximum value in the histogram."
             ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.NumericDataItem",
+        "type": "Interface",
+        "tags": [
+          "interface"
+        ],
+        "label": "NumericDataItem",
+        "description": [
+          "\nRepresents an item in numeric data."
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.NumericDataItem.key",
+            "type": "number",
+            "tags": [],
+            "label": "key",
+            "description": [
+              "\nThe numeric key."
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.NumericDataItem.key_as_string",
+            "type": "string",
+            "tags": [],
+            "label": "key_as_string",
+            "description": [
+              "\nAn optional string representation of the key."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.NumericDataItem.doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "doc_count",
+            "description": [
+              "\nThe document count associated with the key."
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2792,6 +2898,45 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.SignificantItemHistogramItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "SignificantItemHistogramItem",
+        "description": [
+          "\nRepresents a data item in a significant term histogram."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-agg-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAggUtilsPluginApi",
+            "section": "def-common.SignificantItemHistogramItem",
+            "text": "SignificantItemHistogramItem"
+          },
+          " extends SignificantItemHistogramItemBase"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantItemHistogramItem.doc_count_significant_item",
+            "type": "number",
+            "tags": [],
+            "label": "doc_count_significant_item",
+            "description": [
+              "The document count for this histogram item in the significant item context."
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [
@@ -2872,23 +3017,6 @@
             "text": "NumericColumnStats"
           },
           "; }"
-        ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.SignificantItemHistogramItem",
-        "type": "Type",
-        "tags": [],
-        "label": "SignificantItemHistogramItem",
-        "description": [
-          "\nRepresents a data item in a significant term histogram."
-        ],
-        "signature": [
-          "SignificantItemHistogramItemV1 | SignificantItemHistogramItemV2"
         ],
         "path": "x-pack/packages/ml/agg_utils/src/types.ts",
         "deprecated": false,

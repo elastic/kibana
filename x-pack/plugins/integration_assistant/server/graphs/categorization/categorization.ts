@@ -9,10 +9,11 @@ import type {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import type { ESProcessorItem, Pipeline } from '../../../common';
-import type { CategorizationState } from '../../types';
+import type { Pipeline } from '../../../common';
+import type { CategorizationState, SimplifiedProcessors, SimplifiedProcessor } from '../../types';
 import { combineProcessors } from '../../util/processors';
 import { CATEGORIZATION_MAIN_PROMPT } from './prompts';
+import { CATEGORIZATION_EXAMPLE_PROCESSORS } from './constants';
 
 export async function handleCategorization(
   state: CategorizationState,
@@ -21,16 +22,20 @@ export async function handleCategorization(
   const categorizationMainPrompt = CATEGORIZATION_MAIN_PROMPT;
   const outputParser = new JsonOutputParser();
   const categorizationMainGraph = categorizationMainPrompt.pipe(model).pipe(outputParser);
-
   const currentProcessors = (await categorizationMainGraph.invoke({
     pipeline_results: JSON.stringify(state.pipelineResults, null, 2),
+    example_processors: CATEGORIZATION_EXAMPLE_PROCESSORS,
     ex_answer: state?.exAnswer,
     ecs_categories: state?.ecsCategories,
     ecs_types: state?.ecsTypes,
-  })) as ESProcessorItem[];
+  })) as SimplifiedProcessor[];
 
-  const currentPipeline = combineProcessors(state.initialPipeline as Pipeline, currentProcessors);
+  const processors = {
+    type: 'categorization',
+    processors: currentProcessors,
+  } as SimplifiedProcessors;
 
+  const currentPipeline = combineProcessors(state.initialPipeline as Pipeline, processors);
   return {
     currentPipeline,
     currentProcessors,

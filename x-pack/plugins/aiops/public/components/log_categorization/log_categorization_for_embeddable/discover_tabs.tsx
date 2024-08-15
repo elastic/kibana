@@ -62,7 +62,7 @@ export const DiscoverTabs: FC<Props> = ({
   query,
 }) => {
   return (
-    <EuiFlexItem grow={false}>
+    <EuiFlexItem grow={false} className="unifiedDataTableToolbar">
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem grow={false}>{renderViewModeToggle(data?.categories.length)}</EuiFlexItem>
         <EuiFlexItem />
