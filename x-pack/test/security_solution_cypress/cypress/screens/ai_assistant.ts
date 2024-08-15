@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+export const ADD_NEW_CONNECTOR = '[data-test-subj="addNewConnectorButton"]';
 export const ADD_QUICK_PROMPT = '[data-test-subj="addQuickPrompt"]';
+export const ASSISTANT_SETTINGS_BUTTON = 'button[data-test-subj="settings"]';
 export const AI_ASSISTANT_BUTTON = '[data-test-subj="assistantHeaderLink"]';
 export const ASSISTANT_CHAT_BODY = '[data-test-subj="assistantChat"]';
 export const CHAT_CONTEXT_MENU = '[data-test-subj="chat-context-menu"]';
@@ -38,6 +40,7 @@ export const QUICK_PROMPT_TITLE_INPUT =
   '[data-test-subj="quickPromptSelector"] [data-test-subj="comboBoxSearchInput"]';
 export const QUICK_PROMPT_BADGE = (b: string) => `[data-test-subj="quickPrompt-${b}"]`;
 export const QUICK_PROMPT_BODY_INPUT = '[data-test-subj="quick-prompt-prompt"]';
+export const SHOW_ANONYMIZED_BUTTON = '[data-test-subj="showAnonymizedValues"]';
 export const SUBMIT_CHAT = '[data-test-subj="submit-chat"]';
 export const SYSTEM_PROMPT = '[data-test-subj="systemPromptText"]';
 export const SYSTEM_PROMPT_BODY_INPUT = '[data-test-subj="systemPromptModalPromptText"]';
@@ -46,3 +49,4 @@ export const SYSTEM_PROMPT_TITLE_INPUT =
 export const SYSTEM_PROMPT_SELECT = (c: string) => `[data-test-subj="systemPrompt-${c}"]`;
 export const USER_PROMPT = '[data-test-subj="prompt-textarea"]';
 export const WELCOME_SETUP = '[data-test-subj="welcome-setup"]';
+export const UPGRADE_CTA = '[data-test-subj="upgradeLicenseCallToAction"]';

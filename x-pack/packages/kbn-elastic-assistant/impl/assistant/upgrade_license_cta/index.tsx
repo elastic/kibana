@@ -25,6 +25,7 @@ export const UpgradeLicenseCallToAction: React.FC<Props> = ({ http }) => {
   const basePath = http.basePath.get();
   return (
     <EuiFlexGroup
+      data-test-subj="upgradeLicenseCallToAction"
       justifyContent="center"
       direction="column"
       alignItems="center"

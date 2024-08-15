@@ -42,6 +42,9 @@ import {
   QUICK_PROMPT_BODY_INPUT,
   PROMPT_CONTEXT_SELECTOR,
   QUICK_PROMPT_BADGE,
+  ADD_NEW_CONNECTOR,
+  SHOW_ANONYMIZED_BUTTON,
+  ASSISTANT_SETTINGS_BUTTON,
 } from '../screens/ai_assistant';
 import { TOASTER } from '../screens/alerts_detection_rules';
 
@@ -178,6 +181,21 @@ export const assertErrorToastShown = (message?: string) => {
   if (message?.length) {
     cy.get(TOASTER).should('contain', message);
   }
+};
+
+export const assertConversationTitleReadOnly = () => {
+  cy.get(CONVERSATION_TITLE + ' h2').click();
+  cy.get(CONVERSATION_TITLE + ' input').should('not.exist');
+};
+
+export const assertConversationReadOnly = () => {
+  assertConversationTitleReadOnly();
+  cy.get(ADD_NEW_CONNECTOR).should('be.disabled');
+  cy.get(SHOW_ANONYMIZED_BUTTON).should('be.disabled');
+  cy.get(CHAT_CONTEXT_MENU).should('be.disabled');
+  cy.get(FLYOUT_NAV_TOGGLE).should('be.disabled');
+  cy.get(NEW_CHAT).should('be.disabled');
+  cy.get(ASSISTANT_SETTINGS_BUTTON).should('be.disabled');
 };
 
 export const updateConversationTitle = (newTitle: string) => {
