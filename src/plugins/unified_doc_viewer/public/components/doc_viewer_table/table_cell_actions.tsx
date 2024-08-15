@@ -14,6 +14,7 @@ import { DocViewFilterFn, FieldRecordLegacy } from '@kbn/unified-doc-viewer/type
 export interface TableRow {
   action: Omit<FieldRecordLegacy['action'], 'isActive'>;
   field: {
+    selected: boolean;
     pinned: boolean;
     onTogglePinned: (field: string) => void;
   } & FieldRecordLegacy['field'];

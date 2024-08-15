@@ -76,9 +76,18 @@
     border-bottom: $euiBorderThin;
   }
 
+  // .kbnDocViewer__fieldsGrid__selectedRow {
+  //   background-color: tintOrShade($euiColorPrimary, 95%, 70%);
+  // }
+
+  // &.euiDataGrid--rowHoverHighlight .euiDataGridRow:not(.kbnDocViewer__fieldsGrid__selectedRow):hover {
   &.euiDataGrid--rowHoverHighlight .euiDataGridRow:hover {
     background-color: tintOrShade($euiColorLightShade, 50%, 0);
   }
+
+  // .kbnDocViewer__fieldsGrid__selectedRow:hover {
+  //   background-color: tintOrShade($euiColorPrimary, 90%, 70%);
+  // }
 
   & [data-gridcell-column-id='name'] .euiDataGridRowCell__content {
     padding-top: 0;
@@ -89,17 +98,23 @@
     padding: $euiSizeXS / 2 0 0 $euiSizeXS;
   }
 
+  .kbnDocViewer__fieldsGrid__pinSelectedAction {
+    opacity: .35;
+  }
+
   .kbnDocViewer__fieldsGrid__pinAction {
     opacity: 0;
   }
 
   & [data-gridcell-column-id='pin_field']:focus-within {
-    .kbnDocViewer__fieldsGrid__pinAction {
+    .kbnDocViewer__fieldsGrid__pinAction, .kbnDocViewer__fieldsGrid__pinSelectedAction {
       opacity: 1;
     }
   }
 
-  .euiDataGridRow:hover .kbnDocViewer__fieldsGrid__pinAction {
-    opacity: 1;
+  .euiDataGridRow:hover {
+    .kbnDocViewer__fieldsGrid__pinAction, .kbnDocViewer__fieldsGrid__pinSelectedAction {
+      opacity: 1;
+    }
   }
 }

@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import classNames from 'classnames';
 import type { TableRow } from './table_cell_actions';
 
 interface PinControlCellProps {
@@ -26,10 +27,15 @@ const PinControlCell: React.FC<PinControlCellProps> = React.memo(({ row }) => {
   const { euiTheme } = useEuiTheme();
 
   const fieldName = row.field.field;
+  const isSelected = row.field.selected;
   const isPinned = row.field.pinned;
   const label = isPinned
     ? i18n.translate('unifiedDocViewer.docViews.table.unpinFieldLabel', {
         defaultMessage: 'Unpin field',
+      })
+    : isSelected
+    ? i18n.translate('unifiedDocViewer.docViews.table.pinSelectedFieldLabel', {
+        defaultMessage: 'Pin selected field',
       })
     : i18n.translate('unifiedDocViewer.docViews.table.pinFieldLabel', {
         defaultMessage: 'Pin field',
@@ -38,7 +44,10 @@ const PinControlCell: React.FC<PinControlCellProps> = React.memo(({ row }) => {
   return (
     <div
       data-test-subj={`unifiedDocViewer_pinControl_${fieldName}`}
-      className={!isPinned ? 'kbnDocViewer__fieldsGrid__pinAction' : undefined}
+      className={classNames({
+        ['kbnDocViewer__fieldsGrid__pinAction']: !isPinned && !isSelected,
+        ['kbnDocViewer__fieldsGrid__pinSelectedAction']: !isPinned && isSelected,
+      })}
       css={css`
         margin-left: ${isPinned ? '-1px' : 0}; // to align filled/unfilled pin icons better
         width: ${euiTheme.size.l};

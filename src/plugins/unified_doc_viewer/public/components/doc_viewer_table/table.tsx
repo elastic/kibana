@@ -24,6 +24,7 @@ import {
   useResizeObserver,
   EuiSwitch,
   useEuiTheme,
+  EuiDataGridStyle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -58,6 +59,7 @@ import { getPinColumnControl } from './get_pin_control';
 export type FieldRecord = TableRow;
 
 interface ItemsEntry {
+  selectedItems: FieldRecord[];
   pinnedItems: FieldRecord[];
   restItems: FieldRecord[];
   allFields: TableFiltersProps['allFields'];
@@ -74,20 +76,21 @@ const HIDE_NULL_VALUES = 'unifiedDocViewer:hideNullValues';
 const GRID_COLUMN_FIELD_NAME = 'name';
 const GRID_COLUMN_FIELD_VALUE = 'value';
 
+const GRID_STYLE: EuiDataGridStyle = {
+  border: 'horizontal',
+  stripes: true,
+  rowHover: 'highlight',
+  header: 'underline',
+  cellPadding: 'm',
+  fontSize: 's',
+};
+
 const GRID_PROPS: Pick<EuiDataGridProps, 'columnVisibility' | 'rowHeightsOptions' | 'gridStyle'> = {
   columnVisibility: {
     visibleColumns: ['name', 'value'],
     setVisibleColumns: () => null,
   },
   rowHeightsOptions: { defaultHeight: 'auto' },
-  gridStyle: {
-    border: 'horizontal',
-    stripes: true,
-    rowHover: 'highlight',
-    header: 'underline',
-    cellPadding: 'm',
-    fontSize: 's',
-  },
 };
 
 const getPinnedFields = (dataViewId: string, storage: Storage): string[] => {
@@ -180,7 +183,7 @@ export const DocViewerTable = ({
   const { onFilterField, ...tableFiltersProps } = useTableFilters(storage);
 
   const fieldToItem = useCallback(
-    (field: string, isPinned: boolean) => {
+    (field: string): TableRow => {
       const fieldMapping = mapping(field);
       const displayName = fieldMapping?.displayName ?? field;
       const columnMeta = columnsMeta?.[field];
@@ -207,7 +210,8 @@ export const DocViewerTable = ({
           fieldMapping,
           fieldType,
           scripted: Boolean(fieldMapping?.scripted),
-          pinned: isPinned,
+          selected: Boolean(columns?.includes(field)),
+          pinned: pinnedFields.includes(field),
           onTogglePinned,
         },
         value: {
@@ -224,77 +228,114 @@ export const DocViewerTable = ({
     },
     [
       mapping,
+      columnsMeta,
       dataView,
-      hit,
+      hit.raw,
+      hit.flattened,
       onToggleColumn,
       filter,
-      columnsMeta,
       flattened,
+      columns,
+      pinnedFields,
       onTogglePinned,
       fieldFormats,
     ]
   );
 
-  const { pinnedItems, restItems, allFields } = useMemo(
-    () =>
-      Object.keys(flattened)
-        .sort((fieldA, fieldB) => {
-          const mappingA = mapping(fieldA);
-          const mappingB = mapping(fieldB);
-          const nameA = !mappingA || !mappingA.displayName ? fieldA : mappingA.displayName;
-          const nameB = !mappingB || !mappingB.displayName ? fieldB : mappingB.displayName;
-          return nameA.localeCompare(nameB);
-        })
-        .reduce<ItemsEntry>(
-          (acc, curFieldName) => {
-            if (!shouldShowFieldHandler(curFieldName)) {
-              return acc;
-            }
-            const shouldHideNullValue =
-              areNullValuesHidden && flattened[curFieldName] == null && isEsqlMode;
-            if (shouldHideNullValue) {
-              return acc;
-            }
+  const { pinnedItems, selectedItems, restItems, allFields } = useMemo(() => {
+    const fieldToRowOrUndefined = (field: string) => {
+      if (!shouldShowFieldHandler(field)) {
+        return undefined;
+      }
 
-            const isPinned = pinnedFields.includes(curFieldName);
-            const row = fieldToItem(curFieldName, isPinned);
+      const shouldHideNullValue = areNullValuesHidden && flattened[field] == null && isEsqlMode;
 
-            if (isPinned) {
-              acc.pinnedItems.push(row);
-            } else {
-              if (onFilterField(curFieldName, row.field.displayName, row.field.fieldType)) {
-                // filter only unpinned fields
-                acc.restItems.push(row);
-              }
-            }
+      if (shouldHideNullValue) {
+        return undefined;
+      }
 
-            acc.allFields.push({
-              name: curFieldName,
-              displayName: row.field.displayName,
-              type: row.field.fieldType,
-            });
+      return fieldToItem(field);
+    };
 
+    const selectedRows =
+      columns?.map(fieldToRowOrUndefined).filter((row): row is TableRow => {
+        return Boolean(
+          row &&
+            !row.field.pinned &&
+            onFilterField(row.field.field, row.field.displayName, row.field.fieldType)
+        );
+      }) ?? [];
+
+    return Object.keys(flattened)
+      .sort((fieldA, fieldB) => {
+        const mappingA = mapping(fieldA);
+        const mappingB = mapping(fieldB);
+        const nameA = !mappingA || !mappingA.displayName ? fieldA : mappingA.displayName;
+        const nameB = !mappingB || !mappingB.displayName ? fieldB : mappingB.displayName;
+        return nameA.localeCompare(nameB);
+      })
+      .reduce<ItemsEntry>(
+        (acc, field) => {
+          const row = fieldToRowOrUndefined(field);
+
+          if (!row) {
             return acc;
-          },
-          {
-            pinnedItems: [],
-            restItems: [],
-            allFields: [],
           }
-        ),
-    [
-      areNullValuesHidden,
-      fieldToItem,
-      flattened,
-      isEsqlMode,
-      mapping,
-      onFilterField,
-      pinnedFields,
-      shouldShowFieldHandler,
-    ]
+
+          if (row.field.pinned) {
+            acc.pinnedItems.push(row);
+          } else if (!row.field.selected) {
+            // skip selected columns that are not pinned
+            if (onFilterField(field, row.field.displayName, row.field.fieldType)) {
+              // filter only unpinned fields
+              acc.restItems.push(row);
+            }
+          }
+
+          acc.allFields.push({
+            name: row.field.field,
+            displayName: row.field.displayName,
+            type: row.field.fieldType,
+          });
+
+          return acc;
+        },
+        {
+          selectedItems: selectedRows,
+          pinnedItems: [],
+          restItems: [],
+          allFields: [],
+        }
+      );
+  }, [
+    areNullValuesHidden,
+    columns,
+    fieldToItem,
+    flattened,
+    isEsqlMode,
+    mapping,
+    onFilterField,
+    shouldShowFieldHandler,
+  ]);
+
+  const rows = useMemo(
+    () => [...pinnedItems, ...selectedItems, ...restItems],
+    [pinnedItems, restItems, selectedItems]
   );
 
-  const rows = useMemo(() => [...pinnedItems, ...restItems], [pinnedItems, restItems]);
+  const gridStyle = useMemo<EuiDataGridStyle>(
+    () => ({
+      ...GRID_STYLE,
+      rowClasses: rows.reduce<NonNullable<EuiDataGridStyle['rowClasses']>>((acc, row, index) => {
+        if (row.field.selected) {
+          acc[index] = 'kbnDocViewer__fieldsGrid__selectedRow';
+        }
+
+        return acc;
+      }, {}),
+    }),
+    [rows]
+  );
 
   const leadingControlColumns = useMemo(() => {
     return [getPinColumnControl({ rows })];
@@ -491,6 +532,7 @@ export const DocViewerTable = ({
                 defaultMessage: 'Field values',
               })}
               className="kbnDocViewer__fieldsGrid"
+              gridStyle={gridStyle}
               columns={gridColumns}
               toolbarVisibility={false}
               rowCount={rows.length}
