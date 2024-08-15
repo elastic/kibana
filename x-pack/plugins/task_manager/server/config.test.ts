@@ -13,7 +13,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
-        "claim_strategy": "default",
+        "claim_strategy": "update_by_query",
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -70,7 +70,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
-        "claim_strategy": "default",
+        "claim_strategy": "update_by_query",
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -125,7 +125,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
-        "claim_strategy": "default",
+        "claim_strategy": "update_by_query",
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
