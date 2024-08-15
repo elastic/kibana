@@ -8,7 +8,9 @@
 import { Capabilities } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { omit } from 'lodash';
 import { popularizeField } from '../../utils/popularize_field';
+import { UnifiedDataTableSettings } from '../../types';
 
 /**
  * Helper function to provide a fallback to a single _source column if the given array of columns
@@ -61,21 +63,27 @@ export function getStateColumnActions({
   columns,
   sort,
   defaultOrder,
+  settings,
 }: {
   capabilities: Capabilities;
   dataView: DataView;
   dataViews: DataViewsContract;
   useNewFieldsApi: boolean;
-  setAppState: (state: { columns: string[]; sort?: string[][] }) => void;
+  setAppState: (state: {
+    columns: string[];
+    sort?: string[][];
+    settings?: UnifiedDataTableSettings;
+  }) => void;
   columns?: string[];
   sort: string[][] | undefined;
   defaultOrder: string;
+  settings?: UnifiedDataTableSettings;
 }) {
   function onAddColumn(columnName: string) {
     popularizeField(dataView, columnName, dataViews, capabilities);
     const nextColumns = addColumn(columns || [], columnName, useNewFieldsApi);
     const nextSort = columnName === '_score' && !sort?.length ? [['_score', defaultOrder]] : sort;
-    setAppState({ columns: nextColumns, sort: nextSort });
+    setAppState({ columns: nextColumns, sort: nextSort, settings });
   }
 
   function onRemoveColumn(columnName: string) {
@@ -83,12 +91,16 @@ export function getStateColumnActions({
     const nextColumns = removeColumn(columns || [], columnName, useNewFieldsApi);
     // The state's sort property is an array of [sortByColumn,sortDirection]
     const nextSort = sort && sort.length ? sort.filter((subArr) => subArr[0] !== columnName) : [];
-    setAppState({ columns: nextColumns, sort: nextSort });
+    const nextSettings = adjustLastColumnWidth(
+      nextColumns,
+      cleanColumnSettings(nextColumns, settings)
+    );
+    setAppState({ columns: nextColumns, sort: nextSort, settings: nextSettings });
   }
 
   function onMoveColumn(columnName: string, newIndex: number) {
     const nextColumns = moveColumn(columns || [], columnName, newIndex);
-    setAppState({ columns: nextColumns });
+    setAppState({ columns: nextColumns, settings });
   }
 
   function onSetColumns(nextColumns: string[], hideTimeColumn: boolean) {
@@ -98,7 +110,15 @@ export function getStateColumnActions({
         ? (nextColumns || []).slice(1)
         : nextColumns;
 
-    setAppState({ columns: actualColumns });
+    let nextSettings = cleanColumnSettings(nextColumns, settings);
+
+    // When columns are removed, reset the last column to auto width if only absolute
+    // width columns remain, to ensure the columns fill the available grid space
+    if (actualColumns.length < (columns?.length ?? 0)) {
+      nextSettings = adjustLastColumnWidth(actualColumns, nextSettings);
+    }
+
+    setAppState({ columns: actualColumns, settings: nextSettings });
   }
   return {
     onAddColumn,
@@ -107,3 +127,52 @@ export function getStateColumnActions({
     onSetColumns,
   };
 }
+
+const cleanColumnSettings = (
+  columns: string[],
+  settings?: UnifiedDataTableSettings
+): UnifiedDataTableSettings | undefined => {
+  const columnSettings = settings?.columns;
+
+  if (!columnSettings) {
+    return settings;
+  }
+
+  const nextColumnSettings = columns.reduce<NonNullable<UnifiedDataTableSettings['columns']>>(
+    (acc, column) => (columnSettings[column] ? { ...acc, [column]: columnSettings[column] } : acc),
+    {}
+  );
+
+  return { ...settings, columns: nextColumnSettings };
+};
+
+const adjustLastColumnWidth = (
+  columns: string[],
+  settings?: UnifiedDataTableSettings
+): UnifiedDataTableSettings | undefined => {
+  const columnSettings = settings?.columns;
+
+  if (!columns.length || !columnSettings) {
+    return settings;
+  }
+
+  const hasAutoWidthColumn = columns.some((colId) => columnSettings[colId]?.width == null);
+
+  if (hasAutoWidthColumn) {
+    return settings;
+  }
+
+  const lastColumn = columns[columns.length - 1];
+  const lastColumnSettings = omit(columnSettings[lastColumn] ?? {}, 'width');
+  const lastColumnSettingsOptional = Object.keys(lastColumnSettings).length
+    ? { [lastColumn]: lastColumnSettings }
+    : undefined;
+
+  return {
+    ...settings,
+    columns: {
+      ...omit(columnSettings, lastColumn),
+      ...lastColumnSettingsOptional,
+    },
+  };
+};

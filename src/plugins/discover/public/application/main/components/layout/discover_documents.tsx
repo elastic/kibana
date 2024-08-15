@@ -28,6 +28,7 @@ import {
   getTextBasedColumnsMeta,
   getRenderCustomToolbarWithElements,
   UnifiedDataTableProps,
+  UseColumnsProps,
 } from '@kbn/unified-data-table';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -41,6 +42,7 @@ import {
 } from '@kbn/discover-utils';
 import useObservable from 'react-use/lib/useObservable';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
@@ -156,6 +158,13 @@ function DiscoverDocumentsComponent({
     stateContainer,
   });
 
+  const setAppState = useCallback<UseColumnsProps['setAppState']>(
+    ({ settings, ...rest }) => {
+      stateContainer.appState.update({ ...rest, grid: settings as DiscoverGridSettings });
+    },
+    [stateContainer]
+  );
+
   const {
     columns: currentColumns,
     onAddColumn,
@@ -167,10 +176,11 @@ function DiscoverDocumentsComponent({
     defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
     dataView,
     dataViews,
-    setAppState: stateContainer.appState.update,
+    setAppState,
     useNewFieldsApi,
     columns,
     sort,
+    settings: grid,
   });
 
   const setExpandedDoc = useCallback(
