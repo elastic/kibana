@@ -93,13 +93,14 @@ export const AppSearchUnconfigured: React.FC = () => {
 
 export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) => {
   const {
+    showGateForm,
     myRole: {
       canManageEngines,
       canManageMetaEngines,
       canViewSettings,
       canViewAccountCredentials,
       canViewRoleMappings,
-    },
+    }
   } = useValues(AppLogic(props));
   const { renderHeaderActions } = useValues(KibanaLogic);
 
@@ -107,51 +108,50 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
     renderHeaderActions(KibanaHeaderActions);
   }, []);
 
-  const isBlockingRoutes = props.appSearch?.role?.roleType === 'owner' && !props.appSearch?.kibanaIsEnabled;
-  return !isBlockingRoutes ? (
+  return !showGateForm ? (
     <Routes>
-        {process.env.NODE_ENV === 'development' && (
-          <Route path={LIBRARY_PATH}>
-            <Library />
-          </Route>
-        )}
-        <Route exact path={ROOT_PATH}>
-          <Redirect to={ENGINES_PATH} />
+      {process.env.NODE_ENV === 'development' && (
+        <Route path={LIBRARY_PATH}>
+          <Library />
         </Route>
-        <Route exact path={ENGINES_PATH}>
-          <EnginesOverview />
+      )}
+      <Route exact path={ROOT_PATH}>
+        <Redirect to={ENGINES_PATH} />
+      </Route>
+      <Route exact path={ENGINES_PATH}>
+        <EnginesOverview />
+      </Route>
+      {canManageEngines && (
+        <Route exact path={ENGINE_CREATION_PATH}>
+          <EngineCreation />
         </Route>
-        {canManageEngines && (
-          <Route exact path={ENGINE_CREATION_PATH}>
-            <EngineCreation />
-          </Route>
-        )}
-        {canManageMetaEngines && (
-          <Route exact path={META_ENGINE_CREATION_PATH}>
-            <MetaEngineCreation />
-          </Route>
-        )}
-        <Route path={ENGINE_PATH}>
-          <EngineRouter />
+      )}
+      {canManageMetaEngines && (
+        <Route exact path={META_ENGINE_CREATION_PATH}>
+          <MetaEngineCreation />
         </Route>
-        {canViewSettings && (
-          <Route exact path={SETTINGS_PATH}>
-            <Settings />
-          </Route>
-        )}
-        {canViewAccountCredentials && (
-          <Route exact path={CREDENTIALS_PATH}>
-            <Credentials />
-          </Route>
-        )}
-        {canViewRoleMappings && (
-          <Route path={USERS_AND_ROLES_PATH}>
-            <RoleMappings />
-          </Route>
-        )}
-        <Route>
-          <NotFound />
+      )}
+      <Route path={ENGINE_PATH}>
+        <EngineRouter />
+      </Route>
+      {canViewSettings && (
+        <Route exact path={SETTINGS_PATH}>
+          <Settings />
         </Route>
+      )}
+      {canViewAccountCredentials && (
+        <Route exact path={CREDENTIALS_PATH}>
+          <Credentials />
+        </Route>
+      )}
+      {canViewRoleMappings && (
+        <Route path={USERS_AND_ROLES_PATH}>
+          <RoleMappings />
+        </Route>
+      )}
+      <Route>
+        <NotFound />
+      </Route>
     </Routes>
   ) : (
     <Routes>

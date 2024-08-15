@@ -17,6 +17,7 @@ import { getRoleAbilities } from './utils/role';
 
 interface AppValues {
   account: Account;
+  showGateForm: boolean;
   configuredLimits: ConfiguredLimits;
   myRole: Role;
 }
@@ -42,6 +43,7 @@ export const AppLogic = kea<MakeLogicType<AppValues, AppActions, Required<Initia
       },
     ],
     configuredLimits: [props.configuredLimits.appSearch, {}],
+    showGateForm: [props.appSearch.kibanaIsEnabled == false && props.appSearch.role.roleType === 'owner', false],
   }),
   selectors: {
     myRole: [

@@ -29,7 +29,7 @@ export const sendAppSearchGatedFormData = async ({
     '/internal/app_search/as_gate',
     {
       body: JSON.stringify({
-        ws_gate_data: {
+        as_gate_data: {
           additional_feedback: additionalFeedback != null ? additionalFeedback : undefined,
           feature,
           features_other: featuresOther != null ? featuresOther : undefined,

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-import { AppSearchGate } from './app_search_gate';
+export { AppSearchGate } from './app_search_gate';

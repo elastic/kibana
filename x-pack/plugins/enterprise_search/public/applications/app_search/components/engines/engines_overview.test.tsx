@@ -18,9 +18,16 @@ import { EnginesTable } from './components/tables/engines_table';
 import { MetaEnginesTable } from './components/tables/meta_engines_table';
 
 import { EnginesOverview } from '.';
+import { AppSearchGatePage } from '../app_search_gate/app_search_gated_form_page';
 
 describe('EnginesOverview', () => {
   const values = {
+    account: {
+      kibanaIsEnabled: true,
+      role: {
+        roleType: 'owner',
+      }
+    },
     dataLoading: false,
     engines: [],
     enginesMeta: {
@@ -47,6 +54,7 @@ describe('EnginesOverview', () => {
     expandedSourceEngines: {},
     conflictingEnginesSets: {},
   };
+
   const actions = {
     loadEngines: jest.fn(),
     loadMetaEngines: jest.fn(),
@@ -78,10 +86,29 @@ describe('EnginesOverview', () => {
     setMockValues(valuesWithEngines);
   });
 
-  it('renders and calls the engines API', () => {
+  it('does not render overview page when kibanaUIsEnabled is false', () => {
+    setMockValues({
+      ...values,
+      account: {
+        kibanaIsEnabled: false,
+        role: {
+          roleType: 'owner',
+        }
+      }
+    });
+    const wrapper = shallow(<EnginesOverview />);
+
+    expect(wrapper.find(AppSearchGatePage)).toHaveLength(1);
+    expect(wrapper.find(EnginesTable)).toHaveLength(0);
+    expect(actions.loadEngines).toHaveBeenCalled();
+  });
+
+  it('renders and calls the engines API kibanaUIsEnabled is true', () => {
+
     const wrapper = shallow(<EnginesOverview />);
 
     expect(wrapper.find(EnginesTable)).toHaveLength(1);
+    expect(wrapper.find(AppSearchGatePage)).toHaveLength(0);
     expect(actions.loadEngines).toHaveBeenCalled();
   });
 
