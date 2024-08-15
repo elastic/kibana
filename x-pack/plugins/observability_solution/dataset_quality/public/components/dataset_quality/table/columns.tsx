@@ -31,10 +31,9 @@ import {
   BYTE_NUMBER_FORMAT,
 } from '../../../../common/constants';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
-import { NavigationSource } from '../../../services/telemetry';
 import { DatasetQualityIndicator, QualityIndicator } from '../../quality_indicator';
 import { PrivilegesWarningIconWrapper, IntegrationIcon } from '../../common';
-import { useRedirectLink } from '../../../hooks';
+import { useDatasetRedirectLinkTelemetry, useRedirectLink } from '../../../hooks';
 import { FlyoutDataset } from '../../../state_machines/dataset_quality_controller';
 import { DegradedDocsPercentageLink } from './degraded_docs_percentage_link';
 import { TimeRangeConfig } from '../../../../common/types';
@@ -363,9 +362,10 @@ const RedirectLink = ({
   title: string;
   timeRange: TimeRangeConfig;
 }) => {
+  const { sendTelemetry } = useDatasetRedirectLinkTelemetry({ rawName: dataStreamStat.rawName });
   const redirectLinkProps = useRedirectLink({
     dataStreamStat,
-    telemetry: { page: 'main', navigationSource: NavigationSource.Table },
+    sendTelemetry,
     timeRangeConfig: timeRange,
   });
 

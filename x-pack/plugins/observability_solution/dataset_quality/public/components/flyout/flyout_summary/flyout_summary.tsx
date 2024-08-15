@@ -172,7 +172,6 @@ export default function FlyoutSummary({
       <EuiSpacer />
 
       <DegradedDocs
-        dataStream={dataStream}
         timeRange={timeRange}
         lastReloadTime={lastReloadTime}
         onTimeRangeChange={handleTimeRangeChange}

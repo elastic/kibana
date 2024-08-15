@@ -18,8 +18,11 @@ import {
 import { css } from '@emotion/react';
 import React from 'react';
 import { openInDiscoverText, openInLogsExplorerText } from '../../../common/translations';
-import { NavigationSource } from '../../services/telemetry';
-import { useRedirectLink } from '../../hooks';
+import {
+  useDatasetDetailsRedirectLinkTelemetry,
+  useDatasetDetailsTelemetry,
+  useRedirectLink,
+} from '../../hooks';
 import { IntegrationIcon } from '../common';
 import { BasicDataStream, TimeRangeConfig } from '../../../common/types';
 
@@ -37,12 +40,13 @@ export function Header({
   const { integration } = linkDetails;
   const euiShadow = useEuiShadow('s');
   const { euiTheme } = useEuiTheme();
+  const { navigationSources } = useDatasetDetailsTelemetry();
+  const { sendTelemetry } = useDatasetDetailsRedirectLinkTelemetry({
+    navigationSource: navigationSources.Header,
+  });
   const redirectLinkProps = useRedirectLink({
     dataStreamStat: linkDetails,
-    telemetry: {
-      page: 'details',
-      navigationSource: NavigationSource.Header,
-    },
+    sendTelemetry,
     timeRangeConfig: timeRange,
   });
 

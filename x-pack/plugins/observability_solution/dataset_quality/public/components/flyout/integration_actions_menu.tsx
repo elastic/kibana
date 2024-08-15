@@ -18,8 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
-import { useDatasetQualityFlyout } from '../../hooks';
-import { useFlyoutIntegrationActions } from '../../hooks/use_flyout_integration_actions';
+import { useDatasetQualityFlyout, useIntegrationActions } from '../../hooks';
 import { Integration } from '../../../common/data_streams_stats/integration';
 import { Dashboard } from '../../../common/api_types';
 
@@ -59,7 +58,7 @@ export function IntegrationActionsMenu({
     getIntegrationOverviewLinkProps,
     getIndexManagementLinkProps,
     getDashboardLinkProps,
-  } = useFlyoutIntegrationActions();
+  } = useIntegrationActions();
 
   const actionButton = (
     <EuiButtonIcon

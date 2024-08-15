@@ -18,19 +18,30 @@ import {
 import { css } from '@emotion/react';
 import React from 'react';
 import { openInDiscoverText, openInLogsExplorerText } from '../../../common/translations';
-import { useDatasetQualityDetailsRedirectLink, useDatasetQualityDetailsState } from '../../hooks';
+import {
+  useDatasetDetailsRedirectLinkTelemetry,
+  useDatasetDetailsTelemetry,
+  useDatasetQualityDetailsState,
+  useRedirectLink,
+} from '../../hooks';
 import { IntegrationIcon } from '../common';
 
 export function Header() {
   const { datasetDetails, timeRange, integrationDetails, loadingState } =
     useDatasetQualityDetailsState();
 
+  const { navigationSources } = useDatasetDetailsTelemetry();
+
   const { rawName, name: title } = datasetDetails;
   const euiShadow = useEuiShadow('s');
   const { euiTheme } = useEuiTheme();
-  const redirectLinkProps = useDatasetQualityDetailsRedirectLink({
+  const { sendTelemetry } = useDatasetDetailsRedirectLinkTelemetry({
+    navigationSource: navigationSources.Header,
+  });
+  const redirectLinkProps = useRedirectLink({
     dataStreamStat: datasetDetails,
     timeRangeConfig: timeRange,
+    sendTelemetry,
   });
 
   const pageTitle = integrationDetails?.integration?.datasets?.[datasetDetails.name] ?? title;

@@ -12,8 +12,11 @@ import { _IGNORED } from '../../../../common/es_fields';
 
 import { DataStreamDetails } from '../../../../common/api_types';
 import { useKibanaContextForPlugin } from '../../../utils';
-import { NavigationSource } from '../../../services/telemetry';
-import { useDatasetDetailsTelemetry, useRedirectLink } from '../../../hooks';
+import {
+  useDatasetDetailsRedirectLinkTelemetry,
+  useDatasetDetailsTelemetry,
+  useRedirectLink,
+} from '../../../hooks';
 import { FlyoutDataset } from '../../../state_machines/dataset_quality_controller';
 import { FlyoutSummaryKpiItem, FlyoutSummaryKpiItemLoading } from './flyout_summary_kpi_item';
 import { getSummaryKpis } from './get_summary_kpis';
@@ -36,14 +39,17 @@ export function FlyoutSummaryKpis({
   const telemetry = useDatasetDetailsTelemetry();
   const hostsLocator = observabilityShared.locators.infra.hostsLocator;
 
+  const { navigationSources } = useDatasetDetailsTelemetry();
+  const { sendTelemetry } = useDatasetDetailsRedirectLinkTelemetry({
+    navigationSource: navigationSources.Summary,
+    query: { language: 'kuery', query: `${_IGNORED}: *` },
+  });
+
   const degradedDocsLinkProps = useRedirectLink({
     dataStreamStat,
     query: { language: 'kuery', query: `${_IGNORED}: *` },
     timeRangeConfig: timeRange,
-    telemetry: {
-      page: 'details',
-      navigationSource: NavigationSource.Summary,
-    },
+    sendTelemetry,
   });
 
   const kpis = useMemo(

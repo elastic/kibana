@@ -5,54 +5,56 @@
  * 2.0.
  */
 
-import { useCallback, useState, useMemo, useEffect } from 'react';
-import { Action } from '@kbn/ui-actions-plugin/public';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import { fieldSupportsBreakdown } from '@kbn/unified-histogram-plugin/public';
-import { useSelector } from '@xstate/react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
-import { type DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { useDatasetQualityContext } from '../components/dataset_quality/context';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { DEFAULT_LOGS_DATA_VIEW } from '../../common/constants';
 import { useCreateDataView } from './use_create_dataview';
-import { useRedirectLink } from './use_redirect_link';
-import { useDatasetQualityFlyout } from './use_dataset_quality_flyout';
 import { useKibanaContextForPlugin } from '../utils';
-import { useDatasetDetailsTelemetry } from './use_telemetry';
+import { useDatasetQualityDetailsState } from './use_dataset_quality_details_state';
 import { getLensAttributes } from '../components/dataset_quality_details/overview/document_trends/degraded_docs/lens_attributes';
+import { useRedirectLink } from './use_redirect_link';
+import { useDatasetDetailsTelemetry } from './use_dataset_details_telemetry';
+import { useDatasetDetailsRedirectLinkTelemetry } from './use_redirect_link_telemetry';
 
 const exploreDataInLogsExplorerText = i18n.translate(
-  'xpack.datasetQuality.flyoutChartExploreDataInLogsExplorerText',
+  'xpack.datasetQuality.details.chartExploreDataInLogsExplorerText',
   {
     defaultMessage: 'Explore data in Logs Explorer',
   }
 );
 
 const exploreDataInDiscoverText = i18n.translate(
-  'xpack.datasetQuality.flyoutChartExploreDataInDiscoverText',
+  'xpack.datasetQuality.details.chartExploreDataInDiscoverText',
   {
     defaultMessage: 'Explore data in Discover',
   }
 );
 
-const openInLensText = i18n.translate('xpack.datasetQuality.flyoutChartOpenInLensText', {
+const openInLensText = i18n.translate('xpack.datasetQuality.details.chartOpenInLensText', {
   defaultMessage: 'Open in Lens',
 });
 
 const ACTION_EXPLORE_IN_LOGS_EXPLORER = 'ACTION_EXPLORE_IN_LOGS_EXPLORER';
 const ACTION_OPEN_IN_LENS = 'ACTION_OPEN_IN_LENS';
 
-interface DegradedDocsChartDeps {
-  dataStream?: string;
-  breakdownField?: string;
-}
-
-export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
+export const useDegradedDocsChart = () => {
   const { euiTheme } = useEuiTheme();
   const {
     services: { lens },
   } = useKibanaContextForPlugin();
-  const { service } = useDatasetQualityContext();
+  const {
+    service,
+    dataStream,
+    datasetDetails,
+    timeRange,
+    breakdownField,
+    integrationDetails,
+    isBreakdownFieldAsserted,
+  } = useDatasetQualityDetailsState();
 
   const {
     trackDatasetDetailsBreakdownFieldChanged,
@@ -60,21 +62,6 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
     navigationTargets,
     navigationSources,
   } = useDatasetDetailsTelemetry();
-
-  const { dataStreamStat, timeRange, breakdownField } = useDatasetQualityFlyout();
-
-  const isBreakdownFieldEcs = useSelector(
-    service,
-    (state) => state.context.flyout.isBreakdownFieldEcs
-  );
-
-  const isBreakdownFieldEcsAsserted = useSelector(service, (state) => {
-    return (
-      state.matches('flyout.initializing.assertBreakdownFieldIsEcs.done') &&
-      state.history?.matches('flyout.initializing.assertBreakdownFieldIsEcs.fetching') &&
-      isBreakdownFieldEcs !== null
-    );
-  });
 
   const [isChartLoading, setIsChartLoading] = useState<boolean | undefined>(undefined);
   const [attributes, setAttributes] = useState<ReturnType<typeof getLensAttributes> | undefined>(
@@ -98,23 +85,25 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
     (field: DataViewField | undefined) => {
       service.send({
         type: 'BREAKDOWN_FIELD_CHANGE',
-        breakdownField: field?.name ?? null,
+        breakdownField: field?.name,
       });
     },
     [service]
   );
 
   useEffect(() => {
-    if (isBreakdownFieldEcsAsserted) trackDatasetDetailsBreakdownFieldChanged();
-  }, [trackDatasetDetailsBreakdownFieldChanged, isBreakdownFieldEcsAsserted]);
+    if (isBreakdownFieldAsserted) trackDatasetDetailsBreakdownFieldChanged();
+  }, [trackDatasetDetailsBreakdownFieldChanged, isBreakdownFieldAsserted]);
 
   useEffect(() => {
     const dataStreamName = dataStream ?? DEFAULT_LOGS_DATA_VIEW;
+    const datasetTitle =
+      integrationDetails?.integration?.datasets?.[datasetDetails.name] ?? datasetDetails.name;
 
     const lensAttributes = getLensAttributes({
       color: euiTheme.colors.danger,
       dataStream: dataStreamName,
-      datasetTitle: dataStreamStat?.title ?? dataStreamName,
+      datasetTitle,
       breakdownFieldName: breakdownDataViewField?.name,
     });
     setAttributes(lensAttributes);
@@ -123,7 +112,8 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
     euiTheme.colors.danger,
     setAttributes,
     dataStream,
-    dataStreamStat?.title,
+    integrationDetails?.integration?.datasets,
+    datasetDetails.name,
   ]);
 
   const openInLensCallback = useCallback(() => {
@@ -135,7 +125,14 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
         attributes,
       });
     }
-  }, [attributes, trackDetailsNavigated, navigationTargets, navigationSources, lens, timeRange]);
+  }, [
+    attributes,
+    lens,
+    navigationSources.Chart,
+    navigationTargets.Lens,
+    timeRange,
+    trackDetailsNavigated,
+  ]);
 
   const getOpenInLensAction = useMemo(() => {
     return {
@@ -157,15 +154,17 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
     };
   }, [openInLensCallback]);
 
+  const { sendTelemetry } = useDatasetDetailsRedirectLinkTelemetry({
+    query: { language: 'kuery', query: '_ignored:*' },
+    navigationSource: navigationSources.Chart,
+  });
+
   const redirectLinkProps = useRedirectLink({
-    dataStreamStat: dataStreamStat!,
+    dataStreamStat: datasetDetails,
     query: { language: 'kuery', query: '_ignored:*' },
     timeRangeConfig: timeRange,
     breakdownField: breakdownDataViewField?.name,
-    telemetry: {
-      page: 'details',
-      navigationSource: navigationSources.Chart,
-    },
+    sendTelemetry,
   });
 
   const getOpenInLogsExplorerAction = useMemo(() => {

@@ -30,17 +30,15 @@ import { DegradedDocsChart } from '../../dataset_quality_details/overview/docume
 import { TimeRangeConfig } from '../../../../common/types';
 
 export function DegradedDocs({
-  dataStream,
   timeRange = { ...DEFAULT_TIME_RANGE, refresh: DEFAULT_DATEPICKER_REFRESH },
   lastReloadTime,
   onTimeRangeChange,
 }: {
-  dataStream?: string;
   timeRange?: TimeRangeConfig;
   lastReloadTime: number;
   onTimeRangeChange: (props: Pick<OnTimeChangeProps, 'start' | 'end'>) => void;
 }) {
-  const { dataView, breakdown, ...chartProps } = useDegradedDocsChart({ dataStream });
+  const { dataView, breakdown, ...chartProps } = useDegradedDocsChart();
 
   const [breakdownDataViewField, setBreakdownDataViewField] = useState<DataViewField | undefined>(
     undefined
