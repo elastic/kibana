@@ -18,6 +18,7 @@ import {
   EuiText,
   formatNumber,
   EuiSkeletonRectangle,
+  EuiTableHeader,
 } from '@elastic/eui';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -37,6 +38,7 @@ import { PrivilegesWarningIconWrapper, IntegrationIcon } from '../../common';
 import { useRedirectLink } from '../../../hooks';
 import { FlyoutDataset } from '../../../state_machines/dataset_quality_controller';
 import { DegradedDocsPercentageLink } from './degraded_docs_percentage_link';
+import { TimeRangeConfig } from '../../../../common/types';
 
 const expandDatasetAriaLabel = i18n.translate('xpack.datasetQuality.expandLabel', {
   defaultMessage: 'Expand',
@@ -167,6 +169,7 @@ export const getDatasetQualityTableColumns = ({
   showFullDatasetNames,
   isSizeStatsAvailable,
   isActiveDataset,
+  timeRange,
 }: {
   fieldFormats: FieldFormatsStart;
   canUserMonitorDataset: boolean;
@@ -178,6 +181,7 @@ export const getDatasetQualityTableColumns = ({
   isSizeStatsAvailable: boolean;
   openFlyout: (selectedDataset: FlyoutDataset) => void;
   isActiveDataset: (lastActivity: number) => boolean;
+  timeRange: TimeRangeConfig;
 }): Array<EuiBasicTableColumn<DataStreamStat>> => {
   return [
     {
@@ -205,7 +209,9 @@ export const getDatasetQualityTableColumns = ({
       `,
     },
     {
-      name: nameColumnName,
+      name: (
+        <EuiTableHeader data-test-subj="datasetQualityNameColumn">{nameColumnName}</EuiTableHeader>
+      ),
       field: 'title',
       sortable: true,
       render: (title: string, dataStreamStat: DataStreamStat) => {
@@ -227,7 +233,11 @@ export const getDatasetQualityTableColumns = ({
       },
     },
     {
-      name: namespaceColumnName,
+      name: (
+        <EuiTableHeader data-test-subj="datasetQualityNamespaceColumn">
+          {namespaceColumnName}
+        </EuiTableHeader>
+      ),
       field: 'namespace',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
@@ -238,7 +248,11 @@ export const getDatasetQualityTableColumns = ({
     ...(isSizeStatsAvailable && canUserMonitorDataset && canUserMonitorAnyDataStream
       ? [
           {
-            name: sizeColumnName,
+            name: (
+              <EuiTableHeader data-test-subj="datasetQualitySizeColumn">
+                {sizeColumnName}
+              </EuiTableHeader>
+            ),
             field: 'sizeBytes',
             sortable: true,
             render: (_: any, dataStreamStat: DataStreamStat) => {
@@ -267,12 +281,14 @@ export const getDatasetQualityTableColumns = ({
       : []),
     {
       name: (
-        <EuiToolTip content={datasetQualityColumnTooltip}>
-          <span>
-            {`${datasetQualityColumnName} `}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
+        <EuiTableHeader data-test-subj="datasetQualityQualityColumn">
+          <EuiToolTip content={datasetQualityColumnTooltip}>
+            <span>
+              {`${datasetQualityColumnName} `}
+              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            </span>
+          </EuiToolTip>
+        </EuiTableHeader>
       ),
       field: 'degradedDocs.percentage',
       sortable: true,
@@ -283,12 +299,14 @@ export const getDatasetQualityTableColumns = ({
     },
     {
       name: (
-        <EuiToolTip content={degradedDocsColumnTooltip}>
-          <span>
-            {`${degradedDocsColumnName} `}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
+        <EuiTableHeader data-test-subj="datasetQualityPercentageColumn">
+          <EuiToolTip content={degradedDocsColumnTooltip}>
+            <span>
+              {`${degradedDocsColumnName} `}
+              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            </span>
+          </EuiToolTip>
+        </EuiTableHeader>
       ),
       field: 'degradedDocs.percentage',
       sortable: true,
@@ -296,6 +314,7 @@ export const getDatasetQualityTableColumns = ({
         <DegradedDocsPercentageLink
           isLoading={loadingDegradedStats}
           dataStreamStat={dataStreamStat}
+          timeRange={timeRange}
         />
       ),
       width: '140px',
@@ -303,7 +322,11 @@ export const getDatasetQualityTableColumns = ({
     ...(canUserMonitorDataset && canUserMonitorAnyDataStream
       ? [
           {
-            name: lastActivityColumnName,
+            name: (
+              <EuiTableHeader data-test-subj="datasetQualityLastActivityColumn">
+                {lastActivityColumnName}
+              </EuiTableHeader>
+            ),
             field: 'lastActivity',
             render: (timestamp: number, { userPrivileges, title }: DataStreamStat) => (
               <PrivilegesWarningIconWrapper
@@ -339,7 +362,11 @@ export const getDatasetQualityTableColumns = ({
     {
       name: actionsColumnName,
       render: (dataStreamStat: DataStreamStat) => (
-        <RedirectLink dataStreamStat={dataStreamStat} title={openActionName} />
+        <RedirectLink
+          dataStreamStat={dataStreamStat}
+          title={openActionName}
+          timeRange={timeRange}
+        />
       ),
       width: '100px',
     },
@@ -349,13 +376,16 @@ export const getDatasetQualityTableColumns = ({
 const RedirectLink = ({
   dataStreamStat,
   title,
+  timeRange,
 }: {
   dataStreamStat: DataStreamStat;
   title: string;
+  timeRange: TimeRangeConfig;
 }) => {
   const redirectLinkProps = useRedirectLink({
     dataStreamStat,
     telemetry: { page: 'main', navigationSource: NavigationSource.Table },
+    timeRangeConfig: timeRange,
   });
 
   return (

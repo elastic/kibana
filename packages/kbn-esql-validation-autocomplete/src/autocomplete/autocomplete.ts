@@ -350,8 +350,8 @@ function getSourcesRetriever(resourceRetriever?: ESQLCallbacks) {
     return buildSourcesDefinitions(
       list
         .filter(({ hidden }) => !hidden)
-        .map(({ name, dataStreams, title }) => {
-          return { name, isIntegration: Boolean(dataStreams && dataStreams.length), title };
+        .map(({ name, dataStreams, title, type }) => {
+          return { name, isIntegration: Boolean(dataStreams && dataStreams.length), title, type };
         })
     );
   };
@@ -659,7 +659,7 @@ async function getExpressionSuggestionsByType(
     if (argDef.type === 'column' || argDef.type === 'any') {
       if ((!nodeArg || isNewExpression) && !endsWithNot) {
         const fieldSuggestions = await getFieldsOrFunctionsSuggestions(
-          [argDef.innerType || 'any'],
+          argDef.innerTypes || ['any'],
           command.name,
           option?.name,
           getFieldsByType,
@@ -930,7 +930,7 @@ async function getExpressionSuggestionsByType(
       }
     }
     if (argDef.type === 'source') {
-      if (argDef.innerType === 'policy') {
+      if (argDef.innerTypes?.includes('policy')) {
         // ... | ENRICH <suggest>
         const policies = await getPolicies();
         suggestions.push(...(policies.length ? policies : [buildNoPoliciesAvailableDefinition()]));

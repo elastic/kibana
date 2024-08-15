@@ -17,6 +17,7 @@ export interface InstallSourceOptions {
   installPath?: string;
   log?: ToolingLog;
   esArgs?: string[];
+  resources?: string[];
 }
 
 export interface DownloadSnapshotOptions {
@@ -26,6 +27,7 @@ export interface DownloadSnapshotOptions {
   installPath?: string;
   log?: ToolingLog;
   useCached?: boolean;
+  resources?: string[];
 }
 
 export interface InstallSnapshotOptions extends DownloadSnapshotOptions {
@@ -42,4 +44,5 @@ export interface InstallArchiveOptions {
   esArgs?: string[];
   /** Disable creating a temp directory, allowing ES to write to OS's /tmp directory */
   disableEsTmpDir?: boolean;
+  resources?: string[];
 }
