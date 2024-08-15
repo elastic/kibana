@@ -129,9 +129,16 @@ export const EditorFooter = memo(function EditorFooter({
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+            <EuiFlexGroup
+              gutterSize="none"
+              responsive={false}
+              alignItems="center"
+              css={css`
+                gap: 12px;
+              `}
+            >
               <QueryWrapComponent code={code} updateQuery={updateQuery} />
-              <EuiFlexItem grow={false} style={{ marginRight: '8px' }}>
+              <EuiFlexItem grow={false}>
                 <EuiText
                   size="xs"
                   color="subdued"
@@ -147,7 +154,7 @@ export const EditorFooter = memo(function EditorFooter({
               </EuiFlexItem>
               {/* If there is no space and no @timestamp detected hide the information */}
               {(detectedTimestamp || !isSpaceReduced) && !hideTimeFilterInfo && (
-                <EuiFlexItem grow={false} style={{ marginRight: '16px' }}>
+                <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
                     <EuiFlexItem grow={false}>
                       <EuiText
@@ -178,7 +185,7 @@ export const EditorFooter = memo(function EditorFooter({
                   </EuiFlexGroup>
                 </EuiFlexItem>
               )}
-              <EuiFlexItem grow={false} style={{ marginRight: '16px' }}>
+              <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiText
