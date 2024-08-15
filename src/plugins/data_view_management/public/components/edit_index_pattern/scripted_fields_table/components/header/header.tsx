@@ -8,7 +8,15 @@
 
 import React from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiLink, EuiIcon } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiLink,
+  EuiIcon,
+  EuiToolTip,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ScopedHistory } from '@kbn/core/public';
@@ -58,15 +66,18 @@ export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => {
 
       {userEditPermission && (
         <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="addScriptedFieldLink"
-            {...reactRouterNavigate(history, `patterns/${indexPatternId}/create-field/`)}
-          >
-            <FormattedMessage
-              id="indexPatternManagement.editIndexPattern.scripted.addFieldButton"
-              defaultMessage="Add scripted field"
-            />
-          </EuiButton>
+          <EuiToolTip content="Scripted field creation is disabled, add a runtime field instead.">
+            <EuiButton
+              data-test-subj="addScriptedFieldLink"
+              {...reactRouterNavigate(history, `patterns/${indexPatternId}/create-field/`)}
+              isDisabled={true}
+            >
+              <FormattedMessage
+                id="indexPatternManagement.editIndexPattern.scripted.addFieldButton"
+                defaultMessage="Add scripted field"
+              />
+            </EuiButton>
+          </EuiToolTip>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
