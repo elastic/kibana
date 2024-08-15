@@ -258,7 +258,7 @@ export const CloudSecurityDataTable = ({
     [dataView, filterManager, setUrlQuery]
   );
 
-  const onResize = (colSettings: { columnId: string; width?: number }) => {
+  const onResize = (colSettings: { columnId: string; width: number | undefined }) => {
     const grid = persistedSettings || {};
     const newColumns = { ...(grid.columns || {}) };
     newColumns[colSettings.columnId] = colSettings.width

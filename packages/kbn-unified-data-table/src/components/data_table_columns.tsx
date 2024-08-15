@@ -161,7 +161,7 @@ function buildEuiGridColumn({
           size: 'xs',
           iconProps: { size: 'm' },
           onClick: () => {
-            onResize({ columnId: columnName });
+            onResize({ columnId: columnName, width: undefined });
           },
         }
       : undefined;

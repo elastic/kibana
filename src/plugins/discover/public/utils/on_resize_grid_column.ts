@@ -9,7 +9,7 @@
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 
 export const onResizeGridColumn = (
-  colSettings: { columnId: string; width?: number },
+  colSettings: { columnId: string; width: number | undefined },
   gridState: DiscoverGridSettings | undefined
 ): DiscoverGridSettings => {
   const grid = { ...(gridState || {}) };

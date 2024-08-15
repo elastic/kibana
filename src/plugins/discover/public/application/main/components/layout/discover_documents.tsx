@@ -86,7 +86,7 @@ const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
 // export needs for testing
 export const onResize = (
-  colSettings: { columnId: string; width?: number },
+  colSettings: { columnId: string; width: number | undefined },
   stateContainer: DiscoverStateContainer
 ) => {
   const state = stateContainer.appState.getState();
