@@ -17,12 +17,6 @@
       "url": "/"
     }
   ],
-  "tags": [
-    {
-      "name": "alerting",
-      "description": "Alerting APIs enable you to create and manage rules and alerts."
-    }
-  ],
   "paths": {
     "/api/alerting/_health": {
       "get": {
