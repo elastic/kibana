@@ -6,9 +6,21 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { shallow } from 'enzyme';
 
-import { formatAgentCPU } from './agent_metrics';
+import type { Agent, AgentPolicy } from '../../../../../../common/types';
+
+import { useAgentDashboardLink } from '../agent_details_page/hooks';
+
+import { AgentCPU } from './agent_metrics';
+
+jest.mock('../agent_details_page/hooks', () => ({
+  useAgentDashboardLink: jest.fn((agent: Agent) => ({
+    isLoading: false,
+    isInstalled: true,
+    link: `app/dashboards#/view/elastic_agent-${agent.id}`,
+  })),
+}));
 
 jest.mock('../components/metric_non_available', () => {
   return {
@@ -16,66 +28,109 @@ jest.mock('../components/metric_non_available', () => {
   };
 });
 
-jest.mock('@elastic/eui', () => {
-  return {
-    ...jest.requireActual('@elastic/eui'),
-    EuiToolTip: (props: any) => <div data-tooltip-content={props.content}>{props.children}</div>,
-  };
-});
-
 describe('Agent metrics helper', () => {
-  describe('formatAgentCPU', () => {
+  describe('AgentCPU', () => {
     it('should return 0% if cpu is 0.00002', () => {
-      const res = formatAgentCPU({
-        cpu_avg: 0.00002,
-        memory_size_byte_avg: 2000,
-      });
+      const component = shallow(
+        <AgentCPU
+          agent={
+            {
+              id: '01',
+              metrics: {
+                cpu_avg: 0.00002,
+                memory_size_byte_avg: 2000,
+              },
+            } as Agent
+          }
+          agentPolicy={{} as AgentPolicy}
+        />
+      );
 
-      const result = render(<>{res}</>);
-
-      expect(result.asFragment()).toMatchInlineSnapshot(`
-        <DocumentFragment>
-          <div
-            data-tooltip-content="0.0020 %"
-          >
-            0.00 %
-          </div>
-        </DocumentFragment>
-      `);
+      expect(component).toMatchSnapshot();
     });
 
     it('should return 5% if cpu is 0.005', () => {
-      const res = formatAgentCPU({
-        cpu_avg: 0.005,
-        memory_size_byte_avg: 2000,
-      });
+      const component = shallow(
+        <AgentCPU
+          agent={
+            {
+              id: '02',
+              metrics: {
+                cpu_avg: 0.005,
+                memory_size_byte_avg: 2000,
+              },
+            } as Agent
+          }
+          agentPolicy={{} as AgentPolicy}
+        />
+      );
 
-      const result = render(<>{res}</>);
-
-      expect(result.asFragment()).toMatchInlineSnapshot(`
-        <DocumentFragment>
-          <div
-            data-tooltip-content="0.5000 %"
-          >
-            0.50 %
-          </div>
-        </DocumentFragment>
-      `);
+      expect(component).toMatchSnapshot();
     });
 
     it('should return N/A if cpu is undefined', () => {
-      const res = formatAgentCPU({
-        cpu_avg: undefined,
-        memory_size_byte_avg: 2000,
-      });
+      const component = shallow(
+        <AgentCPU
+          agent={
+            {
+              id: '03',
+              metrics: {
+                cpu_avg: undefined,
+                memory_size_byte_avg: 2000,
+              },
+            } as Agent
+          }
+          agentPolicy={{} as AgentPolicy}
+        />
+      );
 
-      const result = render(<>{res}</>);
+      expect(component).toMatchSnapshot();
+    });
 
-      expect(result.asFragment()).toMatchInlineSnapshot(`
-        <DocumentFragment>
-          N/A
-        </DocumentFragment>
-      `);
+    it('CPU value should have disabled link when agent is not installed or is still loading', () => {
+      (useAgentDashboardLink as jest.Mock).mockReturnValueOnce((agent: Agent) => ({
+        isLoading: false,
+        isInstalled: false,
+        link: `app/dashboards#/view/elastic_agent-${agent.id}`,
+      }));
+
+      const notYetInstalledComponent = shallow(
+        <AgentCPU
+          agent={
+            {
+              id: '04',
+              metrics: {
+                cpu_avg: 0.02,
+                memory_size_byte_avg: 2000,
+              },
+            } as Agent
+          }
+          agentPolicy={{} as AgentPolicy}
+        />
+      );
+      expect(notYetInstalledComponent).toMatchSnapshot();
+
+      (useAgentDashboardLink as jest.Mock).mockReturnValueOnce((agent: Agent) => ({
+        isLoading: true,
+        isInstalled: true,
+        link: `app/dashboards#/view/elastic_agent-${agent.id}`,
+      }));
+
+      const isLoadingComponent = shallow(
+        <AgentCPU
+          agent={
+            {
+              id: '05',
+              metrics: {
+                cpu_avg: 0.02,
+                memory_size_byte_avg: 2000,
+              },
+            } as Agent
+          }
+          agentPolicy={{} as AgentPolicy}
+        />
+      );
+      expect(isLoadingComponent).toMatchSnapshot();
     });
   });
 });

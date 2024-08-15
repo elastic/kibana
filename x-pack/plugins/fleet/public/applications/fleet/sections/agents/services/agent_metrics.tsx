@@ -6,21 +6,29 @@
  */
 
 import React from 'react';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiLink, EuiToolTip } from '@elastic/eui';
 
-import type { AgentMetrics, AgentPolicy } from '../../../../../../common/types';
+import type { AgentMetrics, AgentPolicy, Agent } from '../../../../../../common/types';
+import { useAgentDashboardLink } from '../agent_details_page/hooks';
 
 import { MetricNonAvailable } from '../components';
 
-export function formatAgentCPU(metrics?: AgentMetrics, agentPolicy?: AgentPolicy) {
+export const AgentCPU: React.FunctionComponent<{
+  agent: Agent;
+  agentPolicy?: AgentPolicy;
+}> = ({ agent, agentPolicy }) => {
+  const { isInstalled, link, isLoading } = useAgentDashboardLink(agent);
+  const metrics = agent.metrics;
   return typeof metrics?.cpu_avg !== 'undefined' ? (
     <EuiToolTip content={`${(metrics.cpu_avg * 100).toFixed(4)} %`}>
-      <>{(metrics.cpu_avg * 100).toFixed(2)} %</>
+      <EuiLink href={link} disabled={!isInstalled || isLoading}>
+        <>{(metrics.cpu_avg * 100).toFixed(2)} %</>
+      </EuiLink>
     </EuiToolTip>
   ) : (
     <MetricNonAvailable agentPolicy={agentPolicy} />
   );
-}
+};
 
 export function formatAgentMemory(metrics?: AgentMetrics, agentPolicy?: AgentPolicy) {
   return metrics?.memory_size_byte_avg ? (
