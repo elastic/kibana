@@ -38,7 +38,7 @@ const testPrompt = {
   prompt: 'This is a super cool prompt.',
 };
 describe(
-  'Prompts',
+  'AI Assistant Prompts',
   {
     tags: ['@ess', '@serverless'],
     env: {
