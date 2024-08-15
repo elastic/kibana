@@ -91,7 +91,6 @@ export const postEvaluateRoute = (
         const assistantContext = ctx.elasticAssistant;
         const actions = ctx.elasticAssistant.actions;
         const logger = assistantContext.logger.get('evaluate');
-
         const telemetry = assistantContext.telemetry;
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
@@ -110,15 +109,8 @@ export const postEvaluateRoute = (
 
         try {
           const evaluationId = uuidv4();
-          const {
-            evalModel,
-            evaluationType,
-            outputIndex,
-            datasetName,
-            projectName = 'default',
-            runName = evaluationId,
-          } = request.query;
-          const { dataset: customDataset = [], evalPrompt } = request.body;
+          const { datasetName, runName = evaluationId } = request.query;
+          const { dataset: customDataset = [] } = request.body;
           const connectorIds = request.query.models?.split(',') || [];
           const graphNames = request.query.agents?.split(',') || [];
 
@@ -317,13 +309,13 @@ export const postEvaluateRoute = (
 
             const evalOutput = await evaluate(predict, {
               data: datasetName ?? '',
-              evaluators: [],
+              evaluators: [], // TODO: Implement evaluators
               experimentPrefix: name,
             });
             logger.debug(`runResp:\n ${JSON.stringify(evalOutput, null, 2)}`);
           });
 
-          // TODO: Determine if it's still worth it to write evals locally
+          // TODO: Determine if it's worth it to write evals locally
           // logger.info(`Writing evaluation results to index: ${outputIndex}`);
           // await setupEvaluationIndex({ esClient, index: outputIndex, logger });
           // await indexEvaluations({
