@@ -24,6 +24,7 @@ interface Field {
   fields?: Field[];
 }
 
+// Given a graph state, it collects the rawSamples (array of JSON strings) and prefixes them with the packageName and dataStreamName, returning an array of prefixed JSON strings.
 export function prefixSamples(
   state: EcsMappingState | CategorizationState | RelatedState
 ): string[] {
