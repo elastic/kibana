@@ -25,11 +25,13 @@ describe(
   {
     env: {
       ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'responseActionScanEnabled',
-          ])}`,
-        ],
+        // This is not needed for this test, but it's a good example of
+        // how to enable experimental features in the Cypress tests.
+        // kbnServerArgs: [
+        //   `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+        //     'featureFlagName',
+        //   ])}`,
+        // ],
       },
     },
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],

@@ -174,8 +174,6 @@ describe('Response actions', () => {
         licenseService,
       });
 
-      setFeatureFlag({ responseActionScanEnabled: true });
-
       // add the host isolation route handlers to routerMock
       registerResponseActionRoutes(routerMock, endpointContext);
 

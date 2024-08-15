@@ -84,11 +84,6 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsCrowdstrikeManualHostIsolationEnabled: true,
 
   /**
-   * Enables scan response action on Endpoint
-   */
-  responseActionScanEnabled: true,
-
-  /**
    * Enables new notes
    */
   securitySolutionNotesEnabled: false,
