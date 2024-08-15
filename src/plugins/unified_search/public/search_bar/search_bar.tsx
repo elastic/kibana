@@ -554,7 +554,6 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
         showFilterBar={this.props.showFilterBar}
         showSaveQuery={this.props.showSaveQuery}
         isDisabled={this.props.isDisabled}
-        buttonProps={{ size: this.shouldShowDatePickerAsBadge() ? 's' : 'm' }}
         indexPatterns={this.props.indexPatterns}
         timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
         filtersForSuggestions={this.props.filtersForSuggestions}

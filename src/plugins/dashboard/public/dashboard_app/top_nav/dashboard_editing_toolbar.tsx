@@ -100,7 +100,7 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
   return (
     <div
       css={css`
-        padding: 0 ${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.s};
+        padding: 0;
       `}
     >
       <Toolbar>

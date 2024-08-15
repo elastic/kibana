@@ -6,7 +6,7 @@ $controlMinWidth: $euiSize * 14;
 .controlsWrapper {
   display: flex;
   align-items: center;
-  min-height: $euiSize * 4;
+  min-height: $euiSize * 2;
 
   .controlGroup--endButtonGroup {
     align-self: end;
