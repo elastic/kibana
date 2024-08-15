@@ -156,8 +156,6 @@ export type LogsExplorerControllerTypeState =
 
 export type LogsExplorerControllerContext = LogsExplorerControllerTypeState['context'];
 
-export type LogsExplorerControllerStateValue = LogsExplorerControllerTypeState['value'];
-
 export type LogsExplorerControllerEvent =
   | {
       type: 'RECEIVED_STATE_CONTAINER';

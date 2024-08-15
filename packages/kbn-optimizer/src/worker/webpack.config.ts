@@ -212,6 +212,18 @@ export function getWebpackConfig(
                       includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
                       sourceMap: true,
                       quietDeps: true,
+                      logger: {
+                        warn: (message: string, warning: any) => {
+                          // Muted - see https://github.com/elastic/kibana/issues/190345 for tracking remediation
+                          if (warning?.deprecationType?.id === 'mixed-decls') return;
+
+                          if (warning.deprecation)
+                            return process.stderr.write(
+                              `DEPRECATION WARNING: ${message}\n${warning.stack}`
+                            );
+                          process.stderr.write('WARNING: ' + message);
+                        },
+                      },
                     },
                   },
                 },

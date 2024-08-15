@@ -29,8 +29,14 @@ import {
 } from '@kbn/presentation-publishing';
 import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 import { Observable } from 'rxjs';
-import { ControlFetchContext } from './control_fetch/control_fetch';
+
+import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
+import { ParentIgnoreSettings } from '../..';
+import { ControlInputTransform } from '../../../common';
+import { ControlGroupChainingSystem } from '../../../common/control_group/types';
+import { ControlStyle, ControlWidth } from '../../types';
 import { DefaultControlState, PublishesControlDisplaySettings } from '../controls/types';
+import { ControlFetchContext } from './control_fetch/control_fetch';
 import { FieldFilterPredicate } from '../../control_group/types';
 
 /**
@@ -67,7 +73,7 @@ export type ControlGroupApi = PresentationContainer &
   PublishesControlGroupDisplaySettings &
   PublishesTimeslice &
   PublishesDisabledActionIds &
-  Partial<HasParentApi<PublishesUnifiedSearch> & HasSaveNotification> & {
+  Partial<HasParentApi<PublishesUnifiedSearch> & HasSaveNotification & PublishesReload> & {
     asyncResetUnsavedChanges: () => Promise<void>;
     autoApplySelections$: PublishingSubject<boolean>;
     controlFetch$: (controlUuid: string) => Observable<ControlFetchContext>;
@@ -79,6 +85,7 @@ export type ControlGroupApi = PresentationContainer &
       controlInputTransform?: ControlInputTransform;
     }) => void;
     // getEditorConfig: () => ControlGroupEditorConfig | undefined;
+    lastUsedDataViewId$: PublishingSubject<string | undefined>;
   };
 
 /**
