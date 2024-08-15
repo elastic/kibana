@@ -1477,6 +1477,7 @@ export default function (providerContext: FtrProviderContext) {
         const {
           package_policies: packagePolicies,
           id,
+          space_ids: spaceIds,
           updated_at: updatedAt,
           version: policyVersion,
           ...rest
