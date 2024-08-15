@@ -385,10 +385,13 @@ export function useOnSubmit({
       if (!error) {
         setSavedPackagePolicy(data!.item);
 
+        // Check if agentless is configured in ESS and Serverless until Agentless API migrates to Serverless
+        const isAgentlessConfigured =
+          isAgentlessAgentPolicy(createdPolicy) || isAgentlessPackagePolicy(data!.item);
         const promptForAgentEnrollment =
           agentPolicies.length > 0 &&
           !agentCount &&
-          !isAgentlessPackagePolicy(data!.item) &&
+          !isAgentlessConfigured &&
           hasFleetAddAgentsPrivileges;
 
         if (promptForAgentEnrollment && hasAzureArmTemplate) {
