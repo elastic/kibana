@@ -8,6 +8,8 @@ deprecated::[7.13.0,Use <<create-connector-api>> instead.]
 
 Creates a connector.
 
+NOTE: For the latest details, refer to {api-kibana}/group/endpoint-connectors[connector APIs].
+
 [[actions-and-connectors-legacy-api-create-request]]
 ===== Request
 
