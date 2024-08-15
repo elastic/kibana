@@ -19,6 +19,11 @@ import {
 import { KnownParameters } from './type';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 
+const OASPathExceptions = [
+  // This API Endpoint intended to be used only by browser Reporting API.
+  '/internal/security/analytics/_record_violations',
+];
+
 const tagPrefix = 'oas-tag:';
 const extractTag = (tag: string) => {
   if (tag.startsWith(tagPrefix)) {
@@ -111,6 +116,8 @@ export const prepareRoutes = <
 ): R[] => {
   if (Object.getOwnPropertyNames(filters).length === 0) return routes;
   return routes.filter((route) => {
+    if (OASPathExceptions.some((ex) => route.path.startsWith(ex))) return false;
+
     if (
       filters.excludePathsMatching &&
       filters.excludePathsMatching.some((ex) => route.path.startsWith(ex))
