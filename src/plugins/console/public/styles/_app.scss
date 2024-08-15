@@ -9,7 +9,17 @@
 }
 
 .consoleContainer {
-  padding: $euiSizeS;
+  padding: $euiSizeM;
+  gap: 0;
+
+  &--embeddable {
+    padding: 0;
+    gap: 0;
+  }
+}
+
+.consoleTabs {
+  padding: 0 $euiSizeS;
 }
 
 .conApp {

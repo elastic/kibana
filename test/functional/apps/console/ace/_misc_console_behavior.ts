@@ -18,8 +18,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await browser.setWindowSize(1200, 800);
       await PageObjects.common.navigateToApp('console');
-      // Ensure that the text area can be interacted with
-      await PageObjects.console.collapseHelp();
     });
 
     beforeEach(async () => {
@@ -121,7 +119,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('customizable font size', () => {
+    // Settings not yet implemented
+    describe.skip('customizable font size', () => {
       it('should allow the font size to be customized', async () => {
         await PageObjects.console.setFontSizeSetting(20);
         await retry.try(async () => {
