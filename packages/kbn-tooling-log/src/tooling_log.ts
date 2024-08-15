@@ -126,7 +126,7 @@ export class ToolingLog implements SomeDevLog {
   }
 
   public write(...args: any[]) {
-    this.sendToWriters({ type: 'write', context: this.context }, args);
+    this.sendToWriters({ type: 'write' }, args);
   }
 
   public getWriters() {
