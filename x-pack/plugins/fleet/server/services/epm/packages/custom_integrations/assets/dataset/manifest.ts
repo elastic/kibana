@@ -17,5 +17,5 @@ export const createDatasetManifest = (dataset: string, assetOptions: AssetOption
     title: convertStringToTitle(dataset),
     type,
   };
-  return yaml.dump(manifest);
+  return yaml.safeDump(manifest);
 };
