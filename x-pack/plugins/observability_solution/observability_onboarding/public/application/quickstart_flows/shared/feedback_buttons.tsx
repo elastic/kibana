@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
@@ -21,29 +21,17 @@ export type Feedback = 'positive' | 'negative';
 
 const THANK_YOU_MESSAGE = i18n.translate(
   'xpack.observability_onboarding.feedbackButtons.em.thanksForYourFeedbackLabel',
-  { defaultMessage: 'Thanks for your feedback' }
+  { defaultMessage: 'Thanks for your feedback!' }
 );
 
 export function FeedbackButtons({ flow }: { flow: string }) {
   const { notifications, analytics } = useKibana().services;
 
-  const [hasBeenClicked, setHasBeenClicked] = useState(false);
-
-  const handleClickPositive = () => {
+  const handleClick = (feedback: Feedback) => {
     analytics?.reportEvent(OBSERVABILITY_ONBOARDING_FEEDBACK_TELEMETRY_EVENT.eventType, {
       flow,
-      feedback: 'positive',
+      feedback,
     });
-    setHasBeenClicked(true);
-    notifications?.toasts.addSuccess(THANK_YOU_MESSAGE);
-  };
-
-  const handleClickNegative = () => {
-    analytics?.reportEvent(OBSERVABILITY_ONBOARDING_FEEDBACK_TELEMETRY_EVENT.eventType, {
-      flow,
-      feedback: 'negative',
-    });
-    setHasBeenClicked(true);
     notifications?.toasts.addSuccess(THANK_YOU_MESSAGE);
   };
 
@@ -67,10 +55,9 @@ export function FeedbackButtons({ flow }: { flow: string }) {
               <EuiButtonEmpty
                 data-test-subj="observabilityAiAssistantFeedbackButtonsPositiveButton"
                 color="success"
-                disabled={hasBeenClicked}
                 iconType="faceHappy"
                 size="s"
-                onClick={handleClickPositive}
+                onClick={() => handleClick('positive')}
               >
                 {i18n.translate('xpack.observability_onboarding.insight.feedbackButtons.positive', {
                   defaultMessage: 'Yes',
@@ -82,10 +69,9 @@ export function FeedbackButtons({ flow }: { flow: string }) {
               <EuiButtonEmpty
                 data-test-subj="observabilityAiAssistantFeedbackButtonsNegativeButton"
                 color="danger"
-                disabled={hasBeenClicked}
                 iconType="faceSad"
                 size="s"
-                onClick={handleClickNegative}
+                onClick={() => handleClick('negative')}
               >
                 {i18n.translate('xpack.observability_onboarding.insight.feedbackButtons.negative', {
                   defaultMessage: 'No',
