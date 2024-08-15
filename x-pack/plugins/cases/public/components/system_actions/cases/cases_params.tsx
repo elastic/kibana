@@ -66,7 +66,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     [configurations, owner]
   );
 
-  const { timeWindow, reopenClosedCases, groupingBy } = useMemo(
+  const { timeWindow, reopenClosedCases, groupingBy, templateId } = useMemo(
     () =>
       actionParams.subActionParams ?? {
         timeWindow: `${DEFAULT_TIME_WINDOW}`,
@@ -155,7 +155,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
   }, [dataView]);
 
   const selectedOptions = groupingBy.map((field) => ({ value: field, label: field }));
-
+  const selectedTemplate = currentConfiguration.templates.find((t) => t.key === templateId);
   const defaultTemplate = {
     key: DEFAULT_EMPTY_TEMPLATE_KEY,
     name: i18n.DEFAULT_EMPTY_TEMPLATE_NAME,
@@ -233,6 +233,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
             isLoading={isLoadingCaseConfiguration}
             templates={[defaultTemplate, ...currentConfiguration.templates]}
             onTemplateChange={onTemplateChange}
+            templateToSelect={selectedTemplate}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

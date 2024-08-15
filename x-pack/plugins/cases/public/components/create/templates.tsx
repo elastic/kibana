@@ -23,6 +23,7 @@ import { TEMPLATE_HELP_TEXT, TEMPLATE_LABEL } from './translations';
 interface Props {
   isLoading: boolean;
   templates: CasesConfigurationUI['templates'];
+  templateToSelect?: CasesConfigurationUI['templates'][number];
   onTemplateChange: ({
     caseFields,
     key,
@@ -32,10 +33,16 @@ interface Props {
 export const TemplateSelectorComponent: React.FC<Props> = ({
   isLoading,
   templates,
+  templateToSelect,
   onTemplateChange,
 }) => {
   const [selectedTemplate, onSelectTemplate] = useState<string>();
   const isSmallScreen = useIsWithinMaxBreakpoint('s');
+
+  if (templateToSelect && !selectedTemplate) {
+    onSelectTemplate(templateToSelect.key);
+    onTemplateChange({ key: templateToSelect.key, caseFields: templateToSelect.caseFields });
+  }
 
   const options: EuiSelectOption[] = templates.map((template) => ({
     text: template.name,
@@ -44,11 +51,11 @@ export const TemplateSelectorComponent: React.FC<Props> = ({
 
   const onChange: React.ChangeEventHandler<HTMLSelectElement> = useCallback(
     (e) => {
-      const selectedTemplated = templates.find((template) => template.key === e.target.value);
+      const updatedTemplate = templates.find((template) => template.key === e.target.value);
 
-      if (selectedTemplated) {
-        onSelectTemplate(selectedTemplated.key);
-        onTemplateChange({ key: selectedTemplated.key, caseFields: selectedTemplated.caseFields });
+      if (updatedTemplate) {
+        onSelectTemplate(updatedTemplate.key);
+        onTemplateChange({ key: updatedTemplate.key, caseFields: updatedTemplate.caseFields });
       }
     },
     [onTemplateChange, templates]

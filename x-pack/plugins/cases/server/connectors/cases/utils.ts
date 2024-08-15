@@ -7,7 +7,7 @@
 
 import { isPlainObject, partition, toString } from 'lodash';
 import type { CaseRequestCustomField, CaseRequestCustomFields } from '../../../common/types/api';
-import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import type { CaseCustomFields, CustomFieldsConfiguration } from '../../../common/types/domain';
 import { VALUES_FOR_CUSTOM_FIELDS_MISSING_DEFAULTS } from './constants';
 import type { BulkGetOracleRecordsResponse, OracleRecord, OracleRecordError } from './types';
 
@@ -52,9 +52,33 @@ export const convertValueToString = (value: unknown): string => {
   return toString(value);
 };
 
-export const buildRequiredCustomFieldsForRequest = (
-  customFieldsConfiguration?: CustomFieldsConfiguration
+export const buildCustomFieldsForRequest = (
+  customFieldsConfiguration?: CustomFieldsConfiguration,
+  templateCustomFields?: CaseCustomFields
 ): CaseRequestCustomFields => {
+  if (templateCustomFields && templateCustomFields.length) {
+    return templateCustomFields.map((templateCustomField) => {
+      let customFieldValue = templateCustomField.value;
+
+      if (customFieldValue === undefined || customFieldValue === null) {
+        const customFieldConfig = customFieldsConfiguration?.find(
+          (config) => config.key === templateCustomField.key
+        );
+        if (
+          customFieldConfig &&
+          customFieldConfig.required &&
+          VALUES_FOR_CUSTOM_FIELDS_MISSING_DEFAULTS[templateCustomField.type]
+        ) {
+          customFieldValue = VALUES_FOR_CUSTOM_FIELDS_MISSING_DEFAULTS[templateCustomField.type];
+        }
+      }
+
+      return {
+        ...templateCustomField,
+        value: customFieldValue,
+      } as CaseRequestCustomField;
+    });
+  }
   // only populate with the default value required custom fields missing from the request
   return customFieldsConfiguration
     ? customFieldsConfiguration

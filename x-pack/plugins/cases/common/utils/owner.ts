@@ -6,7 +6,7 @@
  */
 
 import { OWNER_INFO } from '../constants';
-import { Owner } from '../constants/types';
+import type { Owner } from '../constants/types';
 
 export const isValidOwner = (owner: string): owner is keyof typeof OWNER_INFO =>
   Object.keys(OWNER_INFO).includes(owner);

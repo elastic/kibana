@@ -15,7 +15,7 @@ import {
   convertValueToString,
   isRecordError,
   partitionRecordsByError,
-  buildRequiredCustomFieldsForRequest,
+  buildCustomFieldsForRequest,
   constructRequiredKibanaPrivileges,
 } from './utils';
 
@@ -78,7 +78,7 @@ describe('utils', () => {
     });
   });
 
-  describe('buildRequiredCustomFieldsForRequest', () => {
+  describe('buildCustomFieldsForRequest', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
@@ -101,7 +101,7 @@ describe('utils', () => {
         },
       ];
 
-      expect(buildRequiredCustomFieldsForRequest(customFieldsConfiguration)).toEqual([
+      expect(buildCustomFieldsForRequest(customFieldsConfiguration)).toEqual([
         {
           key: 'first_key',
           type: CustomFieldTypes.TEXT as const,
@@ -131,7 +131,7 @@ describe('utils', () => {
         },
       ];
 
-      expect(buildRequiredCustomFieldsForRequest(customFieldsConfiguration)).toEqual([
+      expect(buildCustomFieldsForRequest(customFieldsConfiguration)).toEqual([
         {
           key: 'first_key',
           type: CustomFieldTypes.TEXT as const,
@@ -175,7 +175,7 @@ describe('utils', () => {
         },
       ];
 
-      expect(buildRequiredCustomFieldsForRequest(customFieldsConfiguration)).toEqual([]);
+      expect(buildCustomFieldsForRequest(customFieldsConfiguration)).toEqual([]);
     });
 
     it('handles correctly a mix of required and optional custom fields', () => {
@@ -208,7 +208,7 @@ describe('utils', () => {
         },
       ];
 
-      expect(buildRequiredCustomFieldsForRequest(customFieldsConfiguration)).toEqual([
+      expect(buildCustomFieldsForRequest(customFieldsConfiguration)).toEqual([
         {
           key: 'third_key',
           type: CustomFieldTypes.TEXT,
@@ -232,7 +232,7 @@ describe('utils', () => {
           } as CustomFieldConfiguration)
       );
 
-      expect(buildRequiredCustomFieldsForRequest(customFieldsConfiguration).length).toEqual(
+      expect(buildCustomFieldsForRequest(customFieldsConfiguration).length).toEqual(
         customFieldsConfiguration.length
       );
     });

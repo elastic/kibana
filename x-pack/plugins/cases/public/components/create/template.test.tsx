@@ -52,7 +52,63 @@ describe('CustomFields', () => {
     );
 
     await waitFor(() => {
-      expect(onTemplateChange).toHaveBeenCalledWith(selectedTemplate.caseFields);
+      expect(onTemplateChange).toHaveBeenCalledWith({
+        caseFields: selectedTemplate.caseFields,
+        key: selectedTemplate.key,
+      });
+    });
+  });
+
+  it('shows selected template as default', async () => {
+    const templateToSelect = templatesConfigurationMock[1];
+
+    appMockRender.render(
+      <TemplateSelector
+        isLoading={false}
+        templates={templatesConfigurationMock}
+        onTemplateChange={onTemplateChange}
+        templateToSelect={templateToSelect}
+      />
+    );
+
+    await waitFor(() => {
+      expect(onTemplateChange).toHaveBeenCalledWith({
+        caseFields: templateToSelect.caseFields,
+        key: templateToSelect.key,
+      });
+    });
+  });
+
+  it('updates selected template correctly', async () => {
+    const templateToSelect = templatesConfigurationMock[1];
+    const newTemplate = templatesConfigurationMock[2];
+
+    appMockRender.render(
+      <TemplateSelector
+        isLoading={false}
+        templates={templatesConfigurationMock}
+        onTemplateChange={onTemplateChange}
+        templateToSelect={templateToSelect}
+      />
+    );
+
+    await waitFor(() => {
+      expect(onTemplateChange).toHaveBeenCalledWith({
+        caseFields: templateToSelect.caseFields,
+        key: templateToSelect.key,
+      });
+    });
+
+    userEvent.selectOptions(
+      await screen.findByTestId('create-case-template-select'),
+      newTemplate.key
+    );
+
+    await waitFor(() => {
+      expect(onTemplateChange).toHaveBeenCalledWith({
+        caseFields: newTemplate.caseFields,
+        key: newTemplate.key,
+      });
     });
   });
 
