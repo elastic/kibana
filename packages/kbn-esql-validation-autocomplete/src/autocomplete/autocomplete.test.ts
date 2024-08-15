@@ -269,11 +269,7 @@ describe('autocomplete', () => {
       `dissect keywordField ${constantPattern} |`,
     ];
     for (const subExpression of subExpressions) {
-      // Unskip once https://github.com/elastic/kibana/issues/190070 is fixed
-      testSuggestions.skip(
-        `from a | ${subExpression} grok /`,
-        getFieldNamesByType(ESQL_STRING_TYPES)
-      );
+      testSuggestions(`from a | ${subExpression} grok /`, getFieldNamesByType(ESQL_STRING_TYPES));
       testSuggestions(`from a | ${subExpression} grok keywordField /`, [constantPattern], ' ');
       testSuggestions(`from a | ${subExpression} grok keywordField ${constantPattern} /`, ['| ']);
     }
@@ -1024,8 +1020,7 @@ describe('autocomplete', () => {
     ]);
 
     // DISSECT field
-    // enable once https://github.com/elastic/kibana/issues/190070 is fixed
-    testSuggestions.skip('FROM index1 | DISSECT b/', getFieldNamesByType(ESQL_STRING_TYPES));
+    testSuggestions('FROM index1 | DISSECT b/', getFieldNamesByType(ESQL_STRING_TYPES));
 
     // DROP (first field)
     testSuggestions('FROM index1 | DROP f/', getFieldNamesByType('any'));
@@ -1057,8 +1052,7 @@ describe('autocomplete', () => {
     ]);
 
     // GROK field
-    // enable once https://github.com/elastic/kibana/issues/190070
-    testSuggestions.skip('FROM index1 | GROK f/', getFieldNamesByType(ESQL_STRING_TYPES));
+    testSuggestions('FROM index1 | GROK f/', getFieldNamesByType(ESQL_STRING_TYPES), undefined);
 
     // KEEP (first field)
     testSuggestions('FROM index1 | KEEP f/', getFieldNamesByType('any'));

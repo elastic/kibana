@@ -8603,6 +8603,10 @@
                 "path": "x-pack/plugins/observability_solution/observability/server/lib/annotations/register_annotation_apis.ts"
               },
               {
+                "plugin": "logsShared",
+                "path": "x-pack/plugins/observability_solution/logs_shared/server/routes/deprecations/migrate_log_view_settings.ts"
+              },
+              {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_extraction_rules.ts"
               },

@@ -18,6 +18,7 @@ import {
   EuiText,
   formatNumber,
   EuiSkeletonRectangle,
+  EuiTableHeader,
 } from '@elastic/eui';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -208,7 +209,9 @@ export const getDatasetQualityTableColumns = ({
       `,
     },
     {
-      name: nameColumnName,
+      name: (
+        <EuiTableHeader data-test-subj="datasetQualityNameColumn">{nameColumnName}</EuiTableHeader>
+      ),
       field: 'title',
       sortable: true,
       render: (title: string, dataStreamStat: DataStreamStat) => {
@@ -230,7 +233,11 @@ export const getDatasetQualityTableColumns = ({
       },
     },
     {
-      name: namespaceColumnName,
+      name: (
+        <EuiTableHeader data-test-subj="datasetQualityNamespaceColumn">
+          {namespaceColumnName}
+        </EuiTableHeader>
+      ),
       field: 'namespace',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
@@ -241,7 +248,11 @@ export const getDatasetQualityTableColumns = ({
     ...(isSizeStatsAvailable && canUserMonitorDataset && canUserMonitorAnyDataStream
       ? [
           {
-            name: sizeColumnName,
+            name: (
+              <EuiTableHeader data-test-subj="datasetQualitySizeColumn">
+                {sizeColumnName}
+              </EuiTableHeader>
+            ),
             field: 'sizeBytes',
             sortable: true,
             render: (_: any, dataStreamStat: DataStreamStat) => {
@@ -270,12 +281,14 @@ export const getDatasetQualityTableColumns = ({
       : []),
     {
       name: (
-        <EuiToolTip content={datasetQualityColumnTooltip}>
-          <span>
-            {`${datasetQualityColumnName} `}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
+        <EuiTableHeader data-test-subj="datasetQualityQualityColumn">
+          <EuiToolTip content={datasetQualityColumnTooltip}>
+            <span>
+              {`${datasetQualityColumnName} `}
+              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            </span>
+          </EuiToolTip>
+        </EuiTableHeader>
       ),
       field: 'degradedDocs.percentage',
       sortable: true,
@@ -286,12 +299,14 @@ export const getDatasetQualityTableColumns = ({
     },
     {
       name: (
-        <EuiToolTip content={degradedDocsColumnTooltip}>
-          <span>
-            {`${degradedDocsColumnName} `}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
+        <EuiTableHeader data-test-subj="datasetQualityPercentageColumn">
+          <EuiToolTip content={degradedDocsColumnTooltip}>
+            <span>
+              {`${degradedDocsColumnName} `}
+              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            </span>
+          </EuiToolTip>
+        </EuiTableHeader>
       ),
       field: 'degradedDocs.percentage',
       sortable: true,
@@ -307,7 +322,11 @@ export const getDatasetQualityTableColumns = ({
     ...(canUserMonitorDataset && canUserMonitorAnyDataStream
       ? [
           {
-            name: lastActivityColumnName,
+            name: (
+              <EuiTableHeader data-test-subj="datasetQualityLastActivityColumn">
+                {lastActivityColumnName}
+              </EuiTableHeader>
+            ),
             field: 'lastActivity',
             render: (timestamp: number, { userPrivileges, title }: DataStreamStat) => (
               <PrivilegesWarningIconWrapper
