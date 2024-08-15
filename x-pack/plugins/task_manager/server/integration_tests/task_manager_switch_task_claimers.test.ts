@@ -340,7 +340,7 @@ describe('switch task claiming strategies', () => {
     kibanaServer = setupResultDefault.kibanaServer;
 
     taskClaimingOpts = TaskClaimingMock.mock.calls[1][0];
-    expect(taskClaimingOpts.strategy).toBe('default');
+    expect(taskClaimingOpts.strategy).toBe('update_by_query');
 
     // task doc should still exist and be running
     const task = await kibanaServer.coreStart.elasticsearch.client.asInternalUser.get<{
