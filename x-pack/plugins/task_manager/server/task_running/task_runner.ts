@@ -63,7 +63,7 @@ export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 export const TASK_MANAGER_RUN_TRANSACTION_TYPE = 'task-run';
 export const TASK_MANAGER_TRANSACTION_TYPE = 'task-manager';
 export const TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING = 'mark-task-as-running';
-export const CONSISTENT_SCHEDULING_GAP_THRESHOLD = 10000;
+export const CONSISTENT_SCHEDULING_GAP_THRESHOLD = 500;
 
 export interface TaskRunner {
   isExpired: boolean;
