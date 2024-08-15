@@ -4,7 +4,8 @@
 <titleabbrev>Import objects</titleabbrev>
 ++++
 
-experimental[] Create sets of {kib} saved objects from a file created by the export API.
+Create sets of {kib} saved objects from a file created by the export API. Files should not be edited before being imported as this could to lead to unexpected behaviour 
+or upgrade failures in future versions.
 
 [NOTE]
 ====
@@ -66,7 +67,8 @@ NOTE: This option cannot be used with the `createNewCopies` option.
 The request body must include the multipart/form-data type.
 
 `file`::
-  A file exported using the export API.
+  A file exported using the export API. Exported files should not be edited before being imported as this could to lead to unexpected behaviour 
+  or upgrade failures in future versions.
 +
 NOTE: The <<savedObjects-maxImportExportSize, `savedObjects.maxImportExportSize`>> configuration setting
 limits the number of saved objects which may be included in this file. Similarly, the
