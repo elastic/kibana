@@ -95,7 +95,13 @@ export class LlmProxy {
     return Promise.all(this.interceptors);
   }
 
-  interceptConversation({ name, response }: { name: string; response: string }) {
+  interceptConversation({
+    name = 'default_interceptor_conversation_name',
+    response,
+  }: {
+    name?: string;
+    response: string;
+  }) {
     return this.intercept(name, (body) => !isFunctionTitleRequest(body), response);
   }
 
