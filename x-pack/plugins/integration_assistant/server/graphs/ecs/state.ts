@@ -7,7 +7,7 @@
 
 import type { StateGraphArgs } from '@langchain/langgraph';
 import type { EcsMappingState } from '../../types';
-import { merge } from './chunk';
+import { merge } from '../../util/samples';
 
 export const graphState: StateGraphArgs<EcsMappingState>['channels'] = {
   ecs: {
