@@ -34,6 +34,7 @@ export interface FieldDescriptor {
   timeSeriesMetric?: estypes.MappingTimeSeriesMetricType;
   timeSeriesDimension?: boolean;
   defaultFormatter?: string;
+  ecsDescription?: any;
 }
 
 interface FieldSubType {
