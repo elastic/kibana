@@ -46,23 +46,24 @@ const extractContainerType = (context?: KibanaExecutionContext): string | undefi
 const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWrapperProps) => {
   const chartDiv = useRef<HTMLDivElement>(null);
   const visController = useRef<VislibVisController | null>(null);
-  const shouldCountRender = useRef<boolean>(false);
+  const skipRenderComplete = useRef<boolean>(true);
 
   const renderComplete = useCallback(() => {
-    if (shouldCountRender.current) {
-      const usageCollection = getUsageCollectionStart();
-      const containerType = extractContainerType(handlers.getExecutionContext());
-
-      if (usageCollection && containerType) {
-        usageCollection.reportUiCounter(
-          containerType,
-          METRIC_TYPE.COUNT,
-          `render_agg_based_${visConfig!.type}`
-        );
-      }
-      handlers.done();
-      shouldCountRender.current = false;
+    if (skipRenderComplete.current) {
+      return;
     }
+    const usageCollection = getUsageCollectionStart();
+    const containerType = extractContainerType(handlers.getExecutionContext());
+
+    if (usageCollection && containerType) {
+      usageCollection.reportUiCounter(
+        containerType,
+        METRIC_TYPE.COUNT,
+        `render_agg_based_${visConfig!.type}`
+      );
+    }
+    handlers.done();
+    skipRenderComplete.current = true;
   }, [handlers, visConfig]);
 
   const renderChart = useMemo(
@@ -80,7 +81,7 @@ const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWra
   }, [renderChart]);
 
   useEffect(() => {
-    shouldCountRender.current = true;
+    skipRenderComplete.current = false;
     renderChart();
   }, [renderChart]);
 
