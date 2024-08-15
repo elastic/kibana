@@ -218,6 +218,19 @@ export const ReactControlExample = ({
     };
   }, [controlGroupApi, timeslice$]);
 
+  const [hasControls, setHasControls] = useState(false);
+  useEffect(() => {
+    if (!controlGroupApi) {
+      return;
+    }
+    const subscription = controlGroupApi.children$.subscribe((children) => {
+      setHasControls(Object.keys(children).length > 0);
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [controlGroupApi]);
+
   useEffect(() => {
     const subscription = combineLatest([controlGroupFilters$, unifiedSearchFilters$]).subscribe(
       ([controlGroupFilters, unifiedSearchFilters]) => {
@@ -388,7 +401,7 @@ export const ReactControlExample = ({
           reload$.next();
         }}
       />
-      <EuiSpacer size="m" />
+      {hasControls && <EuiSpacer size="m" />}
       <ReactEmbeddableRenderer
         onApiAvailable={(api) => {
           dashboardApi?.setChild(api);
@@ -401,6 +414,7 @@ export const ReactControlExample = ({
           getSerializedStateForChild: getControlGroupSerializedState,
           getRuntimeStateForChild: getControlGroupRuntimeState,
         })}
+        panelProps={{ hideLoader: true }}
         key={`control_group`}
       />
       <EuiSpacer size="l" />
