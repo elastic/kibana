@@ -19,3 +19,13 @@ export { isOutputCompleteEvent } from './output/is_output_complete_event';
 export { isOutputEvent } from './output/is_output_event';
 
 export type { ToolSchema } from './chat_complete/tool_schema';
+
+export {
+  type Message,
+  MessageRole,
+  type ToolMessage,
+  type AssistantMessage,
+  type UserMessage,
+} from './chat_complete';
+
+export { generateFakeToolCallId } from './chat_complete/generate_fake_tool_call_id';

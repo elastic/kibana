@@ -13,8 +13,8 @@ import type {
   ChatCompletionToolMessageParam,
   ChatCompletionUserMessageParam,
 } from 'openai/resources';
-import { filter, from, map, switchMap, tap } from 'rxjs';
-import { Readable } from 'stream';
+import { filter, from, map, switchMap, tap, throwError } from 'rxjs';
+import { Readable, isReadable } from 'stream';
 import {
   ChatCompletionChunkEvent,
   ChatCompletionEventType,
@@ -79,8 +79,12 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       })
     ).pipe(
       switchMap((response) => {
-        const readable = response.data as Readable;
-        return eventSourceStreamIntoObservable(readable);
+        if (isReadable(response.data as any)) {
+          return eventSourceStreamIntoObservable(response.data as Readable);
+        }
+        return throwError(() =>
+          createInferenceInternalError('Unexpected error', response.data as Record<string, any>)
+        );
       }),
       filter((line) => !!line && line !== '[DONE]'),
       map(

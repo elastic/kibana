@@ -9,13 +9,18 @@ import { ToolingLog } from '@kbn/tooling-log';
 import axios, { AxiosInstance, AxiosResponse, isAxiosError } from 'axios';
 import { IncomingMessage } from 'http';
 import { omit, pick } from 'lodash';
-import { from, map, switchMap } from 'rxjs';
+import { from, map, switchMap, throwError } from 'rxjs';
 import { UrlObject, format, parse } from 'url';
 import { inspect } from 'util';
+import { isReadable } from 'stream';
 import type { ChatCompleteAPI, ChatCompletionEvent } from '../../common/chat_complete';
 import { ChatCompleteRequestBody } from '../../common/chat_complete/request';
 import type { InferenceConnector } from '../../common/connectors';
-import { InferenceTaskError, InferenceTaskErrorEvent } from '../../common/errors';
+import {
+  InferenceTaskError,
+  InferenceTaskErrorEvent,
+  createInferenceInternalError,
+} from '../../common/errors';
 import { InferenceTaskEventType } from '../../common/inference_task';
 import type { OutputAPI } from '../../common/output';
 import { createOutputApi } from '../../common/output/create_output_api';
@@ -151,7 +156,10 @@ export class KibanaClient {
     function stream(responsePromise: Promise<AxiosResponse>) {
       return from(responsePromise).pipe(
         switchMap((response) => {
-          return eventSourceStreamIntoObservable(response.data as IncomingMessage);
+          if (isReadable(response.data)) {
+            return eventSourceStreamIntoObservable(response.data as IncomingMessage);
+          }
+          return throwError(() => createInferenceInternalError('Unexpected error', response.data));
         }),
         map((line) => {
           return JSON.parse(line) as ChatCompletionEvent | InferenceTaskErrorEvent;

@@ -8,10 +8,12 @@
 import type { Logger } from '@kbn/logging';
 import { isEmpty, mapValues, pick } from 'lodash';
 import { Observable, from, map, merge, of, switchMap } from 'rxjs';
+import { v4 } from 'uuid';
 import { isChatCompletionMessageEvent } from '../../../common';
 import {
   ChatCompletionChunkEvent,
   ChatCompletionMessageEvent,
+  Message,
   MessageRole,
 } from '../../../common/chat_complete';
 import { ToolChoiceType, type ToolOptions } from '../../../common/chat_complete/tools';
@@ -25,22 +27,25 @@ import { withoutTokenCountEvents } from '../../../common/chat_complete/without_t
 
 export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
   client,
-  input,
   connectorId,
   tools,
   toolChoice,
   logger,
+  ...rest
 }: {
   client: Pick<InferenceClient, 'output' | 'chatComplete'>;
-  input: string;
   connectorId: string;
   logger: Pick<Logger, 'debug'>;
-} & TToolOptions): Observable<
+} & TToolOptions &
+  ({ input: string } | { messages: Message[] })): Observable<
   | OutputCompleteEvent<'request_documentation', {}>
   | ChatCompletionChunkEvent
   | ChatCompletionMessageEvent<TToolOptions>
 > {
   const hasTools = !isEmpty(tools) && toolChoice !== ToolChoiceType.none;
+
+  const messages: Message[] =
+    'input' in rest ? [{ role: MessageRole.User, content: rest.input }] : rest.messages;
 
   return from(loadDocuments()).pipe(
     switchMap(([systemMessage, esqlDocs]) => {
@@ -48,7 +53,7 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
         .output('request_documentation', {
           connectorId,
           system: systemMessage,
-          input: `Based on the following input, request documentation
+          input: `Based on the following conversation, request documentation
         from the ES|QL handbook to help you get the right information
         needed to generate a query. 
 
@@ -61,7 +66,7 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
           hasTools
             ? `### Tools
 
-        Some tools are available to be called in the next step, but not this one.
+        The following tools will be available to be called in the step after this.
 
         \`\`\`json
         ${JSON.stringify({
@@ -72,9 +77,13 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
             : ''
         }
 
-        ## Input
+        ## Conversation
 
-        ${input}
+        What follows is the conversation that the user is having with the system.
+        
+        \`\`\`json
+        ${JSON.stringify(messages)}
+        \`\`\`
 
       `,
           schema: {
@@ -95,6 +104,18 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
                 },
                 description: 'ES|QL functions you want to analyze before generating the query.',
               },
+              ...(hasTools
+                ? {
+                    toolUseCandidates: {
+                      type: 'array',
+                      items: {
+                        type: 'string',
+                        enum: Object.keys(tools ?? {}),
+                      },
+                      description: "Possible tools you could use to answer the user's question",
+                    },
+                  }
+                : {}),
             },
           },
         } as const)
@@ -111,6 +132,14 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
 
             const requestedDocumentation = mapValues(pick(esqlDocs, keywords), ({ data }) => data);
 
+            const fakeRequestDocsToolCall = {
+              function: {
+                name: 'request_documentation',
+                arguments: documentationEvent.output,
+              },
+              toolCallId: v4().substring(0, 6),
+            };
+
             return merge(
               of({
                 ...documentationEvent,
@@ -122,39 +151,40 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
               client
                 .chatComplete({
                   connectorId,
-                  system: systemMessage,
-                  messages: [
+                  system: `${systemMessage}
+
+                  # Current task
+
+                  Your current task is to respond to the user's question. If there is a tool
+                  suitable for answering the user's question, use that tool, preferably
+                  with a natural language reply included.
+
+                  Format any ES|QL query as follows:
+                  \`\`\`esql
+                  <query>
+                  \`\`\`
+
+                  When generating ES|QL, you must use commands and functions for which you 
+                  requested documentation.
+                  
+                  DO NOT UNDER ANY CIRCUMSTANCES use commands or functions that are not a capability
+                  of ES|QL as mentioned in the system message and documentation. When converting
+                  queries from one language to ES|QL, make sure that the functions are available
+                  and documented in ES|QL. E.g., for SPL's LEN, use LENGTH. For IF, use CASE.`,
+                  messages: messages.concat([
                     {
-                      role: MessageRole.User,
-                      content: `Answer using the attached documentation about ES|QL.
-
-                      Format any ES|QL query as follows:
-                      \`\`\`esql
-                      <query>
-                      \`\`\`
-
-                      When generating ES|QL, you must use commands and functions for which you have requested documentation.
-                      
-                      DO NOT UNDER ANY CIRCUMSTANCES use commands or functions that are not a capability of ES|QL
-                      as mentioned in the system message and documentation. When converting queries from one language
-                      to ES|QL, make sure that the functions are available and documented in ES|QL.
-                      E.g., for SPL's LEN, use LENGTH. For IF, use CASE.
-
-                      ${
-                        hasTools
-                          ? `If appropriate, use one of the tools attached to answer the user.`
-                          : ''
-                      }
-
-                      # Documentation
-
-                      ${Object.values(requestedDocumentation).join('\n\n')}
-                      
-                      # Input
-                      
-                      ${input}`,
+                      role: MessageRole.Assistant,
+                      content: null,
+                      toolCalls: [fakeRequestDocsToolCall],
                     },
-                  ],
+                    {
+                      role: MessageRole.Tool,
+                      response: {
+                        documentation: requestedDocumentation,
+                      },
+                      toolCallId: fakeRequestDocsToolCall.toolCallId,
+                    },
+                  ]),
                   toolChoice,
                   tools,
                 })

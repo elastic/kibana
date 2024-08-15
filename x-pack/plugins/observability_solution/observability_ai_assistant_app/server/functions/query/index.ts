@@ -16,9 +16,9 @@ import {
 import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/create_function_response_message';
 import { map } from 'rxjs';
 import { v4 } from 'uuid';
-import { omit } from 'lodash';
 import type { FunctionRegistrationParameters } from '..';
 import { runAndValidateEsqlQuery } from './validate_esql_query';
+import { convertMessagesForInference } from '../../../common/convert_messages_for_inference';
 
 export const QUERY_FUNCTION_NAME = 'query';
 export const EXECUTE_QUERY_NAME = 'execute_query';
@@ -54,8 +54,15 @@ export function registerQueryFunction({
     {
       name: EXECUTE_QUERY_NAME,
       visibility: FunctionVisibility.Internal,
-      description:
-        'Execute a generated ES|QL query on behalf of the user. The results will be returned to you.',
+      description: `Execute a generated ES|QL query on behalf of the user. The results
+        will be returned to you.
+
+        You must use this function if the user is asking for the result of a query,
+        such as a metric or list of things, but does not want to visualize it in
+        a table or chart. You do NOT need to ask permission to execute the query
+        after generating it, use the "${EXECUTE_QUERY_NAME}" function directly instead.
+        
+        Do not use when the user just asks for an example.`,
       parameters: {
         type: 'object',
         properties: {
@@ -115,18 +122,10 @@ export function registerQueryFunction({
       const events$ = naturalLanguageToEsql({
         client: pluginsStart.inference.getClient({ request: resources.request }),
         connectorId,
-        input: `## Conversation
-        
-        ${messages
-          .filter((message) => message.message.role !== MessageRole.System)
-          .map(
-            (message) => `### Message
-          
-          \`\`\`${JSON.stringify(omit(message.message, 'data'))}\`\``
-          )
-          .join('\n\n')}
-
-        `,
+        messages: convertMessagesForInference(
+          // remove system message and query function request
+          messages.filter((message) => message.message.role !== MessageRole.System).slice(0, -1)
+        ),
         logger: resources.logger,
         tools: Object.fromEntries(
           actions
