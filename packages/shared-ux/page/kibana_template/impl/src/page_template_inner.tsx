@@ -27,6 +27,7 @@ const getClasses = (template?: string, className?: string) => {
 export const KibanaPageTemplateInner: FC<Props> = ({
   className,
   pageHeader,
+  pageSectionProps,
   children,
   isEmptyState,
   pageSideBar,
