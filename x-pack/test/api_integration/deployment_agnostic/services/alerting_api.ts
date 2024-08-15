@@ -42,14 +42,14 @@ interface Duration {
 }
 
 export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const retry = getService('retry');
   const samlAuth = getService('samlAuth');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
+  const retry = getService('retry');
+  const logger = getService('log');
   const config = getService('config');
   const retryTimeout = config.get('timeouts.try');
   const requestTimeout = 30 * 1000;
-  const logger = getService('log');
 
   return {
     async waitForRuleStatus({
@@ -61,9 +61,6 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       expectedStatus: string;
       roleAuthc: RoleCredentials;
     }) {
-      if (!ruleId) {
-        throw new Error(`'ruleId' is undefined`);
-      }
       return await retry.tryForTime(retryTimeout, async () => {
         const response = await supertestWithoutAuth
           .get(`/api/alerting/rule/${ruleId}`)
@@ -92,9 +89,16 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
           rest_total_hits_as_int: true,
         });
         logger.debug(`Found ${response.hits.total} docs, looking for atleast ${docCountTarget}.`);
-        if (!response.hits.total || response.hits.total < docCountTarget) {
+
+        if (
+          !response.hits.total ||
+          (typeof response.hits.total === 'number'
+            ? response.hits.total < docCountTarget
+            : response.hits.total.value < docCountTarget)
+        ) {
           throw new Error('No hits found');
         }
+
         return response;
       });
     },
@@ -189,9 +193,6 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
     },
 
     async findRule(ruleId: string, roleAuthc: RoleCredentials) {
-      if (!ruleId) {
-        throw new Error(`'ruleId' is undefined`);
-      }
       const response = await supertestWithoutAuth
         .get('/api/alerting/rules/_find')
         .set(roleAuthc.apiKeyHeader)

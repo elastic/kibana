@@ -58,7 +58,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await alertingApi.waitForDocumentInIndex({
         indexName: DATA_VIEW,
         docCountTarget: 360,
-        roleAuthc: adminRoleAuthc,
       });
       await dataViewApi.create({
         roleAuthc: adminRoleAuthc,
