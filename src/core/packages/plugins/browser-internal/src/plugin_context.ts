@@ -92,7 +92,7 @@ export function createPluginSetupContext<
       },
     },
     injection: {
-      getContainer: deps.injection.getContainer.bind(deps.injection, plugin.opaqueId),
+      getContainer: () => deps.injection.getContainer(plugin.opaqueId),
     },
     notifications: deps.notifications,
     uiSettings: deps.uiSettings,
@@ -161,8 +161,8 @@ export function createPluginStartContext<
       },
     },
     injection: {
-      fork: deps.injection.fork.bind(deps.injection, plugin.opaqueId),
-      getContainer: deps.injection.getContainer.bind(deps.injection, plugin.opaqueId),
+      fork: () => deps.injection.fork(plugin.opaqueId),
+      getContainer: () => deps.injection.getContainer(plugin.opaqueId),
     },
     chrome: omit(deps.chrome, 'getComponent'),
     i18n: deps.i18n,
