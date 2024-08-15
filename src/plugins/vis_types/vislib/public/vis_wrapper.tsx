@@ -60,9 +60,9 @@ const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWra
           `render_agg_based_${visConfig!.type}`
         );
       }
+      handlers.done();
       shouldCountRender.current = false;
     }
-    handlers.done();
   }, [handlers, visConfig]);
 
   const renderChart = useMemo(
