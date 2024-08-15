@@ -11,8 +11,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
+import type { AgentPolicy } from '../../../common';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
-
 import { agentPolicyService } from '../agent_policy';
 import { auditLoggingService } from '../audit_logging';
 import { appContextService } from '../app_context';
@@ -99,8 +99,8 @@ describe('enrollment api keys', () => {
 
       mockedAgentPolicyService.get.mockResolvedValue({
         id: 'test-agent-policy',
-        space_id: 'test123',
-      } as any);
+        space_ids: ['test123'],
+      } as AgentPolicy);
 
       await generateEnrollmentAPIKey(soClient, esClient, {
         name: 'test-api-key',
@@ -113,6 +113,40 @@ describe('enrollment api keys', () => {
         expect.objectContaining({
           body: expect.objectContaining({
             namespaces: ['test123'],
+          }),
+        })
+      );
+    });
+
+    it('should set namespaces if agent policy specify mulitple space IDs', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      esClient.create.mockResolvedValue({
+        _id: 'test-enrollment-api-key-id',
+      } as any);
+
+      esClient.security.createApiKey.mockResolvedValue({
+        api_key: 'test-api-key-value',
+        id: 'test-api-key-id',
+      } as any);
+
+      mockedAgentPolicyService.get.mockResolvedValue({
+        id: 'test-agent-policy',
+        space_ids: ['test123', 'test456'],
+      } as AgentPolicy);
+
+      await generateEnrollmentAPIKey(soClient, esClient, {
+        name: 'test-api-key',
+        expiration: '7d',
+        agentPolicyId: 'test-agent-policy',
+        forceRecreate: true,
+      });
+
+      expect(esClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            namespaces: ['test123', 'test456'],
           }),
         })
       );
