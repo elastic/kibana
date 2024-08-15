@@ -73,10 +73,9 @@ export default function ({ getService }: FtrProviderContext) {
           const enableResponse = await enableEntityDiscovery(authorizedUser, 200);
           expect(enableResponse.success).to.eql(true, "authorized user can't enable EEM");
 
-          const definitionsResponse = await getInstalledDefinitions(
-            supertestWithoutAuth,
-            authorizedUser
-          );
+          const definitionsResponse = await getInstalledDefinitions(supertestWithoutAuth, {
+            auth: authorizedUser,
+          });
           expect(definitionsResponse.definitions.length).to.eql(builtInDefinitions.length);
           expect(
             builtInDefinitions.every((builtin) =>
