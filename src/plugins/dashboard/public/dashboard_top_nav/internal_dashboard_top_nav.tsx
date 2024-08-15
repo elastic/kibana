@@ -346,7 +346,7 @@ export function InternalDashboardTopNav({
                     <EuiLink
                       id="dashboardManagedContentPopoverButton"
                       onClick={() => {
-                        dashboard.runInteractiveSave(viewMode);
+                        dashboard.runInteractiveSave(viewMode, redirectTo);
                       }}
                       aria-label={dashboardManagedBadge.getDuplicateText()}
                     >
@@ -373,6 +373,7 @@ export function InternalDashboardTopNav({
     managed,
     isPopoverOpen,
     dashboard,
+    redirectTo,
   ]);
 
   return (
