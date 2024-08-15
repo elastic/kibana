@@ -8,7 +8,6 @@
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import moment from 'moment';
-import OpenAI from 'openai';
 import {
   createLlmProxy,
   LlmProxy,
