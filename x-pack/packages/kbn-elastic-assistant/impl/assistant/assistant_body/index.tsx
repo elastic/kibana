@@ -13,19 +13,13 @@ import React, {
   useMemo,
   useRef,
 } from 'react';
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingLogo,
-  EuiPanel,
-  EuiText,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { QueryObserverResult } from '@tanstack/react-query';
+import { AssistantAnimatedIcon } from '../assistant_animated_icon';
 import { EmptyConvo } from './empty_convo';
 import { WelcomeSetup } from './welcome_setup';
 import { Conversation } from '../../..';
@@ -113,10 +107,7 @@ export const AssistantBody: FunctionComponent<Props> = ({
     <EuiFlexGroup direction="column" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         {isLoading ? (
-          <EuiEmptyPrompt
-            data-test-subj="animatedLogo"
-            icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
-          />
+          <EuiEmptyPrompt data-test-subj="animatedLogo" icon={<AssistantAnimatedIcon />} />
         ) : isWelcomeSetup ? (
           <WelcomeSetup
             currentConversation={currentConversation}
