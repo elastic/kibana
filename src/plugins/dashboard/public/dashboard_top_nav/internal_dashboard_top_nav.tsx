@@ -16,11 +16,11 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { EuiHorizontalRule, EuiIcon, EuiToolTipProps } from '@elastic/eui';
 import type { EuiBreadcrumb } from '@elastic/eui';
 import { MountPoint } from '@kbn/core/public';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -105,15 +105,7 @@ export function InternalDashboardTopNav({
   const query = dashboard.select((state) => state.explicitInput.query);
   const title = dashboard.select((state) => state.explicitInput.title);
 
-  // store data views in state & subscribe to dashboard data view changes.
-  const [allDataViews, setAllDataViews] = useState<DataView[]>([]);
-  useEffect(() => {
-    setAllDataViews(dashboard.getAllDataViews());
-    const subscription = dashboard.onDataViewsUpdate$.subscribe((dataViews) =>
-      setAllDataViews(dataViews)
-    );
-    return () => subscription.unsubscribe();
-  }, [dashboard]);
+  const allDataViews = useStateFromPublishingSubject(dashboard.dataViews);
 
   const dashboardTitle = useMemo(() => {
     return getDashboardTitle(title, viewMode, !lastSavedId);
@@ -333,7 +325,7 @@ export function InternalDashboardTopNav({
         screenTitle={title}
         useDefaultBehaviors={true}
         savedQueryId={savedQueryId}
-        indexPatterns={allDataViews}
+        indexPatterns={allDataViews ?? []}
         saveQueryMenuVisibility={allowSaveQuery ? 'allowed_by_app_privilege' : 'globally_managed'}
         appName={LEGACY_DASHBOARD_APP_ID}
         visible={viewMode !== ViewMode.PRINT}

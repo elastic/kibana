@@ -36,10 +36,7 @@ export function getControlsInOrder(initialControlPanelsState: ControlPanelsState
     .map(({ id, type }) => ({ id, type })); // filter out `order`
 }
 
-export function initControlsManager(
-  initialControlPanelsState: ControlPanelsState,
-  defaultDataViewId: string | null
-) {
+export function initControlsManager(initialControlPanelsState: ControlPanelsState) {
   const lastSavedControlsPanelState$ = new BehaviorSubject(initialControlPanelsState);
   const initialControlIds = Object.keys(initialControlPanelsState);
   const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
@@ -50,9 +47,7 @@ export function initControlsManager(
     getControlsInOrder(initialControlPanelsState)
   );
   const lastUsedDataViewId$ = new BehaviorSubject<string | undefined>(
-    getLastUsedDataViewId(controlsInOrder$.value, initialControlPanelsState) ??
-      defaultDataViewId ??
-      undefined
+    getLastUsedDataViewId(controlsInOrder$.value, initialControlPanelsState)
   );
 
   function untilControlLoaded(

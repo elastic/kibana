@@ -73,13 +73,8 @@ export const getControlGroupEmbeddableFactory = (services: {
       } = initialRuntimeState;
 
       const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
-      const parentDataViewId = apiPublishesDataViews(parentApi)
-        ? parentApi.dataViews.value?.[0]?.id
-        : undefined;
-      const controlsManager = initControlsManager(
-        initialChildControlState,
-        parentDataViewId ?? (await services.dataViews.getDefaultId())
-      );
+      const defaultDataViewId = await services.dataViews.getDefaultId();
+      const controlsManager = initControlsManager(initialChildControlState);
       const selectionsManager = initSelectionsManager({
         ...controlsManager.api,
         autoApplySelections$,
@@ -171,11 +166,18 @@ export const getControlGroupEmbeddableFactory = (services: {
             defaultMessage: 'Controls',
           }),
         openAddDataControlFlyout: (options) => {
+          const parentDataViewId = apiPublishesDataViews(parentApi)
+            ? parentApi.dataViews.value?.[0]?.id
+            : undefined;
           openDataControlEditor({
             initialState: {
               grow: api.grow.getValue(),
               width: api.width.getValue(),
-              dataViewId: controlsManager.api.lastUsedDataViewId$.value,
+              dataViewId:
+                controlsManager.api.lastUsedDataViewId$.value ??
+                parentDataViewId ??
+                defaultDataViewId ??
+                undefined,
             },
             onSave: ({ type: controlType, state: initialState }) => {
               api.addNewPanel({

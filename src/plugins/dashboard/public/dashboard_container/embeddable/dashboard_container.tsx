@@ -344,6 +344,8 @@ export class DashboardContainer
         (this.dataLoading as BehaviorSubject<boolean | undefined>).next(isAtLeastOneChildLoading);
       })
     );
+
+    this.dataViews = new BehaviorSubject<DataView[] | undefined>(this.getAllDataViews());
   }
 
   public setControlGroupApi(controlGroupApi: ControlGroupApi) {
@@ -656,8 +658,6 @@ export class DashboardContainer
     }
   }
 
-  public onDataViewsUpdate$ = new Subject<DataView[]>();
-
   public async asyncResetToLastSavedState() {
     this.dispatch.resetToLastSavedInput({});
     const {
@@ -750,7 +750,7 @@ export class DashboardContainer
    */
   public setAllDataViews = (newDataViews: DataView[]) => {
     this.allDataViews = newDataViews;
-    this.onDataViewsUpdate$.next(newDataViews);
+    (this.dataViews as BehaviorSubject<DataView[] | undefined>).next(newDataViews);
   };
 
   public getExpandedPanelId = () => {
