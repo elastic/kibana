@@ -16,9 +16,12 @@ rules:
   # Operations
   operation-operationId: error
   operation-operationId-unique: error
-  operation-operationId-valid-in-url: error
+  operation-operationId-valid-in-url: false
   operation-tag-defined: warn
   operation-tags: warn
+  # Parameters
+  # Lower severity to allow optional path parameters
+  path-params: warn
   # Responses
   operation-success-response: warn
   # Schema

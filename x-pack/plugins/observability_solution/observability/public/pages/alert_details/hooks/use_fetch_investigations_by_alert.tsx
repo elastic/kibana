@@ -7,17 +7,13 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { FindInvestigationsResponse } from '@kbn/investigate-plugin/common';
-import { investigationKeys } from './query_key_factory';
-import { useKibana } from './use_kibana';
+import { useKibana } from '../../../utils/kibana_react';
 
-const DEFAULT_PAGE_SIZE = 25;
-
-export interface InvestigationListParams {
-  page?: number;
-  perPage?: number;
+export interface InvestigationsByAlertParams {
+  alertId: string;
 }
 
-export interface UseFetchInvestigationListResponse {
+export interface UseFetchInvestigationsByAlertResponse {
   isInitialLoading: boolean;
   isLoading: boolean;
   isRefetching: boolean;
@@ -26,29 +22,21 @@ export interface UseFetchInvestigationListResponse {
   data: FindInvestigationsResponse | undefined;
 }
 
-export function useFetchInvestigationList({
-  page = 1,
-  perPage = DEFAULT_PAGE_SIZE,
-}: InvestigationListParams = {}): UseFetchInvestigationListResponse {
+export function useFetchInvestigationsByAlert({
+  alertId,
+}: InvestigationsByAlertParams): UseFetchInvestigationsByAlertResponse {
   const {
-    core: {
-      http,
-      notifications: { toasts },
-    },
-  } = useKibana();
+    http,
+    notifications: { toasts },
+    investigate: investigatePlugin,
+  } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
-    queryKey: investigationKeys.list({
-      page,
-      perPage,
-    }),
+    queryKey: ['fetchInvestigationsByAlert', alertId],
     queryFn: async ({ signal }) => {
-      return await http.get<FindInvestigationsResponse>(`/api/observability/investigations`, {
+      return await http.get<FindInvestigationsResponse>('/api/observability/investigations', {
+        query: { alertId },
         version: '2023-10-31',
-        query: {
-          ...(page !== undefined && { page }),
-          ...(perPage !== undefined && { perPage }),
-        },
         signal,
       });
     },
@@ -66,6 +54,7 @@ export function useFetchInvestigationList({
         title: 'Something went wrong while fetching Investigations',
       });
     },
+    enabled: Boolean(investigatePlugin),
   });
 
   return {
