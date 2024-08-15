@@ -474,6 +474,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
+      summary: Delete multiple detection rules
       tags:
         - Security Solution Detections API
         - Bulk API

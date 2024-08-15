@@ -33,6 +33,7 @@ import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../../../../common/constants';
 import type { Sort } from '../../../timelines/components/timeline/body/sort';
 import type {
@@ -179,7 +180,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     browserFields,
     dataViewId,
     indexPattern,
-    runtimeMappings,
+    sourcererDataView,
     selectedPatterns,
     dataViewId: selectedDataViewId,
     loading: isLoadingIndexPattern,
@@ -315,7 +316,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
       id: tableId,
       indexNames: indexNames ?? selectedPatterns,
       limit: itemsPerPage,
-      runtimeMappings,
+      runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
       skip: !canQueryTimeline,
       sort: sortField,
       startDate: start,

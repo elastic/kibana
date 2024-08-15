@@ -6,6 +6,7 @@
  */
 
 import {
+  ENTITY_BASE_PREFIX,
   ENTITY_HISTORY,
   ENTITY_LATEST,
   ENTITY_SCHEMA_VERSION_V1,
@@ -38,6 +39,10 @@ export function generateHistoryIndexName(definition: EntityDefinition) {
   });
 }
 
+export function generateHistoryIndexTemplateId(definition: EntityDefinition) {
+  return `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_HISTORY}_${definition.id}_index_template` as const;
+}
+
 // Latest
 function generateLatestId(definition: EntityDefinition) {
   return `${ENTITY_LATEST_PREFIX_V1}-${definition.id}` as const;
@@ -53,3 +58,6 @@ export function generateLatestIndexName(definition: EntityDefinition) {
     definitionId: definition.id,
   });
 }
+
+export const generateLatestIndexTemplateId = (definition: EntityDefinition) =>
+  `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_LATEST}_${definition.id}_index_template` as const;
