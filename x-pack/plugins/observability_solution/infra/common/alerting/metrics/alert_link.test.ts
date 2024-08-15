@@ -156,7 +156,7 @@ describe('Inventory Threshold Rule', () => {
       });
       expect(mockAssetDetailsLocator.getRedirectUrl).toHaveBeenCalledTimes(1);
       expect(url).toEqual(
-        "/node-mock/host/my-host?receivedParams=(dateRange:(from:'2022-01-01T00:00:00.000Z',to:'2022-01-01T00:15:00.000Z'),incomingAlertMetric:cpu)"
+        "/node-mock/host/my-host?receivedParams=(alertMetric:cpu,dateRange:(from:'2022-01-01T00:00:00.000Z',to:'2022-01-01T00:15:00.000Z'))"
       );
     });
 
@@ -174,7 +174,7 @@ describe('Inventory Threshold Rule', () => {
       });
       expect(mockAssetDetailsLocator.getRedirectUrl).toHaveBeenCalledTimes(1);
       expect(url).toEqual(
-        "/node-mock/container/my-container?receivedParams=(dateRange:(from:'2022-01-01T00:00:00.000Z',to:'2022-01-01T00:15:00.000Z'),incomingAlertMetric:cpu)"
+        "/node-mock/container/my-container?receivedParams=(alertMetric:cpu,dateRange:(from:'2022-01-01T00:00:00.000Z',to:'2022-01-01T00:15:00.000Z'))"
       );
     });
 
