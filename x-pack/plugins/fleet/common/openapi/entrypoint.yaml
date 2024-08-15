@@ -1,5 +1,21 @@
 openapi: 3.0.0
-tags: []
+tags:
+  - name: Agents
+  - name: Agent actions
+  - name: Agent binary download sources
+  - name: Agent policies
+  - name: Agent status
+  - name: Data streams
+  - name: Elastic Package Manager (EPM)
+  - name: Enrollment API keys
+  - name: Fleet internals
+  - name: Fleet Server hosts
+  - name: Kubernetes
+  - name: Outputs
+  - name: Package policies
+  - name: Proxies
+  - name: Service tokens
+  - name: Uninstall tokens
 info:
   title: Fleet
   description: OpenAPI schema for Fleet API endpoints
@@ -183,7 +199,6 @@ paths:
     $ref: paths/uninstall_tokens.yaml
   /uninstall_tokens/{uninstallTokenId}:
     $ref: paths/uninstall_tokens@{uninstall_token_id}.yaml
-
 components:
   securitySchemes:
     basicAuth:
