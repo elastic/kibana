@@ -262,7 +262,9 @@ type FeatureOptionsSelection = {
 };
 
 const getOptionsFeaturesList = (): Array<FeatureOptionsSelection> => {
-  return Object.keys(featuresList).map((featureKey): FeatureOptionsSelection => {
+  const baseTranslatePrefix = 'xpack.enterpriseSearch.appSearch.gateForm.superSelect';
+
+  const featureList = Object.keys(featuresList).map((featureKey): FeatureOptionsSelection => {
     let feature = getFeature(featureKey);
     if (!feature) {
       return {
@@ -272,12 +274,14 @@ const getOptionsFeaturesList = (): Array<FeatureOptionsSelection> => {
       };
     }
 
+    let featureTranslatePrefix = `${baseTranslatePrefix}.${feature.id}`;
+
     return {
       dropdownDisplay: (
         <Fragment>
           <strong>
             {i18n.translate(
-              'xpack.enterpriseSearch.workplaceSearch.gateForm.superSelect.contentSource.title',
+              `${featureTranslatePrefix}.title`,
               {
                 defaultMessage: feature.title,
               }
@@ -286,7 +290,7 @@ const getOptionsFeaturesList = (): Array<FeatureOptionsSelection> => {
           <EuiText size="s" color="subdued">
             <p>
               {i18n.translate(
-                'xpack.enterpriseSearch.workplaceSearch.gateForm.superSelect.contentSource.description',
+                `${featureTranslatePrefix}.description`,
                 {
                   defaultMessage: feature.description,
                 }
@@ -296,7 +300,7 @@ const getOptionsFeaturesList = (): Array<FeatureOptionsSelection> => {
         </Fragment>
       ),
       inputDisplay: i18n.translate(
-        'xpack.enterpriseSearch.workplaceSearch.gateForm.superSelect.contentSource.inputDisplay',
+        `${featureTranslatePrefix}.inputDisplay`,
         {
           defaultMessage: feature.title,
         }
@@ -304,6 +308,40 @@ const getOptionsFeaturesList = (): Array<FeatureOptionsSelection> => {
       value: feature.id,
     }
   });
+
+  featureList.push({
+    dropdownDisplay: (
+      <Fragment>
+        <strong>
+          {i18n.translate(
+            `${baseTranslatePrefix}.other.title`,
+            {
+              defaultMessage: 'Other',
+            }
+          )}
+        </strong>
+        <EuiText size="s" color="subdued">
+          <p>
+            {i18n.translate(
+              `${baseTranslatePrefix}.other.description`,
+              {
+                defaultMessage: 'Another feature not listed here',
+              }
+            )}
+          </p>
+        </EuiText>
+      </Fragment>
+    ),
+    inputDisplay: i18n.translate(
+      `${baseTranslatePrefix}.other.inputDisplay`,
+      {
+        defaultMessage: 'Other',
+      }
+    ),
+    value: 'other',
+  });
+
+  return featureList;
 };
 
 const participateInUXLabsChoice = {
