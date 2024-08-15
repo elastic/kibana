@@ -171,6 +171,22 @@ export interface ESQLSource extends ESQLAstBaseItem {
 
 export interface ESQLColumn extends ESQLAstBaseItem {
   type: 'column';
+
+  /**
+   * An identifier can be composed of multiple parts, e.g: part1.part2.`part``3️⃣`.
+   * This property contains the parsed unquoted parts of the identifier.
+   * For example: `['part1', 'part2', 'part`3️⃣']`.
+   */
+  parts: string[];
+
+  /**
+   * @deprecated
+   *
+   * An identifier can be composed of multiple parts, e.g: part1.part2.`part3️⃣`
+   *
+   * Each part can be quoted or not quoted independently. A single `quoted`
+   * property is not enough to represent the identifier. Use `parts` instead.
+   */
   quoted: boolean;
 }
 

@@ -11,12 +11,13 @@
  */
 
 import { type Token, type ParserRuleContext, type TerminalNode } from 'antlr4';
-import type {
-  ArithmeticUnaryContext,
-  DecimalValueContext,
-  InlineCastContext,
-  IntegerValueContext,
-  QualifiedIntegerLiteralContext,
+import {
+  QualifiedNameContext,
+  type ArithmeticUnaryContext,
+  type DecimalValueContext,
+  type InlineCastContext,
+  type IntegerValueContext,
+  type QualifiedIntegerLiteralContext,
 } from './antlr/esql_parser';
 import { getPosition } from './ast_position_utils';
 import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
@@ -39,6 +40,7 @@ import type {
   FunctionSubtype,
   ESQLNumericLiteral,
 } from './types';
+import { formatIdentifierParts, parseIdentifier } from './parser/helpers';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
@@ -360,10 +362,13 @@ export function createSource(
 }
 
 export function createColumnStar(ctx: TerminalNode): ESQLColumn {
+  const text = ctx.getText();
+
   return {
     type: 'column',
-    name: ctx.getText(),
-    text: ctx.getText(),
+    name: text,
+    parts: [text],
+    text,
     location: getPosition(ctx.symbol),
     incomplete: ctx.getText() === '',
     quoted: false,
@@ -371,14 +376,21 @@ export function createColumnStar(ctx: TerminalNode): ESQLColumn {
 }
 
 export function createColumn(ctx: ParserRuleContext): ESQLColumn {
-  const text = sanitizeIdentifierString(ctx);
+  const parts: string[] = [];
+  if (ctx instanceof QualifiedNameContext) {
+    parts.push(...ctx.identifier_list().map((identifier) => parseIdentifier(identifier.getText())));
+  } else {
+    parts.push(sanitizeIdentifierString(ctx));
+  }
+  const name = formatIdentifierParts(parts);
   const hasQuotes = Boolean(getQuotedText(ctx) || isQuoted(ctx.getText()));
   return {
     type: 'column' as const,
-    name: text,
+    name,
+    parts,
     text: ctx.getText(),
     location: getPosition(ctx.start, ctx.stop),
-    incomplete: Boolean(ctx.exception || text === ''),
+    incomplete: Boolean(ctx.exception || name === ''),
     quoted: hasQuotes,
   };
 }
