@@ -62,7 +62,7 @@ export const Table = () => {
         </EuiText>
         <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
           <DescriptiveSwitch
-            dataTestSubject="datasetQualityFullDatasetNameSwitch"
+            testSubject="datasetQualityFullDatasetNameSwitch"
             label={fullDatasetNameLabel}
             checked={showFullDatasetNames}
             tooltipText={fullDatasetNameDescription}
@@ -70,7 +70,7 @@ export const Table = () => {
           />
           {canUserMonitorDataset && canUserMonitorAnyDataStream && (
             <DescriptiveSwitch
-              dataTestSubject="datasetQualityInactiveDatasetsSwitch"
+              testSubject="datasetQualityInactiveDatasetsSwitch"
               label={inactiveDatasetsLabel}
               checked={showInactiveDatasets}
               tooltipText={inactiveDatasetsDescription}
