@@ -13,7 +13,7 @@ interface DescriptiveSwitchProps {
   checked: boolean;
   tooltipText: string;
   onToggle: () => void;
-  dataTestSubject: string;
+  testSubject: string;
 }
 
 export const DescriptiveSwitch = ({
@@ -21,12 +21,12 @@ export const DescriptiveSwitch = ({
   checked,
   tooltipText,
   onToggle,
-  dataTestSubject,
+  testSubject,
 }: DescriptiveSwitchProps) => {
   return (
     <EuiFlexGroup gutterSize="xs" css={{ flexGrow: 'unset' }} alignItems="center">
       <EuiSwitch
-        data-test-subj={dataTestSubject}
+        data-test-subj={testSubject}
         compressed
         label={label}
         checked={checked}
