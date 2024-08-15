@@ -65,6 +65,11 @@ actions:
                   $ref: '../examples/find_rules_response.yaml'
                 findConditionalActionRulesResponse:
                   $ref: '../examples/find_rules_response_conditional_action.yaml'
+  # Fix some optional path parameters
+  - target: "$.paths['/api/alerting/rule/{id}']['post'].parameters[?(@.name=='id')]"
+    description: Remove optional indicator from path parameter
+    update:
+      required: true
   # Remove the alerting rule parameters
   - target: "$.paths['/api/alerting/rule/{id}']['post'].requestBody.content.*.schema.properties.params"
     description: "Remove params type in create rule API"

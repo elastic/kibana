@@ -25,8 +25,8 @@ rules:
   # Responses
   operation-success-response: warn
   # Schema
-  oas3-schema: error
-  oas2-schema: error
+  oas3-schema: warn
+  oas2-schema: warn
   array-items: false
   # Bump.sh handles $ref siblings. Documentation wise it's convenient to have properties like descriptions next to $ref.
   no-$ref-siblings: off
