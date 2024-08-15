@@ -1,0 +1,56 @@
+# Quickstart for Developers
+
+The tools in this folder are designed to make it fast and easy to build scripts to create detection rules, exceptions, value lists, and source data for testing.
+
+## Usage
+
+`node x-pack/plugins/security_solution/scripts/quickstart/run.js`: Runs the script defined in `scratchpad.ts`
+
+`scratchpad.ts` already contains code to set up clients for Elasticsearch and Kibana. In addition it provides clients for Security Solution, Lists, and Exceptions APIs, built on top of the Kibana client. However, it does not create any rules/exceptions/lists/data - it's a blank slate for you to immediately begin creating the resources you want for testing. Please don't commit data-generating code to `scratchpad.ts`! Instead, when you have built a data-generating script that might be useful to others, please extract the useful components to the `quickstart/modules` folder and leave `scratchpad.ts` empty for the next developer.
+
+## Modules
+
+Extracting data-generating logic into reusable modules that other people will actually use is the hardest part of sharing these scripts. To that end, it's crucial that the modules are organized as neatly as possible and extremely clear about what they do. If the modules are even slightly confusing, it will be faster for people to rebuild the same logic than to figure out how the existing scripts work.
+
+The intial set of modules is:
+
+- Exceptions: Sample exceptions
+- Data Generation
+  - Mappings: ECS mapping and functions to generate other arbitrary mappings
+  - Frozen Tier: Functions to generate data and move it to frozen tier immediately
+- Rules
+  - <Rule Type>: Sample rules of each type and functions to generate data that trigger alerts for those rules
+
+## Speed
+
+To run a number of API requests in parallel, use `concurrentlyExec` from @kbn/securitysolution-utils.
+
+## Example Script
+
+```
+// Extra imports
+import { concurrentlyExec } from '@kbn/securitysolution-utils/src/client_concurrency';
+import { basicRule } from './modules/rules/new_terms/basic_rule';
+import { duplicateRuleParams } from './modules/rules';
+import { buildCreateRuleExceptionListItemsProps } from './modules/exceptions';
+
+// ... omitted client setup stuff
+
+// Core logic
+const ruleCopies = duplicateRuleParams(basicRule, 200);
+const response = await detectionsClient.bulkCreateRules({ body: ruleCopies });
+const createdRules: RuleResponse[] = response.data.filter(
+(r) => r.id != null
+) as RuleResponse[];
+
+// This map looks a bit confusing, but the concept is simple: take the rules we just created and
+// create a *function* per rule to create an exception for that rule. We want a function to call later instead of just
+// calling the API immediately to limit the number of requests in flight (with `concurrentlyExec`)
+const exceptionsFunctions = createdRules.map(
+(r) => () =>
+    exceptionsClient.createRuleExceptionListItems(
+    buildCreateRuleExceptionListItemsProps({ id: r.id })
+    )
+);
+const exceptionsResponses = await concurrentlyExec(exceptionsFunctions);
+```

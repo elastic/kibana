@@ -6,4 +6,4 @@
  */
 
 require('../../../../../src/setup_node_env');
-require('./test').cli();
+require('./scratchpad').cli();
