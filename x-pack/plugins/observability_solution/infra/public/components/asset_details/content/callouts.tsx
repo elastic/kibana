@@ -31,19 +31,15 @@ export const Callouts = () => {
   const [state] = useAssetDetailsUrlState();
 
   const assetConfig = findInventoryModel(asset.type);
-  const incomingAlertMetric = isSnapshotMetricType(assetConfig, state?.incomingAlertMetric)
-    ? state?.incomingAlertMetric
+  const alertMetric = isSnapshotMetricType(assetConfig, state?.alertMetric)
+    ? state?.alertMetric
     : undefined;
 
-  if (
-    asset.type === 'host' &&
-    incomingAlertMetric &&
-    assetConfig.legacyMetrics?.includes(incomingAlertMetric)
-  ) {
+  if (asset.type === 'host' && alertMetric && assetConfig.legacyMetrics?.includes(alertMetric)) {
     return (
       <LegacyAlertMetricCallout
         visibleFor={INCOMING_ALERT_CALLOUT_VISIBLE_FOR}
-        metric={incomingAlertMetric}
+        metric={alertMetric}
       />
     );
   }

@@ -51,8 +51,6 @@ export const getInventoryViewInAppUrl = ({
     return '';
   }
 
-  let inventoryFields = fields;
-
   /* Temporary Solution -> https://github.com/elastic/kibana/issues/137033
    * In the alert table from timelines plugin (old table), we are using an API who is flattening all the response
    * from elasticsearch to Record<string, string[]>, The new alert table API from TriggersActionUI is not doing that
@@ -61,12 +59,12 @@ export const getInventoryViewInAppUrl = ({
    * triggersActionUI then we will stop using this flattening way and we will update the code to work with fields API,
    * it will be less magic.
    */
-  if (fields[ALERT_RULE_PARAMETERS]) {
-    inventoryFields = {
-      ...fields,
-      ...flatAlertRuleParams(fields[ALERT_RULE_PARAMETERS] as {}, ALERT_RULE_PARAMETERS),
-    };
-  }
+  const inventoryFields = fields[ALERT_RULE_PARAMETERS]
+    ? {
+        ...fields,
+        ...flatAlertRuleParams(fields[ALERT_RULE_PARAMETERS] as {}, ALERT_RULE_PARAMETERS),
+      }
+    : fields;
 
   const nodeType = castArray(inventoryFields[ALERT_RULE_PARAMETERS_NODE_TYPE])[0];
 
@@ -86,7 +84,7 @@ export const getInventoryViewInAppUrl = ({
       assetId,
       assetType: nodeType,
       timestamp: inventoryFields[TIMESTAMP],
-      alertRuleMetric: criteriaMetric,
+      alertMetric: criteriaMetric,
       assetDetailsLocator,
     });
   }
@@ -127,39 +125,54 @@ export const getInventoryViewInAppUrl = ({
 
 export const getMetricsViewInAppUrl = ({
   fields,
-  nodeType,
+  groupBy,
   assetDetailsLocator,
 }: {
   fields: ParsedTechnicalFields & Record<string, any>;
-  nodeType?: InventoryItemType;
+  groupBy?: string[];
   assetDetailsLocator?: LocatorPublic<AssetDetailsLocatorParams>;
 }) => {
-  if (assetDetailsLocator && nodeType) {
-    const assetId = fields[findInventoryModel(nodeType).fields.id];
+  if (!groupBy || !assetDetailsLocator) {
+    return METRICS_EXPLORER_URL;
+  }
+
+  // creates an object of asset details supported assetType by their assetId field name
+  const assetTypeByAssetId = Object.values(SupportedAssetTypes).reduce((acc, curr) => {
+    acc[findInventoryModel(curr).fields.id] = curr;
+    return acc;
+  }, {} as Record<string, InventoryItemType>);
+
+  // detemines if the groupBy has a field that the asset details supports
+  const supportedAssetId = groupBy?.find((field) => !!assetTypeByAssetId[field]);
+  // assigns a nodeType if the groupBy field is supported by asset details
+  const supportedAssetType = supportedAssetId ? assetTypeByAssetId[supportedAssetId] : undefined;
+
+  if (supportedAssetType) {
+    const assetId = fields[findInventoryModel(supportedAssetType).fields.id];
     const timestamp = fields[TIMESTAMP];
 
     return getLinkToAssetDetails({
       assetId,
-      assetType: nodeType,
+      assetType: supportedAssetType,
       timestamp,
       assetDetailsLocator,
     });
+  } else {
+    return METRICS_EXPLORER_URL;
   }
-
-  return METRICS_EXPLORER_URL;
 };
 
 function getLinkToAssetDetails({
   assetId,
   assetType,
   timestamp,
-  alertRuleMetric,
+  alertMetric,
   assetDetailsLocator,
 }: {
   assetId: string;
   assetType: InventoryItemType;
   timestamp: string;
-  alertRuleMetric?: string;
+  alertMetric?: string;
   assetDetailsLocator: LocatorPublic<AssetDetailsLocatorParams>;
 }): string {
   return assetDetailsLocator.getRedirectUrl({
@@ -170,9 +183,7 @@ function getLinkToAssetDetails({
         from: timestamp,
         to: moment(timestamp).add(fifteenMinutesInMilliseconds, 'ms').toISOString(),
       },
-      ...(alertRuleMetric && alertRuleMetric !== CUSTOM_METRIC_TYPE
-        ? { incomingAlertMetric: alertRuleMetric }
-        : undefined),
+      ...(alertMetric && alertMetric !== CUSTOM_METRIC_TYPE ? { alertMetric } : undefined),
     },
   });
 }

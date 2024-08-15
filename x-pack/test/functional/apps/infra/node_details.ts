@@ -45,7 +45,7 @@ const END_CONTAINER_DATE = moment.utc(DATE_WITH_DOCKER_DATA_TO);
 
 interface QueryParams {
   name?: string;
-  incomingAlertMetric?: string;
+  alertMetric?: string;
 }
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -647,7 +647,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               it(`Should show for: ${metric}`, async () => {
                 await navigateToNodeDetails('Jennys-MBP.fritz.box', 'host', {
                   name: 'Jennys-MBP.fritz.box',
-                  incomingAlertMetric: metric,
+                  alertMetric: metric,
                 });
                 await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -663,7 +663,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               it(`Should not show for: ${metric}`, async () => {
                 await navigateToNodeDetails('Jennys-MBP.fritz.box', 'host', {
                   name: 'Jennys-MBP.fritz.box',
-                  incomingAlertMetric: metric,
+                  alertMetric: metric,
                 });
 
                 await pageObjects.header.waitUntilLoadingHasFinished();

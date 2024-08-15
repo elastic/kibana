@@ -9,37 +9,29 @@ import { ALERT_REASON, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { ObservabilityRuleTypeFormatter } from '@kbn/observability-plugin/public';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import type { AssetDetailsLocatorParams } from '@kbn/observability-shared-plugin/common';
-import { InventoryItemType, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import { SupportedAssetTypes } from '../../../common/asset_details/types';
+import { castArray } from 'lodash';
+import { METRICS_EXPLORER_URL } from '../../../common/constants';
 import { getMetricsViewInAppUrl } from '../../../common/alerting/metrics/alert_link';
 
-export const getFormatReason = ({
+export const getRuleFormat = ({
   assetDetailsLocator,
 }: {
   assetDetailsLocator?: LocatorPublic<AssetDetailsLocatorParams>;
 }): ObservabilityRuleTypeFormatter => {
   return ({ fields }) => {
     const reason = fields[ALERT_REASON] ?? '-';
-    const groupBy = (fields[ALERT_RULE_PARAMETERS]?.groupBy as string[]) ?? [];
+    const parameters = fields[ALERT_RULE_PARAMETERS];
 
-    const assetTypeByAssetId = Object.values(SupportedAssetTypes).reduce((acc, curr) => {
-      acc[findInventoryModel(curr).fields.id] = curr;
-      return acc;
-    }, {} as Record<string, InventoryItemType>);
-
-    const supportedAssetId = groupBy.find((field) => !!assetTypeByAssetId[field]);
-    const assetType = supportedAssetId ? assetTypeByAssetId[supportedAssetId] : undefined;
-
-    const locator = assetType ? assetDetailsLocator : undefined;
+    const link = getMetricsViewInAppUrl({
+      fields,
+      groupBy: castArray<string>(parameters?.groupBy as string[] | string),
+      assetDetailsLocator,
+    });
 
     return {
       reason,
-      link: getMetricsViewInAppUrl({
-        fields,
-        assetDetailsLocator: locator,
-        nodeType: assetType,
-      }),
-      hasBasePath: !!assetType,
+      link,
+      hasBasePath: link !== METRICS_EXPLORER_URL,
     };
   };
 };

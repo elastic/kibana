@@ -247,8 +247,12 @@ describe('Inventory Threshold Rule', () => {
 });
 
 describe('Metrics Rule', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('getMetricsViewInAppUrl', () => {
-    it('should point to host-details when host.name is present', () => {
+    it('should point to host details when host.name is present', () => {
       const fields = {
         [TIMESTAMP]: '2022-01-01T00:00:00.000Z',
         [`host.name`]: ['my-host'],
@@ -256,12 +260,41 @@ describe('Metrics Rule', () => {
       const url = getMetricsViewInAppUrl({
         fields,
         assetDetailsLocator: mockAssetDetailsLocator,
-        nodeType: 'host',
+        groupBy: ['host.name'],
       });
       expect(mockAssetDetailsLocator.getRedirectUrl).toHaveBeenCalledTimes(1);
       expect(url).toEqual(
         "/node-mock/host/my-host?receivedParams=(dateRange:(from:'2022-01-01T00:00:00.000Z',to:'2022-01-01T00:15:00.000Z'))"
       );
+    });
+
+    it('should point to container details when host.name is present', () => {
+      const fields = {
+        [TIMESTAMP]: '2022-01-01T00:00:00.000Z',
+        [`container.id`]: ['my-host-5xyz'],
+      } as unknown as ParsedTechnicalFields & Record<string, any>;
+      const url = getMetricsViewInAppUrl({
+        fields,
+        assetDetailsLocator: mockAssetDetailsLocator,
+        groupBy: ['container.id'],
+      });
+      expect(mockAssetDetailsLocator.getRedirectUrl).toHaveBeenCalledTimes(1);
+      expect(url).toEqual(
+        "/node-mock/container/my-host-5xyz?receivedParams=(dateRange:(from:'2022-01-01T00:00:00.000Z',to:'2022-01-01T00:15:00.000Z'))"
+      );
+    });
+
+    it('should point to metrics when group by field is not supported by the asset details', () => {
+      const fields = {
+        [TIMESTAMP]: '2022-01-01T00:00:00.000Z',
+        [`host.name`]: ['my-host'],
+      } as unknown as ParsedTechnicalFields & Record<string, any>;
+      const url = getMetricsViewInAppUrl({
+        fields,
+        assetDetailsLocator: mockAssetDetailsLocator,
+        groupBy: ['kubernetes.pod.name'],
+      });
+      expect(url).toEqual('/app/metrics/explorer');
     });
 
     it('should point to metrics explorer', () => {

@@ -26,7 +26,6 @@ import type {
   AssetDetailsLocatorParams,
   InventoryLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import {
   ALERT_RULE_PARAMETERS_NODE_TYPE,
   getInventoryViewInAppUrl,
@@ -176,13 +175,13 @@ export const getMetricsViewInAppUrlWithSpaceId = ({
   basePath,
   spaceId,
   timestamp,
-  nodeType,
+  groupBy,
   assetDetailsLocator,
 }: {
   basePath: IBasePath;
   spaceId: string;
   timestamp: string;
-  nodeType?: InventoryItemType;
+  groupBy?: string[];
   assetDetailsLocator?: LocatorPublic<AssetDetailsLocatorParams>;
 }) => {
   const fields = {
@@ -194,7 +193,7 @@ export const getMetricsViewInAppUrlWithSpaceId = ({
     spaceId,
     getMetricsViewInAppUrl({
       fields: parseTechnicalFields(fields, true),
-      nodeType,
+      groupBy,
       assetDetailsLocator,
     })
   );

@@ -16,7 +16,7 @@ import {
   METRIC_THRESHOLD_ALERT_TYPE_ID,
 } from '../../../common/alerting/metrics';
 import { validateMetricThreshold } from './components/validation';
-import { getFormatReason } from './rule_data_formatters';
+import { getRuleFormat } from './rule_data_formatters';
 
 export interface MetricThresholdRuleTypeParams extends RuleTypeParams {
   criteria: MetricExpressionParams[];
@@ -71,7 +71,7 @@ export function createMetricThresholdRuleType({
     defaultActionMessage: metricThresholdDefaultActionMessage,
     defaultRecoveryMessage: metricThresholdDefaultRecoveryMessage,
     requiresAppContext: false,
-    format: getFormatReason({ assetDetailsLocator }),
+    format: getRuleFormat({ assetDetailsLocator }),
     alertDetailsAppSection: lazy(() => import('./components/alert_details_app_section')),
     priority: 10,
   };

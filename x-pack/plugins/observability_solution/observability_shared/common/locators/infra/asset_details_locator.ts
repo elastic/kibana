@@ -29,7 +29,7 @@ export interface AssetDetailsLocatorParams extends SerializableRecord {
       from: string;
       to: string;
     };
-    incomingAlertMetric?: string;
+    alertMetric?: string;
   };
 }
 
