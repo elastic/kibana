@@ -122,15 +122,18 @@ const deleteInvestigationNotesRoute = createInvestigateAppServerRoute({
     tags: [],
   },
   params: deleteInvestigationNoteParamsSchema,
-  handler: async (params) => {
-    const soClient = (await params.context.core).savedObjects.client;
-    const repository = investigationRepositoryFactory({ soClient, logger: params.logger });
+  handler: async ({ params, context, request, logger }) => {
+    const user = (await context.core).coreStart.security.authc.getCurrentUser(request);
+    if (!user) {
+      throw new Error('User is not authenticated');
+    }
+    const soClient = (await context.core).savedObjects.client;
+    const repository = investigationRepositoryFactory({ soClient, logger });
 
-    return await deleteInvestigationNote(
-      params.params.path.id,
-      params.params.path.noteId,
-      repository
-    );
+    return await deleteInvestigationNote(params.path.id, params.path.noteId, {
+      repository,
+      user,
+    });
   },
 });
 

@@ -6,7 +6,6 @@
  */
 
 import { CreateInvestigationInput, CreateInvestigationResponse } from '@kbn/investigation-shared';
-
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { InvestigationRepository } from './investigation_repository';
 

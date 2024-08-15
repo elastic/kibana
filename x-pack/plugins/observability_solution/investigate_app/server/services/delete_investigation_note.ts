@@ -5,14 +5,24 @@
  * 2.0.
  */
 
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { InvestigationRepository } from './investigation_repository';
 
 export async function deleteInvestigationNote(
   investigationId: string,
   noteId: string,
-  repository: InvestigationRepository
+  { repository, user }: { repository: InvestigationRepository; user: AuthenticatedUser }
 ): Promise<void> {
   const investigation = await repository.findById(investigationId);
-  investigation.notes = investigation.notes.filter((note) => note.id !== noteId);
+  const note = investigation.notes.find((currNote) => currNote.id === noteId);
+  if (!note) {
+    throw new Error('Note not found');
+  }
+
+  if (note.createdBy !== user.username) {
+    throw new Error('User does not have permission to delete note');
+  }
+
+  investigation.notes = investigation.notes.filter((currNote) => currNote.id !== noteId);
   await repository.save(investigation);
 }
