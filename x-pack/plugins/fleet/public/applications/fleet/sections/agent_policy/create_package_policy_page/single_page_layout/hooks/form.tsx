@@ -386,12 +386,9 @@ export function useOnSubmit({
       if (!error) {
         setSavedPackagePolicy(data!.item);
 
-        const newAgentlessPolicy = agentPolicies.find(
-          (policy: AgentPolicy) => policy?.supports_agentless === true
-        );
         // Check if agentless is configured in ESS and Serverless until Agentless API migrates to Serverless
         const isAgentlessConfigured =
-          !isAgentlessAgentPolicy(newAgentlessPolicy) || !isAgentlessPackagePolicy(data!.item);
+          isAgentlessAgentPolicy(createdPolicy) || isAgentlessPackagePolicy(data!.item);
         const promptForAgentEnrollment =
           !(agentCount && agentPolicies.length > 0) &&
           !isAgentlessConfigured &&
