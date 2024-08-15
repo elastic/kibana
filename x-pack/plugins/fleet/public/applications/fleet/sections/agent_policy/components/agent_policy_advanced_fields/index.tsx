@@ -30,7 +30,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import {
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   dataTypes,
   DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT,
 } from '../../../../../../../common/constants';
@@ -41,6 +41,8 @@ import {
   useGetAgentPolicies,
   useLicense,
   useUIExtension,
+  useLink,
+  useFleetStatus,
 } from '../../../../hooks';
 
 import { AgentPolicyPackageBadge } from '../../../../components';
@@ -60,6 +62,7 @@ import {
 } from './hooks';
 
 import { CustomFields } from './custom_fields';
+import { SpaceSelector } from './space_selector';
 
 interface Props {
   agentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
@@ -75,7 +78,11 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   validation,
   disabled = false,
 }) => {
+  const useSpaceAwareness = ExperimentalFeaturesService.get()?.useSpaceAwareness ?? false;
   const { docLinks } = useStartServices();
+  const { spaceId } = useFleetStatus();
+
+  const { getAbsolutePath } = useLink();
   const AgentTamperProtectionWrapper = useUIExtension(
     'endpoint',
     'endpoint-agent-tamper-protection'
@@ -95,7 +102,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const { data: agentPoliciesData } = useGetAgentPolicies({
     page: 1,
     perPage: 0,
-    kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.inactivity_timeout:*`,
+    kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.inactivity_timeout:*`,
   });
 
   const totalAgentPoliciesWithInactivityTimeout = agentPoliciesData?.total ?? 0;
@@ -257,6 +264,63 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
+      {useSpaceAwareness ? (
+        <EuiDescribedFormGroup
+          fullWidth
+          title={
+            <h3>
+              <FormattedMessage
+                id="xpack.fleet.agentPolicyForm.spaceFieldLabel"
+                defaultMessage="Space"
+              />
+            </h3>
+          }
+          description={
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.spaceDescription"
+              defaultMessage="Select a space for this policy or create a new one. {link}"
+              values={{
+                link: (
+                  <EuiLink
+                    target="_blank"
+                    href={getAbsolutePath('/app/management/kibana/spaces/create')}
+                    external
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.agentPolicyForm.createSpaceLink"
+                      defaultMessage="Create space"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
+        >
+          <EuiFormRow
+            fullWidth
+            key="space"
+            error={
+              touchedFields.description && validation.description ? validation.description : null
+            }
+            isDisabled={disabled}
+            isInvalid={Boolean(touchedFields.description && validation.description)}
+          >
+            <SpaceSelector
+              isDisabled={disabled}
+              value={
+                'space_ids' in agentPolicy && agentPolicy.space_ids
+                  ? agentPolicy.space_ids
+                  : [spaceId || 'default']
+              }
+              onChange={(newValue) => {
+                updateAgentPolicy({
+                  space_ids: newValue,
+                });
+              }}
+            />
+          </EuiFormRow>
+        </EuiDescribedFormGroup>
+      ) : null}
       <EuiDescribedFormGroup
         fullWidth
         title={

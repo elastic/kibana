@@ -41,6 +41,21 @@ describe('ui settings', () => {
         await expect(defaultRoute.getValue!()).resolves.toBe(DEFAULT_ROUTES.classic);
       });
 
+      it('should return classic when accessing a non authenticated route', async () => {
+        const spaces = spacesMock.createStart();
+        const mockSpace: Pick<Space, 'solution'> = { solution: 'es' };
+        spaces.spacesService.getActiveSpace.mockResolvedValue(mockSpace as Space);
+        core.getStartServices.mockResolvedValue([{} as any, { spaces }, {} as any]);
+
+        const { defaultRoute } = getUiSettings(core, logger);
+        const requestMock = {
+          auth: { isAuthenticated: false },
+        };
+        await expect(defaultRoute.getValue!({ request: requestMock as any })).resolves.toBe(
+          DEFAULT_ROUTES.classic
+        );
+      });
+
       it('should return the route based on the active space', async () => {
         const spaces = spacesMock.createStart();
 
@@ -50,7 +65,10 @@ describe('ui settings', () => {
           core.getStartServices.mockResolvedValue([{} as any, { spaces }, {} as any]);
           const { defaultRoute } = getUiSettings(core, logger);
 
-          await expect(defaultRoute.getValue!({ request: {} as any })).resolves.toBe(
+          const requestMock = {
+            auth: { isAuthenticated: true },
+          };
+          await expect(defaultRoute.getValue!({ request: requestMock as any })).resolves.toBe(
             DEFAULT_ROUTES[solution]
           );
         }

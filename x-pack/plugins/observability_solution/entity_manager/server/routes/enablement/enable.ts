@@ -6,6 +6,11 @@
  */
 
 import { RequestHandlerContext } from '@kbn/core/server';
+import {
+  CreateEntityDefinitionQuery,
+  createEntityDefinitionQuerySchema,
+} from '@kbn/entities-schema';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { SetupRouteOptions } from '../types';
 import {
   canEnableEntityDiscovery,
@@ -20,16 +25,19 @@ import { builtInDefinitions } from '../../lib/entities/built_in';
 import { installBuiltInEntityDefinitions } from '../../lib/entities/install_entity_definition';
 import { ERROR_API_KEY_SERVICE_DISABLED } from '../../../common/errors';
 import { EntityDiscoveryApiKeyType } from '../../saved_objects';
+import { startTransform } from '../../lib/entities/start_transform';
 
 export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
   router,
   server,
   logger,
 }: SetupRouteOptions<T>) {
-  router.put<unknown, unknown, unknown>(
+  router.put<unknown, CreateEntityDefinitionQuery, unknown>(
     {
       path: '/internal/entities/managed/enablement',
-      validate: false,
+      validate: {
+        query: buildRouteValidationWithZod(createEntityDefinitionQuerySchema),
+      },
     },
     async (context, req, res) => {
       try {
@@ -82,12 +90,20 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
 
         await saveEntityDiscoveryAPIKey(soClient, apiKey);
 
-        await installBuiltInEntityDefinitions({
-          logger,
-          builtInDefinitions,
+        const installedDefinitions = await installBuiltInEntityDefinitions({
           esClient,
           soClient,
+          logger,
+          definitions: builtInDefinitions,
         });
+
+        if (!req.query.installOnly) {
+          await Promise.all(
+            installedDefinitions.map((installedDefinition) =>
+              startTransform(esClient, installedDefinition, logger)
+            )
+          );
+        }
 
         return res.ok({ body: { success: true } });
       } catch (err) {

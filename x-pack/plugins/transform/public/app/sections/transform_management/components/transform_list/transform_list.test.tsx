@@ -40,6 +40,8 @@ describe('Transform: Transform List <TransformList />', () => {
             transforms={[]}
             transformsLoading={false}
             transformsStatsLoading={false}
+            pageState={{ pageSize: 10, pageIndex: 0, sortField: 'id', sortDirection: 'asc' }}
+            updatePageState={jest.fn()}
           />
         </QueryClientProvider>
       </IntlProvider>
