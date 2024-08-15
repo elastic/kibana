@@ -97,7 +97,7 @@ Object {
         },
         "filter": Object {
           "range": Object {
-            "event.ingested": Object {
+            "@timestamp": Object {
               "gte": "now-1m",
             },
           },
@@ -114,7 +114,7 @@ Object {
         },
         "filter": Object {
           "range": Object {
-            "event.ingested": Object {
+            "@timestamp": Object {
               "gte": "now-1m",
             },
           },
@@ -131,7 +131,7 @@ Object {
         },
         "filter": Object {
           "range": Object {
-            "event.ingested": Object {
+            "@timestamp": Object {
               "gte": "now-1m",
             },
           },
@@ -148,7 +148,7 @@ Object {
         },
         "filter": Object {
           "range": Object {
-            "event.ingested": Object {
+            "@timestamp": Object {
               "gte": "now-1m",
             },
           },
