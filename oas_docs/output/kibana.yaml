@@ -82,7 +82,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: List agent binary download sources
       tags:
-        - Agent binary download sources
+        - Elastic Agent binary download sources
     post:
       operationId: post-download-sources
       requestBody:
@@ -117,7 +117,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Create agent binary download source
       tags:
-        - Agent binary download sources
+        - Elastic Agent binary download sources
   '/agent_download_sources/{sourceId}':
     delete:
       operationId: delete-download-source
@@ -139,7 +139,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Delete agent binary download source by ID
       tags:
-        - Agent binary download sources
+        - Elastic Agent binary download sources
     get:
       operationId: get-one-download-source
       responses:
@@ -158,7 +158,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Get agent binary download source by ID
       tags:
-        - Agent binary download sources
+        - Elastic Agent binary download sources
     parameters:
       - in: path
         name: sourceId
@@ -201,7 +201,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Update agent binary download source by ID
       tags:
-        - Agent binary download sources
+        - Elastic Agent binary download sources
   /agent_policies:
     get:
       description: ''
@@ -253,7 +253,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: List agent policies
       tags:
-        - Agent policies
+        - Elastic Agent policies
     post:
       operationId: create-agent-policy
       parameters:
@@ -277,7 +277,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Create agent policy
       tags:
-        - Agent policies
+        - Elastic Agent policies
   /agent_policies/_bulk_get:
     post:
       operationId: bulk-get-agent-policies
@@ -318,7 +318,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Bulk get agent policies
       tags:
-        - Agent policies
+        - Elastic Agent policies
   '/agent_policies/{agentPolicyId}':
     get:
       description: Get one agent policy
@@ -340,7 +340,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Get agent policy by ID
       tags:
-        - Agent policies
+        - Elastic Agent policies
     parameters:
       - in: path
         name: agentPolicyId
@@ -372,7 +372,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Update agent policy by ID
       tags:
-        - Agent policies
+        - Elastic Agent policies
   '/agent_policies/{agentPolicyId}/copy':
     parameters:
       - in: path
@@ -413,7 +413,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Copy agent policy by ID
       tags:
-        - Agent policies
+        - Elastic Agent policies
   '/agent_policies/{agentPolicyId}/download':
     get:
       operationId: agent-policy-download
@@ -431,7 +431,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Download agent policy by ID
       tags:
-        - Agent policies
+        - Elastic Agent policies
     parameters:
       - in: path
         name: agentPolicyId
@@ -472,7 +472,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Get full agent policy by ID
       tags:
-        - Agent policies
+        - Elastic Agent policies
     parameters:
       - in: path
         name: agentPolicyId
@@ -534,7 +534,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Delete agent policy by ID
       tags:
-        - Agent policies
+        - Elastic Agent policies
   /agent_status:
     get:
       operationId: get-agent-status
@@ -596,7 +596,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Get agent status summary
       tags:
-        - Agent status
+        - Elastic Agent status
   /agent_status/data:
     get:
       operationId: get-agent-data
@@ -629,7 +629,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Get incoming agent data
       tags:
-        - Agent status
+        - Elastic Agent status
   /agent-status:
     get:
       deprecated: true
@@ -677,7 +677,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Get agent status summary
       tags:
-        - Agent status
+        - Elastic Agent status
   /agents:
     get:
       operationId: get-agents
@@ -706,7 +706,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: List agents
       tags:
-        - Agents
+        - Elastic Agents
     post:
       operationId: get-agents-by-actions
       parameters:
@@ -735,7 +735,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: List agents by action ids
       tags:
-        - Agents
+        - Elastic Agents
   '/agents/{agentId}':
     delete:
       operationId: delete-agent
@@ -759,7 +759,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Delete agent by ID
       tags:
-        - Agents
+        - Elastic Agents
     get:
       operationId: get-agent
       parameters:
@@ -780,7 +780,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Get agent by ID
       tags:
-        - Agents
+        - Elastic Agents
     parameters:
       - in: path
         name: agentId
@@ -820,7 +820,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Update agent by ID
       tags:
-        - Agents
+        - Elastic Agents
   '/agents/{agentId}/actions':
     parameters:
       - in: path
@@ -861,7 +861,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Create agent action
       tags:
-        - Agent actions
+        - Elastic Agent actions
   '/agents/{agentId}/actions/{actionId}/cancel':
     parameters:
       - in: path
@@ -892,7 +892,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Cancel agent action
       tags:
-        - Agent actions
+        - Elastic Agent actions
   '/agents/{agentId}/reassign':
     parameters:
       - in: path
@@ -926,7 +926,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Reassign agent
       tags:
-        - Agents
+        - Elastic Agents
     put:
       deprecated: true
       operationId: reassign-agent-deprecated
@@ -954,7 +954,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Reassign agent
       tags:
-        - Agents
+        - Elastic Agents
   '/agents/{agentId}/request_diagnostics':
     parameters:
       - in: path
@@ -993,7 +993,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Request agent diagnostics
       tags:
-        - Agents
+        - Elastic Agents
   '/agents/{agentId}/unenroll':
     parameters:
       - in: path
@@ -1039,7 +1039,7 @@ paths:
           description: BAD REQUEST
       summary: Unenroll agent
       tags:
-        - Agents
+        - Elastic Agents
   '/agents/{agentId}/upgrade':
     parameters:
       - in: path
@@ -1068,7 +1068,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Upgrade agent
       tags:
-        - Agents
+        - Elastic Agents
   '/agents/{agentId}/uploads':
     get:
       operationId: list-agent-uploads
@@ -1091,7 +1091,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: List agent uploads
       tags:
-        - Agents
+        - Elastic Agents
     parameters:
       - in: path
         name: agentId
@@ -1212,7 +1212,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Get agent action status
       tags:
-        - Agent actions
+        - Elastic Agent actions
   /agents/bulk_reassign:
     post:
       operationId: bulk-reassign-agents
@@ -1255,7 +1255,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Bulk reassign agents
       tags:
-        - Agents
+        - Elastic Agents
   /agents/bulk_request_diagnostics:
     post:
       operationId: bulk-request-diagnostics
@@ -1302,7 +1302,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Bulk request diagnostics from agents
       tags:
-        - Agents
+        - Elastic Agents
   /agents/bulk_unenroll:
     post:
       operationId: bulk-unenroll-agents
@@ -1355,7 +1355,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Bulk unenroll agents
       tags:
-        - Agents
+        - Elastic Agents
   /agents/bulk_update_agent_tags:
     post:
       operationId: bulk-update-agent-tags
@@ -1409,7 +1409,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Bulk update agent tags
       tags:
-        - Agents
+        - Elastic Agents
   /agents/bulk_upgrade:
     post:
       operationId: bulk-upgrade-agents
@@ -1443,7 +1443,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Bulk upgrade agents
       tags:
-        - Agents
+        - Elastic Agents
   '/agents/files/{fileId}':
     delete:
       operationId: delete-agent-upload-file
@@ -1466,7 +1466,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Delete file uploaded by agent
       tags:
-        - Agents
+        - Elastic Agents
     parameters:
       - in: path
         name: fileId
@@ -1496,7 +1496,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Get file uploaded by agent
       tags:
-        - Agents
+        - Elastic Agents
     parameters:
       - in: path
         name: fileId
@@ -1522,7 +1522,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Get agent setup info
       tags:
-        - Agents
+        - Elastic Agents
     post:
       operationId: setup-agents
       parameters:
@@ -1551,7 +1551,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Initiate agent setup
       tags:
-        - Agents
+        - Elastic Agents
   /agents/tags:
     get:
       operationId: get-agent-tags
@@ -1566,7 +1566,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: List agent tags
       tags:
-        - Agents
+        - Elastic Agents
   /api/actions:
     get:
       deprecated: true
@@ -3941,7 +3941,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: List enrollment API keys
       tags:
-        - Enrollment API keys
+        - Fleet enrollment API keys
     post:
       operationId: create-enrollment-api-keys
       parameters:
@@ -3964,7 +3964,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Create enrollment API key
       tags:
-        - Enrollment API keys
+        - Fleet enrollment API keys
   '/enrollment_api_keys/{keyId}':
     delete:
       operationId: delete-enrollment-api-key
@@ -3988,7 +3988,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Delete enrollment API key by ID
       tags:
-        - Enrollment API keys
+        - Fleet enrollment API keys
     get:
       operationId: get-enrollment-api-key
       responses:
@@ -4007,7 +4007,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Get enrollment API key by ID
       tags:
-        - Enrollment API keys
+        - Fleet enrollment API keys
     parameters:
       - in: path
         name: keyId
@@ -4051,7 +4051,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: List enrollment API keys
       tags:
-        - Enrollment API keys
+        - Fleet enrollment API keys
     post:
       deprecated: true
       operationId: create-enrollment-api-keys-deprecated
@@ -4075,7 +4075,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Create enrollment API key
       tags:
-        - Enrollment API keys
+        - Fleet enrollment API keys
   '/enrollment-api-keys/{keyId}':
     delete:
       deprecated: true
@@ -4100,7 +4100,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Delete enrollment API key by ID
       tags:
-        - Enrollment API keys
+        - Fleet enrollment API keys
     get:
       deprecated: true
       operationId: get-enrollment-api-key-deprecated
@@ -4120,7 +4120,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Get enrollment API key by ID
       tags:
-        - Enrollment API keys
+        - Fleet enrollment API keys
     parameters:
       - in: path
         name: keyId
@@ -5207,7 +5207,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Get full K8s agent manifest
       tags:
-        - Kubernetes
+        - Fleet Kubernetes
   /logstash_api_keys:
     post:
       operationId: generate-logstash-api-key
@@ -5227,7 +5227,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Generate Logstash API key
       tags:
-        - Outputs
+        - Fleet outputs
   /outputs:
     get:
       operationId: get-outputs
@@ -5253,7 +5253,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: List outputs
       tags:
-        - Outputs
+        - Fleet outputs
     post:
       operationId: post-outputs
       requestBody:
@@ -5276,7 +5276,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Create output
       tags:
-        - Outputs
+        - Fleet outputs
   '/outputs/{outputId}':
     delete:
       operationId: delete-output
@@ -5298,7 +5298,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Delete output by ID
       tags:
-        - Outputs
+        - Fleet outputs
     get:
       operationId: get-output
       responses:
@@ -5315,7 +5315,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Get output by ID
       tags:
-        - Outputs
+        - Fleet outputs
     parameters:
       - in: path
         name: outputId
@@ -5345,7 +5345,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Update output by ID
       tags:
-        - Outputs
+        - Fleet outputs
   '/outputs/{outputId}/health':
     get:
       operationId: get-output-health
@@ -5370,7 +5370,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Get latest output health
       tags:
-        - Outputs
+        - Fleet outputs
     parameters:
       - in: path
         name: outputId
@@ -5409,7 +5409,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: List package policies
       tags:
-        - Package policies
+        - Fleet package policies
     parameters: []
     post:
       operationId: create-package-policy
@@ -5442,7 +5442,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Create package policy
       tags:
-        - Package policies
+        - Fleet package policies
   /package_policies/_bulk_get:
     post:
       operationId: bulk-get-package-policies
@@ -5481,7 +5481,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Bulk get package policies
       tags:
-        - Package policies
+        - Fleet package policies
   '/package_policies/{packagePolicyId}':
     delete:
       operationId: delete-package-policy
@@ -5506,7 +5506,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Delete package policy by ID
       tags:
-        - Package policies
+        - Fleet package policies
     get:
       operationId: get-package-policy
       parameters:
@@ -5527,7 +5527,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Get package policy by ID
       tags:
-        - Package policies
+        - Fleet package policies
     parameters:
       - in: path
         name: packagePolicyId
@@ -5563,7 +5563,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Update package policy by ID
       tags:
-        - Package policies
+        - Fleet package policies
   /package_policies/delete:
     post:
       operationId: post-delete-package-policy
@@ -5606,7 +5606,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Delete package policy
       tags:
-        - Package policies
+        - Fleet package policies
   /package_policies/upgrade:
     post:
       operationId: upgrade-package-policy
@@ -5647,7 +5647,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Upgrade package policy to a newer package version
       tags:
-        - Package policies
+        - Fleet package policies
   /package_policies/upgrade/dryrun:
     post:
       operationId: upgrade-package-policy-dry-run
@@ -5687,7 +5687,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Dry run package policy upgrade
       tags:
-        - Package policies
+        - Fleet package policies
   /proxies:
     get:
       operationId: get-fleet-proxies
@@ -5713,7 +5713,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: List proxies
       tags:
-        - Proxies
+        - Fleet proxies
     post:
       operationId: post-fleet-proxies
       requestBody:
@@ -5753,7 +5753,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Create proxy
       tags:
-        - Proxies
+        - Fleet proxies
   '/proxies/{itemId}':
     delete:
       operationId: delete-fleet-proxies
@@ -5775,7 +5775,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Delete proxy by ID
       tags:
-        - Proxies
+        - Fleet proxies
     get:
       operationId: get-one-fleet-proxies
       responses:
@@ -5794,7 +5794,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Get proxy by ID
       tags:
-        - Proxies
+        - Fleet proxies
     parameters:
       - in: path
         name: itemId
@@ -5839,7 +5839,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Update proxy by ID
       tags:
-        - Proxies
+        - Fleet proxies
   '/s/{spaceId}/api/observability/slos':
     get:
       description: >
@@ -6304,7 +6304,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Create service token
       tags:
-        - Service tokens
+        - Fleet service tokens
   /service-tokens:
     post:
       deprecated: true
@@ -6327,7 +6327,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Create service token
       tags:
-        - Service tokens
+        - Fleet service tokens
   /settings:
     get:
       operationId: get-settings
@@ -6480,7 +6480,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: List metadata for latest uninstall tokens per agent policy
       tags:
-        - Uninstall tokens
+        - Fleet uninstall tokens
   '/uninstall_tokens/{uninstallTokenId}':
     get:
       operationId: get-uninstall-token
@@ -6520,7 +6520,7 @@ paths:
           $ref: '#/components/responses/Fleet_error'
       summary: Get one decrypted uninstall token by its ID
       tags:
-        - Uninstall tokens
+        - Fleet uninstall tokens
 components:
   examples:
     Connectors_create_email_connector_request:
@@ -13579,7 +13579,7 @@ components:
         - online
         - inactive
         - warning
-      title: Agent status
+      title: Elastic Agent status
       type: string
     Fleet_agent_type:
       enum:
@@ -17128,16 +17128,6 @@ components:
 security:
   - apiKeyAuth: []
 tags:
-  - name: Agent actions
-    x-displayName: Elastic Agent actions
-  - name: Agent binary download sources
-    x-displayName: Elastic Agent binary download sources
-  - name: Agent policies
-    x-displayName: Elastic Agent policies
-  - name: Agent status
-    x-displayName: Elastic Agent status
-  - name: Agents
-    x-displayName: Elastic Agents
   - description: >
       Configure APM agent keys to authorize requests from APM agents to the APM
       Server.
@@ -17154,30 +17144,27 @@ tags:
       Data view APIs enable you to manage data views, formerly known as Kibana
       index patterns.
     name: data views
+  - name: Elastic Agent actions
+  - name: Elastic Agent binary download sources
+  - name: Elastic Agent policies
+  - name: Elastic Agent status
+  - name: Elastic Agents
   - name: Elastic Package Manager (EPM)
-  - name: Enrollment API keys
-    x-displayName: Fleet enrollment API keys
+  - name: Fleet enrollment API keys
   - name: Fleet internals
+  - name: Fleet Kubernetes
+  - name: Fleet outputs
+  - name: Fleet package policies
+  - name: Fleet proxies
   - name: Fleet Server hosts
-    x-displayName: Fleet server hosts
-  - name: Kubernetes
-    x-displayName: Fleet Kubernetes
+  - name: Fleet service tokens
+  - name: Fleet uninstall tokens
   - description: Machine learning
     name: ml
-  - name: Outputs
-    x-displayName: Fleet outputs
-  - name: Package policies
-    x-displayName: Fleet package policies
-  - name: Proxies
-    x-displayName: Fleet proxies
   - description: >-
       Manage Kibana saved objects, including dashboards, visualizations, and
       more.
     name: saved objects
-  - name: Service tokens
-    x-displayName: Fleet service tokens
   - description: 'SLO APIs enable you to define, manage and track service-level objectives'
     name: slo
   - name: system
-  - name: Uninstall tokens
-    x-displayName: Fleet uninstall tokens
