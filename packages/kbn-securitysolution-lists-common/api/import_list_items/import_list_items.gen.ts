@@ -15,25 +15,25 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { ListId, ListType } from '../model/list_common.gen';
 import { List } from '../model/list_schemas.gen';
 
 export type ImportListItemsRequestQuery = z.infer<typeof ImportListItemsRequestQuery>;
 export const ImportListItemsRequestQuery = z.object({
-  /** 
+  /**
       * List's id.
 
 Required when importing to an existing list.
- 
+
       */
   list_id: ListId.optional(),
-  /** 
+  /**
       * Type of the importing list.
 
 Required when importing a new list that is `list_id` is not specified.
- 
+
       */
   type: ListType.optional(),
   serializer: z.string().optional(),

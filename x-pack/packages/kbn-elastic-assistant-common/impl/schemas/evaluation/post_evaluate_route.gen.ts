@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type OutputIndex = z.infer<typeof OutputIndex>;
 export const OutputIndex = z.string().regex(/^.kibana-elastic-ai-assistant-/);

@@ -15,7 +15,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { BooleanFromString } from '@kbn/zod-helpers';
 
 import {
@@ -40,19 +40,19 @@ export const ExceptionListsImportBulkErrorArray = z.array(ExceptionListsImportBu
 
 export type ImportExceptionListRequestQuery = z.infer<typeof ImportExceptionListRequestQuery>;
 export const ImportExceptionListRequestQuery = z.object({
-  /** 
+  /**
       * Determines whether existing exception lists with the same `list_id` are overwritten.
 If any exception items have the same `item_id`, those are also overwritten.
- 
+
       */
   overwrite: BooleanFromString.optional().default(false),
   overwrite_exceptions: BooleanFromString.optional().default(false),
   overwrite_action_connectors: BooleanFromString.optional().default(false),
-  /** 
+  /**
       * Determines whether the list being imported will have a new `list_id` generated.
 Additional `item_id`'s are generated for each exception item. Both the exception
 list and its items are overwritten.
- 
+
       */
   as_new_list: BooleanFromString.optional().default(false),
 });

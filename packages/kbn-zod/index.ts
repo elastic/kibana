@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from 'zod';
+export * from '@kbn/zod';
 export { isZod } from './util';
 export type { ZodEsque } from './types';

@@ -15,7 +15,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '@kbn/openapi-common/schemas/primitives.gen';
 import { ListId } from '../model/list_common.gen';
@@ -49,17 +49,17 @@ export const FindListItemsRequestQuery = z.object({
    * Determines the sort order, which can be `desc` or `asc`
    */
   sort_order: z.enum(['desc', 'asc']).optional(),
-  /** 
+  /**
       * Returns the list that come after the last list returned in the previous call
 (use the cursor value returned in the previous call). This parameter uses
 the `tie_breaker_id` field to ensure all lists are sorted and returned correctly.
- 
+
       */
   cursor: FindListItemsCursor.optional(),
-  /** 
+  /**
       * Filters the returned results according to the value of the specified field,
 using the <field name>:<field value> syntax.
- 
+
       */
   filter: FindListItemsFilter.optional(),
 });
