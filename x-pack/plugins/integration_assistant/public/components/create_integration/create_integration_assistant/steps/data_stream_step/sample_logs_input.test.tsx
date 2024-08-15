@@ -109,7 +109,7 @@ describe('parseJSONArray', () => {
   it('should parse valid JSON object with array entries', () => {
     const expected = {
       entries: content,
-      pathToEntries: '.events',
+      pathToEntries: 'events',
       errorNoArrayFound: false,
     };
     expect(parseJSONArray(complexEventsJSON)).toEqual(expected);
@@ -152,7 +152,7 @@ describe('SampleLogsInput', () => {
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
           logsSampleParsed: logsSampleRaw.split(','),
-          logFormat: 'json[]',
+          logFormat: 'json.[]',
         });
       });
 
@@ -165,7 +165,7 @@ describe('SampleLogsInput', () => {
         it('should truncate the logs sample', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
             logsSampleParsed: tooLargeLogsSample.split(',').slice(0, 10),
-            logFormat: 'json[]',
+            logFormat: 'json.[]',
           });
         });
         it('should add a notification toast', () => {
@@ -184,7 +184,7 @@ describe('SampleLogsInput', () => {
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
           logsSampleParsed: splitNDJSON,
-          logFormat: 'json[].events',
+          logFormat: 'json.events[]',
         });
       });
     });

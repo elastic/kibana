@@ -53,7 +53,7 @@ export const parseJSONArray = (
       const key = arrayKeys[0];
       return {
         entries: jsonContent[key],
-        pathToEntries: `.${key}`,
+        pathToEntries: key,
         errorNoArrayFound: false,
       };
     }
@@ -81,7 +81,7 @@ const parseLogsContent = (
     //   for a one-line object {} -> do nothing (keep as NDJSON)
     if (parsedContent.length === 1 && Array.isArray(parsedContent[0])) {
       parsedContent = parsedContent[0];
-      logFormat = 'json[]';
+      logFormat = 'json.[]';
     } else {
       logFormat = 'ndjson';
     }
@@ -92,7 +92,7 @@ const parseLogsContent = (
         return { error: i18n.LOGS_SAMPLE_ERROR.NOT_ARRAY };
       }
       parsedContent = entries;
-      logFormat = `json[]${pathToEntries}`;
+      logFormat = `json.${pathToEntries}[]`;
     } catch (parseJSONError) {
       try {
         parsedContent = parseNDJSON(fileContent, true);
