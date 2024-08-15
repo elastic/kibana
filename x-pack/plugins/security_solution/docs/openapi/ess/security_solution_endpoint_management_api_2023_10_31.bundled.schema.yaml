@@ -75,7 +75,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
+                $ref: '#/components/schemas/ActionStatusSuccessResponse'
           description: OK
       summary: Get Actions status schema
       tags:
@@ -278,7 +278,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
+                $ref: '#/components/schemas/ActionStateSuccessResponse'
           description: OK
       summary: Get Action State schema
       tags:
@@ -623,6 +623,41 @@ components:
           $ref: '#/components/schemas/PageSize'
         start_date:
           $ref: '#/components/schemas/StartDate'
+    ActionStateSuccessResponse:
+      type: object
+      properties:
+        body:
+          type: object
+          properties:
+            data:
+              type: object
+              properties:
+                canEncrypt:
+                  type: boolean
+          required:
+            - data
+      required:
+        - body
+    ActionStatusSuccessResponse:
+      type: object
+      properties:
+        body:
+          type: object
+          properties:
+            data:
+              type: object
+              properties:
+                agent_id:
+                  $ref: '#/components/schemas/AgentId'
+                pending_actions:
+                  $ref: '#/components/schemas/PendingActionsSchema'
+              required:
+                - agent_id
+                - pending_actions
+          required:
+            - data
+      required:
+        - body
     AgentId:
       description: Agent ID
       type: string
@@ -900,6 +935,32 @@ components:
     Parameters:
       description: Optional parameters object
       type: object
+    PendingActionDataType:
+      type: integer
+    PendingActionsSchema:
+      oneOf:
+        - type: object
+          properties:
+            execute:
+              $ref: '#/components/schemas/PendingActionDataType'
+            get-file:
+              $ref: '#/components/schemas/PendingActionDataType'
+            isolate:
+              $ref: '#/components/schemas/PendingActionDataType'
+            kill-process:
+              $ref: '#/components/schemas/PendingActionDataType'
+            running-processes:
+              $ref: '#/components/schemas/PendingActionDataType'
+            scan:
+              $ref: '#/components/schemas/PendingActionDataType'
+            suspend-process:
+              $ref: '#/components/schemas/PendingActionDataType'
+            unisolate:
+              $ref: '#/components/schemas/PendingActionDataType'
+            upload:
+              $ref: '#/components/schemas/PendingActionDataType'
+        - additionalProperties: true
+          type: object
     ProtectionUpdatesNoteResponse:
       type: object
       properties:
