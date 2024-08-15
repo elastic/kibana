@@ -21,8 +21,9 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { usePluginConfig } from '../../../containers/plugin_config_context';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useProfilingIntegrationSetting } from '../../../hooks/use_profiling_integration_setting';
+import { CreateAlertRuleButton } from '../../shared/alerts/links/create_alert_rule_button';
 import { APM_HOST_FILTER_FIELD } from '../constants';
-import { LinkToAlertsRule, LinkToNodeDetails } from '../links';
+import { LinkToNodeDetails } from '../links';
 import { ContentTabIds, type LinkOptions, type RouteState, type Tab, type TabIds } from '../types';
 import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
 import { useTabSwitcherContext } from './use_tab_switcher';
@@ -97,7 +98,9 @@ const useRightSideItems = (links?: LinkOptions[]) => {
       nodeDetails: (
         <LinkToNodeDetails assetId={asset.id} assetName={asset.name} assetType={asset.type} />
       ),
-      alertRule: <LinkToAlertsRule />,
+      alertRule: (
+        <CreateAlertRuleButton data-test-subj="infraAssetDetailsPageHeaderCreateAlertsRuleButton" />
+      ),
     }),
     [asset.id, asset.name, asset.type]
   );

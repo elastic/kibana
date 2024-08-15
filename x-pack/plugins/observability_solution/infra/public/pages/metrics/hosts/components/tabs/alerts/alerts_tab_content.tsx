@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertConsumers, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { BrushEndListener, type XYBrushEvent } from '@elastic/charts';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
@@ -21,11 +21,19 @@ import {
   infraAlertFeatureIds,
 } from '../../../../../../components/shared/alerts/constants';
 import AlertsStatusFilter from '../../../../../../components/shared/alerts/alerts_status_filter';
+import { CreateAlertRuleButton } from '../../../../../../components/shared/alerts/links/create_alert_rule_button';
+import { LinkToAlertsPage } from '../../../../../../components/shared/alerts/links/link_to_alerts_page';
+import { INFRA_ALERT_FEATURE_ID } from '../../../../../../../common/constants';
+import { AlertFlyout } from '../../../../../../alerting/inventory/components/alert_flyout';
+import { useBoolean } from '../../../../../../hooks/use_boolean';
+import { usePluginConfig } from '../../../../../../containers/plugin_config_context';
 
 export const AlertsTabContent = () => {
   const { services } = useKibanaContextForPlugin();
+  const { featureFlags } = usePluginConfig();
 
   const { alertStatus, setAlertStatus, alertsEsQueryByStatus } = useAlertsQuery();
+  const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
 
   const { onSubmit, searchCriteria } = useUnifiedSearchContext();
 
@@ -41,6 +49,23 @@ export const AlertsTabContent = () => {
           <EuiFlexItem grow={false}>
             <AlertsStatusFilter onChange={setAlertStatus} status={alertStatus} />
           </EuiFlexItem>
+          <EuiFlexGroup alignItems="center" justifyContent="flexEnd" responsive={false}>
+            {featureFlags.inventoryThresholdAlertRuleEnabled && (
+              <EuiFlexItem grow={false}>
+                <CreateAlertRuleButton
+                  onClick={toggleAlertFlyout}
+                  data-test-subj="infraHostAlertsTabCreateAlertsRuleButton"
+                />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <LinkToAlertsPage
+                dateRange={searchCriteria.dateRange}
+                data-test-subj="infraHostAlertsTabAlertsShowAllButton"
+                kuery={`${ALERT_RULE_PRODUCER}: ${INFRA_ALERT_FEATURE_ID}`}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexGroup>
         <EuiFlexItem>
           <MemoAlertSummaryWidget
@@ -63,6 +88,13 @@ export const AlertsTabContent = () => {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      {featureFlags.inventoryThresholdAlertRuleEnabled && (
+        <AlertFlyout
+          nodeType="host"
+          setVisible={toggleAlertFlyout}
+          visible={isAlertFlyoutVisible}
+        />
+      )}
     </HeightRetainer>
   );
 };
