@@ -340,8 +340,7 @@ export function InternalDashboardTopNav({
             >
               <FormattedMessage
                 id="dashboard.managedContentPopoverButton"
-                defaultMessage="Elastic manages this dashboard.
-                {Duplicate} it to make changes."
+                defaultMessage="Elastic manages this dashboard. {Duplicate} it to make changes."
                 values={{
                   Duplicate: (
                     <EuiLink
