@@ -88,7 +88,7 @@ const computeToolbarButtonCommonCSSProps = (
       : {};
 
   const defaultStyles = {
-    ...toolButtonStyles.default,
+    ...(type === 'primary' ? {} : toolButtonStyles.default),
     ...groupPositionStyles,
   };
 
@@ -96,7 +96,7 @@ const computeToolbarButtonCommonCSSProps = (
     ? defaultStyles
     : {
         ...defaultStyles,
-        ...(type === 'primary' ? {} : toolButtonStyles.emptyButton),
+        ...(type === 'empty' ? toolButtonStyles.emptyButton : {}),
       };
 };
 

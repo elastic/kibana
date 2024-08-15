@@ -2737,7 +2737,7 @@ const logDefinition: FunctionDefinition = {
     // do not really care here about the base and field
     // just need to check both values are not negative
     for (const arg of fnDef.args) {
-      if (isLiteralItem(arg) && typeof arg.value === 'number' && arg.value < 0) {
+      if (isLiteralItem(arg) && Number(arg.value) < 0) {
         messages.push({
           type: 'warning' as const,
           code: 'logOfNegativeValue',
@@ -2820,7 +2820,7 @@ const log10Definition: FunctionDefinition = {
     // do not really care here about the base and field
     // just need to check both values are not negative
     for (const arg of fnDef.args) {
-      if (isLiteralItem(arg) && typeof arg.value === 'number' && arg.value < 0) {
+      if (isLiteralItem(arg) && Number(arg.value) < 0) {
         messages.push({
           type: 'warning' as const,
           code: 'logOfNegativeValue',
@@ -3272,6 +3272,16 @@ const mvCountDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'date',
           optional: false,
         },
@@ -3575,6 +3585,16 @@ const mvFirstDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'date',
           optional: false,
         },
@@ -3732,6 +3752,16 @@ const mvLastDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'date',
           optional: false,
         },
@@ -3864,6 +3894,16 @@ const mvMaxDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
     },
     {
       params: [
@@ -4049,6 +4089,16 @@ const mvMinDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'date',
           optional: false,
         },
@@ -4174,7 +4224,7 @@ const mvPseriesWeightedSumDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -4619,7 +4669,6 @@ const mvSortDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-
   examples: ['ROW a = [4, 2, -3, 2]\n| EVAL sa = mv_sort(a), sd = mv_sort(a, "DESC")'],
 };
 
