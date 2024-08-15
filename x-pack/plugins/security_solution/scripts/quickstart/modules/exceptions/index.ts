@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import {
-  CreateExceptionListItemRequestBodyInput,
-  CreateRuleExceptionListItemProps,
+import type {
   CreateRuleExceptionListItemsRequestBodyInput,
-  ExceptionListItem,
   ExceptionListItemEntry,
 } from '@kbn/securitysolution-exceptions-common/api';
-import {
-  CreateExceptionListItemProps,
-  CreateRuleExceptionListItemsProps,
-} from '@kbn/securitysolution-exceptions-common/api/quickstart_client.gen';
+import type { CreateRuleExceptionListItemsProps } from '@kbn/securitysolution-exceptions-common/api/quickstart_client.gen';
 
 export const test: CreateRuleExceptionListItemsRequestBodyInput['items'][0] = {
   description: 'test',
