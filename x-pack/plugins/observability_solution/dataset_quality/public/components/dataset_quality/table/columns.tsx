@@ -361,7 +361,6 @@ export const getDatasetQualityTableColumns = ({
       : []),
     {
       name: actionsColumnName,
-      'data-test-subj': 'datasetQualityActionsColumn',
       render: (dataStreamStat: DataStreamStat) => (
         <RedirectLink
           dataStreamStat={dataStreamStat}
