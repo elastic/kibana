@@ -15,31 +15,44 @@ const MANAGE_DRILLDOWNS_DATA_TEST_SUBJ = 'embeddablePanelAction-OPEN_FLYOUT_EDIT
 export function DashboardDrilldownPanelActionsProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const testSubjects = getService('testSubjects');
+  const dashboardPanelActions = getService('dashboardPanelActions');
 
   return new (class DashboardDrilldownPanelActions {
     async expectExistsCreateDrilldownAction() {
       log.debug('expectExistsCreateDrilldownAction');
-      await testSubjects.existOrFail(CREATE_DRILLDOWN_DATA_TEST_SUBJ);
+      await dashboardPanelActions.openContextMenu();
+      await dashboardPanelActions.expectContextMenuToBeOpen();
+      await dashboardPanelActions.clickContextMenuMoreItem();
+      await await testSubjects.existOrFail(CREATE_DRILLDOWN_DATA_TEST_SUBJ);
     }
 
     async expectMissingCreateDrilldownAction() {
       log.debug('expectMissingCreateDrilldownAction');
+      await dashboardPanelActions.openContextMenu();
+      await dashboardPanelActions.expectContextMenuToBeOpen();
+      await dashboardPanelActions.clickContextMenuMoreItem();
       await testSubjects.existOrFail(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
     }
 
     async clickCreateDrilldown() {
       log.debug('clickCreateDrilldown');
       await this.expectExistsCreateDrilldownAction();
-      await testSubjects.clickWhenNotDisabledWithoutRetry(CREATE_DRILLDOWN_DATA_TEST_SUBJ);
+      await dashboardPanelActions.clickContextMenuItem(CREATE_DRILLDOWN_DATA_TEST_SUBJ);
     }
 
     async expectExistsManageDrilldownsAction() {
       log.debug('expectExistsCreateDrilldownAction');
+      await dashboardPanelActions.openContextMenu();
+      await dashboardPanelActions.expectContextMenuToBeOpen();
+      await dashboardPanelActions.clickContextMenuMoreItem();
       await testSubjects.existOrFail(CREATE_DRILLDOWN_DATA_TEST_SUBJ);
     }
 
     async expectMissingManageDrilldownsAction() {
       log.debug('expectExistsRemovePanelAction');
+      await dashboardPanelActions.openContextMenu();
+      await dashboardPanelActions.expectContextMenuToBeOpen();
+      await dashboardPanelActions.clickContextMenuMoreItem();
       await testSubjects.existOrFail(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
     }
 

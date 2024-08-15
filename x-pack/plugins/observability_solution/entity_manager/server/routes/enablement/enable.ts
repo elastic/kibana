@@ -25,6 +25,7 @@ import { builtInDefinitions } from '../../lib/entities/built_in';
 import { installBuiltInEntityDefinitions } from '../../lib/entities/install_entity_definition';
 import { ERROR_API_KEY_SERVICE_DISABLED } from '../../../common/errors';
 import { EntityDiscoveryApiKeyType } from '../../saved_objects';
+import { startTransform } from '../../lib/entities/start_transform';
 
 /**
  * @openapi
@@ -116,13 +117,20 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
 
         await saveEntityDiscoveryAPIKey(soClient, apiKey);
 
-        await installBuiltInEntityDefinitions({
-          logger,
-          builtInDefinitions,
+        const installedDefinitions = await installBuiltInEntityDefinitions({
           esClient,
           soClient,
-          installOnly: req.query.installOnly,
+          logger,
+          definitions: builtInDefinitions,
         });
+
+        if (!req.query.installOnly) {
+          await Promise.all(
+            installedDefinitions.map((installedDefinition) =>
+              startTransform(esClient, installedDefinition, logger)
+            )
+          );
+        }
 
         return res.ok({ body: { success: true } });
       } catch (err) {

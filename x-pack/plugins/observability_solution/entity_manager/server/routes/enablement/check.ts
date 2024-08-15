@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import semver from 'semver';
 import { RequestHandlerContext } from '@kbn/core/server';
 import { SetupRouteOptions } from '../types';
 import { checkIfEntityDiscoveryAPIKeyIsValid, readEntityDiscoveryAPIKey } from '../../lib/auth';
 import {
   ERROR_API_KEY_NOT_FOUND,
   ERROR_API_KEY_NOT_VALID,
+  ERROR_BUILTIN_UPGRADE_REQUIRED,
   ERROR_DEFINITION_STOPPED,
   ERROR_PARTIAL_BUILTIN_INSTALLATION,
 } from '../../../common/errors';
@@ -76,17 +78,21 @@ export function checkEntityDiscoveryEnabledRoute<T extends RequestHandlerContext
               id: builtInDefinition.id,
             });
 
-            return definitions[0];
+            return { installedDefinition: definitions[0], builtInDefinition };
           })
         ).then((results) =>
           results.reduce(
-            (state, definition) => {
+            (state, { installedDefinition, builtInDefinition }) => {
               return {
-                installed: Boolean(state.installed && definition?.state.installed),
-                running: Boolean(state.running && definition?.state.running),
+                installed: Boolean(state.installed && installedDefinition?.state.installed),
+                running: Boolean(state.running && installedDefinition?.state.running),
+                outdated:
+                  state.outdated ||
+                  (installedDefinition &&
+                    semver.neq(installedDefinition.version, builtInDefinition.version)),
               };
             },
-            { installed: true, running: true }
+            { installed: true, running: true, outdated: false }
           )
         );
 
@@ -96,6 +102,10 @@ export function checkEntityDiscoveryEnabledRoute<T extends RequestHandlerContext
 
         if (!entityDiscoveryState.running) {
           return res.ok({ body: { enabled: false, reason: ERROR_DEFINITION_STOPPED } });
+        }
+
+        if (entityDiscoveryState.outdated) {
+          return res.ok({ body: { enabled: false, reason: ERROR_BUILTIN_UPGRADE_REQUIRED } });
         }
 
         return res.ok({ body: { enabled: true } });
