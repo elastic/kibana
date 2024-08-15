@@ -12,7 +12,7 @@ import React from 'react';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useViewSpaceServices } from './hooks/view_space_context_provider';
+import { useViewSpaceServices } from './provider';
 import type { Space } from '../../../common';
 import { FeatureTable } from '../edit_space/enabled_features/feature_table';
 import { SectionPanel } from '../edit_space/section_panel';

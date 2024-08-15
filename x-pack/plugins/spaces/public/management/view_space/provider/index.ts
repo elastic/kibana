@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { ViewSpacePage } from './view_space';
+export { ViewSpaceProvider, useViewSpaceServices, useViewSpaceStore } from './view_space_provider';
+export type {
+  ViewSpaceProviderProps,
+  ViewSpaceServices,
+  ViewSpaceStore,
+} from './view_space_provider';

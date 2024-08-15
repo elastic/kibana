@@ -27,14 +27,17 @@ import type {
   EuiTableFieldDataColumnType,
   EuiTableSelectionType,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { Role } from '@kbn/security-plugin-types-common';
 
+import type { Space } from '../../../../../common';
+
 interface ISpaceAssignedRolesTableProps {
   isReadOnly: boolean;
-  assignedRoles: Role[];
+  currentSpace: Space;
+  assignedRoles: Map<Role['name'], Role>;
   onClickAssignNewRole: () => Promise<void>;
   onClickBulkEdit: (selectedRoles: Role[]) => void;
   onClickBulkRemove: (selectedRoles: Role[]) => void;
@@ -57,11 +60,12 @@ export const isEditableRole = (role: Role) => {
 
 const getTableColumns = ({
   isReadOnly,
+  currentSpace,
   onClickRowEditAction,
   onClickRowRemoveAction,
 }: Pick<
   ISpaceAssignedRolesTableProps,
-  'isReadOnly' | 'onClickRowEditAction' | 'onClickRowRemoveAction'
+  'isReadOnly' | 'onClickRowEditAction' | 'onClickRowRemoveAction' | 'currentSpace'
 >) => {
   const columns: Array<EuiBasicTableColumn<Role>> = [
     {
@@ -81,20 +85,25 @@ const getTableColumns = ({
       render: (_, record) => {
         const uniquePrivilege = new Set(
           record.kibana.reduce((privilegeBaseTuple, kibanaPrivilege) => {
-            if (!kibanaPrivilege.base.length) {
-              privilegeBaseTuple.push(
-                i18n.translate(
-                  'xpack.spaces.management.spaceDetails.rolesTable.column.privileges.customPrivilege',
-                  {
-                    defaultMessage: 'custom',
-                  }
-                )
-              );
-
-              return privilegeBaseTuple;
+            if (
+              kibanaPrivilege.spaces.includes(currentSpace.id) ||
+              kibanaPrivilege.spaces.includes('*')
+            ) {
+              if (!kibanaPrivilege.base.length) {
+                privilegeBaseTuple.push(
+                  i18n.translate(
+                    'xpack.spaces.management.spaceDetails.rolesTable.column.privileges.customPrivilege',
+                    {
+                      defaultMessage: 'custom',
+                    }
+                  )
+                );
+              } else {
+                return privilegeBaseTuple.concat(kibanaPrivilege.base);
+              }
             }
 
-            return privilegeBaseTuple.concat(kibanaPrivilege.base);
+            return privilegeBaseTuple;
           }, [] as string[])
         );
 
@@ -113,17 +122,17 @@ const getTableColumns = ({
         return React.createElement(EuiBadge, {
           children: _value?._reserved
             ? i18n.translate(
-                'xpack.spaces.management.spaceDetails.rolesTable.column.roleType.reserved',
-                {
-                  defaultMessage: 'Reserved',
-                }
-              )
+              'xpack.spaces.management.spaceDetails.rolesTable.column.roleType.reserved',
+              {
+                defaultMessage: 'Reserved',
+              }
+            )
             : i18n.translate(
-                'xpack.spaces.management.spaceDetails.rolesTable.column.roleType.custom',
-                {
-                  defaultMessage: 'Custom',
-                }
-              ),
+              'xpack.spaces.management.spaceDetails.rolesTable.column.roleType.custom',
+              {
+                defaultMessage: 'Custom',
+              }
+            ),
           color: _value?._reserved ? undefined : 'success',
         });
       },
@@ -208,7 +217,7 @@ const getRowProps = (item: Role) => {
   const { name } = item;
   return {
     'data-test-subj': `space-role-row-${name}`,
-    onClick: () => {},
+    onClick: () => { },
   };
 };
 
@@ -224,6 +233,7 @@ const getCellProps = (item: Role, column: EuiTableFieldDataColumnType<Role>) => 
 export const SpaceAssignedRolesTable = ({
   isReadOnly,
   assignedRoles,
+  currentSpace,
   onClickAssignNewRole,
   onClickBulkEdit,
   onClickBulkRemove,
@@ -231,10 +241,11 @@ export const SpaceAssignedRolesTable = ({
   onClickRowRemoveAction,
 }: ISpaceAssignedRolesTableProps) => {
   const tableColumns = useMemo(
-    () => getTableColumns({ isReadOnly, onClickRowEditAction, onClickRowRemoveAction }),
-    [isReadOnly, onClickRowEditAction, onClickRowRemoveAction]
+    () =>
+      getTableColumns({ isReadOnly, onClickRowEditAction, onClickRowRemoveAction, currentSpace }),
+    [currentSpace, isReadOnly, onClickRowEditAction, onClickRowRemoveAction]
   );
-  const [rolesInView, setRolesInView] = useState<Role[]>(assignedRoles);
+  const [rolesInView, setRolesInView] = useState<Role[]>([]);
   const [selectedRoles, setSelectedRoles] = useState<Role[]>([]);
   const [isBulkActionContextOpen, setBulkActionContextOpen] = useState(false);
   const selectableRoles = useRef(rolesInView.filter((role) => isEditableRole(role)));
@@ -243,14 +254,20 @@ export const SpaceAssignedRolesTable = ({
     size: 10,
   });
 
+  useEffect(() => {
+    setRolesInView(Array.from(assignedRoles.values()));
+  }, [assignedRoles]);
+
   const onSearchQueryChange = useCallback<NonNullable<NonNullable<EuiSearchBarProps['onChange']>>>(
     ({ query }) => {
+      const _assignedRolesTransformed = Array.from(assignedRoles.values());
+
       if (query?.text) {
         setRolesInView(
-          assignedRoles.filter((role) => role.name.includes(query.text.toLowerCase()))
+          _assignedRolesTransformed.filter((role) => role.name.includes(query.text.toLowerCase()))
         );
       } else {
-        setRolesInView(assignedRoles);
+        setRolesInView(_assignedRolesTransformed);
       }
     },
     [assignedRoles]
@@ -382,29 +399,29 @@ export const SpaceAssignedRolesTable = ({
                 size: 's',
                 ...(Boolean(selectedRoles.length)
                   ? {
-                      iconType: 'crossInCircle',
-                      onClick: setSelectedRoles.bind(null, []),
-                      children: i18n.translate(
-                        'xpack.spaces.management.spaceDetails.rolesTable.clearRolesSelection',
-                        {
-                          defaultMessage: 'Clear selection',
-                        }
-                      ),
-                    }
+                    iconType: 'crossInCircle',
+                    onClick: setSelectedRoles.bind(null, []),
+                    children: i18n.translate(
+                      'xpack.spaces.management.spaceDetails.rolesTable.clearRolesSelection',
+                      {
+                        defaultMessage: 'Clear selection',
+                      }
+                    ),
+                  }
                   : {
-                      iconType: 'pagesSelect',
-                      onClick: setSelectedRoles.bind(null, selectableRoles.current),
-                      children: i18n.translate(
-                        'xpack.spaces.management.spaceDetails.rolesTable.selectAllRoles',
-                        {
-                          defaultMessage:
-                            'Select {count, plural, one {role} other {all {count} roles}}',
-                          values: {
-                            count: selectableRoles.current.length,
-                          },
-                        }
-                      ),
-                    }),
+                    iconType: 'pagesSelect',
+                    onClick: setSelectedRoles.bind(null, selectableRoles.current),
+                    children: i18n.translate(
+                      'xpack.spaces.management.spaceDetails.rolesTable.selectAllRoles',
+                      {
+                        defaultMessage:
+                          'Select {count, plural, one {role} other {all {count} roles}}',
+                        values: {
+                          count: selectableRoles.current.length,
+                        },
+                      }
+                    ),
+                  }),
               })}
             </EuiFlexItem>
           </EuiFlexGroup>

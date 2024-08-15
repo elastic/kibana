@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
 import { ViewSpaceTabFooter } from './footer';
-import { useViewSpaceServices } from './hooks/view_space_context_provider';
+import { useViewSpaceServices } from './provider';
 import { ViewSpaceEnabledFeatures } from './view_space_features_tab';
 import type { Space } from '../../../common';
 import { ConfirmDeleteModal } from '../components';

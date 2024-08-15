@@ -33,20 +33,8 @@ import type { Role } from '@kbn/security-plugin-types-common';
 import { KibanaPrivileges, type RawKibanaPrivileges } from '@kbn/security-role-management-model';
 import { KibanaPrivilegeTable, PrivilegeFormCalculator } from '@kbn/security-ui-components';
 
-import type { Space } from '../../../../common';
-import type { ViewSpaceServices } from '../hooks/view_space_context_provider';
-
-export type RolesAPIClient = ReturnType<ViewSpaceServices['getRolesAPIClient']> extends Promise<
-  infer R
->
-  ? R
-  : never;
-
-export type PrivilegesAPIClient = ReturnType<
-  ViewSpaceServices['getPrivilegesAPIClient']
-> extends Promise<infer R>
-  ? R
-  : never;
+import type { Space } from '../../../../../common';
+import type { ViewSpaceServices, ViewSpaceStore } from '../../provider';
 
 type KibanaRolePrivilege = keyof NonNullable<KibanaFeatureConfig['privileges']> | 'custom';
 
@@ -55,10 +43,9 @@ interface PrivilegesRolesFormProps {
   features: KibanaFeature[];
   closeFlyout: () => void;
   onSaveCompleted: () => void;
-  roleAPIClient: RolesAPIClient;
-  privilegesAPIClient: PrivilegesAPIClient;
-  spaceUnallocatedRole: Role[];
   defaultSelected?: Role[];
+  storeDispatch: ViewSpaceStore['dispatch'];
+  spacesClientsInvocator: ViewSpaceServices['invokeClient'];
 }
 
 const createRolesComboBoxOptions = (roles: Role[]): Array<EuiComboBoxOptionOption<Role>> =>
@@ -72,64 +59,79 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
     onSaveCompleted,
     closeFlyout,
     features,
-    roleAPIClient,
     defaultSelected = [],
-    privilegesAPIClient,
-    spaceUnallocatedRole,
+    spacesClientsInvocator,
+    storeDispatch,
   } = props;
-
   const [space, setSpaceState] = useState<Partial<Space>>(props.space);
-  const [roleSpacePrivilege, setRoleSpacePrivilege] = useState<KibanaRolePrivilege>('all');
+  const [assigningToRole, setAssigningToRole] = useState(false);
+  const [fetchingSystemRoles, setFetchingSystemRoles] = useState(false);
+  const [privileges, setPrivileges] = useState<[RawKibanaPrivileges] | null>(null);
+  const [spaceUnallocatedRoles, setSpaceUnallocatedRole] = useState<Role[]>([]);
   const [selectedRoles, setSelectedRoles] = useState<ReturnType<typeof createRolesComboBoxOptions>>(
     createRolesComboBoxOptions(defaultSelected)
   );
-  const [assigningToRole, setAssigningToRole] = useState(false);
-  const [privileges, setPrivileges] = useState<[RawKibanaPrivileges] | null>(null);
+  const selectedRolesCombinedPrivileges = useMemo(() => {
 
-  const selectedRolesHasSpacePrivilegeConflict = useMemo(() => {
     const combinedPrivilege = new Set(
       selectedRoles.reduce((result, selectedRole) => {
-        let match: string[] = [];
+        let match: Array<Exclude<KibanaRolePrivilege, 'custom'>> = [];
         for (let i = 0; i < selectedRole.value!.kibana.length; i++) {
           if (selectedRole.value!.kibana[i].spaces.includes(space.id!)) {
+            // @ts-ignore - TODO resolve this
             match = selectedRole.value!.kibana[i].base;
             break;
           }
         }
 
         return result.concat(match);
-      }, [] as string[])
+      }, [] as Array<Exclude<KibanaRolePrivilege, 'custom'>>)
     );
 
-    return combinedPrivilege.size > 1;
+    return Array.from(combinedPrivilege);
   }, [selectedRoles, space.id]);
+
+  const [roleSpacePrivilege, setRoleSpacePrivilege] = useState<KibanaRolePrivilege>(
+    selectedRolesCombinedPrivileges.length === 1 ? selectedRolesCombinedPrivileges[0] : 'all'
+  );
+
+  useEffect(() => {
+    async function fetchAllSystemRoles() {
+      setFetchingSystemRoles(true);
+      const systemRoles = await spacesClientsInvocator((clients) => clients.rolesClient.getRoles());
+
+      // exclude roles that are already assigned to this space
+      setSpaceUnallocatedRole(
+        systemRoles.filter(
+          (role) =>
+            !role.metadata?._reserved &&
+            (!role.kibana.length ||
+              role.kibana.some((rolePrivileges) => {
+                return (
+                  !rolePrivileges.spaces.includes(space.id!) && !rolePrivileges.spaces.includes('*')
+                );
+              }))
+        )
+      );
+    }
+
+    fetchAllSystemRoles().finally(() => setFetchingSystemRoles(false));
+  }, [space.id, spacesClientsInvocator]);
 
   useEffect(() => {
     Promise.all([
-      privilegesAPIClient.getAll({ includeActions: true, respectLicenseLevel: false }),
-      privilegesAPIClient.getBuiltIn(),
+      spacesClientsInvocator((clients) =>
+        clients.privilegesClient.getAll({ includeActions: true, respectLicenseLevel: false })
+      ),
+      spacesClientsInvocator((clients) => clients.privilegesClient.getBuiltIn()),
     ]).then(
       ([kibanaPrivileges, builtInESPrivileges]) =>
         setPrivileges([kibanaPrivileges, builtInESPrivileges])
       // (err) => fatalErrors.add(err)
     );
-  }, [privilegesAPIClient]);
+  }, [spacesClientsInvocator]);
 
-  const assignRolesToSpace = useCallback(async () => {
-    try {
-      setAssigningToRole(true);
-
-      await roleAPIClient
-        .bulkUpdateRoles({ rolesUpdate: selectedRoles.map((role) => role.value!) })
-        .then(setAssigningToRole.bind(null, false));
-
-      onSaveCompleted();
-    } catch (err) {
-      // Handle resulting error
-    }
-  }, [onSaveCompleted, roleAPIClient, selectedRoles]);
-
-  const updateRoleSpacePrivilege = useCallback(
+  const onRoleSpacePrivilegeChange = useCallback(
     (spacePrivilege: KibanaRolePrivilege) => {
       // persist select privilege for UI
       setRoleSpacePrivilege(spacePrivilege);
@@ -152,6 +154,29 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
     [space.id]
   );
 
+  const assignRolesToSpace = useCallback(async () => {
+    try {
+      setAssigningToRole(true);
+
+      const updatedRoles = selectedRoles.map((role) => role.value!);
+
+      await spacesClientsInvocator((clients) =>
+        clients.rolesClient
+          .bulkUpdateRoles({ rolesUpdate: updatedRoles })
+          .then(setAssigningToRole.bind(null, false))
+      );
+
+      storeDispatch({
+        type: 'update_roles',
+        payload: updatedRoles,
+      });
+
+      onSaveCompleted();
+    } catch (err) {
+      // Handle resulting error
+    }
+  }, [onSaveCompleted, selectedRoles, spacesClientsInvocator, storeDispatch]);
+
   const getForm = () => {
     return (
       <EuiForm component="form" fullWidth>
@@ -162,8 +187,14 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
               defaultMessage: 'Select role to assign to the {spaceName} space',
               values: { spaceName: space.name },
             })}
-            placeholder="Select roles"
-            options={createRolesComboBoxOptions(spaceUnallocatedRole)}
+            isLoading={fetchingSystemRoles}
+            placeholder={i18n.translate(
+              'xpack.spaces.management.spaceDetails.roles.selectRolesPlaceholder',
+              {
+                defaultMessage: 'Select roles',
+              }
+            )}
+            options={createRolesComboBoxOptions(spaceUnallocatedRoles)}
             selectedOptions={selectedRoles}
             onChange={(value) => {
               setSelectedRoles((prevRoles) => {
@@ -192,7 +223,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
           />
         </EuiFormRow>
         <>
-          {selectedRolesHasSpacePrivilegeConflict && (
+          {selectedRolesCombinedPrivileges.length > 1 && (
             <EuiFormRow>
               <EuiCallOut
                 color="warning"
@@ -257,7 +288,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
             }))}
             color="primary"
             idSelected={roleSpacePrivilege}
-            onChange={(id) => updateRoleSpacePrivilege(id as KibanaRolePrivilege)}
+            onChange={(id) => onRoleSpacePrivilegeChange(id as KibanaRolePrivilege)}
             buttonSize="compressed"
             isFullWidth
           />
@@ -284,7 +315,16 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
               <KibanaPrivilegeTable
                 role={selectedRoles[0].value!}
                 privilegeIndex={0}
-                onChange={setSpaceState}
+                onChange={(...args) => {
+                  console.log('value returned from change!', args);
+                  // setSpaceState()
+                }}
+                onChangeAll={(privilege) => {
+                  // setSelectedRoles((prevRoleDefinition) => {
+                  //   prevRoleDefinition.slice(0)[0].value?.kibana[0].base.concat(privilege);
+                  //   return prevRoleDefinition;
+                  // });
+                }}
                 kibanaPrivileges={new KibanaPrivileges(privileges?.[0]!, features)}
                 privilegeCalculator={
                   new PrivilegeFormCalculator(
@@ -292,6 +332,8 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                     selectedRoles[0].value!
                   )
                 }
+                allSpacesSelected={false}
+                canCustomizeSubFeaturePrivileges={false}
               />
             </>
           </EuiFormRow>

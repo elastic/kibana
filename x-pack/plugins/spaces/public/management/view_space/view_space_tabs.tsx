@@ -11,7 +11,6 @@ import React from 'react';
 import type { Capabilities, ScopedHistory } from '@kbn/core/public';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { Role } from '@kbn/security-plugin-types-common';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
 import { TAB_ID_CONTENT, TAB_ID_GENERAL, TAB_ID_ROLES } from './constants';
@@ -29,7 +28,7 @@ export interface ViewSpaceTab {
 
 export interface GetTabsProps {
   space: Space;
-  roles: Role[];
+  rolesCount: number;
   features: KibanaFeature[];
   history: ScopedHistory;
   capabilities: Capabilities & {
@@ -68,7 +67,7 @@ export const getTabs = ({
   features,
   history,
   capabilities,
-  roles,
+  rolesCount,
   ...props
 }: GetTabsProps): ViewSpaceTab[] => {
   const canUserViewRoles = Boolean(capabilities?.roles?.view);
@@ -105,13 +104,12 @@ export const getTabs = ({
       }),
       append: (
         <EuiNotificationBadge className="eui-alignCenter" color="subdued" size="m">
-          {roles.length}
+          {rolesCount}
         </EuiNotificationBadge>
       ),
       content: (
         <SuspenseViewSpaceAssignedRoles
           space={space}
-          roles={roles}
           features={features}
           isReadOnly={!canUserModifyRoles}
         />
