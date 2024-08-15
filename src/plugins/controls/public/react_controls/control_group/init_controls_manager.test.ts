@@ -13,8 +13,6 @@ jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('delta'),
 }));
 
-const DEFAULT_DATA_VIEW_ID = 'myDataView';
-
 describe('PresentationContainer api', () => {
   test('addNewPanel should add control at end of controls', async () => {
     const controlsManager = initControlsManager(
@@ -23,7 +21,6 @@ describe('PresentationContainer api', () => {
         bravo: { type: 'testControl', order: 1 },
         charlie: { type: 'testControl', order: 2 },
       },
-      DEFAULT_DATA_VIEW_ID
     );
     const addNewPanelPromise = controlsManager.api.addNewPanel({
       panelType: 'testControl',
@@ -46,7 +43,6 @@ describe('PresentationContainer api', () => {
         bravo: { type: 'testControl', order: 1 },
         charlie: { type: 'testControl', order: 2 },
       },
-      DEFAULT_DATA_VIEW_ID
     );
     controlsManager.api.removePanel('bravo');
     expect(controlsManager.controlsInOrder$.value.map((element) => element.id)).toEqual([
@@ -62,7 +58,6 @@ describe('PresentationContainer api', () => {
         bravo: { type: 'testControl', order: 1 },
         charlie: { type: 'testControl', order: 2 },
       },
-      DEFAULT_DATA_VIEW_ID
     );
     const replacePanelPromise = controlsManager.api.replacePanel('bravo', {
       panelType: 'testControl',
@@ -84,7 +79,6 @@ describe('PresentationContainer api', () => {
           alpha: { type: 'testControl', order: 0 },
           bravo: { type: 'testControl', order: 1 },
         },
-        DEFAULT_DATA_VIEW_ID
       );
       let isDone = false;
       controlsManager.api.untilInitialized().then(() => {
@@ -108,7 +102,6 @@ describe('PresentationContainer api', () => {
           alpha: { type: 'testControl', order: 0 },
           bravo: { type: 'testControl', order: 1 },
         },
-        DEFAULT_DATA_VIEW_ID
       );
       controlsManager.setControlApi('alpha', {} as unknown as DefaultControlApi);
       controlsManager.setControlApi('bravo', {} as unknown as DefaultControlApi);
@@ -131,7 +124,6 @@ describe('snapshotControlsRuntimeState', () => {
         alpha: { type: 'testControl', order: 1 },
         bravo: { type: 'testControl', order: 0 },
       },
-      DEFAULT_DATA_VIEW_ID
     );
     controlsManager.setControlApi('alpha', {
       snapshotRuntimeState: () => {

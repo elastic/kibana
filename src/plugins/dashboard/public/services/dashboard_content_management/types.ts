@@ -26,6 +26,7 @@ import {
   SearchDashboardsArgs,
   SearchDashboardsResponse,
 } from './lib/find_dashboards';
+import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 
 export interface DashboardContentManagementRequiredServices {
   data: DashboardDataService;
@@ -63,7 +64,17 @@ export interface LoadDashboardFromSavedObjectProps {
 type DashboardResolveMeta = DashboardCrudTypes['GetOut']['meta'];
 
 export type SavedDashboardInput = DashboardContainerInput & {
+  /**
+   * Serialized control group state.
+   * Contains state loaded from dashboard saved object
+   */
   controlGroupInput?: DashboardAttributes['controlGroupInput'] | undefined;
+  /**
+   * Runtime control group state.
+   * Contains state passed from dashboard locator
+   * Use runtime state when building input for portable dashboards
+   */
+  controlGroupState?: Partial<ControlGroupRuntimeState>;
 };
 
 export interface LoadDashboardReturn {

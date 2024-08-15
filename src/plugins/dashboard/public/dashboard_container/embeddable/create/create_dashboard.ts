@@ -438,10 +438,10 @@ export const initializeDashboard = async ({
   // Set restored runtime state for react embeddables.
   // --------------------------------------------------------------------------------------
   untilDashboardReady().then((dashboardContainer) => {
-    if (overrideInput?.controlGroupInput) {
+    if (overrideInput?.controlGroupState) {
       dashboardContainer.setRuntimeStateForChild(
         PANELS_CONTROL_GROUP_KEY,
-        overrideInput.controlGroupInput
+        overrideInput.controlGroupState
       );
     }
 
