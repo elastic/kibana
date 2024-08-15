@@ -8,6 +8,7 @@
  */
 
 import { type interfaces, ContainerModule } from 'inversify';
+import { isPromise } from '@kbn/std';
 import type { CoreSetup, CoreStart } from '@kbn/core-lifecycle-browser';
 import {
   ConfigService,
@@ -51,8 +52,17 @@ export function createPluginSetupModule(context: CoreSetup): interfaces.Containe
               const scope = container.get(DiService).fork();
               scope.bind(AppMountParametersToken).toConstantValue(params);
               scope.bind(Global).toConstantValue(AppMountParametersToken);
+              const unmount = scope.get<IAppMount>(config).mount();
 
-              return scope.get<IAppMount>(config).mount();
+              return isPromise(unmount)
+                ? unmount.finally(() => scope.unbindAll())
+                : () => {
+                    try {
+                      return unmount();
+                    } finally {
+                      scope.unbindAll();
+                    }
+                  };
             },
           });
         });
