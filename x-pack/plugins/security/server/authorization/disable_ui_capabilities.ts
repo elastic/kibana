@@ -144,7 +144,7 @@ export function disableUICapabilitiesFactory(
       // Capabilities derived from Elasticsearch features should not be
       // included here, as the result is used to check authorization against
       // Kibana Privileges, rather than Elasticsearch Privileges.
-      if (elasticsearchFeatureMap.hasOwnProperty(featureId)) {
+      if (Object.hasOwn(elasticsearchFeatureMap, featureId)) {
         return [];
       }
       if (typeof value === 'boolean') {
@@ -207,7 +207,7 @@ export function disableUICapabilitiesFactory(
 
       const action = authz.actions.ui.get(featureId, ...uiCapabilityParts);
 
-      const isElasticsearchFeature = elasticsearchFeatureMap.hasOwnProperty(featureId);
+      const isElasticsearchFeature = Object.hasOwn(elasticsearchFeatureMap, featureId);
       const isCatalogueFeature = featureId === 'catalogue';
       const isManagementFeature = featureId === 'management';
 
@@ -238,7 +238,7 @@ export function disableUICapabilitiesFactory(
         } else if (isManagementFeature) {
           const [managementSectionId, managementEntryId] = uiCapabilityParts;
           const featureGrantsManagementEntry =
-            (esFeature.management ?? {}).hasOwnProperty(managementSectionId) &&
+            Object.hasOwn(esFeature.management ?? {}, managementSectionId) &&
             esFeature.management![managementSectionId].includes(managementEntryId);
 
           return (
