@@ -33,7 +33,7 @@ export function tableVisResponseHandler(input: Datatable, visConfig: TableVisCon
     input.rows.forEach((row) => {
       const splitValue: string | number = row[splitColumn.id];
 
-      if (!splitMap.hasOwnProperty(splitValue)) {
+      if (!Object.hasOwn(splitMap, splitValue)) {
         splitMap[splitValue] = splitIndex++;
         const tableGroup: TableGroup = {
           title: `${splitColumnFormatter.convert(splitValue)}: ${splitColumn.name}`,

@@ -701,7 +701,7 @@ describe('validation logic', () => {
       // Do not try to validate the dissect pattern string
       testErrorsAndWarnings('from a_index | dissect textField "%{firstWord}"', []);
       testErrorsAndWarnings('from a_index | dissect doubleField "%{firstWord}"', [
-        'DISSECT only supports string type values, found [doubleField] of type [double]',
+        'DISSECT only supports keyword, text types values, found [doubleField] of type [double]',
       ]);
       testErrorsAndWarnings('from a_index | dissect textField "%{firstWord}" option ', [
         "SyntaxError: mismatched input '<EOF>' expecting '='",
@@ -748,11 +748,10 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | grok textField %a', [
         "SyntaxError: mismatched input '%' expecting QUOTED_STRING",
       ]);
-      // @TODO: investigate
       // Do not try to validate the grok pattern string
       testErrorsAndWarnings('from a_index | grok textField "%{firstWord}"', []);
       testErrorsAndWarnings('from a_index | grok doubleField "%{firstWord}"', [
-        'GROK only supports string type values, found [doubleField] of type [double]',
+        'GROK only supports keyword, text types values, found [doubleField] of type [double]',
       ]);
       testErrorsAndWarnings('from a_index | grok textField "%{firstWord}" | keep firstWord', []);
       // testErrorsAndWarnings('from a_index | grok s* "%{a}"', [
@@ -2952,6 +2951,11 @@ describe('validation logic', () => {
           'Argument of [date_trunc] must be [time_literal], found value [textField] type [text]',
           'Argument of [date_trunc] must be [date], found value [concat("20","22")] type [keyword]',
         ]);
+        testErrorsAndWarnings(
+          'row var = date_trunc(1 day, to_datetime("2021-01-01T00:00:00Z"))',
+          []
+        );
+        testErrorsAndWarnings('row date_trunc(1 day, to_datetime("2021-01-01T00:00:00Z"))', []);
       });
 
       describe('e', () => {
@@ -4469,6 +4473,9 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row mv_count(to_geopoint("POINT (30 10)"))', []);
         testErrorsAndWarnings('row var = mv_count(to_geopoint(to_geopoint("POINT (30 10)")))', []);
         testErrorsAndWarnings('row var = mv_count(to_geoshape(to_geopoint("POINT (30 10)")))', []);
+        testErrorsAndWarnings('from a_index | where mv_count(dateNanosField) > 0', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_count(dateNanosField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_count(dateNanosField)', []);
       });
 
       describe('mv_dedupe', () => {
@@ -4772,6 +4779,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row mv_first(to_geopoint("POINT (30 10)"))', []);
         testErrorsAndWarnings('row var = mv_first(to_geopoint(to_geopoint("POINT (30 10)")))', []);
         testErrorsAndWarnings('row var = mv_first(to_geoshape(to_geopoint("POINT (30 10)")))', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_first(dateNanosField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_first(dateNanosField)', []);
       });
 
       describe('mv_last', () => {
@@ -4922,6 +4931,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row mv_last(to_geopoint("POINT (30 10)"))', []);
         testErrorsAndWarnings('row var = mv_last(to_geopoint(to_geopoint("POINT (30 10)")))', []);
         testErrorsAndWarnings('row var = mv_last(to_geoshape(to_geopoint("POINT (30 10)")))', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_last(dateNanosField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_last(dateNanosField)', []);
       });
 
       describe('mv_max', () => {
@@ -5009,6 +5020,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | eval mv_max(nullVar)', []);
         testErrorsAndWarnings('from a_index | eval mv_max("2022")', []);
         testErrorsAndWarnings('from a_index | eval mv_max(concat("20", "22"))', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_max(dateNanosField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_max(dateNanosField)', []);
       });
 
       describe('mv_median', () => {
@@ -5146,6 +5159,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | eval mv_min(nullVar)', []);
         testErrorsAndWarnings('from a_index | eval mv_min("2022")', []);
         testErrorsAndWarnings('from a_index | eval mv_min(concat("20", "22"))', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_min(dateNanosField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_min(dateNanosField)', []);
       });
 
       describe('mv_slice', () => {

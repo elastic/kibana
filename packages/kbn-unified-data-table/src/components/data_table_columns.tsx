@@ -31,7 +31,7 @@ import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_
 import { buildEditFieldButton } from './build_edit_field_button';
 import { DataTableColumnHeader, DataTableTimeColumnHeader } from './data_table_column_header';
 
-const getColumnDisplayName = (
+export const getColumnDisplayName = (
   columnName: string,
   dataViewFieldDisplayName: string | undefined,
   columnDisplay: string | undefined
