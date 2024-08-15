@@ -205,6 +205,7 @@ export const AssistantHeader: React.FC<Props> = ({
               <EuiSkeletonTitle data-test-subj="skeletonTitle" size="xs" />
             ) : (
               <AssistantTitle
+                isDisabled={isDisabled}
                 title={selectedConversation?.title}
                 selectedConversation={selectedConversation}
                 refetchCurrentUserConversations={refetchCurrentUserConversations}

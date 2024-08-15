@@ -146,12 +146,16 @@ const AssistantComponent: React.FC<Props> = ({
   });
 
   const isInitialLoad = useMemo(() => {
+    if (!isAssistantEnabled) {
+      return false;
+    }
     return (
       (!isFetchedAnonymizationFields && !isFetchedCurrentUserConversations && !isFetchedPrompts) ||
       !(currentConversation && currentConversation?.id !== '')
     );
   }, [
     currentConversation,
+    isAssistantEnabled,
     isFetchedAnonymizationFields,
     isFetchedCurrentUserConversations,
     isFetchedPrompts,
