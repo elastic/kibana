@@ -8,11 +8,19 @@
 
 import React, { Fragment } from 'react';
 
-import { EuiBasicTable, EuiButton, EuiColorPicker, EuiFieldText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButton,
+  EuiColorPicker,
+  EuiFieldText,
+  EuiFormRow,
+  EuiSelect,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DEFAULT_CONVERTER_COLOR } from '@kbn/field-formats-plugin/common';
+import { DEFAULT_CONVERTER_COLOR, ColorFormat } from '@kbn/field-formats-plugin/common';
 import { DefaultFormatEditor } from '../default/default';
 import { formatId } from './constants';
 
@@ -31,6 +39,7 @@ interface IndexedColor extends Color {
 
 export interface ColorFormatEditorFormatParams {
   colors: Color[];
+  transform: string | undefined;
 }
 
 export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorFormatParams> {
@@ -69,7 +78,8 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
   };
 
   render() {
-    const { formatParams, fieldType } = this.props;
+    const { formatParams, fieldType, format, fieldFormats } = this.props;
+    const { error } = this.state;
 
     const items =
       (formatParams.colors &&
@@ -192,15 +202,25 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
           />
         ),
         render: (item: IndexedColor) => {
+          const formatter = fieldFormats.getInstance(formatId, {
+            ...format.params(),
+            colors: [
+              {
+                ...DEFAULT_CONVERTER_COLOR,
+                regex: '.+',
+                background: item.background,
+                text: item.text,
+              },
+            ],
+          });
+
           return (
             <div
-              style={{
-                background: item.background,
-                color: item.text,
+              // eslint-disable-next-line react/no-danger
+              dangerouslySetInnerHTML={{
+                __html: formatter.getConverterFor('html')('123456'),
               }}
-            >
-              123456
-            </div>
+            />
           );
         },
       },
@@ -232,6 +252,34 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
 
     return (
       <Fragment>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="indexPatternFieldEditor.color.transformLabel"
+              defaultMessage="Transform"
+            />
+          }
+          isInvalid={!!error}
+          error={error}
+        >
+          <EuiSelect
+            data-test-subj="colorEditorTransform"
+            defaultValue={
+              formatParams.transform ?? (format.type as typeof ColorFormat)?.legacyTransformOption
+            }
+            options={((format.type as typeof ColorFormat)?.transformOptions || []).map((option) => {
+              return {
+                value: option.kind,
+                text: option.text,
+              };
+            })}
+            onChange={(e) => {
+              this.onChange({ transform: e.target.value });
+            }}
+            isInvalid={!!error}
+          />
+        </EuiFormRow>
+        <EuiSpacer size="m" />
         <EuiBasicTable items={items} columns={columns} />
         <EuiSpacer size="m" />
         <EuiButton

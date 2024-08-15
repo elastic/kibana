@@ -150,6 +150,7 @@ export class FormatSelectEditor extends PureComponent<
             fieldFormatId={fieldFormatId}
             fieldFormatParams={fieldFormatParams}
             fieldFormatEditors={fieldFormatEditors}
+            fieldFormats={fieldFormats}
             onChange={(params) => {
               this.onFormatChange(fieldFormatId, params);
             }}
