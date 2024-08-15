@@ -6,6 +6,7 @@
  */
 
 import { DEFAULT_SYSTEM_PROMPT_NON_I18N } from '@kbn/security-solution-plugin/public/assistant/content/prompts/system/translations';
+import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { TIMELINE_CHECKBOX } from '../screens/timelines';
 import { CLOSE_FLYOUT } from '../screens/alerts';
 import {
@@ -204,4 +205,14 @@ export const updateConversationTitle = (newTitle: string) => {
   cy.get(CONVERSATION_TITLE + ' input').type(newTitle);
   cy.get(CONVERSATION_TITLE_SAVE_BUTTON).click();
   cy.get(CONVERSATION_TITLE + ' h2').should('have.text', newTitle);
+};
+
+export const mock = () => {
+  cy.intercept('PATCH', `${LIST_ITEM_URL}`, {
+    statusCode: 400,
+    body: {
+      message: 'error to update list item',
+      status_code: 400,
+    },
+  });
 };

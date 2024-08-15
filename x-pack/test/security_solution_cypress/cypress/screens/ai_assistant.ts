@@ -40,6 +40,7 @@ export const QUICK_PROMPT_TITLE_INPUT =
   '[data-test-subj="quickPromptSelector"] [data-test-subj="comboBoxSearchInput"]';
 export const QUICK_PROMPT_BADGE = (b: string) => `[data-test-subj="quickPrompt-${b}"]`;
 export const QUICK_PROMPT_BODY_INPUT = '[data-test-subj="quick-prompt-prompt"]';
+export const SEND_TO_TIMELINE_BUTTON = '[data-test-subj="sendToTimelineEmptyButton"]';
 export const SHOW_ANONYMIZED_BUTTON = '[data-test-subj="showAnonymizedValues"]';
 export const SUBMIT_CHAT = '[data-test-subj="submit-chat"]';
 export const SYSTEM_PROMPT = '[data-test-subj="systemPromptText"]';
@@ -47,6 +48,6 @@ export const SYSTEM_PROMPT_BODY_INPUT = '[data-test-subj="systemPromptModalPromp
 export const SYSTEM_PROMPT_TITLE_INPUT =
   '[data-test-subj="systemPromptSelector"] [data-test-subj="comboBoxSearchInput"]';
 export const SYSTEM_PROMPT_SELECT = (c: string) => `[data-test-subj="systemPrompt-${c}"]`;
+export const UPGRADE_CTA = '[data-test-subj="upgradeLicenseCallToAction"]';
 export const USER_PROMPT = '[data-test-subj="prompt-textarea"]';
 export const WELCOME_SETUP = '[data-test-subj="welcome-setup"]';
-export const UPGRADE_CTA = '[data-test-subj="upgradeLicenseCallToAction"]';

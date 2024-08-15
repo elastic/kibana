@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { FindConversationsResponse, FindPromptsResponse } from '@kbn/elastic-assistant-common';
+import {
+  ConversationCreateProps,
+  ConversationResponse,
+  FindConversationsResponse,
+  FindPromptsResponse,
+} from '@kbn/elastic-assistant-common';
+import { getMockConversation } from '../../objects/assistant';
 import { getSpaceUrl } from '../space';
 import { rootRequest } from './common';
 
@@ -16,6 +22,17 @@ export const getConversations = (spaceId?: string) =>
       ? getSpaceUrl(spaceId, `api/security_ai_assistant/current_user/conversations/_find`)
       : `api/security_ai_assistant/current_user/conversations/_find`,
   });
+
+export const createConversation = (body?: Partial<ConversationCreateProps>) =>
+  cy.currentSpace().then((spaceId) =>
+    rootRequest<ConversationResponse>({
+      method: 'POST',
+      url: spaceId
+        ? getSpaceUrl(spaceId, `api/security_ai_assistant/current_user/conversations`)
+        : `api/security_ai_assistant/current_user/conversations`,
+      body: getMockConversation(body),
+    })
+  );
 
 export const deleteConversations = () => {
   cy.currentSpace().then((spaceId) => {
