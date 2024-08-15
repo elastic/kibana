@@ -8,7 +8,7 @@ deprecated::[7.13.0,Use <<list-connector-types-api>> instead.]
 
 Retrieves a list of all connector types.
 
-NOTE: For the latest details, refer to {kibana-api}/group/endpoint-connectors[connector APIs].
+NOTE: For the latest details, refer to {api-kibana}/group/endpoint-connectors[connector APIs].
 
 [[actions-and-connectors-legacy-api-list-request]]
 ===== Request

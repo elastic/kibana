@@ -6,7 +6,7 @@
 
 Retrieves all connectors.
 
-NOTE: For the latest details, refer to {kibana-api}/group/endpoint-connectors[connector APIs].
+NOTE: For the latest details, refer to {api-kibana}/group/endpoint-connectors[connector APIs].
 
 [discrete]
 [[get-all-connectors-api-request]]

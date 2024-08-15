@@ -8,7 +8,7 @@ Retrieve a list of rule types that the user is authorized to access.
 
 [NOTE]
 ====
-For the latest details, refer to {kibana-api}/group/endpoint-alerting[alerting APIs].
+For the latest details, refer to {api-kibana}/group/endpoint-alerting[alerting APIs].
 ====
 
 

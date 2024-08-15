@@ -1,7 +1,7 @@
 [[cases-api]]
 == Cases APIs
 
-NOTE: For the latest details, refer to {kibana-api}/group/endpoint-cases[case APIs].
+NOTE: For the latest details, refer to {api-kibana}/group/endpoint-cases[case APIs].
 
 //ADD
 include::cases/cases-api-add-comment.asciidoc[leveloffset=+1]

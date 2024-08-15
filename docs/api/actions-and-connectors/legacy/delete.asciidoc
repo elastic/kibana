@@ -10,7 +10,7 @@ Deletes a connector by ID.
 
 When you delete an connector, _it cannot be recovered_.
 
-NOTE: For the latest details, refer to {kibana-api}/group/endpoint-connectors[connector APIs].
+NOTE: For the latest details, refer to {api-kibana}/group/endpoint-connectors[connector APIs].
 
 [[actions-and-connectors-legacy-api-delete-request]]
 ===== Request

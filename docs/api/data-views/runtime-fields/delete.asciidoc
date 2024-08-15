@@ -6,7 +6,7 @@
 
 Delete a runtime field from a data view.
 
-NOTE: For the latest details, refer to {kibana-api}/group/endpoint-data-views[data view APIs].
+NOTE: For the latest details, refer to {api-kibana}/group/endpoint-data-views[data view APIs].
 
 [[data-views-runtime-field-api-delete-request]]
 ==== Request

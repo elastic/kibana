@@ -8,7 +8,7 @@ Disable a rule.
 
 [NOTE]
 ====
-For the latest details, refer to {kibana-api}/group/endpoint-alerting[alerting APIs].
+For the latest details, refer to {api-kibana}/group/endpoint-alerting[alerting APIs].
 ====
 
 [[disable-rule-api-request]]

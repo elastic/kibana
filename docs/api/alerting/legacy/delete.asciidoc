@@ -12,7 +12,7 @@ WARNING: Once you delete an alert, you cannot recover it.
 
 [NOTE]
 ====
-For the latest details, refer to {kibana-api}/group/endpoint-alerting[alerting APIs].
+For the latest details, refer to {api-kibana}/group/endpoint-alerting[alerting APIs].
 ====
 
 [[alerts-api-delete-request]]

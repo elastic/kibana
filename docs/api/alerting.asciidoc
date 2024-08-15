@@ -1,7 +1,7 @@
 [[alerting-apis]]
 == Alerting APIs
 
-NOTE: For the latest details, refer to {kibana-api}/group/endpoint-alerting[alerting APIs].
+NOTE: For the latest details, refer to {api-kibana}/group/endpoint-alerting[alerting APIs].
 
 include::alerting/create_rule.asciidoc[leveloffset=+1]
 include::alerting/delete_rule.asciidoc[leveloffset=+1]

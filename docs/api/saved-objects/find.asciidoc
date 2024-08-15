@@ -8,7 +8,7 @@ deprecated::[8.7.0, To be removed in an upcoming version]
 
 Retrieve a paginated set of {kib} saved objects by various conditions.
 
-NOTE: For the latest details, refer to {kibana-api}/group/endpoint-saved-objects[saved object APIs].
+NOTE: For the latest details, refer to {api-kibana}/group/endpoint-saved-objects[saved object APIs].
 
 [[saved-objects-api-find-request]]
 ==== Request
