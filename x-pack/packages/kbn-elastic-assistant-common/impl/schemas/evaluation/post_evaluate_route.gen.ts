@@ -62,7 +62,7 @@ export const PostEvaluateRequestQuery = z.object({
   /**
    * Output Index parameter description
    */
-  outputIndex: OutputIndex,
+  outputIndex: OutputIndex.optional(),
   /**
    * Project Name parameter description
    */

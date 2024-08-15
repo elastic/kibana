@@ -91,6 +91,7 @@ export const postEvaluateRoute = (
         const assistantContext = ctx.elasticAssistant;
         const actions = ctx.elasticAssistant.actions;
         const logger = assistantContext.logger.get('evaluate');
+
         const telemetry = assistantContext.telemetry;
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 

@@ -157,20 +157,6 @@ export const EVALUATION_PROMPT_DESCRIPTION = i18n.translate(
       'Prompt template given `input`, `reference` and `prediction` template variables.',
   }
 );
-export const EVALUATOR_OUTPUT_INDEX_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.evaluationSettings.evaluatorOutputIndexLabel',
-  {
-    defaultMessage: 'Output index',
-  }
-);
-
-export const EVALUATOR_OUTPUT_INDEX_DESCRIPTION = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.evaluationSettings.evaluatorOutputIndexDescription',
-  {
-    defaultMessage:
-      'Index to write results to. Must be prefixed with ".kibana-elastic-ai-assistant-".',
-  }
-);
 
 export const SHOW_TRACE_OPTIONS = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.evaluationSettings.showTraceOptionsLabel',

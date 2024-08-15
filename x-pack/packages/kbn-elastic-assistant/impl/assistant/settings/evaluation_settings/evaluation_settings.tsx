@@ -42,20 +42,14 @@ const DEFAULT_EVAL_TYPES_OPTIONS = [
   { label: 'esql-validator', disabled: true },
   { label: 'custom', disabled: true },
 ];
-const DEFAULT_OUTPUT_INDEX = '.kibana-elastic-ai-assistant-evaluation-results';
 
 /**
  * Evaluation Settings -- development-only feature for evaluating models
  */
 export const EvaluationSettings: React.FC = React.memo(() => {
-  const { actionTypeRegistry, basePath, http, setTraceOptions, toasts, traceOptions } =
-    useAssistantContext();
+  const { actionTypeRegistry, http, setTraceOptions, toasts, traceOptions } = useAssistantContext();
   const { data: connectors } = useLoadConnectors({ http });
-  const {
-    data: evalResponse,
-    mutate: performEvaluation,
-    isLoading: isPerformingEvaluation,
-  } = usePerformEvaluation({
+  const { mutate: performEvaluation, isLoading: isPerformingEvaluation } = usePerformEvaluation({
     http,
     toasts,
   });
@@ -73,14 +67,6 @@ export const EvaluationSettings: React.FC = React.memo(() => {
       setRunName(e.target.value);
     },
     [setRunName]
-  );
-  // Local Output Index
-  const [outputIndex, setOutputIndex] = useState(DEFAULT_OUTPUT_INDEX);
-  const onOutputIndexChange = useCallback(
-    (e) => {
-      setOutputIndex(e.target.value);
-    },
-    [setOutputIndex]
   );
   /** Trace Options **/
   const [showTraceOptions, setShowTraceOptions] = useState(false);
@@ -259,9 +245,7 @@ export const EvaluationSettings: React.FC = React.memo(() => {
 
   // Required fields by eval API
   const isPerformEvaluationDisabled =
-    selectedModelOptions.length === 0 ||
-    selectedGraphOptions.length === 0 ||
-    outputIndex.length === 0;
+    selectedModelOptions.length === 0 || selectedGraphOptions.length === 0;
 
   // Perform Evaluation Button
   const handlePerformEvaluation = useCallback(async () => {
@@ -273,7 +257,6 @@ export const EvaluationSettings: React.FC = React.memo(() => {
       evalModel: selectedEvaluatorModelOptions.flatMap((option) => option.key ?? []),
       evalPrompt,
       evaluationType: selectedEvaluationType.map((option) => option.label),
-      outputIndex,
       runName,
     };
     performEvaluation(evalParams);
@@ -281,7 +264,6 @@ export const EvaluationSettings: React.FC = React.memo(() => {
     datasetName,
     datasetText,
     evalPrompt,
-    outputIndex,
     performEvaluation,
     runName,
     selectedGraphOptions,
@@ -389,18 +371,6 @@ export const EvaluationSettings: React.FC = React.memo(() => {
               value={datasetText}
             />
           )}
-        </EuiFormRow>
-        <EuiFormRow
-          display="rowCompressed"
-          label={i18n.EVALUATOR_OUTPUT_INDEX_LABEL}
-          fullWidth
-          helpText={i18n.EVALUATOR_OUTPUT_INDEX_DESCRIPTION}
-        >
-          <EuiFieldText
-            value={outputIndex}
-            onChange={onOutputIndexChange}
-            aria-label="evaluation-output-index-textfield"
-          />
         </EuiFormRow>
         <EuiText
           size={'xs'}

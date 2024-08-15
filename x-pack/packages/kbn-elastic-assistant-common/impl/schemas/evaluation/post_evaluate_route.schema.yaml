@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Post Evaluate API endpoint
-  version: '1'
+  version: "1"
 paths:
   /internal/elastic_assistant/evaluate:
     post:
@@ -17,7 +17,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PostEvaluateBody'
+              $ref: "#/components/schemas/PostEvaluateBody"
       parameters:
         - name: agents
           in: query
@@ -49,9 +49,8 @@ paths:
         - name: outputIndex
           in: query
           description: Output Index parameter description
-          required: true
           schema:
-            $ref: '#/components/schemas/OutputIndex'
+            $ref: "#/components/schemas/OutputIndex"
         - name: projectName
           in: query
           description: Project Name parameter description
@@ -63,7 +62,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
@@ -77,7 +76,7 @@ paths:
                 required:
                   - evaluationId
                   - success
-        '400':
+        "400":
           description: Generic Error
           content:
             application/json:
@@ -94,7 +93,7 @@ components:
   schemas:
     OutputIndex:
       type: string
-      pattern: '^.kibana-elastic-ai-assistant-'
+      pattern: "^.kibana-elastic-ai-assistant-"
     DatasetItem:
       type: object
       properties:
@@ -116,12 +115,12 @@ components:
     Dataset:
       type: array
       items:
-        $ref: '#/components/schemas/DatasetItem'
+        $ref: "#/components/schemas/DatasetItem"
       default: []
     PostEvaluateBody:
       type: object
       properties:
         dataset:
-          $ref: '#/components/schemas/Dataset'
+          $ref: "#/components/schemas/Dataset"
         evalPrompt:
           type: string
