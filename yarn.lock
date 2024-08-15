@@ -1767,10 +1767,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@95.6.0":
-  version "95.6.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-95.6.0.tgz#432845333bd0d64aa816222d192db4715cc75987"
-  integrity sha512-OnErgFixCcYcDpH3iu1fIG5FxoJ+mmHtKOVI/aqeC0beEeJJSZd8uqcLh4iJf9tfCEb+ApykTIuRGi6XTcpvjw==
+"@elastic/eui@95.7.0":
+  version "95.7.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-95.7.0.tgz#50edc43d3aac1a1ea87ec56a04ec0bc91e7e32a1"
+  integrity sha512-T6tihdAtE3JhXaTMHagidXWB5Sv6c++5vHdPj7kyYGjT1fDPpJ/fuTZTfH2GJLc56g63zBdDNMkLnXZYb0ld4Q==
   dependencies:
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -3660,6 +3660,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-favorites-public@link:packages/content-management/favorites/favorites_public":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-management-favorites-server@link:packages/content-management/favorites/favorites_server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-plugin@link:src/plugins/content_management":
   version "0.0.0"
   uid ""
@@ -5309,6 +5317,10 @@
   uid ""
 
 "@kbn/investigate-plugin@link:x-pack/plugins/observability_solution/investigate":
+  version "0.0.0"
+  uid ""
+
+"@kbn/investigation-shared@link:packages/kbn-investigation-shared":
   version "0.0.0"
   uid ""
 
@@ -16597,9 +16609,9 @@ element-resize-detector@^1.2.2:
     batch-processor "1.0.0"
 
 elliptic@^6.0.0, elliptic@^6.5.4:
-  version "6.5.4"
-  resolved "https://registry.yarnpkg.com/elliptic/-/elliptic-6.5.4.tgz#da37cebd31e79a1367e941b592ed1fbebd58abbb"
-  integrity sha512-iLhC6ULemrljPZb+QutR5TQGB+pdW6KGD5RSegS+8sorOZT+rdQFbsQFJgvN3eRqNALqJer4oQ16YvJHlU8hzQ==
+  version "6.5.7"
+  resolved "https://registry.yarnpkg.com/elliptic/-/elliptic-6.5.7.tgz#8ec4da2cb2939926a1b9a73619d768207e647c8b"
+  integrity sha512-ESVCtTwiA+XhY3wyh24QqRGBoP3rEdDUl3EDUUo9tft074fi19IrdpH7hLCMMP3CIj7jb3W96rn8lt/BqIlt5Q==
   dependencies:
     bn.js "^4.11.9"
     brorand "^1.1.0"
@@ -30170,10 +30182,10 @@ terser@^4.1.2, terser@^4.6.3:
     source-map "~0.6.1"
     source-map-support "~0.5.12"
 
-terser@^5.26.0, terser@^5.3.4, terser@^5.31.3, terser@^5.9.0:
-  version "5.31.3"
-  resolved "https://registry.yarnpkg.com/terser/-/terser-5.31.3.tgz#b24b7beb46062f4653f049eea4f0cd165d0f0c38"
-  integrity sha512-pAfYn3NIZLyZpa83ZKigvj6Rn9c/vd5KfYGX7cN1mnzqgDcxWvrU5ZtAfIKhEXz9nRecw4z3LXkjaq96/qZqAA==
+terser@^5.26.0, terser@^5.3.4, terser@^5.31.4, terser@^5.9.0:
+  version "5.31.6"
+  resolved "https://registry.yarnpkg.com/terser/-/terser-5.31.6.tgz#c63858a0f0703988d0266a82fcbf2d7ba76422b1"
+  integrity sha512-PQ4DAriWzKj+qgehQ7LK5bQqCFNMmlhjR2PFFLuqGCpuCAauxemVBWwWOxo3UIwWQx8+Pr61Df++r76wDmkQBg==
   dependencies:
     "@jridgewell/source-map" "^0.3.3"
     acorn "^8.8.2"
