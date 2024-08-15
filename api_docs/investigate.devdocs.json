@@ -1152,24 +1152,6 @@
             }
           ],
           "returnComment": []
-        },
-        {
-          "parentPluginId": "investigate",
-          "id": "def-public.InvestigatePublicStart.useInvestigateWidget",
-          "type": "Function",
-          "tags": [],
-          "label": "useInvestigateWidget",
-          "description": [],
-          "signature": [
-            "() => ",
-            "UseInvestigateWidgetApi",
-            "<{}, {}> | undefined"
-          ],
-          "path": "x-pack/plugins/observability_solution/investigate/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [],
-          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -1789,19 +1771,10 @@
           {
             "parentPluginId": "investigate",
             "id": "def-common.InvestigationNote.createdBy",
-            "type": "Object",
+            "type": "string",
             "tags": [],
             "label": "createdBy",
             "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.AuthenticatedUser",
-                "text": "AuthenticatedUser"
-              }
-            ],
             "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
             "deprecated": false,
             "trackAdoption": false

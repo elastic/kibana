@@ -5066,6 +5066,1348 @@ paths:
       summary: Search for annotations
       tags:
         - APM annotations
+  /api/cases:
+    delete:
+      description: >
+        You must have `read` or `all` privileges and the `delete` sub-feature
+        privilege for the **Cases** feature in the **Management**,
+        **Observability**, or **Security** section of the Kibana feature
+        privileges, depending on the owner of the cases you're deleting.
+      operationId: deleteCaseDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_kbn_xsrf'
+        - $ref: '#/components/parameters/Cases_ids'
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_4xx_response'
+          description: Authorization information is missing or invalid.
+      summary: Delete cases
+      tags:
+        - cases
+    patch:
+      description: >
+        You must have `all` privileges for the **Cases** feature in the 
+        **Management**, **Observability**, or **Security** section of the
+        Kibana  feature privileges, depending on the owner of the case you're
+        updating.
+      operationId: updateCaseDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_kbn_xsrf'
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            examples:
+              updateCaseRequest:
+                $ref: '#/components/examples/Cases_update_case_request'
+            schema:
+              $ref: '#/components/schemas/Cases_update_case_request'
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                updateCaseResponse:
+                  $ref: '#/components/examples/Cases_update_case_response'
+              schema:
+                items:
+                  $ref: '#/components/schemas/Cases_case_response_properties'
+                type: array
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_4xx_response'
+          description: Authorization information is missing or invalid.
+      summary: Update cases
+      tags:
+        - cases
+    post:
+      description: >
+        You must have `all` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the
+        Kibana  feature privileges, depending on the owner of the case you're
+        creating.
+      operationId: createCaseDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_kbn_xsrf'
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            examples:
+              createCaseRequest:
+                $ref: '#/components/examples/Cases_create_case_request'
+            schema:
+              $ref: '#/components/schemas/Cases_create_case_request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                createCaseResponse:
+                  $ref: '#/components/examples/Cases_create_case_response'
+              schema:
+                $ref: '#/components/schemas/Cases_case_response_properties'
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_4xx_response'
+          description: Authorization information is missing or invalid.
+      summary: Create a case
+      tags:
+        - cases
+  /api/cases/_find:
+    get:
+      description: >
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're seeking.
+      operationId: findCasesDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_assignees'
+        - $ref: '#/components/parameters/Cases_category'
+        - $ref: '#/components/parameters/Cases_defaultSearchOperator'
+        - $ref: '#/components/parameters/Cases_from'
+        - $ref: '#/components/parameters/Cases_owner'
+        - $ref: '#/components/parameters/Cases_page_index'
+        - $ref: '#/components/parameters/Cases_page_size'
+        - $ref: '#/components/parameters/Cases_reporters'
+        - $ref: '#/components/parameters/Cases_search'
+        - $ref: '#/components/parameters/Cases_searchFields'
+        - $ref: '#/components/parameters/Cases_severity'
+        - $ref: '#/components/parameters/Cases_sortField'
+        - $ref: '#/components/parameters/Cases_sort_order'
+        - $ref: '#/components/parameters/Cases_status'
+        - $ref: '#/components/parameters/Cases_tags'
+        - $ref: '#/components/parameters/Cases_to'
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                findCaseResponse:
+                  $ref: '#/components/examples/Cases_find_case_response'
+              schema:
+                type: object
+                properties:
+                  cases:
+                    items:
+                      $ref: '#/components/schemas/Cases_case_response_properties'
+                    maxItems: 10000
+                    type: array
+                  count_closed_cases:
+                    type: integer
+                  count_in_progress_cases:
+                    type: integer
+                  count_open_cases:
+                    type: integer
+                  page:
+                    type: integer
+                  per_page:
+                    type: integer
+                  total:
+                    type: integer
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_4xx_response'
+          description: Authorization information is missing or invalid.
+      summary: Search cases
+      tags:
+        - cases
+  '/api/cases/{caseId}':
+    get:
+      description: >
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the case you're seeking.
+      operationId: getCaseDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_case_id'
+        - $ref: '#/components/parameters/Cases_includeComments'
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                getDefaultCaseResponse:
+                  $ref: '#/components/examples/Cases_get_case_response'
+                getDefaultObservabilityCaseReponse:
+                  $ref: '#/components/examples/Cases_get_case_observability_response'
+              schema:
+                $ref: '#/components/schemas/Cases_case_response_properties'
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_4xx_response'
+          description: Authorization information is missing or invalid.
+      summary: Get case information
+      tags:
+        - cases
+  '/api/cases/{caseId}/alerts':
+    get:
+      description: >
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're seeking.
+      operationId: getCaseAlertsDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_case_id'
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                getCaseAlertsResponse:
+                  $ref: '#/components/examples/Cases_get_case_alerts_response'
+              schema:
+                items:
+                  $ref: '#/components/schemas/Cases_alert_response_properties'
+                type: array
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_4xx_response'
+          description: Authorization information is missing or invalid.
+      summary: Get all alerts for a case
+      tags:
+        - cases
+      x-technical-preview: true
+  '/api/cases/{caseId}/comments':
+    delete:
+      description: >
+        Deletes all comments and alerts from a case. You must have `all`
+        privileges for the **Cases** feature in the **Management**,
+        **Observability**, or **Security** section of the Kibana feature
+        privileges, depending on the owner of the cases you're deleting.
+      operationId: deleteCaseCommentsDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_kbn_xsrf'
+        - $ref: '#/components/parameters/Cases_case_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_4xx_response'
+          description: Authorization information is missing or invalid.
+      summary: Delete all case comments and alerts
+      tags:
+        - cases
+    get:
+      deprecated: true
+      description: >
+        Deprecated in 8.1.0. This API is deprecated and will be removed in a
+        future release; instead, use the get case comment API, which requires a
+        comment identifier in the path. You must have `read` privileges for the
+        **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on the
+        owner of the cases with the comments you're seeking.
+      operationId: getAllCaseCommentsDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_case_id'
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_case_response_properties'
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_4xx_response'
+          description: Authorization information is missing or invalid.
+      summary: Get all case comments
+      tags:
+        - cases
+    patch:
+      description: >
+        You must have `all` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the case you're updating.
+        NOTE: You cannot change the comment type or the owner of a comment.
+      operationId: updateCaseCommentDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_kbn_xsrf'
+        - $ref: '#/components/parameters/Cases_case_id'
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            examples:
+              updateCaseCommentRequest:
+                $ref: '#/components/examples/Cases_update_comment_request'
+            schema:
+              $ref: '#/components/schemas/Cases_update_case_comment_request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                updateCaseCommentResponse:
+                  $ref: '#/components/examples/Cases_update_comment_response'
+              schema:
+                $ref: '#/components/schemas/Cases_case_response_properties'
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_4xx_response'
+          description: Authorization information is missing or invalid.
+      summary: Update a case comment or alert
+      tags:
+        - cases
+    post:
+      description: >
+        You must have `all` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the case you're creating.
+        NOTE: Each case can have a maximum of 1,000 alerts.
+      operationId: addCaseCommentDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_kbn_xsrf'
+        - $ref: '#/components/parameters/Cases_case_id'
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            examples:
+              createCaseCommentRequest:
+                $ref: '#/components/examples/Cases_add_comment_request'
+            schema:
+              $ref: '#/components/schemas/Cases_add_case_comment_request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                createCaseCommentResponse:
+                  $ref: '#/components/examples/Cases_add_comment_response'
+              schema:
+                $ref: '#/components/schemas/Cases_case_response_properties'
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_4xx_response'
+          description: Authorization information is missing or invalid.
+      summary: Add a case comment or alert
+      tags:
+        - cases
+  '/api/cases/{caseId}/comments/_find':
+    get:
+      description: >
+        Retrieves a paginated list of comments for a case. You must have `read`
+        privileges for the **Cases** feature in the **Management**,
+        **Observability**, or **Security** section of the Kibana feature
+        privileges, depending on the owner of the cases with the comments you're
+        seeking.
+      operationId: findCaseCommentsDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_case_id'
+        - $ref: '#/components/parameters/Cases_page_index'
+        - $ref: '#/components/parameters/Cases_page_size'
+        - $ref: '#/components/parameters/Cases_sort_order'
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_case_response_properties'
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_4xx_response'
+          description: Authorization information is missing or invalid.
+      summary: Find case comments and alerts
+      tags:
+        - cases
+  '/api/cases/{caseId}/comments/{commentId}':
+    delete:
+      description: >
+        You must have `all` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're deleting.
+      operationId: deleteCaseCommentDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_kbn_xsrf'
+        - $ref: '#/components/parameters/Cases_case_id'
+        - $ref: '#/components/parameters/Cases_comment_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_4xx_response'
+          description: Authorization information is missing or invalid.
+      summary: Delete a case comment or alert
+      tags:
+        - cases
+    get:
+      description: >
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases with the
+        comments you're seeking.
+      operationId: getCaseCommentDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_case_id'
+        - $ref: '#/components/parameters/Cases_comment_id'
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                getCaseCommentResponse:
+                  $ref: '#/components/examples/Cases_get_comment_response'
+              schema:
+                oneOf:
+                  - $ref: >-
+                      #/components/schemas/Cases_alert_comment_response_properties
+                  - $ref: >-
+                      #/components/schemas/Cases_user_comment_response_properties
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_4xx_response'
+          description: Authorization information is missing or invalid.
+      summary: Get a case comment or alert
+      tags:
+        - cases
+  '/api/cases/{caseId}/connector/{connectorId}/_push':
+    post:
+      description: >
+        You must have `all` privileges for the **Actions and Connectors**
+        feature in the **Management** section of the Kibana feature privileges.
+        You must also have `all` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the case you're pushing.
+      operationId: pushCaseDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_case_id'
+        - $ref: '#/components/parameters/Cases_connector_id'
+        - $ref: '#/components/parameters/Cases_kbn_xsrf'
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              nullable: true
+              type: object
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                pushCaseResponse:
+                  $ref: '#/components/examples/Cases_push_case_response'
+              schema:
+                $ref: '#/components/schemas/Cases_case_response_properties'
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_4xx_response'
+          description: Authorization information is missing or invalid.
+      summary: Push a case to an external service
+      tags:
+        - cases
+  '/api/cases/{caseId}/user_actions':
+    get:
+      deprecated: true
+      description: >
+        Returns all user activity for a case. Deprecated in 8.1.0. This API is
+        deprecated and will be removed in a future release; use the find user
+        actions API instead. You must have `read` privileges for the **Cases**
+        feature in the **Management**, **Observability**, or **Security**
+        section of the Kibana feature privileges, depending on the owner of the
+        case you're seeking.
+      operationId: getCaseActivityDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_case_id'
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Cases_user_actions_response_properties'
+                type: array
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_4xx_response'
+          description: Authorization information is missing or invalid.
+      summary: Get case activity
+      tags:
+        - cases
+  '/api/cases/{caseId}/user_actions/_find':
+    get:
+      description: >
+        Retrives a paginated list of user activity for a case. You must have
+        `read` privileges for the **Cases** feature in the **Management**,
+        **Observability**, or **Security** section of the Kibana feature
+        privileges, depending on the owner of the case you're seeking.
+      operationId: findCaseActivityDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_case_id'
+        - $ref: '#/components/parameters/Cases_page_index'
+        - $ref: '#/components/parameters/Cases_page_size'
+        - $ref: '#/components/parameters/Cases_sort_order'
+        - $ref: '#/components/parameters/Cases_user_action_types'
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                findCaseActivityResponse:
+                  $ref: '#/components/examples/Cases_find_case_activity_response'
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer
+                  total:
+                    type: integer
+                  userActions:
+                    items:
+                      $ref: >-
+                        #/components/schemas/Cases_user_actions_find_response_properties
+                    maxItems: 10000
+                    type: array
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_4xx_response'
+          description: Authorization information is missing or invalid.
+      summary: Find case activity
+      tags:
+        - cases
+  '/api/cases/alerts/{alertId}':
+    get:
+      description: >
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're seeking.
+      operationId: getCasesByAlertDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_alert_id'
+        - $ref: '#/components/parameters/Cases_owner'
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                example:
+                  - id: 06116b80-e1c3-11ec-be9b-9b1838238ee6
+                    title: security_case
+                items:
+                  type: object
+                  properties:
+                    id:
+                      description: The case identifier.
+                      type: string
+                    title:
+                      description: The case title.
+                      type: string
+                maxItems: 10000
+                type: array
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_4xx_response'
+          description: Authorization information is missing or invalid.
+      summary: Get cases for an alert
+      tags:
+        - cases
+      x-technical-preview: true
+  /api/cases/configure:
+    get:
+      description: >
+        Get setting details such as the closure type, custom fields, templatse,
+        and the default connector for cases. You must have `read` privileges for
+        the **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on
+        where the cases were created.
+      operationId: getCaseConfigurationDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_owner'
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                getConfigurationResponse:
+                  $ref: '#/components/examples/Cases_get_case_configuration_response'
+              schema:
+                items:
+                  type: object
+                  properties:
+                    closure_type:
+                      $ref: '#/components/schemas/Cases_closure_types'
+                    connector:
+                      type: object
+                      properties:
+                        fields:
+                          description: >-
+                            The fields specified in the case configuration are
+                            not used and are not propagated to individual cases,
+                            therefore it is recommended to set it to `null`.
+                          nullable: true
+                          type: object
+                        id:
+                          description: >-
+                            The identifier for the connector. If you do not want
+                            a default connector, use `none`. To retrieve
+                            connector IDs, use the find connectors API.
+                          example: none
+                          type: string
+                        name:
+                          description: >-
+                            The name of the connector. If you do not want a
+                            default connector, use `none`. To retrieve connector
+                            names, use the find connectors API.
+                          example: none
+                          type: string
+                        type:
+                          $ref: '#/components/schemas/Cases_connector_types'
+                    created_at:
+                      example: '2022-06-01T17:07:17.767Z'
+                      format: date-time
+                      type: string
+                    created_by:
+                      type: object
+                      properties:
+                        email:
+                          example: null
+                          nullable: true
+                          type: string
+                        full_name:
+                          example: null
+                          nullable: true
+                          type: string
+                        profile_uid:
+                          example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                          type: string
+                        username:
+                          example: elastic
+                          nullable: true
+                          type: string
+                      required:
+                        - email
+                        - full_name
+                        - username
+                    customFields:
+                      description: Custom fields configuration details.
+                      items:
+                        type: object
+                        properties:
+                          defaultValue:
+                            description: >
+                              A default value for the custom field. If the
+                              `type` is `text`, the default value must be a
+                              string. If the `type` is `toggle`, the default
+                              value must be boolean.
+                            oneOf:
+                              - type: string
+                              - type: boolean
+                          key:
+                            description: >
+                              A unique key for the custom field. Must be lower
+                              case and composed only of a-z, 0-9, '_', and '-'
+                              characters. It is used in API calls to refer to a
+                              specific custom field.
+                            maxLength: 36
+                            minLength: 1
+                            type: string
+                          label:
+                            description: >-
+                              The custom field label that is displayed in the
+                              case.
+                            maxLength: 50
+                            minLength: 1
+                            type: string
+                          type:
+                            description: The type of the custom field.
+                            enum:
+                              - text
+                              - toggle
+                            type: string
+                          required:
+                            description: >
+                              Indicates whether the field is required. If
+                              `false`, the custom field can be set to null or
+                              omitted when a case is created or updated.
+                            type: boolean
+                      type: array
+                    error:
+                      example: null
+                      nullable: true
+                      type: string
+                    id:
+                      example: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
+                      type: string
+                    mappings:
+                      items:
+                        type: object
+                        properties:
+                          action_type:
+                            example: overwrite
+                            type: string
+                          source:
+                            example: title
+                            type: string
+                          target:
+                            example: summary
+                            type: string
+                      type: array
+                    owner:
+                      $ref: '#/components/schemas/Cases_owners'
+                    templates:
+                      $ref: '#/components/schemas/Cases_templates'
+                    updated_at:
+                      example: '2022-06-01T19:58:48.169Z'
+                      format: date-time
+                      nullable: true
+                      type: string
+                    updated_by:
+                      nullable: true
+                      type: object
+                      properties:
+                        email:
+                          example: null
+                          nullable: true
+                          type: string
+                        full_name:
+                          example: null
+                          nullable: true
+                          type: string
+                        profile_uid:
+                          example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                          type: string
+                        username:
+                          example: elastic
+                          nullable: true
+                          type: string
+                      required:
+                        - email
+                        - full_name
+                        - username
+                    version:
+                      example: WzIwNzMsMV0=
+                      type: string
+                type: array
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_4xx_response'
+          description: Authorization information is missing or invalid.
+      summary: Get case settings
+      tags:
+        - cases
+    post:
+      description: >
+        Case settings include external connection details, custom fields, and
+        templates.  Connectors are used to interface with external systems. You
+        must create a connector before you can use it in your cases. If you set
+        a default connector, it is automatically selected when you create cases
+        in Kibana. If you use the create case API, however, you must still
+        specify all of the connector details. You must have `all` privileges for
+        the **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on
+        where you are creating cases.
+      operationId: setCaseConfigurationDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_kbn_xsrf'
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            examples:
+              setCaseConfigRequest:
+                $ref: '#/components/examples/Cases_set_case_configuration_request'
+            schema:
+              $ref: '#/components/schemas/Cases_set_case_configuration_request'
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                setCaseConfigResponse:
+                  $ref: '#/components/examples/Cases_set_case_configuration_response'
+              schema:
+                type: object
+                properties:
+                  closure_type:
+                    $ref: '#/components/schemas/Cases_closure_types'
+                  connector:
+                    type: object
+                    properties:
+                      fields:
+                        description: >-
+                          The fields specified in the case configuration are not
+                          used and are not propagated to individual cases,
+                          therefore it is recommended to set it to `null`.
+                        nullable: true
+                        type: object
+                      id:
+                        description: >-
+                          The identifier for the connector. If you do not want a
+                          default connector, use `none`. To retrieve connector
+                          IDs, use the find connectors API.
+                        example: none
+                        type: string
+                      name:
+                        description: >-
+                          The name of the connector. If you do not want a
+                          default connector, use `none`. To retrieve connector
+                          names, use the find connectors API.
+                        example: none
+                        type: string
+                      type:
+                        $ref: '#/components/schemas/Cases_connector_types'
+                  created_at:
+                    example: '2022-06-01T17:07:17.767Z'
+                    format: date-time
+                    type: string
+                  created_by:
+                    type: object
+                    properties:
+                      email:
+                        example: null
+                        nullable: true
+                        type: string
+                      full_name:
+                        example: null
+                        nullable: true
+                        type: string
+                      profile_uid:
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                        type: string
+                      username:
+                        example: elastic
+                        nullable: true
+                        type: string
+                    required:
+                      - email
+                      - full_name
+                      - username
+                  customFields:
+                    description: Custom fields configuration details.
+                    items:
+                      type: object
+                      properties:
+                        defaultValue:
+                          description: >
+                            A default value for the custom field. If the `type`
+                            is `text`, the default value must be a string. If
+                            the `type` is `toggle`, the default value must be
+                            boolean.
+                          oneOf:
+                            - type: string
+                            - type: boolean
+                        key:
+                          description: >
+                            A unique key for the custom field. Must be lower
+                            case and composed only of a-z, 0-9, '_', and '-'
+                            characters. It is used in API calls to refer to a
+                            specific custom field.
+                          maxLength: 36
+                          minLength: 1
+                          type: string
+                        label:
+                          description: >-
+                            The custom field label that is displayed in the
+                            case.
+                          maxLength: 50
+                          minLength: 1
+                          type: string
+                        type:
+                          description: The type of the custom field.
+                          enum:
+                            - text
+                            - toggle
+                          type: string
+                        required:
+                          description: >
+                            Indicates whether the field is required. If `false`,
+                            the custom field can be set to null or omitted when
+                            a case is created or updated.
+                          type: boolean
+                    type: array
+                  error:
+                    example: null
+                    nullable: true
+                    type: string
+                  id:
+                    example: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
+                    type: string
+                  mappings:
+                    items:
+                      type: object
+                      properties:
+                        action_type:
+                          example: overwrite
+                          type: string
+                        source:
+                          example: title
+                          type: string
+                        target:
+                          example: summary
+                          type: string
+                    type: array
+                  owner:
+                    $ref: '#/components/schemas/Cases_owners'
+                  templates:
+                    $ref: '#/components/schemas/Cases_templates'
+                  updated_at:
+                    example: '2022-06-01T19:58:48.169Z'
+                    format: date-time
+                    nullable: true
+                    type: string
+                  updated_by:
+                    nullable: true
+                    type: object
+                    properties:
+                      email:
+                        example: null
+                        nullable: true
+                        type: string
+                      full_name:
+                        example: null
+                        nullable: true
+                        type: string
+                      profile_uid:
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                        type: string
+                      username:
+                        example: elastic
+                        nullable: true
+                        type: string
+                    required:
+                      - email
+                      - full_name
+                      - username
+                  version:
+                    example: WzIwNzMsMV0=
+                    type: string
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_4xx_response'
+          description: Authorization information is missing or invalid.
+      summary: Add case settings
+      tags:
+        - cases
+  '/api/cases/configure/{configurationId}':
+    patch:
+      description: >
+        Updates setting details such as the closure type, custom fields,
+        templates, and the default connector for cases. Connectors are used to
+        interface with external systems. You must create a connector before you
+        can use it in your cases. You must have `all` privileges for the
+        **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on
+        where the case was created.
+      operationId: updateCaseConfigurationDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_kbn_xsrf'
+        - $ref: '#/components/parameters/Cases_configuration_id'
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            examples:
+              updateCaseConfigurationRequest:
+                $ref: '#/components/examples/Cases_update_case_configuration_request'
+            schema:
+              $ref: '#/components/schemas/Cases_update_case_configuration_request'
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                updateCaseConfigurationResponse:
+                  $ref: >-
+                    #/components/examples/Cases_update_case_configuration_response
+              schema:
+                type: object
+                properties:
+                  closure_type:
+                    $ref: '#/components/schemas/Cases_closure_types'
+                  connector:
+                    type: object
+                    properties:
+                      fields:
+                        description: >-
+                          The fields specified in the case configuration are not
+                          used and are not propagated to individual cases,
+                          therefore it is recommended to set it to `null`.
+                        nullable: true
+                        type: object
+                      id:
+                        description: >-
+                          The identifier for the connector. If you do not want a
+                          default connector, use `none`. To retrieve connector
+                          IDs, use the find connectors API.
+                        example: none
+                        type: string
+                      name:
+                        description: >-
+                          The name of the connector. If you do not want a
+                          default connector, use `none`. To retrieve connector
+                          names, use the find connectors API.
+                        example: none
+                        type: string
+                      type:
+                        $ref: '#/components/schemas/Cases_connector_types'
+                  created_at:
+                    example: '2022-06-01T17:07:17.767Z'
+                    format: date-time
+                    type: string
+                  created_by:
+                    type: object
+                    properties:
+                      email:
+                        example: null
+                        nullable: true
+                        type: string
+                      full_name:
+                        example: null
+                        nullable: true
+                        type: string
+                      profile_uid:
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                        type: string
+                      username:
+                        example: elastic
+                        nullable: true
+                        type: string
+                    required:
+                      - email
+                      - full_name
+                      - username
+                  customFields:
+                    description: Custom fields configuration details.
+                    items:
+                      type: object
+                      properties:
+                        defaultValue:
+                          description: >
+                            A default value for the custom field. If the `type`
+                            is `text`, the default value must be a string. If
+                            the `type` is `toggle`, the default value must be
+                            boolean.
+                          oneOf:
+                            - type: string
+                            - type: boolean
+                        key:
+                          description: >
+                            A unique key for the custom field. Must be lower
+                            case and composed only of a-z, 0-9, '_', and '-'
+                            characters. It is used in API calls to refer to a
+                            specific custom field.
+                          maxLength: 36
+                          minLength: 1
+                          type: string
+                        label:
+                          description: >-
+                            The custom field label that is displayed in the
+                            case.
+                          maxLength: 50
+                          minLength: 1
+                          type: string
+                        type:
+                          description: The type of the custom field.
+                          enum:
+                            - text
+                            - toggle
+                          type: string
+                        required:
+                          description: >
+                            Indicates whether the field is required. If `false`,
+                            the custom field can be set to null or omitted when
+                            a case is created or updated.
+                          type: boolean
+                    type: array
+                  error:
+                    example: null
+                    nullable: true
+                    type: string
+                  id:
+                    example: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
+                    type: string
+                  mappings:
+                    items:
+                      type: object
+                      properties:
+                        action_type:
+                          example: overwrite
+                          type: string
+                        source:
+                          example: title
+                          type: string
+                        target:
+                          example: summary
+                          type: string
+                    type: array
+                  owner:
+                    $ref: '#/components/schemas/Cases_owners'
+                  templates:
+                    $ref: '#/components/schemas/Cases_templates'
+                  updated_at:
+                    example: '2022-06-01T19:58:48.169Z'
+                    format: date-time
+                    nullable: true
+                    type: string
+                  updated_by:
+                    nullable: true
+                    type: object
+                    properties:
+                      email:
+                        example: null
+                        nullable: true
+                        type: string
+                      full_name:
+                        example: null
+                        nullable: true
+                        type: string
+                      profile_uid:
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                        type: string
+                      username:
+                        example: elastic
+                        nullable: true
+                        type: string
+                    required:
+                      - email
+                      - full_name
+                      - username
+                  version:
+                    example: WzIwNzMsMV0=
+                    type: string
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_4xx_response'
+          description: Authorization information is missing or invalid.
+      summary: Update case settings
+      tags:
+        - cases
+  /api/cases/configure/connectors/_find:
+    get:
+      description: >
+        Get information about connectors that are supported for use in cases.
+        You must have `read` privileges for the **Actions and Connectors**
+        feature in the **Management** section of the Kibana feature privileges.
+      operationId: findCaseConnectorsDefaultSpace
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                findConnectorResponse:
+                  $ref: '#/components/examples/Cases_find_connector_response'
+              schema:
+                items:
+                  type: object
+                  properties:
+                    actionTypeId:
+                      $ref: '#/components/schemas/Cases_connector_types'
+                    config:
+                      additionalProperties: true
+                      type: object
+                      properties:
+                        apiUrl:
+                          type: string
+                        projectKey:
+                          type: string
+                    id:
+                      type: string
+                    isDeprecated:
+                      type: boolean
+                    isMissingSecrets:
+                      type: boolean
+                    isPreconfigured:
+                      type: boolean
+                    name:
+                      type: string
+                    referencedByCount:
+                      type: integer
+                maxItems: 1000
+                type: array
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_4xx_response'
+          description: Authorization information is missing or invalid.
+      summary: Get case connectors
+      tags:
+        - cases
+  /api/cases/reporters:
+    get:
+      description: >
+        Returns information about the users who opened cases. You must have read
+        privileges for the **Cases** feature in the **Management**,
+        **Observability**, or **Security** section of the Kibana feature
+        privileges, depending on the owner of the cases. The API returns
+        information about the users as they existed at the time of the case
+        creation, including their name, full name, and email address. If any of
+        those details change thereafter or if a user is deleted, the information
+        returned by this API is unchanged.
+      operationId: getCaseReportersDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_owner'
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                getReportersResponse:
+                  $ref: '#/components/examples/Cases_get_reporters_response'
+              schema:
+                items:
+                  type: object
+                  properties:
+                    email:
+                      example: null
+                      nullable: true
+                      type: string
+                    full_name:
+                      example: null
+                      nullable: true
+                      type: string
+                    profile_uid:
+                      example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                      type: string
+                    username:
+                      example: elastic
+                      nullable: true
+                      type: string
+                  required:
+                    - email
+                    - full_name
+                    - username
+                maxItems: 10000
+                type: array
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_4xx_response'
+          description: Authorization information is missing or invalid.
+      summary: Get case creators
+      tags:
+        - cases
+  /api/cases/status:
+    get:
+      deprecated: true
+      description: >
+        Returns the number of cases that are open, closed, and in progress.
+        Deprecated in 8.1.0. This API is deprecated and will be removed in a
+        future release; use the find cases API instead. You must have `read`
+        privileges for the **Cases** feature in the **Management**,
+        **Observability**, or **Security** section of the Kibana feature
+        privileges, depending on the owner of the cases you're seeking.
+      operationId: getCaseStatusDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_owner'
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  count_closed_cases:
+                    type: integer
+                  count_in_progress_cases:
+                    type: integer
+                  count_open_cases:
+                    type: integer
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_4xx_response'
+          description: Authorization information is missing or invalid.
+      summary: Get case status summary
+      tags:
+        - cases
+  /api/cases/tags:
+    get:
+      description: >
+        Aggregates and returns a list of case tags. You must have read
+        privileges for the **Cases** feature in the **Management**,
+        **Observability**, or **Security** section of the Kibana feature
+        privileges, depending on the owner of the cases you're seeking.
+      operationId: getCaseTagsDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_owner'
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                getTagsResponse:
+                  $ref: '#/components/examples/Cases_get_tags_response'
+              schema:
+                items:
+                  type: string
+                maxItems: 10000
+                type: array
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_4xx_response'
+          description: Authorization information is missing or invalid.
+      summary: Get case tags
+      tags:
+        - cases
   /api/data_views:
     get:
       operationId: getAllDataViewsDefault
@@ -7075,6 +8417,898 @@ paths:
         - slo
 components:
   examples:
+    Cases_add_comment_request:
+      summary: Adds a comment to a case.
+      value:
+        comment: A new comment.
+        owner: cases
+        type: user
+    Cases_add_comment_response:
+      summary: >-
+        The add comment to case API returns a JSON object that contains details
+        about the case and its comments.
+      value:
+        assignees: []
+        category: null
+        closed_at: null
+        closed_by: null
+        comments:
+          - comment: A new comment.
+            created_at: '2022-10-02T00:49:47.716Z'
+            created_by:
+              email: null
+              full_name: null
+              username: elastic
+            id: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
+            owner: cases
+            type: user
+            version: WzIwNDMxLDFd
+        connector:
+          fields: null
+          id: none
+          name: none
+          type: .none
+        created_at: '2022-03-24T00:37:03.906Z'
+        created_by:
+          email: null
+          full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+          username: elastic
+        customFields:
+          - key: d312efda-ec2b-42ec-9e2c-84981795c581
+            type: text
+            value: Field value
+          - key: fcc6840d-eb14-42df-8aaf-232201a705ec
+            type: toggle
+            value: true
+        description: A case description.
+        duration: null
+        external_service: null
+        id: 293f1bc0-74f6-11ea-b83a-553aecdb28b6
+        owner: cases
+        settings:
+          syncAlerts: false
+        severity: low
+        status: open
+        tags:
+          - tag 1
+        title: Case title 1
+        totalAlerts: 0
+        totalComment: 1
+        updated_at: '2022-06-03T00:49:47.716Z'
+        updated_by:
+          email: null
+          full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+          username: elastic
+        version: WzIzMzgsMV0=
+    Cases_create_case_request:
+      summary: Create a security case that uses a Jira connector.
+      value:
+        connector:
+          fields:
+            issueType: '10006'
+            parent: null
+            priority: High
+          id: 131d4448-abe0-4789-939d-8ef60680b498
+          name: My connector
+          type: .jira
+        customFields:
+          - key: d312efda-ec2b-42ec-9e2c-84981795c581
+            type: text
+            value: My field value
+        description: A case description.
+        owner: cases
+        settings:
+          syncAlerts: true
+        tags:
+          - tag-1
+        title: Case title 1
+    Cases_create_case_response:
+      summary: >-
+        The create case API returns a JSON object that contains details about
+        the case.
+      value:
+        assignees: []
+        closed_at: null
+        closed_by: null
+        comments: []
+        connector:
+          fields:
+            issueType: '10006'
+            parent: null
+            priority: High
+          id: 131d4448-abe0-4789-939d-8ef60680b498
+          name: My connector
+          type: .jira
+        created_at: '2022-10-13T15:33:50.604Z'
+        created_by:
+          email: null
+          full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+          username: elastic
+        customFields:
+          - key: d312efda-ec2b-42ec-9e2c-84981795c581
+            type: text
+            value: My field value
+          - key: fcc6840d-eb14-42df-8aaf-232201a705ec
+            type: toggle
+            value: null
+        description: A case description.
+        duration: null
+        external_service: null
+        id: 66b9aa00-94fa-11ea-9f74-e7e108796192
+        owner: cases
+        settings:
+          syncAlerts: true
+        severity: low
+        status: open
+        tags:
+          - tag 1
+        title: Case title 1
+        totalAlerts: 0
+        totalComment: 0
+        updated_at: null
+        updated_by: null
+        version: WzUzMiwxXQ==
+    Cases_find_case_activity_response:
+      summary: Retrieves all activity for a case
+      value:
+        page: 1
+        perPage: 20
+        total: 3
+        userActions:
+          - action: create
+            comment_id: null
+            created_at: '2023-10-20T01:17:22.150Z'
+            created_by:
+              email: null
+              full_name: null
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+              username: elastic
+            id: b4cd0770-07c9-11ed-a5fd-47154cb8767e
+            owner: cases
+            payload:
+              assignees: []
+              category: null
+              connector:
+                fields: null
+                id: none
+                name: none
+                type: .none
+              customFields:
+                - key: d312efda-ec2b-42ec-9e2c-84981795c581
+                  type: text
+                  value: My field value
+                - key: fcc6840d-eb14-42df-8aaf-232201a705ec
+                  type: toggle
+                  value: null
+              description: A case description.
+              owner: cases
+              settings:
+                syncAlerts: false
+              severity: low
+              status: open
+              tags:
+                - tag 1
+              title: Case title 1
+            type: create_case
+            version: WzM1ODg4LDFd
+          - action: create
+            comment_id: 578608d0-03b1-11ed-920c-974bfa104448
+            created_at: '2023-10-14T20:12:53.354Z'
+            created_by:
+              email: null
+              full_name: null
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+              username: elastic
+            id: 57af14a0-03b1-11ed-920c-974bfa104448
+            owner: cases
+            payload:
+              comment: A new comment
+              owner: cases
+              type: user
+            type: comment
+            version: WzM1ODg4LDFa
+          - action: add
+            comment_id: null
+            created_at: '2023-10-20T01:10:28.238Z'
+            created_by:
+              email: null
+              full_name: null
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+              username: elastic
+            id: 573c6980-6123-11ed-aa41-81a0a61fe447
+            owner: cases
+            payload:
+              assignees:
+                uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+            type: assignees
+            version: WzM1ODg4LDFb
+    Cases_find_case_response:
+      summary: >-
+        Retrieve the first five cases with the `tag-1` tag, in ascending order
+        by last update time.
+      value:
+        cases:
+          - assignees: []
+            category: null
+            closed_at: null
+            closed_by: null
+            comments: []
+            connector:
+              fields: null
+              id: none
+              name: none
+              type: .none
+            created_at: '2023-10-12T00:16:36.371Z'
+            created_by:
+              email: null
+              full_name: null
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+              username: elastic
+            customFields:
+              - key: d312efda-ec2b-42ec-9e2c-84981795c581
+                type: text
+                value: My field value
+              - key: fcc6840d-eb14-42df-8aaf-232201a705ec
+                type: toggle
+                value: null
+            description: Case description
+            duration: null
+            external_service: null
+            id: abed3a70-71bd-11ea-a0b2-c51ea50a58e2
+            owner: cases
+            settings:
+              syncAlerts: true
+            severity: low
+            status: open
+            tags:
+              - tag-1
+            title: Case title
+            totalAlerts: 0
+            totalComment: 1
+            updated_at: '2023-10-12T00:27:58.162Z'
+            updated_by:
+              email: null
+              full_name: null
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+              username: elastic
+            version: WzExMCwxXQ==
+        count_closed_cases: 0
+        count_in_progress_cases: 0
+        count_open_cases: 1
+        page: 1
+        per_page: 5
+        total: 1
+    Cases_find_connector_response:
+      summary: Retrieve information about the connectors and their settings.
+      value:
+        - actionTypeId: .jira
+          config:
+            apiUrl: 'https://elastic.atlassian.net/'
+            projectKey: ES
+          id: 61787f53-4eee-4741-8df6-8fe84fa616f7
+          isDeprecated: false
+          isMissingSecrets: false
+          isPreconfigured: false
+          name: my-Jira
+          referencedByCount: 0
+    Cases_get_case_alerts_response:
+      summary: Retrieves all alerts attached to a case
+      value:
+        - attached_at: '2022-07-25T20:09:40.963Z'
+          id: f6a7d0c3-d52d-432c-b2e6-447cd7fce04d
+          index: .alerts-observability.logs.alerts-default
+    Cases_get_case_configuration_response:
+      summary: Get the case configuration.
+      value:
+        - closure_type: close-by-user
+          connector:
+            fields: null
+            id: none
+            name: none
+            type: .none
+          created_at: '2024-07-01T17:07:17.767Z'
+          created_by:
+            email: null
+            full_name: null
+            username: elastic
+          customFields:
+            - defaultValue: Custom text field value.
+              key: d312efda-ec2b-42ec-9e2c-84981795c581
+              label: my-text-field
+              type: text
+              required: false
+          error: null
+          id: 856ee650-6c82-11ee-a20a-6164169afa58
+          mappings: []
+          owner: cases
+          templates:
+            - caseFields:
+                assignees:
+                  - uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+                category: Default-category
+                connector:
+                  fields: null
+                  id: none
+                  name: none
+                  type: .none
+                customFields:
+                  - key: d312efda-ec2b-42ec-9e2c-84981795c581
+                    type: text
+                    value: Default text field value.
+                description: A default description for cases.
+                settings:
+                  syncAlerts: false
+                tags:
+                  - Default case tag
+                title: Default case title
+              description: A description of the template.
+              key: 505932fe-ee3a-4960-a661-c781b5acdb05
+              name: template-1
+              tags:
+                - Template tag 1
+          updated_at: null
+          updated_by: null
+          version: WzEyLDNd
+    Cases_get_case_observability_response:
+      summary: >-
+        Retrieves information about an Observability case including its alerts
+        and comments.
+      value:
+        assignees:
+          - uid: u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0
+        category: null
+        closed_at: null
+        closed_by: null
+        comments:
+          - alertId:
+              - a6e12ac4-7bce-457b-84f6-d7ce8deb8446
+            created_at: '2023-11-06T19:29:38.424Z'
+            created_by:
+              email: null
+              full_name: null
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+              username: elastic
+            id: 59d438d0-79a9-4864-8d4b-e63adacebf6e
+            index:
+              - .internal.alerts-observability.logs.alerts-default-000001
+            owner: observability
+            pushed_at: null
+            pushed_by: null
+            rule:
+              id: 03e4eb87-62ca-4e5d-9570-3d7625e9669d
+              name: Observability rule
+            type: alert
+            updated_at: null
+            updated_by: null
+            version: WzY3LDJd
+          - comment: The first comment.
+            created_at: '2023-11-06T19:29:57.812Z'
+            created_by:
+              email: null
+              full_name: null
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+              username: elastic
+            id: d99342d3-3aa3-4b80-90ec-a702607604f5
+            owner: observability
+            pushed_at: null
+            pushed_by: null
+            type: user
+            updated_at: null
+            updated_by: null
+            version: WzcyLDJd
+        connector:
+          fields: null
+          id: none
+          name: none
+          type: .none
+        created_at: '2023-11-06T19:29:04.086Z'
+        created_by:
+          email: null
+          full_name: null
+          username: elastic
+        customFields: []
+        description: An Observability case description.
+        duration: null
+        external_service: null
+        id: c3ff7550-def1-4e90-b6bc-c9969a4a09b1
+        owner: observability
+        settings:
+          syncAlerts: false
+        severity: low
+        status: in-progress
+        tags:
+          - observability
+          - tag 1
+        title: Observability case title 1
+        totalAlerts: 1
+        totalComment: 1
+        updated_at: '2023-11-06T19:47:55.662Z'
+        updated_by:
+          email: null
+          full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+          username: elastic
+        version: WzI0NywyXQ==
+    Cases_get_case_response:
+      summary: Retrieves information about a case including its comments.
+      value:
+        assignees:
+          - uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+        category: null
+        closed_at: null
+        closed_by: null
+        comments:
+          - comment: A new comment
+            created_at: '2023-10-13T15:40:32.335Z'
+            created_by:
+              email: null
+              full_name: null
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+              username: elastic
+            id: 2134c1d0-02c2-11ed-85f2-4f7c222ca2fa
+            owner: cases
+            pushed_at: null
+            pushed_by: null
+            type: user
+            updated_at: null
+            updated_by: null
+            version: WzM3LDFd
+        connector:
+          fields: null
+          id: none
+          name: none
+          type: .none
+        created_at: '2023-10-13T15:33:50.604Z'
+        created_by:
+          email: null
+          full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+          username: elastic
+        customFields:
+          - key: d312efda-ec2b-42ec-9e2c-84981795c581
+            type: text
+            value: My field value
+          - key: fcc6840d-eb14-42df-8aaf-232201a705ec
+            type: toggle
+            value: null
+        description: A case description
+        duration: null
+        external_service: null
+        id: 31cdada0-02c1-11ed-85f2-4f7c222ca2fa
+        owner: cases
+        settings:
+          syncAlerts: true
+        severity: low
+        status: open
+        tags:
+          - tag 1
+        title: Case title 1
+        totalAlerts: 0
+        totalComment: 1
+        updated_at: '2023-10-13T15:40:32.335Z'
+        updated_by:
+          email: null
+          full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+          username: elastic
+        version: WzM2LDFd
+    Cases_get_comment_response:
+      summary: A single user comment retrieved from a case
+      value:
+        comment: A new comment
+        created_at: '2023-10-07T19:32:13.104Z'
+        created_by:
+          email: null
+          full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+          username: elastic
+        id: 8048b460-fe2b-11ec-b15d-779a7c8bbcc3
+        owner: cases
+        pushed_at: null
+        pushed_by: null
+        type: user
+        updated_at: null
+        updated_by: null
+        version: WzIzLDFd
+    Cases_get_reporters_response:
+      summary: A list of two users that opened cases
+      value:
+        - email: null
+          full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+          username: elastic
+        - email: jdoe@example.com
+          full_name: Jane Doe
+          profile_uid: u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0
+          username: jdoe
+    Cases_get_tags_response:
+      summary: A list of tags that are used in cases
+      value:
+        - observability
+        - security
+        - tag 1
+        - tag 2
+    Cases_push_case_response:
+      summary: >-
+        The push case API returns a JSON object with details about the case and
+        the external service.
+      value:
+        closed_at: null
+        closed_by: null
+        comments: []
+        connector:
+          fields:
+            issueType: '10006'
+            parent: null
+            priority: Low
+          id: 09f8c0b0-0eda-11ed-bd18-65557fe66949
+          name: My connector
+          type: .jira
+        created_at: '2022-07-29T00:59:39.444Z'
+        created_by:
+          email: null
+          full_name: null
+          username: elastic
+        description: A case description.
+        duration: null
+        external_service:
+          connector_id: 09f8c0b0-0eda-11ed-bd18-65557fe66949
+          connector_name: My connector
+          external_id: '71926'
+          external_title: ES-554
+          external_url: 'https://cases.jira.com'
+          pushed_at: '2022-07-29T01:20:58.436Z'
+          pushed_by:
+            email: null
+            full_name: null
+            username: elastic
+        id: b917f300-0ed9-11ed-bd18-65557fe66949
+        owner: cases
+        settings:
+          syncAlerts: true
+        severity: low
+        status: open
+        tags:
+          - tag 1
+        title: Case title 1
+        totalAlerts: 0
+        totalComment: 0
+        updated_at: '2022-07-29T01:20:58.436Z'
+        updated_by:
+          email: null
+          full_name: null
+          username: elastic
+        version: WzE3NjgsM10=
+    Cases_set_case_configuration_request:
+      summary: >-
+        Set the closure type, custom fields, and default connector for Stack
+        Management cases.
+      value:
+        closure_type: close-by-user
+        connector:
+          fields: null
+          id: 5e656730-e1ca-11ec-be9b-9b1838238ee6
+          name: my-jira-connector
+          type: .jira
+        customFields:
+          - defaultValue: My custom field default value.
+            key: d312efda-ec2b-42ec-9e2c-84981795c581
+            label: my-text-field
+            type: text
+            required: false
+        owner: cases
+        templates:
+          - caseFields:
+              assignees:
+                - uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+              category: Default-category
+              customFields:
+                - key: d312efda-ec2b-42ec-9e2c-84981795c581
+                  type: text
+                  value: A text field value for the template.
+              description: A default description for cases.
+              tags:
+                - Default case tag
+              title: Default case title
+            description: A description of the template.
+            key: 505932fe-ee3a-4960-a661-c781b5acdb05
+            name: template-1
+            tags:
+              - Template tag 1
+    Cases_set_case_configuration_response:
+      summary: This is an example response for case settings.
+      value:
+        closure_type: close-by-user
+        connector:
+          fields: null
+          id: 5e656730-e1ca-11ec-be9b-9b1838238ee6
+          name: my-jira-connector
+          type: .jira
+        created_at: '2024-07-01T17:07:17.767Z'
+        created_by:
+          email: 'null,'
+          full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+          username: elastic
+        customFields:
+          - defaultValue: My custom field default value.
+            key: d312efda-ec2b-42ec-9e2c-84981795c581
+            label: my-text-field
+            type: text
+            required: false
+        error: null
+        id: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
+        mappings:
+          - action_type: overwrite
+            source: title
+            target: summary
+          - action_type: overwrite
+            source: description
+            target: description
+          - action_type: append
+            source: comments
+            target: comments
+          - action_type: overwrite
+            source: tags
+            target: labels
+        owner: cases
+        templates:
+          - caseFields:
+              assignees:
+                - uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+              category: Default-category
+              customFields:
+                - key: d312efda-ec2b-42ec-9e2c-84981795c581
+                  type: text
+                  value: A text field value for the template.
+              description: A default description for cases.
+              tags:
+                - Default case tag
+              title: Default case title
+            description: A description of the template.
+            key: 505932fe-ee3a-4960-a661-c781b5acdb05
+            name: template-1
+            tags:
+              - Template tag 1
+        updated_at: null
+        updated_by: null
+        version: WzIwNzMsMV0=
+    Cases_update_case_configuration_request:
+      summary: Update the case settings.
+      value:
+        closure_type: close-by-user
+        connector:
+          fields: null
+          id: 5e656730-e1ca-11ec-be9b-9b1838238ee6
+          name: my-jira-connector
+          type: .jira
+        customFields:
+          - defaultValue: A new default value.
+            key: d312efda-ec2b-42ec-9e2c-84981795c581
+            label: my-text-field
+            type: text
+            required: true
+          - key: fcc6840d-eb14-42df-8aaf-232201a705ec
+            label: my-toggle
+            type: toggle
+            required: false
+        version: WzExOSw0XQ==
+    Cases_update_case_configuration_response:
+      summary: This is an example response when the case configuration was updated.
+      value:
+        closure_type: close-by-user
+        connector:
+          fields: null
+          id: 5e656730-e1ca-11ec-be9b-9b1838238ee6
+          name: my-jira-connector
+          type: .jira
+        created_at: '2024-07-01T17:07:17.767Z'
+        created_by:
+          email: null
+          full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+          username: elastic
+        customFields:
+          - defaultValue: A new default value.
+            key: d312efda-ec2b-42ec-9e2c-84981795c581
+            label: my-text-field
+            type: text
+            required: true
+          - key: fcc6840d-eb14-42df-8aaf-232201a705ec
+            label: my-toggle
+            type: toggle
+            required: false
+        error: null
+        id: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
+        mappings:
+          - action_type: overwrite
+            source: title
+            target: summary
+          - action_type: overwrite
+            source: description
+            target: description
+          - action_type: overwrite
+            source: tags
+            target: labels
+          - action_type: append
+            source: comments
+            target: comments
+        owner: cases
+        templates: []
+        updated_at: '2024-07-19T00:52:42.401Z'
+        updated_by:
+          email: null
+          full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+          username: elastic
+        version: WzI2LDNd
+    Cases_update_case_request:
+      summary: 'Update the case description, tags, and connector.'
+      value:
+        cases:
+          - connector:
+              fields:
+                issueType: '10006'
+                parent: null
+                priority: null
+              id: 131d4448-abe0-4789-939d-8ef60680b498
+              name: My connector
+              type: .jira
+            customFields:
+              - key: fcc6840d-eb14-42df-8aaf-232201a705ec
+                type: toggle
+                value: false
+              - key: d312efda-ec2b-42ec-9e2c-84981795c581
+                type: text
+                value: My new field value
+            description: A case description.
+            id: a18b38a0-71b0-11ea-a0b2-c51ea50a58e2
+            settings:
+              syncAlerts: true
+            tags:
+              - tag-1
+            version: WzIzLDFd
+    Cases_update_case_response:
+      summary: >-
+        This is an example response when the case description, tags, and
+        connector were updated.
+      value:
+        - assignees: []
+          category: null
+          closed_at: null
+          closed_by: null
+          comments: []
+          connector:
+            fields:
+              issueType: '10006'
+              parent: null
+              priority: null
+            id: 131d4448-abe0-4789-939d-8ef60680b498
+            name: My connector
+            type: .jira
+          created_at: '2023-10-13T09:16:17.416Z'
+          created_by:
+            email: null
+            full_name: null
+            profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+            username: elastic
+          customFields:
+            - key: d312efda-ec2b-42ec-9e2c-84981795c581
+              type: text
+              value: My new field value
+            - key: fcc6840d-eb14-42df-8aaf-232201a705ec
+              type: toggle
+              value: false
+          description: A case description.
+          duration: null
+          external_service:
+            connector_id: 05da469f-1fde-4058-99a3-91e4807e2de8
+            connector_name: Jira
+            external_id: '10003'
+            external_title: IS-4
+            external_url: 'https://hms.atlassian.net/browse/IS-4'
+            pushed_at: '2023-10-13T09:20:40.672Z'
+            pushed_by:
+              email: null
+              full_name: null
+              username: elastic
+          id: 66b9aa00-94fa-11ea-9f74-e7e108796192
+          owner: cases
+          settings:
+            syncAlerts: true
+          severity: low
+          status: open
+          tags:
+            - tag-1
+          title: Case title 1
+          totalAlerts: 0
+          totalComment: 0
+          updated_at: '2023-10-13T09:48:33.043Z'
+          updated_by:
+            email: null
+            full_name: null
+            profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+            username: elastic
+          version: WzU0OCwxXQ==
+    Cases_update_comment_request:
+      summary: Updates a comment of a case.
+      value:
+        comment: An updated comment.
+        id: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
+        owner: cases
+        type: user
+        version: Wzk1LDFd
+    Cases_update_comment_response:
+      summary: >-
+        The add comment to case API returns a JSON object that contains details
+        about the case and its comments.
+      value:
+        assignees: []
+        category: null
+        closed_at: null
+        closed_by: null
+        comments:
+          - comment: An updated comment.
+            created_at: '2023-10-24T00:37:10.832Z'
+            created_by:
+              email: null
+              full_name: null
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+              username: elastic
+            id: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
+            owner: cases
+            pushed_at: null
+            pushed_by: null
+            type: user
+            updated_at: '2023-10-24T01:27:06.210Z'
+            updated_by:
+              email: null
+              full_name: null
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+              username: elastic
+            version: WzIwNjM3LDFd
+        connector:
+          fields: null
+          id: none
+          name: none
+          type: .none
+        created_at: '2023-10-24T00:37:03.906Z'
+        created_by:
+          email: null
+          full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+          username: elastic
+        customFields:
+          - key: d312efda-ec2b-42ec-9e2c-84981795c581
+            type: text
+            value: My new field value
+          - key: fcc6840d-eb14-42df-8aaf-232201a705ec
+            type: toggle
+            value: false
+        description: A case description.
+        duration: null
+        external_service: null
+        id: 293f1bc0-74f6-11ea-b83a-553aecdb28b6
+        owner: cases
+        settings:
+          syncAlerts: false
+        severity: low
+        status: open
+        tags:
+          - tag 1
+        title: Case title 1
+        totalAlerts: 0
+        totalComment: 1
+        updated_at: '2023-10-24T01:27:06.210Z'
+        updated_by:
+          email: null
+          full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+          username: elastic
+        version: WzIwNjM2LDFd
     Connectors_create_email_connector_request:
       summary: Create an email connector.
       value:
@@ -9177,6 +11411,282 @@ components:
               title: Look at my dashboard
             type: dashboard
   parameters:
+    Cases_alert_id:
+      description: An identifier for the alert.
+      in: path
+      name: alertId
+      required: true
+      schema:
+        example: 09f0c261e39e36351d75995b78bb83673774d1bc2cca9df2d15f0e5c0a99a540
+        type: string
+    Cases_assignees:
+      description: >
+        Filters the returned cases by assignees. Valid values are `none` or
+        unique identifiers for the user profiles. These identifiers can be found
+        by using the suggest user profile API.
+      in: query
+      name: assignees
+      schema:
+        oneOf:
+          - type: string
+          - items:
+              type: string
+            maxItems: 100
+            type: array
+    Cases_case_id:
+      description: >-
+        The identifier for the case. To retrieve case IDs, use the find cases
+        API. All non-ASCII characters must be URL encoded.
+      in: path
+      name: caseId
+      required: true
+      schema:
+        example: 9c235210-6834-11ea-a78c-6ffb38a34414
+        type: string
+    Cases_category:
+      description: Filters the returned cases by category.
+      in: query
+      name: category
+      schema:
+        oneOf:
+          - example: my-category
+            type: string
+          - items:
+              type: string
+            maxItems: 100
+            type: array
+    Cases_comment_id:
+      description: >
+        The identifier for the comment. To retrieve comment IDs, use the get
+        case or find cases APIs.
+      in: path
+      name: commentId
+      required: true
+      schema:
+        example: 71ec1870-725b-11ea-a0b2-c51ea50a58e2
+        type: string
+    Cases_configuration_id:
+      description: An identifier for the configuration.
+      in: path
+      name: configurationId
+      required: true
+      schema:
+        example: 3297a0f0-b5ec-11ec-b141-0fdb20a7f9a9
+        type: string
+    Cases_connector_id:
+      description: >-
+        An identifier for the connector. To retrieve connector IDs, use the find
+        connectors API.
+      in: path
+      name: connectorId
+      required: true
+      schema:
+        example: abed3a70-71bd-11ea-a0b2-c51ea50a58e2
+        type: string
+    Cases_defaultSearchOperator:
+      description: he default operator to use for the simple_query_string.
+      example: OR
+      in: query
+      name: defaultSearchOperator
+      schema:
+        default: OR
+        type: string
+    Cases_from:
+      description: >
+        Returns only cases that were created after a specific date. The date
+        must be specified as a KQL data range or date match expression.
+      in: query
+      name: from
+      schema:
+        example: now-1d
+        type: string
+    Cases_ids:
+      description: >
+        The cases that you want to removed. All non-ASCII characters must be URL
+        encoded.
+      example: d4e7abb0-b462-11ec-9a8d-698504725a43
+      in: query
+      name: ids
+      required: true
+      schema:
+        items:
+          maxItems: 100
+          minItems: 1
+          type: string
+        type: array
+    Cases_includeComments:
+      deprecated: true
+      description: >-
+        Deprecated in 8.1.0. This parameter is deprecated and will be removed in
+        a future release. It determines whether case comments are returned.
+      in: query
+      name: includeComments
+      schema:
+        default: true
+        type: boolean
+    Cases_kbn_xsrf:
+      description: Cross-site request forgery protection
+      in: header
+      name: kbn-xsrf
+      required: true
+      schema:
+        type: string
+    Cases_owner:
+      description: >
+        A filter to limit the response to a specific set of applications. If
+        this parameter is omitted, the response contains information about all
+        the cases that the user has access to read.
+      example: cases
+      in: query
+      name: owner
+      schema:
+        oneOf:
+          - $ref: '#/components/schemas/Cases_owners'
+          - items:
+              $ref: '#/components/schemas/Cases_owners'
+            type: array
+    Cases_page_index:
+      description: The page number to return.
+      in: query
+      name: page
+      required: false
+      schema:
+        default: 1
+        type: integer
+    Cases_page_size:
+      description: The number of items to return. Limited to 100 items.
+      in: query
+      name: perPage
+      required: false
+      schema:
+        default: 20
+        maximum: 100
+        type: integer
+    Cases_reporters:
+      description: Filters the returned cases by the user name of the reporter.
+      example: elastic
+      in: query
+      name: reporters
+      schema:
+        oneOf:
+          - type: string
+          - items:
+              type: string
+            maxItems: 100
+            type: array
+    Cases_search:
+      description: >-
+        An Elasticsearch simple_query_string query that filters the objects in
+        the response.
+      in: query
+      name: search
+      schema:
+        type: string
+    Cases_searchFields:
+      description: The fields to perform the simple_query_string parsed query against.
+      in: query
+      name: searchFields
+      schema:
+        oneOf:
+          - $ref: '#/components/schemas/Cases_searchFieldsType'
+          - items:
+              $ref: '#/components/schemas/Cases_searchFieldsType'
+            type: array
+    Cases_severity:
+      description: The severity of the case.
+      in: query
+      name: severity
+      schema:
+        enum:
+          - critical
+          - high
+          - low
+          - medium
+        type: string
+    Cases_sort_order:
+      description: Determines the sort order.
+      in: query
+      name: sortOrder
+      required: false
+      schema:
+        default: desc
+        enum:
+          - asc
+          - desc
+        type: string
+    Cases_sortField:
+      description: Determines which field is used to sort the results.
+      example: updatedAt
+      in: query
+      name: sortField
+      schema:
+        default: createdAt
+        enum:
+          - createdAt
+          - updatedAt
+          - closedAt
+          - title
+          - category
+          - status
+          - severity
+        type: string
+    Cases_status:
+      description: Filters the returned cases by state.
+      example: open
+      in: query
+      name: status
+      schema:
+        enum:
+          - closed
+          - in-progress
+          - open
+        type: string
+    Cases_tags:
+      description: Filters the returned cases by tags.
+      example: tag-1
+      in: query
+      name: tags
+      schema:
+        oneOf:
+          - type: string
+          - items:
+              type: string
+            maxItems: 100
+            type: array
+    Cases_to:
+      description: >
+        Returns only cases that were created before a specific date. The date
+        must be specified as a KQL data range or date match expression.
+      example: now+1d
+      in: query
+      name: to
+      schema:
+        type: string
+    Cases_user_action_types:
+      description: Determines the types of user actions to return.
+      example: create_case
+      in: query
+      name: types
+      schema:
+        items:
+          enum:
+            - action
+            - alert
+            - assignees
+            - attachment
+            - comment
+            - connector
+            - create_case
+            - description
+            - pushed
+            - settings
+            - severity
+            - status
+            - tags
+            - title
+            - user
+          type: string
+        type: array
     Connectors_action_id:
       description: An identifier for the action.
       in: path
@@ -9332,6 +11842,2076 @@ components:
             type: object
       description: Object is not found.
   schemas:
+    Cases_4xx_response:
+      properties:
+        error:
+          example: Unauthorized
+          type: string
+        message:
+          type: string
+        statusCode:
+          example: 401
+          type: integer
+      title: Unsuccessful cases API response
+      type: object
+    Cases_action_types:
+      description: The type of action.
+      enum:
+        - assignees
+        - create_case
+        - comment
+        - connector
+        - delete_case
+        - description
+        - pushed
+        - tags
+        - title
+        - status
+        - settings
+        - severity
+      example: create_case
+      type: string
+    Cases_actions:
+      enum:
+        - add
+        - create
+        - delete
+        - push_to_service
+        - update
+      example: create
+      type: string
+    Cases_add_alert_comment_request_properties:
+      description: Defines properties for case comment requests when type is alert.
+      type: object
+      properties:
+        alertId:
+          $ref: '#/components/schemas/Cases_alert_identifiers'
+        index:
+          $ref: '#/components/schemas/Cases_alert_indices'
+        owner:
+          $ref: '#/components/schemas/Cases_owners'
+        rule:
+          $ref: '#/components/schemas/Cases_rule'
+        type:
+          description: The type of comment.
+          enum:
+            - alert
+          example: alert
+          type: string
+      required:
+        - alertId
+        - index
+        - owner
+        - rule
+        - type
+      title: Add case comment request properties for alerts
+    Cases_add_case_comment_request:
+      description: >-
+        The add comment to case API request body varies depending on whether you
+        are adding an alert or a comment.
+      discriminator:
+        mapping:
+          alert: '#/components/schemas/Cases_add_alert_comment_request_properties'
+          user: '#/components/schemas/Cases_add_user_comment_request_properties'
+        propertyName: type
+      oneOf:
+        - $ref: '#/components/schemas/Cases_add_alert_comment_request_properties'
+        - $ref: '#/components/schemas/Cases_add_user_comment_request_properties'
+      title: Add case comment request
+    Cases_add_user_comment_request_properties:
+      description: Defines properties for case comment requests when type is user.
+      properties:
+        comment:
+          description: The new comment. It is required only when `type` is `user`.
+          example: A new comment.
+          maxLength: 30000
+          type: string
+        owner:
+          $ref: '#/components/schemas/Cases_owners'
+        type:
+          description: The type of comment.
+          enum:
+            - user
+          example: user
+          type: string
+      required:
+        - comment
+        - owner
+        - type
+      title: Add case comment request properties for user comments
+      type: object
+    Cases_alert_comment_response_properties:
+      title: Add case comment response properties for alerts
+      type: object
+      properties:
+        alertId:
+          items:
+            example: a6e12ac4-7bce-457b-84f6-d7ce8deb8446
+            type: string
+          type: array
+        created_at:
+          example: '2023-11-06T19:29:38.424Z'
+          format: date-time
+          type: string
+        created_by:
+          type: object
+          properties:
+            email:
+              example: null
+              nullable: true
+              type: string
+            full_name:
+              example: null
+              nullable: true
+              type: string
+            profile_uid:
+              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+              type: string
+            username:
+              example: elastic
+              nullable: true
+              type: string
+          required:
+            - email
+            - full_name
+            - username
+        id:
+          example: 73362370-ab1a-11ec-985f-97e55adae8b9
+          type: string
+        index:
+          items:
+            example: .internal.alerts-security.alerts-default-000001
+            type: string
+          type: array
+        owner:
+          $ref: '#/components/schemas/Cases_owners'
+        pushed_at:
+          example: null
+          format: date-time
+          nullable: true
+          type: string
+        pushed_by:
+          nullable: true
+          type: object
+          properties:
+            email:
+              example: null
+              nullable: true
+              type: string
+            full_name:
+              example: null
+              nullable: true
+              type: string
+            profile_uid:
+              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+              type: string
+            username:
+              example: elastic
+              nullable: true
+              type: string
+          required:
+            - email
+            - full_name
+            - username
+        rule:
+          type: object
+          properties:
+            id:
+              description: The rule identifier.
+              example: 94d80550-aaf4-11ec-985f-97e55adae8b9
+              type: string
+            name:
+              description: The rule name.
+              example: security_rule
+              type: string
+        type:
+          enum:
+            - alert
+          example: alert
+          type: string
+        updated_at:
+          format: date-time
+          nullable: true
+          type: string
+        updated_by:
+          nullable: true
+          type: object
+          properties:
+            email:
+              example: null
+              nullable: true
+              type: string
+            full_name:
+              example: null
+              nullable: true
+              type: string
+            profile_uid:
+              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+              type: string
+            username:
+              example: elastic
+              nullable: true
+              type: string
+          required:
+            - email
+            - full_name
+            - username
+        version:
+          example: WzMwNDgsMV0=
+          type: string
+      required:
+        - type
+    Cases_alert_identifiers:
+      description: >
+        The alert identifiers. It is required only when `type` is `alert`. You
+        can use an array of strings to add multiple alerts to a case, provided
+        that they all relate to the same rule; `index` must also be an array
+        with the same length or number of elements. Adding multiple alerts in
+        this manner is recommended rather than calling the API multiple times.
+        This functionality is in technical preview and may be changed or removed
+        in a future release. Elastic will work to fix any issues, but features
+        in technical preview are not subject to the support SLA of official GA
+        features.
+      example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
+      oneOf:
+        - type: string
+        - items:
+            type: string
+          maxItems: 1000
+          type: array
+      title: Alert identifiers
+      x-technical-preview: true
+    Cases_alert_indices:
+      description: >
+        The alert indices. It is required only when `type` is `alert`. If you
+        are adding multiple alerts to a case, use an array of strings; the
+        position of each index name in the array must match the position of the
+        corresponding alert identifier in the `alertId` array.  This
+        functionality is in technical preview and may be changed or removed in a
+        future release. Elastic will work to fix any issues, but features in
+        technical preview are not subject to the support SLA of official GA
+        features.
+      oneOf:
+        - type: string
+        - items:
+            type: string
+          maxItems: 1000
+          type: array
+      title: Alert indices
+      x-technical-preview: true
+    Cases_alert_response_properties:
+      type: object
+      properties:
+        attached_at:
+          format: date-time
+          type: string
+        id:
+          description: The alert identifier.
+          type: string
+        index:
+          description: The alert index.
+          type: string
+    Cases_assignees:
+      description: An array containing users that are assigned to the case.
+      items:
+        type: object
+        properties:
+          uid:
+            description: >-
+              A unique identifier for the user profile. These identifiers can be
+              found by using the suggest user profile API.
+            example: u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0
+            type: string
+        required:
+          - uid
+      maxItems: 10
+      nullable: true
+      type: array
+    Cases_case_category:
+      description: A word or phrase that categorizes the case.
+      maxLength: 50
+      type: string
+    Cases_case_description:
+      description: The description for the case.
+      maxLength: 30000
+      type: string
+    Cases_case_response_closed_by_properties:
+      nullable: true
+      properties:
+        email:
+          example: null
+          nullable: true
+          type: string
+        full_name:
+          example: null
+          nullable: true
+          type: string
+        profile_uid:
+          example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+          type: string
+        username:
+          example: elastic
+          nullable: true
+          type: string
+      required:
+        - email
+        - full_name
+        - username
+      title: Case response properties for closed_by
+      type: object
+    Cases_case_response_created_by_properties:
+      title: Case response properties for created_by
+      type: object
+      properties:
+        email:
+          example: null
+          nullable: true
+          type: string
+        full_name:
+          example: null
+          nullable: true
+          type: string
+        profile_uid:
+          example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+          type: string
+        username:
+          example: elastic
+          nullable: true
+          type: string
+      required:
+        - email
+        - full_name
+        - username
+    Cases_case_response_properties:
+      title: Case response properties
+      type: object
+      properties:
+        assignees:
+          $ref: '#/components/schemas/Cases_assignees'
+        category:
+          description: The case category.
+          nullable: true
+          type: string
+        closed_at:
+          format: date-time
+          nullable: true
+          type: string
+        closed_by:
+          $ref: '#/components/schemas/Cases_case_response_closed_by_properties'
+        comments:
+          description: An array of comment objects for the case.
+          items:
+            discriminator:
+              mapping:
+                alert: '#/components/schemas/Cases_alert_comment_response_properties'
+                user: '#/components/schemas/Cases_user_comment_response_properties'
+              propertyName: type
+            oneOf:
+              - $ref: '#/components/schemas/Cases_alert_comment_response_properties'
+              - $ref: '#/components/schemas/Cases_user_comment_response_properties'
+          maxItems: 10000
+          title: Case response properties for comments
+          type: array
+        connector:
+          discriminator:
+            mapping:
+              .cases-webhook: '#/components/schemas/Cases_connector_properties_cases_webhook'
+              .jira: '#/components/schemas/Cases_connector_properties_jira'
+              .none: '#/components/schemas/Cases_connector_properties_none'
+              .resilient: '#/components/schemas/Cases_connector_properties_resilient'
+              .servicenow: '#/components/schemas/Cases_connector_properties_servicenow'
+              .servicenow-sir: '#/components/schemas/Cases_connector_properties_servicenow_sir'
+              .swimlane: '#/components/schemas/Cases_connector_properties_swimlane'
+            propertyName: type
+          oneOf:
+            - $ref: '#/components/schemas/Cases_connector_properties_none'
+            - $ref: '#/components/schemas/Cases_connector_properties_cases_webhook'
+            - $ref: '#/components/schemas/Cases_connector_properties_jira'
+            - $ref: '#/components/schemas/Cases_connector_properties_resilient'
+            - $ref: '#/components/schemas/Cases_connector_properties_servicenow'
+            - $ref: '#/components/schemas/Cases_connector_properties_servicenow_sir'
+            - $ref: '#/components/schemas/Cases_connector_properties_swimlane'
+          title: Case response properties for connectors
+        created_at:
+          example: '2022-05-13T09:16:17.416Z'
+          format: date-time
+          type: string
+        created_by:
+          $ref: '#/components/schemas/Cases_case_response_created_by_properties'
+        customFields:
+          description: Custom field values for the case.
+          items:
+            type: object
+            properties:
+              key:
+                description: >
+                  The unique identifier for the custom field. The key value must
+                  exist in the case configuration settings.
+                type: string
+              type:
+                description: >
+                  The custom field type. It must match the type specified in the
+                  case configuration settings.
+                enum:
+                  - text
+                  - toggle
+                type: string
+              value:
+                description: >
+                  The custom field value. If the custom field is required, it
+                  cannot be explicitly set to null. However, for cases that
+                  existed when the required custom field was added, the default
+                  value stored in Elasticsearch is `undefined`. The value
+                  returned in the API and user interface in this case is `null`.
+                oneOf:
+                  - maxLength: 160
+                    minLength: 1
+                    nullable: true
+                    type: string
+                  - type: boolean
+          type: array
+        description:
+          example: A case description.
+          type: string
+        duration:
+          description: >
+            The elapsed time from the creation of the case to its closure (in
+            seconds). If the case has not been closed, the duration is set to
+            null. If the case was closed after less than half a second, the
+            duration is rounded down to zero.
+          example: 120
+          nullable: true
+          type: integer
+        external_service:
+          $ref: '#/components/schemas/Cases_external_service'
+        id:
+          example: 66b9aa00-94fa-11ea-9f74-e7e108796192
+          type: string
+        owner:
+          $ref: '#/components/schemas/Cases_owners'
+        settings:
+          $ref: '#/components/schemas/Cases_settings'
+        severity:
+          $ref: '#/components/schemas/Cases_case_severity'
+        status:
+          $ref: '#/components/schemas/Cases_case_status'
+        tags:
+          example:
+            - tag-1
+          items:
+            type: string
+          type: array
+        title:
+          example: Case title 1
+          type: string
+        totalAlerts:
+          example: 0
+          type: integer
+        totalComment:
+          example: 0
+          type: integer
+        updated_at:
+          format: date-time
+          nullable: true
+          type: string
+        updated_by:
+          $ref: '#/components/schemas/Cases_case_response_updated_by_properties'
+        version:
+          example: WzUzMiwxXQ==
+          type: string
+      required:
+        - closed_at
+        - closed_by
+        - comments
+        - connector
+        - created_at
+        - created_by
+        - description
+        - duration
+        - external_service
+        - id
+        - owner
+        - settings
+        - severity
+        - status
+        - tags
+        - title
+        - totalAlerts
+        - totalComment
+        - updated_at
+        - updated_by
+        - version
+    Cases_case_response_pushed_by_properties:
+      nullable: true
+      properties:
+        email:
+          example: null
+          nullable: true
+          type: string
+        full_name:
+          example: null
+          nullable: true
+          type: string
+        profile_uid:
+          example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+          type: string
+        username:
+          example: elastic
+          nullable: true
+          type: string
+      required:
+        - email
+        - full_name
+        - username
+      title: Case response properties for pushed_by
+      type: object
+    Cases_case_response_updated_by_properties:
+      nullable: true
+      properties:
+        email:
+          example: null
+          nullable: true
+          type: string
+        full_name:
+          example: null
+          nullable: true
+          type: string
+        profile_uid:
+          example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+          type: string
+        username:
+          example: elastic
+          nullable: true
+          type: string
+      required:
+        - email
+        - full_name
+        - username
+      title: Case response properties for updated_by
+      type: object
+    Cases_case_severity:
+      default: low
+      description: The severity of the case.
+      enum:
+        - critical
+        - high
+        - low
+        - medium
+      type: string
+    Cases_case_status:
+      description: The status of the case.
+      enum:
+        - closed
+        - in-progress
+        - open
+      type: string
+    Cases_case_tags:
+      description: >
+        The words and phrases that help categorize cases. It can be an empty
+        array.
+      items:
+        maxLength: 256
+        type: string
+      maxItems: 200
+      type: array
+    Cases_case_title:
+      description: A title for the case.
+      maxLength: 160
+      type: string
+    Cases_closure_types:
+      description: >-
+        Indicates whether a case is automatically closed when it is pushed to
+        external systems (`close-by-pushing`) or not automatically closed
+        (`close-by-user`).
+      enum:
+        - close-by-pushing
+        - close-by-user
+      example: close-by-user
+      type: string
+    Cases_connector_properties_cases_webhook:
+      description: Defines properties for connectors when type is `.cases-webhook`.
+      type: object
+      properties:
+        fields:
+          example: null
+          nullable: true
+          type: string
+        id:
+          description: >-
+            The identifier for the connector. To retrieve connector IDs, use the
+            find connectors API.
+          type: string
+        name:
+          description: The name of the connector.
+          type: string
+        type:
+          description: The type of connector.
+          enum:
+            - .cases-webhook
+          example: .cases-webhook
+          type: string
+      required:
+        - fields
+        - id
+        - name
+        - type
+      title: Create or upate case request properties for Cases Webhook connector
+    Cases_connector_properties_jira:
+      description: Defines properties for connectors when type is `.jira`.
+      type: object
+      properties:
+        fields:
+          description: >-
+            An object containing the connector fields. If you want to omit any
+            individual field, specify null as its value.
+          type: object
+          properties:
+            issueType:
+              description: The type of issue.
+              nullable: true
+              type: string
+            parent:
+              description: 'The key of the parent issue, when the issue type is sub-task.'
+              nullable: true
+              type: string
+            priority:
+              description: The priority of the issue.
+              nullable: true
+              type: string
+          required:
+            - issueType
+            - parent
+            - priority
+        id:
+          description: >-
+            The identifier for the connector. To retrieve connector IDs, use the
+            find connectors API.
+          type: string
+        name:
+          description: The name of the connector.
+          type: string
+        type:
+          description: The type of connector.
+          enum:
+            - .jira
+          example: .jira
+          type: string
+      required:
+        - fields
+        - id
+        - name
+        - type
+      title: Create or update case request properties for a Jira connector
+    Cases_connector_properties_none:
+      description: Defines properties for connectors when type is `.none`.
+      type: object
+      properties:
+        fields:
+          description: >-
+            An object containing the connector fields. To create a case without
+            a connector, specify null. To update a case to remove the connector,
+            specify null.
+          example: null
+          nullable: true
+          type: string
+        id:
+          description: >-
+            The identifier for the connector. To create a case without a
+            connector, use `none`. To update a case to remove the connector,
+            specify `none`.
+          example: none
+          type: string
+        name:
+          description: >-
+            The name of the connector. To create a case without a connector, use
+            `none`. To update a case to remove the connector, specify `none`.
+          example: none
+          type: string
+        type:
+          description: >-
+            The type of connector. To create a case without a connector, use
+            `.none`. To update a case to remove the connector, specify `.none`.
+          enum:
+            - .none
+          example: .none
+          type: string
+      required:
+        - fields
+        - id
+        - name
+        - type
+      title: Create or update case request properties for no connector
+    Cases_connector_properties_resilient:
+      description: Defines properties for connectors when type is `.resilient`.
+      type: object
+      properties:
+        fields:
+          description: >-
+            An object containing the connector fields. If you want to omit any
+            individual field, specify null as its value.
+          nullable: true
+          type: object
+          properties:
+            issueTypes:
+              description: The type of incident.
+              items:
+                type: string
+              type: array
+            severityCode:
+              description: The severity code of the incident.
+              type: string
+          required:
+            - issueTypes
+            - severityCode
+        id:
+          description: The identifier for the connector.
+          type: string
+        name:
+          description: The name of the connector.
+          type: string
+        type:
+          description: The type of connector.
+          enum:
+            - .resilient
+          example: .resilient
+          type: string
+      required:
+        - fields
+        - id
+        - name
+        - type
+      title: Create case request properties for a IBM Resilient connector
+    Cases_connector_properties_servicenow:
+      description: Defines properties for connectors when type is `.servicenow`.
+      type: object
+      properties:
+        fields:
+          description: >-
+            An object containing the connector fields. If you want to omit any
+            individual field, specify null as its value.
+          type: object
+          properties:
+            category:
+              description: The category of the incident.
+              nullable: true
+              type: string
+            impact:
+              description: The effect an incident had on business.
+              nullable: true
+              type: string
+            severity:
+              description: The severity of the incident.
+              nullable: true
+              type: string
+            subcategory:
+              description: The subcategory of the incident.
+              nullable: true
+              type: string
+            urgency:
+              description: The extent to which the incident resolution can be delayed.
+              nullable: true
+              type: string
+          required:
+            - category
+            - impact
+            - severity
+            - subcategory
+            - urgency
+        id:
+          description: >-
+            The identifier for the connector. To retrieve connector IDs, use the
+            find connectors API.
+          type: string
+        name:
+          description: The name of the connector.
+          type: string
+        type:
+          description: The type of connector.
+          enum:
+            - .servicenow
+          example: .servicenow
+          type: string
+      required:
+        - fields
+        - id
+        - name
+        - type
+      title: Create case request properties for a ServiceNow ITSM connector
+    Cases_connector_properties_servicenow_sir:
+      description: Defines properties for connectors when type is `.servicenow-sir`.
+      type: object
+      properties:
+        fields:
+          description: >-
+            An object containing the connector fields. If you want to omit any
+            individual field, specify null as its value.
+          type: object
+          properties:
+            category:
+              description: The category of the incident.
+              nullable: true
+              type: string
+            destIp:
+              description: >-
+                Indicates whether cases will send a comma-separated list of
+                destination IPs.
+              nullable: true
+              type: boolean
+            malwareHash:
+              description: >-
+                Indicates whether cases will send a comma-separated list of
+                malware hashes.
+              nullable: true
+              type: boolean
+            malwareUrl:
+              description: >-
+                Indicates whether cases will send a comma-separated list of
+                malware URLs.
+              nullable: true
+              type: boolean
+            priority:
+              description: The priority of the issue.
+              nullable: true
+              type: string
+            sourceIp:
+              description: >-
+                Indicates whether cases will send a comma-separated list of
+                source IPs.
+              nullable: true
+              type: boolean
+            subcategory:
+              description: The subcategory of the incident.
+              nullable: true
+              type: string
+          required:
+            - category
+            - destIp
+            - malwareHash
+            - malwareUrl
+            - priority
+            - sourceIp
+            - subcategory
+        id:
+          description: >-
+            The identifier for the connector. To retrieve connector IDs, use the
+            find connectors API.
+          type: string
+        name:
+          description: The name of the connector.
+          type: string
+        type:
+          description: The type of connector.
+          enum:
+            - .servicenow-sir
+          example: .servicenow-sir
+          type: string
+      required:
+        - fields
+        - id
+        - name
+        - type
+      title: Create case request properties for a ServiceNow SecOps connector
+    Cases_connector_properties_swimlane:
+      description: Defines properties for connectors when type is `.swimlane`.
+      type: object
+      properties:
+        fields:
+          description: >-
+            An object containing the connector fields. If you want to omit any
+            individual field, specify null as its value.
+          type: object
+          properties:
+            caseId:
+              description: The case identifier for Swimlane connectors.
+              nullable: true
+              type: string
+          required:
+            - caseId
+        id:
+          description: >-
+            The identifier for the connector. To retrieve connector IDs, use the
+            find connectors API.
+          type: string
+        name:
+          description: The name of the connector.
+          type: string
+        type:
+          description: The type of connector.
+          enum:
+            - .swimlane
+          example: .swimlane
+          type: string
+      required:
+        - fields
+        - id
+        - name
+        - type
+      title: Create case request properties for a Swimlane connector
+    Cases_connector_types:
+      description: The type of connector.
+      enum:
+        - .cases-webhook
+        - .jira
+        - .none
+        - .resilient
+        - .servicenow
+        - .servicenow-sir
+        - .swimlane
+      example: .none
+      type: string
+    Cases_create_case_request:
+      description: >-
+        The create case API request body varies depending on the type of
+        connector.
+      properties:
+        assignees:
+          $ref: '#/components/schemas/Cases_assignees'
+        category:
+          $ref: '#/components/schemas/Cases_case_category'
+        connector:
+          oneOf:
+            - $ref: '#/components/schemas/Cases_connector_properties_none'
+            - $ref: '#/components/schemas/Cases_connector_properties_cases_webhook'
+            - $ref: '#/components/schemas/Cases_connector_properties_jira'
+            - $ref: '#/components/schemas/Cases_connector_properties_resilient'
+            - $ref: '#/components/schemas/Cases_connector_properties_servicenow'
+            - $ref: '#/components/schemas/Cases_connector_properties_servicenow_sir'
+            - $ref: '#/components/schemas/Cases_connector_properties_swimlane'
+        customFields:
+          description: >
+            Custom field values for a case. Any optional custom fields that are
+            not specified in the request are set to null.
+          items:
+            type: object
+            properties:
+              key:
+                description: >
+                  The unique identifier for the custom field. The key value must
+                  exist in the case configuration settings.
+                type: string
+              type:
+                description: >
+                  The custom field type. It must match the type specified in the
+                  case configuration settings.
+                enum:
+                  - text
+                  - toggle
+                type: string
+              value:
+                description: >
+                  The custom field value. If the custom field is required, it
+                  cannot be explicitly set to null. However, for cases that
+                  existed when the required custom field was added, the default
+                  value stored in Elasticsearch is `undefined`. The value
+                  returned in the API and user interface in this case is `null`.
+                oneOf:
+                  - maxLength: 160
+                    minLength: 1
+                    nullable: true
+                    type: string
+                  - type: boolean
+            required:
+              - key
+              - type
+              - value
+          maxItems: 10
+          minItems: 0
+          type: array
+        description:
+          $ref: '#/components/schemas/Cases_case_description'
+        owner:
+          $ref: '#/components/schemas/Cases_owners'
+        settings:
+          $ref: '#/components/schemas/Cases_settings'
+        severity:
+          $ref: '#/components/schemas/Cases_case_severity'
+        tags:
+          $ref: '#/components/schemas/Cases_case_tags'
+        title:
+          $ref: '#/components/schemas/Cases_case_title'
+      required:
+        - connector
+        - description
+        - owner
+        - settings
+        - tags
+        - title
+      title: Create case request
+      type: object
+    Cases_external_service:
+      nullable: true
+      type: object
+      properties:
+        connector_id:
+          type: string
+        connector_name:
+          type: string
+        external_id:
+          type: string
+        external_title:
+          type: string
+        external_url:
+          type: string
+        pushed_at:
+          format: date-time
+          type: string
+        pushed_by:
+          nullable: true
+          type: object
+          properties:
+            email:
+              example: null
+              nullable: true
+              type: string
+            full_name:
+              example: null
+              nullable: true
+              type: string
+            profile_uid:
+              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+              type: string
+            username:
+              example: elastic
+              nullable: true
+              type: string
+    Cases_owners:
+      description: >
+        The application that owns the cases: Stack Management, Observability, or
+        Elastic Security.
+      enum:
+        - cases
+        - observability
+        - securitySolution
+      example: cases
+      type: string
+    Cases_payload_alert_comment:
+      type: object
+      properties:
+        comment:
+          type: object
+          properties:
+            alertId:
+              oneOf:
+                - example: 1c0b056b-cc9f-4b61-b5c9-cb801abd5e1d
+                  type: string
+                - items:
+                    type: string
+                  type: array
+            index:
+              oneOf:
+                - example: .alerts-observability.logs.alerts-default
+                  type: string
+                - items:
+                    type: string
+                  type: array
+            owner:
+              $ref: '#/components/schemas/Cases_owners'
+            rule:
+              type: object
+              properties:
+                id:
+                  description: The rule identifier.
+                  example: 94d80550-aaf4-11ec-985f-97e55adae8b9
+                  type: string
+                name:
+                  description: The rule name.
+                  example: security_rule
+                  type: string
+            type:
+              enum:
+                - alert
+              type: string
+    Cases_payload_assignees:
+      type: object
+      properties:
+        assignees:
+          $ref: '#/components/schemas/Cases_assignees'
+    Cases_payload_connector:
+      type: object
+      properties:
+        connector:
+          type: object
+          properties:
+            fields:
+              description: >-
+                An object containing the connector fields. To create a case
+                without a connector, specify null. If you want to omit any
+                individual field, specify null as its value.
+              example: null
+              nullable: true
+              type: object
+              properties:
+                caseId:
+                  description: The case identifier for Swimlane connectors.
+                  type: string
+                category:
+                  description: >-
+                    The category of the incident for ServiceNow ITSM and
+                    ServiceNow SecOps connectors.
+                  type: string
+                destIp:
+                  description: >-
+                    Indicates whether cases will send a comma-separated list of
+                    destination IPs for ServiceNow SecOps connectors.
+                  nullable: true
+                  type: boolean
+                impact:
+                  description: >-
+                    The effect an incident had on business for ServiceNow ITSM
+                    connectors.
+                  type: string
+                issueType:
+                  description: The type of issue for Jira connectors.
+                  type: string
+                issueTypes:
+                  description: The type of incident for IBM Resilient connectors.
+                  items:
+                    type: string
+                  type: array
+                malwareHash:
+                  description: >-
+                    Indicates whether cases will send a comma-separated list of
+                    malware hashes for ServiceNow SecOps connectors.
+                  nullable: true
+                  type: boolean
+                malwareUrl:
+                  description: >-
+                    Indicates whether cases will send a comma-separated list of
+                    malware URLs for ServiceNow SecOps connectors.
+                  nullable: true
+                  type: boolean
+                parent:
+                  description: >-
+                    The key of the parent issue, when the issue type is sub-task
+                    for Jira connectors.
+                  type: string
+                priority:
+                  description: >-
+                    The priority of the issue for Jira and ServiceNow SecOps
+                    connectors.
+                  type: string
+                severity:
+                  description: The severity of the incident for ServiceNow ITSM connectors.
+                  type: string
+                severityCode:
+                  description: >-
+                    The severity code of the incident for IBM Resilient
+                    connectors.
+                  type: string
+                sourceIp:
+                  description: >-
+                    Indicates whether cases will send a comma-separated list of
+                    source IPs for ServiceNow SecOps connectors.
+                  nullable: true
+                  type: boolean
+                subcategory:
+                  description: >-
+                    The subcategory of the incident for ServiceNow ITSM
+                    connectors.
+                  type: string
+                urgency:
+                  description: >-
+                    The extent to which the incident resolution can be delayed
+                    for ServiceNow ITSM connectors.
+                  type: string
+            id:
+              description: >-
+                The identifier for the connector. To create a case without a
+                connector, use `none`.
+              example: none
+              type: string
+            name:
+              description: >-
+                The name of the connector. To create a case without a connector,
+                use `none`.
+              example: none
+              type: string
+            type:
+              $ref: '#/components/schemas/Cases_connector_types'
+    Cases_payload_create_case:
+      type: object
+      properties:
+        assignees:
+          $ref: '#/components/schemas/Cases_assignees'
+        connector:
+          type: object
+          properties:
+            fields:
+              description: >-
+                An object containing the connector fields. To create a case
+                without a connector, specify null. If you want to omit any
+                individual field, specify null as its value.
+              example: null
+              nullable: true
+              type: object
+              properties:
+                caseId:
+                  description: The case identifier for Swimlane connectors.
+                  type: string
+                category:
+                  description: >-
+                    The category of the incident for ServiceNow ITSM and
+                    ServiceNow SecOps connectors.
+                  type: string
+                destIp:
+                  description: >-
+                    Indicates whether cases will send a comma-separated list of
+                    destination IPs for ServiceNow SecOps connectors.
+                  nullable: true
+                  type: boolean
+                impact:
+                  description: >-
+                    The effect an incident had on business for ServiceNow ITSM
+                    connectors.
+                  type: string
+                issueType:
+                  description: The type of issue for Jira connectors.
+                  type: string
+                issueTypes:
+                  description: The type of incident for IBM Resilient connectors.
+                  items:
+                    type: string
+                  type: array
+                malwareHash:
+                  description: >-
+                    Indicates whether cases will send a comma-separated list of
+                    malware hashes for ServiceNow SecOps connectors.
+                  nullable: true
+                  type: boolean
+                malwareUrl:
+                  description: >-
+                    Indicates whether cases will send a comma-separated list of
+                    malware URLs for ServiceNow SecOps connectors.
+                  nullable: true
+                  type: boolean
+                parent:
+                  description: >-
+                    The key of the parent issue, when the issue type is sub-task
+                    for Jira connectors.
+                  type: string
+                priority:
+                  description: >-
+                    The priority of the issue for Jira and ServiceNow SecOps
+                    connectors.
+                  type: string
+                severity:
+                  description: The severity of the incident for ServiceNow ITSM connectors.
+                  type: string
+                severityCode:
+                  description: >-
+                    The severity code of the incident for IBM Resilient
+                    connectors.
+                  type: string
+                sourceIp:
+                  description: >-
+                    Indicates whether cases will send a comma-separated list of
+                    source IPs for ServiceNow SecOps connectors.
+                  nullable: true
+                  type: boolean
+                subcategory:
+                  description: >-
+                    The subcategory of the incident for ServiceNow ITSM
+                    connectors.
+                  type: string
+                urgency:
+                  description: >-
+                    The extent to which the incident resolution can be delayed
+                    for ServiceNow ITSM connectors.
+                  type: string
+            id:
+              description: >-
+                The identifier for the connector. To create a case without a
+                connector, use `none`.
+              example: none
+              type: string
+            name:
+              description: >-
+                The name of the connector. To create a case without a connector,
+                use `none`.
+              example: none
+              type: string
+            type:
+              $ref: '#/components/schemas/Cases_connector_types'
+        description:
+          type: string
+        owner:
+          $ref: '#/components/schemas/Cases_owners'
+        settings:
+          $ref: '#/components/schemas/Cases_settings'
+        severity:
+          $ref: '#/components/schemas/Cases_case_severity'
+        status:
+          $ref: '#/components/schemas/Cases_case_status'
+        tags:
+          items:
+            example:
+              - tag-1
+            type: string
+          type: array
+        title:
+          type: string
+    Cases_payload_delete:
+      description: >-
+        If the `action` is `delete` and the `type` is `delete_case`, the payload
+        is nullable.
+      nullable: true
+      type: object
+    Cases_payload_description:
+      type: object
+      properties:
+        description:
+          type: string
+    Cases_payload_pushed:
+      type: object
+      properties:
+        externalService:
+          $ref: '#/components/schemas/Cases_external_service'
+    Cases_payload_settings:
+      type: object
+      properties:
+        settings:
+          $ref: '#/components/schemas/Cases_settings'
+    Cases_payload_severity:
+      type: object
+      properties:
+        severity:
+          $ref: '#/components/schemas/Cases_case_severity'
+    Cases_payload_status:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/Cases_case_status'
+    Cases_payload_tags:
+      type: object
+      properties:
+        tags:
+          example:
+            - tag-1
+          items:
+            type: string
+          type: array
+    Cases_payload_title:
+      type: object
+      properties:
+        title:
+          type: string
+    Cases_payload_user_comment:
+      type: object
+      properties:
+        comment:
+          type: object
+          properties:
+            comment:
+              type: string
+            owner:
+              $ref: '#/components/schemas/Cases_owners'
+            type:
+              enum:
+                - user
+              type: string
+    Cases_rule:
+      description: >
+        The rule that is associated with the alerts. It is required only when
+        `type` is `alert`. This functionality is in technical preview and may be
+        changed or removed in a future release. Elastic will work to fix any
+        issues, but features in technical preview are not subject to the support
+        SLA of official GA features.
+      title: Alerting rule
+      type: object
+      properties:
+        id:
+          description: The rule identifier.
+          example: 94d80550-aaf4-11ec-985f-97e55adae8b9
+          type: string
+        name:
+          description: The rule name.
+          example: security_rule
+          type: string
+      x-technical-preview: true
+    Cases_searchFieldsType:
+      description: The fields to perform the `simple_query_string` parsed query against.
+      enum:
+        - description
+        - title
+      type: string
+    Cases_set_case_configuration_request:
+      description: >-
+        External connection details, such as the closure type and default
+        connector for cases.
+      properties:
+        closure_type:
+          $ref: '#/components/schemas/Cases_closure_types'
+        connector:
+          description: An object that contains the connector configuration.
+          type: object
+          properties:
+            fields:
+              description: >-
+                The fields specified in the case configuration are not used and
+                are not propagated to individual cases, therefore it is
+                recommended to set it to `null`.
+              nullable: true
+              type: object
+            id:
+              description: >-
+                The identifier for the connector. If you do not want a default
+                connector, use `none`. To retrieve connector IDs, use the find
+                connectors API.
+              example: none
+              type: string
+            name:
+              description: >-
+                The name of the connector. If you do not want a default
+                connector, use `none`. To retrieve connector names, use the find
+                connectors API.
+              example: none
+              type: string
+            type:
+              $ref: '#/components/schemas/Cases_connector_types'
+          required:
+            - fields
+            - id
+            - name
+            - type
+        customFields:
+          description: Custom fields case configuration.
+          items:
+            type: object
+            properties:
+              defaultValue:
+                description: >
+                  A default value for the custom field. If the `type` is `text`,
+                  the default value must be a string. If the `type` is `toggle`,
+                  the default value must be boolean.
+                oneOf:
+                  - type: string
+                  - type: boolean
+              key:
+                description: >
+                  A unique key for the custom field. Must be lower case and
+                  composed only of a-z, 0-9, '_', and '-' characters. It is used
+                  in API calls to refer to a specific custom field.
+                maxLength: 36
+                minLength: 1
+                type: string
+              label:
+                description: The custom field label that is displayed in the case.
+                maxLength: 50
+                minLength: 1
+                type: string
+              type:
+                description: The type of the custom field.
+                enum:
+                  - text
+                  - toggle
+                type: string
+              required:
+                description: >
+                  Indicates whether the field is required. If `false`, the
+                  custom field can be set to null or omitted when a case is
+                  created or updated.
+                type: boolean
+            required:
+              - key
+              - label
+              - required
+              - type
+          maxItems: 10
+          minItems: 0
+          type: array
+        owner:
+          $ref: '#/components/schemas/Cases_owners'
+        templates:
+          $ref: '#/components/schemas/Cases_templates'
+      required:
+        - closure_type
+        - connector
+        - owner
+      title: Set case configuration request
+      type: object
+    Cases_settings:
+      description: An object that contains the case settings.
+      type: object
+      properties:
+        syncAlerts:
+          description: Turns alert syncing on or off.
+          example: true
+          type: boolean
+      required:
+        - syncAlerts
+    Cases_template_tags:
+      description: >
+        The words and phrases that help categorize templates. It can be an empty
+        array.
+      items:
+        maxLength: 256
+        type: string
+      maxItems: 200
+      type: array
+    Cases_templates:
+      items:
+        type: object
+        properties:
+          caseFields:
+            type: object
+            properties:
+              assignees:
+                $ref: '#/components/schemas/Cases_assignees'
+              category:
+                $ref: '#/components/schemas/Cases_case_category'
+              connector:
+                type: object
+                properties:
+                  fields:
+                    description: >-
+                      The fields specified in the case configuration are not
+                      used and are not propagated to individual cases, therefore
+                      it is recommended to set it to `null`.
+                    nullable: true
+                    type: object
+                  id:
+                    description: >-
+                      The identifier for the connector. If you do not want a
+                      default connector, use `none`. To retrieve connector IDs,
+                      use the find connectors API.
+                    example: none
+                    type: string
+                  name:
+                    description: >-
+                      The name of the connector. If you do not want a default
+                      connector, use `none`. To retrieve connector names, use
+                      the find connectors API.
+                    example: none
+                    type: string
+                  type:
+                    $ref: '#/components/schemas/Cases_connector_types'
+              customFields:
+                description: Custom field values in the template.
+                items:
+                  type: object
+                  properties:
+                    key:
+                      description: The unique key for the custom field.
+                      type: string
+                    type:
+                      description: The type of the custom field.
+                      enum:
+                        - text
+                        - toggle
+                      type: string
+                    value:
+                      description: >
+                        The default value for the custom field when a case uses
+                        the template. If the `type` is `text`, the default value
+                        must be a string. If the `type` is `toggle`, the default
+                        value must be boolean.
+                      oneOf:
+                        - type: string
+                        - type: boolean
+                type: array
+                x-technical-preview: true
+              description:
+                $ref: '#/components/schemas/Cases_case_description'
+              settings:
+                $ref: '#/components/schemas/Cases_settings'
+              severity:
+                $ref: '#/components/schemas/Cases_case_severity'
+              tags:
+                $ref: '#/components/schemas/Cases_case_tags'
+              title:
+                $ref: '#/components/schemas/Cases_case_title'
+          description:
+            description: A description for the template.
+            type: string
+          key:
+            description: >
+              A unique key for the template. Must be lower case and composed
+              only of a-z, 0-9, '_', and '-' characters. It is used in API calls
+              to refer to a specific template.
+            type: string
+          name:
+            description: The name of the template.
+            type: string
+          tags:
+            $ref: '#/components/schemas/Cases_template_tags'
+      type: array
+      x-technical-preview: true
+    Cases_update_alert_comment_request_properties:
+      description: Defines properties for case comment requests when type is alert.
+      type: object
+      properties:
+        alertId:
+          $ref: '#/components/schemas/Cases_alert_identifiers'
+        id:
+          description: >
+            The identifier for the comment. To retrieve comment IDs, use the get
+            comments API.
+          example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
+          type: string
+        index:
+          $ref: '#/components/schemas/Cases_alert_indices'
+        owner:
+          $ref: '#/components/schemas/Cases_owners'
+        rule:
+          $ref: '#/components/schemas/Cases_rule'
+        type:
+          description: The type of comment.
+          enum:
+            - alert
+          example: alert
+          type: string
+        version:
+          description: >
+            The current comment version. To retrieve version values, use the get
+            comments API.
+          example: Wzk1LDFd
+          type: string
+      required:
+        - alertId
+        - id
+        - index
+        - owner
+        - rule
+        - type
+        - version
+      title: Update case comment request properties for alerts
+    Cases_update_case_comment_request:
+      description: >-
+        The update case comment API request body varies depending on whether you
+        are updating an alert or a comment.
+      discriminator:
+        mapping:
+          alert: '#/components/schemas/Cases_update_alert_comment_request_properties'
+          user: '#/components/schemas/Cases_update_user_comment_request_properties'
+        propertyName: type
+      oneOf:
+        - $ref: '#/components/schemas/Cases_update_alert_comment_request_properties'
+        - $ref: '#/components/schemas/Cases_update_user_comment_request_properties'
+      title: Update case comment request
+    Cases_update_case_configuration_request:
+      description: >
+        You can update settings such as the closure type, custom fields,
+        templates, and the default connector for cases.
+      properties:
+        closure_type:
+          $ref: '#/components/schemas/Cases_closure_types'
+        connector:
+          description: An object that contains the connector configuration.
+          type: object
+          properties:
+            fields:
+              description: >-
+                The fields specified in the case configuration are not used and
+                are not propagated to individual cases, therefore it is
+                recommended to set it to `null`.
+              nullable: true
+              type: object
+            id:
+              description: >-
+                The identifier for the connector. If you do not want a default
+                connector, use `none`. To retrieve connector IDs, use the find
+                connectors API.
+              example: none
+              type: string
+            name:
+              description: >-
+                The name of the connector. If you do not want a default
+                connector, use `none`. To retrieve connector names, use the find
+                connectors API.
+              example: none
+              type: string
+            type:
+              $ref: '#/components/schemas/Cases_connector_types'
+          required:
+            - fields
+            - id
+            - name
+            - type
+        customFields:
+          description: Custom fields case configuration.
+          items:
+            type: object
+            properties:
+              defaultValue:
+                description: >
+                  A default value for the custom field. If the `type` is `text`,
+                  the default value must be a string. If the `type` is `toggle`,
+                  the default value must be boolean.
+                oneOf:
+                  - type: string
+                  - type: boolean
+              key:
+                description: >
+                  A unique key for the custom field. Must be lower case and
+                  composed only of a-z, 0-9, '_', and '-' characters. It is used
+                  in API calls to refer to a specific custom field.
+                maxLength: 36
+                minLength: 1
+                type: string
+              label:
+                description: The custom field label that is displayed in the case.
+                maxLength: 50
+                minLength: 1
+                type: string
+              type:
+                description: The type of the custom field.
+                enum:
+                  - text
+                  - toggle
+                type: string
+              required:
+                description: >
+                  Indicates whether the field is required. If `false`, the
+                  custom field can be set to null or omitted when a case is
+                  created or updated.
+                type: boolean
+            required:
+              - key
+              - label
+              - required
+              - type
+          type: array
+        templates:
+          $ref: '#/components/schemas/Cases_templates'
+        version:
+          description: >
+            The version of the connector. To retrieve the version value, use the
+            get configuration API.
+          example: WzIwMiwxXQ==
+          type: string
+      required:
+        - version
+      title: Update case configuration request
+      type: object
+    Cases_update_case_request:
+      description: >-
+        The update case API request body varies depending on the type of
+        connector.
+      properties:
+        cases:
+          description: An array containing one or more case objects.
+          items:
+            type: object
+            properties:
+              assignees:
+                $ref: '#/components/schemas/Cases_assignees'
+              category:
+                $ref: '#/components/schemas/Cases_case_category'
+              connector:
+                oneOf:
+                  - $ref: '#/components/schemas/Cases_connector_properties_none'
+                  - $ref: >-
+                      #/components/schemas/Cases_connector_properties_cases_webhook
+                  - $ref: '#/components/schemas/Cases_connector_properties_jira'
+                  - $ref: '#/components/schemas/Cases_connector_properties_resilient'
+                  - $ref: '#/components/schemas/Cases_connector_properties_servicenow'
+                  - $ref: >-
+                      #/components/schemas/Cases_connector_properties_servicenow_sir
+                  - $ref: '#/components/schemas/Cases_connector_properties_swimlane'
+              customFields:
+                description: >
+                  Custom field values for a case. Any optional custom fields
+                  that are not specified in the request are set to null.
+                items:
+                  type: object
+                  properties:
+                    key:
+                      description: >
+                        The unique identifier for the custom field. The key
+                        value must exist in the case configuration settings.
+                      type: string
+                    type:
+                      description: >
+                        The custom field type. It must match the type specified
+                        in the case configuration settings.
+                      enum:
+                        - text
+                        - toggle
+                      type: string
+                    value:
+                      description: >
+                        The custom field value. If the custom field is required,
+                        it cannot be explicitly set to null. However, for cases
+                        that existed when the required custom field was added,
+                        the default value stored in Elasticsearch is
+                        `undefined`. The value returned in the API and user
+                        interface in this case is `null`.
+                      oneOf:
+                        - maxLength: 160
+                          minLength: 1
+                          nullable: true
+                          type: string
+                        - type: boolean
+                  required:
+                    - key
+                    - type
+                    - value
+                maxItems: 10
+                minItems: 0
+                type: array
+              description:
+                $ref: '#/components/schemas/Cases_case_description'
+              id:
+                description: The identifier for the case.
+                maxLength: 30000
+                type: string
+              settings:
+                $ref: '#/components/schemas/Cases_settings'
+              severity:
+                $ref: '#/components/schemas/Cases_case_severity'
+              status:
+                $ref: '#/components/schemas/Cases_case_status'
+              tags:
+                $ref: '#/components/schemas/Cases_case_tags'
+              title:
+                $ref: '#/components/schemas/Cases_case_title'
+              version:
+                description: >-
+                  The current version of the case. To determine this value, use
+                  the get case or find cases APIs.
+                type: string
+            required:
+              - id
+              - version
+          maxItems: 100
+          minItems: 1
+          type: array
+      required:
+        - cases
+      title: Update case request
+      type: object
+    Cases_update_user_comment_request_properties:
+      description: Defines properties for case comment requests when type is user.
+      properties:
+        comment:
+          description: The new comment. It is required only when `type` is `user`.
+          example: A new comment.
+          maxLength: 30000
+          type: string
+        id:
+          description: >
+            The identifier for the comment. To retrieve comment IDs, use the get
+            comments API.
+          example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
+          type: string
+        owner:
+          $ref: '#/components/schemas/Cases_owners'
+        type:
+          description: The type of comment.
+          enum:
+            - user
+          example: user
+          type: string
+        version:
+          description: >
+            The current comment version. To retrieve version values, use the get
+            comments API.
+          example: Wzk1LDFd
+          type: string
+      required:
+        - comment
+        - id
+        - owner
+        - type
+        - version
+      title: Update case comment request properties for user comments
+      type: object
+    Cases_user_actions_find_response_properties:
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/Cases_actions'
+        comment_id:
+          example: 578608d0-03b1-11ed-920c-974bfa104448
+          nullable: true
+          type: string
+        created_at:
+          example: '2022-05-13T09:16:17.416Z'
+          format: date-time
+          type: string
+        created_by:
+          type: object
+          properties:
+            email:
+              example: null
+              nullable: true
+              type: string
+            full_name:
+              example: null
+              nullable: true
+              type: string
+            profile_uid:
+              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+              type: string
+            username:
+              example: elastic
+              nullable: true
+              type: string
+          required:
+            - email
+            - full_name
+            - username
+        id:
+          example: 22fd3e30-03b1-11ed-920c-974bfa104448
+          type: string
+        owner:
+          $ref: '#/components/schemas/Cases_owners'
+        payload:
+          oneOf:
+            - $ref: '#/components/schemas/Cases_payload_alert_comment'
+            - $ref: '#/components/schemas/Cases_payload_assignees'
+            - $ref: '#/components/schemas/Cases_payload_connector'
+            - $ref: '#/components/schemas/Cases_payload_create_case'
+            - $ref: '#/components/schemas/Cases_payload_delete'
+            - $ref: '#/components/schemas/Cases_payload_description'
+            - $ref: '#/components/schemas/Cases_payload_pushed'
+            - $ref: '#/components/schemas/Cases_payload_settings'
+            - $ref: '#/components/schemas/Cases_payload_severity'
+            - $ref: '#/components/schemas/Cases_payload_status'
+            - $ref: '#/components/schemas/Cases_payload_tags'
+            - $ref: '#/components/schemas/Cases_payload_title'
+            - $ref: '#/components/schemas/Cases_payload_user_comment'
+        type:
+          description: The type of action.
+          enum:
+            - assignees
+            - create_case
+            - comment
+            - connector
+            - description
+            - pushed
+            - tags
+            - title
+            - status
+            - settings
+            - severity
+          example: create_case
+          type: string
+        version:
+          example: WzM1ODg4LDFd
+          type: string
+      required:
+        - action
+        - comment_id
+        - created_at
+        - created_by
+        - id
+        - owner
+        - payload
+        - type
+        - version
+    Cases_user_actions_response_properties:
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/Cases_actions'
+        action_id:
+          example: 22fd3e30-03b1-11ed-920c-974bfa104448
+          type: string
+        case_id:
+          example: 22df07d0-03b1-11ed-920c-974bfa104448
+          type: string
+        comment_id:
+          example: 578608d0-03b1-11ed-920c-974bfa104448
+          nullable: true
+          type: string
+        created_at:
+          example: '2022-05-13T09:16:17.416Z'
+          format: date-time
+          type: string
+        created_by:
+          type: object
+          properties:
+            email:
+              example: null
+              nullable: true
+              type: string
+            full_name:
+              example: null
+              nullable: true
+              type: string
+            profile_uid:
+              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+              type: string
+            username:
+              example: elastic
+              nullable: true
+              type: string
+          required:
+            - email
+            - full_name
+            - username
+        owner:
+          $ref: '#/components/schemas/Cases_owners'
+        payload:
+          oneOf:
+            - $ref: '#/components/schemas/Cases_payload_alert_comment'
+            - $ref: '#/components/schemas/Cases_payload_assignees'
+            - $ref: '#/components/schemas/Cases_payload_connector'
+            - $ref: '#/components/schemas/Cases_payload_create_case'
+            - $ref: '#/components/schemas/Cases_payload_delete'
+            - $ref: '#/components/schemas/Cases_payload_description'
+            - $ref: '#/components/schemas/Cases_payload_pushed'
+            - $ref: '#/components/schemas/Cases_payload_settings'
+            - $ref: '#/components/schemas/Cases_payload_severity'
+            - $ref: '#/components/schemas/Cases_payload_status'
+            - $ref: '#/components/schemas/Cases_payload_tags'
+            - $ref: '#/components/schemas/Cases_payload_title'
+            - $ref: '#/components/schemas/Cases_payload_user_comment'
+        type:
+          $ref: '#/components/schemas/Cases_action_types'
+      required:
+        - action
+        - action_id
+        - case_id
+        - comment_id
+        - created_at
+        - created_by
+        - owner
+        - payload
+        - type
+    Cases_user_comment_response_properties:
+      title: Case response properties for user comments
+      type: object
+      properties:
+        comment:
+          example: A new comment.
+          type: string
+        created_at:
+          example: '2022-05-13T09:16:17.416Z'
+          format: date-time
+          type: string
+        created_by:
+          $ref: '#/components/schemas/Cases_case_response_created_by_properties'
+        id:
+          example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
+          type: string
+        owner:
+          $ref: '#/components/schemas/Cases_owners'
+        pushed_at:
+          example: null
+          format: date-time
+          nullable: true
+          type: string
+        pushed_by:
+          $ref: '#/components/schemas/Cases_case_response_pushed_by_properties'
+        type:
+          enum:
+            - user
+          example: user
+          type: string
+        updated_at:
+          example: null
+          format: date-time
+          nullable: true
+          type: string
+        updated_by:
+          $ref: '#/components/schemas/Cases_case_response_updated_by_properties'
+        version:
+          example: WzIwNDMxLDFd
+          type: string
+      required:
+        - type
     Connectors_action_response_properties:
       description: The properties vary depending on the action type.
       properties:
@@ -15297,6 +19877,8 @@ tags:
       Annotations enable you to easily see how events are impacting the
       performance of your applications.
     name: APM annotations
+  - description: Case APIs enable you to open and track issues.
+    name: cases
   - description: Connector APIs enable you to create and manage connectors.
     name: connectors
   - description: >-
