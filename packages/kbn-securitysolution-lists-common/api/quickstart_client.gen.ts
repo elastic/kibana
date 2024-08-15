@@ -20,45 +20,48 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { catchAxiosErrorFormatAndThrow } from '@kbn/securitysolution-utils';
 
-import { CreateListIndexResponse } from './create_list_index/create_list_index.gen';
-import { CreateListRequestBodyInput, CreateListResponse } from './create_list/create_list.gen';
-import {
+import type { CreateListRequestBodyInput, CreateListResponse } from './create_list/create_list.gen';
+import type { CreateListIndexResponse } from './create_list_index/create_list_index.gen';
+import type {
   CreateListItemRequestBodyInput,
   CreateListItemResponse,
 } from './create_list_item/create_list_item.gen';
-import { DeleteListRequestQueryInput, DeleteListResponse } from './delete_list/delete_list.gen';
-import {
+import type {
+  DeleteListRequestQueryInput,
+  DeleteListResponse,
+} from './delete_list/delete_list.gen';
+import type { DeleteListIndexResponse } from './delete_list_index/delete_list_index.gen';
+import type {
   DeleteListItemRequestQueryInput,
   DeleteListItemResponse,
 } from './delete_list_item/delete_list_item.gen';
-import { DeleteListIndexResponse } from './delete_list_index/delete_list_index.gen';
-import { FindListsRequestQueryInput, FindListsResponse } from './find_list/find_list.gen';
-import { ExportListItemsRequestQueryInput } from './export_list_item/export_list_item.gen';
-import {
+import type { ExportListItemsRequestQueryInput } from './export_list_items/export_list_items.gen';
+import type {
   FindListItemsRequestQueryInput,
   FindListItemsResponse,
-} from './find_list_item/find_list_item.gen';
-import {
+} from './find_list_items/find_list_items.gen';
+import type { FindListsRequestQueryInput, FindListsResponse } from './find_lists/find_lists.gen';
+import type {
   ImportListItemsRequestQueryInput,
   ImportListItemsResponse,
-} from './import_list_item/import_list_item.gen';
-import { GetListPrivilegesResponse } from './get_list_privileges/get_list_privileges.gen';
-import { PatchListRequestBodyInput, PatchListResponse } from './patch_list/patch_list.gen';
-import {
+} from './import_list_items/import_list_items.gen';
+import type { PatchListRequestBodyInput, PatchListResponse } from './patch_list/patch_list.gen';
+import type {
   PatchListItemRequestBodyInput,
   PatchListItemResponse,
 } from './patch_list_item/patch_list_item.gen';
-import { GetListIndexResponse } from './read_list_index/read_list_index.gen';
-import { GetListRequestQueryInput, GetListResponse } from './read_list/read_list.gen';
-import {
+import type { ReadListRequestQueryInput, ReadListResponse } from './read_list/read_list.gen';
+import type { ReadListIndexResponse } from './read_list_index/read_list_index.gen';
+import type {
+  ReadListItemRequestQueryInput,
+  ReadListItemResponse,
+} from './read_list_item/read_list_item.gen';
+import type { ReadListPrivilegesResponse } from './read_list_privileges/read_list_privileges.gen';
+import type { UpdateListRequestBodyInput, UpdateListResponse } from './update_list/update_list.gen';
+import type {
   UpdateListItemRequestBodyInput,
   UpdateListItemResponse,
 } from './update_list_item/update_list_item.gen';
-import { UpdateListRequestBodyInput, UpdateListResponse } from './update_list/update_list.gen';
-import {
-  GetListItemRequestQueryInput,
-  GetListItemResponse,
-} from './read_list_item/read_list_item.gen';
 
 export interface ClientOptions {
   kbnClient: KbnClient;
@@ -196,58 +199,6 @@ export class Client {
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async getList(props: GetListProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetList`);
-    return this.kbnClient
-      .request<GetListResponse>({
-        path: '/api/lists',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'GET',
-
-        query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async getListIndex() {
-    this.log.info(`${new Date().toISOString()} Calling API GetListIndex`);
-    return this.kbnClient
-      .request<GetListIndexResponse>({
-        path: '/api/lists/index',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'GET',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async getListItem(props: GetListItemProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetListItem`);
-    return this.kbnClient
-      .request<GetListItemResponse>({
-        path: '/api/lists/items',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'GET',
-
-        query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async getListPrivileges() {
-    this.log.info(`${new Date().toISOString()} Calling API GetListPrivileges`);
-    return this.kbnClient
-      .request<GetListPrivilegesResponse>({
-        path: '/api/lists/privileges',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'GET',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
   /**
     * Imports a list of items from a `.txt` or `.csv` file. The maximum file size is 9 million bytes.
 
@@ -291,6 +242,58 @@ You can import items to a new or existing list.
         },
         method: 'PATCH',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async readList(props: ReadListProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ReadList`);
+    return this.kbnClient
+      .request<ReadListResponse>({
+        path: '/api/lists',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async readListIndex() {
+    this.log.info(`${new Date().toISOString()} Calling API ReadListIndex`);
+    return this.kbnClient
+      .request<ReadListIndexResponse>({
+        path: '/api/lists/index',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async readListItem(props: ReadListItemProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ReadListItem`);
+    return this.kbnClient
+      .request<ReadListItemResponse>({
+        path: '/api/lists/items',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async readListPrivileges() {
+    this.log.info(`${new Date().toISOString()} Calling API ReadListPrivileges`);
+    return this.kbnClient
+      .request<ReadListPrivilegesResponse>({
+        path: '/api/lists/privileges',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -343,12 +346,6 @@ export interface FindListItemsProps {
 export interface FindListsProps {
   query: FindListsRequestQueryInput;
 }
-export interface GetListProps {
-  query: GetListRequestQueryInput;
-}
-export interface GetListItemProps {
-  query: GetListItemRequestQueryInput;
-}
 export interface ImportListItemsProps {
   query: ImportListItemsRequestQueryInput;
 }
@@ -357,6 +354,12 @@ export interface PatchListProps {
 }
 export interface PatchListItemProps {
   body: PatchListItemRequestBodyInput;
+}
+export interface ReadListProps {
+  query: ReadListRequestQueryInput;
+}
+export interface ReadListItemProps {
+  query: ReadListItemRequestQueryInput;
 }
 export interface UpdateListProps {
   body: UpdateListRequestBodyInput;

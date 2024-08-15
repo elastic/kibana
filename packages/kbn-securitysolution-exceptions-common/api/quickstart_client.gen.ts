@@ -21,65 +21,65 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import { catchAxiosErrorFormatAndThrow } from '@kbn/securitysolution-utils';
 
-import {
+import type {
   CreateExceptionListRequestBodyInput,
   CreateExceptionListResponse,
 } from './create_exception_list/create_exception_list.gen';
-import {
+import type {
+  CreateExceptionListItemRequestBodyInput,
+  CreateExceptionListItemResponse,
+} from './create_exception_list_item/create_exception_list_item.gen';
+import type {
   CreateRuleExceptionListItemsRequestParamsInput,
   CreateRuleExceptionListItemsRequestBodyInput,
   CreateRuleExceptionListItemsResponse,
 } from './create_rule_exceptions/create_rule_exceptions.gen';
-import {
+import type {
   CreateSharedExceptionListRequestBodyInput,
   CreateSharedExceptionListResponse,
 } from './create_shared_exceptions_list/create_shared_exceptions_list.gen';
-import {
-  CreateExceptionListItemRequestBodyInput,
-  CreateExceptionListItemResponse,
-} from './create_exception_list_item/create_exception_list_item.gen';
-import { ExportExceptionListRequestQueryInput } from './export_exception_list/export_exception_list.gen';
-import {
+import type {
   DeleteExceptionListRequestQueryInput,
   DeleteExceptionListResponse,
 } from './delete_exception_list/delete_exception_list.gen';
-import {
-  DuplicateExceptionListRequestQueryInput,
-  DuplicateExceptionListResponse,
-} from './duplicate_exception_list/duplicate_exception_list.gen';
-import {
+import type {
   DeleteExceptionListItemRequestQueryInput,
   DeleteExceptionListItemResponse,
 } from './delete_exception_list_item/delete_exception_list_item.gen';
-import {
+import type {
+  DuplicateExceptionListRequestQueryInput,
+  DuplicateExceptionListResponse,
+} from './duplicate_exception_list/duplicate_exception_list.gen';
+import type { ExportExceptionListRequestQueryInput } from './export_exception_list/export_exception_list.gen';
+import type {
   FindExceptionListItemsRequestQueryInput,
   FindExceptionListItemsResponse,
-} from './find_exception_list_item/find_exception_list_item.gen';
-import {
+} from './find_exception_list_items/find_exception_list_items.gen';
+import type {
   FindExceptionListsRequestQueryInput,
   FindExceptionListsResponse,
-} from './find_exception_list/find_exception_list.gen';
-import {
+} from './find_exception_lists/find_exception_lists.gen';
+import type {
   ImportExceptionListRequestQueryInput,
   ImportExceptionListResponse,
 } from './import_exceptions/import_exceptions.gen';
-import {
-  GetExceptionListRequestQueryInput,
-  GetExceptionListResponse,
+import type {
+  ReadExceptionListRequestQueryInput,
+  ReadExceptionListResponse,
 } from './read_exception_list/read_exception_list.gen';
-import {
-  GetExceptionListItemRequestQueryInput,
-  GetExceptionListItemResponse,
+import type {
+  ReadExceptionListItemRequestQueryInput,
+  ReadExceptionListItemResponse,
 } from './read_exception_list_item/read_exception_list_item.gen';
-import {
+import type {
+  ReadExceptionListSummaryRequestQueryInput,
+  ReadExceptionListSummaryResponse,
+} from './read_exception_list_summary/read_exception_list_summary.gen';
+import type {
   UpdateExceptionListRequestBodyInput,
   UpdateExceptionListResponse,
 } from './update_exception_list/update_exception_list.gen';
-import {
-  GetExceptionListSummaryRequestQueryInput,
-  GetExceptionListSummaryResponse,
-} from './summary_exception_list/summary_exception_list.gen';
-import {
+import type {
   UpdateExceptionListItemRequestBodyInput,
   UpdateExceptionListItemResponse,
 } from './update_exception_list_item/update_exception_list_item.gen';
@@ -236,48 +236,6 @@ export class Client {
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async getExceptionList(props: GetExceptionListProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetExceptionList`);
-    return this.kbnClient
-      .request<GetExceptionListResponse>({
-        path: '/api/exception_lists',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'GET',
-
-        query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async getExceptionListItem(props: GetExceptionListItemProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetExceptionListItem`);
-    return this.kbnClient
-      .request<GetExceptionListItemResponse>({
-        path: '/api/exception_lists/items',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'GET',
-
-        query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async getExceptionListSummary(props: GetExceptionListSummaryProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetExceptionListSummary`);
-    return this.kbnClient
-      .request<GetExceptionListSummaryResponse>({
-        path: '/api/exception_lists/summary',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'GET',
-
-        query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
   /**
    * Imports an exception list and associated items
    */
@@ -290,6 +248,48 @@ export class Client {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async readExceptionList(props: ReadExceptionListProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ReadExceptionList`);
+    return this.kbnClient
+      .request<ReadExceptionListResponse>({
+        path: '/api/exception_lists',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async readExceptionListItem(props: ReadExceptionListItemProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ReadExceptionListItem`);
+    return this.kbnClient
+      .request<ReadExceptionListItemResponse>({
+        path: '/api/exception_lists/items',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async readExceptionListSummary(props: ReadExceptionListSummaryProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ReadExceptionListSummary`);
+    return this.kbnClient
+      .request<ReadExceptionListSummaryResponse>({
+        path: '/api/exception_lists/summary',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
 
         query: props.query,
       })
@@ -354,17 +354,17 @@ export interface FindExceptionListItemsProps {
 export interface FindExceptionListsProps {
   query: FindExceptionListsRequestQueryInput;
 }
-export interface GetExceptionListProps {
-  query: GetExceptionListRequestQueryInput;
-}
-export interface GetExceptionListItemProps {
-  query: GetExceptionListItemRequestQueryInput;
-}
-export interface GetExceptionListSummaryProps {
-  query: GetExceptionListSummaryRequestQueryInput;
-}
 export interface ImportExceptionListProps {
   query: ImportExceptionListRequestQueryInput;
+}
+export interface ReadExceptionListProps {
+  query: ReadExceptionListRequestQueryInput;
+}
+export interface ReadExceptionListItemProps {
+  query: ReadExceptionListItemRequestQueryInput;
+}
+export interface ReadExceptionListSummaryProps {
+  query: ReadExceptionListSummaryRequestQueryInput;
 }
 export interface UpdateExceptionListProps {
   body: UpdateExceptionListRequestBodyInput;

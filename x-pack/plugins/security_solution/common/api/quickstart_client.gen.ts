@@ -20,20 +20,24 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import { catchAxiosErrorFormatAndThrow } from '@kbn/securitysolution-utils';
 
+import type { SetAlertAssigneesRequestBodyInput } from './detection_engine/alert_assignees/set_alert_assignees_route.gen';
 import type {
-  EndpointIsolateRedirectRequestBodyInput,
-  EndpointIsolateRedirectResponse,
-} from './endpoint/actions/isolate_route.gen';
+  RulePreviewRequestBodyInput,
+  RulePreviewResponse,
+} from './detection_engine/rule_preview/rule_preview.gen';
+import type { SuggestUserProfilesRequestQueryInput } from './detection_engine/users/suggest_user_profiles_route.gen';
 import type {
-  EndpointUnisolateRedirectRequestBodyInput,
-  EndpointUnisolateRedirectResponse,
-} from './endpoint/actions/unisolate_route.gen';
+  GetEndpointMetadataListRequestQueryInput,
+  GetEndpointMetadataListResponse,
+} from './endpoint/metadata/get_metadata.gen';
 import type {
   GetAgentPolicySummaryRequestQueryInput,
   GetAgentPolicySummaryResponse,
+} from './endpoint/policy/deprecated_agent_policy_summary.gen';
+import type {
   GetPolicyResponseRequestQueryInput,
   GetPolicyResponseResponse,
-} from './endpoint/policy/policy.gen';
+} from './endpoint/policy/policy_response.gen';
 import type {
   CreateUpdateProtectionUpdatesNoteRequestParamsInput,
   CreateUpdateProtectionUpdatesNoteRequestBodyInput,
@@ -46,12 +50,6 @@ import type {
   GetEndpointSuggestionsRequestBodyInput,
   GetEndpointSuggestionsResponse,
 } from './endpoint/suggestions/get_suggestions.gen';
-import type { SetAlertAssigneesRequestBodyInput } from './detection_engine/alert_assignees/set_alert_assignees_route.gen';
-import type {
-  RulePreviewRequestBodyInput,
-  RulePreviewResponse,
-} from './detection_engine/rule_preview/rule_preview.gen';
-import type { SuggestUserProfilesRequestQueryInput } from './detection_engine/users/suggest_user_profiles_route.gen';
 import type {
   BulkUpsertAssetCriticalityRecordsRequestBodyInput,
   BulkUpsertAssetCriticalityRecordsResponse,
@@ -60,21 +58,16 @@ import type {
   CreateAssetCriticalityRecordRequestBodyInput,
   CreateAssetCriticalityRecordResponse,
 } from './entity_analytics/asset_criticality/create_asset_criticality.gen';
-import type { DeleteAssetCriticalityRecordRequestQueryInput } from './entity_analytics/asset_criticality/delete_asset_criticality.gen';
+import type {
+  DeleteAssetCriticalityRecordRequestQueryInput,
+  DeleteAssetCriticalityRecordResponse,
+} from './entity_analytics/asset_criticality/delete_asset_criticality.gen';
 import type {
   GetAssetCriticalityRecordRequestQueryInput,
   GetAssetCriticalityRecordResponse,
 } from './entity_analytics/asset_criticality/get_asset_criticality.gen';
+import type { AssetCriticalityGetPrivilegesResponse } from './entity_analytics/asset_criticality/get_asset_criticality_privileges.gen';
 import type { GetAssetCriticalityStatusResponse } from './entity_analytics/asset_criticality/get_asset_criticality_status.gen';
-import type {
-  InternalCreateAssetCriticalityRecordRequestBodyInput,
-  InternalCreateAssetCriticalityRecordResponse,
-} from './entity_analytics/asset_criticality/internal_create_asset_criticality.gen';
-import type { InternalDeleteAssetCriticalityRecordRequestQueryInput } from './entity_analytics/asset_criticality/internal_delete_asset_criticality.gen';
-import type {
-  InternalGetAssetCriticalityRecordRequestQueryInput,
-  InternalGetAssetCriticalityRecordResponse,
-} from './entity_analytics/asset_criticality/internal_get_asset_criticality.gen';
 import type {
   FindAssetCriticalityRecordsRequestQueryInput,
   FindAssetCriticalityRecordsResponse,
@@ -94,24 +87,87 @@ import type {
   TriggerRiskScoreCalculationRequestBodyInput,
   TriggerRiskScoreCalculationResponse,
 } from './entity_analytics/risk_engine/entity_calculation_route.gen';
+import type { RiskEngineGetPrivilegesResponse } from './entity_analytics/risk_engine/get_risk_engine_privileges.gen';
 import type {
   PreviewRiskScoreRequestBodyInput,
   PreviewRiskScoreResponse,
 } from './entity_analytics/risk_engine/preview_route.gen';
 import type {
-  ManageAlertTagsRequestBodyInput,
-  ManageAlertTagsResponse,
+  CleanDraftTimelinesRequestBodyInput,
+  CleanDraftTimelinesResponse,
+} from './timeline/clean_draft_timelines/clean_draft_timelines_route.gen';
+import type {
+  CreateTimelinesRequestBodyInput,
+  CreateTimelinesResponse,
+} from './timeline/create_timelines/create_timelines_route.gen';
+import type {
+  DeleteNoteRequestBodyInput,
+  DeleteNoteResponse,
+} from './timeline/delete_note/delete_note_route.gen';
+import type {
+  DeleteTimelinesRequestBodyInput,
+  DeleteTimelinesResponse,
+} from './timeline/delete_timelines/delete_timelines_route.gen';
+import type {
+  ExportTimelinesRequestQueryInput,
+  ExportTimelinesRequestBodyInput,
+} from './timeline/export_timelines/export_timelines_route.gen';
+import type {
+  GetDraftTimelinesRequestQueryInput,
+  GetDraftTimelinesResponse,
+} from './timeline/get_draft_timelines/get_draft_timelines_route.gen';
+import type { GetNotesRequestQueryInput } from './timeline/get_notes/get_notes_route.gen';
+import type {
+  GetTimelineRequestQueryInput,
+  GetTimelineResponse,
+} from './timeline/get_timeline/get_timeline_route.gen';
+import type {
+  GetTimelinesRequestQueryInput,
+  GetTimelinesResponse,
+} from './timeline/get_timelines/get_timelines_route.gen';
+import type {
+  ImportTimelinesRequestBodyInput,
+  ImportTimelinesResponse,
+} from './timeline/import_timelines/import_timelines_route.gen';
+import type {
+  InstallPrepackedTimelinesRequestBodyInput,
+  InstallPrepackedTimelinesResponse,
+} from './timeline/install_prepackaged_timelines/install_prepackaged_timelines_route.gen';
+import type {
+  PatchTimelineRequestBodyInput,
+  PatchTimelineResponse,
+} from './timeline/patch_timelines/patch_timeline_route.gen';
+import type {
+  PersistFavoriteRouteRequestBodyInput,
+  PersistFavoriteRouteResponse,
+} from './timeline/persist_favorite/persist_favorite_route.gen';
+import type {
+  PersistNoteRouteRequestBodyInput,
+  PersistNoteRouteResponse,
+} from './timeline/persist_note/persist_note_route.gen';
+import type {
+  PersistPinnedEventRouteRequestBodyInput,
+  PersistPinnedEventRouteResponse,
+} from './timeline/pinned_events/pinned_events_route.gen';
+import type {
+  ResolveTimelineRequestQueryInput,
+  ResolveTimelineResponse,
+} from './timeline/resolve_timeline/resolve_timeline_route.gen';
+import type {
+  SetAlertTagsRequestBodyInput,
+  SetAlertTagsResponse,
 } from './detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
 import type { CreateAlertsIndexResponse } from './detection_engine/index_management/create_index/create_index.gen';
 import type { DeleteAlertsIndexResponse } from './detection_engine/index_management/delete_index/delete_index.gen';
-import type { GetAlertsIndexResponse } from './detection_engine/index_management/read_index/read_index.gen';
-import type { GetPrivilegesResponse } from './detection_engine/index_management/read_privileges/read_privileges.gen';
-import type { GetPrebuiltRulesAndTimelinesStatusResponse } from './detection_engine/prebuilt_rules/get_prebuilt_rules_and_timelines_status/get_prebuilt_rules_and_timelines_status_route.gen';
+import type { ReadAlertsIndexResponse } from './detection_engine/index_management/read_index/read_index.gen';
+import type { ReadPrivilegesResponse } from './detection_engine/index_management/read_privileges/read_privileges.gen';
+import type { BootstrapPrebuiltRulesResponse } from './detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import type { InstallPrebuiltRulesAndTimelinesResponse } from './detection_engine/prebuilt_rules/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.gen';
+import type { ReadPrebuiltRulesAndTimelinesStatusResponse } from './detection_engine/prebuilt_rules/read_prebuilt_rules_and_timelines_status/read_prebuilt_rules_and_timelines_status_route.gen';
 import type {
-  PerformBulkActionRequestQueryInput,
-  PerformBulkActionRequestBodyInput,
-  PerformBulkActionResponse,
+  PerformRulesBulkActionRequestQueryInput,
+  PerformRulesBulkActionRequestBodyInput,
+  PerformRulesBulkActionResponse,
 } from './detection_engine/rule_management/bulk_actions/bulk_actions_route.gen';
 import type {
   ExportRulesRequestQueryInput,
@@ -147,9 +203,30 @@ import type {
   FinalizeAlertsMigrationResponse,
 } from './detection_engine/signals_migration/finalize_signals_migration/finalize_signals_migration.gen';
 import type {
-  GetAlertsMigrationStatusRequestQueryInput,
-  GetAlertsMigrationStatusResponse,
-} from './detection_engine/signals_migration/get_signals_migration_status/get_signals_migration_status.gen';
+  ReadAlertsMigrationStatusRequestQueryInput,
+  ReadAlertsMigrationStatusResponse,
+} from './detection_engine/signals_migration/read_signals_migration_status/read_signals_migration_status.gen';
+import type {
+  EndpointGetActionsDetailsRequestParamsInput,
+  EndpointGetActionsDetailsResponse,
+} from './endpoint/actions/details/details.gen';
+import type {
+  EndpointFileDownloadRequestParamsInput,
+  EndpointFileDownloadResponse,
+} from './endpoint/actions/file_download/file_download.gen';
+import type {
+  EndpointFileInfoRequestParamsInput,
+  EndpointFileInfoResponse,
+} from './endpoint/actions/file_info/file_info.gen';
+import type {
+  EndpointGetActionsListRequestQueryInput,
+  EndpointGetActionsListResponse,
+} from './endpoint/actions/list/list.gen';
+import type { EndpointGetActionsStateResponse } from './endpoint/actions/state/state.gen';
+import type {
+  EndpointGetActionsStatusRequestQueryInput,
+  EndpointGetActionsStatusResponse,
+} from './endpoint/actions/status/status.gen';
 import type {
   BulkCreateRulesRequestBodyInput,
   BulkCreateRulesResponse,
@@ -161,21 +238,21 @@ import type {
   BulkDeleteRulesPostResponse,
 } from './detection_engine/rule_management/bulk_crud/bulk_delete_rules/bulk_delete_rules_route.gen';
 import type {
-  BulkUpdateRulesRequestBodyInput,
-  BulkUpdateRulesResponse,
-} from './detection_engine/rule_management/bulk_crud/bulk_update_rules/bulk_update_rules_route.gen';
-import type {
   BulkPatchRulesRequestBodyInput,
   BulkPatchRulesResponse,
 } from './detection_engine/rule_management/bulk_crud/bulk_patch_rules/bulk_patch_rules_route.gen';
 import type {
-  DeleteRuleRequestQueryInput,
-  DeleteRuleResponse,
-} from './detection_engine/rule_management/crud/delete_rule/delete_rule_route.gen';
+  BulkUpdateRulesRequestBodyInput,
+  BulkUpdateRulesResponse,
+} from './detection_engine/rule_management/bulk_crud/bulk_update_rules/bulk_update_rules_route.gen';
 import type {
   CreateRuleRequestBodyInput,
   CreateRuleResponse,
 } from './detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
+import type {
+  DeleteRuleRequestQueryInput,
+  DeleteRuleResponse,
+} from './detection_engine/rule_management/crud/delete_rule/delete_rule_route.gen';
 import type {
   PatchRuleRequestBodyInput,
   PatchRuleResponse,
@@ -198,6 +275,50 @@ import type {
   GetRuleExecutionResultsRequestParamsInput,
   GetRuleExecutionResultsResponse,
 } from './detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
+import type {
+  EndpointExecuteActionRequestBodyInput,
+  EndpointExecuteActionResponse,
+} from './endpoint/actions/response_actions/execute/execute.gen';
+import type {
+  EndpointGetFileActionRequestBodyInput,
+  EndpointGetFileActionResponse,
+} from './endpoint/actions/response_actions/get_file/get_file.gen';
+import type {
+  EndpointIsolateRedirectRequestBodyInput,
+  EndpointIsolateRedirectResponse,
+} from './endpoint/actions/response_actions/isolate/deprecated_isolate.gen';
+import type {
+  EndpointIsolateActionRequestBodyInput,
+  EndpointIsolateActionResponse,
+} from './endpoint/actions/response_actions/isolate/isolate.gen';
+import type {
+  EndpointKillProcessActionRequestBodyInput,
+  EndpointKillProcessActionResponse,
+} from './endpoint/actions/response_actions/kill_process/kill_process.gen';
+import type {
+  EndpointGetProcessesActionRequestBodyInput,
+  EndpointGetProcessesActionResponse,
+} from './endpoint/actions/response_actions/running_procs/running_procs.gen';
+import type {
+  EndpointScanActionRequestBodyInput,
+  EndpointScanActionResponse,
+} from './endpoint/actions/response_actions/scan/scan.gen';
+import type {
+  EndpointSuspendProcessActionRequestBodyInput,
+  EndpointSuspendProcessActionResponse,
+} from './endpoint/actions/response_actions/suspend_process/suspend_process.gen';
+import type {
+  EndpointUnisolateRedirectRequestBodyInput,
+  EndpointUnisolateRedirectResponse,
+} from './endpoint/actions/response_actions/unisolate/deprecated_unisolate.gen';
+import type {
+  EndpointUnisolateActionRequestBodyInput,
+  EndpointUnisolateActionResponse,
+} from './endpoint/actions/response_actions/unisolate/unisolate.gen';
+import type {
+  EndpointUploadActionRequestBodyInput,
+  EndpointUploadActionResponse,
+} from './endpoint/actions/response_actions/upload/upload.gen';
 
 export interface ClientOptions {
   kbnClient: KbnClient;
@@ -232,6 +353,33 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         },
         method: 'DELETE',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async assetCriticalityGetPrivileges() {
+    this.log.info(`${new Date().toISOString()} Calling API AssetCriticalityGetPrivileges`);
+    return this.kbnClient
+      .request<AssetCriticalityGetPrivilegesResponse>({
+        path: '/internal/asset_criticality/privileges',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Ensures that the packages needed for prebuilt detection rules to work are installed and up to date
+   */
+  async bootstrapPrebuiltRules() {
+    this.log.info(`${new Date().toISOString()} Calling API BootstrapPrebuiltRules`);
+    return this.kbnClient
+      .request<BootstrapPrebuiltRulesResponse>({
+        path: '/internal/detection_engine/prebuilt_rules/_bootstrap',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -318,11 +466,31 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Bulk upsert up to 1000 asset criticality records, creating or updating them as needed.
+   */
   async bulkUpsertAssetCriticalityRecords(props: BulkUpsertAssetCriticalityRecordsProps) {
     this.log.info(`${new Date().toISOString()} Calling API BulkUpsertAssetCriticalityRecords`);
     return this.kbnClient
       .request<BulkUpsertAssetCriticalityRecordsResponse>({
         path: '/api/asset_criticality/bulk',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Retrieves a clean draft timeline. If a draft timeline does not exist, it is created and returned.
+
+    */
+  async cleanDraftTimelines(props: CleanDraftTimelinesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CleanDraftTimelines`);
+    return this.kbnClient
+      .request<CleanDraftTimelinesResponse>({
+        path: '/api/timeline/_draft',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -361,6 +529,9 @@ Migrations are initiated per index. While the process is neither destructive nor
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Create or update a criticality record for a specific asset.
+   */
   async createAssetCriticalityRecord(props: CreateAssetCriticalityRecordProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateAssetCriticalityRecord`);
     return this.kbnClient
@@ -382,6 +553,19 @@ Migrations are initiated per index. While the process is neither destructive nor
     return this.kbnClient
       .request<CreateRuleResponse>({
         path: '/api/detection_engine/rules',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async createTimelines(props: CreateTimelinesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateTimelines`);
+    return this.kbnClient
+      .request<CreateTimelinesResponse>({
+        path: '/api/timeline',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -418,10 +602,13 @@ Migrations are initiated per index. While the process is neither destructive nor
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Delete the asset criticality record for a specific asset if it exists.
+   */
   async deleteAssetCriticalityRecord(props: DeleteAssetCriticalityRecordProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteAssetCriticalityRecord`);
     return this.kbnClient
-      .request({
+      .request<DeleteAssetCriticalityRecordResponse>({
         path: '/api/asset_criticality',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -429,6 +616,19 @@ Migrations are initiated per index. While the process is neither destructive nor
         method: 'DELETE',
 
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async deleteNote(props: DeleteNoteProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteNote`);
+    return this.kbnClient
+      .request<DeleteNoteResponse>({
+        path: '/api/note',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'DELETE',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -446,6 +646,19 @@ Migrations are initiated per index. While the process is neither destructive nor
         method: 'DELETE',
 
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async deleteTimelines(props: DeleteTimelinesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteTimelines`);
+    return this.kbnClient
+      .request<DeleteTimelinesResponse>({
+        path: '/api/timeline',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'DELETE',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -489,6 +702,164 @@ Migrations are initiated per index. While the process is neither destructive nor
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Execute a given command on an endpoint
+   */
+  async endpointExecuteAction(props: EndpointExecuteActionProps) {
+    this.log.info(`${new Date().toISOString()} Calling API EndpointExecuteAction`);
+    return this.kbnClient
+      .request<EndpointExecuteActionResponse>({
+        path: '/api/endpoint/action/execute',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Download a file from an endpoint
+   */
+  async endpointFileDownload(props: EndpointFileDownloadProps) {
+    this.log.info(`${new Date().toISOString()} Calling API EndpointFileDownload`);
+    return this.kbnClient
+      .request<EndpointFileDownloadResponse>({
+        path: replaceParams(
+          '/api/endpoint/action/{action_id}/file/{file_id}/download&#x60;',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Get file info
+   */
+  async endpointFileInfo(props: EndpointFileInfoProps) {
+    this.log.info(`${new Date().toISOString()} Calling API EndpointFileInfo`);
+    return this.kbnClient
+      .request<EndpointFileInfoResponse>({
+        path: replaceParams('/api/endpoint/action/{action_id}/file/{file_id}&#x60;', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Get action details
+   */
+  async endpointGetActionsDetails(props: EndpointGetActionsDetailsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API EndpointGetActionsDetails`);
+    return this.kbnClient
+      .request<EndpointGetActionsDetailsResponse>({
+        path: replaceParams('/api/endpoint/action/{action_id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Get a list of action requests and their responses
+   */
+  async endpointGetActionsList(props: EndpointGetActionsListProps) {
+    this.log.info(`${new Date().toISOString()} Calling API EndpointGetActionsList`);
+    return this.kbnClient
+      .request<EndpointGetActionsListResponse>({
+        path: '/api/endpoint/action',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async endpointGetActionsState() {
+    this.log.info(`${new Date().toISOString()} Calling API EndpointGetActionsState`);
+    return this.kbnClient
+      .request<EndpointGetActionsStateResponse>({
+        path: '/api/endpoint/action/state',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Get action status
+   */
+  async endpointGetActionsStatus(props: EndpointGetActionsStatusProps) {
+    this.log.info(`${new Date().toISOString()} Calling API EndpointGetActionsStatus`);
+    return this.kbnClient
+      .request<EndpointGetActionsStatusResponse>({
+        path: '/api/endpoint/action_status',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Get a file from an endpoint
+   */
+  async endpointGetFileAction(props: EndpointGetFileActionProps) {
+    this.log.info(`${new Date().toISOString()} Calling API EndpointGetFileAction`);
+    return this.kbnClient
+      .request<EndpointGetFileActionResponse>({
+        path: '/api/endpoint/action/get_file',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Get list of running processes on an endpoint
+   */
+  async endpointGetProcessesAction(props: EndpointGetProcessesActionProps) {
+    this.log.info(`${new Date().toISOString()} Calling API EndpointGetProcessesAction`);
+    return this.kbnClient
+      .request<EndpointGetProcessesActionResponse>({
+        path: '/api/endpoint/action/running_procs',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Isolate an endpoint
+   */
+  async endpointIsolateAction(props: EndpointIsolateActionProps) {
+    this.log.info(`${new Date().toISOString()} Calling API EndpointIsolateAction`);
+    return this.kbnClient
+      .request<EndpointIsolateActionResponse>({
+        path: '/api/endpoint/action/isolate',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async endpointIsolateRedirect(props: EndpointIsolateRedirectProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointIsolateRedirect`);
     return this.kbnClient
@@ -502,11 +873,91 @@ Migrations are initiated per index. While the process is neither destructive nor
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Kill a running process on an endpoint
+   */
+  async endpointKillProcessAction(props: EndpointKillProcessActionProps) {
+    this.log.info(`${new Date().toISOString()} Calling API EndpointKillProcessAction`);
+    return this.kbnClient
+      .request<EndpointKillProcessActionResponse>({
+        path: '/api/endpoint/action/kill_process',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Scan a file or directory
+   */
+  async endpointScanAction(props: EndpointScanActionProps) {
+    this.log.info(`${new Date().toISOString()} Calling API EndpointScanAction`);
+    return this.kbnClient
+      .request<EndpointScanActionResponse>({
+        path: '/api/endpoint/action/scan',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Suspend a running process on an endpoint
+   */
+  async endpointSuspendProcessAction(props: EndpointSuspendProcessActionProps) {
+    this.log.info(`${new Date().toISOString()} Calling API EndpointSuspendProcessAction`);
+    return this.kbnClient
+      .request<EndpointSuspendProcessActionResponse>({
+        path: '/api/endpoint/action/suspend_process',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Release an endpoint
+   */
+  async endpointUnisolateAction(props: EndpointUnisolateActionProps) {
+    this.log.info(`${new Date().toISOString()} Calling API EndpointUnisolateAction`);
+    return this.kbnClient
+      .request<EndpointUnisolateActionResponse>({
+        path: '/api/endpoint/action/unisolate',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async endpointUnisolateRedirect(props: EndpointUnisolateRedirectProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointUnisolateRedirect`);
     return this.kbnClient
       .request<EndpointUnisolateRedirectResponse>({
         path: '/api/endpoint/unisolate',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Upload a file to an endpoint
+   */
+  async endpointUploadAction(props: EndpointUploadActionProps) {
+    this.log.info(`${new Date().toISOString()} Calling API EndpointUploadAction`);
+    return this.kbnClient
+      .request<EndpointUploadActionResponse>({
+        path: '/api/endpoint/action/upload',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -537,6 +988,20 @@ Migrations are initiated per index. While the process is neither destructive nor
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async exportTimelines(props: ExportTimelinesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ExportTimelines`);
+    return this.kbnClient
+      .request({
+        path: '/api/timeline/_export',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
     * Finalize successful migrations of detection alerts. This replaces the original index's alias with the successfully migrated index's alias.
 The endpoint is idempotent; therefore, it can safely be used to poll a given migration and, upon completion,
@@ -556,6 +1021,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * List asset criticality records, paging, sorting and filtering as needed.
+   */
   async findAssetCriticalityRecords(props: FindAssetCriticalityRecordsProps) {
     this.log.info(`${new Date().toISOString()} Calling API FindAssetCriticalityRecords`);
     return this.kbnClient
@@ -564,7 +1032,7 @@ finalize it.
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
-        method: 'POST',
+        method: 'GET',
 
         query: props.query,
       })
@@ -601,35 +1069,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async getAlertsIndex() {
-    this.log.info(`${new Date().toISOString()} Calling API GetAlertsIndex`);
-    return this.kbnClient
-      .request<GetAlertsIndexResponse>({
-        path: '/api/detection_engine/index',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'GET',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
   /**
-   * Retrieve indices that contain detection alerts of a particular age, along with migration information for each of those indices.
+   * Get the criticality record for a specific asset.
    */
-  async getAlertsMigrationStatus(props: GetAlertsMigrationStatusProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetAlertsMigrationStatus`);
-    return this.kbnClient
-      .request<GetAlertsMigrationStatusResponse>({
-        path: '/api/detection_engine/signals/migration_status',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-
-        query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
   async getAssetCriticalityRecord(props: GetAssetCriticalityRecordProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetAssetCriticalityRecord`);
     return this.kbnClient
@@ -656,6 +1098,34 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async getDraftTimelines(props: GetDraftTimelinesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetDraftTimelines`);
+    return this.kbnClient
+      .request<GetDraftTimelinesResponse>({
+        path: '/api/timeline/_draft',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async getEndpointMetadataList(props: GetEndpointMetadataListProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetEndpointMetadataList`);
+    return this.kbnClient
+      .request<GetEndpointMetadataListResponse>({
+        path: '/api/endpoint/metadata',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async getEndpointSuggestions(props: GetEndpointSuggestionsProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetEndpointSuggestions`);
     return this.kbnClient
@@ -666,6 +1136,23 @@ finalize it.
         },
         method: 'POST',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Gets notes
+   */
+  async getNotes(props: GetNotesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetNotes`);
+    return this.kbnClient
+      .request({
+        path: '/api/note',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -680,40 +1167,6 @@ finalize it.
         method: 'GET',
 
         query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Retrieve the status of all Elastic prebuilt detection rules and Timelines.
-   */
-  async getPrebuiltRulesAndTimelinesStatus() {
-    this.log.info(`${new Date().toISOString()} Calling API GetPrebuiltRulesAndTimelinesStatus`);
-    return this.kbnClient
-      .request<GetPrebuiltRulesAndTimelinesStatusResponse>({
-        path: '/api/detection_engine/rules/prepackaged/_status',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'GET',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-    * Retrieves whether or not the user is authenticated, and the user's Kibana
-space and index privileges, which determine if the user can create an
-index for the Elastic Security alerts generated by
-detection engine rules.
-
-    */
-  async getPrivileges() {
-    this.log.info(`${new Date().toISOString()} Calling API GetPrivileges`);
-    return this.kbnClient
-      .request<GetPrivilegesResponse>({
-        path: '/api/detection_engine/privileges',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'GET',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -781,6 +1234,34 @@ detection engine rules.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async getTimeline(props: GetTimelineProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetTimeline`);
+    return this.kbnClient
+      .request<GetTimelineResponse>({
+        path: '/api/timeline',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async getTimelines(props: GetTimelinesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetTimelines`);
+    return this.kbnClient
+      .request<GetTimelinesResponse>({
+        path: '/api/timelines',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
     * Import detection rules from an `.ndjson` file, including actions and exception lists. The request must include:
 - The `Content-Type: multipart/form-data` HTTP header.
@@ -798,6 +1279,19 @@ detection engine rules.
         method: 'POST',
 
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async importTimelines(props: ImportTimelinesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ImportTimelines`);
+    return this.kbnClient
+      .request<ImportTimelinesResponse>({
+        path: '/api/timeline/_import',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -831,44 +1325,16 @@ detection engine rules.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async internalCreateAssetCriticalityRecord(props: InternalCreateAssetCriticalityRecordProps) {
-    this.log.info(`${new Date().toISOString()} Calling API InternalCreateAssetCriticalityRecord`);
+  async installPrepackedTimelines(props: InstallPrepackedTimelinesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API InstallPrepackedTimelines`);
     return this.kbnClient
-      .request<InternalCreateAssetCriticalityRecordResponse>({
-        path: '/internal/asset_criticality',
+      .request<InstallPrepackedTimelinesResponse>({
+        path: '/api/timeline/_prepackaged',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
         body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async internalDeleteAssetCriticalityRecord(props: InternalDeleteAssetCriticalityRecordProps) {
-    this.log.info(`${new Date().toISOString()} Calling API InternalDeleteAssetCriticalityRecord`);
-    return this.kbnClient
-      .request({
-        path: '/internal/asset_criticality',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'DELETE',
-
-        query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async internalGetAssetCriticalityRecord(props: InternalGetAssetCriticalityRecordProps) {
-    this.log.info(`${new Date().toISOString()} Calling API InternalGetAssetCriticalityRecord`);
-    return this.kbnClient
-      .request<InternalGetAssetCriticalityRecordResponse>({
-        path: '/internal/asset_criticality',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'GET',
-
-        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -881,25 +1347,6 @@ detection engine rules.
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-    * And tags to detection alerts, and remove them from alerts.
-> info
-> You cannot add and remove the same alert tag in the same request.
-
-    */
-  async manageAlertTags(props: ManageAlertTagsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API ManageAlertTags`);
-    return this.kbnClient
-      .request<ManageAlertTagsResponse>({
-        path: '/api/detection_engine/signals/tags',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -920,12 +1367,28 @@ detection engine rules.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Updates an existing timeline. This API is used to update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing timeline.
+   */
+  async patchTimeline(props: PatchTimelineProps) {
+    this.log.info(`${new Date().toISOString()} Calling API PatchTimeline`);
+    return this.kbnClient
+      .request<PatchTimelineResponse>({
+        path: '/api/timeline',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'PATCH',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
    */
-  async performBulkAction(props: PerformBulkActionProps) {
-    this.log.info(`${new Date().toISOString()} Calling API PerformBulkAction`);
+  async performRulesBulkAction(props: PerformRulesBulkActionProps) {
+    this.log.info(`${new Date().toISOString()} Calling API PerformRulesBulkAction`);
     return this.kbnClient
-      .request<PerformBulkActionResponse>({
+      .request<PerformRulesBulkActionResponse>({
         path: '/api/detection_engine/rules/_bulk_action',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -933,6 +1396,45 @@ detection engine rules.
         method: 'POST',
         body: props.body,
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async persistFavoriteRoute(props: PersistFavoriteRouteProps) {
+    this.log.info(`${new Date().toISOString()} Calling API PersistFavoriteRoute`);
+    return this.kbnClient
+      .request<PersistFavoriteRouteResponse>({
+        path: '/api/timeline/_favorite',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'PATCH',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async persistNoteRoute(props: PersistNoteRouteProps) {
+    this.log.info(`${new Date().toISOString()} Calling API PersistNoteRoute`);
+    return this.kbnClient
+      .request<PersistNoteRouteResponse>({
+        path: '/api/note',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'PATCH',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async persistPinnedEventRoute(props: PersistPinnedEventRouteProps) {
+    this.log.info(`${new Date().toISOString()} Calling API PersistPinnedEventRoute`);
+    return this.kbnClient
+      .request<PersistPinnedEventRouteResponse>({
+        path: '/api/pinned_event',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'PATCH',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -949,6 +1451,69 @@ detection engine rules.
         },
         method: 'POST',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async readAlertsIndex() {
+    this.log.info(`${new Date().toISOString()} Calling API ReadAlertsIndex`);
+    return this.kbnClient
+      .request<ReadAlertsIndexResponse>({
+        path: '/api/detection_engine/index',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieve indices that contain detection alerts of a particular age, along with migration information for each of those indices.
+   */
+  async readAlertsMigrationStatus(props: ReadAlertsMigrationStatusProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ReadAlertsMigrationStatus`);
+    return this.kbnClient
+      .request<ReadAlertsMigrationStatusResponse>({
+        path: '/api/detection_engine/signals/migration_status',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieve the status of all Elastic prebuilt detection rules and Timelines.
+   */
+  async readPrebuiltRulesAndTimelinesStatus() {
+    this.log.info(`${new Date().toISOString()} Calling API ReadPrebuiltRulesAndTimelinesStatus`);
+    return this.kbnClient
+      .request<ReadPrebuiltRulesAndTimelinesStatusResponse>({
+        path: '/api/detection_engine/rules/prepackaged/_status',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Retrieves whether or not the user is authenticated, and the user's Kibana
+space and index privileges, which determine if the user can create an
+index for the Elastic Security alerts generated by
+detection engine rules.
+
+    */
+  async readPrivileges() {
+    this.log.info(`${new Date().toISOString()} Calling API ReadPrivileges`);
+    return this.kbnClient
+      .request<ReadPrivilegesResponse>({
+        path: '/api/detection_engine/privileges',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -991,6 +1556,32 @@ detection engine rules.
         path: '/api/detection_engine/tags',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async resolveTimeline(props: ResolveTimelineProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ResolveTimeline`);
+    return this.kbnClient
+      .request<ResolveTimelineResponse>({
+        path: '/api/timeline/resolve',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async riskEngineGetPrivileges() {
+    this.log.info(`${new Date().toISOString()} Calling API RiskEngineGetPrivileges`);
+    return this.kbnClient
+      .request<RiskEngineGetPrivilegesResponse>({
+        path: '/internal/risk_engine/privileges',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
       })
@@ -1052,6 +1643,25 @@ detection engine rules.
     return this.kbnClient
       .request<SetAlertsStatusResponse>({
         path: '/api/detection_engine/signals/status',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * And tags to detection alerts, and remove them from alerts.
+> info
+> You cannot add and remove the same alert tag in the same request.
+
+    */
+  async setAlertTags(props: SetAlertTagsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SetAlertTags`);
+    return this.kbnClient
+      .request<SetAlertTagsResponse>({
+        path: '/api/detection_engine/signals/tags',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -1147,6 +1757,9 @@ export interface BulkUpdateRulesProps {
 export interface BulkUpsertAssetCriticalityRecordsProps {
   body: BulkUpsertAssetCriticalityRecordsRequestBodyInput;
 }
+export interface CleanDraftTimelinesProps {
+  body: CleanDraftTimelinesRequestBodyInput;
+}
 export interface CreateAlertsMigrationProps {
   body: CreateAlertsMigrationRequestBodyInput;
 }
@@ -1156,6 +1769,9 @@ export interface CreateAssetCriticalityRecordProps {
 export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
 }
+export interface CreateTimelinesProps {
+  body: CreateTimelinesRequestBodyInput;
+}
 export interface CreateUpdateProtectionUpdatesNoteProps {
   params: CreateUpdateProtectionUpdatesNoteRequestParamsInput;
   body: CreateUpdateProtectionUpdatesNoteRequestBodyInput;
@@ -1163,21 +1779,73 @@ export interface CreateUpdateProtectionUpdatesNoteProps {
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;
 }
+export interface DeleteNoteProps {
+  body: DeleteNoteRequestBodyInput;
+}
 export interface DeleteRuleProps {
   query: DeleteRuleRequestQueryInput;
+}
+export interface DeleteTimelinesProps {
+  body: DeleteTimelinesRequestBodyInput;
 }
 export interface DeprecatedTriggerRiskScoreCalculationProps {
   body: DeprecatedTriggerRiskScoreCalculationRequestBodyInput;
 }
+export interface EndpointExecuteActionProps {
+  body: EndpointExecuteActionRequestBodyInput;
+}
+export interface EndpointFileDownloadProps {
+  params: EndpointFileDownloadRequestParamsInput;
+}
+export interface EndpointFileInfoProps {
+  params: EndpointFileInfoRequestParamsInput;
+}
+export interface EndpointGetActionsDetailsProps {
+  params: EndpointGetActionsDetailsRequestParamsInput;
+}
+export interface EndpointGetActionsListProps {
+  query: EndpointGetActionsListRequestQueryInput;
+}
+export interface EndpointGetActionsStatusProps {
+  query: EndpointGetActionsStatusRequestQueryInput;
+}
+export interface EndpointGetFileActionProps {
+  body: EndpointGetFileActionRequestBodyInput;
+}
+export interface EndpointGetProcessesActionProps {
+  body: EndpointGetProcessesActionRequestBodyInput;
+}
+export interface EndpointIsolateActionProps {
+  body: EndpointIsolateActionRequestBodyInput;
+}
 export interface EndpointIsolateRedirectProps {
   body: EndpointIsolateRedirectRequestBodyInput;
+}
+export interface EndpointKillProcessActionProps {
+  body: EndpointKillProcessActionRequestBodyInput;
+}
+export interface EndpointScanActionProps {
+  body: EndpointScanActionRequestBodyInput;
+}
+export interface EndpointSuspendProcessActionProps {
+  body: EndpointSuspendProcessActionRequestBodyInput;
+}
+export interface EndpointUnisolateActionProps {
+  body: EndpointUnisolateActionRequestBodyInput;
 }
 export interface EndpointUnisolateRedirectProps {
   body: EndpointUnisolateRedirectRequestBodyInput;
 }
+export interface EndpointUploadActionProps {
+  body: EndpointUploadActionRequestBodyInput;
+}
 export interface ExportRulesProps {
   query: ExportRulesRequestQueryInput;
   body: ExportRulesRequestBodyInput;
+}
+export interface ExportTimelinesProps {
+  query: ExportTimelinesRequestQueryInput;
+  body: ExportTimelinesRequestBodyInput;
 }
 export interface FinalizeAlertsMigrationProps {
   body: FinalizeAlertsMigrationRequestBodyInput;
@@ -1191,15 +1859,21 @@ export interface FindRulesProps {
 export interface GetAgentPolicySummaryProps {
   query: GetAgentPolicySummaryRequestQueryInput;
 }
-export interface GetAlertsMigrationStatusProps {
-  query: GetAlertsMigrationStatusRequestQueryInput;
-}
 export interface GetAssetCriticalityRecordProps {
   query: GetAssetCriticalityRecordRequestQueryInput;
+}
+export interface GetDraftTimelinesProps {
+  query: GetDraftTimelinesRequestQueryInput;
+}
+export interface GetEndpointMetadataListProps {
+  query: GetEndpointMetadataListRequestQueryInput;
 }
 export interface GetEndpointSuggestionsProps {
   params: GetEndpointSuggestionsRequestParamsInput;
   body: GetEndpointSuggestionsRequestBodyInput;
+}
+export interface GetNotesProps {
+  query: GetNotesRequestQueryInput;
 }
 export interface GetPolicyResponseProps {
   query: GetPolicyResponseRequestQueryInput;
@@ -1215,33 +1889,51 @@ export interface GetRuleExecutionResultsProps {
   query: GetRuleExecutionResultsRequestQueryInput;
   params: GetRuleExecutionResultsRequestParamsInput;
 }
+export interface GetTimelineProps {
+  query: GetTimelineRequestQueryInput;
+}
+export interface GetTimelinesProps {
+  query: GetTimelinesRequestQueryInput;
+}
 export interface ImportRulesProps {
   query: ImportRulesRequestQueryInput;
 }
-export interface InternalCreateAssetCriticalityRecordProps {
-  body: InternalCreateAssetCriticalityRecordRequestBodyInput;
+export interface ImportTimelinesProps {
+  body: ImportTimelinesRequestBodyInput;
 }
-export interface InternalDeleteAssetCriticalityRecordProps {
-  query: InternalDeleteAssetCriticalityRecordRequestQueryInput;
-}
-export interface InternalGetAssetCriticalityRecordProps {
-  query: InternalGetAssetCriticalityRecordRequestQueryInput;
-}
-export interface ManageAlertTagsProps {
-  body: ManageAlertTagsRequestBodyInput;
+export interface InstallPrepackedTimelinesProps {
+  body: InstallPrepackedTimelinesRequestBodyInput;
 }
 export interface PatchRuleProps {
   body: PatchRuleRequestBodyInput;
 }
-export interface PerformBulkActionProps {
-  query: PerformBulkActionRequestQueryInput;
-  body: PerformBulkActionRequestBodyInput;
+export interface PatchTimelineProps {
+  body: PatchTimelineRequestBodyInput;
+}
+export interface PerformRulesBulkActionProps {
+  query: PerformRulesBulkActionRequestQueryInput;
+  body: PerformRulesBulkActionRequestBodyInput;
+}
+export interface PersistFavoriteRouteProps {
+  body: PersistFavoriteRouteRequestBodyInput;
+}
+export interface PersistNoteRouteProps {
+  body: PersistNoteRouteRequestBodyInput;
+}
+export interface PersistPinnedEventRouteProps {
+  body: PersistPinnedEventRouteRequestBodyInput;
 }
 export interface PreviewRiskScoreProps {
   body: PreviewRiskScoreRequestBodyInput;
 }
+export interface ReadAlertsMigrationStatusProps {
+  query: ReadAlertsMigrationStatusRequestQueryInput;
+}
 export interface ReadRuleProps {
   query: ReadRuleRequestQueryInput;
+}
+export interface ResolveTimelineProps {
+  query: ResolveTimelineRequestQueryInput;
 }
 export interface RulePreviewProps {
   body: RulePreviewRequestBodyInput;
@@ -1254,6 +1946,9 @@ export interface SetAlertAssigneesProps {
 }
 export interface SetAlertsStatusProps {
   body: SetAlertsStatusRequestBodyInput;
+}
+export interface SetAlertTagsProps {
+  body: SetAlertTagsRequestBodyInput;
 }
 export interface SuggestUserProfilesProps {
   query: SuggestUserProfilesRequestQueryInput;
