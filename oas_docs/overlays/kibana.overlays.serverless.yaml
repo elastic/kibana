@@ -4,6 +4,17 @@ info:
   title: Overlays for the Kibana API document
   version: 0.0.1
 actions:
+  # Clean up server definitions
+  - target: '$.servers.*'
+    description: Remove all servers so we can add our own.
+    remove: true
+  - target: '$.servers'
+    description: Add server into the now empty server array.
+    update:
+      - url: https://{kibana_url}
+        variables:
+          kibana_url:
+            default: localhost:5601
   # Mark all operations as beta
   - target: "$.paths[*]['get','put','post','delete','options','head','patch','trace']"
     description: Add x-beta

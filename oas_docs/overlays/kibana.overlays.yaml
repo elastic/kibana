@@ -4,18 +4,6 @@ info:
   title: Overlays for the Kibana API document
   version: 0.0.1
 actions:
-  # Add document-level basic security definition
-  - target: '$.components.securitySchemes'
-    description: Add an basic security scheme
-    update:
-      basicAuth:
-        type: http
-        scheme: basic
-  - target: '$'
-    description: Add document-level security.
-    update:
-      security:
-        - basicAuth: []
   # Add an introduction to spaces
   - target: '$'
     description: Add an extra page about spaces

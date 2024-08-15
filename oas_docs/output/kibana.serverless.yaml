@@ -292,7 +292,6 @@ paths:
           description: OK
         '400':
           $ref: '#/components/responses/Fleet_error'
-      security: []
       summary: Create agent policy
       tags:
         - Elastic Agent policies
@@ -334,7 +333,6 @@ paths:
           description: OK
         '400':
           $ref: '#/components/responses/Fleet_error'
-      security: []
       summary: Bulk get agent policies
       tags:
         - Elastic Agent policies
@@ -723,8 +721,6 @@ paths:
           description: OK
         '400':
           $ref: '#/components/responses/Fleet_error'
-      security:
-        - Fleet_basicAuth: []
       summary: List agents
       tags:
         - Elastic Agents
@@ -1541,8 +1537,6 @@ paths:
           description: OK
         '400':
           $ref: '#/components/responses/Fleet_error'
-      security:
-        - Fleet_basicAuth: []
       summary: Get agent setup info
       tags:
         - Elastic Agents
@@ -7648,8 +7642,6 @@ paths:
           description: OK
         '400':
           $ref: '#/components/responses/Fleet_error'
-      security:
-        - Fleet_basicAuth: []
       summary: Get package
       tags:
         - Elastic Package Manager (EPM)
@@ -7804,8 +7796,6 @@ paths:
           description: OK
         '400':
           $ref: '#/components/responses/Fleet_error'
-      security:
-        - Fleet_basicAuth: []
       summary: Get package
       tags:
         - Elastic Package Manager (EPM)
@@ -8072,8 +8062,6 @@ paths:
           description: OK
         '400':
           $ref: '#/components/responses/Fleet_error'
-      security:
-        - Fleet_basicAuth: []
       summary: Get package stats
       tags:
         - Elastic Package Manager (EPM)
@@ -8112,8 +8100,6 @@ paths:
           description: OK
         '400':
           $ref: '#/components/responses/Fleet_error'
-      security:
-        - Fleet_basicAuth: []
       summary: Get inputs template
       tags:
         - Elastic Package Manager (EPM)
@@ -8609,7 +8595,6 @@ paths:
           description: OK
         '400':
           $ref: '#/components/responses/Fleet_error'
-      security: []
       summary: List package policies
       tags:
         - Fleet package policies
@@ -8682,7 +8667,6 @@ paths:
           description: OK
         '400':
           $ref: '#/components/responses/Fleet_error'
-      security: []
       summary: Bulk get package policies
       tags:
         - Fleet package policies
@@ -18991,19 +18975,16 @@ components:
       title: Update SLO request
       type: object
   securitySchemes:
-    BasicAuth:
-      scheme: basic
-      type: http
-    Fleet_basicAuth:
-      scheme: basic
-      type: http
-    Kibana_HTTP_APIs_basicAuth:
-      scheme: basic
-      type: http
+    apiKeyAuth:
+      description: >-
+        You must create an API key and use the encoded value in the request
+        header. To learn about creating keys, go to [API
+        keys](https://www.elastic.co/docs/current/serverless/api-keys).
+      in: header
+      name: Authorization
+      type: apiKey
 security:
-  - BasicAuth: []
-  - Kibana_HTTP_APIs_basicAuth: []
-  - Fleet_basicAuth: []
+  - apiKeyAuth: []
 tags:
   - name: alerting
   - description: >
