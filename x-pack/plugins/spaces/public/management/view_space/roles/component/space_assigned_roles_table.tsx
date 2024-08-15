@@ -27,7 +27,7 @@ import type {
   EuiTableFieldDataColumnType,
   EuiTableSelectionType,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { Role } from '@kbn/security-plugin-types-common';
@@ -122,17 +122,17 @@ const getTableColumns = ({
         return React.createElement(EuiBadge, {
           children: _value?._reserved
             ? i18n.translate(
-              'xpack.spaces.management.spaceDetails.rolesTable.column.roleType.reserved',
-              {
-                defaultMessage: 'Reserved',
-              }
-            )
+                'xpack.spaces.management.spaceDetails.rolesTable.column.roleType.reserved',
+                {
+                  defaultMessage: 'Reserved',
+                }
+              )
             : i18n.translate(
-              'xpack.spaces.management.spaceDetails.rolesTable.column.roleType.custom',
-              {
-                defaultMessage: 'Custom',
-              }
-            ),
+                'xpack.spaces.management.spaceDetails.rolesTable.column.roleType.custom',
+                {
+                  defaultMessage: 'Custom',
+                }
+              ),
           color: _value?._reserved ? undefined : 'success',
         });
       },
@@ -217,7 +217,7 @@ const getRowProps = (item: Role) => {
   const { name } = item;
   return {
     'data-test-subj': `space-role-row-${name}`,
-    onClick: () => { },
+    onClick: () => {},
   };
 };
 
@@ -248,7 +248,6 @@ export const SpaceAssignedRolesTable = ({
   const [rolesInView, setRolesInView] = useState<Role[]>([]);
   const [selectedRoles, setSelectedRoles] = useState<Role[]>([]);
   const [isBulkActionContextOpen, setBulkActionContextOpen] = useState(false);
-  const selectableRoles = useRef(rolesInView.filter((role) => isEditableRole(role)));
   const [pagination, setPagination] = useState<CriteriaWithPagination<Role>['page']>({
     index: 0,
     size: 10,
@@ -302,6 +301,8 @@ export const SpaceAssignedRolesTable = ({
   const tableHeader = useMemo<EuiInMemoryTableProps<Role>['childrenBetween']>(() => {
     const pageSize = pagination.size;
     const pageIndex = pagination.index;
+
+    const selectableRoles = rolesInView.filter((role) => isEditableRole(role));
 
     return (
       <EuiFlexGroup direction="column" gutterSize="xs">
@@ -399,29 +400,29 @@ export const SpaceAssignedRolesTable = ({
                 size: 's',
                 ...(Boolean(selectedRoles.length)
                   ? {
-                    iconType: 'crossInCircle',
-                    onClick: setSelectedRoles.bind(null, []),
-                    children: i18n.translate(
-                      'xpack.spaces.management.spaceDetails.rolesTable.clearRolesSelection',
-                      {
-                        defaultMessage: 'Clear selection',
-                      }
-                    ),
-                  }
+                      iconType: 'crossInCircle',
+                      onClick: setSelectedRoles.bind(null, []),
+                      children: i18n.translate(
+                        'xpack.spaces.management.spaceDetails.rolesTable.clearRolesSelection',
+                        {
+                          defaultMessage: 'Clear selection',
+                        }
+                      ),
+                    }
                   : {
-                    iconType: 'pagesSelect',
-                    onClick: setSelectedRoles.bind(null, selectableRoles.current),
-                    children: i18n.translate(
-                      'xpack.spaces.management.spaceDetails.rolesTable.selectAllRoles',
-                      {
-                        defaultMessage:
-                          'Select {count, plural, one {role} other {all {count} roles}}',
-                        values: {
-                          count: selectableRoles.current.length,
-                        },
-                      }
-                    ),
-                  }),
+                      iconType: 'pagesSelect',
+                      onClick: setSelectedRoles.bind(null, selectableRoles),
+                      children: i18n.translate(
+                        'xpack.spaces.management.spaceDetails.rolesTable.selectAllRoles',
+                        {
+                          defaultMessage:
+                            'Select {count, plural, one {role} other {all {count} roles}}',
+                          values: {
+                            count: selectableRoles.length,
+                          },
+                        }
+                      ),
+                    }),
               })}
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -437,7 +438,7 @@ export const SpaceAssignedRolesTable = ({
     onClickBulkRemove,
     pagination.index,
     pagination.size,
-    rolesInView.length,
+    rolesInView,
     selectedRoles,
   ]);
 
