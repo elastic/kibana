@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export const METADATA_AGGREGATION_NAME = 'metadata';
-export const FILTER_AGGREGATION_SUB_AGG_NAME = 'result';
+import * as rt from 'io-ts';
 
-export const MAX_SIZE = 500;
+export const AssetTypeRT = rt.type({
+  assetType: rt.literal('host'),
+});
