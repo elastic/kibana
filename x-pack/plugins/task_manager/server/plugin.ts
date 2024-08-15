@@ -18,7 +18,6 @@ import {
   ServiceStatusLevels,
   CoreStatus,
 } from '@kbn/core/server';
-import { ServerlessPluginStart } from '@kbn/serverless/server';
 import type { CloudStart } from '@kbn/cloud-plugin/server';
 import {
   registerDeleteInactiveNodesTaskDefinition,
@@ -81,7 +80,6 @@ export type TaskManagerStartContract = Pick<
 
 export interface TaskManagerPluginStart {
   cloud?: CloudStart;
-  serverless?: ServerlessPluginStart;
 }
 
 const LogHealthForBackgroundTasksOnlyMinutes = 60;
@@ -250,7 +248,7 @@ export class TaskManagerPlugin
 
   public start(
     { savedObjects, elasticsearch, executionContext, docLinks }: CoreStart,
-    { cloud, serverless }: TaskManagerPluginStart
+    { cloud }: TaskManagerPluginStart
   ): TaskManagerStartContract {
     const savedObjectsRepository = savedObjects.createInternalRepository([
       TASK_SO_NAME,
@@ -281,18 +279,20 @@ export class TaskManagerPlugin
       requestTimeouts: this.config.request_timeouts,
     });
 
+    const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
+
     const defaultCapacity = getDefaultCapacity({
       claimStrategy: this.config?.claim_strategy,
       heapSizeLimit: this.heapSizeLimit,
       isCloud: cloud?.isCloudEnabled ?? false,
-      isServerless: !!serverless,
+      isServerless,
       isBackgroundTaskNodeOnly: this.isNodeBackgroundTasksOnly(),
     });
 
     this.logger.info(
       `Task manager isCloud=${
         cloud?.isCloudEnabled ?? false
-      } isServerless=${!!serverless} claimStrategy=${
+      } isServerless=${isServerless} claimStrategy=${
         this.config!.claim_strategy
       } isBackgroundTaskNodeOnly=${this.isNodeBackgroundTasksOnly()} heapSizeLimit=${
         this.heapSizeLimit

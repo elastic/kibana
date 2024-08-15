@@ -10,8 +10,6 @@ import { services as commonServices } from '../../common/services';
 
 // @ts-ignore not ts yet
 import { EsSupertestWithoutAuthProvider } from './es_supertest_without_auth';
-// @ts-ignore not ts yet
-import { SupertestWithoutAuthProvider } from './supertest_without_auth';
 
 import { UsageAPIProvider } from './usage_api';
 
@@ -36,7 +34,6 @@ export const services = {
   dataViewApi: DataViewApiProvider,
   esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
   infraOpsSourceConfiguration: InfraOpsSourceConfigurationProvider,
-  supertestWithoutAuth: SupertestWithoutAuthProvider,
   usageAPI: UsageAPIProvider,
   ml: MachineLearningProvider,
   ingestManager: IngestManagerProvider,

@@ -27,7 +27,7 @@ export interface Props {
 }
 
 export const getDeleteFieldProvider = (
-  modalOpener: (options: OpenFieldDeleteModalOptions) => CloseEditor
+  modalOpener: (options: OpenFieldDeleteModalOptions) => Promise<CloseEditor>
 ): React.FunctionComponent<Props> => {
   return React.memo(({ dataView, children, onDelete }: Props) => {
     const closeModal = useRef<CloseEditor | null>(null);
@@ -36,7 +36,7 @@ export const getDeleteFieldProvider = (
         if (closeModal.current) {
           closeModal.current();
         }
-        closeModal.current = modalOpener({
+        closeModal.current = await modalOpener({
           ctx: {
             dataView,
           },

@@ -11,32 +11,50 @@ const { join, resolve } = require('path');
 
 const ROOT = resolve(__dirname, '../..');
 
-bundle({
-  sourceGlob: join(ROOT, 'common/api/entity_analytics/**/*.schema.yaml'),
-  outputFilePath: join(
-    ROOT,
-    'docs/openapi/serverless/security_solution_entity_analytics_api_{version}.bundled.schema.yaml'
-  ),
-  options: {
-    includeLabels: ['serverless'],
-    specInfo: {
-      title: 'Security Solution Entity Analytics API (Elastic Cloud Serverless)',
-      description: '',
+(async () => {
+  await bundle({
+    sourceGlob: join(ROOT, 'common/api/entity_analytics/**/*.schema.yaml'),
+    outputFilePath: join(
+      ROOT,
+      'docs/openapi/serverless/security_solution_entity_analytics_api_{version}.bundled.schema.yaml'
+    ),
+    options: {
+      includeLabels: ['serverless'],
+      prototypeDocument: {
+        info: {
+          title: 'Security Solution Entity Analytics API (Elastic Cloud Serverless)',
+          description: '',
+        },
+        tags: [
+          {
+            name: 'Security Solution Entity Analytics API',
+            description: '',
+          },
+        ],
+      },
     },
-  },
-});
+  });
 
-bundle({
-  sourceGlob: join(ROOT, 'common/api/entity_analytics/**/*.schema.yaml'),
-  outputFilePath: join(
-    ROOT,
-    'docs/openapi/ess/security_solution_entity_analytics_api_{version}.bundled.schema.yaml'
-  ),
-  options: {
-    includeLabels: ['ess'],
-    specInfo: {
-      title: 'Security Solution Entity Analytics API (Elastic Cloud and self-hosted)',
-      description: '',
+  await bundle({
+    sourceGlob: join(ROOT, 'common/api/entity_analytics/**/*.schema.yaml'),
+    outputFilePath: join(
+      ROOT,
+      'docs/openapi/ess/security_solution_entity_analytics_api_{version}.bundled.schema.yaml'
+    ),
+    options: {
+      includeLabels: ['ess'],
+      prototypeDocument: {
+        info: {
+          title: 'Security Solution Entity Analytics API (Elastic Cloud and self-hosted)',
+          description: '',
+        },
+        tags: [
+          {
+            name: 'Security Solution Entity Analytics API',
+            description: '',
+          },
+        ],
+      },
     },
-  },
-});
+  });
+})();

@@ -13,6 +13,10 @@ import { stringify } from '../../utils/stringify';
 import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
 import type { ResponseActionsClient } from '../../services/actions/clients/lib/types';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import type {
+  KillProcessRequestBody,
+  SuspendProcessRequestBody,
+} from '../../../../common/api/endpoint';
 import {
   EndpointActionGetFileSchema,
   type ExecuteActionRequestBody,
@@ -50,8 +54,6 @@ import type {
   ResponseActionParametersWithProcessData,
   ResponseActionsExecuteParameters,
   ResponseActionScanParameters,
-  KillProcessRequestBody,
-  SuspendProcessRequestBody,
 } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {

@@ -26,6 +26,10 @@ export const KUBERNETES_POD_UID_FIELD = 'kubernetes.pod.uid';
 export const SYSTEM_PROCESS_CMDLINE_FIELD = 'system.process.cmdline';
 export const EVENT_MODULE = 'event.module';
 export const METRICSET_MODULE = 'metricset.module';
+export const METRICSET_NAME = 'metricset.name';
+
+// integrations
+export const SYSTEM_INTEGRATION = 'system';
 
 // logs
 export const MESSAGE_FIELD = 'message';
