@@ -1024,6 +1024,8 @@
       "@kbn/investigate-app-plugin/*": ["x-pack/plugins/observability_solution/investigate_app/*"],
       "@kbn/investigate-plugin": ["x-pack/plugins/observability_solution/investigate"],
       "@kbn/investigate-plugin/*": ["x-pack/plugins/observability_solution/investigate/*"],
+      "@kbn/investigation-shared": ["packages/kbn-investigation-shared"],
+      "@kbn/investigation-shared/*": ["packages/kbn-investigation-shared/*"],
       "@kbn/io-ts-utils": ["packages/kbn-io-ts-utils"],
       "@kbn/io-ts-utils/*": ["packages/kbn-io-ts-utils/*"],
       "@kbn/ipynb": ["packages/kbn-ipynb"],
