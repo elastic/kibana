@@ -59,8 +59,7 @@ export const validateKQLStringFilter = (value: string) => {
     });
   } catch (e) {
     return i18n.translate('xpack.observability.customThreshold.rule.schema.invalidFilterQuery', {
-      defaultMessage: 'filterQuery must be a valid KQL filter (error: {errorMessage})',
-      values: { errorMessage: e?.message },
+      defaultMessage: 'filterQuery must be a valid KQL filter',
     });
   }
 };
