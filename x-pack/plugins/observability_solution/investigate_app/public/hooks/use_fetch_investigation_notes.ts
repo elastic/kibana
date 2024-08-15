@@ -54,7 +54,7 @@ export function useFetchInvestigationNotes({ investigationId, initialNotes }: Pa
       },
       initialData: initialNotes,
       refetchOnWindowFocus: false,
-      refetchInterval: 60 * 1000,
+      refetchInterval: 10 * 1000,
       refetchIntervalInBackground: true,
       onError: (error: Error) => {
         toasts.addError(error, {
