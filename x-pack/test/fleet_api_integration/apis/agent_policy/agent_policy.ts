@@ -963,6 +963,7 @@ export default function (providerContext: FtrProviderContext) {
           inactivity_timeout: 1209600,
           package_policies: [],
           is_protected: false,
+          space_ids: [],
         });
       });
 
@@ -1126,6 +1127,7 @@ export default function (providerContext: FtrProviderContext) {
           package_policies: [],
           monitoring_enabled: ['logs', 'metrics'],
           inactivity_timeout: 1209600,
+          space_ids: [],
         });
 
         const listResponseAfterUpdate = await fetchPackageList();
@@ -1184,6 +1186,7 @@ export default function (providerContext: FtrProviderContext) {
           inactivity_timeout: 1209600,
           package_policies: [],
           is_protected: false,
+          space_ids: [],
           overrides: {
             agent: {
               logging: {
