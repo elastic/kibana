@@ -67,6 +67,7 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
               dataViewId: dataView.id ?? '',
               title: 'Destintion country',
               fieldName: 'geo.dest',
+              width: 'medium',
               grow: false,
             });
             await controlGroupStateBuilder.addDataControlFromField(controlGroupState, {
