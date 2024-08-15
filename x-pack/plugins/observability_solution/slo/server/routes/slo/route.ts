@@ -617,11 +617,13 @@ const fetchSloHealthRoute = createSloServerRoute({
   handler: async ({ context, params, logger }) => {
     await assertPlatinumLicense(context);
 
-    const soClient = (await context.core).savedObjects.client;
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const core = await context.core;
+    const scopedClusterClient = core.elasticsearch.client;
+    const soClient = core.savedObjects.client;
+    const esClient = core.elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
 
-    const getSLOHealth = new GetSLOHealth(esClient, repository);
+    const getSLOHealth = new GetSLOHealth(esClient, scopedClusterClient, repository);
 
     return await getSLOHealth.execute(params.body);
   },

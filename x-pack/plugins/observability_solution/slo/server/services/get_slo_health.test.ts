@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { ScopedClusterClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { getSLOSummaryTransformId, getSLOTransformId } from '../../common/constants';
 import { createSLO } from './fixtures/slo';
@@ -22,12 +22,14 @@ import { SLORepository } from './slo_repository';
 describe('GetSLOHealth', () => {
   let mockRepository: jest.Mocked<SLORepository>;
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockScopedClusterClient: ScopedClusterClientMock;
   let getSLOHealth: GetSLOHealth;
 
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-    getSLOHealth = new GetSLOHealth(mockEsClient, mockRepository);
+    mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    getSLOHealth = new GetSLOHealth(mockEsClient, mockScopedClusterClient, mockRepository);
   });
 
   it('returns the health and state', async () => {

@@ -6,7 +6,7 @@
  */
 
 import { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
 import {
   FetchSLOHealthParams,
   FetchSLOHealthResponse,
@@ -28,7 +28,11 @@ const LAG_THRESHOLD_MINUTES = 10;
 const STALE_THRESHOLD_MINUTES = 2 * 24 * 60;
 
 export class GetSLOHealth {
-  constructor(private esClient: ElasticsearchClient, private repository: SLORepository) {}
+  constructor(
+    private esClient: ElasticsearchClient,
+    private scopedClusterClient: IScopedClusterClient,
+    private repository: SLORepository
+  ) {}
 
   public async execute(params: FetchSLOHealthParams): Promise<FetchSLOHealthResponse> {
     const sloIds = params.list.map(({ sloId }) => sloId);
@@ -91,19 +95,20 @@ export class GetSLOHealth {
   private async getTransformStats(
     sloList: SLODefinition[]
   ): Promise<Dictionary<TransformGetTransformStatsTransformStats>> {
-    const transformStats = await this.esClient.transform.getTransformStats(
-      {
-        transform_id: sloList
-          .map((slo: SLODefinition) => [
-            getSLOTransformId(slo.id, slo.revision),
-            getSLOSummaryTransformId(slo.id, slo.revision),
-          ])
-          .flat(),
-        allow_no_match: true,
-        size: sloList.length * 2,
-      },
-      { ignore: [404] }
-    );
+    const transformStats =
+      await this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
+        {
+          transform_id: sloList
+            .map((slo: SLODefinition) => [
+              getSLOTransformId(slo.id, slo.revision),
+              getSLOSummaryTransformId(slo.id, slo.revision),
+            ])
+            .flat(),
+          allow_no_match: true,
+          size: sloList.length * 2,
+        },
+        { ignore: [404] }
+      );
 
     return keyBy(transformStats.transforms, (transform) => transform.id);
   }
