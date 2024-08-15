@@ -82,11 +82,9 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
     async waitForDocumentInIndex<T>({
       indexName,
       docCountTarget = 1,
-      roleAuthc,
     }: {
       indexName: string;
       docCountTarget?: number;
-      roleAuthc: RoleCredentials;
     }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
       return await retry.tryForTime(retryTimeout, async () => {
         const response = await es.search<T>({
