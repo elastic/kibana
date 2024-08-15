@@ -110,6 +110,7 @@ export const deserializeSavedObjectState = async ({
   savedObjectId,
   enhancements,
   uiState,
+  timeRange,
 }: VisualizeSavedObjectInputState) => {
   // Load a saved visualization from the library
   const {
@@ -152,6 +153,7 @@ export const deserializeSavedObjectState = async ({
     savedObjectId,
     savedObjectProperties,
     linkedToLibrary: true,
+    ...(timeRange ? { timeRange } : {}),
     ...(enhancements ? { enhancements } : {}),
   } as VisualizeSavedVisInputState;
 };
