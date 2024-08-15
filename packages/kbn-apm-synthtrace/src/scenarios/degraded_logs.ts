@@ -43,15 +43,29 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         const index = Math.floor(Math.random() * 3);
         const serviceName = getServiceName(index);
         const logMessage = MESSAGE_LOG_LEVELS[index];
-        const cluster = getCluster(index);
+        const { clusterId, clusterName } = getCluster(index);
         const cloudRegion = getCloudRegion(index);
+
+        const commonLongEntryFields: LogDocument = {
+          'trace.id': generateShortId(),
+          'agent.name': 'synth-agent',
+          'orchestrator.cluster.name': clusterName,
+          'orchestrator.cluster.id': clusterId,
+          'orchestrator.resource.id': generateShortId(),
+          'cloud.provider': getCloudProvider(),
+          'cloud.region': cloudRegion,
+          'cloud.availability_zone': `${cloudRegion}a`,
+          'cloud.project.id': generateShortId(),
+          'cloud.instance.id': generateShortId(),
+          'log.file.path': `/logs/${generateLongId()}/error.txt`,
+        };
 
         return {
           index,
           serviceName,
           logMessage,
-          cluster,
           cloudRegion,
+          commonLongEntryFields,
         };
       };
 
@@ -59,29 +73,16 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         const {
           serviceName,
           logMessage: { level, message },
-          cluster: { clusterId, clusterName },
-          cloudRegion,
+          commonLongEntryFields,
         } = constructLogsCommonData();
 
         return log
           .create({ isLogsDb })
           .dataset('synth.1')
-          .message(message as string)
+          .message(message)
           .logLevel(level)
           .service(serviceName)
-          .defaults({
-            'trace.id': generateShortId(),
-            'agent.name': 'synth-agent',
-            'orchestrator.cluster.name': clusterName,
-            'orchestrator.cluster.id': clusterId,
-            'orchestrator.resource.id': generateShortId(),
-            'cloud.provider': getCloudProvider(),
-            'cloud.region': cloudRegion,
-            'cloud.availability_zone': `${cloudRegion}a`,
-            'cloud.project.id': generateShortId(),
-            'cloud.instance.id': generateShortId(),
-            'log.file.path': `/logs/${generateLongId()}/error.txt`,
-          })
+          .defaults(commonLongEntryFields)
           .timestamp(timestamp);
       };
 
@@ -89,29 +90,16 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         const {
           serviceName,
           logMessage: { level, message },
-          cluster: { clusterId, clusterName },
-          cloudRegion,
+          commonLongEntryFields,
         } = constructLogsCommonData();
         const isMalformed = i % 60 === 0;
         return log
           .create({ isLogsDb })
           .dataset('synth.2')
-          .message(message as string)
+          .message(message)
           .logLevel(isMalformed ? MORE_THAN_1024_CHARS : level) // "ignore_above": 1024 in mapping
           .service(serviceName)
-          .defaults({
-            'trace.id': generateShortId(),
-            'agent.name': 'synth-agent',
-            'orchestrator.cluster.name': clusterName,
-            'orchestrator.cluster.id': clusterId,
-            'orchestrator.resource.id': generateShortId(),
-            'cloud.provider': getCloudProvider(),
-            'cloud.region': cloudRegion,
-            'cloud.availability_zone': `${cloudRegion}a`,
-            'cloud.project.id': generateShortId(),
-            'cloud.instance.id': generateShortId(),
-            'log.file.path': `/logs/${generateLongId()}/error.txt`,
-          })
+          .defaults(commonLongEntryFields)
           .timestamp(timestamp);
       };
 
@@ -119,30 +107,21 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         const {
           serviceName,
           logMessage: { level, message },
-          cluster: { clusterId, clusterName },
           cloudRegion,
+          commonLongEntryFields,
         } = constructLogsCommonData();
         const isMalformed = i % 10 === 0;
         return log
           .create({ isLogsDb })
           .dataset('synth.3')
-          .message(message as string)
+          .message(message)
           .logLevel(isMalformed ? MORE_THAN_1024_CHARS : level) // "ignore_above": 1024 in mapping
           .service(serviceName)
           .defaults({
-            'trace.id': generateShortId(),
-            'agent.name': 'synth-agent',
-            'orchestrator.cluster.name': clusterName,
-            'orchestrator.cluster.id': clusterId,
-            'orchestrator.resource.id': generateShortId(),
-            'cloud.provider': getCloudProvider(),
-            'cloud.region': cloudRegion,
+            ...commonLongEntryFields,
             'cloud.availability_zone': isMalformed
               ? MORE_THAN_1024_CHARS // "ignore_above": 1024 in mapping
               : `${cloudRegion}a`,
-            'cloud.project.id': generateShortId(),
-            'cloud.instance.id': generateShortId(),
-            'log.file.path': `/logs/${generateLongId()}/error.txt`,
           })
           .timestamp(timestamp);
       };
