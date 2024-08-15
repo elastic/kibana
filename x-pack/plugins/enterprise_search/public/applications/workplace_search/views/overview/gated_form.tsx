@@ -240,7 +240,7 @@ const EducationPanel: React.FC<{ featureContent: string }> = ({ featureContent }
                     {i18n.translate(
                       'xpack.enterpriseSearch.workplaceSearch.gateForm.educationalPanel.subTitle',
                       {
-                        defaultMessage: 'Based on your selection we recommend you',
+                        defaultMessage: 'Based on your selection we recommend:',
                       }
                     )}
                   </p>
