@@ -33,7 +33,7 @@ export class CoreInjectionService {
     id?: PluginOpaqueId,
     container: interfaces.Container = this.root
   ): interfaces.Container {
-    const fork = PluginModule.getContext(container).createChild();
+    const fork = container.createChild();
     if (id) {
       fork.onDeactivation(id, () => fork.unbindAll());
     }
