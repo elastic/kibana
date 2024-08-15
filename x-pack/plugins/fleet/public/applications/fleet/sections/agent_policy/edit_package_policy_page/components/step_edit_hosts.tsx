@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
 
-import { useGetAgentPolicies } from '../../../../hooks';
 import type { AgentPolicy, NewAgentPolicy, PackageInfo } from '../../../../types';
 import { AgentPolicyIntegrationForm } from '../../components';
-import { SO_SEARCH_LIMIT } from '../../../../constants';
 import type { ValidationResults } from '../../components/agent_policy_validation';
 
 import { incrementPolicyName } from '../../../../services';
 
 import { StepSelectAgentPolicy } from '../../create_package_policy_page/components/steps/step_select_agent_policy';
 import { SelectedPolicyTab } from '../../create_package_policy_page/components';
+import { useAllNonManagedAgentPolicies } from '../../create_package_policy_page/components/steps/components/use_policies';
 
 interface Props {
   agentPolicies: AgentPolicy[];
@@ -50,23 +49,7 @@ export const StepEditHosts: React.FunctionComponent<Props> = ({
   updateSelectedTab,
 }) => {
   const [showCreateAgentPolicy, setShowCreateAgentPolicy] = useState<boolean>(false);
-  let existingAgentPolicies: AgentPolicy[] = [];
-  const { data: agentPoliciesData, error: err } = useGetAgentPolicies({
-    page: 1,
-    perPage: SO_SEARCH_LIMIT,
-    sortField: 'name',
-    sortOrder: 'asc',
-    full: false, // package_policies will always be empty
-    noAgentCount: true, // agentPolicy.agents will always be 0
-  });
-  if (err) {
-    // eslint-disable-next-line no-console
-    console.debug('Could not retrieve agent policies');
-  }
-  existingAgentPolicies = useMemo(
-    () => agentPoliciesData?.items.filter((policy) => !policy.is_managed) || [],
-    [agentPoliciesData?.items]
-  );
+  const existingAgentPolicies: AgentPolicy[] = useAllNonManagedAgentPolicies();
 
   useEffect(() => {
     if (existingAgentPolicies.length > 0) {
