@@ -16,37 +16,45 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useState } from 'react';
 import { InvestigationNote } from '@kbn/investigate-plugin/common';
 import { useTheme } from '../../../../hooks/use_theme';
 import { ResizableTextInput } from './resizable_text_input';
 import { TimelineMessage } from './timeline_message';
+import { useAddInvestigationNote } from '../../../../hooks/use_add_investigation_note';
+import { useDeleteInvestigationNote } from '../../../../hooks/use_delete_investigation_note';
 
 export interface Props {
-  notes: InvestigationNote[];
-  addNote: (note: string) => Promise<void>;
-  deleteNote: (id: string) => Promise<void>;
+  investigationId: string;
+  initialNotes: InvestigationNote[];
 }
 
-export function InvestigationNotes({ notes, addNote, deleteNote }: Props) {
+export function InvestigationNotes({ investigationId, initialNotes }: Props) {
   const theme = useTheme();
-  const [note, setNote] = React.useState('');
-  const [loading, setLoading] = React.useState(false);
+  const [notes, setNotes] = useState(initialNotes);
+  const [note, setNote] = useState('');
+
+  const { mutateAsync: addInvestigationNote, isLoading } = useAddInvestigationNote();
+  const { mutateAsync: deleteInvestigationNote } = useDeleteInvestigationNote();
 
   function submit() {
     if (note.trim() === '') {
       return;
     }
 
-    setLoading(false);
-    addNote(note)
-      .then(() => {
-        setNote('');
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    onAddNote(note.trim());
   }
+
+  const onAddNote = async (content: string) => {
+    const createdNote = await addInvestigationNote({ investigationId, note: { content } });
+    setNotes(notes.concat(createdNote));
+    setNote('');
+  };
+
+  const onDeleteNote = async (noteId: string) => {
+    await deleteInvestigationNote({ investigationId, noteId });
+    setNotes(notes.filter((currNote) => currNote.id !== noteId));
+  };
 
   const panelClassName = css`
     background-color: ${theme.colors.lightShade};
@@ -71,7 +79,7 @@ export function InvestigationNotes({ notes, addNote, deleteNote }: Props) {
                 key={currNote.id}
                 icon={<EuiAvatar name={currNote.createdBy} size="s" />}
                 note={currNote}
-                onDelete={() => deleteNote(currNote.id)}
+                onDelete={() => onDeleteNote(currNote.id)}
               />
             );
           })}
@@ -89,7 +97,7 @@ export function InvestigationNotes({ notes, addNote, deleteNote }: Props) {
               placeholder={i18n.translate('xpack.investigateApp.investigationNotes.placeholder', {
                 defaultMessage: 'Add a note to the investigation',
               })}
-              disabled={loading}
+              disabled={isLoading}
               value={note}
               onChange={(value) => {
                 setNote(value);
@@ -108,8 +116,8 @@ export function InvestigationNotes({ notes, addNote, deleteNote }: Props) {
               aria-label={i18n.translate('xpack.investigateApp.investigationNotes.addButtonLabel', {
                 defaultMessage: 'Add',
               })}
-              disabled={loading || note.trim() === ''}
-              isLoading={loading}
+              disabled={isLoading || note.trim() === ''}
+              isLoading={isLoading}
               size="m"
               onClick={() => {
                 submit();

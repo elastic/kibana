@@ -13,7 +13,6 @@ import useAsync from 'react-use/lib/useAsync';
 import { AddObservationUI } from '../../../../components/add_observation_ui';
 import { InvestigateSearchBar } from '../../../../components/investigate_search_bar';
 import { InvestigateWidgetGrid } from '../../../../components/investigate_widget_grid';
-import { useAddInvestigationNote } from '../../../../hooks/use_add_investigation_note';
 import { useFetchInvestigation } from '../../../../hooks/use_fetch_investigation';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { InvestigationNotes } from '../investigation_notes/investigation_notes';
@@ -33,12 +32,6 @@ function InvestigationDetailsWithUser({
   const widgetDefinitions = investigate.getWidgetDefinitions();
   const { data: investigationData } = useFetchInvestigation({ id: investigationId });
 
-  const { mutateAsync: addInvestigationNote } = useAddInvestigationNote();
-  const handleAddInvestigationNote = async (content: string) => {
-    const note = await addInvestigationNote({ investigationId, note: { content } });
-    await addNote(note);
-  };
-
   const {
     addItem,
     copyItem,
@@ -46,8 +39,6 @@ function InvestigationDetailsWithUser({
     investigation,
     setGlobalParameters,
     renderableInvestigation,
-    addNote,
-    deleteNote,
   } = investigate.useInvestigation({
     user,
     investigationData,
@@ -61,11 +52,8 @@ function InvestigationDetailsWithUser({
 
       return {
         title: item.title,
-        description: item.description ?? '',
         id: item.id,
         element: item.element,
-        columns: item.columns,
-        rows: item.rows,
         chrome: definitionForType.chrome,
         loading: item.loading,
       };
@@ -132,11 +120,7 @@ function InvestigationDetailsWithUser({
       </EuiFlexItem>
 
       <EuiFlexItem grow={2}>
-        <InvestigationNotes
-          notes={investigation.notes}
-          addNote={handleAddInvestigationNote}
-          deleteNote={deleteNote}
-        />
+        <InvestigationNotes investigationId={investigationId} initialNotes={investigation.notes} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

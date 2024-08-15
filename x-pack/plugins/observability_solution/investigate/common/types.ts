@@ -50,14 +50,11 @@ export interface InvestigateWidget<
   parameters: GlobalWidgetParameters & TParameters;
   data: TData;
   title: string;
-  description?: string;
-  columns: InvestigateWidgetColumnSpan;
-  rows: number;
 }
 
 export type InvestigateWidgetCreate<TParameters extends Record<string, any> = {}> = Pick<
   InvestigateWidget,
-  'title' | 'description' | 'columns' | 'rows' | 'type'
+  'title' | 'type'
 > & {
   parameters: DeepPartial<GlobalWidgetParameters> & TParameters;
 };

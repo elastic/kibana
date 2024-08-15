@@ -37,12 +37,9 @@ interface GridSection {
 type Section = SingleComponentSection | GridSection;
 
 export interface InvestigateWidgetGridItem {
-  title: string;
-  description: string;
-  element: React.ReactNode;
   id: string;
-  columns: number;
-  rows: number;
+  title: string;
+  element: React.ReactNode;
   chrome?: ChromeOption;
   loading: boolean;
 }
@@ -82,8 +79,8 @@ function getResponsiveLayouts(
   const maxColumns = BREAKPOINT_COLUMNS[currentBreakpoint];
 
   items.forEach((item) => {
-    const itemColumns = item.columns;
-    const itemRows = item.rows;
+    const itemColumns = 4;
+    const itemRows = 12;
 
     if (atColumn + itemColumns > maxColumns) {
       atColumn = 0;
@@ -141,7 +138,6 @@ function GridSectionRenderer({
         <GridItem
           id={item.id}
           title={item.title}
-          description={item.description}
           onCopy={() => {
             return itemCallbacksRef.current.onItemCopy(item);
           }}
@@ -297,7 +293,6 @@ export function InvestigateWidgetGrid({
               <GridItem
                 id={section.item.id}
                 title={section.item.title}
-                description={section.item.description}
                 loading={section.item.loading}
                 onCopy={() => {
                   return onItemCopy(section.item);
