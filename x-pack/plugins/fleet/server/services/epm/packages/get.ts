@@ -22,7 +22,6 @@ import { buildNode as buildWildcardNode } from '@kbn/es-query/src/kuery/node_typ
 import {
   ASSETS_SAVED_OBJECT_TYPE,
   installationStatuses,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../../../../common/constants';
 import { isPackageLimited } from '../../../../common/services';
@@ -55,7 +54,7 @@ import * as Registry from '../registry';
 import type { PackageAsset } from '../archive/storage';
 import { getEsPackage } from '../archive/storage';
 import { normalizeKuery } from '../../saved_object';
-
+import { getPackagePolicySavedObjectType } from '../../package_policy';
 import { auditLoggingService } from '../../audit_logging';
 
 import { getFilteredSearchPackages } from '../filtered_packages';
@@ -479,9 +478,11 @@ export const getPackageUsageStats = async ({
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
 }): Promise<PackageUsageStats> => {
+  const packagePolicySavedObjectType = await getPackagePolicySavedObjectType();
+
   const filter = normalizeKuery(
-    PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-    `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${pkgName}`
+    packagePolicySavedObjectType,
+    `${packagePolicySavedObjectType}.package.name: ${pkgName}`
   );
   const agentPolicyCount = new Set<string>();
   let page = 1;
@@ -491,7 +492,7 @@ export const getPackageUsageStats = async ({
     // using saved Objects client directly, instead of the `list()` method of `package_policy` service
     // in order to not cause a circular dependency (package policy service imports from this module)
     const packagePolicies = await savedObjectsClient.find<PackagePolicySOAttributes>({
-      type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      type: packagePolicySavedObjectType,
       perPage: 1000,
       page: page++,
       filter,
@@ -501,7 +502,7 @@ export const getPackageUsageStats = async ({
       auditLoggingService.writeCustomSoAuditLog({
         action: 'find',
         id: packagePolicy.id,
-        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        savedObjectType: packagePolicySavedObjectType,
       });
     }
 

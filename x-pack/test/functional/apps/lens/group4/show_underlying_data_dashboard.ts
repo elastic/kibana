@@ -8,6 +8,8 @@ import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
+const OPEN_IN_DISCOVER_DATA_TEST_SUBJ = 'embeddablePanelAction-ACTION_OPEN_IN_DISCOVER';
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'visualize',
@@ -40,9 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         exitFromEditMode: true,
       });
 
-      await dashboardPanelActions.openContextMenu();
-
-      await testSubjects.click('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER');
+      await dashboardPanelActions.clickContextMenuItem(OPEN_IN_DISCOVER_DATA_TEST_SUBJ);
 
       const [dashboardWindowHandle, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
@@ -73,9 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         exitFromEditMode: true,
       });
 
-      await dashboardPanelActions.openContextMenu();
-
-      await testSubjects.click('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER');
+      await dashboardPanelActions.clickContextMenuItem(OPEN_IN_DISCOVER_DATA_TEST_SUBJ);
 
       const [dashboardWindowHandle, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
@@ -118,19 +116,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.clickQuickSave();
 
       // make sure Open in Discover is also available in edit mode
-      await dashboardPanelActions.openContextMenuMorePanel();
-      await testSubjects.existOrFail('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER');
-
+      await dashboardPanelActions.expectExistsPanelAction(OPEN_IN_DISCOVER_DATA_TEST_SUBJ);
       await PageObjects.dashboard.clickCancelOutOfEditMode();
 
-      await dashboardPanelActions.openContextMenu();
-
-      await testSubjects.click('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER');
+      await dashboardPanelActions.clickContextMenuItem(OPEN_IN_DISCOVER_DATA_TEST_SUBJ);
 
       const [dashboardWindowHandle, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
 
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
 
       await retry.waitFor('filter count to be correct', async () => {
         const filterCount = await filterBarService.getFilterCount();
