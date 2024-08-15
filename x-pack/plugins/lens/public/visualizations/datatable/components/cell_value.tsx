@@ -16,6 +16,13 @@ import type { ColumnConfig } from '../../../../common/expressions';
 import type { DataContextType } from './types';
 import { getContrastColor, getNumericValue } from '../../../shared_components/coloring/utils';
 
+const CELL_RESET_STYLE = {
+  style: {
+    backgroundColor: undefined,
+    color: undefined,
+  },
+};
+
 export const createGridCell = (
   formatters: Record<string, ReturnType<FormatFactory>>,
   columnConfig: ColumnConfig,
@@ -52,22 +59,18 @@ export const createGridCell = (
             if (colorMode === 'cell' && color) {
               style.color = getContrastColor(color, IS_DARK_THEME);
             }
-            setCellProps({
-              style,
-            });
+            setCellProps({ style });
           }
         }
+        if (!colorMode || colorMode === 'none') setCellProps(CELL_RESET_STYLE);
       }
       // make sure to clean it up when something change
       // this avoids cell's styling to stick forever
       return () => {
-        if (minMaxByColumnId?.[originalId]) {
-          setCellProps({
-            style: {
-              backgroundColor: undefined,
-              color: undefined,
-            },
-          });
+        if (!colorMode || colorMode === 'none') {
+          if (minMaxByColumnId?.[originalId]) {
+            setCellProps(CELL_RESET_STYLE);
+          }
         }
       };
     }, [
