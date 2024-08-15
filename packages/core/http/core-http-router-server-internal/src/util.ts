@@ -9,24 +9,22 @@
 import { once } from 'lodash';
 import {
   isFullValidatorContainer,
+  type RouteValidatorFullConfigResponse,
   type RouteConfig,
   type RouteMethod,
   type RouteValidator,
 } from '@kbn/core-http-server';
-import type { ObjectType, Type } from '@kbn/config-schema';
 
 function isStatusCode(key: string) {
   return !isNaN(parseInt(key, 10));
 }
 
-interface ResponseValidation {
-  [statusCode: number]: { body: () => ObjectType | Type<unknown> };
-}
-
-export function prepareResponseValidation(validation: ResponseValidation): ResponseValidation {
+export function prepareResponseValidation(
+  validation: RouteValidatorFullConfigResponse
+): RouteValidatorFullConfigResponse {
   const responses = Object.entries(validation).map(([key, value]) => {
     if (isStatusCode(key)) {
-      return [key, { body: once(value.body) }];
+      return [key, { ...value, ...(value.body ? { body: once(value.body) } : {}) }];
     }
     return [key, value];
   });

@@ -131,3 +131,14 @@ export const assignToPaths = (
   const pathName = path.replace('?', '');
   paths[pathName] = { ...paths[pathName], ...pathObject };
 };
+
+export const mergeResponseContent = (
+  a: OpenAPIV3.ResponseObject['content'],
+  b: OpenAPIV3.ResponseObject['content']
+) => {
+  const mergedContent = {
+    ...(a ?? {}),
+    ...(b ?? {}),
+  };
+  return { ...(Object.keys(mergedContent).length ? { content: mergedContent } : {}) };
+};
