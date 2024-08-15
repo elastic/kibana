@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export { entityDefinition } from './entity_definition';
-export { entityDefinitionWithBackfill } from './entity_definition_with_backfill';
-export { builtInEntityDefinition } from './builtin_entity_definition';
+import { PluginInitializerContext } from '@kbn/core-plugins-server';
+import { FixturePlugin } from './plugin';
+
+export const plugin = async (context: PluginInitializerContext<{}>) => {
+  return new FixturePlugin(context);
+};

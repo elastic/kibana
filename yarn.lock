@@ -4859,6 +4859,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/entity-manager-fixture-plugin@link:x-pack/test/api_integration/apis/entity_manager/fixture_plugin":
+  version "0.0.0"
+  uid ""
+
 "@kbn/entityManager-plugin@link:x-pack/plugins/observability_solution/entity_manager":
   version "0.0.0"
   uid ""
