@@ -12,6 +12,7 @@ import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import type { RowRenderer } from '../../../../../../common/types';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/use_stateful_row_renderer';
@@ -49,6 +50,13 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
       () => (rows ?? []).slice(visibleRowData.startRow, visibleRowData.endRow),
       [rows, visibleRowData]
     );
+
+    const parentRef = React.useRef();
+    const rowVirtualizer = useVirtualizer({
+      count: 10000,
+      getScrollElement: () => parentRef.current,
+      estimateSize: () => 35,
+    });
 
     return (
       <>
