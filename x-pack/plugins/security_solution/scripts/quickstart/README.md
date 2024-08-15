@@ -8,24 +8,47 @@ The tools in this folder are designed to make it fast and easy to build scripts 
 
 `scratchpad.ts` already contains code to set up clients for Elasticsearch and Kibana. In addition it provides clients for Security Solution, Lists, and Exceptions APIs, built on top of the Kibana client. However, it does not create any rules/exceptions/lists/data - it's a blank slate for you to immediately begin creating the resources you want for testing. Please don't commit data-generating code to `scratchpad.ts`! Instead, when you have built a data-generating script that might be useful to others, please extract the useful components to the `quickstart/modules` folder and leave `scratchpad.ts` empty for the next developer.
 
+### Environments
+
 ## Modules
 
 Extracting data-generating logic into reusable modules that other people will actually use is the hardest part of sharing these scripts. To that end, it's crucial that the modules are organized as neatly as possible and extremely clear about what they do. If the modules are even slightly confusing, it will be faster for people to rebuild the same logic than to figure out how the existing scripts work.
 
-The intial set of modules is:
+The intial set of modules will be:
 
-- Exceptions: Sample exceptions
-- Data Generation
-  - Mappings: ECS mapping and functions to generate other arbitrary mappings
-  - Frozen Tier: Functions to generate data and move it to frozen tier immediately
 - Rules
   - <Rule Type>: Sample rules of each type and functions to generate data that trigger alerts for those rules
+- Exceptions: Sample exceptions
+- Value Lists
+  - Functions to generate value lists
+- Data Generation
+  - Mappings: ECS mapping and functions to generate other arbitrary mappings
+  - Large data: Functions to generate a lot of data quickly
+  - Frozen Tier: Functions to generate data and move it to frozen tier immediately
 
 ## Speed
 
 To run a number of API requests in parallel, use `concurrentlyExec` from @kbn/securitysolution-utils.
 
-## Example Script
+## Examples
+
+### Create a Rule
+
+```
+// Extra imports
+import { concurrentlyExec } from '@kbn/securitysolution-utils/src/client_concurrency';
+import { basicRule } from './modules/rules/new_terms/basic_rule';
+import { duplicateRuleParams } from './modules/rules';
+
+// ... omitted client setup stuff
+
+// Core logic
+const ruleCopies = duplicateRuleParams(basicRule, 200);
+const functions = ruleCopies.map((rule) => () => detectionsClient.createRule({ body: rule }));
+const responses = await concurrentlyExec(functions);
+```
+
+### Create 200 Rules and an Exception for each one
 
 ```
 // Extra imports

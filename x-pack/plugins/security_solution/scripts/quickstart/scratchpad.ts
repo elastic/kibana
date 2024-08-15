@@ -8,11 +8,13 @@
 import { run } from '@kbn/dev-cli-runner';
 import { Client as ListsClient } from '@kbn/securitysolution-lists-common/api/quickstart_client.gen';
 import { Client as ExceptionsClient } from '@kbn/securitysolution-exceptions-common/api/quickstart_client.gen';
-// import { concurrentlyExec } from '@kbn/securitysolution-utils/src/client_concurrency';
+import { concurrentlyExec } from '@kbn/securitysolution-utils/src/client_concurrency';
 import { HORIZONTAL_LINE } from '../endpoint/common/constants';
 import { createEsClient, createKbnClient } from '../endpoint/common/stack_services';
 import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 import { Client as DetectionsClient } from '../../common/api/quickstart_client.gen';
+import { duplicateRuleParams } from './modules/rules';
+import { basicRule } from './modules/rules/new_terms/basic_rule';
 
 export const cli = () => {
   run(
@@ -53,13 +55,12 @@ ${HORIZONTAL_LINE}
       /**
        * END Client setup
        * START Custom data loader logic
-       *
-       * Example:
-       * const ruleCopies = duplicateRuleParams(basicRule, 200);
-       * const functions = ruleCopies.map((rule) => () => detectionsClient.createRule({ body: rule }));
-       * const responses = await concurrentlyExec(functions);
        */
 
+      // Replace this code with whatever you want!
+      const ruleCopies = duplicateRuleParams(basicRule, 200);
+      const functions = ruleCopies.map((rule) => () => detectionsClient.createRule({ body: rule }));
+      const responses = await concurrentlyExec(functions);
       /**
        * END Custom data loader logic
        */
