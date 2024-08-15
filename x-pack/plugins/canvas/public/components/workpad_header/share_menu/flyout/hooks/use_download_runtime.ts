@@ -40,8 +40,16 @@ export const useDownloadRuntime = () => {
 
   const downloadRuntime = useCallback(() => {
     try {
-      const path = `${platformService.getBasePath()}${API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD}`;
-      window.open(path);
+      platformService
+        .getHttp()
+        .fetch(API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD, {
+          version: '1',
+        })
+        .then((response) => {
+          const jsBlob = new Blob([response as string], { type: 'text/javascript' });
+          fileSaver.saveAs(jsBlob, `kbn_canvas.js`);
+          return;
+        });
       return;
     } catch (err) {
       notifyService.error(err, { title: strings.getDownloadRuntimeFailureErrorMessage() });
