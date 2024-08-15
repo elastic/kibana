@@ -43,7 +43,10 @@ export const AppLogic = kea<MakeLogicType<AppValues, AppActions, Required<Initia
       },
     ],
     configuredLimits: [props.configuredLimits.appSearch, {}],
-    showGateForm: [props.appSearch.kibanaIsEnabled == false && props.appSearch.role.roleType === 'owner', false],
+    showGateForm: [
+      props.appSearch.kibanaIsEnabled === false && props.appSearch.role.roleType === 'owner',
+      false,
+    ],
   }),
   selectors: {
     myRole: [

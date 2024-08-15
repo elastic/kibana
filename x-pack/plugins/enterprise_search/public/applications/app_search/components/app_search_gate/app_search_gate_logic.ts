@@ -6,7 +6,11 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
-import { AppSearchGatedFormDataApiLogicActions, UpdateAppSearchGatedFormDataApiLogic } from './app_search_gate_api_logic';
+
+import {
+  AppSearchGatedFormDataApiLogicActions,
+  UpdateAppSearchGatedFormDataApiLogic,
+} from './app_search_gate_api_logic';
 
 interface AppSearchGateValues {
   additionalFeedback: string | null;
@@ -26,9 +30,7 @@ interface AppSearchGateActions {
   submitGatedFormDataRequest: AppSearchGatedFormDataApiLogicActions['makeRequest'];
 }
 
-export const AppSearchGateLogic = kea<
-  MakeLogicType<AppSearchGateValues, AppSearchGateActions>
->({
+export const AppSearchGateLogic = kea<MakeLogicType<AppSearchGateValues, AppSearchGateActions>>({
   actions: {
     formSubmitRequest: true,
     setAdditionalFeedback: (additionalFeedback) => ({ additionalFeedback }),
@@ -53,7 +55,7 @@ export const AppSearchGateLogic = kea<
   }),
   path: ['enterprise_search', 'app_search', 'gate_form'],
 
-  reducers: ({ }) => ({
+  reducers: ({}) => ({
     additionalFeedback: [
       null,
       {

@@ -16,6 +16,7 @@ import { convertMetaToPagination, handlePageChange } from '../../../shared/table
 import { AppLogic } from '../../app_logic';
 import { EngineIcon, MetaEngineIcon } from '../../icons';
 import { ENGINE_CREATION_PATH, META_ENGINE_CREATION_PATH } from '../../routes';
+import { AppSearchGatePage } from '../app_search_gate/app_search_gated_form_page';
 import { DataPanel } from '../data_panel';
 import { AppSearchPageTemplate } from '../layout';
 
@@ -23,7 +24,6 @@ import { EmptyState, EmptyMetaEnginesState } from './components';
 import { AuditLogsModal } from './components/audit_logs_modal/audit_logs_modal';
 import { EnginesTable } from './components/tables/engines_table';
 import { MetaEnginesTable } from './components/tables/meta_engines_table';
-import { AppSearchGatePage } from '../app_search_gate/app_search_gated_form_page';
 
 import {
   ENGINES_OVERVIEW_TITLE,
@@ -61,7 +61,7 @@ export const EnginesOverview: React.FC = () => {
     loadMetaEngines();
   }, [metaEnginesMeta.page.current]);
 
-  return (account.role.roleType !== 'owner' || account.kibanaIsEnabled) ? (
+  return account.role.roleType !== 'owner' || account.kibanaIsEnabled ? (
     <AppSearchPageTemplate
       pageViewTelemetry="engines_overview"
       pageChrome={[ENGINES_TITLE]}
@@ -136,5 +136,5 @@ export const EnginesOverview: React.FC = () => {
     </AppSearchPageTemplate>
   ) : (
     <AppSearchGatePage isLoading={dataLoading} />
-  )
+  );
 };

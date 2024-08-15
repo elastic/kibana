@@ -58,7 +58,8 @@ const featuresList = {
         defaultMessage: 'Add Search Analytics',
       }
     ),
-    actionLink: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/behavioral-analytics-event.html',
+    actionLink:
+      'https://www.elastic.co/guide/en/elasticsearch/reference/current/behavioral-analytics-event.html',
     addOnLearnMoreLabel: undefined,
     addOnLearnMoreUrl: undefined,
     description: i18n.translate(
@@ -69,7 +70,8 @@ const featuresList = {
       }
     ),
     id: 'Analytics',
-    learnMore: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/behavioral-analytics-overview.html',
+    learnMore:
+      'https://www.elastic.co/guide/en/elasticsearch/reference/current/behavioral-analytics-overview.html',
     title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.gateForm.analytics.featureName', {
       defaultMessage: 'Use Behavioral Analytics',
     }),
@@ -167,7 +169,8 @@ const featuresList = {
     description: i18n.translate(
       'xpack.enterpriseSearch.workplaceSearch.gateForm.searchApplication.featureDescription',
       {
-        defaultMessage: 'Search-powered applications that leverage the full power of Elasticsearch! Build a unified search using Search Applications or integrate directly with your existing UI with Search UI.',
+        defaultMessage:
+          'Search-powered applications that leverage the full power of Elasticsearch! Build a unified search using Search Applications or integrate directly with your existing UI with Search UI.',
       }
     ),
     id: 'Search Application',

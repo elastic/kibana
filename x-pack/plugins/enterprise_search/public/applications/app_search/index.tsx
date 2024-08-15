@@ -100,7 +100,7 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
       canViewSettings,
       canViewAccountCredentials,
       canViewRoleMappings,
-    }
+    },
   } = useValues(AppLogic(props));
   const { renderHeaderActions } = useValues(KibanaLogic);
 
