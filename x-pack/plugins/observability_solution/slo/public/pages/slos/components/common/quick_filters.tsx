@@ -7,8 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { AwaitingControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/common';
+import { AwaitingControlGroupApi, ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import styled from 'styled-components';
 import { Filter } from '@kbn/es-query';
@@ -27,13 +26,13 @@ export function QuickFilters({
   initialState: { tagsFilter, statusFilter },
   onStateChange,
 }: Props) {
-  const [controlGroupAPI, setControlGroupAPI] = useState<AwaitingControlGroupAPI>();
+  const [controlGroupAPI, setControlGroupAPI] = useState<AwaitingControlGroupApi>();
 
   useEffect(() => {
     if (!controlGroupAPI) {
       return;
     }
-    const subscription = controlGroupAPI.onFiltersPublished$.subscribe((newFilters) => {
+    const subscription = controlGroupAPI.filters$.subscribe((newFilters = []) => {
       if (newFilters.length === 0) {
         onStateChange({ tagsFilter: undefined, statusFilter: undefined });
       } else {
@@ -55,8 +54,8 @@ export function QuickFilters({
   return (
     <Container>
       <ControlGroupRenderer
-        getCreationOptions={async (initialInput, builder) => {
-          await builder.addOptionsListControl(initialInput, {
+        getCreationOptions={async (initialState, builder) => {
+          builder.addOptionsListControl(initialState, {
             dataViewId: dataView.id!,
             fieldName: 'status',
             width: 'small',
@@ -68,7 +67,7 @@ export function QuickFilters({
             existsSelected: Boolean(statusFilter?.query?.exists?.field === 'status'),
             placeholder: ALL_LABEL,
           });
-          await builder.addOptionsListControl(initialInput, {
+          builder.addOptionsListControl(initialState, {
             dataViewId: dataView.id!,
             title: TAGS_LABEL,
             fieldName: 'slo.tags',
@@ -81,10 +80,7 @@ export function QuickFilters({
             placeholder: ALL_LABEL,
           });
           return {
-            initialInput: {
-              ...initialInput,
-              viewMode: ViewMode.VIEW,
-            },
+            initialState,
           };
         }}
         ref={setControlGroupAPI}

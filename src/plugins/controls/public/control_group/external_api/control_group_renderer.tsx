@@ -79,6 +79,7 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
         const state = {
           ...omit(initialState, ['panels', 'ignoreParentSettings']),
           settings,
+          controlStyle: initialState?.labelPosition,
           panelsJSON: JSON.stringify(initialState?.panels ?? {}),
           ignoreParentSettingsJSON: JSON.stringify(initialState?.ignoreParentSettings ?? {}),
         };
