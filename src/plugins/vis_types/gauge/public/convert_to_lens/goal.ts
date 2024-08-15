@@ -13,15 +13,17 @@ import {
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
 import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { getDataViewsStart } from '../services';
+import { getDataViewsStart, getPalettesService } from '../services';
 import { ConvertGoalVisToLensVisualization } from './types';
-import { getConfiguration } from './configurations/goal';
+import { getMetricConfiguration } from './configurations/metric';
+import { getGaugeConfiguration } from './configurations/gauge';
 
 export const convertToLens: ConvertGoalVisToLensVisualization = async (vis, timefilter) => {
   if (!timefilter) {
     return null;
   }
 
+  const palettes = await getPalettesService().getPalettes();
   const dataViews = getDataViewsStart();
   const dataView = await getDataViewByIndexPatternId(vis.data.indexPattern?.id, dataViews);
 
@@ -29,8 +31,12 @@ export const convertToLens: ConvertGoalVisToLensVisualization = async (vis, time
     return null;
   }
 
-  const { getColumnsFromVis, getPalette, getPercentageModeConfig, createStaticValueColumn } =
-    await convertToLensModule;
+  const {
+    getColumnsFromVis,
+    getPredefinedPalette,
+    getPercentageModeConfig,
+    createStaticValueColumn,
+  } = await convertToLensModule;
 
   const percentageModeConfig = getPercentageModeConfig(vis.params.gauge, false);
 
@@ -61,12 +67,36 @@ export const convertToLens: ConvertGoalVisToLensVisualization = async (vis, time
       return null;
     }
   }
-  const { isPercentageMode, max } = percentageModeConfig as PercentageModeConfigWithMinMax;
+  const { max, isPercentageMode } = percentageModeConfig as PercentageModeConfigWithMinMax;
+
   const maxColumn = createStaticValueColumn(isPercentageMode ? 1 : max);
 
   const columns = [...layerConfig.columns, maxColumn];
   const layerId = uuidv4();
   const indexPatternId = dataView.id!;
+  const palette = getPredefinedPalette(palettes, vis.params.gauge, percentageModeConfig, true);
+
+  if (layerConfig.buckets.all.length === 0) {
+    const [metricAccessor] = layerConfig.metrics;
+
+    return {
+      type: 'lnsGauge',
+      layers: [
+        {
+          indexPatternId,
+          layerId,
+          columns: columns.map(excludeMetaFromColumn),
+          columnOrder: [],
+          ignoreGlobalFilters: false,
+        },
+      ],
+      configuration: getGaugeConfiguration(layerId, vis.params, palette, {
+        metricAccessor,
+        maxAccessor: maxColumn.columnId,
+      }),
+      indexPatternIds: [indexPatternId],
+    };
+  }
 
   return {
     type: 'lnsMetric',
@@ -79,15 +109,10 @@ export const convertToLens: ConvertGoalVisToLensVisualization = async (vis, time
         ignoreGlobalFilters: false,
       },
     ],
-    configuration: getConfiguration(
-      layerId,
-      vis.params,
-      getPalette(vis.params.gauge, percentageModeConfig, true),
-      {
-        ...layerConfig,
-        maxAccessor: maxColumn.columnId,
-      }
-    ),
+    configuration: getMetricConfiguration(layerId, vis.params, palette, {
+      ...layerConfig,
+      maxAccessor: maxColumn.columnId,
+    }),
     indexPatternIds: [indexPatternId],
   };
 };

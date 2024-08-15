@@ -6,20 +6,27 @@
  * Side Public License, v 1.
  */
 
-// Currently supported palettes. This list might be extended dynamically in a later release
-export const paletteIds = [
-  'default',
-  'kibana_palette',
-  'custom',
-  'status',
-  'temperature',
-  'complementary',
-  'negative',
-  'positive',
-  'cool',
-  'warm',
-  'gray',
-];
+/**
+ * Currently supported palettes
+ */
+export enum LensPalette {
+  Default = 'default',
+  Kibana = 'kibana_palette',
+  Custom = 'custom',
+  Status = 'status',
+  Temperature = 'temperature',
+  Complementary = 'complementary',
+  Negative = 'negative',
+  Positive = 'positive',
+  Cool = 'cool',
+  Warm = 'warm',
+  Gray = 'gray',
+}
+
+/**
+ * List of currently supported palettes. May be extended dynamically in a later release
+ */
+export const paletteIds: LensPalette[] = Object.values(LensPalette);
 
 // This set of defaults originated in Canvas, which, at present, is the primary
 // consumer of this function.  Changing this default requires a change in Canvas

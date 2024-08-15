@@ -11,6 +11,7 @@ export {
   convertToFiltersColumn,
   getPercentageColumnFormulaColumn,
   getPalette,
+  getPredefinedPalette,
   getPaletteFromStopsWithColors,
   getPercentageModeConfig,
   createStaticValueColumn,

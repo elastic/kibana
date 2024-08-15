@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { BulletSubtype } from '@elastic/charts';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -39,19 +40,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert to Lens', async () => {
       await visualize.navigateToLensFromAnotherVisualization();
-      await lens.waitForVisualization('mtrVis');
-      const data = await lens.getMetricVisualizationData();
-      expect(data.length).to.be.equal(1);
-      expect(data).to.eql([
+      const { bullet } = await lens.getCurrentChartDebugStateForVizType('gaugeChart');
+      expect(bullet?.rows.length).to.be.equal(1);
+      expect(bullet?.rows[0].length).to.be.equal(1);
+      expect(bullet?.rows[0]).to.eql([
         {
           title: 'Count',
-          subtitle: undefined,
-          extraText: '',
-          value: '140.05%',
-          color: 'rgba(255, 255, 255, 1)',
-          trendlineColor: undefined,
-          showingBar: true,
-          showingTrendline: false,
+          subtype: BulletSubtype.twoThirdsCircle,
+          value: 1.4005,
+          colorBands: ['#2f7e54'],
+          ticks: [0, 1],
+          domain: [0, 1],
         },
       ]);
     });
@@ -63,27 +62,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
 
       await visualize.navigateToLensFromAnotherVisualization();
-      await lens.waitForVisualization('mtrVis');
 
+      const { bullet } = await lens.getCurrentChartDebugStateForVizType('gaugeChart');
       expect(await lens.getLayerCount()).to.be(1);
-
-      const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
-      expect(dimensions).to.have.length(2);
-      expect(await dimensions[0].getVisibleText()).to.be('Average machine.ram');
-      expect(await dimensions[1].getVisibleText()).to.be('Static value: 1');
-
-      const data = await lens.getMetricVisualizationData();
-      expect(data.length).to.be.equal(1);
-      expect(data).to.eql([
+      expect(bullet?.rows.length).to.be.equal(1);
+      expect(bullet?.rows[0].length).to.be.equal(1);
+      expect(bullet?.rows[0]).to.eql([
         {
           title: 'Average machine.ram',
-          subtitle: undefined,
-          extraText: '',
-          value: '131,040,360.81%',
-          color: 'rgba(255, 255, 255, 1)',
-          trendlineColor: undefined,
-          showingBar: true,
-          showingTrendline: false,
+          subtype: BulletSubtype.twoThirdsCircle,
+          value: 1310403.608061489,
+          colorBands: ['#2f7e54'],
+          ticks: [0, 1],
+          domain: [0, 1],
         },
       ]);
     });

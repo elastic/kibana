@@ -7,7 +7,8 @@
  */
 
 import color from 'color';
-import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
+import { ColorSchemas, LensPalette } from '@kbn/charts-plugin/common';
 import { getStopsWithColorsFromRanges, PaletteConfig } from '../../../utils';
 import { PaletteParams } from './types';
 import { PercentageModeConfig, PercentageModeConfigWithMinMax } from '../../types';
@@ -96,14 +97,44 @@ export const getPalette = (
 ): PaletteOutput<CustomPaletteParams> | undefined => {
   const { colorSchema, colorsRange, invertColors } = params;
 
-  if (!(colorsRange && colorsRange.length)) {
-    return;
-  }
+  if (!(colorsRange && colorsRange.length)) return;
 
   const stopsWithColors = getStopsWithColorsFromRanges(colorsRange, colorSchema, invertColors);
 
   return getPaletteFromStopsWithColors(
     stopsWithColors,
+    percentageModeConfig,
+    isPercentPaletteSupported
+  );
+};
+
+const colorSchemasToLensPalletteMappings: Record<ColorSchemas, LensPalette> = {
+  [ColorSchemas.Blues]: LensPalette.Cool,
+  [ColorSchemas.Greens]: LensPalette.Positive,
+  [ColorSchemas.Greys]: LensPalette.Gray,
+  [ColorSchemas.Reds]: LensPalette.Negative,
+  [ColorSchemas.YellowToRed]: LensPalette.Warm,
+  [ColorSchemas.GreenToRed]: LensPalette.Status,
+};
+
+/**
+ * Maps legacy colorSchema palette to matching supported Lens palette with params
+ */
+export const getPredefinedPalette = (
+  paletteService: PaletteRegistry,
+  { colorSchema, colorsRange, invertColors }: PaletteParams,
+  percentageModeConfig: PercentageModeConfig,
+  isPercentPaletteSupported: boolean = false
+): PaletteOutput<CustomPaletteParams> | undefined => {
+  const palette = colorSchemasToLensPalletteMappings[colorSchema];
+
+  if (!colorsRange || colorsRange.length < 1 || !palette) return;
+
+  const { stop } = getStopsWithColorsFromRanges(colorsRange, colorSchema, invertColors);
+  const colors = paletteService.get(palette).getCategoricalColors(stop.length);
+
+  return getPaletteFromStopsWithColors(
+    { stop, color: colors },
     percentageModeConfig,
     isPercentPaletteSupported
   );

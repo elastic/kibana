@@ -144,9 +144,19 @@ export class ElasticChartService extends FtrService {
    * Used to set a flag on the window to trigger debug state on elastic charts
    * @param value
    */
-  public async setNewChartUiDebugFlag(value = true) {
+  public async setNewChartUiDebugFlag(enable = true) {
+    this.log.info(`${enable ? 'Enabling' : 'Disabling'} elastic-charts debug state`);
     await this.browser.execute<[boolean], void>((v) => {
       window._echDebugStateFlag = v;
-    }, value);
+    }, enable);
+  }
+
+  /**
+   * Returns true if debug state window flag for elastic charts is enabled
+   */
+  public async isChartUiDebugFlagEnabled(): Promise<boolean> {
+    return await this.browser.execute<[], boolean>(() => {
+      return window._echDebugStateFlag || false;
+    });
   }
 }

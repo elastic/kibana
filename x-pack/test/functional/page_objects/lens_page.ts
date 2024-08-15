@@ -1113,7 +1113,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return el.getVisibleText();
     },
 
+    /**
+     * Enables elastic charts debug state with *soft* refresh
+     */
+    async enableEchDebugState() {
+      await elasticChart.setNewChartUiDebugFlag(true);
+      await queryBar.clickQuerySubmitButton();
+    },
+
     async getCurrentChartDebugStateForVizType(visType: string) {
+      if (!(await elasticChart.isChartUiDebugFlagEnabled())) {
+        await this.enableEchDebugState();
+      }
       await this.waitForVisualization(visType);
       return await elasticChart.getChartDebugData(visType);
     },
@@ -1891,14 +1902,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (isSuggestionPanelOpen) {
         await testSubjects.click('lensSuggestionsPanelToggleButton');
       }
-    },
-
-    /**
-     * Enables elastic charts debug state with *soft* refresh
-     */
-    async enableEchDebugState() {
-      await elasticChart.setNewChartUiDebugFlag(true);
-      await queryBar.clickQuerySubmitButton();
     },
 
     async changeColorMappingPalette(selector: string, paletteId: string) {

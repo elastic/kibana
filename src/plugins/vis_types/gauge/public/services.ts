@@ -8,6 +8,10 @@
 
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 
 export const [getDataViewsStart, setDataViewsStart] =
   createGetterSetter<DataViewsPublicPluginStart>('dataViews');
+
+export const [getPalettesService, setPalettesService] =
+  createGetterSetter<ChartsPluginSetup['palettes']>('charts.palette');

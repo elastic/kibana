@@ -17,7 +17,7 @@ export type {
 } from './expressions/palette';
 export { palette, systemPalette } from './expressions/palette';
 
-export { paletteIds, defaultCustomColors } from './constants';
+export { LensPalette, paletteIds, defaultCustomColors } from './constants';
 export type {
   AllowedChartOverrides,
   AllowedSettingsOverrides,
