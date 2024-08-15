@@ -178,6 +178,7 @@
     "@kbn/entities-schema",
     "@kbn/actions-simulators-plugin",
     "@kbn/cases-api-integration-test-plugin",
-    "@kbn/mock-idp-utils",
+    "@kbn/management-settings-ids",
+    "@kbn/mock-idp-utils"
   ]
 }
