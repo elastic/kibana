@@ -320,7 +320,7 @@ const applyBulkActionEditToRuleParams = (
       break;
     }
     case BulkActionEditTypeEnum.set_alert_suppression: {
-      if (shouldSkipInvestigationFieldsBulkAction(ruleParams.investigationFields, action)) {
+      if (shouldSkipInvestigationFieldsBulkAction(ruleParams.alertSuppression, action)) {
         isActionSkipped = true;
         break;
       }

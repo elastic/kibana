@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFormRow,
@@ -58,49 +58,61 @@ enum GroupByOptions {
 
 interface AlertSuppressionFormData {
   groupBy: string[];
-  groupByFields: string[];
   groupByRadioSelection: GroupByOptions;
   groupByDuration: AlertSuppressionDuration;
   suppressionMissingFields?: AlertSuppressionMissingFieldsStrategy;
-  overwrite: boolean;
+  overwriteGroupBy: boolean;
+  overwriteTimeAndMissingFields: boolean;
+  removeSuppression: boolean;
 }
 
-const schema: FormSchema<AlertSuppressionFormData> = {
-  groupBy: {
-    fieldsToValidateOnChange: ['groupBy'],
-    type: FIELD_TYPES.COMBO_BOX,
-    validations: [
-      {
-        validator: fieldValidators.emptyField(
-          i18n.BULK_EDIT_FLYOUT_FORM_ADD_ALERT_SUPPRESSION_REQUIRED_ERROR
-        ),
-      },
-      {
-        validator: fieldValidators.maxLengthField({
-          message: i18n.BULK_EDIT_FLYOUT_FORM_ADD_ALERT_SUPPRESSION_MAX_LENGTH_ERROR,
-          length: 3,
-        }),
-      },
-    ],
-  },
-  groupByRadioSelection: {},
-  groupByDuration: {
-    value: {},
-    unit: {},
-  },
-  suppressionMissingFields: {
-    label: i18n.BULK_EDIT_FLYOUT_FORM_ALERT_SUPPRESSION_MISSING_FIELDS_LABEL,
-  },
-  overwrite: {
-    type: FIELD_TYPES.CHECKBOX,
-    label: i18n.BULK_EDIT_FLYOUT_FORM_ADD_ALERT_SUPPRESSION_OVERWRITE_LABEL,
-  },
+const getSchema = (maxFieldsNumber: number) => {
+  return {
+    groupBy: {
+      fieldsToValidateOnChange: ['groupBy'],
+      type: FIELD_TYPES.COMBO_BOX,
+      validations: [
+        {
+          validator: fieldValidators.emptyField(
+            i18n.BULK_EDIT_FLYOUT_FORM_ADD_ALERT_SUPPRESSION_REQUIRED_ERROR
+          ),
+        },
+        {
+          validator: fieldValidators.maxLengthField({
+            message: i18n.BULK_EDIT_FLYOUT_FORM_ADD_ALERT_SUPPRESSION_MAX_LENGTH_ERROR,
+            length: maxFieldsNumber,
+          }),
+        },
+      ],
+    },
+    groupByRadioSelection: {},
+    groupByDuration: {
+      value: {},
+      unit: {},
+    },
+    suppressionMissingFields: {
+      label: i18n.BULK_EDIT_FLYOUT_FORM_ALERT_SUPPRESSION_MISSING_FIELDS_LABEL,
+    },
+    overwriteGroupBy: {
+      type: FIELD_TYPES.CHECKBOX,
+      label: i18n.BULK_EDIT_FLYOUT_FORM_ADD_ALERT_SUPPRESSION_OVERWRITE_LABEL,
+    },
+    overwriteTimeAndMissingFields: {
+      type: FIELD_TYPES.CHECKBOX,
+      label: 'Overwrite existing time periods and missing fields',
+    },
+    removeSuppression: {
+      type: FIELD_TYPES.CHECKBOX,
+      label: 'Remove suppression in all selected rules',
+    },
+  };
 };
 
 const initialFormData: AlertSuppressionFormData = {
   groupBy: [],
-  overwrite: false,
-  groupByFields: [],
+  overwriteGroupBy: false,
+  overwriteTimeAndMissingFields: false,
+  removeSuppression: false,
   groupByRadioSelection: GroupByOptions.PerRuleExecution,
   groupByDuration: {
     value: 5,
@@ -135,6 +147,10 @@ const AlertSuppressionFormComponent = ({
   onClose,
   onConfirm,
 }: AlertSuppressionFormProps) => {
+  const schema = useMemo(
+    () => getSchema(editAction === 'delete_alert_suppression' ? 100 : 3),
+    [editAction]
+  );
   const { form } = useForm({
     defaultValue: initialFormData,
     schema,
@@ -145,9 +161,9 @@ const AlertSuppressionFormComponent = ({
 
   const { formTitle } = getFormConfig(editAction);
 
-  const [{ overwrite }] = useFormData({
+  const [{ overwriteGroupBy, removeSuppression }] = useFormData({
     form,
-    watch: ['overwrite'],
+    watch: ['overwriteGroupBy', 'removeSuppression'],
   });
   const [_, { indexPatterns }] = useFetchIndex(defaultPatterns, false);
   const fieldOptions = indexPatterns.fields.map((field) => ({
@@ -160,23 +176,31 @@ const AlertSuppressionFormComponent = ({
       return;
     }
 
-    const event = data.overwrite
+    const event = data.overwriteGroupBy
       ? TELEMETRY_EVENT.SET_ALERT_SUPPRESSION
       : editAction === 'delete_alert_suppression'
       ? TELEMETRY_EVENT.DELETE_ALERT_SUPPRESSION
       : TELEMETRY_EVENT.ADD_ALERT_SUPPRESSION;
     track(METRIC_TYPE.CLICK, event);
 
+    const suppressionConfig = data.overwriteTimeAndMissingFields
+      ? {
+          suppression_config: {
+            missing_fields_strategy: data.suppressionMissingFields,
+            duration:
+              data.groupByRadioSelection === GroupByOptions.PerTimePeriod
+                ? data.groupByDuration
+                : undefined,
+          },
+        }
+      : {};
+
     onConfirm({
       value: {
         group_by: data.groupBy,
-        missing_fields_strategy: data.suppressionMissingFields,
-        duration:
-          data.groupByRadioSelection === GroupByOptions.PerTimePeriod
-            ? data.groupByDuration
-            : undefined,
+        ...suppressionConfig,
       },
-      type: data.overwrite ? BulkActionEditTypeEnum.set_alert_suppression : editAction,
+      type: data.overwriteGroupBy ? BulkActionEditTypeEnum.set_alert_suppression : editAction,
     });
   };
 
@@ -187,10 +211,12 @@ const AlertSuppressionFormComponent = ({
         options={[
           {
             id: GroupByOptions.PerRuleExecution,
+            disabled: removeSuppression,
             label: <> {i18n.BULK_EDIT_FLYOUT_FORM_ALERT_SUPPRESSION_PER_RULE_EXECUTION_LABEL}</>,
           },
           {
             id: GroupByOptions.PerTimePeriod,
+            disabled: removeSuppression,
             label: (
               <>
                 {i18n.BULK_EDIT_FLYOUT_FORM_ALERT_SUPPRESSION_PER_TIME_PERIOD_LABEL}
@@ -199,7 +225,10 @@ const AlertSuppressionFormComponent = ({
                   durationValueField={groupByDurationValue}
                   durationUnitField={groupByDurationUnit}
                   // Suppression duration is also disabled suppression by rule execution is selected in radio button
-                  isDisabled={groupByRadioSelection.value !== GroupByOptions.PerTimePeriod}
+                  isDisabled={
+                    groupByRadioSelection.value !== GroupByOptions.PerTimePeriod ||
+                    removeSuppression
+                  }
                   minimumValue={1}
                 />
               </>
@@ -212,12 +241,13 @@ const AlertSuppressionFormComponent = ({
         data-test-subj="groupByDurationOptions"
       />
     ),
-    []
+    [removeSuppression]
   );
   const AlertSuppressionMissingFields = useCallback(
     ({ suppressionMissingFields }) => (
       <EuiRadioGroup
         idSelected={suppressionMissingFields.value}
+        disabled={removeSuppression}
         options={[
           {
             id: AlertSuppressionMissingFieldsStrategyEnum.suppress,
@@ -235,7 +265,7 @@ const AlertSuppressionFormComponent = ({
         data-test-subj="suppressionMissingFieldsOptions"
       />
     ),
-    []
+    [removeSuppression]
   );
   return (
     <BulkEditFormWrapper form={form} onClose={onClose} onSubmit={handleSubmit} title={formTitle}>
@@ -271,6 +301,7 @@ const AlertSuppressionFormComponent = ({
           idAria: 'bulkEditRulesAlertSuppression',
           'data-test-subj': 'bulkEditRulesAlertSuppression',
           euiFieldProps: {
+            isDisabled: removeSuppression,
             fullWidth: true,
             placeholder: 'Select a field',
             noSuggestions: false,
@@ -278,17 +309,25 @@ const AlertSuppressionFormComponent = ({
           },
         }}
       />
-      {/* TODO: check with design and product */}
-      {/* {editAction === BulkActionEditTypeEnum.add_alert_suppression && (
+      {editAction === BulkActionEditTypeEnum.add_alert_suppression ? (
         <CommonUseField
-          path="overwrite"
+          path="overwriteGroupBy"
           componentProps={{
             idAria: 'bulkEditRulesOverwriteAlertSuppression',
             'data-test-subj': 'bulkEditRulesOverwriteAlertSuppression',
           }}
         />
-      )} */}
-      {overwrite && (
+      ) : (
+        <CommonUseField
+          path="removeSuppression"
+          componentProps={{
+            idAria: 'bulkEditRulesRemoveAlertSuppression',
+            'data-test-subj': 'bulkEditRulesRemoveAlertSuppression',
+          }}
+        />
+      )}
+
+      {overwriteGroupBy && (
         <EuiFormRow fullWidth>
           <EuiCallOut
             color="warning"
@@ -304,6 +343,34 @@ const AlertSuppressionFormComponent = ({
         </EuiFormRow>
       )}
 
+      {removeSuppression && (
+        <EuiFormRow fullWidth>
+          <EuiCallOut
+            color="warning"
+            size="s"
+            data-test-subj="bulkEditRulesRemoveAlertSuppressionWarning"
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.removeAllAlertSuppressionWarningCallout"
+              defaultMessage="You’re about to remove alert suppression for the {rulesCount, plural, one {# rule} other {# rules}} you selected. To apply and save the changes, click Save."
+              values={{ rulesCount }}
+            />
+          </EuiCallOut>
+        </EuiFormRow>
+      )}
+
+      <EuiSpacer size="l" />
+
+      <CommonUseField
+        path="overwriteTimeAndMissingFields"
+        componentProps={{
+          idAria: 'bulkEditRulesOverwriteAlertSuppression',
+          'data-test-subj': 'bulkEditRulesOverwriteAlertSuppression',
+          euiFieldProps: {
+            isDisabled: removeSuppression,
+          },
+        }}
+      />
       <EuiFormRow data-test-subj="alertSuppressionDuration">
         <UseMultiFields
           fields={{
