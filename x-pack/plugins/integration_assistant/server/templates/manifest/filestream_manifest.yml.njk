@@ -22,6 +22,15 @@
       show_user: true
       default: 
         - '\.gz$'
+    - name: multiline_json
+      type: bool
+      title: Parse multiline JSON events
+      description: >-
+          Use to parse JSON events that take more than one line. 
+          This only works if they start the line with the first left bracket.
+      required: false
+      show_user: {{ multiline_json_toggle_display }}
+      default: {{ multiline_json_toggle_default }}
     - name: custom
       type: yaml
       title: Additional Filestream Configuration Options
