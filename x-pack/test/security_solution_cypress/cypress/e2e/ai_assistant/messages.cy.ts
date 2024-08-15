@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MessageRole } from '@kbn/elastic-assistant-common';
 import { TIMELINE_QUERY } from '../../screens/timeline';
 import { CASES_URL } from '../../urls/navigation';
 import { CONVERSATION_TITLE, SEND_TO_TIMELINE_BUTTON } from '../../screens/ai_assistant';
@@ -42,7 +43,7 @@ describe(
           timestamp: '2024-08-15T18:30:37.873Z',
           content:
             'You are a helpful, expert assistant who answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.\nIf you answer a question related to KQL, EQL, or ES|QL, it should be immediately usable within an Elastic Security timeline; please always format the output correctly with back ticks. Any answer provided for Query DSL should also be usable in a security timeline. This means you should only ever include the "filter" portion of the query.\n\nGive a query I can run in the timeline',
-          role: 'user',
+          role: 'user' as MessageRole,
         },
         {
           timestamp: '2024-08-15T18:31:24.008Z',
@@ -50,7 +51,7 @@ describe(
             'To query events from a high-risk host in the Elastic Security timeline, you can use the following KQL query:\n\n```kql\n' +
             mockTimelineQuery +
             '\n```',
-          role: 'assistant',
+          role: 'assistant' as MessageRole,
           traceData: {
             traceId: '74d2fac29753adebd5c479e3d9e45da3',
             transactionId: 'e13d97d138b8a13c',
