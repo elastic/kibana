@@ -23,7 +23,6 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/repo-info",
     "@kbn/ui-theme",
     "@kbn/esql-ast",
     "@kbn/esql-validation-autocomplete",
