@@ -19,6 +19,13 @@ actions:
   - target: "$.paths['/api/status']['get'].security"
     description: Remove system security definitions
     remove: true
+  # Remove operation-level server definitions
+  - target: "$.paths['/s/{spaceId}/api/observability/slos'][*].servers"
+    description: Remove operation security definitions
+    remove: true
+  - target: "$.paths['/s/{spaceId}/api/observability/slos/_delete_instances'][*].servers"
+    description: Remove operation security definitions
+    remove: true
   # Add document-level security definitions
   - target: '$.components.securitySchemes'
     description: Add an API key security scheme
@@ -105,10 +112,10 @@ actions:
     description: Change displayName
     update:
       x-displayName: "Saved objects"
-  # - target: '$.tags[?(@.name=="slo")]'
-  #   description: Change displayName
-  #   update:
-  #     x-displayName: "Service level objectives"
+  - target: '$.tags[?(@.name=="slo")]'
+    description: Change displayName
+    update:
+      x-displayName: "Service level objectives"
   - target: '$.tags[?(@.name=="system")]'
     description: Change displayName
     update:
