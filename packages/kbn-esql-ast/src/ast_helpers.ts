@@ -387,15 +387,15 @@ export function createColumn(ctx: ParserRuleContext): ESQLColumn {
   } else {
     parts.push(sanitizeIdentifierString(ctx));
   }
-  const name = formatIdentifierParts(parts);
+  const text = sanitizeIdentifierString(ctx);
   const hasQuotes = Boolean(getQuotedText(ctx) || isQuoted(ctx.getText()));
   return {
     type: 'column' as const,
-    name,
+    name: text,
     parts,
     text: ctx.getText(),
     location: getPosition(ctx.start, ctx.stop),
-    incomplete: Boolean(ctx.exception || name === ''),
+    incomplete: Boolean(ctx.exception || text === ''),
     quoted: hasQuotes,
   };
 }

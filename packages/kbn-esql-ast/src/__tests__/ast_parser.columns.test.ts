@@ -19,12 +19,10 @@ describe('Column Identifier Expressions', () => {
         args: [
           {
             type: 'column',
-            name: 'a',
             parts: ['a'],
           },
           {
             type: 'column',
-            name: 'b.c',
             parts: ['b', 'c'],
           },
         ],
@@ -42,17 +40,14 @@ describe('Column Identifier Expressions', () => {
         args: [
           {
             type: 'column',
-            name: 'a',
             parts: ['a'],
           },
           {
             type: 'column',
-            name: 'b.c',
             parts: ['b', 'c'],
           },
           {
             type: 'column',
-            name: 'd.`👍`.`123``123`',
             parts: ['d', '👍', '123`123'],
           },
         ],
@@ -71,7 +66,6 @@ describe('Column Identifier Expressions', () => {
         args: [
           {
             type: 'column',
-            name: 'a.b',
             parts: ['a', 'b'],
           },
         ],
