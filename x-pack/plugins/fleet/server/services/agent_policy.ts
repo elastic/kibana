@@ -478,7 +478,10 @@ class AgentPolicyService {
       return {
         ...options,
         id: id.id,
-        namespaces: id.spaceId ? [id.spaceId] : undefined,
+        namespaces:
+          savedObjectType === AGENT_POLICY_SAVED_OBJECT_TYPE && id.spaceId
+            ? [id.spaceId]
+            : undefined,
         type: savedObjectType,
       };
     });
