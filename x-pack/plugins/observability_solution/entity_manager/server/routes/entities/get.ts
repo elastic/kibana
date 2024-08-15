@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { z } from 'zod';
 import { RequestHandlerContext } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { getEntityDefinitionQuerySchema } from '@kbn/entities-schema';
 import { SetupRouteOptions } from '../types';
 import { findEntityDefinitions } from '../../lib/entities/find_entity_definition';
@@ -14,11 +14,12 @@ import { findEntityDefinitions } from '../../lib/entities/find_entity_definition
 export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
 }: SetupRouteOptions<T>) {
-  router.get<unknown, { page?: number; perPage?: number }, unknown>(
+  router.get<{ id?: string }, { page?: number; perPage?: number }, unknown>(
     {
-      path: '/internal/entities/definition',
+      path: '/internal/entities/definition/{id?}',
       validate: {
-        query: buildRouteValidationWithZod(getEntityDefinitionQuerySchema.strict()),
+        query: getEntityDefinitionQuerySchema.strict(),
+        params: z.object({ id: z.optional(z.string()) }),
       },
     },
     async (context, req, res) => {
@@ -30,6 +31,7 @@ export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
           soClient,
           page: req.query.page ?? 1,
           perPage: req.query.perPage ?? 10,
+          id: req.params.id,
         });
         return res.ok({ body: { definitions } });
       } catch (e) {

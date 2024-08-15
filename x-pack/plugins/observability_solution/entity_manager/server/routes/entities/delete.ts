@@ -6,7 +6,6 @@
  */
 
 import { RequestHandlerContext } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   deleteEntityDefinitionParamsSchema,
   deleteEntityDefinitionQuerySchema,
@@ -26,8 +25,8 @@ export function deleteEntityDefinitionRoute<T extends RequestHandlerContext>({
     {
       path: '/internal/entities/definition/{id}',
       validate: {
-        params: buildRouteValidationWithZod(deleteEntityDefinitionParamsSchema.strict()),
-        query: buildRouteValidationWithZod(deleteEntityDefinitionQuerySchema.strict()),
+        params: deleteEntityDefinitionParamsSchema.strict(),
+        query: deleteEntityDefinitionQuerySchema.strict(),
       },
     },
     async (context, req, res) => {

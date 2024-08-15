@@ -58,6 +58,25 @@ export async function findEntityDefinitions({
   );
 }
 
+export async function findEntityDefinitionById({
+  id,
+  esClient,
+  soClient,
+}: {
+  id: string;
+  esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
+}) {
+  const [definition] = await findEntityDefinitions({
+    esClient,
+    soClient,
+    id,
+    perPage: 1,
+  });
+
+  return definition;
+}
+
 async function getEntityDefinitionState(
   esClient: ElasticsearchClient,
   definition: EntityDefinition
