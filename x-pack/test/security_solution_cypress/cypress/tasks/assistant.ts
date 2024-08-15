@@ -183,7 +183,7 @@ export const assertErrorToastShown = (message?: string) => {
   }
 };
 
-export const assertConversationTitleReadOnly = () => {
+const assertConversationTitleReadOnly = () => {
   cy.get(CONVERSATION_TITLE + ' h2').click();
   cy.get(CONVERSATION_TITLE + ' input').should('not.exist');
 };
