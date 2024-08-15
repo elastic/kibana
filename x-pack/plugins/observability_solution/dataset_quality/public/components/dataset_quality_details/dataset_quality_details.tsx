@@ -19,7 +19,7 @@ export default function DatasetQualityDetails() {
   return isIndexNotFoundError ? (
     <DataStreamNotFoundPrompt dataStream={dataStream} />
   ) : (
-    <EuiFlexGroup direction="column" gutterSize="l">
+    <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="datasetDetailsContainer">
       <EuiFlexItem grow={false}>
         <Header />
         <EuiHorizontalRule />

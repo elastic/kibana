@@ -85,7 +85,7 @@ export function FlyoutSummaryKpiItem({
             size="m"
             isLoading={isLoading}
           >
-            <EuiTitle data-test-subj={`datasetQualityFlyoutKpiValue-${title}`} size="s">
+            <EuiTitle data-test-subj={`datasetQualityDetailsSummaryKpiValue-${title}`} size="s">
               <h3 className="eui-textNoWrap">{userHasPrivilege ? value : notAvailableLabel}</h3>
             </EuiTitle>
           </EuiSkeletonTitle>

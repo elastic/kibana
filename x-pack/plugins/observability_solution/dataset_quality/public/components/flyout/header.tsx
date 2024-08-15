@@ -55,14 +55,14 @@ export function Header({
       {loading ? (
         <EuiSkeletonTitle
           size="s"
-          data-test-subj="datasetQualityFlyoutIntegrationLoading"
-          className="datasetQualityFlyoutIntegrationLoading"
+          data-test-subj="datasetQualityDetailsIntegrationLoading"
+          className="datasetQualityDetailsIntegrationLoading"
         />
       ) : (
         <EuiFlexGroup justifyContent="flexStart">
           <EuiFlexItem grow>
             <EuiFlexGroup gutterSize="m" justifyContent="flexStart" alignItems="center">
-              <EuiTitle data-test-subj="datasetQualityFlyoutTitle">
+              <EuiTitle data-test-subj="datasetQualityDetailsTitle">
                 <h3>{title}</h3>
               </EuiTitle>
               <div
@@ -86,7 +86,7 @@ export function Header({
               alignItems="center"
             >
               <EuiButton
-                data-test-subj="datasetQualityHeaderButton"
+                data-test-subj="datasetQualityDetailsHeaderButton"
                 size="s"
                 {...redirectLinkProps.linkProps}
                 iconType={

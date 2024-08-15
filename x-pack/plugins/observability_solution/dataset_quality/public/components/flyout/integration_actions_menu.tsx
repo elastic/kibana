@@ -66,7 +66,7 @@ export function IntegrationActionsMenu({
       aria-label={integrationActionsText}
       iconType="boxesHorizontal"
       onClick={handleToggleMenu}
-      data-test-subj="datasetQualityFlyoutIntegrationActionsButton"
+      data-test-subj="datasetQualityDetailsIntegrationActionsButton"
     />
   );
 

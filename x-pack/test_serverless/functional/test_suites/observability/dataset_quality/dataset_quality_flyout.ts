@@ -108,7 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.datasetQuality.openDatasetFlyout(testDatasetName);
 
         await testSubjects.existOrFail(
-          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutTitle
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsTitle
         );
 
         await PageObjects.datasetQuality.closeFlyout();
@@ -267,7 +267,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
 
         const { docsCountTotal, degradedDocs, services, hosts } =
-          await PageObjects.datasetQuality.parseFlyoutKpis(excludeKeysFromServerless);
+          await PageObjects.datasetQuality.parseOverSummaryPanelKpis(excludeKeysFromServerless);
         expect(parseInt(docsCountTotal, 10)).to.be(226);
         expect(parseInt(degradedDocs, 10)).to.be(1);
         expect(parseInt(services, 10)).to.be(3);
@@ -287,7 +287,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const testDatasetName = datasetNames[2];
         await PageObjects.datasetQuality.openDatasetFlyout(testDatasetName);
 
-        const logExplorerButton = await PageObjects.datasetQuality.getFlyoutLogsExplorerButton();
+        const logExplorerButton =
+          await PageObjects.datasetQuality.getDatasetQualityDetailsHeaderButton();
 
         await logExplorerButton.click();
 
@@ -331,7 +332,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.datasetQuality.openDatasetFlyout(datasetNames[0]);
 
         await testSubjects.existOrFail(
-          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutDegradedTableNoData
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsDegradedTableNoData
         );
 
         await PageObjects.datasetQuality.closeFlyout();
@@ -341,11 +342,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
 
         await testSubjects.existOrFail(
-          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutDegradedFieldTable
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsDegradedFieldTable
         );
 
         const rows =
-          await PageObjects.datasetQuality.getDatasetQualityFlyoutDegradedFieldTableRows();
+          await PageObjects.datasetQuality.getDatasetQualityDetailsDegradedFieldTableRows();
 
         expect(rows.length).to.eql(2);
 
@@ -356,7 +357,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
 
         const rows =
-          await PageObjects.datasetQuality.getDatasetQualityFlyoutDegradedFieldTableRows();
+          await PageObjects.datasetQuality.getDatasetQualityDetailsDegradedFieldTableRows();
 
         const sparkPlots = await testSubjects.findAll(
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualitySparkPlot
