@@ -18,19 +18,16 @@ import {
   Start,
 } from '@kbn/core-di-common';
 
-export const Context = Symbol('Context') as interfaces.ServiceIdentifier<interfaces.Container>;
-export const Id = Symbol('Id') as interfaces.ServiceIdentifier<PluginOpaqueId>;
-export const Plugin = Symbol('Plugin') as interfaces.ServiceIdentifier<interfaces.Container>;
+const Context = Symbol('Context') as interfaces.ServiceIdentifier<interfaces.Container>;
+const Id = Symbol('Id') as interfaces.ServiceIdentifier<PluginOpaqueId>;
 
 function isGlobalServiceWithOptions(service: GlobalService): service is GlobalServiceWithOptions {
   return isObject(service) && Object.hasOwnProperty.call(service, 'service');
 }
 
-export class PluginModule extends ContainerModule {
-  static getContext(container: interfaces.Container): interfaces.Container {
-    return container.isBound(Context) ? container.get(Context) : container;
-  }
+export const Plugin = Symbol('Plugin') as interfaces.ServiceIdentifier<interfaces.Container>;
 
+export class PluginModule extends ContainerModule {
   private services = new WeakMap<
     interfaces.Container,
     Map<interfaces.ServiceIdentifier<unknown>, number>
@@ -105,7 +102,9 @@ export class PluginModule extends ContainerModule {
     context
       .bind(service)
       .toDynamicValue(({ container: origin }) => {
-        const target = PluginModule.getContext(origin).getNamed(Plugin, id);
+        // eslint-disable-next-line @typescript-eslint/no-shadow
+        const context = origin.isBound(Context) ? origin.get(Context) : origin;
+        const target = context.getNamed(Plugin, id);
 
         this.bindServices(origin);
         this.inheritServices(target);
