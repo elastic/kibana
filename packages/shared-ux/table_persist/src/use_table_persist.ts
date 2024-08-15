@@ -19,7 +19,7 @@ export interface EuiTablePersistProps<T> {
   /** (Optional) Specifies a custom onTableChange handler. */
   customOnTableChange?: (change: Criteria<T>) => void;
   /** (Optional) Specifies a custom initial table sorting. */
-  initialSort?: PropertySort;
+  initialSort?: PropertySort<T>;
   /** (Optional) Specifies a custom initial page size for the table. Defaults to 50. */
   initialPageSize?: number;
   /** (Optional) Specifies custom page size options for the table.
@@ -50,7 +50,7 @@ export const useEuiTablePersist = <T extends object>({
   const [pageSize, setPageSize] = useState<number>(
     storagePageSize ?? initialPageSize ?? DEFAULT_INITIAL_PAGE_SIZE
   );
-  const [sort, setSort] = useState<PropertySort | undefined>(storageSort ?? initialSort);
+  const [sort, setSort] = useState<PropertySort<T> | undefined>(storageSort ?? initialSort);
   const sorting = sort && { sort };
 
   const onTableChange = useCallback(
@@ -59,7 +59,7 @@ export const useEuiTablePersist = <T extends object>({
         customOnTableChange(nextValues);
       }
 
-      let nextSort: PropertySort | undefined;
+      let nextSort: PropertySort<T> | undefined;
       if (nextValues.sort?.field && nextValues.sort?.direction) {
         // Both field and direction are needed for a valid sort criteria
         nextSort = nextValues.sort;

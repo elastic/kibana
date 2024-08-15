@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Criteria } from '@elastic/eui';
-
-export type PropertySort = Criteria<any>['sort'];
+export interface PropertySort<T> {
+  field: keyof T;
+  direction: 'asc' | 'desc';
+}
 
 export interface PersistData<T> {
   pageSize?: number;
-  sort?: PropertySort;
+  sort?: PropertySort<T>;
 }
