@@ -40,7 +40,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await dashboardControls.adjustControlsLayout('twoLine');
       const controlGroupWrapper = await testSubjects.find('controls-group-floating-actions');
-      expect(await controlGroupWrapper.elementHasClass('controlFrameFloatingActions--twoLine')).to.be(true);
+      expect(
+        await controlGroupWrapper.elementHasClass('controlFrameFloatingActions--twoLine')
+      ).to.be(true);
     });
 
     describe('apply new default width and grow', async () => {
