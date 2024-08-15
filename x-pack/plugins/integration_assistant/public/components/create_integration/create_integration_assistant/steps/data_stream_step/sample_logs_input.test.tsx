@@ -8,7 +8,12 @@
 import React from 'react';
 import { act, fireEvent, render, waitFor, type RenderResult } from '@testing-library/react';
 import { TestProvider } from '../../../../../mocks/test_provider';
-import { parseNDJSON, parseJSONArray, SampleLogsInput } from './sample_logs_input';
+import {
+  isIdentifierLike,
+  parseNDJSON,
+  parseJSONArray,
+  SampleLogsInput,
+} from './sample_logs_input';
 import { ActionsProvider } from '../../state';
 import { mockActions } from '../../mocks/state';
 import { mockServices } from '../../../../../services/mocks/services';
@@ -27,10 +32,37 @@ const changeFile = async (input: HTMLElement, file: File) => {
   });
 };
 
+describe('isIdentifierLike', () => {
+  it('should return true for valid identifier-like keys', () => {
+    expect(isIdentifierLike('validKey')).toBe(true);
+    expect(isIdentifierLike('_underscore')).toBe(true);
+    expect(isIdentifierLike('key123')).toBe(true);
+    expect(isIdentifierLike('key_with_underscores')).toBe(true);
+  });
+
+  it('should return false for keys starting with a digit', () => {
+    expect(isIdentifierLike('123key')).toBe(false);
+    expect(isIdentifierLike('1_invalid')).toBe(false);
+  });
+
+  it('should return false for keys with invalid characters', () => {
+    expect(isIdentifierLike('invalid-key')).toBe(false);
+    expect(isIdentifierLike('invalid key')).toBe(false);
+    expect(isIdentifierLike('invalid.key')).toBe(false);
+    expect(isIdentifierLike('invalid@key')).toBe(false);
+    expect(isIdentifierLike('ç')).toBe(false);
+  });
+
+  it('should return false for empty string', () => {
+    expect(isIdentifierLike('')).toBe(false);
+  });
+});
+
 const simpleNDJSON = `{"message":"test message 1"}\n{"message":"test message 2"}`;
 const multilineNDJSON = `{"message":"test message 1"}\n\n{\n  "message":\n  "test message 2"\n}\n\n`;
 const splitNDJSON = simpleNDJSON.split('\n');
 const complexEventsJSON = `{"events":[\n{"message":"test message 1"},\n{"message":"test message 2"}\n]}`;
+const nonIdentifierLikeKeyInJSON = `{"1event":[\n{"message":"test message 1"},\n{"message":"test message 2"}\n]}`;
 
 describe('parseNDJSON', () => {
   const content = [{ message: 'test message 1' }, { message: 'test message 2' }];
@@ -113,6 +145,15 @@ describe('parseJSONArray', () => {
       errorNoArrayFound: false,
     };
     expect(parseJSONArray(complexEventsJSON)).toEqual(expected);
+  });
+
+  it('should fail if the JSON object with array entries has not an identifier-like key', () => {
+    const expected = {
+      entries: [],
+      pathToEntries: '',
+      errorNoArrayFound: true,
+    };
+    expect(parseJSONArray(nonIdentifierLikeKeyInJSON)).toEqual(expected);
   });
 
   it('should return error for JSON that does not contain an array', () => {
