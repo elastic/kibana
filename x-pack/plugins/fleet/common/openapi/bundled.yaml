@@ -2347,7 +2347,8 @@ paths:
   /agent_policies/_bulk_get:
     post:
       summary: Bulk get agent policies
-      tags: '-Elastic Agent policies'
+      tags:
+        - Elastic Agent policies
       requestBody:
         content:
           application/json:
