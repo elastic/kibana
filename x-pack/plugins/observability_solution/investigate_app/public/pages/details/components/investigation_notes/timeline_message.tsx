@@ -6,9 +6,9 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiMarkdownFormat, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { InvestigationNote } from '@kbn/investigate-plugin/common';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { format } from 'date-fns';
+import { InvestigationNote } from '@kbn/investigate-plugin/common';
 import React from 'react';
 import { InvestigateTextButton } from '../../../../components/investigate_text_button';
 import { useTheme } from '../../../../hooks/use_theme';

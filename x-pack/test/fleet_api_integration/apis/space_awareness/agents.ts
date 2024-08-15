@@ -78,6 +78,7 @@ export default function (providerContext: FtrProviderContext) {
     }
 
     before(async () => {
+      await apiClient.postEnableSpaceAwareness();
       const [_defaultSpacePolicy1, _defaultSpacePolicy2, _spaceTest1Policy1, _spaceTest1Policy2] =
         await Promise.all([
           apiClient.createAgentPolicy(),
@@ -150,12 +151,12 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('DELETE /agents/{id}', () => {
       it('should allow to delete an agent in the same space', async () => {
-        const testSpaceAgent3 = await createFleetAgent(
+        const testSpaceDeleteAgent = await createFleetAgent(
           esClient,
           spaceTest1Policy2.item.id,
           TEST_SPACE_1
         );
-        await apiClient.deleteAgent(testSpaceAgent3, TEST_SPACE_1);
+        await apiClient.deleteAgent(testSpaceDeleteAgent, TEST_SPACE_1);
       });
 
       it('should not allow deleting an agent from a different space', async () => {

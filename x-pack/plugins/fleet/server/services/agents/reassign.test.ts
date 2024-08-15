@@ -23,6 +23,7 @@ describe('reassignAgent', () => {
     appContextService.start(
       createAppContextStartContractMock({}, false, {
         internal: mocks.soClient,
+        withoutSpaceExtensions: mocks.soClient,
       })
     );
   });

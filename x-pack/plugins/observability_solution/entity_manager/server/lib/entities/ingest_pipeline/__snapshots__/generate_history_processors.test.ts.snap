@@ -23,7 +23,7 @@ Array [
   Object {
     "set": Object {
       "field": "entity.definitionVersion",
-      "value": "999.999.999",
+      "value": "1.0.0",
     },
   },
   Object {

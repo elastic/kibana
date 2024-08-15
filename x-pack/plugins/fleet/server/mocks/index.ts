@@ -136,6 +136,7 @@ export const createFleetRequestHandlerContextMock = (): jest.Mocked<
 > => {
   return {
     authz: createFleetAuthzMock(),
+    getAllSpaces: jest.fn(),
     agentClient: {
       asCurrentUser: agentServiceMock.createClient(),
       asInternalUser: agentServiceMock.createClient(),
@@ -187,20 +188,20 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     enrichPolicyWithDefaultsFromPackage: jest.fn(),
     findAllForAgentPolicy: jest.fn(),
     fetchAllItems: jest.fn((..._) => {
-      return {
+      return Promise.resolve({
         async *[Symbol.asyncIterator]() {
           yield Promise.resolve([PackagePolicyMocks.generatePackagePolicy({ id: '111' })]);
           yield Promise.resolve([PackagePolicyMocks.generatePackagePolicy({ id: '222' })]);
         },
-      };
+      });
     }),
     fetchAllItemIds: jest.fn((..._) => {
-      return {
+      return Promise.resolve({
         async *[Symbol.asyncIterator]() {
           yield Promise.resolve(['111']);
           yield Promise.resolve(['222']);
         },
-      };
+      });
     }),
     removeOutputFromAll: jest.fn(),
   };

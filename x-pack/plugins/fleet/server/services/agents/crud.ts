@@ -28,7 +28,8 @@ import {
 } from '../../errors';
 import { auditLoggingService } from '../audit_logging';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
-
+import { isSpaceAwarenessEnabled } from '../spaces/helpers';
+import { isAgentInNamespace } from '../spaces/agent_namespaces';
 import { addNamespaceFilteringToQuery } from '../spaces/query_namespaces_filtering';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
@@ -229,7 +230,7 @@ export async function getAgentsByKuery(
   } = options;
   const filters = [];
 
-  const useSpaceAwareness = appContextService.getExperimentalFeatures()?.useSpaceAwareness;
+  const useSpaceAwareness = await isSpaceAwarenessEnabled();
   if (useSpaceAwareness && spaceId) {
     if (spaceId === DEFAULT_SPACE_ID) {
       filters.push(`namespaces:"${DEFAULT_SPACE_ID}" or not namespaces:*`);
@@ -407,6 +408,10 @@ export async function getAgentById(
     throw new AgentNotFoundError(`Agent ${agentId} not found`);
   }
 
+  if ((await isAgentInNamespace(agentHit, getCurrentNamespace(soClient))) !== true) {
+    throw new AgentNotFoundError(`${agentHit.id} not found in namespace`);
+  }
+
   return agentHit;
 }
 
@@ -440,7 +445,7 @@ async function _filterAgents(
       runtime_mappings: runtimeFields,
       fields: Object.keys(runtimeFields),
       sort: [{ [sortField]: { order: sortOrder } }],
-      query: addNamespaceFilteringToQuery({ bool: { filter: [query] } }, currentNameSpace),
+      query: await addNamespaceFilteringToQuery({ bool: { filter: [query] } }, currentNameSpace),
       index: AGENTS_INDEX,
       ignore_unavailable: true,
     });

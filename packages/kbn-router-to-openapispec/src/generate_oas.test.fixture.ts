@@ -33,7 +33,7 @@ export const sharedOas = {
     '/bar': {
       get: {
         deprecated: true,
-        operationId: '%2Fbar#0',
+        operationId: '/bar#0',
         parameters: [
           {
             description: 'The version of the API to use',
@@ -152,7 +152,7 @@ export const sharedOas = {
     '/foo/{id}/{path*}': {
       get: {
         description: 'route description',
-        operationId: '%2Ffoo%2F%7Bid%7D%2F%7Bpath*%7D#0',
+        operationId: '/foo/{id}/{path*}#0',
         parameters: [
           {
             description: 'The version of the API to use',
@@ -276,7 +276,7 @@ export const sharedOas = {
       },
       post: {
         description: 'route description',
-        operationId: '%2Ffoo%2F%7Bid%7D%2F%7Bpath*%7D#1',
+        operationId: '/foo/{id}/{path*}#1',
         parameters: [
           {
             description: 'The version of the API to use',

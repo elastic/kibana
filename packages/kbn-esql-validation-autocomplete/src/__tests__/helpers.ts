@@ -72,6 +72,7 @@ export function getCallbackMocks() {
       indexes.map((name) => ({
         name,
         hidden: name.startsWith('.'),
+        type: 'Index',
       }))
     ),
     getPolicies: jest.fn(async () => policies),

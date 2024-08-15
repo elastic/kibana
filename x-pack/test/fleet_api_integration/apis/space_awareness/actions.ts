@@ -55,6 +55,8 @@ export default function (providerContext: FtrProviderContext) {
     let testSpaceAgent2: string;
 
     before(async () => {
+      await apiClient.postEnableSpaceAwareness();
+
       const [_defaultSpacePolicy1, _spaceTest1Policy1, _spaceTest1Policy2] = await Promise.all([
         apiClient.createAgentPolicy(),
         apiClient.createAgentPolicy(TEST_SPACE_1),
