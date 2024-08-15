@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { css } from '@emotion/react';
+import { BrowserUrlService } from '@kbn/share-plugin/public';
 import {
   DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
   POOR_QUALITY_MINIMUM_PERCENTAGE,
@@ -37,6 +38,7 @@ import { useDatasetRedirectLinkTelemetry, useRedirectLink } from '../../../hooks
 import { FlyoutDataset } from '../../../state_machines/dataset_quality_controller';
 import { DegradedDocsPercentageLink } from './degraded_docs_percentage_link';
 import { TimeRangeConfig } from '../../../../common/types';
+import { DatasetQualityDetailsLink } from './dataset_quality_details_link';
 
 const expandDatasetAriaLabel = i18n.translate('xpack.datasetQuality.expandLabel', {
   defaultMessage: 'Expand',
@@ -168,6 +170,7 @@ export const getDatasetQualityTableColumns = ({
   isSizeStatsAvailable,
   isActiveDataset,
   timeRange,
+  urlService,
 }: {
   fieldFormats: FieldFormatsStart;
   canUserMonitorDataset: boolean;
@@ -180,6 +183,7 @@ export const getDatasetQualityTableColumns = ({
   openFlyout: (selectedDataset: FlyoutDataset) => void;
   isActiveDataset: (lastActivity: number) => boolean;
   timeRange: TimeRangeConfig;
+  urlService: BrowserUrlService;
 }): Array<EuiBasicTableColumn<DataStreamStat>> => {
   return [
     {
@@ -211,20 +215,22 @@ export const getDatasetQualityTableColumns = ({
       field: 'title',
       sortable: true,
       render: (title: string, dataStreamStat: DataStreamStat) => {
-        const { integration, name } = dataStreamStat;
+        const { integration, name, rawName } = dataStreamStat;
 
         return (
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <IntegrationIcon integration={integration} />
-            </EuiFlexItem>
-            <EuiText size="s">{title}</EuiText>
-            {showFullDatasetNames && (
-              <EuiText size="xs" color="subdued">
-                <em>{name}</em>
-              </EuiText>
-            )}
-          </EuiFlexGroup>
+          <DatasetQualityDetailsLink urlService={urlService} dataStream={rawName}>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <IntegrationIcon integration={integration} />
+              </EuiFlexItem>
+              <EuiText size="s">{title}</EuiText>
+              {showFullDatasetNames && (
+                <EuiText size="xs" color="subdued">
+                  <em>{name}</em>
+                </EuiText>
+              )}
+            </EuiFlexGroup>
+          </DatasetQualityDetailsLink>
         );
       },
     },

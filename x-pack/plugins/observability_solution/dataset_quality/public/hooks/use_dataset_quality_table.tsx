@@ -30,7 +30,10 @@ const sortingOverrides: Partial<{
 
 export const useDatasetQualityTable = () => {
   const {
-    services: { fieldFormats },
+    services: {
+      fieldFormats,
+      share: { url },
+    },
   } = useKibanaContextForPlugin();
 
   const { service } = useDatasetQualityContext();
@@ -135,6 +138,7 @@ export const useDatasetQualityTable = () => {
         isSizeStatsAvailable,
         isActiveDataset: isActive,
         timeRange,
+        urlService: url,
       }),
     [
       fieldFormats,

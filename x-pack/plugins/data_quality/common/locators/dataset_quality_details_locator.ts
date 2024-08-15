@@ -6,20 +6,23 @@
  */
 
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
-import { DataQualityLocatorParams, DATA_QUALITY_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import {
+  DataQualityDetailsLocatorParams,
+  DATA_QUALITY_DETAILS_LOCATOR_ID,
+} from '@kbn/deeplinks-observability';
 import { DataQualityLocatorDependencies } from './types';
-import { constructDatasetQualityLocatorPath } from './construct_dataset_quality_locator_path';
+import { constructDatasetQualityDetailsLocatorPath } from './construct_dataset_quality_details_locator_path';
 
-export class DatasetQualityLocatorDefinition
-  implements LocatorDefinition<DataQualityLocatorParams>
+export class DatasetQualityDetailsLocatorDefinition
+  implements LocatorDefinition<DataQualityDetailsLocatorParams>
 {
-  public readonly id = DATA_QUALITY_LOCATOR_ID;
+  public readonly id = DATA_QUALITY_DETAILS_LOCATOR_ID;
 
   constructor(protected readonly deps: DataQualityLocatorDependencies) {}
 
-  public readonly getLocation = async (params: DataQualityLocatorParams) => {
+  public readonly getLocation = async (params: DataQualityDetailsLocatorParams) => {
     const { useHash, managementLocator } = this.deps;
-    return await constructDatasetQualityLocatorPath({
+    return await constructDatasetQualityDetailsLocatorPath({
       useHash,
       managementLocator,
       locatorParams: params,
