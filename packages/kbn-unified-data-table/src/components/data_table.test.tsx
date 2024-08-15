@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { ReactWrapper } from 'enzyme';
 import {
   EuiButton,
@@ -34,6 +34,9 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CELL_CLASS } from '../utils/get_render_cell_value';
 import { defaultTimeColumnWidth } from '../constants';
+import { useColumns } from '../hooks/use_data_grid_columns';
+import { capabilitiesServiceMock } from '@kbn/core-capabilities-browser-mocks';
+import { dataViewsMock } from '../../__mocks__/data_views';
 
 const mockUseDataGridColumnsCellActions = jest.fn((prop: unknown) => []);
 jest.mock('@kbn/cell-actions', () => ({
@@ -91,17 +94,36 @@ const DataTable = (props: Partial<UnifiedDataTableProps>) => (
   </KibanaContextProvider>
 );
 
+const capabilities = capabilitiesServiceMock.createStartContract().capabilities;
+
 const renderDataTable = (props: Partial<UnifiedDataTableProps>) => {
   const DataTableWrapped = () => {
     const [columns, setColumns] = useState(props.columns ?? []);
     const [settings, setSettings] = useState(props.settings);
+
+    const { onSetColumns } = useColumns({
+      capabilities,
+      dataView: dataViewMock,
+      dataViews: dataViewsMock,
+      setAppState: useCallback((state) => {
+        if (state.columns) {
+          setColumns(state.columns);
+        }
+        if (state.settings) {
+          setSettings(state.settings);
+        }
+      }, []),
+      useNewFieldsApi: true,
+      columns,
+      settings,
+    });
 
     return (
       <IntlProvider locale="en">
         <DataTable
           {...props}
           columns={columns}
-          onSetColumns={setColumns}
+          onSetColumns={onSetColumns}
           settings={settings}
           onResize={({ columnId, width }) => {
             setSettings({
@@ -934,7 +956,7 @@ describe('UnifiedDataTable', () => {
     const getButton = (name: string) => screen.getByRole('button', { name });
     const queryButton = (name: string) => screen.queryByRole('button', { name });
 
-    it('should reset the last column to auto width when removing the only auto width column', async () => {
+    it('should reset the last column to auto width if only absolute width columns remain', async () => {
       renderDataTable({
         columns: ['message', 'extension', 'bytes'],
         settings: {
@@ -954,7 +976,7 @@ describe('UnifiedDataTable', () => {
       expect(getColumnHeader('bytes')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
     });
 
-    it('should not reset the last column to auto width when there are multiple auto width columns', async () => {
+    it('should not reset the last column to auto width when there are remaining auto width columns', async () => {
       renderDataTable({
         columns: ['message', 'extension', 'bytes'],
         settings: {

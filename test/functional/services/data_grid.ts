@@ -27,6 +27,7 @@ export class DataGridService extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
+  private readonly browser = this.ctx.getService('browser');
 
   async getDataGridTableData(): Promise<TabbedGridData> {
     const table = await this.find.byCssSelector('.euiDataGrid');
@@ -80,6 +81,20 @@ export class DataGridService extends FtrService {
     return $('.euiDataGridHeaderCell__content')
       .toArray()
       .map((cell) => $(cell).text());
+  }
+
+  public getHeaderElement(field: string) {
+    return this.testSubjects.find(`dataGridHeaderCell-${field}`);
+  }
+
+  public async resizeColumn(field: string, delta: number) {
+    const header = await this.getHeaderElement(field);
+    const originalWidth = (await header.getSize()).width;
+    const resizer = await header.findByCssSelector(
+      this.testSubjects.getCssSelector('dataGridColumnResizer')
+    );
+    await this.browser.dragAndDrop({ location: resizer }, { location: { x: delta, y: 0 } });
+    return { originalWidth, newWidth: (await header.getSize()).width };
   }
 
   private getCellElementSelector(rowIndex: number = 0, columnIndex: number = 0) {
@@ -463,6 +478,16 @@ export class DataGridService extends FtrService {
   public async clickEditField(field: string) {
     await this.openColMenuByField(field);
     await this.testSubjects.click('gridEditFieldButton');
+  }
+
+  public async resetColumnWidthExists(field: string) {
+    await this.openColMenuByField(field);
+    return await this.testSubjects.exists('unifiedDataTableResetColumnWidth');
+  }
+
+  public async clickResetColumnWidth(field: string) {
+    await this.openColMenuByField(field);
+    await this.testSubjects.click('unifiedDataTableResetColumnWidth');
   }
 
   public async clickGridSettings() {

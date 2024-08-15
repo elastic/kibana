@@ -163,6 +163,7 @@ function buildEuiGridColumn({
           onClick: () => {
             onResize({ columnId: columnName, width: undefined });
           },
+          'data-test-subj': 'unifiedDataTableResetColumnWidth',
         }
       : undefined;
 

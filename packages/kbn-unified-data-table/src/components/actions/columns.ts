@@ -5,54 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Capabilities } from '@kbn/core/public';
+
+import type { Capabilities } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { omit } from 'lodash';
 import { popularizeField } from '../../utils/popularize_field';
-import { UnifiedDataTableSettings } from '../../types';
-
-/**
- * Helper function to provide a fallback to a single _source column if the given array of columns
- * is empty, and removes _source if there are more than 1 columns given
- * @param columns
- * @param useNewFieldsApi should a new fields API be used
- */
-function buildColumns(columns: string[], useNewFieldsApi = false) {
-  if (columns.length > 1 && columns.indexOf('_source') !== -1) {
-    return columns.filter((col) => col !== '_source');
-  } else if (columns.length !== 0) {
-    return columns;
-  }
-  return useNewFieldsApi ? [] : ['_source'];
-}
-
-export function addColumn(columns: string[], columnName: string, useNewFieldsApi?: boolean) {
-  if (columns.includes(columnName)) {
-    return columns;
-  }
-  return buildColumns([...columns, columnName], useNewFieldsApi);
-}
-
-export function removeColumn(columns: string[], columnName: string, useNewFieldsApi?: boolean) {
-  if (!columns.includes(columnName)) {
-    return columns;
-  }
-  return buildColumns(
-    columns.filter((col) => col !== columnName),
-    useNewFieldsApi
-  );
-}
-
-export function moveColumn(columns: string[], columnName: string, newIndex: number) {
-  if (newIndex < 0 || newIndex >= columns.length || !columns.includes(columnName)) {
-    return columns;
-  }
-  const modifiedColumns = [...columns];
-  modifiedColumns.splice(modifiedColumns.indexOf(columnName), 1); // remove at old index
-  modifiedColumns.splice(newIndex, 0, columnName); // insert before new index
-  return modifiedColumns;
-}
+import type { UnifiedDataTableSettings } from '../../types';
 
 export function getStateColumnActions({
   capabilities,
@@ -88,13 +47,19 @@ export function getStateColumnActions({
 
   function onRemoveColumn(columnName: string) {
     popularizeField(dataView, columnName, dataViews, capabilities);
+
     const nextColumns = removeColumn(columns || [], columnName, useNewFieldsApi);
     // The state's sort property is an array of [sortByColumn,sortDirection]
     const nextSort = sort && sort.length ? sort.filter((subArr) => subArr[0] !== columnName) : [];
-    const nextSettings = adjustLastColumnWidth(
-      nextColumns,
-      cleanColumnSettings(nextColumns, settings)
-    );
+
+    let nextSettings = cleanColumnSettings(nextColumns, settings);
+
+    // When columns are removed, reset the last column to auto width if only absolute
+    // width columns remain, to ensure the columns fill the available grid space
+    if (nextColumns.length < (columns?.length ?? 0)) {
+      nextSettings = adjustLastColumnWidth(nextColumns, nextSettings);
+    }
+
     setAppState({ columns: nextColumns, sort: nextSort, settings: nextSettings });
   }
 
@@ -128,10 +93,52 @@ export function getStateColumnActions({
   };
 }
 
-const cleanColumnSettings = (
+/**
+ * Helper function to provide a fallback to a single _source column if the given array of columns
+ * is empty, and removes _source if there are more than 1 columns given
+ * @param columns
+ * @param useNewFieldsApi should a new fields API be used
+ */
+function buildColumns(columns: string[], useNewFieldsApi = false) {
+  if (columns.length > 1 && columns.indexOf('_source') !== -1) {
+    return columns.filter((col) => col !== '_source');
+  } else if (columns.length !== 0) {
+    return columns;
+  }
+  return useNewFieldsApi ? [] : ['_source'];
+}
+
+function addColumn(columns: string[], columnName: string, useNewFieldsApi?: boolean) {
+  if (columns.includes(columnName)) {
+    return columns;
+  }
+  return buildColumns([...columns, columnName], useNewFieldsApi);
+}
+
+function removeColumn(columns: string[], columnName: string, useNewFieldsApi?: boolean) {
+  if (!columns.includes(columnName)) {
+    return columns;
+  }
+  return buildColumns(
+    columns.filter((col) => col !== columnName),
+    useNewFieldsApi
+  );
+}
+
+function moveColumn(columns: string[], columnName: string, newIndex: number) {
+  if (newIndex < 0 || newIndex >= columns.length || !columns.includes(columnName)) {
+    return columns;
+  }
+  const modifiedColumns = [...columns];
+  modifiedColumns.splice(modifiedColumns.indexOf(columnName), 1); // remove at old index
+  modifiedColumns.splice(newIndex, 0, columnName); // insert before new index
+  return modifiedColumns;
+}
+
+function cleanColumnSettings(
   columns: string[],
   settings?: UnifiedDataTableSettings
-): UnifiedDataTableSettings | undefined => {
+): UnifiedDataTableSettings | undefined {
   const columnSettings = settings?.columns;
 
   if (!columnSettings) {
@@ -144,12 +151,12 @@ const cleanColumnSettings = (
   );
 
   return { ...settings, columns: nextColumnSettings };
-};
+}
 
-const adjustLastColumnWidth = (
+function adjustLastColumnWidth(
   columns: string[],
   settings?: UnifiedDataTableSettings
-): UnifiedDataTableSettings | undefined => {
+): UnifiedDataTableSettings | undefined {
   const columnSettings = settings?.columns;
 
   if (!columns.length || !columnSettings) {
@@ -175,4 +182,4 @@ const adjustLastColumnWidth = (
       ...lastColumnSettingsOptional,
     },
   };
-};
+}
