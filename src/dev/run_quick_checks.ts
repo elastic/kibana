@@ -7,16 +7,17 @@
  */
 
 import { exec } from 'child_process';
-import * as os from 'os';
-import * as path from 'path';
-import { readdirSync } from 'fs';
+import { cpus } from 'os';
+import { join, isAbsolute } from 'path';
+import { readdirSync, readFileSync } from 'fs';
 
 import { run, RunOptions } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 
-const MAX_PARALLELISM = os.cpus().length - 1;
-const buildkiteQuickchecksFolder = path.join('.buildkite', 'scripts', 'steps', 'checks');
+const MAX_PARALLELISM = cpus().length - 1;
+const buildkiteQuickchecksFolder = join('.buildkite', 'scripts', 'steps', 'checks');
+const quickChecksList = join(buildkiteQuickchecksFolder, 'quick_checks.txt');
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 interface CheckResult {
@@ -29,11 +30,13 @@ interface CheckResult {
 const scriptOptions: RunOptions = {
   description: `
     Runs sanity-testing quick-checks in parallel.
+      - arguments (--file, --dir, --checks) are exclusive - only one can be used at a time.
   `,
   flags: {
-    string: ['dir', 'checks'],
+    string: ['dir', 'checks', 'file'],
     help: `
-        --dir              Run all checks in a given directory. (default=${buildkiteQuickchecksFolder})
+        --file             Run all checks from a given file. (default='${quickChecksList}')
+        --dir              Run all checks in a given directory.
         --checks           Runs all scripts given in this parameter. (comma or newline delimited)
       `,
   },
@@ -49,18 +52,24 @@ let logger: ToolingLog;
 run(async ({ log, flagsReader }) => {
   logger = log;
   if (flagsReader.string('dir') && flagsReader.string('checks')) {
-    logger.error(`Can't use --dir and --checks parameters at the same time.`);
+    logger.error(`You can only use one of --file, --dir or --checks at one time.`);
     process.exit(3);
   }
 
+  const targetFile = flagsReader.string('file') || quickChecksList;
   const targetDir = flagsReader.string('dir');
   const checks = flagsReader.string('checks');
 
   let scriptsToRun: string[] = [];
-  if (targetDir) {
-    scriptsToRun = readdirSync(path.join(REPO_ROOT, targetDir)).map((file) =>
-      path.join(REPO_ROOT, targetDir, file)
-    );
+  if (targetFile) {
+    const targetFileAbsolute = isAbsolute(targetFile) ? targetFile : join(REPO_ROOT, targetFile);
+    scriptsToRun = readFileSync(targetFileAbsolute, 'utf-8')
+      .trim()
+      .split('\n')
+      .map((line) => line.trim());
+  } else if (targetDir) {
+    const targetDirAbsolute = isAbsolute(targetDir) ? targetDir : join(REPO_ROOT, targetDir);
+    scriptsToRun = readdirSync(targetDirAbsolute).map((file) => join(targetDir, file));
   } else if (checks) {
     scriptsToRun = checks
       .trim()
