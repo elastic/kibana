@@ -498,7 +498,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       <Suspense fallback={<Loading />}>
         <PliAuthBlockWrapper>
           <EuiErrorBoundary>
-            {formState === 'CONFIRM' && agentPolicies.length > 0 && (
+            {formState === 'CONFIRM' && (
               <ConfirmDeployAgentPolicyModal
                 agentCount={agentCount}
                 agentPolicies={agentPolicies}

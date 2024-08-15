@@ -313,7 +313,8 @@ export function useOnSubmit({
         return;
       }
       if (
-        agentCount !== 0 &&
+        (agentCount !== 0 ||
+          (agentPolicies.length === 0 && selectedPolicyTab !== SelectedPolicyTab.NEW)) &&
         !(isAgentlessIntegration(packageInfo) || isAgentlessPackagePolicy(packagePolicy)) &&
         formState !== 'CONFIRM'
       ) {

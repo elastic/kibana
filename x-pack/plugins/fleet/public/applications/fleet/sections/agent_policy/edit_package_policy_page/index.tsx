@@ -249,7 +249,10 @@ export const EditPackagePolicyForm = memo<{
       return;
     }
     if (
-      (agentCount !== 0 || agentPoliciesToAdd.length > 0 || agentPoliciesToRemove.length > 0) &&
+      (agentCount !== 0 ||
+        agentPolicies.length === 0 ||
+        agentPoliciesToAdd.length > 0 ||
+        agentPoliciesToRemove.length > 0) &&
       !hasAgentlessAgentPolicy &&
       formState !== 'CONFIRM'
     ) {
