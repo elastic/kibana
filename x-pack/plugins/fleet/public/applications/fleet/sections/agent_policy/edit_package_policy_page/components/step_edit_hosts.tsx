@@ -119,6 +119,7 @@ export const StepEditHosts: React.FunctionComponent<Props> = ({
               setShowCreateAgentPolicy(true);
               updateSelectedTab(SelectedPolicyTab.NEW);
             }}
+            data-test-subj="createNewAgentPolicyButton"
           >
             <FormattedMessage
               id="xpack.fleet.editPackagePolicy.addNewAgentPolicyButtonText"
@@ -146,6 +147,7 @@ export const StepEditHosts: React.FunctionComponent<Props> = ({
                 setShowCreateAgentPolicy(false);
                 updateSelectedTab(SelectedPolicyTab.EXISTING);
               }}
+              data-test-subj="deleteNewAgentPolicyButton"
             >
               <FormattedMessage
                 id="xpack.fleet.editPackagePolicy.removeNewAgentPolicyButtonText"
