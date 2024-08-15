@@ -11,6 +11,7 @@ import { ChatFeedback } from '@kbn/observability-ai-assistant-plugin/public/anal
 import { pick } from 'lodash';
 import {
   createLlmProxy,
+  isFunctionTitleRequest,
   LlmProxy,
 } from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { interceptRequest } from '../../common/intercept_request';
@@ -226,11 +227,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
             describe('and sending over some text', () => {
               before(async () => {
-                const titleInterceptor = proxy.intercept(
-                  'title',
-                  (body) =>
-                    body.tools?.find((fn) => fn.function.name === 'title_conversation') !==
-                    undefined
+                const titleInterceptor = proxy.intercept('title', (body) =>
+                  isFunctionTitleRequest(body)
                 );
 
                 const conversationInterceptor = proxy.intercept(

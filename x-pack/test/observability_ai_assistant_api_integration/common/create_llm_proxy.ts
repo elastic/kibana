@@ -10,7 +10,7 @@ import getPort from 'get-port';
 import http, { type Server } from 'http';
 import { once, pull } from 'lodash';
 import OpenAI from 'openai';
-import { GENERATE_TITLE_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/service/client/operators/get_generated_title';
+import { TITLE_CONVERSATION_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/service/client/operators/get_generated_title';
 import { createOpenAiChunk } from './create_openai_chunk';
 
 type Request = http.IncomingMessage;
@@ -109,7 +109,7 @@ export class LlmProxy {
     return this.intercept('conversation_title', (body) => isFunctionTitleRequest(body), [
       {
         function_call: {
-          name: GENERATE_TITLE_FUNCTION_NAME,
+          name: TITLE_CONVERSATION_FUNCTION_NAME,
           arguments: JSON.stringify({ title }),
         },
       },
@@ -229,5 +229,7 @@ async function getRequestBody(
 }
 
 export function isFunctionTitleRequest(body: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming) {
-  return body.tools?.find((fn) => fn.function.name === GENERATE_TITLE_FUNCTION_NAME) !== undefined;
+  return (
+    body.tools?.find((fn) => fn.function.name === TITLE_CONVERSATION_FUNCTION_NAME) !== undefined
+  );
 }
