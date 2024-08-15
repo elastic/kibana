@@ -6615,6 +6615,8 @@
             "section": "def-public.HasSaveNotification",
             "text": "HasSaveNotification"
           },
+          " & ",
+          "PublishesReload",
           "> & { asyncResetUnsavedChanges: () => Promise<void>; autoApplySelections$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
