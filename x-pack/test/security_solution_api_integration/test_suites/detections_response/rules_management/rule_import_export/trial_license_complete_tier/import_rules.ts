@@ -1379,8 +1379,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('should resolve 100 or more exception references when importing into a clean slate', async () => {
-          // So importing a rule that references an exception list
-          // Keep in mind, no exception lists or rules exist yet
           const rules = range(150).map((idx) =>
             getCustomQueryRuleParams({
               rule_id: `${idx}`,
@@ -1415,15 +1413,13 @@ export default ({ getService }: FtrProviderContext): void => {
             name: 'Query with a rule id',
             type: 'simple',
           }));
-          const ndjson = combineArraysToNdJson(rules, exceptionLists, exceptionItems);
+          const importPayload = combineArraysToNdJson(rules, exceptionLists, exceptionItems);
 
-          // Importing the "simpleRule", along with the exception list
-          // it's referencing and the list's item
           const { body } = await supertest
             .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
             .set('kbn-xsrf', 'true')
             .set('elastic-api-version', '2023-10-31')
-            .attach('file', Buffer.from(ndjson), 'rules.ndjson')
+            .attach('file', Buffer.from(importPayload), 'rules.ndjson')
             .expect(200);
 
           expect(body).toMatchObject({
