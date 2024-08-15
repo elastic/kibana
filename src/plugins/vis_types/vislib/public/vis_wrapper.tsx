@@ -75,8 +75,8 @@ const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWra
           handlers,
           shouldSkip ? undefined : renderComplete
         );
+        skipRenderComplete.current = true;
       }
-      skipRenderComplete.current = true;
     }, 100);
   }, [handlers, renderComplete, visConfig, visData]);
 
