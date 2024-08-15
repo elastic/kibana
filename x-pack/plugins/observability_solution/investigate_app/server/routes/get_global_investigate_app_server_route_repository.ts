@@ -30,11 +30,15 @@ const createInvestigationRoute = createInvestigateAppServerRoute({
     tags: [],
   },
   params: createInvestigationParamsSchema,
-  handler: async (params) => {
-    const soClient = (await params.context.core).savedObjects.client;
-    const repository = investigationRepositoryFactory({ soClient, logger: params.logger });
+  handler: async ({ params, context, request, logger }) => {
+    const user = (await context.core).coreStart.security.authc.getCurrentUser(request);
+    if (!user) {
+      throw new Error('User is not authenticated');
+    }
+    const soClient = (await context.core).savedObjects.client;
+    const repository = investigationRepositoryFactory({ soClient, logger });
 
-    return await createInvestigation(params.params.body, repository);
+    return await createInvestigation(params.body, { repository, user });
   },
 });
 
@@ -86,11 +90,15 @@ const createInvestigationNoteRoute = createInvestigateAppServerRoute({
     tags: [],
   },
   params: createInvestigationNoteParamsSchema,
-  handler: async (params) => {
-    const soClient = (await params.context.core).savedObjects.client;
-    const repository = investigationRepositoryFactory({ soClient, logger: params.logger });
+  handler: async ({ params, context, request, logger }) => {
+    const user = (await context.core).coreStart.security.authc.getCurrentUser(request);
+    if (!user) {
+      throw new Error('User is not authenticated');
+    }
+    const soClient = (await context.core).savedObjects.client;
+    const repository = investigationRepositoryFactory({ soClient, logger });
 
-    return await createInvestigationNote(params.params.path.id, params.params.body, repository);
+    return await createInvestigationNote(params.path.id, params.body, { repository, user });
   },
 });
 
