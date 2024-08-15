@@ -34,7 +34,7 @@ export const ChatSetupPage: React.FC = () => {
 
   return (
     <EuiEmptyPrompt
-      iconType={'discuss'}
+      iconType="discuss"
       data-test-subj="setupPage"
       title={
         <h2>

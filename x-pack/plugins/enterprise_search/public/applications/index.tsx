@@ -156,9 +156,6 @@ export const renderApp = (
           services={{
             ...core,
             ...plugins,
-            featureFlags: {
-              searchPlaygroundEnabled: config.ui?.queryBuilder?.enabled ?? false,
-            },
           }}
         >
           <CloudContext>

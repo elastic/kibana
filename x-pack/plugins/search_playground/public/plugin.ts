@@ -22,6 +22,7 @@ import {
   SearchPlaygroundPluginSetup,
   SearchPlaygroundPluginStart,
 } from './types';
+import { isSearchModeEnabled } from './utils/feature_flags';
 
 export class SearchPlaygroundPlugin
   implements Plugin<SearchPlaygroundPluginSetup, SearchPlaygroundPluginStart>
@@ -37,7 +38,7 @@ export class SearchPlaygroundPlugin
   ): SearchPlaygroundPluginSetup {
     if (!this.config.ui?.enabled) return {};
     const featureFlags = {
-      searchPlaygroundEnabled: this.config.ui?.queryBuilder.enabled ?? false,
+      searchPlaygroundEnabled: isSearchModeEnabled(core.uiSettings),
     };
 
     core.application.register({

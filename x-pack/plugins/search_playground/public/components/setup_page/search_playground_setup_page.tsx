@@ -26,7 +26,7 @@ export const SearchPlaygroundSetupPage: React.FC = () => {
   const { isLoading: isIndicesLoading } = useQueryIndices();
 
   useEffect(() => {
-    usageTracker?.load(AnalyticsEvents.setupQueryBuilderPageLoaded);
+    usageTracker?.load(AnalyticsEvents.setupSearchPageLoaded);
   }, [usageTracker]);
 
   return (

@@ -63,7 +63,6 @@ data_visualizer.resultLinks.fileBeat.enabled: false
 
 # Search Playground
 xpack.searchPlayground.ui.enabled: true
-xpack.searchPlayground.ui.queryBuilder.enabled: false
 
 # Search InferenceEndpoints
 xpack.searchInferenceEndpoints.ui.enabled: false

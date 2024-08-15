@@ -30,7 +30,7 @@ export enum AnalyticsEvents {
   sourceFieldsLoaded = 'source_fields_loaded',
   sourceIndexUpdated = 'source_index_updated',
   setupChatPageLoaded = 'start_new_chat_page_loaded',
-  setupQueryBuilderPageLoaded = 'search_page_loaded',
+  setupSearchPageLoaded = 'search_setup_page_loaded',
   viewCodeFlyoutOpened = 'view_code_flyout_opened',
   viewCodeLanguageChange = 'view_code_language_change',
 }

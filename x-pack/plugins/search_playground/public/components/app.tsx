@@ -52,6 +52,10 @@ export const App: React.FC<AppProps> = ({
     initialPageMode: pageMode,
   });
 
+  const restrictedWidth = selectedPageMode === PlaygroundPageMode.search && selectedMode === 'chat';
+  const paddingSize =
+    selectedPageMode === PlaygroundPageMode.search && selectedMode === 'chat' ? 'xl' : 'none';
+
   const getSetupPage = () => {
     return (
       showSetupPage && (
@@ -97,17 +101,13 @@ export const App: React.FC<AppProps> = ({
       />
       <KibanaPageTemplate.Section
         alignment="top"
-        restrictWidth={
-          selectedPageMode === PlaygroundPageMode.search && selectedMode === 'chat' ? true : false
-        }
+        restrictWidth={restrictedWidth}
         grow
         css={{
           position: 'relative',
         }}
         contentProps={{ css: { display: 'flex', flexGrow: 1, position: 'absolute', inset: 0 } }}
-        paddingSize={
-          selectedPageMode === PlaygroundPageMode.search && selectedMode === 'chat' ? 'xl' : 'none'
-        }
+        paddingSize={paddingSize}
         className="eui-fullHeight"
       >
         {getSetupPage()}

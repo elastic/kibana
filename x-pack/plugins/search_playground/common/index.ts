@@ -8,3 +8,5 @@
 export const PLUGIN_ID = 'searchPlayground';
 export const PLUGIN_NAME = 'Playground';
 export const PLUGIN_PATH = '/app/search_playground';
+
+export const SEARCH_MODE_FEATURE_FLAG_ID = 'searchPlayground:searchModeEnabled';
