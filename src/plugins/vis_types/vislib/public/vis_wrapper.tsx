@@ -65,29 +65,29 @@ const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWra
     [handlers, visConfig]
   );
 
-  const renderChart = useMemo(() => {
+  const renderChart = useCallback(() => {
     const shouldSkip = skipRenderComplete.current;
-    return debounce(() => {
-      if (visController.current) {
-        visController.current.render(
-          visData,
-          visConfig,
-          handlers,
-          shouldSkip ? undefined : renderComplete
-        );
-        skipRenderComplete.current = true;
-      }
-    }, 100);
+    if (visController.current) {
+      visController.current.render(
+        visData,
+        visConfig,
+        handlers,
+        shouldSkip ? undefined : renderComplete
+      );
+      skipRenderComplete.current = true;
+    }
   }, [handlers, renderComplete, visConfig, visData]);
 
-  const onResize: EuiResizeObserverProps['onResize'] = useCallback(() => {
-    renderChart();
-  }, [renderChart]);
+  const renderChartDebounced = useMemo(() => debounce(renderChart, 100), [renderChart]);
+
+  const onResize: EuiResizeObserverProps['onResize'] = useCallback(renderChartDebounced, [
+    renderChartDebounced,
+  ]);
 
   useEffect(() => {
     skipRenderComplete.current = false;
-    renderChart();
-  }, [renderChart]);
+    renderChartDebounced();
+  }, [renderChartDebounced]);
 
   useEffect(() => {
     if (chartDiv.current) {
@@ -104,13 +104,13 @@ const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWra
     if (handlers.uiState) {
       const uiState = handlers.uiState as PersistedState;
 
-      uiState.on('change', renderChart);
+      uiState.on('change', renderChartDebounced);
 
       return () => {
-        uiState?.off('change', renderChart);
+        uiState?.off('change', renderChartDebounced);
       };
     }
-  }, [handlers.uiState, renderChart]);
+  }, [handlers.uiState, renderChartDebounced]);
 
   return (
     <EuiResizeObserver onResize={onResize}>
