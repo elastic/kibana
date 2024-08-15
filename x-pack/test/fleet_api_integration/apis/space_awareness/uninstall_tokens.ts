@@ -48,6 +48,7 @@ export default function (providerContext: FtrProviderContext) {
     let spaceTest1Token: UninstallTokenMetadata;
     // Create agent policies it should create am uninstall token for every keys
     before(async () => {
+      await apiClient.postEnableSpaceAwareness();
       const [_defaultSpacePolicy1, _spaceTest1Policy1, _spaceTest1Policy2] = await Promise.all([
         apiClient.createAgentPolicy(),
         apiClient.createAgentPolicy(TEST_SPACE_1),

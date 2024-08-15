@@ -74,6 +74,7 @@ export type ControlGroupApi = PresentationContainer &
       controlInputTransform?: ControlInputTransform;
       onSave?: () => void;
     }) => void;
+    lastUsedDataViewId$: PublishingSubject<string | undefined>;
   };
 
 export interface ControlGroupRuntimeState {
