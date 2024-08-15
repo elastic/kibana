@@ -49,7 +49,7 @@ describe('SampleLogsInput', () => {
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
           logsSampleParsed: logsSampleRaw.split(','),
-          logType: 'json',
+          logFormat: 'json',
         });
       });
 
@@ -62,7 +62,7 @@ describe('SampleLogsInput', () => {
         it('should truncate the logs sample', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
             logsSampleParsed: tooLargeLogsSample.split(',').slice(0, 10),
-            logType: 'json',
+            logFormat: 'json',
           });
         });
         it('should add a notification toast', () => {
@@ -93,7 +93,7 @@ describe('SampleLogsInput', () => {
         it('should set the integrationSetting correctly', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
             logsSampleParsed: undefined,
-            logType: undefined,
+            logFormat: undefined,
           });
         });
       });
@@ -112,7 +112,7 @@ describe('SampleLogsInput', () => {
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
           logsSampleParsed: logsSampleRaw.split('\n'),
-          logType: 'ndjson',
+          logFormat: 'ndjson',
         });
       });
 
@@ -125,7 +125,7 @@ describe('SampleLogsInput', () => {
         it('should truncate the logs sample', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
             logsSampleParsed: tooLargeLogsSample.split('\n').slice(0, 10),
-            logType: 'ndjson',
+            logFormat: 'ndjson',
           });
         });
         it('should add a notification toast', () => {
@@ -156,7 +156,7 @@ describe('SampleLogsInput', () => {
         it('should set the integrationSetting correctly', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
             logsSampleParsed: undefined,
-            logType: undefined,
+            logFormat: undefined,
           });
         });
       });

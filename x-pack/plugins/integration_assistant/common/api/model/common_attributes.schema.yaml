@@ -116,7 +116,7 @@ components:
         docs:
           $ref: "#/components/schemas/Docs"
           description: The documents of the dataStream.
-        logType:
+        logFormat:
           type: string
           description: The log type of the dataStream, e.g. ndjson.
 

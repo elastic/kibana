@@ -20,12 +20,12 @@ const MaxLogsSampleRows = 10;
  */
 const parseLogsContent = (
   fileContent: string | undefined
-): { error?: string; isTruncated?: boolean; logsSampleParsed?: string[]; logType?: string } => {
+): { error?: string; isTruncated?: boolean; logsSampleParsed?: string[]; logFormat?: string } => {
   if (fileContent == null) {
     return { error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_READ };
   }
   let parsedContent;
-  let logType;
+  let logFormat;
 
   try {
     parsedContent = fileContent
@@ -42,14 +42,14 @@ const parseLogsContent = (
       Array.isArray(parsedContent[0])
     ) {
       parsedContent = parsedContent[0];
-      logType = 'json';
+      logFormat = 'json';
     } else {
-      logType = 'ndjson';
+      logFormat = 'ndjson';
     }
   } catch (parseNDJSONError) {
     try {
       parsedContent = JSON.parse(fileContent);
-      logType = 'json';
+      logFormat = 'json';
     } catch (parseJSONError) {
       return { error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_PARSE };
     }
@@ -73,7 +73,7 @@ const parseLogsContent = (
   }
 
   const logsSampleParsed = parsedContent.map((log) => JSON.stringify(log));
-  return { isTruncated, logsSampleParsed, logType };
+  return { isTruncated, logsSampleParsed, logFormat };
 };
 
 interface SampleLogsInputProps {
@@ -93,7 +93,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
         setIntegrationSettings({
           ...integrationSettings,
           logsSampleParsed: undefined,
-          logType: undefined,
+          logFormat: undefined,
         });
         return;
       }
@@ -101,14 +101,14 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
       const reader = new FileReader();
       reader.onload = function (e) {
         const fileContent = e.target?.result as string | undefined; // We can safely cast to string since we call `readAsText` to load the file.
-        const { error, isTruncated, logsSampleParsed, logType } = parseLogsContent(fileContent);
+        const { error, isTruncated, logsSampleParsed, logFormat } = parseLogsContent(fileContent);
         setIsParsing(false);
         setSampleFileError(error);
         if (error) {
           setIntegrationSettings({
             ...integrationSettings,
             logsSampleParsed: undefined,
-            logType: undefined,
+            logFormat: undefined,
           });
           return;
         }
@@ -120,7 +120,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
         setIntegrationSettings({
           ...integrationSettings,
           logsSampleParsed,
-          logType,
+          logFormat,
         });
       };
       setIsParsing(true);
