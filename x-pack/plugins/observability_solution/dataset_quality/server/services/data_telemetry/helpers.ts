@@ -445,7 +445,7 @@ function getFieldsListFromMapping(mapping: MappingPropertyBase): string[] {
   const fields: string[] = [];
 
   for (const [fieldName, field] of Object.entries(mapping.properties ?? {})) {
-    if (field.hasOwnProperty('properties')) {
+    if ((field as MappingPropertyBase).properties) {
       fields.push(...getFieldsListFromMapping(field).map((subField) => `${fieldName}.${subField}`));
     } else {
       fields.push(fieldName);
