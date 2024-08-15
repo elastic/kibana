@@ -141,7 +141,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await waitForRiskScoresToBePresent({ es, log, scoreCount: 2 });
         const persistedScores = await readRiskScores(es);
 
-        expect(persistedScores.length).to.greaterThan(1); // the risk score will is calculated once by the risk engine and a second time by the API
+        expect(persistedScores.length).to.greaterThan(1); // the risk score is calculated once by the risk engine and a second time by the API
         const [persistedScoreByApi, persistedScoreByEngine] = normalizeScores(persistedScores);
 
         expect(persistedScoreByApi).to.eql(expectedScore);
@@ -192,7 +192,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await waitForRiskScoresToBePresent({ es, log, scoreCount: 2 });
           const persistedScores = await readRiskScores(es);
 
-          expect(persistedScores.length).to.greaterThan(1); // the risk score will is calculated once by the risk engine and a second time by the API
+          expect(persistedScores.length).to.greaterThan(1); // the risk score is calculated once by the risk engine and a second time by the API
           const [persistedScoreByApi, persistedScoreByEngine] = normalizeScores(persistedScores);
           expect(persistedScoreByApi).to.eql(expectedScore);
           expect(persistedScoreByApi).to.eql(persistedScoreByEngine);
