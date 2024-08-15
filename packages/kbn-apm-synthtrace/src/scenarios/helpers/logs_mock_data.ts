@@ -10,12 +10,8 @@ import { generateShortId } from '@kbn/apm-synthtrace-client';
 import { randomInt } from 'crypto';
 
 // Utility function to get a random element from an array
-const getRandomElement = <T>(arr: T[], index?: number): T => {
-  if (typeof index === 'number' && index >= 0 && index < arr.length) {
-    return arr[index];
-  }
-  return arr[randomInt(arr.length)];
-};
+const getAtIndexOrRandom = <T>(values: T[], index?: number) =>
+  values[index ?? randomInt(values.length)];
 
 // Arrays for data
 const IP_ADDRESSES = [
@@ -37,7 +33,7 @@ const GEO_COORDINATES = [
 const CLOUD_PROVIDERS = ['gcp', 'aws', 'azure'];
 const CLOUD_REGION = ['eu-central-1', 'us-east-1', 'area-51'];
 
-const CLUSTER = () => [
+const CLUSTER = [
   { clusterId: generateShortId(), clusterName: 'synth-cluster-1', namespace: 'default' },
   { clusterId: generateShortId(), clusterName: 'synth-cluster-2', namespace: 'production' },
   { clusterId: generateShortId(), clusterName: 'synth-cluster-3', namespace: 'kube' },
@@ -48,9 +44,9 @@ const SERVICE_NAMES = Array(3)
   .map((_, idx) => `synth-service-${idx}`);
 
 // Functions to get random elements
-export const getCluster = (index?: number) => getRandomElement(CLUSTER(), index);
-export const getIpAddress = (index?: number) => getRandomElement(IP_ADDRESSES, index);
-export const getGeoCoordinate = (index?: number) => getRandomElement(GEO_COORDINATES, index);
-export const getCloudProvider = (index?: number) => getRandomElement(CLOUD_PROVIDERS, index);
-export const getCloudRegion = (index?: number) => getRandomElement(CLOUD_REGION, index);
-export const getServiceName = (index?: number) => getRandomElement(SERVICE_NAMES, index);
+export const getCluster = (index?: number) => getAtIndexOrRandom(CLUSTER, index);
+export const getIpAddress = (index?: number) => getAtIndexOrRandom(IP_ADDRESSES, index);
+export const getGeoCoordinate = (index?: number) => getAtIndexOrRandom(GEO_COORDINATES, index);
+export const getCloudProvider = (index?: number) => getAtIndexOrRandom(CLOUD_PROVIDERS, index);
+export const getCloudRegion = (index?: number) => getAtIndexOrRandom(CLOUD_REGION, index);
+export const getServiceName = (index?: number) => getAtIndexOrRandom(SERVICE_NAMES, index);

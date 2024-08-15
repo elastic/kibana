@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import { LogDocument, log, generateShortId, generateLongId } from '@kbn/apm-synthtrace-client';
+import moment from 'moment';
 import { Scenario } from '../cli/scenario';
 import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
 import { withClient } from '../lib/utils/with_client';
@@ -36,15 +37,31 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
     const index = Math.floor(Math.random() * 3);
     const serviceName = getServiceName(index);
     const logMessage = MESSAGE_LOG_LEVELS[index];
-    const cluster = getCluster(index);
+    const { clusterId, clusterName, namespace } = getCluster(index);
     const cloudRegion = getCloudRegion(index);
+
+    const commonLongEntryFields: LogDocument = {
+      'trace.id': generateShortId(),
+      'agent.name': 'nodejs',
+      'orchestrator.cluster.name': clusterName,
+      'orchestrator.cluster.id': clusterId,
+      'orchestrator.namespace': namespace,
+      'container.name': `${serviceName}-${generateShortId()}`,
+      'orchestrator.resource.id': generateShortId(),
+      'cloud.provider': getCloudProvider(),
+      'cloud.region': cloudRegion,
+      'cloud.availability_zone': `${cloudRegion}a`,
+      'cloud.project.id': generateShortId(),
+      'cloud.instance.id': generateShortId(),
+      'log.file.path': `/logs/${generateLongId()}/error.txt`,
+    };
 
     return {
       index,
       serviceName,
       logMessage,
-      cluster,
       cloudRegion,
+      commonLongEntryFields,
     };
   };
 
@@ -65,8 +82,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
               const {
                 serviceName,
                 logMessage: { level, message },
-                cluster: { clusterId, clusterName, namespace },
-                cloudRegion,
+                commonLongEntryFields,
               } = constructLogsCommonData();
 
               return log
@@ -76,21 +92,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .service(serviceName)
                 .setGeoLocation(getGeoCoordinate())
                 .setHostIp(getIpAddress())
-                .defaults({
-                  'trace.id': generateShortId(),
-                  'agent.name': 'nodejs',
-                  'orchestrator.cluster.name': clusterName,
-                  'orchestrator.cluster.id': clusterId,
-                  'orchestrator.namespace': namespace,
-                  'container.name': `${serviceName}-${generateShortId()}`,
-                  'orchestrator.resource.id': generateShortId(),
-                  'cloud.provider': getCloudProvider(),
-                  'cloud.region': cloudRegion,
-                  'cloud.availability_zone': `${cloudRegion}a`,
-                  'cloud.project.id': generateShortId(),
-                  'cloud.instance.id': generateShortId(),
-                  'log.file.path': `/logs/${generateLongId()}/error.txt`,
-                })
+                .defaults(commonLongEntryFields)
                 .timestamp(timestamp);
             });
         });
@@ -105,8 +107,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
               const {
                 serviceName,
                 logMessage: { message },
-                cluster: { clusterId, clusterName, namespace },
-                cloudRegion,
+                commonLongEntryFields,
               } = constructLogsCommonData();
 
               return log
@@ -115,21 +116,8 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .setGeoLocation(getGeoCoordinate())
                 .setHostIp(getIpAddress())
                 .defaults({
-                  'trace.id': generateShortId(),
+                  ...commonLongEntryFields,
                   'error.message': message,
-                  'agent.name': 'nodejs',
-                  'orchestrator.cluster.name': clusterName,
-                  'orchestrator.cluster.id': clusterId,
-                  'orchestrator.resource.id': generateShortId(),
-                  'orchestrator.namespace': namespace,
-                  'container.name': `${serviceName}-${generateShortId()}`,
-                  'cloud.provider': getCloudProvider(),
-                  'cloud.region': cloudRegion,
-                  'cloud.availability_zone': `${cloudRegion}a`,
-                  'cloud.project.id': generateShortId(),
-                  'cloud.instance.id': generateShortId(),
-                  'log.file.path': `/logs/${generateLongId()}/error.txt`,
-                  is_published: false,
                 })
                 .timestamp(timestamp);
             });
@@ -145,8 +133,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
               const {
                 serviceName,
                 logMessage: { level, message },
-                cluster: { clusterId, clusterName, namespace },
-                cloudRegion,
+                commonLongEntryFields,
               } = constructLogsCommonData();
 
               return log
@@ -156,21 +143,9 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .setGeoLocation(getGeoCoordinate())
                 .setHostIp(getIpAddress())
                 .defaults({
-                  'trace.id': generateShortId(),
+                  ...commonLongEntryFields,
                   'error.message': message,
                   'error.exception.stacktrace': 'Error message in error.exception.stacktrace',
-                  'agent.name': 'nodejs',
-                  'orchestrator.cluster.name': clusterName,
-                  'orchestrator.cluster.id': clusterId,
-                  'orchestrator.resource.id': generateShortId(),
-                  'orchestrator.namespace': namespace,
-                  'container.name': `${serviceName}-${generateShortId()}`,
-                  'cloud.provider': getCloudProvider(),
-                  'cloud.region': cloudRegion,
-                  'cloud.availability_zone': `${cloudRegion}a`,
-                  'cloud.project.id': generateShortId(),
-                  'cloud.instance.id': generateShortId(),
-                  'log.file.path': `/logs/${generateLongId()}/error.txt`,
                 })
                 .timestamp(timestamp);
             });
@@ -186,9 +161,10 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
               const {
                 serviceName,
                 logMessage: { level, message },
-                cluster: { clusterId, clusterName, namespace },
-                cloudRegion,
+                commonLongEntryFields,
               } = constructLogsCommonData();
+
+              const eventDate = moment().toDate();
 
               return log
                 .create({ isLogsDb })
@@ -197,21 +173,11 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .setGeoLocation(getGeoCoordinate())
                 .setHostIp(getIpAddress())
                 .defaults({
-                  'trace.id': generateShortId(),
+                  ...commonLongEntryFields,
                   'event.original': message,
                   'error.log.stacktrace': 'Error message in error.log.stacktrace',
-                  'agent.name': 'nodejs',
-                  'orchestrator.cluster.name': clusterName,
-                  'orchestrator.cluster.id': clusterId,
-                  'orchestrator.resource.id': generateShortId(),
-                  'orchestrator.namespace': namespace,
-                  'container.name': `${serviceName}-${generateShortId()}`,
-                  'cloud.provider': getCloudProvider(),
-                  'cloud.region': cloudRegion,
-                  'cloud.availability_zone': `${cloudRegion}a`,
-                  'cloud.project.id': generateShortId(),
-                  'cloud.instance.id': generateShortId(),
-                  'log.file.path': `/logs/${generateLongId()}/error.txt`,
+                  'event.start': eventDate,
+                  'event.end': moment(eventDate).add(1, 'm').toDate(),
                 })
                 .timestamp(timestamp);
             });
@@ -227,8 +193,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
               const {
                 serviceName,
                 logMessage: { level },
-                cluster: { clusterId, clusterName, namespace },
-                cloudRegion,
+                commonLongEntryFields,
               } = constructLogsCommonData();
 
               return log
@@ -238,19 +203,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .setGeoLocation(getGeoCoordinate())
                 .setHostIp(getIpAddress())
                 .defaults({
-                  'trace.id': generateShortId(),
-                  'agent.name': 'nodejs',
-                  'orchestrator.cluster.name': clusterName,
-                  'orchestrator.cluster.id': clusterId,
-                  'orchestrator.resource.id': generateShortId(),
-                  'orchestrator.namespace': namespace,
-                  'container.name': `${serviceName}-${generateShortId()}`,
-                  'cloud.provider': getCloudProvider(),
-                  'cloud.region': cloudRegion,
-                  'cloud.availability_zone': `${cloudRegion}a`,
-                  'cloud.project.id': generateShortId(),
-                  'cloud.instance.id': generateShortId(),
-                  'log.file.path': `/logs/${generateLongId()}/error.txt`,
+                  ...commonLongEntryFields,
                   'error.stack_trace': 'Error message in error.stack_trace',
                 })
                 .timestamp(timestamp);
@@ -267,8 +220,8 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
               const {
                 serviceName,
                 logMessage: { message },
-                cluster: { clusterId, clusterName, namespace },
                 cloudRegion,
+                commonLongEntryFields,
               } = constructLogsCommonData();
 
               return log
@@ -279,19 +232,9 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .setHostIp(getIpAddress())
                 .service(serviceName)
                 .defaults({
-                  'trace.id': generateShortId(),
-                  'agent.name': 'nodejs',
-                  'orchestrator.cluster.name': clusterName,
-                  'orchestrator.cluster.id': clusterId,
-                  'orchestrator.namespace': namespace,
-                  'container.name': `${serviceName}-${generateShortId()}`,
-                  'orchestrator.resource.id': generateShortId(),
-                  'cloud.provider': getCloudProvider(),
+                  ...commonLongEntryFields,
                   'cloud.region': cloudRegion,
                   'cloud.availability_zone': MORE_THAN_1024_CHARS,
-                  'cloud.project.id': generateShortId(),
-                  'cloud.instance.id': generateShortId(),
-                  'log.file.path': `/logs/${generateLongId()}/error.txt`,
                 })
                 .timestamp(timestamp);
             });

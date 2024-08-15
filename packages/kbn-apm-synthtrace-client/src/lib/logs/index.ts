@@ -58,10 +58,11 @@ export type LogDocument = Fields &
     'log.custom': Record<string, unknown>;
     'host.geo.location': number[];
     'host.ip': string;
-    bytes: number;
-    hour_of_day: number;
-    is_published: boolean;
-    is_failure: boolean;
+    'network.bytes': number;
+    'tls.established': boolean;
+    'event.duration': number;
+    'event.start': Date;
+    'event.end': Date;
   }>;
 
 class Log extends Serializable<LogDocument> {
@@ -100,7 +101,6 @@ class Log extends Serializable<LogDocument> {
 
   logLevel(level: string) {
     this.fields['log.level'] = level;
-    this.fields.is_failure = level === 'error';
     return this;
   }
 
@@ -121,7 +121,6 @@ class Log extends Serializable<LogDocument> {
 
   timestamp(time: number) {
     super.timestamp(time);
-    this.fields.hour_of_day = new Date(time).getHours();
     return this;
   }
 }
@@ -133,8 +132,8 @@ function create(logsOptions: LogsOptions = defaultLogsOptions): Log {
       'data_stream.namespace': 'default',
       'data_stream.type': 'logs',
       'host.name': 'synth-host',
-      bytes: randomInt(500, 10000),
-      is_published: Math.random() < 0.5,
+      'network.bytes': randomInt(500, 10000),
+      'tls.established': Math.random() < 0.5,
     },
     logsOptions
   ).dataset('synth');
