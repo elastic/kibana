@@ -13,6 +13,8 @@ import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { ProjectAPIKeyResponse } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/get_api_key';
 import { KibanaSupertestProvider } from '@kbn/test-suites-src/api_integration/services/supertest';
+import moment from 'moment/moment';
+import { omit } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export class SyntheticsMonitorTestService {
@@ -45,14 +47,53 @@ export class SyntheticsMonitorTestService {
     return apiKey;
   };
 
-  async getMonitor(monitorId: string, decrypted: boolean = true, space?: string) {
-    let url =
-      SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId) +
-      (decrypted ? '?decrypted=true' : '');
+  async getMonitor(
+    monitorId: string,
+    {
+      statusCode = 200,
+      space,
+      ui,
+    }: {
+      statusCode?: number;
+      space?: string;
+      ui?: boolean;
+    } = {}
+  ) {
+    let url = SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId);
     if (space) {
       url = '/s/' + space + url;
     }
-    return this.supertest.get(url).set('kbn-xsrf', 'true').expect(200);
+    if (ui) {
+      url += `?ui=${ui}`;
+    }
+    const apiResponse = await this.supertest.get(url).expect(200);
+
+    expect(apiResponse.status).eql(statusCode, JSON.stringify(apiResponse.body));
+
+    if (statusCode === 200) {
+      const {
+        created_at: createdAt,
+        updated_at: updatedAt,
+        id,
+        config_id: configId,
+      } = apiResponse.body;
+      expect(id).not.empty();
+      expect(configId).not.empty();
+      expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
+      return {
+        rawBody: apiResponse.body,
+        body: {
+          ...omit(apiResponse.body, [
+            'created_at',
+            'updated_at',
+            'id',
+            'config_id',
+            'form_monitor_type',
+          ]),
+        },
+      };
+    }
+    return apiResponse.body;
   }
 
   async addMonitor(monitor: any) {

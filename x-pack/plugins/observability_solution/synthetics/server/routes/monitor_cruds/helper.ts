@@ -20,19 +20,23 @@ const keysToOmit = [
   ConfigKey.CONFIG_HASH,
   ConfigKey.JOURNEY_ID,
   ConfigKey.FORM_MONITOR_TYPE,
+  ConfigKey.MAX_ATTEMPTS,
 ];
 
 type Result = MonitorFields & { url?: string; host?: string; inline_script?: string };
 
 export const transformPublicKeys = (result: Result, ui?: boolean) => {
-  if (result[ConfigKey.URLS]) {
+  if (result[ConfigKey.URLS] && !ui) {
     result.url = result[ConfigKey.URLS];
   }
   if (result[ConfigKey.SOURCE_INLINE]) {
     result.inline_script = result[ConfigKey.SOURCE_INLINE];
   }
-  if (result[ConfigKey.HOSTS]) {
+  if (result[ConfigKey.HOSTS] && !ui) {
     result.host = result[ConfigKey.HOSTS];
+  }
+  if (result[ConfigKey.MAX_ATTEMPTS]) {
+    result.retest_on_failure = result[ConfigKey.MAX_ATTEMPTS] > 1;
   }
   if (result[ConfigKey.PARAMS]) {
     try {
