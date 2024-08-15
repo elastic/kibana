@@ -305,7 +305,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
         deps.userProfile.registerUserProfileDelegate(delegate),
     },
     injection: {
-      getContainer: deps.injection.getContainer.bind(deps.injection, plugin.opaqueId),
+      getContainer: () => deps.injection.getContainer(plugin.opaqueId),
     },
   };
 }
@@ -401,8 +401,8 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     },
     userProfile: deps.userProfile,
     injection: {
-      fork: deps.injection.fork.bind(deps.injection, plugin.opaqueId),
-      getContainer: deps.injection.getContainer.bind(deps.injection, plugin.opaqueId),
+      fork: () => deps.injection.fork(plugin.opaqueId),
+      getContainer: () => deps.injection.getContainer(plugin.opaqueId),
     },
   };
 }
