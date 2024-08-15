@@ -142,7 +142,7 @@ export class TestSubjects extends FtrService {
 
   /**
    * Clicks on the element identified by the testSubject selector. Somewhat surprisingly,
-   * this method allows `stale element` errors to propogate, which is why it was renamed
+   * this method allows `stale element` errors to propagate, which is why it was renamed
    * from `clickWhenNotDisabled()` and that method was re-implemented to be more consistent
    * with the rest of the functions in this service.
    *
