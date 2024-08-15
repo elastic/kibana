@@ -29,11 +29,9 @@ import {
   ControlGroupSerializedState,
 } from '../../react_controls/control_group/types';
 import {
-  AddOptionsListControlProps,
-  ControlGroupInputBuilder,
-  controlGroupInputBuilder,
-  getOptionsListPanelState,
-} from './control_group_input_builder';
+  type ControlGroupStateBuilder,
+  controlGroupStateBuilder,
+} from '../../react_controls/control_group/control_group_state_builder';
 import {
   AwaitingControlGroupApi,
   ControlGroupCreationOptions,
@@ -43,7 +41,7 @@ import {
 export interface ControlGroupRendererProps {
   getCreationOptions?: (
     initialState: Partial<ControlGroupRuntimeState>,
-    builder: ControlGroupInputBuilder
+    builder: ControlGroupStateBuilder
   ) => Promise<Partial<ControlGroupCreationOptions>>;
   viewMode?: ViewModeType;
   filters?: Filter[];
@@ -83,7 +81,7 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
       let cancelled = false;
       (async () => {
         const test =
-          (await getCreationOptions?.(getDefaultControlGroupInput(), controlGroupInputBuilder)) ??
+          (await getCreationOptions?.(getDefaultControlGroupInput(), controlGroupStateBuilder)) ??
           {};
         console.log('initialState', test);
         const { initialState, settings } = test;

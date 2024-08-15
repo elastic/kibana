@@ -7,5 +7,4 @@
  */
 
 export { ControlGroupRenderer } from './control_group_renderer';
-export { controlGroupInputBuilder } from './control_group_input_builder';
 export type { AwaitingControlGroupApi } from './types';

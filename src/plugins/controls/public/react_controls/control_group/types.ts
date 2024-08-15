@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common/control_group/types';
-import { ParentIgnoreSettings } from '@kbn/controls-plugin/public';
-import { ControlStyle, ControlWidth } from '@kbn/controls-plugin/public/types';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
 import {
@@ -32,7 +29,6 @@ import { Observable } from 'rxjs';
 
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { ParentIgnoreSettings } from '../..';
-import { ControlInputTransform } from '../../../common';
 import { ControlGroupChainingSystem } from '../../../common/control_group/types';
 import { ControlStyle, ControlWidth } from '../../types';
 import { DefaultControlState, PublishesControlDisplaySettings } from '../controls/types';
