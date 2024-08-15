@@ -5,16 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import {
-  ServerRouteCreateOptions,
-  ServerRouteHandlerResources,
   RouteParamsRT,
   ServerRoute,
-} from './typings';
+  ServerRouteCreateOptions,
+  ServerRouteHandlerResources,
+  DefaultRouteHandlerResources,
+  DefaultRouteCreateOptions,
+} from '@kbn/server-route-repository-utils';
 
 export function createServerRouteFactory<
-  TRouteHandlerResources extends ServerRouteHandlerResources,
-  TRouteCreateOptions extends ServerRouteCreateOptions
+  TRouteHandlerResources extends ServerRouteHandlerResources = DefaultRouteHandlerResources,
+  TRouteCreateOptions extends ServerRouteCreateOptions = DefaultRouteCreateOptions
 >(): <
   TEndpoint extends string,
   TReturnType,

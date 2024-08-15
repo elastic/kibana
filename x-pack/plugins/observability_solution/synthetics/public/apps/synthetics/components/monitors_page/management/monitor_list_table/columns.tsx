@@ -200,7 +200,7 @@ export function useMonitorListColumns({
         },
         {
           'data-test-subj': 'syntheticsMonitorCopyAction',
-          isPrimary: true,
+          isPrimary: false,
           name: (fields) => (
             <NoPermissionsTooltip
               canEditSynthetics={canEditSynthetics}

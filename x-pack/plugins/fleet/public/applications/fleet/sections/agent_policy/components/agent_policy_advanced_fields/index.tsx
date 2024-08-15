@@ -30,7 +30,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import {
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   dataTypes,
   DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT,
 } from '../../../../../../../common/constants';
@@ -102,7 +102,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const { data: agentPoliciesData } = useGetAgentPolicies({
     page: 1,
     perPage: 0,
-    kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.inactivity_timeout:*`,
+    kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.inactivity_timeout:*`,
   });
 
   const totalAgentPoliciesWithInactivityTimeout = agentPoliciesData?.total ?? 0;

@@ -31,7 +31,7 @@ export default function (providerContext: FtrProviderContext) {
     const apiClient = new SpaceTestApiClient(supertest);
 
     before(async () => {
-      await setupTestUsers(getService('security'));
+      await setupTestUsers(getService('security'), true);
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.savedObjects.cleanStandardList({
         space: TEST_SPACE_1,

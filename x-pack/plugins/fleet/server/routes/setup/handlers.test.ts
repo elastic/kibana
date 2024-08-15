@@ -181,6 +181,7 @@ describe('FleetStatusHandler', () => {
     const expectedBody = {
       isReady: true,
       is_secrets_storage_enabled: false,
+      is_space_awareness_enabled: false,
       missing_optional_features: [],
       missing_requirements: [],
     };
@@ -202,6 +203,7 @@ describe('FleetStatusHandler', () => {
     const expectedBody = {
       isReady: false,
       is_secrets_storage_enabled: false,
+      is_space_awareness_enabled: false,
       missing_optional_features: [],
       missing_requirements: ['api_keys', 'fleet_server'],
     };
@@ -230,6 +232,7 @@ describe('FleetStatusHandler', () => {
     const expectedBody = {
       isReady: true,
       is_secrets_storage_enabled: false,
+      is_space_awareness_enabled: false,
       missing_optional_features: [],
       missing_requirements: [],
     };

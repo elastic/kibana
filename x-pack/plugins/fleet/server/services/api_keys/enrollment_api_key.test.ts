@@ -26,6 +26,7 @@ import {
 jest.mock('../audit_logging');
 jest.mock('../agent_policy');
 jest.mock('../app_context');
+jest.mock('../spaces/helpers');
 
 jest.mock('uuid', () => {
   return {

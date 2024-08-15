@@ -29,7 +29,7 @@ const allFunctions = statsAggregationFunctionDefinitions
   .concat(evalFunctionDefinitions)
   .concat(groupingFunctionDefinitions);
 
-export const TIME_SYSTEM_PARAMS = ['?start', '?end'];
+export const TIME_SYSTEM_PARAMS = ['?t_start', '?t_end'];
 
 export const TRIGGER_SUGGESTION_COMMAND = {
   title: 'Trigger Suggestion Dialog',
