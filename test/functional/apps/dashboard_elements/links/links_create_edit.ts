@@ -139,7 +139,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.loadSavedDashboard('links 001');
         await dashboard.switchToEditMode();
 
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await dashboardLinks.expectPanelEditorFlyoutIsOpen();
 
@@ -159,7 +158,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.loadSavedDashboard('links 001');
         await dashboard.switchToEditMode();
 
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await dashboardLinks.expectPanelEditorFlyoutIsOpen();
 
@@ -178,7 +176,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.loadSavedDashboard('links 001');
         await dashboard.switchToEditMode();
 
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await dashboardLinks.expectPanelEditorFlyoutIsOpen();
 
