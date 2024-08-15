@@ -99,6 +99,9 @@ export const ReactControlExample = ({
   const saveNotification$ = useMemo(() => {
     return new Subject<void>();
   }, []);
+  const reload$ = useMemo(() => {
+    return new Subject<void>();
+  }, []);
   const [dataLoading, timeRange, viewMode] = useBatchedPublishingSubjects(
     dataLoading$,
     timeRange$,
@@ -138,6 +141,7 @@ export const ReactControlExample = ({
       },
       lastUsedDataViewId: new BehaviorSubject<string>(WEB_LOGS_DATA_VIEW_ID),
       saveNotification$,
+      reload$,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -214,6 +218,19 @@ export const ReactControlExample = ({
       subscription.unsubscribe();
     };
   }, [controlGroupApi, timeslice$]);
+
+  const [hasControls, setHasControls] = useState(false);
+  useEffect(() => {
+    if (!controlGroupApi) {
+      return;
+    }
+    const subscription = controlGroupApi.children$.subscribe((children) => {
+      setHasControls(Object.keys(children).length > 0);
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [controlGroupApi]);
 
   useEffect(() => {
     const subscription = combineLatest([controlGroupFilters$, unifiedSearchFilters$]).subscribe(
@@ -381,8 +398,11 @@ export const ReactControlExample = ({
             to: end,
           });
         }}
+        onRefresh={() => {
+          reload$.next();
+        }}
       />
-      <EuiSpacer size="m" />
+      {hasControls && <EuiSpacer size="m" />}
       <ReactEmbeddableRenderer
         onApiAvailable={(api) => {
           dashboardApi?.setChild(api);
@@ -395,6 +415,7 @@ export const ReactControlExample = ({
           getSerializedStateForChild: getControlGroupSerializedState,
           getRuntimeStateForChild: getControlGroupRuntimeState,
         })}
+        panelProps={{ hideLoader: true }}
         key={`control_group`}
       />
       <EuiSpacer size="l" />
