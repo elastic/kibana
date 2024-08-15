@@ -215,7 +215,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await dashboardPreparation(selectedPanelTitle);
 
-      ml.lensVisualizations.assertMLJobMenuActionDoesNotExist();
+      ml.lensVisualizations.assertMLJobMenuActionDoesNotExist(selectedPanelTitle);
     });
   });
 }

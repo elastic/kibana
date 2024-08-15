@@ -34,9 +34,10 @@ export function MachineLearningLensVisualizationsProvider(
     async assertLayerSelectorExists() {
       await testSubjects.existOrFail('mlFlyoutLayerSelector');
     },
-    async assertMLJobMenuActionDoesNotExist() {
+    async assertMLJobMenuActionDoesNotExist(title = '') {
       await dashboardPanelActions.expectMissingPanelAction(
-        'embeddablePanelAction-create-ml-ad-job-action'
+        'embeddablePanelAction-create-ml-ad-job-action',
+        title
       );
     },
     async assertNumberOfCompatibleLensLayers(numberOfCompatibleLayers: number) {
