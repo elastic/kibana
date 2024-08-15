@@ -1,34 +1,21 @@
 openapi: 3.0.0
 tags:
-  - name: Agents
-    x-displayName: Elastic Agents
-  - name: Agent actions
-    x-displayName: Elastic Agent actions
-  - name: Agent binary download sources
-    x-displayName: Elastic Agent binary download sources
-  - name: Agent policies
-    x-displayName: Elastic Agent policies
-  - name: Agent status
-    x-displayName: Elastic Agent status
   - name: Data streams
+  - name: Elastic Agents
+  - name: Elastic Agent actions
+  - name: Elastic Agent binary download sources
+  - name: Elastic Agent policies
+  - name: Elastic Agent status
   - name: Elastic Package Manager (EPM)
-  - name: Enrollment API keys
-    x-displayName: Fleet enrollment API keys
+  - name: Fleet enrollment API keys
   - name: Fleet internals
   - name: Fleet Server hosts
-    x-displayName: Fleet server hosts
-  - name: Kubernetes
-    x-displayName: Fleet Kubernetes
-  - name: Outputs
-    x-displayName: Fleet outputs
-  - name: Package policies
-    x-displayName: Fleet package policies
-  - name: Proxies
-    x-displayName: Fleet proxies
-  - name: Service tokens
-    x-displayName: Fleet service tokens
-  - name: Uninstall tokens
-    x-displayName: Fleet uninstall tokens
+  - name: Fleet Kubernetes
+  - name: Fleet outputs
+  - name: Fleet package policies
+  - name: Fleet proxies
+  - name: Fleet service tokens
+  - name: Fleet uninstall tokens
 info:
   title: Fleet
   description: OpenAPI schema for Fleet API endpoints
@@ -184,7 +171,7 @@ paths:
     post:
       summary: Create service token
       tags:
-        - Service tokens
+        - Fleet service tokens
       responses:
         '200':
           description: OK
@@ -207,7 +194,7 @@ paths:
     post:
       summary: Create service token
       tags:
-        - Service tokens
+        - Fleet service tokens
       responses:
         '200':
           description: OK
@@ -1073,7 +1060,7 @@ paths:
     get:
       summary: Get agent setup info
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1089,7 +1076,7 @@ paths:
     post:
       summary: Initiate agent setup
       tags:
-        - Agents
+        - Elastic Agents
       operationId: setup-agents
       responses:
         '200':
@@ -1119,7 +1106,7 @@ paths:
     get:
       summary: Get agent status summary
       tags:
-        - Agent status
+        - Elastic Agent status
       responses:
         '200':
           description: OK
@@ -1167,7 +1154,7 @@ paths:
     get:
       summary: Get agent status summary
       tags:
-        - Agent status
+        - Elastic Agent status
       responses:
         '200':
           description: OK
@@ -1229,7 +1216,7 @@ paths:
     get:
       summary: Get incoming agent data
       tags:
-        - Agent status
+        - Elastic Agent status
       responses:
         '200':
           description: OK
@@ -1262,7 +1249,7 @@ paths:
     get:
       summary: List agents
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1292,7 +1279,7 @@ paths:
     post:
       summary: List agents by action ids
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1322,7 +1309,7 @@ paths:
     post:
       summary: Bulk upgrade agents
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1356,7 +1343,7 @@ paths:
     get:
       summary: Get agent action status
       tags:
-        - Agent actions
+        - Elastic Agent actions
       parameters:
         - $ref: '#/components/parameters/page_size'
         - $ref: '#/components/parameters/page_index'
@@ -1477,7 +1464,7 @@ paths:
     get:
       summary: Get agent by ID
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1498,7 +1485,7 @@ paths:
     put:
       summary: Update agent by ID
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1532,7 +1519,7 @@ paths:
     delete:
       summary: Delete agent by ID
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1562,7 +1549,7 @@ paths:
     post:
       summary: Create agent action
       tags:
-        - Agent actions
+        - Elastic Agent actions
       responses:
         '200':
           description: OK
@@ -1608,7 +1595,7 @@ paths:
     post:
       summary: Cancel agent action
       tags:
-        - Agent actions
+        - Elastic Agent actions
       responses:
         '200':
           description: OK
@@ -1639,7 +1626,7 @@ paths:
     get:
       summary: Get file uploaded by agent
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1669,7 +1656,7 @@ paths:
     delete:
       summary: Delete file uploaded by agent
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1698,7 +1685,7 @@ paths:
     post:
       summary: Reassign agent
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1725,7 +1712,7 @@ paths:
     put:
       summary: Reassign agent
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1760,7 +1747,7 @@ paths:
     post:
       summary: Unenroll agent
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1806,7 +1793,7 @@ paths:
     post:
       summary: Upgrade agent
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1835,7 +1822,7 @@ paths:
     get:
       summary: List agent uploads
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1858,7 +1845,7 @@ paths:
     post:
       summary: Bulk reassign agents
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1901,7 +1888,7 @@ paths:
     post:
       summary: Bulk unenroll agents
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1954,7 +1941,7 @@ paths:
     post:
       summary: Bulk update agent tags
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -2008,7 +1995,7 @@ paths:
     get:
       summary: List agent tags
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -2029,7 +2016,7 @@ paths:
     post:
       summary: Request agent diagnostics
       tags:
-        - Agents
+        - Elastic Agents
       requestBody:
         content:
           application/json:
@@ -2062,7 +2049,7 @@ paths:
     post:
       summary: Bulk request diagnostics from agents
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -2109,7 +2096,7 @@ paths:
     get:
       summary: List agent policies
       tags:
-        - Agent policies
+        - Elastic Agent policies
       responses:
         '200':
           description: OK
@@ -2160,7 +2147,7 @@ paths:
     post:
       summary: Create agent policy
       tags:
-        - Agent policies
+        - Elastic Agent policies
       responses:
         '200':
           description: OK
@@ -2192,7 +2179,7 @@ paths:
     get:
       summary: Get agent policy by ID
       tags:
-        - Agent policies
+        - Elastic Agent policies
       responses:
         '200':
           description: OK
@@ -2213,7 +2200,7 @@ paths:
     put:
       summary: Update agent policy by ID
       tags:
-        - Agent policies
+        - Elastic Agent policies
       responses:
         '200':
           description: OK
@@ -2246,7 +2233,7 @@ paths:
     post:
       summary: Copy agent policy by ID
       tags:
-        - Agent policies
+        - Elastic Agent policies
       operationId: agent-policy-copy
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -2281,7 +2268,7 @@ paths:
     get:
       summary: Get full agent policy by ID
       tags:
-        - Agent policies
+        - Elastic Agent policies
       operationId: agent-policy-full
       responses:
         '200':
@@ -2322,7 +2309,7 @@ paths:
     get:
       summary: Download agent policy by ID
       tags:
-        - Agent policies
+        - Elastic Agent policies
       operationId: agent-policy-download
       responses:
         '200':
@@ -2360,8 +2347,7 @@ paths:
   /agent_policies/_bulk_get:
     post:
       summary: Bulk get agent policies
-      tags:
-        - Agent policies
+      tags: '-Elastic Agent policies'
       requestBody:
         content:
           application/json:
@@ -2403,7 +2389,7 @@ paths:
     post:
       summary: Delete agent policy by ID
       tags:
-        - Agent policies
+        - Elastic Agent policies
       operationId: delete-agent-policy
       responses:
         '200':
@@ -2465,7 +2451,7 @@ paths:
     get:
       summary: List enrollment API keys
       tags:
-        - Enrollment API keys
+        - Fleet enrollment API keys
       responses:
         '200':
           description: OK
@@ -2502,7 +2488,7 @@ paths:
     post:
       summary: Create enrollment API key
       tags:
-        - Enrollment API keys
+        - Fleet enrollment API keys
       responses:
         '200':
           description: OK
@@ -2533,7 +2519,7 @@ paths:
     get:
       summary: Get enrollment API key by ID
       tags:
-        - Enrollment API keys
+        - Fleet enrollment API keys
       responses:
         '200':
           description: OK
@@ -2553,7 +2539,7 @@ paths:
     delete:
       summary: Delete enrollment API key by ID
       tags:
-        - Enrollment API keys
+        - Fleet enrollment API keys
       responses:
         '200':
           description: OK
@@ -2578,7 +2564,7 @@ paths:
     get:
       summary: List enrollment API keys
       tags:
-        - Enrollment API keys
+        - Fleet enrollment API keys
       responses:
         '200':
           description: OK
@@ -2614,7 +2600,7 @@ paths:
     post:
       summary: Create enrollment API key
       tags:
-        - Enrollment API keys
+        - Fleet enrollment API keys
       responses:
         '200':
           description: OK
@@ -2644,7 +2630,7 @@ paths:
     get:
       summary: Get enrollment API key by ID
       tags:
-        - Enrollment API keys
+        - Fleet enrollment API keys
       responses:
         '200':
           description: OK
@@ -2663,7 +2649,7 @@ paths:
     delete:
       summary: Delete enrollment API key by ID
       tags:
-        - Enrollment API keys
+        - Fleet enrollment API keys
       responses:
         '200':
           description: OK
@@ -2687,7 +2673,7 @@ paths:
     get:
       summary: List package policies
       tags:
-        - Package policies
+        - Fleet package policies
       responses:
         '200':
           description: OK
@@ -2721,7 +2707,7 @@ paths:
     post:
       summary: Create package policy
       tags:
-        - Package policies
+        - Fleet package policies
       operationId: create-package-policy
       responses:
         '200':
@@ -2754,7 +2740,7 @@ paths:
     post:
       summary: Bulk get package policies
       tags:
-        - Package policies
+        - Fleet package policies
       requestBody:
         content:
           application/json:
@@ -2794,7 +2780,7 @@ paths:
     post:
       summary: Delete package policy
       tags:
-        - Package policies
+        - Fleet package policies
       operationId: post-delete-package-policy
       requestBody:
         content:
@@ -2837,7 +2823,7 @@ paths:
     post:
       summary: Upgrade package policy to a newer package version
       tags:
-        - Package policies
+        - Fleet package policies
       operationId: upgrade-package-policy
       requestBody:
         content:
@@ -2878,7 +2864,7 @@ paths:
     post:
       summary: Dry run package policy upgrade
       tags:
-        - Package policies
+        - Fleet package policies
       operationId: upgrade-package-policy-dry-run
       requestBody:
         content:
@@ -2924,7 +2910,7 @@ paths:
     get:
       summary: Get package policy by ID
       tags:
-        - Package policies
+        - Fleet package policies
       responses:
         '200':
           description: OK
@@ -2945,7 +2931,7 @@ paths:
     put:
       summary: Update package policy by ID
       tags:
-        - Package policies
+        - Fleet package policies
       operationId: update-package-policy
       requestBody:
         content:
@@ -2975,7 +2961,7 @@ paths:
     delete:
       summary: Delete package policy by ID
       tags:
-        - Package policies
+        - Fleet package policies
       operationId: delete-package-policy
       responses:
         '200':
@@ -3000,7 +2986,7 @@ paths:
     get:
       summary: List outputs
       tags:
-        - Outputs
+        - Fleet outputs
       responses:
         '200':
           description: OK
@@ -3025,7 +3011,7 @@ paths:
     post:
       summary: Create output
       tags:
-        - Outputs
+        - Fleet outputs
       responses:
         '200':
           description: OK
@@ -3049,7 +3035,7 @@ paths:
     get:
       summary: Get output by ID
       tags:
-        - Outputs
+        - Fleet outputs
       responses:
         '200':
           description: OK
@@ -3072,7 +3058,7 @@ paths:
     delete:
       summary: Delete output by ID
       tags:
-        - Outputs
+        - Fleet outputs
       operationId: delete-output
       responses:
         '200':
@@ -3093,7 +3079,7 @@ paths:
     put:
       summary: Update output by ID
       tags:
-        - Outputs
+        - Fleet outputs
       operationId: update-output
       requestBody:
         content:
@@ -3118,7 +3104,7 @@ paths:
     get:
       summary: Get latest output health
       tags:
-        - Outputs
+        - Fleet outputs
       responses:
         '200':
           description: OK
@@ -3149,7 +3135,7 @@ paths:
     post:
       summary: Generate Logstash API key
       tags:
-        - Outputs
+        - Fleet outputs
       responses:
         '200':
           description: OK
@@ -3169,7 +3155,7 @@ paths:
     get:
       summary: List agent binary download sources
       tags:
-        - Agent binary download sources
+        - Elastic Agent binary download sources
       responses:
         '200':
           description: OK
@@ -3194,7 +3180,7 @@ paths:
     post:
       summary: Create agent binary download source
       tags:
-        - Agent binary download sources
+        - Elastic Agent binary download sources
       responses:
         '200':
           description: OK
@@ -3230,7 +3216,7 @@ paths:
     get:
       summary: Get agent binary download source by ID
       tags:
-        - Agent binary download sources
+        - Elastic Agent binary download sources
       responses:
         '200':
           description: OK
@@ -3255,7 +3241,7 @@ paths:
     delete:
       summary: Delete agent binary download source by ID
       tags:
-        - Agent binary download sources
+        - Elastic Agent binary download sources
       operationId: delete-download-source
       responses:
         '200':
@@ -3276,7 +3262,7 @@ paths:
     put:
       summary: Update agent binary download source by ID
       tags:
-        - Agent binary download sources
+        - Elastic Agent binary download sources
       operationId: update-download-source
       requestBody:
         content:
@@ -3473,7 +3459,7 @@ paths:
     get:
       summary: List proxies
       tags:
-        - Proxies
+        - Fleet proxies
       responses:
         '200':
           description: OK
@@ -3498,7 +3484,7 @@ paths:
     post:
       summary: Create proxy
       tags:
-        - Proxies
+        - Fleet proxies
       responses:
         '200':
           description: OK
@@ -3539,7 +3525,7 @@ paths:
     get:
       summary: Get proxy by ID
       tags:
-        - Proxies
+        - Fleet proxies
       responses:
         '200':
           description: OK
@@ -3564,7 +3550,7 @@ paths:
     delete:
       summary: Delete proxy by ID
       tags:
-        - Proxies
+        - Fleet proxies
       operationId: delete-fleet-proxies
       responses:
         '200':
@@ -3585,7 +3571,7 @@ paths:
     put:
       summary: Update proxy by ID
       tags:
-        - Proxies
+        - Fleet proxies
       operationId: update-fleet-proxies
       requestBody:
         content:
@@ -3625,7 +3611,7 @@ paths:
     get:
       summary: Get full K8s agent manifest
       tags:
-        - Kubernetes
+        - Fleet Kubernetes
       responses:
         '200':
           description: OK
@@ -3659,7 +3645,7 @@ paths:
     get:
       summary: List metadata for latest uninstall tokens per agent policy
       tags:
-        - Uninstall tokens
+        - Fleet uninstall tokens
       responses:
         '200':
           description: OK
@@ -3717,7 +3703,7 @@ paths:
     get:
       summary: Get one decrypted uninstall token by its ID
       tags:
-        - Uninstall tokens
+        - Fleet uninstall tokens
       responses:
         '200':
           description: OK
@@ -4533,7 +4519,7 @@ components:
       type: object
     agent_status:
       type: string
-      title: Agent status
+      title: Elastic Agent status
       enum:
         - offline
         - error

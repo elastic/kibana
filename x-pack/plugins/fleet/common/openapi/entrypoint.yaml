@@ -1,34 +1,21 @@
 openapi: 3.0.0
 tags:
-  - name: Agents
-    x-displayName: Elastic Agents
-  - name: Agent actions
-    x-displayName: Elastic Agent actions
-  - name: Agent binary download sources
-    x-displayName: Elastic Agent binary download sources
-  - name: Agent policies
-    x-displayName: Elastic Agent policies
-  - name: Agent status
-    x-displayName: Elastic Agent status
   - name: Data streams
+  - name: Elastic Agents
+  - name: Elastic Agent actions
+  - name: Elastic Agent binary download sources
+  - name: Elastic Agent policies
+  - name: Elastic Agent status
   - name: Elastic Package Manager (EPM)
-  - name: Enrollment API keys
-    x-displayName: Fleet enrollment API keys
+  - name: Fleet enrollment API keys
   - name: Fleet internals
   - name: Fleet Server hosts
-    x-displayName: Fleet server hosts
-  - name: Kubernetes
-    x-displayName: Fleet Kubernetes
-  - name: Outputs
-    x-displayName: Fleet outputs
-  - name: Package policies
-    x-displayName: Fleet package policies
-  - name: Proxies
-    x-displayName: Fleet proxies
-  - name: Service tokens
-    x-displayName: Fleet service tokens
-  - name: Uninstall tokens
-    x-displayName: Fleet uninstall tokens
+  - name: Fleet Kubernetes
+  - name: Fleet outputs
+  - name: Fleet package policies
+  - name: Fleet proxies
+  - name: Fleet service tokens
+  - name: Fleet uninstall tokens
 info:
   title: Fleet
   description: OpenAPI schema for Fleet API endpoints
