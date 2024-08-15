@@ -16,17 +16,15 @@ import { useDataView } from '../../common/api/use_data_view';
 import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
 import { LatestFindingsContainer } from './latest_findings/latest_findings_container';
 import { DataViewContext } from '../../common/contexts/data_view_context';
-import { useLatestFindings } from './latest_findings/use_latest_findings';
 
 export const Configurations = () => {
   const location = useLocation();
   const dataViewQuery = useDataView(CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX);
   const { data: getSetupStatus, isLoading: getSetupStatusIsLoading } = useCspSetupStatusApi();
-  const getLatestFindings = useLatestFindings({ sort: [['asc']], enabled: true, pageSize: 1 });
-  const hasFindings = !!getLatestFindings.data?.pages?.[0]?.total;
+  const hasMisconfigurationsFindings = !!getSetupStatus?.hasMisconfigurationsFindings;
 
-  const hasConfigurationFindings =
-    hasFindings ||
+  const hasFindings =
+    hasMisconfigurationsFindings ||
     getSetupStatus?.kspm.status === 'indexed' ||
     getSetupStatus?.cspm.status === 'indexed';
 
@@ -35,8 +33,8 @@ export const Configurations = () => {
   const noFindingsForPostureType =
     getSetupStatus?.cspm.status !== 'not-installed' ? 'cspm' : 'kspm';
 
-  if (getLatestFindings.isLoading || getSetupStatusIsLoading) return defaultLoadingRenderer();
-  if (!hasConfigurationFindings) return <NoFindingsStates postureType={noFindingsForPostureType} />;
+  if (getSetupStatusIsLoading) return defaultLoadingRenderer();
+  if (!hasFindings) return <NoFindingsStates postureType={noFindingsForPostureType} />;
 
   const dataViewContextValue = {
     dataView: dataViewQuery.data!,

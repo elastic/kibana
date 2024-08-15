@@ -30,7 +30,7 @@ import type {
 import { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { useIsSubscriptionStatusValid } from '../../common/hooks/use_subscription_status';
+import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 import { SubscriptionNotAllowed } from '../subscription_not_allowed';
 import { CspRadioGroupProps, RadioGroup } from './csp_boxed_radio_group';
 import { assert } from '../../../common/utils/helpers';

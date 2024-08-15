@@ -57,7 +57,7 @@ import {
 } from '../test_subjects';
 import { ExperimentalFeaturesService } from '@kbn/fleet-plugin/public/services';
 import { createFleetTestRendererMock } from '@kbn/fleet-plugin/public/mock';
-import { useIsSubscriptionStatusValid } from '../../common/hooks/use_subscription_status';
+import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 
 // mock useParams
