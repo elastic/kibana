@@ -31,6 +31,15 @@ import { EditPackagePolicyPage } from '.';
 
 type MockFn = jest.MockedFunction<any>;
 
+jest.mock('../create_package_policy_page/components/steps/components/use_policies', () => {
+  return {
+    ...jest.requireActual('../create_package_policy_page/components/steps/components/use_policies'),
+    useAllNonManagedAgentPolicies: jest
+      .fn()
+      .mockReturnValue([{ id: 'agent-policy-1', name: 'Agent policy 1' }]),
+  };
+});
+
 jest.mock('../../../hooks', () => {
   return {
     ...jest.requireActual('../../../hooks'),
@@ -581,6 +590,9 @@ describe('edit package policy page', () => {
         },
         isLoading: false,
       });
+      // (useAllNonManagedAgentPolicies as MockFn).mockReturnValue([
+      //       { id: 'fleet-server-policy', name: 'Fleet Server Policy' },
+      // ]);
 
       await act(async () => {
         render();

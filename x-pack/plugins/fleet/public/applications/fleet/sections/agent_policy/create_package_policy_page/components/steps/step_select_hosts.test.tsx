@@ -15,6 +15,14 @@ import { useGetAgentPolicies } from '../../../../../hooks';
 import type { AgentPolicy, PackageInfo } from '../../../../../types';
 
 import { StepSelectHosts } from './step_select_hosts';
+import { useAllNonManagedAgentPolicies } from './components/use_policies';
+
+jest.mock('./components/use_policies', () => {
+  return {
+    ...jest.requireActual('./components/use_policies'),
+    useAllNonManagedAgentPolicies: jest.fn(),
+  };
+});
 
 jest.mock('../../../../../hooks', () => {
   return {
@@ -121,6 +129,9 @@ describe('StepSelectHosts', () => {
         items: [{ id: '1', name: 'Agent policy 1', namespace: 'default' }],
       },
     });
+    (useAllNonManagedAgentPolicies as jest.MockedFunction<any>).mockReturnValue([
+      { id: '1', name: 'Agent policy 1', namespace: 'default' },
+    ]);
 
     render();
 
@@ -140,6 +151,9 @@ describe('StepSelectHosts', () => {
         items: [{ id: '1', name: 'Agent policy 1', namespace: 'default' }],
       },
     });
+    (useAllNonManagedAgentPolicies as jest.MockedFunction<any>).mockReturnValue([
+      { id: '1', name: 'Agent policy 1', namespace: 'default' },
+    ]);
 
     render();
 
@@ -164,6 +178,10 @@ describe('StepSelectHosts', () => {
         ],
       },
     });
+    (useAllNonManagedAgentPolicies as jest.MockedFunction<any>).mockReturnValue([
+      { id: '1', name: 'Agent policy 1', namespace: 'default' },
+      { id: '2', name: 'Agent policy 2', namespace: 'default' },
+    ]);
 
     render();
 
