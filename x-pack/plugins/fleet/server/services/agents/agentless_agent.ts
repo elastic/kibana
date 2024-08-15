@@ -95,20 +95,20 @@ class AgentlessAgentService {
       requestConfig.data.stack_version = appContextService.getKibanaVersion();
     }
 
-    logger.debug(
-      `Creating agentless agent with request config ${JSON.stringify({
-        ...requestConfig,
-        httpsAgent: {
-          ...requestConfig.httpsAgent,
-          options: {
-            ...requestConfig.httpsAgent.options,
-            cert: requestConfig.httpsAgent.options.cert ? 'REDACTED' : undefined,
-            key: requestConfig.httpsAgent.options.key ? 'REDACTED' : undefined,
-            ca: requestConfig.httpsAgent.options.ca ? 'REDACTED' : undefined,
-          },
+    const requestConfigDebug = JSON.stringify({
+      ...requestConfig,
+      httpsAgent: {
+        ...requestConfig.httpsAgent,
+        options: {
+          ...requestConfig.httpsAgent.options,
+          cert: requestConfig.httpsAgent.options.cert ? 'REDACTED' : undefined,
+          key: requestConfig.httpsAgent.options.key ? 'REDACTED' : undefined,
+          ca: requestConfig.httpsAgent.options.ca ? 'REDACTED' : undefined,
         },
-      })}`
-    );
+      },
+    });
+
+    logger.debug(`Creating agentless agent with request config ${requestConfigDebug}`);
 
     const response = await axios<AgentlessApiResponse>(requestConfig).catch(
       (error: Error | AxiosError) => {
@@ -118,20 +118,22 @@ class AgentlessAgentService {
         }
         if (error.response) {
           logger.error(
-            `Creating agentless failed with a response status code that falls out of the range of 2xx: ${error.response.status} ${error.response.statusText} ${requestConfig.data}`
+            `Creating agentless failed with a response status code that falls out of the range of 2xx: ${
+              error.response.status
+            } ${JSON.stringify(error.response.data)}}`
           );
           throw new AgentlessAgentCreateError(
             `the Agentless API could not create the agentless agent`
           );
         } else if (error.request) {
           logger.error(
-            `Creating agentless failed to receive a response from the Agentless API ${JSON.stringify(
-              error.cause
-            )}`
+            `Creating agentless failed to receive a response from the Agentless API: ${error.code} ${error.errors}`
           );
           throw new AgentlessAgentCreateError(`no response received from the Agentless API`);
         } else {
-          logger.error(`Creating agentless failed to create the request ${error.cause}`);
+          logger.error(
+            `Creating agentless failed to create the request ${error.code} ${error.errors}`
+          );
           throw new AgentlessAgentCreateError('the request could not be created');
         }
       }
