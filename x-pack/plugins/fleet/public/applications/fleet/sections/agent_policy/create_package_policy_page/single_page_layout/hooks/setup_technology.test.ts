@@ -49,7 +49,7 @@ describe('useAgentless', () => {
     jest.clearAllMocks();
   });
 
-  it('should not return return isAgentless when agentless is not enabled', () => {
+  it('should not return isAgentless when agentless is not enabled', () => {
     const { result } = renderHook(() => useAgentless());
 
     expect(result.current.isAgentlessEnabled).toBeFalsy();
@@ -114,7 +114,7 @@ describe('useAgentless', () => {
     expect(result.current.isDefaultAgentlessPolicyEnabled).toBeTruthy();
   });
 
-  it('should return  as falsy and isDefaultAgentlessPolicyEnabled as falsy with isServerlessEnabled and experimental feature agentless is falsy', () => {
+  it('should return isAgentlessEnabled as falsy and isDefaultAgentlessPolicyEnabled as falsy with isServerlessEnabled and experimental feature agentless is falsy', () => {
     mockedExperimentalFeaturesService.get.mockReturnValue({
       agentless: false,
     } as any);
