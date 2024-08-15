@@ -7,7 +7,7 @@ parameters:
 get:
   summary: Get enrollment API key by ID
   tags:
-    - Enrollment API keys
+    - Fleet enrollment API keys
   responses:
     '200':
       description: OK
@@ -27,7 +27,7 @@ get:
 delete:
   summary: Delete enrollment API key by ID
   tags:
-    - Enrollment API keys
+    - Fleet enrollment API keys
   responses:
     '200':
       description: OK
