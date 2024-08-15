@@ -88,6 +88,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
       await supertestWithoutAuth
         .delete('/api/observability/slos/my-custom-id')
+        .set(adminRoleAuthc.apiKeyHeader)
         .set(internalHeaders);
       await esDeleteAllIndices([ALERT_ACTION_INDEX, ...dataForgeIndices]);
       await cleanup({ client: esClient, config: dataForgeConfig, logger });
