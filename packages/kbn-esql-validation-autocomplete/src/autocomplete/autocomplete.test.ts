@@ -1388,6 +1388,22 @@ describe('autocomplete', () => {
       '>= $0',
       'IN $0',
     ]);
+    testSuggestions('FROM a | EVAL doubleField IS NOT N/', [
+      { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 34 } },
+      'IS NULL',
+      '% $0',
+      '* $0',
+      '+ $0',
+      '- $0',
+      '/ $0',
+      '!= $0',
+      '< $0',
+      '<= $0',
+      '== $0',
+      '> $0',
+      '>= $0',
+      'IN $0',
+    ]);
     describe('dot-separated field names', () => {
       testSuggestions(
         'FROM a | KEEP field.nam/',

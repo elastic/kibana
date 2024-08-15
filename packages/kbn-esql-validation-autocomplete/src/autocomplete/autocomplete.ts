@@ -806,6 +806,7 @@ async function getExpressionSuggestionsByType(
               const nodeArgType = extractFinalTypeFromArg(nodeArg, references);
               suggestions.push(
                 ...(await getBuiltinFunctionNextArgument(
+                  innerText,
                   command,
                   option,
                   argDef,
@@ -900,26 +901,16 @@ async function getExpressionSuggestionsByType(
                 );
               } else {
                 suggestions.push(
-                  ...(
-                    await getBuiltinFunctionNextArgument(
-                      command,
-                      option,
-                      argDef,
-                      nodeArg,
-                      nodeArgType as string,
-                      references,
-                      getFieldsByType
-                    )
-                  ).map<SuggestionRawDefinition>((s) => {
-                    const overlap = getOverlapRange(innerText, s.text);
-                    return {
-                      ...s,
-                      rangeToReplace: {
-                        start: overlap.start,
-                        end: overlap.end,
-                      },
-                    };
-                  })
+                  ...(await getBuiltinFunctionNextArgument(
+                    innerText,
+                    command,
+                    option,
+                    argDef,
+                    nodeArg,
+                    nodeArgType as string,
+                    references,
+                    getFieldsByType
+                  ))
                 );
               }
             } else {
@@ -1021,6 +1012,7 @@ async function getExpressionSuggestionsByType(
 }
 
 async function getBuiltinFunctionNextArgument(
+  queryText: string,
   command: ESQLCommand,
   option: ESQLCommandOption | undefined,
   argDef: { type: string },
@@ -1105,7 +1097,16 @@ async function getBuiltinFunctionNextArgument(
       }
     }
   }
-  return suggestions;
+  return suggestions.map<SuggestionRawDefinition>((s) => {
+    const overlap = getOverlapRange(queryText, s.text);
+    return {
+      ...s,
+      rangeToReplace: {
+        start: overlap.start,
+        end: overlap.end,
+      },
+    };
+  });
 }
 
 function pushItUpInTheList(suggestions: SuggestionRawDefinition[], shouldPromote: boolean) {
@@ -1669,6 +1670,7 @@ async function getOptionArgsSuggestions(
       if (isFunctionItem(nodeArg) && !isFunctionArgComplete(nodeArg, references).complete) {
         suggestions.push(
           ...(await getBuiltinFunctionNextArgument(
+            innerText,
             command,
             option,
             { type: argDef?.type || 'any' },
