@@ -63,7 +63,7 @@ export type ControlGroupApi = PresentationContainer &
   HasSerializedChildState<ControlPanelState> &
   HasEditCapabilities &
   PublishesDataLoading &
-  Pick<PublishesUnsavedChanges, 'unsavedChanges'> &
+  Pick<PublishesUnsavedChanges<ControlGroupRuntimeState>, 'unsavedChanges'> &
   PublishesControlGroupDisplaySettings &
   PublishesTimeslice &
   PublishesDisabledActionIds &
@@ -108,7 +108,7 @@ export interface ControlGroupRuntimeState<State extends DefaultControlState = De
   autoApplySelections: boolean;
   ignoreParentSettings?: ParentIgnoreSettings;
 
-  panels?: ControlPanelsState;
+  panels?: ControlPanelsState; // TODO: Remove in favour of initial child control state
   initialChildControlState: ControlPanelsState<State>;
 
   /*
