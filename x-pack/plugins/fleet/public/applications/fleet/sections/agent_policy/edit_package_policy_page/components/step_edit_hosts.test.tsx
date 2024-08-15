@@ -14,7 +14,18 @@ import { createFleetTestRendererMock } from '../../../../../../mock';
 import { useGetAgentPolicies } from '../../../../hooks';
 import type { AgentPolicy, PackageInfo } from '../../../../types';
 
+import { useAllNonManagedAgentPolicies } from '../../create_package_policy_page/components/steps/components/use_policies';
+
 import { StepEditHosts } from './step_edit_hosts';
+
+jest.mock('../../create_package_policy_page/components/steps/components/use_policies', () => {
+  return {
+    ...jest.requireActual(
+      '../../create_package_policy_page/components/steps/components/use_policies'
+    ),
+    useAllNonManagedAgentPolicies: jest.fn(),
+  };
+});
 
 jest.mock('../../../../hooks', () => {
   return {
@@ -121,6 +132,9 @@ describe('StepEditHosts', () => {
         items: [{ id: '1', name: 'Agent policy 1', namespace: 'default' }],
       },
     });
+    (useAllNonManagedAgentPolicies as jest.MockedFunction<any>).mockReturnValue([
+      { id: '1', name: 'Agent policy 1', namespace: 'default' },
+    ]);
 
     render();
 
@@ -153,6 +167,9 @@ describe('StepEditHosts', () => {
         items: [{ id: '1', name: 'Agent policy 1', namespace: 'default' }],
       },
     });
+    (useAllNonManagedAgentPolicies as jest.MockedFunction<any>).mockReturnValue([
+      { id: '1', name: 'Agent policy 1', namespace: 'default' },
+    ]);
 
     render();
 
