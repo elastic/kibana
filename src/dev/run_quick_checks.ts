@@ -42,71 +42,79 @@ const scriptOptions: RunOptions = {
   },
   log: {
     context: 'Quick-checks',
+    defaultLevel: process.env.CI === 'true' ? 'debug' : 'info',
   },
 };
 
-/**
- * Takes a multiline string of commands from the CLI args, runs the commands in parallel, collects and prints the results
- */
 let logger: ToolingLog;
 run(async ({ log, flagsReader }) => {
   logger = log;
-  if (flagsReader.string('dir') && flagsReader.string('checks')) {
-    logger.error(`You can only use one of --file, --dir or --checks at one time.`);
-    process.exit(3);
-  }
 
-  const targetFile = flagsReader.string('file') || quickChecksList;
-  const targetDir = flagsReader.string('dir');
-  const checks = flagsReader.string('checks');
+  const scriptsToRun = collectScriptsToRun({
+    targetFile: flagsReader.string('file'),
+    targetDir: flagsReader.string('dir'),
+    checks: flagsReader.string('checks'),
+  });
 
-  let scriptsToRun: string[] = [];
-  if (targetFile) {
-    const targetFileAbsolute = isAbsolute(targetFile) ? targetFile : join(REPO_ROOT, targetFile);
-    scriptsToRun = readFileSync(targetFileAbsolute, 'utf-8')
-      .trim()
-      .split('\n')
-      .map((line) => line.trim());
-  } else if (targetDir) {
-    const targetDirAbsolute = isAbsolute(targetDir) ? targetDir : join(REPO_ROOT, targetDir);
-    scriptsToRun = readdirSync(targetDirAbsolute).map((file) => join(targetDir, file));
-  } else if (checks) {
-    scriptsToRun = checks
-      .trim()
-      .split(/[,\n]/)
-      .map((script) => script.trim());
-  }
-
-  logger.write(`--- Running ${scriptsToRun.length} checks...`, scriptsToRun);
+  logger.write(
+    `--- Running ${scriptsToRun.length} checks, with parallelism ${MAX_PARALLELISM}...`,
+    scriptsToRun
+  );
   const startTime = Date.now();
   const results = await runAllChecks(scriptsToRun);
 
   logger.write('--- All checks finished.');
-  printDurations(startTime, results);
+  printResults(startTime, results);
+
   const failedChecks = results.filter((check) => !check.success);
   if (failedChecks.length > 0) {
-    logger.write('--- Failed checks');
-    failedChecks.forEach((check) => {
-      logger.error(` ❌ ${check.script}:`);
-      logger.error(check.output);
-    });
-
     throw new Error(`Failed ${failedChecks.length} checks.`);
   } else {
     return results;
   }
 }, scriptOptions)
   .then(() => {
-    logger.write('--- All checks passed.');
+    logger.write('--- All checks passed. ✅');
 
     process.exit(0);
   })
   .catch((error) => {
-    logger.write('--- Some quick checks failed.');
+    logger.write('--- Some quick checks failed. ❌');
     logger.error(error);
 
     process.exit(1);
   });
+
+function collectScriptsToRun(inputOptions: {
+  targetFile: string | undefined;
+  targetDir: string | undefined;
+  checks: string | undefined;
+}) {
+  const { targetFile, targetDir, checks } = inputOptions;
+  if ([targetFile, targetDir, checks].filter(Boolean).length > 1) {
+    throw new Error('Only one of --file, --dir, or --checks can be used at a time.');
+  }
+
+  if (targetDir) {
+    const targetDirAbsolute = isAbsolute(targetDir) ? targetDir : join(REPO_ROOT, targetDir);
+    return readdirSync(targetDirAbsolute).map((file) => join(targetDir, file));
+  } else if (checks) {
+    return checks
+      .trim()
+      .split(/[,\n]/)
+      .map((script) => script.trim());
+  } else {
+    const targetFileWithDefault = targetFile || quickChecksList;
+    const targetFileAbsolute = isAbsolute(targetFileWithDefault)
+      ? targetFileWithDefault
+      : join(REPO_ROOT, targetFileWithDefault);
+
+    return readFileSync(targetFileAbsolute, 'utf-8')
+      .trim()
+      .split('\n')
+      .map((line) => line.trim());
+  }
+}
 
 async function runAllChecks(scriptsToRun: string[]) {
   const checksRunning: Array<Promise<any>> = [];
@@ -163,18 +171,22 @@ async function runCheckAsync(script: string): Promise<CheckResult> {
   });
 }
 
-function printDurations(startTimestamp: number, results: CheckResult[]) {
+function printResults(startTimestamp: number, results: CheckResult[]) {
   const totalDuration = results.reduce((acc, result) => acc + result.durationMs, 0);
-
-  logger.info('- Check durations:');
-  results.forEach((result) => {
-    logger.info(
-      `${result.success ? '✅' : '❌'} ${result.script}: ${humanizeTime(result.durationMs)}`
-    );
-  });
   const total = humanizeTime(totalDuration);
   const effective = humanizeTime(Date.now() - startTimestamp);
   logger.info(`- Total time: ${total}, effective: ${effective}`);
+
+  results.forEach((result) => {
+    logger.write(
+      `--- ${result.success ? '✅' : '❌'} ${result.script}: ${humanizeTime(result.durationMs)}`
+    );
+    if (result.success) {
+      logger.debug(result.output);
+    } else {
+      logger.warn(result.output);
+    }
+  });
 }
 
 function humanizeTime(ms: number) {
