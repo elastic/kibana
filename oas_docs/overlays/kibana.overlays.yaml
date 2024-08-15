@@ -81,10 +81,10 @@ actions:
     description: Change displayName
     update:
       x-displayName: "Saved objects"
-  # - target: '$.tags[?(@.name=="slo")]'
-  #   description: Change displayName
-  #   update:
-  #     x-displayName: "Service level objectives"
+  - target: '$.tags[?(@.name=="slo")]'
+    description: Change displayName
+    update:
+      x-displayName: "Service level objectives"
   - target: '$.tags[?(@.name=="system")]'
     description: Change displayName
     update:

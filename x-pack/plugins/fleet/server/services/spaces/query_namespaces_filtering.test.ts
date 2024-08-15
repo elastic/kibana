@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { appContextService } from '..';
-
+import { isSpaceAwarenessEnabled } from './helpers';
 import { addNamespaceFilteringToQuery } from './query_namespaces_filtering';
 
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
-
-jest.mock('../app_context');
+jest.mock('./helpers');
 
 describe('addNamespaceFilteringToQuery', () => {
   const baseActionQuery = {
@@ -67,31 +64,29 @@ describe('addNamespaceFilteringToQuery', () => {
     },
   };
 
-  describe('with the useSpaceAwareness feature flag disabled', () => {
+  describe('with isSpaceAwarenessEnabled returning false', () => {
     beforeEach(() => {
-      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
-        useSpaceAwareness: false,
-      } as any);
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
     });
 
-    it('should return the same query', () => {
-      expect(addNamespaceFilteringToQuery(baseActionQuery, 'mySpace')).toEqual(baseActionQuery);
+    it('should return the same query', async () => {
+      expect(await addNamespaceFilteringToQuery(baseActionQuery, 'mySpace')).toEqual(
+        baseActionQuery
+      );
     });
   });
 
-  describe('with the useSpaceAwareness feature flag enabled', () => {
+  describe('with isSpaceAwarenessEnabled returning true', () => {
     beforeEach(() => {
-      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
-        useSpaceAwareness: true,
-      } as any);
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
     });
 
-    it('should return the same query if the current namespace is undefined', () => {
-      expect(addNamespaceFilteringToQuery(baseActionQuery)).toEqual(baseActionQuery);
+    it('should return the same query if the current namespace is undefined', async () => {
+      expect(await addNamespaceFilteringToQuery(baseActionQuery)).toEqual(baseActionQuery);
     });
 
-    it('should add a filter to the base action query in a custom space', () => {
-      expect(addNamespaceFilteringToQuery(baseActionQuery, 'mySpace')).toEqual({
+    it('should add a filter to the base action query in a custom space', async () => {
+      expect(await addNamespaceFilteringToQuery(baseActionQuery, 'mySpace')).toEqual({
         bool: {
           must_not: [
             {
@@ -111,8 +106,8 @@ describe('addNamespaceFilteringToQuery', () => {
       });
     });
 
-    it('should add a filter to the base action query in a custom space if there is already filtering', () => {
-      expect(addNamespaceFilteringToQuery(baseActionQueryWithFilter, 'mySpace')).toEqual({
+    it('should add a filter to the base action query in a custom space if there is already filtering', async () => {
+      expect(await addNamespaceFilteringToQuery(baseActionQueryWithFilter, 'mySpace')).toEqual({
         bool: {
           must_not: [
             {
@@ -140,8 +135,8 @@ describe('addNamespaceFilteringToQuery', () => {
       });
     });
 
-    it('should add a filter to the base policy query in a custom space', () => {
-      expect(addNamespaceFilteringToQuery(basePolicyQuery, 'mySpace')).toEqual({
+    it('should add a filter to the base policy query in a custom space', async () => {
+      expect(await addNamespaceFilteringToQuery(basePolicyQuery, 'mySpace')).toEqual({
         bool: {
           filter: [
             {
@@ -166,8 +161,8 @@ describe('addNamespaceFilteringToQuery', () => {
       });
     });
 
-    it('should add a filter to the base action query in the default space', () => {
-      expect(addNamespaceFilteringToQuery(baseActionQuery, 'default')).toEqual({
+    it('should add a filter to the base action query in the default space', async () => {
+      expect(await addNamespaceFilteringToQuery(baseActionQuery, 'default')).toEqual({
         bool: {
           must_not: [
             {
@@ -204,8 +199,8 @@ describe('addNamespaceFilteringToQuery', () => {
       });
     });
 
-    it('should add a filter to the base action query in the default space if there is already filtering', () => {
-      expect(addNamespaceFilteringToQuery(baseActionQueryWithFilter, 'default')).toEqual({
+    it('should add a filter to the base action query in the default space if there is already filtering', async () => {
+      expect(await addNamespaceFilteringToQuery(baseActionQueryWithFilter, 'default')).toEqual({
         bool: {
           must_not: [
             {
@@ -250,8 +245,8 @@ describe('addNamespaceFilteringToQuery', () => {
       });
     });
 
-    it('should add a filter to the base policy query in the default space', () => {
-      expect(addNamespaceFilteringToQuery(basePolicyQuery, 'default')).toEqual({
+    it('should add a filter to the base policy query in the default space', async () => {
+      expect(await addNamespaceFilteringToQuery(basePolicyQuery, 'default')).toEqual({
         bool: {
           filter: [
             {

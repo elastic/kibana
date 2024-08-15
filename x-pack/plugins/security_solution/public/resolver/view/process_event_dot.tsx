@@ -584,7 +584,7 @@ export const ProcessEventDot = styled(UnstyledProcessEventDot)`
     width: fit-content;
   }
 
-  & .euiSelectableList-bordered {
+  & .euiSelectableList {
     border-top-right-radius: 0px;
     border-top-left-radius: 0px;
   }
