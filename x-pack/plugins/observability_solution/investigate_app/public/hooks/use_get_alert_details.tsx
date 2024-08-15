@@ -10,7 +10,7 @@ import { BASE_RAC_ALERTS_API_PATH, EcsFieldsResponse } from '@kbn/rule-registry-
 import { useKibana } from './use_kibana';
 
 export interface AlertParams {
-  id: string;
+  id?: string;
 }
 
 export interface UseFetchAlertResponse {
@@ -40,15 +40,7 @@ export function useFetchAlert({ id }: AlertParams): UseFetchAlertResponse {
         signal,
       });
     },
-    cacheTime: 0,
     refetchOnWindowFocus: false,
-    retry: (failureCount, error) => {
-      if (String(error) === 'Error: Forbidden') {
-        return false;
-      }
-
-      return failureCount < 3;
-    },
     onError: (error: Error) => {
       toasts.addError(error, {
         title: 'Something went wrong while fetching alert',

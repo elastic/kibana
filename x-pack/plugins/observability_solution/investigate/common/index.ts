@@ -14,11 +14,3 @@ export type {
 export { mergePlainObjects } from './utils/merge_plain_objects';
 
 export { InvestigateWidgetColumnSpan } from './types';
-
-export type { CreateInvestigationInput, CreateInvestigationResponse } from './schema/create';
-export type { GetInvestigationParams } from './schema/get';
-export type { FindInvestigationsResponse } from './schema/find';
-
-export { createInvestigationParamsSchema } from './schema/create';
-export { getInvestigationParamsSchema } from './schema/get';
-export { findInvestigationsParamsSchema } from './schema/find';
