@@ -7,12 +7,16 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiLoadingSpinner, EuiPageSection } from '@elastic/eui';
+import { EuiText, EuiPageSection, EuiSpacer } from '@elastic/eui';
 
-export const EditorContentSpinner: FunctionComponent = () => {
+export const EditorOutputEmptyState: FunctionComponent = () => {
   return (
     <EuiPageSection alignment="center" grow={true} className="conApp__editor__spinner">
-      <EuiLoadingSpinner size="xxl"/>
+      <EuiText textAlign="center" size="s">
+        <h3>Enter a new request</h3>
+        <EuiSpacer size="xs"/>
+        <p>When you run a request in the input panel, you will see the output response here.</p>
+      </EuiText>
     </EuiPageSection>
   );
 };

@@ -10,7 +10,7 @@ import React, { useCallback, memo, useEffect, useState } from 'react';
 import { debounce } from 'lodash';
 import { EuiProgress } from '@elastic/eui';
 
-import { EditorContentSpinner } from '../../components';
+import { EditorContentSpinner, EditorOutputEmptyState } from '../../components';
 import { Panel, PanelsContainer } from '..';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
 import { getAutocompleteInfo, StorageKeys } from '../../../services';
@@ -31,6 +31,10 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
     services: { storage },
     config: { isMonacoEnabled } = {},
   } = useServicesContext();
+
+  const {
+    lastResult: { data },
+  } = useRequestReadContext();
 
   const { currentTextObject } = useEditorReadContext();
   const { requestInFlight } = useRequestReadContext();
@@ -89,7 +93,7 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
           {loading ? (
             <EditorContentSpinner />
           ) : isMonacoEnabled ? (
-            <MonacoEditorOutput />
+            data? <MonacoEditorOutput /> : <EditorOutputEmptyState />
           ) : (
             <EditorOutput />
           )}
