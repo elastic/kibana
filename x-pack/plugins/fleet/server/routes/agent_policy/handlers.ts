@@ -278,7 +278,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
       item: agentPolicy,
     };
 
-    if (spaceIds?.length && authorizedSpaces) {
+    if (spaceIds && spaceIds.length > 1 && authorizedSpaces) {
       await updateAgentPolicySpaces({
         agentPolicyId: agentPolicy.id,
         currentSpaceId: spaceId,

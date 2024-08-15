@@ -986,7 +986,7 @@ export const getSavedObjectTypes = (
       name: MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
       indexPattern: INGEST_SAVED_OBJECT_INDEX,
       hidden: true,
-      namespaceType: useSpaceAwareness ? 'multiple' : 'agnostic',
+      namespaceType: useSpaceAwareness ? 'single' : 'agnostic',
       management: {
         importableAndExportable: false,
       },
@@ -999,7 +999,7 @@ export const getSavedObjectTypes = (
       name: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
       indexPattern: INGEST_SAVED_OBJECT_INDEX,
       hidden: true,
-      namespaceType: useSpaceAwareness ? 'multiple' : 'agnostic',
+      namespaceType: useSpaceAwareness ? 'single' : 'agnostic',
       management: {
         importableAndExportable: false,
       },

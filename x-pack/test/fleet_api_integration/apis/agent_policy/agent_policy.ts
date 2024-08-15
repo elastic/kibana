@@ -531,6 +531,7 @@ export default function (providerContext: FtrProviderContext) {
           updated_by: 'elastic',
           package_policies: [],
           is_protected: false,
+          space_ids: [],
         });
       });
 

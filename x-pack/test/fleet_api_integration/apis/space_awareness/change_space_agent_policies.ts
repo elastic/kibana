@@ -51,6 +51,7 @@ export default function (providerContext: FtrProviderContext) {
     let defaultSpacePolicy1: CreateAgentPolicyResponse;
     let defaultPackagePolicy1: GetOnePackagePolicyResponse;
     before(async () => {
+      await apiClient.postEnableSpaceAwareness();
       const _policyRes = await apiClient.createAgentPolicy();
       defaultSpacePolicy1 = _policyRes;
       await apiClient.installPackage({

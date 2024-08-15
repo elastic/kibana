@@ -13,12 +13,15 @@ import {
   AGENTS_INDEX,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-} from '../../../common';
+} from '../../../common/constants';
+
 import { appContextService } from '../app_context';
 import { agentPolicyService } from '../agent_policy';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
 import { packagePolicyService } from '../package_policy';
 import { FleetError } from '../../errors';
+
+import { isSpaceAwarenessEnabled } from './helpers';
 
 export async function updateAgentPolicySpaces({
   agentPolicyId,
@@ -31,7 +34,8 @@ export async function updateAgentPolicySpaces({
   newSpaceIds: string[];
   authorizedSpaces: string[];
 }) {
-  if (!appContextService.getExperimentalFeatures()?.useSpaceAwareness) {
+  const useSpaceAwareness = await isSpaceAwarenessEnabled();
+  if (!useSpaceAwareness || !newSpaceIds || newSpaceIds.length === 0) {
     return;
   }
 
