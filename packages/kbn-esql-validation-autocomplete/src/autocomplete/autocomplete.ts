@@ -88,6 +88,7 @@ import {
 import { ESQLCallbacks } from '../shared/types';
 import {
   getFunctionsToIgnoreForStats,
+  getOverlapRange,
   getParamAtPosition,
   getQueryForFields,
   getSourcesFromCommands,
@@ -909,13 +910,16 @@ async function getExpressionSuggestionsByType(
                       references,
                       getFieldsByType
                     )
-                  ).map<SuggestionRawDefinition>((s) => ({
-                    ...s,
-                    rangeToReplace: {
-                      start: innerText.length - s.text.length,
-                      end: innerText.length,
-                    },
-                  }))
+                  ).map<SuggestionRawDefinition>((s) => {
+                    const overlap = getOverlapRange(innerText, s.text);
+                    return {
+                      ...s,
+                      rangeToReplace: {
+                        start: overlap.start,
+                        end: overlap.end,
+                      },
+                    };
+                  })
                 );
               }
             } else {

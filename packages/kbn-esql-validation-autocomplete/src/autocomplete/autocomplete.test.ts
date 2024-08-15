@@ -1366,8 +1366,28 @@ describe('autocomplete', () => {
   });
 
   describe('Replacement ranges are attached when needed', () => {
-    testSuggestions('FROM a | WHERE doubleField IS NOT N/', ['IS NOT NULL']);
-    testSuggestions('FROM a | WHERE doubleField IS N/', ['IS NOT NULL']);
+    testSuggestions('FROM a | WHERE doubleField IS NOT N/', [
+      { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 35 } },
+      { text: 'IS NULL', rangeToReplace: { start: 35, end: 35 } },
+      '!= $0',
+      '< $0',
+      '<= $0',
+      '== $0',
+      '> $0',
+      '>= $0',
+      'IN $0',
+    ]);
+    testSuggestions('FROM a | WHERE doubleField IS N/', [
+      { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 31 } },
+      { text: 'IS NULL', rangeToReplace: { start: 28, end: 31 } },
+      { text: '!= $0', rangeToReplace: { start: 31, end: 31 } },
+      '< $0',
+      '<= $0',
+      '== $0',
+      '> $0',
+      '>= $0',
+      'IN $0',
+    ]);
     describe('dot-separated field names', () => {
       testSuggestions(
         'FROM a | KEEP field.nam/',
