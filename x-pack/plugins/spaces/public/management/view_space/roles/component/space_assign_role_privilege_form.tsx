@@ -106,9 +106,9 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
           (role) =>
             !role.metadata?._reserved &&
             (!role.kibana.length ||
-              role.kibana.some((rolePrivileges) => {
-                return (
-                  !rolePrivileges.spaces.includes(space.id!) && !rolePrivileges.spaces.includes('*')
+              role.kibana.every((rolePrivileges) => {
+                return !(
+                  rolePrivileges.spaces.includes(space.id!) || rolePrivileges.spaces.includes('*')
                 );
               }))
         )
