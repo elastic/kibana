@@ -121,6 +121,7 @@ export const sharedOas = {
         },
         responses: {
           '200': {
+            description: 'OK response oas-test-version-1\nOK response oas-test-version-2',
             content: {
               'application/json; Elastic-Api-Version=oas-test-version-1': {
                 schema: {
@@ -284,6 +285,16 @@ export const sharedOas = {
             schema: {
               default: '2023-10-31',
               enum: ['2023-10-31'],
+              type: 'string',
+            },
+          },
+          {
+            description: 'A required header to protect against CSRF attacks',
+            in: 'header',
+            name: 'kbn-xsrf',
+            required: true,
+            schema: {
+              example: 'true',
               type: 'string',
             },
           },
