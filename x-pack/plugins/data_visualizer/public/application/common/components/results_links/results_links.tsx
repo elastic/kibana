@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
@@ -16,7 +16,6 @@ import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import { flatten } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';
-import { FILE_FORMATS } from '../../../../../common/constants';
 import type { ResultLinks } from '../../../../../common/app';
 import type { LinkCardProps } from '../link_card/link_card';
 import { useDataVisualizerKibana } from '../../../kibana_context';
@@ -101,7 +100,7 @@ export const ResultsLinks: FC<Props> = ({
     const getDiscoverUrl = async (): Promise<void> => {
       const isDiscoverAvailable = capabilities.discover?.show ?? false;
       if (!isDiscoverAvailable) return;
-      const discoverLocator = url?.locators.get('DISCOVER_APP_LOCATOR');
+      const discoverLocator = url.locators.get('DISCOVER_APP_LOCATOR');
 
       if (!discoverLocator) {
         // eslint-disable-next-line no-console
@@ -145,11 +144,11 @@ export const ResultsLinks: FC<Props> = ({
     }
 
     if (!unmounted) {
-      setPlaygroundLink(
-        getUrlForApp('enterprise_search', {
-          path: `/applications/playground?default-index=${index}`,
-        })
-      );
+      const playgroundLocator = url.locators.get('PLAYGROUND_LOCATOR_ID');
+
+      if (playgroundLocator !== undefined) {
+        playgroundLocator.getUrl({ 'default-index': index }).then(setPlaygroundLink);
+      }
 
       setIndexManagementLink(
         getUrlForApp('management', { path: '/data/index_management/indices' })
@@ -221,10 +220,6 @@ export const ResultsLinks: FC<Props> = ({
     }
   }
 
-  const hasSemanticTextField = useMemo(() => {
-    return combinedFields.some(({ mappingType }) => mappingType === 'semantic_text');
-  }, [combinedFields]);
-
   return (
     <EuiFlexGroup gutterSize="l">
       {createDataView && discoverLink && (
@@ -293,7 +288,7 @@ export const ResultsLinks: FC<Props> = ({
         </EuiFlexItem>
       )}
 
-      {results.format === FILE_FORMATS.TIKA && hasSemanticTextField ? (
+      {playgroundLink ? (
         <EuiFlexItem>
           <EuiCard
             hasBorder
