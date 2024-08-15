@@ -235,6 +235,7 @@ export const getTimelineStatus = (
   return duplicate ? TimelineStatusEnum.active : timeline.status;
 };
 
+// eslint-disable-next-line complexity
 export const defaultTimelineToTimelineModel = (
   timeline: TimelineResult,
   duplicate: boolean,
@@ -286,6 +287,10 @@ export const defaultTimelineToTimelineModel = (
         esql: timeline.esqlOptions?.query ?? timelineDefaults.esqlOptions.query.esql,
       },
       sort: timeline.esqlOptions?.sort ?? timelineDefaults.esqlOptions.sort,
+      visibleColumns:
+        timeline.esqlOptions?.visibleColumns ?? timelineDefaults.esqlOptions.visibleColumns,
+      esqlDataViewId:
+        timeline.esqlOptions?.esqlDataViewId ?? timelineDefaults.esqlOptions.esqlDataViewId,
     },
   };
   return Object.entries(timelineEntries).reduce(

@@ -56,7 +56,7 @@ import {
   USER,
 } from '@kbn/lists-plugin/common/constants.mock';
 import { of } from 'rxjs';
-import { timelineDefaults } from '../../../timelines/store/defaults';
+import { timelineDefaults, timelineESQLDefaults } from '../../../timelines/store/defaults';
 import { defaultUdtHeaders } from '../../../timelines/components/timeline/unified_components/default_headers';
 
 jest.mock('../../../timelines/containers/api', () => ({
@@ -295,7 +295,7 @@ describe('alert actions', () => {
   });
 
   describe('sendAlertToTimelineAction', () => {
-    describe('timeline id is NOT empty string and apollo client exists', () => {
+    describe('timeline id is NOT empty string', () => {
       test('it invokes updateTimelineIsLoading to set to true', async () => {
         await sendAlertToTimelineAction({
           createTimeline,
@@ -343,22 +343,27 @@ describe('alert actions', () => {
               {
                 columnHeaderType: 'not-filtered',
                 id: 'event.category',
+                initialWidth: undefined,
               },
               {
                 columnHeaderType: 'not-filtered',
                 id: 'host.name',
+                initialWidth: undefined,
               },
               {
                 columnHeaderType: 'not-filtered',
                 id: 'source.ip',
+                initialWidth: undefined,
               },
               {
                 columnHeaderType: 'not-filtered',
                 id: 'destination.ip',
+                initialWidth: undefined,
               },
               {
                 columnHeaderType: 'not-filtered',
                 id: 'user.name',
+                initialWidth: undefined,
               },
             ],
             defaultColumns: defaultUdtHeaders,
@@ -451,6 +456,9 @@ describe('alert actions', () => {
             isDataProviderVisible: false,
             rowHeight: 3,
             sampleSize: 500,
+            esqlOptions: {
+              ...timelineESQLDefaults,
+            },
           },
           to: '2018-11-05T19:03:25.937Z',
           ruleNote: '# this is some markdown documentation',
@@ -488,7 +496,7 @@ describe('alert actions', () => {
         expect(createTimelineArg.timeline.kqlQuery.filterQuery.kuery.kind).toEqual('kuery');
       });
 
-      test('it invokes createTimeline with default timeline if apolloClient throws', async () => {
+      test('it invokes createTimeline with default timeline if getTimelineTemplate throws', async () => {
         (getTimelineTemplate as jest.Mock).mockImplementation(() => {
           throw new Error('Test error');
         });
@@ -524,42 +532,15 @@ describe('alert actions', () => {
               filterQuery: null,
             },
             resolveTimelineConfig: undefined,
+            esqlOptions: {
+              ...timelineESQLDefaults,
+            },
           },
         });
       });
     });
 
     describe('timelineId is empty string', () => {
-      test('it invokes createTimeline with timelineDefaults', async () => {
-        const ecsDataMock: Ecs = {
-          ...mockEcsDataWithAlert,
-          signal: {
-            rule: {
-              ...mockEcsDataWithAlert.signal?.rule,
-              timeline_id: [''],
-            },
-          },
-        };
-
-        await sendAlertToTimelineAction({
-          createTimeline,
-          ecsData: ecsDataMock,
-          updateTimelineIsLoading,
-          searchStrategyClient,
-          getExceptionFilter: mockGetExceptionFilter,
-        });
-
-        const expectedTimelineProps = structuredClone(defaultTimelineProps);
-        expectedTimelineProps.timeline.excludedRowRendererIds = [];
-
-        expect(updateTimelineIsLoading).not.toHaveBeenCalled();
-        expect(mockGetExceptionFilter).not.toHaveBeenCalled();
-        expect(createTimeline).toHaveBeenCalledTimes(1);
-        expect(createTimeline).toHaveBeenCalledWith(expectedTimelineProps);
-      });
-    });
-
-    describe('apolloClient is not defined', () => {
       test('it invokes createTimeline with timelineDefaults', async () => {
         const ecsDataMock: Ecs = {
           ...mockEcsDataWithAlert,
@@ -1130,6 +1111,9 @@ describe('alert actions', () => {
               filterQuery: null,
             },
             resolveTimelineConfig: undefined,
+            esqlOptions: {
+              ...timelineESQLDefaults,
+            },
           },
           from: expectedFrom,
           to: expectedTo,

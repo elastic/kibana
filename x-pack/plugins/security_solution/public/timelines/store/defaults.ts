@@ -21,7 +21,7 @@ import { defaultUdtHeaders } from '../components/timeline/unified_components/def
 // normalizeTimeRange uses getTimeRangeSettings which cannot be used outside Kibana context if the uiSettings is not false
 const { from: start, to: end } = normalizeTimeRange({ from: '', to: '' }, false);
 
-const timelineESQLDefaults: ESQLOptions = {
+export const timelineESQLDefaults: ESQLOptions = {
   query: {
     esql: '',
   },

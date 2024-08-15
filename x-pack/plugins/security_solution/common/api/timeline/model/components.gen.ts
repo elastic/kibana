@@ -211,6 +211,18 @@ export const SavedTimeline = z.object({
   timelineType: TimelineType.nullable().optional(),
   updated: z.number().nullable().optional(),
   updatedBy: z.string().nullable().optional(),
+  esqlOptions: z
+    .object({
+      query: z
+        .object({
+          esql: z.string().optional(),
+        })
+        .optional(),
+      esqlDataViewId: z.string().optional(),
+      sort: Sort.optional(),
+      visibleColumns: ColumnHeaderResult.optional(),
+    })
+    .optional(),
 });
 
 export type BareNote = z.infer<typeof BareNote>;

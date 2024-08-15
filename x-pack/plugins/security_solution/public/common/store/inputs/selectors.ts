@@ -88,3 +88,9 @@ export const getTimelineSelector = () => createSelector(selectTimeline, (timelin
 
 export const getTimelinePolicySelector = () =>
   createSelector(selectTimeline, (timeline) => timeline.policy);
+
+
+export const selectTimelineDateRange = createSelector(
+  selectTimeline,
+  (timeline) => timeline?.timerange
+);

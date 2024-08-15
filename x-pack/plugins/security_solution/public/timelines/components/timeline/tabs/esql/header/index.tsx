@@ -10,11 +10,12 @@ import type { SearchBarProps, StatefulSearchBarProps } from '@kbn/unified-search
 import type { AggregateQuery } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectTimelineDateRange } from '../../../../../../common/store/inputs/selectors';
 import { useDeepEqualSelector } from '../../../../../../common/hooks/use_selector';
 import { timelineActions } from '../../../../../store';
 import { APP_ID } from '../../../../../../../common';
 import { useGetStatefulQueryBar } from '../use_get_stateful_query_bar';
-import { selectTimelineDateRange, selectTimelineESQLOptions } from '../../../../../store/selectors';
+import { selectTimelineESQLOptions } from '../../../../../store/selectors';
 import type { State } from '../../../../../../common/store/types';
 import type { ESQLOptions } from '../../../../../store/types';
 
@@ -55,21 +56,16 @@ export const ESQLTabHeader = (props: ESQLTabHeaderProps) => {
     selectTimelineESQLOptions(state, timelineId)
   );
 
-  const timelineDateRange = useDeepEqualSelector((state: State) =>
-    selectTimelineDateRange(state, timelineId)
-  );
+  const timelineDateRange = useDeepEqualSelector((state: State) => selectTimelineDateRange(state));
 
   const [localQuery, setLocalQuery] = useState<AggregateQuery>(esqlQuery);
-  const [localDateRange, setLocalDateRange] = useState<TimeRange>({
-    from: timelineDateRange.start,
-    to: timelineDateRange.end,
-  });
+  const [localDateRange, setLocalDateRange] = useState<TimeRange>(() => timelineDateRange);
 
   useEffect(() => {
     setLocalQuery(esqlQuery);
     setLocalDateRange({
-      from: timelineDateRange.start,
-      to: timelineDateRange.end,
+      from: timelineDateRange.from,
+      to: timelineDateRange.to,
     });
   }, [esqlQuery, timelineDateRange]);
 

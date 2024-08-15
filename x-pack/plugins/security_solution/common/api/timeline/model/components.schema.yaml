@@ -149,6 +149,20 @@ components:
         updatedBy:
           type: string
           nullable: true
+        esqlOptions:
+          type: object
+          properties:
+            query:
+              type: object
+              properties:
+                esql:
+                  type: string
+            esqlDataViewId: 
+                type: string
+            sort:
+              $ref: '#/components/schemas/Sort'
+            visibleColumns:
+              $ref: '#/components/schemas/ColumnHeaderResult'
     TimelineResponse:
       allOf:
         - $ref: '#/components/schemas/SavedTimeline'

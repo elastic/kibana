@@ -686,7 +686,6 @@ export const updateTimelineRange = ({
   end,
   timelineById,
 }: UpdateTimelineRangeParams): TimelineById => {
-  debugger;
   const timeline = timelineById[id];
   return {
     ...timelineById,

@@ -622,6 +622,8 @@ export interface KueryFilterQueryResult {
 export interface ESQLOptionsResult {
   query?: Maybe<string>;
   sort?: Maybe<Sort>;
+  esqlDataViewId?: Maybe<string>;
+  visibleColumns?: Maybe<ColumnHeaderResult[]>;
 }
 export interface SerializedKueryQueryResult {
   kuery?: Maybe<KueryFilterQueryResult>;

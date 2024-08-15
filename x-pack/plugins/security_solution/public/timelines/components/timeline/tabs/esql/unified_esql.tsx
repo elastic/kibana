@@ -118,7 +118,7 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
     services: { expressions, dataViews },
   } = useKibana();
 
-  const { data: esqlDataView } = useQuery<DataView | undefined>({
+  const { data: esqlDataView } = useQuery<DataView | null>({
     queryKey: ['timeline', 'esql', 'dataView', esqlDataViewId ?? -1],
     queryFn: () => {
       return esqlDataViewId ? dataViews.get(esqlDataViewId) : null;
@@ -142,7 +142,7 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
     dataUpdatedAt,
   } = useESQLBasedEvents({
     query: esqlQuery,
-    dataView: esqlDataView,
+    dataView: esqlDataView ?? undefined,
     expressions,
     inspectorAdapters: inspectorAdapters.current,
     timeRange: {
