@@ -5,7 +5,7 @@ info:
   version: 0.0.1
 actions:
   # Mark all operations as beta
-  - target: '$.paths[*][*]'
+  - target: "$.paths[*]['get','put','post','delete','options','head','patch','trace']"
     description: Add x-beta
     update:
       x-beta: true
