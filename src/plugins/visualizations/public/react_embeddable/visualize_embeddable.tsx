@@ -177,7 +177,6 @@ export const getVisualizeEmbeddableFactory: (deps: {
           });
         },
         getVis: () => vis$.getValue(),
-        getTitles: () => serializeTitles(),
         getInspectorAdapters: () => inspectorAdapters$.getValue(),
         getTypeDisplayName: () =>
           i18n.translate('visualizations.displayName', {

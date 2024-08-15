@@ -93,5 +93,4 @@ export type VisualizeApi = HasEditCapabilities &
     checkForDuplicateTitle: (title: string) => boolean;
     getByValueState: () => VisualizeSerializedState;
     getByReferenceState: (id: string) => VisualizeSerializedState;
-    getTitles: () => SerializedTitles;
   };
