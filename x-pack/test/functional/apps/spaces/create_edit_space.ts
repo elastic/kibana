@@ -16,7 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const spacesServices = getService('spaces');
   const log = getService('log');
 
-  describe('create and edit space', () => {
+  describe('Create and edit Space', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
@@ -26,61 +26,59 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('create space', () => {
-      it('create a space with a given name', async () => {
-        const spaceName = faker.word.adjective() + ' space';
-        log.debug(`new space name: ${spaceName}`);
+      const spaceName = `${faker.word.adjective()} space`;
+      const spaceId = spaceName.replace(' ', '-');
 
+      before(async () => {
         await PageObjects.common.navigateToApp('spacesManagement');
         await testSubjects.existOrFail('spaces-grid-page');
 
         await PageObjects.spaceSelector.clickCreateSpace();
         await testSubjects.existOrFail('spaces-edit-page');
+      });
 
-        await PageObjects.spaceSelector.addSpaceName(spaceName);
-        const spaceUrlDisplay = await testSubjects.find('spaceURLDisplay');
-        const spaceId = (await spaceUrlDisplay.getAttribute('value')) as string;
-        expect(spaceId).not.to.be.empty();
-        log.debug(`new space identifier: ${spaceId}`);
-        await PageObjects.spaceSelector.clickSaveSpaceCreation();
-
-        await testSubjects.existOrFail('spaces-grid-page');
-        await testSubjects.existOrFail(`spacesListTableRow-${spaceId}`);
-
+      after(async () => {
         await spacesServices.delete(spaceId);
+      });
+
+      it('create a space with a given name', async () => {
+        await PageObjects.spaceSelector.addSpaceName(spaceName);
+        await PageObjects.spaceSelector.clickSaveSpaceCreation();
+        await testSubjects.existOrFail(`spacesListTableRow-${spaceId}`);
       });
     });
 
     describe('edit space', () => {
-      const spaceName = faker.word.adjective() + ' space';
+      const spaceName = `${faker.word.adjective()} space`;
       const spaceId = spaceName.replace(' ', '-');
 
       before(async () => {
+        log.debug(`Creating space named "${spaceName}" with ID "${spaceId}"`);
+
         await spacesServices.create({
           id: spaceId,
           name: spaceName,
           disabledFeatures: [],
           color: '#AABBCC',
         });
-      });
 
-      it('allows changing space initials', async () => {
         await PageObjects.common.navigateToApp('spacesManagement');
         await testSubjects.existOrFail('spaces-grid-page');
         await testSubjects.click(`${spaceId}-hyperlink`);
-
-        const spaceInitials = faker.string.alpha(2);
-
-        // navigated to edit space page
         await testSubjects.existOrFail('spaces-view-page > generalPanel');
+      });
+
+      after(async () => {
+        await spacesServices.delete(spaceId);
+      });
+
+      it('allows changing space initials', async () => {
+        const spaceInitials = faker.string.alpha(2);
         await testSubjects.setValue('spaceLetterInitial', spaceInitials);
         await testSubjects.click('save-space-button');
-
-        // navigated back to space grid
-        await testSubjects.existOrFail('spaces-grid-page');
+        await testSubjects.existOrFail('spaces-grid-page'); // wait for grid page to reload
         await testSubjects.existOrFail(`space-avatar-${spaceId}`);
         expect(await testSubjects.getVisibleText(`space-avatar-${spaceId}`)).to.be(spaceInitials);
-
-        await spacesServices.delete(spaceId);
       });
     });
 
