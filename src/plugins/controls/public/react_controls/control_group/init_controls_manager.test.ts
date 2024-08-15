@@ -7,7 +7,7 @@
  */
 
 import { DefaultControlApi } from '../controls/types';
-import { initControlsManager } from './init_controls_manager';
+import { initControlsManager, getLastUsedDataViewId } from './init_controls_manager';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('delta'),
@@ -155,5 +155,35 @@ describe('snapshotControlsRuntimeState', () => {
         type: 'testControl',
       },
     });
+  });
+});
+
+describe('getLastUsedDataViewId', () => {
+  test('should return last used data view id', () => {
+    const dataViewId = getLastUsedDataViewId(
+      [
+        { id: 'alpha', type: 'testControl' },
+        { id: 'bravo', type: 'testControl' },
+        { id: 'charlie', type: 'testControl' },
+      ],
+      {
+        alpha: { dataViewId: '1', type: 'testControl', order: 0 },
+        bravo: { dataViewId: '2', type: 'testControl', order: 1 },
+        charlie: { type: 'testControl', order: 2 },
+      }
+    );
+    expect(dataViewId).toBe('2');
+  });
+
+  test('should return undefined when there are no controls', () => {
+    const dataViewId = getLastUsedDataViewId([], {});
+    expect(dataViewId).toBeUndefined();
+  });
+
+  test('should return undefined when there are no controls with data views', () => {
+    const dataViewId = getLastUsedDataViewId([{ id: 'alpha', type: 'testControl' }], {
+      alpha: { type: 'testControl', order: 0 },
+    });
+    expect(dataViewId).toBeUndefined();
   });
 });

@@ -40,9 +40,6 @@ export function initControlsManager(
   initialControlPanelsState: ControlPanelsState,
   defaultDataViewId: string | null
 ) {
-  const lastUsedDataViewId$ = new BehaviorSubject<string | undefined>(
-    getLastUsedDataViewId(initialControlPanelsState) ?? defaultDataViewId ?? undefined
-  );
   const lastSavedControlsPanelState$ = new BehaviorSubject(initialControlPanelsState);
   const initialControlIds = Object.keys(initialControlPanelsState);
   const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
@@ -51,6 +48,11 @@ export function initControlsManager(
   };
   const controlsInOrder$ = new BehaviorSubject<ControlsInOrder>(
     getControlsInOrder(initialControlPanelsState)
+  );
+  const lastUsedDataViewId$ = new BehaviorSubject<string | undefined>(
+    getLastUsedDataViewId(controlsInOrder$.value, initialControlPanelsState) ??
+      defaultDataViewId ??
+      undefined
   );
 
   function untilControlLoaded(
@@ -235,13 +237,18 @@ export function initControlsManager(
   };
 }
 
-function getLastUsedDataViewId(initialControlPanelsState: ControlPanelsState) {
-  const panelStates = Object.values(initialControlPanelsState);
+export function getLastUsedDataViewId(
+  controlsInOrder: ControlsInOrder,
+  initialControlPanelsState: ControlPanelsState<
+    ControlPanelState & Partial<DefaultDataControlState>
+  >
+) {
   let dataViewId: string | undefined;
-  for (let i = 0; i < panelStates.length; i++) {
-    const panelState = panelStates[i];
-    if ((panelState as unknown as DefaultDataControlState).dataViewId) {
-      dataViewId = (panelState as unknown as DefaultDataControlState).dataViewId;
+  for (let i = controlsInOrder.length - 1; i >= 0; i--) {
+    const controlId = controlsInOrder[i].id;
+    const controlState = initialControlPanelsState[controlId];
+    if (controlState?.dataViewId) {
+      dataViewId = controlState.dataViewId;
       break;
     }
   }
