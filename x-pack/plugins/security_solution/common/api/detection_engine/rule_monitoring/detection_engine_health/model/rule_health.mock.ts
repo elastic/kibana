@@ -14,12 +14,12 @@ const getEmptyRuleHealthSnapshot = (): RuleHealthSnapshot => {
     state_at_the_moment: {
       rule: getRulesSchemaMock(),
     },
-    stats_over_interval: healthStatsMock.getEmptyHealthOverviewStats(),
+    stats_over_interval: healthStatsMock.getEmptyRuleHealthOverviewStats(),
     history_over_interval: {
       buckets: [
         {
           timestamp: '2023-05-15T16:12:14.967Z',
-          stats: healthStatsMock.getEmptyHealthOverviewStats(),
+          stats: healthStatsMock.getEmptyRuleHealthOverviewStats(),
         },
       ],
     },

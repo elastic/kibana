@@ -13,14 +13,29 @@ import type {
   RuleHealthSnapshot,
   RuleHealthStats,
   HealthHistory,
+  SpaceHealthSnapshot,
+  SpaceHealthStats,
 } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 import type { RawData } from '../../../utils/normalization';
 
 import * as f from '../../../event_log/event_log_fields';
 import {
   getRuleExecutionStatsAggregation,
+  getTopRulesByMetricsAggregation,
+  normalizeSpaceExecutionStatsAggregationResult,
   normalizeRuleExecutionStatsAggregationResult,
 } from './rule_execution_stats';
+
+export const getSpacesRuleHealthAggregation = (
+  granularity: HealthIntervalGranularity,
+  numOfTopRules: number
+): Record<string, estypes.AggregationsAggregationContainer> => {
+  return {
+    ...getRuleExecutionStatsAggregation('whole-interval'),
+    ...getTopRulesByMetricsAggregation(numOfTopRules),
+    ...getClusterRulesExecutionStatsHistoryAggregation(granularity, numOfTopRules),
+  };
+};
 
 export const getRuleHealthAggregation = (
   granularity: HealthIntervalGranularity
@@ -40,6 +55,24 @@ export const getRuleHealthAggregation = (
   };
 };
 
+const getClusterRulesExecutionStatsHistoryAggregation = (
+  granularity: HealthIntervalGranularity,
+  numOfTopRules: number
+): Record<string, estypes.AggregationsAggregationContainer> => {
+  return {
+    statsHistory: {
+      date_histogram: {
+        field: f.TIMESTAMP,
+        calendar_interval: granularity,
+      },
+      aggs: {
+        ...getRuleExecutionStatsAggregation('histogram'),
+        ...getTopRulesByMetricsAggregation(numOfTopRules),
+      },
+    },
+  };
+};
+
 const getRuleExecutionStatsHistoryAggregation = (
   granularity: HealthIntervalGranularity
 ): Record<string, estypes.AggregationsAggregationContainer> => {
@@ -50,6 +83,26 @@ const getRuleExecutionStatsHistoryAggregation = (
         calendar_interval: granularity,
       },
       aggs: getRuleExecutionStatsAggregation('histogram'),
+    },
+  };
+};
+
+export const normalizeSpaceHealthAggregationResult = (
+  result: AggregateEventsBySavedObjectResult,
+  requestAggs: Record<string, estypes.AggregationsAggregationContainer>
+): Omit<SpaceHealthSnapshot, 'state_at_the_moment'> => {
+  const aggregations = result.aggregations ?? {};
+  return {
+    stats_over_interval: normalizeSpaceExecutionStatsAggregationResult(
+      aggregations,
+      'whole-interval'
+    ),
+    history_over_interval: normalizeSpaceHistoryOverInterval(aggregations),
+    debug: {
+      eventLog: {
+        request: { aggs: requestAggs },
+        response: { aggregations },
+      },
     },
   };
 };
@@ -71,6 +124,20 @@ export const normalizeRuleHealthAggregationResult = (
         response: { aggregations },
       },
     },
+  };
+};
+
+const normalizeSpaceHistoryOverInterval = (
+  aggregations: Record<string, RawData>
+): HealthHistory<SpaceHealthStats> => {
+  const statsHistory = aggregations.statsHistory || {};
+
+  return {
+    buckets: statsHistory.buckets.map((rawBucket: RawData) => {
+      const timestamp: string = String(rawBucket.key_as_string);
+      const stats = normalizeSpaceExecutionStatsAggregationResult(rawBucket, 'histogram');
+      return { timestamp, stats };
+    }),
   };
 };
 

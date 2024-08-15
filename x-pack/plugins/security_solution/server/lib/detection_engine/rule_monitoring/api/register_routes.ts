@@ -6,6 +6,7 @@
  */
 
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { getAiRuleMonitoringResultsRoute } from './ai_rule_monitoring/get_ai_rule_monitoring_results_route';
 import { getClusterHealthRoute } from './detection_engine_health/get_cluster_health/get_cluster_health_route';
 import { getRuleHealthRoute } from './detection_engine_health/get_rule_health/get_rule_health_route';
 import { getSpaceHealthRoute } from './detection_engine_health/get_space_health/get_space_health_route';
@@ -23,4 +24,7 @@ export const registerRuleMonitoringRoutes = (router: SecuritySolutionPluginRoute
   // Rule execution logs API
   getRuleExecutionEventsRoute(router);
   getRuleExecutionResultsRoute(router);
+
+  // AI Rule Monitoring API
+  getAiRuleMonitoringResultsRoute(router);
 };
