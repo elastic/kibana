@@ -114,7 +114,7 @@
     "@elastic/ecs": "^8.11.1",
     "@elastic/elasticsearch": "^8.14.0",
     "@elastic/ems-client": "8.5.3",
-    "@elastic/eui": "95.7.0",
+    "@elastic/eui": "/Users/lenegadewoll/Documents/Projects/eui/packages/eui/elastic-eui-95.7.0-theme-matrix-without-vis.tgz",
     "@elastic/filesaver": "1.1.2",
     "@elastic/node-crypto": "1.2.1",
     "@elastic/numeral": "^2.5.1",
