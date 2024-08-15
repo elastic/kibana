@@ -90,7 +90,7 @@ async function getCreationOptions(
       getInitialInput: () => ({
         viewMode: ViewMode.VIEW,
         panels,
-        controlGroupStateBuilder,
+        controlGroupState,
       }),
     };
   } catch (error) {
