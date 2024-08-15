@@ -41,7 +41,7 @@ export const DatasetQualityDetailsLink = React.memo(
       <EuiHeaderLink
         {...datasetQualityLinkDetailsProps}
         color="primary"
-        data-test-subj="datasetQualityTableDetailsLink"
+        data-test-subj={`datasetQualityTableDetailsLink-${dataStream}`}
         target="_blank"
         size="xs"
       >
