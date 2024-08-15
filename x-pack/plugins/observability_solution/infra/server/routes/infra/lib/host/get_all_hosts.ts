@@ -39,7 +39,7 @@ export const getAllHosts = async ({
     metrics.map((metric) => metric)
   );
 
-  const validDocumentsFilter = await getDocumentsFilter({
+  const documentsFilter = await getDocumentsFilter({
     apmDataAccessServices,
     apmDocumentSources,
     from,
@@ -55,7 +55,7 @@ export const getAllHosts = async ({
       query: {
         bool: {
           filter: [...termsQuery(HOST_NAME_FIELD, ...hostNames), ...rangeQuery(from, to)],
-          should: [...validDocumentsFilter],
+          should: [...documentsFilter],
         },
       },
       aggs: {
