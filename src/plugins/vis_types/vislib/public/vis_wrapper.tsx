@@ -46,10 +46,10 @@ const extractContainerType = (context?: KibanaExecutionContext): string | undefi
 const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWrapperProps) => {
   const chartDiv = useRef<HTMLDivElement>(null);
   const visController = useRef<VislibVisController | null>(null);
-  const skipRenderComplete = useRef<boolean>(true);
+  const shouldCountRender = useRef<boolean>(false);
 
-  const renderComplete = useMemo(
-    () => () => {
+  const renderComplete = useCallback(() => {
+    if (shouldCountRender.current) {
       const usageCollection = getUsageCollectionStart();
       const containerType = extractContainerType(handlers.getExecutionContext());
 
@@ -60,34 +60,29 @@ const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWra
           `render_agg_based_${visConfig!.type}`
         );
       }
-      handlers.done();
-    },
-    [handlers, visConfig]
+      shouldCountRender.current = false;
+    }
+    handlers.done();
+  }, [handlers, visConfig]);
+
+  const renderChart = useMemo(
+    () =>
+      debounce(() => {
+        if (visController.current) {
+          visController.current.render(visData, visConfig, handlers, renderComplete);
+        }
+      }, 100),
+    [handlers, renderComplete, visConfig, visData]
   );
 
-  const renderChart = useCallback(() => {
-    const shouldSkip = skipRenderComplete.current;
-    if (visController.current) {
-      visController.current.render(
-        visData,
-        visConfig,
-        handlers,
-        shouldSkip ? undefined : renderComplete
-      );
-      skipRenderComplete.current = true;
-    }
-  }, [handlers, renderComplete, visConfig, visData]);
-
-  const renderChartDebounced = useMemo(() => debounce(renderChart, 100), [renderChart]);
-
-  const onResize: EuiResizeObserverProps['onResize'] = useCallback(renderChartDebounced, [
-    renderChartDebounced,
-  ]);
+  const onResize: EuiResizeObserverProps['onResize'] = useCallback(() => {
+    renderChart();
+  }, [renderChart]);
 
   useEffect(() => {
-    skipRenderComplete.current = false;
-    renderChartDebounced();
-  }, [renderChartDebounced]);
+    shouldCountRender.current = true;
+    renderChart();
+  }, [renderChart]);
 
   useEffect(() => {
     if (chartDiv.current) {
@@ -104,13 +99,13 @@ const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWra
     if (handlers.uiState) {
       const uiState = handlers.uiState as PersistedState;
 
-      uiState.on('change', renderChartDebounced);
+      uiState.on('change', renderChart);
 
       return () => {
-        uiState?.off('change', renderChartDebounced);
+        uiState?.off('change', renderChart);
       };
     }
-  }, [handlers.uiState, renderChartDebounced]);
+  }, [handlers.uiState, renderChart]);
 
   return (
     <EuiResizeObserver onResize={onResize}>
