@@ -16,7 +16,7 @@ export interface CoreDiServiceSetup {
   /**
    * Get the plugin-scoped container
    */
-  getContainer(container?: interfaces.Container): interfaces.Container;
+  getContainer(): interfaces.Container;
 }
 
 /**
@@ -27,5 +27,5 @@ export interface CoreDiServiceStart extends CoreDiServiceSetup {
   /**
    * Fork the current plugin scope
    */
-  fork(container?: interfaces.Container): interfaces.Container;
+  fork(): interfaces.Container;
 }
