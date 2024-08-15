@@ -163,6 +163,7 @@ export const serializeState: (props: {
   savedObjectProperties?: ExtraSavedObjectProperties;
   linkedToLibrary?: boolean;
   enhancements?: VisualizeRuntimeState['enhancements'];
+  timeRange?: VisualizeRuntimeState['timeRange'];
 }) => Required<SerializedPanelState<VisualizeSerializedState>> = ({
   serializedVis, // Serialize the vis before passing it to this function for easier testing
   titles,
@@ -170,6 +171,7 @@ export const serializeState: (props: {
   savedObjectProperties,
   linkedToLibrary,
   enhancements,
+  timeRange,
 }) => {
   const titlesWithDefaults = {
     title: '',
@@ -186,6 +188,7 @@ export const serializeState: (props: {
         savedObjectId: id,
         ...(enhancements ? { enhancements } : {}),
         ...(!isEmpty(serializedVis.uiState) ? { uiState: serializedVis.uiState } : {}),
+        ...(timeRange ? { timeRange } : {}),
       } as VisualizeSavedObjectInputState,
       references,
     };
@@ -200,6 +203,7 @@ export const serializeState: (props: {
       ...titlesWithDefaults,
       ...savedObjectProperties,
       ...(enhancements ? { enhancements } : {}),
+      ...(timeRange ? { timeRange } : {}),
       savedVis: {
         ...serializedVis,
         id,

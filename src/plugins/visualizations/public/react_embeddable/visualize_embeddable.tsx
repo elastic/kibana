@@ -92,14 +92,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
     const initialVisInstance = await createVisInstance(state.serializedVis);
     const vis$ = new BehaviorSubject<Vis>(initialVisInstance);
 
-    const onUiStateChange = () => {
-      console.log(
-        'onUiStateChange',
-        vis$.getValue().serialize().uiState,
-        serializedVis$.getValue().uiState
-      );
-      serializedVis$.next(vis$.getValue().serialize());
-    };
+    const onUiStateChange = () => serializedVis$.next(vis$.getValue().serialize());
     initialVisInstance.uiState.on('change', onUiStateChange);
     vis$.subscribe((vis) => vis.uiState.on('change', onUiStateChange));
 
@@ -180,6 +173,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
               apiIsOfType(parentApi, VISUALIZE_APP_NAME) ? false : linkedToLibrary$.getValue(),
             ...(savedObjectProperties ? { savedObjectProperties } : {}),
             ...(dynamicActionsApi?.serializeDynamicActions?.() ?? {}),
+            ...timeRange.serialize(),
           });
         },
         getVis: () => vis$.getValue(),
@@ -196,6 +190,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
           const parentTimeRange = apiPublishesTimeRange(parentApi)
             ? parentApi.timeRange$.getValue()
             : {};
+          const customTimeRange = timeRange.api.timeRange$.getValue();
           await stateTransferService.navigateToEditor('visualize', {
             path: editPath,
             state: {
@@ -204,7 +199,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
                 savedVis: vis$.getValue().serialize(),
                 title: api.panelTitle?.getValue(),
                 description: api.panelDescription?.getValue(),
-                timeRange: parentTimeRange,
+                timeRange: customTimeRange ?? parentTimeRange,
               },
               originatingApp: parentApiContext?.currentAppId ?? '',
               searchSessionId: searchSessionId$.getValue() || undefined,
@@ -218,7 +213,6 @@ export const getVisualizeEmbeddableFactory: (deps: {
           if (readOnly) return false;
           const capabilities = getCapabilities();
           const isByValue = !savedObjectId$.getValue();
-          console.log('capabilities', capabilities);
           if (isByValue)
             return Boolean(
               capabilities.dashboard?.showWriteControls && capabilities.visualize?.show
