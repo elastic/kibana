@@ -20,6 +20,27 @@ export interface SloBurnRateRuleParams {
   dependencies?: Dependency[];
 }
 
+interface WindowSchema {
+  id: string;
+  burnRateThreshold: number;
+  maxBurnRateThreshold: number;
+  longWindow: Duration;
+  shortWindow: Duration;
+  actionGroup: string;
+}
+
+interface Dependency {
+  ruleId: string;
+  actionGroupsToSuppressOn: string[];
+}
+
+type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M';
+
+interface Duration {
+  value: number;
+  unit: DurationUnit;
+}
+
 export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProviderContext) {
   const retry = getService('retry');
   const samlAuth = getService('samlAuth');
