@@ -21,8 +21,7 @@ import type {
   PackagePolicyInput,
   NewPackagePolicyInput,
 } from '../../../types';
-import { appContextService } from '../../../services';
-import { agentPolicyService, licenseService } from '../../../services';
+import { agentPolicyService } from '../../../services';
 import type { SimplifiedPackagePolicy } from '../../../../common/services/simplified_package_policy_helper';
 import { PackagePolicyRequestError } from '../../../errors';
 import type { NewPackagePolicyInputStream } from '../../../../common';
@@ -54,20 +53,6 @@ export function removeFieldsFromInputSchema(
     delete newInput.compiled_input;
     return newInput;
   });
-}
-
-const LICENCE_FOR_MULTIPLE_AGENT_POLICIES = 'enterprise';
-
-export function canUseMultipleAgentPolicies() {
-  const hasEnterpriseLicence = licenseService.hasAtLeast(LICENCE_FOR_MULTIPLE_AGENT_POLICIES);
-  const { enableReusableIntegrationPolicies } = appContextService.getExperimentalFeatures();
-
-  return {
-    canUseReusablePolicies: hasEnterpriseLicence && enableReusableIntegrationPolicies,
-    errorMessage: !hasEnterpriseLicence
-      ? 'Reusable integration policies are only available with an Enterprise license'
-      : 'Reusable integration policies are not supported',
-  };
 }
 
 /**
