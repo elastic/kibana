@@ -32,7 +32,7 @@ export class GridExamplePlugin
     developerExamples.register({
       appId: GRID_EXAMPLE_APP_ID,
       title: gridExampleTitle,
-      description: `This temporary example plugin will be used to build out the new layout engine for Dashboards.`,
+      description: `A playground and learning tool that demonstrates the Dashboard layout engine.`,
     });
   }
 

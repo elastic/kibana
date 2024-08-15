@@ -39,8 +39,8 @@ export const GridLayout = ({
       {gridLayout.map((rowData, rowIndex) => {
         return (
           <GridRow
-            key={rowIndex}
             rowData={rowData}
+            key={rowData.title}
             rowIndex={rowIndex}
             runtimeSettings={runtimeSettings}
             activePanelId={interactionEvent?.id}

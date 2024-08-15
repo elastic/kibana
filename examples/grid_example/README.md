@@ -1,3 +1,3 @@
 # Grid Example
 
-This temporary example plugin will be used to build out the new layout engine for Dashboards.
+This plugin is a playground and learning tool that demonstrates the Dashboard layout engine.
