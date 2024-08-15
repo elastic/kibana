@@ -7,6 +7,7 @@
 
 import { APMEventClient } from '../lib/helpers/create_es_client/create_apm_event_client';
 import { createGetDocumentSources } from './get_document_sources';
+import { getDocumentTypeConfig } from './get_document_type_config';
 import { createGetHostNames } from './get_host_names';
 
 export interface ApmDataAccessServicesParams {
@@ -17,5 +18,6 @@ export function getServices(params: ApmDataAccessServicesParams) {
   return {
     getDocumentSources: createGetDocumentSources(params),
     getHostNames: createGetHostNames(params),
+    getDocumentTypeConfig,
   };
 }
