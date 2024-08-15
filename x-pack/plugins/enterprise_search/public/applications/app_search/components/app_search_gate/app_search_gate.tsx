@@ -76,7 +76,7 @@ const featuresList = {
       }
     ),
     id: 'analyticsAndLogs',
-    learnMore: undefined,
+    learnMore: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/behavioral-analytics-overview.html',
     panelText: i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.analyticsAndLogs.panelText', {
       defaultMessage:
         'You can track and analyze users\' searching and clicking behavior with Behavioral Analytics. Instrument your website or application to track relevant user actions.',
