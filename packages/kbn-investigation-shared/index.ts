@@ -14,6 +14,7 @@ export type * from './src/schema/get';
 export type * from './src/schema/get_notes';
 export type * from './src/schema/origin';
 export type * from './src/schema/delete_note';
+export type * from './src/schema/investigation_note';
 
 export * from './src/schema/create';
 export * from './src/schema/create_notes';
@@ -23,3 +24,4 @@ export * from './src/schema/get';
 export * from './src/schema/get_notes';
 export * from './src/schema/origin';
 export * from './src/schema/delete_note';
+export * from './src/schema/investigation_note';
