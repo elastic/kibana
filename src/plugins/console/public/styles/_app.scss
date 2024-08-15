@@ -9,7 +9,8 @@
 }
 
 .consoleContainer {
-  padding: $euiSizeS;
+  padding: $euiSizeM;
+  gap: 0;
 
   &--embeddable {
     padding: 0;
