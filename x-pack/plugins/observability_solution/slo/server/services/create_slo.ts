@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { IScopedClusterClient } from '@kbn/core/server';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, IBasePath, Logger } from '@kbn/core/server';
 import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
@@ -32,6 +32,7 @@ import { getTransformQueryComposite } from './utils/get_transform_compite_query'
 export class CreateSLO {
   constructor(
     private esClient: ElasticsearchClient,
+    private scopedClusterClient: IScopedClusterClient,
     private repository: SLORepository,
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
@@ -53,11 +54,14 @@ export class CreateSLO {
     const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
     try {
       await retryTransientEsErrors(
-        () => this.esClient.ingest.putPipeline(getSLOPipelineTemplate(slo)),
+        () =>
+          this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
+            getSLOPipelineTemplate(slo)
+          ),
         { logger: this.logger }
       );
       rollbackOperations.push(() =>
-        this.esClient.ingest.deletePipeline(
+        this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
           { id: getSLOPipelineId(slo.id, slo.revision) },
           { ignore: [404] }
         )
@@ -71,13 +75,13 @@ export class CreateSLO {
 
       await retryTransientEsErrors(
         () =>
-          this.esClient.ingest.putPipeline(
+          this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
             getSLOSummaryPipelineTemplate(slo, this.spaceId, this.basePath)
           ),
         { logger: this.logger }
       );
       rollbackOperations.push(() =>
-        this.esClient.ingest.deletePipeline(
+        this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
           { id: getSLOSummaryPipelineId(slo.id, slo.revision) },
           { ignore: [404] }
         )
