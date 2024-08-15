@@ -16,6 +16,24 @@ import { useActions } from '../../state';
 const MaxLogsSampleRows = 10;
 
 /**
+ * Parse the logs sample file content as newiline-delimited JSON (NDJSON).
+ *
+ * This supports multiline JSON objects if passed multiline flag.
+ * Note that in that case the { character must happen at the beginning of the
+ * line if and only if it denotes the start of a new JSON object. Thus some
+ * inputs that will be parsed as NDJSON without the multiline flag will _not_ be
+ * parsed as NDJSON with the multiline flag.
+ */
+export const parseNDJSON = (fileContent: string, multiline: boolean = false): unknown[] => {
+  const separator = multiline ? /\n(?=\{)/ : '\n';
+
+  return fileContent
+    .split(separator) // For multiline, split at newline followed by '{'
+    .filter((entry) => entry.trim() !== '') // Remove empty entries
+    .map((entry) => JSON.parse(entry)); // Parse each entry as JSON.
+};
+
+/**
  * Parse the logs sample file content (json or ndjson) and return the parsed logs sample
  */
 const parseLogsContent = (
@@ -28,14 +46,11 @@ const parseLogsContent = (
   let logFormat;
 
   try {
-    parsedContent = fileContent
-      .split('\n')
-      .filter((line) => line.trim() !== '')
-      .map((line) => JSON.parse(line));
+    parsedContent = parseNDJSON(fileContent);
 
     // Special case for files that can be parsed as both JSON and NDJSON:
     //   for a one-line array [] -> extract its contents (it's a JSON)
-    //   for a one-line object {} -> do nothing (keep NDJSON)
+    //   for a one-line object {} -> do nothing (keep as NDJSON)
     if (
       Array.isArray(parsedContent) &&
       parsedContent.length === 1 &&
@@ -51,7 +66,12 @@ const parseLogsContent = (
       parsedContent = JSON.parse(fileContent);
       logFormat = 'json';
     } catch (parseJSONError) {
-      return { error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_PARSE };
+      try {
+        parsedContent = parseNDJSON(fileContent, true);
+        logFormat = 'ndjson+multiline';
+      } catch (parseNDMJSONError) {
+        return { error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_PARSE };
+      }
     }
   }
 

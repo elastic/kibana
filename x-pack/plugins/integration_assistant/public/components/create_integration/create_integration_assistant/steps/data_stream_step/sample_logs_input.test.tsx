@@ -8,7 +8,7 @@
 import React from 'react';
 import { act, fireEvent, render, waitFor, type RenderResult } from '@testing-library/react';
 import { TestProvider } from '../../../../../mocks/test_provider';
-import { SampleLogsInput } from './sample_logs_input';
+import { parseNDJSON, SampleLogsInput } from './sample_logs_input';
 import { ActionsProvider } from '../../state';
 import { mockActions } from '../../mocks/state';
 import { mockServices } from '../../../../../services/mocks/services';
@@ -26,6 +26,70 @@ const changeFile = async (input: HTMLElement, file: File) => {
     await waitFor(() => expect(input).toHaveAttribute('data-loading', 'false'));
   });
 };
+
+describe('parseNDJSON', () => {
+  const content = [{ message: 'test message 1' }, { message: 'test message 2' }];
+  const simpleNDJSON = '{"message":"test message 1"}\n{ "message": "test message 2" }';
+  const validNDJSONWithSpaces = `{"message":"test message 1"}
+                                 {"message":"test message 2"}`;
+  const multilineNDJSON = `{
+                             "message":"test message 1"
+                           }\n{ 
+                             "message"
+                               :
+                             "test message 2"
+                           }
+  `;
+  const singlelineArray = '[{"message":"test message 1"}, {"message":"test message 2"}]';
+  const multilineArray = '[{"message":"test message 1"},\n{"message":"test message 2"}]';
+
+  it('should parse valid NDJSON', () => {
+    expect(parseNDJSON(simpleNDJSON, false)).toEqual(content);
+    expect(parseNDJSON(simpleNDJSON, true)).toEqual(content);
+  });
+
+  it('should parse valid NDJSON with extra spaces in single-line mode', () => {
+    expect(parseNDJSON(validNDJSONWithSpaces, false)).toEqual(content);
+  });
+
+  it('should not parse valid NDJSON with extra spaces in multiline mode', () => {
+    expect(() => parseNDJSON(validNDJSONWithSpaces, true)).toThrow();
+  });
+
+  it('should not parse multiline NDJSON in single-line mode', () => {
+    expect(() => parseNDJSON(multilineNDJSON, false)).toThrow();
+  });
+
+  it('should parse multiline NDJSON in multiline mode', () => {
+    expect(parseNDJSON(multilineNDJSON, true)).toEqual(content);
+  });
+
+  it('should parse single-line JSON Array', () => {
+    expect(parseNDJSON(singlelineArray, false)).toEqual([content]);
+    expect(parseNDJSON(singlelineArray, true)).toEqual([content]);
+  });
+
+  it('should not parse a multi-line JSON Array', () => {
+    expect(() => parseNDJSON(multilineArray, false)).toThrow();
+    expect(() => parseNDJSON(multilineArray, true)).toThrow();
+  });
+
+  it('should parse single-line JSON with one entry', () => {
+    const fileContent = '{"message":"test message 1"}';
+    expect(parseNDJSON(fileContent)).toEqual([{ message: 'test message 1' }]);
+  });
+
+  it('should handle empty content', () => {
+    expect(parseNDJSON('  ', false)).toEqual([]);
+    expect(parseNDJSON('  ', true)).toEqual([]);
+  });
+
+  it('should handle empty lines in file content', () => {
+    const fileContent = '\n\n{"message":"test message 1"}\n\n{"message":"test message 2"}\n\n';
+    expect(parseNDJSON(fileContent, false)).toEqual(content);
+    expect(parseNDJSON(fileContent, true)).toEqual(content);
+  });
+});
 
 describe('SampleLogsInput', () => {
   let result: RenderResult;
