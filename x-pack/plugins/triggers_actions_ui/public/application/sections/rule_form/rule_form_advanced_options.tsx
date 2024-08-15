@@ -7,7 +7,6 @@
 
 import React, { useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBadge,
   EuiFieldNumber,
@@ -30,6 +29,35 @@ import { RuleSettingsFlappingInputs } from '@kbn/alerts-ui-shared/src/rule_setti
 import { RuleSettingsFlappingMessage } from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_message';
 import { RuleSpecificFlappingProperties } from '@kbn/alerting-plugin/common';
 import { useGetFlappingSettings } from '../../hooks/use_get_flapping_settings';
+
+const alertDelayFormRowLabel = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleForm.alertDelayLabel',
+  {
+    defaultMessage: 'Alert delay',
+  }
+);
+
+const alertDelayIconTipDescription = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldHelp',
+  {
+    defaultMessage:
+      'An alert occurs only when the specified number of consecutive runs meet the rule conditions.',
+  }
+);
+
+const alertDelayPrependLabel = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldLabel',
+  {
+    defaultMessage: 'Alert after',
+  }
+);
+
+const alertDelayAppendLabel = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldAppendLabel',
+  {
+    defaultMessage: 'consecutive matches',
+  }
+);
 
 const flappingLabel = i18n.translate(
   'xpack.triggersActionsUI.ruleFormAdvancedOptions.flappingLabel',
@@ -275,9 +303,14 @@ export const RuleFormAdvancedOptions = (props: RuleFormAdvancedOptionsProps) => 
         <EuiFlexItem grow={false}>
           <EuiFormRow
             fullWidth
-            label={i18n.translate('xpack.triggersActionsUI.sections.ruleForm.alertDelayLabel', {
-              defaultMessage: 'Alert delay',
-            })}
+            label={
+              <EuiFlexGroup gutterSize="xs">
+                <EuiFlexItem>{alertDelayFormRowLabel}</EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip content={alertDelayIconTipDescription} position="top" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
             data-test-subj="alertDelayFormRow"
             display="rowCompressed"
           >
@@ -287,27 +320,8 @@ export const RuleFormAdvancedOptions = (props: RuleFormAdvancedOptionsProps) => 
               value={alertDelay || ''}
               name="alertDelay"
               data-test-subj="alertDelayInput"
-              prepend={[
-                i18n.translate('xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldLabel', {
-                  defaultMessage: 'Alert after',
-                }),
-                <EuiIconTip
-                  position="right"
-                  type="questionInCircle"
-                  content={
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldHelp"
-                      defaultMessage="An alert occurs only when the specified number of consecutive runs meet the rule conditions."
-                    />
-                  }
-                />,
-              ]}
-              append={i18n.translate(
-                'xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldAppendLabel',
-                {
-                  defaultMessage: 'consecutive matches',
-                }
-              )}
+              prepend={alertDelayPrependLabel}
+              append={alertDelayAppendLabel}
               onChange={internalOnAlertDelayChange}
             />
           </EuiFormRow>

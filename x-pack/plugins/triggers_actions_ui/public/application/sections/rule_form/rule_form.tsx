@@ -92,7 +92,10 @@ import {
   ruleTypeGroupCompare,
   ruleTypeUngroupedCompare,
 } from '../../lib/rule_type_compare';
-import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
+import {
+  IS_RULE_SPECIFIC_FLAPPING_ENABLED,
+  VIEW_LICENSE_OPTIONS_LINK,
+} from '../../../common/constants';
 import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../../constants';
 import { SectionLoading } from '../../components/section_loading';
 import { RuleFormConsumerSelection, VALID_CONSUMERS } from './rule_form_consumer_selection';
@@ -629,20 +632,6 @@ export const RuleForm = ({
     </Fragment>
   ));
 
-  const labelForRuleChecked = [
-    i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkFieldLabel', {
-      defaultMessage: 'Check every',
-    }),
-    <EuiIconTip
-      position="right"
-      type="questionInCircle"
-      content={i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkWithTooltip', {
-        defaultMessage:
-          'Define how often to evaluate the condition. Checks are queued; they run as close to the defined value as capacity allows.',
-      })}
-    />,
-  ];
-
   const getHelpTextForInterval = () => {
     if (!config || !config.minimumScheduleInterval) {
       return '';
@@ -809,9 +798,27 @@ export const RuleForm = ({
           <EuiFlexItem>
             <EuiFormRow
               fullWidth
-              label={i18n.translate('xpack.triggersActionsUI.sections.ruleForm.ruleScheduleLabel', {
-                defaultMessage: 'Rule schedule',
-              })}
+              label={
+                <EuiFlexGroup gutterSize="xs">
+                  <EuiFlexItem>
+                    {i18n.translate('xpack.triggersActionsUI.sections.ruleForm.ruleScheduleLabel', {
+                      defaultMessage: 'Rule schedule',
+                    })}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiIconTip
+                      content={i18n.translate(
+                        'xpack.triggersActionsUI.sections.ruleForm.checkWithTooltip',
+                        {
+                          defaultMessage:
+                            'Define how often to evaluate the condition. Checks are queued; they run as close to the defined value as capacity allows.',
+                        }
+                      )}
+                      position="top"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
               data-test-subj="intervalFormRow"
               display="rowCompressed"
               helpText={getHelpTextForInterval()}
@@ -821,7 +828,12 @@ export const RuleForm = ({
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={2}>
                   <EuiFieldNumber
-                    prepend={labelForRuleChecked}
+                    prepend={i18n.translate(
+                      'xpack.triggersActionsUI.sections.ruleForm.checkFieldLabel',
+                      {
+                        defaultMessage: 'Check every',
+                      }
+                    )}
                     fullWidth
                     min={1}
                     isInvalid={!!errors['schedule.interval'].length}
@@ -876,6 +888,7 @@ export const RuleForm = ({
             flappingSettings={rule.flapping}
             onAlertDelayChange={onAlertDelayChange}
             onFlappingChange={setFlapping}
+            enabledFlapping={IS_RULE_SPECIFIC_FLAPPING_ENABLED}
           />
         </EuiAccordion>
       </EuiFlexItem>
