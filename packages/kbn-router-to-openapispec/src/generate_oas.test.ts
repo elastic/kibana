@@ -19,8 +19,34 @@ describe('generateOpenApiDocument', () => {
   describe('@kbn/config-schema', () => {
     it('generates the expected OpenAPI document', () => {
       const [routers, versionedRouters] = createTestRouters({
-        routers: { testRouter: { routes: [{ method: 'get' }, { method: 'post' }] } },
-        versionedRouters: { testVersionedRouter: { routes: [{}] } },
+        routers: {
+          testRouter: {
+            routes: [
+              { method: 'get' },
+              { method: 'post' },
+              { method: 'post', path: '/no-xsrf/{id}/{path*}', options: { xsrfRequired: false } },
+              {
+                method: 'delete',
+                validationSchemas: {
+                  request: {},
+                  response: { [200]: { description: 'good response' } },
+                },
+              },
+            ],
+          },
+        },
+        versionedRouters: {
+          testVersionedRouter: {
+            routes: [
+              { method: 'get' },
+              {
+                method: 'post',
+                path: '/no-xsrf/{id}/{path*}',
+                options: { access: 'public', options: { xsrfRequired: false } },
+              },
+            ],
+          },
+        },
       });
       expect(
         generateOpenApiDocument(
