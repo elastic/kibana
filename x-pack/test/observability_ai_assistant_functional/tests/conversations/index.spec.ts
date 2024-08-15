@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { ChatFeedback } from '@kbn/observability-ai-assistant-plugin/public/analytics/schemas/chat_feedback';
 import { pick } from 'lodash';
-import type OpenAI from 'openai';
 import {
   createLlmProxy,
   LlmProxy,
@@ -230,17 +229,15 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                 const titleInterceptor = proxy.intercept(
                   'title',
                   (body) =>
-                    (
-                      JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
-                    ).tools?.find((fn) => fn.function.name === 'title_conversation') !== undefined
+                    body.tools?.find((fn) => fn.function.name === 'title_conversation') !==
+                    undefined
                 );
 
                 const conversationInterceptor = proxy.intercept(
                   'conversation',
                   (body) =>
-                    (
-                      JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
-                    ).tools?.find((fn) => fn.function.name === 'title_conversation') === undefined
+                    body.tools?.find((fn) => fn.function.name === 'title_conversation') ===
+                    undefined
                 );
 
                 await testSubjects.setValue(ui.pages.conversations.chatInput, 'hello');
