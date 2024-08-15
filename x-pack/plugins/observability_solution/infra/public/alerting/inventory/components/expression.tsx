@@ -105,7 +105,7 @@ type Props = Omit<
 >;
 
 export const defaultExpression = {
-  metric: 'cpu' as SnapshotMetricType,
+  metric: 'cpuV2' as SnapshotMetricType,
   comparator: COMPARATORS.GREATER_THAN,
   threshold: [],
   timeSize: 1,
@@ -772,7 +772,7 @@ export const nodeTypes: { [key: string]: any } = {
 const metricUnit: Record<string, { label: string }> = {
   count: { label: '' },
   cpu: { label: '%' },
-  cpuTotal: { label: '%' },
+  cpuV2: { label: '%' },
   memory: { label: '%' },
   rx: { label: 'bits/s' },
   tx: { label: 'bits/s' },
