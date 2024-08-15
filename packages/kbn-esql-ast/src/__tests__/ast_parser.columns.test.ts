@@ -64,9 +64,8 @@ describe('Column Identifier Expressions', () => {
     const text = 'FROM a | KEEP a.b';
     const { ast } = parse(text);
 
-    console.log(JSON.stringify(ast, null, 2));
-
     expect(ast).toMatchObject([
+      {},
       {
         type: 'command',
         args: [

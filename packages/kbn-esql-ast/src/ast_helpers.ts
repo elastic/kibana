@@ -18,6 +18,7 @@ import {
   type InlineCastContext,
   type IntegerValueContext,
   type QualifiedIntegerLiteralContext,
+  QualifiedNamePatternContext,
 } from './antlr/esql_parser';
 import { getPosition } from './ast_position_utils';
 import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
@@ -377,7 +378,11 @@ export function createColumnStar(ctx: TerminalNode): ESQLColumn {
 
 export function createColumn(ctx: ParserRuleContext): ESQLColumn {
   const parts: string[] = [];
-  if (ctx instanceof QualifiedNameContext) {
+  if (ctx instanceof QualifiedNamePatternContext) {
+    parts.push(
+      ...ctx.identifierPattern_list().map((identifier) => parseIdentifier(identifier.getText()))
+    );
+  } else if (ctx instanceof QualifiedNameContext) {
     parts.push(...ctx.identifier_list().map((identifier) => parseIdentifier(identifier.getText())));
   } else {
     parts.push(sanitizeIdentifierString(ctx));
