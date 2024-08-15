@@ -437,6 +437,10 @@ export class DashboardContainer
     if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }
 
+  public cancel() {
+    this.controlGroup?.destroy();
+  }
+
   // ------------------------------------------------------------------------------------------------------
   // Dashboard API
   // ------------------------------------------------------------------------------------------------------
