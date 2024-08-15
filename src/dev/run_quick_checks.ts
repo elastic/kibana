@@ -77,17 +77,17 @@ run(async ({ log, flagsReader }) => {
       .map((script) => script.trim());
   }
 
-  logger.info(`--- Running ${scriptsToRun.length} checks...`, scriptsToRun);
+  logger.write(`--- Running ${scriptsToRun.length} checks...`, scriptsToRun);
   const startTime = Date.now();
   const results = await runAllChecks(scriptsToRun);
 
-  logger.info('--- All checks finished.');
+  logger.write('--- All checks finished.');
   printDurations(startTime, results);
   const failedChecks = results.filter((check) => !check.success);
   if (failedChecks.length > 0) {
-    logger.error('--- Failed checks');
+    logger.write('--- Failed checks');
     failedChecks.forEach((check) => {
-      logger.error(`--- ❌ ${check.script}:`);
+      logger.error(` ❌ ${check.script}:`);
       logger.error(check.output);
     });
 
@@ -97,12 +97,12 @@ run(async ({ log, flagsReader }) => {
   }
 }, scriptOptions)
   .then(() => {
-    logger.info('--- All checks passed.');
+    logger.write('--- All checks passed.');
 
     process.exit(0);
   })
   .catch((error) => {
-    logger.error('--- Some quick checks failed.');
+    logger.write('--- Some quick checks failed.');
     logger.error(error);
 
     process.exit(1);
