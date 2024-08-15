@@ -32,6 +32,7 @@ export type ApmDataAccessServices = ReturnType<typeof getServices>;
 export type { ApmDataAccessServicesParams } from './services/get_services';
 export type { DocumentSourcesRequest } from './services/get_document_sources';
 export type { HostNamesRequest } from './services/get_host_names';
+export type { GetDocumentTypeParams } from './services/get_document_type_config';
 export type {
   APMEventClientConfig,
   APMEventESSearchRequest,

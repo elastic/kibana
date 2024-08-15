@@ -6,21 +6,30 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import type { ApmDataAccessServicesWrapper } from '../../../../lib/helpers/get_apm_data_access_client';
 import { GetInfraAssetCountRequestBodyPayload } from '../../../../../common/http_api';
 import { InfraMetricsClient } from '../../../../lib/helpers/get_infra_metrics_client';
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
 import { assertQueryStructure } from '../utils';
-import { getValidDocumentsFilter } from '../helpers/query';
+import { getDocumentsFilter } from '../helpers/query';
 
 export async function getHostsCount({
   infraMetricsClient,
+  apmDataAccessServices,
   query,
   from,
   to,
 }: GetInfraAssetCountRequestBodyPayload & {
   infraMetricsClient: InfraMetricsClient;
+  apmDataAccessServices?: ApmDataAccessServicesWrapper;
 }) {
   assertQueryStructure(query);
+
+  const validDocumentsFilter = await getDocumentsFilter({
+    apmDataAccessServices,
+    from,
+    to,
+  });
 
   const response = await infraMetricsClient.search({
     allow_no_indices: true,
@@ -30,7 +39,7 @@ export async function getHostsCount({
       query: {
         bool: {
           filter: [query, ...rangeQuery(from, to)],
-          should: [...getValidDocumentsFilter()],
+          should: [...validDocumentsFilter],
         },
       },
       aggs: {

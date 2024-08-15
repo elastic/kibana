@@ -93,6 +93,7 @@ export type {
   DocumentSourcesRequest,
   ApmDataAccessPrivilegesCheck,
   HostNamesRequest,
+  GetDocumentTypeParams,
 } from './types';
 
 export { APMEventClient } from './lib/helpers';

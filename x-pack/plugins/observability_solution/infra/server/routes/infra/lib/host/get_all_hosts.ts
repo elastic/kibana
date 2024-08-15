@@ -6,6 +6,7 @@
  */
 
 import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
+import type { TimeRangeMetadata } from '@kbn/apm-data-access-plugin/common';
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
 import type { InfraAssetMetadataType } from '../../../../../common/http_api';
 import { METADATA_AGGREGATION_NAME } from '../constants';
@@ -13,24 +14,37 @@ import type { GetHostParameters } from '../types';
 import {
   getFilterByIntegration,
   getInventoryModelAggregations,
-  getValidDocumentsFilter,
+  getDocumentsFilter,
 } from '../helpers/query';
 import { BasicMetricValueRT } from '../../../../lib/metrics/types';
 
 export const getAllHosts = async ({
   infraMetricsClient,
+  apmDocumentSources,
   from,
   to,
   limit,
   metrics,
   hostNames,
-}: Pick<GetHostParameters, 'infraMetricsClient' | 'from' | 'to' | 'limit' | 'metrics'> & {
+  apmDataAccessServices,
+}: Pick<
+  GetHostParameters,
+  'infraMetricsClient' | 'apmDataAccessServices' | 'from' | 'to' | 'limit' | 'metrics'
+> & {
   hostNames: string[];
+  apmDocumentSources?: TimeRangeMetadata['sources'];
 }) => {
   const metricAggregations = getInventoryModelAggregations(
     'host',
     metrics.map((metric) => metric)
   );
+
+  const validDocumentsFilter = await getDocumentsFilter({
+    apmDataAccessServices,
+    apmDocumentSources,
+    from,
+    to,
+  });
 
   const response = await infraMetricsClient.search({
     allow_no_indices: true,
@@ -41,7 +55,7 @@ export const getAllHosts = async ({
       query: {
         bool: {
           filter: [...termsQuery(HOST_NAME_FIELD, ...hostNames), ...rangeQuery(from, to)],
-          should: [...getValidDocumentsFilter()],
+          should: [...validDocumentsFilter],
         },
       },
       aggs: {

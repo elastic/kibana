@@ -6,14 +6,16 @@
  */
 
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import { termQuery, termsQuery } from '@kbn/observability-plugin/server';
+import { termQuery } from '@kbn/observability-plugin/server';
+import { ApmDocumentType, type TimeRangeMetadata } from '@kbn/apm-data-access-plugin/common';
+import { estypes } from '@elastic/elasticsearch';
+import type { ApmDataAccessServicesWrapper } from '../../../../lib/helpers/get_apm_data_access_client';
 import {
   EVENT_MODULE,
   METRICSET_MODULE,
-  METRICSET_NAME,
   SYSTEM_INTEGRATION,
 } from '../../../../../common/constants';
-import { InfraAssetMetricType } from '../../../../../common/http_api/infra';
+import type { InfraAssetMetricType } from '../../../../../common/http_api/infra';
 
 export const getFilterByIntegration = (integration: typeof SYSTEM_INTEGRATION) => {
   return {
@@ -27,13 +29,56 @@ export const getFilterByIntegration = (integration: typeof SYSTEM_INTEGRATION) =
   };
 };
 
-export const getValidDocumentsFilter = () => {
-  return [
-    // system module
-    getFilterByIntegration('system'),
-    // apm docs
-    ...termsQuery(METRICSET_NAME, 'transaction'),
-  ];
+const getApmDocumentsFilter = async ({
+  apmDataAccessServices,
+  apmDocumentSources,
+  start,
+  end,
+}: {
+  apmDataAccessServices: ApmDataAccessServicesWrapper;
+  apmDocumentSources: TimeRangeMetadata['sources'];
+  start: number;
+  end: number;
+}) => {
+  const { preferredSource, documentTypeConfig } = apmDataAccessServices.getDocumentTypeConfig({
+    start,
+    end,
+    documentTypes: [ApmDocumentType.TransactionMetric],
+    documentSources: apmDocumentSources,
+  });
+
+  return 'getQuery' in documentTypeConfig
+    ? documentTypeConfig.getQuery(preferredSource.source.rollupInterval)
+    : undefined;
+};
+
+export const getDocumentsFilter = async ({
+  apmDataAccessServices,
+  apmDocumentSources,
+  from,
+  to,
+}: {
+  apmDataAccessServices?: ApmDataAccessServicesWrapper;
+  apmDocumentSources?: TimeRangeMetadata['sources'];
+  from: number;
+  to: number;
+}) => {
+  const filters: estypes.QueryDslQueryContainer[] = [getFilterByIntegration('system')];
+  const apmDocumentsFilter =
+    apmDataAccessServices && apmDocumentSources
+      ? await getApmDocumentsFilter({
+          apmDataAccessServices,
+          apmDocumentSources,
+          start: from,
+          end: to,
+        })
+      : undefined;
+
+  if (apmDocumentsFilter) {
+    filters.push(apmDocumentsFilter);
+  }
+
+  return filters;
 };
 
 export const getInventoryModelAggregations = (

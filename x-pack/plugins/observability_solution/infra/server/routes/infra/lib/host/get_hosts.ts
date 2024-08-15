@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { TimeRangeMetadata } from '@kbn/apm-data-access-plugin/common';
 import type { GetInfraMetricsResponsePayload } from '../../../../../common/http_api/infra';
 import { getFilteredHostNames, getHasDataFromSystemIntegration } from './get_filtered_hosts';
 import type { GetHostParameters } from '../types';
@@ -23,9 +24,15 @@ export const getHosts = async ({
   apmDataAccessServices,
   infraMetricsClient,
 }: GetHostParameters): Promise<GetInfraMetricsResponsePayload> => {
+  const apmDocumentSources = await apmDataAccessServices?.getDocumentSources({
+    start: from,
+    end: to,
+  });
+
   const hostNames = await getHostNames({
     infraMetricsClient,
     apmDataAccessServices,
+    apmDocumentSources,
     from,
     to,
     limit,
@@ -42,6 +49,7 @@ export const getHosts = async ({
   const [hostMetricsResponse, alertsCountResponse] = await Promise.all([
     getAllHosts({
       infraMetricsClient,
+      apmDocumentSources,
       from,
       to,
       limit,
@@ -79,6 +87,7 @@ export const getHosts = async ({
 const getHostNames = async ({
   infraMetricsClient,
   apmDataAccessServices,
+  apmDocumentSources,
   from,
   to,
   limit,
@@ -86,7 +95,9 @@ const getHostNames = async ({
 }: Pick<
   GetHostParameters,
   'apmDataAccessServices' | 'infraMetricsClient' | 'from' | 'to' | 'limit' | 'query'
->) => {
+> & {
+  apmDocumentSources?: TimeRangeMetadata['sources'];
+}) => {
   assertQueryStructure(query);
 
   const hasSystemIntegrationData = await getHasDataFromSystemIntegration({
@@ -106,9 +117,10 @@ const getHostNames = async ({
           limit,
         })
       : undefined,
-    apmDataAccessServices
+    apmDataAccessServices && apmDocumentSources
       ? getApmHostNames({
           apmDataAccessServices,
+          apmDocumentSources,
           query,
           from,
           to,

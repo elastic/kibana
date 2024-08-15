@@ -6,10 +6,12 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
+import type { TimeRangeMetadata } from '@kbn/apm-data-access-plugin/common';
 import { GetHostParameters } from '../types';
 
 export const getApmHostNames = async ({
   apmDataAccessServices,
+  apmDocumentSources,
   from: start,
   to: end,
   query,
@@ -17,10 +19,10 @@ export const getApmHostNames = async ({
 }: Required<Pick<GetHostParameters, 'apmDataAccessServices' | 'from' | 'to'>> & {
   query?: estypes.QueryDslQueryContainer;
   limit?: number;
+  apmDocumentSources: TimeRangeMetadata['sources'];
 }) => {
-  const documentSources = await apmDataAccessServices.getDocumentSources({ start, end });
   return apmDataAccessServices.getHostNames({
-    documentSources,
+    documentSources: apmDocumentSources,
     query,
     start,
     end,
