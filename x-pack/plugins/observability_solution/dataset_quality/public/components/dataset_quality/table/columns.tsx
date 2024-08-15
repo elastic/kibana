@@ -218,7 +218,7 @@ export const getDatasetQualityTableColumns = ({
         const { integration, name } = dataStreamStat;
 
         return (
-          <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj="sadas">
+          <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               <IntegrationIcon integration={integration} />
             </EuiFlexItem>
