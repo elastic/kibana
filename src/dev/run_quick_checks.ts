@@ -8,49 +8,100 @@
 
 import { exec } from 'child_process';
 import * as os from 'os';
+import * as path from 'path';
+import { readdirSync } from 'fs';
+
+import { run, RunOptions } from '@kbn/dev-cli-runner';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { ToolingLog } from '@kbn/tooling-log';
 
 const MAX_PARALLELISM = os.cpus().length - 1;
+const buildkiteQuickchecksFolder = path.join('.buildkite', 'scripts', 'steps', 'checks');
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-interface Result {
+interface CheckResult {
   success: boolean;
   script: string;
   output: string;
-  duration: number;
+  durationMs: number;
 }
+
+const scriptOptions: RunOptions = {
+  description: `
+    Runs sanity-testing quick-checks in parallel.
+  `,
+  flags: {
+    string: ['dir', 'checks'],
+    help: `
+        --dir              Run all checks in a given directory. (default=${buildkiteQuickchecksFolder})
+        --checks           Runs all scripts given in this parameter. (comma or newline delimited)
+      `,
+  },
+  log: {
+    context: 'Quick-checks',
+  },
+};
 
 /**
  * Takes a multiline string of commands from the CLI args, runs the commands in parallel, collects and prints the results
  */
-async function main() {
-  const scriptsToRun = process.argv[2]
-    .trim()
-    .split('\n')
-    .map((script) => script.trim());
+let logger: ToolingLog;
+run(async ({ log, flagsReader }) => {
+  logger = log;
+  if (flagsReader.string('dir') && flagsReader.string('checks')) {
+    logger.error(`Can't use --dir and --checks parameters at the same time.`);
+    process.exit(3);
+  }
 
-  console.log(`--- Running ${scriptsToRun.length} checks...`, scriptsToRun);
+  const targetDir = flagsReader.string('dir');
+  const checks = flagsReader.string('checks');
+
+  let scriptsToRun: string[] = [];
+  if (targetDir) {
+    scriptsToRun = readdirSync(path.join(REPO_ROOT, targetDir)).map((file) =>
+      path.join(REPO_ROOT, targetDir, file)
+    );
+  } else if (checks) {
+    scriptsToRun = checks
+      .trim()
+      .split(/[,\n]/)
+      .map((script) => script.trim());
+  }
+
+  logger.info(`--- Running ${scriptsToRun.length} checks...`, scriptsToRun);
   const startTime = Date.now();
   const results = await runAllChecks(scriptsToRun);
 
-  console.log('--- All checks finished.');
+  logger.info('--- All checks finished.');
   printDurations(startTime, results);
   const failedChecks = results.filter((check) => !check.success);
   if (failedChecks.length > 0) {
-    console.error('--- Failed checks');
+    logger.error('--- Failed checks');
     failedChecks.forEach((check) => {
-      console.error(`--- ❌ ${check.script}:`);
-      console.error(check.output);
+      logger.error(`--- ❌ ${check.script}:`);
+      logger.error(check.output);
     });
 
     throw new Error(`Failed ${failedChecks.length} checks.`);
   } else {
     return results;
   }
-}
+}, scriptOptions)
+  .then(() => {
+    logger.info('--- All checks passed.');
+
+    process.exit(0);
+  })
+  .catch((error) => {
+    logger.error('--- Some quick checks failed.');
+    logger.error(error);
+
+    process.exit(1);
+  });
 
 async function runAllChecks(scriptsToRun: string[]) {
   const checksRunning: Array<Promise<any>> = [];
-  const checksFinished: Result[] = [];
+  const checksFinished: CheckResult[] = [];
 
   while (scriptsToRun.length > 0 || checksRunning.length > 0) {
     while (scriptsToRun.length > 0 && checksRunning.length < MAX_PARALLELISM) {
@@ -73,8 +124,8 @@ async function runAllChecks(scriptsToRun: string[]) {
   return checksFinished;
 }
 
-async function runCheckAsync(script: string): Promise<Result> {
-  console.log(`Starting check: ${script}`);
+async function runCheckAsync(script: string): Promise<CheckResult> {
+  logger.info(`Starting check: ${script}`);
   const startTime = Date.now();
 
   return new Promise((resolve) => {
@@ -86,16 +137,16 @@ async function runCheckAsync(script: string): Promise<Result> {
     scriptProcess.stderr?.on('data', appendToOutput);
 
     scriptProcess.on('exit', (code) => {
-      const result = {
+      const result: CheckResult = {
         success: code === 0,
         script,
         output,
-        duration: Date.now() - startTime,
+        durationMs: Date.now() - startTime,
       };
       if (code === 0) {
-        console.info(`Passed check: ${script} in ${humanizeTime(result.duration)}`);
+        logger.info(`Passed check: ${script} in ${humanizeTime(result.durationMs)}`);
       } else {
-        console.warn(`Failed check: ${script} in ${humanizeTime(result.duration)}`);
+        logger.warning(`Failed check: ${script} in ${humanizeTime(result.durationMs)}`);
       }
 
       resolve(result);
@@ -103,18 +154,18 @@ async function runCheckAsync(script: string): Promise<Result> {
   });
 }
 
-function printDurations(startTimestamp: number, results: Result[]) {
-  const totalDuration = results.reduce((acc, result) => acc + result.duration, 0);
+function printDurations(startTimestamp: number, results: CheckResult[]) {
+  const totalDuration = results.reduce((acc, result) => acc + result.durationMs, 0);
 
-  console.log('- Check durations:');
+  logger.info('- Check durations:');
   results.forEach((result) => {
-    console.log(
-      `${result.success ? '✅' : '❌'} ${result.script}: ${humanizeTime(result.duration)}`
+    logger.info(
+      `${result.success ? '✅' : '❌'} ${result.script}: ${humanizeTime(result.durationMs)}`
     );
   });
   const total = humanizeTime(totalDuration);
   const effective = humanizeTime(Date.now() - startTimestamp);
-  console.log(`- Total time: ${total}, effective: ${effective}`);
+  logger.info(`- Total time: ${total}, effective: ${effective}`);
 }
 
 function humanizeTime(ms: number) {
@@ -130,18 +181,3 @@ function humanizeTime(ms: number) {
     return `${minutes}m ${seconds}s`;
   }
 }
-
-main()
-  .then(() => {
-    console.log('--- All checks passed.');
-
-    process.exit(0);
-  })
-  .catch((error) => {
-    console.error('--- Some quick checks failed.');
-    console.error(error);
-
-    process.exit(1);
-  });
-
-export {};

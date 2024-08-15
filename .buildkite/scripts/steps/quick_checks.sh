@@ -7,7 +7,7 @@ if [[ "${CI:-}" =~ ^(1|true)$ ]]; then
   .buildkite/scripts/bootstrap.sh
 fi
 
-ts-node-script ./.buildkite/scripts/steps/quick_checks.ts """
+node scripts/quick_checks --checks """
 .buildkite/scripts/steps/checks/precommit_hook.sh
 .buildkite/scripts/steps/checks/ts_projects.sh
 .buildkite/scripts/steps/checks/packages.sh
