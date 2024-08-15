@@ -12,11 +12,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { v4 } from 'uuid';
 import type { GlobalWidgetParameters } from '../..';
-import type {
-  InvestigateWidget,
-  InvestigateWidgetCreate,
-  InvestigationNote,
-} from '../../../common';
+import type { InvestigateWidget, InvestigateWidgetCreate } from '../../../common';
 import type { WidgetDefinition } from '../../types';
 import {
   InvestigateWidgetApiContextProvider,
@@ -42,8 +38,6 @@ export interface UseInvestigationApi {
   addItem: (options: InvestigateWidgetCreate) => Promise<void>;
   setGlobalParameters: (parameters: GlobalWidgetParameters) => Promise<void>;
   setTitle: (title: string) => Promise<void>;
-  addNote: (note: InvestigationNote) => Promise<void>;
-  deleteNote: (id: string) => Promise<void>;
 }
 
 function useInvestigationWithoutContext({
@@ -161,17 +155,7 @@ function useInvestigationWithoutContext({
 
   const { copyItem, setGlobalParameters, setTitle } = investigationStore;
 
-  const addNote = async (note: InvestigationNote) => {
-    await investigationStore.addNote(note);
-  };
-
-  const deleteNote = async (id: string) => {
-    await investigationStore.deleteNote(id);
-  };
-
   return {
-    addNote,
-    deleteNote,
     addItem,
     copyItem,
     deleteItem,
