@@ -73,6 +73,7 @@ export const ESQLMenuPopover = () => {
           color="text"
           onClick={() => setIsESQLMenuPopoverOpen(!isESQLMenuPopoverOpen)}
           data-test-subj="esql-menu-button"
+          size="s"
         >
           {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.label', {
             defaultMessage: 'ES|QL help',
