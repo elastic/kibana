@@ -6,18 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { sendRequest, XJson } from '@kbn/es-ui-shared-plugin/public';
-
-const { collapseLiteralStrings, expandLiteralStrings } = XJson;
-
-export { sendRequest, collapseLiteralStrings, expandLiteralStrings };
-
-export { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-
-export { toMountPoint } from '@kbn/react-kibana-mount';
-
-export type {
+import {
   SendRequestConfig,
   SendRequestResponse,
+  sendRequest as _sendRequest,
   Error,
-} from '@kbn/es-ui-shared-plugin/public';
+} from '../shared_imports';
+
+import { httpService } from './http';
+
+export const sendRequest = <T = any, E = Error>(
+  config: SendRequestConfig
+): Promise<SendRequestResponse<T, E>> => {
+  return _sendRequest(httpService.httpClient, config);
+};
