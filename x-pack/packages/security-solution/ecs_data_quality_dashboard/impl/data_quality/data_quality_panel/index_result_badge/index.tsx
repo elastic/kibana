@@ -10,6 +10,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { getIndexResultBadgeColor, getIndexResultToolTip } from './helpers';
+import * as i18n from './translations';
 
 const StyledBadge = styled(EuiBadge)`
   width: 44px;
@@ -38,7 +39,7 @@ export const IndexResultBadgeComponent: React.FC<Props> = ({
         color={getIndexResultBadgeColor(incompatible)}
         {...props}
       >
-        {incompatible > 0 ? 'Fail' : 'Pass'}
+        {incompatible > 0 ? i18n.FAIL : i18n.PASS}
       </StyledBadge>
     </EuiToolTip>
   );

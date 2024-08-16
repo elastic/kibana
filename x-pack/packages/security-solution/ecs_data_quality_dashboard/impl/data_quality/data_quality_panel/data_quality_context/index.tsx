@@ -14,7 +14,7 @@ import { PartialTheme, Theme } from '@elastic/charts';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { TelemetryEvents } from '../../types';
 
-interface DataQualityProviderProps {
+export interface DataQualityProviderProps {
   httpFetch: HttpHandler;
   isILMAvailable: boolean;
   telemetryEvents: TelemetryEvents;

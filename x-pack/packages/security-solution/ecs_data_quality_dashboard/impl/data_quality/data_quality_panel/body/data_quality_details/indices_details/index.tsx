@@ -36,7 +36,7 @@ const IndicesDetailsComponent: React.FC<Props> = ({
 
   return (
     <div data-test-subj="indicesDetails">
-      {patterns.map((pattern, i) => (
+      {patterns.map((pattern) => (
         <StyledPatternWrapperFlexItem grow={false} key={pattern}>
           <Pattern
             indexNames={patternIndexNames[pattern]}

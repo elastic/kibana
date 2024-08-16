@@ -21,7 +21,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 import { useIndicesCheckContext } from '../../../contexts/indices_check_context';
 
@@ -43,6 +43,18 @@ export interface Props {
   stats: Record<string, MeteringStatsIndex> | null;
   onClose: () => void;
 }
+
+const tabs = [
+  {
+    id: LATEST_CHECK,
+    name: LATEST_CHECK,
+  },
+  {
+    id: HISTORY,
+    name: HISTORY,
+    disabled: true,
+  },
+];
 
 export const IndexCheckFlyoutComponent: React.FC<Props> = ({
   ilmExplain,
@@ -85,28 +97,20 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
     };
   }, []);
 
-  const tabs = [
-    {
-      id: LATEST_CHECK,
-      name: LATEST_CHECK,
-    },
-    {
-      id: HISTORY,
-      name: HISTORY,
-      disabled: true,
-    },
-  ];
-
-  const renderTabs = tabs.map((tab, index) => (
-    <EuiTab
-      onClick={() => setSelectedTabId(tab.id)}
-      isSelected={tab.id === selectedTabId}
-      key={index}
-      disabled={tab.disabled}
-    >
-      {tab.name}
-    </EuiTab>
-  ));
+  const renderTabs = useMemo(
+    () =>
+      tabs.map((tab, index) => (
+        <EuiTab
+          onClick={() => setSelectedTabId(tab.id)}
+          isSelected={tab.id === selectedTabId}
+          key={index}
+          disabled={tab.disabled}
+        >
+          {tab.name}
+        </EuiTab>
+      )),
+    [selectedTabId]
+  );
 
   return (
     <div data-test-subj="indexCheckFlyout">
