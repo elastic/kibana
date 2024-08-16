@@ -30,7 +30,7 @@ describe('AppLogic', () => {
     },
     account: {
       accountId: 'some-id-string',
-      kibanaIsEnabled: true,
+      kibanaUIsEnabled: true,
       onboardingComplete: true,
       role: DEFAULT_INITIAL_APP_DATA.appSearch.role,
     },
@@ -50,7 +50,7 @@ describe('AppLogic', () => {
       },
       account: {
         accountId: 'some-id-string',
-        kibanaIsEnabled: true,
+        kibanaUIsEnabled: true,
         onboardingComplete: true,
         role: DEFAULT_INITIAL_APP_DATA.appSearch.role,
       },

@@ -24,7 +24,7 @@ import { EnginesOverview } from '.';
 describe('EnginesOverview', () => {
   const values = {
     account: {
-      kibanaIsEnabled: true,
+      kibanaUIsEnabled: true,
       role: {
         roleType: 'owner',
       },
@@ -54,6 +54,7 @@ describe('EnginesOverview', () => {
     // MetaEnginesTableLogic
     expandedSourceEngines: {},
     conflictingEnginesSets: {},
+    showGateForm: false,
   };
 
   const actions = {
@@ -90,12 +91,7 @@ describe('EnginesOverview', () => {
   it('does not render overview page when kibanaUIsEnabled is false', () => {
     setMockValues({
       ...values,
-      account: {
-        kibanaIsEnabled: false,
-        role: {
-          roleType: 'owner',
-        },
-      },
+      showGateForm: true,
     });
     const wrapper = shallow(<EnginesOverview />);
 

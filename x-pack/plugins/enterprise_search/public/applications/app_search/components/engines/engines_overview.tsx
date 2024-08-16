@@ -36,7 +36,7 @@ import { EnginesLogic } from './engines_logic';
 
 export const EnginesOverview: React.FC = () => {
   const {
-    account,
+    showGateForm,
     myRole: { canManageEngines, canManageMetaEngines },
   } = useValues(AppLogic);
 
@@ -61,7 +61,7 @@ export const EnginesOverview: React.FC = () => {
     loadMetaEngines();
   }, [metaEnginesMeta.page.current]);
 
-  return account.role.roleType !== 'owner' || account.kibanaIsEnabled ? (
+  return !showGateForm ? (
     <AppSearchPageTemplate
       pageViewTelemetry="engines_overview"
       pageChrome={[ENGINES_TITLE]}

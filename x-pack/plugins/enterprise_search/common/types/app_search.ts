@@ -7,7 +7,7 @@
 
 export interface Account {
   accountId: string;
-  kibanaIsEnabled: boolean;
+  kibanaUIsEnabled: boolean;
   onboardingComplete: boolean;
   role: {
     id: string;

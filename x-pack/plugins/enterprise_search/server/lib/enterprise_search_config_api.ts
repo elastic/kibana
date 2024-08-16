@@ -139,7 +139,7 @@ export const callEnterpriseSearchConfigAPI = async ({
       },
       appSearch: {
         accountId: data?.current_user?.app_search?.account?.id,
-        kibanaIsEnabled: data?.current_user?.app_search?.account?.kibana_uis_enabled || false,
+        kibanaUIsEnabled: data?.current_user?.app_search?.account?.kibana_uis_enabled || false,
         onboardingComplete: !!data?.current_user?.app_search?.account?.onboarding_complete,
         role: {
           id: data?.current_user?.app_search?.role?.id,
