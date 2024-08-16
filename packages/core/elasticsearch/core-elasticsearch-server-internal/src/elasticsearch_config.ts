@@ -7,7 +7,7 @@
  */
 
 import { readFileSync } from 'fs';
-import { Duration } from 'moment';
+import moment, { Duration } from 'moment';
 import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
 import { i18n } from '@kbn/i18n';
 import { schema, offeringBasedSchema, ByteSizeValue, type TypeOf } from '@kbn/config-schema';
@@ -110,8 +110,10 @@ export const configSchema = schema.object({
     },
   }),
   shardTimeout: schema.duration({ defaultValue: '30s' }),
-  requestTimeout: schema.duration({ defaultValue: '30s' }),
-  pingTimeout: schema.duration({ defaultValue: schema.siblingRef('requestTimeout') }),
+  requestTimeout: schema.oneOf<Duration, false>([schema.duration(), schema.literal(false)], {
+    defaultValue: moment.duration({ seconds: 30 }),
+  }),
+  pingTimeout: schema.duration({ defaultValue: '30s' }),
   logQueries: schema.boolean({ defaultValue: false }),
   ssl: schema.object(
     {
@@ -372,7 +374,7 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
   /**
    * Timeout after which HTTP request will be aborted and retried.
    */
-  public readonly requestTimeout: Duration;
+  public readonly requestTimeout: number | Duration;
 
   /**
    * Timeout for Elasticsearch to wait for responses from shards. Set to 0 to disable.
@@ -451,7 +453,7 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
       ? rawConfig.requestHeadersWhitelist
       : [rawConfig.requestHeadersWhitelist];
     this.pingTimeout = rawConfig.pingTimeout;
-    this.requestTimeout = rawConfig.requestTimeout;
+    this.requestTimeout = rawConfig.requestTimeout === false ? Infinity : rawConfig.requestTimeout;
     this.shardTimeout = rawConfig.shardTimeout;
     this.sniffOnStart = rawConfig.sniffOnStart;
     this.sniffOnConnectionFault = rawConfig.sniffOnConnectionFault;

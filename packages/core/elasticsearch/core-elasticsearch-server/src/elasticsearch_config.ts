@@ -73,7 +73,7 @@ export interface IElasticsearchConfig {
   /**
    * Timeout after which HTTP request will be aborted and retried.
    */
-  readonly requestTimeout: Duration;
+  readonly requestTimeout: Duration | number;
 
   /**
    * Timeout for Elasticsearch to wait for responses from shards. Set to 0 to disable.
