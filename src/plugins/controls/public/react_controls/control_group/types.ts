@@ -73,6 +73,7 @@ export type ControlGroupApi = PresentationContainer &
     openAddDataControlFlyout: (settings?: {
       controlInputTransform?: ControlInputTransform;
     }) => void;
+    lastUsedDataViewId$: PublishingSubject<string | undefined>;
   };
 
 export interface ControlGroupRuntimeState {

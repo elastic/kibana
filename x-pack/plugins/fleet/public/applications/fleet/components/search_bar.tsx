@@ -23,6 +23,7 @@ import {
   AGENTS_INDEX,
   ENROLLMENT_API_KEYS_INDEX,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   INGEST_SAVED_OBJECT_INDEX,
 } from '../constants';
 
@@ -50,6 +51,8 @@ const getMappings = (indexPattern: string, fieldPrefix: string) => {
     case INGEST_SAVED_OBJECT_INDEX:
       switch (fieldPrefix) {
         case AGENT_POLICY_SAVED_OBJECT_TYPE:
+          return AGENT_POLICY_MAPPINGS;
+        case LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE:
           return AGENT_POLICY_MAPPINGS;
         default:
           return {};
