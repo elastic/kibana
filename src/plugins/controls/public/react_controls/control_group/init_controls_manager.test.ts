@@ -15,13 +15,11 @@ jest.mock('uuid', () => ({
 
 describe('PresentationContainer api', () => {
   test('addNewPanel should add control at end of controls', async () => {
-    const controlsManager = initControlsManager(
-      {
-        alpha: { type: 'testControl', order: 0 },
-        bravo: { type: 'testControl', order: 1 },
-        charlie: { type: 'testControl', order: 2 },
-      },
-    );
+    const controlsManager = initControlsManager({
+      alpha: { type: 'testControl', order: 0 },
+      bravo: { type: 'testControl', order: 1 },
+      charlie: { type: 'testControl', order: 2 },
+    });
     const addNewPanelPromise = controlsManager.api.addNewPanel({
       panelType: 'testControl',
       initialState: {},
@@ -37,13 +35,11 @@ describe('PresentationContainer api', () => {
   });
 
   test('removePanel should remove control', () => {
-    const controlsManager = initControlsManager(
-      {
-        alpha: { type: 'testControl', order: 0 },
-        bravo: { type: 'testControl', order: 1 },
-        charlie: { type: 'testControl', order: 2 },
-      },
-    );
+    const controlsManager = initControlsManager({
+      alpha: { type: 'testControl', order: 0 },
+      bravo: { type: 'testControl', order: 1 },
+      charlie: { type: 'testControl', order: 2 },
+    });
     controlsManager.api.removePanel('bravo');
     expect(controlsManager.controlsInOrder$.value.map((element) => element.id)).toEqual([
       'alpha',
@@ -52,13 +48,11 @@ describe('PresentationContainer api', () => {
   });
 
   test('replacePanel should replace control', async () => {
-    const controlsManager = initControlsManager(
-      {
-        alpha: { type: 'testControl', order: 0 },
-        bravo: { type: 'testControl', order: 1 },
-        charlie: { type: 'testControl', order: 2 },
-      },
-    );
+    const controlsManager = initControlsManager({
+      alpha: { type: 'testControl', order: 0 },
+      bravo: { type: 'testControl', order: 1 },
+      charlie: { type: 'testControl', order: 2 },
+    });
     const replacePanelPromise = controlsManager.api.replacePanel('bravo', {
       panelType: 'testControl',
       initialState: {},
@@ -74,12 +68,10 @@ describe('PresentationContainer api', () => {
 
   describe('untilInitialized', () => {
     test('should not resolve until all controls are initialized', async () => {
-      const controlsManager = initControlsManager(
-        {
-          alpha: { type: 'testControl', order: 0 },
-          bravo: { type: 'testControl', order: 1 },
-        },
-      );
+      const controlsManager = initControlsManager({
+        alpha: { type: 'testControl', order: 0 },
+        bravo: { type: 'testControl', order: 1 },
+      });
       let isDone = false;
       controlsManager.api.untilInitialized().then(() => {
         isDone = true;
@@ -97,12 +89,10 @@ describe('PresentationContainer api', () => {
     });
 
     test('should resolve when all control already initialized ', async () => {
-      const controlsManager = initControlsManager(
-        {
-          alpha: { type: 'testControl', order: 0 },
-          bravo: { type: 'testControl', order: 1 },
-        },
-      );
+      const controlsManager = initControlsManager({
+        alpha: { type: 'testControl', order: 0 },
+        bravo: { type: 'testControl', order: 1 },
+      });
       controlsManager.setControlApi('alpha', {} as unknown as DefaultControlApi);
       controlsManager.setControlApi('bravo', {} as unknown as DefaultControlApi);
 
@@ -119,12 +109,10 @@ describe('PresentationContainer api', () => {
 
 describe('snapshotControlsRuntimeState', () => {
   test('should snapshot runtime state for all controls', async () => {
-    const controlsManager = initControlsManager(
-      {
-        alpha: { type: 'testControl', order: 1 },
-        bravo: { type: 'testControl', order: 0 },
-      },
-    );
+    const controlsManager = initControlsManager({
+      alpha: { type: 'testControl', order: 1 },
+      bravo: { type: 'testControl', order: 0 },
+    });
     controlsManager.setControlApi('alpha', {
       snapshotRuntimeState: () => {
         return { key1: 'alpha value' };

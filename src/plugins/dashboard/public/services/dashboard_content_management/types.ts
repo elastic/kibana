@@ -9,6 +9,7 @@
 import type { Reference } from '@kbn/content-management-utils';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
+import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 import { DashboardContainerInput } from '../../../common';
 import { DashboardAttributes, DashboardCrudTypes } from '../../../common/content_management';
 import { DashboardStartDependencies } from '../../plugin';
@@ -26,7 +27,6 @@ import {
   SearchDashboardsArgs,
   SearchDashboardsResponse,
 } from './lib/find_dashboards';
-import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 
 export interface DashboardContentManagementRequiredServices {
   data: DashboardDataService;

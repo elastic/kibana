@@ -82,7 +82,9 @@ export const getControlGroupEmbeddableFactory = (services: {
         autoApplySelections$,
       });
       const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
-      const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(chainingSystem ?? DEFAULT_CHAINING_SYSTEM);
+      const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(
+        chainingSystem ?? DEFAULT_CHAINING_SYSTEM
+      );
       const ignoreParentSettings$ = new BehaviorSubject<ParentIgnoreSettings | undefined>(
         ignoreParentSettings
       );
