@@ -1224,16 +1224,13 @@ async function getFunctionArgsSuggestions(
     relevantFuncSignatures.map((f) => f.params[argIndex]).filter((d) => d),
     (o) => `${o.type}-${o.constantOnly}`
   );
-  // @TODO: remove
-  console.log(`--@@compatibleTypesToSuggestForArg`, compatibleTypesToSuggestForArg);
-  // @TODO: remove
-  // console.log(`--@@compatibleTypesToSuggestForArg`, compatibleTypesToSuggestForArg);
 
   // the first signature is used as reference
   // TODO - take into consideration all signatures that match the current args
   const refSignature = fnDefinition.signatures[0];
 
-  const old_hasMoreMandatoryArgs =
+  // @TODO: remove
+  const oldHasMoreMandatoryArgs =
     (refSignature.params.length >= argIndex &&
       refSignature.params.filter(({ optional }, index) => !optional && index > argIndex).length >
         0) ||
@@ -1381,14 +1378,6 @@ async function getFunctionArgsSuggestions(
       )
     );
 
-    // @TODO: remove
-    // @TODO: remove
-    console.log(`--@@paramDefsWhichSupportFields`, paramDefsWhichSupportFields);
-    console.log(
-      `--@@getTypesFromParamDefs(paramDefsWhichSupportFields)`,
-      getTypesFromParamDefs(paramDefsWhichSupportFields)
-    );
-
     // Fields
     suggestions.push(
       ...pushItUpInTheList(
@@ -1399,22 +1388,6 @@ async function getFunctionArgsSuggestions(
         true
       )
     );
-    // @TODO: remove
-    console.log(
-      `--@@getCompatibleFunctionDefinition(
-        command.name,
-        option?.name,
-        getTypesFromParamDefs(paramDefsWhichSupportFields) as string[],
-        fnToIgnore
-      )`,
-      getCompatibleFunctionDefinition(
-        command.name,
-        option?.name,
-        getTypesFromParamDefs(paramDefsWhichSupportFields) as string[],
-        fnToIgnore
-      )
-    );
-
     // Functions
     suggestions.push(
       ...getCompatibleFunctionDefinition(

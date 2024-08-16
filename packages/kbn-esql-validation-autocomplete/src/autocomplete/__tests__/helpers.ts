@@ -344,3 +344,4 @@ export const setup = async (caret = '/') => {
     assertSuggestions,
   };
 };
+export const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
