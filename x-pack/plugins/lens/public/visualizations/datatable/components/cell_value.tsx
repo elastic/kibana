@@ -35,8 +35,12 @@ export const createGridCell = (
     const { table, alignments, handleFilterClick } = useContext(DataContext);
     const rowValue = getParsedValue(table?.rows[rowIndex]?.[columnId]);
     const colIndex = columnConfig.columns.findIndex(({ columnId: id }) => id === columnId);
-    const { oneClickFilter, colorMode, palette, colorMapping } =
-      columnConfig.columns[colIndex] ?? {};
+    const {
+      oneClickFilter,
+      colorMode = 'none',
+      palette,
+      colorMapping,
+    } = columnConfig.columns[colIndex] ?? {};
     const filterOnClick = oneClickFilter && handleFilterClick;
     const content = formatters[columnId]?.convert(rowValue, filterOnClick ? 'text' : 'html');
     const currentAlignment = alignments && alignments[columnId];
@@ -58,7 +62,7 @@ export const createGridCell = (
 
       // Clean up styles when something changes, this avoids cell's styling to stick forever
       // Checks isExpanded to prevent clearing style after expanding cell
-      if (colorMode !== 'none' && colorSet && !isExpanded) {
+      if (colorSet && !isExpanded) {
         return () => {
           setCellProps({
             style: {
