@@ -28,7 +28,7 @@ describe('multi select filter', () => {
 
     render(<MultiSelectFilter {...props} />);
 
-    userEvent.click(await screen.findByRole('button', { name: 'Tags' }));
+    userEvent.click(await screen.findByTestId('options-filter-popover-button-tags'));
     await waitForEuiPopoverOpen();
 
     expect(await screen.findByText('4 options')).toBeInTheDocument();
@@ -52,7 +52,7 @@ describe('multi select filter', () => {
 
     const { rerender } = render(<MultiSelectFilter {...props} />);
 
-    userEvent.click(await screen.findByRole('button', { name: 'Tags' }));
+    userEvent.click(await screen.findByTestId('options-filter-popover-button-tags'));
     await waitForEuiPopoverOpen();
 
     expect(await screen.findByText('Limit reached')).toBeInTheDocument();
@@ -86,7 +86,7 @@ describe('multi select filter', () => {
 
     const { rerender } = render(<MultiSelectFilter {...props} />);
 
-    userEvent.click(await screen.findByRole('button', { name: 'Tags' }));
+    userEvent.click(await screen.findByTestId('options-filter-popover-button-tags'));
     await waitForEuiPopoverOpen();
 
     expect(screen.queryByText('Limit reached')).not.toBeInTheDocument();
@@ -123,7 +123,7 @@ describe('multi select filter', () => {
 
     render(<MultiSelectFilter {...props} />);
 
-    userEvent.click(await screen.findByRole('button', { name: 'Tags' }));
+    userEvent.click(await screen.findByTestId('options-filter-popover-button-tags'));
     await waitForEuiPopoverOpen();
 
     expect(await screen.findByText('Limit reached')).toBeInTheDocument();
@@ -174,7 +174,7 @@ describe('multi select filter', () => {
     };
 
     render(<MultiSelectFilter {...props} />);
-    userEvent.click(await screen.findByRole('button', { name: 'Tags' }));
+    userEvent.click(await screen.findByTestId('options-filter-popover-button-tags'));
     await waitForEuiPopoverOpen();
     expect((await screen.findAllByTestId(TEST_ID)).length).toBe(2);
   });
