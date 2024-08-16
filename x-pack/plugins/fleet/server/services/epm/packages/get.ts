@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as yaml from 'js-yaml';
+import { safeLoad } from 'js-yaml';
 import pMap from 'p-map';
 import type { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
 import semverGte from 'semver/functions/gte';
@@ -360,7 +360,7 @@ export async function getInstalledPackageManifests(
 
   const parsedManifests = result.saved_objects.reduce<Map<string, PackageSpecManifest>>(
     (acc, asset) => {
-      acc.set(asset.attributes.asset_path, yaml.load(asset.attributes.data_utf8));
+      acc.set(asset.attributes.asset_path, safeLoad(asset.attributes.data_utf8));
       return acc;
     },
     new Map()
