@@ -43,6 +43,8 @@ import { initSelectionsManager } from './selections_manager';
 import { initializeControlGroupUnsavedChanges } from './control_group_unsaved_changes_api';
 import { openDataControlEditor } from '../controls/data_controls/open_data_control_editor';
 
+const DEFAULT_CHAINING_SYSTEM = 'HIERARCHICAL';
+
 export const getControlGroupEmbeddableFactory = (services: {
   core: CoreStart;
   dataViews: DataViewsPublicPluginStart;
@@ -80,7 +82,7 @@ export const getControlGroupEmbeddableFactory = (services: {
         autoApplySelections$,
       });
       const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
-      const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(chainingSystem);
+      const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(chainingSystem ?? DEFAULT_CHAINING_SYSTEM);
       const ignoreParentSettings$ = new BehaviorSubject<ParentIgnoreSettings | undefined>(
         ignoreParentSettings
       );
@@ -110,6 +112,7 @@ export const getControlGroupEmbeddableFactory = (services: {
           chainingSystem: [
             chainingSystem$,
             (next: ControlGroupChainingSystem) => chainingSystem$.next(next),
+            (a, b) => (a ?? DEFAULT_CHAINING_SYSTEM) === (b ?? DEFAULT_CHAINING_SYSTEM),
           ],
           ignoreParentSettings: [
             ignoreParentSettings$,
