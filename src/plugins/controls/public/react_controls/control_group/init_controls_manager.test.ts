@@ -167,3 +167,26 @@ describe('getLastUsedDataViewId', () => {
     expect(dataViewId).toBeUndefined();
   });
 });
+
+describe('comparators', () => {
+  // Test edge case where adding a panel and resetting left orphaned control in children$
+  test('should remove orphaned children on reset', () => {
+    // baseline last saved state contains a single control
+    const initialControlsStateLastSavedState = {
+      alpha: { type: 'testControl', order: 0 },
+    };
+    const controlsManager = initControlsManager(initialControlsStateLastSavedState);
+    controlsManager.setControlApi('alpha', {} as unknown as DefaultControlApi);
+
+    // add another control
+    controlsManager.api.addNewPanel({ panelType: 'testControl' });
+    controlsManager.setControlApi('delta', {} as unknown as DefaultControlApi);
+    expect(Object.keys(controlsManager.api.children$.value).length).toBe(2);
+
+    // simulate reset by calling comparator setter with last saved state
+    const setter = controlsManager.comparators.initialChildControlState[1];
+    setter(initialControlsStateLastSavedState);
+    // children$ should no longer contain control removed by resetting back to original control baseline
+    expect(Object.keys(controlsManager.api.children$.value).length).toBe(1);
+  });
+});

@@ -222,7 +222,22 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
           controlsPanelState = {
             ...lastSavedControlPanelsState,
           };
-          controlsInOrder$.next(getControlsInOrder(lastSavedControlPanelsState));
+          const nextControlsInOrder = getControlsInOrder(lastSavedControlPanelsState);
+          controlsInOrder$.next(nextControlsInOrder);
+
+          const nextControlIds = nextControlsInOrder.map(({ id }) => id);
+          const children = { ...children$.value };
+          let modifiedChildren = false;
+          Object.keys(children).forEach((controlId) => {
+            if (!nextControlIds.includes(controlId)) {
+              // remove children that no longer exist after reset
+              delete children[controlId];
+              modifiedChildren = true;
+            }
+          });
+          if (modifiedChildren) {
+            children$.next(children);
+          }
         },
         () => true,
       ],
