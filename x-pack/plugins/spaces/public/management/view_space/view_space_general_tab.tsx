@@ -118,7 +118,7 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
         i18n.translate(
           'xpack.spaces.management.spaceDetails.spaceSuccessfullySavedNotificationMessage',
           {
-            defaultMessage: `Space '{name}' was saved.`,
+            defaultMessage: 'Space "{name}" was saved.',
             values: { name },
           }
         )
