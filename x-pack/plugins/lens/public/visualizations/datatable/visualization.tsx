@@ -255,7 +255,7 @@ export const getDatatableVisualization = ({
                 collapseFn,
               } = columnMap[accessor] ?? {};
               const stops = getColorStops(paletteService, isDarkMode, palette, colorMapping);
-              const hasColoring = Boolean(colorMode !== 'none' && stops);
+              const hasColoring = colorMode !== 'none' && stops.length > 0;
 
               return {
                 columnId: accessor,
@@ -342,7 +342,7 @@ export const getDatatableVisualization = ({
                 hidden,
               } = columnMap[accessor] ?? {};
               const stops = getColorStops(paletteService, isDarkMode, palette, colorMapping);
-              const hasColoring = Boolean(colorMode !== 'none' && stops);
+              const hasColoring = colorMode !== 'none' && stops.length > 0;
 
               return {
                 columnId: accessor,
@@ -523,11 +523,14 @@ export const getDatatableVisualization = ({
               transposable: isTransposable,
               alignment: column.alignment,
               colorMode: canColor ? column.colorMode ?? 'none' : 'none',
-              palette: paletteService
-                // The palette for numeric values is a pseudo custom palette that is only custom from params level
-                .get(isNumeric ? CUSTOM_PALETTE : column.palette?.name || CUSTOM_PALETTE)
-                .toExpression(paletteParams),
-              colorMapping: column.colorMapping ? JSON.stringify(column.colorMapping) : undefined,
+              palette: !canColor
+                ? undefined
+                : paletteService
+                    // The palette for numeric values is a pseudo custom palette that is only custom from params level
+                    .get(isNumeric ? CUSTOM_PALETTE : column.palette?.name || CUSTOM_PALETTE)
+                    .toExpression(paletteParams),
+              colorMapping:
+                canColor && column.colorMapping ? JSON.stringify(column.colorMapping) : undefined,
               summaryRow: hasNoSummaryRow ? undefined : column.summaryRow!,
               summaryLabel: hasNoSummaryRow
                 ? undefined

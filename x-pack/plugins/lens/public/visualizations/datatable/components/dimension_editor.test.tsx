@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import type { PaletteRegistry } from '@kbn/coloring';
-import { render, screen } from '@testing-library/react';
+import { DEFAULT_COLOR_MAPPING_CONFIG, type PaletteRegistry } from '@kbn/coloring';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
+import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
 import {
   FramePublicAPI,
   OperationDescriptor,
@@ -21,11 +21,18 @@ import {
 import { DatatableVisualizationState } from '../visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
 import { TableDimensionEditor } from './dimension_editor';
+import { ColumnState } from '../../../../common/expressions';
+import { capitalize } from 'lodash';
+import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 
 describe('data table dimension editor', () => {
   let frame: FramePublicAPI;
   let state: DatatableVisualizationState;
-  let setState: (newState: DatatableVisualizationState) => void;
+  let btnGroups: {
+    colorMode: EuiButtonGroupTestHarness;
+    alignment: EuiButtonGroupTestHarness;
+  };
+  let mockOperationForFirstColumn: (overrides?: Partial<OperationDescriptor>) => void;
   let props: VisualizationDimensionEditorProps<DatatableVisualizationState> & {
     paletteService: PaletteRegistry;
     isDarkMode: boolean;
@@ -43,7 +50,19 @@ describe('data table dimension editor', () => {
     };
   }
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
+    btnGroups = {
+      colorMode: new EuiButtonGroupTestHarness('lnsDatatable_dynamicColoring_groups'),
+      alignment: new EuiButtonGroupTestHarness('lnsDatatable_alignment_groups'),
+    };
     state = testState();
     frame = createMockFramePublicAPI();
     frame.datasourceLayers = {
@@ -64,15 +83,13 @@ describe('data table dimension editor', () => {
         rows: [],
       },
     };
-    setState = jest.fn();
-
     props = {
       accessor: 'foo',
       frame,
       groupId: 'columns',
       layerId: 'first',
       state,
-      setState,
+      setState: jest.fn(),
       isDarkMode: false,
       paletteService: chartPluginMock.createPaletteRegistry(),
       panelRef: React.createRef(),
@@ -80,6 +97,18 @@ describe('data table dimension editor', () => {
       removeLayer: jest.fn(),
       datasource: {} as DatasourcePublicAPI,
     };
+
+    mockOperationForFirstColumn = (overrides: Partial<OperationDescriptor> = {}) => {
+      frame!.datasourceLayers!.first!.getOperationForColumnId = jest.fn().mockReturnValue({
+        label: 'label',
+        isBucketed: false,
+        dataType: 'string',
+        hasTimeShift: false,
+        hasReducedTimeRange: false,
+        ...overrides,
+      } satisfies OperationDescriptor);
+    };
+    mockOperationForFirstColumn();
   });
 
   const renderTableDimensionEditor = (
@@ -101,19 +130,19 @@ describe('data table dimension editor', () => {
 
   it('should render default alignment', () => {
     renderTableDimensionEditor();
-    expect(getSelectedButtonInGroup('lnsDatatable_alignment_groups')()).toHaveTextContent('Left');
+    expect(btnGroups.alignment.selected).toHaveTextContent('Left');
   });
 
   it('should render default alignment for number', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
     renderTableDimensionEditor();
-    expect(getSelectedButtonInGroup('lnsDatatable_alignment_groups')()).toHaveTextContent('Right');
+    expect(btnGroups.alignment.selected).toHaveTextContent('Right');
   });
 
   it('should render specific alignment', () => {
     state.columns[0].alignment = 'center';
     renderTableDimensionEditor();
-    expect(getSelectedButtonInGroup('lnsDatatable_alignment_groups')()).toHaveTextContent('Center');
+    expect(btnGroups.alignment.selected).toHaveTextContent('Center');
   });
 
   it('should set state for the right column', () => {
@@ -127,7 +156,8 @@ describe('data table dimension editor', () => {
     ];
     renderTableDimensionEditor();
     userEvent.click(screen.getByRole('button', { name: 'Center' }));
-    expect(setState).toHaveBeenCalledWith({
+    jest.advanceTimersByTime(256);
+    expect(props.setState).toHaveBeenCalledWith({
       ...state,
       columns: [
         {
@@ -141,44 +171,49 @@ describe('data table dimension editor', () => {
     });
   });
 
-  it('should not show the dynamic coloring option for non numeric columns', () => {
-    renderTableDimensionEditor();
-    expect(screen.queryByTestId('lnsDatatable_dynamicColoring_groups')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('lns_dynamicColoring_edit')).not.toBeInTheDocument();
-  });
-
   it('should set the dynamic coloring default to "none"', () => {
-    frame.activeData!.first.columns[0].meta.type = 'number';
+    state.columns[0].colorMode = undefined;
     renderTableDimensionEditor();
-    expect(getSelectedButtonInGroup('lnsDatatable_dynamicColoring_groups')()).toHaveTextContent(
-      'None'
-    );
+    expect(btnGroups.colorMode.selected).toHaveTextContent('None');
     expect(screen.queryByTestId('lns_dynamicColoring_edit')).not.toBeInTheDocument();
   });
 
-  it('should show the dynamic palette display ony when colorMode is different from "none"', () => {
-    frame.activeData!.first.columns[0].meta.type = 'number';
-    state.columns[0].colorMode = 'text';
-    renderTableDimensionEditor();
-    expect(getSelectedButtonInGroup('lnsDatatable_dynamicColoring_groups')()).toHaveTextContent(
-      'Text'
-    );
-    expect(screen.getByTestId('lns_dynamicColoring_edit')).toBeInTheDocument();
-  });
+  it.each<DatatableColumnType>(['date'])(
+    'should not show the dynamic coloring option for "%s" columns',
+    (dataType) => {
+      frame.activeData!.first.columns[0].meta.type = dataType;
+      renderTableDimensionEditor();
+      expect(screen.queryByTestId('lnsDatatable_dynamicColoring_groups')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('lns_dynamicColoring_edit')).not.toBeInTheDocument();
+    }
+  );
+
+  it.each<ColumnState['colorMode']>(['cell', 'text'])(
+    'should show the palette options ony when colorMode is "%s"',
+    (colorMode) => {
+      state.columns[0].colorMode = colorMode;
+      renderTableDimensionEditor();
+      expect(btnGroups.colorMode.selected).toHaveTextContent(capitalize(colorMode));
+      expect(screen.getByTestId('lns_dynamicColoring_edit')).toBeInTheDocument();
+    }
+  );
+
+  it.each<ColumnState['colorMode']>(['none', undefined])(
+    'should not show the palette options when colorMode is "%s"',
+    (colorMode) => {
+      state.columns[0].colorMode = colorMode;
+      renderTableDimensionEditor();
+      expect(btnGroups.colorMode.selected).toHaveTextContent(capitalize(colorMode ?? 'none'));
+      expect(screen.queryByTestId('lns_dynamicColoring_edit')).not.toBeInTheDocument();
+    }
+  );
 
   it('should set the coloring mode to the right column', () => {
-    frame.activeData!.first.columns[0].meta.type = 'number';
-    state.columns = [
-      {
-        columnId: 'foo',
-      },
-      {
-        columnId: 'bar',
-      },
-    ];
+    state.columns = [{ columnId: 'foo' }, { columnId: 'bar' }];
     renderTableDimensionEditor();
     userEvent.click(screen.getByRole('button', { name: 'Cell' }));
-    expect(setState).toHaveBeenCalledWith({
+    jest.advanceTimersByTime(256);
+    expect(props.setState).toHaveBeenCalledWith({
       ...state,
       columns: [
         {
@@ -194,30 +229,62 @@ describe('data table dimension editor', () => {
   });
 
   it('should open the palette panel when "Settings" link is clicked in the palette input', () => {
-    frame.activeData!.first.columns[0].meta.type = 'number';
     state.columns[0].colorMode = 'cell';
-
     renderTableDimensionEditor();
     userEvent.click(screen.getByLabelText('Edit colors'));
     expect(screen.getByTestId('lns-palettePanelFlyout')).toBeInTheDocument();
   });
 
-  it('should not show the dynamic coloring option for a dates', () => {
-    frame.activeData!.first.columns[0].meta.type = 'date';
-    const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
-    datasourceLayers.first.getOperationForColumnId = jest.fn(
-      () => ({ isBucketed: true } as OperationDescriptor)
-    );
+  it('should show the dynamic coloring option for a bucketed operation', () => {
     state.columns[0].colorMode = 'cell';
+    mockOperationForFirstColumn({ isBucketed: true });
 
     renderTableDimensionEditor();
-    expect(screen.queryByTestId('lnsDatatable_dynamicColoring_groups')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('lns_dynamicColoring_edit')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('lnsDatatable_dynamicColoring_groups')).toBeInTheDocument();
+    expect(screen.queryByTestId('lns_dynamicColoring_edit')).toBeInTheDocument();
   });
 
-  it('should not show the summary field for non numeric columns', () => {
+  it('should clear palette and colorMapping when colorMode is set to "none"', () => {
+    state.columns[0].colorMode = 'cell';
+    state.columns[0].palette = {
+      type: 'palette',
+      name: 'default',
+    };
+    state.columns[0].colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
+
     renderTableDimensionEditor();
-    expect(screen.queryByTestId('lnsDatatable_summaryrow_function')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('lnsDatatable_summaryrow_label')).not.toBeInTheDocument();
+
+    act(() => {
+      // this throws an error about state update even in act()
+      btnGroups.colorMode.select('None');
+    });
+
+    jest.advanceTimersByTime(256);
+    expect(props.setState).toBeCalledWith({
+      ...state,
+      columns: [
+        expect.objectContaining({
+          colorMode: 'none',
+          palette: undefined,
+          colorMapping: undefined,
+        }),
+      ],
+    });
+  });
+
+  [true, false].forEach((isTransposed) => {
+    it(`should${isTransposed ? ' not' : ''} show hidden switch when column is${
+      !isTransposed ? ' not' : ''
+    } transposed`, () => {
+      state.columns[0].isTransposed = isTransposed;
+      renderTableDimensionEditor();
+
+      const hiddenSwitch = screen.queryByTestId('lns-table-column-hidden');
+      if (isTransposed) {
+        expect(hiddenSwitch).not.toBeInTheDocument();
+      } else {
+        expect(hiddenSwitch).toBeInTheDocument();
+      }
+    });
   });
 });

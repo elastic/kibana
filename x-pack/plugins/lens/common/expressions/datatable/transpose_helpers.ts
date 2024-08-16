@@ -14,7 +14,7 @@ const TRANSPOSE_SEPARATOR = '---';
 
 const TRANSPOSE_VISUAL_SEPARATOR = '›';
 
-function getTransposeId(value: string, columnId: string) {
+export function getTransposeId(value: string, columnId: string) {
   return `${value}${TRANSPOSE_SEPARATOR}${columnId}`;
 }
 

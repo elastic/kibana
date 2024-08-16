@@ -74,9 +74,10 @@ export const getPaletteRegistry = () => {
   };
 
   return {
-    get: (name: string) =>
-      name === 'custom' ? mockPalette3 : name !== 'default' ? mockPalette2 : mockPalette1,
-    getAll: () => [mockPalette1, mockPalette2, mockPalette3],
+    get: jest.fn((name: string) =>
+      name === 'custom' ? mockPalette3 : name !== 'default' ? mockPalette2 : mockPalette1
+    ),
+    getAll: jest.fn(() => [mockPalette1, mockPalette2, mockPalette3]),
   };
 };
 

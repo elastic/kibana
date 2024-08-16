@@ -21,7 +21,6 @@ import {
   getFinalSummaryConfiguration,
   getSummaryRowOptions,
 } from '../../../../common/expressions/datatable/summary';
-
 import { isNumericFieldForDatatable } from '../../../../common/expressions/datatable/utils';
 
 import './dimension_editor.scss';
@@ -76,7 +75,6 @@ export function TableDimensionEditorAdditionalSection(
 
   const currentData = frame.activeData?.[state.layerId];
 
-  // either read config state or use same logic as chart itself
   const isNumeric = isNumericFieldForDatatable(currentData, accessor);
   // when switching from one operation to another, make sure to keep the configuration consistent
   const { summaryRow, summaryLabel: fallbackSummaryLabel } = getFinalSummaryConfiguration(

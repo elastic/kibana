@@ -19,7 +19,7 @@ import {
   defaultPaletteParams,
   findMinMaxByColumnId,
 } from '../../../shared_components';
-import { isNumericFieldForDatatable } from '../../../../common/expressions/datatable/utils';
+import { getFieldTypeFromDatatable } from '../../../../common/expressions/datatable/utils';
 import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 
 import './dimension_editor.scss';
@@ -73,18 +73,12 @@ export function TableDimensionEditor(
   if (column.isTransposed) return null;
 
   const currentData = frame.activeData?.[localState.layerId];
-
-  // either read config state or use same logic as chart itself
-  const isNumeric = isNumericFieldForDatatable(currentData, accessor);
+  const dataType = getFieldTypeFromDatatable(currentData, accessor);
+  const isNumeric = dataType === 'number';
   const currentAlignment = column?.alignment || (isNumeric ? 'right' : 'left');
   const currentColorMode = column?.colorMode || 'none';
   const hasDynamicColoring = currentColorMode !== 'none';
-
-  const datasource = frame.datasourceLayers[localState.layerId];
-
-  const showDynamicColoringFeature =
-    datasource?.getOperationForColumnId(accessor)?.dataType !== 'date';
-
+  const showDynamicColoringFeature = dataType !== 'date';
   const visibleColumnsCount = localState.columns.filter((c) => !c.hidden).length;
 
   const hasTransposedColumn = localState.columns.some(({ isTransposed }) => isTransposed);
@@ -204,6 +198,7 @@ export function TableDimensionEditor(
                     },
                   };
                 }
+
                 // clear up when switching to no coloring
                 if (newMode === 'none') {
                   params.palette = undefined;

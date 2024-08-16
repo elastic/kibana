@@ -13,6 +13,7 @@ import { Datatable } from '@kbn/expressions-plugin/public';
 import { DatatableArgs } from '../../../../common/expressions';
 import { DataContextType } from './types';
 import { render, screen } from '@testing-library/react';
+import { getTransposeId } from '../../../../common/expressions/datatable/transpose_helpers';
 
 describe('datatable cell renderer', () => {
   const innerCellColorFnMock = jest.fn().mockReturnValue('blue');
@@ -207,7 +208,7 @@ describe('datatable cell renderer', () => {
         <CellRendererWithPalette
           rowIndex={0}
           colIndex={0}
-          columnId="a"
+          columnId={columnConfig.columns[0].columnId}
           setCellProps={setCellProps}
           isExpandable={false}
           isDetails={false}
@@ -238,6 +239,27 @@ describe('datatable cell renderer', () => {
       expect(setCellProps).toHaveBeenCalledWith({
         style: expect.objectContaining({ backgroundColor: 'blue' }),
       });
+    });
+
+    it('should call getCellColor with full columnId of transpose column', () => {
+      const columnId = getTransposeId('test', 'a');
+      const columnConfig = getColumnConfiguration();
+      columnConfig.columns[0].colorMode = 'cell';
+      columnConfig.columns[0].columnId = columnId;
+
+      renderCellComponent(columnConfig, {
+        table: {
+          ...table,
+          columns: [
+            {
+              ...table.columns[0],
+              id: columnId,
+            },
+          ],
+        },
+      });
+
+      expect(cellColorFnMock.mock.calls[0][0]).toBe(columnId);
     });
 
     it('should set the coloring of the text when enabled', () => {
