@@ -5,33 +5,37 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { i18n } from '@kbn/i18n';
 import { ExpandablePanel } from '../../../../shared/components/expandable_panel';
 
 export const MisconfigurationsOverview = ({ hostName }: { hostName: string }) => {
-  const queryHostName = {
-    bool: {
-      must: [],
-      filter: [
-        {
-          bool: {
-            should: [{ term: { 'host.name': { value: `${hostName}` } } }],
-            minimum_should_match: 1,
+  const queryHostName = useCallback(() => {
+    return {
+      bool: {
+        must: [],
+        filter: [
+          {
+            bool: {
+              should: [{ term: { 'host.name': { value: `${hostName}` } } }],
+              minimum_should_match: 1,
+            },
           },
-        },
-      ],
-      should: [],
-      must_not: [],
-    },
-  };
+        ],
+        should: [],
+        must_not: [],
+      },
+    };
+  }, [hostName]);
+
   const { data } = useMisconfigurationPreview({
-    query: queryHostName,
+    query: queryHostName(),
     sort: [],
     enabled: true,
     pageSize: 1,
@@ -44,16 +48,89 @@ export const MisconfigurationsOverview = ({ hostName }: { hostName: string }) =>
     if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
     return [
       {
-        key: 'Passed findings',
+        key: i18n.translate(
+          'xpack.securitySolution.flyout.right.insights.misconfigurations.passedFindingsText',
+          {
+            defaultMessage: 'Passed findings',
+          }
+        ),
         count: passedFindingsStats,
         color: euiThemeVars.euiColorSuccess,
       },
       {
-        key: 'Failed findings',
+        key: i18n.translate(
+          'xpack.securitySolution.flyout.right.insights.misconfigurations.failedFindingsText',
+          {
+            defaultMessage: 'Failed findings',
+          }
+        ),
         count: failedFindingsStats,
         color: euiThemeVars.euiColorVis9,
       },
     ];
+  };
+
+  const MisconfigurationEmptyState = () => {
+    return (
+      <EuiFlexItem>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem>
+            <EuiText
+              css={css`
+                font-size: ${euiTheme.size.l};
+                font-weight: ${euiTheme.font.weight.bold};
+              `}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText
+              css={css`
+                font-size: ${euiTheme.size.base};
+                font-weight: ${euiTheme.font.weight.semiBold};
+              `}
+              data-test-subj="noFindingsDataTestSubj"
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.insights.misconfigurations.noFindingsDescription"
+                defaultMessage="No Findings"
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    );
+  };
+
+  const MisconfigurationPreviewScore = () => {
+    return (
+      <EuiFlexItem>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem>
+            <EuiText
+              css={css`
+                font-size: ${euiTheme.size.l};
+                font-weight: ${euiTheme.font.weight.bold};
+              `}
+            >
+              {`${Math.round((passedFindings / (passedFindings + failedFindings)) * 100)}%`}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText
+              css={css`
+                font-size: ${euiTheme.size.base};
+                font-weight: ${euiTheme.font.weight.semiBold};
+              `}
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.insights.misconfigurations.postureScoreDescription"
+                defaultMessage="Posture score"
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    );
   };
 
   return (
@@ -72,69 +149,16 @@ export const MisconfigurationsOverview = ({ hostName }: { hostName: string }) =>
             />
           </EuiText>
         ),
-        // Commented this out until we have the expanded flyout
+        // TODO: Uncomment when we have the expanded flyout
         // iconType: 'arrowStart',
       }}
       data-test-subj={'securitySolutionFlyoutInsightsMisconfigurations'}
     >
       <EuiFlexGroup gutterSize="none">
         {passedFindings === 0 && failedFindings === 0 ? (
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column" gutterSize="none">
-              <EuiFlexItem>
-                <EuiText
-                  css={css`
-                    font-size: ${euiTheme.size.l};
-                    font-weight: ${euiTheme.font.weight.bold};
-                  `}
-                >
-                  <b>{'-'}</b>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText
-                  css={css`
-                    font-size: ${euiTheme.size.base};
-                    font-weight: ${euiTheme.font.weight.semiBold};
-                  `}
-                  data-test-subj="noFindingsDataTestSubj"
-                >
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.right.insights.misconfigurations.noFindingsDescription"
-                    defaultMessage="No Findings"
-                  />
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          <MisconfigurationEmptyState />
         ) : (
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column" gutterSize="none">
-              <EuiFlexItem>
-                <EuiText
-                  css={css`
-                    font-size: ${euiTheme.size.l};
-                    font-weight: ${euiTheme.font.weight.bold};
-                  `}
-                >
-                  {`${Math.round((passedFindings / (passedFindings + failedFindings)) * 100)}%`}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText
-                  css={css`
-                    font-size: ${euiTheme.size.base};
-                    font-weight: ${euiTheme.font.weight.semiBold};
-                  `}
-                >
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.right.insights.misconfigurations.postureScoreDescription"
-                    defaultMessage="Posture score"
-                  />
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          <MisconfigurationPreviewScore />
         )}
         <EuiFlexItem grow={2}>
           <EuiFlexGroup direction="column" gutterSize="none">

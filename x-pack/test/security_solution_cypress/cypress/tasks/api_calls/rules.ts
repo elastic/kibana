@@ -138,3 +138,16 @@ export const enableRules = ({ names, ids }: EnableRulesParameters): Cypress.Chai
     failOnStatusCode: false,
   });
 };
+
+export const createFindings = (
+  rule: RuleCreateProps
+): Cypress.Chainable<Cypress.Response<RuleResponse>> => {
+  return cy.currentSpace().then((spaceId) =>
+    rootRequest<RuleResponse>({
+      method: 'POST',
+      url: spaceId ? getSpaceUrl(spaceId, DETECTION_ENGINE_RULES_URL) : DETECTION_ENGINE_RULES_URL,
+      body: rule,
+      failOnStatusCode: false,
+    })
+  );
+};

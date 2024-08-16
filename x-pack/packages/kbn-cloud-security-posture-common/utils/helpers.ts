@@ -5,13 +5,16 @@
  * 2.0.
  */
 import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import { i18n } from '@kbn/i18n';
 import { CspBenchmarkRulesStates } from '../types/latest';
 
 export const extractErrorMessage = (e: unknown, defaultMessage = 'Unknown Error'): string => {
   if (e instanceof Error) return e.message;
   if (typeof e === 'string') return e;
 
-  return defaultMessage; // TODO: i18n
+  return i18n.translate('xpack.csp.findings.errorMessage.default', {
+    defaultMessage,
+  });
 };
 
 export const buildMutedRulesFilter = (
