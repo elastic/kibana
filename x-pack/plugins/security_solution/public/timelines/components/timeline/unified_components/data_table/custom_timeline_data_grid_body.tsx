@@ -182,7 +182,10 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
         : {},
     [canShowRowRenderer]
   );
-  const eventTypeRowClassName = useMemo(() => getEventTypeRowClassName(rowData.ecs), [rowData.ecs]);
+  const eventTypeRowClassName = useMemo(
+    () => (isTimelineRecord(rowData) ? getEventTypeRowClassName(rowData.ecs) : ''),
+    [rowData]
+  );
 
   return (
     <CustomGridRow

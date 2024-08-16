@@ -9,6 +9,7 @@ import { useCallback, useState } from 'react';
 import type { PluginStartDependencies } from '@kbn/security-plugin/public/plugin';
 import type { DataView, DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import type { AggregateQuery } from '@kbn/es-query';
 import { getESQLAdHocDataViewForSecuritySolution } from './helpers';
 
 interface UseGetDataViewWithTextQueryArgs {
@@ -37,7 +38,7 @@ export function useGetAdHocDataViewWithESQLQuery({
   const [dataView, setDataView] = useState<DataView | undefined>(undefined);
 
   const getDataView = useCallback(
-    async (query) => {
+    async (query: AggregateQuery) => {
       setIsLoading(true);
       const esqlQuery = query?.esql;
       const indexPatternFromQuery = getIndexPatternFromESQLQuery(esqlQuery);

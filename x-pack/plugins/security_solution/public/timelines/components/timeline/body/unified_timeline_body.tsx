@@ -52,7 +52,7 @@ export const UnifiedTimelineBodyComp = (props: UnifiedTimelineBodyProps) => {
         return currentPageRows;
       }
       const newPageRows = pageInfo.activePage === 0 ? [] : [...currentPageRows];
-      newPageRows[pageInfo.activePage] = events;
+      newPageRows[pageInfo.activePage] = events as TimelineItem[]; // We cast here as this table is specific for non-esql scenarios
       return newPageRows;
     });
   }, [events, pageInfo.activePage]);

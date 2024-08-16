@@ -13,8 +13,10 @@ export const convertDataTableRecordToTimelineItem = (
 ): TimelineEventsDetailsItem[] =>
   Object.keys(data.flattened).map((recordKey) => {
     const unknownValue = data.flattened[recordKey];
-    const value: string =
-      typeof unknownValue === 'object' || unknownValue === undefined ? '-' : unknownValue;
+    // TODO: Fix what we show here
+    let value = '-';
+    if (typeof unknownValue === 'string') value = unknownValue;
+    if (typeof unknownValue === 'number') value = String(unknownValue);
 
     return {
       ariaRowIndex: data.id,

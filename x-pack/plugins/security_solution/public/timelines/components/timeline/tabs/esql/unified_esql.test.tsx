@@ -7,6 +7,7 @@
 
 import type { ComponentProps } from 'react';
 import React from 'react';
+import { mockTimelineESQLData } from '@kbn/securitysolution-data-table/mock/demo_data/timeline';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import {
   createSecuritySolutionStorageMock,
@@ -19,10 +20,6 @@ import { createStartServicesMock } from '../../../../../common/lib/kibana/kibana
 import type { StartServices } from '../../../../../types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import UnifiedEsql from './unified_esql';
-import {
-  mockESQLTimelineData,
-  mockESQLTimelineNoResultResponse,
-} from '../../../../../common/containers/use_esql_based_query_events/test.data';
 import { useGetAdHocDataViewWithESQLQuery } from '../../../../../sourcerer/containers/use_get_ad_hoc_data_view_with_esql_query';
 import { useESQLBasedEvents } from '../../../../../common/containers/use_esql_based_query_events';
 import { useGetStatefulQueryBar } from './use_get_stateful_query_bar';
@@ -37,7 +34,7 @@ import { useSourcererDataView } from '../../../../../sourcerer/containers';
 
 jest.mock('./use_get_stateful_query_bar');
 jest.mock('../../../../../common/containers/use_esql_based_query_events');
-jest.mock('../../../../../common/containers/sourcerer/use_get_ad_hoc_data_view_with_esql_query');
+jest.mock('../../../../../sourcerer/containers/use_get_ad_hoc_data_view_with_esql_query');
 jest.mock('../../body/events', () => ({
   Events: () => <></>,
 }));
@@ -56,10 +53,7 @@ const SPECIAL_TEST_TIMEOUT = 15000;
 
 jest.mock('../../../../../common/lib/kibana');
 
-// unified-field-list is is reporiting multiple analytics events
-jest.mock(`@kbn/analytics-client`);
-
-jest.mock('../../../../../common/containers/sourcerer');
+jest.mock('../../../../../sourcerer/containers');
 
 const useSourcererDataViewMocked = jest.fn().mockReturnValue({
   ...mockSourcererScope,
@@ -104,8 +98,8 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof ExperimentalFeatures) => {
-  if (feature === 'unifiedComponentsInTimelineEnabled') {
-    return true;
+  if (feature === 'unifiedComponentsInTimelineDisabled') {
+    return false;
   }
   return allowedExperimentalValues[feature];
 });
@@ -126,8 +120,7 @@ const renderTestComponents = (props?: Partial<ComponentProps<typeof TestComponen
   return render(<TestComponent {...props} />, {});
 };
 
-const actualTimelineData = structuredClone(mockESQLTimelineData);
-const emptyData = structuredClone(mockESQLTimelineNoResultResponse);
+const actualTimelineData = structuredClone(mockTimelineESQLData);
 
 const useESQLBasedEventsMock = jest.fn(() => {
   return {

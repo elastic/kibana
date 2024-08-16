@@ -6,7 +6,6 @@
  */
 
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { waitFor } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { getESQLAdHocDataViewForSecuritySolution } from './helpers';
 import { useGetAdHocDataViewWithESQLQuery } from './use_get_ad_hoc_data_view_with_esql_query';
@@ -46,7 +45,6 @@ describe('useGetAdHocDataViewWithESQLQuery', () => {
     test('should return undefined dataView', async () => {
       const { result } = renderHook(() =>
         useGetAdHocDataViewWithESQLQuery({
-          query: invalidQuery,
           dataViews: mockDataViewService,
         })
       );
@@ -54,7 +52,7 @@ describe('useGetAdHocDataViewWithESQLQuery', () => {
       expect(result.current.isLoading).toBe(false);
 
       await act(async () => {
-        await result.current.getDataView();
+        await result.current.getDataView(invalidQuery);
       });
 
       expect(result.current.dataView).toBeUndefined();
@@ -63,7 +61,6 @@ describe('useGetAdHocDataViewWithESQLQuery', () => {
     test('should have correct loading states', async () => {
       const { result } = renderHook(() =>
         useGetAdHocDataViewWithESQLQuery({
-          query: invalidQuery,
           dataViews: mockDataViewService,
         })
       );
@@ -71,7 +68,7 @@ describe('useGetAdHocDataViewWithESQLQuery', () => {
       expect(result.current.isLoading).toBe(false);
 
       await act(async () => {
-        await result.current.getDataView();
+        await result.current.getDataView(invalidQuery);
       });
 
       expect(result.current.isLoading).toBe(false);
@@ -86,74 +83,75 @@ describe('useGetAdHocDataViewWithESQLQuery', () => {
     test('should return dataView correctly', async () => {
       const { result } = renderHook(() =>
         useGetAdHocDataViewWithESQLQuery({
-          query,
           dataViews: mockDataViewService,
         })
       );
 
       await act(async () => {
         const { getDataView } = result.current;
-        await getDataView();
+        await getDataView(query);
       });
 
       expect(result.current.isLoading).toBe(false);
       expect(result.current.dataView).not.toBeUndefined();
     });
 
-    test('should update getDataView handler when only indexPattern changes', async () => {
-      let esqlQuery = query;
-      const { result, rerender } = renderHook(
-        () =>
-          useGetAdHocDataViewWithESQLQuery({
-            query: esqlQuery,
-            dataViews: mockDataViewService,
-          }),
-        {
-          initialProps: { query },
-        }
-      );
+    // TODO: Speak to Jatin about removing below tests as indexPattern is determined in discover util
 
-      const initialGetDataView = result.current.getDataView;
+    // test('should update getDataView handler when only indexPattern changes', async () => {
+    //   let esqlQuery = query;
+    //   const { result, rerender } = renderHook(
+    //     () =>
+    //       useGetAdHocDataViewWithESQLQuery({
+    //         query: esqlQuery,
+    //         dataViews: mockDataViewService,
+    //       }),
+    //     {
+    //       initialProps: { query },
+    //     }
+    //   );
 
-      expect(result.current.getDataView === initialGetDataView).toBe(true);
+    //   const initialGetDataView = result.current.getDataView;
 
-      esqlQuery = {
-        esql: 'from new_indexPattern*',
-      };
+    //   expect(result.current.getDataView === initialGetDataView).toBe(true);
 
-      rerender();
+    //   esqlQuery = {
+    //     esql: 'from new_indexPattern*',
+    //   };
 
-      await waitFor(() => {
-        expect(result.current.getDataView === initialGetDataView).toBe(false);
-      });
-    });
+    //   rerender();
 
-    test('should not update getDataView handler when indexPattern does not change but query changes', async () => {
-      let esqlQuery = query;
-      const { result, rerender } = renderHook(
-        () =>
-          useGetAdHocDataViewWithESQLQuery({
-            query: esqlQuery,
-            dataViews: mockDataViewService,
-          }),
-        {
-          initialProps: { query },
-        }
-      );
+    //   await waitFor(() => {
+    //     expect(result.current.getDataView === initialGetDataView).toBe(false);
+    //   });
+    // });
 
-      const initialGetDataView = result.current.getDataView;
+    // test('should not update getDataView handler when indexPattern does not change but query changes', async () => {
+    //   let esqlQuery = query;
+    //   const { result, rerender } = renderHook(
+    //     () =>
+    //       useGetAdHocDataViewWithESQLQuery({
+    //         query: esqlQuery,
+    //         dataViews: mockDataViewService,
+    //       }),
+    //     {
+    //       initialProps: { query },
+    //     }
+    //   );
 
-      expect(result.current.getDataView === initialGetDataView).toBe(true);
+    //   const initialGetDataView = result.current.getDataView;
 
-      esqlQuery = {
-        esql: `${query.esql} | limit 10`,
-      };
+    //   expect(result.current.getDataView === initialGetDataView).toBe(true);
 
-      rerender();
+    //   esqlQuery = {
+    //     esql: `${query.esql} | limit 10`,
+    //   };
 
-      await waitFor(() => {
-        expect(result.current.getDataView === initialGetDataView).toBe(true);
-      });
-    });
+    //   rerender();
+
+    //   await waitFor(() => {
+    //     expect(result.current.getDataView === initialGetDataView).toBe(true);
+    //   });
+    // });
   });
 });
