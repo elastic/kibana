@@ -21,7 +21,7 @@ import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 
 import type { AgentPolicy } from '../../common';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../common';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../common';
 
 import { LicenseService } from '../../common/services';
 
@@ -52,7 +52,7 @@ describe('Agent Policy-Changing license watcher', () => {
 
   const createPolicySO = (id: string, isProtected: boolean, error?: SavedObjectError) => ({
     id,
-    type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+    type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
     attributes: {
       is_protected: isProtected,
     },
@@ -101,12 +101,14 @@ describe('Agent Policy-Changing license watcher', () => {
 
   it('should bulk update policies that are not compliant', async () => {
     const getMockAgentPolicyFetchAllAgentPolicies = (items: AgentPolicy[]) =>
-      jest.fn(async function* (soClient: SavedObjectsClientContract) {
-        const chunkSize = 1000; // Emulate paginated response
-        for (let i = 0; i < items.length; i += chunkSize) {
-          yield items.slice(i, i + chunkSize);
-        }
-      });
+      jest.fn().mockResolvedValue(
+        jest.fn(async function* () {
+          const chunkSize = 1000; // Emulate paginated response
+          for (let i = 0; i < items.length; i += chunkSize) {
+            yield items.slice(i, i + chunkSize);
+          }
+        })()
+      );
 
     const policiesToUpdate = Array.from({ length: 2001 }, (_, i) =>
       createAgentPolicyMock({ id: `policy${i}`, is_protected: true })
@@ -159,9 +161,11 @@ describe('Agent Policy-Changing license watcher', () => {
 
   it('should return failed policies if bulk update fails', async () => {
     const getMockAgentPolicyFetchAllAgentPolicies = (items: AgentPolicy[]) =>
-      jest.fn(async function* (soClient: SavedObjectsClientContract) {
-        yield items;
-      });
+      jest.fn().mockResolvedValue(
+        jest.fn(async function* () {
+          yield items;
+        })()
+      );
 
     agentPolicySvcMock.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies([
       createAgentPolicyMock({ is_protected: true }),

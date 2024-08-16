@@ -31,7 +31,7 @@ export function getSupportedFilterAggs(
   if (dataViewField !== undefined) {
     return [...commonFilterAggs, ...filterAggsFieldSupport[dataViewField.type]];
   }
-  if (isPopulatedObject(runtimeMappings) && runtimeMappings.hasOwnProperty(fieldName)) {
+  if (isPopulatedObject(runtimeMappings) && Object.hasOwn(runtimeMappings, fieldName)) {
     const runtimeField = runtimeMappings[fieldName];
     return [
       ...commonFilterAggs,
