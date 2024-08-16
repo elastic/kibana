@@ -18,6 +18,7 @@ import { EntitySecurityException } from '../../lib/entities/errors/entity_securi
 import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
 import { startTransform } from '../../lib/entities/start_transform';
 import { installEntityDefinition } from '../../lib/entities/install_entity_definition';
+import { EntityDefinitionIdInvalid } from '../../lib/entities/errors/entity_definition_id_invalid';
 
 export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
@@ -51,12 +52,20 @@ export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
 
         return res.ok({ body: definition });
       } catch (e) {
+        logger.error(e);
+
+        if (e instanceof EntityDefinitionIdInvalid) {
+          return res.badRequest({ body: e });
+        }
+
         if (e instanceof EntityIdConflict) {
           return res.conflict({ body: e });
         }
+
         if (e instanceof EntitySecurityException || e instanceof InvalidTransformError) {
           return res.customError({ body: e, statusCode: 400 });
         }
+
         return res.customError({ body: e, statusCode: 500 });
       }
     }

@@ -72,6 +72,8 @@ export function updateEntityDefinitionRoute<T extends RequestHandlerContext>({
 
         return res.ok({ body: updatedDefinition });
       } catch (e) {
+        logger.error(e);
+
         if (e instanceof EntitySecurityException || e instanceof InvalidTransformError) {
           return res.customError({ body: e, statusCode: 400 });
         }

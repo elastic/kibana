@@ -13,6 +13,7 @@ import { findEntityDefinitions } from '../../lib/entities/find_entity_definition
 
 export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
+  logger,
 }: SetupRouteOptions<T>) {
   router.get<{ id?: string }, { page?: number; perPage?: number }, unknown>(
     {
@@ -35,6 +36,7 @@ export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
         });
         return res.ok({ body: { definitions } });
       } catch (e) {
+        logger.error(e);
         return res.customError({ body: e, statusCode: 500 });
       }
     }

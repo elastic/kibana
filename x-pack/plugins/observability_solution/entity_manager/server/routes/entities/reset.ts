@@ -74,6 +74,8 @@ export function resetEntityDefinitionRoute<T extends RequestHandlerContext>({
 
         return res.ok({ body: { acknowledged: true } });
       } catch (e) {
+        logger.error(e);
+
         if (e instanceof EntityDefinitionNotFound) {
           return res.notFound({ body: e });
         }
