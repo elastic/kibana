@@ -6,12 +6,13 @@
  */
 
 import { entityDefinitionSchema } from '@kbn/entities-schema';
-export const rawEntityDefinition = {
-  id: 'admin-console-services',
+export const builtInEntityDefinition = entityDefinitionSchema.parse({
+  id: 'builtin_mock_entity_definition',
   version: '1.0.0',
-  name: 'Services for Admin Console',
+  name: 'Mock builtin definition',
   type: 'service',
   indexPatterns: ['kbn-data-forge-fake_stack.*'],
+  managed: true,
   history: {
     timestampField: '@timestamp',
     interval: '1m',
@@ -19,29 +20,5 @@ export const rawEntityDefinition = {
   identityFields: ['log.logger', { field: 'event.category', optional: true }],
   displayNameTemplate: '{{log.logger}}{{#event.category}}:{{.}}{{/event.category}}',
   metadata: ['tags', 'host.name', 'host.os.name', { source: '_index', destination: 'sourceIndex' }],
-  metrics: [
-    {
-      name: 'logRate',
-      equation: 'A',
-      metrics: [
-        {
-          name: 'A',
-          aggregation: 'doc_count',
-          filter: 'log.level: *',
-        },
-      ],
-    },
-    {
-      name: 'errorRate',
-      equation: 'A',
-      metrics: [
-        {
-          name: 'A',
-          aggregation: 'doc_count',
-          filter: 'log.level: "ERROR"',
-        },
-      ],
-    },
-  ],
-};
-export const entityDefinition = entityDefinitionSchema.parse(rawEntityDefinition);
+  metrics: [],
+});
