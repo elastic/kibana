@@ -3158,13 +3158,28 @@
             "label": "create",
             "description": [],
             "signature": [
-              "() => Log"
+              "(logsOptions?: LogsOptions) => Log"
             ],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/logs/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
-            "children": []
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.log.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "logsOptions",
+                "description": [],
+                "signature": [
+                  "LogsOptions"
+                ],
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/logs/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false

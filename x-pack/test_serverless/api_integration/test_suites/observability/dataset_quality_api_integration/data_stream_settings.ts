@@ -29,6 +29,10 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
   const serviceName = 'my-service';
   const hostName = 'synth-host';
 
+  const defaultDataStreamPrivileges = {
+    datasetUserPrivileges: { canRead: true, canMonitor: true, canViewIntegrations: true },
+  };
+
   async function callApi(
     dataStream: string,
     roleAuthc: RoleCredentials,
@@ -85,11 +89,11 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
       expect(err.res.body.message.indexOf(expectedMessage)).to.greaterThan(-1);
     });
 
-    it('returns {} if matching data stream is not available', async () => {
+    it('returns only privileges if matching data stream is not available', async () => {
       const nonExistentDataSet = 'Non-existent';
       const nonExistentDataStream = `${type}-${nonExistentDataSet}-${namespace}`;
       const resp = await callApi(nonExistentDataStream, roleAuthc, internalReqHeader);
-      expect(resp.body).empty();
+      expect(resp.body).eql(defaultDataStreamPrivileges);
     });
 
     it('returns "createdOn" correctly', async () => {

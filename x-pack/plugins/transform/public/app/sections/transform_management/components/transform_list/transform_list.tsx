@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, type MouseEventHandler, useState } from 'react';
+import React, { type FC, type MouseEventHandler, useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { EuiSearchBarProps } from '@elastic/eui';
@@ -18,8 +18,10 @@ import {
   EuiInMemoryTable,
   EuiPageTemplate,
   EuiPopover,
+  EuiSearchBar,
   EuiTitle,
 } from '@elastic/eui';
+import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import {
   isReauthorizeActionDisabled,
   ReauthorizeActionModal,
@@ -85,25 +87,36 @@ function getItemIdToExpandedRowMap(
 interface TransformListProps {
   isLoading: boolean;
   onCreateTransform: MouseEventHandler<HTMLButtonElement>;
+  pageState: ListingPageUrlState;
   transformNodes: number;
   transforms: TransformListRow[];
   transformsLoading: boolean;
   transformsStatsLoading: boolean;
+  updatePageState: (update: Partial<ListingPageUrlState>) => void;
 }
 
 export const TransformList: FC<TransformListProps> = ({
   isLoading,
   onCreateTransform,
+  pageState,
   transformNodes,
   transforms,
   transformsLoading,
   transformsStatsLoading,
+  updatePageState,
 }) => {
   const refreshTransformList = useRefreshTransformList();
   const { setEditAlertRule } = useAlertRuleFlyout();
 
-  const [query, setQuery] = useState<Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]>();
+  const searchQueryText = pageState.queryText ?? '';
+  const setSearchQueryText = useCallback(
+    (value) => {
+      updatePageState({ queryText: value });
+    },
+    [updatePageState]
+  );
 
+  const [searchError, setSearchError] = useState<string | undefined>();
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<TransformId[]>([]);
   const [transformSelection, setTransformSelection] = useState<TransformListRow[]>([]);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
@@ -122,7 +135,9 @@ export const TransformList: FC<TransformListProps> = ({
 
   const { sorting, pagination, onTableChange } = useTableSettings<TransformListRow>(
     TRANSFORM_LIST_COLUMN.ID,
-    transforms
+    transforms,
+    pageState,
+    updatePageState
   );
 
   const { columns, modals: singleActionModals } = useColumns(
@@ -133,10 +148,11 @@ export const TransformList: FC<TransformListProps> = ({
     transformsStatsLoading
   );
 
-  const searchError = query?.error ? query?.error.message : undefined;
-  const clauses = query?.query?.ast?.clauses ?? [];
-  const filteredTransforms =
-    clauses.length > 0 ? filterTransforms(transforms, clauses) : transforms;
+  const filteredTransforms = useMemo(() => {
+    const query = searchQueryText !== '' ? EuiSearchBar.Query.parse(searchQueryText) : undefined;
+    const clauses = query?.ast?.clauses ?? [];
+    return clauses.length > 0 ? filterTransforms(transforms, clauses) : transforms;
+  }, [searchQueryText, transforms]);
 
   if (transforms.length === 0) {
     return (
@@ -317,14 +333,25 @@ export const TransformList: FC<TransformListProps> = ({
     </EuiFlexGroup>
   );
 
+  const handleSearchOnChange: EuiSearchBarProps['onChange'] = (search) => {
+    if (search.error !== null) {
+      setSearchError(search.error.message);
+      return;
+    }
+
+    setSearchError(undefined);
+    setSearchQueryText(search.queryText);
+  };
+
   const search = {
     toolsLeft: transformSelection.length > 0 ? renderToolsLeft() : undefined,
     toolsRight,
-    onChange: setQuery,
+    onChange: handleSearchOnChange,
     box: {
       incremental: true,
     },
     filters: transformFilters,
+    query: searchQueryText,
   };
 
   const selection = {

@@ -108,7 +108,7 @@ export class UrlFormat extends FieldFormat {
       let i = -1;
       while (++i < parts.length) {
         if (i % 2) {
-          if (locals.hasOwnProperty(parts[i])) {
+          if (Object.hasOwn(locals, parts[i])) {
             const local = locals[parts[i]];
             output += local == null ? '' : local;
           }
