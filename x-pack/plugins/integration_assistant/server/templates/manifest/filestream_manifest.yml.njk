@@ -22,6 +22,7 @@
       show_user: true
       default: 
         - '\.gz$'
+    {% if multiline_json_toggle_display %}
     - name: multiline_json
       type: bool
       title: Parse multiline JSON events
@@ -29,8 +30,9 @@
           Parses JSON events that take more than one line
           (they still need to be separated by newlines).
       required: false
-      show_user: {{ multiline_json_toggle_display }}
+      show_user: false
       default: {{ multiline_json_toggle_default }}
+    {% endif %}
     - name: custom
       type: yaml
       title: Additional Filestream Configuration Options
