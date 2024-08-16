@@ -68,6 +68,7 @@ interface State {
   showAlteringActiveSpaceDialog: boolean;
   haveDisabledFeaturesChanged: boolean;
   hasSolutionViewChanged: boolean;
+  allowFeatureVisibility: boolean;
   isLoading: boolean;
   saveInProgress: boolean;
   formError?: {
@@ -90,6 +91,7 @@ export class ManageSpacePage extends Component<Props, State> {
         color: getSpaceColor({}),
       },
       features: [],
+      allowFeatureVisibility: true,
       haveDisabledFeaturesChanged: false,
       hasSolutionViewChanged: false,
     };
@@ -185,7 +187,6 @@ export class ManageSpacePage extends Component<Props, State> {
 
   public getForm = () => {
     const { showAlteringActiveSpaceDialog } = this.state;
-
     return (
       <div data-test-subj="spaces-edit-page">
         <CustomizeSpace
@@ -203,7 +204,7 @@ export class ManageSpacePage extends Component<Props, State> {
             <EuiSpacer size="l" />
             <SolutionView
               space={this.state.space}
-              onChange={this.onSpaceChange}
+              onChange={this.onSolutionViewChange}
               sectionTitle={i18n.translate(
                 'xpack.spaces.management.manageSpacePage.navigationTitle',
                 { defaultMessage: 'Navigation' }
@@ -212,7 +213,7 @@ export class ManageSpacePage extends Component<Props, State> {
           </>
         )}
 
-        {this.props.allowFeatureVisibility && (
+        {this.state.allowFeatureVisibility && (
           <>
             <EuiSpacer />
             <EnabledFeatures
@@ -346,6 +347,15 @@ export class ManageSpacePage extends Component<Props, State> {
     }
 
     return null;
+  };
+
+  private onSolutionViewChange = (space: Partial<Space>) => {
+    let allowFeatureVisibility = false;
+    if (space.solution === 'classic' || space.solution == null) {
+      allowFeatureVisibility = true;
+    }
+    this.setState((state) => ({ ...state, allowFeatureVisibility }));
+    this.onSpaceChange(space);
   };
 
   public onSpaceChange = (updatedSpace: FormValues) => {

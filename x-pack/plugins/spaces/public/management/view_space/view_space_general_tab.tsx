@@ -37,13 +37,9 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
   const [showUserImpactWarning, setShowUserImpactWarning] = useState(false);
   const [showAlteringActiveSpaceDialog, setShowAlteringActiveSpaceDialog] = useState(false);
   const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState(false);
-
   const { http, overlays, notifications, navigateToUrl, spacesManager } = useViewSpaceServices();
 
-  const { solution } = space;
-  const shouldShowFeaturesVisibility = !solution || solution === 'classic';
-
-  const validator = new SpaceValidator();
+  const [solution, setSolution] = useState<typeof space.solution | undefined>(space.solution);
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: isDirty,
@@ -69,6 +65,11 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
     setSpaceSettings({ ...spaceSettings, ...updatedSpace });
     setIsDirty(true);
     setShowUserImpactWarning(true);
+  };
+
+  const onSolutionViewChange = (updatedSpace: Partial<Space>) => {
+    setSolution(updatedSpace.solution);
+    onChangeFeatures(updatedSpace);
   };
 
   const onClickSubmit = () => {
@@ -194,6 +195,8 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
     );
   };
 
+  const validator = new SpaceValidator();
+
   return (
     <>
       {doShowAlteringActiveSpaceDialog()}
@@ -207,9 +210,9 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
       />
 
       <EuiSpacer />
-      <SolutionView space={spaceSettings} onChange={onChangeFeatures} />
+      <SolutionView space={spaceSettings} onChange={onSolutionViewChange} />
 
-      {shouldShowFeaturesVisibility && (
+      {(solution == null || solution === 'classic') && (
         <>
           <EuiSpacer />
           <ViewSpaceEnabledFeatures
