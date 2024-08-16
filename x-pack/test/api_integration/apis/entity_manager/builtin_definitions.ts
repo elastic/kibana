@@ -90,7 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
 
           const disableResponse = await disableEntityDiscovery(authorizedUser, 200, {
-            deleteData: false,
+            deleteData: true,
           });
           expect(disableResponse.success).to.eql(
             true,
@@ -120,7 +120,9 @@ export default function ({ getService }: FtrProviderContext) {
 
           await disableEntityDiscovery(unauthorizedUser, 403);
 
-          const disableResponse = await disableEntityDiscovery(authorizedUser, 200);
+          const disableResponse = await disableEntityDiscovery(authorizedUser, 200, {
+            deleteData: true,
+          });
           expect(disableResponse.success).to.eql(true, "authorized user can't disable EEM");
         });
       });
@@ -164,7 +166,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
         ).to.eql(true, 'all builtin definitions are not installed/running');
 
-        await disableEntityDiscovery(authorizedUser, 200);
+        await disableEntityDiscovery(authorizedUser, 200, { deleteData: true });
       });
     });
 
@@ -185,7 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
         isInstalledAndRunning(mockBuiltInEntityDefinition, definitionsResponse.definitions)
       ).to.ok();
 
-      await disableEntityDiscovery(authorizedUser, 200);
+      await disableEntityDiscovery(authorizedUser, 200, { deleteData: true });
     });
   });
 }

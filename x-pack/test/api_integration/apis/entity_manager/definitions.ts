@@ -55,8 +55,10 @@ export default function ({ getService }: FtrProviderContext) {
           )
         ).to.eql(true);
 
-        await uninstallDefinition(supertest, { id: mockDefinition.id });
-        await uninstallDefinition(supertest, { id: mockBackfillDefinition.id });
+        await Promise.all([
+          uninstallDefinition(supertest, { id: mockDefinition.id, deleteData: true }),
+          uninstallDefinition(supertest, { id: mockBackfillDefinition.id, deleteData: true }),
+        ]);
       });
 
       it('does not start transforms when specified', async () => {
