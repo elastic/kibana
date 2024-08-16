@@ -11,12 +11,15 @@ import { DataLoadingState } from '@kbn/unified-data-table';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { isEmpty } from 'lodash';
+import { InPortal } from 'react-reverse-portal';
 import { useQuery } from '@tanstack/react-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingLogo } from '@elastic/eui';
 import { getESQLHasKeepClause, getESQLSourceCommand } from '@kbn/securitysolution-utils';
 import { noop } from 'lodash/fp';
+import { selectTimelineDateRange } from '../../../../../common/store/inputs/selectors';
+import { useEsqlEventsCountPortal } from '../../../../../common/hooks/use_timeline_events_count';
 import { useGetAdHocDataViewWithESQLQuery } from '../../../../../sourcerer/containers/use_get_ad_hoc_data_view_with_esql_query';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
@@ -36,11 +39,11 @@ import {
   defaultUdtHeaders,
 } from '../../unified_components/default_headers';
 import {
-  selectTimelineDateRange,
   selectTimelineESQLOptions,
   selectTimelinesItemPageOptions,
   selectTimelinesItemsPerPage,
 } from '../../../../store/selectors';
+import { EventsCountBadge } from '../shared/layout';
 
 interface UnifiedEsqlProps {
   timelineId: string;
@@ -69,7 +72,7 @@ interface ESQLColumnsWithMeta {
 export const UnifiedEsql = (props: UnifiedEsqlProps) => {
   const { timelineId } = props;
   const dispatch = useDispatch();
-
+  const { portalNode: esqlEventsCountPortalNode } = useEsqlEventsCountPortal();
   const inspectorAdapters = useRef({ requests: new RequestAdapter() });
 
   const augumentedColumnsRef = useRef<{
@@ -86,9 +89,7 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
     visibleColumns: visibleESQLColumns,
   } = useSelector((state: State) => selectTimelineESQLOptions(state, timelineId));
 
-  const timelineDateRange = useDeepEqualSelector((state: State) =>
-    selectTimelineDateRange(state, timelineId)
-  );
+  const timelineDateRange = useDeepEqualSelector(selectTimelineDateRange);
 
   const timelineItemsPerPage = useSelector((state: State) =>
     selectTimelinesItemsPerPage(state, timelineId)
@@ -146,8 +147,8 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
     expressions,
     inspectorAdapters: inspectorAdapters.current,
     timeRange: {
-      from: timelineDateRange.start,
-      to: timelineDateRange.end,
+      from: timelineDateRange.from,
+      to: timelineDateRange.to,
     },
   });
 
@@ -290,6 +291,8 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
     [updateESQLOptionsHandler]
   );
 
+  const totalCount = useMemo(() => data.rows.length, [data.rows.length]);
+
   if (!securityDataView) {
     return (
       <EuiEmptyPrompt
@@ -301,6 +304,9 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
+      <InPortal node={esqlEventsCountPortalNode}>
+        {totalCount >= 0 ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
+      </InPortal>
       <EuiFlexItem grow={false}>
         <ESQLTabHeader
           onQuerySubmit={onQuerySubmit}
@@ -322,7 +328,7 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
             refetch={refetch}
             onSort={onSort}
             dataLoadingState={dataLoadingState}
-            totalCount={data.rows.length}
+            totalCount={totalCount}
             activeTab={TimelineTabs.esql}
             isTextBasedQuery={true}
             dataView={esqlDataView ?? securityDataView}

@@ -24,6 +24,7 @@ import {
 } from '../../../../common/hooks/use_selector';
 import {
   EqlEventsCountBadge,
+  EsqlEventsCountBadge,
   TimelineEventsCountBadge,
 } from '../../../../common/hooks/use_timeline_events_count';
 import { timelineActions } from '../../../store';
@@ -367,6 +368,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
               key={TimelineTabs.esql}
             >
               <span>{i18n.DISCOVER_ESQL_IN_TIMELINE_TAB}</span>
+              {showTimeline && <EsqlEventsCountBadge />}
             </StyledEuiTab>
           )}
           {timelineType === TimelineTypeEnum.default && (
