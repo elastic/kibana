@@ -8,3 +8,4 @@
 export { getSecurityFeature } from './src/security';
 export { getCasesFeature } from './src/cases';
 export { getAssistantFeature } from './src/assistant';
+export { getAttackDiscoveryFeature } from './src/attack_discovery';
