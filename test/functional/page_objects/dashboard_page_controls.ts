@@ -496,7 +496,9 @@ export class DashboardPageControls extends FtrService {
   public async optionsListPopoverSearchForOption(search: string) {
     this.log.debug(`searching for ${search} in options list`);
     await this.optionsListPopoverAssertOpen();
-    await this.testSubjects.setValue(`optionsList-control-search-input`, search);
+    await this.testSubjects.setValue(`optionsList-control-search-input`, search, {
+      typeCharByChar: true,
+    });
     await this.optionsListPopoverWaitForLoading();
   }
 
