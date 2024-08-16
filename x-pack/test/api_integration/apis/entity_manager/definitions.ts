@@ -39,21 +39,21 @@ export default function ({ getService }: FtrProviderContext) {
         const { definitions } = await getInstalledDefinitions(supertest);
         expect(definitions.length).to.eql(2);
         expect(
-          definitions.find(
+          definitions.some(
             (definition) =>
               definition.id === mockDefinition.id &&
               definition.state.installed === true &&
               definition.state.running === true
           )
-        );
+        ).to.eql(true);
         expect(
-          definitions.find(
+          definitions.some(
             (definition) =>
               definition.id === mockBackfillDefinition.id &&
               definition.state.installed === true &&
               definition.state.running === true
           )
-        );
+        ).to.eql(true);
 
         await uninstallDefinition(supertest, { id: mockDefinition.id });
         await uninstallDefinition(supertest, { id: mockBackfillDefinition.id });
@@ -147,6 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
           retryService,
           logger,
         });
+
         const parsedSample = entityLatestSchema.safeParse(sample.hits.hits[0]._source);
         expect(parsedSample.success).to.be(true);
       });

@@ -6,13 +6,14 @@
  */
 
 import { z } from 'zod';
+import { booleanStringSchema } from './common';
 
 export const deleteEntityDefinitionParamsSchema = z.object({
   id: z.string(),
 });
 
 export const deleteEntityDefinitionQuerySchema = z.object({
-  deleteData: z.optional(z.coerce.boolean().default(false)),
+  deleteData: z.optional(booleanStringSchema).default(false),
 });
 
 export type DeleteEntityDefinitionQuery = z.infer<typeof deleteEntityDefinitionQuerySchema>;

@@ -6,9 +6,10 @@
  */
 
 import { z } from 'zod';
+import { booleanStringSchema } from './common';
 
 export const createEntityDefinitionQuerySchema = z.object({
-  installOnly: z.optional(z.coerce.boolean()).default(false),
+  installOnly: z.optional(booleanStringSchema).default(false),
 });
 
 export type CreateEntityDefinitionQuery = z.infer<typeof createEntityDefinitionQuerySchema>;
