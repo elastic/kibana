@@ -11,12 +11,13 @@ const swaggerJsdoc = require('swagger-jsdoc');
 const { zodToJsonSchema } = require('zod-to-json-schema');
 
 const {
+  createEntityDefinitionQuerySchema,
   getEntityDefinitionQuerySchema,
   resetEntityDefinitionParamsSchema,
   deleteEntityDefinitionParamsSchema,
   deleteEntityDefinitionQuerySchema,
   entityDefinitionSchema,
-  entitySummarySchema,
+  entityLatestSchema,
   entityHistorySchema,
 } = require('..');
 
@@ -35,6 +36,10 @@ export const generateOAS = (options) =>
       },
       components: {
         schemas: {
+          createEntityDefinitionQuerySchema: zodToJsonSchema(
+            createEntityDefinitionQuerySchema,
+            schemaOptions
+          ),
           getEntityDefinitionQuerySchema: zodToJsonSchema(
             getEntityDefinitionQuerySchema,
             schemaOptions
@@ -52,7 +57,7 @@ export const generateOAS = (options) =>
             schemaOptions
           ),
           entityDefinitionSchema: zodToJsonSchema(entityDefinitionSchema, schemaOptions),
-          entitySummarySchema: zodToJsonSchema(entitySummarySchema, schemaOptions),
+          entitySummarySchema: zodToJsonSchema(entityLatestSchema, schemaOptions),
           entityHistorySchema: zodToJsonSchema(entityHistorySchema, schemaOptions),
         },
       },
