@@ -217,9 +217,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         proxy
           .interceptConversation({ name: 'conversation', response: 'I, the LLM, hear you!' })
           .completeAfterIntercept();
-        proxy
-          .interceptConversation({ name: 'context', response: 'Responding to context' })
-          .completeAfterIntercept();
 
         const messages: Message[] = [
           {
