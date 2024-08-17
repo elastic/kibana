@@ -5,14 +5,25 @@
  * 2.0.
  */
 
-import { CreateInvestigationInput, CreateInvestigationResponse } from '../../common/schema/create';
+import { CreateInvestigationInput, CreateInvestigationResponse } from '@kbn/investigation-shared';
 import { InvestigationRepository } from './investigation_repository';
+
+enum InvestigationStatus {
+  ongoing = 'ongoing',
+  closed = 'closed',
+}
 
 export async function createInvestigation(
   params: CreateInvestigationInput,
   repository: InvestigationRepository
 ): Promise<CreateInvestigationResponse> {
-  const investigation = { ...params, createdAt: Date.now(), createdBy: 'elastic' };
+  const investigation = {
+    ...params,
+    createdAt: Date.now(),
+    createdBy: 'elastic',
+    status: InvestigationStatus.ongoing,
+    notes: [],
+  };
   await repository.save(investigation);
 
   return investigation;

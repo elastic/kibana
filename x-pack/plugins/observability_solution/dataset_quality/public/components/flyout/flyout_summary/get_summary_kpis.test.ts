@@ -8,7 +8,6 @@
 import { formatNumber } from '@elastic/eui';
 import type { useKibanaContextForPlugin } from '../../../utils';
 import type { useDatasetDetailsTelemetry } from '../../../hooks';
-import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
 
 import {
   BYTE_NUMBER_FORMAT,
@@ -17,7 +16,7 @@ import {
   MAX_HOSTS_METRIC_VALUE,
 } from '../../../../common/constants';
 import {
-  flyoutDegradedDocsText,
+  overviewDegradedDocsText,
   flyoutDocsCountTotalText,
   flyoutHostsText,
   flyoutServicesText,
@@ -25,6 +24,7 @@ import {
   flyoutSizeText,
 } from '../../../../common/translations';
 import { getSummaryKpis } from './get_summary_kpis';
+import { TimeRangeConfig } from '../../../../common/types';
 
 const dataStreamDetails = {
   services: {
@@ -83,7 +83,7 @@ describe('getSummaryKpis', () => {
       {
         title: flyoutSizeText,
         value: formatNumber(dataStreamDetails.sizeBytes ?? 0, BYTE_NUMBER_FORMAT),
-        userHasPrivilege: true,
+        userHasPrivilege: false,
       },
       {
         title: flyoutServicesText,
@@ -98,7 +98,7 @@ describe('getSummaryKpis', () => {
         userHasPrivilege: true,
       },
       {
-        title: flyoutDegradedDocsText,
+        title: overviewDegradedDocsText,
         value: '200',
         link: {
           label: flyoutShowAllText,
@@ -143,7 +143,7 @@ describe('getSummaryKpis', () => {
       {
         title: flyoutSizeText,
         value: formatNumber(dataStreamDetails.sizeBytes ?? 0, BYTE_NUMBER_FORMAT),
-        userHasPrivilege: true,
+        userHasPrivilege: false,
       },
       {
         title: flyoutServicesText,
@@ -158,7 +158,7 @@ describe('getSummaryKpis', () => {
         userHasPrivilege: true,
       },
       {
-        title: flyoutDegradedDocsText,
+        title: overviewDegradedDocsText,
         value: '200',
         link: {
           label: flyoutShowAllText,

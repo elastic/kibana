@@ -17,6 +17,8 @@
     "@kbn/es-types",
     "@kbn/apm-types",
     "@kbn/core-http-server-mocks",
-    "@kbn/apm-utils"
+    "@kbn/apm-utils",
+    "@kbn/core-http-server",
+    "@kbn/security-plugin-types-server"
   ]
 }

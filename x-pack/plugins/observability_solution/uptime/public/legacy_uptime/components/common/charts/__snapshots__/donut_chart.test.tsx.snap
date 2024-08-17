@@ -106,7 +106,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#eaedf3",
+                  "stroke": "#E9EDF3",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -130,11 +130,11 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 ],
                 "vertical": Object {
                   "dash": Array [
-                    4,
-                    4,
+                    0,
+                    0,
                   ],
                   "opacity": 1,
-                  "stroke": "#eaedf3",
+                  "stroke": "#E9EDF3",
                   "strokeWidth": 1,
                   "visible": true,
                 },

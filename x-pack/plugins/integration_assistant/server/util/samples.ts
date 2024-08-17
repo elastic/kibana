@@ -203,5 +203,5 @@ export function generateFields(mergedDocs: string): string {
     .filter((key) => !ecsTopKeysSet.has(key))
     .map((key) => recursiveParse(doc[key], [key]));
 
-  return yaml.dump(fieldsStructure, { sortKeys: false });
+  return yaml.safeDump(fieldsStructure, { sortKeys: false });
 }

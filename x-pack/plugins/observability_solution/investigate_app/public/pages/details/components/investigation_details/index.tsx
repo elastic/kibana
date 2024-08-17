@@ -6,26 +6,40 @@
  */
 import datemath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import type { InvestigateWidgetCreate } from '@kbn/investigate-plugin/public';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { keyBy, noop } from 'lodash';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { AddObservationUI } from '../../../../components/add_observation_ui';
 import { InvestigateSearchBar } from '../../../../components/investigate_search_bar';
 import { InvestigateWidgetGrid } from '../../../../components/investigate_widget_grid';
+import { useAddInvestigationNote } from '../../../../hooks/use_add_investigation_note';
 import { useDateRange } from '../../../../hooks/use_date_range';
+import { useFetchInvestigation } from '../../../../hooks/use_fetch_investigation';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { InvestigationNotes } from '../investigation_notes/investigation_notes';
 
-function InvestigationDetailsWithUser({ user }: { user: AuthenticatedUser }) {
+function InvestigationDetailsWithUser({
+  user,
+  investigationId,
+}: {
+  user: AuthenticatedUser;
+  investigationId: string;
+}) {
   const {
     dependencies: {
       start: { investigate },
     },
   } = useKibana();
-  const widgetDefinitions = useMemo(() => investigate.getWidgetDefinitions(), [investigate]);
+  const widgetDefinitions = investigate.getWidgetDefinitions();
   const [range, setRange] = useDateRange();
+
+  const { data: investigationData } = useFetchInvestigation({ id: investigationId });
+  const { mutateAsync: addInvestigationNote } = useAddInvestigationNote();
+  const handleAddInvestigationNote = async (note: string) => {
+    await addInvestigationNote({ investigationId, note: { content: note } });
+    await addNote(note);
+  };
 
   const {
     addItem,
@@ -41,33 +55,6 @@ function InvestigationDetailsWithUser({ user }: { user: AuthenticatedUser }) {
     from: range.start.toISOString(),
     to: range.end.toISOString(),
   });
-
-  const createWidget = (widgetCreate: InvestigateWidgetCreate) => {
-    return addItem(widgetCreate);
-  };
-
-  const createWidgetRef = useRef(createWidget);
-  createWidgetRef.current = createWidget;
-
-  useEffect(() => {
-    if (
-      renderableInvestigation?.parameters.timeRange.from &&
-      renderableInvestigation?.parameters.timeRange.to &&
-      range.start.toISOString() !== renderableInvestigation.parameters.timeRange.from &&
-      range.end.toISOString() !== renderableInvestigation.parameters.timeRange.to
-    ) {
-      setRange({
-        from: renderableInvestigation.parameters.timeRange.from,
-        to: renderableInvestigation.parameters.timeRange.to,
-      });
-    }
-  }, [
-    renderableInvestigation?.parameters.timeRange.from,
-    renderableInvestigation?.parameters.timeRange.to,
-    range.start,
-    range.end,
-    setRange,
-  ]);
 
   const gridItems = useMemo(() => {
     const widgetDefinitionsByType = keyBy(widgetDefinitions, 'type');
@@ -88,7 +75,7 @@ function InvestigationDetailsWithUser({ user }: { user: AuthenticatedUser }) {
     });
   }, [renderableInvestigation, widgetDefinitions]);
 
-  if (!investigation || !renderableInvestigation || !gridItems) {
+  if (!investigation || !renderableInvestigation || !gridItems || !investigationData) {
     return <EuiLoadingSpinner />;
   }
 
@@ -135,20 +122,24 @@ function InvestigationDetailsWithUser({ user }: { user: AuthenticatedUser }) {
           <AddObservationUI
             timeRange={renderableInvestigation.parameters.timeRange}
             onWidgetAdd={(widget) => {
-              return createWidgetRef.current(widget);
+              return addItem(widget);
             }}
           />
         </EuiFlexGroup>
       </EuiFlexItem>
 
       <EuiFlexItem grow={2}>
-        <InvestigationNotes notes={investigation.notes} addNote={addNote} deleteNote={deleteNote} />
+        <InvestigationNotes
+          notes={investigationData.notes}
+          addNote={handleAddInvestigationNote}
+          deleteNote={deleteNote}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
 
-export function InvestigationDetails({}: {}) {
+export function InvestigationDetails({ investigationId }: { investigationId: string }) {
   const {
     core: { security },
   } = useKibana();
@@ -157,5 +148,12 @@ export function InvestigationDetails({}: {}) {
     return security.authc.getCurrentUser();
   }, [security]);
 
-  return user.value ? <InvestigationDetailsWithUser user={user.value} /> : null;
+  if (investigationId == null) {
+    // TODO: return 404 page
+    return null;
+  }
+
+  return user.value ? (
+    <InvestigationDetailsWithUser user={user.value} investigationId={investigationId} />
+  ) : null;
 }
