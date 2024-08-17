@@ -24,27 +24,23 @@ interface RouterParams extends NodeParamsBase {
 export function stepRouter({ logger, state }: RouterParams): string {
   logger.debug(() => `${NodeType.STEP_ROUTER}: Node state:\n${JSON.stringify(state, null, 2)}`);
 
-  // All possible conditional edges when source node is the Agent node
-  if (state.lastNode === NodeType.AGENT) {
-    if (state.agentOutcome && 'returnValues' in state.agentOutcome) {
-      return state.hasRespondStep ? NodeType.RESPOND : END;
-    }
-    return NodeType.TOOLS;
-  }
-  // All possible conditional edges when source node is the GetPersistedConversation node
-  if (state.lastNode === NodeType.GET_PERSISTED_CONVERSATION) {
-    if (state.conversation?.title?.length && state.conversation?.title !== NEW_CHAT) {
-      return NodeType.PERSIST_CONVERSATION_CHANGES;
-    }
-    return NodeType.GENERATE_CHAT_TITLE;
-  }
-  // All possible conditional edges when source node is the ModelInput node
-  if (state.lastNode === NodeType.MODEL_INPUT) {
-    if (!state.conversationId) {
-      return NodeType.AGENT;
-    }
-    return NodeType.GET_PERSISTED_CONVERSATION;
-  }
+  switch (state.lastNode) {
+    case NodeType.AGENT:
+      if (state.agentOutcome && 'returnValues' in state.agentOutcome) {
+        return state.hasRespondStep ? NodeType.RESPOND : END;
+      }
+      return NodeType.TOOLS;
 
-  return END;
+    case NodeType.GET_PERSISTED_CONVERSATION:
+      if (state.conversation?.title?.length && state.conversation?.title !== NEW_CHAT) {
+        return NodeType.PERSIST_CONVERSATION_CHANGES;
+      }
+      return NodeType.GENERATE_CHAT_TITLE;
+
+    case NodeType.MODEL_INPUT:
+      return state.conversationId ? NodeType.GET_PERSISTED_CONVERSATION : NodeType.AGENT;
+
+    default:
+      return END;
+  }
 }
