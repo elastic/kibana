@@ -420,7 +420,34 @@ describe('UnifiedDataTable', () => {
 
       expect(component.find(EuiDataGrid).first().prop('toolbarVisibility')).toMatchInlineSnapshot(`
         Object {
-          "additionalControls": null,
+          "additionalControls": <EuiFlexGroup
+            alignItems="center"
+            gutterSize="s"
+            responsive={false}
+            wrap={true}
+          >
+            <EuiFlexItem
+              css={
+                Object {
+                  "paddingRight": "8px",
+                }
+              }
+              grow={false}
+            >
+              <EuiSwitch
+                checked={true}
+                compressed={true}
+                disabled={true}
+                label={
+                  <Memo(MemoizedFormattedMessage)
+                    defaultMessage="Show summary"
+                    id="unifiedDataTable.showSummary"
+                  />
+                }
+                onChange={[Function]}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>,
           "showColumnSelector": false,
           "showDisplaySelector": Object {
             "additionalDisplaySettings": <UnifiedDataTableAdditionalDisplaySettings
@@ -453,7 +480,34 @@ describe('UnifiedDataTable', () => {
 
       expect(component.find(EuiDataGrid).first().prop('toolbarVisibility')).toMatchInlineSnapshot(`
         Object {
-          "additionalControls": null,
+          "additionalControls": <EuiFlexGroup
+            alignItems="center"
+            gutterSize="s"
+            responsive={false}
+            wrap={true}
+          >
+            <EuiFlexItem
+              css={
+                Object {
+                  "paddingRight": "8px",
+                }
+              }
+              grow={false}
+            >
+              <EuiSwitch
+                checked={true}
+                compressed={true}
+                disabled={true}
+                label={
+                  <Memo(MemoizedFormattedMessage)
+                    defaultMessage="Show summary"
+                    id="unifiedDataTable.showSummary"
+                  />
+                }
+                onChange={[Function]}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>,
           "showColumnSelector": false,
           "showDisplaySelector": Object {
             "additionalDisplaySettings": <UnifiedDataTableAdditionalDisplaySettings
@@ -485,7 +539,34 @@ describe('UnifiedDataTable', () => {
 
       expect(component.find(EuiDataGrid).first().prop('toolbarVisibility')).toMatchInlineSnapshot(`
         Object {
-          "additionalControls": null,
+          "additionalControls": <EuiFlexGroup
+            alignItems="center"
+            gutterSize="s"
+            responsive={false}
+            wrap={true}
+          >
+            <EuiFlexItem
+              css={
+                Object {
+                  "paddingRight": "8px",
+                }
+              }
+              grow={false}
+            >
+              <EuiSwitch
+                checked={true}
+                compressed={true}
+                disabled={true}
+                label={
+                  <Memo(MemoizedFormattedMessage)
+                    defaultMessage="Show summary"
+                    id="unifiedDataTable.showSummary"
+                  />
+                }
+                onChange={[Function]}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>,
           "showColumnSelector": false,
           "showDisplaySelector": undefined,
           "showFullScreenSelector": true,
@@ -694,7 +775,7 @@ describe('UnifiedDataTable', () => {
       const renderCustomToolbarMock = jest.fn((props) => {
         toolbarParams = props.toolbarProps;
         gridParams = props.gridProps;
-        return <div data-test-subj="custom-toolbar">Custom layout</div>;
+        return <div data-test-subj="custom-toolbar">{gridParams?.additionalControls}</div>;
       });
       const component = await getComponent({
         ...getProps(),
@@ -709,18 +790,16 @@ describe('UnifiedDataTable', () => {
           toolbarProps: expect.objectContaining({
             hasRoomForGridControls: true,
           }),
-          gridProps: expect.objectContaining({
-            additionalControls: null,
-          }),
         })
       );
 
       // the default eui controls should be available for custom rendering
       expect(toolbarParams?.columnSortingControl).toBeTruthy();
       expect(toolbarParams?.keyboardShortcutsControl).toBeTruthy();
-      expect(gridParams?.additionalControls).toBe(null);
+      expect(gridParams?.additionalControls).toBeTruthy();
+      expect(findTestSubject(component, 'unifiedDataTableSelectionBtn').exists()).toBeFalsy();
 
-      // additional controls become available after selecting a document
+      // select button become available after selecting a document
       act(() => {
         component
           .find('.euiDataGridRowCell[data-gridcell-column-id="select"] .euiCheckbox__input')
@@ -730,6 +809,9 @@ describe('UnifiedDataTable', () => {
 
       expect(toolbarParams?.keyboardShortcutsControl).toBeTruthy();
       expect(gridParams?.additionalControls).toBeTruthy();
+      expect(
+        findTestSubject(component.update(), 'unifiedDataTableSelectionBtn').exists()
+      ).toBeTruthy();
     });
   });
 

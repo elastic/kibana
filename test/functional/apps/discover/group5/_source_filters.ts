@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
       await retry.try(async function () {
-        expect(await PageObjects.discover.getDocHeader()).to.have.string('Document');
+        expect(await PageObjects.discover.getDocHeader()).to.have.string('Summary');
       });
     });
 
