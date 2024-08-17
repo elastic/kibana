@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
-        await expectColumns(['@timestamp', 'Document']);
+        await expectColumns(['@timestamp', 'Summary']);
         await dataGrid.clickGridSettings();
         let rowHeightValue = await dataGrid.getCurrentRowHeightValue();
         expect(rowHeightValue).to.be('Custom');
@@ -101,7 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('log.level');
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('message');
-        await expectColumns(['@timestamp', 'Document']);
+        await expectColumns(['@timestamp', 'Summary']);
         await dataGrid.clickGridSettings();
         await dataGrid.changeRowHeightValue('Single');
         let rowHeightValue = await dataGrid.getCurrentRowHeightValue();
@@ -151,7 +151,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           ensureCurrentUrl: false,
         });
         await dataViews.switchTo('my-example-*');
-        await expectColumns(['@timestamp', 'Document']);
+        await expectColumns(['@timestamp', 'Summary']);
         await dataGrid.clickGridSettings();
         let rowHeightValue = await dataGrid.getCurrentRowHeightValue();
         expect(rowHeightValue).to.be('Custom');
@@ -174,7 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('log.level');
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('message');
-        await expectColumns(['@timestamp', 'Document']);
+        await expectColumns(['@timestamp', 'Summary']);
         await dataGrid.clickGridSettings();
         await dataGrid.changeRowHeightValue('Single');
         let rowHeightValue = await dataGrid.getCurrentRowHeightValue();

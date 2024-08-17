@@ -432,6 +432,7 @@ describe('UnifiedDataTable', () => {
               rowHeight="custom"
               rowHeightLines={3}
               sampleSize={150}
+              showSummaryColumn={true}
             />,
             "allowDensity": false,
             "allowResetButton": false,
@@ -463,6 +464,7 @@ describe('UnifiedDataTable', () => {
               rowHeight="custom"
               rowHeightLines={3}
               sampleSize={200}
+              showSummaryColumn={true}
             />,
             "allowDensity": false,
             "allowResetButton": false,
