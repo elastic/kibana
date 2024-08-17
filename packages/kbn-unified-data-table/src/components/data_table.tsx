@@ -502,10 +502,13 @@ export const UnifiedDataTable = ({
 
   useEffect(() => {
     if (!prevDefaultColumns.current && defaultColumns) {
-      prevDefaultColumns.current = defaultColumns;
       // @ts-expect-error
       onResize?.({ columnId: SOURCE_COLUMN, width: undefined });
+    } else if (prevDefaultColumns.current && !defaultColumns) {
+      onResize?.({ columnId: SOURCE_COLUMN, width: 500 });
     }
+
+    prevDefaultColumns.current = defaultColumns;
   }, [defaultColumns, onResize]);
 
   const displayedRows = useMemo(() => {
