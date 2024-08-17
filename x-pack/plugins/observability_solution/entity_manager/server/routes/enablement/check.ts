@@ -24,7 +24,7 @@ import { getClientsFromAPIKey } from '../../lib/utils';
  * @openapi
  * /internal/entities/managed/enablement:
  *   get:
- *     description: Check if managed (built-in) entity discovery is enabled.
+ *     description: Check if managed (built-in) entity discovery is enabled. Enabled entity discovery requires a valid api key and the latest version of the builtin definitions installed and running.
  *     tags:
  *       - management
  *     responses:

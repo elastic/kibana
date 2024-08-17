@@ -34,6 +34,14 @@ import { startTransform } from '../../lib/entities/start_transform';
  *     description: Enable managed (built-in) entity discovery.
  *     tags:
  *       - management
+ *     parameters:
+ *       - in: query
+ *         name: installOnly
+ *         description: If true, the definition transforms will not be started
+ *         required: false
+ *         schema:
+ *           type: boolean
+ *           default: false
  *     responses:
  *       403:
  *         description: The current user does not have the required permissions to enable entity discovery

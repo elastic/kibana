@@ -30,7 +30,7 @@ import { EntityDiscoveryApiKeyType } from '../../saved_objects';
  *           default: false
  *     responses:
  *       403:
- *         description: The current user does not have the required permissions to enable entity discovery
+ *         description: The current user does not have the required permissions to disable entity discovery
  *       200:
  *         description: Built-in entity discovery successfully disabled
  *         content:

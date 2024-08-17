@@ -27,6 +27,14 @@ import { installEntityDefinition } from '../../lib/entities/install_entity_defin
  *     description: Install an entity definition.
  *     tags:
  *       - definitions
+ *     parameters:
+ *       - in: query
+ *         name: installOnly
+ *         description: If true, the definition transforms will not be started
+ *         required: false
+ *         schema:
+ *           type: boolean
+ *           default: false
  *     requestBody:
  *       description: The entity definition to install
  *       required: true
