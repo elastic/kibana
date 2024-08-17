@@ -29,6 +29,9 @@ import {
   EuiDataGridToolBarVisibilityDisplaySelectorOptions,
   EuiDataGridStyle,
   EuiDataGridProps,
+  EuiSwitch,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -45,6 +48,7 @@ import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AdditionalFieldGroups } from '@kbn/unified-field-list';
+import { euiThemeVars } from '@kbn/ui-theme';
 import {
   UnifiedDataTableSettings,
   ValueToStringConverter,
@@ -494,6 +498,16 @@ export const UnifiedDataTable = ({
     }
   }, [isFilterActive, hasSelectedDocs, setIsFilterActive]);
 
+  const prevDefaultColumns = useRef(defaultColumns);
+
+  useEffect(() => {
+    if (!prevDefaultColumns.current && defaultColumns) {
+      prevDefaultColumns.current = defaultColumns;
+      // @ts-expect-error
+      onResize?.({ columnId: SOURCE_COLUMN, width: undefined });
+    }
+  }, [defaultColumns, onResize]);
+
   const displayedRows = useMemo(() => {
     if (!rows) {
       return [];
@@ -895,45 +909,71 @@ export const UnifiedDataTable = ({
   ]);
 
   const additionalControls = useMemo(() => {
-    if (!externalAdditionalControls && !selectedDocsCount) {
-      return null;
-    }
-
     return (
-      <>
-        {Boolean(selectedDocsCount) && (
-          <DataTableDocumentToolbarBtn
-            isPlainRecord={isPlainRecord}
-            isFilterActive={isFilterActive}
-            rows={rows!}
-            setIsFilterActive={setIsFilterActive}
-            selectedDocsState={selectedDocsState}
-            enableComparisonMode={enableComparisonMode}
-            setIsCompareActive={setIsCompareActive}
-            fieldFormats={fieldFormats}
-            pageIndex={unifiedDataTableContextValue.pageIndex}
-            pageSize={unifiedDataTableContextValue.pageSize}
-            toastNotifications={toastNotifications}
-            columns={visibleColumns}
+      <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s" wrap>
+        <EuiFlexItem grow={false} css={{ paddingRight: euiThemeVars.euiSizeS }}>
+          <EuiSwitch
+            label={
+              <FormattedMessage id="unifiedDataTable.showSummary" defaultMessage="Show summary" />
+            }
+            compressed
+            disabled={hasOnlySourceColumn(displayedColumns)}
+            checked={displayedColumns.some((column) => column === SOURCE_COLUMN)}
+            onChange={(e) => {
+              const filteredColumns = visibleColumns.filter((column) => column !== SOURCE_COLUMN);
+              const dontModifyColumns = !shouldPrependTimeFieldColumn(filteredColumns);
+              const insertIndex = timeFieldName ? filteredColumns.indexOf(timeFieldName) + 1 : 0;
+
+              if (e.target.checked) {
+                filteredColumns.splice(insertIndex, 0, SOURCE_COLUMN);
+              }
+
+              onSetColumns(filteredColumns, dontModifyColumns);
+              onResize?.({ columnId: SOURCE_COLUMN, width: 500 });
+            }}
           />
+        </EuiFlexItem>
+        {Boolean(selectedDocsCount) && (
+          <EuiFlexItem grow={false}>
+            <DataTableDocumentToolbarBtn
+              isPlainRecord={isPlainRecord}
+              isFilterActive={isFilterActive}
+              rows={rows!}
+              setIsFilterActive={setIsFilterActive}
+              selectedDocsState={selectedDocsState}
+              enableComparisonMode={enableComparisonMode}
+              setIsCompareActive={setIsCompareActive}
+              fieldFormats={fieldFormats}
+              pageIndex={unifiedDataTableContextValue.pageIndex}
+              pageSize={unifiedDataTableContextValue.pageSize}
+              toastNotifications={toastNotifications}
+              columns={visibleColumns}
+            />
+          </EuiFlexItem>
         )}
-        {externalAdditionalControls}
-      </>
+        {Boolean(externalAdditionalControls) && (
+          <EuiFlexItem grow={false}>{externalAdditionalControls}</EuiFlexItem>
+        )}
+      </EuiFlexGroup>
     );
   }, [
+    displayedColumns,
     selectedDocsCount,
-    selectedDocsState,
-    externalAdditionalControls,
     isPlainRecord,
     isFilterActive,
-    setIsFilterActive,
-    enableComparisonMode,
     rows,
+    selectedDocsState,
+    enableComparisonMode,
     fieldFormats,
     unifiedDataTableContextValue.pageIndex,
     unifiedDataTableContextValue.pageSize,
     toastNotifications,
     visibleColumns,
+    externalAdditionalControls,
+    shouldPrependTimeFieldColumn,
+    timeFieldName,
+    onSetColumns,
+    onResize,
   ]);
 
   const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
