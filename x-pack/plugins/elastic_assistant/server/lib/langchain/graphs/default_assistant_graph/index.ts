@@ -151,7 +151,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
 
   const assistantGraph = getDefaultAssistantGraph({
     agentRunnable,
-    conversationId,
     dataClients,
     // we need to pass it like this or streaming does not work for bedrock
     createLlmInstance,
@@ -159,11 +158,14 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     tools,
     responseLanguage,
     replacements,
-    llmType,
-    bedrockChatEnabled,
-    isStreaming: isStream,
   });
-  const inputs = { input: latestMessage[0]?.content as string };
+  const inputs = {
+    bedrockChatEnabled,
+    conversationId,
+    llmType,
+    isStream,
+    input: latestMessage[0]?.content as string,
+  };
 
   if (isStream) {
     return streamGraph({

@@ -22,7 +22,13 @@ interface StreamGraphParams {
   apmTracer: APMTracer;
   assistantGraph: DefaultAssistantGraph;
   bedrockChatEnabled: boolean;
-  inputs: { input: string };
+  inputs: {
+    input: string;
+    conversationId?: string;
+    llmType?: string;
+    bedrockChatEnabled?: boolean;
+    isStream: boolean;
+  };
   llmType: string | undefined;
   logger: Logger;
   onLlmResponse?: OnLlmResponse;
@@ -84,7 +90,7 @@ export const streamGraph = async ({
 
   if ((llmType === 'bedrock' || llmType === 'gemini') && bedrockChatEnabled) {
     const stream = await assistantGraph.streamEvents(
-      inputs,
+      { inputs, llmType, bedrockChatEnabled },
       {
         callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
         runName: DEFAULT_ASSISTANT_GRAPH_ID,
@@ -225,7 +231,13 @@ export const streamGraph = async ({
 interface InvokeGraphParams {
   apmTracer: APMTracer;
   assistantGraph: DefaultAssistantGraph;
-  inputs: { input: string };
+  inputs: {
+    input: string;
+    conversationId?: string;
+    llmType?: string;
+    bedrockChatEnabled?: boolean;
+    isStream: boolean;
+  };
   onLlmResponse?: OnLlmResponse;
   traceOptions?: TraceOptions;
 }

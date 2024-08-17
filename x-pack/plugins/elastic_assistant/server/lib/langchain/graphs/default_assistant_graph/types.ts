@@ -19,7 +19,14 @@ export interface AgentState extends AgentStateBase {
   input: string;
   messages: BaseMessage[];
   chatTitle: string;
+  lastNode: string;
+  hasRespondStep: boolean;
+  isStream: boolean;
+  bedrockChatEnabled: boolean;
+  llmType: string;
+  responseLanguage: string;
   conversation: ConversationResponse | undefined;
+  conversationId: string;
 }
 
 export interface NodeParamsBase {
