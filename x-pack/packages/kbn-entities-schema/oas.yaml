@@ -4,6 +4,13 @@ info:
   version: v1
 components:
   schemas:
+    createEntityDefinitionQuerySchema:
+      type: object
+      properties:
+        installOnly:
+          type: boolean
+          default: false
+      additionalProperties: false
     getEntityDefinitionQuerySchema:
       type: object
       properties:
@@ -234,6 +241,22 @@ components:
                   pattern: ^\d+[m|d|s|h]$
               additionalProperties: false
           additionalProperties: false
+        installStatus:
+          anyOf:
+            - type: string
+              enum:
+                - installing
+            - type: string
+              enum:
+                - upgrading
+            - type: string
+              enum:
+                - installed
+            - type: string
+              enum:
+                - failed
+        installStartedAt:
+          type: string
       required:
         - id
         - version
@@ -253,6 +276,8 @@ components:
               properties:
                 id:
                   type: string
+                type:
+                  type: string
                 identityFields:
                   type: array
                   items:
@@ -263,34 +288,55 @@ components:
                   type: object
                   additionalProperties:
                     type: number
+                definitionVersion:
+                  type: string
+                schemaVersion:
+                  type: string
+                definitionId:
+                  type: string
+                lastSeenTimestamp:
+                  type: string
+                firstSeenTimestamp:
+                  type: string
               required:
                 - id
+                - type
                 - identityFields
                 - displayName
                 - metrics
+                - definitionVersion
+                - schemaVersion
+                - definitionId
+                - lastSeenTimestamp
+                - firstSeenTimestamp
               additionalProperties: false
-            lastSeenTimestamp:
-              type: string
-            firstSeenTimestamp:
-              type: string
           required:
             - entity
-            - lastSeenTimestamp
-            - firstSeenTimestamp
-        - type: object
-          additionalProperties:
-            anyOf:
-              - type: string
-              - type: number
+        - anyOf:
+            - anyOf:
+                - type: string
+                - type: number
+                - type: boolean
+                - enum:
+                    - "null"
+                  nullable: true
+            - type: array
+              items: {}
+            - type: object
+              additionalProperties: {}
     entityHistorySchema:
       allOf:
         - type: object
           properties:
+            "@timestamp":
+              type: string
             entity:
               type: object
               properties:
                 id:
                   type: string
+                type:
+                  type: string
                 identityFields:
                   type: array
                   items:
@@ -301,26 +347,43 @@ components:
                   type: object
                   additionalProperties:
                     type: number
+                definitionVersion:
+                  type: string
+                schemaVersion:
+                  type: string
+                definitionId:
+                  type: string
               required:
                 - id
+                - type
                 - identityFields
                 - displayName
                 - metrics
+                - definitionVersion
+                - schemaVersion
+                - definitionId
               additionalProperties: false
-            "@timestamp":
-              type: string
           required:
-            - entity
             - "@timestamp"
-        - type: object
-          additionalProperties:
-            anyOf:
-              - type: string
-              - type: number
+            - entity
+        - anyOf:
+            - anyOf:
+                - type: string
+                - type: number
+                - type: boolean
+                - enum:
+                    - "null"
+                  nullable: true
+            - type: array
+              items: {}
+            - type: object
+              additionalProperties: {}
 paths:
   /internal/entities/managed/enablement:
     get:
-      description: Check if managed (built-in) entity discovery is enabled.
+      description: Check if managed (built-in) entity discovery is enabled. Enabled
+        entity discovery requires a valid api key and the latest version of the
+        builtin definitions installed and running.
       tags:
         - management
       responses:
@@ -354,7 +417,7 @@ paths:
             default: false
       responses:
         "200":
-          description: OK - validate disable result in response body
+          description: Built-in entity discovery successfully disabled
           content:
             application/json:
               schema:
@@ -362,18 +425,21 @@ paths:
                 properties:
                   success:
                     type: boolean
-                    example: false
-                  reason:
-                    type: string
-                    example: user_not_authorized
-                  message:
-                    type: string
-                    example: Current Kibana user does not have the required permissions to disable
-                      entity discovery
+        "403":
+          description: The current user does not have the required permissions to disable
+            entity discovery
     put:
       description: Enable managed (built-in) entity discovery.
       tags:
         - management
+      parameters:
+        - in: query
+          name: installOnly
+          description: If true, the definition transforms will not be started
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         "200":
           description: OK - validate enable result in response body
@@ -393,11 +459,22 @@ paths:
                     example: API key service is not enabled; try configuring
                       `xpack.security.authc.api_key.enabled` in your
                       elasticsearch config
+        "403":
+          description: The current user does not have the required permissions to enable
+            entity discovery
   /internal/entities/definition:
     post:
       description: Install an entity definition.
       tags:
         - definitions
+      parameters:
+        - in: query
+          name: installOnly
+          description: If true, the definition transforms will not be started
+          required: false
+          schema:
+            type: boolean
+            default: false
       requestBody:
         description: The entity definition to install
         required: true
@@ -471,12 +548,17 @@ paths:
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/entityDefinitionSchema"
-                  - type: object
-                    properties:
-                      installed:
-                        type: boolean
-                      running:
-                        type: boolean
+                type: object
+                properties:
+                  definitions:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: "#/components/schemas/entityDefinitionSchema"
+                        - type: object
+                          properties:
+                            installed:
+                              type: boolean
+                            running:
+                              type: boolean
 tags: []
