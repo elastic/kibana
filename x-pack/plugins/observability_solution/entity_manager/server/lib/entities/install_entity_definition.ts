@@ -161,7 +161,7 @@ export async function installBuiltInEntityDefinitions({
     }
 
     // verify existing installation
-    if (!shouldReinstall(installedDefinition, builtInDefinition)) {
+    if (!shouldReinstallBuiltinDefinition(installedDefinition, builtInDefinition)) {
       return installedDefinition;
     }
 
@@ -281,19 +281,34 @@ export async function reinstallEntityDefinition({
 }
 
 const INSTALLATION_TIMEOUT = 5 * 60 * 1000;
-const shouldReinstall = (
-  definition: EntityDefinitionWithState,
-  latestDefinition: EntityDefinition
-) => {
+export const installationInProgress = (definition: EntityDefinition) => {
   const { installStatus, installStartedAt } = definition;
 
-  const isStale =
+  return (
     (installStatus === 'installing' || installStatus === 'upgrading') &&
-    Date.now() - Date.parse(installStartedAt!) >= INSTALLATION_TIMEOUT;
-  const isOutdated =
-    installStatus === 'installed' && semver.neq(definition.version, latestDefinition.version);
-  const isFailed = installStatus === 'failed';
-  const isPartial = installStatus === 'installed' && !definition.state.installed;
+    Date.now() - Date.parse(installStartedAt!) < INSTALLATION_TIMEOUT
+  );
+};
 
-  return isStale || isOutdated || isFailed || isPartial;
+const installationTimedOut = (definition: EntityDefinition) => {
+  const { installStatus, installStartedAt } = definition;
+
+  return (
+    (installStatus === 'installing' || installStatus === 'upgrading') &&
+    Date.now() - Date.parse(installStartedAt!) >= INSTALLATION_TIMEOUT
+  );
+};
+
+const shouldReinstallBuiltinDefinition = (
+  installedDefinition: EntityDefinitionWithState,
+  latestDefinition: EntityDefinition
+) => {
+  const { installStatus, version, state } = installedDefinition;
+
+  const timedOut = installationTimedOut(installedDefinition);
+  const outdated = installStatus === 'installed' && semver.neq(version, latestDefinition.version);
+  const failed = installStatus === 'failed';
+  const partial = installStatus === 'installed' && !state.installed;
+
+  return timedOut || outdated || failed || partial;
 };

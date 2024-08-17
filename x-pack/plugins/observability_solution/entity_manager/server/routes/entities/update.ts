@@ -17,7 +17,10 @@ import { SetupRouteOptions } from '../types';
 import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
 import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
 import { startTransform } from '../../lib/entities/start_transform';
-import { reinstallEntityDefinition } from '../../lib/entities/install_entity_definition';
+import {
+  installationInProgress,
+  reinstallEntityDefinition,
+} from '../../lib/entities/install_entity_definition';
 import { findEntityDefinitionById } from '../../lib/entities/find_entity_definition';
 
 export function updateEntityDefinitionRoute<T extends RequestHandlerContext>({
@@ -55,6 +58,12 @@ export function updateEntityDefinitionRoute<T extends RequestHandlerContext>({
         if (installedDefinition.managed) {
           return res.forbidden({
             body: { message: `Managed definition can't be upgraded` },
+          });
+        }
+
+        if (installationInProgress(installedDefinition)) {
+          return res.conflict({
+            body: { message: `Entity definition [${req.params.id}] is being installed` },
           });
         }
 
