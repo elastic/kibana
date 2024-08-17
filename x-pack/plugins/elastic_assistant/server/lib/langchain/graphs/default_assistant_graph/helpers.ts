@@ -27,7 +27,7 @@ interface StreamGraphParams {
     conversationId?: string;
     llmType?: string;
     bedrockChatEnabled?: boolean;
-    isStream: boolean;
+    isStream?: boolean;
   };
   llmType: string | undefined;
   logger: Logger;
@@ -236,7 +236,7 @@ interface InvokeGraphParams {
     conversationId?: string;
     llmType?: string;
     bedrockChatEnabled?: boolean;
-    isStream: boolean;
+    isStream?: boolean;
   };
   onLlmResponse?: OnLlmResponse;
   traceOptions?: TraceOptions;
