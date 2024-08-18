@@ -42,3 +42,14 @@ export async function clearKnowledgeBase(es: Client) {
     refresh: true,
   });
 }
+
+export async function clearConversations(es: Client) {
+  const KB_INDEX = '.kibana-observability-ai-assistant-conversations-*';
+
+  return es.deleteByQuery({
+    index: KB_INDEX,
+    conflicts: 'proceed',
+    query: { match_all: {} },
+    refresh: true,
+  });
+}

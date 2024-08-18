@@ -11,7 +11,12 @@ import { sortBy } from 'lodash';
 import { Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { clearKnowledgeBase, createKnowledgeBaseModel, deleteKnowledgeBaseModel } from './helpers';
+import {
+  clearConversations,
+  clearKnowledgeBase,
+  createKnowledgeBaseModel,
+  deleteKnowledgeBaseModel,
+} from './helpers';
 import { getConversationCreatedEvent } from '../conversations/helpers';
 import { LlmProxy } from '../../common/create_llm_proxy';
 import { createLLMProxyConnector, deleteLLMProxyConnector } from '../complete/functions/helpers';
@@ -43,6 +48,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await deleteKnowledgeBaseModel(ml);
       await security.user.delete(userJohn);
       await clearKnowledgeBase(es);
+      await clearConversations(es);
     });
 
     describe('when creating private and public user instructions', () => {
@@ -213,10 +219,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         ({ proxy, connectorId } = await createLLMProxyConnector({ log, supertest }));
 
-        proxy.interceptConversationTitle('LLM-generated title').completeAfterIntercept();
-        proxy
-          .interceptConversation({ name: 'conversation', response: 'I, the LLM, hear you!' })
-          .completeAfterIntercept();
+        const interceptPromises = [
+          proxy.interceptConversationTitle('LLM-generated title').completeAfterIntercept(),
+          proxy
+            .interceptConversation({ name: 'conversation', response: 'I, the LLM, hear you!' })
+            .completeAfterIntercept(),
+        ];
 
         const messages: Message[] = [
           {
@@ -259,6 +267,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
           },
         });
+
+        // wait for all interceptors to be settled
+        await Promise.all(interceptPromises);
 
         const conversation = res.body;
         return conversation;
