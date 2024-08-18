@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
@@ -34,7 +34,13 @@ import { getLatestAvailableAgentVersion } from './versions';
 
 export class UpgradeActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
-    return await upgradeBatch(this.soClient, this.esClient, agents, {}, this.actionParams! as any);
+    return await upgradeBatch(
+      this.esClient,
+      agents,
+      {},
+      this.actionParams! as any,
+      this.actionParams?.spaceId
+    );
   }
 
   protected getTaskType() {
@@ -52,7 +58,6 @@ const isActionIdCancelled = async (esClient: ElasticsearchClient, actionId: stri
 };
 
 export async function upgradeBatch(
-  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   givenAgents: Agent[],
   outgoingErrors: Record<Agent['id'], Error>,
@@ -68,6 +73,7 @@ export async function upgradeBatch(
   },
   spaceId?: string
 ): Promise<{ actionId: string }> {
+  const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
   const hostedPolicies = await getHostedPolicies(soClient, givenAgents);

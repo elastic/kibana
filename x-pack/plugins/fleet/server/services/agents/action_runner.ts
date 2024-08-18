@@ -197,8 +197,8 @@ export abstract class ActionRunner {
 
     appContextService.getLogger().debug('kuery: ' + this.actionParams.kuery);
 
-    const getAgents = () => {
-      const namespaceFilter = agentsKueryNamespaceFilter(this.actionParams.spaceId);
+    const getAgents = async () => {
+      const namespaceFilter = await agentsKueryNamespaceFilter(this.actionParams.spaceId);
       const kuery = namespaceFilter
         ? `${namespaceFilter} AND ${this.actionParams.kuery}`
         : this.actionParams.kuery;

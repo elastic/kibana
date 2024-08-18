@@ -121,7 +121,7 @@ export async function reassignAgents(
     }
   } else if ('kuery' in options) {
     const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
-    const namespaceFilter = agentsKueryNamespaceFilter(currentNameSpace);
+    const namespaceFilter = await agentsKueryNamespaceFilter(currentNameSpace);
     const kuery = namespaceFilter ? `${namespaceFilter} AND ${options.kuery}` : options.kuery;
     const res = await getAgentsByKuery(esClient, soClient, {
       kuery,

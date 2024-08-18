@@ -96,7 +96,7 @@ export async function sendUpgradeAgentsActions(
     }
   } else if ('kuery' in options) {
     const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
-    const namespaceFilter = agentsKueryNamespaceFilter(currentNameSpace);
+    const namespaceFilter = await agentsKueryNamespaceFilter(currentNameSpace);
     const kuery = namespaceFilter ? `${namespaceFilter} AND ${options.kuery}` : options.kuery;
 
     const res = await getAgentsByKuery(esClient, soClient, {
@@ -123,12 +123,5 @@ export async function sendUpgradeAgentsActions(
     }
   }
 
-  return await upgradeBatch(
-    soClient,
-    esClient,
-    givenAgents,
-    outgoingErrors,
-    options,
-    currentNameSpace
-  );
+  return await upgradeBatch(esClient, givenAgents, outgoingErrors, options, currentNameSpace);
 }

@@ -329,7 +329,7 @@ export async function cancelAgentAction(
     };
     const res = await esClient.search<FleetServerAgentAction>({
       index: AGENT_ACTIONS_INDEX,
-      query: addNamespaceFilteringToQuery(query, currentNameSpace),
+      query: await addNamespaceFilteringToQuery(query, currentNameSpace),
       size: SO_SEARCH_LIMIT,
     });
 
