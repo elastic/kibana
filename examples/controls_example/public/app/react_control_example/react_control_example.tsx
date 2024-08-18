@@ -139,7 +139,6 @@ export const ReactControlExample = ({
       addNewPanel: () => {
         return Promise.resolve(undefined);
       },
-      lastUsedDataViewId: new BehaviorSubject<string>(WEB_LOGS_DATA_VIEW_ID),
       saveNotification$,
       reload$,
     };

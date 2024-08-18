@@ -94,7 +94,62 @@
                 "DatasetQualityPublicState",
                 "> | undefined; }"
               ],
-              "path": "x-pack/plugins/observability_solution/dataset_quality/public/controller/create_controller.ts",
+              "path": "x-pack/plugins/observability_solution/dataset_quality/public/controller/dataset_quality/create_controller.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "datasetQuality",
+          "id": "def-public.DatasetQualityPluginStart.DatasetQualityDetails",
+          "type": "CompoundType",
+          "tags": [],
+          "label": "DatasetQualityDetails",
+          "description": [],
+          "signature": [
+            "React.ComponentClass<",
+            "DatasetQualityDetailsProps",
+            ", any> | React.FunctionComponent<",
+            "DatasetQualityDetailsProps",
+            ">"
+          ],
+          "path": "x-pack/plugins/observability_solution/dataset_quality/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "datasetQuality",
+          "id": "def-public.DatasetQualityPluginStart.createDatasetQualityDetailsController",
+          "type": "Function",
+          "tags": [],
+          "label": "createDatasetQualityDetailsController",
+          "description": [],
+          "signature": [
+            "({ initialState, }: { initialState: ",
+            "DatasetQualityDetailsPublicStateUpdate",
+            "; }) => Promise<",
+            "DatasetQualityDetailsController",
+            ">"
+          ],
+          "path": "x-pack/plugins/observability_solution/dataset_quality/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "datasetQuality",
+              "id": "def-public.DatasetQualityPluginStart.createDatasetQualityDetailsController.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "__0",
+              "description": [],
+              "signature": [
+                "{ initialState: ",
+                "DatasetQualityDetailsPublicStateUpdate",
+                "; }"
+              ],
+              "path": "x-pack/plugins/observability_solution/dataset_quality/public/controller/dataset_quality_details/create_controller.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -115,7 +170,41 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "datasetQuality",
+        "id": "def-common.indexNameToDataStreamParts",
+        "type": "Function",
+        "tags": [],
+        "label": "indexNameToDataStreamParts",
+        "description": [],
+        "signature": [
+          "(dataStreamName: string) => { type: \"metrics\" | \"synthetics\" | \"traces\" | \"logs\" | \"profiling\"; dataset: string; namespace: string; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/dataset_quality/common/utils/dataset_name.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "datasetQuality",
+            "id": "def-common.indexNameToDataStreamParts.$1",
+            "type": "string",
+            "tags": [],
+            "label": "dataStreamName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/observability_solution/dataset_quality/common/utils/dataset_name.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "datasetQuality",
@@ -169,7 +258,7 @@
           "StringC",
           "; }>; }> | undefined; handler: ({}: ",
           "DatasetQualityRouteHandlerResources",
-          " & { params: { path: { dataStream: string; }; }; }) => Promise<{ createdOn?: number | null | undefined; integration?: string | undefined; }>; } & ",
+          " & { params: { path: { dataStream: string; }; }; }) => Promise<{ createdOn?: number | null | undefined; integration?: string | undefined; datasetUserPrivileges?: ({ canMonitor: boolean; } & { canRead: boolean; canViewIntegrations: boolean; }) | undefined; }>; } & ",
           "DatasetQualityRouteCreateOptions",
           "; \"GET /internal/dataset_quality/data_streams/{dataStream}/details\": { endpoint: \"GET /internal/dataset_quality/data_streams/{dataStream}/details\"; params?: ",
           "TypeC",
@@ -330,7 +419,7 @@
           "StringC",
           "; }>; }> | undefined; handler: ({}: ",
           "DatasetQualityRouteHandlerResources",
-          " & { params: { path: { dataStream: string; }; }; }) => Promise<{ createdOn?: number | null | undefined; integration?: string | undefined; }>; } & ",
+          " & { params: { path: { dataStream: string; }; }; }) => Promise<{ createdOn?: number | null | undefined; integration?: string | undefined; datasetUserPrivileges?: ({ canMonitor: boolean; } & { canRead: boolean; canViewIntegrations: boolean; }) | undefined; }>; } & ",
           "DatasetQualityRouteCreateOptions",
           "; \"GET /internal/dataset_quality/data_streams/{dataStream}/details\": { endpoint: \"GET /internal/dataset_quality/data_streams/{dataStream}/details\"; params?: ",
           "TypeC",
