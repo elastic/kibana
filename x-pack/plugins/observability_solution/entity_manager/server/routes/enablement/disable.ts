@@ -39,6 +39,7 @@ export function disableEntityDiscoveryRoute<T extends RequestHandlerContext>({
             },
           });
         }
+
         const soClient = (await context.core).savedObjects.getClient({
           includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
         });
