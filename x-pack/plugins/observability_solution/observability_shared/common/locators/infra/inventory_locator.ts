@@ -40,12 +40,12 @@ export interface InventoryLocatorParams extends SerializableRecord {
   metric: string; // encoded value
   nodeType: string;
   region?: string;
-  sort: {
+  sort?: {
     by: string;
     direction: 'desc' | 'async';
   };
-  timelineOpen: boolean;
-  view: 'map' | 'table';
+  timelineOpen?: boolean;
+  view?: 'map' | 'table';
   state?: SerializableRecord;
 }
 
