@@ -106,7 +106,6 @@ export class FileDataVisualizerView extends Component {
     if (this.fileSizeChecker.check()) {
       try {
         const { data, fileContents } = await readFile(file);
-        console.log(file.type);
         if (isTikaType(file.type)) {
           this.setState({
             data,
