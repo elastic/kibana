@@ -6,16 +6,12 @@
  */
 
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import {
-  CreateInvestigationNoteInput,
-  CreateInvestigationNoteResponse,
-} from '@kbn/investigation-shared';
 import { useMutation } from '@tanstack/react-query';
 import { useKibana } from './use_kibana';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
-export function useAddInvestigationNote() {
+export function useDeleteInvestigationNote() {
   const {
     core: {
       http,
@@ -24,22 +20,21 @@ export function useAddInvestigationNote() {
   } = useKibana();
 
   return useMutation<
-    CreateInvestigationNoteResponse,
+    void,
     ServerError,
-    { investigationId: string; note: CreateInvestigationNoteInput },
+    { investigationId: string; noteId: string },
     { investigationId: string }
   >(
     ['addInvestigationNote'],
-    ({ investigationId, note }) => {
-      const body = JSON.stringify(note);
-      return http.post<CreateInvestigationNoteResponse>(
-        `/api/observability/investigations/${investigationId}/notes`,
-        { body, version: '2023-10-31' }
+    ({ investigationId, noteId }) => {
+      return http.delete<void>(
+        `/api/observability/investigations/${investigationId}/notes/${noteId}`,
+        { version: '2023-10-31' }
       );
     },
     {
       onSuccess: (response, {}) => {
-        toasts.addSuccess('Note saved');
+        toasts.addSuccess('Note deleted');
       },
       onError: (error, {}, context) => {
         toasts.addError(new Error(error.body?.message ?? 'An error occurred'), { title: 'Error' });

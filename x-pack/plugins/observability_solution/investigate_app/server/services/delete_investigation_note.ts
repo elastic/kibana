@@ -5,30 +5,24 @@
  * 2.0.
  */
 
-import {
-  CreateInvestigationNoteInput,
-  CreateInvestigationNoteResponse,
-} from '@kbn/investigation-shared';
-import { v4 } from 'uuid';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { InvestigationRepository } from './investigation_repository';
 
-export async function createInvestigationNote(
+export async function deleteInvestigationNote(
   investigationId: string,
-  params: CreateInvestigationNoteInput,
+  noteId: string,
   { repository, user }: { repository: InvestigationRepository; user: AuthenticatedUser }
-): Promise<CreateInvestigationNoteResponse> {
+): Promise<void> {
   const investigation = await repository.findById(investigationId);
+  const note = investigation.notes.find((currNote) => currNote.id === noteId);
+  if (!note) {
+    throw new Error('Note not found');
+  }
 
-  const investigationNote = {
-    id: v4(),
-    content: params.content,
-    createdBy: user.username,
-    createdAt: Date.now(),
-  };
-  investigation.notes.push(investigationNote);
+  if (note.createdBy !== user.username) {
+    throw new Error('User does not have permission to delete note');
+  }
 
+  investigation.notes = investigation.notes.filter((currNote) => currNote.id !== noteId);
   await repository.save(investigation);
-
-  return investigationNote;
 }
