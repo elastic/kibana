@@ -12,7 +12,7 @@ import { EuiLoadingSpinner, EuiPageSection } from '@elastic/eui';
 export const EditorContentSpinner: FunctionComponent = () => {
   return (
     <EuiPageSection alignment="center" grow={true} className="conApp__editor__spinner">
-      <EuiLoadingSpinner size="xxl"/>
+      <EuiLoadingSpinner size="xxl" />
     </EuiPageSection>
   );
 };

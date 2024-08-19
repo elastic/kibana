@@ -37,6 +37,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    it('output panel should initially be in empty state', async () => {
+      expect(await PageObjects.console.isOutputPanelEmptyStateVisible()).to.be(true);
+    });
+
     it('default request response should include `"timed_out" : false`', async () => {
       const expectedResponseContains = `"timed_out": false`;
       await PageObjects.console.monaco.selectAllRequests();
@@ -46,6 +50,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug(actualResponse);
         expect(actualResponse).to.contain(expectedResponseContains);
       });
+      // Output panel should not longer be in empty state
+      expect(await PageObjects.console.isOutputPanelEmptyStateVisible()).to.be(false);
     });
 
     // the resizer doesn't work the same as in ace https://github.com/elastic/kibana/issues/184352

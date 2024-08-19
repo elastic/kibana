@@ -31,6 +31,13 @@
   }
 }
 
+.conApp__outputPanel__emptyState {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding-left: $euiSizeM;
+}
+
 .conApp__output, .conApp_example {
   display: flex;
   flex: 1 1 1px;
