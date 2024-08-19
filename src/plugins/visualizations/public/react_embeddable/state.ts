@@ -73,15 +73,13 @@ export const deserializeSavedVisState = (
   let serializedReferences = [...references];
   if (!('indexRefName' in data.searchSource)) {
     // due to a bug in 8.0, some visualizations were saved with an injected state - re-extract in that case and inject the upstream references because they might have changed
-    const [newSearchSource, newReferences] = extractSearchSourceReferences(serializedSearchSource);
+    const [extractedSearchSource, extractedReferences] =
+      extractSearchSourceReferences(serializedSearchSource);
 
-    serializedSearchSource = newSearchSource as SerializedSearchSourceFields & {
+    serializedSearchSource = extractedSearchSource as SerializedSearchSourceFields & {
       indexRefName: string;
     };
-    serializedReferences = [
-      ...references.filter((r) => r.name !== serializedSearchSource.indexRefName),
-      ...newReferences,
-    ];
+    serializedReferences = [...references, ...extractedReferences];
   }
 
   const { references: deserializedReferences, deserializedSearchSource } = deserializeReferences(
