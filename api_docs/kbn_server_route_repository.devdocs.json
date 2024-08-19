@@ -60,7 +60,7 @@
         "label": "decodeRequestParams",
         "description": [],
         "signature": [
-          "(params: KibanaRequestParams, paramsRt: T) => ",
+          "(params: Partial<{ path: any; query: any; body: any; }>, paramsRt: T) => ",
           "OutputOf",
           "<T>"
         ],
@@ -76,7 +76,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "KibanaRequestParams"
+              "Partial<{ path: any; query: any; body: any; }>"
             ],
             "path": "packages/kbn-server-route-repository/src/decode_request_params.ts",
             "deprecated": false,
@@ -314,6 +314,39 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/server-route-repository",
+        "id": "def-server.stripNullishRequestParameters",
+        "type": "Function",
+        "tags": [],
+        "label": "stripNullishRequestParameters",
+        "description": [],
+        "signature": [
+          "(params: KibanaRequestParams) => Partial<{ path: any; body: any; query: any; }>"
+        ],
+        "path": "packages/kbn-server-route-repository/src/strip_nullish_request_parameters.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/server-route-repository",
+            "id": "def-server.stripNullishRequestParameters.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "KibanaRequestParams"
+            ],
+            "path": "packages/kbn-server-route-repository/src/strip_nullish_request_parameters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -530,6 +563,27 @@
       },
       {
         "parentPluginId": "@kbn/server-route-repository",
+        "id": "def-server.IoTsParamsObject",
+        "type": "Type",
+        "tags": [],
+        "label": "IoTsParamsObject",
+        "description": [],
+        "signature": [
+          "Omit<",
+          "Type",
+          "<{ path?: any; query?: any; body?: any; }, { path?: any; query?: any; body?: any; }, unknown>, \"encode\" | \"asEncoder\"> & { encode: ",
+          "Encode",
+          "<any, any>; asEncoder: () => ",
+          "Encoder",
+          "<any, any>; }"
+        ],
+        "path": "packages/kbn-server-route-repository-utils/src/typings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/server-route-repository",
         "id": "def-server.ReturnOf",
         "type": "Type",
         "tags": [],
@@ -577,13 +631,21 @@
         "label": "RouteParamsRT",
         "description": [],
         "signature": [
-          "Omit<",
-          "Type",
-          "<{ path?: any; query?: any; body?: any; }, { path?: any; query?: any; body?: any; }, unknown>, \"encode\" | \"asEncoder\"> & { encode: ",
-          "Encode",
-          "<any, any>; asEncoder: () => ",
-          "Encoder",
-          "<any, any>; }"
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.IoTsParamsObject",
+            "text": "IoTsParamsObject"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ZodParamsObject",
+            "text": "ZodParamsObject"
+          }
         ],
         "path": "packages/kbn-server-route-repository-utils/src/typings.ts",
         "deprecated": false,
@@ -727,77 +789,54 @@
     "objects": [
       {
         "parentPluginId": "@kbn/server-route-repository",
-        "id": "def-server.routeValidationObject",
+        "id": "def-server.passThroughValidationObject",
         "type": "Object",
         "tags": [],
-        "label": "routeValidationObject",
+        "label": "passThroughValidationObject",
         "description": [],
-        "path": "packages/kbn-server-route-repository/src/route_validation_object.ts",
+        "path": "packages/kbn-server-route-repository/src/validation_objects.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/server-route-repository",
-            "id": "def-server.routeValidationObject.body",
+            "id": "def-server.passThroughValidationObject.body",
             "type": "Object",
             "tags": [],
             "label": "body",
-            "description": [
-              "// `body` can be null, but `validate` expects non-nullable types\n// if any validation is defined. Not having validation currently\n// means we don't get the payload. See\n// https://github.com/elastic/kibana/issues/50179"
-            ],
+            "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/config-schema",
-                "scope": "common",
-                "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-common.Type",
-                "text": "Type"
-              },
-              "<string | Readonly<{} & {}> | null>"
+              "Zod.ZodAny"
             ],
-            "path": "packages/kbn-server-route-repository/src/route_validation_object.ts",
+            "path": "packages/kbn-server-route-repository/src/validation_objects.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/server-route-repository",
-            "id": "def-server.routeValidationObject.params",
+            "id": "def-server.passThroughValidationObject.params",
             "type": "Object",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/config-schema",
-                "scope": "common",
-                "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-common.ObjectType",
-                "text": "ObjectType"
-              },
-              "<{}>"
+              "Zod.ZodAny"
             ],
-            "path": "packages/kbn-server-route-repository/src/route_validation_object.ts",
+            "path": "packages/kbn-server-route-repository/src/validation_objects.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/server-route-repository",
-            "id": "def-server.routeValidationObject.query",
+            "id": "def-server.passThroughValidationObject.query",
             "type": "Object",
             "tags": [],
             "label": "query",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/config-schema",
-                "scope": "common",
-                "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-common.ObjectType",
-                "text": "ObjectType"
-              },
-              "<{}>"
+              "Zod.ZodAny"
             ],
-            "path": "packages/kbn-server-route-repository/src/route_validation_object.ts",
+            "path": "packages/kbn-server-route-repository/src/validation_objects.ts",
             "deprecated": false,
             "trackAdoption": false
           }

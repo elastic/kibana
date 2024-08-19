@@ -7,7 +7,7 @@ parameters:
 post:
   summary: Request agent diagnostics
   tags:
-    - Agents
+    - Elastic Agents
   requestBody:
     content:
       application/json:

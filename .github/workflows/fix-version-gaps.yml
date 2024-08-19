@@ -16,8 +16,9 @@ jobs:
       && !(
         contains(github.event.pull_request.labels.*.name, 'backport:prev-minor')
         || contains(github.event.pull_request.labels.*.name, 'backport:prev-major')
+        || contains(github.event.pull_request.labels.*.name, 'backport:current-major')
         || contains(github.event.pull_request.labels.*.name, 'backport:all-open')
-        || contains(github.event.pull_request.labels.*.name, 'backport:auto-version')
+        || contains(github.event.pull_request.labels.*.name, 'backport:version')
       )
       && !(
         (github.event.action == 'labeled' && github.event.label.name == 'auto-backport')
