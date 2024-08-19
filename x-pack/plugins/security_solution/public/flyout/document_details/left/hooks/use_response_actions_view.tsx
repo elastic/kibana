@@ -5,23 +5,29 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect } from 'react';
-import styled from 'styled-components';
+import React, { useState, useEffect } from 'react';
+import styled from '@emotion/styled';
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiLink, EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import type { Ecs } from '@kbn/cases-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RESPONSE_NO_DATA_TEST_ID } from '../../../flyout/document_details/left/components/test_ids';
-import type { SearchHit } from '../../../../common/search_strategy';
+import { i18n } from '@kbn/i18n';
+import { RESPONSE_NO_DATA_TEST_ID } from '../components/test_ids';
+import type { SearchHit } from '../../../../../common/search_strategy';
 import type {
   ExpandedEventFieldsObject,
   RawEventData,
-} from '../../../../common/types/response_actions';
-import { ResponseActionsResults } from '../response_actions/response_actions_results';
-import { expandDottedObject } from '../../../../common/utils/expand_dotted';
-import { useGetAutomatedActionList } from '../../../management/hooks/response_actions/use_get_automated_action_list';
-import { EventsViewType } from './event_details';
-import * as i18n from './translations';
+} from '../../../../../common/types/response_actions';
+import { ResponseActionsResults } from '../../../../common/components/response_actions/response_actions_results';
+import { expandDottedObject } from '../../../../../common/utils/expand_dotted';
+import { useGetAutomatedActionList } from '../../../../management/hooks/response_actions/use_get_automated_action_list';
+
+const RESPONSE_ACTIONS_VIEW = i18n.translate(
+  'xpack.securitySolution.flyout.response.responseActionsView',
+  {
+    defaultMessage: 'Response Results',
+  }
+);
 
 const TabContentWrapper = styled.div`
   height: 100%;
@@ -56,23 +62,29 @@ const EmptyResponseActions = () => {
   );
 };
 
-// TODO: MOVE TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
+const viewData = {
+  id: 'response-actions-results-view',
+  name: RESPONSE_ACTIONS_VIEW,
+};
+
+export interface UseResponseActionsViewParams {
+  /**
+   * An object with top level fields from the ECS object
+   */
+  ecsData?: Ecs | null;
+  /**
+   * The actual raw document object
+   */
+  rawEventData: SearchHit | undefined;
+}
+
+/**
+ *
+ */
 export const useResponseActionsView = <T extends object = JSX.Element>({
   rawEventData,
   ecsData,
-}: {
-  ecsData?: Ecs | null;
-  rawEventData: SearchHit | undefined;
-}): EuiTabbedContentTab | undefined => {
-  // can not be moved outside of the component, because then EventsViewType throws runtime error regarding not being initialized yet
-  const viewData = useMemo(
-    () => ({
-      id: EventsViewType.responseActionsView,
-      'data-test-subj': 'responseActionsViewTab',
-      name: i18n.RESPONSE_ACTIONS_VIEW,
-    }),
-    []
-  );
+}: UseResponseActionsViewParams): EuiTabbedContentTab => {
   const expandedEventFieldsObject = rawEventData
     ? (expandDottedObject((rawEventData as RawEventData).fields) as ExpandedEventFieldsObject)
     : undefined;
