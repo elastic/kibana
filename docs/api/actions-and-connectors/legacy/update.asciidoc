@@ -8,6 +8,8 @@ deprecated::[7.13.0,Use <<update-connector-api>> instead.]
 
 Updates the attributes for an existing connector.
 
+NOTE: For the latest details, refer to {api-kibana}/group/endpoint-connectors[connector APIs].
+
 [[actions-and-connectors-legacy-api-update-request]]
 ===== Request
 
