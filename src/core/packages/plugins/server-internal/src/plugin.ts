@@ -25,6 +25,7 @@ import type {
 } from '@kbn/core-plugins-server';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
 import { Setup, Start } from '@kbn/core-di-common';
+import { Contract } from '@kbn/core-di-common-internal';
 import {
   createPluginInitializerModule,
   createPluginSetupModule,
@@ -79,7 +80,9 @@ export class PluginWrapper<
     | PrebootPlugin<TSetup, TPluginsSetup>;
   private container?: interfaces.Container;
 
-  private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
+  private readonly startDependencies$ = new Subject<
+    [CoreStart, TPluginsStart, TStart | undefined]
+  >();
   public readonly startDependencies = firstValueFrom(this.startDependencies$);
 
   constructor(
@@ -145,10 +148,10 @@ export class PluginWrapper<
       this.container.load(createPluginSetupModule(setupContext as CoreSetup));
     }
 
-    return (
-      this.instance?.setup(setupContext as CoreSetup<TPluginsStart, TStart>, plugins) ??
-      (this.container?.getAsync(Setup) as TSetup)
-    );
+    return [
+      this.instance?.setup(setupContext as CoreSetup<TPluginsStart, TStart>, plugins),
+      this.container?.getNamed(Contract, Setup as symbol) as TSetup,
+    ].find(Boolean);
   }
 
   /**
@@ -172,17 +175,21 @@ export class PluginWrapper<
 
     this.container?.load(createPluginStartModule(startContext));
 
-    const contract =
-      this.instance?.start(startContext, plugins) ?? (this.container?.getAsync(Start) as TStart);
+    const contract = [
+      this.instance?.start(startContext, plugins),
+      this.container?.getNamed(Contract, Start as symbol) as TStart,
+    ].find(Boolean);
+
     if (isPromise(contract)) {
       return contract.then((resolvedContract) => {
         this.startDependencies$.next([startContext, plugins, resolvedContract]);
         return resolvedContract!;
       });
-    } else {
-      this.startDependencies$.next([startContext, plugins, contract]);
-      return contract;
     }
+
+    this.startDependencies$.next([startContext, plugins, contract]);
+
+    return contract;
   }
 
   /**

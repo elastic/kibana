@@ -24,7 +24,7 @@ import {
   AppMountParametersToken,
   IAppMount,
 } from '@kbn/core-application-browser';
-import { DiService, Global } from '@kbn/core-di-common';
+import { DiService, Global, OnSetup } from '@kbn/core-di-common';
 
 export function createPluginInitializerModule(
   context: PluginInitializerContext
@@ -37,41 +37,39 @@ export function createPluginInitializerModule(
 }
 
 export function createPluginSetupModule(context: CoreSetup): interfaces.ContainerModule {
-  return new ContainerModule((bind) => {
-    bind(ApplicationService)
-      .toConstantValue(context.application)
-      .onActivation(({ container }, application) => {
-        const applications = container.isCurrentBound(Application)
-          ? container.getAll(Application)
-          : [];
-
-        applications.forEach((config) => {
-          application.register({
-            ...config,
-            mount(params) {
-              const scope = container.get(DiService).fork();
-              scope.bind(AppMountParametersToken).toConstantValue(params);
-              scope.bind(Global).toConstantValue(AppMountParametersToken);
-              const unmount = scope.get<IAppMount>(config).mount();
-
-              return isPromise(unmount)
-                ? unmount.finally(() => scope.unbindAll())
-                : () => {
-                    try {
-                      return unmount();
-                    } finally {
-                      scope.unbindAll();
-                    }
-                  };
-            },
-          });
-        });
-
-        return application;
-      });
+  return new ContainerModule((bind, _unbind, _isBound, _rebind, _unbindAsync, onActivation) => {
+    bind(ApplicationService).toConstantValue(context.application);
     bind(HttpSetupService).toConstantValue(context.http);
 
-    bind(Global).toConstantValue(ApplicationService);
+    onActivation(Application, ({ container }, application) => {
+      container.get(ApplicationService).register({
+        ...application,
+        mount(params) {
+          const scope = container.get(DiService).fork();
+          scope.bind(AppMountParametersToken).toConstantValue(params);
+          scope.bind(Global).toConstantValue(AppMountParametersToken);
+          const unmount = scope.get<IAppMount>(application).mount();
+
+          return isPromise(unmount)
+            ? unmount.finally(() => scope.unbindAll())
+            : () => {
+                try {
+                  return unmount();
+                } finally {
+                  scope.unbindAll();
+                }
+              };
+        },
+      });
+
+      return application;
+    });
+
+    bind(OnSetup).toConstantValue((container) => {
+      if (container.isCurrentBound(Application)) {
+        container.getAll(Application);
+      }
+    });
   });
 }
 
