@@ -28,12 +28,12 @@ export const getApmDataAccessClient = ({
   request: KibanaRequest;
 }) => {
   const hasPrivileges = async () => {
-    const [, { apmDataAccess }] = await libs.getStartServices();
-    return apmDataAccess.hasPrivileges({ request });
+    const apmDataAccessStart = await libs.plugins.apmDataAccess.start();
+    return apmDataAccessStart.hasPrivileges({ request });
   };
 
   const getServices = async () => {
-    const { apmDataAccess } = libs;
+    const apmDataAccess = libs.plugins.apmDataAccess.setup;
 
     const coreContext = await context.core;
 
