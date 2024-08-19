@@ -76,9 +76,11 @@ describe('UnenrollInactiveAgentsTask', () => {
   ];
 
   const getMockAgentPolicyFetchAllAgentPolicies = (items: AgentPolicy[]) =>
-    jest.fn(async function* (soClient: SavedObjectsClientContract) {
-      yield items;
-    });
+    jest.fn().mockResolvedValue(
+      jest.fn(async function* () {
+        yield items;
+      })()
+    );
 
   beforeEach(() => {
     mockContract = createAppContextStartContractMock();
