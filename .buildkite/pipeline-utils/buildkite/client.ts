@@ -8,7 +8,7 @@
 
 import axios, { AxiosInstance } from 'axios';
 import { execSync, ExecSyncOptions } from 'child_process';
-import { dump } from 'js-yaml';
+import { safeDump } from 'js-yaml';
 import { parseLinkHeader } from './parse_link_header';
 import { Artifact } from './types/artifact';
 import { Build, BuildStatus } from './types/build';
@@ -405,7 +405,7 @@ export class BuildkiteClient {
 
   uploadSteps = (steps: Array<BuildkiteStep | BuildkiteGroup>) => {
     this.exec(`buildkite-agent pipeline upload`, {
-      input: dump({ steps }),
+      input: safeDump({ steps }),
       stdio: ['pipe', 'inherit', 'inherit'],
     });
   };
