@@ -596,7 +596,8 @@ describe('query tab with unified timeline', () => {
     );
   });
 
-  describe('left controls', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/189792
+  describe.skip('left controls', () => {
     it(
       'should clear all sorting',
       async () => {
