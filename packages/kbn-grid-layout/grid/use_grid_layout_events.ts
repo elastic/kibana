@@ -169,36 +169,11 @@ export const useGridLayoutEvents = ({
       dragEnterCount.current = 0;
     };
 
-    const onDragEnter = (e: MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (!interactionEvent$.value) return;
-
-      dragEnterCount.current++;
-    };
-
-    const onDragLeave = (e: MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (!interactionEvent$.value) return;
-
-      dragEnterCount.current--;
-      if (dragEnterCount.current === 0) {
-        interactionEvent$.next(undefined);
-        gridLayoutStateManager.hideDragPreview();
-        dragEnterCount.current = 0;
-      }
-    };
-
-    window.addEventListener('drop', onDrop);
-    window.addEventListener('dragover', dragOver);
-    window.addEventListener('dragenter', onDragEnter);
-    window.addEventListener('dragleave', onDragLeave);
+    window.addEventListener('mouseup', onDrop);
+    window.addEventListener('mousemove', dragOver);
     return () => {
-      window.removeEventListener('drop', dragOver);
-      window.removeEventListener('dragover', dragOver);
-      window.removeEventListener('dragenter', onDragEnter);
-      window.removeEventListener('dragleave', onDragLeave);
+      window.removeEventListener('mousemove', dragOver);
+      window.removeEventListener('mouseup', onDrop);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

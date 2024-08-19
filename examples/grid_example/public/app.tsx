@@ -39,14 +39,14 @@ export const GridExample = () => {
                   },
                 },
                 {
-                  title: 'Small section',
-                  isCollapsed: false,
-                  panels: { panel9: { column: 0, row: 0, width: 12, height: 6, id: 'panel9' } },
-                },
-                {
                   title: 'Another small section',
                   isCollapsed: false,
                   panels: { panel10: { column: 24, row: 0, width: 12, height: 6, id: 'panel10' } },
+                },
+                {
+                  title: 'Small section',
+                  isCollapsed: false,
+                  panels: { panel9: { column: 0, row: 0, width: 12, height: 6, id: 'panel9' } },
                 },
               ];
 

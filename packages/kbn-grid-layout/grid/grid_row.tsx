@@ -12,6 +12,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import React, { forwardRef, useMemo } from 'react';
 import { GridPanel } from './grid_panel';
 import { GridRowData, PanelInteractionEvent, RuntimeGridSettings } from './types';
+import { i18n } from '@kbn/i18n';
 
 const gridColor = transparentize(euiThemeVars.euiColorSuccess, 0.2);
 const getGridBackgroundCSS = (settings: RuntimeGridSettings) => {
@@ -69,6 +70,9 @@ export const GridRow = forwardRef<
             <EuiFlexGroup gutterSize="s">
               <EuiButtonIcon
                 color="text"
+                aria-label={i18n.translate('kbnGridLayout.row.toggleCollapse', {
+                  defaultMessage: 'Toggle collapse',
+                })}
                 iconType={rowData.isCollapsed ? 'arrowRight' : 'arrowDown'}
                 onClick={toggleIsCollapsed}
               />

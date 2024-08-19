@@ -34,11 +34,10 @@ export const GridPanel = ({
   const thisPanelActive = activePanelId === panelData.id;
 
   const interactionStart = useCallback(
-    (type: 'drag' | 'resize', e: React.DragEvent) => {
+    (type: 'drag' | 'resize', e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
       if (!panelRef.current || !ghostRef.current) return;
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.dropEffect = 'move';
-      e.dataTransfer.setDragImage(ghostRef.current, 0, 0);
+      e.preventDefault();
+      e.stopPropagation();
       const panelRect = panelRef.current.getBoundingClientRect();
       setInteractionEvent({
         type,
@@ -98,7 +97,6 @@ export const GridPanel = ({
         />
         {/* drag handle */}
         <div
-          draggable="true"
           className="dragHandle"
           css={css`
             opacity: 0;
@@ -116,15 +114,14 @@ export const GridPanel = ({
             background-color: ${euiThemeVars.euiColorEmptyShade};
             border-radius: ${euiThemeVars.euiBorderRadius} ${euiThemeVars.euiBorderRadius} 0 0;
           `}
-          onDragStart={(e: React.DragEvent<HTMLDivElement>) => interactionStart('drag', e)}
+          onMouseDown={(e) => interactionStart('drag', e)}
         >
           <EuiIcon type="grabOmnidirectional" />
         </div>
         {/* Resize handle */}
         <div
-          draggable="true"
           className="resizeHandle"
-          onDragStart={(e) => interactionStart('resize', e)}
+          onMouseDown={(e) => interactionStart('resize', e)}
           css={css`
             right: 0;
             bottom: 0;
