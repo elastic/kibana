@@ -292,7 +292,8 @@ describe('query tab with unified timeline', () => {
     );
   });
 
-  describe('pagination', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/189791
+  describe.skip('pagination', () => {
     beforeEach(() => {
       // should return all the records instead just 3
       // as the case in the default mock
