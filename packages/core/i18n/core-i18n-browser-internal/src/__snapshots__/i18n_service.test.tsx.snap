@@ -140,6 +140,7 @@ exports[`#start() returns \`Context\` component 1`] = `
           "euiExternalLinkIcon.newTarget.screenReaderOnlyText": "(opens in a new tab or window)",
           "euiFieldPassword.maskPassword": "Mask password",
           "euiFieldPassword.showPassword": "Show password as plain text. Note: this will visually expose your password on the screen.",
+          "euiFieldSearch.clearSearchButtonLabel": "Clear search input",
           "euiFilePicker.filesSelected": [Function],
           "euiFilePicker.promptText": "Select or drag and drop a file",
           "euiFilePicker.removeSelected": "Remove",
