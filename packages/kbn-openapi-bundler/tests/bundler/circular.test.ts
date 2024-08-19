@@ -48,7 +48,8 @@ describe('OpenAPI Bundler - circular specs', () => {
       })
     );
 
-    expect(safeDump(bundledSpec.paths['/api/some_api']!.get!.responses['200'])).toMatchInlineSnapshot(`
+    expect(safeDump(bundledSpec.paths['/api/some_api']!.get!.responses['200']))
+      .toMatchInlineSnapshot(`
 "content:
   application/json:
     schema: &ref_0
