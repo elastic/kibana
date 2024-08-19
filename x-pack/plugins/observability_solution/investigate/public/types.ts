@@ -14,12 +14,6 @@ import type { InvestigateWidget } from '../common';
 import type { GlobalWidgetParameters, InvestigateWidgetCreate } from '../common/types';
 import type { UseInvestigationApi } from './hooks/use_investigation';
 
-export enum ChromeOption {
-  disabled = 'disabled',
-  static = 'static',
-  dynamic = 'dynamic',
-}
-
 export type OnWidgetAdd = (create: InvestigateWidgetCreate) => Promise<void>;
 
 export interface WidgetRenderAPI {
@@ -40,7 +34,6 @@ export interface WidgetDefinition {
     signal: AbortSignal;
   }) => Promise<Record<string, any>>;
   render: (options: WidgetRenderOptions<InvestigateWidget>) => React.ReactNode;
-  chrome?: ChromeOption;
 }
 
 type RegisterWidgetOptions = Omit<WidgetDefinition, 'generate' | 'render'>;

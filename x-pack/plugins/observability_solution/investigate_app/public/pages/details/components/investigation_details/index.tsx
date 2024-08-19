@@ -7,8 +7,8 @@
 import datemath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { keyBy, noop } from 'lodash';
-import React, { useMemo } from 'react';
+import { noop } from 'lodash';
+import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { AddObservationUI } from '../../../../components/add_observation_ui';
 import { InvestigateSearchBar } from '../../../../components/investigate_search_bar';
@@ -29,7 +29,7 @@ function InvestigationDetailsWithUser({
       start: { investigate },
     },
   } = useKibana();
-  const widgetDefinitions = investigate.getWidgetDefinitions();
+  // const widgetDefinitions = investigate.getWidgetDefinitions();
   const { data: investigationData } = useFetchInvestigation({ id: investigationId });
 
   const {
@@ -44,23 +44,7 @@ function InvestigationDetailsWithUser({
     investigationData,
   });
 
-  const gridItems = useMemo(() => {
-    const widgetDefinitionsByType = keyBy(widgetDefinitions, 'type');
-
-    return renderableInvestigation?.items.map((item) => {
-      const definitionForType = widgetDefinitionsByType[item.type];
-
-      return {
-        title: item.title,
-        id: item.id,
-        element: item.element,
-        chrome: definitionForType.chrome,
-        loading: item.loading,
-      };
-    });
-  }, [renderableInvestigation, widgetDefinitions]);
-
-  if (!investigation || !renderableInvestigation || !gridItems || !investigationData) {
+  if (!investigation || !renderableInvestigation || !investigationData) {
     return <EuiLoadingSpinner />;
   }
 
@@ -96,7 +80,7 @@ function InvestigationDetailsWithUser({
 
             <EuiFlexItem grow={false}>
               <InvestigateWidgetGrid
-                items={gridItems}
+                items={renderableInvestigation.items}
                 onItemsChange={async (nextGridItems) => {
                   noop();
                 }}

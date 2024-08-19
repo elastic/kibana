@@ -11,7 +11,6 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
 import { i18n } from '@kbn/i18n';
 import {
-  ChromeOption,
   type EsqlWidgetParameters,
   type GlobalWidgetParameters,
 } from '@kbn/investigate-plugin/public';
@@ -219,7 +218,6 @@ export function registerEsqlWidget({
     {
       type: ESQL_WIDGET_NAME,
       description: 'Visualize an ES|QL query',
-      chrome: ChromeOption.static,
       schema: {
         type: 'object',
         properties: {
