@@ -59,6 +59,7 @@ import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 import { coreConfig, type CoreConfigType } from './core_config';
 import { registerRootEvents, reportKibanaStartedEvent, type UptimeSteps } from './events';
+import { MetricsServiceSetup } from '@kbn/core-metrics-server';
 
 const coreId = Symbol('core');
 
@@ -271,9 +272,13 @@ export class Server {
     const securitySetup = this.security.setup();
     const userProfileSetup = this.userProfile.setup();
 
+    let metricsSetup: MetricsServiceSetup;
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
       executionContext: executionContextSetup,
+      getEluHistory() {
+        return metricsSetup.getEluHistory();
+      }
     });
 
     // setup i18n prior to any other service, to have translations ready
@@ -287,7 +292,7 @@ export class Server {
       executionContext: executionContextSetup,
     });
 
-    const metricsSetup = await this.metrics.setup({
+    metricsSetup = await this.metrics.setup({
       http: httpSetup,
       elasticsearchService: elasticsearchServiceSetup,
     });
