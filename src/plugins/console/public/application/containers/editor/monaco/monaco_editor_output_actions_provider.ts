@@ -80,8 +80,7 @@ export class MonacoEditorOutputActionsProvider {
     if (parsedRequests.length > 0) {
       // display the actions buttons on the 1st line of the 1st selected request
       const selectionStartLineNumber = parsedRequests[0].startLineNumber;
-      this.updateEditorActions(selectionStartLineNumber);
-      // highlight the lines from the 1st line of the first selected request
+      this.updateEditorActions(selectionStartLineNumber); // highlight the lines from the 1st line of the first selected request
       // to the last line of the last selected request
       const selectionEndLineNumber = parsedRequests[parsedRequests.length - 1].endLineNumber;
       const selectedRange = new monaco.Range(
@@ -152,6 +151,11 @@ export class MonacoEditorOutputActionsProvider {
     return selectedRequests;
   }
 
+  // Set the cursor to the first line of the editor
+  public selectFirstLine() {
+    this.editor.setSelection(new monaco.Selection(0, 0, 0, 0));
+  }
+
   public async getParsedOutput(): Promise<string> {
     const selectedRequests = await this.getSelectedParsedOutput();
 
@@ -160,6 +164,7 @@ export class MonacoEditorOutputActionsProvider {
       for (const data of request.data || []) {
         selectedRequestsString += JSON.stringify(data, null, 2) + '\n';
       }
+      selectedRequestsString += '\n';
     }
 
     return selectedRequestsString;

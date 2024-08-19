@@ -108,6 +108,8 @@ export const MonacoEditorOutput: FunctionComponent = () => {
         // If there are multiple responses, add decorations for their status codes
         const decorations = getStatusCodeDecorations(data);
         lineDecorations.current?.set(decorations);
+        // Highlight first line of the output editor
+        actionsProvider.current?.selectFirstLine();
       }
     } else {
       setValue('');
