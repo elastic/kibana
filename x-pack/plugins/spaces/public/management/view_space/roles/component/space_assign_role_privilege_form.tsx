@@ -18,6 +18,7 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -71,9 +72,17 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
   const [selectedRoles, setSelectedRoles] = useState<ReturnType<typeof createRolesComboBoxOptions>>(
     createRolesComboBoxOptions(defaultSelected)
   );
-  const [roleCustomizationAnchor, setRoleCustomizationAnchor] = useState({
-    value: selectedRoles?.[0]?.value,
-    privilegeIndex: 0,
+  const [roleCustomizationAnchor, setRoleCustomizationAnchor] = useState(() => {
+    // support instance where the form is opened with roles already preselected
+    const defaultAnchor = selectedRoles?.[0]?.value;
+    const privilegeIndex = defaultAnchor?.kibana.findIndex(({ spaces }) =>
+      spaces.includes(space.id!)
+    );
+
+    return {
+      value: defaultAnchor,
+      privilegeIndex: (privilegeIndex || -1) >= 0 ? privilegeIndex : 0,
+    };
   });
 
   const selectedRolesCombinedPrivileges = useMemo(() => {
@@ -83,8 +92,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
         for (let i = 0; i < selectedRole.value!.kibana.length; i++) {
           const { spaces, base } = selectedRole.value!.kibana[i];
           if (spaces.includes(space.id!)) {
-            // @ts-ignore - TODO resolve this
-            match = base.length ? base : ['custom'];
+            match = (base.length ? base : ['custom']) as [KibanaRolePrivilege];
             break;
           }
         }
@@ -98,12 +106,12 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
 
   const [roleSpacePrivilege, setRoleSpacePrivilege] = useState<KibanaRolePrivilege>(
     !selectedRoles.length || selectedRolesCombinedPrivileges.length > 1
-      ? 'all'
+      ? 'read'
       : selectedRolesCombinedPrivileges[0]
   );
 
   useEffect(() => {
-    async function fetchAllSystemRoles(spaceId: string) {
+    async function fetchRequiredData(spaceId: string) {
       setFetchingDataDeps(true);
 
       const [systemRoles, _kibanaPrivileges] = await Promise.all([
@@ -130,45 +138,79 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
       setKibanaPrivileges(_kibanaPrivileges);
     }
 
-    fetchAllSystemRoles(space.id!).finally(() => setFetchingDataDeps(false));
+    fetchRequiredData(space.id!).finally(() => setFetchingDataDeps(false));
   }, [space.id, spacesClientsInvocator]);
 
-  useEffect(() => {
-    if (roleSpacePrivilege === 'custom') {
+  const computeRoleCustomizationAnchor = useCallback(
+    (spaceId: string, _selectedRoles: ReturnType<typeof createRolesComboBoxOptions>) => {
       let anchor: typeof roleCustomizationAnchor | null = null;
 
-      /**
-       * when custom privilege is selected we selected the first role that already has a custom privilege
-       * and use that as the starting point for all customizations that will happen to all the other selected roles
-       */
-      for (let i = 0; i < selectedRoles.length; i++) {
-        for (let j = 0; i < selectedRoles[i].value?.kibana!.length!; j++) {
-          let iterationIndexPrivilegeValue;
+      for (let i = 0; i < _selectedRoles.length; i++) {
+        let role;
 
-          // check that the current iteration has a value, since roles can have uneven privilege defs
-          if ((iterationIndexPrivilegeValue = selectedRoles[i].value?.kibana[j])) {
-            const { spaces, base } = iterationIndexPrivilegeValue;
-            if (spaces.includes(space.id) && !base.length) {
-              anchor = {
-                value: structuredClone(selectedRoles[i].value),
-                privilegeIndex: j,
-              };
-              break;
+        if ((role = _selectedRoles[i].value)) {
+          for (let j = 0; j < _selectedRoles[i].value!.kibana.length; j++) {
+            let privilegeIterationIndexValue;
+
+            if ((privilegeIterationIndexValue = role.kibana[j])) {
+              const { spaces, base } = privilegeIterationIndexValue;
+              /*
+               * check to see if current role already has a custom privilege, if it does we use that as the starting point for all customizations
+               * that will happen to all the other selected roles and exit
+               */
+              if (spaces.includes(spaceId) && !base.length) {
+                anchor = {
+                  value: structuredClone(role),
+                  privilegeIndex: j,
+                };
+
+                break;
+              }
             }
           }
         }
 
         if (anchor) break;
+
+        // provide a fallback anchor if no suitable anchor was discovered, and we have reached the end of selected roles iteration
+        if (!anchor && role && i === _selectedRoles.length - 1) {
+          const fallbackRole = structuredClone(role);
+
+          const spacePrivilegeIndex = fallbackRole.kibana.findIndex(({ spaces }) =>
+            spaces.includes(spaceId)
+          );
+
+          anchor = {
+            value: fallbackRole,
+            privilegeIndex:
+              (spacePrivilegeIndex || -1) >= 0
+                ? spacePrivilegeIndex
+                : (fallbackRole?.kibana?.push?.({
+                    spaces: [spaceId],
+                    base: [],
+                    feature: {},
+                  }) || 0) - 1,
+          };
+        }
       }
 
-      if (anchor) setRoleCustomizationAnchor(anchor);
-    }
-  }, [selectedRoles, roleSpacePrivilege, space.id]);
+      return anchor;
+    },
+    []
+  );
 
-  const onRoleSpacePrivilegeChange = useCallback((spacePrivilege: KibanaRolePrivilege) => {
-    // persist selected privilege for UI
-    setRoleSpacePrivilege(spacePrivilege);
-  }, []);
+  const onRoleSpacePrivilegeChange = useCallback(
+    (spacePrivilege: KibanaRolePrivilege) => {
+      if (spacePrivilege === 'custom') {
+        const _roleCustomizationAnchor = computeRoleCustomizationAnchor(space.id, selectedRoles);
+        if (_roleCustomizationAnchor) setRoleCustomizationAnchor(_roleCustomizationAnchor);
+      }
+
+      // persist selected privilege for UI
+      setRoleSpacePrivilege(spacePrivilege);
+    },
+    [computeRoleCustomizationAnchor, selectedRoles, space.id]
+  );
 
   const assignRolesToSpace = useCallback(async () => {
     try {
@@ -178,18 +220,28 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
         base: roleSpacePrivilege === 'custom' ? [] : [roleSpacePrivilege],
         feature:
           roleSpacePrivilege === 'custom'
-            ? roleCustomizationAnchor.value?.kibana[roleCustomizationAnchor.privilegeIndex].feature!
+            ? roleCustomizationAnchor.value?.kibana[roleCustomizationAnchor.privilegeIndex!]
+                .feature!
             : {},
       };
 
       const updatedRoles = structuredClone(selectedRoles).map((selectedRole) => {
         let found = false;
 
-        // TODO: account for case where previous assignment included multiple spaces assigned to a particular base
         for (let i = 0; i < selectedRole.value!.kibana.length; i++) {
-          if (selectedRole.value!.kibana[i].spaces.includes(space.id!)) {
-            Object.assign(selectedRole.value!.kibana[i], newPrivileges);
-            found = true;
+          const { spaces } = selectedRole.value!.kibana[i];
+
+          if (spaces.includes(space.id!)) {
+            if (spaces.length > 1) {
+              // space belongs to a collection of other spaces that share the same privileges,
+              // so we have to assign the new privilege to apply only to the specific space
+              // hence we remove the space from the shared privilege
+              spaces.splice(i, 1);
+            } else {
+              Object.assign(selectedRole.value!.kibana[i], newPrivileges);
+              found = true;
+            }
+
             break;
           }
         }
@@ -338,19 +390,23 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                 </p>
               </EuiText>
               <EuiSpacer />
-              {/** TODO: rework privilege table to accommodate operating on multiple roles */}
               <React.Fragment>
                 {!kibanaPrivileges ? (
-                  <p>loading...</p>
+                  <EuiLoadingSpinner size="l" />
                 ) : (
                   <KibanaPrivilegeTable
                     role={roleCustomizationAnchor.value!}
                     privilegeIndex={roleCustomizationAnchor.privilegeIndex}
                     onChange={(featureId, selectedPrivileges) => {
-                      // apply selected changes only to customization anchor, this delay we delay reconciling the intending privileges
-                      //  of the selected roles till we decide to commit the changes chosen
+                      // apply selected changes only to customization anchor, this way we delay reconciling the intending privileges
+                      // of the selected roles till we decide to commit the changes chosen
                       setRoleCustomizationAnchor(({ value, privilegeIndex }) => {
-                        value!.kibana[privilegeIndex].feature[featureId] = selectedPrivileges;
+                        let privilege;
+
+                        if ((privilege = value!.kibana?.[privilegeIndex!])) {
+                          privilege.feature[featureId] = selectedPrivileges;
+                        }
+
                         return { value, privilegeIndex };
                       });
                     }}
@@ -361,7 +417,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                     privilegeCalculator={
                       new PrivilegeFormCalculator(
                         new KibanaPrivileges(kibanaPrivileges, features),
-                        selectedRoles[0].value!
+                        roleCustomizationAnchor.value!
                       )
                     }
                     allSpacesSelected={false}
