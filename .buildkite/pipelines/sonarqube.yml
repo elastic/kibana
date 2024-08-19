@@ -1,6 +1,6 @@
 env:
   SKIP_NODE_SETUP: true
-  SONAR_SCANNER_OPTS: '-Xmx16G'
+  SONAR_SCANNER_OPTS: '-Xmx16g'
 
 steps:
   - label: ':sonarqube: Continuous Code Inspection'
