@@ -28,7 +28,7 @@ const roleEditor = 'editor';
 const cloudUsersFilePath = resolve(REPO_ROOT, SERVERLESS_ROLES_ROOT_PATH, 'role_users.json');
 
 const createLocalSAMLSessionMock = jest.spyOn(samlAuth, 'createLocalSAMLSession');
-const createCloudSAMLSessionMock = jest.spyOn(samlAuth, 'createCloudSAMLSession');
+// const createCloudSAMLSessionMock = jest.spyOn(samlAuth, 'createCloudSAMLSession');
 const getSecurityProfileMock = jest.spyOn(samlAuth, 'getSecurityProfile');
 const readCloudUsersFromFileMock = jest.spyOn(helper, 'readCloudUsersFromFile');
 const isValidHostnameMock = jest.spyOn(helper, 'isValidHostname');
@@ -41,6 +41,11 @@ jest.mock('../kbn_client/kbn_client', () => {
 const get = jest.fn();
 
 describe('SamlSessionManager', () => {
+  let createCloudSAMLSessionMock: jest.SpyInstance;
+  beforeEach(() => {
+    createCloudSAMLSessionMock = jest.spyOn(samlAuth, 'createCloudSAMLSession');
+  });
+
   describe('for local session', () => {
     beforeEach(() => {
       jest.resetAllMocks();
