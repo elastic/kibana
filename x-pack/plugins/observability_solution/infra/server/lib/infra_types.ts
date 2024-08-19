@@ -10,8 +10,6 @@ import type { IBasePath } from '@kbn/core/server';
 import type { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import { ObservabilityConfig } from '@kbn/observability-plugin/server';
 import type { ILogsSharedLogEntriesDomain } from '@kbn/logs-shared-plugin/server';
-import { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { RulesServiceSetup } from '../services/rules';
 import { InfraConfig, InfraPluginStartServicesAccessor } from '../types';
 import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
@@ -46,6 +44,5 @@ export interface InfraBackendLibs extends InfraDomainLibs {
   getStartServices: InfraPluginStartServicesAccessor;
   handleEsError: typeof handleEsError;
   logger: Logger;
-  getApmIndices: (soClient: SavedObjectsClientContract) => Promise<APMDataAccessConfig['indices']>;
   plugins: Plugins;
 }

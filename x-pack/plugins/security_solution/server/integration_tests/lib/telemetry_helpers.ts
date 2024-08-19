@@ -23,7 +23,7 @@ import {
   deleteExceptionList,
   deleteExceptionListItem,
 } from '@kbn/lists-plugin/server/services/exception_lists';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 
 import { packagePolicyService } from '@kbn/fleet-plugin/server/services';
 
@@ -282,7 +282,7 @@ export async function createAgentPolicy(
     ],
   };
 
-  await soClient.create<unknown>(AGENT_POLICY_SAVED_OBJECT_TYPE, {}, { id }).catch(() => {});
+  await soClient.create<unknown>(LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, {}, { id }).catch(() => {});
   await packagePolicyService
     .create(soClient, esClient, packagePolicy, {
       id,

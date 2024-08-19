@@ -159,7 +159,7 @@ export function createInvestigationStore({
           notes: prevInvestigation.notes.concat({
             id: v4(),
             createdAt: Date.now(),
-            createdBy: user,
+            createdBy: user.username,
             content: note,
           }),
         };

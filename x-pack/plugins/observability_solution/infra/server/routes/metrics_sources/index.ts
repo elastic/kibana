@@ -206,7 +206,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
         query: createRouteValidationFunction(getHasDataQueryParamsRT),
       },
     },
-    async (requestContext, request, response) => {
+    async (context, request, response) => {
       try {
         const modules = castArray(request.query.modules);
 
@@ -217,10 +217,9 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
         }
 
         const infraMetricsClient = await getInfraMetricsClient({
-          framework,
           request,
-          metricsDataAccess: libs.plugins.metricsDataAccess.setup.client,
-          requestContext,
+          libs,
+          context,
         });
 
         const results = await infraMetricsClient.search({
