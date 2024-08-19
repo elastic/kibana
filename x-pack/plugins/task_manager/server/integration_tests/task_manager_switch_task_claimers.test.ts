@@ -58,7 +58,7 @@ describe('switch task claiming strategies', () => {
     let kibanaServer = setupResultDefault.kibanaServer;
     let taskClaimingOpts: TaskClaimingOpts = TaskClaimingMock.mock.calls[0][0];
 
-    expect(taskClaimingOpts.strategy).toBe('default');
+    expect(taskClaimingOpts.strategy).toBe('update_by_query');
 
     mockTaskTypeRunFn.mockImplementation(() => {
       return { state: {} };
@@ -180,7 +180,7 @@ describe('switch task claiming strategies', () => {
     kibanaServer = setupResultDefault.kibanaServer;
 
     taskClaimingOpts = TaskClaimingMock.mock.calls[1][0];
-    expect(taskClaimingOpts.strategy).toBe('default');
+    expect(taskClaimingOpts.strategy).toBe('update_by_query');
 
     // inject a task to run and ensure it is claimed and run
     const id2 = uuidV4();
@@ -218,7 +218,7 @@ describe('switch task claiming strategies', () => {
     let kibanaServer = setupResultDefault.kibanaServer;
     let taskClaimingOpts: TaskClaimingOpts = TaskClaimingMock.mock.calls[0][0];
 
-    expect(taskClaimingOpts.strategy).toBe('default');
+    expect(taskClaimingOpts.strategy).toBe('update_by_query');
 
     mockTaskTypeRunFn.mockImplementation(async () => {
       await new Promise((resolve) => setTimeout(resolve, 2000));
