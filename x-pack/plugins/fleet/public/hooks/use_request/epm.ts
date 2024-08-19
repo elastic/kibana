@@ -63,7 +63,7 @@ export function useGetCategoriesQuery(query: GetCategoriesRequest['query'] = {})
         query,
         version: API_VERSIONS.public.v1,
       }),
-    { retry: false }
+    { retry: false, refetchOnWindowFocus: false }
   );
 }
 
@@ -100,6 +100,7 @@ export const useGetPackagesQuery = (
       }),
     enabled: options?.enabled,
     retry: false,
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -155,7 +156,12 @@ export const useGetPackageInfoByKeyQuery = (
           ...(ignoreUnverifiedQueryParam && { ignoreUnverified: ignoreUnverifiedQueryParam }),
         },
       }),
-    { enabled: queryOptions.enabled, refetchOnMount: queryOptions.refetchOnMount, retry: false }
+    {
+      enabled: queryOptions.enabled,
+      refetchOnMount: queryOptions.refetchOnMount,
+      retry: false,
+      refetchOnWindowFocus: false,
+    }
   );
 
   const confirm = async () => {

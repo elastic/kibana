@@ -78,7 +78,7 @@ export function CategoryFacets({
   const controls = (
     <EuiFacetGroup>
       {isLoading ? (
-        <Loading />
+        <Loading size="m" />
       ) : (
         categories.map((category) => {
           return (
