@@ -12,6 +12,7 @@ import {
   RequiredFieldInput,
   RuleSignatureId,
   TypeSpecificCreateProps,
+  RuleVersion,
 } from '../../model/rule_schema';
 
 /**
@@ -40,3 +41,12 @@ export const RuleToImport = BaseCreateProps.and(TypeSpecificCreateProps).and(
     required_fields: z.array(RequiredFieldInput).optional(),
   })
 );
+
+/**
+ * PrebuiltRuleToImport represents a RuleToImport that has been validated as
+ * representing a prebuilt rule. Part of this definition is the inclusion of a
+ * "version" specifier, which is represented here.
+ */
+export type PrebuiltRuleToImport = z.infer<typeof PrebuiltRuleToImport>;
+export type PrebuiltRuleToImportInput = z.input<typeof PrebuiltRuleToImport>;
+export const PrebuiltRuleToImport = RuleToImport.and(z.object({ version: RuleVersion }));
