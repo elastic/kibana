@@ -47,10 +47,11 @@ const stacktraceNotAvailableControlButton = i18n.translate(
 const Stacktrace = ({
   Control,
   rowProps: { record },
+  ...props
 }: {
   Control: RowControlComponent;
   rowProps: RowControlRowProps;
-}) => {
+} & Partial<RowControlProps>) => {
   const stacktrace = getStacktraceFields(record as LogDocument);
   const hasValue = Object.values(stacktrace).some(Boolean);
 
@@ -60,6 +61,7 @@ const Stacktrace = ({
       label={stacktraceAvailableControlButton}
       iconType="apmTrace"
       onClick={undefined}
+      {...props}
     />
   ) : (
     <Control
@@ -68,6 +70,7 @@ const Stacktrace = ({
       label={stacktraceNotAvailableControlButton}
       iconType="apmTrace"
       onClick={undefined}
+      {...props}
     />
   );
 };

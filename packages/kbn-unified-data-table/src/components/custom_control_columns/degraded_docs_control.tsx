@@ -53,7 +53,7 @@ const DegradedDocs = ({
 }: {
   Control: RowControlComponent;
   rowProps: RowControlRowProps;
-}) => {
+} & Partial<RowControlProps>) => {
   const isDegradedDocumentExists = DEGRADED_DOCS_FIELD in record.raw;
 
   return isDegradedDocumentExists ? (
