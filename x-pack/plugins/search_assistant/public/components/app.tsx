@@ -8,17 +8,7 @@ import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 export const App: React.FC = () => {
   return (
-    <KibanaPageTemplate.Section
-      alignment="top"
-      restrictWidth={false}
-      grow
-      css={{
-        position: 'relative',
-      }}
-      contentProps={{ css: { display: 'flex', flexGrow: 1, position: 'absolute', inset: 0 } }}
-      paddingSize="none"
-      className="eui-fullHeight"
-    >
+    <KibanaPageTemplate.Section alignment="top" restrictWidth={false} grow paddingSize="none">
       <div />
     </KibanaPageTemplate.Section>
   );

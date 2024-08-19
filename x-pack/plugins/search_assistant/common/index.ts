@@ -4,5 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export const PLUGIN_ID = 'SearchAssistant';
-export const PLUGIN_NAME = 'SearchAssistant';
+export const PLUGIN_ID = 'searchAssistant';
+export const PLUGIN_NAME = 'searchAssistant';

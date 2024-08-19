@@ -6,7 +6,6 @@ import type {
   SearchAssistantPluginStartDependencies,
 } from './types';
 import { PLUGIN_ID } from '../common';
-import { SearchAssistant } from './embeddable';
 
 export class SearchAssistantPlugin
   implements Plugin<SearchAssistantPluginSetup, SearchAssistantPluginStart>
@@ -33,13 +32,8 @@ export class SearchAssistantPlugin
     return {};
   }
 
-  public start(
-    core: CoreStart,
-    services: SearchAssistantPluginStartDependencies
-  ): SearchAssistantPluginStart {
-    return {
-      SearchAssistant,
-    };
+  public start(): SearchAssistantPluginStart {
+    return {};
   }
 
   public stop() {}
