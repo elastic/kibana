@@ -1366,6 +1366,17 @@ module.exports = {
       },
     },
     {
+      files: ['x-pack/test/functional/apps/**/*.{js,ts}'],
+      plugins: ['mocha'],
+      env: {
+        mocha: true,
+      },
+      rules: {
+        'require-await': 'error',
+        'no-return-await': 'error',
+      },
+    },
+    {
       files: ['x-pack/plugins/lists/public/**/!(*.test).{js,mjs,ts,tsx}'],
       plugins: ['react-perf'],
       rules: {
