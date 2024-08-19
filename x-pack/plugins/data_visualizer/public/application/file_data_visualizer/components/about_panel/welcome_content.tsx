@@ -81,64 +81,6 @@ export const WelcomeContent: FC<Props> = ({ hasPermissionToImport }) => {
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.dataVisualizer.file.welcomeContent.supportedFileFormatDescription"
-              defaultMessage="The following file formats are supported {maxFileSize}:"
-              values={{ maxFileSize }}
-            />
-          </p>
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup gutterSize="m">
-          <EuiFlexItem grow={false} css={docIconStyle}>
-            <EuiIcon size="m" type="document" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="xpack.dataVisualizer.file.welcomeContent.delimitedTextFilesDescription"
-                  defaultMessage="Delimited text files, such as CSV and TSV"
-                />
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup gutterSize="m">
-          <EuiFlexItem grow={false} css={docIconStyle}>
-            <EuiIcon size="m" type="document" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="xpack.dataVisualizer.file.welcomeContent.newlineDelimitedJsonDescription"
-                  defaultMessage="Newline-delimited JSON"
-                />
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup gutterSize="m">
-          <EuiFlexItem grow={false} css={docIconStyle}>
-            <EuiIcon size="m" type="document" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="xpack.dataVisualizer.file.welcomeContent.logFilesWithCommonFormatDescription"
-                  defaultMessage="Log files with a common format for the timestamp"
-                />
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <EuiText>
-          <p>
-            <FormattedMessage
               id="xpack.dataVisualizer.file.welcomeContent.supportedTikaFileFormatDescription"
               defaultMessage="The following file formats are supported {maxTikaFileSize}:"
               values={{ maxTikaFileSize }}
@@ -204,6 +146,66 @@ export const WelcomeContent: FC<Props> = ({ hasPermissionToImport }) => {
                 <FormattedMessage
                   id="xpack.dataVisualizer.file.welcomeContent.openDocFilesDescription"
                   defaultMessage="Open Document Format"
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="m" />
+
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.welcomeContent.supportedFileFormatDescription"
+              defaultMessage="The following file formats are supported {maxFileSize}:"
+              values={{ maxFileSize }}
+            />
+          </p>
+        </EuiText>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem grow={false} css={docIconStyle}>
+            <EuiIcon size="m" type="document" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.welcomeContent.delimitedTextFilesDescription"
+                  defaultMessage="Delimited text files, such as CSV and TSV"
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem grow={false} css={docIconStyle}>
+            <EuiIcon size="m" type="document" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.welcomeContent.newlineDelimitedJsonDescription"
+                  defaultMessage="Newline-delimited JSON"
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem grow={false} css={docIconStyle}>
+            <EuiIcon size="m" type="document" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.welcomeContent.logFilesWithCommonFormatDescription"
+                  defaultMessage="Log files with a common format for the timestamp"
                 />
               </p>
             </EuiText>
