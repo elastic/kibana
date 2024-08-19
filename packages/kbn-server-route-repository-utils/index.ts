@@ -24,4 +24,6 @@ export type {
   DefaultClientOptions,
   DefaultRouteCreateOptions,
   DefaultRouteHandlerResources,
+  IoTsParamsObject,
+  ZodParamsObject,
 } from './src/typings';

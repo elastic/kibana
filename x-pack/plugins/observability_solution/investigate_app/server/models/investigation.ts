@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { alertOriginSchema, blankOriginSchema } from '@kbn/investigate-plugin/common/schema/origin';
+import { alertOriginSchema, blankOriginSchema } from '@kbn/investigation-shared';
 import * as t from 'io-ts';
+import { investigationNoteSchema } from './investigation_note';
 
 export const investigationSchema = t.type({
   id: t.string,
@@ -18,6 +19,7 @@ export const investigationSchema = t.type({
   }),
   origin: t.union([alertOriginSchema, blankOriginSchema]),
   status: t.union([t.literal('ongoing'), t.literal('closed')]),
+  notes: t.array(investigationNoteSchema),
 });
 
 export type Investigation = t.TypeOf<typeof investigationSchema>;

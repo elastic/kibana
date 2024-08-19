@@ -11,6 +11,7 @@ export {
   getFieldByType,
   findInventoryFields,
   metrics,
+  type InventoryModels,
 } from './inventory_models';
 
 export { podSnapshotMetricTypes } from './inventory_models/kubernetes/pod';
