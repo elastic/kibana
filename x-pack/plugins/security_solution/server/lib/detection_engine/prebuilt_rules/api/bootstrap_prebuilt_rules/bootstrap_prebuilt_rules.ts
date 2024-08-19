@@ -15,6 +15,7 @@ import {
   installEndpointPackage,
   installPrebuiltRulesPackage,
 } from '../install_prebuilt_rules_and_timelines/install_prebuilt_rules_package';
+import { installLocalPrebuiltRuleAssets } from '../../logic/rule_assets/install_local_prebuilt_rule_assets';
 
 export const bootstrapPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -34,7 +35,8 @@ export const bootstrapPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const ctx = await context.resolve(['securitySolution']);
+          const ctx = await context.resolve(['securitySolution', 'core']);
+          const savedObjectsClient = ctx.core.savedObjects.client;
           const securityContext = ctx.securitySolution;
           const config = securityContext.getConfig();
 
@@ -42,6 +44,8 @@ export const bootstrapPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter
             installPrebuiltRulesPackage(config, securityContext),
             installEndpointPackage(config, securityContext),
           ]);
+
+          await installLocalPrebuiltRuleAssets(savedObjectsClient, securityContext);
 
           const responseBody: BootstrapPrebuiltRulesResponse = {
             packages: results.map((result) => ({
