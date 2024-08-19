@@ -31,7 +31,6 @@ import type {
   AlertSuppressionMissingFieldsStrategy,
   AlertSuppressionDuration,
 } from '../../../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
-import type { FormSchema } from '../../../../../../shared_imports';
 import {
   Field,
   getUseField,
