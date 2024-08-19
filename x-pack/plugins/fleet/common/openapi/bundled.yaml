@@ -1580,13 +1580,8 @@ paths:
               properties:
                 action:
                   $ref: '#/components/schemas/agent_action'
-  /agents/{agentId}/actions/{actionId}/cancel:
+  /agents/actions/{actionId}/cancel:
     parameters:
-      - schema:
-          type: string
-        name: agentId
-        in: path
-        required: true
       - schema:
           type: string
         name: actionId
