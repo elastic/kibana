@@ -93,7 +93,7 @@ exports[`GaugeComponent renders the chart 1`] = `
                 0,
               ],
               "opacity": 1,
-              "stroke": "#eaedf3",
+              "stroke": "#E9EDF3",
               "strokeWidth": 1,
               "visible": true,
             },
@@ -117,11 +117,11 @@ exports[`GaugeComponent renders the chart 1`] = `
             ],
             "vertical": Object {
               "dash": Array [
-                4,
-                4,
+                0,
+                0,
               ],
               "opacity": 1,
-              "stroke": "#eaedf3",
+              "stroke": "#E9EDF3",
               "strokeWidth": 1,
               "visible": true,
             },
