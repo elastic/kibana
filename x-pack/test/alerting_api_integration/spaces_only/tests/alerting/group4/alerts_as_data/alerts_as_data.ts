@@ -436,12 +436,14 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
           omit(alertBDocRun2, fieldsToOmitInComparison)
         );
 
-        if (enableFlapping) {
-          // execution uuid should be overwritten
-          expect(alertBDocRun3[ALERT_RULE_EXECUTION_UUID]).to.eql(
-            alertBDocRun2[ALERT_RULE_EXECUTION_UUID]
-          );
+        // execution uuid should be overwritten
+        expect(alertBDocRun3[ALERT_RULE_EXECUTION_UUID]).to.eql(
+          alertBDocRun2[ALERT_RULE_EXECUTION_UUID]
+        );
 
+        // when flapping is enabled, we will continue to update
+        // the alert doc when the alert is still recovered
+        if (enableFlapping) {
           // flapping history should be history from prior run with additional entry
           expect(alertBDocRun3[ALERT_FLAPPING_HISTORY]).to.eql([
             ...alertBDocRun2[ALERT_FLAPPING_HISTORY]!,

@@ -425,7 +425,6 @@ export class AlertsClient<
     // event action: new alert = 'new', active alert: 'active', otherwise 'close'
 
     const activeAlertsToIndex: Array<Alert & AlertData> = [];
-
     for (const id of keys(alertsToReturn)) {
       // See if there's an existing active alert document
       if (!!activeAlerts[id]) {
