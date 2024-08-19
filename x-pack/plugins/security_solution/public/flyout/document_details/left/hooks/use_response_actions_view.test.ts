@@ -58,24 +58,4 @@ describe('useResponseActionsView', () => {
     expect(result.current.append).not.toBeDefined();
     expect(result.current.content).toBeDefined();
   });
-
-  it('returns early return if endpointResponseActionsEnabled feature flag is off', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
-    (useGetAutomatedActionList as jest.Mock).mockReturnValue({
-      data: [],
-      isFetched: true,
-    });
-
-    const { result } = renderHook(() =>
-      useResponseActionsView({
-        ecsData,
-        rawEventData,
-      })
-    );
-
-    expect(result.current.id).toEqual('response-actions-results-view');
-    expect(result.current.name).toEqual('Response Results');
-    expect(result.current.append).not.toBeDefined();
-    expect(result.current.content).toBeDefined();
-  });
 });

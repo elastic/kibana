@@ -69,11 +69,11 @@ const viewData = {
 
 export interface UseResponseActionsViewParams {
   /**
-   *
+   * An object with top level fields from the ECS object
    */
   ecsData?: Ecs | null;
   /**
-   *
+   * The actual raw document object
    */
   rawEventData: SearchHit | undefined;
 }

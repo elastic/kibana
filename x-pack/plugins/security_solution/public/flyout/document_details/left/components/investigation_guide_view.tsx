@@ -9,8 +9,8 @@ import { EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
 import React, { createContext } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import type { UseBasicDataFromDetailsDataResult } from '../../../flyout/document_details/shared/hooks/use_basic_data_from_details_data';
-import { LineClamp } from '../line_clamp';
+import type { UseBasicDataFromDetailsDataResult } from '../../shared/hooks/use_basic_data_from_details_data';
+import { LineClamp } from '../../../../common/components/line_clamp';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
 
 const INVESTIGATION_GUIDE = i18n.translate(
