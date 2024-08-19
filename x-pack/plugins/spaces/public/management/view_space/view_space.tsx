@@ -54,9 +54,10 @@ interface PageProps extends ViewSpaceServices {
   history: ScopedHistory;
   selectedTabId?: string;
   capabilities: Capabilities;
-  solutionNavExperiment?: Promise<boolean>;
   getFeatures: FeaturesPluginStart['getFeatures'];
   onLoadSpace: (space: Space) => void;
+  allowFeatureVisibility: boolean;
+  allowSolutionVisibility: boolean;
 }
 
 const handleApiError = (error: Error) => {
@@ -73,7 +74,6 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     spacesManager,
     history,
     onLoadSpace,
-    solutionNavExperiment,
     selectedTabId: _selectedTabId,
     capabilities,
     getUrlForApp,
@@ -88,16 +88,13 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
   const [isLoadingSpace, setIsLoadingSpace] = useState(true);
   const [isLoadingFeatures, setIsLoadingFeatures] = useState(true);
   const [isLoadingRoles, setIsLoadingRoles] = useState(true);
-  const [isSolutionNavEnabled, setIsSolutionNavEnabled] = useState(false);
   const selectedTabId = getSelectedTabId(Boolean(capabilities?.roles?.view), _selectedTabId);
   const [tabs, selectedTabContent] = useTabs({
     space,
     features,
     roles,
-    capabilities,
-    history,
     currentSelectedTabId: selectedTabId,
-    isSolutionNavEnabled,
+    ...props,
   });
 
   useEffect(() => {
@@ -168,12 +165,6 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     }
   }, [onLoadSpace, space]);
 
-  useEffect(() => {
-    solutionNavExperiment?.then((isEnabled) => {
-      setIsSolutionNavEnabled(isEnabled);
-    });
-  }, [solutionNavExperiment]);
-
   if (!space) {
     return null;
   }
@@ -198,7 +189,7 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
 
   const { id, solution: spaceSolution } = space;
   const solution = spaceSolution ?? 'classic';
-  const shouldShowSolutionBadge = isSolutionNavEnabled || solution !== 'classic';
+  const shouldShowSolutionBadge = props.allowSolutionVisibility || solution !== 'classic';
 
   return (
     <div data-test-subj="spaces-view-page">

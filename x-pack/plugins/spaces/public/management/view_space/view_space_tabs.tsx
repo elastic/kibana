@@ -33,7 +33,8 @@ export interface GetTabsProps {
   capabilities: Capabilities & {
     roles?: { view: boolean; save: boolean };
   };
-  isSolutionNavEnabled: boolean;
+  allowFeatureVisibility: boolean;
+  allowSolutionVisibility: boolean;
 }
 
 const SuspenseViewSpaceSettings = withSuspense(
@@ -66,6 +67,7 @@ export const getTabs = ({
   history,
   capabilities,
   roles,
+  ...props
 }: GetTabsProps): ViewSpaceTab[] => {
   const canUserViewRoles = Boolean(capabilities?.roles?.view);
   const canUserModifyRoles = Boolean(capabilities?.roles?.save);
@@ -76,7 +78,9 @@ export const getTabs = ({
       name: i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.general.heading', {
         defaultMessage: 'General settings',
       }),
-      content: <SuspenseViewSpaceSettings space={space} features={features} history={history} />,
+      content: (
+        <SuspenseViewSpaceSettings space={space} features={features} history={history} {...props} />
+      ),
     },
   ];
 

@@ -16,7 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const spacesServices = getService('spaces');
   const log = getService('log');
 
-  describe('Create and edit Space', () => {
+  describe('Spaces Management: Create and Edit', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
@@ -64,8 +64,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await PageObjects.common.navigateToApp('spacesManagement');
         await testSubjects.existOrFail('spaces-grid-page');
-        await testSubjects.click(`${spaceId}-hyperlink`);
-        await testSubjects.existOrFail('spaces-view-page > generalPanel');
       });
 
       after(async () => {
@@ -74,8 +72,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('allows changing space initials', async () => {
         const spaceInitials = faker.string.alpha(2);
+
+        await testSubjects.click(`${spaceId}-hyperlink`);
+        await testSubjects.existOrFail('spaces-view-page > generalPanel');
+
         await testSubjects.setValue('spaceLetterInitial', spaceInitials);
         await testSubjects.click('save-space-button');
+
         await testSubjects.existOrFail('spaces-grid-page'); // wait for grid page to reload
         await testSubjects.existOrFail(`space-avatar-${spaceId}`);
         expect(await testSubjects.getVisibleText(`space-avatar-${spaceId}`)).to.be(spaceInitials);
@@ -83,15 +86,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('solution view', () => {
-      // FIXME: no longer a valid test?
-      it.skip('does not show solution view panel', async () => {
+      it('does not show solution view panel', async () => {
         await PageObjects.common.navigateToUrl('management', 'kibana/spaces/edit/default', {
           shouldUseHashForSubUrl: false,
         });
 
         await testSubjects.existOrFail('spaces-view-page');
         await testSubjects.existOrFail('spaces-view-page > generalPanel');
-        await testSubjects.missingOrFail('spaces-view-page > navigationPanel');
+        await testSubjects.missingOrFail('spaces-view-page > navigationPanel'); // xpack.spaces.allowSolutionVisibility is not enabled, so the solution view picker should not appear
       });
     });
   });

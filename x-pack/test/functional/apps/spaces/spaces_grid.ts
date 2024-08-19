@@ -25,7 +25,7 @@ export default function spaceDetailsViewFunctionalTests({
     ...Array.from(new Array(5)).map((_) => `space-${crypto.randomUUID()}`),
   ];
 
-  describe('Spaces grid', function () {
+  describe('Spaces Management: List of Spaces', function () {
     before(async () => {
       for (const testSpaceId of testSpacesIds) {
         await spacesService.create({ id: testSpaceId, name: `${testSpaceId}-name` });

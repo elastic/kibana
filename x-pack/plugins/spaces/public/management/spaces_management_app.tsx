@@ -149,6 +149,8 @@ export const spacesManagementApp = Object.freeze({
               history={history}
               selectedTabId={selectedTabId}
               getRolesAPIClient={getRolesAPIClient}
+              allowFeatureVisibility={config.allowFeatureVisibility}
+              allowSolutionVisibility={config.allowSolutionVisibility}
             />
           );
         };

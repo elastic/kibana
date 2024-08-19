@@ -66,9 +66,9 @@ interface State {
   features: KibanaFeature[];
   originalSpace?: Partial<Space>;
   showAlteringActiveSpaceDialog: boolean;
+  showVisibleFeaturesPicker: boolean;
   haveDisabledFeaturesChanged: boolean;
   hasSolutionViewChanged: boolean;
-  allowFeatureVisibility: boolean;
   isLoading: boolean;
   saveInProgress: boolean;
   formError?: {
@@ -86,12 +86,12 @@ export class ManageSpacePage extends Component<Props, State> {
     this.state = {
       isLoading: true,
       showAlteringActiveSpaceDialog: false,
+      showVisibleFeaturesPicker: !!props.allowFeatureVisibility,
       saveInProgress: false,
       space: {
         color: getSpaceColor({}),
       },
       features: [],
-      allowFeatureVisibility: true,
       haveDisabledFeaturesChanged: false,
       hasSolutionViewChanged: false,
     };
@@ -187,6 +187,7 @@ export class ManageSpacePage extends Component<Props, State> {
 
   public getForm = () => {
     const { showAlteringActiveSpaceDialog } = this.state;
+
     return (
       <div data-test-subj="spaces-edit-page">
         <CustomizeSpace
@@ -213,7 +214,7 @@ export class ManageSpacePage extends Component<Props, State> {
           </>
         )}
 
-        {this.state.allowFeatureVisibility && (
+        {this.state.showVisibleFeaturesPicker && (
           <>
             <EuiSpacer />
             <EnabledFeatures
@@ -350,11 +351,11 @@ export class ManageSpacePage extends Component<Props, State> {
   };
 
   private onSolutionViewChange = (space: Partial<Space>) => {
-    let allowFeatureVisibility = false;
+    let showVisibleFeaturesPicker = false;
     if (space.solution === 'classic' || space.solution == null) {
-      allowFeatureVisibility = true;
+      showVisibleFeaturesPicker = true;
     }
-    this.setState((state) => ({ ...state, allowFeatureVisibility }));
+    this.setState((state) => ({ ...state, showVisibleFeaturesPicker }));
     this.onSpaceChange(space);
   };
 

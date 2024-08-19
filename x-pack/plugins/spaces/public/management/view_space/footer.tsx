@@ -50,7 +50,9 @@ export const ViewSpaceTabFooter: React.FC<Props> = ({
           {isDirty && (
             <>
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={onClickCancel}>Cancel</EuiButtonEmpty>
+                <EuiButtonEmpty onClick={onClickCancel} data-test-subj="cancel-space-button">
+                  Cancel
+                </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton

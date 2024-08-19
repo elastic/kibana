@@ -28,9 +28,11 @@ interface Props {
   space: Space;
   history: ScopedHistory;
   features: KibanaFeature[];
+  allowFeatureVisibility: boolean;
+  allowSolutionVisibility: boolean;
 }
 
-export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history }) => {
+export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history, ...props }) => {
   const [spaceSettings, setSpaceSettings] = useState<Partial<Space>>(space);
   const [isDirty, setIsDirty] = useState(false); // track if unsaved changes have been made
   const [isLoading, setIsLoading] = useState(false); // track if user has just clicked the Update button
@@ -209,10 +211,14 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
         validator={validator}
       />
 
-      <EuiSpacer />
-      <SolutionView space={spaceSettings} onChange={onSolutionViewChange} />
+      {props.allowSolutionVisibility && (
+        <>
+          <EuiSpacer />
+          <SolutionView space={spaceSettings} onChange={onSolutionViewChange} />
+        </>
+      )}
 
-      {(solution == null || solution === 'classic') && (
+      {props.allowFeatureVisibility && (solution == null || solution === 'classic') && (
         <>
           <EuiSpacer />
           <ViewSpaceEnabledFeatures
