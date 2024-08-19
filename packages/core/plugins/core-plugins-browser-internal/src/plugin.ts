@@ -16,6 +16,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core-plugins-browser';
 import { Setup, Start } from '@kbn/core-di-common';
+import { Contract } from '@kbn/core-di-common-internal';
 import { type PluginDefinition, read } from './plugin_reader';
 import {
   createPluginInitializerModule,
@@ -80,9 +81,10 @@ export class PluginWrapper<
       this.container.load(createPluginSetupModule(setupContext));
     }
 
-    return (
-      this.instance?.setup(setupContext, plugins) ?? (this.container?.getAsync(Setup) as TSetup)
-    );
+    return [
+      this.instance?.setup(setupContext, plugins),
+      this.container?.getNamed(Contract, Setup as symbol) as TSetup,
+    ].find(Boolean);
   }
 
   /**
@@ -98,8 +100,10 @@ export class PluginWrapper<
     }
 
     this.container?.load(createPluginStartModule(startContext));
-    const contract =
-      this.instance?.start(startContext, plugins) ?? (this.container?.getAsync(Start) as TStart);
+    const contract = [
+      this.instance?.start(startContext, plugins),
+      this.container?.getNamed(Contract, Start as symbol) as TStart,
+    ].find(Boolean);
 
     if (contract) {
       this.startDependencies$.next([startContext, plugins, contract]);

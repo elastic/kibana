@@ -16,3 +16,5 @@ export const InternalDiSetupService = Symbol.for(
 export const InternalDiService = Symbol.for(
   'InternalDiService'
 ) as interfaces.ServiceIdentifier<InternalCoreDiServiceStart>;
+
+export { Contract } from './modules';

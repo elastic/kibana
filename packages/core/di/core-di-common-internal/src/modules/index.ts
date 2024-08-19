@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { CoreInjectionService } from './src/service';
-export type { InternalCoreDiServiceSetup, InternalCoreDiServiceStart } from './src/contracts';
-export { Contract, InternalDiService, InternalDiSetupService } from './src/services';
+export { Contract, LifecycleModule } from './lifecycle';
+export { Plugin, PluginModule } from './plugin';

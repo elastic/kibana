@@ -28,11 +28,9 @@ import type {
   NavigateToAppOptions,
   NavigateToUrlOptions,
 } from '@kbn/core-application-browser';
-import { ApplicationService as ApplicationServiceToken } from '@kbn/core-application-browser';
 import { CapabilitiesService } from '@kbn/core-capabilities-browser-internal';
 import { AppStatus } from '@kbn/core-application-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import type { InternalCoreDiServiceStart } from '@kbn/core-di-common-internal';
 import { AppRouter } from './ui';
 import type { InternalApplicationSetup, InternalApplicationStart, Mounter } from './types';
 
@@ -57,7 +55,6 @@ export interface SetupDeps {
 
 export interface StartDeps {
   http: InternalHttpStart;
-  injection: InternalCoreDiServiceStart;
   analytics: AnalyticsServiceStart;
   theme: ThemeServiceStart;
   overlays: OverlayStart;
@@ -232,17 +229,12 @@ export class ApplicationService {
   public async start({
     analytics,
     http,
-    injection,
     overlays,
     theme,
     customBranding,
   }: StartDeps): Promise<InternalApplicationStart> {
     if (!this.redirectTo) {
       throw new Error('ApplicationService#setup() must be invoked before start.');
-    }
-
-    if (injection.getContainer().isBound(ApplicationServiceToken)) {
-      injection.getContainer().getAll(ApplicationServiceToken);
     }
 
     this.overlayStart$.next(overlays);
