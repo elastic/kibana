@@ -20,7 +20,7 @@ export default meta;
 
 const defaultProps: ComponentStoryObj<typeof Component> = {
   args: {},
-  render: (props) => <Component {...props} />,
+  render: (props) => <Component investigationId="123" />,
 };
 
 export const InvestigateViewStory: ComponentStoryObj<typeof Component> = {
