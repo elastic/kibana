@@ -10,6 +10,7 @@ import type { KbnClient } from '@kbn/test';
 import pRetry from 'p-retry';
 import { kibanaPackageJson } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { fetchFleetLatestAvailableAgentVersion } from '../../../../../common/endpoint/utils/fetch_fleet_version';
 import { dump } from '../../../../../scripts/endpoint/common/utils';
 import { STARTED_TRANSFORM_STATES } from '../../../../../common/constants';
 import {
@@ -77,8 +78,18 @@ export const cyLoadEndpointDataHandler = async (
     isServerless = false,
   } = options;
 
+  let agentVersion = version;
+
+  if (isServerless) {
+    agentVersion = await fetchFleetLatestAvailableAgentVersion(kbnClient);
+  }
+
   const DocGenerator = EndpointDocGenerator.custom({
-    CustomMetadataGenerator: EndpointMetadataGenerator.custom({ version, os, isolation }),
+    CustomMetadataGenerator: EndpointMetadataGenerator.custom({
+      version: agentVersion,
+      os,
+      isolation,
+    }),
   });
 
   if (waitUntilTransformed) {
@@ -192,6 +203,7 @@ const startTransform = async (
  * the united metadata index
  *
  * @param esClient
+ * @param log
  * @param location
  * @param ids
  */

@@ -32,6 +32,7 @@ import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../common/detection_engine/constants';
 import type { ExperimentalFeatures } from '../../../../../../common';
 import { createEnrichEventsFunction } from '../../utils/enrichments';
+import { getNumberOfSuppressedAlerts } from '../../utils/get_number_of_suppressed_alerts';
 
 export interface BucketHistory {
   key: Record<string, string | number | null>;
@@ -274,6 +275,7 @@ export const groupAndBulkCreate = async ({
           suppressionWindow,
           alertTimestampOverride: runOpts.alertTimestampOverride,
           experimentalFeatures,
+          ruleType: 'query',
         });
         addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
         runOpts.ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
@@ -286,7 +288,13 @@ export const groupAndBulkCreate = async ({
             logger: runOpts.ruleExecutionLogger,
           })
         );
-        addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
+        addToSearchAfterReturn({
+          current: toReturn,
+          next: {
+            ...bulkCreateResult,
+            suppressedItemsCount: getNumberOfSuppressedAlerts(bulkCreateResult.createdItems, []),
+          },
+        });
         runOpts.ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
       }
 

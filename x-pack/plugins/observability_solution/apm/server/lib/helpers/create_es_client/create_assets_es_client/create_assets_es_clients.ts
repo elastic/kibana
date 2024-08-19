@@ -4,18 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { entitiesAliasPattern, ENTITY_LATEST, ENTITY_HISTORY } from '@kbn/entities-schema';
 import { unwrapEsResponse } from '@kbn/observability-plugin/common/utils/unwrap_es_response';
 import {
   MsearchMultisearchBody,
   MsearchMultisearchHeader,
 } from '@elastic/elasticsearch/lib/api/types';
 import { withApmSpan } from '../../../../utils/with_apm_span';
+import { EntityType } from '../../../../routes/entities/types';
 
-const ENTITIES_LATEST_INDEX_NAME = '.entities.v1.latest.builtin_services*';
-const ENTITIES_HISTORY_INDEX_NAME = '.entities.v1.history.builtin_services*';
+const SERVICE_ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
+  type: EntityType.SERVICE,
+  dataset: ENTITY_LATEST,
+});
+const SERVICE_ENTITIES_HISTORY_ALIAS = entitiesAliasPattern({
+  type: EntityType.SERVICE,
+  dataset: ENTITY_HISTORY,
+});
 
 export function cancelEsRequestOnAbort<T extends Promise<any>>(
   promise: T,
@@ -60,7 +69,7 @@ export async function createEntitiesESClient({
     const promise = withApmSpan(operationName, () => {
       return cancelEsRequestOnAbort(
         esClient.search(
-          { ...searchRequest, index: [indexName] },
+          { ...searchRequest, index: [indexName], ignore_unavailable: true },
           {
             signal: controller.signal,
             meta: true,
@@ -81,14 +90,14 @@ export async function createEntitiesESClient({
       operationName: string,
       searchRequest: TSearchRequest
     ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>> {
-      return search(ENTITIES_LATEST_INDEX_NAME, operationName, searchRequest);
+      return search(SERVICE_ENTITIES_LATEST_ALIAS, operationName, searchRequest);
     },
 
     searchHistory<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
       operationName: string,
       searchRequest: TSearchRequest
     ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>> {
-      return search(ENTITIES_HISTORY_INDEX_NAME, operationName, searchRequest);
+      return search(SERVICE_ENTITIES_HISTORY_ALIAS, operationName, searchRequest);
     },
 
     async msearch<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
@@ -98,7 +107,8 @@ export async function createEntitiesESClient({
         .map((params) => {
           const searchParams: [MsearchMultisearchHeader, MsearchMultisearchBody] = [
             {
-              index: [ENTITIES_LATEST_INDEX_NAME],
+              index: [SERVICE_ENTITIES_LATEST_ALIAS],
+              ignore_unavailable: true,
             },
             {
               ...params.body,

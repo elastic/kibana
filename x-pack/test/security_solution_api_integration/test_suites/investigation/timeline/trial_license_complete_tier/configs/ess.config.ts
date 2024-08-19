@@ -20,7 +20,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([])}`,
       ],
     },
-    testFiles: [require.resolve('../ess')],
+    testFiles: [require.resolve('../tests')],
     junit: {
       reportName: 'Timeline Integration Tests - ESS Env - Trial License',
     },

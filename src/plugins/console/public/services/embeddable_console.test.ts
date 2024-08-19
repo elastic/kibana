@@ -54,6 +54,49 @@ describe('EmbeddableConsoleInfo', () => {
         payload: { content: 'GET /_cat/_indices' },
       });
     });
+    it('does nothing if dispatch not set', () => {
+      eConsole.setDispatch(null);
+
+      eConsole.openEmbeddedConsole();
+
+      expect(mockDispatch).toHaveBeenCalledTimes(0);
+    });
+  });
+  describe('openEmbeddedConsoleAlternateView', () => {
+    const mockDispatch = jest.fn();
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      eConsole.setDispatch(mockDispatch);
+    });
+    it('dispatches open when alt view does not exist', () => {
+      eConsole.openEmbeddedConsoleAlternateView();
+      expect(mockDispatch).toHaveBeenCalledTimes(1);
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'open',
+        payload: { alternateView: false },
+      });
+    });
+    it('dispatches open alt view when alt view exists', () => {
+      eConsole.registerAlternateView({
+        ActivationButton: jest.fn(),
+        ViewContent: jest.fn(),
+      });
+
+      eConsole.openEmbeddedConsoleAlternateView();
+      expect(mockDispatch).toHaveBeenCalledTimes(1);
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'open',
+        payload: { alternateView: true },
+      });
+    });
+    it('does nothing if dispatch not set', () => {
+      eConsole.setDispatch(null);
+
+      eConsole.openEmbeddedConsoleAlternateView();
+
+      expect(mockDispatch).toHaveBeenCalledTimes(0);
+    });
   });
   describe('getConsoleHeight', () => {
     it('returns value in storage when found', () => {
