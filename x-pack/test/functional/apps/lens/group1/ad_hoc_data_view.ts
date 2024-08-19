@@ -28,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const dataViews = getService('dataViews');
+  const dashboardPanelActions = getService('dashboardPanelActions');
 
   const expectedData = [
     { x: '97.220.3.248', y: 19755 },
@@ -55,9 +56,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   }
 
   const checkDiscoverNavigationResult = async () => {
-    await testSubjects.click('embeddablePanelToggleMenuIcon');
-    await testSubjects.click('embeddablePanelMore-mainMenu');
-    await testSubjects.click('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER');
+    await dashboardPanelActions.clickContextMenuItem(
+      'embeddablePanelAction-ACTION_OPEN_IN_DISCOVER'
+    );
 
     const [, discoverHandle] = await browser.getAllWindowHandles();
     await browser.switchToWindow(discoverHandle);
