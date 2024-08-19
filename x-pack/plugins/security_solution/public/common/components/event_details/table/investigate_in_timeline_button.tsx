@@ -21,7 +21,7 @@ import { sourcererActions } from '../../../store/actions';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import type { DataProvider } from '../../../../../common/types';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
 
@@ -58,7 +58,7 @@ export const InvestigateInTimelineButton: FC<
 
   const clearTimeline = useCreateTimeline({
     timelineId: TimelineId.active,
-    timelineType: hasTemplateProviders ? TimelineType.template : TimelineType.default,
+    timelineType: hasTemplateProviders ? TimelineTypeEnum.template : TimelineTypeEnum.default,
   });
 
   const configureAndOpenTimeline = useCallback(async () => {

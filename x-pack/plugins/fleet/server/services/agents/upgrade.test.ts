@@ -36,7 +36,12 @@ jest.mock('./action_status', () => {
 
 describe('sendUpgradeAgentsActions (plural)', () => {
   beforeEach(async () => {
-    appContextService.start(createAppContextStartContractMock());
+    const { soClient } = createClientMock();
+    appContextService.start(
+      createAppContextStartContractMock({}, false, {
+        withoutSpaceExtensions: soClient,
+      })
+    );
   });
 
   afterEach(() => {

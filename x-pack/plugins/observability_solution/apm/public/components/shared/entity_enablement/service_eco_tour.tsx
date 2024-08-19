@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiTourStep } from '@elastic/eui';
-import { useServiceEcoTour } from '../../../hooks/use_eco_tour';
+import { useEntityManagerEnablementContext } from '../../../context/entity_manager_context/use_entity_manager_enablement_context';
 
 export function ServiceEcoTour({
   children,
@@ -17,7 +17,7 @@ export function ServiceEcoTour({
   children: React.ReactElement;
   onFinish: () => void;
 }) {
-  const { tourState } = useServiceEcoTour();
+  const { tourState } = useEntityManagerEnablementContext();
 
   return (
     <EuiTourStep

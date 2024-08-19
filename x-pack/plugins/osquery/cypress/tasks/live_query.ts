@@ -165,7 +165,7 @@ export const checkActionItemsInResults = ({
 };
 
 export const takeOsqueryActionWithParams = () => {
-  cy.getBySel('take-action-dropdown-btn').click();
+  cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click();
   cy.getBySel('osquery-action-item').click();
   selectAllAgents();
   inputQuery("SELECT * FROM os_version where name='{{host.os.name}}';", {

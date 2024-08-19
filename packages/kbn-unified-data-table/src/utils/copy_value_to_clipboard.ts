@@ -8,9 +8,12 @@
 
 import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ToastsStart } from '@kbn/core/public';
+import type { ToastsStart } from '@kbn/core/public';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ValueToStringConverter } from '../types';
 import { convertNameToString } from './convert_value_to_string';
+import { getColumnDisplayName } from '../components/data_table_columns';
 
 const WARNING_FOR_FORMULAS = i18n.translate(
   'unifiedDataTable.copyEscapedValueWithFormulasToClipboardWarningText',
@@ -150,4 +153,119 @@ export const copyColumnNameToClipboard = ({
   });
 
   return columnDisplayName;
+};
+
+export const copyRowsAsTextToClipboard = async ({
+  columns,
+  dataView,
+  selectedRowIndices,
+  toastNotifications,
+  valueToStringConverter,
+}: {
+  columns: string[];
+  dataView: DataView;
+  selectedRowIndices: number[];
+  toastNotifications: ToastsStart;
+  valueToStringConverter: ValueToStringConverter;
+}): Promise<string | null> => {
+  const columnSeparator = '\t';
+  const rowSeparator = '\n';
+  let withFormula = false;
+  let textToCopy = '';
+
+  textToCopy +=
+    columns
+      .map((columnId) => {
+        const columnDisplayName = getColumnDisplayName(
+          columnId,
+          dataView.getFieldByName(columnId)?.displayName,
+          undefined
+        );
+        const nameFormattedResult = convertNameToString(columnDisplayName);
+        withFormula = withFormula || nameFormattedResult.withFormula;
+        return nameFormattedResult.formattedString;
+      })
+      .join(columnSeparator) + rowSeparator;
+
+  selectedRowIndices.forEach((rowIndex, index) => {
+    textToCopy +=
+      columns
+        .map((columnId) => {
+          const result = valueToStringConverter(rowIndex, columnId, { compatibleWithCSV: true });
+          withFormula = withFormula || result.withFormula;
+          return result.formattedString || '-';
+        })
+        .join(columnSeparator) + (index !== selectedRowIndices.length - 1 ? rowSeparator : '');
+  });
+
+  let copied;
+  try {
+    // try to copy without browser styles
+    await window.navigator?.clipboard?.writeText(textToCopy);
+    copied = true;
+  } catch (error) {
+    copied = copyToClipboard(textToCopy);
+  }
+
+  if (!copied) {
+    toastNotifications.addWarning({
+      title: COPY_FAILED_ERROR_MESSAGE,
+    });
+
+    return null;
+  }
+
+  const toastTitle = i18n.translate('unifiedDataTable.copyRowsAsTextToClipboard.toastTitle', {
+    defaultMessage: 'Copied to clipboard',
+  });
+
+  if (withFormula) {
+    toastNotifications.addWarning({
+      title: toastTitle,
+      text: WARNING_FOR_FORMULAS,
+    });
+  } else {
+    toastNotifications.addInfo({
+      title: toastTitle,
+    });
+  }
+
+  return textToCopy;
+};
+
+export const copyRowsAsJsonToClipboard = async ({
+  selectedRows,
+  toastNotifications,
+}: {
+  selectedRows: DataTableRecord[];
+  toastNotifications: ToastsStart;
+}): Promise<string | null> => {
+  const textToCopy = selectedRows ? JSON.stringify(selectedRows.map((row) => row.raw)) : '';
+
+  let copied;
+  try {
+    // try to copy without browser styles
+    await window.navigator?.clipboard?.writeText(textToCopy);
+    copied = true;
+  } catch (error) {
+    copied = copyToClipboard(textToCopy);
+  }
+
+  if (!copied) {
+    toastNotifications.addWarning({
+      title: COPY_FAILED_ERROR_MESSAGE,
+    });
+
+    return null;
+  }
+
+  const toastTitle = i18n.translate('unifiedDataTable.copyRowsAsJsonToClipboard.toastTitle', {
+    defaultMessage: 'Copied to clipboard',
+  });
+
+  toastNotifications.addInfo({
+    title: toastTitle,
+  });
+
+  return textToCopy;
 };

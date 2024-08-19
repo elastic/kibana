@@ -28,6 +28,11 @@ import {
   IEditableControlFactory,
   ControlInput,
 } from './types';
+import { registerControlGroupEmbeddable } from './react_controls/control_group/register_control_group_embeddable';
+import { registerOptionsListControl } from './react_controls/controls/data_controls/options_list_control/register_options_list_control';
+import { registerRangeSliderControl } from './react_controls/controls/data_controls/range_slider/register_range_slider_control';
+import { registerTimeSliderControl } from './react_controls/controls/timeslider_control/register_timeslider_control';
+import { EditControlAction } from './react_controls/actions/edit_control_action/edit_control_action';
 export class ControlsPlugin
   implements
     Plugin<
@@ -62,6 +67,11 @@ export class ControlsPlugin
   ): ControlsPluginSetup {
     const { registerControlType } = controlsService;
     const { embeddable } = _setupPlugins;
+
+    registerControlGroupEmbeddable(_coreSetup, embeddable);
+    registerOptionsListControl(_coreSetup);
+    registerRangeSliderControl(_coreSetup);
+    registerTimeSliderControl(_coreSetup);
 
     // register control group embeddable factory
     _coreSetup.getStartServices().then(([, deps]) => {
@@ -120,10 +130,21 @@ export class ControlsPlugin
       uiActions.registerAction(deleteControlAction);
       uiActions.attachAction(PANEL_HOVER_TRIGGER, deleteControlAction.id);
 
-      const { EditControlAction } = await import('./control_group/actions/edit_control_action');
-      const editControlAction = new EditControlAction(deleteControlAction);
+      const editControlAction = new EditControlAction();
       uiActions.registerAction(editControlAction);
       uiActions.attachAction(PANEL_HOVER_TRIGGER, editControlAction.id);
+
+      /**
+       * TODO: Remove edit legacy control embeddable action when embeddable controls are removed
+       */
+      const { EditLegacyEmbeddableControlAction } = await import(
+        './control_group/actions/edit_control_action'
+      );
+      const editLegacyEmbeddableControlAction = new EditLegacyEmbeddableControlAction(
+        deleteControlAction
+      );
+      uiActions.registerAction(editLegacyEmbeddableControlAction);
+      uiActions.attachAction(PANEL_HOVER_TRIGGER, editLegacyEmbeddableControlAction.id);
 
       const { ClearControlAction } = await import('./control_group/actions/clear_control_action');
       const clearControlAction = new ClearControlAction();

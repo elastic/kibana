@@ -6,7 +6,7 @@
  */
 
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
-import { EMPTY_BROWSER_FIELDS, EMPTY_INDEX_FIELDS } from '@kbn/timelines-plugin/common';
+import { EMPTY_BROWSER_FIELDS } from '@kbn/timelines-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { RuntimeFieldSpec, RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
 import type { SecuritySolutionDataViewBase } from '../../common/types';
@@ -69,19 +69,9 @@ export interface SourcererDataView extends KibanaDataView {
    * category, description, format
    * indices the field is included in etc*/
   browserFields: BrowserFields;
-  /**
-   * @deprecated use sourcererDataView.fields
-   * comes from dataView.fields.toSpec() */
-  indexFields: SecuritySolutionDataViewBase['fields'];
   fields: DataViewSpec['fields'] | undefined;
   /** set when data view fields are fetched */
   loading: boolean;
-  /**
-   * @deprecated use sourcererDataView.runtimeMappings
-   * Needed to pass to search strategy
-   * Remove once issue resolved: https://github.com/elastic/kibana/issues/111762
-   */
-  runtimeMappings: RunTimeMappings;
   /**
    * @type DataView @kbn/data-views-plugin/common
    */
@@ -96,7 +86,7 @@ export interface SelectedDataView {
   /**
    * @deprecated use EcsFlat or fields / indexFields from data view
    */
-  browserFields: SourcererDataView['browserFields'];
+  browserFields: BrowserFields;
   dataViewId: string | null; // null if legacy pre-8.0 timeline
   /**
    * @deprecated use sourcererDataView
@@ -107,25 +97,8 @@ export interface SelectedDataView {
   indicesExist: boolean;
   /** is an update being made to the data view */
   loading: boolean;
-  /**
-   * @deprecated use sourcererDataView.title or sourcererDataView.matchedIndices
-   * all active & inactive patterns from SourcererDataView['title']
-   */
-  patternList: string[];
-  /**
-   * @deprecated use sourcererDataView.runtimeMappings
-   */
-  runtimeMappings: SourcererDataView['runtimeMappings'];
-  /**
-   * @deprecated use sourcererDataView.title or sourcererDataView.matchedIndices
-   * all selected patterns from SourcererScope['selectedPatterns'] */
+  /* all selected patterns from SourcererScope['selectedPatterns'] */
   selectedPatterns: SourcererScope['selectedPatterns'];
-  /**
-   * @deprecated use sourcererDataView.title or sourcererDataView.matchedIndices
-   * active patterns when dataViewId == null
-   */
-  activePatterns?: string[];
-
   /**
    * Easier to add this additional data rather than
    * try to extend the SelectedDataView type from DataView.
@@ -166,11 +139,9 @@ export const initSourcererScope: Omit<SourcererScope, 'id'> = {
 export const initDataView: SourcererDataView & { id: string; error?: unknown } = {
   browserFields: EMPTY_BROWSER_FIELDS,
   id: '',
-  indexFields: EMPTY_INDEX_FIELDS,
   fields: undefined,
   loading: false,
   patternList: [],
-  runtimeMappings: {},
   title: '',
   dataView: undefined,
 };

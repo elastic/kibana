@@ -10,6 +10,7 @@ import { EuiButton } from '@elastic/eui';
 import { waitFor } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { notificationServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
@@ -20,6 +21,8 @@ import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
 import { EnabledFeatures } from './enabled_features';
 import { ManageSpacePage } from './manage_space_page';
+import type { SolutionView, Space } from '../../../common/types/latest';
+import { EventTracker } from '../../analytics';
 import type { SpacesManager } from '../../spaces_manager';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 
@@ -31,7 +34,7 @@ jest.mock('@elastic/eui/lib/components/overlay_mask', () => {
   };
 });
 
-const space = {
+const space: Space = {
   id: 'my-space',
   name: 'My Space',
   disabledFeatures: [],
@@ -47,6 +50,9 @@ featuresStart.getFeatures.mockResolvedValue([
     privileges: null,
   }),
 ]);
+
+const reportEvent = jest.fn();
+const eventTracker = new EventTracker({ reportEvent });
 
 describe('ManageSpacePage', () => {
   beforeAll(() => {
@@ -75,7 +81,9 @@ describe('ManageSpacePage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        eventTracker={eventTracker}
         allowFeatureVisibility
+        allowSolutionVisibility
       />
     );
 
@@ -105,7 +113,7 @@ describe('ManageSpacePage', () => {
     });
   });
 
-  it('shows solution view select when enabled', async () => {
+  it('shows solution view select when visible', async () => {
     const spacesManager = spacesManagerMock.create();
     spacesManager.createSpace = jest.fn(spacesManager.createSpace);
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
@@ -123,7 +131,8 @@ describe('ManageSpacePage', () => {
           spaces: { manage: true },
         }}
         allowFeatureVisibility
-        solutionNavExperiment={Promise.resolve(true)}
+        allowSolutionVisibility
+        eventTracker={eventTracker}
       />
     );
 
@@ -135,61 +144,35 @@ describe('ManageSpacePage', () => {
     expect(findTestSubject(wrapper, 'navigationPanel')).toHaveLength(1);
   });
 
-  it('hides solution view select when not enabled or undefined', async () => {
+  it('hides solution view select when not visible', async () => {
     const spacesManager = spacesManagerMock.create();
     spacesManager.createSpace = jest.fn(spacesManager.createSpace);
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
-    {
-      const wrapper = mountWithIntl(
-        <ManageSpacePage
-          spacesManager={spacesManager as unknown as SpacesManager}
-          getFeatures={featuresStart.getFeatures}
-          notifications={notificationServiceMock.createStartContract()}
-          history={history}
-          capabilities={{
-            navLinks: {},
-            management: {},
-            catalogue: {},
-            spaces: { manage: true },
-          }}
-          allowFeatureVisibility
-        />
-      );
+    const wrapper = mountWithIntl(
+      <ManageSpacePage
+        spacesManager={spacesManager as unknown as SpacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        allowFeatureVisibility
+        allowSolutionVisibility={false}
+        eventTracker={eventTracker}
+      />
+    );
 
-      await waitFor(() => {
-        wrapper.update();
-        expect(wrapper.find('input[name="name"]')).toHaveLength(1);
-      });
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find('input[name="name"]')).toHaveLength(1);
+    });
 
-      expect(findTestSubject(wrapper, 'navigationPanel')).toHaveLength(0);
-    }
-
-    {
-      const wrapper = mountWithIntl(
-        <ManageSpacePage
-          spacesManager={spacesManager as unknown as SpacesManager}
-          getFeatures={featuresStart.getFeatures}
-          notifications={notificationServiceMock.createStartContract()}
-          history={history}
-          capabilities={{
-            navLinks: {},
-            management: {},
-            catalogue: {},
-            spaces: { manage: true },
-          }}
-          allowFeatureVisibility
-          solutionNavExperiment={Promise.resolve(false)}
-        />
-      );
-
-      await waitFor(() => {
-        wrapper.update();
-        expect(wrapper.find('input[name="name"]')).toHaveLength(1);
-      });
-
-      expect(findTestSubject(wrapper, 'navigationPanel')).toHaveLength(0);
-    }
+    expect(findTestSubject(wrapper, 'navigationPanel')).toHaveLength(0);
   });
 
   it('shows feature visibility controls when allowed', async () => {
@@ -209,7 +192,9 @@ describe('ManageSpacePage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        eventTracker={eventTracker}
         allowFeatureVisibility
+        allowSolutionVisibility
       />
     );
 
@@ -238,7 +223,9 @@ describe('ManageSpacePage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        eventTracker={eventTracker}
         allowFeatureVisibility={false}
+        allowSolutionVisibility
       />
     );
 
@@ -258,6 +245,7 @@ describe('ManageSpacePage', () => {
       color: '#aabbcc',
       initials: 'AB',
       disabledFeatures: [],
+      solution: 'es',
     };
 
     const spacesManager = spacesManagerMock.create();
@@ -282,7 +270,9 @@ describe('ManageSpacePage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        eventTracker={eventTracker}
         allowFeatureVisibility
+        allowSolutionVisibility
       />
     );
 
@@ -299,7 +289,7 @@ describe('ManageSpacePage', () => {
 
     wrapper.update();
 
-    updateSpace(wrapper);
+    updateSpace(wrapper, true, 'oblt');
 
     await clickSaveButton(wrapper);
 
@@ -311,6 +301,14 @@ describe('ManageSpacePage', () => {
       initials: 'AB',
       imageUrl: '',
       disabledFeatures: ['feature-1'],
+      solution: 'oblt', // solution has been changed
+    });
+
+    expect(reportEvent).toHaveBeenCalledWith('space_solution_changed', {
+      action: 'edit',
+      solution: 'oblt',
+      solution_prev: 'es',
+      space_id: 'existing-space',
     });
   });
 
@@ -350,7 +348,9 @@ describe('ManageSpacePage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        eventTracker={eventTracker}
         allowFeatureVisibility
+        allowSolutionVisibility
       />
     );
 
@@ -399,7 +399,9 @@ describe('ManageSpacePage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        eventTracker={eventTracker}
         allowFeatureVisibility
+        allowSolutionVisibility
       />
     );
 
@@ -436,7 +438,9 @@ describe('ManageSpacePage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        eventTracker={eventTracker}
         allowFeatureVisibility
+        allowSolutionVisibility
       />
     );
 
@@ -497,7 +501,9 @@ describe('ManageSpacePage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        eventTracker={eventTracker}
         allowFeatureVisibility
+        allowSolutionVisibility
       />
     );
 
@@ -521,7 +527,11 @@ describe('ManageSpacePage', () => {
   });
 });
 
-function updateSpace(wrapper: ReactWrapper<any, any>, updateFeature = true) {
+function updateSpace(
+  wrapper: ReactWrapper<any, any>,
+  updateFeature = true,
+  solution?: SolutionView
+) {
   const nameInput = wrapper.find('input[name="name"]');
   const descriptionInput = wrapper.find('textarea[name="description"]');
 
@@ -530,6 +540,16 @@ function updateSpace(wrapper: ReactWrapper<any, any>, updateFeature = true) {
 
   if (updateFeature) {
     toggleFeature(wrapper);
+  }
+
+  if (solution) {
+    act(() => {
+      findTestSubject(wrapper, `solutionViewSelect`).simulate('click');
+    });
+    wrapper.update();
+    findTestSubject(wrapper, `solutionView${capitalizeFirstLetter(solution)}Option`).simulate(
+      'click'
+    );
   }
 }
 
@@ -551,4 +571,8 @@ async function clickSaveButton(wrapper: ReactWrapper<any, any>) {
   await Promise.resolve();
 
   wrapper.update();
+}
+
+function capitalizeFirstLetter(string: string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
 }

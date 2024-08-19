@@ -9,8 +9,6 @@ paths:
       operationId: PatchListItem
       x-codegen-enabled: true
       summary: Patches a list item
-      tags:
-        - List item API
       requestBody:
         description: List item's properties
         required: true

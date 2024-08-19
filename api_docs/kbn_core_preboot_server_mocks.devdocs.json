@@ -13,18 +13,10 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
     "misc": [
       {
         "parentPluginId": "@kbn/core-preboot-server-mocks",
-        "id": "def-common.InternalPrebootServicePrebootMock",
+        "id": "def-server.InternalPrebootServicePrebootMock",
         "type": "Type",
         "tags": [],
         "label": "InternalPrebootServicePrebootMock",
@@ -40,7 +32,7 @@
       },
       {
         "parentPluginId": "@kbn/core-preboot-server-mocks",
-        "id": "def-common.PrebootServicePrebootMock",
+        "id": "def-server.PrebootServicePrebootMock",
         "type": "Type",
         "tags": [],
         "label": "PrebootServicePrebootMock",
@@ -49,9 +41,9 @@
           "{ readonly isSetupOnHold: jest.MockInstance<boolean, [], unknown>; readonly holdSetupUntilResolved: jest.MockInstance<void, [reason: string, promise: Promise<{ shouldReloadConfig: boolean; } | undefined>], unknown>; } & ",
           {
             "pluginId": "@kbn/core-preboot-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCorePrebootServerPluginApi",
-            "section": "def-common.PrebootServicePreboot",
+            "section": "def-server.PrebootServicePreboot",
             "text": "PrebootServicePreboot"
           }
         ],
@@ -64,7 +56,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-preboot-server-mocks",
-        "id": "def-common.prebootServiceMock",
+        "id": "def-server.prebootServiceMock",
         "type": "Object",
         "tags": [],
         "label": "prebootServiceMock",
@@ -75,7 +67,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-preboot-server-mocks",
-            "id": "def-common.prebootServiceMock.create",
+            "id": "def-server.prebootServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -91,7 +83,7 @@
           },
           {
             "parentPluginId": "@kbn/core-preboot-server-mocks",
-            "id": "def-common.prebootServiceMock.createInternalPrebootContract",
+            "id": "def-server.prebootServiceMock.createInternalPrebootContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalPrebootContract",
@@ -100,9 +92,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-preboot-server-mocks",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCorePrebootServerMocksPluginApi",
-                "section": "def-common.InternalPrebootServicePrebootMock",
+                "section": "def-server.InternalPrebootServicePrebootMock",
                 "text": "InternalPrebootServicePrebootMock"
               }
             ],
@@ -114,7 +106,7 @@
           },
           {
             "parentPluginId": "@kbn/core-preboot-server-mocks",
-            "id": "def-common.prebootServiceMock.createPrebootContract",
+            "id": "def-server.prebootServiceMock.createPrebootContract",
             "type": "Function",
             "tags": [],
             "label": "createPrebootContract",
@@ -123,9 +115,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-preboot-server-mocks",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCorePrebootServerMocksPluginApi",
-                "section": "def-common.PrebootServicePrebootMock",
+                "section": "def-server.PrebootServicePrebootMock",
                 "text": "PrebootServicePrebootMock"
               }
             ],
@@ -139,5 +131,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

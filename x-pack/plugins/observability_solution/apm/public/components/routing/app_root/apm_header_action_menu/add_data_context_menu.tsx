@@ -14,7 +14,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useServiceEcoTour } from '../../../../hooks/use_eco_tour';
 import { useKibana } from '../../../../context/kibana_context/use_kibana';
 import { ApmPluginStartDeps, ApmServices } from '../../../../plugin';
 import { EntityInventoryAddDataParams } from '../../../../services/telemetry';
@@ -24,6 +23,7 @@ import {
   addApmData,
 } from '../../../shared/add_data_buttons/buttons';
 import { ServiceEcoTour } from '../../../shared/entity_enablement/service_eco_tour';
+import { useEntityManagerEnablementContext } from '../../../../context/entity_manager_context/use_entity_manager_enablement_context';
 
 const addData = i18n.translate('xpack.apm.addDataContextMenu.link', {
   defaultMessage: 'Add data',
@@ -31,7 +31,7 @@ const addData = i18n.translate('xpack.apm.addDataContextMenu.link', {
 
 export function AddDataContextMenu() {
   const [popoverOpen, setPopoverOpen] = useState(false);
-  const { tourState, hideTour } = useServiceEcoTour();
+  const { tourState, updateTourState } = useEntityManagerEnablementContext();
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const {
     core: {
@@ -76,7 +76,6 @@ export function AddDataContextMenu() {
           name: collectServiceLogs.name,
           href: basePath.prepend(collectServiceLogs.link),
           'data-test-subj': 'apmAddDataCollectServiceLogs',
-          target: '_blank',
           onClick: () => {
             reportButtonClick('collect_new_service_logs');
           },
@@ -95,7 +94,7 @@ export function AddDataContextMenu() {
   ];
 
   const handleTourClose = () => {
-    hideTour();
+    updateTourState({ isTourActive: false });
     setPopoverOpen(false);
   };
   return (

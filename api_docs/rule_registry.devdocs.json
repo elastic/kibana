@@ -806,9 +806,9 @@
             "signature": [
               "({ featureIds, indices, metaFields, allowNoIndex, }: { featureIds: string[]; indices: string[]; metaFields: string[]; allowNoIndex: boolean; }) => Promise<{ browserFields: ",
               {
-                "pluginId": "ruleRegistry",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibRuleRegistryPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.BrowserFields",
                 "text": "BrowserFields"
               },
@@ -1844,9 +1844,9 @@
           ") => ",
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.AuditEvent",
+            "section": "def-server.AuditEvent",
             "text": "AuditEvent"
           }
         ],
@@ -3667,7 +3667,7 @@
             "label": "alertWithPersistence",
             "description": [],
             "signature": [
-              "<T>(alerts: { _id: string; _source: T; }[], refresh: boolean | \"wait_for\", maxAlerts?: number | undefined, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined, currentTimeOverride?: Date | undefined) => Promise<",
+              "<T>(alerts: { _id: string; _source: T; }[], refresh: boolean | \"wait_for\", maxAlerts?: number | undefined, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined) => Promise<",
               {
                 "pluginId": "ruleRegistry",
                 "scope": "server",
@@ -3733,20 +3733,6 @@
                 "description": [],
                 "signature": [
                   "((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined"
-                ],
-                "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "ruleRegistry",
-                "id": "def-server.PersistenceServices.alertWithPersistence.$5",
-                "type": "Object",
-                "tags": [],
-                "label": "currentTimeOverride",
-                "description": [],
-                "signature": [
-                  "Date | undefined"
                 ],
                 "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
                 "deprecated": false,
@@ -4431,7 +4417,7 @@
         "label": "PersistenceAlertService",
         "description": [],
         "signature": [
-          "<T>(alerts: { _id: string; _source: T; }[], refresh: boolean | \"wait_for\", maxAlerts?: number | undefined, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined, currentTimeOverride?: Date | undefined) => Promise<",
+          "<T>(alerts: { _id: string; _source: T; }[], refresh: boolean | \"wait_for\", maxAlerts?: number | undefined, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined) => Promise<",
           {
             "pluginId": "ruleRegistry",
             "scope": "server",
@@ -4497,20 +4483,6 @@
             "description": [],
             "signature": [
               "((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined"
-            ],
-            "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.PersistenceAlertService.$5",
-            "type": "Object",
-            "tags": [],
-            "label": "currentTimeOverride",
-            "description": [],
-            "signature": [
-              "Date | undefined"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false,
@@ -4756,9 +4728,9 @@
           "<",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-common.ElasticsearchClient",
+            "section": "def-server.ElasticsearchClient",
             "text": "ElasticsearchClient"
           },
           ">"
@@ -5018,9 +4990,9 @@
             "(req: ",
             {
               "pluginId": "@kbn/core-http-server",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-common.KibanaRequest",
+              "section": "def-server.KibanaRequest",
               "text": "KibanaRequest"
             },
             "<unknown, unknown, unknown, any>) => Promise<",
@@ -5047,9 +5019,9 @@
               "signature": [
                 {
                   "pluginId": "@kbn/core-http-server",
-                  "scope": "common",
+                  "scope": "server",
                   "docId": "kibKbnCoreHttpServerPluginApi",
-                  "section": "def-common.KibanaRequest",
+                  "section": "def-server.KibanaRequest",
                   "text": "KibanaRequest"
                 },
                 "<unknown, unknown, unknown, any>"
@@ -5155,7 +5127,7 @@
         "tags": [],
         "label": "BrowserField",
         "description": [],
-        "path": "x-pack/plugins/rule_registry/common/types.ts",
+        "path": "packages/kbn-alerting-types/alert_fields_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5166,7 +5138,7 @@
             "tags": [],
             "label": "aggregatable",
             "description": [],
-            "path": "x-pack/plugins/rule_registry/common/types.ts",
+            "path": "packages/kbn-alerting-types/alert_fields_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5177,7 +5149,7 @@
             "tags": [],
             "label": "category",
             "description": [],
-            "path": "x-pack/plugins/rule_registry/common/types.ts",
+            "path": "packages/kbn-alerting-types/alert_fields_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5191,7 +5163,7 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "x-pack/plugins/rule_registry/common/types.ts",
+            "path": "packages/kbn-alerting-types/alert_fields_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5205,7 +5177,7 @@
             "signature": [
               "string | number | null | undefined"
             ],
-            "path": "x-pack/plugins/rule_registry/common/types.ts",
+            "path": "packages/kbn-alerting-types/alert_fields_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5219,15 +5191,15 @@
             "signature": [
               "{ readonly [x: string]: Partial<",
               {
-                "pluginId": "ruleRegistry",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibRuleRegistryPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.BrowserField",
                 "text": "BrowserField"
               },
               ">; }"
             ],
-            "path": "x-pack/plugins/rule_registry/common/types.ts",
+            "path": "packages/kbn-alerting-types/alert_fields_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5256,7 +5228,7 @@
               },
               "> | undefined"
             ],
-            "path": "x-pack/plugins/rule_registry/common/types.ts",
+            "path": "packages/kbn-alerting-types/alert_fields_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5270,7 +5242,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/rule_registry/common/types.ts",
+            "path": "packages/kbn-alerting-types/alert_fields_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5281,7 +5253,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/rule_registry/common/types.ts",
+            "path": "packages/kbn-alerting-types/alert_fields_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5292,7 +5264,7 @@
             "tags": [],
             "label": "searchable",
             "description": [],
-            "path": "x-pack/plugins/rule_registry/common/types.ts",
+            "path": "packages/kbn-alerting-types/alert_fields_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5303,7 +5275,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "x-pack/plugins/rule_registry/common/types.ts",
+            "path": "packages/kbn-alerting-types/alert_fields_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5324,7 +5296,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/rule_registry/common/types.ts",
+            "path": "packages/kbn-alerting-types/alert_fields_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5335,7 +5307,7 @@
             "tags": [],
             "label": "readFromDocValues",
             "description": [],
-            "path": "x-pack/plugins/rule_registry/common/types.ts",
+            "path": "packages/kbn-alerting-types/alert_fields_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5356,7 +5328,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/rule_registry/common/types.ts",
+            "path": "packages/kbn-alerting-types/alert_fields_type.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5510,15 +5482,15 @@
         "signature": [
           "{ [x: string]: Partial<",
           {
-            "pluginId": "ruleRegistry",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibRuleRegistryPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.BrowserField",
             "text": "BrowserField"
           },
           ">; }"
         ],
-        "path": "x-pack/plugins/rule_registry/common/types.ts",
+        "path": "packages/kbn-alerting-types/alert_fields_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

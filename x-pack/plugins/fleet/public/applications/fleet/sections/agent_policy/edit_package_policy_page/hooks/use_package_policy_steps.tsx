@@ -145,6 +145,7 @@ export function usePackagePolicySteps({
     packageInfo,
     packagePolicy,
     isEditPage: true,
+    agentPolicies,
   });
 
   const stepSelectAgentPolicy = useMemo(

@@ -3,5 +3,4 @@ description: Indicates whether a case is automatically closed when it is pushed 
 enum:
   - close-by-pushing
   - close-by-user
-examples:
-  - close-by-user
+example: close-by-user

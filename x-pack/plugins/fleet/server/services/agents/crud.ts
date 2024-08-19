@@ -26,11 +26,12 @@ import {
   AgentNotFoundError,
   FleetUnauthorizedError,
 } from '../../errors';
-
 import { auditLoggingService } from '../audit_logging';
+import { isAgentInNamespace } from '../spaces/agent_namespaces';
+import { getCurrentNamespace } from '../spaces/get_current_namespace';
+import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
-
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
 import { getLatestAvailableAgentVersion } from './versions';
 
@@ -228,7 +229,7 @@ export async function getAgentsByKuery(
   } = options;
   const filters = [];
 
-  const useSpaceAwareness = appContextService.getExperimentalFeatures()?.useSpaceAwareness;
+  const useSpaceAwareness = await isSpaceAwarenessEnabled();
   if (useSpaceAwareness && spaceId) {
     if (spaceId === DEFAULT_SPACE_ID) {
       filters.push(`namespaces:"${DEFAULT_SPACE_ID}" or not namespaces:*`);
@@ -404,6 +405,10 @@ export async function getAgentById(
 
   if ('notFound' in agentHit) {
     throw new AgentNotFoundError(`Agent ${agentId} not found`);
+  }
+
+  if ((await isAgentInNamespace(agentHit, getCurrentNamespace(soClient))) !== true) {
+    throw new AgentNotFoundError(`${agentHit.id} not found in namespace`);
   }
 
   return agentHit;

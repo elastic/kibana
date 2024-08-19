@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type EventTypeOpts } from '@kbn/ebt/client';
+import { type EventTypeOpts } from '@elastic/ebt/client';
 
 export const OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT: EventTypeOpts<{
   flow?: string;
@@ -49,6 +49,28 @@ export const OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT: EventTypeOpts<{
       type: 'boolean',
       _meta: {
         description: 'Whether the user is using the legacy onboarding page or the new one',
+      },
+    },
+  },
+};
+
+export const OBSERVABILITY_ONBOARDING_FEEDBACK_TELEMETRY_EVENT: EventTypeOpts<{
+  flow: string;
+  feedback: string;
+}> = {
+  eventType: 'observability_onboarding_feedback',
+  schema: {
+    flow: {
+      type: 'keyword',
+      _meta: {
+        description:
+          "The current onboarding flow user is going through (e.g. 'system_logs', 'nginx'). If not present, user is on the landing screen.",
+      },
+    },
+    feedback: {
+      type: 'keyword',
+      _meta: {
+        description: 'The feedback the user left (e.g. positive, negative)',
       },
     },
   },

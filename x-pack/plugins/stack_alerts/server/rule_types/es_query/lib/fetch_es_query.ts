@@ -120,6 +120,7 @@ export async function fetchEsQuery({
         ),
       },
       ...(isGroupAgg ? { topHitsSize: params.size } : {}),
+      loggerCb: (message: string) => logger.warn(message),
     }),
   });
 

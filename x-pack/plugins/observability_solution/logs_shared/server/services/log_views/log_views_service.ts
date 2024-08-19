@@ -11,6 +11,7 @@ import {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import {
   defaultLogViewAttributes,
   defaultLogViewsStaticConfig,
@@ -56,6 +57,7 @@ export class LogViewsService {
 
   public start({
     dataViews,
+    logsDataAccess,
     elasticsearch,
     savedObjects,
   }: LogViewsServiceStartDeps): LogViewsServiceStart {
@@ -65,11 +67,13 @@ export class LogViewsService {
       getClient(
         savedObjectsClient: SavedObjectsClientContract,
         elasticsearchClient: ElasticsearchClient,
+        logSourcesService: Promise<LogSourcesService>,
         request?: KibanaRequest
       ) {
         return new LogViewsClient(
           logger,
           dataViews.dataViewsServiceFactory(savedObjectsClient, elasticsearchClient, request),
+          logSourcesService,
           savedObjectsClient,
           logViewFallbackHandler,
           internalLogViews,
@@ -79,8 +83,9 @@ export class LogViewsService {
       getScopedClient(request: KibanaRequest) {
         const savedObjectsClient = savedObjects.getScopedClient(request);
         const elasticsearchClient = elasticsearch.client.asScoped(request).asCurrentUser;
-
-        return this.getClient(savedObjectsClient, elasticsearchClient, request);
+        const logSourcesService =
+          logsDataAccess.services.logSourcesServiceFactory.getScopedLogSourcesService(request);
+        return this.getClient(savedObjectsClient, elasticsearchClient, logSourcesService, request);
       },
     };
   }
