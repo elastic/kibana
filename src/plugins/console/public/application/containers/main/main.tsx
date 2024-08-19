@@ -70,3 +70,4 @@ export function Main({ isEmbeddable = false }: MainProps) {
     </div>
   );
 }
+
