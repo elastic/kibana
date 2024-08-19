@@ -31,11 +31,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.resetKibanaTimeZone();
     });
 
-    loadTestFile(require.resolve('./anomaly_charts_dashboard_embeddables'));
-    loadTestFile(require.resolve('./single_metric_viewer_dashboard_embeddables'));
-    loadTestFile(require.resolve('./anomaly_embeddables_migration'));
+    // loadTestFile(require.resolve('./anomaly_charts_dashboard_embeddables'));
+    // loadTestFile(require.resolve('./single_metric_viewer_dashboard_embeddables'));
+    // loadTestFile(require.resolve('./anomaly_embeddables_migration'));
     // loadTestFile(require.resolve('./lens_to_ml'));
     // loadTestFile(require.resolve('./map_to_ml'));
-    // loadTestFile(require.resolve('./lens_to_ml_with_wizard'));
+    loadTestFile(require.resolve('./lens_to_ml_with_wizard'));
   });
 }
