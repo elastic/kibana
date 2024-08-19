@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { uniqBy } from 'lodash';
+import { uniq, uniqBy } from 'lodash';
 import type {
   AstProviderFn,
   ESQLAstItem,
@@ -93,6 +93,7 @@ import {
   getSourcesFromCommands,
   getSupportedTypesForBinaryOperators,
   isAggFunctionUsedAlready,
+  narrowDownCompatibleTypesToSuggestNext,
   narrowDownRelevantFunctionSignatures,
   removeQuoteForSuggestedSources,
 } from './helper';
@@ -1215,61 +1216,23 @@ async function getFunctionArgsSuggestions(
   const arg: ESQLAstItem = enrichedArgs[argIndex];
 
   // Retrieve unique of types that are compatiable for the current arg
-  const relevantFuncSignatures = narrowDownRelevantFunctionSignatures(
+  const typesToSuggestNext = narrowDownCompatibleTypesToSuggestNext(
     fnDefinition,
     enrichedArgs,
     argIndex
   );
-  const compatibleTypesToSuggestForArg = uniqBy(
-    relevantFuncSignatures.map((f) => f.params[argIndex]).filter((d) => d),
-    (o) => `${o.type}-${o.constantOnly}`
-  );
+  const hasMoreMandatoryArgs = typesToSuggestNext.filter(({ optional }) => !optional).length > 0;
 
-  // the first signature is used as reference
-  // TODO - take into consideration all signatures that match the current args
-  const refSignature = fnDefinition.signatures[0];
-
-  // @TODO: remove
-  const oldHasMoreMandatoryArgs =
-    (refSignature.params.length >= argIndex &&
-      refSignature.params.filter(({ optional }, index) => !optional && index > argIndex).length >
-        0) ||
-    ('minParams' in refSignature && refSignature.minParams
-      ? refSignature.minParams - 1 > argIndex
-      : false);
-
-  const needMoreArgsChecks = relevantFuncSignatures.map((signature) => {
-    return (
-      (signature.params.length >= argIndex &&
-        signature.params.filter(({ optional }, index) => !optional && index > argIndex).length >
-          0) ||
-      ('minParams' in signature && signature.minParams ? signature.minParams - 1 > argIndex : false)
-    );
-  });
-  const hasMoreMandatoryArgs =
-    needMoreArgsChecks.length === 0 ? false : needMoreArgsChecks.some((d) => d === false) === false;
-
-  const canHaveMoreArgs = compatibleTypesToSuggestForArg.length > 0;
+  // Should prepend comma to suggestion string
+  // E.g. if true, "fieldName" -> "fieldName, "
   const shouldAddComma = hasMoreMandatoryArgs && fnDefinition.type !== 'builtin';
 
-  const suggestedConstants = Array.from(
-    new Set(
-      fnDefinition.signatures.reduce<string[]>((acc, signature) => {
-        const p = signature.params[argIndex];
-        if (!p) {
-          return acc;
-        }
-
-        const _suggestions: string[] = p.literalSuggestions
-          ? p.literalSuggestions
-          : p.literalOptions
-          ? p.literalOptions
-          : [];
-
-        return acc.concat(_suggestions);
-      }, [] as string[])
-    )
-  );
+  const suggestedConstants = uniq(
+    typesToSuggestNext
+      .map((d) => d.literalSuggestions || d.literalOptions)
+      .filter((d) => d)
+      .flat()
+  ) as string[];
 
   if (suggestedConstants.length) {
     return buildValueDefinitions(suggestedConstants, {
@@ -1381,7 +1344,7 @@ async function getFunctionArgsSuggestions(
     // Fields
     suggestions.push(
       ...pushItUpInTheList(
-        await getFieldsByType(getTypesFromParamDefs(paramDefsWhichSupportFields) as string[], [], {
+        await getFieldsByType(getTypesFromParamDefs(typesToSuggestNext) as string[], [], {
           addComma: shouldAddComma,
           advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
         }),
@@ -1393,7 +1356,7 @@ async function getFunctionArgsSuggestions(
       ...getCompatibleFunctionDefinition(
         command.name,
         option?.name,
-        getTypesFromParamDefs(paramDefsWhichSupportFields) as string[],
+        getTypesFromParamDefs(typesToSuggestNext) as string[],
         fnToIgnore
       ).map((suggestion) => ({
         ...suggestion,
@@ -1403,7 +1366,7 @@ async function getFunctionArgsSuggestions(
 
     // could also be in stats (bucket) but our autocomplete is not great yet
     if (
-      getTypesFromParamDefs(paramDefsWhichSupportFields).includes('date') &&
+      getTypesFromParamDefs(typesToSuggestNext).includes('date') &&
       ['where', 'eval'].includes(command.name)
     )
       suggestions.push(

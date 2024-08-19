@@ -27,7 +27,6 @@ import {
 import { METADATA_FIELDS } from '../shared/constants';
 import { ESQL_COMMON_NUMERIC_TYPES, ESQL_STRING_TYPES } from '../shared/esql_types';
 
-const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
 const powParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
 const log10ParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
 
