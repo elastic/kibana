@@ -3,7 +3,7 @@ on:
     types:
       - opened
     paths:
-      - 'fleet-packages.json'
+      - 'fleet_packages.json'
 
 jobs:
   approve:
