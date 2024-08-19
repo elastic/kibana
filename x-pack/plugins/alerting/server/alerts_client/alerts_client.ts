@@ -414,6 +414,9 @@ export class AlertsClient<
     const currentTime = this.startedAtString ?? new Date().toISOString();
     const esClient = await this.options.elasticsearchClientPromise;
 
+    const { alertsToReturn, recoveredAlertsToReturn } =
+      this.legacyAlertsClient.getAlertsToSerialize(false);
+
     const activeAlerts = this.legacyAlertsClient.getProcessedAlerts('active');
     const currentRecoveredAlerts = this.legacyAlertsClient.getProcessedAlerts('recoveredCurrent');
 
@@ -422,63 +425,71 @@ export class AlertsClient<
     // event action: new alert = 'new', active alert: 'active', otherwise 'close'
 
     const activeAlertsToIndex: Array<Alert & AlertData> = [];
-    for (const id of keys(activeAlerts)) {
-      if (
-        Object.hasOwn(this.fetchedAlerts.data, id) &&
-        get(this.fetchedAlerts.data[id], ALERT_STATUS) === 'active'
-      ) {
-        const isImproving = isAlertImproving<
-          AlertData,
-          LegacyState,
-          LegacyContext,
-          ActionGroupIds,
-          RecoveryActionGroupId
-        >(this.fetchedAlerts.data[id], activeAlerts[id], this.ruleType.actionGroups);
-        activeAlertsToIndex.push(
-          buildOngoingAlert<
+
+    for (const id of keys(alertsToReturn)) {
+      // See if there's an existing active alert document
+      if (!!activeAlerts[id]) {
+        if (
+          Object.hasOwn(this.fetchedAlerts.data, id) &&
+          get(this.fetchedAlerts.data[id], ALERT_STATUS) === 'active'
+        ) {
+          const isImproving = isAlertImproving<
             AlertData,
             LegacyState,
             LegacyContext,
             ActionGroupIds,
             RecoveryActionGroupId
-          >({
-            alert: this.fetchedAlerts.data[id],
-            legacyAlert: activeAlerts[id],
-            rule: this.rule,
-            isImproving,
-            runTimestamp: this.runTimestampString,
-            timestamp: currentTime,
-            payload: this.reportedAlerts[id],
-            kibanaVersion: this.options.kibanaVersion,
-          })
-        );
-      } else {
-        // skip writing the alert document if the number of consecutive
-        // active alerts is less than the rule alertDelay threshold
-        if (activeAlerts[id].getActiveCount() < this.options.rule.alertDelay) {
-          continue;
+          >(this.fetchedAlerts.data[id], activeAlerts[id], this.ruleType.actionGroups);
+          activeAlertsToIndex.push(
+            buildOngoingAlert<
+              AlertData,
+              LegacyState,
+              LegacyContext,
+              ActionGroupIds,
+              RecoveryActionGroupId
+            >({
+              alert: this.fetchedAlerts.data[id],
+              legacyAlert: activeAlerts[id],
+              rule: this.rule,
+              isImproving,
+              runTimestamp: this.runTimestampString,
+              timestamp: currentTime,
+              payload: this.reportedAlerts[id],
+              kibanaVersion: this.options.kibanaVersion,
+            })
+          );
+        } else {
+          // skip writing the alert document if the number of consecutive
+          // active alerts is less than the rule alertDelay threshold
+          if (activeAlerts[id].getActiveCount() < this.options.rule.alertDelay) {
+            continue;
+          }
+          activeAlertsToIndex.push(
+            buildNewAlert<
+              AlertData,
+              LegacyState,
+              LegacyContext,
+              ActionGroupIds,
+              RecoveryActionGroupId
+            >({
+              legacyAlert: activeAlerts[id],
+              rule: this.rule,
+              runTimestamp: this.runTimestampString,
+              timestamp: currentTime,
+              payload: this.reportedAlerts[id],
+              kibanaVersion: this.options.kibanaVersion,
+            })
+          );
         }
-        activeAlertsToIndex.push(
-          buildNewAlert<
-            AlertData,
-            LegacyState,
-            LegacyContext,
-            ActionGroupIds,
-            RecoveryActionGroupId
-          >({
-            legacyAlert: activeAlerts[id],
-            rule: this.rule,
-            runTimestamp: this.runTimestampString,
-            timestamp: currentTime,
-            payload: this.reportedAlerts[id],
-            kibanaVersion: this.options.kibanaVersion,
-          })
+      } else {
+        this.options.logger.error(
+          `Error writing alert(${id}) to ${this.indexTemplateAndPattern.alias} - alert(${id}) doesn't exist in active alerts`
         );
       }
     }
 
     const recoveredAlertsToIndex: Array<Alert & AlertData> = [];
-    for (const id of keys(currentRecoveredAlerts)) {
+    for (const id of keys(recoveredAlertsToReturn)) {
       // See if there's an existing alert document
       // If there is not, log an error because there should be
       if (Object.hasOwn(this.fetchedAlerts.data, id)) {
@@ -502,7 +513,7 @@ export class AlertsClient<
               })
             : buildUpdatedRecoveredAlert<AlertData>({
                 alert: this.fetchedAlerts.data[id],
-                legacyRawAlert: currentRecoveredAlerts[id].toRaw(),
+                legacyRawAlert: recoveredAlertsToReturn[id],
                 runTimestamp: this.runTimestampString,
                 timestamp: currentTime,
                 rule: this.rule,
