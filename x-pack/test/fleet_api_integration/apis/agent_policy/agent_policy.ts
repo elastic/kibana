@@ -531,6 +531,7 @@ export default function (providerContext: FtrProviderContext) {
           updated_by: 'elastic',
           package_policies: [],
           is_protected: false,
+          space_ids: [],
         });
       });
 
@@ -962,6 +963,7 @@ export default function (providerContext: FtrProviderContext) {
           inactivity_timeout: 1209600,
           package_policies: [],
           is_protected: false,
+          space_ids: [],
         });
       });
 
@@ -1125,6 +1127,7 @@ export default function (providerContext: FtrProviderContext) {
           package_policies: [],
           monitoring_enabled: ['logs', 'metrics'],
           inactivity_timeout: 1209600,
+          space_ids: [],
         });
 
         const listResponseAfterUpdate = await fetchPackageList();
@@ -1183,6 +1186,7 @@ export default function (providerContext: FtrProviderContext) {
           inactivity_timeout: 1209600,
           package_policies: [],
           is_protected: false,
+          space_ids: [],
           overrides: {
             agent: {
               logging: {
@@ -1473,6 +1477,7 @@ export default function (providerContext: FtrProviderContext) {
         const {
           package_policies: packagePolicies,
           id,
+          space_ids: spaceIds,
           updated_at: updatedAt,
           version: policyVersion,
           ...rest
