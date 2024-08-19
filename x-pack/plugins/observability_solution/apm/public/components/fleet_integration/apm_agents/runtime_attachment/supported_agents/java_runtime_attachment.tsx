@@ -205,7 +205,7 @@ function decodeDiscoveryRulesYaml(
   defaultDiscoveryRules: IDiscoveryRule[] = []
 ): IDiscoveryRule[] {
   try {
-    const parsedYaml: DiscoveryRulesParsedYaml = yaml.safeLoad(discoveryRulesYaml) ?? [];
+    const parsedYaml = (yaml.load(discoveryRulesYaml) as DiscoveryRulesParsedYaml) ?? [];
 
     if (parsedYaml.length === 0) {
       return defaultDiscoveryRules;

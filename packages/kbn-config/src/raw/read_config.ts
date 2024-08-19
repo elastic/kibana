@@ -76,7 +76,7 @@ export const getConfigFromFiles = (configFiles: readonly string[]) => {
 
   for (const configFile of configFiles) {
     const yaml = readYaml(configFile);
-    if (yaml !== null) {
+    if (yaml) {
       yamlEntries.push(...listEntries(yaml));
     }
   }
