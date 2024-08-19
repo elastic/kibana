@@ -27,6 +27,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 
+import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { ParentIgnoreSettings } from '../..';
 import { ControlInputTransform } from '../../../common';
 import { ControlGroupChainingSystem } from '../../../common/control_group/types';
@@ -61,7 +62,7 @@ export type ControlGroupApi = PresentationContainer &
   Pick<PublishesUnsavedChanges, 'unsavedChanges'> &
   PublishesControlGroupDisplaySettings &
   PublishesTimeslice &
-  Partial<HasParentApi<PublishesUnifiedSearch> & HasSaveNotification> & {
+  Partial<HasParentApi<PublishesUnifiedSearch> & HasSaveNotification & PublishesReload> & {
     asyncResetUnsavedChanges: () => Promise<void>;
     autoApplySelections$: PublishingSubject<boolean>;
     controlFetch$: (controlUuid: string) => Observable<ControlFetchContext>;
@@ -72,6 +73,7 @@ export type ControlGroupApi = PresentationContainer &
     openAddDataControlFlyout: (settings?: {
       controlInputTransform?: ControlInputTransform;
     }) => void;
+    lastUsedDataViewId$: PublishingSubject<string | undefined>;
   };
 
 export interface ControlGroupRuntimeState {
