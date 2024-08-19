@@ -59,7 +59,7 @@ export class ContentManagementPlugin
     });
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, plugins: ContentManagementServerSetupDependencies) {
     if (this.#eventStream) {
       this.#eventStream.setup({ core });
     }
@@ -75,7 +75,7 @@ export class ContentManagementPlugin
       contentRegistry,
     });
 
-    registerFavorites({ core, logger: this.logger });
+    registerFavorites({ core, logger: this.logger, usageCollection: plugins.usageCollection });
 
     return {
       ...coreApi,

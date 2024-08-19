@@ -21,13 +21,19 @@ const schemaV1 = schema.object({
   favoriteIds: schema.arrayOf(schema.string()),
 });
 
+export const favoritesSavedObjectName = 'favorites';
+
 export const favoritesSavedObjectType: SavedObjectsType = {
-  name: 'favorites',
+  name: favoritesSavedObjectName,
   hidden: true,
   namespaceType: 'single',
   mappings: {
     dynamic: false,
-    properties: {},
+    properties: {
+      userId: { type: 'keyword' },
+      type: { type: 'keyword' },
+      favoriteIds: { type: 'keyword' },
+    },
   },
   modelVersions: {
     1: {

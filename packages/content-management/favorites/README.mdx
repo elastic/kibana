@@ -28,9 +28,11 @@ import {
   FavoriteButton,
 } from '@kbn/content-management-favorites-public';
 
+const appName = 'my-app';
 const favoriteObjectType = 'dashboard';
-const favoritesClient = new FavoritesClient('dashboard', {
+const favoritesClient = new FavoritesClient(appName, favoriteObjectType, {
   http: core.http,
+  usageCollection: plugins.usageCollection,
 });
 
 // wrap your content with the favorites context provider

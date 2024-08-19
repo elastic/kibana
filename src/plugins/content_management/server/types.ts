@@ -7,10 +7,12 @@
  */
 
 import type { Version } from '@kbn/object-versioning';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { CoreApi, StorageContextGetTransformFn } from './core';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ContentManagementServerSetupDependencies {}
+export interface ContentManagementServerSetupDependencies {
+  usageCollection?: UsageCollectionSetup;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContentManagementServerStartDependencies {}
