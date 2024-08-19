@@ -12,7 +12,7 @@ import type SuperTest from 'supertest';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { BFETCH_ROUTE_VERSION_LATEST } from '@kbn/bfetch-plugin/common';
-import { FtrService } from '../ftr_provider_context';
+import { FtrService } from './ftr_provider_context';
 
 /**
  * Function copied from here:
@@ -62,6 +62,7 @@ export interface SendOptions {
  * });
  * expect(response).eql({ ... your value ... });
  */
+
 export class BsearchService extends FtrService {
   private readonly retry = this.ctx.getService('retry');
 

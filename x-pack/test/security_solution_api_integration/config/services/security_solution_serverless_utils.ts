@@ -9,7 +9,7 @@ import supertest from 'supertest';
 import { format as formatUrl } from 'url';
 import { IEsSearchResponse } from '@kbn/search-types';
 import { RoleCredentials } from '@kbn/test-suites-serverless/shared/services';
-import type { SendOptions } from '@kbn/test-suites-src/common/services/bsearch';
+import type { SendOptions } from '@kbn/ftr-common-functional-services';
 import type { SendOptions as SecureBsearchSendOptions } from '@kbn/test-suites-serverless/shared/services/bsearch_secure';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { SecuritySolutionUtilsInterface } from './types';

@@ -7,7 +7,14 @@
  */
 
 import { GenericFtrProviderContext } from '@kbn/test';
-import { services as kibanaCommonServices } from '../../common/services';
+import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
+import { commonFunctionalUIServices } from '@kbn/ftr-common-functional-ui-services';
+
+export const kibanaCommonServices = {
+  ...commonFunctionalServices,
+  ...commonFunctionalUIServices,
+} as const;
+
 import { services as kibanaApiIntegrationServices } from '../../api_integration/services';
 
 export type FtrProviderContext = GenericFtrProviderContext<

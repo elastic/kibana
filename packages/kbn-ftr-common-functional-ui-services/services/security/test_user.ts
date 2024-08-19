@@ -9,10 +9,11 @@
 import { format as formatUrl } from 'url';
 import supertest from 'supertest';
 
-import { type Browser, TestSubjects } from '@kbn/ftr-common-functional-ui-services';
+import type { Browser } from '../browser';
+import type { TestSubjects } from '../test_subjects';
 import { Role } from './role';
 import { User } from './user';
-import { FtrService, FtrProviderContext } from '../../ftr_provider_context';
+import { FtrService, FtrProviderContext } from '../ftr_provider_context';
 
 const TEST_USER_NAME = 'test_user';
 const TEST_USER_PASSWORD = 'changeme';

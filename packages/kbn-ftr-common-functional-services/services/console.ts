@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from './ftr_provider_context';
 
-export function helpers(getService: FtrProviderContext['getService']) {
+export function ConsoleProvider({ getService }: FtrProviderContext) {
   const client = getService('es');
 
   const createIndex = async (indexName: string) => {

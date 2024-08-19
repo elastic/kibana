@@ -22,3 +22,4 @@ export {
 } from './services/remote/network_profiles';
 export type { TimeoutOpt } from './types';
 export { TestSubjects } from './services/test_subjects';
+export { SecurityService } from './services/security';

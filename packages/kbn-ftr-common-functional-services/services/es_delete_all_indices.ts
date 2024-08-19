@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from './ftr_provider_context';
 
 export function EsDeleteAllIndicesProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
