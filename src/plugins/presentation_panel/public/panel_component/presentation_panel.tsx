@@ -50,7 +50,7 @@ export const PresentationPanel = <
   }, []);
 
   if (loading)
-    return (
+    return props.hideLoader ? null : (
       <PanelLoader
         showShadow={props.showShadow}
         showBorder={props.showBorder}
