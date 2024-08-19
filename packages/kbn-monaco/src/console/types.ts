@@ -23,6 +23,17 @@ export interface ConsoleParserResult {
   requests: ParsedRequest[];
 }
 
+
+export interface OutputParsedRequest {
+  startOffset: number;
+  endOffset?: number;
+  data?: Array<Record<string, unknown>>;
+}
+export interface ConsoleOutputParserResult {
+  errors: ErrorAnnotation[];
+  requests: OutputParsedRequest[];
+}
+
 export interface ConsoleWorkerDefinition {
   getParserResult: (modelUri: string) => ConsoleParserResult | undefined;
 }
