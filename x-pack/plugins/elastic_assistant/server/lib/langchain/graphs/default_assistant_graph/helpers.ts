@@ -90,7 +90,7 @@ export const streamGraph = async ({
 
   if ((llmType === 'bedrock' || llmType === 'gemini') && bedrockChatEnabled) {
     const stream = await assistantGraph.streamEvents(
-      { inputs, llmType, bedrockChatEnabled },
+      inputs,
       {
         callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
         runName: DEFAULT_ASSISTANT_GRAPH_ID,
