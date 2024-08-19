@@ -544,6 +544,7 @@
   ],
   "fleet-space-settings": [],
   "fleet-uninstall-tokens": [
+    "namespaces",
     "policy_id",
     "token_plain"
   ],
