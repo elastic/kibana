@@ -15,6 +15,7 @@ import { FtrConfigProviderContext, defineDockerServersConfig } from '@kbn/test';
 import path from 'path';
 import supertest from 'supertest';
 import { UrlObject, format } from 'url';
+import { dockerImage } from '../../fleet_api_integration/config.base';
 import { DatasetQualityFtrConfigName } from '../configs';
 import { createDatasetQualityApiClient } from './dataset_quality_api_supertest';
 import {
@@ -24,8 +25,6 @@ import {
 } from './ftr_provider_context';
 import { PackageService } from './package_service';
 import { RegistryProvider } from './registry';
-
-export const dockerImage = 'docker.elastic.co/package-registry/distribution:lite';
 
 export interface DatasetQualityFtrConfig {
   name: DatasetQualityFtrConfigName;
