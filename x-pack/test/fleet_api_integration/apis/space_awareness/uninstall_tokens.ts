@@ -11,7 +11,7 @@ import { UninstallTokenMetadata } from '@kbn/fleet-plugin/common/types/models/un
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
-import { cleanFleetIndices } from './helpers';
+import { cleanFleetIndices, expectToRejectWithNotFound } from './helpers';
 import { setupTestSpaces, TEST_SPACE_1 } from './space_helpers';
 
 export default function (providerContext: FtrProviderContext) {
@@ -48,6 +48,7 @@ export default function (providerContext: FtrProviderContext) {
     let spaceTest1Token: UninstallTokenMetadata;
     // Create agent policies it should create am uninstall token for every keys
     before(async () => {
+      await apiClient.postEnableSpaceAwareness();
       const [_defaultSpacePolicy1, _spaceTest1Policy1, _spaceTest1Policy2] = await Promise.all([
         apiClient.createAgentPolicy(),
         apiClient.createAgentPolicy(TEST_SPACE_1),
@@ -88,27 +89,13 @@ export default function (providerContext: FtrProviderContext) {
         await apiClient.getUninstallToken(spaceTest1Token.id, TEST_SPACE_1);
       });
       it('should not allow to get an uninstall token from a different space from the default space', async () => {
-        let err: Error | undefined;
-        try {
-          await apiClient.getUninstallToken(spaceTest1Token.id);
-        } catch (_err) {
-          err = _err;
-        }
-
-        expect(err).to.be.an(Error);
-        expect(err?.message).to.match(/404 "Not Found"/);
+        await expectToRejectWithNotFound(() => apiClient.getUninstallToken(spaceTest1Token.id));
       });
 
       it('should not allow to get an default space uninstall token from a different space', async () => {
-        let err: Error | undefined;
-        try {
-          await apiClient.getUninstallToken(defaultSpaceToken.id, TEST_SPACE_1);
-        } catch (_err) {
-          err = _err;
-        }
-
-        expect(err).to.be.an(Error);
-        expect(err?.message).to.match(/404 "Not Found"/);
+        await expectToRejectWithNotFound(() =>
+          apiClient.getUninstallToken(defaultSpaceToken.id, TEST_SPACE_1)
+        );
       });
     });
   });

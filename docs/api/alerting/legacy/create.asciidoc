@@ -8,6 +8,11 @@ deprecated::[7.13.0,Use <<create-rule-api>> instead.]
 
 Create {kib} alerts.
 
+[NOTE]
+====
+For the latest details, refer to {api-kibana}/group/endpoint-alerting[alerting APIs].
+====
+
 [[alerts-api-create-request]]
 ==== Request
 
