@@ -153,9 +153,6 @@ export function LensEditConfigurationFlyout({
       }
     };
     getESQLGridAttrs();
-    return () => {
-      abortController.abort();
-    };
   }, [adHocDataViews, dataGridAttrs, query, startDependencies]);
 
   const attributesChanged: boolean = useMemo(() => {
