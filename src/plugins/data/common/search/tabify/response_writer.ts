@@ -63,7 +63,7 @@ export class TabbedAggResponseWriter {
     let isPartialRow = false;
     for (let i = 0; i < this.columns.length; i++) {
       const column = this.columns[i];
-      if (!rowBuffer.hasOwnProperty(column.id)) {
+      if (!Object.hasOwn(rowBuffer, column.id)) {
         isPartialRow = true;
         break;
       }

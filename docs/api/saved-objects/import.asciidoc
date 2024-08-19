@@ -6,11 +6,7 @@
 
 experimental[] Create sets of {kib} saved objects from a file created by the export API.
 
-[NOTE]
-====
-For the most up-to-date API details, refer to the
-{kib-repo}/tree/{branch}/packages/core/saved-objects/docs/openapi[open API specification].
-====
+NOTE: For the latest details, refer to {api-kibana}/group/endpoint-saved-objects[saved object APIs].
 
 ==== Compatibility across versions
 Saved objects can only be imported into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of {kib}. See the table below for compatibility examples:
