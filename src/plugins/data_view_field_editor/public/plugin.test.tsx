@@ -118,7 +118,7 @@ describe('DataViewFieldEditorPlugin', () => {
       isPersisted: () => true,
     } as unknown as DataView;
 
-    openDeleteModal({
+    await openDeleteModal({
       onDelete: onDeleteSpy,
       ctx: { dataView: indexPatternMock },
       fieldName: ['a', 'b', 'c'],
@@ -147,7 +147,7 @@ describe('DataViewFieldEditorPlugin', () => {
   test('should return a handler to close the modal', async () => {
     const { openDeleteModal } = plugin.start(coreStart, pluginStart);
 
-    const closeModal = openDeleteModal({ fieldName: ['a'], ctx: { dataView: {} as any } });
+    const closeModal = await openDeleteModal({ fieldName: ['a'], ctx: { dataView: {} as any } });
     expect(typeof closeModal).toBe('function');
   });
 

@@ -78,9 +78,15 @@ export const getTopNavLinks = ({
           defaultMessage: 'Try ES|QL',
         }),
     emphasize: true,
-    iconType: 'editorRedo',
     fill: false,
     color: 'text',
+    tooltip: isEsqlMode
+      ? i18n.translate('discover.localMenu.switchToClassicTooltipLabel', {
+          defaultMessage: 'Switch to KQL or Lucene syntax.',
+        })
+      : i18n.translate('discover.localMenu.esqlTooltipLabel', {
+          defaultMessage: `ES|QL is Elastic's powerful new piped query language.`,
+        }),
     run: () => {
       if (dataView) {
         if (isEsqlMode) {

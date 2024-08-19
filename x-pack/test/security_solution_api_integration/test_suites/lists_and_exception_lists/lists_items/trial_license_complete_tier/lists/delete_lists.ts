@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless delete_lists', () => {
+  describe('@ess @serverless @serverlessQA delete_lists', () => {
     let supertest: TestAgent;
 
     before(async () => {

@@ -9,6 +9,10 @@
 import { KibanaErrorService } from './error_service';
 
 describe('KibanaErrorBoundary Error Service', () => {
+  beforeEach(() => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
   const mockDeps = {
     analytics: { reportEvent: jest.fn() },
   };

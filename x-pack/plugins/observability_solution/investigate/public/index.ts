@@ -21,12 +21,10 @@ export type { InvestigatePublicSetup, InvestigatePublicStart, OnWidgetAdd, Widge
 
 export {
   type Investigation,
-  type InvestigationRevision,
   type InvestigateWidget,
   type InvestigateWidgetCreate,
   InvestigateWidgetColumnSpan,
   type GlobalWidgetParameters,
-  type WorkflowBlock,
 } from '../common/types';
 
 export { mergePlainObjects } from '../common/utils/merge_plain_objects';
