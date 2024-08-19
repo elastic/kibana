@@ -12,6 +12,7 @@ import { isPlainObject } from 'lodash/fp';
 import type { IntegrationSettings } from '../../types';
 import * as i18n from './translations';
 import { useActions } from '../../state';
+import type { SampleFormat } from '../../../../../../common';
 
 const MaxLogsSampleRows = 10;
 
@@ -87,13 +88,13 @@ const parseLogsContent = (
   error?: string;
   isTruncated?: boolean;
   logsSampleParsed?: string[];
-  sampleFormat?: string;
+  sampleFormat?: SampleFormat;
 } => {
   if (fileContent == null) {
     return { error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_READ };
   }
   let parsedContent: unknown[];
-  let sampleFormat;
+  let sampleFormat: SampleFormat;
 
   try {
     parsedContent = parseNDJSON(fileContent);
@@ -103,9 +104,9 @@ const parseLogsContent = (
     //   for a one-line object {} -> do nothing (keep as NDJSON)
     if (parsedContent.length === 1 && Array.isArray(parsedContent[0])) {
       parsedContent = parsedContent[0];
-      sampleFormat = 'json.[]';
+      sampleFormat = { name: 'json', json_path: '' };
     } else {
-      sampleFormat = 'ndjson';
+      sampleFormat = { name: 'ndjson', multiline: false };
     }
   } catch (parseNDJSONError) {
     try {
@@ -114,11 +115,11 @@ const parseLogsContent = (
         return { error: i18n.LOGS_SAMPLE_ERROR.NOT_ARRAY };
       }
       parsedContent = entries;
-      sampleFormat = `json.${pathToEntries}[]`;
+      sampleFormat = { name: 'json', json_path: pathToEntries };
     } catch (parseJSONError) {
       try {
         parsedContent = parseNDJSON(fileContent, true);
-        sampleFormat = 'ndjson+multiline';
+        sampleFormat = { name: 'ndjson', multiline: true };
       } catch (parseMultilineNDJSONError) {
         return { error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_PARSE };
       }

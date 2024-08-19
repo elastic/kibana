@@ -22,16 +22,15 @@
       show_user: true
       default: 
         - '\.gz$'
-    {% if multiline_json_toggle_display %}
-    - name: multiline_json
+    {% if multiline_ndjson_toggle_display %}
+    - name: multiline_ndjson
       type: bool
-      title: Parse multiline JSON events
+      title: Parse multiline newline-delimited JSON events
       description: >-
-          Parses JSON events that take more than one line
-          (they still need to be separated by newlines).
+          Enables parsing of JSON-formatted events that take more than one line. Each event must start with the curly brace at the first column.
       required: false
       show_user: false
-      default: {{ multiline_json_toggle_default }}
+      default: {{ multiline_ndjson_toggle_default }}
     {% endif %}
     - name: custom
       type: yaml
