@@ -7,4 +7,5 @@ steps:
     agents:
       image: docker.elastic.co/cloud-ci/sonarqube/buildkite-scanner:latest
       memory: 32G
+      cpu: 4
     command: /scan-source-code.sh
