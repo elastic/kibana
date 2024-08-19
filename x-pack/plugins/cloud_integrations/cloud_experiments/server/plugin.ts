@@ -103,7 +103,7 @@ export class CloudExperimentsPlugin
 
     if (!ldConfig) return;
 
-    return new LaunchDarklyProvider(ldConfig.client_id, {
+    return new LaunchDarklyProvider(ldConfig.sdk_key, {
       logger: this.logger.get('launch-darkly'),
       application: {
         id: 'kibana-server',
