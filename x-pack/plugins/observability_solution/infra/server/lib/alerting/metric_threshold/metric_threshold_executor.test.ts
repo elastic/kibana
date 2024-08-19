@@ -31,6 +31,7 @@ import {
   ALERT_GROUP,
 } from '@kbn/rule-data-utils';
 import { type Group } from '@kbn/observability-alerting-rule-utils';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
 
@@ -2472,6 +2473,11 @@ const mockLibs: any = {
   basePath: {
     publicBaseUrl: 'http://localhost:5601',
     prepend: (path: string) => path,
+  },
+  plugins: {
+    share: {
+      setup: sharePluginMock.createSetupContract(),
+    },
   },
   logger,
 };
