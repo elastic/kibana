@@ -221,7 +221,9 @@
           " | ",
           "ProductFeatureCasesKey",
           " | ",
-          "ProductFeatureAssistantKey"
+          "ProductFeatureAssistantKey",
+          " | ",
+          "ProductFeatureAttackDiscoveryKey"
         ],
         "path": "x-pack/packages/security-solution/features/src/product_features_keys.ts",
         "deprecated": false,
@@ -295,6 +297,31 @@
           "<",
           "AssistantSubFeatureId",
           ">>"
+        ],
+        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-features",
+        "id": "def-common.ProductFeaturesAttackDiscoveryConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "ProductFeaturesAttackDiscoveryConfig",
+        "description": [],
+        "signature": [
+          "Map<",
+          "ProductFeatureAttackDiscoveryKey",
+          ", ",
+          {
+            "pluginId": "@kbn/security-solution-features",
+            "scope": "common",
+            "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+            "section": "def-common.ProductFeatureKibanaConfig",
+            "text": "ProductFeatureKibanaConfig"
+          },
+          "<string>>"
         ],
         "path": "x-pack/packages/security-solution/features/src/types.ts",
         "deprecated": false,
