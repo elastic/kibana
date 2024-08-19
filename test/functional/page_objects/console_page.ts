@@ -206,6 +206,10 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('sendRequestButton');
   }
 
+  public async clickCopyOutput() {
+    await this.testSubjects.click('copyOutputButton');
+  }
+
   public async collapseHelp() {
     await this.testSubjects.click('help-close-button');
   }
