@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export * from './defaults';
-export * from './default_all_selection';
-export * from './state_machine';
-export * from './types';
+import { AllDatasetSelection } from '../../../../common';
+
+export const DEFAULT_ALL_SELECTION = AllDatasetSelection.create({ indices: 'logs-*-*' });

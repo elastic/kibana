@@ -11,10 +11,8 @@ import {
   DEFAULT_ROWS_PER_PAGE,
   LOG_LEVEL_FIELD,
 } from '../../../../common/constants';
-import { AllDatasetSelection } from '../../../../common/data_source_selection';
 import { DefaultLogsExplorerControllerState } from './types';
-
-export const DEFAULT_ALL_SELECTION = AllDatasetSelection.create({ indices: 'logs-*-*' });
+import { DEFAULT_ALL_SELECTION } from './default_all_selection';
 
 export const DEFAULT_CONTEXT: DefaultLogsExplorerControllerState = {
   dataSourceSelection: DEFAULT_ALL_SELECTION,
