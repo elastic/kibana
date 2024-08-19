@@ -62,12 +62,21 @@ import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 
 const testIdPrefix = 'blocklist-form';
 
-export interface BlocklistEntry {
+interface BlocklistEntryMatch {
   field: BlocklistConditionEntryField;
   operator: ListOperatorEnum.INCLUDED;
-  type: ListOperatorTypeEnum.MATCH_ANY | ListOperatorTypeEnum.MATCH;
-  value: string[] | string;
+  type: ListOperatorTypeEnum.MATCH;
+  value: string;
 }
+
+interface BlocklistEntryMatchAny {
+  field: BlocklistConditionEntryField;
+  operator: ListOperatorEnum.INCLUDED;
+  type: ListOperatorTypeEnum.MATCH_ANY;
+  value: string[];
+}
+
+export type BlocklistEntry = BlocklistEntryMatch | BlocklistEntryMatchAny;
 
 type ERROR_KEYS = keyof typeof ERRORS;
 

@@ -11,7 +11,6 @@ import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import { ENDPOINT_BLOCKLISTS_LIST_ID } from '@kbn/securitysolution-list-constants';
 
 import type { BlocklistEntry } from './blocklist_form';
 import { BlockListForm } from './blocklist_form';
@@ -25,6 +24,8 @@ import { ERRORS } from '../../translations';
 import { licenseService } from '../../../../../common/hooks/use_license';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../../../common/endpoint/service/artifacts';
+import { ListOperatorEnum, ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 jest.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
@@ -46,8 +47,8 @@ describe('blocklist form', () => {
   function createEntry(field: BlocklistConditionEntryField, value: string[]): BlocklistEntry {
     return {
       field,
-      operator: 'included',
-      type: 'match_any',
+      operator: ListOperatorEnum.INCLUDED,
+      type: ListOperatorTypeEnum.MATCH_ANY,
       value,
     };
   }
@@ -56,7 +57,7 @@ describe('blocklist form', () => {
     overrides: Partial<ArtifactFormComponentProps['item']> = {}
   ): ArtifactFormComponentProps['item'] {
     const defaults: ArtifactFormComponentProps['item'] = {
-      list_id: ENDPOINT_BLOCKLISTS_LIST_ID,
+      list_id: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
       name: '',
       description: '',
       entries: [],
@@ -425,7 +426,7 @@ describe('blocklist form', () => {
 
   it('should be valid if all required inputs complete', () => {
     const validItem: ArtifactFormComponentProps['item'] = {
-      list_id: ENDPOINT_BLOCKLISTS_LIST_ID,
+      list_id: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
       name: 'test name',
       description: 'test description',
       entries: [
