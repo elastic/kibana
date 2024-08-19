@@ -47,24 +47,23 @@ export const ViewSpaceTabFooter: React.FC<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={true} />
 
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={onClickCancel} data-test-subj="cancel-space-button">
+              Cancel
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+
           {isDirty && (
-            <>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={onClickCancel} data-test-subj="cancel-space-button">
-                  Cancel
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  color="primary"
-                  fill
-                  onClick={onClickSubmit}
-                  data-test-subj="save-space-button"
-                >
-                  Update space
-                </EuiButton>
-              </EuiFlexItem>
-            </>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                color="primary"
+                fill
+                onClick={onClickSubmit}
+                data-test-subj="save-space-button"
+              >
+                Update space
+              </EuiButton>
+            </EuiFlexItem>
           )}
         </EuiFlexGroup>
       )}
