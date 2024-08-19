@@ -22,7 +22,7 @@ import { appContextService } from '../app_context';
 
 import { listEnrollmentApiKeys } from '../api_keys';
 import { listFleetServerHosts } from '../fleet_server_host';
-import { prependAgentlessApiBasePathToEndpoint } from '../utils/agentless';
+import { prependAgentlessApiBasePathToEndpoint, isAgentlessApiEnabled } from '../utils/agentless';
 
 class AgentlessAgentService {
   public async createAgentlessAgent(
@@ -33,8 +33,10 @@ class AgentlessAgentService {
     const logger = appContextService.getLogger();
     logger.debug(`Creating agentless agent ${agentlessAgentPolicy.id}`);
 
-    if (!appContextService.getCloud()?.isCloudEnabled) {
-      logger.error('Creating agentless agent not supported in non-cloud environments');
+    if (!isAgentlessApiEnabled) {
+      logger.error(
+        'Creating agentless agent not supported in non-cloud or non-serverless environments'
+      );
       throw new AgentlessAgentCreateError('Agentless agent not supported');
     }
     if (!agentlessAgentPolicy.supports_agentless) {

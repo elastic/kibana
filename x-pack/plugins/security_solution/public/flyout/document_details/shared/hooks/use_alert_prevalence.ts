@@ -7,41 +7,80 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
-import { useGlobalTime } from '../use_global_time';
-import type { GenericBuckets } from '../../../../common/search_strategy';
-import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
-import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { inputsSelectors } from '../../store';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../common/constants';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import type { GenericBuckets } from '../../../../../common/search_strategy';
+import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { inputsSelectors } from '../../../../common/store';
 
-const ALERT_PREVALENCE_AGG = 'countOfAlertsWithSameFieldAndValue';
+export const ALERT_PREVALENCE_AGG = 'countOfAlertsWithSameFieldAndValue';
+interface AlertPrevalenceAggregation {
+  [ALERT_PREVALENCE_AGG]: {
+    buckets: GenericBuckets[];
+  };
+}
 
-interface UseAlertPrevalenceOptions {
+export interface UseAlertPrevalenceParams {
+  /**
+   * The field to search for
+   */
   field: string;
+  /**
+   * The value to search for
+   */
   value: string | string[] | undefined | null;
+  /**
+   * The index to search in
+   */
+  indexName: string | null;
+  /**
+   * Whether to use the timeline time or the global time
+   */
   isActiveTimelines: boolean;
-  signalIndexName: string | null;
+  /**
+   * Whether to include the alert ids in the response
+   */
   includeAlertIds?: boolean;
+  /**
+   * Whether to ignore the timeline time and use the global time
+   */
   ignoreTimerange?: boolean;
 }
 
-interface UserAlertPrevalenceResult {
+export interface UserAlertPrevalenceResult {
+  /**
+   * Whether the query is loading
+   */
   loading: boolean;
+  /**
+   * The count of the prevalence aggregation
+   */
   count: undefined | number;
+  /**
+   * Whether there was an error with the query
+   */
   error: boolean;
+  /**
+   * The alert ids sorted by timestamp
+   */
   alertIds?: string[];
 }
 
-// TODO: MOVE TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
+/**
+ * Hook to get the prevalence of alerts with the field and value pair.
+ * By default, includeAlertIds is false, which means the call only returns the aggregation and not all the alerts themselves. If includeAlertIds is true, it will also return the alertIds sorted by timestamp.
+ * By default, includeAlertIds is false, which means we're fetching with the global time from and to values. If isActiveTimelines is true, we're getting the timeline time.
+ */
 export const useAlertPrevalence = ({
   field,
   value,
+  indexName,
   isActiveTimelines,
-  signalIndexName,
   includeAlertIds = false,
   ignoreTimerange = false,
-}: UseAlertPrevalenceOptions): UserAlertPrevalenceResult => {
+}: UseAlertPrevalenceParams): UserAlertPrevalenceResult => {
   const timelineTime = useDeepEqualSelector((state) =>
     inputsSelectors.timelineTimeRangeSelector(state)
   );
@@ -57,7 +96,7 @@ export const useAlertPrevalence = ({
 
   const { loading, data, setQuery } = useQueryAlerts<{ _id: string }, AlertPrevalenceAggregation>({
     query: initialQuery,
-    indexName: signalIndexName,
+    indexName,
     queryName: ALERTS_QUERY_NAMES.PREVALENCE,
   });
 
@@ -165,9 +204,3 @@ const generateAlertPrevalenceQuery = (
     runtime_mappings: {},
   };
 };
-
-export interface AlertPrevalenceAggregation {
-  [ALERT_PREVALENCE_AGG]: {
-    buckets: GenericBuckets[];
-  };
-}
