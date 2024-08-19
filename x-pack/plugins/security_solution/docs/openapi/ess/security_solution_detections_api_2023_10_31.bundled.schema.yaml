@@ -1612,9 +1612,65 @@ components:
         - $ref: '#/components/schemas/BulkActionEditPayloadTags'
         - $ref: '#/components/schemas/BulkActionEditPayloadIndexPatterns'
         - $ref: '#/components/schemas/BulkActionEditPayloadInvestigationFields'
+        - $ref: '#/components/schemas/BulkActionEditPayloadAlertSuppression'
         - $ref: '#/components/schemas/BulkActionEditPayloadTimeline'
         - $ref: '#/components/schemas/BulkActionEditPayloadRuleActions'
         - $ref: '#/components/schemas/BulkActionEditPayloadSchedule'
+    BulkActionEditPayloadAddSetAlertSuppression:
+      type: object
+      properties:
+        type:
+          enum:
+            - add_alert_suppression
+            - set_alert_suppression
+          type: string
+        value:
+          type: object
+          properties:
+            group_by:
+              items:
+                type: string
+              maxItems: 3
+              type: array
+            suppression_config:
+              $ref: '#/components/schemas/BulkActionEditPayloadAlertSuppressionConfig'
+          required:
+            - group_by
+      required:
+        - type
+        - value
+    BulkActionEditPayloadAlertSuppression:
+      anyOf:
+        - $ref: '#/components/schemas/BulkActionEditPayloadAddSetAlertSuppression'
+        - $ref: '#/components/schemas/BulkActionEditPayloadDeleteAlertSuppression'
+    BulkActionEditPayloadAlertSuppressionConfig:
+      type: object
+      properties:
+        duration:
+          $ref: '#/components/schemas/AlertSuppressionDuration'
+        missing_fields_strategy:
+          $ref: '#/components/schemas/AlertSuppressionMissingFieldsStrategy'
+    BulkActionEditPayloadDeleteAlertSuppression:
+      type: object
+      properties:
+        type:
+          enum:
+            - delete_alert_suppression
+          type: string
+        value:
+          type: object
+          properties:
+            group_by:
+              items:
+                type: string
+              type: array
+            suppression_config:
+              $ref: '#/components/schemas/BulkActionEditPayloadAlertSuppressionConfig'
+          required:
+            - group_by
+      required:
+        - type
+        - value
     BulkActionEditPayloadIndexPatterns:
       type: object
       properties:
@@ -1735,6 +1791,7 @@ components:
         - MACHINE_LEARNING_AUTH
         - MACHINE_LEARNING_INDEX_PATTERN
         - ESQL_INDEX_PATTERN
+        - ALERT_SUPPRESSION_FEATURE
         - MANUAL_RULE_RUN_FEATURE
         - MANUAL_RULE_RUN_DISABLED_RULE
       type: string
