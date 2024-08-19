@@ -41,7 +41,7 @@ import type {
   FunctionSubtype,
   ESQLNumericLiteral,
 } from './types';
-import { formatIdentifierParts, parseIdentifier } from './parser/helpers';
+import { parseIdentifier } from './parser/helpers';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
