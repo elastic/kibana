@@ -7,6 +7,7 @@
 
 import { RegisterRenderFunctionDefinition } from '@kbn/observability-ai-assistant-plugin/public/types';
 import { registerGetApmTimeseriesFunction } from './get_apm_timeseries';
+import { registerGetApmTraceWaterfallFunction } from './get_apm_trace_watefall';
 
 export async function registerAssistantFunctions({
   registerRenderFunction,
@@ -14,6 +15,9 @@ export async function registerAssistantFunctions({
   registerRenderFunction: RegisterRenderFunctionDefinition;
 }) {
   registerGetApmTimeseriesFunction({
+    registerRenderFunction,
+  });
+  registerGetApmTraceWaterfallFunction({
     registerRenderFunction,
   });
 }

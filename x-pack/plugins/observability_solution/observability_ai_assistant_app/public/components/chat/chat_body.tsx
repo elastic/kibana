@@ -141,6 +141,7 @@ export function ChatBody({
   });
 
   const timelineContainerRef = useRef<HTMLDivElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
   let footer: React.ReactNode;
 
@@ -195,7 +196,7 @@ export function ChatBody({
   }, []);
 
   useEffect(() => {
-    const parent = timelineContainerRef.current?.parentElement;
+    const parent = scrollRef.current;
     if (!parent) {
       return;
     }
@@ -210,10 +211,10 @@ export function ChatBody({
       parent.removeEventListener('scroll', onScroll);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timelineContainerRef.current]);
+  }, [timelineContainerRef.current, scrollRef.current]);
 
   useEffect(() => {
-    const parent = timelineContainerRef.current?.parentElement;
+    const parent = scrollRef.current;
     if (!parent) {
       return;
     }
@@ -335,7 +336,7 @@ export function ChatBody({
   } else {
     footer = (
       <>
-        <EuiFlexItem grow className={timelineClassName(scrollBarStyles)}>
+        <EuiFlexItem grow className={timelineClassName(scrollBarStyles)} ref={scrollRef}>
           <div ref={timelineContainerRef} className={fullHeightClassName}>
             <EuiPanel
               grow
@@ -381,6 +382,7 @@ export function ChatBody({
                   }
                   onStopGenerating={stop}
                   onActionClick={handleActionClick}
+                  scrollElement={scrollRef}
                 />
               )}
             </EuiPanel>

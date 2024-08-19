@@ -7,55 +7,25 @@
 
 import { EuiButtonEmpty, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { History } from 'history';
 import React, { useMemo, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { css } from '@emotion/react';
 import { useTheme } from '../../../../../../hooks/use_theme';
 import {
   VerticalLinesContainer,
   TimelineAxisContainer,
 } from '../../../../../shared/charts/timeline';
-import { fromQuery, toQuery } from '../../../../../shared/links/url_helpers';
 import { getAgentMarks } from '../marks/get_agent_marks';
 import { getErrorMarks } from '../marks/get_error_marks';
 import { AccordionWaterfall } from './accordion_waterfall';
-import { WaterfallFlyout } from './waterfall_flyout';
-import { IWaterfall, IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
-
-const Container = euiStyled.div`
-  transition: 0.1s padding ease;
-  position: relative;
-`;
-
-const toggleFlyout = ({
-  history,
-  item,
-  flyoutDetailTab,
-}: {
-  history: History;
-  item?: IWaterfallItem;
-  flyoutDetailTab?: string;
-}) => {
-  history.replace({
-    ...history.location,
-    search: fromQuery({
-      ...toQuery(location.search),
-      flyoutDetailTab,
-      waterfallItemId: item?.id,
-    }),
-  });
-};
-
-const WaterfallItemsContainer = euiStyled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorMediumShade};
-`;
+import type { IWaterfall, IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
 
 interface Props {
   waterfallItemId?: string;
   waterfall: IWaterfall;
   showCriticalPath: boolean;
+  scrollElement?: React.RefObject<HTMLDivElement>;
+  showRelatedErrors?: boolean;
+  onClickWaterfallItem?: (item: IWaterfallItem, flyoutDetailTab: string) => void;
 }
 
 function getWaterfallMaxLevel(waterfall: IWaterfall) {
@@ -86,17 +56,32 @@ function getWaterfallMaxLevel(waterfall: IWaterfall) {
   return maxLevel;
 }
 
-const MAX_DEPTH_OPEN_LIMIT = 2;
+interface Props {
+  waterfallItemId?: string;
+  waterfall: IWaterfall;
+  showCriticalPath: boolean;
+  scrollElement?: React.RefObject<HTMLDivElement>;
+  showRelatedErrors?: boolean;
+  stickyHeader?: boolean;
+  onClickWaterfallItem?: (item: IWaterfallItem, flyoutDetailTab: string) => void;
+}
 
-export function Waterfall({ waterfall, waterfallItemId, showCriticalPath }: Props) {
-  const history = useHistory();
+export function Waterfall({
+  waterfall,
+  waterfallItemId,
+  showCriticalPath,
+  scrollElement,
+  showRelatedErrors = true,
+  stickyHeader = true,
+  onClickWaterfallItem,
+}: Props) {
   const theme = useTheme();
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
 
-  const { duration } = waterfall;
+  const { duration, entryTransaction, errorItems } = waterfall;
 
-  const agentMarks = getAgentMarks(waterfall.entryTransaction);
-  const errorMarks = getErrorMarks(waterfall.errorItems);
+  const agentMarks = getAgentMarks(entryTransaction);
+  const errorMarks = getErrorMarks(errorItems);
 
   const timelineMargins = useMemo(() => {
     // Calculate the left margin relative to the deepest level, or 100px, whichever
@@ -111,7 +96,12 @@ export function Waterfall({ waterfall, waterfallItemId, showCriticalPath }: Prop
   }, [waterfall]);
 
   return (
-    <Container>
+    <div
+      css={css`
+        transition: 0.1s padding ease;
+        position: relative;
+      `}
+    >
       {waterfall.exceedsMax && (
         <EuiCallOut
           data-test-subj="apmWaterfallSizeWarning"
@@ -133,7 +123,7 @@ export function Waterfall({ waterfall, waterfallItemId, showCriticalPath }: Prop
         css={css`
           display: flex;
           position: sticky;
-          top: var(--euiFixedHeadersOffset, 0);
+          top: ${stickyHeader ? 'var(--euiFixedHeadersOffset, 0)' : '0'};
           z-index: ${theme.eui.euiZLevel2};
           background-color: ${theme.eui.euiColorEmptyShade};
           border-bottom: 1px solid ${theme.eui.euiColorMediumShade};
@@ -162,30 +152,24 @@ export function Waterfall({ waterfall, waterfallItemId, showCriticalPath }: Prop
         xMax={duration}
         margins={timelineMargins}
       />
-      <WaterfallItemsContainer>
+      <div
+        css={css`
+          border-bottom: 1px solid ${theme.eui.euiColorMediumShade};
+        `}
+      >
         {!waterfall.entryWaterfallTransaction ? null : (
           <AccordionWaterfall
             isOpen={isAccordionOpen}
             waterfallItemId={waterfallItemId}
-            duration={duration}
             waterfall={waterfall}
             timelineMargins={timelineMargins}
-            onClickWaterfallItem={(item: IWaterfallItem, flyoutDetailTab: string) =>
-              toggleFlyout({ history, item, flyoutDetailTab })
-            }
+            scrollElement={scrollElement}
+            onClickWaterfallItem={onClickWaterfallItem}
             showCriticalPath={showCriticalPath}
-            maxLevelOpen={
-              waterfall.traceDocsTotal > 500 ? MAX_DEPTH_OPEN_LIMIT : waterfall.traceDocsTotal
-            }
+            showRelatedErrors={showRelatedErrors}
           />
         )}
-      </WaterfallItemsContainer>
-
-      <WaterfallFlyout
-        waterfallItemId={waterfallItemId}
-        waterfall={waterfall}
-        toggleFlyout={toggleFlyout}
-      />
-    </Container>
+      </div>
+    </div>
   );
 }

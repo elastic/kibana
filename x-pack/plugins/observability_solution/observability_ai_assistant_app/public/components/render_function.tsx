@@ -15,6 +15,7 @@ interface Props {
   name: string;
   arguments: string | undefined;
   response: Message['message'];
+  scrollElement?: React.RefObject<HTMLDivElement>;
   onActionClick: ChatActionClickHandler;
 }
 
@@ -22,7 +23,13 @@ export function RenderFunction(props: Props) {
   const chatService = useObservabilityAIAssistantChatService();
   return (
     <>
-      {chatService.renderFunction(props.name, props.arguments, props.response, props.onActionClick)}
+      {chatService.renderFunction(
+        props.name,
+        props.arguments,
+        props.response,
+        props.onActionClick,
+        props.scrollElement
+      )}
     </>
   );
 }

@@ -25,6 +25,7 @@ import { hasHistoricalAgentData } from '../routes/historical_data/has_historical
 import { registerGetApmDatasetInfoFunction } from './get_apm_dataset_info';
 import { registerGetApmDownstreamDependenciesFunction } from './get_apm_downstream_dependencies';
 import { registerGetApmTimeseriesFunction } from './get_apm_timeseries';
+import { registerGetApmTraceWaterfallFunction } from './get_apm_trace_waterfall';
 
 export interface FunctionRegistrationParameters {
   apmEventClient: APMEventClient;
@@ -101,6 +102,7 @@ export function registerAssistantFunctions({
 
     registerGetApmDownstreamDependenciesFunction({ ...parameters, randomSampler });
     registerGetApmTimeseriesFunction(parameters);
+    registerGetApmTraceWaterfallFunction({ ...parameters, config, logger });
     registerGetApmDatasetInfoFunction(parameters);
   };
 }

@@ -78,7 +78,8 @@ export interface ObservabilityAIAssistantChatService {
     name: string,
     args: string | undefined,
     response: { data?: string; content?: string },
-    onActionClick: ChatActionClickHandler
+    onActionClick: ChatActionClickHandler,
+    scrollElement?: React.RefObject<HTMLDivElement>
   ) => React.ReactNode;
 }
 
@@ -101,6 +102,7 @@ export interface ObservabilityAIAssistantService {
 export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {
   arguments: TArguments;
   response: TResponse;
+  scrollElement?: React.RefObject<HTMLDivElement>;
   onActionClick: ChatActionClickHandler;
 }) => React.ReactNode;
 

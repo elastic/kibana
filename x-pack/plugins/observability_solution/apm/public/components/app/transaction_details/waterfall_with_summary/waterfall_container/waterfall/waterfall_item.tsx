@@ -114,6 +114,7 @@ interface IWaterfallItemProps {
   isSelected: boolean;
   errorCount: number;
   marginLeftLevel: number;
+  showRelatedErrors?: boolean;
   segments?: Array<{
     id: string;
     left: number;
@@ -223,6 +224,7 @@ export function WaterfallItem({
   marginLeftLevel,
   onClick,
   segments,
+  showRelatedErrors = true,
 }: IWaterfallItemProps) {
   const [widthFactor, setWidthFactor] = useState(1);
   const waterfallItemRef: React.RefObject<any> = useRef(null);
@@ -287,7 +289,7 @@ export function WaterfallItem({
         <NameLabel item={item} />
 
         <Duration item={item} />
-        <RelatedErrors item={item} errorCount={errorCount} />
+        {showRelatedErrors && <RelatedErrors item={item} errorCount={errorCount} />}
         {item.docType === 'span' && (
           <SyncBadge sync={item.doc.span.sync} agentName={item.doc.agent.name} />
         )}

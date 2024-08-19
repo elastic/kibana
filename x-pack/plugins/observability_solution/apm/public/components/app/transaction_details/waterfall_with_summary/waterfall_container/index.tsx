@@ -5,124 +5,106 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { keyBy } from 'lodash';
-import React from 'react';
+import { History } from 'history';
+import { useHistory } from 'react-router-dom';
 import { useCriticalPathFeatureEnabledSetting } from '../../../../../hooks/use_critical_path_feature_enabled_setting';
 import { TechnicalPreviewBadge } from '../../../../shared/technical_preview_badge';
-import { Waterfall } from './waterfall';
-import {
-  type IWaterfall,
-  WaterfallLegendType,
-} from './waterfall/waterfall_helpers/waterfall_helpers';
-import { WaterfallLegends } from './waterfall_legends';
-import { OrphanTraceItemsWarning } from './waterfall/orphan_trace_items_warning';
+import type { IWaterfall, IWaterfallItem } from './waterfall/waterfall_helpers/waterfall_helpers';
+import { fromQuery, toQuery } from '../../../../shared/links/url_helpers';
+import { WaterfallFlyout } from './waterfall/waterfall_flyout';
+import { WaterfallContent } from './waterfall_content';
 
 interface Props {
   waterfallItemId?: string;
   serviceName?: string;
   waterfall: IWaterfall;
   showCriticalPath: boolean;
+  scrollElement?: React.RefObject<HTMLDivElement>;
   onShowCriticalPathChange: (showCriticalPath: boolean) => void;
 }
+
+const toggleFlyout = ({
+  history,
+  item,
+  flyoutDetailTab,
+}: {
+  history: History;
+  item?: IWaterfallItem;
+  flyoutDetailTab?: string;
+}) => {
+  history.replace({
+    ...history.location,
+    search: fromQuery({
+      ...toQuery(location.search),
+      flyoutDetailTab,
+      waterfallItemId: item?.id,
+    }),
+  });
+};
 
 export function WaterfallContainer({
   serviceName,
   waterfallItemId,
   waterfall,
   showCriticalPath,
+  scrollElement,
   onShowCriticalPathChange,
 }: Props) {
+  const history = useHistory();
+
   const isCriticalPathFeatureEnabled = useCriticalPathFeatureEnabledSetting();
 
   if (!waterfall) {
     return null;
   }
-  const { legends, items, orphanTraceItemsCount } = waterfall;
-
-  // Service colors are needed to color the dot in the error popover
-  const serviceLegends = legends.filter(({ type }) => type === WaterfallLegendType.ServiceName);
-  const serviceColors = serviceLegends.reduce((colorMap, legend) => {
-    return {
-      ...colorMap,
-      [legend.value!]: legend.color,
-    };
-  }, {} as Record<string, string>);
-
-  // only color by span type if there are only events for one service
-  const colorBy =
-    serviceLegends.length > 1 ? WaterfallLegendType.ServiceName : WaterfallLegendType.SpanType;
-
-  const displayedLegends = legends.filter((legend) => legend.type === colorBy);
-
-  const legendsByValue = keyBy(displayedLegends, 'value');
-
-  // mutate items rather than rebuilding both items and childrenByParentId
-  items.forEach((item) => {
-    let color = '';
-    if ('legendValues' in item) {
-      color = legendsByValue[item.legendValues[colorBy]].color;
-    }
-
-    if (!color) {
-      // fall back to service color if there's no span.type, e.g. for transactions
-      color = serviceColors[item.doc.service.name];
-    }
-
-    item.color = color;
-  });
-
-  // default to serviceName if value is empty, e.g. for transactions (which don't
-  // have span.type or span.subtype)
-  const legendsWithFallbackLabel = displayedLegends.map((legend) => {
-    return { ...legend, value: !legend.value ? serviceName : legend.value };
-  });
 
   return (
-    <EuiFlexGroup direction="column">
-      {isCriticalPathFeatureEnabled ? (
+    <>
+      <EuiFlexGroup direction="column">
+        {isCriticalPathFeatureEnabled ? (
+          <EuiFlexItem>
+            <EuiSwitch
+              id="showCriticalPath"
+              label={
+                <EuiFlexGroup gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    {i18n.translate('xpack.apm.waterfall.showCriticalPath', {
+                      defaultMessage: 'Show critical path',
+                    })}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <TechnicalPreviewBadge icon="beaker" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+              checked={showCriticalPath}
+              onChange={(event) => {
+                onShowCriticalPathChange(event.target.checked);
+              }}
+            />
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem>
-          <EuiSwitch
-            id="showCriticalPath"
-            label={
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  {i18n.translate('xpack.apm.waterfall.showCriticalPath', {
-                    defaultMessage: 'Show critical path',
-                  })}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <TechnicalPreviewBadge icon="beaker" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
-            checked={showCriticalPath}
-            onChange={(event) => {
-              onShowCriticalPathChange(event.target.checked);
+          <WaterfallContent
+            showCriticalPath={showCriticalPath}
+            waterfall={waterfall}
+            scrollElement={scrollElement}
+            onClickWaterfallItem={(item, flyoutDetailTab) => {
+              toggleFlyout({ history, item, flyoutDetailTab });
             }}
+            serviceName={serviceName}
+            waterfallItemId={waterfallItemId}
           />
         </EuiFlexItem>
-      ) : null}
-      <EuiFlexItem>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <WaterfallLegends legends={legendsWithFallbackLabel} type={colorBy} />
-          </EuiFlexItem>
-          {orphanTraceItemsCount > 0 ? (
-            <EuiFlexItem grow={false}>
-              <OrphanTraceItemsWarning orphanTraceItemsCount={orphanTraceItemsCount} />
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <Waterfall
-          showCriticalPath={showCriticalPath}
-          waterfallItemId={waterfallItemId}
-          waterfall={waterfall}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </EuiFlexGroup>
+      <WaterfallFlyout
+        waterfallItemId={waterfallItemId}
+        waterfall={waterfall}
+        toggleFlyout={toggleFlyout}
+      />
+    </>
   );
 }

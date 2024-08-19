@@ -5,19 +5,21 @@
  * 2.0.
  */
 
+// DUPLICATE
+
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { Dictionary, first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { CriticalPathSegment } from '../../../../../../../../common/critical_path/types';
-import type { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
-import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import { Transaction } from '../../typings/es_schemas/ui/transaction';
 import {
   WaterfallError,
+  WaterfallTraceItems,
   WaterfallSpan,
   WaterfallTransaction,
-} from '../../../../../../../../common/waterfall/typings';
-
-type TraceAPIResponse = APIReturnType<'GET /internal/apm/traces/{traceId}'>;
+} from './typings';
+import { CriticalPathSegment } from '../critical_path/types';
+import { isRumAgentName } from '../agent_name';
+import { asDuration } from '../utils/formatters';
 
 const ROOT_ID = 'root';
 
@@ -294,7 +296,7 @@ const getWaterfallDuration = (waterfallItems: IWaterfallItem[]) =>
 
 const getWaterfallItems = (
   items: Array<WaterfallTransaction | WaterfallSpan>,
-  spanLinksCountById: TraceAPIResponse['traceItems']['spanLinksCountById']
+  spanLinksCountById: Record<string, number>
 ) =>
   items.map((item) => {
     const docType = item.processor.event;
@@ -364,7 +366,7 @@ function isInEntryTransaction(
 }
 
 function getWaterfallErrors(
-  errorDocs: TraceAPIResponse['traceItems']['errorDocs'],
+  errorDocs: WaterfallError[],
   items: IWaterfallItem[],
   entryWaterfallTransaction?: IWaterfallTransaction
 ) {
@@ -387,7 +389,7 @@ function getWaterfallErrors(
 /*
   { 'parentId': 2 }
   */
-function getErrorCountByParentId(errorDocs: TraceAPIResponse['traceItems']['errorDocs']) {
+function getErrorCountByParentId(errorDocs: WaterfallError[]) {
   return errorDocs.reduce<Record<string, number>>((acc, doc) => {
     const parentId = doc.parent?.id;
 
@@ -421,8 +423,13 @@ export const getOrphanTraceItemsCount = (
   return missingTraceItemsCounter;
 };
 
-export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
-  const { traceItems, entryTransaction } = apiResponse;
+export function getWaterfall({
+  traceItems,
+  entryTransaction,
+}: {
+  traceItems: WaterfallTraceItems;
+  entryTransaction?: Transaction;
+}): IWaterfall {
   if (isEmpty(traceItems.traceDocs) || !entryTransaction) {
     return {
       duration: 0,
@@ -549,6 +556,7 @@ function buildTree({
 
   return tree;
 }
+
 export function buildTraceTree({
   waterfall,
   maxLevelOpen,
@@ -596,14 +604,58 @@ export const convertTreeToList = (root: IWaterfallNode | null): IWaterfallNodeFl
     result.push(nodeWithoutChildren);
 
     if (node.expanded) {
-      for (let i = children.length - 1; i >= 0; i--) {
-        stack.push(children[i]);
+      for (let i = node.children.length - 1; i >= 0; i--) {
+        stack.push(node.children[i]);
       }
     }
   }
 
   return result;
 };
+
+export function treeToASCII(root: IWaterfallNode): string {
+  let output = '';
+  const stack: Array<{ node: IWaterfallNode; prefix: string; isLast: boolean }> = [
+    { node: root, prefix: '', isLast: true },
+  ];
+
+  while (stack.length > 0) {
+    const { node, prefix, isLast } = stack.pop()!;
+
+    output += `${prefix}${isLast ? '└── ' : '├── '}${
+      node.item.docType === 'span' ? node.item.doc.span.name : node.item.doc.transaction.name
+    }`;
+
+    const requestType =
+      node.item.docType === 'transaction'
+        ? isRumAgentName(node.item.doc.agent.name)
+          ? 'HTTP Request'
+          : 'Async call'
+        : node.item.docType === 'span' && node.item.doc.span.type.startsWith('db')
+        ? 'DB operation'
+        : '';
+    if (requestType) {
+      output += ` --(${requestType})--`;
+    }
+
+    if (node.item.duration !== undefined) {
+      output += ` [${asDuration(node.item.duration)}]`;
+    }
+
+    output += '\n';
+
+    const childPrefix = prefix + (isLast ? '    ' : '│   ');
+    for (let i = node.children.length - 1; i >= 0; i--) {
+      stack.push({
+        node: node.children[i],
+        prefix: childPrefix,
+        isLast: i === node.children.length - 1,
+      });
+    }
+  }
+
+  return output;
+}
 
 export const updateTraceTreeNode = ({
   root,
