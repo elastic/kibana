@@ -23,8 +23,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     },
     {
       // without dashboards
-      name: 'apm',
-      version: '8.4.2',
+      name: 'endpoint',
+      version: '1.1.0',
     },
   ];
 
