@@ -39,7 +39,7 @@ const featuresList = {
     actionLabel: i18n.translate(
       'xpack.enterpriseSearch.appSearch.gateForm.webCrawler.featureButtonLabel',
       {
-        defaultMessage: 'Try open crawler',
+        defaultMessage: 'Try Open Crawler',
       }
     ),
     actionLink: 'https://github.com/elastic/crawler?tab=readme-ov-file#setup',

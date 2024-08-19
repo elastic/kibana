@@ -7,13 +7,11 @@
 
 import React from 'react';
 
-import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
 
-import { docLinks } from '../../../shared/doc_links';
 import {
   EnterpriseSearchPageTemplateWrapper,
   PageTemplateProps,
@@ -31,21 +29,7 @@ export const AppSearchGatePage: React.FC<PageTemplateProps> = ({ isLoading }) =>
         description: (
           <FormattedMessage
             id="xpack.enterpriseSearch.appSearch.gateForm.description"
-            defaultMessage="The standalone App Search product remains available in maintenance mode, but is not recommended for new search experiences. We recommend using native Elasticsearch tools, which offer flexibility and composability, and include exciting new search features. Learn more in this {blogUrl}. To help you choose the tools best suited for your use case, we’ve created this recommendation wizard. Select the features you need, and we'll point you to corresponding Elasticsearch features. If you still want to use the standalone App Search product, you can do so after submitting the form."
-            values={{
-              blogUrl: (
-                <EuiLink
-                  data-test-subj="appSearch-gateForm-blog-link"
-                  href={docLinks.workplaceSearchGatedFormBlog}
-                  target="_blank"
-                  data-telemetry-id="appSearch-gateForm-blog-viewLink"
-                >
-                  {i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.viewBlog', {
-                    defaultMessage: 'blog',
-                  })}
-                </EuiLink>
-              ),
-            }}
+            defaultMessage="The standalone App Search product remains available in maintenance mode, but is not recommended for new search experiences. We recommend using native Elasticsearch tools, which offer flexibility and composability, and include exciting new search features. To help you choose the tools best suited for your use case, we’ve created this recommendation wizard. Select the features you need, and we'll point you to corresponding Elasticsearch features. If you still want to use the standalone App Search product, you can do so after submitting the form."
           />
         ),
         pageTitle: i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.title', {
