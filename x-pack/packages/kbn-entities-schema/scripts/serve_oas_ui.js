@@ -16,5 +16,5 @@ app.use('/', swaggerUi.serve, swaggerUi.setup(generateOAS()));
 
 const port = 3000;
 app.listen(port, () => {
-  console.log(`OpenAPI UI available on localhost:${port}`);
+  console.log(`OpenAPI UI available on http://localhost:${port}`);
 });
