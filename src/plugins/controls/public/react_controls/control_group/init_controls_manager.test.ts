@@ -7,7 +7,7 @@
  */
 
 import { DefaultControlApi } from '../controls/types';
-import { initControlsManager, getLastUsedDataViewId } from './init_controls_manager';
+import { initControlsManager, getLastControlValue } from './init_controls_manager';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('delta'),
@@ -158,9 +158,10 @@ describe('snapshotControlsRuntimeState', () => {
   });
 });
 
-describe('getLastUsedDataViewId', () => {
+describe('getLastControlValue', () => {
   test('should return last used data view id', () => {
-    const dataViewId = getLastUsedDataViewId(
+    const dataViewId = getLastControlValue(
+      'dataViewId',
       [
         { id: 'alpha', type: 'testControl' },
         { id: 'bravo', type: 'testControl' },
@@ -176,14 +177,42 @@ describe('getLastUsedDataViewId', () => {
   });
 
   test('should return undefined when there are no controls', () => {
-    const dataViewId = getLastUsedDataViewId([], {});
+    const dataViewId = getLastControlValue('dataViewId', [], {});
     expect(dataViewId).toBeUndefined();
   });
 
   test('should return undefined when there are no controls with data views', () => {
-    const dataViewId = getLastUsedDataViewId([{ id: 'alpha', type: 'testControl' }], {
+    const dataViewId = getLastControlValue('dataViewId', [{ id: 'alpha', type: 'testControl' }], {
       alpha: { type: 'testControl', order: 0 },
     });
     expect(dataViewId).toBeUndefined();
+  });
+});
+
+describe('getNewControlState', () => {
+  test('should contain defaults when there are existing controls', () => {
+    const controlsManager = initControlsManager({}, DEFAULT_DATA_VIEW_ID);
+    expect(controlsManager.getNewControlState()).toEqual({
+      grow: true,
+      width: 'medium',
+      dataViewId: DEFAULT_DATA_VIEW_ID,
+    });
+  });
+
+  test('should contain values of last added control', () => {
+    const controlsManager = initControlsManager({}, DEFAULT_DATA_VIEW_ID);
+    controlsManager.api.addNewPanel({
+      panelType: 'testControl',
+      initialState: {
+        grow: false,
+        width: 'small',
+        dataViewId: 'myOtherDataViewId',
+      },
+    });
+    expect(controlsManager.getNewControlState()).toEqual({
+      grow: false,
+      width: 'small',
+      dataViewId: 'myOtherDataViewId',
+    });
   });
 });
