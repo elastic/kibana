@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { safeDump } from 'js-yaml';
+import { dump } from 'js-yaml';
 import { BuildkiteClient, BuildkiteCommandStep } from './buildkite';
 
 type AgentImageConfig = BuildkiteCommandStep['agents'];
@@ -46,7 +46,7 @@ function getAgentImageConfig({ returnYaml = false } = {}): string | AgentImageCo
   }
 
   if (returnYaml) {
-    return safeDump({ agents: config });
+    return dump({ agents: config });
   }
 
   return config;
