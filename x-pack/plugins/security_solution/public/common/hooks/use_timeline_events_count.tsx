@@ -13,6 +13,7 @@ import { createHtmlPortalNode, OutPortal } from 'react-reverse-portal';
  */
 const timelineEventsCountPortalNodeSingleton = createHtmlPortalNode();
 const eqlEventsCountPortalNodeSingleton = createHtmlPortalNode();
+const esqlEventsCountPortalNodeSingleton = createHtmlPortalNode();
 
 export const useTimelineEventsCountPortal = () => {
   const [timelineEventsCountPortalNode] = useState(timelineEventsCountPortalNodeSingleton);
@@ -37,3 +38,15 @@ export const EqlEventsCountBadge = React.memo(() => {
 });
 
 EqlEventsCountBadge.displayName = 'EqlEventsCountBadge';
+
+export const useEsqlEventsCountPortal = () => {
+  const [esqlEventsCountPortalNode] = useState(esqlEventsCountPortalNodeSingleton);
+  return { portalNode: esqlEventsCountPortalNode };
+};
+
+export const EsqlEventsCountBadge = React.memo(() => {
+  const { portalNode } = useEsqlEventsCountPortal();
+  return <OutPortal node={portalNode} />;
+});
+
+EsqlEventsCountBadge.displayName = 'EsqlEventsCountBadge';

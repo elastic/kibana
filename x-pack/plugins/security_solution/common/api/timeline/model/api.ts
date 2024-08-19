@@ -293,6 +293,11 @@ export const TimelineTypeLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TimelineTypeEnum.default),
 ]);
 
+const EsqlOptionsRuntimeType = runtimeTypes.partial({
+  query: unionWithNullType(runtimeTypes.string),
+  sort: unionWithNullType(runtimeTypes.array(SavedSortObject)),
+});
+
 /**
  * This is the response type
  */
@@ -322,6 +327,7 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   updated: unionWithNullType(runtimeTypes.number),
   updatedBy: unionWithNullType(runtimeTypes.string),
   savedSearchId: unionWithNullType(runtimeTypes.string),
+  esqlOptions: unionWithNullType(EsqlOptionsRuntimeType),
 });
 
 export type SavedTimeline = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType>;
@@ -613,6 +619,12 @@ export interface KueryFilterQueryResult {
   expression?: Maybe<string>;
 }
 
+export interface ESQLOptionsResult {
+  query?: Maybe<string>;
+  sort?: Maybe<Sort>;
+  esqlDataViewId?: Maybe<string>;
+  visibleColumns?: Maybe<ColumnHeaderResult[]>;
+}
 export interface SerializedKueryQueryResult {
   kuery?: Maybe<KueryFilterQueryResult>;
   serializedQuery?: Maybe<string>;
@@ -651,6 +663,7 @@ export interface TimelineResult {
   updatedBy?: Maybe<string>;
   version: string;
   savedSearchId?: Maybe<string>;
+  esqlOptions?: Maybe<ESQLOptionsResult>;
 }
 
 export interface ResponseTimeline {

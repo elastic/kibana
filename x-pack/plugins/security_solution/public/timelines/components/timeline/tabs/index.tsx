@@ -12,6 +12,7 @@ import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 're
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import type { SessionViewConfig } from '../../../../../common/types';
 import type { RowRenderer, TimelineId } from '../../../../../common/types/timeline';
@@ -23,6 +24,7 @@ import {
 } from '../../../../common/hooks/use_selector';
 import {
   EqlEventsCountBadge,
+  EsqlEventsCountBadge,
   TimelineEventsCountBadge,
 } from '../../../../common/hooks/use_timeline_events_count';
 import { timelineActions } from '../../../store';
@@ -77,6 +79,7 @@ const NotesTab = tabWithSuspense(lazy(() => import('./notes')));
 const PinnedTab = tabWithSuspense(lazy(() => import('./pinned')));
 const SessionTab = tabWithSuspense(lazy(() => import('./session')));
 const EsqlTab = tabWithSuspense(lazy(() => import('./esql')));
+const UnifiedEsqlTab = tabWithSuspense(lazy(() => import('./esql/unified_esql')));
 interface BasicTimelineTab {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
@@ -138,6 +141,10 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
       [activeTimelineTab]
     );
 
+    const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+      'unifiedComponentsInTimelineDisabled'
+    );
+
     /* Future developer -> why are we doing that
      * It is really expansive to re-render the QueryTab because the drag/drop
      * Therefore, we are only hiding its dom when switching to another tab
@@ -160,7 +167,11 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             $isVisible={true}
             data-test-subj={`timeline-tab-content-${TimelineTabs.esql}`}
           >
-            <EsqlTab timelineId={timelineId} />
+            {unifiedComponentsInTimelineDisabled ? (
+              <EsqlTab timelineId={timelineId} />
+            ) : (
+              <UnifiedEsqlTab timelineId={timelineId} />
+            )}
           </HideShowContainer>
         )}
         <HideShowContainer
@@ -357,6 +368,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
               key={TimelineTabs.esql}
             >
               <span>{i18n.DISCOVER_ESQL_IN_TIMELINE_TAB}</span>
+              {showTimeline && <EsqlEventsCountBadge />}
             </StyledEuiTab>
           )}
           {timelineType === TimelineTypeEnum.default && (

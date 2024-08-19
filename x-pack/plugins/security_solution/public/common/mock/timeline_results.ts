@@ -22,7 +22,7 @@ import type { TimelineEventsDetailsItem } from '../../../common/search_strategy'
 import { Direction } from '../../../common/search_strategy';
 import type { CreateTimelineProps } from '../../detections/components/alerts_table/types';
 import type { TimelineModel } from '../../timelines/store/model';
-import { timelineDefaults } from '../../timelines/store/defaults';
+import { timelineDefaults, timelineESQLDefaults } from '../../timelines/store/defaults';
 
 export const mockOpenTimelineQueryResults = {
   totalCount: 11,
@@ -1934,6 +1934,9 @@ export const mockTimelineModel: TimelineModel = {
   savedSearch: null,
   isDataProviderVisible: false,
   sampleSize: 500,
+  esqlOptions: {
+    ...timelineESQLDefaults,
+  },
 };
 
 export const mockDataTableModel: DataTableModel = {
@@ -2119,6 +2122,9 @@ export const defaultTimelineProps: CreateTimelineProps = {
     isDataProviderVisible: false,
     sampleSize: 500,
     rowHeight: 3,
+    esqlOptions: {
+      ...timelineESQLDefaults,
+    },
   },
   to: '2018-11-05T19:03:25.937Z',
   notes: null,

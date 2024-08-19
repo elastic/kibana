@@ -65,6 +65,11 @@ export interface EqlOptionsInput {
   size?: Maybe<number>;
 }
 
+export interface ESQLOptionsInput {
+  query: Maybe<string>;
+  sort: Maybe<SortTimelineInput[]>;
+}
+
 export interface FilterMetaTimelineInput {
   alias?: Maybe<string>;
   controlledBy?: Maybe<string>;
@@ -134,6 +139,7 @@ export interface TimelineInput {
   sort?: Maybe<SortTimelineInput[]>;
   status?: Maybe<TimelineStatus>;
   savedSearchId: Maybe<string>;
+  esqlOptions?: Maybe<ESQLOptionsInput>;
 }
 
 export enum FlowDirection {

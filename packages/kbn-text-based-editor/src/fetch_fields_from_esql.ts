@@ -12,6 +12,7 @@ import { Query, AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { type DataView, textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
+import { ExpressionExecutionParams } from '@kbn/expressions-plugin/common';
 
 interface TextBasedLanguagesErrorResponse {
   error: {
@@ -25,16 +26,21 @@ export function fetchFieldsFromESQL(
   expressions: ExpressionsStart,
   time?: TimeRange,
   abortController?: AbortController,
-  dataView?: DataView
+  dataView?: DataView,
+  expressionsExecutionParams?: ExpressionExecutionParams,
+  titleForInspector?: string,
+  descriptionForInspector?: string
 ) {
   return textBasedQueryStateToAstWithValidation({
     query,
     time,
     dataView,
+    titleForInspector,
+    descriptionForInspector,
   })
     .then((ast) => {
       if (ast) {
-        const executionContract = expressions.execute(ast, null);
+        const executionContract = expressions.execute(ast, null, expressionsExecutionParams);
 
         if (abortController) {
           abortController.signal.onabort = () => {

@@ -14,8 +14,8 @@ import { getFieldTypeName } from '@kbn/field-utils';
 import {
   FLYOUT_TABLE_FIELD_NAME_CELL_ICON_TEST_ID,
   FLYOUT_TABLE_FIELD_NAME_CELL_TEXT_TEST_ID,
-} from './test_ids';
-import { getExampleText } from '../../../../common/components/event_details/helpers';
+} from '../../document_details/right/components/test_ids';
+import { getExampleText } from '../../../common/components/event_details/helpers';
 
 const getEcsField = (field: string): { example?: string; description?: string } | undefined => {
   return EcsFlat[field as keyof typeof EcsFlat] as

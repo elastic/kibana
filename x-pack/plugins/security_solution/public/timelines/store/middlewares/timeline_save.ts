@@ -176,6 +176,7 @@ const timelineInput: TimelineInput = {
   sort: null,
   status: null,
   savedSearchId: null,
+  esqlOptions: null,
 };
 
 export const convertTimelineAsInput = (
@@ -253,6 +254,10 @@ export const convertTimelineAsInput = (
             : [],
           acc
         );
+      } else if (key === 'esqlOptions' && get(key, timeline) != null) {
+        const esqlOptions = get(key, timeline);
+        const convertedESQLOptions = convertTimelineESQLOptionsToTimelineInput(esqlOptions);
+        return set(key, esqlOptions != null ? convertedESQLOptions : null, acc);
       }
       return set(key, get(key, timeline), acc);
     }
@@ -293,5 +298,20 @@ function extractTimelineIdsAndVersions(timeline: TimelineModel) {
     timelineVersion: timeline.version,
     templateTimelineId: timeline.savedObjectId ? timeline.templateTimelineId : null,
     templateTimelineVersion: timeline.savedObjectId ? timeline.templateTimelineVersion : null,
+  };
+}
+
+function convertTimelineESQLOptionsToTimelineInput(
+  esqlOptions: TimelineModel['esqlOptions']
+): TimelineInput['esqlOptions'] {
+  const sort = get('sort', esqlOptions);
+  const query = get('query', esqlOptions);
+  return {
+    query: query.esql,
+    sort: sort.map((s) => ({
+      columnId: s.columnId,
+      columnType: s.columnType,
+      sortDirection: s.sortDirection,
+    })),
   };
 }

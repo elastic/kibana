@@ -6,6 +6,7 @@
  */
 
 import { TimelineItem } from '@kbn/timelines-plugin/common';
+import { mockESQLEmptyResponse, mockESQLResponse } from './esql';
 
 export const demoTimelineData: TimelineItem[] = [
   {
@@ -1115,3 +1116,16 @@ export const demoTimelineData: TimelineItem[] = [
     },
   },
 ];
+
+export const mockTimelineESQLData = {
+  rows: mockESQLResponse.rows.map((row, idx) => {
+    return {
+      id: String(idx),
+      raw: row,
+      flattened: row,
+    };
+  }),
+  columns: mockESQLResponse.columns,
+};
+
+export const mockTimelineESQLEmptyData = structuredClone(mockESQLEmptyResponse);

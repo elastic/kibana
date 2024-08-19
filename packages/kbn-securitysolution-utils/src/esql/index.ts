@@ -8,3 +8,6 @@
 
 export * from './compute_if_esql_query_aggregating';
 export * from './get_index_list_from_esql_query';
+export * from './get_has_keep_clause';
+export * from './get_esql_metadata_fields';
+export * from './get_esql_source_command';

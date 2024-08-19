@@ -12,7 +12,7 @@ import { TableFieldNameCell } from './table_field_name_cell';
 import {
   FLYOUT_TABLE_FIELD_NAME_CELL_ICON_TEST_ID,
   FLYOUT_TABLE_FIELD_NAME_CELL_TEXT_TEST_ID,
-} from './test_ids';
+} from '../../document_details/right/components/test_ids';
 
 const mockDataType = 'date';
 const mockField = '@timestamp';

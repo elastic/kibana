@@ -7,6 +7,10 @@
 
 import type { ComponentProps, FC, PropsWithChildren } from 'react';
 import React, { useEffect } from 'react';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { TimelineTabs } from '@kbn/securitysolution-data-table';
+import { DataLoadingState } from '@kbn/unified-data-table';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import type QueryTabContent from '.';
 import { UnifiedTimeline } from '.';
 import { TimelineId } from '../../../../../common/types/timeline';
@@ -29,8 +33,6 @@ import { timelineActions } from '../../../store';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { allowedExperimentalValues } from '../../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { TimelineTabs } from '@kbn/securitysolution-data-table';
-import { DataLoadingState } from '@kbn/unified-data-table';
 import { getColumnHeaders } from '../body/column_headers/helpers';
 import { defaultUdtHeaders } from './default_headers';
 import type { ColumnHeaderType } from '../../../../../common/types';
@@ -78,6 +80,11 @@ jest.mock('../../../../common/lib/kibana');
 // unified-field-list is reporting multiple analytics events
 jest.mock(`@elastic/ebt/client`);
 
+const mockDataView = new DataView({
+  spec: mockSourcererScope.sourcererDataView,
+  fieldFormats: fieldFormatsMock,
+});
+
 const columnsToDisplay = [
   ...defaultUdtHeaders,
   {
@@ -96,6 +103,7 @@ const TestComponent = (props: Partial<ComponentProps<typeof UnifiedTimeline>>) =
   const testComponentDefaultProps: ComponentProps<typeof QueryTabContent> = {
     columns: getColumnHeaders(columnsToDisplay, mockSourcererScope.browserFields),
     activeTab: TimelineTabs.query,
+    dataView: mockDataView,
     rowRenderers: [],
     timelineId: TimelineId.test,
     itemsPerPage: 10,

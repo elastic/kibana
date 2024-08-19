@@ -179,6 +179,43 @@ export const selectDataInTimeline = createSelector(
   }
 );
 
+export const selectTimelineDateRange = createSelector(
+  selectTimelineById,
+  (timeline) => timeline?.dateRange
+);
+
+export const selectTimelineESQLOptions = createSelector(
+  selectTimelineById,
+  (timeline) => timeline?.esqlOptions
+);
+
+export const selectTimelineESQLQuery = createSelector(
+  selectTimelineESQLOptions,
+  (esqlOptions) => esqlOptions?.query
+);
+
+export const selectTimelineColumns = createSelector(
+  selectTimelineById,
+  (timeline) => timeline?.columns
+);
+
+export const selectTimelineActiveTab = createSelector(
+  selectTimelineById,
+  (timeline) => timeline?.activeTab
+);
+
+export const selectTimelineSort = createSelector(selectTimelineById, (timeline) => timeline?.sort);
+
+export const selectTimelinesItemsPerPage = createSelector(
+  selectTimelineById,
+  (timeline) => timeline?.itemsPerPage
+);
+
+export const selectTimelinesItemPageOptions = createSelector(
+  selectTimelineById,
+  (timeline) => timeline?.itemsPerPageOptions
+);
+
 export const selectExcludedRowRendererIds = createSelector(
   selectTimelineById,
   (timeline) => timeline?.excludedRowRendererIds

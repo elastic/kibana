@@ -58,7 +58,7 @@ export const useTimelineEventsDetails = ({
   const searchSubscription$ = useRef(new Subscription());
 
   // loading = false initial state causes flashes of empty tables
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !!eventId);
   const [timelineDetailsRequest, setTimelineDetailsRequest] =
     useState<TimelineEventsDetailsRequestOptionsInput | null>(null);
   const { addError } = useAppToasts();

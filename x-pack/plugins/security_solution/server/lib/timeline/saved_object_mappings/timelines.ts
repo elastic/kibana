@@ -9,6 +9,10 @@ import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { timelinesMigrations } from './migrations/timelines';
+import {
+  timelineESQLOptionsMapping,
+  timelineSOVersionAddEsqlOptionsMapping,
+} from './model_versions/timelines';
 
 export const timelineSavedObjectType = 'siem-ui-timeline';
 
@@ -320,6 +324,7 @@ export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
     savedSearchId: {
       type: 'text',
     },
+    ...timelineESQLOptionsMapping,
   },
 };
 
@@ -346,5 +351,6 @@ export const timelineType: SavedObjectsType = {
   migrations: timelinesMigrations,
   modelVersions: {
     1: timelineSOVersion1,
+    2: timelineSOVersionAddEsqlOptionsMapping,
   },
 };

@@ -16,7 +16,7 @@ import type {
 } from '../components/timeline/data_providers/data_provider';
 
 import type { KqlMode, TimelineModel } from './model';
-import type { InitialyzeTimelineSettings, InsertTimeline } from './types';
+import type { ESQLOptions, InitialyzeTimelineSettings, InsertTimeline } from './types';
 import type {
   FieldsEqlOptions,
   TimelineNonEcsData,
@@ -308,3 +308,10 @@ export const setConfirmingNoteId = actionCreator<{
   id: string;
   confirmingNoteId: string | null | undefined;
 }>('SET_CONFIRMING_NOTE_ID');
+
+export const updateESQLOptions = actionCreator<{
+  /* Timeline ID */
+  id: string;
+  /* esqlOptions */
+  esqlOptions: Partial<ESQLOptions>;
+}>('UPDATE_ESQL_OPTIONS');

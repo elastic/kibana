@@ -15,13 +15,33 @@ import {
 import { defaultHeaders } from '../components/timeline/body/column_headers/default_headers';
 import { normalizeTimeRange } from '../../common/utils/normalize_time_range';
 import type { SubsetTimelineModel, TimelineModel } from './model';
+import type { ESQLOptions } from './types';
 import { defaultUdtHeaders } from '../components/timeline/unified_components/default_headers';
 
 // normalizeTimeRange uses getTimeRangeSettings which cannot be used outside Kibana context if the uiSettings is not false
 const { from: start, to: end } = normalizeTimeRange({ from: '', to: '' }, false);
 
+export const timelineESQLDefaults: ESQLOptions = {
+  query: {
+    esql: '',
+  },
+  esqlDataViewId: undefined,
+  visibleColumns: [],
+  sort: [
+    {
+      columnId: '@timestamp',
+      columnType: 'date',
+      esTypes: ['date'],
+      sortDirection: 'desc',
+    },
+  ],
+};
+
 export const timelineDefaults: SubsetTimelineModel &
-  Pick<TimelineModel, 'eqlOptions' | 'resolveTimelineConfig' | 'sampleSize' | 'rowHeight'> = {
+  Pick<
+    TimelineModel,
+    'eqlOptions' | 'resolveTimelineConfig' | 'sampleSize' | 'rowHeight' | 'esqlOptions'
+  > = {
   activeTab: TimelineTabs.query,
   prevActiveTab: TimelineTabs.query,
   columns: defaultUdtHeaders,
@@ -106,6 +126,9 @@ export const timelineDefaults: SubsetTimelineModel &
   isDataProviderVisible: false,
   sampleSize: 500,
   rowHeight: 3,
+  esqlOptions: {
+    ...timelineESQLDefaults,
+  },
 };
 
 export const getTimelineManageDefaults = (id: string) => ({

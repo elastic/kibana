@@ -87,6 +87,7 @@ export const convertSavedObjectToSavedTimeline = (savedObject: unknown): Timelin
               : [savedTimeline.attributes.sort]
             : [],
         savedSearchId: savedTimeline.attributes.savedSearchId,
+        esqlOptions: savedTimeline.attributes.esqlOptions,
       };
 
       return {

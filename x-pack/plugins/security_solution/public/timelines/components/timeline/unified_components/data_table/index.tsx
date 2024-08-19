@@ -14,11 +14,13 @@ import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EuiDataGridCustomBodyProps, EuiDataGridProps } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { DocumentDetailsProps } from '../../../../../flyout/document_details/shared/types';
+import { ESQLDetailsPanelKey } from '../../../../../flyout/esql_details/constants';
+import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
 import { useOnExpandableFlyoutClose } from '../../../../../flyout/shared/hooks/use_on_expandable_flyout_close';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { selectTimelineById } from '../../../../store/selectors';
 import { RowRendererCount } from '../../../../../../common/api/timeline';
-import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
 import { withDataView } from '../../../../../common/components/with_data_view';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type { TimelineItem } from '../../../../../../common/search_strategy';
@@ -39,7 +41,8 @@ import {
   UnifiedTimelineGlobalStyles,
 } from '../styles';
 import { timelineActions } from '../../../../store';
-import { transformTimelineItemToUnifiedRows } from '../utils';
+import type { TimelineDataTableRecord } from '../utils';
+import { areTimelineRecords, isTimelineRecord, transformDataToUnifiedRows } from '../utils';
 import { TimelineEventDetailRow } from './timeline_event_detail_row';
 import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
@@ -55,7 +58,7 @@ type CommonDataTableProps = {
   timelineId: string;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
-  events: TimelineItem[];
+  events: TimelineItem[] | DataTableRecord[];
   refetch: inputsModel.Refetch;
   onFieldEdited: () => void;
   totalCount: number;
@@ -74,6 +77,7 @@ type CommonDataTableProps = {
   | 'renderCustomGridBody'
   | 'trailingControlColumns'
   | 'isSortEnabled'
+  | 'columnsMeta'
 >;
 
 interface DataTableProps extends CommonDataTableProps {
@@ -104,6 +108,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     onSort,
     onFilter,
     leadingControlColumns,
+    columnsMeta,
   }) {
     const dispatch = useDispatch();
 
@@ -128,7 +133,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       },
     } = useKibana();
 
-    const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
+    const [expandedDoc, setExpandedDoc] = useState<TimelineDataTableRecord | DataTableRecord>();
     const [fetchedPage, setFechedPage] = useState<number>(0);
 
     const onCloseExpandableFlyout = useCallback((id: string) => {
@@ -145,28 +150,55 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     );
 
     const { tableRows, tableStylesOverride } = useMemo(
-      () => transformTimelineItemToUnifiedRows({ events, dataView }),
+      () => transformDataToUnifiedRows({ events, dataView }),
       [events, dataView]
     );
 
     const handleOnEventDetailPanelOpened = useCallback(
-      (eventData: DataTableRecord & TimelineItem) => {
-        openFlyout({
-          right: {
-            id: DocumentDetailsRightPanelKey,
-            params: {
-              id: eventData._id,
-              indexName: eventData.ecs._index ?? '',
-              scopeId: timelineId,
+      (eventData: TimelineDataTableRecord | DataTableRecord) => {
+        const params = { scopeId: timelineId } as Partial<Required<DocumentDetailsProps>['params']>;
+        /**
+         * We want to be able to show the security flyout if _id and _index metadata are available in the ESQL context
+         * Since the data is structured differently, we access the _id and _index fields based on the record type
+         */
+        if (isTimelineRecord(eventData)) {
+          params.id = eventData._id;
+          params.indexName = eventData?.ecs?._index;
+        } else {
+          params.id = eventData?.raw?._id;
+          params.indexName = eventData?.raw?._index;
+        }
+
+        /**
+         * If id and index are available we will open the default security flyout. Otherwise if we are in an ESQL mode (isTextBasedQuery === true)
+         * we will open a simple flyout with the table and json tabs for rendering the field value pairs returned
+         */
+        if (params.id && params.indexName) {
+          openFlyout({
+            right: {
+              id: DocumentDetailsRightPanelKey,
+              params,
             },
-          },
-        });
+          });
+        } else if (isTextBasedQuery) {
+          openFlyout({
+            shouldSync: false,
+            right: {
+              id: ESQLDetailsPanelKey,
+              params: {
+                scopeId: timelineId,
+                data: eventData,
+              },
+            },
+          });
+        }
+
         telemetry.reportDetailsFlyoutOpened({
           location: timelineId,
           panel: 'right',
         });
       },
-      [openFlyout, timelineId, telemetry]
+      [isTextBasedQuery, telemetry, timelineId, openFlyout]
     );
 
     const onSetExpandedDoc = useCallback(
@@ -216,11 +248,13 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
     const customColumnRenderers = useMemo(
       () =>
-        getFormattedFields({
-          dataTableRows: tableRows,
-          scopeId: 'timeline',
-          headers: columns,
-        }),
+        areTimelineRecords(tableRows)
+          ? getFormattedFields({
+              dataTableRows: tableRows,
+              scopeId: 'timeline',
+              headers: columns,
+            })
+          : undefined,
       [columns, tableRows]
     );
 
@@ -302,7 +336,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           // the automatic width/heights calculated by EuiDataGrid
           rowCellRender: (props) => {
             const { rowIndex, ...restProps } = props;
-            return (
+            return areTimelineRecords(tableRows) ? (
               <TimelineEventDetailRow
                 event={tableRows[rowIndex]}
                 rowIndex={rowIndex}
@@ -310,7 +344,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
                 enabledRowRenderers={enabledRowRenderers}
                 {...restProps}
               />
-            );
+            ) : null;
           },
         },
       ],
@@ -375,21 +409,22 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             onFilter={onFilter}
             onResize={onResizeDataGrid}
             onSetColumns={onSetColumns}
-            onSort={!isTextBasedQuery ? onSort : undefined}
+            onSort={onSort}
             rows={tableRows}
             sampleSizeState={sampleSize || 500}
-            onUpdateSampleSize={onUpdateSampleSize}
+            onUpdateSampleSize={isTextBasedQuery ? onUpdateSampleSize : undefined}
             setExpandedDoc={onSetExpandedDoc}
             showTimeCol={showTimeCol}
             isSortEnabled={isSortEnabled}
             sort={sort}
             rowHeightState={rowHeight}
+            isPaginationEnabled={!isTextBasedQuery}
             isPlainRecord={isTextBasedQuery}
             rowsPerPageState={itemsPerPage}
             onUpdateRowsPerPage={onChangeItemsPerPage}
             onUpdateRowHeight={onUpdateRowHeight}
             onFieldEdited={onFieldEdited}
-            cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
+            cellActionsTriggerId={isTextBasedQuery ? undefined : SecurityCellActionsTrigger.DEFAULT}
             services={dataGridServices}
             visibleCellActions={3}
             externalCustomRenderers={customColumnRenderers}
@@ -405,10 +440,11 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             showMultiFields={true}
             cellActionsMetadata={cellActionsMetadata}
             externalAdditionalControls={additionalControls}
-            renderCustomGridBody={finalRenderCustomBodyCallback}
-            trailingControlColumns={finalTrailControlColumns}
+            trailingControlColumns={isTextBasedQuery ? undefined : finalTrailControlColumns}
+            renderCustomGridBody={isTextBasedQuery ? undefined : finalRenderCustomBodyCallback}
             externalControlColumns={leadingControlColumns}
             cellContext={cellContext}
+            columnsMeta={columnsMeta}
           />
         </StyledTimelineUnifiedDataTable>
       </StatefulEventContext.Provider>

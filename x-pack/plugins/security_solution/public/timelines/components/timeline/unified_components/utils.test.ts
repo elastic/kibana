@@ -10,16 +10,16 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
 import { mockSourcererScope } from '../../../../sourcerer/containers/mocks';
 import { mockTimelineData } from '../../../../common/mock';
-import type { TransformTimelineItemToUnifiedRowsReturn } from './utils';
-import { transformTimelineItemToUnifiedRows } from './utils';
+import type { TransformDataToUnifiedRowsReturn } from './utils';
+import { transformDataToUnifiedRows } from './utils';
 
 const testTimelineData = mockTimelineData;
 
 describe('utils', () => {
-  describe('transformTimelineItemToUnifiedRows', () => {
-    let result: TransformTimelineItemToUnifiedRowsReturn;
+  describe('transformDataToUnifiedRows', () => {
+    let result: TransformDataToUnifiedRowsReturn;
     beforeAll(() => {
-      result = transformTimelineItemToUnifiedRows({
+      result = transformDataToUnifiedRows({
         events: testTimelineData,
         dataView: new DataView({
           spec: mockSourcererScope.sourcererDataView,

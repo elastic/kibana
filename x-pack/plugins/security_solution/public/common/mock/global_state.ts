@@ -47,6 +47,7 @@ import { initialGroupingState } from '../store/grouping/reducer';
 import type { SourcererState } from '../../sourcerer/store';
 import { EMPTY_RESOLVER } from '../../resolver/store/helpers';
 import { getMockDiscoverInTimelineState } from './mock_discover_state';
+import { timelineESQLDefaults } from '../../timelines/store/defaults';
 
 const mockFieldMap: DataViewSpec['fields'] = Object.fromEntries(
   mockIndexFields.map((field) => [field.name, field])
@@ -395,6 +396,9 @@ export const mockGlobalState: State = {
         savedSearch: null,
         isDataProviderVisible: true,
         sampleSize: 500,
+        esqlOptions: {
+          ...timelineESQLDefaults,
+        },
       },
     },
     insertTimeline: null,

@@ -12,13 +12,14 @@ import { StyledTableFlexGroup, StyledUnifiedTableFlexItem } from '../unified_com
 import { UnifiedTimeline } from '../unified_components';
 import { defaultUdtHeaders } from '../unified_components/default_headers';
 import type { PaginationInputPaginated, TimelineItem } from '../../../../../common/search_strategy';
+import { withDataView } from '../../../../common/components/with_data_view';
 
 export interface UnifiedTimelineBodyProps extends ComponentProps<typeof UnifiedTimeline> {
   header: ReactElement;
   pageInfo: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
 }
 
-export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
+export const UnifiedTimelineBodyComp = (props: UnifiedTimelineBodyProps) => {
   const {
     header,
     isSortEnabled,
@@ -36,6 +37,7 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
     onChangePage,
     activeTab,
     updatedAt,
+    dataView,
     trailingControlColumns,
     leadingControlColumns,
   } = props;
@@ -50,7 +52,7 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
         return currentPageRows;
       }
       const newPageRows = pageInfo.activePage === 0 ? [] : [...currentPageRows];
-      newPageRows[pageInfo.activePage] = events;
+      newPageRows[pageInfo.activePage] = events as TimelineItem[]; // We cast here as this table is specific for non-esql scenarios
       return newPageRows;
     });
   }, [events, pageInfo.activePage]);
@@ -81,6 +83,7 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
             activeTab={activeTab}
             updatedAt={updatedAt}
             isTextBasedQuery={false}
+            dataView={dataView}
             trailingControlColumns={trailingControlColumns}
             leadingControlColumns={leadingControlColumns}
           />
@@ -89,3 +92,7 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
     </StyledTableFlexGroup>
   );
 };
+
+export const UnifiedTimelineBody = React.memo(
+  withDataView<UnifiedTimelineBodyProps>(UnifiedTimelineBodyComp)
+);
