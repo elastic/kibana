@@ -39,7 +39,7 @@ const featuresList = {
     actionLabel: i18n.translate(
       'xpack.enterpriseSearch.appSearch.gateForm.webCrawler.featureButtonLabel',
       {
-        defaultMessage: 'Try Open Crawler',
+        defaultMessage: 'Try open crawler',
       }
     ),
     actionLink: 'https://github.com/elastic/crawler?tab=readme-ov-file#setup',
@@ -58,14 +58,14 @@ const featuresList = {
         'Did you know the new self-managed Elastic open crawler is now available? You can keep your web content in sync with your search-optimized indices!',
     }),
     title: i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.webCrawler.featureName', {
-      defaultMessage: 'Web Crawler',
+      defaultMessage: 'Web crawler',
     }),
   },
   analyticsAndLogs: {
     actionLabel: i18n.translate(
       'xpack.enterpriseSearch.appSearch.gateForm.analyticsAndLogs.featureButtonLabel',
       {
-        defaultMessage: 'Add Search Analytics',
+        defaultMessage: 'Add search analytics',
       }
     ),
     actionLink:
@@ -91,7 +91,7 @@ const featuresList = {
     title: i18n.translate(
       'xpack.enterpriseSearch.appSearch.gateForm.analyticsAndLogs.featureName',
       {
-        defaultMessage: 'Search Analytics and Logs',
+        defaultMessage: 'Search analytics and logs',
       }
     ),
   },
@@ -99,7 +99,7 @@ const featuresList = {
     actionLabel: i18n.translate(
       'xpack.enterpriseSearch.appSearch.gateForm.synonyms.featureButtonLabel',
       {
-        defaultMessage: 'Search with Synonyms',
+        defaultMessage: 'Search with synonyms',
       }
     ),
     actionLink:
@@ -120,14 +120,14 @@ const featuresList = {
         'Use the Elasticsearch Synonyms APIs to easily create and manage synonym sets.',
     }),
     title: i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.synonyms.featureName', {
-      defaultMessage: 'Search with Synonyms',
+      defaultMessage: 'Search with synonyms',
     }),
   },
   relevanceTuning: {
     actionLabel: i18n.translate(
       'xpack.enterpriseSearch.appSearch.gateForm.relevanceTuning.featureButtonLabel',
       {
-        defaultMessage: 'Tune Search Relevancy',
+        defaultMessage: 'Tune search relevancy',
       }
     ),
     actionLink:
@@ -150,7 +150,7 @@ const featuresList = {
       }
     ),
     title: i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.relevanceTuning.featureName', {
-      defaultMessage: 'Relevance Tuning',
+      defaultMessage: 'Relevance tuning',
     }),
   },
   curations: {
@@ -177,7 +177,7 @@ const featuresList = {
         'Query rules provide a more robust set of tools to customize your search results for queries that match specific criteria and metadata.',
     }),
     title: i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.curations.featureName', {
-      defaultMessage: 'Curate Results',
+      defaultMessage: 'Curate results',
     }),
   },
   searchManagementUis: {
@@ -193,7 +193,7 @@ const featuresList = {
     description: i18n.translate(
       'xpack.enterpriseSearch.appSearch.gateForm.searchManagementUis.featureDescription',
       {
-        defaultMessage: 'Use user interfaces to manage your search and application experience',
+        defaultMessage: 'Use graphical user interfaces (GUIs) to manage your search application experience',
       }
     ),
     id: 'searchManagementUis',
@@ -208,7 +208,7 @@ const featuresList = {
     title: i18n.translate(
       'xpack.enterpriseSearch.appSearch.gateForm.searchManagementUis.featureName',
       {
-        defaultMessage: 'Search and Management UIs',
+        defaultMessage: 'Search and management UIs',
       }
     ),
   },
@@ -237,7 +237,7 @@ const featuresList = {
         'Elasticsearch provides a comprehensive set of security features, including document-level security and role-based access control.',
     }),
     title: i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.credentials.featureName', {
-      defaultMessage: 'Credentials and Roles',
+      defaultMessage: 'Credentials and roles',
     }),
   },
 };
