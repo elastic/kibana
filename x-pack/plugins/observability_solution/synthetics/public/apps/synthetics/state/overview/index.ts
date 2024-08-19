@@ -11,6 +11,7 @@ import { MonitorOverviewState } from './models';
 
 import {
   fetchMonitorOverviewAction,
+  quietFetchOverviewAction,
   setFlyoutConfig,
   setOverviewGroupByAction,
   setOverviewPageStateAction,
@@ -43,6 +44,9 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
     .addCase(fetchMonitorOverviewAction.get, (state, action) => {
       state.loading = true;
       state.loaded = false;
+    })
+    .addCase(quietFetchOverviewAction.get, (state, action) => {
+      state.loading = true;
     })
     .addCase(fetchMonitorOverviewAction.success, (state, action) => {
       state.data = action.payload;

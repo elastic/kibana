@@ -72,12 +72,12 @@ export const formatDefaultAggregationResult = (
 
   // Fill missing keys with zeroes
   for (const key of RuleExecutionStatusValues) {
-    if (!result.ruleExecutionStatus.hasOwnProperty(key)) {
+    if (!Object.hasOwn(result.ruleExecutionStatus, key)) {
       result.ruleExecutionStatus[key] = 0;
     }
   }
   for (const key of RuleLastRunOutcomeValues) {
-    if (!result.ruleLastRunOutcome.hasOwnProperty(key)) {
+    if (!Object.hasOwn(result.ruleLastRunOutcome, key)) {
       result.ruleLastRunOutcome[key] = 0;
     }
   }
