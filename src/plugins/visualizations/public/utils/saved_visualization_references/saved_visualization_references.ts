@@ -90,7 +90,6 @@ export function deserializeReferences(
         updatedReferences
       );
     } catch (e) {
-      console.error('Failed to inject references into search source', e);
       // Allow missing index pattern error to surface in vis
     }
   }
@@ -98,7 +97,6 @@ export function deserializeReferences(
     const savedSearchReference = updatedReferences.find(
       (reference) => reference.name === savedSearchRefName
     );
-    console.log('REFERENCES', updatedReferences, savedSearchReference);
 
     if (!savedSearchReference) {
       throw new Error(`Could not find saved search reference "${savedSearchRefName}"`);
