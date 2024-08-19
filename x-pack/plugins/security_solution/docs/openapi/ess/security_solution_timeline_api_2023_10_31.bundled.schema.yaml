@@ -6,7 +6,7 @@ info:
   title: Security Solution Timeline API (Elastic Cloud and self-hosted)
   version: '2023-10-31'
 servers:
-  - url: 'http://{kibana_host}:{port}'
+  - url: http://{kibana_host}:{port}
     variables:
       kibana_host:
         default: localhost
@@ -52,7 +52,7 @@ paths:
       summary: Deletes a note from a timeline.
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
     get:
       description: Gets notes
       operationId: GetNotes
@@ -98,7 +98,7 @@ paths:
       summary: Get all notes for a given document.
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
     patch:
       operationId: PersistNoteRoute
       requestBody:
@@ -162,7 +162,7 @@ paths:
       summary: Persists a note to a timeline.
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/pinned_event:
     patch:
       operationId: PersistPinnedEventRoute
@@ -211,7 +211,7 @@ paths:
       summary: Persists a pinned event to a timeline.
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/timeline:
     delete:
       operationId: DeleteTimelines
@@ -256,7 +256,7 @@ paths:
       summary: Deletes one or more timelines or timeline templates.
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
     get:
       operationId: GetTimeline
       parameters:
@@ -293,7 +293,7 @@ paths:
         retrieve an existing saved timeline or timeline template.
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
     patch:
       description: >-
         Updates an existing timeline. This API is used to update the title,
@@ -361,7 +361,7 @@ paths:
       summary: Updates an existing timeline.
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
     post:
       operationId: CreateTimelines
       requestBody:
@@ -430,7 +430,7 @@ paths:
       summary: Creates a new timeline.
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/timeline/_draft:
     get:
       operationId: GetDraftTimelines
@@ -464,7 +464,7 @@ paths:
           description: Indicates that the draft timeline was successfully retrieved.
         '403':
           content:
-            'application:json':
+            application:json:
               schema:
                 type: object
                 properties:
@@ -478,7 +478,7 @@ paths:
             create a draft timeline.
         '409':
           content:
-            'application:json':
+            application:json:
               schema:
                 type: object
                 properties:
@@ -495,7 +495,7 @@ paths:
         have a draft timeline, an empty timeline is returned.
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
     post:
       description: >
         Retrieves a clean draft timeline. If a draft timeline does not exist, it
@@ -542,7 +542,7 @@ paths:
             timeline is cleared and returned.
         '403':
           content:
-            'application:json':
+            application:json:
               schema:
                 type: object
                 properties:
@@ -555,7 +555,7 @@ paths:
             create a draft timeline.
         '409':
           content:
-            'application:json':
+            application:json:
               schema:
                 type: object
                 properties:
@@ -569,7 +569,7 @@ paths:
       summary: Retrieves a draft timeline or timeline template.
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/timeline/_export:
     post:
       operationId: ExportTimelines
@@ -615,7 +615,7 @@ paths:
       summary: Exports timelines as an NDJSON file
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/timeline/_favorite:
     patch:
       operationId: PersistFavoriteRoute
@@ -663,7 +663,7 @@ paths:
           description: Indicates the favorite status was successfully updated.
         '403':
           content:
-            'application:json':
+            application:json:
               schema:
                 type: object
                 properties:
@@ -677,7 +677,7 @@ paths:
       summary: Persists a given users favorite status of a timeline.
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/timeline/_import:
     post:
       operationId: ImportTimelines
@@ -767,7 +767,7 @@ paths:
       summary: Imports timelines.
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/timeline/_prepackaged:
     post:
       operationId: InstallPrepackedTimelines
@@ -811,7 +811,7 @@ paths:
           description: Indicates the installation of prepackaged timelines was successful.
         '500':
           content:
-            'application:json':
+            application:json:
               schema:
                 type: object
                 properties:
@@ -825,7 +825,7 @@ paths:
       summary: Installs prepackaged timelines.
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/timeline/resolve:
     get:
       operationId: ResolveTimeline
@@ -865,7 +865,7 @@ paths:
       summary: Get an existing saved timeline or timeline template.
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/timelines:
     get:
       operationId: GetTimelines
@@ -956,7 +956,7 @@ paths:
           description: Indicates that the (template) timelines were found and returned.
         '400':
           content:
-            'application:json':
+            application:json:
               schema:
                 type: object
                 properties:
@@ -970,7 +970,7 @@ paths:
         timeline templates.
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
 components:
   schemas:
     BareNote:

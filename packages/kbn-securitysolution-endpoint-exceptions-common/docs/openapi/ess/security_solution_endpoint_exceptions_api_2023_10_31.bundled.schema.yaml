@@ -4,7 +4,7 @@ info:
   title: Security Solution Endpoint Exceptions API (Elastic Cloud and self-hosted)
   version: '2023-10-31'
 servers:
-  - url: 'http://{kibana_host}:{port}'
+  - url: http://{kibana_host}:{port}
     variables:
       kibana_host:
         default: localhost
@@ -353,7 +353,7 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/NonEmptyString'
-        - description: 'Determines the sort order, which can be `desc` or `asc`'
+        - description: Determines the sort order, which can be `desc` or `asc`
           in: query
           name: sort_order
           required: false
@@ -489,7 +489,7 @@ components:
       type: string
     ExceptionListHumanId:
       $ref: '#/components/schemas/NonEmptyString'
-      description: 'Human readable string identifier, e.g. `trusted-linux-processes`'
+      description: Human readable string identifier, e.g. `trusted-linux-processes`
     ExceptionListId:
       $ref: '#/components/schemas/NonEmptyString'
     ExceptionListItem:

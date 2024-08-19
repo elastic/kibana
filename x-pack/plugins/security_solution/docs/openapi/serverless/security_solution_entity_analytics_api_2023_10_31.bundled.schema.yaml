@@ -4,7 +4,7 @@ info:
   title: Security Solution Entity Analytics API (Elastic Cloud Serverless)
   version: '2023-10-31'
 servers:
-  - url: 'http://{kibana_host}:{port}'
+  - url: http://{kibana_host}:{port}
     variables:
       kibana_host:
         default: localhost
@@ -182,7 +182,7 @@ paths:
         - Security Solution Entity Analytics API
   /api/asset_criticality/list:
     get:
-      description: 'List asset criticality records, paging, sorting and filtering as needed.'
+      description: List asset criticality records, paging, sorting and filtering as needed.
       operationId: FindAssetCriticalityRecords
       parameters:
         - description: The field to sort by.
