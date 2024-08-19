@@ -7,5 +7,6 @@ steps:
       image: docker.elastic.co/cloud-ci/sonarqube/buildkite-scanner:latest
       memory: 32G
       cpu: 4
-    SONAR_SCANNER_OPTS: '-Xmx16384m'
+    env:
+      SONAR_SCANNER_OPTS: '-Xmx16384m'
     command: /scan-source-code.sh
