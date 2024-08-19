@@ -34,7 +34,7 @@ async function registryFetch(url: string) {
   }
 }
 
-export async function getResponse(url: string, retries: number = 3): Promise<Response> {
+export async function getResponse(url: string, retries: number = 5): Promise<Response> {
   try {
     // we only want to retry certain failures like network issues
     // the rest should only try the one time then fail as they do now
