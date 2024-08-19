@@ -7,11 +7,9 @@
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { appContextService } from '..';
-
+import { appContextService } from '../app_context';
 import type { PreconfiguredOutput } from '../../../common/types';
 import type { Output } from '../../types';
-
 import * as agentPolicy from '../agent_policy';
 import { outputService } from '../output';
 
@@ -26,15 +24,17 @@ jest.mock('../agent_policy_update');
 jest.mock('../output');
 jest.mock('../epm/packages/bundled_packages');
 jest.mock('../epm/archive');
+jest.mock('../settings');
 
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
 
 jest.mock('../app_context', () => ({
   appContextService: {
-    getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
-    getExperimentalFeatures: () => ({
-      useSpaceAwareness: true,
+    getExperimentalFeatures: jest.fn().mockReturnValue({
+      useSpaceAwareness: false,
     }),
+    getInternalUserSOClient: jest.fn(),
+    getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
     getLogger: () =>
       new Proxy(
         {},

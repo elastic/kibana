@@ -10,6 +10,11 @@ Permanently remove an alert.
 
 WARNING: Once you delete an alert, you cannot recover it.
 
+[NOTE]
+====
+For the latest details, refer to {api-kibana}/group/endpoint-alerting[alerting APIs].
+====
+
 [[alerts-api-delete-request]]
 ==== Request
 
