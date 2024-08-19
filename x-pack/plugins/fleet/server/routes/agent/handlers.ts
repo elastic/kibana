@@ -266,7 +266,7 @@ export const putAgentsReassignHandlerDeprecated: RequestHandler<
   }
 };
 
-export const postAgentsReassignHandler: RequestHandler<
+export const postAgentReassignHandler: RequestHandler<
   TypeOf<typeof PostAgentReassignRequestSchema.params>,
   undefined,
   TypeOf<typeof PostAgentReassignRequestSchema.body>

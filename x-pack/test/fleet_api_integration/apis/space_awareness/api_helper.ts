@@ -260,6 +260,38 @@ export class SpaceTestApiClient {
 
     return res;
   }
+  async reassignAgent(agentId: string, policyId: string, spaceId?: string) {
+    await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/${agentId}/reassign`)
+      .set('kbn-xsrf', 'xxx')
+      .send({
+        policy_id: policyId,
+      })
+      .expect(200);
+  }
+  async bulkReassignAgents(data: any, spaceId?: string) {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/bulk_reassign`)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data)
+      .expect(200);
+
+    return res;
+  }
+  async upgradeAgent(agentId: string, data: any, spaceId?: string) {
+    await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/${agentId}/upgrade`)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data)
+      .expect(200);
+  }
+  async bulkUpgradeAgents(data: any, spaceId?: string) {
+    await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/bulk_upgrade`)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data)
+      .expect(200);
+  }
   async bulkUpdateAgentTags(data: any, spaceId?: string) {
     const { body: res } = await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/bulk_update_agent_tags`)
@@ -366,7 +398,6 @@ export class SpaceTestApiClient {
 
     return res;
   }
-
   async postNewAgentAction(agentId: string, spaceId?: string): Promise<PostNewAgentActionResponse> {
     const { body: res } = await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/${agentId}/actions`)
@@ -374,6 +405,14 @@ export class SpaceTestApiClient {
       .send({ action: { type: 'UNENROLL' } })
       .expect(200);
 
+    return res;
+  }
+
+  async cancelAction(actionId: string, spaceId?: string): Promise<PostNewAgentActionResponse> {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/actions/${actionId}/cancel`)
+      .set('kbn-xsrf', 'xxxx')
+      .expect(200);
     return res;
   }
   // Enable space awareness
