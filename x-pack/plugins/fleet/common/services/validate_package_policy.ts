@@ -393,6 +393,8 @@ export const countValidationErrors = (
 ): number => {
   const flattenedValidation = getFlattenedObject(validationResults);
   const errors = Object.values(flattenedValidation).filter((value) => Boolean(value)) || [];
+  // eslint-disable-next-line no-console
+  console.debug('Validation Errors:', errors);
   return errors.length;
 };
 
