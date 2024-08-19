@@ -123,8 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Upon clicking ctrl enter a newline character should be added to the editor
       await PageObjects.console.monaco.pressCtrlEnter();
       await retry.waitFor('shortcut shouldnt have generated any request', async () => {
-        const response = await PageObjects.console.monaco.getOutputText();
-        return response === '';
+        expect(await PageObjects.console.isOutputPanelEmptyStateVisible()).to.be(true);
       });
 
       // Restore setting
