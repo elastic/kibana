@@ -58,6 +58,11 @@ x-pack/test/<my_own_api_integration_folder>
 │     ├─ <deployment_agnostic_service_2>.ts
 ```
 
+## Loading Your Tests Properly
+When Platform teams add deployment-agnostic tests, it is expected that these tests are loaded in `configs/stateful/platform.index.ts` and at least one of the `<serverless_project>.serverless.config` files under `configs/serverless` folder.
+
+When a Solution team (e.g., one of the Oblt teams) adds deployment-agnostic tests, it is expected that these tests are loaded in both `configs/stateful/oblt.index.ts` and `configs/serverless/oblt.index.ts`.
+
 ## Step-by-Step Guide
 1. Define Deployment-Agnostic Services
 
