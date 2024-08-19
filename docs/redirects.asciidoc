@@ -838,3 +838,78 @@ Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
 == Update object API
 
 Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="data-views-api-get-all"]
+== Get all data views API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-runtime-field-api-create"]
+== Create runtime field API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-runtime-field-api-delete"]
+== Delete runtime field API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-runtime-field-api-get"]
+== Get runtime field API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-runtime-field-api-update"]
+== Update runtime field API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-runtime-field-api-upsert"]
+== Upsert runtime field API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-api-create"]
+== Create data view API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-api-default-get"]
+== Get default data view API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-api-default-set"]
+== Set default data view API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-api-delete"]
+== Delete data view API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-api-get"]
+== Get data view API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-api-swap-references-preview"]
+== Swap references preview data view API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-api-swap-references"]
+== Swap references data view API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-fields-api-update"]
+== Update data view fields API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-api-update"]
+== Update data view API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
