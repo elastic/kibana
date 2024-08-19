@@ -50,7 +50,7 @@ export const ESQLMenuPopover = () => {
           defaultMessage: 'Example queries',
         })}
       </EuiContextMenuItem>,
-      <EuiHorizontalRule margin="none" key="dataviewActions-divider" />,
+      <EuiHorizontalRule margin="xs" key="dataviewActions-divider" />,
       <EuiContextMenuItem
         key="feedback"
         icon="editorComment"
