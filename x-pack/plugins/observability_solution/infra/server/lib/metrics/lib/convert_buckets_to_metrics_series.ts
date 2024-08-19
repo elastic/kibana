@@ -12,7 +12,7 @@ import {
   MetricsAPISeries,
   MetricsAPIColumn,
   MetricsAPIRow,
-} from '@kbn/metrics-data-access-plugin/common/http_api/metrics_api';
+} from '@kbn/metrics-data-access-plugin/common';
 import {
   Bucket,
   BasicMetricValueRT,

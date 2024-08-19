@@ -49,3 +49,26 @@ export type {
 
 export { networkTraffic } from './inventory_models/shared/metrics/snapshot/network_traffic';
 export { METRICS_EXPLORER_API_MAX_METRICS } from './constants';
+
+export {
+  MetricsAPIMetricRT,
+  MetricsAPIRequestRT,
+  MetricsAPIPageInfoRT,
+  MetricsAPIColumnTypeRT,
+  MetricsAPIColumnRT,
+  MetricsAPIRowRT,
+  MetricsAPISeriesRT,
+  MetricsAPIResponseSeriesRT,
+  MetricsAPIResponseRT,
+} from './http_api';
+export type {
+  MetricsAPIMetric,
+  MetricsAPIRequest,
+  MetricsAPITimerange,
+  MetricsAPIColumnType,
+  MetricsAPIPageInfo,
+  MetricsAPIColumn,
+  MetricsAPIRow,
+  MetricsAPISeries,
+  MetricsAPIResponse,
+} from './http_api';

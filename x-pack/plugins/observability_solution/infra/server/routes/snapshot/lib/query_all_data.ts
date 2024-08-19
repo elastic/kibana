@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  MetricsAPIResponse,
-  MetricsAPIRequest,
-} from '@kbn/metrics-data-access-plugin/common/http_api/metrics_api';
+import type { MetricsAPIResponse, MetricsAPIRequest } from '@kbn/metrics-data-access-plugin/common';
 import { ESSearchClient } from '../../../lib/metrics/types';
 import { query } from '../../../lib/metrics';
 

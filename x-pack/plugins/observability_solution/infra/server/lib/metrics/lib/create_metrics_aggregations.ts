@@ -6,7 +6,7 @@
  */
 
 import type { MetricsUIAggregation } from '@kbn/metrics-data-access-plugin/common';
-import type { MetricsAPIRequest } from '@kbn/metrics-data-access-plugin/common/http_api/metrics_api';
+import type { MetricsAPIRequest } from '@kbn/metrics-data-access-plugin/common';
 
 export const createMetricsAggregations = (options: MetricsAPIRequest): MetricsUIAggregation => {
   const { metrics } = options;

@@ -8,7 +8,6 @@
 import { has } from 'lodash';
 import {
   MetricsUIAggregation,
-  hasAggregations,
   ESSumBucketAggRT,
   hasSnapshotTermsWithAggregation,
   ESDerivativeAggRT,
@@ -17,7 +16,7 @@ import {
 import { SnapshotCustomMetricInput } from '../../../../../common/http_api';
 
 export const isMetricRate = (metric: MetricsUIAggregation | undefined): boolean => {
-  if (hasAggregations(metric) || metric === undefined) {
+  if (metric === undefined) {
     return false;
   }
   const values = Object.values(metric);
@@ -32,7 +31,7 @@ export const isCustomMetricRate = (customMetric: SnapshotCustomMetricInput) => {
 };
 
 export const isInterfaceRateAgg = (metric: MetricsUIAggregation | undefined) => {
-  if (hasAggregations(metric) || metric === undefined) {
+  if (metric === undefined) {
     return false;
   }
   const values = Object.values(metric);
