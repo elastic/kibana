@@ -16,9 +16,5 @@ export const EchoService = Symbol.for('EchoService') as interfaces.ServiceIdenti
 
 export const module = new ContainerModule((bind) => {
   bind(EchoService).to(Echo).inRequestScope();
-  bind(Global).toConstantValue({
-    name: 'echo',
-    service: EchoService,
-    stage: 'start',
-  });
+  bind(Global).toConstantValue(EchoService);
 });

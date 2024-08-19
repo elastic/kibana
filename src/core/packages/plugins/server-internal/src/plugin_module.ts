@@ -26,7 +26,7 @@ import {
   RouterService,
 } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { DiService, Global } from '@kbn/core-di-common';
+import { DiService, Global, OnSetup } from '@kbn/core-di-common';
 
 export function createCoreModule() {
   return new ContainerModule(() => {});
@@ -43,39 +43,43 @@ export function createPluginInitializerModule(
 }
 
 export function createPluginSetupModule(context: CoreSetup): interfaces.ContainerModule {
-  return new ContainerModule((bind) => {
+  return new ContainerModule((bind, _unbind, _isBound, _rebind, _unbindAsync, onActivation) => {
     bind(LoggingService).toConstantValue(context.logging);
     bind(HttpService).toConstantValue(context.http);
     bind(RouterService)
       .toDynamicValue(({ container }) => container.get(HttpService).createRouter())
-      .inSingletonScope()
-      .onActivation(({ container }, router) => {
-        (container.isCurrentBound(Route) ? container.getAll(Route) : []).forEach((route) => {
-          const register = router[route.method] as RouteRegistrar<
-            typeof route.method,
-            RequestHandlerContext
-          >;
+      .inSingletonScope();
 
-          register(route, async (_context, request, response) => {
-            const scope = container.get(DiService).fork();
+    onActivation(Route, ({ container }, route) => {
+      const router = container.get(RouterService);
+      const register = router[route.method] as RouteRegistrar<
+        typeof route.method,
+        RequestHandlerContext
+      >;
 
-            scope.bind(RequestToken).toConstantValue(request);
-            scope.bind(ResponseToken).toConstantValue(response);
-            scope.bind(Global).toConstantValue(RequestToken);
-            scope.bind(Global).toConstantValue(ResponseToken);
+      register(route, async (_context, request, response) => {
+        const scope = container.get(DiService).fork();
 
-            try {
-              return await scope.get<IRouteHandler>(route).handle();
-            } finally {
-              scope.unbindAll();
-            }
-          });
-        });
+        scope.bind(RequestToken).toConstantValue(request);
+        scope.bind(ResponseToken).toConstantValue(response);
+        scope.bind(Global).toConstantValue(RequestToken);
+        scope.bind(Global).toConstantValue(ResponseToken);
 
-        return router;
+        try {
+          return await scope.get<IRouteHandler>(route).handle();
+        } finally {
+          scope.unbindAll();
+        }
       });
 
-    bind(Global).toConstantValue(RouterService);
+      return route;
+    });
+
+    bind(OnSetup).toConstantValue((container) => {
+      if (container.isCurrentBound(Route)) {
+        container.getAll(Route);
+      }
+    });
   });
 }
 

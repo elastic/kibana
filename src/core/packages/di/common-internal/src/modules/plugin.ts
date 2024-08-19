@@ -1,31 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isObject } from 'lodash';
-import { set } from '@kbn/safer-lodash-set';
 import { ContainerModule, type interfaces } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
-import {
-  Global,
-  type GlobalService,
-  type GlobalServiceWithOptions,
-  Setup,
-  Start,
-} from '@kbn/core-di-common';
+import { Global, OnSetup } from '@kbn/core-di-common';
 
 const Context = Symbol('Context') as interfaces.ServiceIdentifier<interfaces.Container>;
 const Id = Symbol('Id') as interfaces.ServiceIdentifier<PluginOpaqueId>;
 
-function isGlobalServiceWithOptions(service: GlobalService): service is GlobalServiceWithOptions {
-  return isObject(service) && Object.hasOwnProperty.call(service, 'service');
-}
-
-export const Plugin = Symbol('Plugin') as interfaces.ServiceIdentifier<interfaces.Container>;
+export const Plugin = Symbol.for('Plugin') as interfaces.ServiceIdentifier<interfaces.Container>;
 
 export class PluginModule extends ContainerModule {
   private services = new WeakMap<
@@ -36,25 +25,11 @@ export class PluginModule extends ContainerModule {
 
   constructor() {
     super((bind, _unbind, _isBound, _rebind, _unbindAsync, onActivation) => {
+      bind(OnSetup).toConstantValue((scope) => this.bindServices(scope));
       bind(Plugin).toDynamicValue(this.getScope).inRequestScope();
-      bind(Setup).toDynamicValue(this.getContract).inSingletonScope();
-      bind(Start).toDynamicValue(this.getContract).inSingletonScope();
       onActivation(Global, this.bindService);
     });
   }
-
-  protected getContract: interfaces.DynamicValue<Record<string, unknown>> = ({
-    container,
-    currentRequest: { target },
-  }) => {
-    const contract = target.serviceIdentifier === Setup ? 'setup' : 'start';
-    const globals = container.isCurrentBound(Global) ? container.getAll(Global) : [];
-
-    return globals
-      .filter(isGlobalServiceWithOptions)
-      .filter(({ name, stage }) => name && stage === contract)
-      .reduce((result, { name, service }) => set(result, name!, container.get(service)), {});
-  };
 
   protected getScope: interfaces.DynamicValue<interfaces.Container> = ({
     container,
@@ -74,7 +49,12 @@ export class PluginModule extends ContainerModule {
       scope
         .bind(Context)
         .toConstantValue(container)
-        .onDeactivation(() => container.unbind(id));
+        .onDeactivation(() => {
+          try {
+            container.unbind(id);
+            // eslint-disable-next-line no-empty
+          } catch {}
+        });
 
       container
         .bind(id)
@@ -85,11 +65,10 @@ export class PluginModule extends ContainerModule {
     return container.get(id);
   };
 
-  protected bindService: interfaces.BindingActivation<GlobalService> = (
+  protected bindService: interfaces.BindingActivation<interfaces.ServiceIdentifier> = (
     { container: scope },
-    definition
+    service
   ) => {
-    const service = isGlobalServiceWithOptions(definition) ? definition.service : definition;
     const context = scope.get(Context);
     const id = scope.get(Id);
     const index = this.getServicesCount(scope, service);
@@ -145,6 +124,7 @@ export class PluginModule extends ContainerModule {
     if (!scope.isCurrentBound(Global)) {
       return;
     }
+
     scope.getAll(Global);
   }
 

@@ -508,7 +508,7 @@ export class Server {
 
     await this.plugins.start(this.coreStart);
 
-    await this.http.start({ injection: injectionStart });
+    await this.http.start();
 
     startTransaction.end();
 

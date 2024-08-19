@@ -160,9 +160,7 @@ export class PluginsSystem<T extends PluginType> {
         contract = contractOrPromise;
       }
 
-      if (contract) {
-        contracts.set(pluginName, contract);
-      }
+      contracts.set(pluginName, contract);
       this.satupPlugins.push(pluginName);
     }
 
@@ -224,9 +222,7 @@ export class PluginsSystem<T extends PluginType> {
         contract = contractOrPromise;
       }
 
-      if (contract) {
-        contracts.set(pluginName, contract);
-      }
+      contracts.set(pluginName, contract);
     }
 
     this.runtimeResolver.resolveStartRequests(contracts);
