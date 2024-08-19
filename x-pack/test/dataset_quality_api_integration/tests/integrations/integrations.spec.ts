@@ -29,8 +29,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     },
     {
       // logs based integration
-      name: 'endpoint',
-      version: '1.1.0',
+      name: 'apm',
+      version: '8.0.0',
     },
     {
       // non-logs based integration
@@ -76,7 +76,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const resp = await callApiAs();
 
         expect(resp.body.integrations.map((integration) => integration.name)).to.eql([
-          'endpoint',
+          'apm',
           'system',
         ]);
 
