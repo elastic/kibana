@@ -43,7 +43,7 @@ import { type InputsOverride, packagePolicyService } from './package_policy';
 import { preconfigurePackageInputs } from './package_policy';
 import { appContextService } from './app_context';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
-import { isAgentlessServerlessEnabled } from './utils/agentless';
+import { isDefaultAgentlessPolicyEnabled } from './utils/agentless';
 
 interface PreconfigurationResult {
   policies: Array<{ id: string; updated_at: string }>;
@@ -164,7 +164,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       }
 
       if (
-        !isAgentlessServerlessEnabled() &&
+        !isDefaultAgentlessPolicyEnabled() &&
         preconfiguredAgentPolicy?.supports_agentless !== undefined
       ) {
         throw new FleetError(
