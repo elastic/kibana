@@ -31,7 +31,7 @@ export const RawSamples = z.array(z.string());
  * mapping object to ECS Mapping Request.
  */
 export type Mapping = z.infer<typeof Mapping>;
-export const Mapping = z.object({}).passthrough();
+export const Mapping = z.object({});
 
 /**
  * LLM Connector to be used in each API request.
@@ -43,7 +43,26 @@ export const Connector = z.string();
  * An array of processed documents.
  */
 export type Docs = z.infer<typeof Docs>;
-export const Docs = z.array(z.object({}).passthrough());
+export const Docs = z.array(z.object({}));
+
+/**
+ * Format of the provided samples.
+ */
+export type SampleFormat = z.infer<typeof SampleFormat>;
+export const SampleFormat = z.object({
+  /**
+   * The name of the sample format.
+   */
+  name: z.enum(['ndjson', 'json']),
+  /**
+   * For some formats, specifies if the samples can be multiline.
+   */
+  multiline: z.boolean().optional(),
+  /**
+   * For a JSON format, describes how to get to the sample array from the root of the JSON.
+   */
+  json_path: z.string().optional(),
+});
 
 /**
  * The pipeline object.
@@ -129,9 +148,9 @@ export const DataStream = z.object({
    */
   docs: Docs,
   /**
-   * The log type of the dataStream, e.g. ndjson.
+   * The format of log samples in this dataStream.
    */
-  sampleFormat: z.string().optional(),
+  sampleFormat: SampleFormat,
 });
 
 /**
@@ -167,11 +186,11 @@ export const Integration = z.object({
 export type LangSmithOptions = z.infer<typeof LangSmithOptions>;
 export const LangSmithOptions = z.object({
   /**
-   * The project name to use with tracing.
+   * The project name.
    */
   projectName: z.string(),
   /**
-   * The api key for the project
+   * The apiKey to use for tracing.
    */
   apiKey: z.string(),
 });

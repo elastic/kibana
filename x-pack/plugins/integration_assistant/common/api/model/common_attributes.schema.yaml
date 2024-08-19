@@ -111,6 +111,7 @@ components:
         - rawSamples
         - pipeline
         - docs
+        - sampleFormat
       properties:
         name:
           type: string
