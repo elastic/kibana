@@ -14,10 +14,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import {
   API_VERSIONS,
+  ELASTIC_AI_ASSISTANT_EVALUATE_URL,
   ExecuteConnectorRequestBody,
   INTERNAL_API_ACCESS,
   PostEvaluateBody,
-  PostEvaluateRequestQuery,
   PostEvaluateResponse,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
@@ -29,18 +29,12 @@ import {
   createToolCallingAgent,
 } from 'langchain/agents';
 import { RetrievalQAChain } from 'langchain/chains';
-import { EVALUATE } from '../../../common/constants';
 import { buildResponse } from '../../lib/build_response';
 import { AssistantDataClients } from '../../lib/langchain/executors/types';
 import { AssistantToolParams, ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
 import { DEFAULT_PLUGIN_NAME, performChecks } from '../helpers';
 import { ESQL_RESOURCE } from '../knowledge_base/constants';
 import { fetchLangSmithDataset } from './utils';
-
-/**
- * To support additional Graph in the UI, add them to this map
- * and reference your specific Graph function
- */
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
 import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
@@ -66,7 +60,7 @@ export const postEvaluateRoute = (
   router.versioned
     .post({
       access: INTERNAL_API_ACCESS,
-      path: EVALUATE,
+      path: ELASTIC_AI_ASSISTANT_EVALUATE_URL,
       options: {
         tags: ['access:elasticAssistant'],
         timeout: {
@@ -80,7 +74,6 @@ export const postEvaluateRoute = (
         validate: {
           request: {
             body: buildRouteValidationWithZod(PostEvaluateBody),
-            query: buildRouteValidationWithZod(PostEvaluateRequestQuery),
           },
           response: {
             200: {
@@ -112,13 +105,24 @@ export const postEvaluateRoute = (
 
         try {
           const evaluationId = uuidv4();
-          const { datasetName, runName = evaluationId } = request.query;
-          const { dataset: customDataset = [] } = request.body;
-          const connectorIds = request.query.models?.split(',') || [];
-          const graphNames = request.query.agents?.split(',') || [];
+          const {
+            alertsIndexPattern,
+            datasetName,
+            graphs: graphNames,
+            langSmithApiKey,
+            connectorIds,
+            size,
+            replacements,
+            runName = evaluationId,
+          } = request.body;
 
-          const dataset =
-            datasetName != null ? await fetchLangSmithDataset(datasetName, logger) : customDataset;
+          const dataset = await fetchLangSmithDataset(datasetName, logger, langSmithApiKey);
+
+          if (dataset.length === 0) {
+            return response.badRequest({
+              body: { message: `No LangSmith dataset found for name: ${datasetName}` },
+            });
+          }
 
           logger.info('postEvaluateRoute:');
           logger.info(`request.query:\n${JSON.stringify(request.query, null, 2)}`);
@@ -245,11 +249,10 @@ export const postEvaluateRoute = (
                 logger,
                 modelExists,
                 request: skeletonRequest,
-                // TODO: Plumb through eval API
-                // alertsIndexPattern,
+                alertsIndexPattern,
                 // onNewReplacements,
-                // replacements,
-                // size,
+                replacements,
+                size,
               };
 
               const tools: StructuredTool[] = assistantTools.flatMap(
@@ -317,17 +320,6 @@ export const postEvaluateRoute = (
             });
             logger.debug(`runResp:\n ${JSON.stringify(evalOutput, null, 2)}`);
           });
-
-          // TODO: Determine if it's worth it to write evals locally
-          // logger.info(`Writing evaluation results to index: ${outputIndex}`);
-          // await setupEvaluationIndex({ esClient, index: outputIndex, logger });
-          // await indexEvaluations({
-          //   esClient,
-          //   evaluationResults,
-          //   evaluationSummary,
-          //   index: outputIndex,
-          //   logger,
-          // });
 
           return response.ok({
             body: { evaluationId, success: true },

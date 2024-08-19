@@ -9,6 +9,7 @@ import { useMutation } from '@tanstack/react-query';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
+import { PostEvaluateRequestBody } from '@kbn/elastic-assistant-common';
 import { postEvaluation } from './evaluate';
 
 const PERFORM_EVALUATION_MUTATION_KEY = ['elastic-assistant', 'perform-evaluation'];
@@ -26,19 +27,6 @@ export interface ResponseError {
   };
 }
 
-export interface PerformEvaluationParams {
-  agents: string[];
-  dataset: string | undefined;
-  datasetName: string | undefined;
-  evalModel: string[];
-  evalPrompt: string;
-  evaluationType: string[];
-  models: string[];
-  outputIndex?: string;
-  projectName?: string | undefined;
-  runName: string | undefined;
-}
-
 /**
  * Hook for performing model evaluations
  *
@@ -51,9 +39,8 @@ export interface PerformEvaluationParams {
 export const usePerformEvaluation = ({ http, toasts }: UsePerformEvaluationParams) => {
   return useMutation(
     PERFORM_EVALUATION_MUTATION_KEY,
-    (evalParams?: PerformEvaluationParams | void) => {
-      // Optional params workaround: see: https://github.com/TanStack/query/issues/1077#issuecomment-1431247266
-      return postEvaluation({ http, evalParams: evalParams ?? undefined });
+    (evalParams: PostEvaluateRequestBody) => {
+      return postEvaluation({ http, evalParams });
     },
     {
       onError: (error: IHttpFetchError<ResponseError>) => {

@@ -10,13 +10,13 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 
 import {
   API_VERSIONS,
+  ELASTIC_AI_ASSISTANT_EVALUATE_URL,
   INTERNAL_API_ACCESS,
   GetEvaluateResponse,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
-import { EVALUATE } from '../../../common/constants';
 import { performChecks } from '../helpers';
 import { ASSISTANT_GRAPH_MAP } from '../../lib/langchain/graphs';
 
@@ -24,7 +24,7 @@ export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerC
   router.versioned
     .get({
       access: INTERNAL_API_ACCESS,
-      path: EVALUATE,
+      path: ELASTIC_AI_ASSISTANT_EVALUATE_URL,
       options: {
         tags: ['access:elasticAssistant'],
       },

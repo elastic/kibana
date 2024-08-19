@@ -18,18 +18,13 @@ import {
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 const defaultBody: PostEvaluateRequestBodyInput = {
-  dataset: undefined,
-  evalPrompt: undefined,
+  langSmithApiKey: undefined,
 };
 
 const defaultQueryParams: PostEvaluateRequestQueryInput = {
-  agents: 'agents',
-  datasetName: undefined,
-  evaluationType: undefined,
-  evalModel: undefined,
+  datasetName: 'datasetName',
+  graphs: 'graphs',
   models: 'models',
-  outputIndex: '.kibana-elastic-ai-assistant-',
-  projectName: undefined,
   runName: undefined,
 };
 

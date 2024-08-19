@@ -50,21 +50,6 @@ export const PREDICTION_DETAILS_DESCRIPTION = i18n.translate(
   }
 );
 
-export const EVALUATION_DETAILS_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.evaluationSettings.evaluationDetailsTitle',
-  {
-    defaultMessage: 'Evaluation (Optional)',
-  }
-);
-
-export const EVALUATION_DETAILS_DESCRIPTION = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.evaluationSettings.evaluationDetailsDescription',
-  {
-    defaultMessage:
-      'Evaluate prediction results using a specific model (connector) and evaluation criterion.',
-  }
-);
-
 export const RUN_NAME_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.evaluationSettings.runNameLabel',
   {
@@ -111,50 +96,6 @@ export const GRAPHS_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.evaluationSettings.graphsDescription',
   {
     defaultMessage: 'Select the different graphs to evaluate the dataset against.',
-  }
-);
-
-export const EVALUATOR_MODEL_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.evaluationSettings.evaluatorModelLabel',
-  {
-    defaultMessage: 'Evaluator Model',
-  }
-);
-
-export const EVALUATOR_MODEL_DESCRIPTION = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.evaluationSettings.evaluatorModelDescription',
-  {
-    defaultMessage: 'Model that performs the final evaluation.',
-  }
-);
-
-export const EVALUATION_TYPE_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.evaluationSettings.evaluationTypeLabel',
-  {
-    defaultMessage: 'Evaluation type',
-  }
-);
-
-export const EVALUATION_TYPE_DESCRIPTION = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.evaluationSettings.evaluationTypeDescription',
-  {
-    defaultMessage:
-      'Type of evaluation to perform, e.g. "correctness" "esql-validator", or "custom".',
-  }
-);
-
-export const EVALUATION_PROMPT_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.evaluationSettings.evaluationPromptLabel',
-  {
-    defaultMessage: 'Evaluation prompt',
-  }
-);
-
-export const EVALUATION_PROMPT_DESCRIPTION = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.evaluationSettings.evaluationPromptDescription',
-  {
-    defaultMessage:
-      'Prompt template given `input`, `reference` and `prediction` template variables.',
   }
 );
 
@@ -215,14 +156,7 @@ export const LANGSMITH_API_KEY_DESCRIPTION = i18n.translate(
 export const EVALUATOR_DATASET_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.evaluationSettings.evaluatorDatasetLabel',
   {
-    defaultMessage: 'Dataset',
-  }
-);
-
-export const LANGSMITH_DATASET_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.evaluationSettings.langsmithDatasetLabel',
-  {
-    defaultMessage: 'LangSmith',
+    defaultMessage: 'LangSmith Dataset',
   }
 );
 
@@ -237,21 +171,6 @@ export const LANGSMITH_DATASET_PLACEHOLDER = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.evaluationSettings.langsmithDatasetPlaceholder',
   {
     defaultMessage: 'ESQL Query Generation',
-  }
-);
-
-export const CUSTOM_DATASET_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.evaluationSettings.customDatasetLabel',
-  {
-    defaultMessage: 'Custom',
-  }
-);
-
-export const CUSTOM_DATASET_DESCRIPTION = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.evaluationSettings.customDatasetDescription',
-  {
-    defaultMessage:
-      'Custom dataset to evaluate. Array of objects with "input" and "references" properties.',
   }
 );
 

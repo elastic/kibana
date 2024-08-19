@@ -17,7 +17,6 @@ import {
   EuiComboBox,
   EuiButton,
   EuiComboBoxOptionOption,
-  EuiTextArea,
   EuiTextColor,
   EuiFieldText,
   EuiFlexItem,
@@ -28,7 +27,7 @@ import {
 
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { GetEvaluateResponse } from '@kbn/elastic-assistant-common';
+import type { GetEvaluateResponse, PostEvaluateRequestBody } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../../assistant_context';
 import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
@@ -89,56 +88,12 @@ export const EvaluationSettings: React.FC = React.memo(() => {
     [setTraceOptions, traceOptions]
   );
   /** Dataset **/
-  const [useLangSmithDataset, setUseLangSmithDataset] = useState(true);
-  const datasetToggleButton = useMemo(() => {
-    return (
-      <EuiText
-        size={'xs'}
-        css={css`
-          margin-top: 16px;
-        `}
-      >
-        {i18n.EVALUATOR_DATASET_LABEL}
-        {' ('}
-        <EuiLink
-          color={useLangSmithDataset ? 'primary' : 'text'}
-          onClick={() => setUseLangSmithDataset(true)}
-        >
-          {i18n.LANGSMITH_DATASET_LABEL}
-        </EuiLink>
-        {' / '}
-        <EuiLink
-          color={useLangSmithDataset ? 'text' : 'primary'}
-          onClick={() => setUseLangSmithDataset(false)}
-        >
-          {i18n.CUSTOM_DATASET_LABEL}
-        </EuiLink>
-        {')'}
-      </EuiText>
-    );
-  }, [useLangSmithDataset]);
-  const [datasetName, setDatasetName] = useState<string>();
+  const [datasetName, setDatasetName] = useState<string>('');
   const onDatasetNameChange = useCallback(
     (e) => {
       setDatasetName(e.target.value);
     },
     [setDatasetName]
-  );
-  const sampleDataset = [
-    {
-      input:
-        'As an expert user of Elastic Security, please generate an accurate and valid ESQL query to detect the use case below. Your response should be formatted to be able to use immediately in an Elastic Security timeline or detection rule. Take your time with the answer, and really make sure you check your knowledge really well on all the functions I am asking for. check it multiple times if you need to. I cannot afford for queries to be inaccurate. Assume I am using the Elastic Common Schema. Ensure the answers are formatted in a way which is easily copyable.\n\n' +
-        'Write an ESQL query for detecting cryptomining activity on an AWS EC2 instance.',
-      reference:
-        'FROM metrics-apm*\n| WHERE metricset.name == ""transaction"" AND metricset.interval == ""1m""\n| EVAL bucket = AUTO_BUCKET(transaction.duration.histogram, 50, <start-date>, <end-date>)\n| STATS avg_duration = AVG(transaction.duration.histogram) BY bucket',
-    },
-  ];
-  const [datasetText, setDatasetText] = useState<string>(JSON.stringify(sampleDataset, null, 2));
-  const onDatasetTextChange = useCallback(
-    (e) => {
-      setDatasetText(e.target.value);
-    },
-    [setDatasetText]
   );
 
   // Predictions
@@ -233,45 +188,20 @@ export const EvaluationSettings: React.FC = React.memo(() => {
     [setSelectedEvaluatorModelOptions]
   );
 
-  // Eval Prompt
-  const sampleEvalPrompt: string = `For the below input: \n\n{{input}} \n\na prediction: \n\n{{prediction}} \n\nwas made. How's it stack up against this reference: \n\n{{reference}} \n\nReturn output in a succinct sentence ranking on a simple grading rubric focused on correctness.`;
-  const [evalPrompt, setEvalPrompt] = useState<string>(sampleEvalPrompt);
-  const onEvalPromptChange = useCallback(
-    (e) => {
-      setEvalPrompt(e.target.value);
-    },
-    [setEvalPrompt]
-  );
-
   // Required fields by eval API
   const isPerformEvaluationDisabled =
     selectedModelOptions.length === 0 || selectedGraphOptions.length === 0;
 
   // Perform Evaluation Button
   const handlePerformEvaluation = useCallback(async () => {
-    const evalParams = {
-      models: selectedModelOptions.flatMap((option) => option.key ?? []),
-      agents: selectedGraphOptions.map((option) => option.label),
-      dataset: useLangSmithDataset ? undefined : datasetText,
-      datasetName: useLangSmithDataset ? datasetName : undefined,
-      evalModel: selectedEvaluatorModelOptions.flatMap((option) => option.key ?? []),
-      evalPrompt,
-      evaluationType: selectedEvaluationType.map((option) => option.label),
+    const evalParams: PostEvaluateRequestBody = {
+      connectorIds: selectedModelOptions.flatMap((option) => option.key ?? []).sort(),
+      graphs: selectedGraphOptions.map((option) => option.label).sort(),
+      datasetName,
       runName,
     };
     performEvaluation(evalParams);
-  }, [
-    datasetName,
-    datasetText,
-    evalPrompt,
-    performEvaluation,
-    runName,
-    selectedGraphOptions,
-    selectedEvaluationType,
-    selectedEvaluatorModelOptions,
-    selectedModelOptions,
-    useLangSmithDataset,
-  ]);
+  }, [datasetName, performEvaluation, runName, selectedGraphOptions, selectedModelOptions]);
 
   const getSection = (title: string, description: string) => (
     <div>
@@ -299,10 +229,6 @@ export const EvaluationSettings: React.FC = React.memo(() => {
     () => getSection(i18n.PREDICTION_DETAILS_TITLE, i18n.PREDICTION_DETAILS_DESCRIPTION),
     []
   );
-  const evalDetailsSection = useMemo(
-    () => getSection(i18n.EVALUATION_DETAILS_TITLE, i18n.EVALUATION_DETAILS_DESCRIPTION),
-    []
-  );
 
   const buttonCss = css`
     &:hover {
@@ -324,53 +250,32 @@ export const EvaluationSettings: React.FC = React.memo(() => {
         initialIsOpen={true}
         paddingSize="s"
       >
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFormRow
-              display="rowCompressed"
-              label={i18n.RUN_NAME_LABEL}
-              helpText={i18n.RUN_NAME_DESCRIPTION}
-            >
-              <EuiFieldText
-                aria-label="run-name-textfield"
-                compressed
-                onChange={onRunNameChange}
-                placeholder={i18n.RUN_NAME_PLACEHOLDER}
-                value={runName}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
         <EuiFormRow
           display="rowCompressed"
-          label={datasetToggleButton}
-          fullWidth
-          helpText={
-            useLangSmithDataset
-              ? i18n.LANGSMITH_DATASET_DESCRIPTION
-              : i18n.CUSTOM_DATASET_DESCRIPTION
-          }
+          label={i18n.RUN_NAME_LABEL}
+          helpText={i18n.RUN_NAME_DESCRIPTION}
         >
-          {useLangSmithDataset ? (
-            <EuiFieldText
-              aria-label="dataset-name-textfield"
-              compressed
-              onChange={onDatasetNameChange}
-              placeholder={i18n.LANGSMITH_DATASET_PLACEHOLDER}
-              value={datasetName}
-            />
-          ) : (
-            <EuiTextArea
-              aria-label={'evaluation-dataset-textarea'}
-              compressed
-              css={css`
-                min-height: 300px;
-              `}
-              fullWidth
-              onChange={onDatasetTextChange}
-              value={datasetText}
-            />
-          )}
+          <EuiFieldText
+            aria-label="run-name-textfield"
+            compressed
+            onChange={onRunNameChange}
+            placeholder={i18n.RUN_NAME_PLACEHOLDER}
+            value={runName}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          display="rowCompressed"
+          label={i18n.EVALUATOR_DATASET_LABEL}
+          fullWidth
+          helpText={i18n.LANGSMITH_DATASET_DESCRIPTION}
+        >
+          <EuiFieldText
+            aria-label="dataset-name-textfield"
+            compressed
+            onChange={onDatasetNameChange}
+            placeholder={i18n.LANGSMITH_DATASET_PLACEHOLDER}
+            value={datasetName}
+          />
         </EuiFormRow>
         <EuiText
           size={'xs'}
@@ -467,66 +372,6 @@ export const EvaluationSettings: React.FC = React.memo(() => {
         </EuiFormRow>
       </EuiAccordion>
       <EuiHorizontalRule margin={'s'} />
-      {/* Evaluation Details*/}
-      <EuiAccordion
-        id={i18n.EVALUATION_DETAILS_TITLE}
-        arrowDisplay={'right'}
-        element="fieldset"
-        buttonProps={{ paddingSize: 's', css: buttonCss }}
-        buttonContent={evalDetailsSection}
-        paddingSize="s"
-      >
-        <EuiFormRow
-          display="rowCompressed"
-          label={i18n.EVALUATOR_MODEL_LABEL}
-          helpText={i18n.EVALUATOR_MODEL_DESCRIPTION}
-        >
-          <EuiComboBox
-            aria-label={'evaluation-type-select'}
-            compressed
-            options={modelOptions}
-            selectedOptions={selectedEvaluatorModelOptions}
-            singleSelection={{ asPlainText: true }}
-            onChange={onEvaluatorModelOptionsChange}
-          />
-        </EuiFormRow>
-
-        <EuiFormRow
-          display="rowCompressed"
-          label={i18n.EVALUATION_TYPE_LABEL}
-          helpText={i18n.EVALUATION_TYPE_DESCRIPTION}
-        >
-          <EuiComboBox
-            aria-label={'evaluation-type-select'}
-            compressed
-            onChange={onEvaluationTypeChange}
-            onCreateOption={onEvaluationTypeOptionsCreate}
-            options={evaluationTypeOptions}
-            selectedOptions={selectedEvaluationType}
-            singleSelection={{ asPlainText: true }}
-          />
-        </EuiFormRow>
-
-        <EuiFormRow
-          display="rowCompressed"
-          label={i18n.EVALUATION_PROMPT_LABEL}
-          fullWidth
-          helpText={i18n.EVALUATION_PROMPT_DESCRIPTION}
-        >
-          <EuiTextArea
-            aria-label={'evaluation-prompt-textarea'}
-            compressed
-            css={css`
-              min-height: 330px;
-            `}
-            disabled={selectedEvaluationType[0]?.label !== 'custom'}
-            fullWidth
-            onChange={onEvalPromptChange}
-            value={evalPrompt}
-          />
-        </EuiFormRow>
-      </EuiAccordion>
-      <EuiHorizontalRule />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButton
