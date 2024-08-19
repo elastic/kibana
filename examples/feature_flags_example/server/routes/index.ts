@@ -8,6 +8,7 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { FeatureFlagExampleNumber } from '../../common/feature_flags';
 
 export function defineRoutes(router: IRouter) {
   router.versioned
@@ -34,7 +35,7 @@ export function defineRoutes(router: IRouter) {
 
         return response.ok({
           body: {
-            number: await featureFlags.getNumberValue('example-number', 1),
+            number: await featureFlags.getNumberValue(FeatureFlagExampleNumber, 1),
           },
         });
       }

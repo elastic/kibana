@@ -15,6 +15,11 @@ import type {
 } from '@kbn/core/server';
 import { combineLatest } from 'rxjs';
 
+import {
+  FeatureFlagExampleBoolean,
+  FeatureFlagExampleNumber,
+  FeatureFlagExampleString,
+} from '../common/feature_flags';
 import { defineRoutes } from './routes';
 
 export class FeatureFlagsExamplePlugin implements Plugin {
@@ -34,27 +39,27 @@ export class FeatureFlagsExamplePlugin implements Plugin {
   public start(core: CoreStart) {
     // Promise form: when we need to fetch it once, like in an HTTP request
     void Promise.all([
-      core.featureFlags.getBooleanValue('example-boolean', false),
-      core.featureFlags.getStringValue('example-string', 'white'),
-      core.featureFlags.getNumberValue('example-number', 1),
+      core.featureFlags.getBooleanValue(FeatureFlagExampleBoolean, false),
+      core.featureFlags.getStringValue(FeatureFlagExampleString, 'white'),
+      core.featureFlags.getNumberValue(FeatureFlagExampleNumber, 1),
     ]).then(([bool, str, num]) => {
       this.logger.info(`The feature flags are:
-      - example-boolean: ${bool}
-      - example-string: ${str}
-      - example-number: ${num}
+      - ${FeatureFlagExampleBoolean}: ${bool}
+      - ${FeatureFlagExampleString}: ${str}
+      - ${FeatureFlagExampleNumber}: ${num}
       `);
     });
 
     // Observable form: when we need to react to the changes
     combineLatest([
-      core.featureFlags.getBooleanValue$('example-boolean', false),
-      core.featureFlags.getStringValue$('example-string', 'red'),
-      core.featureFlags.getNumberValue$('example-number', 1),
+      core.featureFlags.getBooleanValue$(FeatureFlagExampleBoolean, false),
+      core.featureFlags.getStringValue$(FeatureFlagExampleString, 'red'),
+      core.featureFlags.getNumberValue$(FeatureFlagExampleNumber, 1),
     ]).subscribe(([bool, str, num]) => {
       this.logger.info(`The observed feature flags are:
-      - example-boolean: ${bool}
-      - example-string: ${str}
-      - example-number: ${num}
+      - ${FeatureFlagExampleBoolean}: ${bool}
+      - ${FeatureFlagExampleString}: ${str}
+      - ${FeatureFlagExampleNumber}: ${num}
       `);
     });
   }

@@ -19,6 +19,11 @@ import {
 import type { CoreStart, FeatureFlagsStart } from '@kbn/core/public';
 
 import useObservable from 'react-use/lib/useObservable';
+import {
+  FeatureFlagExampleBoolean,
+  FeatureFlagExampleNumber,
+  FeatureFlagExampleString,
+} from '../../common/feature_flags';
 import { PLUGIN_NAME } from '../../common';
 
 interface FeatureFlagsExampleAppDeps {
@@ -29,14 +34,14 @@ interface FeatureFlagsExampleAppDeps {
 
 export const FeatureFlagsExampleApp = ({ featureFlags }: FeatureFlagsExampleAppDeps) => {
   // Fetching the feature flags synchronously
-  const bool = featureFlags.getBooleanValue('example-boolean', false);
-  const str = featureFlags.getStringValue('example-string', 'red');
-  const num = featureFlags.getNumberValue('example-number', 1);
+  const bool = featureFlags.getBooleanValue(FeatureFlagExampleBoolean, false);
+  const str = featureFlags.getStringValue(FeatureFlagExampleString, 'red');
+  const num = featureFlags.getNumberValue(FeatureFlagExampleNumber, 1);
 
   // Use React Hooks to observe feature flags changes
-  const bool$ = useObservable(featureFlags.getBooleanValue$('example-boolean', false));
-  const str$ = useObservable(featureFlags.getStringValue$('example-string', 'red'));
-  const num$ = useObservable(featureFlags.getNumberValue$('example-number', 1));
+  const bool$ = useObservable(featureFlags.getBooleanValue$(FeatureFlagExampleBoolean, false));
+  const str$ = useObservable(featureFlags.getStringValue$(FeatureFlagExampleString, 'red'));
+  const num$ = useObservable(featureFlags.getNumberValue$(FeatureFlagExampleNumber, 1));
 
   return (
     <>
@@ -64,17 +69,17 @@ export const FeatureFlagsExampleApp = ({ featureFlags }: FeatureFlagsExampleAppD
             <EuiListGroup>
               <p>
                 The feature flags are:
-                <EuiListGroupItem label={`example-boolean: ${bool}`} />
-                <EuiListGroupItem label={`example-string: ${str}`} />
-                <EuiListGroupItem label={`example-number: ${num}`} />
+                <EuiListGroupItem label={`${FeatureFlagExampleBoolean}: ${bool}`} />
+                <EuiListGroupItem label={`${FeatureFlagExampleString}: ${str}`} />
+                <EuiListGroupItem label={`${FeatureFlagExampleNumber}: ${num}`} />
               </p>
             </EuiListGroup>
             <EuiListGroup>
               <p>
                 The <strong>observed</strong> feature flags are:
-                <EuiListGroupItem label={`example-boolean: ${bool$}`} />
-                <EuiListGroupItem label={`example-string: ${str$}`} />
-                <EuiListGroupItem label={`example-number: ${num$}`} />
+                <EuiListGroupItem label={`${FeatureFlagExampleBoolean}: ${bool$}`} />
+                <EuiListGroupItem label={`${FeatureFlagExampleString}: ${str$}`} />
+                <EuiListGroupItem label={`${FeatureFlagExampleNumber}: ${num$}`} />
               </p>
             </EuiListGroup>
           </EuiText>

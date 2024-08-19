@@ -8,10 +8,15 @@
 
 import type { FeatureFlagDefinitions } from '@kbn/core-feature-flags-server';
 import type { PluginInitializerContext } from '@kbn/core-plugins-server';
+import {
+  FeatureFlagExampleBoolean,
+  FeatureFlagExampleNumber,
+  FeatureFlagExampleString,
+} from '../common/feature_flags';
 
 export const featureFlags: FeatureFlagDefinitions = [
   {
-    key: 'example-boolean',
+    key: FeatureFlagExampleBoolean,
     name: 'Example boolean',
     description: 'This is a demo of a boolean flag',
     tags: ['example', 'my-plugin'],
@@ -30,7 +35,7 @@ export const featureFlags: FeatureFlagDefinitions = [
     ],
   },
   {
-    key: 'example-string',
+    key: FeatureFlagExampleString,
     name: 'Example string',
     description: 'This is a demo of a string flag',
     tags: ['example', 'my-plugin'],
@@ -47,7 +52,7 @@ export const featureFlags: FeatureFlagDefinitions = [
     ],
   },
   {
-    key: 'example-number',
+    key: FeatureFlagExampleNumber,
     name: 'Example Number',
     description: 'This is a demo of a number flag',
     tags: ['example', 'my-plugin'],
