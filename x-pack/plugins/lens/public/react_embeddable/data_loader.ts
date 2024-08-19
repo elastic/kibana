@@ -23,7 +23,7 @@ import { getExpressionRendererParams } from './expressions/expression_params';
 import { ReactiveConfigs } from './initializers/initialize_observables';
 import { LensEmbeddableStartServices } from './types';
 import { prepareCallbacks } from './expressions/callbacks';
-import { buildUserMessagesHelper } from './userMessages/methods';
+import { buildUserMessagesHelper } from './user_messages/methods';
 import { getLogError } from './expressions/telemetry';
 
 /**

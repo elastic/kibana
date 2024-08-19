@@ -26,8 +26,8 @@ import { initializePanelSettings } from './initializers/initialize_panel_setting
 import { initializeSearchContext } from './initializers/initialize_search_context';
 import { isTextBasedLanguage } from './helper';
 import { initializeData } from './initializers/initialize_data';
-import { UserMessages } from './userMessages/container';
-import { useMessages } from './userMessages/use_messages';
+import { UserMessages } from './user_messages/container';
+import { useMessages } from './user_messages/use_messages';
 import { initializeVisualizationContext } from './initializers/initialize_visualization_context';
 import { initializeActionApi } from './initializers/initialize_actions';
 import { initializeIntegrations } from './initializers/initialize_integrations';
