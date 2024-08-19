@@ -59,7 +59,6 @@ export class MonacoEditorActionsProvider {
   ) {
     this.parsedRequestsProvider = getParsedRequestsProvider(this.editor.getModel());
     this.highlightedLines = this.editor.createDecorationsCollection();
-    this.editor.focus();
 
     const debouncedHighlightRequests = debounce(
       () => this.highlightRequests(),
@@ -198,7 +197,7 @@ export class MonacoEditorActionsProvider {
     return selectedRequests;
   }
 
-  private async getRequests() {
+  public async getRequests() {
     const parsedRequests = await this.getSelectedParsedRequests();
     const stringifiedRequests = parsedRequests.map((parsedRequest) =>
       stringifyRequest(parsedRequest)

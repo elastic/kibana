@@ -45,7 +45,7 @@ function Assertion (obj, flag, parent) {
     this.flags[flag] = true;
 
     for (var i in parent.flags) {
-      if (parent.flags.hasOwnProperty(i)) {
+      if (Object.hasOwn(parent.flags, i)) {
         this.flags[i] = true;
       }
     }
@@ -70,7 +70,7 @@ function Assertion (obj, flag, parent) {
         };
 
         for (var fn in Assertion.prototype) {
-          if (Assertion.prototype.hasOwnProperty(fn) && fn != name) {
+          if (Object.hasOwn(Assertion.prototype, fn) && fn != name) {
             if (typeof this[name] === 'function' && fn === 'length') {
               continue;
             }

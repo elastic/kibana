@@ -70,6 +70,7 @@ describe('SyntheticsPrivateLocation', () => {
         get: jest.fn().mockReturnValue({}),
         buildPackagePolicyFromPackage: mockBuildPackagePolicy,
         bulkCreate: jest.fn(),
+        getByIDs: jest.fn(),
       },
     },
     spaces: {
