@@ -14,10 +14,6 @@ import { v4 } from 'uuid';
 import type { GlobalWidgetParameters } from '../..';
 import type { InvestigateWidget, InvestigateWidgetCreate } from '../../../common';
 import type { WidgetDefinition } from '../../types';
-import {
-  InvestigateWidgetApiContextProvider,
-  UseInvestigateWidgetApi,
-} from '../use_investigate_widget';
 import { createNewInvestigation, fromInvestigationResponse } from './create_new_investigation';
 import { StatefulInvestigation, createInvestigationStore } from './investigation_store';
 
@@ -94,32 +90,12 @@ function useInvestigationWithoutContext({
         let Component = widgetComponentsById.current[item.id];
         if (!Component) {
           const id = item.id;
-          const api: UseInvestigateWidgetApi = {
-            onWidgetAdd: async (create) => {
-              return investigationStore.addItem(item.id, create);
-            },
-          };
-
-          const onDelete = () => {
-            return investigationStore.deleteItem(id);
-          };
-
           const widgetDefinition = widgetDefinitions.find(
             (definition) => definition.type === item.type
           )!;
 
           Component = widgetComponentsById.current[id] = (props) => {
-            return (
-              <InvestigateWidgetApiContextProvider value={api}>
-                {widgetDefinition
-                  ? widgetDefinition.render({
-                      onWidgetAdd: api.onWidgetAdd,
-                      onDelete,
-                      widget: props.widget,
-                    })
-                  : undefined}
-              </InvestigateWidgetApiContextProvider>
-            );
+            return <>{widgetDefinition?.render({ widget: props.widget })}</>;
           };
         }
 
@@ -136,7 +112,7 @@ function useInvestigationWithoutContext({
     });
 
     return nextItemsWithContext;
-  }, [investigation?.items, widgetDefinitions, investigationStore]);
+  }, [investigation?.items, widgetDefinitions]);
 
   const renderableInvestigation = useMemo(() => {
     return investigation

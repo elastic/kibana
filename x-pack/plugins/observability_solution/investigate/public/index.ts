@@ -14,10 +14,9 @@ import type {
   InvestigateStartDependencies,
   ConfigSchema,
   OnWidgetAdd,
-  WidgetRenderAPI,
 } from './types';
 
-export type { InvestigatePublicSetup, InvestigatePublicStart, OnWidgetAdd, WidgetRenderAPI };
+export type { InvestigatePublicSetup, InvestigatePublicStart, OnWidgetAdd };
 
 export {
   type Investigation,

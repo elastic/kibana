@@ -16,14 +16,9 @@ import type { UseInvestigationApi } from './hooks/use_investigation';
 
 export type OnWidgetAdd = (create: InvestigateWidgetCreate) => Promise<void>;
 
-export interface WidgetRenderAPI {
-  onDelete: () => void;
-  onWidgetAdd: OnWidgetAdd;
-}
-
-type WidgetRenderOptions<TInvestigateWidget extends InvestigateWidget> = {
+interface WidgetRenderOptions<TInvestigateWidget extends InvestigateWidget> {
   widget: TInvestigateWidget;
-} & WidgetRenderAPI;
+}
 
 export interface WidgetDefinition {
   type: string;
