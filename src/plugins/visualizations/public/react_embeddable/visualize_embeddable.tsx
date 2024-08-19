@@ -14,7 +14,6 @@ import {
   EmbeddableStart,
   ReactEmbeddableFactory,
   SELECT_RANGE_TRIGGER,
-  ViewMode,
 } from '@kbn/embeddable-plugin/public';
 import { ExpressionRendererParams, useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -121,7 +120,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
     const expressionAbortController$ = new BehaviorSubject<AbortController>(new AbortController());
     const viewMode$ = apiPublishesViewMode(parentApi)
       ? parentApi.viewMode
-      : new BehaviorSubject(ViewMode.VIEW);
+      : new BehaviorSubject('view');
 
     const executionContext = apiHasExecutionContext(parentApi)
       ? parentApi.executionContext
@@ -207,7 +206,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
           });
         },
         isEditingEnabled: () => {
-          if (viewMode$.getValue() !== ViewMode.EDIT) return false;
+          if (viewMode$.getValue() !== 'edit') return false;
           const readOnly = Boolean(vis$.getValue().type.disableEdit);
           if (readOnly) return false;
           const capabilities = getCapabilities();
