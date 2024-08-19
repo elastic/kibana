@@ -8,14 +8,25 @@
 
 import React, { useCallback, memo, useEffect, useState } from 'react';
 import { debounce } from 'lodash';
-import { EuiProgress, EuiSplitPanel, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiProgress,
+  EuiSplitPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { EditorContentSpinner, NetworkRequestStatusBar } from '../../components';
 import { Panel, PanelsContainer } from '..';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
 import { getAutocompleteInfo, StorageKeys } from '../../../services';
-import { useEditorReadContext, useServicesContext, useRequestReadContext, useRequestActionContext } from '../../contexts';
+import {
+  useEditorReadContext,
+  useServicesContext,
+  useRequestReadContext,
+  useRequestActionContext,
+} from '../../contexts';
 import type { SenseEditor } from '../../models';
 import { MonacoEditor, MonacoEditorOutput } from './monaco';
 import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
@@ -37,7 +48,7 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
   const { currentTextObject } = useEditorReadContext();
   const {
     requestInFlight,
-    lastResult: { data: requestData, error: requestError }
+    lastResult: { data: requestData, error: requestError },
   } = useRequestReadContext();
 
   const dispatch = useRequestActionContext();
@@ -128,12 +139,13 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
                     requestResult={
                       data
                         ? {
-                          method: data.request.method.toUpperCase(),
-                          endpoint: data.request.path,
-                          statusCode: data.response.statusCode,
-                          statusText: data.response.statusText,
-                          timeElapsedMs: data.response.timeMs,
-                        } : undefined
+                            method: data.request.method.toUpperCase(),
+                            endpoint: data.request.path,
+                            statusCode: data.response.statusCode,
+                            statusText: data.response.statusText,
+                            timeElapsedMs: data.response.timeMs,
+                          }
+                        : undefined
                     }
                   />
                 </EuiFlexItem>

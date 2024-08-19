@@ -14,12 +14,7 @@ import { Editor } from '../editor';
 import { Settings } from '../settings';
 import { Variables } from '../variables';
 
-import {
-  TopNavMenu,
-  WelcomePanel,
-  HelpPanel,
-  SomethingWentWrongCallout,
-} from '../../components';
+import { TopNavMenu, WelcomePanel, HelpPanel, SomethingWentWrongCallout } from '../../components';
 
 import { useServicesContext, useEditorReadContext } from '../../contexts';
 import { useDataInit } from '../../hooks';
@@ -82,9 +77,9 @@ export function Main({ hideWelcome = false }: MainProps) {
             disabled={!done}
             items={getTopNavConfig({
               onClickHistory: () => setShowHistory(!showingHistory),
-                onClickSettings: () => setShowSettings(true),
-                onClickHelp: () => setShowHelp(!showHelp),
-                onClickVariables: () => setShowVariables(!showVariables),
+              onClickSettings: () => setShowSettings(true),
+              onClickHelp: () => setShowHelp(!showHelp),
+              onClickVariables: () => setShowVariables(!showVariables),
             })}
           />
         </EuiFlexItem>

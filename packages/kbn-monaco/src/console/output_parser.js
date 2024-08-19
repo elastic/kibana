@@ -8,7 +8,7 @@
 
 /* eslint-disable prettier/prettier,prefer-const,no-throw-literal,camelcase,@typescript-eslint/no-shadow,one-var,object-shorthand,eqeqeq */
 
-export const createParser = () => {
+export const createOutputParser = () => {
   let at, // The index of the current character
     ch, // The current character
     escapee = {
@@ -35,18 +35,6 @@ export const createParser = () => {
     addRequestStart = function() {
       requestStartOffset = at - 1;
       requests.push({ startOffset: requestStartOffset });
-    },
-    addRequestMethod = function(method) {
-      const lastRequest = getLastRequest();
-      lastRequest.method = method;
-      requests.push(lastRequest);
-      requestEndOffset = at - 1;
-    },
-    addRequestUrl = function(url) {
-      const lastRequest = getLastRequest();
-      lastRequest.url = url;
-      requests.push(lastRequest);
-      requestEndOffset = at - 1;
     },
     addRequestData = function(data) {
       const lastRequest = getLastRequest();
@@ -234,95 +222,6 @@ export const createParser = () => {
       }
       error('Unexpected \'' + ch + '\'');
     },
-    // parses and returns the method
-    method = function () {
-      switch (ch) {
-        case 'g':
-          next('g');
-          next('e');
-          next('t');
-          return 'get';
-        case 'G':
-          next('G');
-          next('E');
-          next('T');
-          return 'GET';
-        case 'h':
-          next('h');
-          next('e');
-          next('a');
-          next('d');
-          return 'head';
-        case 'H':
-          next('H');
-          next('E');
-          next('A');
-          next('D');
-          return 'HEAD';
-        case 'd':
-          next('d');
-          next('e');
-          next('l');
-          next('e');
-          next('t');
-          next('e');
-          return 'delete';
-        case 'D':
-          next('D');
-          next('E');
-          next('L');
-          next('E');
-          next('T');
-          next('E');
-          return 'DELETE';
-        case 'p':
-          next('p');
-          switch (ch) {
-            case 'a':
-              next('a');
-              next('t');
-              next('c');
-              next('h');
-              return 'patch';
-            case 'u':
-              next('u');
-              next('t');
-              return 'put';
-            case 'o':
-              next('o');
-              next('s');
-              next('t');
-              return 'post';
-            default:
-              error('Unexpected \'' + ch + '\'');
-          }
-          break;
-        case 'P':
-          next('P');
-          switch (ch) {
-            case 'A':
-              next('A');
-              next('T');
-              next('C');
-              next('H');
-              return 'PATCH';
-            case 'U':
-              next('U');
-              next('T');
-              return 'PUT';
-            case 'O':
-              next('O');
-              next('S');
-              next('T');
-              return 'POST';
-            default:
-              error('Unexpected \'' + ch + '\'');
-          }
-          break;
-        default:
-          error('Expected one of GET/POST/PUT/DELETE/HEAD/PATCH');
-      }
-    },
     value, // Place holder for the value function.
     array = function () {
       const array = [];
@@ -394,28 +293,9 @@ export const createParser = () => {
     }
   };
 
-  let url = function () {
-      let url = '';
-      while (ch && ch != '\n') {
-        url += ch;
-        next();
-      }
-      if (url == '') {
-        error('Missing url');
-      }
-      return url;
-    },
-    request = function () {
+  let request = function () {
       white();
       addRequestStart();
-      const parsedMethod = method();
-      addRequestMethod(parsedMethod);
-      strictWhite();
-      const parsedUrl = url();
-      addRequestUrl(parsedUrl);
-      strictWhite(); // advance to one new line
-      newLine();
-      strictWhite();
       if (ch == '{') {
         const parsedObject = object();
         addRequestData(parsedObject);
@@ -460,7 +340,7 @@ export const createParser = () => {
           addError(e.message);
           // snap
           const substring = text.substr(at);
-          const nextMatch = substring.search(/^POST|HEAD|GET|PUT|DELETE|PATCH/m);
+          const nextMatch = substring.search(/[#{]/);
           if (nextMatch < 1) return;
           reset(at + nextMatch);
         }

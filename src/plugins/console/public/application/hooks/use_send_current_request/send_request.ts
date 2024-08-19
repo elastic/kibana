@@ -17,7 +17,7 @@ const { collapseLiteralStrings } = XJson;
 
 export interface RequestArgs {
   http: HttpSetup;
-  requests: Array<{ url: string; method: string; data: string[], lineNumber?: number }>;
+  requests: Array<{ url: string; method: string; data: string[]; lineNumber?: number }>;
 }
 
 export interface ResponseObject<V = unknown> {
