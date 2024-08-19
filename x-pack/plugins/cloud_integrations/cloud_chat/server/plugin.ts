@@ -10,7 +10,6 @@ import { PluginInitializerContext, CoreSetup, Plugin } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { registerChatRoute } from './routes';
 import type { CloudChatConfigType } from './config';
-import type { ChatVariant } from '../common/types';
 
 interface CloudChatSetupDeps {
   cloud: CloudSetup;
@@ -36,16 +35,6 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps> {
         trialEndDate,
         trialBuffer,
         isDev: this.isDev,
-        getChatVariant: () =>
-          core
-            .getStartServices()
-            .then(([{ featureFlags }]) =>
-              featureFlags.getStringValue<ChatVariant>('cloud-chat.chat-variant', 'header')
-            ),
-        getChatDisabledThroughExperiments: () =>
-          core
-            .getStartServices()
-            .then(([{ featureFlags }]) => featureFlags.getBooleanValue('cloud-chat.enabled', true)),
       });
     }
   }
