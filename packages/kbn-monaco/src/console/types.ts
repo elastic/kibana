@@ -23,7 +23,6 @@ export interface ConsoleParserResult {
   requests: ParsedRequest[];
 }
 
-
 export interface OutputParsedRequest {
   startOffset: number;
   endOffset?: number;

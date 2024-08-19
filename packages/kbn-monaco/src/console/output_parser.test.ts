@@ -27,7 +27,7 @@ describe('console output parser', () => {
     expect(errors.length).toBe(0);
     const { data } = requests[0];
 
-    const expected = [{ "_index": "my-index" }];
+    const expected = [{ _index: 'my-index' }];
     expect(data).toEqual(expected);
   });
 
