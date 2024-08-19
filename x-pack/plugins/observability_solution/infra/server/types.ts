@@ -44,6 +44,7 @@ export interface InfraRequestHandlerContext {
   spaceId: string;
   savedObjectsClient: SavedObjectsClientContract;
   uiSettingsClient: IUiSettingsClient;
+  getMetricsIndices: () => Promise<string>;
 }
 
 /**
