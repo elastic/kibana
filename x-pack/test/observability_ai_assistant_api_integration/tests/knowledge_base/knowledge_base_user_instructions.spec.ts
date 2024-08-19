@@ -18,8 +18,8 @@ import {
   deleteKnowledgeBaseModel,
 } from './helpers';
 import { getConversationCreatedEvent } from '../conversations/helpers';
-import { LlmProxy } from '../../common/create_llm_proxy';
-import { createLLMProxyConnector, deleteLLMProxyConnector } from '../complete/functions/helpers';
+import { LlmProxy, createLlmProxy } from '../../common/create_llm_proxy';
+import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
@@ -217,8 +217,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        ({ proxy, connectorId } = await createLLMProxyConnector({ log, supertest }));
-
         const interceptPromises = [
           proxy.interceptConversationTitle('LLM-generated title').completeAfterIntercept(),
           proxy
@@ -275,8 +273,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         return conversation;
       }
 
+      before(async () => {
+        proxy = await createLlmProxy(log);
+        connectorId = await createProxyActionConnector({ supertest, log, port: proxy.getPort() });
+      });
+
       after(async () => {
-        await deleteLLMProxyConnector({ supertest, connectorId, proxy, log });
+        proxy.close();
+        await deleteActionConnector({ supertest, connectorId, log });
       });
 
       it('adds the instruction to the system prompt', async () => {

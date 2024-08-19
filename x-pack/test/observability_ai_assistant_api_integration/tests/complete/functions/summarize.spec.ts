@@ -7,13 +7,13 @@
 
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import expect from '@kbn/expect';
-import { LlmProxy } from '../../../common/create_llm_proxy';
+import { LlmProxy, createLlmProxy } from '../../../common/create_llm_proxy';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { invokeChatCompleteWithFunctionRequest } from './helpers';
 import {
-  createLLMProxyConnector,
-  deleteLLMProxyConnector,
-  invokeChatCompleteWithFunctionRequest,
-} from './helpers';
+  createProxyActionConnector,
+  deleteActionConnector,
+} from '../../../common/action_connectors';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -26,7 +26,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     let connectorId: string;
 
     before(async () => {
-      ({ connectorId, proxy } = await createLLMProxyConnector({ log, supertest }));
+      proxy = await createLlmProxy(log);
+      connectorId = await createProxyActionConnector({ supertest, log, port: proxy.getPort() });
 
       // intercept the LLM request and return a fixed response
       proxy.intercept('conversation', () => true, 'Hello from LLM Proxy').completeAfterIntercept();
@@ -51,7 +52,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await deleteLLMProxyConnector({ supertest, connectorId, proxy, log });
+      proxy.close();
+      await deleteActionConnector({ supertest, connectorId, log });
     });
 
     it('persists entry in knowledge base', async () => {

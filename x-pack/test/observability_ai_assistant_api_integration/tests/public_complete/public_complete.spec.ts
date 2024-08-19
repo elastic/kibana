@@ -21,6 +21,7 @@ import {
   LlmResponseSimulator,
 } from '../../common/create_llm_proxy';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -133,32 +134,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     before(async () => {
       proxy = await createLlmProxy(log);
-
-      const response = await supertest
-        .post('/api/actions/connector')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'OpenAI Proxy',
-          connector_type_id: '.gen-ai',
-          config: {
-            apiProvider: 'OpenAI',
-            apiUrl: `http://localhost:${proxy.getPort()}`,
-          },
-          secrets: {
-            apiKey: 'my-api-key',
-          },
-        })
-        .expect(200);
-
-      connectorId = response.body.id;
+      connectorId = await createProxyActionConnector({ supertest, log, port: proxy.getPort() });
     });
 
     after(async () => {
-      await supertest
-        .delete(`/api/actions/connector/${connectorId}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
-
+      await deleteActionConnector({ supertest, connectorId, log });
       proxy.close();
     });
 

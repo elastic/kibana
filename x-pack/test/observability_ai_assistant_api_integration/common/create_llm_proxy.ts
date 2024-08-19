@@ -46,10 +46,13 @@ export interface LlmResponseSimulator {
 
 export class LlmProxy {
   server: Server;
+  interval: NodeJS.Timeout;
 
   interceptors: Array<RequestInterceptor & { handle: RequestHandler }> = [];
 
   constructor(private readonly port: number, private readonly log: ToolingLog) {
+    this.interval = setInterval(() => this.log.info(`LLM proxy listening on port ${port}`), 1000);
+
     this.server = http
       .createServer()
       .on('request', async (request, response) => {
@@ -88,6 +91,8 @@ export class LlmProxy {
   }
 
   close() {
+    this.log.debug(`Closing LLM Proxy on port ${this.port}`);
+    clearInterval(this.interval);
     this.server.close();
   }
 
@@ -204,7 +209,7 @@ export class LlmProxy {
 
 export async function createLlmProxy(log: ToolingLog) {
   const port = await getPort({ port: getPort.makeRange(9000, 9100) });
-
+  log.debug(`Starting LLM Proxy on port ${port}`);
   return new LlmProxy(port, log);
 }
 
