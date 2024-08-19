@@ -478,6 +478,8 @@ x-pack/plugins/global_search @elastic/appex-sharedux
 x-pack/plugins/global_search_providers @elastic/appex-sharedux
 x-pack/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
 x-pack/plugins/graph @elastic/kibana-visualizations
+examples/grid_example @elastic/kibana-presentation
+packages/kbn-grid-layout @elastic/kibana-presentation
 x-pack/plugins/grokdebugger @elastic/kibana-management
 packages/kbn-grouping @elastic/response-ops
 packages/kbn-guided-onboarding @elastic/appex-sharedux

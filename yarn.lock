@@ -1668,10 +1668,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@66.1.0":
-  version "66.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-66.1.0.tgz#0b2d27532c30e3ddbf80ec7dcf3e94e97af85801"
-  integrity sha512-oiNsCFfuqZCrDMmPX8RlGEtULhddOJFkN8pxNavD9x9JIwSB6R0gaw29aWJxwnUeROwq241yDijaOpXmIo/lQQ==
+"@elastic/charts@66.1.1":
+  version "66.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-66.1.1.tgz#94b931a2c070d92cc35574392a404435d2d37de9"
+  integrity sha512-CQQUBsU7VwnencHcnZ6Wh5mGjkX73ui6nSTjtwJuxtjXezflN6cPzbWKgwVKeduxHGoHcWUWoScLSgSCLkMdJQ==
   dependencies:
     "@popperjs/core" "^2.11.8"
     bezier-easing "^2.1.0"
@@ -5188,6 +5188,14 @@
   uid ""
 
 "@kbn/graph-plugin@link:x-pack/plugins/graph":
+  version "0.0.0"
+  uid ""
+
+"@kbn/grid-example-plugin@link:examples/grid_example":
+  version "0.0.0"
+  uid ""
+
+"@kbn/grid-layout@link:packages/kbn-grid-layout":
   version "0.0.0"
   uid ""
 
@@ -16585,10 +16593,10 @@ elastic-apm-node@3.46.0:
     traverse "^0.6.6"
     unicode-byte-truncate "^1.0.0"
 
-elastic-apm-node@^4.7.2:
-  version "4.7.2"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.7.2.tgz#880b3df8e2266aac70f6370f916b0e66d5063455"
-  integrity sha512-9jsvAeHU6wztM+qUWJvgJCgdCVUI1sfg6a9quXmgkcjUJmRDJG0trfTScELZrfK5VJBQ88LVl05Q0nJW2j6TsA==
+elastic-apm-node@^4.7.3:
+  version "4.7.3"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.7.3.tgz#d819a9030f7321cc858c788f60b383de85461f24"
+  integrity sha512-x+cQKrXSCz6JgoTFAiBpLlC85ruqZ7sAl+jAS3+DeSmc6ZXLRTwTa2ay2PCGv3DxGLZjVZ+ItzGdHTj5B7PYKg==
   dependencies:
     "@elastic/ecs-pino-format" "^1.5.0"
     "@opentelemetry/api" "^1.4.1"
@@ -16608,7 +16616,7 @@ elastic-apm-node@^4.7.2:
     fast-safe-stringify "^2.0.7"
     fast-stream-to-buffer "^1.0.0"
     http-headers "^3.0.2"
-    import-in-the-middle "1.9.1"
+    import-in-the-middle "1.11.0"
     json-bigint "^1.0.0"
     lru-cache "10.2.0"
     measured-reporting "^1.51.1"
@@ -19999,10 +20007,10 @@ import-fresh@^3.1.0, import-fresh@^3.2.1, import-fresh@^3.3.0:
     parent-module "^1.0.0"
     resolve-from "^4.0.0"
 
-import-in-the-middle@1.9.1:
-  version "1.9.1"
-  resolved "https://registry.yarnpkg.com/import-in-the-middle/-/import-in-the-middle-1.9.1.tgz#83f68c0ca926709257562238e1993a1c31e01272"
-  integrity sha512-E+3tEOutU1MV0mxhuCwfSPNNWRkbTJ3/YyL5be+blNIbHwZc53uYHQfuIhAU77xWR0BoF2eT7cqDJ6VlU5APPg==
+import-in-the-middle@1.11.0:
+  version "1.11.0"
+  resolved "https://registry.yarnpkg.com/import-in-the-middle/-/import-in-the-middle-1.11.0.tgz#a94c4925b8da18256cde3b3b7b38253e6ca5e708"
+  integrity sha512-5DimNQGoe0pLUHbR9qK84iWaWjjbsxiqXnw6Qz64+azRgleqv9k2kTt5fw7QsOpmaGYtuxxursnPPsnTKEx10Q==
   dependencies:
     acorn "^8.8.2"
     acorn-import-attributes "^1.9.5"
@@ -30238,7 +30246,7 @@ terser@^4.1.2, terser@^4.6.3:
     source-map "~0.6.1"
     source-map-support "~0.5.12"
 
-terser@^5.26.0, terser@^5.3.4, terser@^5.31.4, terser@^5.9.0:
+terser@^5.26.0, terser@^5.3.4, terser@^5.31.5, terser@^5.9.0:
   version "5.31.6"
   resolved "https://registry.yarnpkg.com/terser/-/terser-5.31.6.tgz#c63858a0f0703988d0266a82fcbf2d7ba76422b1"
   integrity sha512-PQ4DAriWzKj+qgehQ7LK5bQqCFNMmlhjR2PFFLuqGCpuCAauxemVBWwWOxo3UIwWQx8+Pr61Df++r76wDmkQBg==

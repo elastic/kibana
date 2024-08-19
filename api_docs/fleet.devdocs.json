@@ -19833,13 +19833,13 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-common.AgentPolicy.space_id",
-            "type": "string",
+            "id": "def-common.AgentPolicy.space_ids",
+            "type": "Array",
             "tags": [],
-            "label": "space_id",
+            "label": "space_ids",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string[] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
@@ -23277,6 +23277,20 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.space_ids",
+            "type": "Array",
+            "tags": [],
+            "label": "space_ids",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.NewAgentPolicy.description",
             "type": "string",
             "tags": [],
@@ -24236,13 +24250,13 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-common.PackagePolicy.spaceId",
-            "type": "string",
+            "id": "def-common.PackagePolicy.spaceIds",
+            "type": "Array",
             "tags": [],
-            "label": "spaceId",
+            "label": "spaceIds",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string[] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
             "deprecated": false,
@@ -29549,6 +29563,17 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.APP_API_ROUTES.AGENT_POLICIES_SPACES",
+            "type": "string",
+            "tags": [],
+            "label": "AGENT_POLICIES_SPACES",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN_DEPRECATED",
             "type": "string",
             "tags": [],
@@ -29612,6 +29637,22 @@
             "type": "Function",
             "tags": [],
             "label": "postHealthCheckPath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.appRoutesService.getAgentPoliciesSpacesPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getAgentPoliciesSpacesPath",
             "description": [],
             "signature": [
               "() => string"
