@@ -31,6 +31,7 @@ const renderDisplaySettings = (
       rowHeightLines={10}
       headerRowHeight={RowHeightMode.custom}
       headerRowHeightLines={5}
+      showSummaryColumn={false}
       {...props}
     />
   );
@@ -49,6 +50,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
           rowHeightLines={10}
           headerRowHeight={RowHeightMode.custom}
           headerRowHeightLines={5}
+          showSummaryColumn={false}
         />
       );
       const input = findTestSubject(component, 'unifiedDataTableSampleSizeInput').last();
@@ -85,6 +87,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
           rowHeightLines={10}
           headerRowHeight={RowHeightMode.custom}
           headerRowHeightLines={5}
+          showSummaryColumn={false}
         />
       );
       const input = findTestSubject(component, 'unifiedDataTableSampleSizeInput').last();
@@ -119,6 +122,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
           rowHeightLines={10}
           headerRowHeight={RowHeightMode.custom}
           headerRowHeightLines={5}
+          showSummaryColumn={false}
         />
       );
 
@@ -156,6 +160,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
           rowHeightLines={10}
           headerRowHeight={RowHeightMode.custom}
           headerRowHeightLines={5}
+          showSummaryColumn={false}
         />
       );
       const input = findTestSubject(component, 'unifiedDataTableSampleSizeInput').last();

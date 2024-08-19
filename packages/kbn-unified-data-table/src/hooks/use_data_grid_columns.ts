@@ -34,14 +34,15 @@ export const useColumns = ({
   sort,
   defaultOrder = 'desc',
 }: UseColumnsProps) => {
-  const [usedColumns, setUsedColumns] = useState(getColumns(columns, useNewFieldsApi));
+  const [usedColumns, setUsedColumns] = useState(getColumns(columns));
+
   useEffect(() => {
-    const nextColumns = getColumns(columns, useNewFieldsApi);
-    if (isEqual(usedColumns, nextColumns)) {
-      return;
-    }
-    setUsedColumns(nextColumns);
-  }, [columns, useNewFieldsApi, usedColumns]);
+    setUsedColumns((currentColumns) => {
+      const nextColumns = getColumns(columns);
+      return isEqual(currentColumns, nextColumns) ? currentColumns : nextColumns;
+    });
+  }, [columns]);
+
   const { onAddColumn, onRemoveColumn, onSetColumns, onMoveColumn } = useMemo(
     () =>
       getStateColumnActions({
@@ -75,9 +76,4 @@ export const useColumns = ({
   };
 };
 
-function getColumns(columns: string[] | undefined, useNewFieldsApi: boolean) {
-  if (!columns) {
-    return [];
-  }
-  return useNewFieldsApi ? columns.filter((col) => col !== '_source') : columns;
-}
+const getColumns = (columns: string[] | undefined) => columns ?? [];

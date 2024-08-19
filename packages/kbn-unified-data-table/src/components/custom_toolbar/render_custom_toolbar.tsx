@@ -86,13 +86,13 @@ export const internalRenderCustomToolbar = (
       >
         <EuiFlexItem grow={false}>
           {leftSide || (
-            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center" wrap>
               {buttons}
             </EuiFlexGroup>
           )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+          <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center" wrap>
             {Boolean(leftSide) && buttons}
             {(keyboardShortcutsControl || displayControl || fullScreenControl) && (
               <EuiFlexItem grow={false}>

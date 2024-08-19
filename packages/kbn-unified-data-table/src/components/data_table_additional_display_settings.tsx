@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiFormRow, EuiHorizontalRule, EuiRange } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow, EuiHorizontalRule, EuiRange } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import { RowHeightSettings, RowHeightSettingsProps } from './row_height_settings';
@@ -29,6 +29,8 @@ export interface UnifiedDataTableAdditionalDisplaySettingsProps {
   maxAllowedSampleSize?: number;
   sampleSize: number;
   onChangeSampleSize?: (sampleSize: number) => void;
+  showSummaryColumn: boolean;
+  onChangeShowSummaryColumn?: (showSummaryColumn: boolean) => void;
 }
 
 const defaultOnChangeSampleSize = () => {};
@@ -47,6 +49,8 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   maxAllowedSampleSize = DEFAULT_MAX_ALLOWED_SAMPLE_SIZE,
   sampleSize,
   onChangeSampleSize,
+  showSummaryColumn,
+  onChangeShowSummaryColumn,
 }) => {
   const [activeSampleSize, setActiveSampleSize] = useState<number | ''>(sampleSize);
   const minRangeSampleSize = Math.max(
@@ -136,6 +140,41 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
           value={activeSampleSize}
           onChange={onChangeActiveSampleSize}
           data-test-subj="unifiedDataTableSampleSizeInput"
+        />
+      </EuiFormRow>
+    );
+  }
+
+  if (onChangeShowSummaryColumn) {
+    settings.push(
+      <EuiFormRow
+        display="columnCompressed"
+        label={i18n.translate('unifiedDataTable.showSummaryColumnLabel', {
+          defaultMessage: 'Summary column',
+        })}
+      >
+        <EuiButtonGroup
+          isFullWidth
+          legend={i18n.translate('unifiedDataTable.showSummaryColumnLabel', {
+            defaultMessage: 'Summary column',
+          })}
+          buttonSize="compressed"
+          options={[
+            {
+              id: 'off',
+              label: i18n.translate('unifiedDataTable.hideSummaryColumnLabel', {
+                defaultMessage: 'Off',
+              }),
+            },
+            {
+              id: 'on',
+              label: i18n.translate('unifiedDataTable.showSummaryColumnLabel', {
+                defaultMessage: 'On',
+              }),
+            },
+          ]}
+          idSelected={showSummaryColumn ? 'on' : 'off'}
+          onChange={(optionId) => onChangeShowSummaryColumn(optionId === 'on')}
         />
       </EuiFormRow>
     );

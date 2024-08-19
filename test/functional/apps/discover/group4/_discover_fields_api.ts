@@ -45,8 +45,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should correctly display documents', async function () {
-      log.debug('check if Document title exists in the grid');
-      expect(await PageObjects.discover.getDocHeader()).to.have.string('Document');
+      log.debug('check if Summary title exists in the grid');
+      expect(await PageObjects.discover.getDocHeader()).to.have.string('Summary');
       const rowData = await PageObjects.discover.getDocTableIndex(1);
       log.debug('check the newest doc timestamp in UTC (check diff timezone in last test)');
       expect(rowData.startsWith('Sep 22, 2015 @ 23:50:13.253')).to.be.ok();
@@ -59,13 +59,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('adding a column removes a default column', async function () {
       await PageObjects.unifiedFieldList.clickFieldListItemAdd('_score');
       expect(await PageObjects.discover.getDocHeader()).to.have.string('_score');
-      expect(await PageObjects.discover.getDocHeader()).not.to.have.string('Document');
+      expect(await PageObjects.discover.getDocHeader()).not.to.have.string('Summary');
     });
 
     it('removing a column adds a default column', async function () {
       await PageObjects.unifiedFieldList.clickFieldListItemRemove('_score');
       expect(await PageObjects.discover.getDocHeader()).not.to.have.string('_score');
-      expect(await PageObjects.discover.getDocHeader()).to.have.string('Document');
+      expect(await PageObjects.discover.getDocHeader()).to.have.string('Summary');
     });
 
     it('displays _source viewer in doc viewer', async function () {
@@ -83,10 +83,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
 
-      expect(await PageObjects.discover.getDocHeader()).to.have.string('Document');
+      expect(await PageObjects.discover.getDocHeader()).to.have.string('Summary');
     });
 
-    it('switches to Document column when fields API is used', async function () {
+    it('switches to Summary column when fields API is used', async function () {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSettings();
       await PageObjects.settings.toggleAdvancedSettingCheckbox('discover:searchFieldsFromSource');
@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
 
-      expect(await PageObjects.discover.getDocHeader()).to.have.string('Document');
+      expect(await PageObjects.discover.getDocHeader()).to.have.string('Summary');
     });
   });
 }

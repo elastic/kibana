@@ -15,7 +15,7 @@ export const onResizeGridColumn = (
   const grid = { ...(gridState || {}) };
   const newColumns = { ...(grid.columns || {}) };
   newColumns[colSettings.columnId] = {
-    width: Math.round(colSettings.width),
+    width: colSettings.width && Math.round(colSettings.width),
   };
   return { ...grid, columns: newColumns };
 };
