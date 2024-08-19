@@ -5,58 +5,48 @@
  * 2.0.
  */
 
-import type {
-  GetInfraMetricsRequestBodyPayload,
-  InfraAssetMetadataType,
-} from '../../../../../common/http_api/infra';
-import { BUCKET_KEY, MAX_SIZE, METADATA_AGGREGATION_NAME } from '../constants';
-import type { GetHostsArgs } from '../types';
-import { createFilters, getInventoryModelAggregations } from '../helpers/query';
+import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
+import type { TimeRangeMetadata } from '@kbn/apm-data-access-plugin/common';
+import { HOST_NAME_FIELD } from '../../../../../common/constants';
+import type { InfraAssetMetadataType } from '../../../../../common/http_api';
+import { METADATA_AGGREGATION_NAME } from '../constants';
+import type { GetHostParameters } from '../types';
+import {
+  getFilterByIntegration,
+  getInventoryModelAggregations,
+  getDocumentsFilter,
+} from '../helpers/query';
 import { BasicMetricValueRT } from '../../../../lib/metrics/types';
 
-export const getAllHosts = async (
-  { infraMetricsClient, params }: GetHostsArgs,
-  hostNamesShortList: string[] = []
-) => {
-  const query = createQuery(params, hostNamesShortList);
-  const response = await infraMetricsClient.search(query);
-
-  const result = (response.aggregations?.nodes.buckets ?? [])
-    .sort((a, b) => {
-      const aValue = getMetricValue(a?.cpuV2) ?? 0;
-      const bValue = getMetricValue(b?.cpuV2) ?? 0;
-      return bValue - aValue;
-    })
-    .map((bucket) => {
-      const metadata = (bucket?.metadata.top ?? [])
-        .flatMap((top) => Object.entries(top.metrics))
-        .map(([key, value]) => ({
-          name: key as InfraAssetMetadataType,
-          value: typeof value === 'string' && value.trim().length === 0 ? null : value,
-        }));
-
-      const metrics = params.metrics.map((metric) => ({
-        name: metric.type,
-        value: metric.type in bucket ? getMetricValue(bucket[metric.type]) ?? 0 : null,
-      }));
-
-      return {
-        name: bucket?.key as string,
-        metadata,
-        metrics,
-      };
-    });
-
-  return result;
-};
-
-const createQuery = (params: GetInfraMetricsRequestBodyPayload, hostNamesShortList: string[]) => {
+export const getAllHosts = async ({
+  infraMetricsClient,
+  apmDocumentSources,
+  from,
+  to,
+  limit,
+  metrics,
+  hostNames,
+  apmDataAccessServices,
+}: Pick<
+  GetHostParameters,
+  'infraMetricsClient' | 'apmDataAccessServices' | 'from' | 'to' | 'limit' | 'metrics'
+> & {
+  hostNames: string[];
+  apmDocumentSources?: TimeRangeMetadata['sources'];
+}) => {
   const metricAggregations = getInventoryModelAggregations(
-    params.type,
-    params.metrics.map((p) => p.type)
+    'host',
+    metrics.map((metric) => metric)
   );
 
-  return {
+  const documentsFilter = await getDocumentsFilter({
+    apmDataAccessServices,
+    apmDocumentSources,
+    from,
+    to,
+  });
+
+  const response = await infraMetricsClient.search({
     allow_no_indices: true,
     ignore_unavailable: true,
     body: {
@@ -64,19 +54,32 @@ const createQuery = (params: GetInfraMetricsRequestBodyPayload, hostNamesShortLi
       track_total_hits: false,
       query: {
         bool: {
-          filter: createFilters({
-            params,
-            hostNamesShortList,
-          }),
+          filter: [...termsQuery(HOST_NAME_FIELD, ...hostNames), ...rangeQuery(from, to)],
+          should: [...documentsFilter],
         },
       },
       aggs: {
-        nodes: {
+        // find hosts with metrics that are monitored by the system integration.
+        monitoredHosts: {
+          filter: getFilterByIntegration('system'),
+          aggs: {
+            names: {
+              terms: {
+                field: HOST_NAME_FIELD,
+                size: limit,
+                order: {
+                  _key: 'asc',
+                },
+              },
+            },
+          },
+        },
+        allHostMetrics: {
           terms: {
-            field: BUCKET_KEY,
-            size: params.limit ?? MAX_SIZE,
+            field: HOST_NAME_FIELD,
+            size: limit,
             order: {
-              _key: 'asc' as const,
+              _key: 'asc',
             },
           },
           aggs: {
@@ -96,7 +99,7 @@ const createQuery = (params: GetInfraMetricsRequestBodyPayload, hostNamesShortLi
                 ],
                 size: 1,
                 sort: {
-                  '@timestamp': 'desc' as const,
+                  '@timestamp': 'desc',
                 },
               },
             },
@@ -104,7 +107,47 @@ const createQuery = (params: GetInfraMetricsRequestBodyPayload, hostNamesShortLi
         },
       },
     },
-  };
+  });
+
+  const systemIntegrationHosts = new Set(
+    response.aggregations?.monitoredHosts.names.buckets.map((p) => p.key) ?? []
+  );
+
+  const result = (response.aggregations?.allHostMetrics.buckets ?? [])
+    .sort((a, b) => {
+      const hasASystemMetrics = systemIntegrationHosts.has(a?.key as string);
+      const hasBSystemMetrics = systemIntegrationHosts.has(b?.key as string);
+
+      if (hasASystemMetrics !== hasBSystemMetrics) {
+        return hasASystemMetrics ? -1 : 1;
+      }
+
+      const aValue = getMetricValue(a?.cpuV2) ?? 0;
+      const bValue = getMetricValue(b?.cpuV2) ?? 0;
+
+      return bValue - aValue;
+    })
+    .map((bucket) => {
+      const hostName = bucket.key as string;
+      const metadata = (bucket?.metadata.top ?? [])
+        .flatMap((top) => Object.entries(top.metrics))
+        .map(([key, value]) => ({
+          name: key as InfraAssetMetadataType,
+          value: typeof value === 'string' && value.trim().length === 0 ? null : value,
+        }));
+
+      return {
+        name: hostName,
+        metadata,
+        metrics: metrics.map((metric) => ({
+          name: metric,
+          value: getMetricValue(bucket[metric]) || null,
+        })),
+        hasSystemMetrics: systemIntegrationHosts.has(hostName),
+      };
+    });
+
+  return result;
 };
 
 const getMetricValue = (valueObject: unknown): number | null => {
