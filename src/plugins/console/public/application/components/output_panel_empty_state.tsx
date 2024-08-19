@@ -7,7 +7,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiPageSection, EuiSpacer, EuiTitle, EuiLink } from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer, EuiTitle, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useServicesContext } from '../contexts';
 
@@ -16,53 +16,43 @@ export const OutputPanelEmptyState: FunctionComponent = () => {
 
   return (
     <div className="conApp__outputPanel__emptyState" data-test-subj="consoleOutputPanelEmptyState">
-      <EuiPageSection
-        alignment="center"
-        grow={true}
-        css={{
-          justifyContent: 'end',
-          textAlign: 'center',
-        }}
-        bottomBorder={'extended'}
-      >
-        <EuiTitle>
-          <h2>
-            <FormattedMessage
-              id="console.outputEmptyState.title"
-              defaultMessage="Enter a new request"
-            />
-          </h2>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-        <FormattedMessage
-          id="console.outputEmptyState.description"
-          defaultMessage="When you run a request in the input panel, you will see the output response here."
-        />
-      </EuiPageSection>
-      <EuiPageSection
-        alignment="center"
-        grow={true}
-        css={{
-          justifyContent: 'start',
-          textAlign: 'center',
-        }}
-      >
-        <EuiTitle size="xxs">
-          <span>
+      <EuiTitle size="s">
+        <h3>
+          <FormattedMessage
+            id="console.outputEmptyState.title"
+            defaultMessage="Enter a new request"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+      <EuiText size="relative">
+        <p>
+          <FormattedMessage
+            id="console.outputEmptyState.description"
+            defaultMessage="When you run a request in the input panel, you will see the output response here."
+          />
+        </p>
+      </EuiText>
+
+      <EuiHorizontalRule />
+
+      <EuiText size="xs">
+        <p>
+          <strong>
             <FormattedMessage
               id="console.outputEmptyState.learnMore"
               defaultMessage="Want to learn more?"
             />
-          </span>
-        </EuiTitle>
-        &nbsp;
-        <EuiLink href={docLinks.console.guide} target="_blank" external>
-          <FormattedMessage
-            id="console.outputEmptyState.docsLink"
-            defaultMessage="Read Console documentation"
-          />
-        </EuiLink>
-      </EuiPageSection>
+          </strong>
+          &nbsp;
+          <EuiLink href={docLinks.console.guide} target="_blank">
+            <FormattedMessage
+              id="console.outputEmptyState.docsLink"
+              defaultMessage="Read Console documentation"
+            />
+          </EuiLink>
+        </p>
+      </EuiText>
     </div>
   );
 };

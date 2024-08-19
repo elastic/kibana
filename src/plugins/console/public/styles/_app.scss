@@ -32,10 +32,10 @@
 }
 
 .conApp__outputPanel__emptyState {
-  display: flex;
-  flex-direction: column;
   width: 100%;
   padding-left: $euiSizeM;
+  align-content: center;
+  text-align: center;
 }
 
 .conApp__output, .conApp_example {
