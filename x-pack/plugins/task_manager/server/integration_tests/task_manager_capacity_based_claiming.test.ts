@@ -8,7 +8,7 @@
 import { v4 as uuidV4 } from 'uuid';
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import { schema } from '@kbn/config-schema';
-import { times } from 'lodash';
+import { flatMap, times } from 'lodash';
 import { TaskCost, TaskStatus } from '../task';
 import type { TaskClaimingOpts } from '../queries/task_claiming';
 import { TaskManagerPlugin, type TaskManagerStartContract } from '../plugin';
@@ -84,8 +84,8 @@ jest.mock('../queries/task_claiming', () => {
     ...actual,
     TaskClaiming: jest.fn().mockImplementation((opts: TaskClaimingOpts) => {
       opts.definitions.registerTaskDefinitions({
-        normalCostType: mockTaskTypeNormalCost,
-        xlCostType: mockTaskTypeXLCost,
+        _normalCostType: mockTaskTypeNormalCost,
+        _xlCostType: mockTaskTypeXLCost,
       });
       return new actual.TaskClaiming(opts);
     }),
@@ -93,6 +93,7 @@ jest.mock('../queries/task_claiming', () => {
 });
 
 const taskManagerStartSpy = jest.spyOn(TaskManagerPlugin.prototype, 'start');
+const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
 
 describe('capacity based claiming', () => {
   const taskIdsToRemove: string[] = [];
@@ -109,23 +110,10 @@ describe('capacity based claiming', () => {
           capacity: 10,
           poll_interval: POLLING_INTERVAL,
           unsafe: {
-            exclude_task_types: [
-              'security*',
-              'osquery*',
-              'endpoint*',
-              'apm*',
-              'ML*',
-              'task_manager*',
-              'alert*',
-              'action*',
-              'cases*',
-              'SLO*',
-              'Fleet*',
-              'fleet*',
-              'session*',
-              'dashboard*',
-              'observability*',
-            ],
+            exclude_task_types: flatMap(alphabet, (letter) => [
+              `${letter}*`,
+              `${letter.toUpperCase()}*`,
+            ]),
           },
         },
       },
@@ -188,7 +176,7 @@ describe('capacity based claiming', () => {
     for (const id of ids) {
       await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
         id,
-        taskType: 'normalCostType',
+        taskType: '_normalCostType',
         params: {},
         state: { foo: 'test' },
         stateVersion: 1,
@@ -252,7 +240,7 @@ describe('capacity based claiming', () => {
     for (const id of ids) {
       await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
         id,
-        taskType: 'normalCostType',
+        taskType: '_normalCostType',
         params: {},
         state: { foo: 'test' },
         stateVersion: 1,
@@ -273,7 +261,7 @@ describe('capacity based claiming', () => {
     const runAt2 = now;
     await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
       id: xlid,
-      taskType: 'xlCostType',
+      taskType: '_xlCostType',
       params: {},
       state: { foo: 'test' },
       stateVersion: 1,
@@ -293,7 +281,7 @@ describe('capacity based claiming', () => {
     const lastid = uuidV4();
     await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
       id: lastid,
-      taskType: 'normalCostType',
+      taskType: '_normalCostType',
       params: {},
       state: { foo: 'test' },
       stateVersion: 1,
