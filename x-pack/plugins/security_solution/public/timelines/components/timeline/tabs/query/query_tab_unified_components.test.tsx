@@ -835,7 +835,8 @@ describe('query tab with unified timeline', () => {
   });
 
   describe('Leading actions - notes', () => {
-    describe('securitySolutionNotesEnabled = true', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/189794
+    describe.skip('securitySolutionNotesEnabled = true', () => {
       beforeEach(() => {
         (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
           jest.fn((feature: keyof ExperimentalFeatures) => {
