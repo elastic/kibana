@@ -17,34 +17,34 @@ interface EntityResponse {
 
 export interface UseAlertDocumentAnalyzerSchemaParams {
   /**
-   *
+   * The document ID of the alert to analyze
    */
   documentId: string;
   /**
-   *
+   * The indices to search for alerts
    */
   indices: string[];
 }
 
 export interface UseAlertDocumentAnalyzerSchemaResult {
   /**
-   *
+   * True if the request is still loading
    */
   loading: boolean;
   /**
-   *
+   * True if there was an error
    */
   error: boolean;
   /**
-   *
+   * The id returned by the API
    */
   id: string | null;
   /**
-   *
+   * The schema returned by the API
    */
   schema: object | null;
   /**
-   *
+   * The agent ID value returned byt the API
    */
   agentId: string | null;
 }
