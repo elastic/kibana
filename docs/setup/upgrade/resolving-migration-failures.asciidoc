@@ -38,7 +38,7 @@ To delete the documents that cause migrations to fail, take the following steps:
 
 . Create a role as follows:
 +
-[source,sh]
+[source,console]
 --------------------------------------------
 PUT _security/role/grant_kibana_system_indices
 {
@@ -58,7 +58,7 @@ PUT _security/role/grant_kibana_system_indices
 
 . Create a user with the role above and `superuser` built-in role:
 +
-[source,sh]
+[source,console]
 --------------------------------------------
 POST /_security/user/temporarykibanasuperuser
 {
@@ -69,7 +69,7 @@ POST /_security/user/temporarykibanasuperuser
 
 . Remove the write block which the migration system has placed on the previous index:
 +
-[source,sh]
+[source,console]
 --------------------------------------------
 PUT .kibana_7.12.1_001/_settings
 {
@@ -81,7 +81,7 @@ PUT .kibana_7.12.1_001/_settings
 
 . Delete the corrupt document:
 +
-[source,sh]
+[source,console]
 --------------------------------------------
 DELETE .kibana_7.12.0_001/_doc/marketing_space:dashboard:e3c5fc71-ac71-4805-bcab-2bcc9cc93275
 --------------------------------------------
@@ -167,7 +167,7 @@ The process is waiting for a yellow index status. There are two known causes:
 
 Before retrying the migration, inspect the output of the `_cluster/allocation/explain?index=${targetIndex}` API to identify why the index isn't yellow:
 
-[source,sh]
+[source,console]
 --------------------------------------------
 GET _cluster/allocation/explain
 {
@@ -202,7 +202,7 @@ Unable to complete saved object migrations for the [.kibana] index: [incompatibl
 --------------------------------------------
 
 To get around the issue, remove the transient and persisted routing allocation settings:
-[source,sh]
+[source,console]
 --------------------------------------------
 PUT /_cluster/settings
 {
