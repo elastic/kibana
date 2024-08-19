@@ -21,7 +21,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const synthtrace = getService('apmSynthtraceEsClient');
   const logger = getService('log');
-  const dataViewPattern = 'traces-apm*,apm-*,traces-*.otel-*,logs-apm*,apm-*,logs-*.otel-*,metrics-apm*,apm-*,metrics-*.otel-*';
+  const dataViewPattern =
+    'traces-apm*,apm-*,traces-*.otel-*,logs-apm*,apm-*,logs-*.otel-*,metrics-apm*,apm-*,metrics-*.otel-*';
 
   function createDataViewWithWriteUser({ spaceId }: { spaceId: string }) {
     return apmApiClient.writeUser({
@@ -116,7 +117,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(dataView.id).to.be('apm_static_data_view_id_default');
         expect(dataView.name).to.be('APM');
-        expect(dataView.title).to.be('traces-apm*,apm-*,traces-*.otel-*,logs-apm*,apm-*,logs-*.otel-*,metrics-apm*,apm-*,metrics-*.otel-*');
+        expect(dataView.title).to.be(
+          'traces-apm*,apm-*,traces-*.otel-*,logs-apm*,apm-*,logs-*.otel-*,metrics-apm*,apm-*,metrics-*.otel-*'
+        );
       });
     });
 
