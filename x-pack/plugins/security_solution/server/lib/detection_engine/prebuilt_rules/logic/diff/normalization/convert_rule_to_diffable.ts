@@ -9,6 +9,7 @@ import type { RequiredOptional } from '@kbn/zod-helpers';
 import { requiredOptional } from '@kbn/zod-helpers';
 import { DEFAULT_MAX_SIGNALS } from '../../../../../../../common/constants';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
+import type { PrebuiltRuleToImport } from '../../../../../../../common/api/detection_engine';
 import type {
   EqlRule,
   EqlRuleCreateProps,
@@ -59,7 +60,9 @@ import { addEcsToRequiredFields } from '../../../../rule_management/utils/utils'
  * Normalizes a given rule to the form which is suitable for passing to the diff algorithm.
  * Read more in the JSDoc description of DiffableRule.
  */
-export const convertRuleToDiffable = (rule: RuleResponse | PrebuiltRuleAsset): DiffableRule => {
+export const convertRuleToDiffable = (
+  rule: RuleResponse | PrebuiltRuleAsset | PrebuiltRuleToImport
+): DiffableRule => {
   const commonFields = extractDiffableCommonFields(rule);
 
   switch (rule.type) {
@@ -109,7 +112,7 @@ export const convertRuleToDiffable = (rule: RuleResponse | PrebuiltRuleAsset): D
 };
 
 const extractDiffableCommonFields = (
-  rule: RuleResponse | PrebuiltRuleAsset
+  rule: RuleResponse | PrebuiltRuleAsset | PrebuiltRuleToImport
 ): RequiredOptional<DiffableCommonFields> => {
   return {
     // --------------------- REQUIRED FIELDS

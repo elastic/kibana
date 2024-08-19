@@ -13,7 +13,10 @@ import type {
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
+import type {
+  PrebuiltRuleToImport,
+  RuleToImport,
+} from '../../../../../../common/api/detection_engine/rule_management';
 import type { ImportRuleResponse } from '../../../routes/utils';
 import { createBulkErrorObject } from '../../../routes/utils';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
@@ -106,7 +109,8 @@ export const importRules = async ({
             }
 
             if (allowPrebuiltRules) {
-              if (parsedRule.rule_id && !parsedRule.version) {
+              // TODO how do we differentiate this case from a non-prebuilt import?
+              if (!ruleImportIsPrebuilt(parsedRule)) {
                 resolve(
                   createBulkErrorObject({
                     statusCode: 400,
@@ -119,12 +123,13 @@ export const importRules = async ({
                     ruleId: parsedRule.rule_id,
                   })
                 );
+
+                return null;
               }
 
-              // TODO rule_source calculated here
               const ruleSource = calculateRuleSourceForImport({
                 rule: parsedRule,
-                prebuiltRuleAssets,
+                prebuiltRuleAssets: prebuiltRuleAssets ?? [],
                 installedRuleIds: [], // TODO
               });
 
@@ -174,3 +179,5 @@ export const importRules = async ({
 
   return importRuleResponse;
 };
+
+const ruleImportIsPrebuilt = (rule: RuleToImport): rule is PrebuiltRuleToImport => !!rule.version;

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '../../../../../../../../common/api/detection_engine';
+import type {
+  PrebuiltRuleToImport,
+  RuleResponse,
+} from '../../../../../../../../common/api/detection_engine';
 import { MissingVersion } from '../../../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../../../../prebuilt_rules';
 import { calculateRuleFieldsDiff } from '../../../../../prebuilt_rules/logic/diff/calculation/calculate_rule_fields_diff';
@@ -14,7 +17,7 @@ import { convertPrebuiltRuleAssetToRuleResponse } from '../../converters/convert
 
 export function calculateIsCustomized(
   baseRule: PrebuiltRuleAsset | undefined,
-  nextRule: RuleResponse
+  nextRule: RuleResponse | PrebuiltRuleToImport
 ) {
   if (baseRule == null) {
     // If the base version is missing, we consider the rule to be customized

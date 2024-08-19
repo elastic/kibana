@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { RuleSource, RuleResponse } from '../../../../../../common/api/detection_engine';
+import type {
+  PrebuiltRuleToImport,
+  RuleSource,
+} from '../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 import { calculateRuleSourceFromAsset } from '../detection_rules_client/mergers/rule_source/calculate_rule_source_from_asset';
 
@@ -22,7 +25,7 @@ export const calculateRuleSourceForImport = ({
   prebuiltRuleAssets,
   installedRuleIds,
 }: {
-  rule: RuleResponse;
+  rule: PrebuiltRuleToImport;
   prebuiltRuleAssets: PrebuiltRuleAsset[];
   installedRuleIds: string[];
 }): RuleSource => {
