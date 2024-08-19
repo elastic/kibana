@@ -14,9 +14,6 @@ const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
-    queryBuilder: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
-    }),
   }),
 });
 

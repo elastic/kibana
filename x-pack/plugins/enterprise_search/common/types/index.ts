@@ -66,7 +66,6 @@ export interface ClientConfigType {
   host?: string;
   ui: {
     enabled: boolean;
-    searchModeEnabled?: boolean;
   };
 }
 

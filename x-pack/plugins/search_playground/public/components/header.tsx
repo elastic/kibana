@@ -82,7 +82,7 @@ export const Header: React.FC<HeaderProps> = ({
               <FormattedMessage id="xpack.searchPlayground.pageTitle" defaultMessage="Playground" />
             </h2>
           </EuiTitle>
-          {featureFlags.searchPlaygroundEnabled && (
+          {featureFlags?.searchPlaygroundEnabled && (
             <EuiSelect
               data-test-subj="page-mode-select"
               options={[
