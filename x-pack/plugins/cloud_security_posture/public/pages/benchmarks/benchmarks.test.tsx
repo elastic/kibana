@@ -22,7 +22,7 @@ import { useLicenseManagementLocatorApi } from '../../common/api/use_license_man
 jest.mock('./use_csp_benchmark_integrations');
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/api/use_license_management_locator_api');
-jest.mock('../../common/hooks/use_subscription_status');
+jest.mock('../../common/hooks/use_is_subscription_status_valid');
 jest.mock('../../common/navigation/use_csp_integration_link');
 
 const chance = new Chance();

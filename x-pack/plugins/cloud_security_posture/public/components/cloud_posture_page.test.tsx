@@ -26,7 +26,7 @@ const chance = new Chance();
 
 jest.mock('../common/api/use_setup_status_api');
 jest.mock('../common/api/use_license_management_locator_api');
-jest.mock('../common/hooks/use_subscription_status');
+jest.mock('../common/hooks/use_is_subscription_status_valid');
 jest.mock('../common/navigation/use_csp_integration_link');
 
 describe('<CloudPosturePage />', () => {

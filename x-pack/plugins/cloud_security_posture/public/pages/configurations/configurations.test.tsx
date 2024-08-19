@@ -53,11 +53,11 @@ describe('<Findings />', () => {
     expect(screen.getByText(/add kspm integration/i)).toBeInTheDocument();
   });
 
-  it("renders the 'latest misconfigurations findings' DataTable component when the CSPM/KSPM integration status not installed but there are findings", async () => {
+  it("renders the 'latest misconfigurations findings' DataTable component when the CSPM/KSPM integration status is not installed but there are findings", async () => {
     const finding1 = generateCspFinding('0003', 'failed');
     const finding2 = generateCspFinding('0004', 'passed');
 
-    server.use(statusHandlers.notInstalledHandler);
+    server.use(statusHandlers.notInstalledHasMisconfigurationsFindingsHandler);
     server.use(bsearchFindingsHandler([finding1, finding2]));
     renderFindingsPage();
 

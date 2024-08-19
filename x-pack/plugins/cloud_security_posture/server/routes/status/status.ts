@@ -146,6 +146,7 @@ const assertResponse = (resp: CspSetupStatus, logger: CspApiRequestHandlerContex
 const checkIndexHasFindings = async (
   esClient: ElasticsearchClient,
   index: string,
+  retentionPolicy: string,
   logger: Logger
 ) => {
   try {
@@ -158,7 +159,7 @@ const checkIndexHasFindings = async (
             {
               range: {
                 '@timestamp': {
-                  gte: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
+                  gte: `now-${retentionPolicy}`,
                   lte: 'now',
                 },
               },
@@ -169,9 +170,10 @@ const checkIndexHasFindings = async (
     });
 
     // Check the number of hits
-    const hasHits = !!response.hits.total.value;
+    const totalHits =
+      typeof response.hits.total === 'object' ? response.hits.total.value : response.hits.total;
 
-    return hasHits;
+    return !!totalHits;
   } catch (err) {
     logger.error(`Error checking if index ${index} has findings`);
     logger.error(err);
@@ -208,7 +210,12 @@ export const getCspStatus = async ({
     installedPackagePoliciesVulnMgmt,
     installedPolicyTemplates,
   ] = await Promise.all([
-    checkIndexHasFindings(esClient, CDR_MISCONFIGURATIONS_INDEX_PATTERN, logger),
+    checkIndexHasFindings(
+      esClient,
+      CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+      LATEST_FINDINGS_RETENTION_POLICY,
+      logger
+    ),
     checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, {
       postureType: POSTURE_TYPE_ALL,
       retentionTime: LATEST_VULNERABILITIES_RETENTION_POLICY,
