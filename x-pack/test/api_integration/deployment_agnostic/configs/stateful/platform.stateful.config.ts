@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { createStatefulTestConfig } from './default_configs/stateful.config.base';
+import { createStatefulTestConfig } from '../../default_configs/stateful.config.base';
 
 export default createStatefulTestConfig({
-  testFiles: [require.resolve('./stateful.index.ts')],
+  testFiles: [require.resolve('./platform.index.ts')],
   junit: {
-    reportName: 'Stateful - Deployment-agnostic API Integration Tests',
+    reportName: 'Platform Stateful - Deployment-agnostic API Integration Tests',
   },
 });
