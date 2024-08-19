@@ -6,8 +6,11 @@
  */
 
 import { decodeOrThrow } from '@kbn/io-ts-utils';
+import type {
+  MetricsAPIResponse,
+  MetricsAPIRequest,
+} from '@kbn/metrics-data-access-plugin/common/http_api/metrics_api';
 import { TIMESTAMP_FIELD } from '../../../common/constants';
-import { MetricsAPIRequest, MetricsAPIResponse } from '../../../common/http_api';
 import {
   ESSearchClient,
   CompositeResponseRT,

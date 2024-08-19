@@ -25,7 +25,6 @@ import {
   initGetLogAnalysisIdFormatsRoute,
 } from './routes/log_analysis';
 import { initMetadataRoute } from './routes/metadata';
-import { initMetricsAPIRoute } from './routes/metrics_api';
 import { initMetricsSourceConfigurationRoutes } from './routes/metrics_sources';
 import { initNodeDetailsRoute } from './routes/node_details';
 import { initOverviewRoute } from './routes/overview';
@@ -60,7 +59,6 @@ export const initInfraServer = (
   initValidateLogAnalysisIndicesRoute(libs);
   initGetLogEntryExamplesRoute(libs);
   initMetricsExplorerViewRoutes(libs);
-  initMetricsAPIRoute(libs);
   initMetadataRoute(libs);
   initInventoryMetaRoute(libs);
   initInventoryViewRoutes(libs);
