@@ -45,7 +45,6 @@ describe('useThreatIntelligenceDetails', () => {
       .mockReturnValue({ isAlert: true } as unknown as GetBasicDataFromDetailsData);
 
     jest.mocked(useSourcererDataView).mockReturnValue({
-      runtimeMappings: {},
       browserFields: {},
       dataViewId: '',
       loading: false,
