@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 
 import type { PackageInstallContext } from '../../../../common/types';
 import { getAssetsDataFromAssetsMap } from '../packages/assets';
