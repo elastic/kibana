@@ -45,6 +45,7 @@ import { identity, isObject } from 'lodash';
 import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import { Env } from '@kbn/config';
 import { CoreContext } from '@kbn/core-base-server-internal';
+import type { MetricsServiceSetup } from '@kbn/core-metrics-server';
 import { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
@@ -57,6 +58,8 @@ import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
 import { StaticAssets, type InternalStaticAssets } from './static_assets';
+
+const THRESHOLD = 0.3;
 
 /**
  * Adds ELU timings for the executed function to the current's context transaction
@@ -166,6 +169,7 @@ export type LifecycleRegistrar = Pick<
 export interface HttpServerSetupOptions {
   config$: Observable<HttpConfig>;
   executionContext?: InternalExecutionContextSetup;
+  getEluHistory?: MetricsServiceSetup['getEluHistory'];
 }
 
 /** @internal */
@@ -231,6 +235,7 @@ export class HttpServer {
   public async setup({
     config$,
     executionContext,
+    getEluHistory,
   }: HttpServerSetupOptions): Promise<HttpServerSetup> {
     const config = await firstValueFrom(config$);
     this.config = config;
@@ -245,6 +250,25 @@ export class HttpServer {
         options: {
           compress: { quality: config.compression.brotli.quality },
         },
+      });
+    }
+
+    if (getEluHistory) {
+      this.server.ext('onRequest', (_request, toolkit) => {
+        const { medium, short } = getEluHistory();
+
+        this.log.debug(`ELU: short=${short}, medium=${medium}`);
+
+        if (medium > THRESHOLD && short > THRESHOLD) {
+          this.log.warn('Request is throttled due to high event loop utilization');
+
+          return toolkit.response({
+            statusCode: 429,
+            body: 'Server is overloaded',
+          }).takeover();
+        }
+
+        return toolkit.continue;
       });
     }
 
