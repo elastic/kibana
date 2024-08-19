@@ -54,13 +54,16 @@ export function useGetReplacementCustomIntegrationsQuery() {
 }
 
 export function useGetCategoriesQuery(query: GetCategoriesRequest['query'] = {}) {
-  return useQuery<GetCategoriesResponse, RequestError>(['categories', query], () =>
-    sendRequestForRq<GetCategoriesResponse>({
-      path: epmRouteService.getCategoriesPath(),
-      method: 'get',
-      query,
-      version: API_VERSIONS.public.v1,
-    })
+  return useQuery<GetCategoriesResponse, RequestError>(
+    ['categories', query],
+    () =>
+      sendRequestForRq<GetCategoriesResponse>({
+        path: epmRouteService.getCategoriesPath(),
+        method: 'get',
+        query,
+        version: API_VERSIONS.public.v1,
+      }),
+    { retry: false }
   );
 }
 
@@ -96,6 +99,7 @@ export const useGetPackagesQuery = (
         query,
       }),
     enabled: options?.enabled,
+    retry: false,
   });
 };
 
@@ -151,7 +155,7 @@ export const useGetPackageInfoByKeyQuery = (
           ...(ignoreUnverifiedQueryParam && { ignoreUnverified: ignoreUnverifiedQueryParam }),
         },
       }),
-    { enabled: queryOptions.enabled, refetchOnMount: queryOptions.refetchOnMount }
+    { enabled: queryOptions.enabled, refetchOnMount: queryOptions.refetchOnMount, retry: false }
   );
 
   const confirm = async () => {
