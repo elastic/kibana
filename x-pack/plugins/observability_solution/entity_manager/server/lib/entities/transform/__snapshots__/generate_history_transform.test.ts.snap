@@ -155,7 +155,7 @@ Object {
 exports[`generateHistoryTransform(definition) should generate a valid history transform 1`] = `
 Object {
   "_meta": Object {
-    "definitionVersion": "999.999.999",
+    "definitionVersion": "1.0.0",
     "managed": false,
   },
   "defer_validation": true,
