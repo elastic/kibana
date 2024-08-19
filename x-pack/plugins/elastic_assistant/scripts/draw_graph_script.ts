@@ -25,12 +25,14 @@ const testPrompt = ChatPromptTemplate.fromMessages([
   ['human', '{input}'],
   ['placeholder', '{agent_scratchpad}'],
 ]);
-const createLlmInstance = () => {
-  return new ActionsClientSimpleChatModel({ response: 'test' });
-};
+
 const mockLlm = new FakeLLM({
   response: JSON.stringify({}, null, 2),
 }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+
+const createLlmInstance = () => {
+  return mockLlm;
+};
 
 async function getGraph(logger: Logger) {
   const agentRunnable = await createOpenAIFunctionsAgent({
