@@ -288,14 +288,14 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
                             values={{
                               default: (
                                 <strong>
-                                  {i18n.translate('charts.palettes.defaultPaletteLabel', {
+                                  {i18n.translate('dashboard.palettes.defaultPaletteLabel', {
                                     defaultMessage: 'Default',
                                   })}
                                 </strong>
                               ),
                               compatibility: (
                                 <strong>
-                                  {i18n.translate('charts.palettes.kibanaPaletteLabel', {
+                                  {i18n.translate('dashboard.palettes.kibanaPaletteLabel', {
                                     defaultMessage: 'Compatibility',
                                   })}
                                 </strong>
