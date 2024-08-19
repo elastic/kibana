@@ -479,9 +479,7 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
       },
       loadDataStreamIntegration: (context) => {
         if ('dataStreamSettings' in context && context.dataStreamSettings?.integration) {
-          const { type } = indexNameToDataStreamParts(context.dataStream);
           return dataStreamDetailsClient.getDataStreamIntegration({
-            type,
             integrationName: context.dataStreamSettings.integration,
           });
         }
