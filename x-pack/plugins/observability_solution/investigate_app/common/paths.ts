@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
-
-export const cpuTotal: MetricsUIAggregation = {
-  cpuTotal: {
-    avg: {
-      field: 'system.cpu.total.norm.pct',
-    },
+export const paths = {
+  investigations: `/app/investigations`,
+  create: `/app/investigations/new`,
+  investigationDetails: (id: string) => {
+    return `/app/investigations/${encodeURIComponent(id)}`;
   },
 };

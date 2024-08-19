@@ -7,23 +7,31 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { SHELL_TAB_ID, HISTORY_TAB_ID, CONFIG_TAB_ID } from './tab_ids';
 
 interface Props {
-  onClickHistory: () => void;
-  onClickSettings: () => void;
-  onClickHelp: () => void;
-  onClickVariables: () => void;
+  selectedTab: string;
+  setSelectedTab: (id: string) => void;
 }
 
-export function getTopNavConfig({
-  onClickHistory,
-  onClickSettings,
-  onClickHelp,
-  onClickVariables,
-}: Props) {
+export function getTopNavConfig({ selectedTab, setSelectedTab }: Props) {
   return [
     {
-      id: 'history',
+      id: SHELL_TAB_ID,
+      label: i18n.translate('console.topNav.shellTabLabel', {
+        defaultMessage: 'Shell',
+      }),
+      description: i18n.translate('console.topNav.shellTabDescription', {
+        defaultMessage: 'Shell',
+      }),
+      onClick: () => {
+        setSelectedTab(SHELL_TAB_ID);
+      },
+      testId: 'consoleShellButton',
+      isSelected: selectedTab === SHELL_TAB_ID,
+    },
+    {
+      id: HISTORY_TAB_ID,
       label: i18n.translate('console.topNav.historyTabLabel', {
         defaultMessage: 'History',
       }),
@@ -31,48 +39,24 @@ export function getTopNavConfig({
         defaultMessage: 'History',
       }),
       onClick: () => {
-        onClickHistory();
+        setSelectedTab(HISTORY_TAB_ID);
       },
       testId: 'consoleHistoryButton',
+      isSelected: selectedTab === HISTORY_TAB_ID,
     },
     {
-      id: 'settings',
-      label: i18n.translate('console.topNav.settingsTabLabel', {
-        defaultMessage: 'Settings',
+      id: CONFIG_TAB_ID,
+      label: i18n.translate('console.topNav.configTabLabel', {
+        defaultMessage: 'Config',
       }),
-      description: i18n.translate('console.topNav.settingsTabDescription', {
-        defaultMessage: 'Settings',
-      }),
-      onClick: () => {
-        onClickSettings();
-      },
-      testId: 'consoleSettingsButton',
-    },
-    {
-      id: 'variables',
-      label: i18n.translate('console.topNav.variablesTabLabel', {
-        defaultMessage: 'Variables',
-      }),
-      description: i18n.translate('console.topNav.variablesTabDescription', {
-        defaultMessage: 'Variables',
+      description: i18n.translate('console.topNav.configTabDescription', {
+        defaultMessage: 'Config',
       }),
       onClick: () => {
-        onClickVariables();
+        setSelectedTab(CONFIG_TAB_ID);
       },
-      testId: 'consoleVariablesButton',
-    },
-    {
-      id: 'help',
-      label: i18n.translate('console.topNav.helpTabLabel', {
-        defaultMessage: 'Help',
-      }),
-      description: i18n.translate('console.topNav.helpTabDescription', {
-        defaultMessage: 'Help',
-      }),
-      onClick: () => {
-        onClickHelp();
-      },
-      testId: 'consoleHelpButton',
+      testId: 'consoleConfigButton',
+      isSelected: selectedTab === CONFIG_TAB_ID,
     },
   ];
 }

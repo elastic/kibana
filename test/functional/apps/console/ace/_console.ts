@@ -87,7 +87,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('with query params', () => {
+    // Status badge is not yet implented in phase 2
+    describe.skip('with query params', () => {
       it('should issue a successful request', async () => {
         await PageObjects.console.clearTextArea();
         await PageObjects.console.enterRequest(

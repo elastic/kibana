@@ -113,7 +113,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('can toggle keyboard shortcuts', async () => {
+    // Settings not yet implemented
+    it.skip('can toggle keyboard shortcuts', async () => {
       // Enter a sample command
       await PageObjects.console.monaco.enterText('GET _search');
 
