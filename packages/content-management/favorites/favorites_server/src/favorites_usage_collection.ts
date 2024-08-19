@@ -43,7 +43,7 @@ export function registerFavoritesUsageCollection({
             type: 'double',
             _meta: {
               description:
-                'Average favorite objects count of this type per user per space for this deployment',
+                'Average favorite objects count of this type per user per space for this deployment, only counts users who have favorited at least one object of this type',
             },
           },
           max_per_user_per_space: {
