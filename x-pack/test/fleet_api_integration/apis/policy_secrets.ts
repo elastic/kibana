@@ -169,13 +169,13 @@ export default function (providerContext: FtrProviderContext) {
 
       // Reset the global settings object to disable secrets between tests.
       // Each test can re-run setup as part of its setup if it needs to enable secrets
-      await kibanaServer.savedObjects.update({
+      await kibanaServer.savedObjects.create({
         type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
         id: 'fleet-default-settings',
         attributes: {
           secret_storage_requirements_met: false,
         },
-        overwrite: false,
+        overwrite: true,
       });
     };
 

@@ -5,94 +5,176 @@
  * 2.0.
  */
 
-import { enumeration } from '@kbn/securitysolution-io-ts-types';
-import * as t from 'io-ts';
+import { z } from 'zod';
 
-import type { RuleResponse } from '../../model';
-import type { AggregatedPrebuiltRuleError } from '../model';
+import {
+  RuleSignatureId,
+  RuleVersion,
+  RuleName,
+  RuleTagArray,
+  RuleDescription,
+  Severity,
+  SeverityMapping,
+  RiskScore,
+  RiskScoreMapping,
+  RuleReferenceArray,
+  RuleFalsePositiveArray,
+  ThreatArray,
+  InvestigationGuide,
+  SetupGuide,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  MaxSignals,
+  BuildingBlockType,
+  RuleIntervalFrom,
+  RuleInterval,
+  RuleExceptionList,
+  RuleNameOverride,
+  TimestampOverride,
+  TimestampOverrideFallbackDisabled,
+  TimelineTemplateId,
+  TimelineTemplateTitle,
+  IndexPatternArray,
+  DataViewId,
+  RuleQuery,
+  QueryLanguage,
+  RuleFilterArray,
+  SavedQueryId,
+  KqlQueryLanguage,
+} from '../../model/rule_schema/common_attributes.gen';
+import {
+  MachineLearningJobId,
+  AnomalyThreshold,
+} from '../../model/rule_schema/specific_attributes/ml_attributes.gen';
+import {
+  ThreatQuery,
+  ThreatMapping,
+  ThreatIndex,
+  ThreatFilters,
+  ThreatIndicatorPath,
+} from '../../model/rule_schema/specific_attributes/threat_match_attributes.gen';
+import {
+  NewTermsFields,
+  HistoryWindowStart,
+} from '../../model/rule_schema/specific_attributes/new_terms_attributes.gen';
+import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
+import { AggregatedPrebuiltRuleError } from '../model';
 
-export enum PickVersionValues {
-  BASE = 'BASE',
-  CURRENT = 'CURRENT',
-  TARGET = 'TARGET',
-}
+export type PickVersionValues = z.infer<typeof PickVersionValues>;
+export const PickVersionValues = z.enum(['BASE', 'CURRENT', 'TARGET', 'MERGED']);
+export type PickVersionValuesEnum = typeof PickVersionValues.enum;
+export const PickVersionValuesEnum = PickVersionValues.enum;
 
-export const TPickVersionValues = enumeration('PickVersionValues', PickVersionValues);
+const createUpgradeFieldSchema = <T extends z.ZodType>(fieldSchema: T) =>
+  z
+    .discriminatedUnion('pick_version', [
+      z.object({
+        pick_version: PickVersionValues,
+      }),
+      z.object({
+        pick_version: z.literal('RESOLVED'),
+        resolved_value: fieldSchema,
+      }),
+    ])
+    .optional();
 
-export const RuleUpgradeSpecifier = t.exact(
-  t.intersection([
-    t.type({
-      rule_id: t.string,
-      /**
-       * This parameter is needed for handling race conditions with Optimistic Concurrency Control.
-       * Two or more users can call upgrade/_review and upgrade/_perform endpoints concurrently.
-       * Also, in general the time between these two calls can be anything.
-       * The idea is to only allow the user to install a rule if the user has reviewed the exact version
-       * of it that had been returned from the _review endpoint. If the version changed on the BE,
-       * upgrade/_perform endpoint will return a version mismatch error for this rule.
-       */
-      revision: t.number,
-      /**
-       * The target version to upgrade to.
-       */
-      version: t.number,
-    }),
-    t.partial({
-      pick_version: TPickVersionValues,
-    }),
-  ])
-);
-export type RuleUpgradeSpecifier = t.TypeOf<typeof RuleUpgradeSpecifier>;
+export type RuleUpgradeSpecifier = z.infer<typeof RuleUpgradeSpecifier>;
+export const RuleUpgradeSpecifier = z.object({
+  rule_id: RuleSignatureId,
+  revision: z.number(),
+  version: RuleVersion,
+  pick_version: PickVersionValues.optional(),
+  // Fields that can be customized during the upgrade workflow
+  // as decided in: https://github.com/elastic/kibana/issues/186544
+  fields: z
+    .object({
+      name: createUpgradeFieldSchema(RuleName),
+      tags: createUpgradeFieldSchema(RuleTagArray),
+      description: createUpgradeFieldSchema(RuleDescription),
+      severity: createUpgradeFieldSchema(Severity),
+      severity_mapping: createUpgradeFieldSchema(SeverityMapping),
+      risk_score: createUpgradeFieldSchema(RiskScore),
+      risk_score_mapping: createUpgradeFieldSchema(RiskScoreMapping),
+      references: createUpgradeFieldSchema(RuleReferenceArray),
+      false_positives: createUpgradeFieldSchema(RuleFalsePositiveArray),
+      threat: createUpgradeFieldSchema(ThreatArray),
+      note: createUpgradeFieldSchema(InvestigationGuide),
+      setup: createUpgradeFieldSchema(SetupGuide),
+      related_integrations: createUpgradeFieldSchema(RelatedIntegrationArray),
+      required_fields: createUpgradeFieldSchema(RequiredFieldArray),
+      max_signals: createUpgradeFieldSchema(MaxSignals),
+      building_block_type: createUpgradeFieldSchema(BuildingBlockType),
+      from: createUpgradeFieldSchema(RuleIntervalFrom),
+      interval: createUpgradeFieldSchema(RuleInterval),
+      exceptions_list: createUpgradeFieldSchema(RuleExceptionList),
+      rule_name_override: createUpgradeFieldSchema(RuleNameOverride),
+      timestamp_override: createUpgradeFieldSchema(TimestampOverride),
+      timestamp_override_fallback_disabled: createUpgradeFieldSchema(
+        TimestampOverrideFallbackDisabled
+      ),
+      timeline_id: createUpgradeFieldSchema(TimelineTemplateId),
+      timeline_title: createUpgradeFieldSchema(TimelineTemplateTitle),
+      index: createUpgradeFieldSchema(IndexPatternArray),
+      data_view_id: createUpgradeFieldSchema(DataViewId),
+      query: createUpgradeFieldSchema(RuleQuery),
+      language: createUpgradeFieldSchema(QueryLanguage),
+      filters: createUpgradeFieldSchema(RuleFilterArray),
+      saved_id: createUpgradeFieldSchema(SavedQueryId),
+      machine_learning_job_id: createUpgradeFieldSchema(MachineLearningJobId),
+      anomaly_threshold: createUpgradeFieldSchema(AnomalyThreshold),
+      threat_query: createUpgradeFieldSchema(ThreatQuery),
+      threat_mapping: createUpgradeFieldSchema(ThreatMapping),
+      threat_index: createUpgradeFieldSchema(ThreatIndex),
+      threat_filters: createUpgradeFieldSchema(ThreatFilters),
+      threat_indicator_path: createUpgradeFieldSchema(ThreatIndicatorPath),
+      threat_language: createUpgradeFieldSchema(KqlQueryLanguage),
+      new_terms_fields: createUpgradeFieldSchema(NewTermsFields),
+      history_window_start: createUpgradeFieldSchema(HistoryWindowStart),
+    })
+    .optional(),
+});
 
-export type UpgradeSpecificRulesRequest = t.TypeOf<typeof UpgradeSpecificRulesRequest>;
-export const UpgradeSpecificRulesRequest = t.exact(
-  t.intersection([
-    t.type({
-      mode: t.literal(`SPECIFIC_RULES`),
-      rules: t.array(RuleUpgradeSpecifier),
-    }),
-    t.partial({
-      pick_version: TPickVersionValues,
-    }),
-  ])
-);
+export type UpgradeSpecificRulesRequest = z.infer<typeof UpgradeSpecificRulesRequest>;
+export const UpgradeSpecificRulesRequest = z.object({
+  mode: z.literal('SPECIFIC_RULES'),
+  rules: z.array(RuleUpgradeSpecifier),
+  pick_version: PickVersionValues.optional(),
+});
 
-export const UpgradeAllRulesRequest = t.exact(
-  t.intersection([
-    t.type({
-      mode: t.literal(`ALL_RULES`),
-    }),
-    t.partial({
-      pick_version: TPickVersionValues,
-    }),
-  ])
-);
+export type UpgradeAllRulesRequest = z.infer<typeof UpgradeAllRulesRequest>;
+export const UpgradeAllRulesRequest = z.object({
+  mode: z.literal('ALL_RULES'),
+  pick_version: PickVersionValues.optional(),
+});
 
-export const PerformRuleUpgradeRequestBody = t.union([
+export type SkipRuleUpgradeReason = z.infer<typeof SkipRuleUpgradeReason>;
+export const SkipRuleUpgradeReason = z.enum(['RULE_UP_TO_DATE']);
+export type SkipRuleUpgradeReasonEnum = typeof SkipRuleUpgradeReason.enum;
+export const SkipRuleUpgradeReasonEnum = SkipRuleUpgradeReason.enum;
+
+export type SkippedRuleUpgrade = z.infer<typeof SkippedRuleUpgrade>;
+export const SkippedRuleUpgrade = z.object({
+  rule_id: z.string(),
+  reason: SkipRuleUpgradeReason,
+});
+
+export type PerformRuleUpgradeResponseBody = z.infer<typeof PerformRuleUpgradeResponseBody>;
+export const PerformRuleUpgradeResponseBody = z.object({
+  summary: z.object({
+    total: z.number(),
+    succeeded: z.number(),
+    skipped: z.number(),
+    failed: z.number(),
+  }),
+  results: z.object({
+    updated: z.array(RuleResponse),
+    skipped: z.array(SkippedRuleUpgrade),
+  }),
+  errors: z.array(AggregatedPrebuiltRuleError),
+});
+
+export type PerformRuleUpgradeRequestBody = z.infer<typeof PerformRuleUpgradeRequestBody>;
+export const PerformRuleUpgradeRequestBody = z.discriminatedUnion('mode', [
   UpgradeAllRulesRequest,
   UpgradeSpecificRulesRequest,
 ]);
-export type PerformRuleUpgradeRequestBody = t.TypeOf<typeof PerformRuleUpgradeRequestBody>;
-
-export enum SkipRuleUpgradeReason {
-  RULE_UP_TO_DATE = 'RULE_UP_TO_DATE',
-}
-
-export interface SkippedRuleUpgrade {
-  rule_id: string;
-  reason: SkipRuleUpgradeReason;
-}
-
-export interface PerformRuleUpgradeResponseBody {
-  summary: {
-    total: number;
-    succeeded: number;
-    skipped: number;
-    failed: number;
-  };
-  results: {
-    updated: RuleResponse[];
-    skipped: SkippedRuleUpgrade[];
-  };
-  errors: AggregatedPrebuiltRuleError[];
-}

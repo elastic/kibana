@@ -120,7 +120,7 @@ export class DataViewLazy extends AbstractDataView {
 
   public getRuntimeFields = ({ fieldName = ['*'] }: Pick<GetFieldsParams, 'fieldName'>) =>
     // getRuntimeFieldSpecMap flattens composites into a list of fields
-    Object.values(this.getRuntimeFieldSpecMap({ fieldName })).reduce<DataViewFieldMap>(
+    Object.values(this.getRuntimeFieldSpecMap({ fieldName: ['*'] })).reduce<DataViewFieldMap>(
       (col, field) => {
         if (!fieldMatchesFieldsRequested(field.name, fieldName)) {
           return col;

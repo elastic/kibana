@@ -73,12 +73,6 @@ export interface SourcererDataView extends KibanaDataView {
   /** set when data view fields are fetched */
   loading: boolean;
   /**
-   * @deprecated use sourcererDataView.runtimeMappings
-   * Needed to pass to search strategy
-   * Remove once issue resolved: https://github.com/elastic/kibana/issues/111762
-   */
-  runtimeMappings: RunTimeMappings;
-  /**
    * @type DataView @kbn/data-views-plugin/common
    */
   dataView: DataViewSpec | undefined;
@@ -103,25 +97,8 @@ export interface SelectedDataView {
   indicesExist: boolean;
   /** is an update being made to the data view */
   loading: boolean;
-  /**
-   * @deprecated use sourcererDataView.title or sourcererDataView.matchedIndices
-   * all active & inactive patterns from SourcererDataView['title']
-   */
-  patternList: string[];
-  /**
-   * @deprecated use sourcererDataView.runtimeMappings
-   */
-  runtimeMappings: SourcererDataView['runtimeMappings'];
-  /**
-   * @deprecated use sourcererDataView.title or sourcererDataView.matchedIndices
-   * all selected patterns from SourcererScope['selectedPatterns'] */
+  /* all selected patterns from SourcererScope['selectedPatterns'] */
   selectedPatterns: SourcererScope['selectedPatterns'];
-  /**
-   * @deprecated use sourcererDataView.title or sourcererDataView.matchedIndices
-   * active patterns when dataViewId == null
-   */
-  activePatterns?: string[];
-
   /**
    * Easier to add this additional data rather than
    * try to extend the SelectedDataView type from DataView.
@@ -165,7 +142,6 @@ export const initDataView: SourcererDataView & { id: string; error?: unknown } =
   fields: undefined,
   loading: false,
   patternList: [],
-  runtimeMappings: {},
   title: '',
   dataView: undefined,
 };

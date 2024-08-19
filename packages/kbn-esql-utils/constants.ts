@@ -6,3 +6,4 @@
  * Side Public License, v 1.
  */
 export const ENABLE_ESQL = 'enableESQL';
+export const FEEDBACK_LINK = 'https://ela.st/esql-feedback';

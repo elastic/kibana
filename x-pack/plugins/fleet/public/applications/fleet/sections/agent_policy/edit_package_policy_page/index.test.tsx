@@ -541,7 +541,7 @@ describe('edit package policy page', () => {
       expect(sendCreateAgentPolicy as jest.MockedFunction<any>).toHaveBeenCalledWith(
         {
           description: '',
-          monitoring_enabled: ['logs', 'metrics'],
+          monitoring_enabled: ['logs', 'metrics', 'traces'],
           name: 'Agent policy 2',
           namespace: 'default',
           inactivity_timeout: 1209600,

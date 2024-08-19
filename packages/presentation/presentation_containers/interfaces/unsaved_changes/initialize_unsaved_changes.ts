@@ -12,7 +12,6 @@ import {
   combineLatestWith,
   debounceTime,
   map,
-  skip,
   Subscription,
 } from 'rxjs';
 import {
@@ -74,7 +73,6 @@ export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
   subscriptions.push(
     combineLatest(comparatorSubjects)
       .pipe(
-        skip(1),
         debounceTime(COMPARATOR_SUBJECTS_DEBOUNCE),
         map((latestStates) =>
           comparatorKeys.reduce((acc, key, index) => {
