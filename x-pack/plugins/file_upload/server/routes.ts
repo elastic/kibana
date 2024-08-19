@@ -34,13 +34,14 @@ function importData(
   client: IScopedClusterClient,
   id: string | undefined,
   index: string,
+  reuseIndex: boolean,
   settings: IndicesIndexSettings,
   mappings: MappingTypeMapping,
   ingestPipeline: IngestPipelineWrapper,
   data: InputData
 ) {
   const { importData: importDataFunc } = importDataProvider(client);
-  return importDataFunc(id, index, settings, mappings, ingestPipeline, data);
+  return importDataFunc(id, index, reuseIndex, settings, mappings, ingestPipeline, data);
 }
 
 /**
@@ -164,7 +165,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       async (context, request, response) => {
         try {
           const { id } = request.query;
-          const { index, data, settings, mappings, ingestPipeline } = request.body;
+          const { index, reuseIndex, data, settings, mappings, ingestPipeline } = request.body;
           const esClient = (await context.core).elasticsearch.client;
 
           // `id` being `undefined` tells us that this is a new import due to create a new index.
@@ -178,6 +179,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
             esClient,
             id,
             index,
+            !!reuseIndex,
             settings,
             mappings,
             // @ts-expect-error
