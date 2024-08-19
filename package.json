@@ -533,6 +533,7 @@
     "@kbn/guided-onboarding-plugin": "link:src/plugins/guided_onboarding",
     "@kbn/handlebars": "link:packages/kbn-handlebars",
     "@kbn/hapi-mocks": "link:packages/kbn-hapi-mocks",
+    "@kbn/hardening-plugin": "link:test/plugin_functional/plugins/hardening",
     "@kbn/health-gateway-server": "link:packages/kbn-health-gateway-server",
     "@kbn/hello-world-plugin": "link:examples/hello_world",
     "@kbn/home-plugin": "link:src/plugins/home",
