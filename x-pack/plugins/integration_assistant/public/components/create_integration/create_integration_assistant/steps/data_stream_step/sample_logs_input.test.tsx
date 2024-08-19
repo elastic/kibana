@@ -130,7 +130,7 @@ describe('parseJSONArray', () => {
   it('should parse valid JSON array', () => {
     const expected = {
       entries: content,
-      pathToEntries: '',
+      pathToEntries: [],
       errorNoArrayFound: false,
     };
     expect(parseJSONArray(singlelineArray)).toEqual(expected);
@@ -141,7 +141,7 @@ describe('parseJSONArray', () => {
   it('should parse valid JSON object with array entries', () => {
     const expected = {
       entries: content,
-      pathToEntries: 'events',
+      pathToEntries: ['events'],
       errorNoArrayFound: false,
     };
     expect(parseJSONArray(complexEventsJSON)).toEqual(expected);
@@ -150,7 +150,7 @@ describe('parseJSONArray', () => {
   it('should fail if the JSON object with array entries has not an identifier-like key', () => {
     const expected = {
       entries: [],
-      pathToEntries: '',
+      pathToEntries: [],
       errorNoArrayFound: true,
     };
     expect(parseJSONArray(nonIdentifierLikeKeyInJSON)).toEqual(expected);
@@ -160,7 +160,7 @@ describe('parseJSONArray', () => {
     const fileContent = '{"records" : {"message": "test message 1"}}';
     const expected = {
       entries: [],
-      pathToEntries: '',
+      pathToEntries: [],
       errorNoArrayFound: true,
     };
     expect(parseJSONArray(fileContent)).toEqual(expected);
@@ -193,7 +193,7 @@ describe('SampleLogsInput', () => {
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
           logsSampleParsed: logsSampleRaw.split(','),
-          sampleFormat: { name: 'json', json_path: '' },
+          sampleFormat: { name: 'json', json_path: [] },
         });
       });
 
@@ -206,7 +206,7 @@ describe('SampleLogsInput', () => {
         it('should truncate the logs sample', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
             logsSampleParsed: tooLargeLogsSample.split(',').slice(0, 10),
-            sampleFormat: { name: 'json', json_path: '' },
+            sampleFormat: { name: 'json', json_path: [] },
           });
         });
         it('should add a notification toast', () => {
@@ -225,7 +225,7 @@ describe('SampleLogsInput', () => {
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
           logsSampleParsed: splitNDJSON,
-          sampleFormat: { name: 'json', json_path: 'events' },
+          sampleFormat: { name: 'json', json_path: ['events'] },
         });
       });
     });

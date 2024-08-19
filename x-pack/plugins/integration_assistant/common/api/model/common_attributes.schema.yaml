@@ -52,8 +52,10 @@ components:
           type: boolean
           description: For some formats, specifies if the samples can be multiline.
         json_path:
-          type: string
+          type: array
           description: For a JSON format, describes how to get to the sample array from the root of the JSON.
+          items:
+            type: string
 
     Pipeline:
       type: object

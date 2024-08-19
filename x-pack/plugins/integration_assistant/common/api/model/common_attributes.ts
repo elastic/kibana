@@ -61,7 +61,7 @@ export const SampleFormat = z.object({
   /**
    * For a JSON format, describes how to get to the sample array from the root of the JSON.
    */
-  json_path: z.string().optional(),
+  json_path: z.array(z.string()).optional(),
 });
 
 /**

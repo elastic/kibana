@@ -58,10 +58,10 @@ export const isIdentifierLike = (key: string): boolean => {
  */
 export const parseJSONArray = (
   fileContent: string
-): { entries: unknown[]; pathToEntries: string; errorNoArrayFound: boolean } => {
+): { entries: unknown[]; pathToEntries: string[]; errorNoArrayFound: boolean } => {
   const jsonContent = JSON.parse(fileContent);
   if (Array.isArray(jsonContent)) {
-    return { entries: jsonContent, pathToEntries: '', errorNoArrayFound: false };
+    return { entries: jsonContent, pathToEntries: [], errorNoArrayFound: false };
   }
   if (typeof jsonContent === 'object' && jsonContent !== null) {
     const arrayKeys = Object.keys(jsonContent).filter((key) => Array.isArray(jsonContent[key]));
@@ -70,13 +70,13 @@ export const parseJSONArray = (
       if (isIdentifierLike(key)) {
         return {
           entries: jsonContent[key],
-          pathToEntries: key,
+          pathToEntries: [key],
           errorNoArrayFound: false,
         };
       }
     }
   }
-  return { errorNoArrayFound: true, entries: [], pathToEntries: '' };
+  return { errorNoArrayFound: true, entries: [], pathToEntries: [] };
 };
 
 /**
@@ -104,7 +104,7 @@ const parseLogsContent = (
     //   for a one-line object {} -> do nothing (keep as NDJSON)
     if (parsedContent.length === 1 && Array.isArray(parsedContent[0])) {
       parsedContent = parsedContent[0];
-      sampleFormat = { name: 'json', json_path: '' };
+      sampleFormat = { name: 'json', json_path: [] };
     } else {
       sampleFormat = { name: 'ndjson', multiline: false };
     }
