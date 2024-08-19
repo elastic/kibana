@@ -128,6 +128,7 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
                   <EuiButtonEmpty
                     size="xs"
                     color="primary"
+                    data-test-subj="clearConsoleOutput"
                     onClick={() => dispatch({ type: 'cleanRequest', payload: undefined })}
                   >
                     Clear this output
