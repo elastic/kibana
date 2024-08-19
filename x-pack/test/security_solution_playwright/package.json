@@ -1,0 +1,9 @@
+{
+  "name": "security_solution_playwright",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "playwright": "node ./scripts/start_playwright open --config-file security_solution_playwright/playwright.config.ts --ftr-config-file ../security_solution_cypress/cli_config"
+  }
+}
