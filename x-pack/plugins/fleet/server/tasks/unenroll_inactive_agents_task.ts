@@ -118,7 +118,7 @@ export class UnenrollInactiveAgentsTask {
     const policiesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed: false AND ${AGENT_POLICY_SAVED_OBJECT_TYPE}.unenroll_timeout > 0`;
     let agentCounter = 0;
 
-    const agentPolicyFetcher = agentPolicyService.fetchAllAgentPolicies(soClient, {
+    const agentPolicyFetcher = await agentPolicyService.fetchAllAgentPolicies(soClient, {
       kuery: policiesKuery,
       perPage: POLICIES_BATCHSIZE,
     });
