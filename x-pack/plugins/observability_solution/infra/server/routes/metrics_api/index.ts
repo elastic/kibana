@@ -8,10 +8,16 @@
 import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import { throwErrors } from '@kbn/io-ts-utils';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
+import {
+  MetricsAPIRequestRT,
+  MetricsAPIResponseRT,
+} from '@kbn/metrics-data-access-plugin/common/http_api';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { createSearchClient } from '../../lib/create_search_client';
 import { query } from '../../lib/metrics';
-import { MetricsAPIRequest, isMetricsAPIRequest } from '../../../common/http_api';
 
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
@@ -26,16 +32,17 @@ export const initMetricsAPIRoute = (libs: InfraBackendLibs) => {
       },
     },
     async (requestContext, request, response) => {
-      if (isMetricsAPIRequest(request.body)) {
-        const options: MetricsAPIRequest = request.body;
-        const client = createSearchClient(requestContext, framework);
-        const metricsApiResponse = await query(client, options);
-        return response.ok({
-          body: metricsApiResponse,
-        });
-      }
-      throwErrors(Boom.badRequest);
-      return response.badRequest();
+      const options = pipe(
+        MetricsAPIRequestRT.decode(request.body),
+        fold(throwErrors(Boom.badRequest), identity)
+      );
+
+      const client = createSearchClient(requestContext, framework);
+      const metricsApiResponse = await query(client, options);
+
+      return response.ok({
+        body: MetricsAPIResponseRT.encode(metricsApiResponse),
+      });
     }
   );
 };

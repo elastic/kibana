@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { createLiteralValueFromUndefinedRT } from '@kbn/io-ts-utils';
 import { afterKeyObjectRT, timeRangeRT } from './metrics_explorer';
 import { MetricsUIAggregation } from '../inventory_models/types';
 
@@ -20,24 +21,31 @@ export interface MetricsAPIMetric {
   aggregations: MetricsUIAggregation;
 }
 
-export interface MetricsAPIRequest {
-  timerange: TimeRange;
-  indexPattern: string;
-  metrics: MetricsAPIMetric[];
-  includeTimeseries: boolean | undefined;
-  groupBy?: Array<string | null | undefined>;
-  groupInstance?: Array<string | null | undefined>;
-  modules?: string[];
-  afterKey?: Record<string, string | null> | null;
-  limit?: number | null;
-  filters?: Array<Record<string, unknown>>;
-  dropPartialBuckets?: boolean;
-  alignDataToEnd?: boolean;
-}
+const groupByRT = rt.union([rt.string, rt.null, rt.undefined]);
 
-export const isMetricsAPIRequest = (request?: any): request is MetricsAPIRequest => {
-  return !!(request as MetricsAPIRequest);
-};
+export const MetricsAPIMetricRT = rt.type({
+  id: rt.string,
+  aggregations: rt.UnknownRecord,
+});
+
+export const MetricsAPIRequestRT = rt.intersection([
+  rt.type({
+    timerange: timeRangeRT,
+    indexPattern: rt.string,
+    metrics: rt.array(MetricsAPIMetricRT),
+    includeTimeseries: rt.union([rt.boolean, createLiteralValueFromUndefinedRT(true)]),
+  }),
+  rt.partial({
+    groupBy: rt.array(groupByRT),
+    groupInstance: rt.array(groupByRT),
+    modules: rt.array(rt.string),
+    afterKey: rt.union([rt.null, afterKeyObjectRT]),
+    limit: rt.union([rt.number, rt.null]),
+    filters: rt.array(rt.UnknownRecord),
+    dropPartialBuckets: rt.boolean,
+    alignDataToEnd: rt.boolean,
+  }),
+]);
 
 export const MetricsAPIPageInfoRT = rt.intersection([
   rt.type({
@@ -87,6 +95,10 @@ export const MetricsAPIResponseRT = rt.type({
   series: rt.array(MetricsAPIResponseSeriesRT),
   info: MetricsAPIPageInfoRT,
 });
+
+export type MetricsAPIRequest = Omit<rt.OutputOf<typeof MetricsAPIRequestRT>, 'metrics'> & {
+  metrics: MetricsAPIMetric[];
+};
 
 export type MetricsAPITimerange = rt.TypeOf<typeof timeRangeRT>;
 
