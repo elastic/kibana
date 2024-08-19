@@ -11,6 +11,8 @@ Swap saved object references
 Misuse can break large numbers of saved objects! Practicing with a backup is recommended. 
 ====
 
+NOTE: For the latest details, refer to {api-kibana}/group/endpoint-data-views[data view APIs].
+
 [NOTE]
 ====
 For the most up-to-date API details, refer to the
