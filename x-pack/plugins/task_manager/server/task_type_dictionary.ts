@@ -7,7 +7,13 @@
 
 import { ObjectType } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
-import { TaskDefinition, taskDefinitionSchema, TaskRunCreatorFunction, TaskPriority } from './task';
+import {
+  TaskDefinition,
+  taskDefinitionSchema,
+  TaskRunCreatorFunction,
+  TaskPriority,
+  TaskCost,
+} from './task';
 import { CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE } from './constants';
 
 /**
@@ -50,6 +56,10 @@ export interface TaskRegisterDefinition {
    * claimed before low priority
    */
   priority?: TaskPriority;
+  /**
+   * An optional definition of the cost associated with running the task.
+   */
+  cost?: TaskCost;
   /**
    * An optional more detailed description of what this task does.
    */
@@ -117,9 +127,8 @@ export class TaskTypeDictionary {
     return this.definitions.size;
   }
 
-  public get(type: string): TaskDefinition {
-    this.ensureHas(type);
-    return this.definitions.get(type)!;
+  public get(type: string): TaskDefinition | undefined {
+    return this.definitions.get(type);
   }
 
   public ensureHas(type: string) {

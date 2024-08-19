@@ -88,6 +88,9 @@ const useSummaryPanel = () => {
 
     isDatasetsActivityLoading,
     datasetsActivity,
+
+    numberOfDatasets: filteredItems.length,
+    numberOfDocuments: filteredItems.reduce((acc, curr) => acc + curr.degradedDocs.docsCount, 0),
   };
 };
 

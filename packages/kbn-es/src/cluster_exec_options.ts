@@ -7,7 +7,7 @@
  */
 
 export interface EsClusterExecOptions {
-  skipNativeRealmSetup?: boolean;
+  skipSecuritySetup?: boolean;
   reportTime?: (...args: any[]) => void;
   startTime?: number;
   esArgs?: string[] | string;

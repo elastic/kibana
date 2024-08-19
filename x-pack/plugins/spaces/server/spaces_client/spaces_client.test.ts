@@ -22,6 +22,7 @@ const createMockConfig = (
     enabled: true,
     maxSpaces: 1000,
     allowFeatureVisibility: true,
+    allowSolutionVisibility: true,
   }
 ) => {
   return ConfigSchema.validate(mockConfig, { serverless: !mockConfig.allowFeatureVisibility });
@@ -311,6 +312,7 @@ describe('#create', () => {
       enabled: true,
       maxSpaces,
       allowFeatureVisibility: true,
+      allowSolutionVisibility: true,
     });
 
     const client = new SpacesClient(
@@ -347,6 +349,7 @@ describe('#create', () => {
       enabled: true,
       maxSpaces,
       allowFeatureVisibility: true,
+      allowSolutionVisibility: true,
     });
 
     const client = new SpacesClient(
@@ -382,6 +385,7 @@ describe('#create', () => {
       enabled: true,
       maxSpaces,
       allowFeatureVisibility: true,
+      allowSolutionVisibility: true,
     });
 
     const client = new SpacesClient(
@@ -428,6 +432,7 @@ describe('#create', () => {
       enabled: true,
       maxSpaces,
       allowFeatureVisibility: true,
+      allowSolutionVisibility: true,
     });
 
     const client = new SpacesClient(
@@ -470,6 +475,7 @@ describe('#create', () => {
         enabled: true,
         maxSpaces,
         allowFeatureVisibility: false,
+        allowSolutionVisibility: false,
       });
 
       const client = new SpacesClient(
@@ -506,6 +512,7 @@ describe('#create', () => {
         enabled: true,
         maxSpaces,
         allowFeatureVisibility: false,
+        allowSolutionVisibility: false,
       });
 
       const client = new SpacesClient(
@@ -520,6 +527,46 @@ describe('#create', () => {
         client.create({ ...spaceToCreate, disabledFeatures: ['some-feature'] })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Unable to create Space, the disabledFeatures array must be empty when xpack.spaces.allowFeatureVisibility setting is disabled"`
+      );
+
+      expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
+        type: 'space',
+        page: 1,
+        perPage: 0,
+      });
+      expect(mockCallWithRequestRepository.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when config.allowSolutionVisibility is disabled', () => {
+    test(`throws bad request when creating space with solution`, async () => {
+      const maxSpaces = 5;
+      const mockDebugLogger = createMockDebugLogger();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      mockCallWithRequestRepository.create.mockResolvedValue(savedObject);
+      mockCallWithRequestRepository.find.mockResolvedValue({
+        total: maxSpaces - 1,
+      } as any);
+
+      const mockConfig = createMockConfig({
+        enabled: true,
+        maxSpaces,
+        allowFeatureVisibility: false,
+        allowSolutionVisibility: false,
+      });
+
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional'
+      );
+
+      await expect(
+        client.create({ ...spaceToCreate, solution: 'es' })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unable to create Space, the solution property can not be set when xpack.spaces.allowSolutionVisibility setting is disabled"`
       );
 
       expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
@@ -675,6 +722,7 @@ describe('#update', () => {
         enabled: true,
         maxSpaces: 1000,
         allowFeatureVisibility: false,
+        allowSolutionVisibility: false,
       });
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
@@ -700,6 +748,7 @@ describe('#update', () => {
         enabled: true,
         maxSpaces: 1000,
         allowFeatureVisibility: false,
+        allowSolutionVisibility: false,
       });
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
@@ -717,6 +766,38 @@ describe('#update', () => {
         client.update(id, { ...spaceToUpdate, disabledFeatures: ['some-feature'] })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Unable to update Space, the disabledFeatures array must be empty when xpack.spaces.allowFeatureVisibility setting is disabled"`
+      );
+
+      expect(mockCallWithRequestRepository.update).not.toHaveBeenCalled();
+      expect(mockCallWithRequestRepository.get).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when config.allowSolutionVisibility is disabled', () => {
+    test(`throws bad request when updating space with solution`, async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig({
+        enabled: true,
+        maxSpaces: 1000,
+        allowFeatureVisibility: false,
+        allowSolutionVisibility: false,
+      });
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
+
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional'
+      );
+      const id = savedObject.id;
+
+      await expect(
+        client.update(id, { ...spaceToUpdate, solution: 'es' })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unable to update Space, the solution property can not be set when xpack.spaces.allowSolutionVisibility setting is disabled"`
       );
 
       expect(mockCallWithRequestRepository.update).not.toHaveBeenCalled();

@@ -11,15 +11,11 @@ import { isEmpty } from 'lodash/fp';
 
 import {
   EuiFlyout,
-  EuiFlyoutHeader,
   EuiTitle,
-  EuiFlyoutFooter,
   EuiFlyoutBody,
   EuiButton,
-  EuiButtonEmpty,
   EuiHorizontalRule,
   EuiSpacer,
-  EuiFlexGroup,
   EuiSkeletonText,
   EuiCallOut,
   EuiText,
@@ -56,13 +52,15 @@ import type { Rule } from '../../../rule_management/logic/types';
 import { ExceptionItemsFlyoutAlertsActions } from '../flyout_components/alerts_actions';
 import { ExceptionsAddToRulesOrLists } from '../flyout_components/add_exception_to_rule_or_list';
 import { useAddNewExceptionItems } from './use_add_new_exceptions';
-import { enrichNewExceptionItems } from '../flyout_components/utils';
 import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
 import { ruleTypesThatAllowLargeValueLists } from '../../utils/constants';
 import { useInvalidateFetchRuleByIdQuery } from '../../../rule_management/api/hooks/use_fetch_rule_by_id_query';
 import { ExceptionsExpireTime } from '../flyout_components/expire_time';
 import { CONFIRM_WARNING_MODAL_LABELS } from '../../../../management/common/translations';
 import { ArtifactConfirmModal } from '../../../../management/components/artifact_list_page/components/artifact_confirm_modal';
+import { ExceptionFlyoutFooter } from '../flyout_components/footer';
+import { ExceptionFlyoutHeader } from '../flyout_components/header';
+import { isSubmitDisabled, prepareNewItemsForSubmission, prepareToCloseAlerts } from './helpers';
 
 const SectionHeader = styled(EuiTitle)`
   ${() => css`
@@ -94,18 +92,6 @@ const FlyoutBodySection = styled(EuiFlyoutBody)`
     &.builder-section {
       overflow-y: scroll;
     }
-  `}
-`;
-
-const FlyoutHeader = styled(EuiFlyoutHeader)`
-  ${({ theme }) => css`
-    border-bottom: 1px solid ${theme.eui.euiColorLightShade};
-  `}
-`;
-
-const FlyoutFooterGroup = styled(EuiFlexGroup)`
-  ${({ theme }) => css`
-    padding: ${theme.eui.euiSizeS};
   `}
 `;
 
@@ -395,23 +381,16 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     if (submitNewExceptionItems == null) return;
 
     try {
-      const ruleDefaultOptions = ['add_to_rule', 'add_to_rules', 'select_rules_to_add_to'];
-      const addToRules = ruleDefaultOptions.includes(addExceptionToRadioSelection);
-      const addToSharedLists =
-        !!sharedListToAddTo?.length ||
-        (addExceptionToRadioSelection === 'add_to_lists' && !isEmpty(exceptionListsToAddTo));
-      const sharedLists = sharedListToAddTo?.length ? sharedListToAddTo : exceptionListsToAddTo;
-
-      const items = enrichNewExceptionItems({
-        itemName: exceptionItemName,
-        commentToAdd: newComment,
-        addToRules,
-        addToSharedLists,
-        sharedLists,
+      const { listsToAddTo, addToLists, addToRules, items } = prepareNewItemsForSubmission({
+        sharedListToAddTo,
+        addExceptionToRadioSelection,
+        exceptionListsToAddTo,
+        exceptionItemName,
+        newComment,
         listType,
-        selectedOs: osTypesSelection,
+        osTypesSelection,
         expireTime,
-        items: exceptionItems,
+        exceptionItems,
       });
 
       const addedItems = await submitNewExceptionItems({
@@ -419,16 +398,20 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         selectedRulesToAddTo,
         listType,
         addToRules: addToRules && !isEmpty(selectedRulesToAddTo),
-        addToSharedLists,
-        sharedLists,
+        addToSharedLists: addToLists,
+        sharedLists: listsToAddTo,
       });
 
-      const alertIdToClose = closeSingleAlert && alertData ? alertData._id : undefined;
-      const ruleStaticIds = addToRules
-        ? selectedRulesToAddTo.map(({ rule_id: ruleId }) => ruleId)
-        : (rules ?? []).map(({ rule_id: ruleId }) => ruleId);
+      const { shouldCloseAlerts, alertIdToClose, ruleStaticIds } = prepareToCloseAlerts({
+        alertData,
+        closeSingleAlert,
+        addToRules,
+        rules,
+        bulkCloseAlerts,
+        selectedRulesToAddTo,
+      });
 
-      if (closeAlerts != null && !isEmpty(ruleStaticIds) && (bulkCloseAlerts || closeSingleAlert)) {
+      if (closeAlerts != null && shouldCloseAlerts) {
         await closeAlerts(ruleStaticIds, addedItems, alertIdToClose, bulkCloseIndex);
       }
 
@@ -470,35 +453,20 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     }
   }, [wildcardWarningExists, submitException]);
 
-  const isSubmitButtonDisabled = useMemo(
-    (): boolean =>
-      isSubmitting ||
-      isClosingAlerts ||
-      errorSubmitting != null ||
-      exceptionItemName.trim() === '' ||
-      exceptionItems.every((item) => item.entries.length === 0) ||
-      itemConditionValidationErrorExists ||
-      commentErrorExists ||
-      expireErrorExists ||
-      (addExceptionToRadioSelection === 'add_to_lists' && isEmpty(exceptionListsToAddTo)) ||
-      (addExceptionToRadioSelection === 'select_rules_to_add_to' &&
-        isEmpty(selectedRulesToAddTo) &&
-        listType === ExceptionListTypeEnum.RULE_DEFAULT),
-    [
-      isSubmitting,
-      isClosingAlerts,
-      errorSubmitting,
-      exceptionItemName,
-      exceptionItems,
-      itemConditionValidationErrorExists,
-      addExceptionToRadioSelection,
-      exceptionListsToAddTo,
-      expireErrorExists,
-      selectedRulesToAddTo,
-      listType,
-      commentErrorExists,
-    ]
-  );
+  const isSubmitButtonDisabled = isSubmitDisabled({
+    isSubmitting,
+    isClosingAlerts,
+    errorSubmitting,
+    exceptionItemName,
+    exceptionItems,
+    itemConditionValidationErrorExists,
+    commentErrorExists,
+    expireErrorExists,
+    addExceptionToRadioSelection,
+    selectedRulesToAddTo,
+    listType,
+    exceptionListsToAddTo,
+  });
 
   const handleDismissError = useCallback((): void => {
     setErrorSubmitting(null);
@@ -507,12 +475,6 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   const handleCloseFlyout = useCallback((): void => {
     onCancel(false);
   }, [onCancel]);
-
-  const addExceptionMessage = useMemo(() => {
-    return listType === ExceptionListTypeEnum.ENDPOINT
-      ? i18n.ADD_ENDPOINT_EXCEPTION
-      : i18n.CREATE_RULE_EXCEPTION;
-  }, [listType]);
 
   const exceptionFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'exceptionFlyoutTitle',
@@ -545,14 +507,11 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
       maskProps={{ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }} // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
     >
-      <FlyoutHeader>
-        <EuiTitle>
-          <h2 id={exceptionFlyoutTitleId} data-test-subj="exceptionFlyoutTitle">
-            {addExceptionMessage}
-          </h2>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-      </FlyoutHeader>
+      <ExceptionFlyoutHeader
+        listType={listType}
+        titleId={exceptionFlyoutTitleId}
+        dataTestSubjId={'exceptionFlyoutTitle'}
+      />
       <FlyoutBodySection className="builder-section">
         {
           // TODO: This is a quick fix to make sure that we do not lose conditions state on refetching index patterns via `useFetchIndexPatterns`
@@ -660,22 +619,14 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
           </>
         )}
       </FlyoutBodySection>
-      <EuiFlyoutFooter>
-        <FlyoutFooterGroup justifyContent="spaceBetween">
-          <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={handleCloseFlyout}>
-            {i18n.CANCEL}
-          </EuiButtonEmpty>
-
-          <EuiButton
-            data-test-subj="addExceptionConfirmButton"
-            onClick={handleOnSubmit}
-            isDisabled={isSubmitButtonDisabled}
-            fill
-          >
-            {addExceptionMessage}
-          </EuiButton>
-        </FlyoutFooterGroup>
-      </EuiFlyoutFooter>
+      <ExceptionFlyoutFooter
+        listType={listType}
+        isSubmitButtonDisabled={isSubmitButtonDisabled}
+        cancelButtonDataTestSubjId={'cancelExceptionAddButton'}
+        submitButtonDataTestSubjId={'addExceptionConfirmButton'}
+        handleOnSubmit={handleOnSubmit}
+        handleCloseFlyout={handleCloseFlyout}
+      />
       {showConfirmModal && confirmModal}
     </EuiFlyout>
   );

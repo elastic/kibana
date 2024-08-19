@@ -8,6 +8,7 @@ Update fields presentation metadata, such as `count`,
 `customLabel`, `customDescription`, and `format`. You can update multiple fields in one request. Updates
 are merged with persisted metadata. To remove existing metadata, specify `null` as the value.
 
+NOTE: For the latest details, refer to {api-kibana}/group/endpoint-data-views[data view APIs].
 
 [[data-views-fields-api-update-request]]
 ==== Request

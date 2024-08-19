@@ -197,6 +197,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
         onChange={useCallback(onAlertParamChange('jobSelection'), [])}
         errors={Array.isArray(errors.jobSelection) ? errors.jobSelection : []}
+        shouldUseDropdownJobCreate
       />
 
       <ConfigValidator

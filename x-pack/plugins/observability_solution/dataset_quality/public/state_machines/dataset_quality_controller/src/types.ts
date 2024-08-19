@@ -6,46 +6,40 @@
  */
 
 import { DoneInvokeEvent } from 'xstate';
-import { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
-import { DataStreamType, QualityIndicators, SortDirection } from '../../../../common/types';
-import { Dashboard, DatasetUserPrivileges } from '../../../../common/api_types';
-import { Integration } from '../../../../common/data_streams_stats/integration';
-import { DatasetTableSortField, DegradedFieldSortField } from '../../../hooks';
-import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
+import {
+  Dashboard,
+  DatasetUserPrivileges,
+  NonAggregatableDatasets,
+} from '../../../../common/api_types';
 import {
   DataStreamDegradedDocsStatServiceResponse,
-  DataStreamSettings,
   DataStreamDetails,
-  DataStreamStatServiceResponse,
+  DataStreamSettings,
   DataStreamStat,
+  DataStreamStatServiceResponse,
   DataStreamStatType,
-  GetNonAggregatableDataStreamsResponse,
   DegradedField,
   DegradedFieldResponse,
 } from '../../../../common/data_streams_stats';
+import { Integration } from '../../../../common/data_streams_stats/integration';
+import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
+import {
+  DataStreamType,
+  QualityIndicators,
+  TableCriteria,
+  TimeRangeConfig,
+} from '../../../../common/types';
+import { DatasetTableSortField, DegradedFieldSortField } from '../../../hooks';
 
 export type FlyoutDataset = Omit<
   DataStreamStat,
   'type' | 'size' | 'sizeBytes' | 'lastActivity' | 'degradedDocs'
 > & { type: string };
 
-interface TableCriteria<TSortField> {
-  page: number;
-  rowsPerPage: number;
-  sort: {
-    field: TSortField;
-    direction: SortDirection;
-  };
-}
-
 export interface DegradedFields {
   table: TableCriteria<DegradedFieldSortField>;
   data?: DegradedField[];
 }
-
-export type TimeRangeConfig = Pick<TimeRange, 'from' | 'to'> & {
-  refresh: RefreshInterval;
-};
 
 interface FiltersCriteria {
   inactive: boolean;
@@ -70,7 +64,7 @@ export interface WithTableOptions {
 export interface WithFlyoutOptions {
   flyout: {
     dataset?: FlyoutDataset;
-    datasetSettings?: DataStreamSettings;
+    dataStreamSettings?: DataStreamSettings;
     datasetDetails?: DataStreamDetails;
     insightsTimeRange?: TimeRangeConfig;
     breakdownField?: string;
@@ -249,7 +243,7 @@ export type DatasetQualityControllerEvent =
       types: DataStreamType[];
     }
   | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
-  | DoneInvokeEvent<GetNonAggregatableDataStreamsResponse>
+  | DoneInvokeEvent<NonAggregatableDatasets>
   | DoneInvokeEvent<Dashboard[]>
   | DoneInvokeEvent<DataStreamDetails>
   | DoneInvokeEvent<DegradedFieldResponse>

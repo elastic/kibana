@@ -8,7 +8,12 @@ deprecated::[7.13.0,Use <<find-rules-api>> instead.]
 
 Retrieve a paginated set of alerts based on condition.
 
-NOTE: As alerts change in {kib}, the results on each page of the response also
+[NOTE]
+====
+For the latest details, refer to {api-kibana}/group/endpoint-alerting[alerting APIs].
+====
+
+As alerts change in {kib}, the results on each page of the response also
 change. Use the find API for traditional paginated results, but avoid using it to export large amounts of data.
 
 [[alerts-api-find-request]]

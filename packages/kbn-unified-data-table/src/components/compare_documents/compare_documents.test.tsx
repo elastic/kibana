@@ -52,7 +52,7 @@ const getDocById = (id: string) => docs.find((doc) => doc.raw._id === id);
 const renderCompareDocuments = ({
   forceShowAllFields = false,
 }: { forceShowAllFields?: boolean } = {}) => {
-  const setSelectedDocs = jest.fn();
+  const replaceSelectedDocs = jest.fn();
   const getCompareDocuments = (props?: Partial<CompareDocumentsProps>) => (
     <CompareDocuments
       id="test"
@@ -63,20 +63,20 @@ const renderCompareDocuments = ({
       dataView={dataViewWithTimefieldMock}
       isPlainRecord={false}
       selectedFieldNames={['message', 'extension', 'bytes']}
-      selectedDocs={['0', '1', '2']}
+      selectedDocIds={['0', '1', '2']}
       schemaDetectors={[]}
       forceShowAllFields={forceShowAllFields}
       showFullScreenButton={true}
       fieldFormats={{} as any}
       getDocById={getDocById}
-      setSelectedDocs={setSelectedDocs}
+      replaceSelectedDocs={replaceSelectedDocs}
       setIsCompareActive={jest.fn()}
       {...props}
     />
   );
   const { rerender } = render(getCompareDocuments());
   return {
-    setSelectedDocs,
+    replaceSelectedDocs,
     rerender: (props?: Partial<CompareDocumentsProps>) => rerender(getCompareDocuments(props)),
   };
 };
@@ -146,10 +146,10 @@ describe('CompareDocuments', () => {
   });
 
   it('should set selected docs when columns change', () => {
-    const { setSelectedDocs } = renderCompareDocuments();
+    const { replaceSelectedDocs } = renderCompareDocuments();
     const visibleColumns = ['fields_generated-id', '0', '1', '2'];
     mockDataGridProps?.columnVisibility.setVisibleColumns(visibleColumns);
-    expect(setSelectedDocs).toHaveBeenCalledWith(visibleColumns.slice(1));
+    expect(replaceSelectedDocs).toHaveBeenCalledWith(visibleColumns.slice(1));
   });
 
   it('should force show all fields when prop is true', () => {
