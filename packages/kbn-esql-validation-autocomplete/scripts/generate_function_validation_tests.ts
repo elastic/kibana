@@ -21,8 +21,8 @@ import {
   SupportedDataType,
   FunctionDefinition,
   dataTypes,
-  isSupportedDataType,
   fieldTypes,
+  isFieldType,
 } from '../src/definitions/types';
 import { FUNCTION_DESCRIBE_BLOCK_NAME } from '../src/validation/function_describe_block_name';
 import { getMaxMinNumberOfParams } from '../src/validation/helpers';
@@ -1110,7 +1110,7 @@ function getFieldMapping(
 
   return params.map(({ name: _name, type, constantOnly, literalOptions, ...rest }) => {
     const typeString: string = type as string;
-    if (isSupportedDataType(typeString)) {
+    if (isFieldType(typeString)) {
       if (useLiterals && literalOptions) {
         return {
           name: `"${literalOptions[0]}"`,
