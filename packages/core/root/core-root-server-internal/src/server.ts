@@ -465,7 +465,7 @@ export class Server {
       analytics: analyticsStart,
     });
 
-    Object.freeze(Object.prototype);
+    Object.seal(Object.prototype);
 
     return this.coreStart;
   }
