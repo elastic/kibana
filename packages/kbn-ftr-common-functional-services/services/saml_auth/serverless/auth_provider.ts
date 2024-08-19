@@ -49,7 +49,7 @@ export class ServerlessAuthProvider implements AuthProvider {
     this.rolesDefinitionPath = resolve(SERVERLESS_ROLES_ROOT_PATH, this.projectType, 'roles.yml');
   }
 
-  getSupportedRoleDescriptors(): any {
+  getSupportedRoleDescriptors(): Record<string, unknown> {
     return readRolesDescriptorsFromResource(this.rolesDefinitionPath);
   }
   getDefaultRole(): string {

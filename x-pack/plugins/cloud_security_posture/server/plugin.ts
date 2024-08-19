@@ -38,10 +38,7 @@ import { setupRoutes } from './routes/setup_routes';
 import { cspBenchmarkRule, cspSettings } from './saved_objects';
 import { initializeCspIndices } from './create_indices/create_indices';
 import { initializeCspTransforms } from './create_transforms/create_transforms';
-import {
-  isCspPackagePolicyInstalled,
-  onPackagePolicyPostCreateCallback,
-} from './fleet_integration/fleet_integration';
+import { isCspPackagePolicyInstalled } from './fleet_integration/fleet_integration';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import {
   removeFindingsStatsTask,
@@ -168,8 +165,6 @@ export class CspPlugin
           ): Promise<PackagePolicy> => {
             if (isCspPackage(packagePolicy.package?.name)) {
               await this.initialize(core, plugins.taskManager);
-              await onPackagePolicyPostCreateCallback(this.logger, packagePolicy, soClient);
-
               return packagePolicy;
             }
 

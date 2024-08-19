@@ -88,20 +88,23 @@ describe('useSetupTechnology', () => {
       const { result } = renderHook(() =>
         useSetupTechnology({
           input: { type: 'cloudbeat/no-agentless-support' } as NewPackagePolicyInput,
+          isEditPage: true,
+          isAgentlessEnabled: false,
         })
       );
       expect(result.current.setupTechnology).toBe(SetupTechnology.AGENT_BASED);
     });
 
-    it('initializes with AGENT-BASED technology if isAgentlessEnable is true', () => {
+    it('initializes with agentless when is in edit mode and is agentless selected', () => {
       const input = { type: CLOUDBEAT_AWS } as NewPackagePolicyInput;
       const { result } = renderHook(() =>
         useSetupTechnology({
           input,
           isAgentlessEnabled: true,
+          isEditPage: true,
         })
       );
-      expect(result.current.setupTechnology).toBe(SetupTechnology.AGENT_BASED);
+      expect(result.current.setupTechnology).toBe(SetupTechnology.AGENTLESS);
     });
 
     it('should not call handleSetupTechnologyChange when setupTechnology changes', () => {

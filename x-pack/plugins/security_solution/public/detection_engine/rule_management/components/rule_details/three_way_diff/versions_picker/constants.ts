@@ -8,6 +8,13 @@
 import type { EuiSelectOption } from '@elastic/eui';
 import * as i18n from './translations';
 
+export enum Version {
+  Base = 'base',
+  Current = 'current',
+  Target = 'target',
+  Final = 'final',
+}
+
 export enum SelectedVersions {
   BaseTarget = 'base_target',
   BaseCurrent = 'base_current',
