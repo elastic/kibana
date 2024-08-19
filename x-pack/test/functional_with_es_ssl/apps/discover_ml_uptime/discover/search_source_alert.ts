@@ -13,7 +13,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const es = getService('es');
   const monacoEditor = getService('monacoEditor');
-  const PageObjects = getPageObjects(['settings', 'common', 'header', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'settings',
+    'common',
+    'header',
+    'discover',
+    'timePicker',
+    'unifiedFieldList',
+  ]);
   const deployment = getService('deployment');
   const dataGrid = getService('dataGrid');
   const browser = getService('browser');
@@ -526,12 +533,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.timePicker.setCommonlyUsedTime('Last_15 minutes');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.addRuntimeField('runtime-message-field', `emit('mock-message')`);
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-      let documentCell = await dataGrid.getCellElement(0, 3);
-      let firstRowContent = await documentCell.getVisibleText();
-      expect(firstRowContent.includes('runtime-message-fieldmock-message')).to.be.equal(true);
+      await retry.try(async () => {
+        expect(await PageObjects.unifiedFieldList.getAllFieldNames()).to.contain(
+          'runtime-message-field'
+        );
+      });
 
       // create an alert
       await openDiscoverAlertFlyout();
@@ -547,8 +555,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const selectedDataView = await dataViews.getSelectedName();
       expect(selectedDataView).to.be.equal('search-source-*');
 
-      documentCell = await dataGrid.getCellElement(0, 3);
-      firstRowContent = await documentCell.getVisibleText();
+      const documentCell = await dataGrid.getCellElement(0, 3);
+      const firstRowContent = await documentCell.getVisibleText();
       expect(firstRowContent.includes('runtime-message-fieldmock-message')).to.be.equal(true);
 
       expect(await dataGrid.getDocCount()).to.be(5);
