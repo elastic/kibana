@@ -124,13 +124,13 @@ export const MonacoEditorOutput: FunctionComponent = () => {
 
       await window.navigator.clipboard.writeText(selectedText);
 
-      notifications.toasts.add({
+      notifications.toasts.addSuccess({
         title: i18n.translate('console.outputPanel.copyOutputToast', {
           defaultMessage: 'Selected output copied to clipboard',
         }),
       });
     } catch (e) {
-      notifications.toasts.addError(e, {
+      notifications.toasts.addDanger({
         title: i18n.translate('console.outputPanel.copyOutputToastFailedMessage', {
           defaultMessage: 'Could not copy selected output to clipboard',
         }),

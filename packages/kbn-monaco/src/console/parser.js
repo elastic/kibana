@@ -9,6 +9,7 @@
 /* eslint-disable prettier/prettier,prefer-const,no-throw-literal,camelcase,@typescript-eslint/no-shadow,one-var,object-shorthand,eqeqeq */
 
 export const createParser = () => {
+
   let at, // The index of the current character
     ch, // The current character
     escapee = {
