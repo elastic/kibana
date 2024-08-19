@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { DefaultDataControlState } from '../controls/data_controls/types';
 import { DefaultControlApi } from '../controls/types';
 import { initControlsManager, getLastControlValue } from './init_controls_manager';
+import { ControlPanelState } from './types';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('delta'),
@@ -190,12 +192,32 @@ describe('getLastControlValue', () => {
 });
 
 describe('getNewControlState', () => {
-  test('should contain defaults when there are existing controls', () => {
+  test('should contain defaults when there are no existing controls', () => {
     const controlsManager = initControlsManager({}, DEFAULT_DATA_VIEW_ID);
     expect(controlsManager.getNewControlState()).toEqual({
       grow: true,
       width: 'medium',
       dataViewId: DEFAULT_DATA_VIEW_ID,
+    });
+  });
+
+  test('should contain values of last control when there are existing controls', () => {
+    const controlsManager = initControlsManager(
+      {
+        alpha: {
+          type: 'testControl',
+          order: 1,
+          dataViewId: 'myOtherDataViewId',
+          width: 'small',
+          grow: false,
+        } as ControlPanelState & Pick<DefaultDataControlState, 'dataViewId'>,
+      },
+      DEFAULT_DATA_VIEW_ID
+    );
+    expect(controlsManager.getNewControlState()).toEqual({
+      grow: false,
+      width: 'small',
+      dataViewId: 'myOtherDataViewId',
     });
   });
 

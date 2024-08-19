@@ -273,7 +273,7 @@ export function getLastControlValue(
   for (let i = controlsInOrder.length - 1; i >= 0; i--) {
     const controlId = controlsInOrder[i].id;
     const controlState = initialControlPanelsState[controlId];
-    if (controlState?.[key]) {
+    if (Object.hasOwn(controlState, key) && typeof controlState[key] !== undefined) {
       return controlState[key];
     }
   }
