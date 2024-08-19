@@ -64,6 +64,7 @@ export const ReactEmbeddableRenderer = <
     | 'showBorder'
     | 'showBadges'
     | 'showNotifications'
+    | 'hideLoader'
     | 'hideHeader'
     | 'hideInspector'
   >;
