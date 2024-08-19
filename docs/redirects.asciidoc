@@ -875,3 +875,108 @@ Refer to {api-kibana}/group/endpoint-connectors[connectors API].
 == Deprecated 7.x APIs
 
 Refer to {api-kibana}/group/endpoint-connectors[connectors API].
+
+[role="exclude",id="cases-api-add-comment"]
+== Add comment to case API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-create"]
+== Create case API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-delete-cases"]
+== Delete cases API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-delete-comments"]
+== Delete comments from case API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-find-case-activity"]
+== Find case activity API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-find-cases"]
+== Find cases API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-find-connectors"]
+== Find connectors API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-alerts"]
+== Get alerts attached to case API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-case-activity"]
+== Get case activity API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-case"]
+== Get case API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-cases-by-alert"]
+== Get cases by alert API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-comments"]
+== Get comments API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-get-configuration"]
+== Get case configuration API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-reporters"]
+== Get reporters API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-status"]
+== Get case status API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-tag"]
+== Get tags API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-push"]
+== Push case API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-set-configuration"]
+== Set case configuration API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-update-comment"]
+== Update case comment API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-update-configuration"]
+== Update case configuration API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-update"]
+== Update cases API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
