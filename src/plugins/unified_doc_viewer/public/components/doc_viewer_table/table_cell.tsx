@@ -33,7 +33,7 @@ export const TableCell: React.FC<TableCellProps> = React.memo(
 
     const {
       action: { flattenedField },
-      field: { field, fieldMapping, fieldType, scripted, pinned },
+      field: { field, fieldMapping, fieldType, scripted },
       value: { formattedValue, ignored },
     } = row;
 
@@ -49,7 +49,6 @@ export const TableCell: React.FC<TableCellProps> = React.memo(
               fieldMapping?.displayName ?? field,
               searchTerm
             )}
-            isPinned={pinned}
           />
 
           {isDetails && !!fieldMapping ? (
