@@ -465,8 +465,6 @@ export class Server {
       analytics: analyticsStart,
     });
 
-    Object.seal(Object.prototype);
-
     return this.coreStart;
   }
 
