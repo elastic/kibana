@@ -158,7 +158,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraHostsView.getBetaBadgeExists();
         });
 
-        describe('Hosts table', async () => {
+        describe('Hosts table', () => {
           let hostRows: WebElementWrapper[] = [];
 
           before(async () => {

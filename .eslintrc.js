@@ -1369,6 +1369,7 @@ module.exports = {
       files: [
         'test/{accessibility,*functional*}/apps/**/*.{js,ts}',
         'x-pack/test/{accessibility,*functional*}/apps/**/*.{js,ts}',
+        'x-pack/test_serverless/functional/test_suites/**/*.{js,ts}',
       ],
       extends: ['plugin:mocha/recommended'],
       plugins: ['mocha'],
