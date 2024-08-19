@@ -45,7 +45,7 @@ describe('useSessionPreview', () => {
 
     expect(hookResult.result.current).toEqual({
       index: 'kibana.alert.ancestors.index',
-      investigatedAlertId: 'id',
+      investigatedAlertId: '_id',
       jumpToCursor: '2023-01-01T00:00:00.000Z',
       jumpToEntityId: 'process.entity_id',
       sessionEntityId: 'process.entry_leader.entity_id',
@@ -79,8 +79,8 @@ describe('useSessionPreview', () => {
     });
 
     expect(hookResult.result.current).toEqual({
-      index: '.some-index',
-      investigatedAlertId: 'id',
+      index: 'index',
+      investigatedAlertId: '_id',
       jumpToCursor: '2023-01-01T00:00:00.000Z',
       jumpToEntityId: 'process.entity_id',
       sessionEntityId: 'process.entry_leader.entity_id',
