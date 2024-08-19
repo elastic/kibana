@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return text === 'Sep 22, 2015 @ 23:50:13.253';
       });
 
-      await dataGrid.clickCellExpandButton(0, 3);
+      await dataGrid.clickCellExpandButton(0, 5);
 
       let expandDocId = '';
       await retry.waitForWithTimeout('expandDocId to be valid', 5000, async () => {
