@@ -46,7 +46,7 @@ import { startTransform } from '../../lib/entities/start_transform';
  *       403:
  *         description: The current user does not have the required permissions to enable entity discovery
  *       200:
- *         description: OK - validate enable result in response body
+ *         description: OK - Verify result in response body
  *         content:
  *           application/json:
  *             schema:
