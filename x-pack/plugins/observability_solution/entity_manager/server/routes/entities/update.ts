@@ -23,6 +23,44 @@ import {
 } from '../../lib/entities/install_entity_definition';
 import { findEntityDefinitionById } from '../../lib/entities/find_entity_definition';
 
+/**
+ * @openapi
+ * /internal/entities/definition:
+ *   put:
+ *     description: Update an entity definition.
+ *     tags:
+ *       - definitions
+ *     parameters:
+ *       - in: query
+ *         name: installOnly
+ *         description: If true, the definition transforms will not be started
+ *         required: false
+ *         schema:
+ *           type: boolean
+ *           default: false
+ *     requestBody:
+ *       description: The definition properties to update
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/entityDefinitionUpdateSchema'
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/entityDefinitionSchema'
+ *       400:
+ *         description: The entity definition cannot be installed; see the error for more details
+ *       404:
+ *         description: The entity definition does not exist
+ *       403:
+ *         description: User is not allowed to update the entity definition
+ *       409:
+ *         description: The entity definition is being updated by another request
+ */
 export function updateEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
   server,
@@ -57,7 +95,7 @@ export function updateEntityDefinitionRoute<T extends RequestHandlerContext>({
 
         if (installedDefinition.managed) {
           return res.forbidden({
-            body: { message: `Managed definition can't be upgraded` },
+            body: { message: `Managed definition can't be updated` },
           });
         }
 
