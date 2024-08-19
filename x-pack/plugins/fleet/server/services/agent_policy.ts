@@ -478,7 +478,10 @@ class AgentPolicyService {
       return {
         ...options,
         id: id.id,
-        namespaces: id.spaceId ? [id.spaceId] : undefined,
+        namespaces:
+          savedObjectType === AGENT_POLICY_SAVED_OBJECT_TYPE && id.spaceId
+            ? [id.spaceId]
+            : undefined,
         type: savedObjectType,
       };
     });
@@ -591,16 +594,12 @@ class AgentPolicyService {
             (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicySO.id)) || [];
         }
         if (options.withAgentCount) {
-          await getAgentsByKuery(
-            appContextService.getInternalUserESClient(),
-            appContextService.getInternalUserSOClientForSpaceId(agentPolicy.space_id),
-            {
-              showInactive: true,
-              perPage: 0,
-              page: 1,
-              kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
-            }
-          ).then(({ total }) => (agentPolicy.agents = total));
+          await getAgentsByKuery(appContextService.getInternalUserESClient(), soClient, {
+            showInactive: true,
+            perPage: 0,
+            page: 1,
+            kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
+          }).then(({ total }) => (agentPolicy.agents = total));
         } else {
           agentPolicy.agents = 0;
         }
@@ -1246,10 +1245,6 @@ class AgentPolicyService {
         default_fleet_server: policy.is_default_fleet_server === true,
       };
 
-      if (policy.unenroll_timeout) {
-        fleetServerPolicy.unenroll_timeout = policy.unenroll_timeout;
-      }
-
       acc.push(fleetServerPolicy);
       return acc;
     }, [] as FleetServerPolicy[]);
@@ -1519,16 +1514,19 @@ class AgentPolicyService {
     );
   }
 
-  public async getInactivityTimeouts(
-    soClient: SavedObjectsClientContract
-  ): Promise<Array<{ policyIds: string[]; inactivityTimeout: number }>> {
+  public async getInactivityTimeouts(): Promise<
+    Array<{ policyIds: string[]; inactivityTimeout: number }>
+  > {
     const savedObjectType = await getAgentPolicySavedObjectType();
-    const findRes = await soClient.find<AgentPolicySOAttributes>({
+    const internalSoClientWithoutSpaceExtension =
+      appContextService.getInternalUserSOClientWithoutSpaceExtension();
+    const findRes = await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
       type: savedObjectType,
       page: 1,
       perPage: SO_SEARCH_LIMIT,
       filter: `${savedObjectType}.attributes.inactivity_timeout > 0`,
       fields: [`inactivity_timeout`],
+      namespaces: ['*'],
     });
 
     const groupedResults = groupBy(findRes.saved_objects, (so) => so.attributes.inactivity_timeout);
