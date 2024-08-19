@@ -1,7 +1,7 @@
 get:
   summary: Get agent setup info
   tags:
-    - Agents
+    - Elastic Agents
   responses:
     '200':
       description: OK
@@ -17,7 +17,7 @@ get:
 post:
   summary: Initiate agent setup
   tags:
-    - Agents
+    - Elastic Agents
   operationId: setup-agents
   responses:
     '200':
