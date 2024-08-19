@@ -8,11 +8,10 @@
 
 import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
+import { TimeRange } from '@kbn/es-query';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
-import deepEqual from 'fast-deep-equal';
 import { cloneDeep, omit } from 'lodash';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { v4 } from 'uuid';
 import {
   DashboardContainerInput,
@@ -476,24 +475,6 @@ export const initializeDashboard = async ({
   untilDashboardReady().then((dashboard) =>
     setTimeout(() => dashboard.dispatch.setAnimatePanelTransforms(true), 500)
   );
-
-  // --------------------------------------------------------------------------------------
-  // Set up parentApi.query$
-  // Can not use legacyEmbeddableToApi since query$ setting is delayed
-  // --------------------------------------------------------------------------------------
-  untilDashboardReady().then((dashboardContainer) => {
-    const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(
-      dashboardContainer.getInput().query
-    );
-    dashboardContainer.query$ = query$;
-    dashboardContainer.integrationSubscriptions.add(
-      dashboardContainer.getInput$().subscribe((input) => {
-        if (!deepEqual(query$.getValue() ?? [], input.query)) {
-          query$.next(input.query);
-        }
-      })
-    );
-  });
 
   // --------------------------------------------------------------------------------------
   // Set up search sessions integration.

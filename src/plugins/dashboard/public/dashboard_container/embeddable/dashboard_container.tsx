@@ -33,7 +33,7 @@ import {
   type EmbeddableOutput,
   type IEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
   HasRuntimeChildState,
@@ -346,6 +346,16 @@ export class DashboardContainer
     );
 
     this.dataViews = new BehaviorSubject<DataView[] | undefined>(this.getAllDataViews());
+
+    const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(this.getInput().query);
+    this.query$ = query$;
+    this.publishingSubscription.add(
+      this.getInput$().subscribe((input) => {
+        if (!deepEqual(query$.getValue() ?? [], input.query)) {
+          query$.next(input.query);
+        }
+      })
+    );
   }
 
   public setControlGroupApi(controlGroupApi: ControlGroupApi) {
