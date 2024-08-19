@@ -27,12 +27,18 @@ import {
 } from '@kbn/rule-data-utils';
 
 import {
+  AggregateName,
+  AggregationsAggregate,
+  AggregationsMultiBucketAggregateBase,
   InlineScript,
   MappingRuntimeFields,
   QueryDslQueryContainer,
   SortCombinations,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { RuleTypeParams, PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/server';
+} from '@elastic/elasticsearch/lib/api/types';
+import type {
+  RuleTypeParams,
+  PluginStartContract as AlertingStart,
+} from '@kbn/alerting-plugin/server';
 import {
   ReadOperations,
   AlertingAuthorization,
@@ -279,7 +285,7 @@ export class AlertsClient {
   /**
    * Searches alerts by id or query and audits the results
    */
-  private async searchAlerts({
+  private async searchAlerts<TAggregations = Record<AggregateName, AggregationsAggregate>>({
     id,
     query,
     aggs,
@@ -335,7 +341,7 @@ export class AlertsClient {
         };
       }
 
-      const result = await this.esClient.search<ParsedTechnicalFields>({
+      const result = await this.esClient.search<ParsedTechnicalFields, TAggregations>({
         index: index ?? '.alerts-*',
         ignore_unavailable: true,
         body: queryBody,
@@ -975,7 +981,10 @@ export class AlertsClient {
     }
   }
 
-  public async find<Params extends RuleTypeParams = never>({
+  public async find<
+    Params extends RuleTypeParams = never,
+    TAggregations = Record<AggregateName, AggregationsAggregate>
+  >({
     aggs,
     featureIds,
     index,
@@ -1007,7 +1016,7 @@ export class AlertsClient {
         }
       }
 
-      const alertsSearchResponse = await this.searchAlerts({
+      const alertsSearchResponse = await this.searchAlerts<TAggregations>({
         query,
         aggs,
         _source,
@@ -1036,7 +1045,7 @@ export class AlertsClient {
   /**
    * Performs a `find` query to extract aggregations on alert groups
    */
-  public getGroupAggregations({
+  public async getGroupAggregations({
     featureIds,
     groupByField,
     aggregations,
@@ -1086,7 +1095,10 @@ export class AlertsClient {
         `The number of documents is too high. Paginating through more than ${MAX_PAGINATED_ALERTS} documents is not possible.`
       );
     }
-    return this.find({
+    const searchResult = await this.find<
+      never,
+      { groupByFields: AggregationsMultiBucketAggregateBase<{ key: string }> }
+    >({
       featureIds,
       aggs: {
         groupByFields: {
@@ -1139,6 +1151,20 @@ export class AlertsClient {
       size: 0,
       _source: false,
     });
+    // Replace artificial uuid values with '--' in null-value buckets and mark them with `isNullGroup = true`
+    const groupsAggregation = searchResult.aggregations?.groupByFields;
+    if (groupsAggregation) {
+      const buckets = Array.isArray(groupsAggregation?.buckets)
+        ? groupsAggregation.buckets
+        : Object.values(groupsAggregation?.buckets ?? {});
+      buckets.forEach((bucket) => {
+        if (bucket.key === uniqueValue) {
+          bucket.key = '--';
+          (bucket as { isNullGroup?: boolean }).isNullGroup = true;
+        }
+      });
+    }
+    return searchResult;
   }
 
   public async getAuthorizedAlertsIndices(featureIds: string[]): Promise<string[] | undefined> {

@@ -110,6 +110,39 @@ describe('processEnum', () => {
         ],
       },
     },
+    {
+      name: 'correctly transforms schema.nullable inputs',
+      input: {
+        anyOf: [
+          {
+            description: 'test',
+            type: 'object',
+            properties: {
+              test: {
+                type: 'string',
+              },
+            },
+            required: ['test'],
+          },
+          {
+            enum: [],
+            nullable: true,
+            type: undefined,
+          },
+        ],
+      } as OpenAPIV3.SchemaObject,
+      expected: {
+        description: 'test',
+        type: 'object',
+        properties: {
+          test: {
+            type: 'string',
+          },
+        },
+        required: ['test'],
+        nullable: true,
+      },
+    },
   ])('$name', ({ input, expected }) => {
     processEnum(input);
     expect(input).toEqual(expected);

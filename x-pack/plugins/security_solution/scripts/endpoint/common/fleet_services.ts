@@ -29,7 +29,7 @@ import type {
 import {
   AGENT_API_ROUTES,
   AGENT_POLICY_API_ROUTES,
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   agentPolicyRouteService,
   agentRouteService,
   AGENTS_INDEX,
@@ -850,7 +850,7 @@ export const getOrCreateDefaultAgentPolicy = async ({
   policyName = DEFAULT_AGENT_POLICY_NAME,
 }: GetOrCreateDefaultAgentPolicyOptions): Promise<AgentPolicy> => {
   const existingPolicy = await fetchAgentPolicyList(kbnClient, {
-    kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.name: "${policyName}"`,
+    kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.name: "${policyName}"`,
   });
 
   if (existingPolicy.items[0]) {
