@@ -14,7 +14,7 @@ import type {
 } from '@kbn/observability-shared-plugin/common';
 import { getInventoryViewInAppUrl } from '../../../common/alerting/metrics/alert_link';
 
-export const geRuleFormat = ({
+export const getRuleFormat = ({
   assetDetailsLocator,
   inventoryLocator,
 }: {

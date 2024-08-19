@@ -19,7 +19,7 @@ import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
 } from '../../../common/alerting/metrics';
 import { validateMetricThreshold } from './components/validation';
-import { geRuleFormat } from './rule_data_formatters';
+import { getRuleFormat } from './rule_data_formatters';
 
 interface InventoryMetricRuleTypeParams extends RuleTypeParams {
   criteria: InventoryMetricConditions[];
@@ -62,7 +62,7 @@ export function createInventoryMetricRuleType({
   assetDetailsLocator?: LocatorPublic<AssetDetailsLocatorParams>;
   inventoryLocator?: LocatorPublic<InventoryLocatorParams>;
 }): ObservabilityRuleTypeModel<InventoryMetricRuleTypeParams> {
-  const format = geRuleFormat({ assetDetailsLocator, inventoryLocator });
+  const format = getRuleFormat({ assetDetailsLocator, inventoryLocator });
 
   return {
     id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
