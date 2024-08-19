@@ -123,9 +123,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Upon clicking ctrl enter a newline character should be added to the editor
       await PageObjects.console.monaco.pressCtrlEnter();
-      await retry.waitFor('shortcut shouldnt have generated any request', async () => {
-        expect(await PageObjects.console.isOutputPanelEmptyStateVisible()).to.be(true);
-      });
+      // Shortcut shouldn't have generated any request so output panel should still be in empty state
+      expect(await PageObjects.console.isOutputPanelEmptyStateVisible()).to.be(true);
 
       // Restore setting
       await PageObjects.console.toggleKeyboardShortcuts(true);
