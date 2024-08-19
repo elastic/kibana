@@ -29,7 +29,7 @@ import { getClientsFromAPIKey } from '../../lib/utils';
  *       - management
  *     responses:
  *       200:
- *         description: OK - validate check result in response body
+ *         description: OK - Verify result in response body
  *         content:
  *           application/json:
  *             schema:
