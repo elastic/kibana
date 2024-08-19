@@ -9,7 +9,11 @@ import { createHash } from 'crypto';
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  SECURITY_EXTENSION_ID,
+  SPACES_EXTENSION_ID,
+  type SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 
@@ -41,6 +45,8 @@ interface TokenSO {
   };
   created_at: string;
 }
+
+jest.mock('../../spaces/helpers');
 
 describe('UninstallTokenService', () => {
   const now = new Date().toISOString();
@@ -204,7 +210,9 @@ describe('UninstallTokenService', () => {
       mockContext.encryptedSavedObjectsStart!.getClient() as jest.Mocked<EncryptedSavedObjectsClient>;
     soClientMock = appContextService
       .getSavedObjects()
-      .getScopedClient({} as unknown as KibanaRequest) as jest.Mocked<SavedObjectsClientContract>;
+      .getScopedClient({} as unknown as KibanaRequest, {
+        excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
+      }) as jest.Mocked<SavedObjectsClientContract>;
     agentPolicyService.deployPolicies = jest.fn();
 
     getAgentPoliciesByIDsMock = jest.fn().mockResolvedValue([]);

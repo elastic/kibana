@@ -986,7 +986,7 @@ export const getSavedObjectTypes = (
       name: MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
       indexPattern: INGEST_SAVED_OBJECT_INDEX,
       hidden: true,
-      namespaceType: useSpaceAwareness ? 'single' : 'agnostic',
+      namespaceType: 'agnostic',
       management: {
         importableAndExportable: false,
       },
@@ -999,7 +999,7 @@ export const getSavedObjectTypes = (
       name: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
       indexPattern: INGEST_SAVED_OBJECT_INDEX,
       hidden: true,
-      namespaceType: useSpaceAwareness ? 'single' : 'agnostic',
+      namespaceType: 'agnostic',
       management: {
         importableAndExportable: false,
       },
@@ -1008,6 +1008,19 @@ export const getSavedObjectTypes = (
         properties: {
           policy_id: { type: 'keyword' },
           token_plain: { type: 'keyword' },
+          namespaces: { type: 'keyword' },
+        },
+      },
+      modelVersions: {
+        '1': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                namespaces: { type: 'keyword' },
+              },
+            },
+          ],
         },
       },
     },
