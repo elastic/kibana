@@ -14,7 +14,14 @@ import type { CustomFieldType } from '../types';
 const ViewComponent: CustomFieldType<CaseCustomFieldText>['View'] = ({ customField }) => {
   const value = customField?.value ?? '-';
 
-  return <EuiText data-test-subj={`text-custom-field-view-${customField?.key}`}>{value}</EuiText>;
+  return (
+    <EuiText
+      className="eui-textBreakWord"
+      data-test-subj={`text-custom-field-view-${customField?.key}`}
+    >
+      {value}
+    </EuiText>
+  );
 };
 
 ViewComponent.displayName = 'View';

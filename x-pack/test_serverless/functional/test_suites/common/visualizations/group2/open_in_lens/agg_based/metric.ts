@@ -40,8 +40,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert to Lens', async () => {
-      const visPanel = await panelActions.getPanelHeading('Metric - Basic');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Metric - Basic');
       await lens.waitForVisualization('mtrVis');
 
       const data = await lens.getMetricVisualizationData();
@@ -61,8 +60,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert aggregation with params', async () => {
-      const visPanel = await panelActions.getPanelHeading('Metric - Agg with params');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Metric - Agg with params');
       await lens.waitForVisualization('mtrVis');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -88,8 +86,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert sibling pipeline aggregation', async () => {
-      const visPanel = await panelActions.getPanelHeading('Metric - Sibling pipeline agg');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Metric - Sibling pipeline agg');
       await lens.waitForVisualization('mtrVis');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -116,13 +113,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should not convert aggregation with not supported field type', async () => {
-      const visPanel = await panelActions.getPanelHeading('Metric - Unsupported field type');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('Metric - Unsupported field type')).to.eql(
+        false
+      );
     });
 
     it('should convert color ranges', async () => {
-      const visPanel = await panelActions.getPanelHeading('Metric - Color ranges');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Metric - Color ranges');
       await lens.waitForVisualization('mtrVis');
 
       expect(await lens.getLayerCount()).to.be(1);
