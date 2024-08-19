@@ -292,10 +292,18 @@ const PatternComponent: React.FC<Props> = ({
           )}
 
           {!loading && error != null && (
-            <ErrorEmptyPrompt title={i18n.ERROR_LOADING_METADATA_TITLE(pattern)} />
+            <>
+              <ErrorEmptyPrompt title={i18n.ERROR_LOADING_METADATA_TITLE(pattern)} />
+              <EuiSpacer size="m" />
+            </>
           )}
 
-          {loading && <LoadingEmptyPrompt loading={i18n.LOADING_STATS} />}
+          {loading && (
+            <>
+              <LoadingEmptyPrompt loading={i18n.LOADING_STATS} />
+              <EuiSpacer size="m" />
+            </>
+          )}
 
           {!loading && error == null && (
             <div ref={containerRef}>
