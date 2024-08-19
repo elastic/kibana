@@ -135,11 +135,6 @@ export function InvestigationDetails({ investigationId }: { investigationId: str
     return security.authc.getCurrentUser();
   }, [security]);
 
-  if (investigationId == null) {
-    // TODO: return 404 page
-    return null;
-  }
-
   return user.value ? (
     <InvestigationDetailsWithUser user={user.value} investigationId={investigationId} />
   ) : null;
