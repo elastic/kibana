@@ -39,7 +39,7 @@ import React, { useEffect, useRef } from 'react';
 import { BehaviorSubject, switchMap } from 'rxjs';
 import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
 import { VIS_EVENT_TO_TRIGGER } from '../embeddable';
-import { getCapabilities, getInspector, getUiActions } from '../services';
+import { getCapabilities, getInspector, getUiActions, getUsageCollection } from '../services';
 import { ACTION_CONVERT_TO_LENS } from '../triggers';
 import { urlFor } from '../utils/saved_visualize_utils';
 import type { SerializedVis, Vis } from '../vis';
@@ -369,8 +369,34 @@ export const getVisualizeEmbeddableFactory: (deps: {
                 searchSessionId,
                 parentExecutionContext: executionContext,
                 abortController: expressionAbortController$.getValue(),
-                onRender: () => {
-                  renderCount$.next(renderCount$.getValue() + 1);
+                onRender: async (renderCount) => {
+                  if (renderCount === renderCount$.getValue()) return;
+                  renderCount$.next(renderCount);
+                  const visInstance = vis$.getValue();
+                  const visTypeName = visInstance.type.name;
+
+                  let telemetryVisTypeName = visTypeName;
+                  if (visTypeName === 'metrics') {
+                    telemetryVisTypeName = 'legacy_metric';
+                  }
+                  if (visTypeName === 'pie' && visInstance.params.isDonut) {
+                    telemetryVisTypeName = 'donut';
+                  }
+                  if (
+                    visTypeName === 'area' &&
+                    visInstance.params.seriesParams.some(
+                      (seriesParams: { mode: string }) => seriesParams.mode === 'stacked'
+                    )
+                  ) {
+                    telemetryVisTypeName = 'area_stacked';
+                  }
+
+                  getUsageCollection().reportUiCounter(
+                    executionContext?.type ?? '',
+                    'count',
+                    `render_agg_based_${telemetryVisTypeName}`
+                  );
+
                   if (hasRendered$.getValue() === true) return;
                   hasRendered$.next(true);
                   hasRendered$.complete();

@@ -29,7 +29,7 @@ interface GetExpressionRendererPropsParams {
   searchSessionId?: string;
   abortController?: AbortController;
   vis: Vis<VisParams>;
-  onRender: () => void;
+  onRender: (renderCount: number) => void;
   onEvent: (event: ExpressionRendererEvent) => void;
   onData: ExpressionRendererParams['onData$'];
 }
