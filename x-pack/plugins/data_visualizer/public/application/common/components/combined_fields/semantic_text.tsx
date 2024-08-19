@@ -66,15 +66,14 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
         version: '1',
       })
       .then((response) => {
-        setInferenceServices(
-          response.map((service) => ({ value: service.model_id, text: service.model_id }))
-        );
+        const inferenceServiceOptions = response.map((service) => ({
+          value: service.model_id,
+          text: service.model_id,
+        }));
+        setInferenceServices(inferenceServiceOptions);
+        setSelectedInference(inferenceServiceOptions[0]?.value ?? undefined);
       });
   }, [http]);
-
-  useEffect(() => {
-    setSelectedInference(String(inferenceServices[0]?.value) ?? undefined);
-  }, [inferenceServices]);
 
   useEffect(() => {
     if (selectedFieldOption?.includes('.')) {
