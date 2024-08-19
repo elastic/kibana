@@ -1502,12 +1502,17 @@ describe('Agent policy', () => {
 
     it('should return empty array if no policies with inactivity timeouts', async () => {
       const mockSoClient = createMockSoClientThatReturns([]);
-      expect(await agentPolicyService.getInactivityTimeouts(mockSoClient)).toEqual([]);
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValueOnce(
+        mockSoClient
+      );
+      expect(await agentPolicyService.getInactivityTimeouts()).toEqual([]);
     });
     it('should return single inactivity timeout', async () => {
       const mockSoClient = createMockSoClientThatReturns([createPolicySO('policy1', 1000)]);
-
-      expect(await agentPolicyService.getInactivityTimeouts(mockSoClient)).toEqual([
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValueOnce(
+        mockSoClient
+      );
+      expect(await agentPolicyService.getInactivityTimeouts()).toEqual([
         { inactivityTimeout: 1000, policyIds: ['policy1'] },
       ]);
     });
@@ -1516,8 +1521,11 @@ describe('Agent policy', () => {
         createPolicySO('policy1', 1000),
         createPolicySO('policy2', 1000),
       ]);
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValueOnce(
+        mockSoClient
+      );
 
-      expect(await agentPolicyService.getInactivityTimeouts(mockSoClient)).toEqual([
+      expect(await agentPolicyService.getInactivityTimeouts()).toEqual([
         { inactivityTimeout: 1000, policyIds: ['policy1', 'policy2'] },
       ]);
     });
@@ -1527,8 +1535,10 @@ describe('Agent policy', () => {
         createPolicySO('policy2', 1000),
         createPolicySO('policy3', 2000),
       ]);
-
-      expect(await agentPolicyService.getInactivityTimeouts(mockSoClient)).toEqual([
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValueOnce(
+        mockSoClient
+      );
+      expect(await agentPolicyService.getInactivityTimeouts()).toEqual([
         { inactivityTimeout: 1000, policyIds: ['policy1', 'policy2'] },
         { inactivityTimeout: 2000, policyIds: ['policy3'] },
       ]);
