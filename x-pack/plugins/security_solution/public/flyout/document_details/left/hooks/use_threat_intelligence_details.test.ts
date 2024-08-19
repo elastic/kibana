@@ -49,7 +49,6 @@ describe('useThreatIntelligenceDetails', () => {
       dataViewId: '',
       loading: false,
       indicesExist: true,
-      patternList: [],
       selectedPatterns: [],
       indexPattern: { fields: [], title: '' },
       sourcererDataView: undefined,

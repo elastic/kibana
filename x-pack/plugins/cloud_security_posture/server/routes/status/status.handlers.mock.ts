@@ -48,6 +48,47 @@ export const notInstalledHandler = http.get(STATUS_URL, () => {
   });
 });
 
+export const notInstalledHasMisconfigurationsFindingsHandler = http.get(STATUS_URL, () => {
+  return HttpResponse.json({
+    hasMisconfigurationsFindings: true,
+    cspm: {
+      status: 'not-installed',
+      healthyAgents: 1,
+      installedPackagePolicies: 1,
+    },
+    kspm: {
+      status: 'not-installed',
+      healthyAgents: 1,
+      installedPackagePolicies: 1,
+    },
+    vuln_mgmt: {
+      status: 'not-installed',
+      healthyAgents: 1,
+      installedPackagePolicies: 1,
+    },
+    indicesDetails: [
+      {
+        index: 'logs-cloud_security_posture.findings_latest-default',
+        status: 'empty',
+      },
+      {
+        index: 'logs-cloud_security_posture.findings-default*',
+        status: 'empty',
+      },
+      {
+        index: 'logs-cloud_security_posture.scores-default',
+        status: 'empty',
+      },
+      {
+        index: 'logs-cloud_security_posture.vulnerabilities_latest-default',
+        status: 'empty',
+      },
+    ],
+    isPluginInitialized: true,
+    latestPackageVersion: '1.9.0',
+  });
+});
+
 export const notDeployedHandler = http.get(STATUS_URL, () => {
   return HttpResponse.json({
     cspm: {
