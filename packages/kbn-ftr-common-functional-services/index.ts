@@ -25,4 +25,7 @@ export type SupertestWithoutAuthProviderType = ProvidedType<typeof SupertestWith
 
 export type { InternalRequestHeader, RoleCredentials } from './services/saml_auth';
 
+import { SamlAuthProvider } from './services/saml_auth/saml_auth_provider';
+export type SamlAuthProviderType = ProvidedType<typeof SamlAuthProvider>;
+
 export type { FtrProviderContext } from './services/ftr_provider_context';

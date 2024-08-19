@@ -41,8 +41,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
     await setFarequoteTimerange();
 
-    const header = await dashboardPanelActions.getPanelHeading(selectedPanelTitle);
-    await dashboardPanelActions.openContextMenuMorePanel(header);
+    await dashboardPanelActions.openContextMenuByTitle(selectedPanelTitle);
   }
 
   async function createJobInWizard(
@@ -129,7 +128,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await dashboardPreparation(selectedPanelTitle);
 
-      await ml.lensVisualizations.clickCreateMLJobMenuAction();
+      await ml.lensVisualizations.clickCreateMLJobMenuAction(selectedPanelTitle);
 
       await ml.lensVisualizations.assertLayerSelectorExists();
 
@@ -154,7 +153,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await dashboardPreparation(selectedPanelTitle);
 
-      await ml.lensVisualizations.clickCreateMLJobMenuAction();
+      await ml.lensVisualizations.clickCreateMLJobMenuAction(selectedPanelTitle);
 
       await ml.lensVisualizations.assertLayerSelectorExists();
 
@@ -179,7 +178,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await dashboardPreparation(selectedPanelTitle);
 
-      await ml.lensVisualizations.clickCreateMLJobMenuAction();
+      await ml.lensVisualizations.clickCreateMLJobMenuAction(selectedPanelTitle);
 
       await ml.lensVisualizations.assertLayerSelectorExists();
 
@@ -202,7 +201,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await dashboardPreparation(selectedPanelTitle);
 
-      await ml.lensVisualizations.clickCreateMLJobMenuAction();
+      await ml.lensVisualizations.clickCreateMLJobMenuAction(selectedPanelTitle);
 
       await ml.lensVisualizations.assertLayerSelectorExists();
 
@@ -216,7 +215,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await dashboardPreparation(selectedPanelTitle);
 
-      ml.lensVisualizations.assertMLJobMenuActionDoesNotExist();
+      ml.lensVisualizations.assertMLJobMenuActionDoesNotExist(selectedPanelTitle);
     });
   });
 }
