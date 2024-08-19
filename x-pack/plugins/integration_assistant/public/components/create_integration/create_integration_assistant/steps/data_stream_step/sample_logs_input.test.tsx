@@ -292,6 +292,19 @@ describe('SampleLogsInput', () => {
       });
     });
 
+    describe('when the file is a an ndjson with a single record', () => {
+      beforeEach(async () => {
+        await changeFile(input, new File([multilineNDJSON.split('\n')[0]], 'test.json', { type }));
+      });
+
+      it('should set the integrationSetting correctly', () => {
+        expect(mockActions.setIntegrationSettings).toBeCalledWith({
+          logsSampleParsed: [splitNDJSON[0]],
+          logFormat: 'ndjson',
+        });
+      });
+    });
+
     describe('when the file is multiline ndjson', () => {
       beforeEach(async () => {
         await changeFile(input, new File([multilineNDJSON], 'test.json', { type }));
