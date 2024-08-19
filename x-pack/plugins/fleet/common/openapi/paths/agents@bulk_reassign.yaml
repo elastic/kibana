@@ -1,7 +1,7 @@
 post:
   summary: Bulk reassign agents
   tags:
-    - Agents
+    - Elastic Agents
   responses:
     '200':
       description: OK
