@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { defaultNamespace } from '@kbn/test-suites-xpack/functional/apps/dataset_quality/data';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   datasetNames,
@@ -14,7 +15,6 @@ import {
   createDegradedFieldsRecord,
   productionNamespace,
 } from './data';
-import { defaultNamespace } from '@kbn/test-suites-xpack/functional/apps/dataset_quality/data';
 
 const integrationActions = {
   overview: 'Overview',
@@ -174,7 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         const { docsCountTotal, degradedDocs, services, hosts } =
-          await PageObjects.datasetQuality.parseOverSummaryPanelKpis(excludeKeysFromServerless);
+          await PageObjects.datasetQuality.parseOverviewSummaryPanelKpis(excludeKeysFromServerless);
         expect(parseInt(docsCountTotal, 10)).to.be(226);
         expect(parseInt(degradedDocs, 10)).to.be(1);
         expect(parseInt(services, 10)).to.be(3);

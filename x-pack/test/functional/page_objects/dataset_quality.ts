@@ -64,7 +64,10 @@ type SummaryPanelKpi = Record<
   string
 >;
 
-type FlyoutKpi = Record<'docsCountTotal' | 'size' | 'services' | 'hosts' | 'degradedDocs', string>;
+type SummaryPanelKPI = Record<
+  'docsCountTotal' | 'size' | 'services' | 'hosts' | 'degradedDocs',
+  string
+>;
 
 const texts = {
   noActivityText: 'No activity in the selected timeframe',
@@ -101,17 +104,12 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityTable: 'datasetQualityTable',
     datasetQualityFiltersContainer: 'datasetQualityFiltersContainer',
     datasetQualityExpandButton: 'datasetQualityExpandButton',
-    datasetQualityFlyout: 'datasetQualityFlyout',
-    datasetQualityFlyoutBody: 'datasetQualityFlyoutBody',
     datasetDetailsContainer: 'datasetDetailsContainer',
     datasetQualityDetailsTitle: 'datasetQualityDetailsTitle',
     datasetQualityDetailsDegradedFieldTable: 'datasetQualityDetailsDegradedFieldTable',
     datasetQualityDetailsDegradedTableNoData: 'datasetQualityDetailsDegradedTableNoData',
     datasetQualitySparkPlot: 'datasetQualitySparkPlot',
     datasetQualityDetailsHeaderButton: 'datasetQualityDetailsHeaderButton',
-    datasetQualityFlyoutFieldValue: 'datasetQualityFlyoutFieldValue',
-    datasetQualityFlyoutFieldsListIntegrationDetails:
-      'datasetQualityFlyoutFieldsList-integration_details',
     datasetQualityDetailsIntegrationLoading: 'datasetQualityDetailsIntegrationLoading',
     datasetQualityDetailsIntegrationActionsButton: 'datasetQualityDetailsIntegrationActionsButton',
     datasetQualityDetailsIntegrationAction: (action: string) =>
@@ -130,7 +128,6 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityDetailsIntegrationRowIntegration: 'datasetQualityDetailsFieldsList-integration',
     datasetQualityDetailsIntegrationRowVersion: 'datasetQualityDetailsFieldsList-version',
     datasetQualityDetailsLinkToDiscover: 'datasetQualityDetailsLinkToDiscover',
-    datasetQualityFlyoutKpiLink: 'datasetQualityFlyoutKpiLink',
     datasetQualityInsufficientPrivileges: 'datasetQualityInsufficientPrivileges',
     datasetQualityNoDataEmptyState: 'datasetQualityNoDataEmptyState',
     datasetQualityNoPrivilegesEmptyState: 'datasetQualityNoPrivilegesEmptyState',
@@ -138,7 +135,6 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     superDatePickerToggleQuickMenuButton: 'superDatePickerToggleQuickMenuButton',
     superDatePickerApplyTimeButton: 'superDatePickerApplyTimeButton',
     superDatePickerQuickMenu: 'superDatePickerQuickMenu',
-    euiFlyoutCloseButton: 'euiFlyoutCloseButton',
     unifiedHistogramBreakdownSelectorButton: 'unifiedHistogramBreakdownSelectorButton',
     unifiedHistogramBreakdownSelectorSelectorSearch:
       'unifiedHistogramBreakdownSelectorSelectorSearch',
@@ -203,17 +199,6 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading', 20 * 1000);
     },
 
-    async waitUntilDegradedFieldTableLoaded() {
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading', 20 * 1000);
-    },
-
-    async waitUntilIntegrationsInFlyoutLoaded() {
-      await find.waitForDeletedByCssSelector(
-        '.euiSkeletonTitle .datasetQualityDetailsIntegrationLoading',
-        10 * 1000
-      );
-    },
-
     async waitUntilSummaryPanelLoaded(isStateful: boolean = true) {
       await testSubjects.missingOrFail(`datasetQuality-${texts.activeDatasets}-loading`);
       if (isStateful) {
@@ -261,7 +246,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     async getDatasetQualityDetailsDegradedFieldTableRows(): Promise<WebElementWrapper[]> {
-      await this.waitUntilDegradedFieldTableLoaded();
+      await this.waitUntilTableLoaded();
       const table = await testSubjects.find(
         testSubjectSelectors.datasetQualityDetailsDegradedFieldTable
       );
@@ -308,7 +293,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     async parseDegradedFieldTable() {
-      await this.waitUntilDegradedFieldTableLoaded();
+      await this.waitUntilTableLoaded();
       const table = await this.getDatasetQualityDetailsDegradedFieldTable();
       return this.parseTable(table, ['Field', 'Docs count', 'Last Occurrence']);
     },
@@ -343,51 +328,6 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
     async toggleShowFullDatasetNames() {
       return find.clickByCssSelector(selectors.showFullDatasetNamesSwitch);
-    },
-
-    async openDatasetFlyout(datasetName: string) {
-      await this.waitUntilTableLoaded();
-      const cols = await this.parseDatasetTable();
-      const datasetNameCol = cols['Data Set Name'];
-      const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
-      const testDatasetRowIndex = datasetNameColCellTexts.findIndex(
-        (dName) => dName === datasetName
-      );
-
-      expect(testDatasetRowIndex).to.be.greaterThan(-1);
-
-      const expandColumn = cols['0'];
-      const expandButtons = await expandColumn.getCellChildren(
-        `[data-test-subj=${testSubjectSelectors.datasetQualityExpandButton}]`
-      );
-
-      expect(expandButtons.length).to.be.greaterThan(0);
-
-      const datasetExpandButton = expandButtons[testDatasetRowIndex];
-
-      // Check if 'title' attribute is "Expand" or "Collapse"
-      const isCollapsed = (await datasetExpandButton.getAttribute('title')) === 'Expand';
-
-      // Open if collapsed
-      if (isCollapsed) {
-        await datasetExpandButton.click();
-      }
-
-      await this.waitUntilIntegrationsInFlyoutLoaded();
-    },
-
-    async closeFlyout() {
-      return testSubjects.click(testSubjectSelectors.euiFlyoutCloseButton);
-    },
-
-    async refreshFlyout() {
-      const flyoutContainer: WebElementWrapper = await testSubjects.find(
-        testSubjectSelectors.datasetQualityFlyoutBody
-      );
-      const refreshButton = await flyoutContainer.findByTestSubject(
-        testSubjectSelectors.superDatePickerApplyTimeButton
-      );
-      return refreshButton.click();
     },
 
     async refreshDetailsPageData() {
@@ -430,7 +370,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
     // `excludeKeys` needed to circumvent `_stats` not available in Serverless  https://github.com/elastic/kibana/issues/178954
     // TODO: Remove `excludeKeys` when `_stats` is available in Serverless
-    async parseOverSummaryPanelKpis(excludeKeys: string[] = []): Promise<FlyoutKpi> {
+    async parseOverviewSummaryPanelKpis(excludeKeys: string[] = []): Promise<SummaryPanelKPI> {
       const kpiTitleAndKeys = [
         { title: texts.docsCountTotal, key: 'docsCountTotal' },
         { title: texts.size, key: 'size' },
@@ -453,50 +393,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
           ...acc,
           [key]: value,
         }),
-        {} as FlyoutKpi
+        {} as SummaryPanelKPI
       );
-    },
-
-    async setDatePickerLastXUnits(
-      container: WebElementWrapper,
-      timeValue: number,
-      unit: TimeUnitId
-    ) {
-      // Only click the menu button found under the provided container
-      const datePickerToggleQuickMenuButton = await container.findByTestSubject(
-        testSubjectSelectors.superDatePickerToggleQuickMenuButton
-      );
-      await datePickerToggleQuickMenuButton.click();
-
-      const datePickerQuickMenu = await testSubjects.find(
-        testSubjectSelectors.superDatePickerQuickMenu
-      );
-
-      const timeTenseSelect = await datePickerQuickMenu.findByCssSelector(
-        `select[aria-label="Time tense"]`
-      );
-      const timeValueInput = await datePickerQuickMenu.findByCssSelector(
-        `input[aria-label="Time value"]`
-      );
-      const timeUnitSelect = await datePickerQuickMenu.findByCssSelector(
-        `select[aria-label="Time unit"]`
-      );
-
-      await timeTenseSelect.focus();
-      await timeTenseSelect.type('Last');
-
-      await timeValueInput.focus();
-      await timeValueInput.clearValue();
-      await timeValueInput.type(timeValue.toString());
-
-      await timeUnitSelect.focus();
-      await timeUnitSelect.type(unit);
-
-      await (
-        await datePickerQuickMenu.findByCssSelector(selectors.superDatePickerApplyButton)
-      ).click();
-
-      return testSubjects.missingOrFail(testSubjectSelectors.superDatePickerQuickMenu);
     },
 
     /**

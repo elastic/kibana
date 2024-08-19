@@ -169,7 +169,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         });
 
         const { docsCountTotal, degradedDocs, services, hosts, size } =
-          await PageObjects.datasetQuality.parseOverSummaryPanelKpis();
+          await PageObjects.datasetQuality.parseOverviewSummaryPanelKpis();
         expect(parseInt(docsCountTotal, 10)).to.be(226);
         expect(parseInt(degradedDocs, 10)).to.be(1);
         expect(parseInt(services, 10)).to.be(3);
