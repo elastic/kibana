@@ -326,7 +326,13 @@ export const setup = async (caret = '/') => {
       .map((suggestion) => (typeof suggestion === 'string' ? suggestion : suggestion.text ?? ''))
       .sort();
 
-    expect(resultTexts).toEqual(expectedTexts);
+    try {
+      expect(resultTexts).toEqual(expectedTexts);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(`${query}\nExpected:${expectedTexts}\nResult:${resultTexts}`);
+      throw error;
+    }
 
     const expectedNonStringSuggestions = expected.filter(
       (suggestion) => typeof suggestion !== 'string'

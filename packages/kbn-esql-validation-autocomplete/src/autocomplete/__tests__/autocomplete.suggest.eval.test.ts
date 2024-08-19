@@ -20,9 +20,12 @@ import { ESQL_COMMON_NUMERIC_TYPES } from '../../shared/esql_types';
 import { evalFunctionDefinitions } from '../../definitions/functions';
 import { timeUnitsToSuggest } from '../../definitions/literals';
 import { getUnitDuration } from '../factories';
-import { getParamAtPosition, narrowDownCompatibleTypesToSuggestNext } from '../helper';
-import { nonNullable } from '../../shared/helpers';
-import { partition, uniq } from 'lodash';
+import {
+  getParamAtPosition,
+  getCompatibleTypesToSuggestNext,
+  getValidFunctionSignaturesForPreviousArgs,
+} from '../helper';
+import { uniq } from 'lodash';
 import {
   FunctionParameter,
   SupportedDataType,
@@ -356,7 +359,7 @@ describe('autocomplete.suggest', () => {
       ]);
     });
 
-    describe.only('eval functions', () => {
+    describe('eval functions', () => {
       const getTypesFromParamDefs = (paramDefs: FunctionParameter[]): SupportedDataType[] =>
         Array.from(new Set(paramDefs.map((p) => p.type))).filter(isSupportedDataType);
 
@@ -366,7 +369,7 @@ describe('autocomplete.suggest', () => {
         const testedCases = new Set<string>();
         // skip this fn for the moment as it's quite hard to test
         // if (!['bucket', 'date_extract', 'date_diff', 'case'].includes(fn.name)) {
-        if (['date_trunc'].includes(fn.name)) {
+        if (!['bucket', 'date_extract', 'date_diff', 'case'].includes(fn.name)) {
           test(`${fn.name}`, async () => {
             const { assertSuggestions } = await setup();
 
@@ -382,29 +385,42 @@ describe('autocomplete.suggest', () => {
               }));
 
               for (const [i, param] of signature.params.entries()) {
+                if (param.type === 'time_duration') {
+                  continue;
+                }
                 const testCase = `${fn.name}(${signature.params
                   .slice(0, i + 1)
-                  .map((p, i) =>
+                  .map((p) =>
                     p.type === 'time_literal' ? '1 year,' : `${fieldNameFromType(p.type)}, `
                   )
                   .join('')} / )`;
 
-                // @TODO: remove
-                console.log(`--@@testCase`, testCase);
                 if (testedCases.has(testCase)) {
                   continue;
                 }
 
                 testedCases.add(testCase);
 
-                const typesToSuggestNext = narrowDownCompatibleTypesToSuggestNext(
+                const validSignatures = getValidFunctionSignaturesForPreviousArgs(
                   fn,
                   enrichedArgs,
-                  // +1 for where the cursor is
                   i + 1
                 );
-                const requiresMoreArgs =
-                  typesToSuggestNext.filter(({ optional }) => !optional).length > 0;
+                // Retrieve unique of types that are compatiable for the current arg
+                const typesToSuggestNext = getCompatibleTypesToSuggestNext(fn, enrichedArgs, i + 1);
+
+                const hasMoreMandatoryArgs = !validSignatures
+                  // Types available to suggest next after this argument is completed
+                  .map((sig) => getParamAtPosition(sig, i + 2))
+                  // when a param is null, it means param is optional
+                  // If there's at least one param that is optional, then
+                  // no need to suggest comma
+                  .some((p) => p === null || p?.optional === true);
+
+                // Wehther to prepend comma to suggestion string
+                // E.g. if true, "fieldName" -> "fieldName, "
+                const shouldAddComma = hasMoreMandatoryArgs && fn.type !== 'builtin';
+
                 const constantOnlyParamDefs = typesToSuggestNext.filter(
                   (p) => p.constantOnly || /_literal/.test(p.type as string)
                 );
@@ -417,14 +433,16 @@ describe('autocomplete.suggest', () => {
                 );
 
                 const addCommaIfRequired = (s: string | PartialSuggestionWithText) => {
-                  if (!requiresMoreArgs || s === '' || (typeof s === 'object' && s.text === '')) {
+                  if (!shouldAddComma || s === '' || (typeof s === 'object' && s.text === '')) {
                     return s;
                   }
                   return typeof s === 'string' ? `${s}, ` : { ...s, text: `${s.text},` };
                 };
 
                 const expected = suggestedConstants?.length
-                  ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ', ' : ''}`)
+                  ? suggestedConstants.map(
+                      (option) => `"${option}"${hasMoreMandatoryArgs ? ', ' : ''}`
+                    )
                   : [
                       ...getDateLiteralsByFieldType(
                         getTypesFromParamDefs(typesToSuggestNext).filter(isFieldType)

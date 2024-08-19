@@ -100,7 +100,7 @@ export function getSupportedTypesForBinaryOperators(
 // e.g. BUCKET(longField, /) => all signatures with first param as long column type
 // or BUCKET(longField, 2, /) => all signatures with (longField, integer, ...)
 
-export function narrowDownRelevantFunctionSignatures(
+export function getValidFunctionSignaturesForPreviousArgs(
   fnDefinition: FunctionDefinition,
   enrichedArgs: Array<
     ESQLAstItem & {
@@ -130,7 +130,7 @@ export function narrowDownRelevantFunctionSignatures(
  * @param argIndex
  * @returns
  */
-export function narrowDownCompatibleTypesToSuggestNext(
+export function getCompatibleTypesToSuggestNext(
   fnDefinition: FunctionDefinition,
   enrichedArgs: Array<
     ESQLAstItem & {
@@ -139,7 +139,7 @@ export function narrowDownCompatibleTypesToSuggestNext(
   >,
   argIndex: number
 ) {
-  const relevantFuncSignatures = narrowDownRelevantFunctionSignatures(
+  const relevantFuncSignatures = getValidFunctionSignaturesForPreviousArgs(
     fnDefinition,
     enrichedArgs,
     argIndex

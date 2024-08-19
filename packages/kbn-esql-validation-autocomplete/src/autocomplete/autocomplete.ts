@@ -16,7 +16,6 @@ import type {
   ESQLLiteral,
   ESQLSingleAstItem,
 } from '@kbn/esql-ast';
-import { partition } from 'lodash';
 import { ESQL_NUMBER_TYPES, compareTypesWithLiterals, isNumericType } from '../shared/esql_types';
 import type { EditorContext, SuggestionRawDefinition } from './types';
 import {
@@ -93,8 +92,7 @@ import {
   getSourcesFromCommands,
   getSupportedTypesForBinaryOperators,
   isAggFunctionUsedAlready,
-  narrowDownCompatibleTypesToSuggestNext,
-  narrowDownRelevantFunctionSignatures,
+  getCompatibleTypesToSuggestNext,
   removeQuoteForSuggestedSources,
 } from './helper';
 import { FunctionParameter, FunctionReturnType, SupportedDataType } from '../definitions/types';
@@ -439,7 +437,7 @@ function areCurrentArgsValid(
   return true;
 }
 
-function extractFinalTypeFromArg(
+export function extractFinalTypeFromArg(
   arg: ESQLAstItem,
   references: Pick<ReferenceMaps, 'fields' | 'variables'>
 ):
@@ -1214,16 +1212,40 @@ async function getFunctionArgsSuggestions(
   }
 
   const arg: ESQLAstItem = enrichedArgs[argIndex];
+  const existingTypes = node.args
+    .map((nodeArg) =>
+      extractFinalTypeFromArg(nodeArg, {
+        fields: fieldsMap,
+        variables: variablesExcludingCurrentCommandOnes,
+      })
+    )
+    .filter(nonNullable);
+
+  const validSignatures = fnDefinition.signatures
+    // if existing arguments are preset already, use them to filter out incompatible signatures
+    .filter((signature) => {
+      if (existingTypes.length) {
+        return existingTypes.every((type, index) =>
+          signature.params[index]
+            ? compareTypesWithLiterals(signature.params[index].type, type)
+            : false
+        );
+      }
+      return true;
+    });
 
   // Retrieve unique of types that are compatiable for the current arg
-  const typesToSuggestNext = narrowDownCompatibleTypesToSuggestNext(
-    fnDefinition,
-    enrichedArgs,
-    argIndex
-  );
-  const hasMoreMandatoryArgs = typesToSuggestNext.filter(({ optional }) => !optional).length > 0;
+  const typesToSuggestNext = getCompatibleTypesToSuggestNext(fnDefinition, enrichedArgs, argIndex);
 
-  // Should prepend comma to suggestion string
+  const hasMoreMandatoryArgs = !validSignatures
+    // Types available to suggest next after this argument is completed
+    .map((signature) => getParamAtPosition(signature, argIndex + 1))
+    // when a param is null, it means param is optional
+    // If there's at least one param that is optional, then
+    // no need to suggest comma
+    .some((p) => p === null || p?.optional === true);
+
+  // Wehther to prepend comma to suggestion string
   // E.g. if true, "fieldName" -> "fieldName, "
   const shouldAddComma = hasMoreMandatoryArgs && fnDefinition.type !== 'builtin';
 
@@ -1236,7 +1258,7 @@ async function getFunctionArgsSuggestions(
 
   if (suggestedConstants.length) {
     return buildValueDefinitions(suggestedConstants, {
-      addComma: hasMoreMandatoryArgs,
+      addComma: shouldAddComma,
       advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
     });
   }
@@ -1281,37 +1303,6 @@ async function getFunctionArgsSuggestions(
           : [])
       );
     }
-
-    const existingTypes = node.args
-      .map((nodeArg) =>
-        extractFinalTypeFromArg(nodeArg, {
-          fields: fieldsMap,
-          variables: variablesExcludingCurrentCommandOnes,
-        })
-      )
-      .filter(nonNullable);
-
-    const validSignatures = fnDefinition.signatures
-      // if existing arguments are preset already, use them to filter out incompatible signatures
-      .filter((signature) => {
-        if (existingTypes.length) {
-          return existingTypes.every((type, index) =>
-            signature.params[index]
-              ? compareTypesWithLiterals(signature.params[index].type, type)
-              : false
-          );
-        }
-        return true;
-      });
-
-    /**
-     * Get all parameter definitions across all function signatures
-     * for the current parameter position in the given function definition,
-     */
-    const allParamDefinitionsForThisPosition = validSignatures
-      .map((signature) => getParamAtPosition(signature, argIndex))
-      .filter(nonNullable);
-
     // Separate the param definitions into two groups:
     // fields should only be suggested if the param isn't constant-only,
     // and constant suggestions should only be given if it is.
@@ -1322,9 +1313,8 @@ async function getFunctionArgsSuggestions(
     // (e.g. if func1's first parameter is constant-only, any nested functions should
     // inherit that constraint: func1(func2(shouldBeConstantOnly)))
     //
-    const [constantOnlyParamDefs, paramDefsWhichSupportFields] = partition(
-      allParamDefinitionsForThisPosition,
-      (paramDef) => paramDef.constantOnly || /_literal$/.test(paramDef.type as string)
+    const constantOnlyParamDefs = typesToSuggestNext.filter(
+      (p) => p.constantOnly || /_literal/.test(p.type as string)
     );
 
     const getTypesFromParamDefs = (paramDefs: FunctionParameter[]) => {
@@ -1344,10 +1334,15 @@ async function getFunctionArgsSuggestions(
     // Fields
     suggestions.push(
       ...pushItUpInTheList(
-        await getFieldsByType(getTypesFromParamDefs(typesToSuggestNext) as string[], [], {
-          addComma: shouldAddComma,
-          advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
-        }),
+        await getFieldsByType(
+          // @TODO: have a way to better suggest constant only params
+          getTypesFromParamDefs(typesToSuggestNext.filter((d) => !d.constantOnly)) as string[],
+          [],
+          {
+            addComma: shouldAddComma,
+            advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
+          }
+        ),
         true
       )
     );
