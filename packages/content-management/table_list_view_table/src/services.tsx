@@ -24,6 +24,10 @@ import type { FormattedRelative } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
 import { UserProfilesKibanaProvider } from '@kbn/content-management-user-profiles';
+import {
+  FavoritesClientPublic,
+  FavoritesContextProvider,
+} from '@kbn/content-management-favorites-public';
 
 import { TAG_MANAGEMENT_APP_URL } from './constants';
 import type { Tag } from './types';
@@ -63,6 +67,8 @@ export interface Services {
   TagList: FC<TagListProps>;
   /** Predicate to indicate if tagging features is enabled */
   isTaggingEnabled: () => boolean;
+  /** Predicate to indicate if favorites features is enabled */
+  isFavoritesEnabled: () => boolean;
   /** Predicate function to indicate if some of the saved object references are tags */
   itemHasTags: (references: SavedObjectsReference[]) => boolean;
   /** Handler to return the url to navigate to the kibana tags management */
@@ -163,6 +169,11 @@ export interface TableListViewKibanaDependencies {
   };
   /** The <FormattedRelative /> component from the @kbn/i18n-react package */
   FormattedRelative: typeof FormattedRelative;
+
+  /**
+   * The favorites client to enable the favorites feature.
+   */
+  favorites?: FavoritesClientPublic;
 }
 
 /**
@@ -229,29 +240,37 @@ export const TableListViewKibanaProvider: FC<
     <RedirectAppLinksKibanaProvider coreStart={core}>
       <UserProfilesKibanaProvider core={core}>
         <ContentEditorKibanaProvider core={core} savedObjectsTagging={savedObjectsTagging}>
-          <TableListViewProvider
-            canEditAdvancedSettings={Boolean(application.capabilities.advancedSettings?.save)}
-            getListingLimitSettingsUrl={() =>
-              application.getUrlForApp('management', {
-                path: `/kibana/settings?query=savedObjects:listingLimit`,
-              })
-            }
+          <FavoritesContextProvider
+            favoritesClient={services.favorites}
             notifyError={(title, text) => {
               notifications.toasts.addDanger({ title: toMountPoint(title, startServices), text });
             }}
-            searchQueryParser={searchQueryParser}
-            DateFormatterComp={(props) => <FormattedRelative {...props} />}
-            currentAppId$={application.currentAppId$}
-            navigateToUrl={application.navigateToUrl}
-            isTaggingEnabled={() => Boolean(savedObjectsTagging)}
-            getTagList={getTagList}
-            TagList={TagList}
-            itemHasTags={itemHasTags}
-            getTagIdsFromReferences={getTagIdsFromReferences}
-            getTagManagementUrl={() => core.http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
           >
-            {children}
-          </TableListViewProvider>
+            <TableListViewProvider
+              canEditAdvancedSettings={Boolean(application.capabilities.advancedSettings?.save)}
+              getListingLimitSettingsUrl={() =>
+                application.getUrlForApp('management', {
+                  path: `/kibana/settings?query=savedObjects:listingLimit`,
+                })
+              }
+              notifyError={(title, text) => {
+                notifications.toasts.addDanger({ title: toMountPoint(title, startServices), text });
+              }}
+              searchQueryParser={searchQueryParser}
+              DateFormatterComp={(props) => <FormattedRelative {...props} />}
+              currentAppId$={application.currentAppId$}
+              navigateToUrl={application.navigateToUrl}
+              isTaggingEnabled={() => Boolean(savedObjectsTagging)}
+              isFavoritesEnabled={() => Boolean(services.favorites)}
+              getTagList={getTagList}
+              TagList={TagList}
+              itemHasTags={itemHasTags}
+              getTagIdsFromReferences={getTagIdsFromReferences}
+              getTagManagementUrl={() => core.http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
+            >
+              {children}
+            </TableListViewProvider>
+          </FavoritesContextProvider>
         </ContentEditorKibanaProvider>
       </UserProfilesKibanaProvider>
     </RedirectAppLinksKibanaProvider>

@@ -40,3 +40,11 @@ export const EntityAnalyticsUpsellingSectionLazy = withSuspenseUpsell(
     )
   )
 );
+
+export const AttackDiscoveryUpsellingPageLazy = withSuspenseUpsell(
+  lazy(() =>
+    import('./pages/attack_discovery').then(({ AttackDiscoveryUpsellingPageServerless }) => ({
+      default: AttackDiscoveryUpsellingPageServerless,
+    }))
+  )
+);
