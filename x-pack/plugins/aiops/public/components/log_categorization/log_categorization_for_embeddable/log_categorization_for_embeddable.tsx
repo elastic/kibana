@@ -38,6 +38,7 @@ import { useMinimumTimeRange } from './use_minimum_time_range';
 
 import { FieldValidationCallout } from '../category_validation_callout';
 import { useActions } from '../category_table/use_actions';
+import { InformationText } from '../information_text';
 
 export type LogCategorizationEmbeddableProps = Readonly<
   EmbeddablePatternAnalysisInput & PatternAnalysisProps
@@ -354,6 +355,12 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     <>
       <FieldValidationCallout validationResults={fieldValidationResult} />
       {(loading ?? true) === true ? <LoadingCategorization onCancel={cancelRequest} /> : null}
+
+      <InformationText
+        loading={loading ?? true}
+        categoriesLength={data?.categories?.length ?? null}
+        eventRateLength={eventRate.length}
+      />
 
       {loading === false && data !== null && data.categories.length > 0 && fieldName !== null ? (
         <CategoryTable
