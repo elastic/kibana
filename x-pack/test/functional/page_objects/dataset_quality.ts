@@ -123,6 +123,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityNamespacesSelectableButton: 'datasetQualityNamespacesSelectableButton',
     datasetQualityQualitiesSelectable: 'datasetQualityQualitiesSelectable',
     datasetQualityQualitiesSelectableButton: 'datasetQualityQualitiesSelectableButton',
+    datasetQualityDetailsEmptyPrompt: 'datasetQualityDetailsEmptyPrompt',
+    datasetQualityDetailsEmptyPromptBody: 'datasetQualityDetailsEmptyPromptBody',
     datasetQualityDatasetHealthKpi: 'datasetQualityDatasetHealthKpi',
     datasetQualityDetailsSummaryKpiValue: 'datasetQualityDetailsSummaryKpiValue',
     datasetQualityDetailsIntegrationRowIntegration: 'datasetQualityDetailsFieldsList-integration',

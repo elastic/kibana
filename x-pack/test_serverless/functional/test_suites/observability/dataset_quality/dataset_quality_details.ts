@@ -95,8 +95,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ]);
 
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();
-
-      await PageObjects.datasetQuality.navigateTo();
     });
 
     after(async () => {
@@ -112,8 +110,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail(
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsTitle
         );
+      });
 
+      it('should navigate to details page from a main page', async () => {
         await PageObjects.datasetQuality.navigateTo();
+
+        const synthDataset = await testSubjects.find(
+          'datasetQualityTableDetailsLink-logs-synth.1-default',
+          20 * 1000
+        );
+
+        synthDataset.click();
+
+        await testSubjects.existOrFail(
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsTitle
+        );
+      });
+
+      it('should show an empty prompt with error message when the dataset is not found', async () => {
+        const nonExistentDataStreamName = 'logs-non.existent-production';
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: nonExistentDataStreamName,
+        });
+
+        await testSubjects.existOrFail(
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsEmptyPrompt
+        );
+
+        const emptyPromptBody = await testSubjects.getVisibleText(
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsEmptyPromptBody
+        );
+
+        expect(emptyPromptBody).to.contain(nonExistentDataStreamName);
       });
 
       it('reflects the breakdown field state in url', async () => {
@@ -136,7 +164,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.not.contain('breakdownField');
         });
-        await PageObjects.datasetQuality.navigateTo();
       });
     });
 
@@ -152,8 +179,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(parseInt(degradedDocs, 10)).to.be(1);
         expect(parseInt(services, 10)).to.be(3);
         expect(parseInt(hosts, 10)).to.be(52);
-
-        await PageObjects.datasetQuality.navigateTo();
       });
     });
 
@@ -173,8 +198,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail(
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsIntegrationRowVersion
         );
-
-        await PageObjects.datasetQuality.navigateTo();
       });
 
       it('should shows the integration section for integrations', async () => {
@@ -199,8 +222,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
           expect(integrationNameExists).to.be(true);
         });
-
-        await PageObjects.datasetQuality.navigateTo();
       });
 
       it('should show the integration actions menu with correct actions', async () => {
@@ -217,7 +238,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         expect(actions.length).to.eql(3);
-        await PageObjects.datasetQuality.navigateTo();
       });
 
       it('should hide integration dashboard for integrations without dashboards', async () => {
@@ -232,7 +252,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             integrationActions.viewDashboards
           )
         );
-        await PageObjects.datasetQuality.navigateTo();
       });
 
       it('Should navigate to integration overview page on clicking integration overview action', async () => {
@@ -253,8 +272,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           expect(parsedUrl.pathname).to.contain('/app/integrations/detail/atlassian_bitbucket');
         });
-
-        await PageObjects.datasetQuality.navigateTo();
       });
 
       it('should navigate to index template page in clicking Integration template', async () => {
@@ -276,7 +293,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             `/app/management/data/index_management/templates/logs-${apacheAccessDatasetName}`
           );
         });
-        await PageObjects.datasetQuality.navigateTo();
       });
 
       it('should navigate to the selected dashboard on clicking integration dashboard action ', async () => {
@@ -300,8 +316,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const breadcrumbText = await testSubjects.getVisibleText('breadcrumb last');
 
         expect(breadcrumbText).to.eql(dashboardText);
-
-        await PageObjects.datasetQuality.navigateTo();
       });
     });
 
@@ -320,8 +334,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const datasetSelectorText =
           await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
         expect(datasetSelectorText).to.eql(regularDatasetName);
-
-        await PageObjects.datasetQuality.navigateTo();
       });
 
       it('should go log explorer for degraded docs when the button next to breakdown selector is clicked', async () => {
@@ -337,8 +349,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const datasetSelectorText =
           await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
         expect(datasetSelectorText).to.contain(apacheAccessDatasetName);
-
-        await PageObjects.datasetQuality.navigateTo();
       });
     });
 
@@ -351,8 +361,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail(
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsDegradedTableNoData
         );
-
-        await PageObjects.datasetQuality.navigateTo();
       });
 
       it('should show the degraded fields table with data when present', async () => {
@@ -368,8 +376,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.datasetQuality.getDatasetQualityDetailsDegradedFieldTableRows();
 
         expect(rows.length).to.eql(2);
-
-        await PageObjects.datasetQuality.navigateTo();
       });
 
       it('should display Spark Plot for every row of degraded fields', async () => {
@@ -385,8 +391,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         expect(rows.length).to.be(sparkPlots.length);
-
-        await PageObjects.datasetQuality.navigateTo();
       });
 
       it('should sort the table when the count table header is clicked', async () => {
@@ -403,8 +407,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const sortedCellTexts = await countColumn.getCellTexts();
 
         expect(cellTexts.reverse()).to.eql(sortedCellTexts);
-
-        await PageObjects.datasetQuality.navigateTo();
       });
 
       it('should update the URL when the table is sorted', async () => {
@@ -436,8 +438,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'sort:(direction:asc,field:count)'
           );
         });
-
-        await PageObjects.datasetQuality.navigateTo();
       });
 
       // This is the only test which ingest data during the test.
@@ -473,8 +473,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const singleValueNow = parseInt(updatedCellTexts[0], 10);
 
         expect(singleValueNow).to.be.greaterThan(singleValuePreviously);
-
-        await PageObjects.datasetQuality.navigateTo();
       });
     });
   });
