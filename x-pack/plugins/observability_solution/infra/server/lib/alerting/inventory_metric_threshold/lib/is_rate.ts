@@ -9,9 +9,9 @@ import { has } from 'lodash';
 import {
   MetricsUIAggregation,
   ESSumBucketAggRT,
-  hasSnapshotTermsWithAggregation,
   ESDerivativeAggRT,
   ESBasicMetricAggRT,
+  ESTermsWithAggregationRT,
 } from '@kbn/metrics-data-access-plugin/common';
 import { SnapshotCustomMetricInput } from '../../../../../common/http_api';
 
@@ -36,7 +36,7 @@ export const isInterfaceRateAgg = (metric: MetricsUIAggregation | undefined) => 
   }
   const values = Object.values(metric);
   return (
-    values.some((agg) => hasSnapshotTermsWithAggregation(agg)) &&
+    values.some((agg) => ESTermsWithAggregationRT.is(agg)) &&
     values.some((agg) => ESSumBucketAggRT.is(agg))
   );
 };

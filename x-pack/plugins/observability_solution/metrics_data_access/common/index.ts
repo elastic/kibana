@@ -32,8 +32,7 @@ export {
   ESDerivativeAggRT,
   ESBasicMetricAggRT,
   SnapshotMetricTypeKeys,
-  hasSnapshotTermsWithAggregation,
-  hasAggregations,
+  ESTermsWithAggregationRT,
 } from './inventory_models/types';
 
 export type {
