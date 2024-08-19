@@ -27,9 +27,16 @@
       "enabled": true
     },
     {
-      "groupName": "GitHub actions",
+      "groupName": "operations actions",
       "matchManagers": ["github-actions"],
-      "matchPackageNames": ["actions/checkout"],
+      "matchPackageNames": [
+        "actions/checkout",
+        "elastic/github-actions/project-assigner",
+        "hmarr/auto-approve-action",
+        "octokit/graphql-action",
+        "sergeysova/jq-action",
+        "sourenlouv/backport"
+      ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "backport:all-open", "release_note:skip"],
@@ -61,7 +68,7 @@
     },
     {
       "groupName": "LaunchDarkly",
-      "matchDepNames": ["launchdarkly-js-client-sdk", "@launchdarkly/node-server-sdk"],
+      "matchDepNames": ["launchdarkly-js-client-sdk", "@launchdarkly/node-server-sdk", "launchdarkly/find-code-references"],
       "reviewers": ["team:kibana-security", "team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "Team:Security", "Team:Core", "backport:prev-minor"],
