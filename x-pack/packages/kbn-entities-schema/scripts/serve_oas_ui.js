@@ -7,7 +7,7 @@
 
 require('../../../../src/setup_node_env');
 
-const { generateOAS } = require('./generate');
+const { generateOAS } = require('./generate_oas');
 const express = require('express');
 const swaggerUi = require('swagger-ui-express');
 

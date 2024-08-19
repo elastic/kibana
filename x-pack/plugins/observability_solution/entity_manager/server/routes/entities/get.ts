@@ -42,10 +42,13 @@ import { findEntityDefinitions } from '../../lib/entities/find_entity_definition
  *                       - $ref: '#/components/schemas/entityDefinitionSchema'
  *                       - type: object
  *                         properties:
- *                           installed:
- *                             type: boolean
- *                           running:
- *                             type: boolean
+ *                           state:
+ *                            type: object
+ *                            properties:
+ *                              installed:
+ *                                type: boolean
+ *                              running:
+ *                                type: boolean
  */
 export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,

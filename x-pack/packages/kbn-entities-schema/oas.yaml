@@ -388,7 +388,7 @@ paths:
         - management
       responses:
         "200":
-          description: OK - validate check result in response body
+          description: OK - Verify result in response body
           content:
             application/json:
               schema:
@@ -442,7 +442,7 @@ paths:
             default: false
       responses:
         "200":
-          description: OK - validate enable result in response body
+          description: OK - Verify result in response body
           content:
             application/json:
               schema:
@@ -557,8 +557,11 @@ paths:
                         - $ref: "#/components/schemas/entityDefinitionSchema"
                         - type: object
                           properties:
-                            installed:
-                              type: boolean
-                            running:
-                              type: boolean
+                            state:
+                              type: object
+                              properties:
+                                installed:
+                                  type: boolean
+                                running:
+                                  type: boolean
 tags: []
