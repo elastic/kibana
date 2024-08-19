@@ -91,6 +91,8 @@ export default function (providerContext: FtrProviderContext) {
           true,
           `expected hasMisconfigurationsFindings to be true but got ${res.hasMisconfigurationsFindings} instead`
         );
+
+        await deleteIndex(es, [mock3PIndex]);
       });
 
       it(`Return hasMisconfigurationsFindings false when there are no findings`, async () => {
