@@ -71,7 +71,7 @@ export interface EcsMappingState {
   missingKeys: string[];
   invalidEcsFields: string[];
   results: object;
-  logFormat: string;
+  sampleFormat: string;
   ecsVersion: string;
 }
 

@@ -193,7 +193,7 @@ describe('SampleLogsInput', () => {
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
           logsSampleParsed: logsSampleRaw.split(','),
-          logFormat: 'json.[]',
+          sampleFormat: 'json.[]',
         });
       });
 
@@ -206,7 +206,7 @@ describe('SampleLogsInput', () => {
         it('should truncate the logs sample', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
             logsSampleParsed: tooLargeLogsSample.split(',').slice(0, 10),
-            logFormat: 'json.[]',
+            sampleFormat: 'json.[]',
           });
         });
         it('should add a notification toast', () => {
@@ -225,7 +225,7 @@ describe('SampleLogsInput', () => {
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
           logsSampleParsed: splitNDJSON,
-          logFormat: 'json.events[]',
+          sampleFormat: 'json.events[]',
         });
       });
     });
@@ -250,7 +250,7 @@ describe('SampleLogsInput', () => {
         it('should set the integrationSetting correctly', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
             logsSampleParsed: undefined,
-            logFormat: undefined,
+            sampleFormat: undefined,
           });
         });
       });
@@ -268,7 +268,7 @@ describe('SampleLogsInput', () => {
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
           logsSampleParsed: splitNDJSON,
-          logFormat: 'ndjson',
+          sampleFormat: 'ndjson',
         });
       });
 
@@ -281,7 +281,7 @@ describe('SampleLogsInput', () => {
         it('should truncate the logs sample', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
             logsSampleParsed: tooLargeLogsSample.split('\n').slice(0, 10),
-            logFormat: 'ndjson',
+            sampleFormat: 'ndjson',
           });
         });
         it('should add a notification toast', () => {
@@ -300,7 +300,7 @@ describe('SampleLogsInput', () => {
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
           logsSampleParsed: [splitNDJSON[0]],
-          logFormat: 'ndjson',
+          sampleFormat: 'ndjson',
         });
       });
     });
@@ -313,7 +313,7 @@ describe('SampleLogsInput', () => {
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
           logsSampleParsed: splitNDJSON,
-          logFormat: 'ndjson+multiline',
+          sampleFormat: 'ndjson+multiline',
         });
       });
     });
@@ -338,7 +338,7 @@ describe('SampleLogsInput', () => {
         it('should set the integrationSetting correctly', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
             logsSampleParsed: undefined,
-            logFormat: undefined,
+            sampleFormat: undefined,
           });
         });
       });

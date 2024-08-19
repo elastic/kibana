@@ -131,7 +131,7 @@ export const DataStream = z.object({
   /**
    * The log type of the dataStream, e.g. ndjson.
    */
-  logFormat: z.string().optional(),
+  sampleFormat: z.string().optional(),
 });
 
 /**

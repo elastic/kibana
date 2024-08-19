@@ -36,6 +36,22 @@ components:
       items:
         type: object
 
+    SampleFormat:
+      type: object
+      description: Description of user-provided sample format.
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: The name of the sample format.
+        multiline:
+          type: boolean
+          description: Whether the samples are multiline.
+        json_path:
+          type: string
+          description: For a JSON format, how to get to the samples.
+
     Pipeline:
       type: object
       description: The pipeline object.
@@ -116,7 +132,7 @@ components:
         docs:
           $ref: "#/components/schemas/Docs"
           description: The documents of the dataStream.
-        logFormat:
+        sampleFormat:
           type: string
           description: The log type of the dataStream, e.g. ndjson.
 

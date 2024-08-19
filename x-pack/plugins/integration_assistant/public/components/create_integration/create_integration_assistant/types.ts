@@ -34,5 +34,5 @@ export interface IntegrationSettings {
   dataStreamName?: string;
   inputTypes?: InputType[];
   logsSampleParsed?: string[];
-  logFormat?: string;
+  sampleFormat?: string;
 }

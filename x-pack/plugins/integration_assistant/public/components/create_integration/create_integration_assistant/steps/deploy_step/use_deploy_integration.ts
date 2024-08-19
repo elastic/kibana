@@ -61,7 +61,7 @@ export const useDeployIntegration = ({
                 rawSamples: integrationSettings.logsSampleParsed ?? [],
                 docs: result.docs ?? [],
                 pipeline: result.pipeline,
-                logFormat: integrationSettings.logFormat,
+                sampleFormat: integrationSettings.sampleFormat,
               },
             ],
           },
