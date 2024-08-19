@@ -64,6 +64,6 @@ describe('postEvaluation', () => {
       http: mockHttp,
     };
 
-    await expect(postEvaluation(knowledgeBaseArgs)).resolves.toThrowError('simulated error');
+    await expect(postEvaluation(knowledgeBaseArgs)).rejects.toThrowError('simulated error');
   });
 });

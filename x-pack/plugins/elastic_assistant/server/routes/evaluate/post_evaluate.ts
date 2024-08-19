@@ -57,6 +57,7 @@ import {
 import { getLlmClass, getLlmType } from '../utils';
 
 const DEFAULT_SIZE = 20;
+const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
 
 export const postEvaluateRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -66,9 +67,11 @@ export const postEvaluateRoute = (
     .post({
       access: INTERNAL_API_ACCESS,
       path: EVALUATE,
-
       options: {
         tags: ['access:elasticAssistant'],
+        timeout: {
+          idleSocket: ROUTE_HANDLER_TIMEOUT,
+        },
       },
     })
     .addVersion(

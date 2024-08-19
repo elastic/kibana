@@ -34,7 +34,7 @@ export interface PerformEvaluationParams {
   evalPrompt: string;
   evaluationType: string[];
   models: string[];
-  outputIndex: string;
+  outputIndex?: string;
   projectName?: string | undefined;
   runName: string | undefined;
 }

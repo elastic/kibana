@@ -9,11 +9,13 @@ import { postEvaluateRoute } from './post_evaluate';
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getPostEvaluateRequest } from '../../__mocks__/request';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import {
   defaultAssistantFeatures,
   PostEvaluateRequestBodyInput,
   PostEvaluateRequestQueryInput,
 } from '@kbn/elastic-assistant-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 const defaultBody: PostEvaluateRequestBodyInput = {
   dataset: undefined,
@@ -32,13 +34,28 @@ const defaultQueryParams: PostEvaluateRequestQueryInput = {
 };
 
 describe('Post Evaluate Route', () => {
-  let server: ReturnType<typeof serverMock.create>;
-  let { context } = requestContextMock.createTools();
+  const { clients, context } = requestContextMock.createTools();
+  const server: ReturnType<typeof serverMock.create> = serverMock.create();
+  clients.core.elasticsearch.client = elasticsearchServiceMock.createScopedClusterClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (server as any).responseMock.notFound = jest.fn().mockReturnValue({
+    status: 404,
+    payload: 'Not Found',
+  });
+
+  const mockUser = {
+    username: 'my_username',
+    authentication_realm: {
+      type: 'my_realm_type',
+      name: 'my_realm_name',
+    },
+  } as AuthenticatedUser;
+
   const mockGetElser = jest.fn().mockResolvedValue('.elser_model_2');
 
   beforeEach(() => {
-    server = serverMock.create();
-    ({ context } = requestContextMock.createTools());
+    jest.clearAllMocks();
+    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser);
 
     postEvaluateRoute(server.router, mockGetElser);
   });
