@@ -25,6 +25,7 @@ export const cli = () => {
       createToolingLogger.setDefaultLogLevelFromCliFlags(cliContext.flags);
 
       const log = cliContext.log;
+
       const kbnClient = createKbnClient({
         log,
         url: cliContext.flags.kibana as string,
@@ -60,7 +61,13 @@ ${HORIZONTAL_LINE}
       // Replace this code with whatever you want!
       const ruleCopies = duplicateRuleParams(basicRule, 200);
       const functions = ruleCopies.map((rule) => () => detectionsClient.createRule({ body: rule }));
-      const responses = await concurrentlyExec(functions);
+      await concurrentlyExec(functions);
+
+      listsClient.findLists({ query: {} });
+      exceptionsClient.findExceptionLists({ query: {} });
+
+      esClient.indices.exists({ index: 'test' });
+
       /**
        * END Custom data loader logic
        */

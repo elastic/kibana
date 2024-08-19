@@ -5,10 +5,17 @@ The tools in this folder are designed to make it fast and easy to build scripts 
 ## Usage
 
 `node x-pack/plugins/security_solution/scripts/quickstart/run.js`: Runs the script defined in `scratchpad.ts`
+Options:
+--username: User name to be used for auth against elasticsearch and kibana (Default: elastic).
+--password: User name Password (Default: changeme)
+--kibana: The url to Kibana (Default: http://127.0.0.1:5601)
+--apikey: The API key for authentication, overrides username/password - use for serverless projects
 
 `scratchpad.ts` already contains code to set up clients for Elasticsearch and Kibana. In addition it provides clients for Security Solution, Lists, and Exceptions APIs, built on top of the Kibana client. However, it does not create any rules/exceptions/lists/data - it's a blank slate for you to immediately begin creating the resources you want for testing. Please don't commit data-generating code to `scratchpad.ts`! Instead, when you have built a data-generating script that might be useful to others, please extract the useful components to the `quickstart/modules` folder and leave `scratchpad.ts` empty for the next developer.
 
 ### Environments
+
+The API clients are designed to work with any delivery method - local, cloud, or serverless deployments. For deployments that do not allow username/password auth, use an API key.
 
 ## Modules
 
@@ -77,3 +84,13 @@ const exceptionsFunctions = createdRules.map(
 );
 const exceptionsResponses = await concurrentlyExec(exceptionsFunctions);
 ```
+
+## Future Work
+
+### Interactive Mode
+
+It may be useful to have a mode where the CLI waits for input from the user and creates resources selected from a predefined list.
+
+### Resource Tracking/Cleanup
+
+It may also be useful to have the tooling automatically keep track of the created resources so they can be deleted automatically when finished.
