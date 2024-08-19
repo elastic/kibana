@@ -1366,14 +1366,21 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/test/functional/apps/**/*.{js,ts}'],
+      files: [
+        'test/{accessibility,*functional*}/apps/**/*.{js,ts}',
+        'x-pack/test/{accessibility,*functional*}/apps/**/*.{js,ts}',
+      ],
+      extends: ['plugin:mocha/recommended'],
       plugins: ['mocha'],
       env: {
         mocha: true,
       },
       rules: {
-        'require-await': 'error',
-        'no-return-await': 'error',
+        'mocha/no-mocha-arrows': 'off',
+        'mocha/no-exports': 'off',
+        'mocha/no-setup-in-describe': 'off',
+        'mocha/no-nested-tests': 'off',
+        'mocha/no-skipped-tests': 'off',
       },
     },
     {

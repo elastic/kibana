@@ -117,8 +117,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.unsetTime();
     });
 
-    describe('snapshot share', async () => {
-      describe('test local state', async () => {
+    describe('snapshot share', () => {
+      describe('test local state', () => {
         it('should not have "panels" state when not in unsaved changes state', async () => {
           await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
           expect(await getSharedUrl('snapshot')).to.not.contain('panels');
@@ -144,6 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      // eslint-disable-next-line mocha/no-async-describe
       describe('test filter state', async () => {
         await testFilterState('snapshot');
       });
@@ -155,7 +156,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('saved object share', async () => {
+    describe('saved object share', () => {
+      // eslint-disable-next-line mocha/no-async-describe
       describe('test filter state', async () => {
         await testFilterState('savedObject');
       });

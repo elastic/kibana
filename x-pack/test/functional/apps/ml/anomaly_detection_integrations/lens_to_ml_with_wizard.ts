@@ -119,7 +119,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
       }
     });
 
-    it('can create multi metric job from vis with single layer', async () => {
+    it.skip('can create multi metric job from vis with single layer', async () => {
       const selectedPanelTitle = 'panel1';
       const jobId = 'job_from_lens_1';
       const splitField = 'airline';

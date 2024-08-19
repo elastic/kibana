@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await controlGroupWrapper.elementHasClass('controlsWrapper--twoLine')).to.be(true);
     });
 
-    describe('apply new default width and grow', async () => {
+    describe('apply new default width and grow', () => {
       it('defaults to medium width and grow enabled', async () => {
         await dashboardControls.openCreateControlFlyout();
         const mediumWidthButton = await testSubjects.find('control-editor-width-medium');
@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('filtering settings', async () => {
+    describe('filtering settings', () => {
       let firstOptionsListId: string;
       let beforeCount: number;
 
@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         beforeRange = await getRange();
       });
 
-      describe('do not apply global filters', async () => {
+      describe('do not apply global filters', () => {
         it('- filter pills', async () => {
           await filterBar.addFilter({ field: 'animal.keyword', operation: 'is', value: 'cat' });
           await dashboardControls.optionsListOpenPopover(firstOptionsListId);
@@ -172,7 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('flyout only show settings that are relevant', async () => {
+    describe('flyout only show settings that are relevant', () => {
       before(async () => {
         await dashboard.switchToEditMode();
       });
@@ -205,7 +205,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('control group settings flyout closes', async () => {
+    describe('control group settings flyout closes', () => {
       it('on save', async () => {
         await dashboardControls.openControlGroupSettingsFlyout();
         await dashboard.saveDashboard('Test Control Group Settings', {

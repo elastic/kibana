@@ -315,7 +315,7 @@ GET _search
       });
     });
 
-    describe('with conditional templates', async () => {
+    describe('with conditional templates', () => {
       const CONDITIONAL_TEMPLATES = [
         {
           type: 'fs',

@@ -20,7 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('security feature controls', function () {
     this.tags(['skipFirefox']);
 
-    before(async () => await kibanaServer.importExport.load(archive));
+    before(async () => kibanaServer.importExport.load(archive));
 
     after(async () => await kibanaServer.importExport.unload(archive));
 
