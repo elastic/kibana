@@ -78,7 +78,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it(`Return hasMisconfigurationsFindings true when there are only findings in third party index`, async () => {
         await deleteIndex(es, INDEX_ARRAY);
-        const mock3PIndex = 'logs-mock3pIntegration_latest_misconfigurations_cdr';
+        const mock3PIndex = 'logs-mock-3p-integration_latest_misconfigurations_cdr';
         await addIndex(es, findingsMockData, mock3PIndex);
 
         const { body: res }: { body: CspSetupStatus } = await supertest
