@@ -158,6 +158,8 @@ export const useColumns = ({
   defaultColumns,
   browserFields,
 }: UseColumnsArgs): UseColumnsResp => {
+  console.log('storageAlertsTable', storageAlertsTable);
+  console.log('defaultColumns', defaultColumns);
   const { http } = useKibana().services;
 
   const { isLoading: isBrowserFieldDataLoading, data } = useFetchAlertsFieldsQuery(
@@ -290,9 +292,20 @@ export const useColumns = ({
     [columns]
   );
 
+  const columnsWithoutInitialWidthForLastColumn = useMemo(
+    () =>
+      columns.map((col, inx) => {
+        if (inx !== columns.length - 1) {
+          return col;
+        }
+        return (({ initialWidth, ...object }) => object)(col);
+      }),
+    [columns]
+  );
+
   return useMemo(
     () => ({
-      columns,
+      columns: columnsWithoutInitialWidthForLastColumn,
       visibleColumns,
       isBrowserFieldDataLoading,
       browserFields: browserFields ?? data.browserFields,
@@ -303,7 +316,7 @@ export const useColumns = ({
       fields: fieldsToFetch,
     }),
     [
-      columns,
+      columnsWithoutInitialWidthForLastColumn,
       visibleColumns,
       isBrowserFieldDataLoading,
       browserFields,
