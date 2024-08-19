@@ -1032,7 +1032,7 @@ export const getMappingConflictsInfo = (field: DataViewField): FieldConflictsInf
 export const hasWrongOperatorWithWildcard = (
   items: ExceptionsBuilderReturnExceptionItem[]
 ): boolean => {
-  // flattens array of multiple entries added with OR or AND
+  // flattens array of multiple entries added with OR
   const multipleEntries = items.flatMap((item) => item.entries);
   // flattens nested entries
   const allEntries = multipleEntries.flatMap((item) => {
