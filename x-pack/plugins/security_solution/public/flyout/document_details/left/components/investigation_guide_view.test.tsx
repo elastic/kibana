@@ -8,12 +8,12 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { InvestigationGuideView } from './investigation_guide_view';
-import type { GetBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
+import type { UseBasicDataFromDetailsDataResult } from '../../shared/hooks/use_basic_data_from_details_data';
 
 const defaultProps = {
   basicData: {
     ruleId: 'rule-id',
-  } as unknown as GetBasicDataFromDetailsData,
+  } as unknown as UseBasicDataFromDetailsDataResult,
   ruleNote: 'test note',
 };
 
