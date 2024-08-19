@@ -836,67 +836,42 @@ Refer to {api-kibana}/group/endpoint-alerting[alerting API].
 
 Refer to {api-kibana}/group/endpoint-alerting[alerting API].
 
-[[alerts-api-create]]
-=== Legacy create alert API
+[role="exclude",id="update-connector-api"]
+== Update connector API
 
-Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
 
-[[alerts-api-delete]]
-=== Legacy delete alert API
+[role="exclude",id="list-connector-types-api"]
+== List connector types API
 
-Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
 
-[[alerts-api-disable]]
-=== Legacy disable alert API
+[role="exclude",id="get-connector-api"]
+== Get connector API
 
-Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
 
-[[alerts-api-enable]]
-=== Legacy enable alert API
+[role="exclude",id="get-all-connectors-api"]
+== Get all connectors API
 
-Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
 
-[[alerts-api-find]]
-=== Legacy find alerts API
+[role="exclude",id="execute-connector-api"]
+== Run connector API
 
-Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
 
-[[alerts-api-get]]
-=== Legacy get alert API
+[role="exclude",id="delete-connector-api"]
+== Delete connector API
 
-Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
 
-[[alerts-api-list]]
-=== Legacy list alert types API
+[role="exclude",id="create-connector-api"]
+== Create connector API
 
-Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
 
-[[alerts-api-mute-all]]
-=== Legacy mute all alert instances API
+[role="exclude",id="actions-and-connectors-legacy-apis"]
+== Deprecated 7.x APIs
 
-Refer to {api-kibana}/group/endpoint-alerting[alerting API].
-
-[[alerts-api-mute]]
-=== Legacy mute alert instance API
-
-Refer to {api-kibana}/group/endpoint-alerting[alerting API].
-
-[[alerts-api-unmute-all]]
-=== Legacy unmute all alert instances API
-
-Refer to {api-kibana}/group/endpoint-alerting[alerting API].
-
-[[alerts-api-unmute]]
-=== Legacy unmute alert instance API
-
-Refer to {api-kibana}/group/endpoint-alerting[alerting API].
-
-[[alerts-api-update]]
-=== Legacy update alert API
-
-Refer to {api-kibana}/group/endpoint-alerting[alerting API].
-
-[[alerts-api-health]]
-=== Legacy get Alerting framework health API
-
-Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
