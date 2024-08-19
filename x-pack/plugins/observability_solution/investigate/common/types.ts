@@ -35,7 +35,7 @@ export interface Investigation {
 export interface InvestigationNote {
   id: string;
   createdAt: number;
-  createdBy: AuthenticatedUser;
+  createdBy: string;
   content: string;
 }
 
