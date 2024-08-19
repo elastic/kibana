@@ -259,7 +259,7 @@ export function InvestigateWidgetGrid({
       {sections.map((section, index) => {
         if ('items' in section) {
           return (
-            <EuiFlexItem key={index} grow={false}>
+            <EuiFlexItem key={`section-${section.items[0].id}`} grow={false}>
               <GridSectionRenderer
                 items={section.items}
                 onItemCopy={(copiedItem) => {
@@ -286,7 +286,7 @@ export function InvestigateWidgetGrid({
           );
         }
         return (
-          <EuiFlexItem grow={false} key={index}>
+          <EuiFlexItem grow={false} key={`item-${section.item.id}`}>
             {section.item.chrome === ChromeOption.disabled ? (
               section.item.element
             ) : (
