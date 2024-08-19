@@ -193,7 +193,8 @@ const featuresList = {
     description: i18n.translate(
       'xpack.enterpriseSearch.appSearch.gateForm.searchManagementUis.featureDescription',
       {
-        defaultMessage: 'Use graphical user interfaces (GUIs) to manage your search application experience',
+        defaultMessage:
+          'Use graphical user interfaces (GUIs) to manage your search application experience',
       }
     ),
     id: 'searchManagementUis',
