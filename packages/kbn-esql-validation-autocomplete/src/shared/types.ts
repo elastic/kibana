@@ -20,6 +20,7 @@ export interface ESQLCallbacks {
       hidden: boolean;
       title?: string;
       dataStreams?: Array<{ name: string; title?: string }>;
+      type?: string;
     }
   >;
   getFieldsFor?: CallbackFn<{ query: string }, ESQLRealField>;

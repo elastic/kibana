@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type {
-  GetInfraAssetCountRequestBodyPayload,
+  GetInfraAssetCountRequestBodyPayloadClient,
   GetInfraAssetCountResponsePayload,
   GetInfraAssetCountRequestParamsPayload,
 } from '@kbn/infra-plugin/common/http_api';
@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
     roleAuthc,
   }: {
     params: GetInfraAssetCountRequestParamsPayload;
-    body: GetInfraAssetCountRequestBodyPayload;
+    body: GetInfraAssetCountRequestBodyPayloadClient;
     roleAuthc: RoleCredentials;
   }): Promise<GetInfraAssetCountResponsePayload | undefined> => {
     const { assetType } = params;
@@ -73,7 +73,6 @@ export default function ({ getService }: FtrProviderContext) {
               },
               from: timeRange.from,
               to: timeRange.to,
-              sourceId: 'default',
             },
             roleAuthc,
           });

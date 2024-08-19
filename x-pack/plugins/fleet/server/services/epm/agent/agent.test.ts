@@ -327,6 +327,25 @@ input: logs
     });
   });
 
+  it('should support $$$$ yaml values at root level', () => {
+    const streamTemplate = `
+input: logs
+{{custom}}
+    `;
+    const vars = {
+      custom: {
+        type: 'yaml',
+        value: 'test: $$$$',
+      },
+    };
+
+    const output = compileTemplate(vars, streamTemplate);
+    expect(output).toEqual({
+      input: 'logs',
+      test: '$$$$',
+    });
+  });
+
   it('should suport !!str for string values', () => {
     const stringTemplate = `
 my-package:

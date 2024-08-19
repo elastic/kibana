@@ -8,7 +8,7 @@
 import { EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
 import React, { createContext } from 'react';
 import styled from 'styled-components';
-import type { GetBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
+import type { UseBasicDataFromDetailsDataResult } from '../../../flyout/document_details/shared/hooks/use_basic_data_from_details_data';
 import * as i18n from './translations';
 import { MarkdownRenderer } from '../markdown_editor';
 import { LineClamp } from '../line_clamp';
@@ -18,13 +18,13 @@ export const Indent = styled.div`
   word-break: break-word;
 `;
 
-export const BasicAlertDataContext = createContext<Partial<GetBasicDataFromDetailsData>>({});
+export const BasicAlertDataContext = createContext<Partial<UseBasicDataFromDetailsDataResult>>({});
 
 interface InvestigationGuideViewProps {
   /**
    * An object of basic fields from the event details data
    */
-  basicData: GetBasicDataFromDetailsData;
+  basicData: UseBasicDataFromDetailsDataResult;
   /**
    * The markdown text of rule.note
    */
