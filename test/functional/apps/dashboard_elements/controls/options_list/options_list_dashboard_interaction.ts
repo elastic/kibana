@@ -373,7 +373,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       before(async () => {
         await common.navigateToApp('console');
-        await console.collapseHelp();
         await console.clearTextArea();
         await addDocument(
           'animals-cats-2018-01-01',

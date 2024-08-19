@@ -90,13 +90,15 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         });
       });
 
-      it('should allow inline comments in request url row', async () => {
+      // Status badge not yet implemented in phase 2
+      it.skip('should allow inline comments in request url row', async () => {
         await executeRequest('\n GET _search // inline comment');
         expect(await PageObjects.console.monaco.hasInvalidSyntax()).to.be(false);
         expect(await PageObjects.console.getResponseStatus()).to.eql(200);
       });
 
-      it('should allow inline comments in request body', async () => {
+      // Status badge not yet implemented in phase 2
+      it.skip('should allow inline comments in request body', async () => {
         await executeRequest(
           '\n GET _search \n{\n "query": {\n "match_all": {} // inline comment\n}\n}'
         );

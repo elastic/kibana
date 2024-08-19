@@ -64,7 +64,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('console history', () => {
+    // History is not yet implemented in phase 2
+    describe.skip('console history', () => {
       const sendRequest = async (request: string) => {
         await PageObjects.console.monaco.enterText(request);
         await PageObjects.console.clickPlay();

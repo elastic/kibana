@@ -26,9 +26,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.setWindowSize(1200, 1800);
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
-      await retry.try(async () => {
-        await PageObjects.console.collapseHelp();
-      });
     });
 
     after(async () => {

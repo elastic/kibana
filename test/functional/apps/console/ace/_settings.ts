@@ -13,7 +13,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'console']);
 
-  describe('console settings', function testSettings() {
+  // Settings is not yet implemented in phase 2
+  describe.skip('console settings', function testSettings() {
     this.tags('includeFirefox');
     before(async () => {
       log.debug('navigateTo console');
