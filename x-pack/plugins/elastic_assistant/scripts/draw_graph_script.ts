@@ -7,6 +7,7 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs/promises';
+import path from 'path';
 import {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
@@ -17,27 +18,21 @@ import { FakeLLM } from '@langchain/core/utils/testing';
 import { createOpenAIFunctionsAgent } from 'langchain/agents';
 import { getDefaultAssistantGraph } from '../server/lib/langchain/graphs/default_assistant_graph/graph';
 
-export const testPrompt = ChatPromptTemplate.fromMessages([
+// Just defining some test variables to get the graph to compile..
+const testPrompt = ChatPromptTemplate.fromMessages([
   ['system', 'You are a helpful assistant'],
   ['placeholder', '{chat_history}'],
   ['human', '{input}'],
   ['placeholder', '{agent_scratchpad}'],
 ]);
-
 const createLlmInstance = () => {
-  return new ActionsClientSimpleChatModel({ response: JSON.stringify({}, null, 2) });
+  return new ActionsClientSimpleChatModel({ response: 'test' });
 };
-
 const mockLlm = new FakeLLM({
   response: JSON.stringify({}, null, 2),
 }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
-export const draw = async () => {
-  const logger = new ToolingLog({
-    level: 'info',
-    writeTo: process.stdout,
-  }) as unknown as Logger;
-  logger.info('Drawing Langgraph charts');
+async function getGraph(logger: Logger) {
   const agentRunnable = await createOpenAIFunctionsAgent({
     llm: mockLlm,
     tools: [],
@@ -52,8 +47,19 @@ export const draw = async () => {
     responseLanguage: 'English',
     replacements: {},
   });
-  const image = await graph.getGraph().drawMermaidPng();
-  const buffer = Buffer.from(await image.arrayBuffer());
-  await fs.writeFile('output.png', buffer);
-  console.log(image);
+  return graph.getGraph();
+}
+
+export const draw = async () => {
+  const logger = new ToolingLog({
+    level: 'info',
+    writeTo: process.stdout,
+  }) as unknown as Logger;
+  logger.info('Compiling graph');
+  const outputPath = path.join(__dirname, '../docs/img/default_assistant_graph.png');
+  const graph = await getGraph(logger);
+  const output = await graph.drawMermaidPng();
+  const buffer = Buffer.from(await output.arrayBuffer());
+  logger.info(`Writing graph to ${outputPath}`);
+  await fs.writeFile(outputPath, buffer);
 };

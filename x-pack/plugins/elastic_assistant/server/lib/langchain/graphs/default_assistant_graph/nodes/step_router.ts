@@ -6,24 +6,16 @@
  */
 import { END } from '@langchain/langgraph';
 import { NodeType } from '../constants';
-import { NodeParamsBase, AgentState } from '../types';
+import { AgentState } from '../types';
 import { NEW_CHAT } from '../../../../../routes/helpers';
 
-interface RouterParams extends NodeParamsBase {
-  state: AgentState;
-}
-
 /*
- * We use a single router endpoint for the conditional edges.
+ * We use a single router endpoint for common conditional edges.
  * This allows for much easier extension later, where one node might want to go back and validate with an earlier node
  * or to a new node that's been added to the graph.
- *
- * @param logger - The scoped logger
- * @param state - The current state of the graph
+ * More routers could always be added later when needed.
  */
-export function stepRouter({ logger, state }: RouterParams): string {
-  logger.debug(() => `${NodeType.STEP_ROUTER}: Node state:\n${JSON.stringify(state, null, 2)}`);
-
+export function stepRouter(state: AgentState): string {
   switch (state.lastNode) {
     case NodeType.AGENT:
       if (state.agentOutcome && 'returnValues' in state.agentOutcome) {

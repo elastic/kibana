@@ -150,15 +150,19 @@ export const getDefaultAssistantGraph = ({
       .addEdge(NodeType.GENERATE_CHAT_TITLE, NodeType.PERSIST_CONVERSATION_CHANGES)
       .addEdge(NodeType.PERSIST_CONVERSATION_CHANGES, NodeType.AGENT)
       .addEdge(NodeType.TOOLS, NodeType.AGENT)
-      .addConditionalEdges(NodeType.MODEL_INPUT, (state: AgentState) =>
-        stepRouter({ ...nodeParams, state })
-      )
-      .addConditionalEdges(NodeType.GET_PERSISTED_CONVERSATION, (state: AgentState) =>
-        stepRouter({ ...nodeParams, state })
-      )
-      .addConditionalEdges(NodeType.AGENT, (state: AgentState) =>
-        stepRouter({ ...nodeParams, state })
-      );
+      .addConditionalEdges(NodeType.MODEL_INPUT, stepRouter, {
+        [NodeType.GET_PERSISTED_CONVERSATION]: NodeType.GET_PERSISTED_CONVERSATION,
+        [NodeType.AGENT]: NodeType.AGENT,
+      })
+      .addConditionalEdges(NodeType.GET_PERSISTED_CONVERSATION, stepRouter, {
+        [NodeType.PERSIST_CONVERSATION_CHANGES]: NodeType.PERSIST_CONVERSATION_CHANGES,
+        [NodeType.GENERATE_CHAT_TITLE]: NodeType.GENERATE_CHAT_TITLE,
+      })
+      .addConditionalEdges(NodeType.AGENT, stepRouter, {
+        [NodeType.RESPOND]: NodeType.RESPOND,
+        [NodeType.TOOLS]: NodeType.TOOLS,
+        end: END,
+      });
     return graph.compile();
   } catch (e) {
     throw new Error(`Unable to compile DefaultAssistantGraph\n${e}`);

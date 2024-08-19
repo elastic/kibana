@@ -6,4 +6,4 @@
  */
 
 require('../../../../src/setup_node_env');
-require('./draw_graphs_script').draw();
+require('./draw_graph_script').draw();
