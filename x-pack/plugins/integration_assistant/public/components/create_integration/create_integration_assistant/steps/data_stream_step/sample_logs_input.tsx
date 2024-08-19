@@ -35,19 +35,6 @@ export const parseNDJSON = (fileContent: string, multiline: boolean = false): un
 };
 
 /**
- * Checks if a given key is identifier-like.
- * An identifier-like key is made of alphanumeric characters and underscores,
- * and does not start with a digit (this definition is taken from jq)
- *
- * @param key - The key to check.
- * @returns True if the key is identifier-like, false otherwise.
- */
-export const isIdentifierLike = (key: string): boolean => {
-  const identifierRegex = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
-  return identifierRegex.test(key);
-};
-
-/**
  * Parse the logs sample file content as a JSON, find an array of entries there.
  *
  * If the JSON object can be parsed, but is not an array, we try to find a candidate
@@ -67,13 +54,11 @@ export const parseJSONArray = (
     const arrayKeys = Object.keys(jsonContent).filter((key) => Array.isArray(jsonContent[key]));
     if (arrayKeys.length === 1) {
       const key = arrayKeys[0];
-      if (isIdentifierLike(key)) {
-        return {
-          entries: jsonContent[key],
-          pathToEntries: [key],
-          errorNoArrayFound: false,
-        };
-      }
+      return {
+        entries: jsonContent[key],
+        pathToEntries: [key],
+        errorNoArrayFound: false,
+      };
     }
   }
   return { errorNoArrayFound: true, entries: [], pathToEntries: [] };
