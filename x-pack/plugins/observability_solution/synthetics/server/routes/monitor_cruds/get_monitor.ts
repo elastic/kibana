@@ -18,7 +18,7 @@ import {
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import { getMonitorFilters, MonitorsQuery, QuerySchema, SEARCH_FIELDS } from '../common';
-import { mapSavedObjectToMonitor } from './helper';
+import { mapSavedObjectToMonitor } from './saved_object_to_monitor';
 import { getSyntheticsMonitor } from '../../queries/get_monitor';
 
 export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({

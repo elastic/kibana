@@ -8,7 +8,7 @@ import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitors, isMonitorsQueryFiltered, QuerySchema } from '../common';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { mapSavedObjectToMonitor } from './helper';
+import { mapSavedObjectToMonitor } from './saved_object_to_monitor';
 
 export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',

@@ -14,7 +14,7 @@ import { AddEditMonitorAPI, CreateMonitorPayLoad } from './add_monitor/add_monit
 import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from './add_monitor_project';
 import { getDecryptedMonitor } from '../../saved_objects/synthetics_monitor';
 import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
-import { mergeSourceMonitor } from './helper';
+import { mergeSourceMonitor } from './saved_object_to_monitor';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import {
@@ -33,7 +33,7 @@ import {
   formatTelemetryUpdateEvent,
 } from '../telemetry/monitor_upgrade_sender';
 import { formatSecrets, normalizeSecrets } from '../../synthetics_service/utils/secrets';
-import { mapSavedObjectToMonitor } from './helper';
+import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({

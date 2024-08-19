@@ -15,7 +15,7 @@ import {
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
-import { removeMonitorEmptyValues } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/helper';
+import { removeMonitorEmptyValues } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/saved_object_to_monitor';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { omitResponseTimestamps, omitEmptyValues } from './helper/monitor';

@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
-import { transformPublicKeys } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/helper';
+import { transformPublicKeys } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/saved_object_to_monitor';
 import { LOCATION_REQUIRED_ERROR } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/monitor_validation';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { addMonitorAPIHelper, omitMonitorKeys } from './add_monitor';

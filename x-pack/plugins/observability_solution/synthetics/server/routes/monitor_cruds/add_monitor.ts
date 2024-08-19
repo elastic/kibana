@@ -13,7 +13,7 @@ import { AddEditMonitorAPI, CreateMonitorPayLoad } from './add_monitor/add_monit
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { normalizeAPIConfig, validateMonitor } from './monitor_validation';
-import { mapSavedObjectToMonitor } from './helper';
+import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
