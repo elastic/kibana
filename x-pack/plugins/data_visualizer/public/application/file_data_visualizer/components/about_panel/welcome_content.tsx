@@ -34,10 +34,11 @@ interface Props {
 export const WelcomeContent: FC<Props> = ({ hasPermissionToImport }) => {
   const {
     services: {
-      fileUpload: { getMaxBytesFormatted },
+      fileUpload: { getMaxBytesFormatted, getMaxTikaBytesFormatted },
     },
   } = useDataVisualizerKibana();
   const maxFileSize = getMaxBytesFormatted();
+  const maxTikaFileSize = getMaxTikaBytesFormatted();
 
   return (
     <EuiFlexGroup gutterSize="xl" alignItems="center">
@@ -57,10 +58,17 @@ export const WelcomeContent: FC<Props> = ({ hasPermissionToImport }) => {
         <EuiText>
           <p>
             {hasPermissionToImport ? (
-              <FormattedMessage
-                id="xpack.dataVisualizer.file.welcomeContent.visualizeAndImportDataFromLogFileDescription"
-                defaultMessage="Upload your file, analyze its data, and optionally import the data into an Elasticsearch index."
-              />
+              <>
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.welcomeContent.visualizeAndImportDataFromLogFileDescription"
+                  defaultMessage="Upload your file, analyze its data, and optionally import the data into an index."
+                />
+                <br />
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.welcomeContent.visualizeAndImportDataFromLogFileDescription2"
+                  defaultMessage="The data can also be automatically vectorized using semantic text."
+                />
+              </>
             ) : (
               <FormattedMessage
                 id="xpack.dataVisualizer.file.welcomeContent.visualizeDataFromLogFileDescription"
@@ -74,11 +82,12 @@ export const WelcomeContent: FC<Props> = ({ hasPermissionToImport }) => {
           <p>
             <FormattedMessage
               id="xpack.dataVisualizer.file.welcomeContent.supportedFileFormatDescription"
-              defaultMessage="The following file formats are supported:"
+              defaultMessage="The following file formats are supported {maxFileSize}:"
+              values={{ maxFileSize }}
             />
           </p>
         </EuiText>
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem grow={false} css={docIconStyle}>
             <EuiIcon size="m" type="document" />
@@ -130,12 +139,76 @@ export const WelcomeContent: FC<Props> = ({ hasPermissionToImport }) => {
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.dataVisualizer.file.welcomeContent.uploadedFilesAllowedSizeDescription"
-              defaultMessage="You can upload files up to {maxFileSize}."
-              values={{ maxFileSize }}
+              id="xpack.dataVisualizer.file.welcomeContent.supportedTikaFileFormatDescription"
+              defaultMessage="The following file formats are supported {maxTikaFileSize}:"
+              values={{ maxTikaFileSize }}
             />
           </p>
         </EuiText>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem grow={false} css={docIconStyle}>
+            <EuiIcon size="m" type="document" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.welcomeContent.pdfDescription"
+                  defaultMessage="PDF"
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem grow={false} css={docIconStyle}>
+            <EuiIcon size="m" type="document" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.welcomeContent.msFilesDescription"
+                  defaultMessage="Microsoft Office Word, Excel, and PowerPoint"
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem grow={false} css={docIconStyle}>
+            <EuiIcon size="m" type="document" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.welcomeContent.plainAndRichTextFilesDescription"
+                  defaultMessage="Plain text and Rich Text Format"
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem grow={false} css={docIconStyle}>
+            <EuiIcon size="m" type="document" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.welcomeContent.openDocFilesDescription"
+                  defaultMessage="Open Document Format"
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
