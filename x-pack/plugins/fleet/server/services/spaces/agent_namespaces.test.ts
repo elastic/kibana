@@ -5,125 +5,114 @@
  * 2.0.
  */
 
-import { appContextService } from '../app_context';
-
 import type { Agent } from '../../types';
 
 import { agentsKueryNamespaceFilter, isAgentInNamespace } from './agent_namespaces';
+import { isSpaceAwarenessEnabled } from './helpers';
 
-jest.mock('../app_context');
-
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+jest.mock('./helpers');
 
 describe('isAgentInNamespace', () => {
-  describe('with the useSpaceAwareness feature flag disabled', () => {
+  describe('with isSpaceAwarenessEnabled is false', () => {
     beforeEach(() => {
-      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
-        useSpaceAwareness: false,
-      } as any);
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
     });
 
-    it('returns true even if the agent is in a different space', () => {
+    it('returns true even if the agent is in a different space', async () => {
       const agent = { id: '123', namespaces: ['default', 'space1'] } as Agent;
-      expect(isAgentInNamespace(agent, 'space2')).toEqual(true);
+      expect(await isAgentInNamespace(agent, 'space2')).toEqual(true);
     });
   });
 
-  describe('with the useSpaceAwareness feature flag enabled', () => {
+  describe('with the isSpaceAwarenessEnabled return true', () => {
     beforeEach(() => {
-      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
-        useSpaceAwareness: true,
-      } as any);
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
     });
 
     describe('when the namespace is defined', () => {
-      it('returns true in a custom space if the agent namespaces include the namespace', () => {
+      it('returns true in a custom space if the agent namespaces include the namespace', async () => {
         const agent = { id: '123', namespaces: ['default', 'space1'] } as Agent;
-        expect(isAgentInNamespace(agent, 'space1')).toEqual(true);
+        expect(await isAgentInNamespace(agent, 'space1')).toEqual(true);
       });
 
-      it('returns false in a custom space if the agent namespaces do not include the namespace', () => {
+      it('returns false in a custom space if the agent namespaces do not include the namespace', async () => {
         const agent = { id: '123', namespaces: ['default', 'space1'] } as Agent;
-        expect(isAgentInNamespace(agent, 'space2')).toEqual(false);
+        expect(await isAgentInNamespace(agent, 'space2')).toEqual(false);
       });
 
-      it('returns true in the default space if the agent has zero length namespaces', () => {
+      it('returns true in the default space if the agent has zero length namespaces', async () => {
         const agent = { id: '123', namespaces: [] as string[] } as Agent;
-        expect(isAgentInNamespace(agent, 'default')).toEqual(true);
+        expect(await isAgentInNamespace(agent, 'default')).toEqual(true);
       });
 
-      it('returns false in a custom space if the agent has zero length namespaces', () => {
+      it('returns false in a custom space if the agent has zero length namespaces', async () => {
         const agent = { id: '123', namespaces: [] as string[] } as Agent;
-        expect(isAgentInNamespace(agent, 'space1')).toEqual(false);
+        expect(await isAgentInNamespace(agent, 'space1')).toEqual(false);
       });
 
-      it('returns true in the default space if the agent does not have namespaces', () => {
+      it('returns true in the default space if the agent does not have namespaces', async () => {
         const agent = { id: '123' } as Agent;
-        expect(isAgentInNamespace(agent, 'default')).toEqual(true);
+        expect(await isAgentInNamespace(agent, 'default')).toEqual(true);
       });
 
-      it('returns false in a custom space if the agent does not have namespaces', () => {
+      it('returns false in a custom space if the agent does not have namespaces', async () => {
         const agent = { id: '123' } as Agent;
-        expect(isAgentInNamespace(agent, 'space1')).toEqual(false);
+        expect(await isAgentInNamespace(agent, 'space1')).toEqual(false);
       });
     });
 
     describe('when the namespace is undefined', () => {
-      it('returns true if the agent does not have namespaces', () => {
+      it('returns true if the agent does not have namespaces', async () => {
         const agent = { id: '123' } as Agent;
-        expect(isAgentInNamespace(agent)).toEqual(true);
+        expect(await isAgentInNamespace(agent)).toEqual(true);
       });
 
-      it('returns true if the agent has zero length namespaces', () => {
+      it('returns true if the agent has zero length namespaces', async () => {
         const agent = { id: '123', namespaces: [] as string[] } as Agent;
-        expect(isAgentInNamespace(agent)).toEqual(true);
+        expect(await isAgentInNamespace(agent)).toEqual(true);
       });
 
-      it('returns true if the agent namespaces include the default one', () => {
+      it('returns true if the agent namespaces include the default one', async () => {
         const agent = { id: '123', namespaces: ['default'] } as Agent;
-        expect(isAgentInNamespace(agent)).toEqual(true);
+        expect(await isAgentInNamespace(agent)).toEqual(true);
       });
 
-      it('returns false if the agent namespaces include the default one', () => {
+      it('returns false if the agent namespaces include the default one', async () => {
         const agent = { id: '123', namespaces: ['space1'] } as Agent;
-        expect(isAgentInNamespace(agent)).toEqual(false);
+        expect(await isAgentInNamespace(agent)).toEqual(false);
       });
     });
   });
 });
 
 describe('agentsKueryNamespaceFilter', () => {
-  describe('with the useSpaceAwareness feature flag disabled', () => {
+  describe('with isSpaceAwarenessEnabled returning false', () => {
     beforeEach(() => {
-      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
-        useSpaceAwareness: false,
-      } as any);
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
     });
 
-    it('returns undefined if the useSpaceAwareness feature flag disabled', () => {
-      expect(agentsKueryNamespaceFilter('space1')).toBeUndefined();
+    it('returns undefined', async () => {
+      expect(await agentsKueryNamespaceFilter('space1')).toBeUndefined();
     });
   });
 
-  describe('with the useSpaceAwareness feature flag enabled', () => {
+  describe('with isSpaceAwarenessEnabled returning true', () => {
     beforeEach(() => {
-      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
-        useSpaceAwareness: true,
-      } as any);
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
     });
 
-    it('returns undefined if the namespace is undefined', () => {
-      expect(agentsKueryNamespaceFilter()).toBeUndefined();
+    it('returns undefined if the namespace is undefined', async () => {
+      expect(await agentsKueryNamespaceFilter()).toBeUndefined();
     });
 
-    it('returns a kuery for the default space', () => {
-      expect(agentsKueryNamespaceFilter('default')).toEqual(
+    it('returns a kuery for the default space', async () => {
+      expect(await agentsKueryNamespaceFilter('default')).toEqual(
         'namespaces:(default) or not namespaces:*'
       );
     });
 
-    it('returns a kuery for custom spaces', () => {
-      expect(agentsKueryNamespaceFilter('space1')).toEqual('namespaces:(space1)');
+    it('returns a kuery for custom spaces', async () => {
+      expect(await agentsKueryNamespaceFilter('space1')).toEqual('namespaces:(space1)');
     });
   });
 });
