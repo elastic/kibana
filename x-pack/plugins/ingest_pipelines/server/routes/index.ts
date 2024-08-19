@@ -16,6 +16,7 @@ import {
   registerSimulateRoute,
   registerDocumentsRoute,
   registerParseCsvRoute,
+  registerListGeoipRoute,
 } from './api';
 
 export class ApiRoutes {
@@ -28,5 +29,6 @@ export class ApiRoutes {
     registerSimulateRoute(dependencies);
     registerDocumentsRoute(dependencies);
     registerParseCsvRoute(dependencies);
+    registerListGeoipRoute(dependencies);
   }
 }

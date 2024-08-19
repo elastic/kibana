@@ -16,6 +16,7 @@ import {
   sendRequest as _sendRequest,
   useRequest as _useRequest,
 } from '../../shared_imports';
+import { GeoipDatabase } from '../sections/manage_processors/types';
 import { UiMetricService } from './ui_metric';
 import {
   UIM_PIPELINE_CREATE,
@@ -139,6 +140,13 @@ export class ApiService {
       body: JSON.stringify(reqBody),
     });
     return result;
+  }
+
+  public useLoadGeoipDatabases() {
+    return this.useRequest<GeoipDatabase[]>({
+      path: `${API_BASE_PATH}/geoip_database`,
+      method: 'get',
+    });
   }
 }
 

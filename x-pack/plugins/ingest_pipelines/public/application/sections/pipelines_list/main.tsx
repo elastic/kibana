@@ -26,7 +26,13 @@ import {
 import { Pipeline } from '../../../../common/types';
 import { useKibana, SectionLoading } from '../../../shared_imports';
 import { UIM_PIPELINES_LIST_LOAD } from '../../constants';
-import { getEditPath, getClonePath } from '../../services/navigation';
+import {
+  getEditPath,
+  getClonePath,
+  getCreateFromCsvPath,
+  getCreatePath,
+  getManageProcessorsPath,
+} from '../../services/navigation';
 
 import { EmptyList } from './empty_list';
 import { PipelineTable } from './table';
@@ -142,7 +148,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
       name: i18n.translate('xpack.ingestPipelines.list.table.createPipelineButtonLabel', {
         defaultMessage: 'New pipeline',
       }),
-      ...reactRouterNavigate(history, '/create'),
+      ...reactRouterNavigate(history, getCreatePath()),
       'data-test-subj': `createNewPipeline`,
     },
     /**
@@ -152,7 +158,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
       name: i18n.translate('xpack.ingestPipelines.list.table.createPipelineFromCsvButtonLabel', {
         defaultMessage: 'New pipeline from CSV',
       }),
-      ...reactRouterNavigate(history, '/csv_create'),
+      ...reactRouterNavigate(history, getCreateFromCsvPath()),
       'data-test-subj': `createPipelineFromCsv`,
     },
   ];
@@ -232,6 +238,16 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
               ]}
             />
           </EuiPopover>,
+          <EuiButtonEmpty
+            iconType="wrench"
+            data-test-subj="manageProcessorsLink"
+            {...reactRouterNavigate(history, getManageProcessorsPath())}
+          >
+            <FormattedMessage
+              id="xpack.ingestPipelines.list.manageProcessorsLinkText"
+              defaultMessage="Manage processors"
+            />
+          </EuiButtonEmpty>,
           <EuiButtonEmpty
             href={services.documentation.getIngestNodeUrl()}
             target="_blank"

@@ -27,6 +27,7 @@ import {
   PipelinesEdit,
   PipelinesClone,
   PipelinesCreateFromCsv,
+  ManageProcessors,
 } from './sections';
 import { ROUTES } from './services/navigation';
 
@@ -37,6 +38,7 @@ export const AppWithoutRouter = () => (
     <Route exact path={ROUTES.create} component={PipelinesCreate} />
     <Route exact path={ROUTES.edit} component={PipelinesEdit} />
     <Route exact path={ROUTES.createFromCsv} component={PipelinesCreateFromCsv} />
+    <Route exact path={ROUTES.manageProcessors} component={ManageProcessors} />
     {/* Catch all */}
     <Route component={PipelinesList} />
   </Routes>
