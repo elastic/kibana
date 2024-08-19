@@ -16,7 +16,12 @@ import { createClientMock } from './action.mock';
 
 describe('reassignAgent', () => {
   beforeEach(async () => {
-    appContextService.start(createAppContextStartContractMock());
+    const { soClient } = createClientMock();
+    appContextService.start(
+      createAppContextStartContractMock({}, false, {
+        withoutSpaceExtensions: soClient,
+      })
+    );
   });
 
   afterEach(() => {

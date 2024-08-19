@@ -6,6 +6,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
+import expect from '@kbn/expect';
 
 import {
   AGENT_ACTIONS_INDEX,
@@ -16,6 +17,21 @@ import {
 import { ENROLLMENT_API_KEYS_INDEX } from '@kbn/fleet-plugin/common/constants';
 
 const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
+
+export async function expectToRejectWithNotFound(fn: any) {
+  await expectToRejectWithError(fn, /404 "Not Found"/);
+}
+
+export async function expectToRejectWithError(fn: any, errRegexp: RegExp) {
+  let err: Error | undefined;
+  try {
+    await fn();
+  } catch (_err) {
+    err = _err;
+  }
+  expect(err).to.be.an(Error);
+  expect(err?.message).to.match(errRegexp);
+}
 
 export async function cleanFleetIndices(esClient: Client) {
   await Promise.all([
@@ -40,6 +56,7 @@ export async function cleanFleetActionIndices(esClient: Client) {
       esClient.deleteByQuery({
         index: AGENT_POLICY_INDEX,
         q: '*',
+        refresh: true,
       }),
       esClient.deleteByQuery({
         index: AGENT_ACTIONS_INDEX,
@@ -51,6 +68,7 @@ export async function cleanFleetActionIndices(esClient: Client) {
         {
           index: AGENT_ACTIONS_RESULTS_INDEX,
           q: '*',
+          refresh: true,
         },
         ES_INDEX_OPTIONS
       ),
