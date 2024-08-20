@@ -1,5 +1,5 @@
 type: string
-title: Agent status
+title: Elastic Agent status
 enum:
   - offline
   - error

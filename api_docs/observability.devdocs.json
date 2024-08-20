@@ -3821,6 +3821,27 @@
             "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.investigate",
+            "type": "Object",
+            "tags": [],
+            "label": "investigate",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "investigate",
+                "scope": "public",
+                "docId": "kibInvestigatePluginApi",
+                "section": "def-public.InvestigatePublicStart",
+                "text": "InvestigatePublicStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

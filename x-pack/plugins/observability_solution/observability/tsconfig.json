@@ -111,6 +111,7 @@
     "@kbn/observability-alerting-rule-utils",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/investigate-plugin",
+    "@kbn/investigation-shared",
   ],
   "exclude": [
     "target/**/*"

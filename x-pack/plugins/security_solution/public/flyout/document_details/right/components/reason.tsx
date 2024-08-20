@@ -20,7 +20,7 @@ import {
   REASON_DETAILS_TEST_ID,
   REASON_TITLE_TEST_ID,
 } from './test_ids';
-import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
+import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { useDocumentDetailsContext } from '../../shared/context';
 
 export const ALERT_REASON_BANNER = {
