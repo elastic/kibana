@@ -19,6 +19,7 @@ import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 import { performChecks } from '../helpers';
 import { ASSISTANT_GRAPH_MAP } from '../../lib/langchain/graphs';
+import { fetchLangSmithDatasets } from './utils';
 
 export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
   router.versioned
@@ -58,8 +59,11 @@ export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerC
           return checkResponse;
         }
 
+        // Fetch datasets from LangSmith // TODO: plumb apiKey so this will work in cloud w/o env vars
+        const datasets = await fetchLangSmithDatasets({ logger });
+
         try {
-          return response.ok({ body: { agentExecutors: Object.keys(ASSISTANT_GRAPH_MAP) } });
+          return response.ok({ body: { graphs: Object.keys(ASSISTANT_GRAPH_MAP), datasets } });
         } catch (err) {
           logger.error(err);
           const error = transformError(err);

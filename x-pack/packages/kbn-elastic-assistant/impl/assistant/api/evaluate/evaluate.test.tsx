@@ -33,7 +33,7 @@ describe('postEvaluation', () => {
 
     await postEvaluation(testProps);
 
-    expect(mockHttp.post).toHaveBeenCalledWith('/internal/elastic_assistant/evaluate/', {
+    expect(mockHttp.post).toHaveBeenCalledWith('/internal/elastic_assistant/evaluate', {
       body: '{"graphs":["not","alphabetical"],"datasetName":"Test Dataset","runName":"Test Run Name","connectorIds":["not","alphabetical"]}',
       headers: { 'Content-Type': 'application/json' },
       signal: undefined,

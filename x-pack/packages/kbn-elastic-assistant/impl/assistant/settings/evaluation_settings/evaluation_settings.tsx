@@ -50,10 +50,8 @@ export const EvaluationSettings: React.FC = React.memo(() => {
     toasts,
   });
   const { data: evalData } = useEvaluationData({ http });
-  const defaultGraphs = useMemo(
-    () => (evalData as GetEvaluateResponse)?.agentExecutors ?? [],
-    [evalData]
-  );
+  const defaultGraphs = useMemo(() => (evalData as GetEvaluateResponse)?.graphs ?? [], [evalData]);
+  const datasets = useMemo(() => (evalData as GetEvaluateResponse)?.datasets ?? [], [evalData]);
 
   // Run Details
   // Run Name
@@ -85,12 +83,17 @@ export const EvaluationSettings: React.FC = React.memo(() => {
     [setTraceOptions, traceOptions]
   );
   /** Dataset **/
-  const [datasetName, setDatasetName] = useState<string>('');
-  const onDatasetNameChange = useCallback(
-    (e) => {
-      setDatasetName(e.target.value);
+  const [selectedDatasetOptions, setSelectedDatasetOptions] = useState<
+    Array<EuiComboBoxOptionOption<string>>
+  >([]);
+  const datasetOptions = useMemo(() => {
+    return datasets.map((label) => ({ label }));
+  }, [datasets]);
+  const onDatasetOptionsChange = useCallback(
+    (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+      setSelectedDatasetOptions(selectedOptions);
     },
-    [setDatasetName]
+    [setSelectedDatasetOptions]
   );
 
   // Predictions
@@ -156,11 +159,17 @@ export const EvaluationSettings: React.FC = React.memo(() => {
     const evalParams: PostEvaluateRequestBodyInput = {
       connectorIds: selectedModelOptions.flatMap((option) => option.key ?? []).sort(),
       graphs: selectedGraphOptions.map((option) => option.label).sort(),
-      datasetName,
+      datasetName: selectedDatasetOptions[0]?.label,
       runName,
     };
     performEvaluation(evalParams);
-  }, [datasetName, performEvaluation, runName, selectedGraphOptions, selectedModelOptions]);
+  }, [
+    performEvaluation,
+    runName,
+    selectedDatasetOptions,
+    selectedGraphOptions,
+    selectedModelOptions,
+  ]);
 
   const getSection = (title: string, description: string) => (
     <div>
@@ -228,12 +237,14 @@ export const EvaluationSettings: React.FC = React.memo(() => {
           fullWidth
           helpText={i18n.LANGSMITH_DATASET_DESCRIPTION}
         >
-          <EuiFieldText
-            aria-label="dataset-name-textfield"
-            compressed
-            onChange={onDatasetNameChange}
+          <EuiComboBox
+            aria-label={'dataset-name-combobox'}
             placeholder={i18n.LANGSMITH_DATASET_PLACEHOLDER}
-            value={datasetName}
+            singleSelection={{ asPlainText: true }}
+            options={datasetOptions}
+            selectedOptions={selectedDatasetOptions}
+            onChange={onDatasetOptionsChange}
+            compressed={true}
           />
         </EuiFormRow>
         <EuiText

@@ -8,6 +8,7 @@
 import { IRouter, KibanaRequest, type IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { asyncForEach } from '@kbn/std';
+import { Client } from 'langsmith';
 import { evaluate } from 'langsmith/evaluation';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -308,15 +309,22 @@ export const postEvaluateRoute = (
             const predict = async (input: { question: string }) => {
               logger.debug(`input:\n ${JSON.stringify(input, null, 2)}`);
 
-              const r = await graph.invoke({ input: input.question });
+              const r = await graph.invoke(
+                { input: input.question }, // TODO: Update to use the correct input format per dataset type
+                {
+                  runName,
+                  tags: ['evaluation'],
+                }
+              );
               const output = r.agentOutcome.returnValues.output;
               return output;
             };
 
             const evalOutput = await evaluate(predict, {
               data: datasetName ?? '',
-              evaluators: [], // TODO: Implement evaluators
+              evaluators: [], // Evals to be managed in LangSmith for now
               experimentPrefix: name,
+              client: new Client({ apiKey: langSmithApiKey }),
             });
             logger.debug(`runResp:\n ${JSON.stringify(evalOutput, null, 2)}`);
           });

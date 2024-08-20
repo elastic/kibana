@@ -39,3 +39,30 @@ export const fetchLangSmithDataset = async (
     return [];
   }
 };
+
+/**
+ * Fetches all LangSmith datasets.  Note that `client` will use env vars unless langSmithApiKey is specified
+ *
+ * @param logger
+ * @param langSmithApiKey
+ */
+export const fetchLangSmithDatasets = async ({
+  logger,
+  langSmithApiKey,
+}: {
+  logger: Logger;
+  langSmithApiKey?: string;
+}): Promise<string[]> => {
+  try {
+    const client = new Client({ apiKey: langSmithApiKey });
+    const datasets = [];
+    for await (const dataset of client.listDatasets()) {
+      datasets.push(dataset);
+    }
+
+    return datasets.map((d) => d.name);
+  } catch (e) {
+    logger.error(`Error fetching datasets from LangSmith: ${e.message}`);
+    return [];
+  }
+};

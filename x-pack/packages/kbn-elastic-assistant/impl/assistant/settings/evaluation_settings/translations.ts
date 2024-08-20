@@ -17,7 +17,7 @@ export const SETTINGS_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.evaluationSettings.settingsDescription',
   {
     defaultMessage:
-      'Run predictions and evaluations against test data sets using different models (connectors), agents, and evaluation schemes.',
+      'Run predictions against LangSmith test data sets using different models (connectors) and graphs.',
   }
 );
 
@@ -31,7 +31,7 @@ export const RUN_DETAILS_TITLE = i18n.translate(
 export const RUN_DETAILS_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.evaluationSettings.runDetailsDescription',
   {
-    defaultMessage: 'Configure test run details like project, run name, dataset, and output index.',
+    defaultMessage: 'Configure test run details like the run name and dataset.',
   }
 );
 
@@ -46,7 +46,7 @@ export const PREDICTION_DETAILS_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.evaluationSettings.predictionDetailsDescription',
   {
     defaultMessage:
-      'Choose models (connectors) and corresponding agents the dataset should run against.',
+      'Choose models (connectors) and corresponding graphs the dataset should run against.',
   }
 );
 
@@ -170,7 +170,7 @@ export const LANGSMITH_DATASET_DESCRIPTION = i18n.translate(
 export const LANGSMITH_DATASET_PLACEHOLDER = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.evaluationSettings.langsmithDatasetPlaceholder',
   {
-    defaultMessage: 'ESQL Query Generation',
+    defaultMessage: 'Select dataset...',
   }
 );
 
