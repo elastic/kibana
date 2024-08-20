@@ -40,13 +40,15 @@ export const useExpandableFlyoutApi = () => {
   const openPanels = useCallback(
     ({
       right,
+      shouldSync,
       left,
       preview,
     }: {
       right?: FlyoutPanelProps;
+      shouldSync?: boolean;
       left?: FlyoutPanelProps;
       preview?: FlyoutPanelProps;
-    }) => dispatch(openPanelsAction({ right, left, preview, id })),
+    }) => dispatch(openPanelsAction({ right, left, preview, id, shouldSync })),
     [dispatch, id]
   );
 

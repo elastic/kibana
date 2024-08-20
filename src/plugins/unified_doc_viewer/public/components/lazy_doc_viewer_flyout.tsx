@@ -9,9 +9,16 @@
 import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import type { UnifiedDocViewerFlyoutProps } from './doc_viewer_flyout/doc_viewer_flyout';
+import type { UnifiedDocViewerPanelProps } from './doc_viewer_flyout/new/default_panel';
 
 const LazyUnifiedDocViewerFlyout = React.lazy(() => import('./doc_viewer_flyout'));
 export const UnifiedDocViewerFlyout = withSuspense<UnifiedDocViewerFlyoutProps>(
   LazyUnifiedDocViewerFlyout,
+  <></>
+);
+
+const LazyUnifiedDocViewerPanel = React.lazy(() => import('./doc_viewer_flyout/new'));
+export const UnifiedDocViewerPanel = withSuspense<UnifiedDocViewerPanelProps>(
+  LazyUnifiedDocViewerPanel,
   <></>
 );

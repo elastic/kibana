@@ -39,6 +39,10 @@ export const openPanelsAction = createAction<{
    * Unique identifier for the flyout (either the urlKey or 'memory')
    */
   id: string;
+  /**
+   * Whether or not the panel should sync to url state
+   */
+  shouldSync?: boolean;
 }>(ActionType.openFlyout);
 
 export const openRightPanelAction = createAction<{

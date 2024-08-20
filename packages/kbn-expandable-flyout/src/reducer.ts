@@ -23,21 +23,24 @@ import {
 import { initialState } from './state';
 
 export const reducer = createReducer(initialState, (builder) => {
-  builder.addCase(openPanelsAction, (state, { payload: { preview, left, right, id } }) => {
-    if (id in state.byId) {
-      state.byId[id].right = right;
-      state.byId[id].left = left;
-      state.byId[id].preview = preview ? [preview] : undefined;
-    } else {
-      state.byId[id] = {
-        left,
-        right,
-        preview: preview ? [preview] : undefined,
-      };
-    }
+  builder.addCase(
+    openPanelsAction,
+    (state, { payload: { preview, left, right, id, shouldSync } }) => {
+      if (id in state.byId) {
+        state.byId[id].right = right;
+        state.byId[id].left = left;
+        state.byId[id].preview = preview ? [preview] : undefined;
+      } else {
+        state.byId[id] = {
+          left,
+          right,
+          preview: preview ? [preview] : undefined,
+        };
+      }
 
-    state.needsSync = true;
-  });
+      state.needsSync = shouldSync ?? true;
+    }
+  );
 
   builder.addCase(openLeftPanelAction, (state, { payload: { left, id } }) => {
     if (id in state.byId) {

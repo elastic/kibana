@@ -8,8 +8,8 @@
 
 import React, { useMemo } from 'react';
 import type { Interpolation, Theme } from '@emotion/react';
-import { EuiFlyoutProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlyout } from '@elastic/eui';
+import { EuiFlyoutResizableProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlyoutResizable } from '@elastic/eui';
 import { useSectionSizes } from './hooks/use_sections_sizes';
 import { useWindowSize } from './hooks/use_window_size';
 import { useExpandableFlyoutState } from './hooks/use_expandable_flyout_state';
@@ -22,7 +22,7 @@ import { isPreviewBanner } from './components/preview_section';
 
 const flyoutInnerStyles = { height: '100%' };
 
-export interface ExpandableFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
+export interface ExpandableFlyoutProps extends Omit<EuiFlyoutResizableProps, 'onClose'> {
   /**
    * List of all registered panels available for render
    */
@@ -34,7 +34,7 @@ export interface ExpandableFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
   /**
    * Callback function to let application's code the flyout is closed
    */
-  onClose?: EuiFlyoutProps['onClose'];
+  onClose?: EuiFlyoutResizableProps['onClose'];
 }
 
 /**
@@ -92,7 +92,7 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
   }
 
   return (
-    <EuiFlyout
+    <EuiFlyoutResizable
       {...flyoutProps}
       size={flyoutWidth}
       ownFocus={false}
@@ -132,7 +132,7 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
           banner={previewBanner}
         />
       ) : null}
-    </EuiFlyout>
+    </EuiFlyoutResizable>
   );
 };
 

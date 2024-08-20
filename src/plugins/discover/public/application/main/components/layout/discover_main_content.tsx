@@ -13,6 +13,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
@@ -145,13 +146,15 @@ export const DiscoverMainContent = ({
         >
           {showChart && isChartAvailable && <EuiHorizontalRule margin="none" />}
           {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
-            <DiscoverDocuments
-              viewModeToggle={viewModeToggle}
-              dataView={dataView}
-              onAddFilter={onAddFilter}
-              stateContainer={stateContainer}
-              onFieldEdited={!isEsqlMode ? onFieldEdited : undefined}
-            />
+            <ExpandableFlyoutProvider urlKey="discover">
+              <DiscoverDocuments
+                viewModeToggle={viewModeToggle}
+                dataView={dataView}
+                onAddFilter={onAddFilter}
+                stateContainer={stateContainer}
+                onFieldEdited={!isEsqlMode ? onFieldEdited : undefined}
+              />
+            </ExpandableFlyoutProvider>
           ) : null}
           {viewMode === VIEW_MODE.AGGREGATED_LEVEL ? (
             <>

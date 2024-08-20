@@ -21,6 +21,7 @@ import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SearchResponseWarningsCallout } from '@kbn/search-response-warnings';
+import { ExpandableFlyout, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
   DataLoadingState,
   useColumns,
@@ -60,7 +61,7 @@ import {
   getMaxAllowedSampleSize,
   getAllowedSampleSize,
 } from '../../../../utils/get_allowed_sample_size';
-import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
+// import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
@@ -70,6 +71,7 @@ import { useContextualGridCustomisations } from '../../hooks/grid_customisations
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
 import { useProfileAccessor } from '../../../../context_awareness';
+import { expandableFlyoutDocumentsPanels } from './flyout_panels';
 
 const containerStyles = css`
   position: relative;
@@ -110,6 +112,7 @@ function DiscoverDocumentsComponent({
   const services = useDiscoverServices();
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
+  const { openFlyout } = useExpandableFlyoutApi();
   const { dataViews, capabilities, uiSettings, uiActions } = services;
   const [
     query,
@@ -251,30 +254,89 @@ function DiscoverDocumentsComponent({
     [documentState.esqlQueryColumns]
   );
 
+  // const renderDocumentView = useCallback(
+  //   (
+  //     hit: DataTableRecord,
+  //     displayedRows: DataTableRecord[],
+  //     displayedColumns: string[],
+  //     customColumnsMeta?: DataTableColumnsMeta
+  //   ) => (
+  //     <DiscoverGridFlyout
+  //       dataView={dataView}
+  //       hit={hit}
+  //       hits={displayedRows}
+  //       // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
+  //       columns={displayedColumns}
+  //       columnsMeta={customColumnsMeta}
+  //       savedSearchId={savedSearch.id}
+  //       onFilter={onAddFilter}
+  //       onRemoveColumn={onRemoveColumn}
+  //       onAddColumn={onAddColumn}
+  //       onClose={() => setExpandedDoc(undefined)}
+  //       setExpandedDoc={setExpandedDoc}
+  //       query={query}
+  //     />
+  //   ),
+  //   [dataView, onAddColumn, onAddFilter, onRemoveColumn, query, savedSearch.id, setExpandedDoc]
+  // );
+
   const renderDocumentView = useCallback(
     (
       hit: DataTableRecord,
       displayedRows: DataTableRecord[],
       displayedColumns: string[],
       customColumnsMeta?: DataTableColumnsMeta
-    ) => (
-      <DiscoverGridFlyout
-        dataView={dataView}
-        hit={hit}
-        hits={displayedRows}
-        // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
-        columns={displayedColumns}
-        columnsMeta={customColumnsMeta}
-        savedSearchId={savedSearch.id}
-        onFilter={onAddFilter}
-        onRemoveColumn={onRemoveColumn}
-        onAddColumn={onAddColumn}
-        onClose={() => setExpandedDoc(undefined)}
-        setExpandedDoc={setExpandedDoc}
-        query={query}
-      />
-    ),
-    [dataView, onAddColumn, onAddFilter, onRemoveColumn, query, savedSearch.id, setExpandedDoc]
+    ) => {
+      openFlyout({
+        right: {
+          id: 'discover-right',
+          params: {
+            dataView,
+            hit,
+            hits: displayedRows,
+            columns: displayedColumns,
+            columnsMeta: customColumnsMeta,
+            savedSearchId: savedSearch.id,
+            onFilter: onAddFilter,
+            onRemoveColumn,
+            onAddColumn,
+            onClose: () => setExpandedDoc(undefined),
+            setExpandedDoc,
+            query,
+          },
+        },
+        shouldSync: false,
+      });
+
+      return undefined;
+    },
+    // (
+    //   <DiscoverGridFlyout
+    //     dataView={dataView}
+    //     hit={hit}
+    //     hits={displayedRows}
+    //     // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
+    //     columns={displayedColumns}
+    //     columnsMeta={customColumnsMeta}
+    //     savedSearchId={savedSearch.id}
+    //     onFilter={onAddFilter}
+    //     onRemoveColumn={onRemoveColumn}
+    //     onAddColumn={onAddColumn}
+    //     onClose={() => setExpandedDoc(undefined)}
+    //     setExpandedDoc={setExpandedDoc}
+    //     query={query}
+    //   />
+    // ),
+    [
+      dataView,
+      onAddColumn,
+      onAddFilter,
+      onRemoveColumn,
+      openFlyout,
+      query,
+      savedSearch.id,
+      setExpandedDoc,
+    ]
   );
 
   const { rowAdditionalLeadingControls } = useDiscoverCustomization('data_table') || {};
@@ -462,6 +524,15 @@ function DiscoverDocumentsComponent({
           </div>
         )}
       </EuiFlexItem>
+      <ExpandableFlyout
+        className="DiscoverFlyout" // used to override the z-index of the flyout from SecuritySolution
+        type="push"
+        pushMinBreakpoint="xl"
+        data-test-subj="docViewerFlyout"
+        ownFocus={true}
+        paddingSize="m"
+        registeredPanels={expandableFlyoutDocumentsPanels}
+      />
     </>
   );
 }

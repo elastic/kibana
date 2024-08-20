@@ -27,7 +27,7 @@ export const JsonCodeEditor = withSuspense<JsonCodeEditorProps>(
 
 export { useEsDocSearch } from './hooks';
 export { UnifiedDocViewer } from './components/lazy_doc_viewer';
-export { UnifiedDocViewerFlyout } from './components/lazy_doc_viewer_flyout';
+export { UnifiedDocViewerFlyout, UnifiedDocViewerPanel } from './components/lazy_doc_viewer_flyout';
 
 export type { LogsOverviewProps as UnifiedDocViewerLogsOverviewProps } from './components/doc_viewer_logs_overview/logs_overview';
 export { UnifiedDocViewerLogsOverview } from './components/lazy_doc_viewer_logs_overview';

@@ -13,7 +13,7 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
-import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
+import { UnifiedDocViewerPanel } from '@kbn/unified-doc-viewer-plugin/public';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useFlyoutActions } from './use_flyout_actions';
 import { useDiscoverCustomization } from '../../customizations';
@@ -88,7 +88,7 @@ export function DiscoverGridFlyout({
   }, [flyoutCustomization, getDocViewerAccessor, actualHit]);
 
   return (
-    <UnifiedDocViewerFlyout
+    <UnifiedDocViewerPanel
       flyoutTitle={docViewer.title}
       flyoutDefaultWidth={flyoutCustomization?.size}
       flyoutActions={
@@ -112,6 +112,30 @@ export function DiscoverGridFlyout({
       onFilter={onFilter}
       setExpandedDoc={setExpandedDoc}
     />
+    // <UnifiedDocViewerFlyout
+    //   flyoutTitle={docViewer.title}
+    //   flyoutDefaultWidth={flyoutCustomization?.size}
+    //   flyoutActions={
+    //     !isESQLQuery && flyoutActions.length > 0 ? (
+    //       <DiscoverGridFlyoutActions flyoutActions={flyoutActions} />
+    //     ) : null
+    //   }
+    //   flyoutWidthLocalStorageKey={FLYOUT_WIDTH_KEY}
+    //   FlyoutCustomBody={flyoutCustomization?.Content}
+    //   services={services}
+    //   docViewsRegistry={docViewer.docViewsRegistry}
+    //   isEsqlQuery={isESQLQuery}
+    //   hit={hit}
+    //   hits={hits}
+    //   dataView={dataView}
+    //   columns={columns}
+    //   columnsMeta={columnsMeta}
+    //   onAddColumn={onAddColumn}
+    //   onRemoveColumn={onRemoveColumn}
+    //   onClose={onClose}
+    //   onFilter={onFilter}
+    //   setExpandedDoc={setExpandedDoc}
+    // />
   );
 }
 
