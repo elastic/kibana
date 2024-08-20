@@ -22,17 +22,3 @@ export const LOADING_STATS = i18n.translate(
     defaultMessage: 'Loading stats',
   }
 );
-
-export const HISTORY = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.indexCheckFlyout.historyTab',
-  {
-    defaultMessage: 'History',
-  }
-);
-
-export const LATEST_CHECK = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.indexCheckFlyout.latestCheckTab',
-  {
-    defaultMessage: 'Latest Check',
-  }
-);

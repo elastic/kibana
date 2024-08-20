@@ -57,19 +57,6 @@ describe('IndexCheckFlyout', () => {
       );
     });
 
-    it('should render tabs correctly, with latest check preselected', () => {
-      expect(screen.getByRole('tab', { name: 'Latest Check' })).toHaveAttribute(
-        'aria-selected',
-        'true'
-      );
-      expect(screen.getByRole('tab', { name: 'Latest Check' })).not.toBeDisabled();
-      expect(screen.getByRole('tab', { name: 'History' })).toHaveAttribute(
-        'aria-selected',
-        'false'
-      );
-      expect(screen.getByRole('tab', { name: 'History' })).toBeDisabled();
-    });
-
     it('should render the correct index properties panel', () => {
       expect(screen.getByTestId('indexStatsPanel')).toBeInTheDocument();
       expect(screen.getByTestId('indexCheckFields')).toBeInTheDocument();
