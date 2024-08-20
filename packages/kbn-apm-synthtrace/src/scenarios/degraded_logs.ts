@@ -121,6 +121,31 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
           .timestamp(timestamp);
       };
 
+      const datasetNginxLogs = (i: number, timestamp: number) => {
+        const index = Math.floor(Math.random() * 3);
+        const isMalformed = i % 10 === 0;
+        return log
+          .create()
+          .dataset('nginx.error')
+          .message(MESSAGE_LOG_LEVELS[index].message as string)
+          .logLevel(isMalformed ? MORE_THAN_1024_CHARS : MESSAGE_LOG_LEVELS[index].level) // "ignore_above": 1024 in mapping
+          .service(SERVICE_NAMES[index])
+          .defaults({
+            'trace.id': generateShortId(),
+            'agent.name': 'synth-agent',
+            'orchestrator.cluster.name': CLUSTER[index].clusterName,
+            'orchestrator.cluster.id': MORE_THAN_1024_CHARS,
+            'orchestrator.resource.id': generateShortId(),
+            'cloud.provider': CLOUD_PROVIDERS[Math.floor(Math.random() * 3)],
+            'cloud.region': MORE_THAN_1024_CHARS,
+            'cloud.availability_zone': MORE_THAN_1024_CHARS,
+            'cloud.project.id': generateShortId(),
+            'cloud.instance.id': generateShortId(),
+            'log.file.path': `/logs/${generateLongId()}/error.txt`,
+          })
+          .timestamp(timestamp);
+      };
+
       const logs = range
         .interval('1m')
         .rate(1)
@@ -131,6 +156,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
               datasetSynth1Logs(timestamp),
               datasetSynth2Logs(index, timestamp),
               datasetSynth3Logs(index, timestamp),
+              datasetNginxLogs(index, timestamp),
             ]);
         });
 

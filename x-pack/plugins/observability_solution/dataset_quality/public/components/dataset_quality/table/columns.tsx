@@ -14,7 +14,6 @@ import {
   EuiIcon,
   EuiLink,
   EuiToolTip,
-  EuiButtonIcon,
   EuiText,
   formatNumber,
   EuiSkeletonRectangle,
@@ -24,7 +23,6 @@ import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { css } from '@emotion/react';
 import { BrowserUrlService } from '@kbn/share-plugin/public';
 import {
   DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
@@ -35,17 +33,10 @@ import { DataStreamStat } from '../../../../common/data_streams_stats/data_strea
 import { DatasetQualityIndicator, QualityIndicator } from '../../quality_indicator';
 import { PrivilegesWarningIconWrapper, IntegrationIcon } from '../../common';
 import { useDatasetRedirectLinkTelemetry, useRedirectLink } from '../../../hooks';
-import { FlyoutDataset } from '../../../state_machines/dataset_quality_controller';
 import { DegradedDocsPercentageLink } from './degraded_docs_percentage_link';
 import { TimeRangeConfig } from '../../../../common/types';
 import { DatasetQualityDetailsLink } from './dataset_quality_details_link';
 
-const expandDatasetAriaLabel = i18n.translate('xpack.datasetQuality.expandLabel', {
-  defaultMessage: 'Expand',
-});
-const collapseDatasetAriaLabel = i18n.translate('xpack.datasetQuality.collapseLabel', {
-  defaultMessage: 'Collapse',
-});
 const nameColumnName = i18n.translate('xpack.datasetQuality.nameColumnName', {
   defaultMessage: 'Data Set Name',
 });
@@ -162,8 +153,6 @@ export const getDatasetQualityTableColumns = ({
   fieldFormats,
   canUserMonitorDataset,
   canUserMonitorAnyDataStream,
-  selectedDataset,
-  openFlyout,
   loadingDataStreamStats,
   loadingDegradedStats,
   showFullDatasetNames,
@@ -175,41 +164,15 @@ export const getDatasetQualityTableColumns = ({
   fieldFormats: FieldFormatsStart;
   canUserMonitorDataset: boolean;
   canUserMonitorAnyDataStream: boolean;
-  selectedDataset?: FlyoutDataset;
   loadingDataStreamStats: boolean;
   loadingDegradedStats: boolean;
   showFullDatasetNames: boolean;
   isSizeStatsAvailable: boolean;
-  openFlyout: (selectedDataset: FlyoutDataset) => void;
   isActiveDataset: (lastActivity: number) => boolean;
   timeRange: TimeRangeConfig;
   urlService: BrowserUrlService;
 }): Array<EuiBasicTableColumn<DataStreamStat>> => {
   return [
-    {
-      name: '',
-      render: (dataStreamStat: DataStreamStat) => {
-        const isExpanded = dataStreamStat.rawName === selectedDataset?.rawName;
-
-        return (
-          <EuiButtonIcon
-            data-test-subj="datasetQualityExpandButton"
-            size="xs"
-            color="text"
-            onClick={() => openFlyout(dataStreamStat as FlyoutDataset)}
-            iconType={isExpanded ? 'minimize' : 'expand'}
-            title={!isExpanded ? expandDatasetAriaLabel : collapseDatasetAriaLabel}
-            aria-label={!isExpanded ? expandDatasetAriaLabel : collapseDatasetAriaLabel}
-          />
-        );
-      },
-      width: '40px',
-      css: css`
-        &.euiTableCellContent {
-          padding: 0;
-        }
-      `,
-    },
     {
       name: nameColumnName,
       field: 'title',
