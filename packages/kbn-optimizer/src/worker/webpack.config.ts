@@ -43,7 +43,7 @@ export function getWebpackConfig(
       [bundle.id]: ENTRY_CREATOR,
     },
 
-    devtool: worker.dist ? false : '#cheap-source-map',
+    devtool: worker.dist ? false : 'cheap-source-map',
     profile: worker.profileWebpack,
 
     output: {
@@ -60,7 +60,7 @@ export function getWebpackConfig(
     },
 
     optimization: {
-      noEmitOnErrors: true,
+      emitOnErrors: false,
       splitChunks: {
         maxAsyncRequests: 10,
         cacheGroups: {
