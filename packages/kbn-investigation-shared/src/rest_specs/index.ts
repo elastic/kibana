@@ -15,6 +15,7 @@ export type * from './get_notes';
 export type * from './delete_note';
 export type * from './investigation_note';
 export type * from './create_item';
+export type * from './delete_item';
 
 export * from './create';
 export * from './create_notes';
@@ -25,3 +26,4 @@ export * from './get_notes';
 export * from './delete_note';
 export * from './investigation_note';
 export * from './create_item';
+export * from './delete_item';

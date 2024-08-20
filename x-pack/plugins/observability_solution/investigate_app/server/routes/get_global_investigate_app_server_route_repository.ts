@@ -9,6 +9,7 @@ import {
   createInvestigationItemParamsSchema,
   createInvestigationNoteParamsSchema,
   createInvestigationParamsSchema,
+  deleteInvestigationItemParamsSchema,
   deleteInvestigationNoteParamsSchema,
   deleteInvestigationParamsSchema,
   findInvestigationsParamsSchema,
@@ -16,15 +17,16 @@ import {
   getInvestigationParamsSchema,
 } from '@kbn/investigation-shared';
 import { createInvestigation } from '../services/create_investigation';
+import { createInvestigationItem } from '../services/create_investigation_item';
 import { createInvestigationNote } from '../services/create_investigation_note';
 import { deleteInvestigation } from '../services/delete_investigation';
+import { deleteInvestigationItem } from '../services/delete_investigation_item';
+import { deleteInvestigationNote } from '../services/delete_investigation_note';
 import { findInvestigations } from '../services/find_investigations';
 import { getInvestigation } from '../services/get_investigation';
 import { getInvestigationNotes } from '../services/get_investigation_notes';
 import { investigationRepositoryFactory } from '../services/investigation_repository';
 import { createInvestigateAppServerRoute } from './create_investigate_app_server_route';
-import { deleteInvestigationNote } from '../services/delete_investigation_note';
-import { createInvestigationItem } from '../services/create_investigation_item';
 
 const createInvestigationRoute = createInvestigateAppServerRoute({
   endpoint: 'POST /api/observability/investigations 2023-10-31',
@@ -157,6 +159,27 @@ const createInvestigationItemRoute = createInvestigateAppServerRoute({
   },
 });
 
+const deleteInvestigationItemRoute = createInvestigateAppServerRoute({
+  endpoint: 'DELETE /api/observability/investigations/{investigationId}/items/{itemId} 2023-10-31',
+  options: {
+    tags: [],
+  },
+  params: deleteInvestigationItemParamsSchema,
+  handler: async ({ params, context, request, logger }) => {
+    const user = (await context.core).coreStart.security.authc.getCurrentUser(request);
+    if (!user) {
+      throw new Error('User is not authenticated');
+    }
+    const soClient = (await context.core).savedObjects.client;
+    const repository = investigationRepositoryFactory({ soClient, logger });
+
+    return await deleteInvestigationItem(params.path.investigationId, params.path.itemId, {
+      repository,
+      user,
+    });
+  },
+});
+
 export function getGlobalInvestigateAppServerRouteRepository() {
   return {
     ...createInvestigationRoute,
@@ -167,6 +190,7 @@ export function getGlobalInvestigateAppServerRouteRepository() {
     ...getInvestigationNotesRoute,
     ...deleteInvestigationNotesRoute,
     ...createInvestigationItemRoute,
+    ...deleteInvestigationItemRoute,
   };
 }
 
