@@ -27,7 +27,8 @@
 
 import './index.scss';
 
-import 'reflect-metadata';
+// eslint-disable-next-line @kbn/imports/no_unresolvable_imports
+import 'reflect-metadata/lite';
 
 export type { DocLinksStart } from '@kbn/core-doc-links-browser';
 export type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
