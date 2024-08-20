@@ -55,7 +55,7 @@ Diagnosing these may be difficult - but there may be log messages for error cond
 === Use the REST APIs
 
 There is a rich set of HTTP endpoints to introspect and manage rules and connectors.
-One of the HTTP endpoints available for actions is the run connector API. You can use this to “test” an action.  For instance, if you have a server log action created, you can run it via curling the endpoint:
+One of the HTTP endpoints available for actions is the run connector API. You can use this to “test” an action. For instance, if you have a server log action created, you can run it via curling the endpoint:
 [source, txt]
 --------------------------------------------------
 curl -X POST -k \
