@@ -23,8 +23,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
-import { columnActions, DataGridDensity, DataLoadingState } from '@kbn/unified-data-table';
-import { DataLoadingState, useColumns } from '@kbn/unified-data-table';
+import { DataGridDensity, DataLoadingState, useColumns } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 
 import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
@@ -165,6 +164,7 @@ export function SearchEmbeddableGridComponent({
       stateManager.headerRowHeight,
       stateManager.sort,
       stateManager.sampleSize,
+      stateManager.density,
       stateManager.grid,
       grid,
     ]
