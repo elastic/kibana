@@ -19,13 +19,13 @@ components:
     EncodedRawSamples:
       type: string
       format: binary
-      description: Blob containing the RawSamples.
+      description:  Blob containing the Base64 encoded rawSamples.
 
     RawSamples:
       type: array
-      items: 
+      items:
         type: string
-      description: Array of raw samples.
+      description: String array containing the json raw samples that are used for ecs mapping.
 
     Mapping:
       type: object
@@ -162,3 +162,15 @@ components:
         apiKey:
           type: string
           description: The apiKey to use for tracing.
+    LogFormat:
+      type: string
+      enum:
+        - json
+        - ndjson
+        - multiline_json
+        - csv
+        - structured
+        - unstructured
+        - cef
+        - unsupported
+

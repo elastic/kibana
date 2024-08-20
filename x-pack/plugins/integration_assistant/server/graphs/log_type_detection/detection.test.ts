@@ -6,9 +6,9 @@
  */
 
 import { FakeLLM } from '@langchain/core/utils/testing';
-import { handleLogTypeDetection } from './detection';
-import type { LogTypeDetectionState } from '../../types';
-import { logTypeDetectionTestState } from '../../../__jest__/fixtures/log_type_detection';
+import { handleLogFormatDetection } from './detection';
+import type { LogFormatDetectionState } from '../../types';
+import { logFormatDetectionTestState } from '../../../__jest__/fixtures/log_type_detection';
 import {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
@@ -18,12 +18,12 @@ const mockLlm = new FakeLLM({
   response: '{ "log_type": "structured"}',
 }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
-const testState: LogTypeDetectionState = logTypeDetectionTestState;
+const testState: LogFormatDetectionState = logFormatDetectionTestState;
 
 describe('Testing log type detection handler', () => {
-  it('handleLogTypeDetection()', async () => {
-    const response = await handleLogTypeDetection(testState, mockLlm);
-    expect(response.logType).toStrictEqual('structured');
-    expect(response.lastExecutedChain).toBe('logTypeDetection');
+  it('handleLogFormatDetection()', async () => {
+    const response = await handleLogFormatDetection(testState, mockLlm);
+    expect(response.logFormat).toStrictEqual('structured');
+    expect(response.lastExecutedChain).toBe('LogFormatDetection');
   });
 });

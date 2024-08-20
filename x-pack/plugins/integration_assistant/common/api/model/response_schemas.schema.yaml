@@ -16,14 +16,11 @@ components:
           required:
             - mapping
             - pipeline
-            - parsedRawSamples
           properties:
             mapping:
               $ref: "./common_attributes.schema.yaml#/components/schemas/Mapping"
             pipeline:
               $ref: "./common_attributes.schema.yaml#/components/schemas/Pipeline"
-            parsedRawSamples:
-              type: string
 
     CategorizationAPIResponse:
       type: object
@@ -69,3 +66,20 @@ components:
           properties:
             docs:
               $ref: "./common_attributes.schema.yaml#/components/schemas/Docs"
+    
+    AnalyseLogsAPIResponse:
+      type: object
+      required:
+        - results
+      properties:
+        results:
+          type: object
+          required:
+            - parsedSamples
+          properties:
+            logFormat:
+              $ref: "./common_attributes.schema.yaml#/components/schemas/LogFormat"
+            parsedSamples:
+              type: array
+              items:
+                type: string

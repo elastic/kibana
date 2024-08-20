@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { LogType } from '../../server/constants';
+import { LogFormat } from '../../common/api/model/common_attributes';
 
-export const logTypeDetectionTestState = {
+export const logFormatDetectionTestState = {
   lastExecutedChain: 'testchain',
   rawSamples: ['{"test1": "test1"}'],
   exAnswer: 'testanswer',
   packageName: 'testPackage',
   dataStreamName: 'testDatastream',
   finalized: false,
-  logType: LogType.JSON,
+  logFormat: LogFormat.Values.json,
   ecsVersion: 'testVersion',
+  results: { test1: 'test1' },
 };

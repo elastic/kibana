@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { LogFormat } from '../../common';
+
 export function decodeRawSamples(encodedContent: string): string {
   const base64encodedContent = encodedContent.split('base64,')[1];
   const logsSampleParsed = Buffer.from(base64encodedContent, 'base64').toString();
@@ -11,8 +14,13 @@ export function decodeRawSamples(encodedContent: string): string {
   return logsSampleParsed;
 }
 
-export function parseSamples(fileContent: string): { isJSON: boolean; parsedSamples: string[] } {
+export function parseSamples(fileContent: string): {
+  logFormat: LogFormat;
+  parsedSamples: string[];
+} {
   let parsedContent;
+  let logFormat: LogFormat = 'unsupported';
+
   try {
     // NDJSON
     parsedContent = fileContent
@@ -30,16 +38,32 @@ export function parseSamples(fileContent: string): { isJSON: boolean; parsedSamp
     ) {
       parsedContent = parsedContent[0];
     }
+    logFormat = 'ndjson';
   } catch (parseNDJSONError) {
     try {
       // JSON
       parsedContent = JSON.parse(fileContent);
+      logFormat = 'json';
     } catch (parseJSONError) {
-      // Other log formats
-      parsedContent = fileContent.split('\n').filter((line) => line.trim() !== '');
-      return { isJSON: false, parsedSamples: parsedContent };
+      // Multi Line JSON
+      parsedContent = fileContent
+        .split(/\n(?=\{)/) // Split at newline followed by '{'
+        .map((entry) => entry.trim()) // Remove leading/trailing whitespace
+        .filter((entry) => entry) // Remove empty entries
+        .map((entry) => {
+          try {
+            return JSON.parse(entry);
+          } catch (parseError) {
+            // All other log types
+            parsedContent = fileContent.split('\n').filter((line) => line.trim() !== '');
+            return { logFormat, parsedSamples: parsedContent };
+          }
+        })
+        .filter((entry) => entry !== null); // Remove null entries due to parse errors
+      logFormat = 'multiline_json';
+      return { logFormat, parsedSamples: parsedContent };
     }
   }
   const jsonSamples = parsedContent.map((log: string) => JSON.stringify(log));
-  return { isJSON: true, parsedSamples: jsonSamples };
+  return { logFormat, parsedSamples: jsonSamples };
 }

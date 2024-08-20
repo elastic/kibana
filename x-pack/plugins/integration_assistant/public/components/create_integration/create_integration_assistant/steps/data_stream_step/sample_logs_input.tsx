@@ -24,34 +24,29 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
       const logsSampleFile = files?.[0];
       if (logsSampleFile == null) {
         setSampleFileError(undefined);
-        setIntegrationSettings({ ...integrationSettings, logsSampleParsed: undefined });
+        setIntegrationSettings({ ...integrationSettings, encodedLogSamples: undefined });
         return;
       }
 
       if (logsSampleFile.size > 9000000) {
         // File size limited to 9 MegaBytes
         setSampleFileError(i18n.LOGS_SAMPLE_ERROR.LOGS_SAMPLE_FILE_TOO_LARGE);
-        setIntegrationSettings({ ...integrationSettings, logsSampleParsed: undefined });
+        setIntegrationSettings({ ...integrationSettings, encodedLogSamples: undefined });
         return;
       }
 
       const reader = new FileReader();
       reader.onload = function (e) {
-        const logsSampleParsed = e.target?.result as string | undefined; // We can safely cast to string since we call `readAsDataURL` to load the file.
+        const encodedLogSamples = e.target?.result as string | undefined; // We can safely cast to string since we call `readAsDataURL` to load the file.
         setIsParsing(false);
-
-        if (logsSampleParsed === undefined) {
+        if (encodedLogSamples === undefined) {
           setSampleFileError(i18n.LOGS_SAMPLE_ERROR.EMPTY);
-          setIntegrationSettings({ ...integrationSettings, logsSampleParsed: undefined });
+          setIntegrationSettings({ ...integrationSettings, encodedLogSamples: undefined });
           return;
         }
-        const base64encodedContent = logsSampleParsed.split('base64,')[1];
-        const logsSampleOriginal = Buffer.from(base64encodedContent, 'base64').toString();
-
         setIntegrationSettings({
           ...integrationSettings,
-          logsSampleParsed,
-          logsSampleOriginal: logsSampleOriginal.split('\n'),
+          encodedLogSamples,
         });
       };
       setIsParsing(true);

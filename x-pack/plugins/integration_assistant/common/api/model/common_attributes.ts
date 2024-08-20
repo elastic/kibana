@@ -22,13 +22,13 @@ export type DataStreamName = z.infer<typeof DataStreamName>;
 export const DataStreamName = z.string().min(1);
 
 /**
- * Blob containing the RawSamples.
+ * Blob containing the Base64 encoded rawSamples.
  */
 export type EncodedRawSamples = z.infer<typeof EncodedRawSamples>;
 export const EncodedRawSamples = z.string();
 
 /**
- * String array containing the json raw samples.
+ * String array containing the json raw samples that are used for ecs mapping.
  */
 export type RawSamples = z.infer<typeof RawSamples>;
 export const RawSamples = z.array(z.string());
@@ -177,3 +177,17 @@ export const LangSmithOptions = z.object({
    */
   apiKey: z.string(),
 });
+
+export type LogFormat = z.infer<typeof LogFormat>;
+export const LogFormat = z.enum([
+  'json',
+  'ndjson',
+  'multiline_json',
+  'csv',
+  'structured',
+  'unstructured',
+  'cef',
+  'unsupported',
+]);
+export type LogFormatEnum = typeof LogFormat.enum;
+export const LogFormatEnum = LogFormat.enum;

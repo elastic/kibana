@@ -15,6 +15,7 @@ export {
 } from './api/check_pipeline/check_pipeline';
 export { EcsMappingRequestBody, EcsMappingResponse } from './api/ecs/ecs_route';
 export { RelatedRequestBody, RelatedResponse } from './api/related/related_route';
+export { AnalyseLogsRequestBody, AnalyseLogsResponse } from './api/analyse_logs/analyse_logs_route';
 
 export type {
   DataStream,
@@ -22,6 +23,7 @@ export type {
   Integration,
   Pipeline,
   Docs,
+  LogFormat,
 } from './api/model/common_attributes';
 export type { ESProcessorItem } from './api/model/processor_attributes';
 
@@ -34,4 +36,5 @@ export {
   PLUGIN_ID,
   RELATED_GRAPH_PATH,
   CHECK_PIPELINE_PATH,
+  ANALYSE_LOGS_PATH,
 } from './constants';

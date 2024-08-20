@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-export const LOG_TYPE_DETECTION_PROMPT = ChatPromptTemplate.fromMessages([
+export const LOG_FORMAT_DETECTION_PROMPT = ChatPromptTemplate.fromMessages([
   [
     'system',
     `You are a helpful, expert assistant in identifying different log types based on the format.

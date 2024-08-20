@@ -13,17 +13,22 @@ import {
 } from '@kbn/langchain/server/language_models';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
-import { ECS_GRAPH_PATH, EcsMappingRequestBody, EcsMappingResponse } from '../../common';
+import { ANALYSE_LOGS_PATH, AnalyseLogsRequestBody, AnalyseLogsResponse } from '../../common';
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
-import { getEcsGraph } from '../graphs/ecs';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
+import { getLogFormatDetectionGraph } from '../graphs/log_type_detection/graph';
+import { decodeRawSamples, parseSamples } from '../util/parse';
 
-export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
+const MaxLogsSampleRows = 10;
+
+export function registerAnalyseLogsRoutes(
+  router: IRouter<IntegrationAssistantRouteHandlerContext>
+) {
   router.versioned
     .post({
-      path: ECS_GRAPH_PATH,
+      path: ANALYSE_LOGS_PATH,
       access: 'internal',
       options: {
         timeout: {
@@ -36,12 +41,12 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
         version: '1',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(EcsMappingRequestBody),
+            body: buildRouteValidationWithZod(AnalyseLogsRequestBody),
           },
         },
       },
-      withAvailability(async (context, req, res): Promise<IKibanaResponse<EcsMappingResponse>> => {
-        const { packageName, dataStreamName, rawSamples, mapping, langSmithOptions } = req.body;
+      withAvailability(async (context, req, res): Promise<IKibanaResponse<AnalyseLogsResponse>> => {
+        const { encodedRawSamples, langSmithOptions } = req.body;
         const { getStartServices, logger } = await context.integrationAssistant;
 
         const [, { actions: actionsPlugin }] = await getStartServices();
@@ -70,13 +75,6 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
             streaming: false,
           });
 
-          const parameters = {
-            packageName,
-            dataStreamName,
-            rawSamples,
-            ...(mapping && { mapping }),
-          };
-
           const options = {
             callbacks: [
               new APMTracer({ projectName: langSmithOptions?.projectName ?? 'default' }, logger),
@@ -84,13 +82,40 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
             ],
           };
 
-          const graph = await getEcsGraph(model);
-          const results = await graph.invoke(parameters, options);
+          const logsSampleDecoded = decodeRawSamples(encodedRawSamples);
+          const { logFormat, parsedSamples } = parseSamples(logsSampleDecoded);
 
-          return res.ok({ body: EcsMappingResponse.parse(results) });
+          // Truncate samples to 10 entries
+          const truncatedSamples = truncateSamples(parsedSamples);
+          let parseResults = { results: { logFormat, truncatedSamples } };
+
+          if (logFormat === 'unsupported') {
+            // Non JSON log samples. Could be some syslog structured / unstructured logs
+            const logFormatParameters = {
+              rawSamples: truncatedSamples,
+            };
+            const graph = await getLogFormatDetectionGraph(model);
+            const graphResults = await graph.invoke(logFormatParameters, options);
+
+            if (graphResults.results.logFormat === 'unsupported') {
+              return res.customError({
+                statusCode: 501,
+                body: { message: 'Unsupported log type' },
+              });
+            }
+            parseResults = graphResults;
+          }
+          return res.ok({ body: AnalyseLogsResponse.parse(parseResults) });
         } catch (e) {
           return res.badRequest({ body: e });
         }
       })
     );
+}
+
+function truncateSamples(parsedSamples: string[]) {
+  if (parsedSamples.length > MaxLogsSampleRows) {
+    return parsedSamples.slice(0, MaxLogsSampleRows);
+  }
+  return parsedSamples;
 }

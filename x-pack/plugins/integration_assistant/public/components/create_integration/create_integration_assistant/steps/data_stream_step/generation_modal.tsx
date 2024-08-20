@@ -26,6 +26,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { getLangSmithOptions } from '../../../../../common/lib/lang_smith';
 import type {
+  AnalyseLogsRequestBody,
   CategorizationRequestBody,
   EcsMappingRequestBody,
   RelatedRequestBody,
@@ -34,6 +35,7 @@ import {
   runCategorizationGraph,
   runEcsGraph,
   runRelatedGraph,
+  runAnalyseLogsGraph,
 } from '../../../../../common/lib/api';
 import { useKibana } from '../../../../../common/hooks/use_kibana';
 import type { State } from '../../state';
@@ -46,6 +48,7 @@ const ProgressOrder = ['ecs', 'categorization', 'related'];
 type ProgressItem = (typeof ProgressOrder)[number];
 
 const progressText: Record<ProgressItem, string> = {
+  analyseLogs: i18n.PROGRESS_ANALYSE_LOGS,
   ecs: i18n.PROGRESS_ECS_MAPPING,
   categorization: i18n.PROGRESS_CATEGORIZATION,
   related: i18n.PROGRESS_RELATED_GRAPH,
@@ -83,10 +86,23 @@ export const useGeneration = ({
 
     (async () => {
       try {
+        const analyseLogsRequest: AnalyseLogsRequestBody = {
+          encodedRawSamples: integrationSettings.encodedLogSamples ?? '',
+          connectorId: connector.id,
+          langSmithOptions: getLangSmithOptions(),
+        };
+
+        setProgress('analyseLogs');
+        const analyseLogsResult = await runAnalyseLogsGraph(analyseLogsRequest, deps);
+        if (abortController.signal.aborted) return;
+        if (isEmpty(analyseLogsResult?.results)) {
+          setError('No results from Analyse Logs Graph');
+          return;
+        }
         const ecsRequest: EcsMappingRequestBody = {
           packageName: integrationSettings.name ?? '',
           dataStreamName: integrationSettings.dataStreamName ?? '',
-          encodedRawSamples: integrationSettings.logsSampleParsed ?? '',
+          rawSamples: analyseLogsResult.results.parsedSamples ?? [],
           connectorId: connector.id,
           langSmithOptions: getLangSmithOptions(),
         };
@@ -99,11 +115,7 @@ export const useGeneration = ({
           return;
         }
         const categorizationRequest: CategorizationRequestBody = {
-          packageName: integrationSettings.name ?? '',
-          dataStreamName: integrationSettings.dataStreamName ?? '',
-          rawSamples: JSON.parse(ecsGraphResult.results.parsedRawSamples), // Unstringified JSON
-          connectorId: connector.id,
-          langSmithOptions: getLangSmithOptions(),
+          ...ecsRequest,
           currentPipeline: ecsGraphResult.results.pipeline,
         };
 

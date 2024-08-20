@@ -9,22 +9,21 @@ import type {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import type { LogTypeDetectionState } from '../../types';
-import { LOG_TYPE_DETECTION_PROMPT } from './prompts';
+import type { LogFormatDetectionState } from '../../types';
+import { LOG_FORMAT_DETECTION_PROMPT } from './prompts';
 
-export async function handleLogTypeDetection(
-  state: LogTypeDetectionState,
+export async function handleLogFormatDetection(
+  state: LogFormatDetectionState,
   model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel
 ) {
-  const logTypeDetectionPrompt = LOG_TYPE_DETECTION_PROMPT;
   const outputParser = new JsonOutputParser();
-  const logTypeDetectionNode = logTypeDetectionPrompt.pipe(model).pipe(outputParser);
+  const logFormatDetectionNode = LOG_FORMAT_DETECTION_PROMPT.pipe(model).pipe(outputParser);
 
-  const logTypeJson = await logTypeDetectionNode.invoke({
+  const detectedLogFormatAnswer = await logFormatDetectionNode.invoke({
     ex_answer: state.exAnswer,
     log_samples: state.rawSamples,
   });
-  const logType = logTypeJson.log_type;
+  const logFormat = detectedLogFormatAnswer.log_type;
 
-  return { logType, lastExecutedChain: 'logTypeDetection' };
+  return { logFormat, lastExecutedChain: 'logFormatDetection' };
 }

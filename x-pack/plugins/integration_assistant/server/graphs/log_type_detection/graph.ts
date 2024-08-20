@@ -11,12 +11,12 @@ import type {
 } from '@kbn/langchain/server/language_models';
 import type { StateGraphArgs } from '@langchain/langgraph';
 import { END, START, StateGraph } from '@langchain/langgraph';
-import type { LogTypeDetectionState } from '../../types';
-import { LOG_TYPE_JSON } from './constants';
-import { LogType } from '../../constants';
-import { handleLogTypeDetection } from './detection';
+import type { LogFormatDetectionState } from '../../types';
+import { EX_ANSWER_LOG_TYPE } from './constants';
+import { handleLogFormatDetection } from './detection';
+import { LogFormat } from '../../../common';
 
-const graphState: StateGraphArgs<LogTypeDetectionState>['channels'] = {
+const graphState: StateGraphArgs<LogFormatDetectionState>['channels'] = {
   lastExecutedChain: {
     value: (x: string, y?: string) => y ?? x,
     default: () => '',
@@ -29,57 +29,57 @@ const graphState: StateGraphArgs<LogTypeDetectionState>['channels'] = {
     value: (x: string, y?: string) => y ?? x,
     default: () => '',
   },
-  packageName: {
-    value: (x: string, y?: string) => y ?? x,
-    default: () => '',
-  },
-  dataStreamName: {
-    value: (x: string, y?: string) => y ?? x,
-    default: () => '',
-  },
   finalized: {
     value: (x: boolean, y?: boolean) => y ?? x,
     default: () => false,
   },
-  logType: {
-    value: (x: LogType, y?: LogType) => y ?? x,
-    default: () => LogType.JSON,
+  logFormat: {
+    value: (x: LogFormat, y?: LogFormat) => y ?? x,
+    default: () => 'json',
   },
   ecsVersion: {
     value: (x: string, y?: string) => y ?? x,
     default: () => '8.11.0',
   },
+  results: {
+    value: (x: object, y?: object) => y ?? x,
+    default: () => ({}),
+  },
 };
 
-function modelInput(state: LogTypeDetectionState): Partial<LogTypeDetectionState> {
+function modelInput(state: LogFormatDetectionState): Partial<LogFormatDetectionState> {
   return {
-    exAnswer: JSON.stringify(LOG_TYPE_JSON, null, 2),
+    exAnswer: JSON.stringify(EX_ANSWER_LOG_TYPE, null, 2),
     finalized: false,
     lastExecutedChain: 'modelInput',
   };
 }
 
-function modelOutput(state: LogTypeDetectionState): Partial<LogTypeDetectionState> {
+function modelOutput(state: LogFormatDetectionState): Partial<LogFormatDetectionState> {
   return {
     finalized: true,
     lastExecutedChain: 'modelOutput',
+    results: {
+      logFormat: state.logFormat,
+      parsedSamples: state.rawSamples, // TODO: Add parsed samples
+    },
   };
 }
 
-function logTypeRouter(state: LogTypeDetectionState): string {
-  // if (state.logType === LogType.STRUCTURED) {
+function logFormatRouter(state: LogFormatDetectionState): string {
+  // if (state.logFormat === LogFormat.STRUCTURED) {
   //   return 'structured';
   // }
-  // if (state.logType === LogType.UNSTRUCTURED) {
+  // if (state.logFormat === LogFormat.UNSTRUCTURED) {
   //   return 'unstructured';
   // }
-  // if (state.logType === LogType.CSV) {
+  // if (state.logFormat === LogFormat.CSV) {
   //   return 'csv';
   // }
   return 'unsupported';
 }
 
-export async function getLogTypeDetectionGraph(
+export async function getLogFormatDetectionGraph(
   model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel
 ) {
   const workflow = new StateGraph({
@@ -87,16 +87,16 @@ export async function getLogTypeDetectionGraph(
   })
     .addNode('modelInput', modelInput)
     .addNode('modelOutput', modelOutput)
-    .addNode('handleLogTypeDetection', (state: LogTypeDetectionState) =>
-      handleLogTypeDetection(state, model)
+    .addNode('handleLogFormatDetection', (state: LogFormatDetectionState) =>
+      handleLogFormatDetection(state, model)
     )
-    // .addNode('handleKVGraph', (state: LogTypeDetectionState) => getCompiledKvGraph(state, model))
-    // .addNode('handleUnstructuredGraph', (state: LogTypeDetectionState) => getCompiledUnstructuredGraph(state, model))
-    // .addNode('handleCsvGraph', (state: LogTypeDetectionState) => getCompiledCsvGraph(state, model))
+    // .addNode('handleKVGraph', (state: LogFormatDetectionState) => getCompiledKvGraph(state, model))
+    // .addNode('handleUnstructuredGraph', (state: LogFormatDetectionState) => getCompiledUnstructuredGraph(state, model))
+    // .addNode('handleCsvGraph', (state: LogFormatDetectionState) => getCompiledCsvGraph(state, model))
     .addEdge(START, 'modelInput')
-    .addEdge('modelInput', 'handleLogTypeDetection')
+    .addEdge('modelInput', 'handleLogFormatDetection')
     .addEdge('modelOutput', END)
-    .addConditionalEdges('handleLogTypeDetection', logTypeRouter, {
+    .addConditionalEdges('handleLogFormatDetection', logFormatRouter, {
       // TODO: Add structured, unstructured, csv nodes
       // structured: 'handleKVGraph',
       // unstructured: 'handleUnstructuredGraph',
@@ -104,7 +104,7 @@ export async function getLogTypeDetectionGraph(
       unsupported: 'modelOutput',
     });
 
-  const compiledLogTypeDetectionGraph = workflow.compile();
+  const compiledLogFormatDetectionGraph = workflow.compile();
 
-  return compiledLogTypeDetectionGraph;
+  return compiledLogFormatDetectionGraph;
 }

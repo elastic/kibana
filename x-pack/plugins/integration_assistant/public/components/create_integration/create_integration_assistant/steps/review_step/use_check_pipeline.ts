@@ -38,7 +38,7 @@ export const useCheckPipeline = ({ integrationSettings, customPipeline }: CheckP
       try {
         const parameters: CheckPipelineRequestBody = {
           pipeline: customPipeline,
-          rawSamples: integrationSettings.logsSampleOriginal ?? [],
+          rawSamples: integrationSettings.logsSampleParsed ?? [],
         };
         setIsGenerating(true);
 

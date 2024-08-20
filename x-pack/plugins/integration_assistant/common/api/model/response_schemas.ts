@@ -16,14 +16,13 @@
 
 import { z } from 'zod';
 
-import { Docs, Mapping, Pipeline } from './common_attributes';
+import { Docs, Mapping, Pipeline, LogFormat } from './common_attributes';
 
 export type EcsMappingAPIResponse = z.infer<typeof EcsMappingAPIResponse>;
 export const EcsMappingAPIResponse = z.object({
   results: z.object({
     mapping: Mapping,
     pipeline: Pipeline,
-    parsedRawSamples: z.string(),
   }),
 });
 
@@ -47,5 +46,13 @@ export type CheckPipelineAPIResponse = z.infer<typeof CheckPipelineAPIResponse>;
 export const CheckPipelineAPIResponse = z.object({
   results: z.object({
     docs: Docs,
+  }),
+});
+
+export type AnalyseLogsAPIResponse = z.infer<typeof AnalyseLogsAPIResponse>;
+export const AnalyseLogsAPIResponse = z.object({
+  results: z.object({
+    logFormat: LogFormat,
+    parsedSamples: z.array(z.string()),
   }),
 });

@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export const LOG_TYPE_JSON = {
+export const EX_ANSWER_LOG_TYPE = {
   log_type: 'structured',
 };

@@ -16,6 +16,8 @@ import type {
   CheckPipelineRequestBody,
   CheckPipelineResponse,
   BuildIntegrationRequestBody,
+  AnalyseLogsRequestBody,
+  AnalyseLogsResponse,
 } from '../../../common';
 import {
   INTEGRATION_BUILDER_PATH,
@@ -24,7 +26,7 @@ import {
   RELATED_GRAPH_PATH,
   CHECK_PIPELINE_PATH,
 } from '../../../common';
-import { FLEET_PACKAGES_PATH } from '../../../common/constants';
+import { ANALYSE_LOGS_PATH, FLEET_PACKAGES_PATH } from '../../../common/constants';
 
 export interface EpmPackageResponse {
   response: [{ id: string; name: string }];
@@ -41,6 +43,16 @@ export interface RequestDeps {
   http: HttpSetup;
   abortSignal: AbortSignal;
 }
+
+export const runAnalyseLogsGraph = async (
+  body: AnalyseLogsRequestBody,
+  { http, abortSignal }: RequestDeps
+): Promise<AnalyseLogsResponse> =>
+  http.post<AnalyseLogsResponse>(ANALYSE_LOGS_PATH, {
+    headers: defaultHeaders,
+    body: JSON.stringify(body),
+    signal: abortSignal,
+  });
 
 export const runEcsGraph = async (
   body: EcsMappingRequestBody,

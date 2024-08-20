@@ -18,7 +18,7 @@ import {
   CategorizationRequestBody,
   CategorizationResponse,
 } from '../../common';
-import { ROUTE_HANDLER_TIMEOUT, MAX_IMPORT_PAYLOAD_BYTES } from '../constants';
+import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getCategorizationGraph } from '../graphs/categorization';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { buildRouteValidationWithZod } from '../util/route_validation';
@@ -32,9 +32,6 @@ export function registerCategorizationRoutes(
       path: CATEGORIZATION_GRAPH_PATH,
       access: 'internal',
       options: {
-        body: {
-          maxBytes: MAX_IMPORT_PAYLOAD_BYTES,
-        },
         timeout: {
           idleSocket: ROUTE_HANDLER_TIMEOUT,
         },

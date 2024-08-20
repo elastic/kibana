@@ -9,11 +9,3 @@ export const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 min
 export const LANG_CHAIN_TIMEOUT = ROUTE_HANDLER_TIMEOUT - 10_000; // 9 minutes 50 seconds
 export const CONNECTOR_TIMEOUT = LANG_CHAIN_TIMEOUT - 10_000; // 9 minutes 40 seconds
 export const MAX_IMPORT_PAYLOAD_BYTES = 9000000; // 9 MegaBytes
-export enum LogType {
-  JSON = 'json',
-  NDJSON = 'ndjson',
-  STRUCTURED = 'structured',
-  UNSTRUCTURED = 'unstructured',
-  CSV = 'csv',
-  UNSUPPORTED = 'unsupported',
-}
