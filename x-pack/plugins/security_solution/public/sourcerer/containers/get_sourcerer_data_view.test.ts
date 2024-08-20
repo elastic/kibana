@@ -40,7 +40,6 @@ describe('getSourcererDataView', () => {
         runtimeFieldMap: {},
       },
       browserFields: {},
-      runtimeMappings: {},
     });
   });
   it('should call dataViewsService.get with the correct arguments', async () => {

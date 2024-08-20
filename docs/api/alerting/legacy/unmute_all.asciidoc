@@ -8,6 +8,11 @@ deprecated::[7.13.0,Use <<unmute-all-alerts-api>> instead.]
 
 Unmute all alert instances.
 
+[NOTE]
+====
+For the latest details, refer to {api-kibana}/group/endpoint-alerting[alerting APIs].
+====
+
 [[alerts-api-unmute-all-request]]
 ==== Request
 
