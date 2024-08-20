@@ -6,19 +6,15 @@
  */
 import type { AuthenticatedUser, NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { GetInvestigationResponse } from '@kbn/investigation-shared';
 import { pull } from 'lodash';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { v4 } from 'uuid';
 import type { GlobalWidgetParameters } from '../..';
-import type { InvestigateWidget, InvestigateWidgetCreate, Investigation } from '../../../common';
+import type { InvestigateWidget, InvestigateWidgetCreate } from '../../../common';
 import type { WidgetDefinition } from '../../types';
-import {
-  InvestigateWidgetApiContextProvider,
-  UseInvestigateWidgetApi,
-} from '../use_investigate_widget';
-import { useLocalStorage } from '../use_local_storage';
-import { createNewInvestigation } from './create_new_investigation';
+import { createNewInvestigation, fromInvestigationResponse } from './create_new_investigation';
 import { StatefulInvestigation, createInvestigationStore } from './investigation_store';
 
 export type RenderableInvestigateWidget = InvestigateWidget & {
@@ -31,7 +27,6 @@ export type RenderableInvestigation = Omit<StatefulInvestigation, 'items'> & {
 };
 
 export interface UseInvestigationApi {
-  investigations: Investigation[];
   investigation?: StatefulInvestigation;
   renderableInvestigation?: RenderableInvestigation;
   copyItem: (id: string) => Promise<void>;
@@ -39,37 +34,26 @@ export interface UseInvestigationApi {
   addItem: (options: InvestigateWidgetCreate) => Promise<void>;
   setGlobalParameters: (parameters: GlobalWidgetParameters) => Promise<void>;
   setTitle: (title: string) => Promise<void>;
-  addNote: (note: string) => Promise<void>;
-  deleteNote: (id: string) => Promise<void>;
 }
 
 function useInvestigationWithoutContext({
   user,
   notifications,
   widgetDefinitions,
-  from,
-  to,
+  investigationData,
 }: {
   user: AuthenticatedUser;
   notifications: NotificationsStart;
   widgetDefinitions: WidgetDefinition[];
-  from: string;
-  to: string;
+  investigationData?: GetInvestigationResponse;
 }): UseInvestigationApi {
   const [investigationStore, _] = useState(() =>
     createInvestigationStore({
       user,
       widgetDefinitions,
-      investigation: createNewInvestigation({
-        user,
-        id: v4(),
-        globalWidgetParameters: {
-          timeRange: {
-            from,
-            to,
-          },
-        },
-      }),
+      investigation: investigationData
+        ? fromInvestigationResponse(investigationData)
+        : createNewInvestigation(),
     })
   );
 
@@ -106,32 +90,12 @@ function useInvestigationWithoutContext({
         let Component = widgetComponentsById.current[item.id];
         if (!Component) {
           const id = item.id;
-          const api: UseInvestigateWidgetApi = {
-            onWidgetAdd: async (create) => {
-              return investigationStore.addItem(item.id, create);
-            },
-          };
-
-          const onDelete = () => {
-            return investigationStore.deleteItem(id);
-          };
-
           const widgetDefinition = widgetDefinitions.find(
             (definition) => definition.type === item.type
           )!;
 
           Component = widgetComponentsById.current[id] = (props) => {
-            return (
-              <InvestigateWidgetApiContextProvider value={api}>
-                {widgetDefinition
-                  ? widgetDefinition.render({
-                      onWidgetAdd: api.onWidgetAdd,
-                      onDelete,
-                      widget: props.widget,
-                    })
-                  : undefined}
-              </InvestigateWidgetApiContextProvider>
-            );
+            return <>{widgetDefinition?.render({ widget: props.widget })}</>;
           };
         }
 
@@ -148,7 +112,7 @@ function useInvestigationWithoutContext({
     });
 
     return nextItemsWithContext;
-  }, [investigation?.items, widgetDefinitions, investigationStore]);
+  }, [investigation?.items, widgetDefinitions]);
 
   const renderableInvestigation = useMemo(() => {
     return investigation
@@ -167,79 +131,7 @@ function useInvestigationWithoutContext({
 
   const { copyItem, setGlobalParameters, setTitle } = investigationStore;
 
-  const { storedItem: investigations, setStoredItem: setInvestigations } = useLocalStorage<
-    Investigation[]
-  >('experimentalInvestigations', []);
-
-  const investigationsRef = useRef(investigations);
-  investigationsRef.current = investigations;
-
-  useEffect(() => {
-    function attemptToStoreInvestigations(next: Investigation[]) {
-      try {
-        setInvestigations(next);
-      } catch (error) {
-        notifications.showErrorDialog({
-          title: i18n.translate('xpack.investigate.useInvestigation.errorSavingInvestigations', {
-            defaultMessage: 'Could not save investigations to local storage',
-          }),
-          error,
-        });
-      }
-    }
-
-    const subscription = investigation$.subscribe(({ investigation: investigationFromStore }) => {
-      const isEmpty = investigationFromStore.items.length === 0;
-
-      if (isEmpty) {
-        return;
-      }
-
-      const toSerialize = {
-        ...investigationFromStore,
-        items: investigationFromStore.items.map((item) => {
-          const { loading, ...rest } = item;
-          return rest;
-        }),
-      };
-
-      const hasStoredCurrentInvestigation = !!investigationsRef.current.find(
-        (investigationAtIndex) => investigationAtIndex.id === investigationFromStore.id
-      );
-
-      if (!hasStoredCurrentInvestigation) {
-        attemptToStoreInvestigations([...(investigationsRef.current ?? []), toSerialize].reverse());
-        return;
-      }
-
-      const nextInvestigations = investigationsRef.current
-        .map((investigationAtIndex) => {
-          if (investigationAtIndex.id === investigationFromStore.id) {
-            return toSerialize;
-          }
-          return investigationAtIndex;
-        })
-        .reverse();
-
-      attemptToStoreInvestigations(nextInvestigations);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [investigation$, setInvestigations, notifications]);
-
-  const addNote = async (note: string) => {
-    await investigationStore.addNote(note);
-  };
-
-  const deleteNote = async (id: string) => {
-    await investigationStore.deleteNote(id);
-  };
-
   return {
-    addNote,
-    deleteNote,
     addItem,
     copyItem,
     deleteItem,
@@ -247,7 +139,6 @@ function useInvestigationWithoutContext({
     renderableInvestigation,
     setGlobalParameters,
     setTitle,
-    investigations,
   };
 }
 
@@ -258,13 +149,18 @@ export function createUseInvestigation({
   notifications: NotificationsStart;
   widgetDefinitions: WidgetDefinition[];
 }) {
-  return ({ user, from, to }: { user: AuthenticatedUser; from: string; to: string }) => {
+  return ({
+    user,
+    investigationData,
+  }: {
+    user: AuthenticatedUser;
+    investigationData?: GetInvestigationResponse;
+  }) => {
     return useInvestigationWithoutContext({
       user,
       notifications,
       widgetDefinitions,
-      from,
-      to,
+      investigationData,
     });
   };
 }
