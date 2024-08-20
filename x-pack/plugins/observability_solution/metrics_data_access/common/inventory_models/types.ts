@@ -318,39 +318,12 @@ export const ESMaxPeriodFilterExistsAggRT = rt.type({
   }),
 });
 
-export interface SnapshotTermsWithAggregation {
-  terms: { field: string };
-  aggregations: MetricsUIAggregation;
-}
-
 export type MetricsUIAggregation = Record<string, estypes.AggregationsAggregate>;
 
-export const ESTermsWithAggregationRT: rt.Type<SnapshotTermsWithAggregationForAlerts> =
-  rt.recursion('SnapshotModelRT', () =>
-    rt.type({
-      terms: rt.type({ field: rt.string }),
-      aggregations: MetricsUIAggregationRT,
-    })
-  );
-
-export const ESAggregationRT = rt.union([
-  ESBasicMetricAggRT,
-  ESPercentileAggRT,
-  ESBucketScriptAggRT,
-  ESCumulativeSumAggRT,
-  ESDerivativeAggRT,
-  ESSumBucketAggRT,
-  ESTermsWithAggregationRT,
-  ESCaridnalityAggRT,
-  ESTopMetricsAggRT,
-  ESMaxPeriodFilterExistsAggRT,
-]);
-
-export const MetricsUIAggregationRT = rt.record(rt.string, ESAggregationRT);
-export interface SnapshotTermsWithAggregationForAlerts {
-  terms: { field: string };
-  aggregations: rt.TypeOf<typeof MetricsUIAggregationRT>;
-}
+export const ESTermsWithAggregationRT = rt.type({
+  terms: rt.type({ field: rt.string }),
+  aggregations: rt.UnknownRecord,
+});
 
 export const SnapshotMetricTypeKeys = {
   count: null,

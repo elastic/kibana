@@ -7,7 +7,7 @@
 
 import { get, values, first } from 'lodash';
 import * as rt from 'io-ts';
-import {
+import type {
   MetricsAPIRequest,
   MetricsAPISeries,
   MetricsAPIColumn,

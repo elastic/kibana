@@ -16,7 +16,7 @@ import {
 import { SnapshotCustomMetricInput } from '../../../../../common/http_api';
 
 export const isMetricRate = (metric: MetricsUIAggregation | undefined): boolean => {
-  if (metric === undefined) {
+  if (!metric) {
     return false;
   }
   const values = Object.values(metric);
@@ -31,7 +31,7 @@ export const isCustomMetricRate = (customMetric: SnapshotCustomMetricInput) => {
 };
 
 export const isInterfaceRateAgg = (metric: MetricsUIAggregation | undefined) => {
-  if (metric === undefined) {
+  if (!metric) {
     return false;
   }
   const values = Object.values(metric);

@@ -10,12 +10,6 @@ import { createLiteralValueFromUndefinedRT } from '@kbn/io-ts-utils';
 import { afterKeyObjectRT, timeRangeRT } from './metrics_explorer';
 import { MetricsUIAggregation } from '../inventory_models/types';
 
-export interface TimeRange {
-  from: number;
-  to: number;
-  interval: string;
-}
-
 export interface MetricsAPIMetric {
   id: string;
   aggregations: MetricsUIAggregation;
