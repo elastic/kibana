@@ -50,6 +50,7 @@ import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../utils/shallow_equal';
 import { AddFilterPopover } from './add_filter_popover';
 import { DataViewPicker, DataViewPickerProps } from '../dataview_picker';
+import { ESQLMenuPopover } from './esql_menu_popover';
 
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import type {
@@ -514,7 +515,7 @@ export const QueryBarTopRow = React.memo(
           className="kbnQueryBar__datePicker"
           isQuickSelectOnly={isMobile ? false : isQueryInputFocused}
           width={isMobile ? 'full' : 'auto'}
-          compressed
+          compressed={shouldShowDatePickerAsBadge()}
         />
       );
       const component = getWrapperWithTooltip(datePicker, enableTooltip, props.query);
@@ -531,7 +532,7 @@ export const QueryBarTopRow = React.memo(
             iconType="cross"
             aria-label={buttonLabelCancel}
             onClick={onClickCancelButton}
-            size="s"
+            size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
             data-test-subj="queryCancelButton"
             color="text"
             display="base"
@@ -546,7 +547,7 @@ export const QueryBarTopRow = React.memo(
           iconType="cross"
           aria-label={buttonLabelCancel}
           onClick={onClickCancelButton}
-          size="s"
+          size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
           data-test-subj="queryCancelButton"
           color="text"
         >
@@ -586,7 +587,7 @@ export const QueryBarTopRow = React.memo(
               isDisabled={isDateRangeInvalid || props.isDisabled}
               isLoading={props.isLoading}
               onClick={onClickSubmitButton}
-              size="s"
+              size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
               color={props.isDirty ? 'success' : 'primary'}
               fill={false}
               needsUpdate={props.isDirty}
@@ -621,22 +622,17 @@ export const QueryBarTopRow = React.memo(
     }
 
     function renderDataViewsPicker() {
-      if (!props.dataViewPickerComponentProps) return;
-      let textBasedLanguage;
-      if (Boolean(isQueryLangSelected)) {
-        const query = props.query as AggregateQuery;
-        textBasedLanguage = getAggregateQueryMode(query);
+      if (props.dataViewPickerComponentProps && !Boolean(isQueryLangSelected)) {
+        return (
+          <EuiFlexItem style={{ maxWidth: '100%' }} grow={isMobile}>
+            <DataViewPicker
+              {...props.dataViewPickerComponentProps}
+              trigger={{ fullWidth: isMobile, ...props.dataViewPickerComponentProps.trigger }}
+              isDisabled={props.isDisabled}
+            />
+          </EuiFlexItem>
+        );
       }
-      return (
-        <EuiFlexItem style={{ maxWidth: '100%' }} grow={isMobile}>
-          <DataViewPicker
-            {...props.dataViewPickerComponentProps}
-            trigger={{ fullWidth: isMobile, ...props.dataViewPickerComponentProps.trigger }}
-            textBasedLanguage={textBasedLanguage}
-            isDisabled={props.isDisabled}
-          />
-        </EuiFlexItem>
-      );
     }
 
     function renderAddButton() {
@@ -649,7 +645,7 @@ export const QueryBarTopRow = React.memo(
               timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
               filtersForSuggestions={props.filtersForSuggestions}
               onFiltersUpdated={props.onFiltersUpdated}
-              buttonProps={{ display: 'empty' }}
+              buttonProps={{ size: shouldShowDatePickerAsBadge() ? 's' : 'm', display: 'empty' }}
               isDisabled={props.isDisabled}
               suggestionsAbstraction={props.suggestionsAbstraction}
             />
@@ -665,7 +661,7 @@ export const QueryBarTopRow = React.memo(
             <FilterButtonGroup
               items={[props.prepend, renderAddButton()]}
               attached={renderFilterMenuOnly()}
-              size="s"
+              size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
             />
           </EuiFlexItem>
         )
@@ -770,12 +766,12 @@ export const QueryBarTopRow = React.memo(
                 padding: ${isQueryLangSelected && !props.disableExternalPadding
                   ? euiTheme.size.s
                   : 0};
-                padding-bottom: 0;
               `}
               justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
               wrap
             >
               {props.dataViewPickerOverride || renderDataViewsPicker()}
+              {Boolean(isQueryLangSelected) && <ESQLMenuPopover />}
               <EuiFlexItem
                 grow={!shouldShowDatePickerAsBadge()}
                 style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}

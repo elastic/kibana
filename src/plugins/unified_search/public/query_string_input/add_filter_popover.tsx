@@ -65,7 +65,7 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
         aria-label={strings.getAddFilterButtonLabel()}
         data-test-subj="addFilter"
         onClick={() => setShowAddFilterPopover((isOpen) => !isOpen)}
-        size="s"
+        size="m"
         disabled={isDisabled}
         {...buttonProps}
         style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
