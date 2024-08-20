@@ -24,7 +24,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   });
 
   describe('endpoint transforms', function () {
-    targetTags(this, ['@ess', '@serverless', '@serverlessQA']);
+    targetTags(this, ['@ess', '@serverless', '@serverlessQA', 'esGate']);
 
     describe('united transform', () => {
       const transformName = 'test-agg-united';
