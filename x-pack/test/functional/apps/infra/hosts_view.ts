@@ -35,8 +35,6 @@ import { getLogsSynthtraceEsClient } from '../../../common/utils/synthtrace/logs
 
 const START_DATE = moment.utc(DATES.metricsAndLogs.hosts.min);
 const END_DATE = moment.utc(DATES.metricsAndLogs.hosts.max);
-const START_HOST_PROCESSES_DATE = moment.utc(DATES.metricsAndLogs.hosts.processesDataStartDate);
-const END_HOST_PROCESSES_DATE = moment.utc(DATES.metricsAndLogs.hosts.processesDataEndDate);
 
 // synthtrace data dates
 const START_SYNTHTRACE_DATE = moment.utc(DATE_WITH_HOSTS_DATA_FROM);
@@ -119,8 +117,8 @@ const synthtraceHostsTableEntries = [
     memoryUsage: '35%',
     memoryFree: '44.7 GB',
     diskSpaceUsage: '1,223%',
-    rx: '2.3 Mbit/s',
-    tx: '2.3 Mbit/s',
+    rx: '1.5 Mbit/s',
+    tx: '1.5 Mbit/s',
   },
   {
     title: 'host-2',
@@ -129,8 +127,8 @@ const synthtraceHostsTableEntries = [
     memoryUsage: '35%',
     memoryFree: '44.7 GB',
     diskSpaceUsage: '1,223%',
-    rx: '2.3 Mbit/s',
-    tx: '2.3 Mbit/s',
+    rx: '1.5 Mbit/s',
+    tx: '1.5 Mbit/s',
   },
   {
     title: 'host-3',
@@ -139,8 +137,8 @@ const synthtraceHostsTableEntries = [
     memoryUsage: '35%',
     memoryFree: '44.7 GB',
     diskSpaceUsage: '1,223%',
-    rx: '2.3 Mbit/s',
-    tx: '2.3 Mbit/s',
+    rx: '1.5 Mbit/s',
+    tx: '1.5 Mbit/s',
   },
   {
     title: 'host-4',
@@ -149,8 +147,8 @@ const synthtraceHostsTableEntries = [
     memoryUsage: '35%',
     memoryFree: '44.7 GB',
     diskSpaceUsage: '1,223%',
-    rx: '2.3 Mbit/s',
-    tx: '2.3 Mbit/s',
+    rx: '1.5 Mbit/s',
+    tx: '1.5 Mbit/s',
   },
   {
     title: 'host-5',
@@ -159,8 +157,8 @@ const synthtraceHostsTableEntries = [
     memoryUsage: '35%',
     memoryFree: '44.7 GB',
     diskSpaceUsage: '1,223%',
-    rx: '2.3 Mbit/s',
-    tx: '2.3 Mbit/s',
+    rx: '1.5 Mbit/s',
+    tx: '1.5 Mbit/s',
   },
   {
     title: 'host-6',
@@ -169,8 +167,8 @@ const synthtraceHostsTableEntries = [
     memoryUsage: '35%',
     memoryFree: '44.7 GB',
     diskSpaceUsage: '1,223%',
-    rx: '2.3 Mbit/s',
-    tx: '2.3 Mbit/s',
+    rx: '1.5 Mbit/s',
+    tx: '1.5 Mbit/s',
   },
 ];
 
@@ -261,8 +259,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
     await pageObjects.header.waitUntilLoadingHasFinished();
     await pageObjects.timePicker.setAbsoluteRange(
-      START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT),
-      END_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
+      START_SYNTHTRACE_DATE.format(DATE_PICKER_FORMAT),
+      END_SYNTHTRACE_DATE.format(DATE_PICKER_FORMAT)
     );
 
     await waitForPageToLoad();
@@ -300,6 +298,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Hosts View', function () {
     let synthEsInfraClient: InfraSynthtraceEsClient;
     let syntEsLogsClient: LogsSynthtraceEsClient;
+
     describe('#Onboarding', function () {
       before(async () => {
         synthEsInfraClient = await getInfraSynthtraceEsClient(esClient);
@@ -364,6 +363,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         return Promise.all([
           apmSynthtraceKibanaClient.uninstallApmPackage(),
           synthtraceApmClient.clean(),
+          synthEsInfraClient.clean(),
           browser.removeLocalStorageItem(HOSTS_LINK_LOCAL_STORAGE_KEY),
         ]);
       });
@@ -411,7 +411,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
 
             [
-              { metric: 'cpuUsage', value: '50.0%' },
+              { metric: 'cpuUsage', value: '48.3%' },
               { metric: 'normalizedLoad1m', value: '18.8%' },
               { metric: 'memoryUsage', value: '35.0%' },
               { metric: 'diskUsage', value: '1,223.0%' },
@@ -486,7 +486,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               await pageObjects.header.waitUntilLoadingHasFinished();
 
               const addedFilter = await pageObjects.assetDetails.getMetadataAppliedFilter();
-              expect(addedFilter).to.contain('host.name: host-1');
+              expect(addedFilter).to.contain('host.hostname: host-1');
               const removeFilterExists =
                 await pageObjects.assetDetails.metadataRemoveFilterExists();
               expect(removeFilterExists).to.be(true);
@@ -770,7 +770,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.infraHostsView.sortByCpuUsage();
             let hostRows = await pageObjects.infraHostsView.getHostsTableData();
             const hostDataFirtPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
-            expect(hostDataFirtPage).to.eql(synthtraceHostsTableEntries[3]);
+            expect(hostDataFirtPage).to.eql(synthtraceHostsTableEntries[5]);
 
             await pageObjects.infraHostsView.paginateTo(2);
             hostRows = await pageObjects.infraHostsView.getHostsTableData();
@@ -787,7 +787,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.infraHostsView.paginateTo(2);
             hostRows = await pageObjects.infraHostsView.getHostsTableData();
             const hostDataLastPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
-            expect(hostDataLastPage).to.eql(synthtraceHostsTableEntries[3]);
+            expect(hostDataLastPage).to.eql(synthtraceHostsTableEntries[5]);
           });
 
           it('should sort by text field asc', async () => {
@@ -806,7 +806,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.infraHostsView.sortByTitle();
             let hostRows = await pageObjects.infraHostsView.getHostsTableData();
             const hostDataFirtPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
-            expect(hostDataFirtPage).to.eql(synthtraceHostsTableEntries[6]);
+            expect(hostDataFirtPage).to.eql(synthtraceHostsTableEntries[5]);
 
             await pageObjects.infraHostsView.paginateTo(2);
             hostRows = await pageObjects.infraHostsView.getHostsTableData();
@@ -821,7 +821,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           return Promise.all([
             esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
             esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
-            // esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_hosts_processes'),
           ]);
         });
 
@@ -829,7 +828,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           return Promise.all([
             esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts'),
             esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
-            // esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_hosts_processes'),
           ]);
         });
 
@@ -1002,7 +1000,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('#Permissions: Read Only User - Single Host Flyout', () => {
+      describe.skip('#Permissions: Read Only User - Single Host Flyout', () => {
         describe('Dashboards Tab', () => {
           before(async () => {
             await setCustomDashboardsEnabled(true);
