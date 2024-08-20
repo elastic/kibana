@@ -7,7 +7,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { getOr } from 'lodash/fp';
-import type { SearchHit } from '../../../common/search_strategy';
+import type { SearchHit } from '../../../../../common/search_strategy';
 
 /**
  * Since the fields api may return a string array as well as an object array
@@ -37,7 +37,6 @@ const getAllDotIndicesInReverse = (dotField: string): number[] => {
 /**
  * We get the dot paths so we can look up each path to see if any of the nested fields exist
  * */
-
 const getAllPotentialDotPaths = (dotField: string): string[][] => {
   const reverseDotIndices = getAllDotIndicesInReverse(dotField);
 
@@ -49,6 +48,9 @@ const getAllPotentialDotPaths = (dotField: string): string[][] => {
   return pathTuples;
 };
 
+/**
+ * We get the nested value
+ */
 const getNestedValue = (startPath: string, endPath: string, data: Record<string, unknown>) => {
   const foundPrimaryPath = data[startPath];
   if (Array.isArray(foundPrimaryPath)) {
@@ -63,7 +65,7 @@ const getNestedValue = (startPath: string, endPath: string, data: Record<string,
 };
 
 /**
- * we get the field value from a fields response and by breaking down to look at each individual path,
+ * We get the field value from a fields response and by breaking down to look at each individual path,
  * we're able to get both top level fields as well as nested fields that don't provide index information.
  * In the case where a user enters kibana.alert.parameters.someField, a mapped array of the subfield value will be returned
  */
@@ -93,11 +95,28 @@ const getFieldsValue = (
   return undefined;
 };
 
-export type GetFieldsDataValue = string | string[] | null | undefined;
-export type GetFieldsData = (field: string) => GetFieldsDataValue;
+export type GetFieldsData = (field: string) => string | string[] | null | undefined;
 
-// TODO: MOVE TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
-export const useGetFieldsData = (fieldsData: SearchHit['fields'] | undefined): GetFieldsData => {
+export interface UseGetFieldsDataParams {
+  /**
+   * All fields from the searchHit result
+   */
+  fieldsData: SearchHit['fields'] | undefined;
+}
+
+export interface UseGetFieldsDataResult {
+  /**
+   * Retrieves the value for the provided field (reading from the searchHit result)
+   */
+  getFieldsData: GetFieldsData;
+}
+
+/**
+ * Hook that returns a function to retrieve the values for a field (reading from the searchHit result)
+ */
+export const useGetFieldsData = ({
+  fieldsData,
+}: UseGetFieldsDataParams): UseGetFieldsDataResult => {
   // TODO: Move cache to top level container such as redux or context. Make it store type agnostic if possible
   // TODO: Handle updates where data is re-requested and the cache is reset.
   const cachedOriginalData = useMemo(() => fieldsData, [fieldsData]);
@@ -111,7 +130,7 @@ export const useGetFieldsData = (fieldsData: SearchHit['fields'] | undefined): G
     [cachedExpensiveNestedValues]
   );
 
-  return useCallback(
+  const getFieldsData = useCallback(
     (field: string) => {
       let fieldsValue;
       // Get an expensive value from the cache if it exists, otherwise search for the value
@@ -133,4 +152,6 @@ export const useGetFieldsData = (fieldsData: SearchHit['fields'] | undefined): G
     },
     [cacheNestedValues, cachedExpensiveNestedValues, cachedOriginalData]
   );
+
+  return { getFieldsData };
 };

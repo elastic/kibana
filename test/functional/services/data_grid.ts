@@ -512,6 +512,18 @@ export class DataGridService extends FtrService {
     await option.click();
   }
 
+  public async getCurrentDensityValue() {
+    const buttonGroup = await this.testSubjects.find('densityButtonGroup');
+    const selectedButton = await buttonGroup.findByCssSelector('[aria-pressed=true]');
+    return selectedButton.getVisibleText();
+  }
+
+  public async changeDensityValue(newValue: string) {
+    const buttonGroup = await this.testSubjects.find('densityButtonGroup');
+    const option = await buttonGroup.findByCssSelector(`[data-text="${newValue}"]`);
+    await option.click();
+  }
+
   private async findSampleSizeInput() {
     return await this.find.byCssSelector(
       'input[type="number"][data-test-subj="unifiedDataTableSampleSizeInput"]'
