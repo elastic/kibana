@@ -183,8 +183,9 @@ export function AlertsPopover({
         button={anchorElement}
         closePopover={onClose}
         isOpen={!alertFlyoutVisible}
+        panelPaddingSize="s"
       >
-        <EuiContextMenu initialPanelId="mainPanel" panels={panels} />
+        <EuiContextMenu initialPanelId="mainPanel" size="s" panels={panels} />
       </EuiWrappingPopover>
     </>
   );
