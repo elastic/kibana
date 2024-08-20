@@ -98,7 +98,7 @@ export const mappings = (specService: SpecDefinitionsService) => {
                 ef_construction: 100,
                 confidence_interval: 0,
               },
-            ]
+            ],
           },
           analyzer: 'standard',
           search_analyzer: 'standard',
@@ -233,7 +233,7 @@ export const mappings = (specService: SpecDefinitionsService) => {
               { __one_of: ['BM25', 'boolean'] },
               // dense_vector type
               { __one_of: ['l2_norm', 'dot_product', 'cosine', 'max_inner_product'] },
-            ]
+            ],
           },
 
           // objects
