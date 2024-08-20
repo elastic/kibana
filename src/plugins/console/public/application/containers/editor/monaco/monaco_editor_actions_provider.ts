@@ -200,7 +200,6 @@ export class MonacoEditorActionsProvider {
     return selectedRequests;
   }
 
-  
   public async getRequests() {
     const model = this.editor.getModel();
     if (!model) {
