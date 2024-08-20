@@ -162,8 +162,6 @@ export const useColumns = ({
   defaultColumns,
   alertsFields,
 }: UseColumnsArgs): UseColumnsResp => {
-  console.log('storageAlertsTable', storageAlertsTable);
-  console.log('defaultColumns', defaultColumns);
   const { http } = useKibana().services;
 
   const fieldsQuery = useFetchAlertsFieldsQuery(
