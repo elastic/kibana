@@ -283,8 +283,6 @@ interface FeatureOptionsSelection {
 }
 
 const getOptionsFeaturesList = (): FeatureOptionsSelection[] => {
-  const baseTranslatePrefix = 'xpack.enterpriseSearch.appSearch.gateForm.superSelect';
-
   const featureList = Object.keys(featuresList).map((featureKey): FeatureOptionsSelection => {
     const feature = getFeature(featureKey);
     if (!feature) {
@@ -313,22 +311,28 @@ const getOptionsFeaturesList = (): FeatureOptionsSelection[] => {
     dropdownDisplay: (
       <>
         <strong>
-          {i18n.translate(`${baseTranslatePrefix}.other.title`, {
+          {i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.superSelect.other.title', {
             defaultMessage: 'Other',
           })}
         </strong>
         <EuiText size="s" color="subdued">
           <p>
-            {i18n.translate(`${baseTranslatePrefix}.other.description`, {
-              defaultMessage: 'Another feature not listed here',
-            })}
+            {i18n.translate(
+              'xpack.enterpriseSearch.appSearch.gateForm.superSelect.other.description',
+              {
+                defaultMessage: 'Another feature not listed here',
+              }
+            )}
           </p>
         </EuiText>
       </>
     ),
-    inputDisplay: i18n.translate(`${baseTranslatePrefix}.other.inputDisplay`, {
-      defaultMessage: 'Other',
-    }),
+    inputDisplay: i18n.translate(
+      'xpack.enterpriseSearch.appSearch.gateForm.superSelect.other.inputDisplay',
+      {
+        defaultMessage: 'Other',
+      }
+    ),
     value: 'other',
   });
 
@@ -410,15 +414,14 @@ const EducationPanel: React.FC<{ featureContent: string }> = ({ featureContent }
               </EuiFlexItem>
             )}
 
-            {feature.addOnLearnMoreLabel !== undefined &&
-              feature.addOnLearnMoreUrl !== undefined && (
-                <EuiFlexItem grow={false}>
-                  <EuiLink type="button" href={feature.addOnLearnMoreUrl} target="_blank" external>
-                    <EuiSpacer />
-                    {feature.addOnLearnMoreLabel}
-                  </EuiLink>
-                </EuiFlexItem>
-              )}
+            {feature.addOnLearnMoreLabel !== undefined && feature.addOnLearnMoreUrl !== undefined && (
+              <EuiFlexItem grow={false}>
+                <EuiLink type="button" href={feature.addOnLearnMoreUrl} target="_blank" external>
+                  <EuiSpacer />
+                  {feature.addOnLearnMoreLabel}
+                </EuiLink>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiCallOut>
       </EuiPanel>
