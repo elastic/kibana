@@ -36,8 +36,7 @@ Add preconfigured settings for this connector type in alert-action-settings.asci
 [[<ACTION-TYPE>-action-configuration]]
 === Test connectors
 
-You can test connectors with the <<execute-connector-api,run connector API>> or
-as you're creating or editing the connector in {kib}.
+You can test connectors as you're creating or editing the connector in {kib}.
 
 <ACTION-TYPE> actions have the following properties.
 
