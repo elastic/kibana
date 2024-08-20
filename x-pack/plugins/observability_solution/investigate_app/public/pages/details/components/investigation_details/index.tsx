@@ -81,9 +81,6 @@ function InvestigationDetailsWithUser({
             <EuiFlexItem grow={false}>
               <InvestigateWidgetGrid
                 items={renderableInvestigation.items}
-                onItemsChange={async (nextGridItems) => {
-                  noop();
-                }}
                 onItemCopy={async (copiedItem) => {
                   return copyItem(copiedItem.id);
                 }}
