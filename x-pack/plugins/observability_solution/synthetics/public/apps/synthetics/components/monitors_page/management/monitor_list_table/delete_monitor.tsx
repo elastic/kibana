@@ -68,13 +68,13 @@ export const DeleteMonitor = ({
                 ? i18n.translate(
                     'xpack.synthetics.monitorManagement.monitorDeleteSuccessMessage.name',
                     {
-                      defaultMessage: 'Deleted "{name}"',
+                      defaultMessage: 'Deleted "{name}" monitor successfully.',
                       values: { name },
                     }
                   )
                 : i18n.translate('xpack.synthetics.monitorManagement.successDeletion', {
                     defaultMessage:
-                      'Deleted {monitorCount, number} {monitorCount, plural, one {monitor} other {monitors}} successfully',
+                      'Deleted {monitorCount, number} {monitorCount, plural, one {monitor} other {monitors}} successfully.',
                     values: { monitorCount: configIds.length },
                   })}
             </p>,
