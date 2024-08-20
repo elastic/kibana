@@ -218,7 +218,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should correctly load the Alerts tab section when clicking on it', async () => {
-            testSubjects.existOrFail('hostsView-alerts');
+            await testSubjects.existOrFail('hostsView-alerts');
           });
         });
       });

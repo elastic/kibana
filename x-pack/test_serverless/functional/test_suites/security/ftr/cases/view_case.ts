@@ -363,7 +363,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         expect(await userActionsLists[1].findAllByCssSelector('li')).length(4);
 
-        testSubjects.click('cases-show-more-user-actions');
+        await testSubjects.click('cases-show-more-user-actions');
 
         await header.waitUntilLoadingHasFinished();
 
