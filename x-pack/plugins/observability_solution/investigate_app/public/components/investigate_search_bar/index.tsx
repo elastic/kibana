@@ -7,7 +7,7 @@
 import { css } from '@emotion/css';
 import type { TimeRange } from '@kbn/es-query';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 
 const parentClassName = css`
@@ -15,99 +15,26 @@ const parentClassName = css`
 `;
 
 interface Props {
-  rangeFrom?: string;
-  rangeTo?: string;
+  dateRangeFrom?: string;
+  dateRangeTo?: string;
   onQuerySubmit: (payload: { dateRange: TimeRange }, isUpdate?: boolean) => void;
   onRefresh?: Required<React.ComponentProps<typeof SearchBar>>['onRefresh'];
-  onFocus?: () => void;
-  onBlur?: () => void;
-  showSubmitButton?: boolean;
 }
 
 export function InvestigateSearchBar({
-  rangeFrom,
-  rangeTo,
+  dateRangeFrom,
+  dateRangeTo,
   onQuerySubmit,
   onRefresh,
-  onFocus,
-  onBlur,
-  showSubmitButton = true,
 }: Props) {
   const {
     dependencies: {
       start: { unifiedSearch },
     },
   } = useKibana();
-  const [element, setElement] = useState<HTMLElement | null>(null);
-
-  const onBlurRef = useRef(onBlur);
-  onBlurRef.current = onBlur;
-
-  const onFocusRef = useRef(onFocus);
-  onFocusRef.current = onFocus;
-
-  useEffect(() => {
-    if (!element) {
-      return;
-    }
-
-    let inFocus = false;
-
-    function updateFocus(activeElement: Element | null | undefined) {
-      const thisElementContainsActiveElement = activeElement && element?.contains(activeElement);
-
-      let nextInFocus = Boolean(thisElementContainsActiveElement);
-
-      if (!nextInFocus) {
-        const popoverContent = document.querySelector(
-          '[data-test-subj=superDatePickerQuickMenu], .euiDatePopoverContent, .kbnTypeahead'
-        );
-
-        nextInFocus = Boolean(
-          activeElement &&
-            activeElement !== document.body &&
-            (activeElement === popoverContent ||
-              activeElement?.contains(popoverContent) ||
-              popoverContent?.contains(activeElement))
-        );
-      }
-
-      if (inFocus !== nextInFocus) {
-        inFocus = Boolean(nextInFocus);
-
-        if (inFocus) {
-          onFocusRef.current?.();
-        } else {
-          onBlurRef.current?.();
-        }
-      }
-    }
-
-    function captureFocus() {
-      updateFocus(document.activeElement);
-    }
-
-    function captureBlur(event: FocusEvent) {
-      updateFocus(event.relatedTarget as Element | null);
-    }
-
-    window.addEventListener('focus', captureFocus, true);
-
-    window.addEventListener('blur', captureBlur, true);
-
-    return () => {
-      window.removeEventListener('focus', captureFocus);
-      window.removeEventListener('blur', captureBlur);
-    };
-  }, [element]);
 
   return (
-    <div
-      className={parentClassName}
-      ref={(nextElement) => {
-        setElement(nextElement);
-      }}
-    >
+    <div className={parentClassName}>
       <unifiedSearch.ui.SearchBar
         appName="investigate"
         onQuerySubmit={({ dateRange }) => {
@@ -117,9 +44,9 @@ export function InvestigateSearchBar({
         showFilterBar={false}
         showQueryMenu={false}
         showDatePicker
-        showSubmitButton={showSubmitButton}
-        dateRangeFrom={rangeFrom}
-        dateRangeTo={rangeTo}
+        showSubmitButton={true}
+        dateRangeFrom={dateRangeFrom}
+        dateRangeTo={dateRangeTo}
         onRefresh={onRefresh}
         displayStyle="inPage"
         disableQueryLanguageSwitcher

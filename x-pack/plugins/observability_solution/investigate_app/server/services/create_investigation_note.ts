@@ -10,19 +10,20 @@ import {
   CreateInvestigationNoteResponse,
 } from '@kbn/investigation-shared';
 import { v4 } from 'uuid';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { InvestigationRepository } from './investigation_repository';
 
 export async function createInvestigationNote(
   investigationId: string,
   params: CreateInvestigationNoteInput,
-  repository: InvestigationRepository
+  { repository, user }: { repository: InvestigationRepository; user: AuthenticatedUser }
 ): Promise<CreateInvestigationNoteResponse> {
   const investigation = await repository.findById(investigationId);
 
   const investigationNote = {
     id: v4(),
     content: params.content,
-    createdBy: 'TODO: get user from request',
+    createdBy: user.username,
     createdAt: Date.now(),
   };
   investigation.notes.push(investigationNote);
