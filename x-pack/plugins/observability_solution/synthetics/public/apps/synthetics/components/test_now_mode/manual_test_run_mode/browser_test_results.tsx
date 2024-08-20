@@ -38,7 +38,7 @@ export const BrowserTestRunResult = ({
   });
 
   useEffect(() => {
-    const { core, toasts } = kibanaService;
+    const { coreStart, toasts } = kibanaService;
     if (retriesExceeded) {
       toasts.addDanger(
         {
@@ -49,7 +49,7 @@ export const BrowserTestRunResult = ({
               defaultMessage="Manual test run failed for {name}"
               values={{ name }}
             />,
-            core
+            coreStart
           ),
         },
         {

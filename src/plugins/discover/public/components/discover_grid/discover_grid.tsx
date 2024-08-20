@@ -6,24 +6,43 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   renderCustomToolbar,
   UnifiedDataTable,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
+import { useProfileAccessor } from '../../context_awareness';
 
 /**
  * Customized version of the UnifiedDataTable
- * @param props
  * @constructor
  */
-export const DiscoverGrid: React.FC<UnifiedDataTableProps> = (props) => {
+export const DiscoverGrid: React.FC<UnifiedDataTableProps> = ({
+  rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
+  ...props
+}) => {
+  const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
+  const getRowIndicator = useMemo(() => {
+    return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView });
+  }, [getRowIndicatorProvider, props.dataView]);
+
+  const getRowAdditionalLeadingControlsAccessor = useProfileAccessor(
+    'getRowAdditionalLeadingControls'
+  );
+  const rowAdditionalLeadingControls = useMemo(() => {
+    return getRowAdditionalLeadingControlsAccessor(() => customRowAdditionalLeadingControls)({
+      dataView: props.dataView,
+    });
+  }, [getRowAdditionalLeadingControlsAccessor, props.dataView, customRowAdditionalLeadingControls]);
+
   return (
     <UnifiedDataTable
       showColumnTokens
       enableComparisonMode
       renderCustomToolbar={renderCustomToolbar}
+      getRowIndicator={getRowIndicator}
+      rowAdditionalLeadingControls={rowAdditionalLeadingControls}
       {...props}
     />
   );

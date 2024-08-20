@@ -4,13 +4,9 @@
 <titleabbrev>Get runtime field</titleabbrev>
 ++++
 
-experimental[] Get a runtime field
+Get a runtime field
 
-[NOTE]
-====
-For the most up-to-date API details, refer to the
-{kib-repo}/tree/{branch}/src/plugins/data_views/docs/openapi[open API specification].
-====
+NOTE: For the latest details, refer to {api-kibana}/group/endpoint-data-views[data view APIs].
 
 [[data-views-runtime-field-get-request]]
 ==== Request

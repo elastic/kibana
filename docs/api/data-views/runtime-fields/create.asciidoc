@@ -4,7 +4,9 @@
 <titleabbrev>Create runtime field</titleabbrev>
 ++++
 
-experimental[] Create a runtime field
+Create a runtime field
+
+NOTE: For the latest details, refer to {api-kibana}/group/endpoint-data-views[data view APIs].
 
 [[data-views-runtime-field-create-request]]
 ==== Request

@@ -12,6 +12,10 @@ import { AgentReassignmentError } from '../../errors';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
+import { agentsKueryNamespaceFilter, isAgentInNamespace } from '../spaces/agent_namespaces';
+
+import { getCurrentNamespace } from '../spaces/get_current_namespace';
+
 import { getAgentsById, getAgentsByKuery, openPointInTime } from './crud';
 import type { GetAgentsOptions } from '.';
 import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
@@ -23,6 +27,7 @@ export async function updateAgentTags(
   tagsToAdd: string[],
   tagsToRemove: string[]
 ): Promise<{ actionId: string }> {
+  const currentNameSpace = getCurrentNamespace(soClient);
   const outgoingErrors: Record<Agent['id'], Error> = {};
   const givenAgents: Agent[] = [];
 
@@ -33,14 +38,19 @@ export async function updateAgentTags(
         outgoingErrors[maybeAgent.id] = new AgentReassignmentError(
           `Cannot find agent ${maybeAgent.id}`
         );
+      } else if ((await isAgentInNamespace(maybeAgent, currentNameSpace)) !== true) {
+        outgoingErrors[maybeAgent.id] = new AgentReassignmentError(
+          `Agent ${maybeAgent.id} is not in the current space`
+        );
       } else {
         givenAgents.push(maybeAgent);
       }
     }
   } else if ('kuery' in options) {
     const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
+    const namespaceFilter = await agentsKueryNamespaceFilter(currentNameSpace);
 
-    const filters = [];
+    const filters = namespaceFilter ? [namespaceFilter] : [];
     if (options.kuery !== '') {
       filters.push(options.kuery);
     }
@@ -76,8 +86,15 @@ export async function updateAgentTags(
     ).runActionAsyncWithRetry();
   }
 
-  return await updateTagsBatch(soClient, esClient, givenAgents, outgoingErrors, {
-    tagsToAdd,
-    tagsToRemove,
-  });
+  return await updateTagsBatch(
+    soClient,
+    esClient,
+    givenAgents,
+    outgoingErrors,
+    {
+      tagsToAdd,
+      tagsToRemove,
+    },
+    currentNameSpace
+  );
 }

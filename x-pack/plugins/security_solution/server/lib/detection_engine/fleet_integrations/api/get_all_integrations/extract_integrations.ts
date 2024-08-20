@@ -26,29 +26,36 @@ export function extractIntegrations(
     const packagePolicyTemplates = fleetPackage.policy_templates ?? [];
 
     for (const policyTemplate of packagePolicyTemplates) {
-      const integrationId = getIntegrationId(packageName, policyTemplate.name);
       const integrationName = policyTemplate.name;
-      const integrationTitle =
-        packagePolicyTemplates.length === 1 && policyTemplate.name === fleetPackage.name
-          ? packageTitle
-          : `${packageTitle} ${capitalize(policyTemplate.title)}`;
 
-      const integration: Integration = {
-        package_name: packageName,
-        package_title: packageTitle,
-        latest_package_version: fleetPackage.version,
-        installed_package_version: installedPackageVersion,
-        integration_name: packageName !== integrationName ? integrationName : undefined,
-        integration_title: packageName !== integrationName ? integrationTitle : undefined,
-        is_installed: isPackageInstalled, // All integrations installed as a part of the package
-        is_enabled: enabledIntegrationsSet.has(integrationId),
-      };
+      if (integrationName !== packageName) {
+        const integrationId = getIntegrationId(packageName, integrationName);
+        const integrationTitle = `${packageTitle} ${capitalize(policyTemplate.title)}`;
+        const integration: Integration = {
+          package_name: packageName,
+          package_title: packageTitle,
+          latest_package_version: fleetPackage.version,
+          installed_package_version: installedPackageVersion,
+          integration_name: integrationName,
+          integration_title: integrationTitle,
+          is_installed: isPackageInstalled, // All integrations installed as a part of the package
+          is_enabled: enabledIntegrationsSet.has(integrationId),
+        };
 
-      result.push(integration);
+        result.push(integration);
+      }
     }
 
-    // some packages don't have policy templates at al, e.g. Lateral Movement Detection
-    if (packagePolicyTemplates.length === 0) {
+    // There are two edge cases here
+    //
+    // - (1) Some prebuilt rules don't use integration name when there is just
+    //   one integration per package, e.g. "Web Application Suspicious Activity:
+    //   Unauthorized Method" refers "apm" package name while apm package has
+    //   "apmserver" integration
+    //
+    // - (2) Some packages don't have policy templates at all,
+    //   e.g. "Lateral Movement Detection"
+    if (packagePolicyTemplates.length <= 1) {
       result.push({
         package_name: packageName,
         package_title: packageTitle,

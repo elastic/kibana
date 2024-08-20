@@ -23,10 +23,10 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('search', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     before(async () => {
       // TODO: emptyKibanaIndex fails in Serverless with

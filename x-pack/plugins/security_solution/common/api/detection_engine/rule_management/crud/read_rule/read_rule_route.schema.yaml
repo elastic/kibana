@@ -8,7 +8,8 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: ReadRule
-      description: Read a single rule
+      summary: Retrieve a detection rule
+      description: Retrieve a detection rule using the `rule_id` or `id` field.
       tags:
         - Rules API
       parameters:

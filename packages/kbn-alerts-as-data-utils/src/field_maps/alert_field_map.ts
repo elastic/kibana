@@ -44,6 +44,7 @@ import {
   VERSION,
   EVENT_ACTION,
   EVENT_KIND,
+  EVENT_ORIGINAL,
   TAGS,
 } from '@kbn/rule-data-utils';
 import { MultiField } from './types';
@@ -224,11 +225,19 @@ export const alertFieldMap = {
     type: 'keyword',
     array: false,
     required: false,
+    ignore_above: 1024,
   },
   [EVENT_KIND]: {
     type: 'keyword',
     array: false,
     required: false,
+    ignore_above: 1024,
+  },
+  [EVENT_ORIGINAL]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+    ignore_above: 1024,
   },
   [SPACE_IDS]: {
     type: 'keyword',

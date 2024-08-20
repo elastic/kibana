@@ -6,26 +6,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-logging-browser-mocks",
-        "id": "def-common.loggingSystemMock",
+        "id": "def-public.loggingSystemMock",
         "type": "Object",
         "tags": [],
         "label": "loggingSystemMock",
@@ -36,7 +20,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-browser-mocks",
-            "id": "def-common.loggingSystemMock.create",
+            "id": "def-public.loggingSystemMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -54,7 +38,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-browser-mocks",
-            "id": "def-common.loggingSystemMock.createLogger",
+            "id": "def-public.loggingSystemMock.createLogger",
             "type": "Function",
             "tags": [],
             "label": "createLogger",
@@ -76,7 +60,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-logging-browser-mocks",
-                "id": "def-common.loggingSystemMock.createLogger.$1",
+                "id": "def-public.loggingSystemMock.createLogger.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "context",
@@ -94,5 +78,21 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

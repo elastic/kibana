@@ -1,7 +1,7 @@
 get:
   summary: Get one decrypted uninstall token by its ID
   tags:
-    - Uninstall tokens
+    - Fleet uninstall tokens
   responses:
     '200':
       description: OK

@@ -33,7 +33,7 @@ type UserActionActionTypeKeys = keyof typeof UserActionTypes;
  * This defines the type of the user action, meaning what individual action was taken, for example changing the status,
  * adding an assignee etc.
  */
-export type UserActionType = typeof UserActionTypes[UserActionActionTypeKeys];
+export type UserActionType = (typeof UserActionTypes)[UserActionActionTypeKeys];
 
 export const UserActionActions = {
   add: 'add',

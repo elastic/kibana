@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { useSearchSessionContext } from '../../../../../hooks/use_search_session';
 import { HostKpiCharts } from '../../../../../components/asset_details';
 import { buildCombinedAssetFilter } from '../../../../../utils/filters/build';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
@@ -16,8 +17,9 @@ import { useMetricsDataViewContext } from '../../../../../containers/metrics_sou
 
 export const KpiCharts = () => {
   const { searchCriteria } = useUnifiedSearchContext();
-  const { hostNodes, loading: hostsLoading, searchSessionId } = useHostsViewContext();
-  const { isRequestRunning: hostCountLoading, data: hostCountData } = useHostCountContext();
+  const { searchSessionId } = useSearchSessionContext();
+  const { hostNodes, loading: hostsLoading } = useHostsViewContext();
+  const { loading: hostCountLoading, count: hostCount } = useHostCountContext();
   const { metricsView } = useMetricsDataViewContext();
 
   const shouldUseSearchCriteria = hostNodes.length === 0;
@@ -35,7 +37,7 @@ export const KpiCharts = () => {
 
   const getSubtitle = (formulaValue: string) => {
     if (formulaValue.startsWith('max')) {
-      return searchCriteria.limit < (hostCountData?.count.value ?? 0)
+      return searchCriteria.limit < hostCount
         ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.max.limit', {
             defaultMessage: 'Max (of {limit} hosts)',
             values: {
@@ -46,7 +48,7 @@ export const KpiCharts = () => {
             defaultMessage: 'Max',
           });
     }
-    return searchCriteria.limit < (hostCountData?.count.value ?? 0)
+    return searchCriteria.limit < hostCount
       ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average.limit', {
           defaultMessage: 'Average (of {limit} hosts)',
           values: {

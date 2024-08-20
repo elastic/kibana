@@ -18,11 +18,12 @@ import {
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FLYOUT_TOUR_CONFIG_ANCHORS } from '../../shared/utils/tour_step_config';
-import { useIsTimelineFlyoutOpen } from '../../shared/hooks/use_is_timeline_flyout_open';
 import { FLYOUT_TOUR_TEST_ID } from '../../shared/components/test_ids';
+import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
+import { Flyouts } from '../../shared/constants/flyouts';
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../shared/hooks/use_is_timeline_flyout_open');
+jest.mock('../../shared/hooks/use_which_flyout');
 
 const mockedUseKibana = mockUseKibana();
 
@@ -52,7 +53,7 @@ describe('<LeftPanelTour />', () => {
         storage: storageMock,
       },
     });
-    (useIsTimelineFlyoutOpen as jest.Mock).mockReturnValue(false);
+    (useWhichFlyout as jest.Mock).mockReturnValue(Flyouts.securitySolution);
 
     storageMock.clear();
   });
@@ -105,7 +106,7 @@ describe('<LeftPanelTour />', () => {
   });
 
   it('should not render left panel tour for flyout in timeline', () => {
-    (useIsTimelineFlyoutOpen as jest.Mock).mockReturnValue(true);
+    (useWhichFlyout as jest.Mock).mockReturnValue(Flyouts.timeline);
     storageMock.set('securitySolution.documentDetails.newFeaturesTour.v8.14', {
       currentTourStep: 3,
       isTourActive: true,

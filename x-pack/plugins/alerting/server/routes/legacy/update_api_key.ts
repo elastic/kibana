@@ -30,6 +30,11 @@ export const updateApiKeyRoute = (
       validate: {
         params: paramSchema,
       },
+      options: {
+        summary: 'Update the API key for an alert',
+        tags: ['oas-tag:alerting'],
+        deprecated: true,
+      },
     },
     handleDisabledApiKeysError(
       router.handleLegacyErrors(async function (context, req, res) {
@@ -41,7 +46,7 @@ export const updateApiKeyRoute = (
         const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
         try {
-          await rulesClient.updateApiKey({ id });
+          await rulesClient.updateRuleApiKey({ id });
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleTypeDisabledError) {

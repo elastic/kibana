@@ -27,7 +27,9 @@ properties:
       namespaces:
         $ref: 'namespaces.yaml'
       runtimeFieldMap:
-        $ref: 'runtimefieldmap.yaml'
+        type: object
+        additionalProperties:
+          $ref: 'runtimefieldmap.yaml'
       sourceFilters:
         $ref: 'sourcefilters.yaml'
       timeFieldName:

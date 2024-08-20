@@ -182,15 +182,12 @@ export function Header({
                   onIsLockedUpdate={onIsLockedUpdate}
                   closeNav={() => {
                     setIsNavOpen(false);
-                    if (toggleCollapsibleNavRef.current) {
-                      toggleCollapsibleNavRef.current.focus();
-                    }
                   }}
                   customNavLink$={observables.customNavLink$}
                   button={
                     <HeaderMenuButton
                       data-test-subj="toggleNavButton"
-                      aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
+                      aria-label={i18n.translate('core.ui.primaryNav.header.toggleNavAriaLabel', {
                         defaultMessage: 'Toggle primary navigation',
                       })}
                       onClick={() => setIsNavOpen(!isNavOpen)}

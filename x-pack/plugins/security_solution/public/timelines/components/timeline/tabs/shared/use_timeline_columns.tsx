@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import { useMemo } from 'react';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
@@ -28,10 +27,7 @@ export const useTimelineColumns = (columns: ColumnHeaderOptions[]) => {
     [unifiedComponentsInTimelineDisabled]
   );
 
-  const localColumns = useMemo(
-    () => (isEmpty(columns) ? defaultColumns : columns),
-    [columns, defaultColumns]
-  );
+  const localColumns = useMemo(() => columns ?? defaultColumns, [columns, defaultColumns]);
 
   const augmentedColumnHeaders = memoizedGetTimelineColumnHeaders(
     localColumns,

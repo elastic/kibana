@@ -12,6 +12,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IndexManagementPluginSetup } from '@kbn/index-management';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import {
   updateESQLQueryTrigger,
   UpdateESQLQueryAction,
@@ -24,6 +25,7 @@ interface EsqlPluginStart {
   expressions: ExpressionsStart;
   uiActions: UiActionsStart;
   data: DataPublicPluginStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 interface EsqlPluginSetup {
@@ -44,11 +46,11 @@ export class EsqlPlugin implements Plugin<{}, void> {
 
   public start(
     core: CoreStart,
-    { dataViews, expressions, data, uiActions }: EsqlPluginStart
+    { dataViews, expressions, data, uiActions, fieldsMetadata }: EsqlPluginStart
   ): void {
     const appendESQLAction = new UpdateESQLQueryAction(data);
     uiActions.addTriggerAction(UPDATE_ESQL_QUERY_TRIGGER, appendESQLAction);
-    setKibanaServices(core, dataViews, expressions, this.indexManagement);
+    setKibanaServices(core, dataViews, expressions, this.indexManagement, fieldsMetadata);
   }
 
   public stop() {}

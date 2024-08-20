@@ -28,7 +28,12 @@ const defaultPageSize = 25;
 describe(
   'Timeline Pagination',
   {
-    tags: ['@ess', '@serverless'],
+    /*
+     * Tests with feature flag should not be enabled on serverless mki
+     * so skipping it. When you remove the feature flag, remove the
+     * skipInServerlessMKI tag as well.
+     * */
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         kbnServerArgs: [

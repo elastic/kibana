@@ -34,7 +34,7 @@ export type EnrollmentSettingsFleetServerPolicy = Pick<
   | 'has_fleet_server'
   | 'fleet_server_host_id'
   | 'download_source_id'
-  | 'space_id'
+  | 'space_ids'
 >;
 
 export interface GetEnrollmentSettingsResponse {
@@ -45,4 +45,15 @@ export interface GetEnrollmentSettingsResponse {
     host_proxy?: FleetProxy;
   };
   download_source?: DownloadSource;
+}
+export interface PutSpaceSettingsRequest {
+  body: {
+    allowed_namespace_prefixes?: string[];
+  };
+}
+
+export interface GetSpaceSettingsResponse {
+  item: {
+    allowed_namespace_prefixes?: string[];
+  };
 }

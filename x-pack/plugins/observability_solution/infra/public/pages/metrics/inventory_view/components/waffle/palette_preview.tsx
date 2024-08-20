@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import type { InventoryColorPalette } from '../../../../../lib/lib';
+import type { InventoryColorPalette } from '../../../../../common/inventory/types';
 import { getColorPalette } from '../../lib/get_color_palette';
 
 interface Props {

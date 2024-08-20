@@ -16,7 +16,7 @@ import {
   deleteEntityAction,
   ReducerStreamApiAction,
 } from '../../common/api/reducer_stream/reducer_actions';
-import { reducerStreamRequestBodySchema } from '../../common/api/reducer_stream';
+import { reducerStreamRequestBodySchema } from './schemas/reducer_stream';
 import { RESPONSE_STREAM_API_ENDPOINT } from '../../common/api';
 
 import { entities, getActions } from './shared';

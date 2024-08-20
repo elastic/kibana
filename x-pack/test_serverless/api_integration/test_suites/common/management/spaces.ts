@@ -20,13 +20,13 @@ export default function ({ getService }: FtrProviderContext) {
   describe('spaces', function () {
     before(async () => {
       // admin is the only predefined role that will work for all 3 solutions
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       commonRequestHeader = svlCommonApi.getCommonRequestHeader();
       internalRequestHeader = svlCommonApi.getInternalRequestHeader();
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('route access', () => {
@@ -39,7 +39,9 @@ export default function ({ getService }: FtrProviderContext) {
         svlCommonApi.assertResponseStatusCode(400, status, body);
       });
 
-      it('#create', async () => {
+      // Skipped due to change in QA environment for role management and spaces
+      // TODO: revisit once the change is rolled out to all environments
+      it.skip('#create', async () => {
         const { body, status } = await supertestWithoutAuth
           .post('/api/spaces/space')
           .set(internalRequestHeader)

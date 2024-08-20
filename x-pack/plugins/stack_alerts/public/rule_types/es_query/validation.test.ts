@@ -419,4 +419,25 @@ describe('expression params validation', () => {
       'Cannot select more than 5 fields'
     );
   });
+
+  test('if groupBy is defined and size is greater than max allowed, should return proper errror message', () => {
+    const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
+      index: ['test'],
+      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 101,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [0],
+      timeField: '',
+      excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'top',
+      termSize: 5,
+      termField: ['term'],
+    };
+    expect(validateExpression(initialParams).errors.size.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.size[0]).toBe(
+      'Size cannot exceed 100 when using a group by field.'
+    );
+  });
 });

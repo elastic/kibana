@@ -15,6 +15,7 @@ export const createShrinkActions = (testBed: TestBed, phase: Phase) => {
   const toggleShrinkSelector = `${phase}-shrinkSwitch`;
   const shrinkSizeSelector = `${phase}-primaryShardSize`;
   const shrinkCountSelector = `${phase}-primaryShardCount`;
+  const allowWritesToggleSelector = `${phase}-allowWriteAfterShrink`;
 
   const changeShrinkRadioButton = async (selector: string) => {
     await act(async () => {
@@ -41,6 +42,12 @@ export const createShrinkActions = (testBed: TestBed, phase: Phase) => {
         await changeShrinkRadioButton(`${phase}-configureShardSize`);
       }
       await createFormSetValueAction(testBed, shrinkSizeSelector)(value);
+    },
+    toggleAllowWriteAfterShrink: async () => {
+      if (!exists(allowWritesToggleSelector)) {
+        await form.toggleEuiSwitch(toggleShrinkSelector);
+      }
+      await form.toggleEuiSwitch(allowWritesToggleSelector);
     },
   };
 };

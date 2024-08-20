@@ -10,7 +10,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 
 import { DeleteTimelineModalOverlay } from '.';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import * as i18n from '../translations';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
@@ -42,7 +42,7 @@ describe('DeleteTimelineModal', () => {
   };
 
   beforeAll(() => {
-    (useParams as jest.Mock).mockReturnValue({ tabName: TimelineType.default });
+    (useParams as jest.Mock).mockReturnValue({ tabName: TimelineTypeEnum.default });
   });
 
   describe('showModalState', () => {
@@ -78,7 +78,7 @@ describe('DeleteTimelineModal', () => {
     });
 
     test('it shows correct toast message on success for deleted templates', async () => {
-      (useParams as jest.Mock).mockReturnValue({ tabName: TimelineType.template });
+      (useParams as jest.Mock).mockReturnValue({ tabName: TimelineTypeEnum.template });
 
       const wrapper = mountWithIntl(<DeleteTimelineModalOverlay {...defaultProps} />);
       wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');

@@ -17,10 +17,12 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
-import { getEvaluationValues, getThreshold } from './lib/get_values';
+import { getEcsGroups } from '@kbn/observability-alerting-rule-utils';
+import { getEsQueryConfig } from '../../../utils/get_es_query_config';
 import { AlertsLocatorParams, getAlertDetailsUrl } from '../../../../common';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
 import { ObservabilityConfig } from '../../..';
+import { getEvaluationValues, getThreshold } from './lib/get_values';
 import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, UNGROUPED_FACTORY_KEY } from './constants';
 import {
   AlertStates,
@@ -45,7 +47,6 @@ import {
 import { formatAlertResult, getLabel } from './lib/format_alert_result';
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
 import { MissingGroupsRecord } from './lib/check_missing_group';
-import { Group } from '../../../../common/typings';
 
 export interface CustomThresholdLocators {
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;
@@ -94,7 +95,8 @@ export const createCustomThresholdExecutor = ({
       executionId,
     });
 
-    const { searchSourceClient, alertsClient } = services;
+    const { alertsClient, uiSettingsClient } = services;
+    const searchSourceClient = await services.getSearchSourceClient();
 
     if (!alertsClient) {
       throw new AlertsClientError();
@@ -134,6 +136,7 @@ export const createCustomThresholdExecutor = ({
 
     // Calculate initial start and end date with no time window, as each criterion has its own time window
     const { dateStart, dateEnd } = getTimeRange();
+    const esQueryConfig = await getEsQueryConfig(uiSettingsClient);
     const alertResults = await evaluateRule(
       services.scopedClusterClient.asCurrentUser,
       params as EvaluatedRuleParams,
@@ -143,6 +146,7 @@ export const createCustomThresholdExecutor = ({
       alertOnGroupDisappear,
       logger,
       { end: dateEnd, start: dateStart },
+      esQueryConfig,
       state.lastRunTimestamp,
       previousMissingGroups
     );
@@ -242,7 +246,7 @@ export const createCustomThresholdExecutor = ({
           new Set([...(additionalContext.tags ?? []), ...options.rule.tags])
         );
 
-        const groups: Group[] = groupByKeysObjectMapping[group];
+        const groups = groupByKeysObjectMapping[group];
 
         const { uuid, start } = alertsClient.report({
           id: `${group}`,
@@ -253,6 +257,7 @@ export const createCustomThresholdExecutor = ({
             [ALERT_EVALUATION_THRESHOLD]: threshold,
             [ALERT_GROUP]: groups,
             ...flattenAdditionalContext(additionalContext),
+            ...getEcsGroups(groups),
           },
         });
 

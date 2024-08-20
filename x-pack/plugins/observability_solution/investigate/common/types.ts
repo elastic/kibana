@@ -5,39 +5,30 @@
  * 2.0.
  */
 
-import type { EuiThemeComputed } from '@elastic/eui';
-import type { Filter } from '@kbn/es-query';
-import type { DeepPartial, PickByValue } from 'utility-types';
-
-export interface InvestigateUser {
-  name: string;
-}
+import type { AuthenticatedUser } from '@kbn/core/public';
+import type { DeepPartial } from 'utility-types';
 
 export interface GlobalWidgetParameters {
   timeRange: {
     from: string;
     to: string;
   };
-  query: {
-    query: string;
-    language: 'kuery';
-  };
-  filters: Filter[];
 }
 
-export enum InvestigateWidgetColumnSpan {
-  One = 1,
-  Two = 2,
-  Three = 3,
-  Four = 4,
-}
-
-export interface InvestigateTimeline {
+export interface Investigation {
   id: string;
+  createdAt: number;
   title: string;
-  '@timestamp': number;
-  user: InvestigateUser;
   items: InvestigateWidget[];
+  notes: InvestigationNote[];
+  parameters: GlobalWidgetParameters;
+}
+
+export interface InvestigationNote {
+  id: string;
+  createdAt: number;
+  createdBy: string;
+  content: string;
 }
 
 export interface InvestigateWidget<
@@ -48,29 +39,15 @@ export interface InvestigateWidget<
   created: number;
   last_updated: number;
   type: string;
-  user: InvestigateUser;
+  user: AuthenticatedUser;
   parameters: GlobalWidgetParameters & TParameters;
   data: TData;
   title: string;
-  description?: string;
-  columns: InvestigateWidgetColumnSpan;
-  rows: number;
-  locked: boolean;
 }
 
 export type InvestigateWidgetCreate<TParameters extends Record<string, any> = {}> = Pick<
   InvestigateWidget,
-  'title' | 'description' | 'columns' | 'rows' | 'type' | 'locked'
+  'title' | 'type'
 > & {
   parameters: DeepPartial<GlobalWidgetParameters> & TParameters;
 };
-
-export interface WorkflowBlock {
-  id: string;
-  content?: string;
-  description?: string;
-  loading: boolean;
-  onClick?: () => void;
-  color?: keyof PickByValue<EuiThemeComputed<{}>['colors'], string>;
-  children?: React.ReactNode;
-}

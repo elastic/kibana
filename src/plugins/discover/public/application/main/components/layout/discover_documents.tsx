@@ -27,6 +27,7 @@ import {
   type DataTableColumnsMeta,
   getTextBasedColumnsMeta,
   getRenderCustomToolbarWithElements,
+  type DataGridDensity,
 } from '@kbn/unified-data-table';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -110,19 +111,29 @@ function DiscoverDocumentsComponent({
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
   const { dataViews, capabilities, uiSettings, uiActions } = services;
-  const [query, sort, rowHeight, headerRowHeight, rowsPerPage, grid, columns, sampleSizeState] =
-    useAppStateSelector((state) => {
-      return [
-        state.query,
-        state.sort,
-        state.rowHeight,
-        state.headerRowHeight,
-        state.rowsPerPage,
-        state.grid,
-        state.columns,
-        state.sampleSize,
-      ];
-    });
+  const [
+    query,
+    sort,
+    rowHeight,
+    headerRowHeight,
+    rowsPerPage,
+    grid,
+    columns,
+    sampleSizeState,
+    density,
+  ] = useAppStateSelector((state) => {
+    return [
+      state.query,
+      state.sort,
+      state.rowHeight,
+      state.headerRowHeight,
+      state.rowsPerPage,
+      state.grid,
+      state.columns,
+      state.sampleSize,
+      state.density,
+    ];
+  });
   const expandedDoc = useInternalStateSelector((state) => state.expandedDoc);
   const isEsqlMode = useIsEsqlMode();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
@@ -219,6 +230,13 @@ function DiscoverDocumentsComponent({
     [stateContainer]
   );
 
+  const onUpdateDensity = useCallback(
+    (newDensity: DataGridDensity) => {
+      stateContainer.appState.update({ density: newDensity });
+    },
+    [stateContainer]
+  );
+
   // should be aligned with embeddable `showTimeCol` prop
   const showTimeCol = useMemo(
     () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
@@ -259,7 +277,7 @@ function DiscoverDocumentsComponent({
     [dataView, onAddColumn, onAddFilter, onRemoveColumn, query, savedSearch.id, setExpandedDoc]
   );
 
-  const { customControlColumnsConfiguration } = useDiscoverCustomization('data_table') || {};
+  const { rowAdditionalLeadingControls } = useDiscoverCustomization('data_table') || {};
   const { customCellRenderer, customGridColumnsConfiguration } =
     useContextualGridCustomisations() || {};
   const additionalFieldGroups = useAdditionalFieldGroups();
@@ -417,6 +435,7 @@ function DiscoverDocumentsComponent({
                 onUpdateRowHeight={onUpdateRowHeight}
                 isSortEnabled={true}
                 isPlainRecord={isEsqlMode}
+                isPaginationEnabled={!isEsqlMode}
                 rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
                 onUpdateRowsPerPage={onUpdateRowsPerPage}
                 maxAllowedSampleSize={getMaxAllowedSampleSize(services.uiSettings)}
@@ -434,8 +453,10 @@ function DiscoverDocumentsComponent({
                 componentsTourSteps={TOUR_STEPS}
                 externalCustomRenderers={cellRenderers}
                 customGridColumnsConfiguration={customGridColumnsConfiguration}
-                customControlColumnsConfiguration={customControlColumnsConfiguration}
+                rowAdditionalLeadingControls={rowAdditionalLeadingControls}
                 additionalFieldGroups={additionalFieldGroups}
+                dataGridDensityState={density}
+                onUpdateDataGridDensity={onUpdateDensity}
               />
             </CellActionsProvider>
           </div>

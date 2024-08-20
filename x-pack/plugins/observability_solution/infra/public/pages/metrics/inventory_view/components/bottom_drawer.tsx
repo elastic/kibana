@@ -14,7 +14,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { TryItButton } from '../../../../components/try_it_button';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
-import { InfraFormatter } from '../../../../lib/lib';
+import { InfraFormatter } from '../../../../common/inventory/types';
 import { Timeline } from './timeline/timeline';
 
 const showHistory = i18n.translate('xpack.infra.showHistory', {

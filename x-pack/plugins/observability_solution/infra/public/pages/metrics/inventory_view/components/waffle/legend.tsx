@@ -15,7 +15,7 @@ import {
   SteppedGradientLegendRT,
   StepLegendRT,
   GradientLegendRT,
-} from '../../../../../lib/lib';
+} from '../../../../../common/inventory/types';
 import { GradientLegend } from './gradient_legend';
 import { StepLegend } from './steps_legend';
 import { SteppedGradientLegend } from './stepped_gradient_legend';

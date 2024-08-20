@@ -33,4 +33,4 @@ export class Mode extends JSONMode {
   };
 
   this.$id = 'sense/mode/input';
-}.call(Mode.prototype));
+}).call(Mode.prototype);

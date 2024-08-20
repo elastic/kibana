@@ -42,9 +42,6 @@ export interface CasesTimelineIntegration {
       onChange: (newValue: string) => void
     ) => UseInsertTimelineReturn;
   };
-  ui?: {
-    renderTimelineDetailsPanel?: () => JSX.Element;
-  };
 }
 
 // This context is available to all children of the stateful_event component where the provider is currently set

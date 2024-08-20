@@ -7,11 +7,7 @@
 Sets external connection details, such as the closure type and
 default connector for cases.
 
-[NOTE]
-====
-For the most up-to-date API details, refer to the
-{kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[open API specification].
-====
+NOTE: For the latest details, refer to {api-kibana}/group/endpoint-cases[cases APIs].
 
 === {api-request-title}
 
@@ -29,7 +25,7 @@ You must have `all` privileges for the *Cases* feature in the *Management*,
 === {api-description-title}
 
 Connectors are used to interface with external systems. You must create a
-connector before you can use it in your cases. Refer to <<add-case-connectors>>.
+connector before you can use it in your cases. Refer to <<case-connectors>>.
 
 If you set a default connector, it is automatically selected when you create
 cases in {kib}. If you use the <<cases-api-create,create case API>>, however,

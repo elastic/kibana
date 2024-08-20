@@ -32,7 +32,7 @@ import {
   type InfraWaffleMapBounds,
   type InventoryColorPalette,
   PALETTES,
-} from '../../../../../lib/lib';
+} from '../../../../../common/inventory/types';
 import { getColorPalette } from '../../lib/get_color_palette';
 import { convertBoundsToPercents } from '../../lib/convert_bounds_to_percents';
 import { SwatchLabel } from './swatch_label';
@@ -180,7 +180,7 @@ export const LegendControls = ({
   );
   const errors = !boundsValidRange
     ? [
-        i18n.translate('xpack.infra.legnedControls.boundRangeError', {
+        i18n.translate('xpack.infra.legendControls.boundRangeError', {
           defaultMessage: 'Minimum must be smaller than the maximum',
         }),
       ]
@@ -194,9 +194,12 @@ export const LegendControls = ({
       button={buttonComponent}
       anchorPosition="leftCenter"
       data-test-subj="legendControls"
-      // panelStyle={{ width: '100%', maxWidth: 375 }}
     >
-      <EuiPopoverTitle>Legend Options</EuiPopoverTitle>
+      <EuiPopoverTitle>
+        {i18n.translate('xpack.infra.legendControls.legendOptionsPopoverTitleLabel', {
+          defaultMessage: 'Legend Options',
+        })}
+      </EuiPopoverTitle>
       <StyledEuiForm>
         <EuiFormRow
           display="columnCompressed"
@@ -248,7 +251,9 @@ export const LegendControls = ({
           <EuiSwitch
             showLabel={false}
             name="reverseColors"
-            label="reverseColors"
+            label={i18n.translate('xpack.infra.legendControls.euiSwitch.reversecolorsLabel', {
+              defaultMessage: 'reverseColors',
+            })}
             checked={draftLegend.reverseColors}
             onChange={handleReverseColors}
             compressed
@@ -268,7 +273,9 @@ export const LegendControls = ({
           <EuiSwitch
             showLabel={false}
             name="bounds"
-            label="bounds"
+            label={i18n.translate('xpack.infra.legendControls.euiSwitch.boundsLabel', {
+              defaultMessage: 'bounds',
+            })}
             checked={draftAuto}
             onChange={handleAutoChange}
             compressed

@@ -21,11 +21,11 @@ const components = [
   { name: `${MONGODB}_${ECS_VERSION}_base`, template: base },
   { name: `${MONGODB}_${ECS_VERSION}_log`, template: log },
   { name: `${MONGODB}_${ECS_VERSION}_host`, template: host },
-  { name: `${MONGODB}_${ECS_VERSION}_host`, template: mongodb },
+  { name: `${MONGODB}_${ECS_VERSION}_mongodb`, template: mongodb },
 ];
 
 export const indexTemplate: IndexTemplateDef = {
-  namespace: MONGODB,
+  name: `logs-${MONGODB}@template`,
   template: { ...template, composed_of: components.map(({ name }) => name) },
   components,
 };

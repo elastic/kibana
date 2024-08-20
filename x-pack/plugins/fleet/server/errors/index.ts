@@ -51,6 +51,12 @@ export class AgentPolicyError extends FleetError {}
 export class AgentRequestInvalidError extends FleetError {}
 export class AgentPolicyInvalidError extends FleetError {}
 
+export class AgentlessAgentCreateError extends FleetError {
+  constructor(message: string) {
+    super(`Error creating agentless agent in Fleet, ${message}`);
+  }
+}
+
 export class AgentPolicyNameExistsError extends AgentPolicyError {}
 export class AgentReassignmentError extends FleetError {}
 export class PackagePolicyIneligibleForUpgradeError extends FleetError {}
@@ -59,6 +65,8 @@ export class PackagePolicyNameExistsError extends FleetError {}
 export class BundledPackageLocationNotFoundError extends FleetError {}
 
 export class PackagePolicyRequestError extends FleetError {}
+export class PackagePolicyMultipleAgentPoliciesError extends FleetError {}
+export class PackagePolicyOutputError extends FleetError {}
 
 export class EnrollmentKeyNameExistsError extends FleetError {}
 export class HostedAgentPolicyRestrictionRelatedError extends FleetError {

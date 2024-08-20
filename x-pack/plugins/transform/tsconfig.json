@@ -41,7 +41,6 @@
     "@kbn/es-query",
     "@kbn/ml-agg-utils",
     "@kbn/ml-string-hash",
-    "@kbn/ui-theme",
     "@kbn/field-types",
     "@kbn/ml-nested-property",
     "@kbn/ml-is-defined",

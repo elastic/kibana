@@ -36,7 +36,7 @@ export const OsqueryQuery = z.object({
    */
   id: z.string(),
   /**
-   * Query to execute
+   * Query to run
    */
   query: z.string(),
   ecs_mapping: EcsMapping.optional(),

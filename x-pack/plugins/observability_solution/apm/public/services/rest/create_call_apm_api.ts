@@ -12,7 +12,7 @@ import type {
   RouteRepositoryClient,
   ServerRouteRepository,
 } from '@kbn/server-route-repository';
-import { formatRequest } from '@kbn/server-route-repository';
+import { formatRequest } from '@kbn/server-route-repository-utils';
 import { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import { FetchOptions } from '../../../common/fetch_options';
 import { CallApi, callApi } from './call_api';

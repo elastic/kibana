@@ -27,6 +27,7 @@ import { CheckInEmptyCircle, PartialClock } from './custom_icons';
 import './search_session_indicator.scss';
 import { SearchSessionName } from './components';
 import { SearchSessionState } from '../../search_session_state';
+import { SearchSessionsDeprecatedWarning } from '../../search_sessions_deprecation_message';
 
 export interface SearchSessionIndicatorProps {
   state: SearchSessionState;
@@ -404,6 +405,9 @@ export const SearchSessionIndicator = React.forwardRef<
       }
     >
       <div data-test-subj="searchSessionIndicatorPopoverContainer">
+        <SearchSessionsDeprecatedWarning size="s" />
+        <EuiSpacer size="m" />
+
         {props.searchSessionName && props.saveSearchSessionNameFn ? (
           <SearchSessionName
             name={props.searchSessionName}

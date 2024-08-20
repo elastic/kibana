@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { useState, useCallback, useEffect, useReducer, useRef } from 'react';
-import { HttpHandler } from '@kbn/core/public';
+import { useState, useCallback, useEffect, useReducer } from 'react';
+import { BehaviorSubject } from 'rxjs';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { isFailure, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import {
   Sort,
   Pagination,
@@ -17,9 +19,6 @@ import {
   MetricsK8sAnomaly,
   Metric,
 } from '../../../../../common/http_api/infra_ml';
-import { useTrackedPromise } from '../../../../hooks/use_tracked_promise';
-import { decodeOrThrow } from '../../../../../common/runtime_types';
-import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 
 export type SortOptions = Sort;
 export type PaginationOptions = Pick<Pagination, 'pageSize'>;
@@ -134,27 +133,34 @@ const STATE_DEFAULTS: ReducerStateDefaults = {
   hasNextPage: false,
 };
 
-export const useMetricsK8sAnomaliesResults = ({
-  endTime,
-  startTime,
-  sourceId,
-  anomalyThreshold,
-  defaultSortOptions,
-  defaultPaginationOptions,
-  onGetMetricsHostsAnomaliesDatasetsError,
-  filteredDatasets,
-}: {
-  endTime: number;
-  startTime: number;
-  sourceId: string;
-  anomalyThreshold: number;
-  defaultSortOptions: Sort;
-  defaultPaginationOptions: Pick<Pagination, 'pageSize'>;
-  onGetMetricsHostsAnomaliesDatasetsError?: (error: Error) => void;
-  filteredDatasets?: string[];
-}) => {
-  const { services } = useKibanaContextForPlugin();
-  const abortController = useRef(new AbortController());
+export const useMetricsK8sAnomaliesResults = (
+  {
+    endTime,
+    startTime,
+    sourceId,
+    anomalyThreshold,
+    defaultSortOptions,
+    defaultPaginationOptions,
+    filteredDatasets,
+    search,
+    metric,
+  }: {
+    endTime: number;
+    startTime: number;
+    sourceId: string;
+    anomalyThreshold: number;
+    defaultSortOptions: Sort;
+    defaultPaginationOptions: Pick<Pagination, 'pageSize'>;
+    filteredDatasets?: string[];
+    search?: string;
+    metric?: Metric;
+  },
+  {
+    request$,
+    active = true,
+  }: { request$?: BehaviorSubject<(() => Promise<unknown>) | undefined>; active?: boolean }
+) => {
+  const [metricsK8sAnomalies, setMetricsK8sAnomalies] = useState<MetricsK8sAnomalies>([]);
   const initStateReducer = (stateDefaults: ReducerStateDefaults): ReducerState => {
     return {
       ...stateDefaults,
@@ -167,82 +173,83 @@ export const useMetricsK8sAnomaliesResults = ({
       },
     };
   };
-
   const [reducerState, dispatch] = useReducer(stateReducer, STATE_DEFAULTS, initStateReducer);
 
-  const [metricsK8sAnomalies, setMetricsK8sAnomalies] = useState<MetricsK8sAnomalies>([]);
-
-  useEffect(() => {
-    const current = abortController?.current;
-    return () => {
-      current.abort();
-    };
-  }, []);
-
-  const [getMetricsK8sAnomaliesRequest, getMetricsK8sAnomalies] = useTrackedPromise(
-    {
-      cancelPreviousOn: 'creation',
-      createPromise: async (metric?: Metric, query?: string) => {
-        const {
-          timeRange: { start: queryStartTime, end: queryEndTime },
-          sortOptions,
-          paginationOptions,
-          paginationCursor,
-        } = reducerState;
-
-        abortController.current.abort();
-
-        abortController.current = new AbortController();
-
-        return await callGetMetricsK8sAnomaliesAPI(
-          {
-            sourceId,
-            anomalyThreshold,
-            startTime: queryStartTime,
-            endTime: queryEndTime,
-            metric,
-            query,
-            sort: sortOptions,
-            pagination: {
-              ...paginationOptions,
-              cursor: paginationCursor,
+  const {
+    data: response,
+    status,
+    refetch,
+  } = useFetcher(
+    async (callApi) => {
+      const apiResponse = await callApi(INFA_ML_GET_METRICS_K8S_ANOMALIES_PATH, {
+        method: 'POST',
+        body: JSON.stringify(
+          getMetricsK8sAnomaliesRequestPayloadRT.encode({
+            data: {
+              sourceId,
+              anomalyThreshold,
+              timeRange: {
+                startTime: reducerState.timeRange.start,
+                endTime: reducerState.timeRange.end,
+              },
+              metric,
+              query: search,
+              sort: reducerState.sortOptions,
+              pagination: {
+                ...reducerState.paginationOptions,
+                cursor: reducerState.paginationCursor,
+              },
             },
-          },
-          services.http.fetch,
-          abortController.current.signal
-        );
-      },
-      onResolve: ({ data: { anomalies, paginationCursors: requestCursors, hasMoreEntries } }) => {
-        const { paginationCursor } = reducerState;
-        if (requestCursors) {
-          dispatch({
-            type: 'changeLastReceivedCursors',
-            payload: { lastReceivedCursors: requestCursors },
-          });
-        }
-        // Check if we have more "next" entries. "Page" covers the "previous" scenario,
-        // since we need to know the page we're on anyway.
-        if (!paginationCursor || (paginationCursor && 'searchAfter' in paginationCursor)) {
-          dispatch({ type: 'changeHasNextPage', payload: { hasNextPage: hasMoreEntries } });
-        } else if (paginationCursor && 'searchBefore' in paginationCursor) {
-          // We've requested a previous page, therefore there is a next page.
-          dispatch({ type: 'changeHasNextPage', payload: { hasNextPage: true } });
-        }
-        setMetricsK8sAnomalies(anomalies);
-      },
+          })
+        ),
+      });
+
+      return decodeOrThrow(getMetricsK8sAnomaliesSuccessReponsePayloadRT)(apiResponse);
     },
     [
-      sourceId,
       anomalyThreshold,
-      dispatch,
-      reducerState.timeRange.start,
-      reducerState.timeRange.end,
-      reducerState.sortOptions,
-      reducerState.paginationOptions,
+      metric,
       reducerState.paginationCursor,
-      reducerState.filteredDatasets,
-    ]
+      reducerState.paginationOptions,
+      reducerState.sortOptions,
+      reducerState.timeRange.end,
+      reducerState.timeRange.start,
+      search,
+      sourceId,
+    ],
+    {
+      requestObservable$: request$,
+      autoFetch: active,
+    }
   );
+
+  const { data } = response ?? {};
+
+  useEffect(() => {
+    if (isPending(status) || !data) {
+      return;
+    }
+
+    const { anomalies, paginationCursors: requestCursors, hasMoreEntries } = data;
+    if (requestCursors) {
+      dispatch({
+        type: 'changeLastReceivedCursors',
+        payload: { lastReceivedCursors: requestCursors },
+      });
+    }
+    // Check if we have more "next" entries. "Page" covers the "previous" scenario,
+    // since we need to know the page we're on anyway.
+    if (
+      !reducerState.paginationCursor ||
+      (reducerState.paginationCursor && 'searchAfter' in reducerState.paginationCursor)
+    ) {
+      dispatch({ type: 'changeHasNextPage', payload: { hasNextPage: hasMoreEntries } });
+    } else if (reducerState.paginationCursor && 'searchBefore' in reducerState.paginationCursor) {
+      // We've requested a previous page, therefore there is a next page.
+      dispatch({ type: 'changeHasNextPage', payload: { hasNextPage: true } });
+    }
+    setMetricsK8sAnomalies(anomalies);
+  }, [reducerState.paginationCursor, data, status]);
 
   const changeSortOptions = useCallback(
     (nextSortOptions: Sort) => {
@@ -289,15 +296,12 @@ export const useMetricsK8sAnomaliesResults = ({
     }
   }, [dispatch, reducerState]);
 
-  const isPendingMetricsK8sAnomalies =
-    getMetricsK8sAnomaliesRequest.state === 'pending' ||
-    getMetricsK8sAnomaliesRequest.state === 'uninitialized';
-
-  const hasFailedLoadingMetricsK8sAnomalies = getMetricsK8sAnomaliesRequest.state === 'rejected';
+  const isPendingMetricsK8sAnomalies = isPending(status);
+  const hasFailedLoadingMetricsK8sAnomalies = isFailure(status);
 
   return {
     metricsK8sAnomalies,
-    getMetricsK8sAnomalies,
+    getMetricsK8sAnomalies: refetch,
     isPendingMetricsK8sAnomalies,
     hasFailedLoadingMetricsK8sAnomalies,
     changeSortOptions,
@@ -308,46 +312,4 @@ export const useMetricsK8sAnomaliesResults = ({
     fetchNextPage: reducerState.hasNextPage ? handleFetchNextPage : undefined,
     page: reducerState.page,
   };
-};
-
-interface RequestArgs {
-  sourceId: string;
-  anomalyThreshold: number;
-  startTime: number;
-  endTime: number;
-  metric?: Metric;
-  query?: string;
-  sort: Sort;
-  pagination: Pagination;
-}
-
-export const callGetMetricsK8sAnomaliesAPI = async (
-  requestArgs: RequestArgs,
-  fetch: HttpHandler,
-  signal?: AbortSignal | null
-) => {
-  const { sourceId, anomalyThreshold, startTime, endTime, metric, query, sort, pagination } =
-    requestArgs;
-  const response = await fetch(INFA_ML_GET_METRICS_K8S_ANOMALIES_PATH, {
-    method: 'POST',
-    body: JSON.stringify(
-      getMetricsK8sAnomaliesRequestPayloadRT.encode({
-        data: {
-          sourceId,
-          anomalyThreshold,
-          timeRange: {
-            startTime,
-            endTime,
-          },
-          metric,
-          query,
-          sort,
-          pagination,
-        },
-      })
-    ),
-    signal,
-  });
-
-  return decodeOrThrow(getMetricsK8sAnomaliesSuccessReponsePayloadRT)(response);
 };

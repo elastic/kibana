@@ -83,9 +83,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     };
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
-      await svlCommonPage.loginWithRole('admin');
+      await svlCommonPage.loginWithPrivilegedRole();
       await svlObltNavigation.navigateToLandingPage();
       await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
       await testSubjects.click('manageRulesPageButton');
@@ -103,7 +103,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('should create an ES Query Rule and display it when consumer is observability', async () => {

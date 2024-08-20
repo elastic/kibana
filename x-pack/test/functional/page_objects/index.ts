@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pageObjects as kibanaFunctionalPageObjects } from '../../../../test/functional/page_objects';
+import { pageObjects as kibanaFunctionalPageObjects } from '@kbn/test-suites-src/functional/page_objects';
 
 import { AccountSettingsPageObject } from './account_settings_page';
 import { ApiKeysPageProvider } from './api_keys_page';

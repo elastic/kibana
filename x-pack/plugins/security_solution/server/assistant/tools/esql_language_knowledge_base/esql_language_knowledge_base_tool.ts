@@ -14,7 +14,7 @@ export type EsqlKnowledgeBaseToolParams = AssistantToolParams;
 
 const toolDetails = {
   description:
-    'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language. Input must always be the query on a single line, with no other text. Only output valid ES|QL queries as described above. Do not add any additional text to describe your output.',
+    'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language. Input must always be the query on a single line, with no other text. Your answer will be parsed as JSON, so never use quotes within the output and instead use backticks. Do not add any additional text to describe your output.',
   id: 'esql-knowledge-base-tool',
   name: 'ESQLKnowledgeBaseTool',
 };
@@ -47,6 +47,7 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
         return result.text;
       },
       tags: ['esql', 'query-generation', 'knowledge-base'],
-    });
+      // TODO: Remove after ZodAny is fixed https://github.com/langchain-ai/langchainjs/blob/main/langchain-core/src/tools.ts
+    }) as unknown as DynamicStructuredTool;
   },
 };

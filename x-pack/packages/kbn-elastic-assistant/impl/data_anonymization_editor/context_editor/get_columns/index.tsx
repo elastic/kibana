@@ -19,13 +19,15 @@ const AnonymizedButton = styled(EuiButtonEmpty)`
 `;
 
 export const getColumns = ({
+  compressed = true,
+  hasUpdateAIAssistantAnonymization,
   onListUpdated,
   rawData,
-  hasUpdateAIAssistantAnonymization,
 }: {
+  compressed?: boolean;
+  hasUpdateAIAssistantAnonymization: boolean;
   onListUpdated: (updates: BatchUpdateListItem[]) => void;
   rawData: Record<string, string[]> | null;
-  hasUpdateAIAssistantAnonymization: boolean;
 }): Array<EuiBasicTableColumn<ContextEditorRow>> => {
   const actionsColumn: EuiBasicTableColumn<ContextEditorRow> = {
     field: FIELDS.ACTIONS,
@@ -68,6 +70,7 @@ export const getColumns = ({
           disabled={!hasUpdateAIAssistantAnonymization}
           label=""
           showLabel={false}
+          compressed={compressed}
           onChange={() => {
             onListUpdated([
               {

@@ -21,10 +21,10 @@ import { allCasesPermissions, noCasesPermissions } from '@kbn/observability-shar
 import { noop } from 'lodash';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { waitFor } from '@testing-library/react';
-import { AlertsTableQueryContext } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/contexts/alerts_table_context';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 
 const refresh = jest.fn();
 const caseHooksReturnedValue = {
@@ -128,7 +128,7 @@ describe('ObservabilityActions component', () => {
 
     const wrapper = mountWithIntl(
       <Router history={createMemoryHistory()}>
-        <QueryClientProvider client={queryClient} context={AlertsTableQueryContext}>
+        <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
           <AlertActions {...props} />
         </QueryClientProvider>
       </Router>

@@ -6,7 +6,7 @@
  */
 
 import { isBoom } from '@hapi/boom';
-import { createValidationFunction } from '../../../common/runtime_types';
+import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import {
   metricsExplorerViewRequestParamsRT,
   metricsExplorerViewRequestQueryRT,
@@ -32,9 +32,9 @@ export const initUpdateMetricsExplorerViewRoute = ({
       method: 'put',
       path: METRICS_EXPLORER_VIEW_URL_ENTITY,
       validate: {
-        params: createValidationFunction(metricsExplorerViewRequestParamsRT),
-        query: createValidationFunction(metricsExplorerViewRequestQueryRT),
-        body: createValidationFunction(updateMetricsExplorerViewRequestPayloadRT),
+        params: createRouteValidationFunction(metricsExplorerViewRequestParamsRT),
+        query: createRouteValidationFunction(metricsExplorerViewRequestQueryRT),
+        body: createRouteValidationFunction(updateMetricsExplorerViewRequestPayloadRT),
       },
     },
     async (_requestContext, request, response) => {

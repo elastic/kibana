@@ -74,7 +74,7 @@ export class FieldFormatService {
   // Return the FieldFormat to use for formatting values from
   // the detector from the job with the specified ID.
   getFieldFormat(jobId: string, detectorIndex: number) {
-    if (this.formatsByJob.hasOwnProperty(jobId)) {
+    if (Object.hasOwn(this.formatsByJob, jobId)) {
       return this.formatsByJob[jobId][detectorIndex];
     }
   }

@@ -1,7 +1,64 @@
 {
   "id": "entityManager",
   "client": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "entityManager",
+        "id": "def-public.EntityManagerUnauthorizedError",
+        "type": "Class",
+        "tags": [],
+        "label": "EntityManagerUnauthorizedError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "entityManager",
+            "scope": "public",
+            "docId": "kibEntityManagerPluginApi",
+            "section": "def-public.EntityManagerUnauthorizedError",
+            "text": "EntityManagerUnauthorizedError"
+          },
+          " extends Error"
+        ],
+        "path": "x-pack/plugins/observability_solution/entity_manager/public/lib/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityManager",
+            "id": "def-public.EntityManagerUnauthorizedError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/observability_solution/entity_manager/public/lib/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "entityManager",
+                "id": "def-public.EntityManagerUnauthorizedError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/observability_solution/entity_manager/public/lib/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [],
     "interfaces": [
       {
@@ -147,21 +204,6 @@
         "description": [],
         "signature": [
           "\"partial_builtin_installation\""
-        ],
-        "path": "x-pack/plugins/observability_solution/entity_manager/common/errors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "entityManager",
-        "id": "def-public.ERROR_USER_NOT_AUTHORIZED",
-        "type": "string",
-        "tags": [],
-        "label": "ERROR_USER_NOT_AUTHORIZED",
-        "description": [],
-        "signature": [
-          "\"user_not_authorized\""
         ],
         "path": "x-pack/plugins/observability_solution/entity_manager/common/errors.ts",
         "deprecated": false,

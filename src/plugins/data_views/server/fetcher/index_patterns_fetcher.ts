@@ -93,9 +93,7 @@ export class IndexPatternsFetcher {
       fieldTypes,
       includeEmptyFields,
     } = options;
-    const allowNoIndices = fieldCapsOptions
-      ? fieldCapsOptions.allow_no_indices
-      : this.allowNoIndices;
+    const allowNoIndices = fieldCapsOptions?.allow_no_indices || this.allowNoIndices;
 
     const expandWildcards = allowHidden ? 'all' : 'open';
 

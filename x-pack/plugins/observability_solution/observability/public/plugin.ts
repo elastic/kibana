@@ -69,6 +69,8 @@ import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/publ
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
+import { InvestigatePublicStart } from '@kbn/investigate-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -139,6 +141,7 @@ export interface ObservabilityPublicPluginsStart {
   guidedOnboarding?: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
+  licenseManagement?: LicenseManagementUIPluginSetup;
   navigation: NavigationPublicPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
@@ -159,6 +162,7 @@ export interface ObservabilityPublicPluginsStart {
   theme: CoreStart['theme'];
   dataViewFieldEditor: DataViewFieldEditorStart;
   toastNotifications: ToastsStart;
+  investigate?: InvestigatePublicStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 

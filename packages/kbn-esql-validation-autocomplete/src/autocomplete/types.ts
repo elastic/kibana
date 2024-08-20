@@ -57,11 +57,23 @@ export interface SuggestionRawDefinition {
     title: string;
     id: string;
   };
+  /**
+   * The range that should be replaced when the suggestion is applied
+   */
+  rangeToReplace?: {
+    start: number;
+    end: number;
+  };
 }
 
 export interface EditorContext {
   /** The actual char that triggered the suggestion (1 single char) */
   triggerCharacter?: string;
-  /** The type of trigger id. triggerKind = 0 is a programmatic trigger, while any other non-zero value is currently ignored. */
+  /**
+   * monaco.editor.CompletionTriggerKind
+   *
+   * 0 is "Invoke" (user starts typing a word)
+   * 1 is "Trigger character" (user types a trigger character)
+   */
   triggerKind: number;
 }

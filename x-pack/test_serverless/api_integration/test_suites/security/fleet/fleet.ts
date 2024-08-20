@@ -24,7 +24,7 @@ export default function (ctx: FtrProviderContext) {
     let defaultEsOutputUrl: string = '';
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       defaultFleetServerHostUrl = await expectDefaultFleetServer(ctx);
       expect(defaultFleetServerHostUrl).not.toBe('');
 
@@ -33,7 +33,7 @@ export default function (ctx: FtrProviderContext) {
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('rejects request to create a new fleet server hosts if host url is different from default', async () => {

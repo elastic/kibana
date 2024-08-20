@@ -5,9 +5,8 @@ properties:
     type: object
     properties:
       alias:
-        type:
-          - "string"
-          - "null"
+        type: string
+        nullable: true
       controlledBy:
         type: string
       disabled:

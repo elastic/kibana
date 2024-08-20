@@ -39,6 +39,8 @@ export const registerImportRoute = (
         summary: `Import saved objects`,
         tags: ['oas-tag:saved objects'],
         access: 'public',
+        description:
+          'Create sets of Kibana saved objects from a file created by the export API. Saved objects can only be imported into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.',
         body: {
           maxBytes: maxImportPayloadBytes,
           output: 'stream',

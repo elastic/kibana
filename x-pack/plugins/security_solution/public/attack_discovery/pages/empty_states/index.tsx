@@ -36,11 +36,11 @@ const EmptyStatesComponent: React.FC<Props> = ({
 }) => {
   if (showWelcomePrompt({ aiConnectorsCount, isLoading })) {
     return <Welcome />;
-  } else if (failureReason !== null) {
+  } else if (!isLoading && failureReason != null) {
     return <Failure failureReason={failureReason} />;
   } else if (showNoAlertsPrompt({ alertsContextCount, isLoading })) {
     return <NoAlerts />;
-  } else if (showEmptyPrompt({ attackDiscoveriesCount, isLoading })) {
+  } else if (showEmptyPrompt({ aiConnectorsCount, attackDiscoveriesCount, isLoading })) {
     return (
       <EmptyPrompt
         alertsCount={alertsCount}

@@ -114,7 +114,13 @@ export const actionSchema = schema.object(
       })
     ),
     alerts_filter: schema.maybe(actionAlertsFilterSchema),
-    use_alert_data_for_template: schema.maybe(schema.boolean()),
+    use_alert_data_for_template: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: 'Indicates whether to use alert data as a template.',
+        },
+      })
+    ),
   },
   {
     meta: { description: 'An action that runs under defined conditions.' },
@@ -183,5 +189,11 @@ export const createBodySchema = schema.object({
 });
 
 export const createParamsSchema = schema.object({
-  id: schema.maybe(schema.string()),
+  id: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'The identifier for the rule. If it is omitted, an ID is randomly generated.',
+      },
+    })
+  ),
 });

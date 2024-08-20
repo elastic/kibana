@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { Readable } from 'node:stream';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { AssetCriticalityBulkUploadResponse } from '../../../../../common/api/entity_analytics';
-import { AssetCriticalityBulkUploadRequest } from '../../../../../common/api/entity_analytics';
+import {
+  BulkUpsertAssetCriticalityRecordsRequestBody,
+  type BulkUpsertAssetCriticalityRecordsResponse,
+} from '../../../../../common/api/entity_analytics';
 import type { ConfigType } from '../../../../config';
 import {
   ASSET_CRITICALITY_PUBLIC_BULK_UPLOAD_URL,
@@ -42,11 +44,15 @@ export const assetCriticalityPublicBulkUploadRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(AssetCriticalityBulkUploadRequest),
+            body: buildRouteValidationWithZod(BulkUpsertAssetCriticalityRecordsRequestBody),
           },
         },
       },
-      async (context, request, response) => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<BulkUpsertAssetCriticalityRecordsResponse>> => {
         const { errorRetries, maxBulkRequestBodySizeBytes } =
           config.entityAnalytics.assetCriticality.csvUpload;
         const { records } = request.body;
@@ -90,9 +96,7 @@ export const assetCriticalityPublicBulkUploadRoute = (
             () => `Asset criticality Bulk upload completed in ${tookMs}ms ${JSON.stringify(stats)}`
           );
 
-          const resBody: AssetCriticalityBulkUploadResponse = { errors, stats };
-
-          return response.ok({ body: resBody });
+          return response.ok({ body: { errors, stats } });
         } catch (e) {
           logger.error(`Error during asset criticality bulk upload: ${e}`);
           const error = transformError(e);

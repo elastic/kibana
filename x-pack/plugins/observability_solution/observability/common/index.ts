@@ -37,7 +37,7 @@ export {
   enableAwsLambdaMetrics,
   enableAgentExplorerView,
   apmEnableTableSearchBar,
-  apmEnableMultiSignal,
+  entityCentricExperience,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
   apmEnableServiceMetrics,

@@ -9,7 +9,7 @@
 import { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/core/server';
 
 import type { GuideId, GuideConfig } from '@kbn/guided-onboarding';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { GUIDED_ONBOARDING_FEATURE } from './feature';
 import { GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart } from './types';
 import { defineRoutes } from './routes';

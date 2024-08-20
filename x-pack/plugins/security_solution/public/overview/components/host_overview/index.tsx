@@ -19,10 +19,8 @@ import { buildHostNamesFilter, RiskScoreEntity } from '../../../../common/search
 import type { DescriptionList } from '../../../../common/utility_types';
 import { useDarkMode } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import {
-  DefaultFieldRenderer,
-  hostIdRenderer,
-} from '../../../timelines/components/field_renderers/field_renderers';
+import { hostIdRenderer } from '../../../timelines/components/field_renderers/field_renderers';
+import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/default_renderer';
 import {
   FirstLastSeen,
   FirstLastSeenType,

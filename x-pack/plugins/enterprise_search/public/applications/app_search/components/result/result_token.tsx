@@ -25,6 +25,7 @@ const fieldTypeToTokenMap = {
   [SchemaType.Geolocation]: 'tokenGeo',
   [InternalSchemaType.Location]: 'tokenGeo',
   [SchemaType.Date]: 'tokenDate',
+  // @ts-expect-error upgrade typescript v5.1.6
   [InternalSchemaType.Date]: 'tokenDate',
   [InternalSchemaType.Nested]: 'tokenNested',
 };

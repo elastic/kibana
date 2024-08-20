@@ -46,13 +46,13 @@ import { useCategorizeRequest } from './use_categorize_request';
 import type { EventRate } from './use_categorize_request';
 import { CategoryTable } from './category_table';
 import { InformationText } from './information_text';
-import { SamplingMenu } from './sampling_menu';
+import { SamplingMenu, useRandomSamplerStorage } from './sampling_menu';
 import { LoadingCategorization } from './loading_categorization';
 import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
 import { CreateCategorizationJobButton } from './create_categorization_job';
 import { TableHeader } from './category_table/table_header';
-import { useOpenInDiscover } from './category_table/use_open_in_discover';
+import { useActions } from './category_table/use_actions';
 
 enum SELECTED_TAB {
   BUCKET,
@@ -93,23 +93,21 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   const { filters, query } = useMemo(() => getState(), [getState]);
 
   const mounted = useRef(false);
+  const randomSamplerStorage = useRandomSamplerStorage();
   const {
     runCategorizeRequest,
     cancelRequest: cancelCategorizationRequest,
     randomSampler,
-  } = useCategorizeRequest();
+  } = useCategorizeRequest(randomSamplerStorage);
   const [stateFromUrl] = usePageUrlState<LogCategorizationPageUrlState>(
     'logCategorization',
     getDefaultLogCategorizationAppState({
       searchQuery: createMergedEsQuery(query, filters, dataView, uiSettings),
     })
   );
-  const [highlightedCategory, setHighlightedCategory] = useState<Category | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
-  const [selectedSavedSearch /* , setSelectedSavedSearch*/] = useState(savedSearch);
   const [loading, setLoading] = useState(true);
   const [eventRate, setEventRate] = useState<EventRate>([]);
-  const [pinnedCategory, setPinnedCategory] = useState<Category | null>(null);
   const [data, setData] = useState<{
     categories: Category[];
     categoriesInBucket: Category[] | null;
@@ -139,7 +137,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   );
 
   const { searchQueryLanguage, searchString, searchQuery } = useSearch(
-    { dataView, savedSearch: selectedSavedSearch },
+    { dataView, savedSearch },
     stateFromUrl,
     true
   );
@@ -154,13 +152,12 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     BAR_TARGET
   );
 
-  const openInDiscover = useOpenInDiscover(
+  const { getActions, openInDiscover } = useActions(
     dataView.id!,
     selectedField,
     selectedCategories,
     stateFromUrl,
     timefilter,
-    true,
     undefined,
     undefined
   );
@@ -189,17 +186,28 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
       to: latest,
     };
 
+    const runtimeMappings = dataView.getRuntimeMappings();
+
     try {
       const [validationResult, categorizationResult] = await Promise.all([
-        runValidateFieldRequest(index, selectedField.name, timeField, timeRange, searchQuery, {
-          [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
-        }),
+        runValidateFieldRequest(
+          index,
+          selectedField.name,
+          timeField,
+          timeRange,
+          searchQuery,
+          runtimeMappings,
+          {
+            [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
+          }
+        ),
         runCategorizeRequest(
           index,
           selectedField.name,
           timeField,
           timeRange,
           searchQuery,
+          runtimeMappings,
           intervalMs,
           additionalFilter
         ),
@@ -281,6 +289,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     randomSampler,
   ]);
 
+  const actions = getActions(true);
   const infoIconCss = { marginTop: euiTheme.size.m, marginLeft: euiTheme.size.xxs };
 
   return (
@@ -406,15 +415,11 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
                   : data.categories
               }
               eventRate={eventRate}
-              pinnedCategory={pinnedCategory}
-              setPinnedCategory={setPinnedCategory}
-              highlightedCategory={highlightedCategory}
-              setHighlightedCategory={setHighlightedCategory}
               enableRowActions={false}
               displayExamples={data.displayExamples}
               setSelectedCategories={setSelectedCategories}
-              openInDiscover={openInDiscover}
               tableState={tableState}
+              actions={actions}
             />
           </>
         ) : null}

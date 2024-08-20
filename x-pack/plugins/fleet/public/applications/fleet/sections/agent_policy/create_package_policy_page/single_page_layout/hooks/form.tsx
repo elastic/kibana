@@ -11,6 +11,7 @@ import { safeLoad } from 'js-yaml';
 
 import { isEqual } from 'lodash';
 
+import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
 import type {
   AgentPolicy,
   NewPackagePolicy,
@@ -152,6 +153,7 @@ export function useOnSubmit({
 }) {
   const { notifications } = useStartServices();
   const confirmForceInstall = useConfirmForceInstall();
+  const spaceSettings = useSpaceSettingsContext();
   // only used to store the resulting package policy once saved
   const [savedPackagePolicy, setSavedPackagePolicy] = useState<PackagePolicy>();
   // Form state
@@ -204,7 +206,8 @@ export function useOnSubmit({
         const newValidationResult = validatePackagePolicy(
           newPackagePolicy || packagePolicy,
           packageInfo,
-          safeLoad
+          safeLoad,
+          spaceSettings
         );
         setValidationResults(newValidationResult);
         // eslint-disable-next-line no-console
@@ -213,7 +216,7 @@ export function useOnSubmit({
         return newValidationResult;
       }
     },
-    [packagePolicy, packageInfo]
+    [packagePolicy, packageInfo, spaceSettings]
   );
   // Update package policy method
   const updatePackagePolicy = useCallback(
@@ -375,31 +378,22 @@ export function useOnSubmit({
 
       const hasGoogleCloudShell = data?.item ? getCloudShellUrlFromPackagePolicy(data.item) : false;
 
-      if (hasFleetAddAgentsPrivileges) {
-        if (hasAzureArmTemplate) {
-          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_AZURE_ARM_TEMPLATE');
-        } else {
-          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
-        }
-        if (hasCloudFormation) {
-          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_CLOUD_FORMATION');
-        } else {
-          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
-        }
-        if (hasGoogleCloudShell) {
-          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_GOOGLE_CLOUD_SHELL');
-        } else {
-          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
-        }
-      } else {
+      if (agentCount > 0) {
         setFormState('SUBMITTED');
+        return;
       }
 
       if (!error) {
         setSavedPackagePolicy(data!.item);
 
+        // Check if agentless is configured in ESS and Serverless until Agentless API migrates to Serverless
+        const isAgentlessConfigured =
+          isAgentlessAgentPolicy(createdPolicy) || isAgentlessPackagePolicy(data!.item);
         const promptForAgentEnrollment =
-          !(agentCount && agentPolicies.length > 0) && hasFleetAddAgentsPrivileges;
+          !(agentCount && agentPolicies.length > 0) &&
+          !isAgentlessConfigured &&
+          hasFleetAddAgentsPrivileges;
+
         if (promptForAgentEnrollment && hasAzureArmTemplate) {
           setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
           return;

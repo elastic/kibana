@@ -50,6 +50,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<
     body: {
       query: {
         bool: {
+          // @ts-expect-error upgrade typescript v5.1.6
           filter: [...filter, SUMMARY_FILTER, EXCLUDE_RUN_ONCE_FILTER],
         },
       },
@@ -80,9 +81,10 @@ export const getPingHistogram: UMElasticsearchQueryFn<
   });
 
   const { body: result } = await uptimeEsClient.search(params, 'getPingsOverTime');
+  // @ts-expect-error upgrade typescript v5.1.6
   const buckets = result?.aggregations?.timeseries?.buckets ?? [];
 
-  const histogram = buckets.map((bucket: Pick<typeof buckets[0], 'key' | 'down' | 'up'>) => {
+  const histogram = buckets.map((bucket: Pick<(typeof buckets)[0], 'key' | 'down' | 'up'>) => {
     const x: number = bucket.key;
     const downCount = bucket.down.value || 0;
     const upCount = bucket.up.value || 0;

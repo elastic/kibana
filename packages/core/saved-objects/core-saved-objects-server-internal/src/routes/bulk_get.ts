@@ -37,6 +37,7 @@ export const registerBulkGetRoute = (
         summary: `Get saved objects`,
         tags: ['oas-tag:saved objects'],
         access,
+        deprecated: true,
       },
       validate: {
         body: schema.arrayOf(

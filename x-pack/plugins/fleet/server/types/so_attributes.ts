@@ -121,6 +121,8 @@ export interface PackagePolicySOAttributes {
   inputs: PackagePolicyInput[];
   policy_id?: string;
   policy_ids: string[];
+  // Nullable to allow user to reset to default outputs
+  output_id?: string | null;
   updated_at: string;
   updated_by: string;
   description?: string;
@@ -237,6 +239,11 @@ export interface SettingsSOAttributes {
   fleet_server_hosts?: string[];
   secret_storage_requirements_met?: boolean;
   output_secret_storage_requirements_met?: boolean;
+}
+
+export interface SpaceSettingsSOAttributes {
+  allowed_namespace_prefixes?: string[] | null;
+  managed_by?: 'kibana_config' | null;
 }
 
 export interface DownloadSourceSOAttributes {
