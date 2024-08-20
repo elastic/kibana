@@ -57,6 +57,13 @@ export interface SuggestionRawDefinition {
     title: string;
     id: string;
   };
+  /**
+   * The range that should be replaced when the suggestion is applied
+   */
+  rangeToReplace?: {
+    start: number;
+    end: number;
+  };
 }
 
 export interface EditorContext {

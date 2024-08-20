@@ -21,8 +21,12 @@ export const Configurations = () => {
   const location = useLocation();
   const dataViewQuery = useDataView(CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX);
   const { data: getSetupStatus, isLoading: getSetupStatusIsLoading } = useCspSetupStatusApi();
-  const hasConfigurationFindings =
-    getSetupStatus?.kspm.status === 'indexed' || getSetupStatus?.cspm.status === 'indexed';
+  const hasMisconfigurationsFindings = !!getSetupStatus?.hasMisconfigurationsFindings;
+
+  const hasFindings =
+    hasMisconfigurationsFindings ||
+    getSetupStatus?.kspm.status === 'indexed' ||
+    getSetupStatus?.cspm.status === 'indexed';
 
   // For now, when there are no findings we prompt first to install cspm, if it is already installed we will prompt to
   // install kspm
@@ -30,7 +34,7 @@ export const Configurations = () => {
     getSetupStatus?.cspm.status !== 'not-installed' ? 'cspm' : 'kspm';
 
   if (getSetupStatusIsLoading) return defaultLoadingRenderer();
-  if (!hasConfigurationFindings) return <NoFindingsStates postureType={noFindingsForPostureType} />;
+  if (!hasFindings) return <NoFindingsStates postureType={noFindingsForPostureType} />;
 
   const dataViewContextValue = {
     dataView: dataViewQuery.data!,

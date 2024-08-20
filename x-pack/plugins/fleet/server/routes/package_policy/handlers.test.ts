@@ -311,6 +311,7 @@ describe('When calling package policy', () => {
           },
         ],
       });
+      (agentPolicyService.get as jest.Mock).mockResolvedValue({ inputs: [] });
     });
 
     it('should use existing package policy props if not provided by request', async () => {
@@ -368,6 +369,25 @@ describe('When calling package policy', () => {
       await routeHandler(context, request, response);
       expect(response.ok).toHaveBeenCalledWith({
         body: { item: { ...existingPolicy, namespace: 'namespace' } },
+      });
+    });
+
+    it('should throw if policy_ids changed on agentless integration', async () => {
+      (agentPolicyService.get as jest.Mock).mockResolvedValue({
+        supports_agentless: true,
+        inputs: [],
+      });
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      jest
+        .spyOn(appContextService, 'getExperimentalFeatures')
+        .mockReturnValue({ enableReusableIntegrationPolicies: true } as any);
+      const request = getUpdateKibanaRequest({ policy_ids: ['1', '2'] } as any);
+      await routeHandler(context, request, response);
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 400,
+        body: {
+          message: 'Cannot change agent policies of an agentless integration',
+        },
       });
     });
 
