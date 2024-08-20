@@ -6,24 +6,28 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import {
   ControlGroupApi,
   ControlGroupRuntimeState,
-  ControlGroupSerializedState,
   ControlGroupSettings,
 } from '../../react_controls/control_group/types';
-// import { AddOptionsListControlProps } from './control_group_input_builder';
 
 export type ControlGroupRendererApi = ControlGroupApi & {
   save: () => void;
   reload: () => void;
-  getInput$: () => BehaviorSubject<ControlGroupSerializedState | null>;
-  updateInput: (input: Partial<ControlGroupRuntimeState>) => void;
 
-  // addOptionsListControl: (controlProps: AddOptionsListControlProps) => void;
+  /**
+   * @deprecated
+   * Calling `updateInput` will cause the entire control group to be re-initialized.
+   *
+   * Therefore, to update the runtime state without `updateInput`, you should add public setters to the
+   * relavant API (`ControlGroupApi` or the individual control type APIs) for the state you wish to update
+   * and call those setters instead.
+   */
+  updateInput: (input: Partial<ControlGroupRuntimeState>) => void;
 };
+
 export type FieldFilterPredicate = (f: DataViewField) => boolean;
 export type AwaitingControlGroupApi = ControlGroupRendererApi | null;
 

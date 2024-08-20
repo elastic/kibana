@@ -54,7 +54,6 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
     const id = useMemo(() => uuidv4(), []);
     const [regenerateId, setRegenerateId] = useState(uuidv4());
     const lastInput = useRef<Partial<ControlGroupRuntimeState> | null>(null);
-    const input$ = useMemo(() => new BehaviorSubject<ControlGroupSerializedState | null>(null), []);
 
     const [apiLoading, setApiLoading] = useState<boolean>(true);
     const [controlGroup, setControlGroup] = useState<ControlGroupRendererApi | undefined>();
@@ -118,9 +117,6 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
         key={regenerateId} // forces unmount + mount when `updateInput` is called
         maybeId={id}
         type={CONTROL_GROUP_TYPE}
-        onAnyStateChange={(newState) => {
-          input$.next(newState.rawState);
-        }}
         getParentApi={() => ({
           reload$,
           viewMode: viewMode$,
@@ -144,7 +140,6 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
               lastInput.current = newInput;
               setRegenerateId(uuidv4());
             },
-            getInput$: () => input$,
           });
         }}
         hidePanelChrome
