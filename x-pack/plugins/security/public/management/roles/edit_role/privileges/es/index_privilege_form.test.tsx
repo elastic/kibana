@@ -425,13 +425,13 @@ describe('field level security', () => {
     const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
     expect(wrapper.find('div.indexPrivilegeForm__grantedFieldsRow')).toHaveLength(1);
     expect(wrapper.find('div.indexPrivilegeForm__deniedFieldsRow')).toHaveLength(1);
-    expect(wrapper.find('.euiFormHelpText')).toHaveLength(1);
+    expect(wrapper.find('div.euiFormHelpText')).toHaveLength(1);
   });
 
   test('it does not display a warning when fields are granted', () => {
     const wrapper = mountWithIntl(<IndexPrivilegeForm {...props} />);
     expect(wrapper.find('div.indexPrivilegeForm__grantedFieldsRow')).toHaveLength(1);
     expect(wrapper.find('div.indexPrivilegeForm__deniedFieldsRow')).toHaveLength(1);
-    expect(wrapper.find('.euiFormHelpText')).toHaveLength(0);
+    expect(wrapper.find('div.euiFormHelpText')).toHaveLength(0);
   });
 });

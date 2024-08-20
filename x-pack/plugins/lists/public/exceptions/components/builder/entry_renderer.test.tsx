@@ -241,7 +241,7 @@ describe('BuilderEntryItem', () => {
 
     await waitFor(() => {
       wrapper.update();
-      expect(wrapper.find('.euiFormHelpText.euiFormRow__text').text()).toMatch(
+      expect(wrapper.find('div.euiFormHelpText.euiFormRow__text').text()).toMatch(
         /This field is defined as different types across the following indices or is unmapped. This can cause unexpected query results./
       );
     });
