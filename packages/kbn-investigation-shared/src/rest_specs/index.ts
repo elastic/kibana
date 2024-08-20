@@ -7,7 +7,7 @@
  */
 
 export type * from './create';
-export type * from './create_notes';
+export type * from './create_note';
 export type * from './delete';
 export type * from './find';
 export type * from './get';
@@ -16,9 +16,10 @@ export type * from './delete_note';
 export type * from './investigation_note';
 export type * from './create_item';
 export type * from './delete_item';
+export type * from './get_items';
 
 export * from './create';
-export * from './create_notes';
+export * from './create_note';
 export * from './delete';
 export * from './find';
 export * from './get';
@@ -27,3 +28,4 @@ export * from './delete_note';
 export * from './investigation_note';
 export * from './create_item';
 export * from './delete_item';
+export * from './get_items';

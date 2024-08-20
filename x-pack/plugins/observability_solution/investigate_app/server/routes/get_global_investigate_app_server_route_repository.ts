@@ -13,6 +13,7 @@ import {
   deleteInvestigationNoteParamsSchema,
   deleteInvestigationParamsSchema,
   findInvestigationsParamsSchema,
+  getInvestigationItemsParamsSchema,
   getInvestigationNotesParamsSchema,
   getInvestigationParamsSchema,
 } from '@kbn/investigation-shared';
@@ -27,6 +28,7 @@ import { getInvestigation } from '../services/get_investigation';
 import { getInvestigationNotes } from '../services/get_investigation_notes';
 import { investigationRepositoryFactory } from '../services/investigation_repository';
 import { createInvestigateAppServerRoute } from './create_investigate_app_server_route';
+import { getInvestigationItems } from '../services/get_investigation_items';
 
 const createInvestigationRoute = createInvestigateAppServerRoute({
   endpoint: 'POST /api/observability/investigations 2023-10-31',
@@ -165,6 +167,20 @@ const createInvestigationItemRoute = createInvestigateAppServerRoute({
   },
 });
 
+const getInvestigationItemsRoute = createInvestigateAppServerRoute({
+  endpoint: 'GET /api/observability/investigations/{investigationId}/items 2023-10-31',
+  options: {
+    tags: [],
+  },
+  params: getInvestigationItemsParamsSchema,
+  handler: async ({ params, context, request, logger }) => {
+    const soClient = (await context.core).savedObjects.client;
+    const repository = investigationRepositoryFactory({ soClient, logger });
+
+    return await getInvestigationItems(params.path.investigationId, repository);
+  },
+});
+
 const deleteInvestigationItemRoute = createInvestigateAppServerRoute({
   endpoint: 'DELETE /api/observability/investigations/{investigationId}/items/{itemId} 2023-10-31',
   options: {
@@ -197,6 +213,7 @@ export function getGlobalInvestigateAppServerRouteRepository() {
     ...deleteInvestigationNotesRoute,
     ...createInvestigationItemRoute,
     ...deleteInvestigationItemRoute,
+    ...getInvestigationItemsRoute,
   };
 }
 
