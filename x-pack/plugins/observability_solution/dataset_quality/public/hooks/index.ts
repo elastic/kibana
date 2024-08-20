@@ -6,7 +6,6 @@
  */
 
 export * from './use_dataset_quality_table';
-export * from './use_dataset_quality_flyout';
 export * from './use_degraded_docs_chart';
 export * from './use_redirect_link';
 export * from './use_summary_panel';
