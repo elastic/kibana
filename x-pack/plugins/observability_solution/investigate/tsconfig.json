@@ -21,6 +21,7 @@
     "@kbn/i18n",
     "@kbn/utility-types",
     "@kbn/core-security-common",
+    "@kbn/investigation-shared",
   ],
   "exclude": ["target/**/*"]
 }

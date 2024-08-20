@@ -102,11 +102,6 @@ export function getSupportedTypesForBinaryOperators(
     : [previousType];
 }
 
-// @TODO:
-// Filter down to signatures that match every params up to the current argIndex
-// e.g. BUCKET(longField, /) => all signatures with first param as long column type
-// or BUCKET(longField, 2, /) => all signatures with (longField, integer, ...)
-
 export function getValidFunctionSignaturesForPreviousArgs(
   fnDefinition: FunctionDefinition,
   enrichedArgs: Array<
@@ -116,6 +111,9 @@ export function getValidFunctionSignaturesForPreviousArgs(
   >,
   argIndex: number
 ) {
+  // Filter down to signatures that match every params up to the current argIndex
+  // e.g. BUCKET(longField, /) => all signatures with first param as long column type
+  // or BUCKET(longField, 2, /) => all signatures with (longField, integer, ...)
   const relevantFuncSignatures = fnDefinition.signatures.filter(
     (s) =>
       s.params?.length >= argIndex &&
@@ -156,4 +154,43 @@ export function getCompatibleTypesToSuggestNext(
     (o) => `${o.type}-${o.constantOnly}`
   );
   return compatibleTypesToSuggestForArg;
+}
+
+/**
+ * Checks the suggestion text for overlap with the current query.
+ *
+ * This is useful to determine the range of the existing query that should be
+ * replaced if the suggestion is accepted.
+ *
+ * For example
+ * QUERY: FROM source | WHERE field IS NO
+ * SUGGESTION: IS NOT NULL
+ *
+ * The overlap is "IS NO" and the range to replace is "IS NO" in the query.
+ *
+ * @param query
+ * @param suggestionText
+ * @returns
+ */
+export function getOverlapRange(
+  query: string,
+  suggestionText: string
+): { start: number; end: number } {
+  let overlapLength = 0;
+
+  // Convert both strings to lowercase for case-insensitive comparison
+  const lowerQuery = query.toLowerCase();
+  const lowerSuggestionText = suggestionText.toLowerCase();
+
+  for (let i = 0; i <= lowerSuggestionText.length; i++) {
+    const substr = lowerSuggestionText.substring(0, i);
+    if (lowerQuery.endsWith(substr)) {
+      overlapLength = i;
+    }
+  }
+
+  return {
+    start: Math.min(query.length - overlapLength + 1, query.length),
+    end: query.length,
+  };
 }

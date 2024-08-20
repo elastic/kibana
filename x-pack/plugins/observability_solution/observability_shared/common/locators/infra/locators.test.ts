@@ -60,7 +60,7 @@ describe('Infra Locators', () => {
 
       expect(app).toBe('metrics');
       expect(path).toBe(
-        `/detail/${params.assetType}/${params.assetId}?assetDetails=${assetDetails}&_a=undefined`
+        `/detail/${params.assetType}/${params.assetId}?assetDetails=${assetDetails}`
       );
       expect(state).toBeDefined();
       expect(Object.keys(state)).toHaveLength(0);
@@ -72,7 +72,7 @@ describe('Infra Locators', () => {
 
       expect(app).toBe('metrics');
       expect(path).toBe(
-        `/detail/${params.assetType}/${params.assetId}?assetDetails=${assetDetails}&_a=undefined`
+        `/detail/${params.assetType}/${params.assetId}?assetDetails=${assetDetails}`
       );
       expect(state).toBeDefined();
       expect(Object.keys(state)).toHaveLength(0);
