@@ -111,7 +111,7 @@ describe('Agentless Agent service', () => {
         namespace: 'default',
         supports_agentless: true,
       } as AgentPolicy)
-    ).rejects.toThrowError(new AgentlessAgentCreateError('Agentless agent not supported'));
+    ).rejects.toThrowError(new AgentlessAgentCreateError('missing agentless configuration'));
   });
 
   it('should throw AgentlessAgentCreateError if agentless configuration is not found', async () => {
@@ -219,8 +219,9 @@ describe('Agentless Agent service', () => {
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     jest.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: {
+        enabled: true,
         api: {
-          url: 'http://api.agentless.com/api/v1/ess',
+          url: 'http://api.agentless.com',
           tls: {
             certificate: '/path/to/cert',
             key: '/path/to/key',

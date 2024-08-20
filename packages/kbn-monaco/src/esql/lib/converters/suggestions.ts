@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { SuggestionRawDefinition } from '@kbn/esql-validation-autocomplete';
 import { monaco } from '../../../monaco_imports';
-import { MonacoAutocompleteCommandDefinition } from '../types';
+import {
+  MonacoAutocompleteCommandDefinition,
+  SuggestionRawDefinitionWithMonacoRange,
+} from '../types';
 
 export function wrapAsMonacoSuggestions(
-  suggestions: SuggestionRawDefinition[]
+  suggestions: SuggestionRawDefinitionWithMonacoRange[]
 ): MonacoAutocompleteCommandDefinition[] {
   return suggestions.map<MonacoAutocompleteCommandDefinition>(
     ({

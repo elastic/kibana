@@ -59,30 +59,15 @@ interface InMemoryPackagePolicyAndAgentPolicy {
 const IntegrationDetailsLink = memo<{
   packagePolicy: InMemoryPackagePolicyAndAgentPolicy['packagePolicy'];
   agentPolicies: InMemoryPackagePolicyAndAgentPolicy['agentPolicies'];
-}>(({ packagePolicy, agentPolicies }) => {
+}>(({ packagePolicy }) => {
   const { getHref } = useLink();
-  const policySupportsAgentless = agentPolicies?.some((policy) => policy.supports_agentless);
   return (
     <EuiLink
       className="eui-textTruncate"
       data-test-subj="integrationNameLink"
-      {...(policySupportsAgentless
-        ? {
-            disabled: true,
-            title: i18n.translate(
-              'xpack.fleet.epm.packageDetails.integrationList.disabledEditTitle',
-              {
-                defaultMessage:
-                  'Editing an agentless integration is not supported. Add a new integration if needed.',
-              }
-            ),
-          }
-        : {
-            href: getHref('integration_policy_edit', {
-              packagePolicyId: packagePolicy.id,
-            }),
-            title: packagePolicy.name,
-          })}
+      href={getHref('integration_policy_edit', {
+        packagePolicyId: packagePolicy.id,
+      })}
     >
       {packagePolicy.name}
     </EuiLink>

@@ -62,11 +62,9 @@ export interface SuggestionRawDefinition {
   /**
    * The range that should be replaced when the suggestion is applied
    */
-  range?: {
-    startColumn: number;
-    endColumn: number;
-    startLineNumber: number;
-    endLineNumber: number;
+  rangeToReplace?: {
+    start: number;
+    end: number;
   };
 }
 
