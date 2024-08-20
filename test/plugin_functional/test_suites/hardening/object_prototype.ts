@@ -20,6 +20,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         .expect(200)
         .then((response) => {
           expect(response.body.prototype).to.eql({});
+          expect(response.body.error).to.eql(
+            'Cannot add property polluted, object is not extensible'
+          );
         });
     });
   });

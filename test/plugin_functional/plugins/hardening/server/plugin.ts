@@ -17,12 +17,13 @@ export class HardeningPlugin implements Plugin {
       },
       async (context, request, response) => {
         let result;
+        let error;
         try {
           (({}) as any).__proto__.polluted = true;
         } catch (e) {
-          // ignore
+          error = e.message;
         } finally {
-          result = response.ok({ body: { prototype: Object.getPrototypeOf({}) } });
+          result = response.ok({ body: { prototype: Object.getPrototypeOf({}), error } });
         }
         return result;
       }
