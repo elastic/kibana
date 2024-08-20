@@ -50,7 +50,7 @@ export function serializeReferences(savedVis: SerializedVis) {
     const [extractedSearchSource, searchSourceReferences] =
       extractSearchSourceReferences(serializedSearchSource);
     serializedSearchSource = extractedSearchSource;
-    searchSourceReferences.forEach((r) => references.push(r));
+    searchSourceReferences.forEach((r) => references.push(r as Reference));
   }
 
   // Extract saved search

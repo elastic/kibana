@@ -6,23 +6,24 @@
  * Side Public License, v 1.
  */
 
-import {
-  GetIn,
+import type {
   CreateIn,
-  SearchIn,
-  UpdateIn,
+  CreateResult,
   DeleteIn,
   DeleteResult,
-  SearchResult,
+  GetIn,
   GetResult,
-  CreateResult,
+  SearchIn,
+  SearchResult,
+  UpdateIn,
   UpdateResult,
 } from '@kbn/content-management-plugin/common';
-import { ContentManagementCrudTypes } from '@kbn/content-management-utils';
+import type { ContentManagementCrudTypes } from '@kbn/content-management-utils';
 
-import { VisualizationContentType } from '../types';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { VisualizationContentType } from '../types';
 
-export interface Reference {
+export interface Reference extends SerializableRecord {
   type: string;
   id: string;
   name: string;

@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { PublicContract } from '@kbn/utility-types';
 import { PluginInitializerContext } from '@kbn/core/public';
 import { VisualizationsPlugin, VisualizationsSetup, VisualizationsStart } from './plugin';
+import type { VisualizeEmbeddableFactory, VisualizeEmbeddable } from './embeddable';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new VisualizationsPlugin(initializerContext);
@@ -38,6 +40,8 @@ export type {
 } from './vis_types';
 export type { VisualizeEditorInput } from './react_embeddable/types';
 export type { Vis, SerializedVis, SerializedVisData, VisData } from './vis';
+export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbeddableFactory>;
+export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
 export type { SchemaConfig } from '../common/types';
 export { updateOldState } from './legacy/vis_update_state';
 export type { VisualizeInput, VisualizeEmbeddable, HasVisualizeConfig } from './embeddable';
@@ -73,11 +77,7 @@ export type {
 export { urlFor, getFullPath } from './utils/saved_visualize_utils';
 export { convertSavedObjectAttributesToReferences } from './utils/saved_visualization_references';
 
-export type {
-  IEditorController,
-  EditorRenderProps,
-  EmbeddableApiHandler,
-} from './visualize_app/types';
+export type { IEditorController, EditorRenderProps } from './visualize_app/types';
 
 export {
   VISUALIZE_EDITOR_TRIGGER,

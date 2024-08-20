@@ -21,7 +21,7 @@ import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_con
  * @param services
  */
 export async function checkForDuplicateTitle(
-  savedObject: Pick<VisSavedObject, 'id' | 'title' | 'lastSavedTitle'>,
+  savedObject: Pick<VisSavedObject, 'id' | 'title' | 'lastSavedTitle' | 'getEsType'>,
   copyOnSave: boolean,
   isTitleDuplicateConfirmed: boolean,
   onTitleDuplicate: (() => void) | undefined,
