@@ -26,9 +26,7 @@ import {
 } from './__tests__/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
 import { ESQL_COMMON_NUMERIC_TYPES, ESQL_STRING_TYPES } from '../shared/esql_types';
-
-const powParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
-const log10ParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
+import { log10ParameterTypes, powParameterTypes } from './__tests__/constants';
 
 const commandDefinitions = unmodifiedCommandDefinitions.filter(({ hidden }) => !hidden);
 describe('autocomplete', () => {
