@@ -8,25 +8,14 @@
 import expect from '@kbn/expect';
 import { DatasetQualityApiClientKey } from '../../common/config';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { installPackage, IntegrationPackage, uninstallPackage } from './package_utils';
+import { installPackage, uninstallPackage } from './package_utils';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const supertest = getService('supertest');
   const datasetQualityApiClient = getService('datasetQualityApiClient');
 
-  const integrationPackages: IntegrationPackage[] = [
-    {
-      // with dashboards
-      name: 'postgresql',
-      version: '1.23.0',
-    },
-    {
-      // without dashboards
-      name: 'apm',
-      version: '8.4.2',
-    },
-  ];
+  const integrationPackages = ['postgresql', 'apm'];
 
   async function callApiAs(integration: string) {
     const user = 'datasetQualityLogsUser' as DatasetQualityApiClientKey;
@@ -43,13 +32,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when('Integration dashboards', { config: 'basic' }, () => {
     describe('gets the installed integration dashboards', () => {
       before(async () => {
-        await Promise.all(
-          integrationPackages.map((pkg: IntegrationPackage) => installPackage({ supertest, pkg }))
-        );
+        await Promise.all(integrationPackages.map((pkg) => installPackage({ supertest, pkg })));
       });
 
       it('returns a non-empty body', async () => {
-        const resp = await callApiAs(integrationPackages[0].name);
+        const resp = await callApiAs(integrationPackages[0]);
         expect(resp.body).not.empty();
       });
 
@@ -70,7 +57,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
           ],
         };
-        const resp = await callApiAs(integrationPackages[0].name);
+        const resp = await callApiAs(integrationPackages[0]);
         expect(resp.body).to.eql(expectedResult);
       });
 
@@ -78,7 +65,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const expectedResult = {
           dashboards: [],
         };
-        const resp = await callApiAs(integrationPackages[1].name);
+        const resp = await callApiAs(integrationPackages[1]);
         expect(resp.body).to.eql(expectedResult);
       });
 
@@ -92,11 +79,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(
         async () =>
-          await Promise.all(
-            integrationPackages.map((pkg: IntegrationPackage) =>
-              uninstallPackage({ supertest, pkg })
-            )
-          )
+          await Promise.all(integrationPackages.map((pkg) => uninstallPackage({ supertest, pkg })))
       );
     });
   });
