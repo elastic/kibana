@@ -36,7 +36,8 @@ export function inferenceModelsApiProvider(httpService: HttpService) {
      */
     async getAllInferenceEndpoints() {
       const result = await httpService.http<{
-        endpoints: estypes.InferenceModelConfigContainer[];
+        // TODO remove inference_id when esType has been updated to include it
+        endpoints: Array<estypes.InferenceModelConfigContainer & { inference_id: string}>;
       }>({
         path: `${ML_INTERNAL_BASE_PATH}/_inference/all`,
         method: 'GET',
