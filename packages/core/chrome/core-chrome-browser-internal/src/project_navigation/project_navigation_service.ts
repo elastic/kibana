@@ -362,17 +362,14 @@ export class ProjectNavigationService {
     const stop$ = new Subject<void>();
     const tenSeconds = timer(10000);
 
-    this.navLinksService
-      .getNavLinks$()
-      .pipe(takeUntil(tenSeconds), takeUntil(stop$))
-      .subscribe((navLinks) => {
-        navLink = navLinks.find((link) => link.id === linkId);
+    this.deepLinksMap$.pipe(takeUntil(tenSeconds), takeUntil(stop$)).subscribe((navLinks) => {
+      navLink = navLinks[linkId];
 
-        if (navLink) {
-          cb(navLink);
-          stop$.next();
-        }
-      });
+      if (navLink) {
+        cb(navLink);
+        stop$.next();
+      }
+    });
   }
 
   private setProjectHome(homeHref: string) {
