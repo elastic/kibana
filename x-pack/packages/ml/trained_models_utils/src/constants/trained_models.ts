@@ -266,6 +266,15 @@ export type InferenceServiceSettings =
       };
     }
   | {
+      service: 'alibabacloud-ai-search';
+      service_settings: {
+        api_key: string;
+        service_id: string;
+        host: string;
+        workspace: string;
+      };
+    }
+  | {
       service: 'amazonbedrock';
       service_settings: {
         access_key: string;

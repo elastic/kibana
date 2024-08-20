@@ -285,6 +285,27 @@ describe('RenderEndpoint component tests', () => {
     });
   });
 
+  describe('with alibabaaisearch service', () => {
+    const mockEndpoint = {
+      model_id: 'alibabacloud-ai-search-1',
+      service: 'alibabacloud-ai-search',
+      service_settings: {
+        service_id: 'service-123',
+        host: 'host-123',
+        workspace: 'default-123',
+      },
+    } as any;
+
+    it('renders the component with endpoint details', () => {
+      render(<EndpointInfo endpoint={mockEndpoint} />);
+
+      expect(screen.getByText('alibabacloud-ai-search-1')).toBeInTheDocument();
+      expect(screen.getByText('service-123')).toBeInTheDocument();
+      expect(screen.getByText('host-123')).toBeInTheDocument();
+      expect(screen.getByText('default-123')).toBeInTheDocument();
+    });
+  });  
+
   describe('for MIT licensed models', () => {
     const mockEndpointWithMitLicensedModel = {
       model_id: 'model-123',

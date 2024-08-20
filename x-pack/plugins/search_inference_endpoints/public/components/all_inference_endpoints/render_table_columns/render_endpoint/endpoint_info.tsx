@@ -84,6 +84,8 @@ function endpointModelAtrributes(endpoint: InferenceAPIConfigResponse) {
       return mistralAttributes(endpoint);
     case ServiceProviderKeys.googleaistudio:
       return googleAIStudioAttributes(endpoint);
+      case ServiceProviderKeys.alibabaaisearch:
+        return alibabaAISearchAttributes(endpoint);      
     case ServiceProviderKeys.amazonbedrock:
       return amazonBedrockAttributes(endpoint);
     default:
@@ -165,6 +167,15 @@ function mistralAttributes(endpoint: InferenceAPIConfigResponse) {
   ]
     .filter(Boolean)
     .join(', ');
+}
+
+function alibabaAISearchAttributes(endpoint: InferenceAPIConfigResponse) {
+  const serviceSettings = endpoint.service_settings;
+
+  const rateLimit =
+    'rate_limit' in serviceSettings ? serviceSettings.rate_limit.requests_per_minute : undefined;
+
+  return rateLimit && `rate_limit: ${rateLimit}`;
 }
 
 function amazonBedrockAttributes(endpoint: InferenceAPIConfigResponse) {
