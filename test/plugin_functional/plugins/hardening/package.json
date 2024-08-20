@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/hardeningh-plugin",
+  "name": "@kbn/hardening-plugin",
   "version": "1.0.0",
   "main": "target/test/plugin_functional/plugins/hardening",
   "kibana": {
