@@ -19,7 +19,13 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   type BrowserStorage = 'sessionStorage' | 'localStorage';
 
   const getSessionStorageItem = async (key: string) => {
-    return await driver.executeScript<string>(`return window.sessionStorage.getItem("${key}");`);
+    try {
+      return await driver.executeScript<string>(`return window.sessionStorage.getItem("${key}");`);
+    } catch (error) {
+      if (!error.message.includes(`Failed to read the 'sessionStorage' property from 'Window'`)) {
+        throw error;
+      }
+    }
   };
 
   const clearBrowserStorage = async (storageType: BrowserStorage) => {
