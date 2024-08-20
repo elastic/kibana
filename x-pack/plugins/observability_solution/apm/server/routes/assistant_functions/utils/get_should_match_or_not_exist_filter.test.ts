@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getShouldMatchOrNotExistFilter } from '.';
+import { getShouldMatchOrNotExistFilter } from './get_should_match_or_not_exist_filter';
 
 describe('getShouldMatchOrNotExistFilter', () => {
   describe('when all fields are provided', () => {
