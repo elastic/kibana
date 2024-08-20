@@ -11,14 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects([
-    'common',
-    'dashboard',
-    'spaceSelector',
-    'header',
-    'lens',
-    'timePicker',
-  ]);
+  const { dashboard, header, lens } = getPageObjects(['dashboard', 'header', 'lens']);
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardSettings = getService('dashboardSettings');
   const filterBar = getService('filterBar');
@@ -52,36 +45,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should sync colors on dashboard by default', async function () {
-      await PageObjects.dashboard.navigateToApp();
+      await dashboard.navigateToApp();
       await elasticChart.setNewChartUiDebugFlag(true);
-      await PageObjects.dashboard.clickCreateDashboardPrompt();
+      await dashboard.clickCreateDashboardPrompt();
       await dashboardAddPanel.clickCreateNewLink();
-      await PageObjects.lens.goToTimeRange();
+      await lens.goToTimeRange();
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'count',
         field: 'Records',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'geo.src',
         palette: { mode: 'legacy', id: 'default' },
       });
 
-      await PageObjects.lens.save('vis1', false, true);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await lens.save('vis1', false, true);
+      await header.waitUntilLoadingHasFinished();
       await dashboardAddPanel.clickCreateNewLink();
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'count',
         field: 'Records',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'geo.src',
@@ -90,15 +83,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await filterBar.addFilter({ field: 'geo.src', operation: 'is not', value: 'CN' });
 
-      await PageObjects.lens.save('vis2', false, true);
-      await PageObjects.dashboard.openSettingsFlyout();
+      await lens.save('vis2', false, true);
+      await dashboard.openSettingsFlyout();
       await dashboardSettings.toggleSyncColors(true);
       await dashboardSettings.clickApplyButton();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
 
-      const colorMapping1 = getColorMapping(await PageObjects.dashboard.getPanelChartDebugState(0));
-      const colorMapping2 = getColorMapping(await PageObjects.dashboard.getPanelChartDebugState(1));
+      const colorMapping1 = getColorMapping(await dashboard.getPanelChartDebugState(0));
+      const colorMapping2 = getColorMapping(await dashboard.getPanelChartDebugState(1));
 
       expect(Object.keys(colorMapping1)).to.have.length(6);
       expect(Object.keys(colorMapping1)).to.have.length(6);
@@ -122,12 +115,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be possible to disable color sync', async () => {
-      await PageObjects.dashboard.openSettingsFlyout();
+      await dashboard.openSettingsFlyout();
       await dashboardSettings.toggleSyncColors(false);
       await dashboardSettings.clickApplyButton();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const colorMapping1 = getColorMapping(await PageObjects.dashboard.getPanelChartDebugState(0));
-      const colorMapping2 = getColorMapping(await PageObjects.dashboard.getPanelChartDebugState(1));
+      await header.waitUntilLoadingHasFinished();
+      const colorMapping1 = getColorMapping(await dashboard.getPanelChartDebugState(0));
+      const colorMapping2 = getColorMapping(await dashboard.getPanelChartDebugState(1));
       const colorsByOrder1 = Object.values(colorMapping1);
       const colorsByOrder2 = Object.values(colorMapping2);
       // colors by order of occurence have to be the same

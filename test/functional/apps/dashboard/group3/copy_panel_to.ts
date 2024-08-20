@@ -15,14 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
 
-  const PageObjects = getPageObjects([
-    'header',
-    'common',
-    'discover',
-    'dashboard',
-    'visualize',
-    'timePicker',
-  ]);
+  const { dashboard, timePicker } = getPageObjects(['dashboard', 'timePicker']);
 
   const fewPanelsTitle = 'few panels';
   const markdownTitle = 'Copy To Markdown';
@@ -45,15 +38,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.dashboard.loadSavedDashboard(fewPanelsTitle);
-      await PageObjects.dashboard.waitForRenderComplete();
-      fewPanelsPanelCount = await PageObjects.dashboard.getPanelCount();
+      await dashboard.navigateToApp();
+      await dashboard.preserveCrossAppState();
+      await dashboard.loadSavedDashboard(fewPanelsTitle);
+      await dashboard.waitForRenderComplete();
+      fewPanelsPanelCount = await dashboard.getPanelCount();
 
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.timePicker.setHistoricalDataRange();
+      await dashboard.gotoDashboardLandingPage();
+      await dashboard.clickNewDashboard();
+      await timePicker.setHistoricalDataRange();
       await dashboardVisualizations.createAndAddMarkdown({
         name: markdownTitle,
         markdown: 'Please add me to some other dashboard',
@@ -61,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async function () {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await dashboard.gotoDashboardLandingPage();
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
@@ -90,16 +83,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click(`dashboard-picker-option-few-panels`);
       await testSubjects.click('confirmCopyToButton');
 
-      await PageObjects.dashboard.waitForRenderComplete();
-      await PageObjects.dashboard.expectOnDashboard(`Editing ${fewPanelsTitle}`);
-      const newPanelCount = await PageObjects.dashboard.getPanelCount();
+      await dashboard.waitForRenderComplete();
+      await dashboard.expectOnDashboard(`Editing ${fewPanelsTitle}`);
+      const newPanelCount = await dashboard.getPanelCount();
       expect(newPanelCount).to.be(fewPanelsPanelCount + 1);
 
       // Save & ensure that view mode is applied properly.
-      await PageObjects.dashboard.clickQuickSave();
+      await dashboard.clickQuickSave();
       await testSubjects.existOrFail('saveDashboardSuccess');
 
-      await PageObjects.dashboard.clickCancelOutOfEditMode();
+      await dashboard.clickCancelOutOfEditMode();
       await dashboardPanelActions.expectMissingEditPanelAction(markdownTitle);
     });
 
@@ -125,12 +118,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await label.click();
       await testSubjects.click('confirmCopyToButton');
 
-      await PageObjects.dashboard.waitForRenderComplete();
-      await PageObjects.dashboard.expectOnDashboard(`Editing New Dashboard`);
+      await dashboard.waitForRenderComplete();
+      await dashboard.expectOnDashboard(`Editing New Dashboard`);
     });
 
     it('it always appends new panels instead of overwriting', async () => {
-      const newPanelCount = await PageObjects.dashboard.getPanelCount();
+      const newPanelCount = await dashboard.getPanelCount();
       expect(newPanelCount).to.be(2);
     });
   });

@@ -10,13 +10,13 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObject }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardVisualizations = getService('dashboardVisualizations');
   const dashboardExpect = getService('dashboardExpect');
-  const PageObjects = getPageObjects(['common', 'dashboard']);
+  const dashboard = getPageObject('dashboard');
 
   describe('empty dashboard', () => {
     before(async () => {
@@ -27,14 +27,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.dashboard.clickNewDashboard();
+      await dashboard.navigateToApp();
+      await dashboard.preserveCrossAppState();
+      await dashboard.clickNewDashboard();
     });
 
     after(async () => {
       await dashboardAddPanel.closeAddPanel();
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await dashboard.gotoDashboardLandingPage();
       await kibanaServer.savedObjects.cleanStandardList();
     });
 

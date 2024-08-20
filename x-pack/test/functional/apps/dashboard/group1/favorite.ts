@@ -8,14 +8,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects([
-    'common',
-    'dashboard',
-    'visualize',
-    'lens',
-    'timePicker',
-    'security',
-  ]);
+  const { dashboard, security: securityPage } = getPageObjects(['dashboard', 'security']);
 
   const esArchiver = getService('esArchiver');
   const listingTable = getService('listingTable');
@@ -44,7 +37,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
 
       // ensure we're logged out so we can login as the appropriate users
-      await PageObjects.security.forceLogout();
+      await securityPage.forceLogout();
 
       await security.role.create(ROLE, {
         elasticsearch: {
@@ -66,11 +59,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         full_name: USERNAME,
       });
 
-      await PageObjects.security.login(USERNAME, 'changeme', {
+      await securityPage.login(USERNAME, 'changeme', {
         expectSpaceSelector: true,
       });
 
-      await PageObjects.dashboard.gotoDashboardListingURL({
+      await dashboard.gotoDashboardListingURL({
         args: {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
@@ -81,7 +74,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
-      await PageObjects.security.forceLogout();
+      await securityPage.forceLogout();
       await spaces.delete(customSpace);
       await security.user.delete(USERNAME);
       await security.role.delete(ROLE);

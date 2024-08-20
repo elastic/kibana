@@ -12,14 +12,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const config = getService('config');
-  const PageObjects = getPageObjects([
-    'common',
-    'dashboard',
-    'security',
-    'spaceSelector',
-    'share',
-    'error',
-  ]);
+  const {
+    dashboard,
+    security: securityPage,
+    error,
+  } = getPageObjects(['dashboard', 'security', 'error']);
   const appsMenu = getService('appsMenu');
   const panelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
@@ -46,13 +43,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       // ensure we're logged out so we can login as the appropriate users
-      await PageObjects.security.forceLogout();
+      await securityPage.forceLogout();
     });
 
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-      await PageObjects.security.forceLogout();
+      await securityPage.forceLogout();
 
       await kbnServer.savedObjects.cleanStandardList();
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
@@ -80,7 +77,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
+        await securityPage.login(
           'global_dashboard_all_user',
           'global_dashboard_all_user-password',
           {
@@ -100,7 +97,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`landing page shows "Create new Dashboard" button`, async () => {
-        await PageObjects.dashboard.gotoDashboardListingURL({
+        await dashboard.gotoDashboardListingURL({
           args: navigationArgs,
         });
         await testSubjects.existOrFail('dashboardLandingPage', {
@@ -114,14 +111,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`create new dashboard shows addNew button`, async () => {
-        await PageObjects.dashboard.gotoDashboardURL({ args: navigationArgs });
+        await dashboard.gotoDashboardURL({ args: navigationArgs });
         await testSubjects.existOrFail('emptyDashboardWidget', {
           timeout: config.get('timeouts.waitFor'),
         });
       });
 
       it(`can view existing Dashboard`, async () => {
-        await PageObjects.dashboard.gotoDashboardURL({
+        await dashboard.gotoDashboardURL({
           id: 'i-exist',
           args: navigationArgs,
         });
@@ -131,12 +128,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`does not allow a visualization to be edited`, async () => {
-        await PageObjects.dashboard.gotoDashboardEditMode('A Dashboard');
+        await dashboard.gotoDashboardEditMode('A Dashboard');
         await panelActions.expectMissingEditPanelAction();
       });
 
       it(`does not allow a map to be edited`, async () => {
-        await PageObjects.dashboard.gotoDashboardEditMode('dashboard with map');
+        await dashboard.gotoDashboardEditMode('dashboard with map');
         await panelActions.expectMissingEditPanelAction();
       });
     });
@@ -165,7 +162,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
+        await securityPage.login(
           'global_dashboard_visualize_all_user',
           'global_dashboard_visualize_all_user-password',
           {
@@ -180,14 +177,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`allows a visualization to be edited`, async () => {
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.gotoDashboardEditMode('A Dashboard');
+        await dashboard.navigateToApp();
+        await dashboard.gotoDashboardEditMode('A Dashboard');
         await panelActions.expectExistsEditPanelAction();
       });
 
       it(`allows a map to be edited`, async () => {
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.gotoDashboardEditMode('dashboard with map');
+        await dashboard.navigateToApp();
+        await dashboard.gotoDashboardEditMode('dashboard with map');
         await panelActions.expectExistsEditPanelAction();
       });
 
@@ -265,7 +262,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
+        await securityPage.login(
           'global_dashboard_read_user',
           'global_dashboard_read_user-password',
           {
@@ -285,7 +282,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {
-        await PageObjects.dashboard.gotoDashboardListingURL({
+        await dashboard.gotoDashboardListingURL({
           args: navigationArgs,
         });
         await testSubjects.existOrFail('dashboardLandingPage', {
@@ -295,21 +292,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`shows read-only badge`, async () => {
-        await PageObjects.dashboard.gotoDashboardListingURL({
+        await dashboard.gotoDashboardListingURL({
           args: navigationArgs,
         });
         await globalNav.badgeExistsOrFail('Read only');
       });
 
       it(`create new dashboard shows the read only warning`, async () => {
-        await PageObjects.dashboard.gotoDashboardURL({
+        await dashboard.gotoDashboardURL({
           args: navigationArgs,
         });
         await testSubjects.existOrFail('dashboardEmptyReadOnly', { timeout: 20000 });
       });
 
       it(`can view existing Dashboard`, async () => {
-        await PageObjects.dashboard.gotoDashboardURL({
+        await dashboard.gotoDashboardURL({
           id: 'i-exist',
           args: navigationArgs,
         });
@@ -370,7 +367,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
+        await security.login(
           'global_dashboard_read_url_create_user',
           'global_dashboard_read_url_create_user-password',
           {
@@ -390,7 +387,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {
-        await PageObjects.dashboard.gotoDashboardListingURL({
+        await dashboard.gotoDashboardListingURL({
           args: navigationArgs,
         });
         await testSubjects.existOrFail('dashboardLandingPage', { timeout: 10000 });
@@ -402,14 +399,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`create new dashboard shows the read only warning`, async () => {
-        await PageObjects.dashboard.gotoDashboardURL({
+        await dashboard.gotoDashboardURL({
           args: navigationArgs,
         });
         await testSubjects.existOrFail('dashboardEmptyReadOnly', { timeout: 20000 });
       });
 
       it(`can view existing Dashboard`, async () => {
-        await PageObjects.dashboard.gotoDashboardURL({ id: 'i-exist', args: navigationArgs });
+        await dashboard.gotoDashboardURL({ id: 'i-exist', args: navigationArgs });
         await testSubjects.existOrFail('embeddablePanelHeading-APie', { timeout: 10000 });
       });
 
@@ -461,7 +458,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
+        await security.login(
           'no_dashboard_privileges_user',
           'no_dashboard_privileges_user-password',
           {
@@ -481,25 +478,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`landing page shows 403`, async () => {
-        await PageObjects.dashboard.gotoDashboardListingURL({
+        await dashboard.gotoDashboardListingURL({
           args: navigationArgs,
         });
-        await PageObjects.error.expectForbidden();
+        await error.expectForbidden();
       });
 
       it(`create new dashboard shows 403`, async () => {
-        await PageObjects.dashboard.gotoDashboardURL({ args: navigationArgs });
-        await PageObjects.error.expectForbidden();
+        await dashboard.gotoDashboardURL({ args: navigationArgs });
+        await error.expectForbidden();
       });
 
       it(`edit dashboard for object which doesn't exist shows 403`, async () => {
-        await PageObjects.dashboard.gotoDashboardURL({ id: 'i-dont-exist', args: navigationArgs });
-        await PageObjects.error.expectForbidden();
+        await dashboard.gotoDashboardURL({ id: 'i-dont-exist', args: navigationArgs });
+        await error.expectForbidden();
       });
 
       it(`edit dashboard for object which exists shows 403`, async () => {
-        await PageObjects.dashboard.gotoDashboardURL({ id: 'i-exist', args: navigationArgs });
-        await PageObjects.error.expectForbidden();
+        await dashboard.gotoDashboardURL({ id: 'i-exist', args: navigationArgs });
+        await error.expectForbidden();
       });
     });
   });
