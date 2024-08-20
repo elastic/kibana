@@ -61,35 +61,35 @@ const findInvestigationsRoute = createInvestigateAppServerRoute({
 });
 
 const getInvestigationRoute = createInvestigateAppServerRoute({
-  endpoint: 'GET /api/observability/investigations/{id} 2023-10-31',
+  endpoint: 'GET /api/observability/investigations/{investigationId} 2023-10-31',
   options: {
     tags: [],
   },
   params: getInvestigationParamsSchema,
-  handler: async (params) => {
-    const soClient = (await params.context.core).savedObjects.client;
-    const repository = investigationRepositoryFactory({ soClient, logger: params.logger });
+  handler: async ({ params, context, logger }) => {
+    const soClient = (await context.core).savedObjects.client;
+    const repository = investigationRepositoryFactory({ soClient, logger });
 
-    return await getInvestigation(params.params.path, repository);
+    return await getInvestigation(params.path, repository);
   },
 });
 
 const deleteInvestigationRoute = createInvestigateAppServerRoute({
-  endpoint: 'DELETE /api/observability/investigations/{id} 2023-10-31',
+  endpoint: 'DELETE /api/observability/investigations/{investigationId} 2023-10-31',
   options: {
     tags: [],
   },
   params: deleteInvestigationParamsSchema,
-  handler: async (params) => {
-    const soClient = (await params.context.core).savedObjects.client;
-    const repository = investigationRepositoryFactory({ soClient, logger: params.logger });
+  handler: async ({ params, context, logger }) => {
+    const soClient = (await context.core).savedObjects.client;
+    const repository = investigationRepositoryFactory({ soClient, logger });
 
-    return await deleteInvestigation(params.params.path.id, repository);
+    return await deleteInvestigation(params.path.investigationId, repository);
   },
 });
 
 const createInvestigationNoteRoute = createInvestigateAppServerRoute({
-  endpoint: 'POST /api/observability/investigations/{id}/notes 2023-10-31',
+  endpoint: 'POST /api/observability/investigations/{investigationId}/notes 2023-10-31',
   options: {
     tags: [],
   },
@@ -102,26 +102,29 @@ const createInvestigationNoteRoute = createInvestigateAppServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const repository = investigationRepositoryFactory({ soClient, logger });
 
-    return await createInvestigationNote(params.path.id, params.body, { repository, user });
+    return await createInvestigationNote(params.path.investigationId, params.body, {
+      repository,
+      user,
+    });
   },
 });
 
 const getInvestigationNotesRoute = createInvestigateAppServerRoute({
-  endpoint: 'GET /api/observability/investigations/{id}/notes 2023-10-31',
+  endpoint: 'GET /api/observability/investigations/{investigationId}/notes 2023-10-31',
   options: {
     tags: [],
   },
   params: getInvestigationNotesParamsSchema,
-  handler: async (params) => {
-    const soClient = (await params.context.core).savedObjects.client;
-    const repository = investigationRepositoryFactory({ soClient, logger: params.logger });
+  handler: async ({ params, context, request, logger }) => {
+    const soClient = (await context.core).savedObjects.client;
+    const repository = investigationRepositoryFactory({ soClient, logger });
 
-    return await getInvestigationNotes(params.params.path.id, repository);
+    return await getInvestigationNotes(params.path.investigationId, repository);
   },
 });
 
 const deleteInvestigationNotesRoute = createInvestigateAppServerRoute({
-  endpoint: 'DELETE /api/observability/investigations/{id}/notes/{noteId} 2023-10-31',
+  endpoint: 'DELETE /api/observability/investigations/{investigationId}/notes/{noteId} 2023-10-31',
   options: {
     tags: [],
   },
@@ -134,7 +137,7 @@ const deleteInvestigationNotesRoute = createInvestigateAppServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const repository = investigationRepositoryFactory({ soClient, logger });
 
-    return await deleteInvestigationNote(params.path.id, params.path.noteId, {
+    return await deleteInvestigationNote(params.path.investigationId, params.path.noteId, {
       repository,
       user,
     });
@@ -142,7 +145,7 @@ const deleteInvestigationNotesRoute = createInvestigateAppServerRoute({
 });
 
 const createInvestigationItemRoute = createInvestigateAppServerRoute({
-  endpoint: 'POST /api/observability/investigations/{id}/items 2023-10-31',
+  endpoint: 'POST /api/observability/investigations/{investigationId}/items 2023-10-31',
   options: {
     tags: [],
   },
@@ -155,7 +158,10 @@ const createInvestigationItemRoute = createInvestigateAppServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const repository = investigationRepositoryFactory({ soClient, logger });
 
-    return await createInvestigationItem(params.path.id, params.body, { repository, user });
+    return await createInvestigationItem(params.path.investigationId, params.body, {
+      repository,
+      user,
+    });
   },
 });
 

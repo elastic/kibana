@@ -12,7 +12,7 @@ import { investigationItemResponseSchema } from './investigation_item';
 
 const createInvestigationItemParamsSchema = t.type({
   path: t.type({
-    id: t.string,
+    investigationId: t.string,
   }),
   body: investigationItemsSchema,
 });

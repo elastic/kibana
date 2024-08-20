@@ -10,7 +10,7 @@ import * as t from 'io-ts';
 
 const deleteInvestigationNoteParamsSchema = t.type({
   path: t.type({
-    id: t.string,
+    investigationId: t.string,
     noteId: t.string,
   }),
 });
