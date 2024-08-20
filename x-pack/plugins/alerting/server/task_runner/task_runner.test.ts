@@ -2001,7 +2001,43 @@ describe('Task Runner', () => {
     expect(loggerMeta?.tags).toEqual(['1', 'test', 'rule-run-failed', 'framework-error']);
   });
 
-  test('should log framework error and disable the task when rule is not enabled', async () => {
+  test('should log framework error and increase taskAbortedCount when the rule is not enabled', async () => {
+    const taskRunner = new TaskRunner({
+      ruleType,
+      internalSavedObjectsRepository,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+    expect(AlertingEventLogger).toHaveBeenCalled();
+    rulesClient.getAlertFromRaw.mockReturnValue({
+      ...mockedRuleTypeSavedObject,
+      enabled: false,
+    } as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      ...mockedRawRuleSO,
+      attributes: {
+        ...mockedRawRuleSO.attributes,
+        enabled: false,
+      },
+    });
+
+    const runnerResult = await taskRunner.run();
+
+    expect(logger.error).toBeCalledTimes(1);
+
+    const loggerCall = logger.error.mock.calls[0][0];
+    const loggerMeta = logger.error.mock.calls[0][1];
+    const loggerCallPrefix = (loggerCall as string).split('-');
+    expect(loggerCallPrefix[0].trim()).toMatchInlineSnapshot(
+      `"Executing Rule default:test:1 has resulted in Error: Rule did not execute as it is disabled."`
+    );
+    expect(loggerMeta?.tags).toEqual(['1', 'test', 'rule-run-failed', 'framework-error']);
+    expect(runnerResult.state).toEqual({ taskAbortedCount: 1 });
+    expect(taskRunnerFactoryInitializerParams.taskManager.bulkDisable).not.toHaveBeenCalledTimes(1);
+  });
+
+  test('should disable the task when the rule is not enabled and task has been aborted at least 5 times', async () => {
     taskRunnerFactoryInitializerParams.taskManager.bulkDisable.mockImplementation(async () => ({
       tasks: [{ ...mockedTaskInstance, id: mockedRawRuleSO.id, enabled: false }],
       errors: [],
@@ -2010,7 +2046,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner({
       ruleType,
       internalSavedObjectsRepository,
-      taskInstance: mockedTaskInstance,
+      taskInstance: { ...mockedTaskInstance, state: { taskAbortedCount: 5 } },
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -2056,6 +2092,99 @@ describe('Task Runner', () => {
         },
       ],
     });
+  });
+
+  test('should disable the task when the rule is not enabled and task has been aborted more than 5 times', async () => {
+    taskRunnerFactoryInitializerParams.taskManager.bulkDisable.mockImplementation(async () => ({
+      tasks: [{ ...mockedTaskInstance, id: mockedRawRuleSO.id, enabled: false }],
+      errors: [],
+    }));
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      internalSavedObjectsRepository,
+      taskInstance: { ...mockedTaskInstance, state: { taskAbortedCount: 6 } },
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+    expect(AlertingEventLogger).toHaveBeenCalled();
+    rulesClient.getAlertFromRaw.mockReturnValue({
+      ...mockedRuleTypeSavedObject,
+      enabled: false,
+    } as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      ...mockedRawRuleSO,
+      attributes: {
+        ...mockedRawRuleSO.attributes,
+        enabled: false,
+      },
+    });
+
+    await taskRunner.run();
+
+    expect(logger.error).toBeCalledTimes(1);
+
+    const loggerCall = logger.error.mock.calls[0][0];
+    const loggerMeta = logger.error.mock.calls[0][1];
+    const loggerCallPrefix = (loggerCall as string).split('-');
+    expect(loggerCallPrefix[0].trim()).toMatchInlineSnapshot(
+      `"Executing Rule default:test:1 has resulted in Error: Rule did not execute as it is disabled."`
+    );
+    expect(loggerMeta?.tags).toEqual(['1', 'test', 'rule-run-failed', 'framework-error']);
+
+    expect(taskRunnerFactoryInitializerParams.taskManager.bulkDisable).toHaveBeenCalledTimes(1);
+    expect(taskRunnerFactoryInitializerParams.taskManager.bulkDisable).toHaveBeenCalledWith([
+      mockedRawRuleSO.id,
+    ]);
+
+    expect(
+      await taskRunnerFactoryInitializerParams.taskManager.bulkDisable([mockedRawRuleSO.id])
+    ).toEqual({
+      errors: [],
+      tasks: [
+        {
+          ...mockedTaskInstance,
+          id: mockedRawRuleSO.id,
+          enabled: false,
+        },
+      ],
+    });
+  });
+
+  test('should not disable the task when the rule is not enabled but task has been aborted less than 5 times', async () => {
+    const taskRunner = new TaskRunner({
+      ruleType,
+      internalSavedObjectsRepository,
+      taskInstance: { ...mockedTaskInstance, state: { taskAbortedCount: 4 } },
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+    expect(AlertingEventLogger).toHaveBeenCalled();
+    rulesClient.getAlertFromRaw.mockReturnValue({
+      ...mockedRuleTypeSavedObject,
+      enabled: false,
+    } as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      ...mockedRawRuleSO,
+      attributes: {
+        ...mockedRawRuleSO.attributes,
+        enabled: false,
+      },
+    });
+
+    const runnerResult = await taskRunner.run();
+
+    expect(logger.error).toBeCalledTimes(1);
+
+    const loggerCall = logger.error.mock.calls[0][0];
+    const loggerMeta = logger.error.mock.calls[0][1];
+    const loggerCallPrefix = (loggerCall as string).split('-');
+    expect(loggerCallPrefix[0].trim()).toMatchInlineSnapshot(
+      `"Executing Rule default:test:1 has resulted in Error: Rule did not execute as it is disabled."`
+    );
+    expect(loggerMeta?.tags).toEqual(['1', 'test', 'rule-run-failed', 'framework-error']);
+    expect(runnerResult.state).toEqual({ taskAbortedCount: 5 });
+    expect(taskRunnerFactoryInitializerParams.taskManager.bulkDisable).not.toHaveBeenCalledTimes(1);
   });
 
   test('recovers gracefully when the RuleType executor throws an exception', async () => {

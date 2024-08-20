@@ -28,7 +28,13 @@ import {
   TaskRunnerContext,
 } from './types';
 import { getExecutorServices } from './get_executor_services';
-import { ElasticsearchError, getNextRun, isRuleSnoozed, ruleExecutionStatusToRaw } from '../lib';
+import {
+  ElasticsearchError,
+  getNextRun,
+  getReasonFromError,
+  isRuleSnoozed,
+  ruleExecutionStatusToRaw,
+} from '../lib';
 import {
   IntervalSchedule,
   RawRuleExecutionStatus,
@@ -72,6 +78,7 @@ import { createTaskRunnerLogger, withAlertingSpan, processRunResults } from './l
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
+const MAX_TASK_ABORTED_COUNT = 5;
 
 interface TaskRunnerConstructorParams<
   Params extends RuleTypeParams,
@@ -608,7 +615,9 @@ export class TaskRunner<
         // disable task if rule was disabled
         if (
           executionStatus.error?.reason &&
-          executionStatus.error.reason === RuleExecutionStatusErrorReasons.Disabled
+          executionStatus.error.reason === RuleExecutionStatusErrorReasons.Disabled &&
+          this.taskInstance.state.taskAbortedCount &&
+          this.taskInstance.state.taskAbortedCount >= MAX_TASK_ABORTED_COUNT
         ) {
           await this.context.taskManager.bulkDisable([ruleId]);
         }
@@ -765,6 +774,16 @@ export class TaskRunner<
               error: { stack_trace: stack },
             });
           }
+
+          if (getReasonFromError(err) === RuleExecutionStatusErrorReasons.Disabled) {
+            const updatedOriginalState = {
+              ...originalState,
+              taskAbortedCount: (originalState.taskAbortedCount || 0) + 1,
+            };
+
+            return updatedOriginalState;
+          }
+
           return originalState;
         }
       ),
