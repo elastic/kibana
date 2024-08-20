@@ -37,11 +37,7 @@ import { pluginServices } from '../services/plugin_services';
 import { AwaitingDashboardAPI } from '../dashboard_container';
 import { DashboardRedirect } from '../dashboard_container/types';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
-import {
-  createDashboardEditUrl,
-  DASHBOARD_APP_ID,
-  DASHBOARD_STATE_STORAGE_KEY,
-} from '../dashboard_constants';
+import { createDashboardEditUrl, DASHBOARD_APP_ID, getFullEditPath } from '../dashboard_constants';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import { loadDashboardHistoryLocationState } from './locator/load_dashboard_history_location_state';
 import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
@@ -54,6 +50,7 @@ export interface DashboardAppProps {
   savedDashboardId?: string;
   redirectTo: DashboardRedirect;
   embedSettings?: DashboardEmbedSettings;
+  expandedPanelId?: string;
 }
 
 export const DashboardAPIContext = createContext<AwaitingDashboardAPI>(null);
@@ -71,10 +68,10 @@ export function DashboardApp({
   embedSettings,
   redirectTo,
   history,
+  expandedPanelId,
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
-  const [redirectToExpandedPanel, setRedirectToExpandedPanel] = useState<string | undefined>();
-
+  console.log('expandedPanelId passed into app', expandedPanelId);
   useMount(() => {
     (async () => {
       setShowNoDataPage(await isDashboardAppInNoDataState());
@@ -91,6 +88,7 @@ export function DashboardApp({
    * Unpack & set up dashboard services
    */
   const {
+    application: { getUrlForApp },
     screenshotMode: { isScreenshotMode, getScreenshotContext },
     coreContext: { executionContext },
     embeddable: { getStateTransfer },
@@ -187,18 +185,20 @@ export function DashboardApp({
       isEmbeddedExternally: Boolean(embedSettings), // embed settings are only sent if the dashboard URL has `embed=true`
       getEmbeddableAppContext: (dashboardId) => ({
         currentAppId: DASHBOARD_APP_ID,
-        getCurrentPath: () => `#${createDashboardEditUrl(dashboardId)}`,
+        getCurrentPath: () =>
+          `#${createDashboardEditUrl(dashboardId, dashboardAPI?.expandedPanelId.value)}`,
       }),
     });
   }, [
     history,
-    embedSettings,
+    kbnUrlStateStorage,
     validateOutcome,
+    embedSettings,
     getScopedHistory,
     isScreenshotMode,
-    getStateTransfer,
-    kbnUrlStateStorage,
     getScreenshotContext,
+    getStateTransfer,
+    dashboardAPI?.expandedPanelId.value,
   ]);
 
   /**
@@ -210,11 +210,18 @@ export function DashboardApp({
       kbnUrlStateStorage,
       dashboardAPI,
     });
-    if (redirectToExpandedPanel) {
-      return dashboardAPI?.setExpandedPanelId(redirectToExpandedPanel);
-    }
+    dashboardAPI.expandedPanelId.subscribe(() => {
+      // update url here to look like `/app/dashboards/{dashboardId}/{expandedPanelId}`
+      console.log(dashboardAPI.expandedPanelId.value, 'expandedPanelId in app useEffect hook');
+
+      const newUrl = getFullEditPath(
+        dashboardAPI.getDashboardSavedObjectId(),
+        dashboardAPI.expandedPanelId.value
+      );
+      dashboardAPI.updateInput(newUrl);
+    });
     return () => stopWatchingAppStateInUrl();
-  }, [dashboardAPI, kbnUrlStateStorage, redirectToExpandedPanel, savedDashboardId]);
+  }, [dashboardAPI, kbnUrlStateStorage, savedDashboardId, expandedPanelId, getUrlForApp]);
 
   const locator = useMemo(() => url?.locators.get(DASHBOARD_APP_LOCATOR), [url]);
 
@@ -239,7 +246,14 @@ export function DashboardApp({
           {getLegacyConflictWarning?.()}
           <DashboardRenderer
             locator={locator}
-            ref={setDashboardAPI}
+            ref={(dashboard) => {
+              if (dashboard && !dashboardAPI) {
+                setDashboardAPI(dashboard);
+                if (expandedPanelId) {
+                  dashboard?.expandPanel(expandedPanelId);
+                }
+              }
+            }}
             dashboardRedirect={redirectTo}
             savedObjectId={savedDashboardId}
             showPlainSpinner={showPlainSpinner}

@@ -215,9 +215,11 @@ const ParentClassController = ({
 
     if (maximizedPanelId) {
       parentDiv.classList.add('dshDashboardViewportWrapper');
+      console.log(dashboard.expandedPanelId.value, 'expandedPanelId in ParentClassController');
     } else {
+      console.log(dashboard.expandedPanelId.value, 'expandedPanelId in ParentClassController');
       parentDiv.classList.remove('dshDashboardViewportWrapper');
     }
-  }, [maximizedPanelId, viewportRef.parentElement]);
+  }, [dashboard.expandedPanelId.value, maximizedPanelId, viewportRef.parentElement]);
   return null;
 };
