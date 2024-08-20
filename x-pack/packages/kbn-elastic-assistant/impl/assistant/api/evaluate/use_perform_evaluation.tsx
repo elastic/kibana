@@ -9,7 +9,7 @@ import { useMutation } from '@tanstack/react-query';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
-import { PostEvaluateRequestBody } from '@kbn/elastic-assistant-common';
+import { PostEvaluateRequestBodyInput } from '@kbn/elastic-assistant-common';
 import { postEvaluation } from './evaluate';
 
 const PERFORM_EVALUATION_MUTATION_KEY = ['elastic-assistant', 'perform-evaluation'];
@@ -39,7 +39,7 @@ export interface ResponseError {
 export const usePerformEvaluation = ({ http, toasts }: UsePerformEvaluationParams) => {
   return useMutation(
     PERFORM_EVALUATION_MUTATION_KEY,
-    (evalParams: PostEvaluateRequestBody) => {
+    (evalParams: PostEvaluateRequestBodyInput) => {
       return postEvaluation({ http, evalParams });
     },
     {

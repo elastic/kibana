@@ -13,19 +13,15 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import {
   defaultAssistantFeatures,
   PostEvaluateRequestBodyInput,
-  PostEvaluateRequestQueryInput,
 } from '@kbn/elastic-assistant-common';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 const defaultBody: PostEvaluateRequestBodyInput = {
-  langSmithApiKey: undefined,
-};
-
-const defaultQueryParams: PostEvaluateRequestQueryInput = {
   datasetName: 'datasetName',
-  graphs: 'graphs',
-  models: 'models',
+  graphs: ['graphs'],
+  connectorIds: ['id1', 'id2'],
   runName: undefined,
+  langSmithApiKey: undefined,
 };
 
 describe('Post Evaluate Route', () => {
@@ -63,7 +59,7 @@ describe('Post Evaluate Route', () => {
       });
 
       const response = await server.inject(
-        getPostEvaluateRequest({ body: defaultBody, query: defaultQueryParams }),
+        getPostEvaluateRequest({ body: defaultBody }),
         requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(404);

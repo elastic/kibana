@@ -27,7 +27,10 @@ import {
 
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { GetEvaluateResponse, PostEvaluateRequestBody } from '@kbn/elastic-assistant-common';
+import type {
+  GetEvaluateResponse,
+  PostEvaluateRequestBodyInput,
+} from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../../assistant_context';
 import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
@@ -35,12 +38,6 @@ import { getActionTypeTitle, getGenAiConfig } from '../../../connectorland/helpe
 import { PRECONFIGURED_CONNECTOR } from '../../../connectorland/translations';
 import { usePerformEvaluation } from '../../api/evaluate/use_perform_evaluation';
 import { useEvaluationData } from '../../api/evaluate/use_evaluation_data';
-
-const DEFAULT_EVAL_TYPES_OPTIONS = [
-  { label: 'correctness' },
-  { label: 'esql-validator', disabled: true },
-  { label: 'custom', disabled: true },
-];
 
 /**
  * Evaluation Settings -- development-only feature for evaluating models
@@ -150,51 +147,13 @@ export const EvaluationSettings: React.FC = React.memo(() => {
     return defaultGraphs.map((label) => ({ label }));
   }, [defaultGraphs]);
 
-  // Evaluation
-  // Evaluation Type
-  const [selectedEvaluationType, setSelectedEvaluationType] = useState<
-    Array<EuiComboBoxOptionOption<string>>
-  >([]);
-  const onEvaluationTypeChange = useCallback(
-    (evaluationType: Array<EuiComboBoxOptionOption<string>>) => {
-      setSelectedEvaluationType(evaluationType);
-    },
-    [setSelectedEvaluationType]
-  );
-  const onEvaluationTypeOptionsCreate = useCallback(
-    (searchValue: string) => {
-      const normalizedSearchValue = searchValue.trim();
-
-      if (!normalizedSearchValue) {
-        return;
-      }
-
-      setSelectedEvaluationType([{ label: normalizedSearchValue }]);
-    },
-    [setSelectedEvaluationType]
-  );
-  const evaluationTypeOptions = useMemo(() => {
-    return DEFAULT_EVAL_TYPES_OPTIONS;
-  }, []);
-
-  // Eval Model
-  const [selectedEvaluatorModelOptions, setSelectedEvaluatorModelOptions] = useState<
-    Array<EuiComboBoxOptionOption<string>>
-  >([]);
-  const onEvaluatorModelOptionsChange = useCallback(
-    (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-      setSelectedEvaluatorModelOptions(selectedOptions);
-    },
-    [setSelectedEvaluatorModelOptions]
-  );
-
   // Required fields by eval API
   const isPerformEvaluationDisabled =
     selectedModelOptions.length === 0 || selectedGraphOptions.length === 0;
 
   // Perform Evaluation Button
   const handlePerformEvaluation = useCallback(async () => {
-    const evalParams: PostEvaluateRequestBody = {
+    const evalParams: PostEvaluateRequestBodyInput = {
       connectorIds: selectedModelOptions.flatMap((option) => option.key ?? []).sort(),
       graphs: selectedGraphOptions.map((option) => option.label).sort(),
       datasetName,

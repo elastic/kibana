@@ -10,13 +10,13 @@ import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_EVALUATE_URL,
   GetEvaluateResponse,
-  PostEvaluateRequestBody,
+  PostEvaluateRequestBodyInput,
   PostEvaluateResponse,
 } from '@kbn/elastic-assistant-common';
 
 export interface PostEvaluationParams {
   http: HttpSetup;
-  evalParams: PostEvaluateRequestBody;
+  evalParams: PostEvaluateRequestBodyInput;
   signal?: AbortSignal | undefined;
 }
 
