@@ -243,7 +243,7 @@ export const getOptionsListControlFactory = (
                 searchTechnique: searchTechnique$.getValue(),
                 runPastTimeout: runPastTimeout$.getValue(),
                 singleSelect: singleSelect$.getValue(),
-                selections: selections.selectedOptions$.getValue(),
+                selectedOptions: selections.selectedOptions$.getValue(),
                 sort: sort$.getValue(),
                 existsSelected: selections.existsSelected$.getValue(),
                 exclude: selections.exclude$.getValue(),
