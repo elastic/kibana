@@ -32,6 +32,7 @@ import {
   of,
   type Observable,
   type Subscription,
+  timer,
 } from 'rxjs';
 import { type Location, createLocation } from 'history';
 import deepEqual from 'react-fast-compare';
@@ -334,9 +335,32 @@ export class ProjectNavigationService {
 
         if (homePageLink) {
           this.setProjectHome(homePageLink.href);
+        } else {
+          this.waitForLink(homePage, (navLink: ChromeNavLink) => {
+            this.setProjectHome(navLink.href);
+          });
         }
 
         this.initNavigation(nextId, definition.navigationTree$);
+      });
+  }
+
+  private waitForLink(linkId: string, cb: (chromeNavLink: ChromeNavLink) => undefined): void {
+    if (!this.navLinksService) return;
+
+    const fiveSeconds = timer(5000);
+    let navLink: ChromeNavLink | undefined;
+
+    this.navLinksService
+      .getNavLinks$()
+      .pipe(takeUntil(fiveSeconds))
+      .subscribe((navLinks) => {
+        if (navLink) return; // already found and called the callback
+
+        navLink = navLinks.find((link) => link.id === linkId);
+        if (navLink) {
+          cb(navLink);
+        }
       });
   }
 

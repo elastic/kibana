@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { map, filter, take } from 'rxjs';
+import { map } from 'rxjs';
 import produce from 'immer';
 import { i18n } from '@kbn/i18n';
 import { SecurityPageName, SECURITY_UI_APP_ID } from '@kbn/security-solution-navigation';
@@ -45,26 +45,15 @@ export const initSideNavigation = async (services: Services) => {
     )
   );
 
-  // To avoid a race condition where the navLinks are registered after the solution navigation
-  // we wait to have the getStarted link before adding the solution navigation.
-  // The getStarted deepLink needs to exist to correctly set the logo href link in the header.
-  securitySolution
-    .getNavLinks$()
-    .pipe(
-      filter((links) => links.some((link) => link.id === 'get_started')),
-      take(1)
-    )
-    .subscribe(() => {
-      navigation.addSolutionNavigation({
-        id: 'security',
-        homePage: `${SECURITY_UI_APP_ID}:${SecurityPageName.landing}`,
-        title: SOLUTION_NAME,
-        icon: 'logoSecurity',
-        navigationTree$: essNavigationTree$,
-        panelContentProvider,
-        dataTestSubj: 'securitySolutionSideNav',
-      });
-    });
+  navigation.addSolutionNavigation({
+    id: 'security',
+    homePage: `${SECURITY_UI_APP_ID}:${SecurityPageName.landing}`,
+    title: SOLUTION_NAME,
+    icon: 'logoSecurity',
+    navigationTree$: essNavigationTree$,
+    panelContentProvider,
+    dataTestSubj: 'securitySolutionSideNav',
+  });
 };
 
 // Temporary configuration to render the stack management links in the panel
