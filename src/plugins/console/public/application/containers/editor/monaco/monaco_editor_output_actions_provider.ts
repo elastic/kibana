@@ -164,7 +164,6 @@ export class MonacoEditorOutputActionsProvider {
       for (const data of request.data || []) {
         selectedRequestsString += JSON.stringify(data, null, 2) + '\n';
       }
-      selectedRequestsString += '\n';
     }
 
     return selectedRequestsString;
