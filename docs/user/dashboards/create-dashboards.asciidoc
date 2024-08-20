@@ -1,6 +1,13 @@
 [[create-dashboards]]
 = Build dashboards
 
+{kib} offers many ways to build powerful dashboards that will help you visualize and keep track of the most important information contained in your {es} data.
+
+* Create and assemble visualizations such as charts or maps, and enrich them with helpful legends containing key data.
+* Extract and show key indicators and metrics to keep them visible and highlighted at all times.
+* Add text, images, and links to help viewers make the most of your dashboard.
+* Include additional controls to facilitate filtering and browsing the data.
+
 [float]
 [[dashboard-minimum-requirements]]
 
@@ -26,18 +33,18 @@ TIP: If you don't have data at hand and still want to explore dashboards, you ca
 When you create a dashboard, you are automatically in edit mode and can make changes to the dashboard. 
 [[create-panels-with-lens]]
 . Add content to the dashboard. You have several options covered in more details in the <<panels-editors,Visualizations section>>:
-** **Create visualization**. This option is a shortcut to create a chart using **Lens**, the default visualization editor in {kib}.
-** **Add panel**. Choose one of the available panels to add and configure content to your dashboard.
+** <<lens,**Create visualization**>>. This option is a shortcut to create a chart using **Lens**, the default visualization editor in {kib}.
+** <<panels-editors,**Add panel**>>. Choose one of the available panels to add and configure content to your dashboard.
 ** **Add from library**. Select existing content that has already been configured and saved to the **Visualize Library**.
 +
-NOTE: When you add search results from *Discover* to dashboards, the results are not aggregated.
-** **Controls**. Add controls to help filter the content of your dashboard.
+NOTE: When you add a saved search from *Discover* to a dashboard, the results are not aggregated.
+** <<add-controls,**Controls**>>. Add controls to help filter the content of your dashboard.
 
-. Organize the content of your dashboard.
+. Organize your dashboard by <<arrange-panels,organizing the various panels>>. 
 [[add-dashboard-settings]]
-. Define the main settings of your dashboard: title, <<managing-tags,tags>>, and design options
-.. In the toolbar, click *Settings*.
-.. Edit the settings that you need. Some advanced options let you define additional display options to unify the look and feel of the dashboard's panels.
+. Define the main settings of your dashboard from the *Settings* menu located in the toolbar.
+.. Clear title, description, and <<managing-tags,tags>> allow you to find the dashboard quickly later when browsing your list of dashboard or using the {kib} search bar.
+.. Additional display options allow you unify the look and feel of the dashboard's panels:
 
 *** *Store time with dashboard* &mdash; Saves the specified time filter.
 *** *Use margins between panels* &mdash; Adds a margin of space between each panel.
@@ -63,7 +70,11 @@ TIP: When looking for a specific dashboard, you can filter them by tag or by cre
 
 . When you open an existing dashboard, you are in view mode. To make changes to the dashboard, click *Edit* in the toolbar. 
 
-. Make the changes you need to the dashboard.
+. Make the changes that you need to the dashboard:
+
+** Adjust the dashboard's settings
+** <<panels-editors,Add, remove, move, or edit panels>>
+** <<add-controls,Change the available controls>>
 [[save-dashboards]]
 . **Save** the dashboard. You can then leave the **Edit** mode and *Switch to view mode*. 
 
@@ -131,4 +142,4 @@ Copy panels from one dashboard to another dashboard.
 
 == Import dashboards
 
-You can import dashboards from the **Saved Objects** page under **Stack Management**
+You can import dashboards from the **Saved Objects** page under **Stack Management**. Refer to <<managing-saved-objects,Manage saved objects>>.
