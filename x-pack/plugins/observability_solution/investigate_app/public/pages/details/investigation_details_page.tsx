@@ -7,15 +7,16 @@
 
 import { EuiButton, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import { alertOriginSchema } from '@kbn/investigation-shared';
 import { ALERT_RULE_CATEGORY } from '@kbn/rule-data-utils/src/default_alerts_as_data';
-import { AlertOrigin } from '@kbn/investigate-plugin/common/schema/origin';
+import React from 'react';
+import { useParams } from 'react-router-dom';
 import { paths } from '../../../common/paths';
-import { useKibana } from '../../hooks/use_kibana';
-import { useFetchInvestigation } from '../../hooks/use_get_investigation_details';
-import { useInvestigateParams } from '../../hooks/use_investigate_params';
 import { useFetchAlert } from '../../hooks/use_get_alert_details';
+import { useFetchInvestigation } from '../../hooks/use_get_investigation_details';
+import { useKibana } from '../../hooks/use_kibana';
 import { InvestigationDetails } from './components/investigation_details';
+import { InvestigationDetailsPathParams } from './types';
 
 export function InvestigationDetailsPage() {
   const {
@@ -27,9 +28,7 @@ export function InvestigationDetailsPage() {
     },
   } = useKibana();
 
-  const {
-    path: { id },
-  } = useInvestigateParams('/{id}');
+  const { investigationId } = useParams<InvestigationDetailsPathParams>();
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
 
@@ -37,17 +36,15 @@ export function InvestigationDetailsPage() {
     data: investigationDetails,
     isLoading: isFetchInvestigationLoading,
     isError: isFetchInvestigationError,
-  } = useFetchInvestigation({ id });
+  } = useFetchInvestigation({ id: investigationId });
 
-  const alertId = investigationDetails ? (investigationDetails.origin as AlertOrigin).id : '';
+  const alertId = alertOriginSchema.is(investigationDetails?.origin)
+    ? investigationDetails?.origin.id
+    : undefined;
 
-  const {
-    data: alertDetails,
-    isLoading: isFetchAlertLoading,
-    isError: isFetchAlertError,
-  } = useFetchAlert({ id: alertId });
+  const { data: alertDetails } = useFetchAlert({ id: alertId });
 
-  if (isFetchInvestigationLoading || isFetchAlertLoading) {
+  if (isFetchInvestigationLoading) {
     return (
       <h1>
         {i18n.translate('xpack.investigateApp.fetchInvestigation.loadingLabel', {
@@ -57,7 +54,7 @@ export function InvestigationDetailsPage() {
     );
   }
 
-  if (isFetchInvestigationError || isFetchAlertError) {
+  if (isFetchInvestigationError) {
     return (
       <h1>
         {i18n.translate('xpack.investigateApp.fetchInvestigation.errorLabel', {
@@ -109,7 +106,7 @@ export function InvestigationDetailsPage() {
         ],
       }}
     >
-      <InvestigationDetails />
+      <InvestigationDetails investigationId={investigationId} />
     </ObservabilityPageTemplate>
   );
 }

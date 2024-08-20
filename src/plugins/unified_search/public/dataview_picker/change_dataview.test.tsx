@@ -17,7 +17,7 @@ import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/d
 import { ChangeDataView } from './change_dataview';
 import { DataViewSelector } from './data_view_selector';
 import { dataViewMock, dataViewMockEsql } from './mocks/dataview';
-import { DataViewPickerPropsExtended } from './data_view_picker';
+import { DataViewPickerProps } from './data_view_picker';
 
 describe('DataView component', () => {
   const createMockWebStorage = () => ({
@@ -43,7 +43,7 @@ describe('DataView component', () => {
   };
 
   function wrapDataViewComponentInContext(
-    testProps: DataViewPickerPropsExtended,
+    testProps: DataViewPickerProps,
     storageValue: boolean,
     uiSettingValue: boolean = false
   ) {
@@ -75,7 +75,7 @@ describe('DataView component', () => {
       </I18nProvider>
     );
   }
-  let props: DataViewPickerPropsExtended;
+  let props: DataViewPickerProps;
   beforeEach(() => {
     props = {
       currentDataViewId: 'dataview-1',
