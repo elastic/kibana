@@ -31,7 +31,7 @@ import {
   SavedDashboardInput,
 } from '../../../services/dashboard_content_management/types';
 import { pluginServices } from '../../../services/plugin_services';
-import { DashboardSaveOptions, DashboardStateFromSaveModal, DashboardRedirect } from '../../types';
+import { DashboardSaveOptions, DashboardStateFromSaveModal } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
 import { extractTitleAndCount } from './lib/extract_title_and_count';
 import { DashboardSaveModal } from './overlays/save_modal';
@@ -116,11 +116,7 @@ export async function runQuickSave(this: DashboardContainer) {
  * @description exclusively for user directed dashboard save actions, also
  * accounts for scenarios of cloning elastic managed dashboard into user managed dashboards
  */
-export async function runInteractiveSave(
-  this: DashboardContainer,
-  interactionMode: ViewMode,
-  redirectTo?: DashboardRedirect
-) {
+export async function runInteractiveSave(this: DashboardContainer, interactionMode: ViewMode) {
   const {
     data: {
       query: {
@@ -265,15 +261,6 @@ export async function runInteractiveSave(
         this.saveNotification$.next();
 
         resolve(saveResult);
-
-        if (redirectTo) {
-          redirectTo({
-            id: saveResult.id,
-            editMode: true,
-            useReplace: true,
-            destination: 'dashboard',
-          });
-        }
 
         return saveResult;
       } catch (error) {

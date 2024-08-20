@@ -46,6 +46,7 @@ import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount
 import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../dashboard_constants';
 import './_dashboard_top_nav.scss';
 import { DashboardRedirect } from '../dashboard_container/types';
+import { SaveDashboardReturn } from '../services/dashboard_content_management/types';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -322,12 +323,26 @@ export function InternalDashboardTopNav({
     }
     if (showWriteControls && managed) {
       const badgeProps = {
-        ...getManagedContentBadge(dashboardManagedBadge.getAriaLabel(), false),
+        ...getManagedContentBadge(dashboardManagedBadge.getAriaLabel()),
         onClick: () => setIsPopoverOpen(!isPopoverOpen),
         onClickAriaLabel: dashboardManagedBadge.getAriaLabel(),
         iconOnClick: () => setIsPopoverOpen(!isPopoverOpen),
         iconOnClickAriaLabel: dashboardManagedBadge.getAriaLabel(),
       } as TopNavMenuBadgeProps;
+
+      const maybeRedirect = (result?: SaveDashboardReturn) => {
+        if (!result) return;
+        const { redirectRequired, id } = result;
+        if (redirectRequired) {
+          redirectTo({
+            id,
+            editMode: true,
+            useReplace: true,
+            destination: 'dashboard',
+          });
+        }
+      };
+
       allBadges.push({
         renderCustomBadge: ({ badgeText }) => {
           const badgeButton = <EuiBadge {...badgeProps}>{badgeText}</EuiBadge>;
@@ -346,7 +361,9 @@ export function InternalDashboardTopNav({
                     <EuiLink
                       id="dashboardManagedContentPopoverButton"
                       onClick={() => {
-                        dashboard.runInteractiveSave(viewMode, redirectTo);
+                        dashboard
+                          .runInteractiveSave(viewMode)
+                          .then((result) => maybeRedirect(result));
                       }}
                       aria-label={dashboardManagedBadge.getDuplicateText()}
                     >
