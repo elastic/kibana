@@ -60,7 +60,7 @@ export const fetchLangSmithDatasets = async ({
       datasets.push(dataset);
     }
 
-    return datasets.map((d) => d.name);
+    return datasets.map((d) => d.name).sort();
   } catch (e) {
     logger.error(`Error fetching datasets from LangSmith: ${e.message}`);
     return [];

@@ -306,11 +306,11 @@ export const postEvaluateRoute = (
           // Run an evaluation for each graph so they show up separately (resulting in each dataset run grouped by connector)
           await asyncForEach(graphs, async ({ name, graph }) => {
             // Wrapper function for invoking the graph (to parse different input/output formats)
-            const predict = async (input: { question: string }) => {
+            const predict = async (input: { input: string }) => {
               logger.debug(`input:\n ${JSON.stringify(input, null, 2)}`);
 
               const r = await graph.invoke(
-                { input: input.question }, // TODO: Update to use the correct input format per dataset type
+                { input: input.input }, // TODO: Update to use the correct input format per dataset type
                 {
                   runName,
                   tags: ['evaluation'],
