@@ -35,18 +35,6 @@ interface QueueItem {
   fieldNames: string[];
 }
 
-export interface LogRateChange {
-  type: string;
-  averageLogRateCount: number;
-  logRateAggregationIntervalUsedForAnalysis: string;
-  documentSamplingFactorForAnalysis?: number;
-}
-
-export interface SimpleSignificantItem {
-  logRateChangeSort: number;
-  description: string;
-}
-
 /**
  * Runs log rate analysis data an on index given some alert metadata.
  */
@@ -162,8 +150,8 @@ export async function fetchLogRateAnalysisForAlert({
     );
   }, MAX_CONCURRENT_QUERIES);
 
-  // Push the actual items to the queue. We won't chunk the text fields since
-  // they are just `message` and `error.message`.
+  // Push the actual items to the queue. We don't need to chunk the text fields
+  // since they are just `message` and `error.message`.
   significantItemsQueue.push(
     [
       { fn: fetchSignificantCategories, fieldNames: textFieldCandidates },
