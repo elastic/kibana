@@ -20,6 +20,7 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import {
+  Subject,
   BehaviorSubject,
   combineLatest,
   map,
@@ -327,39 +328,49 @@ export class ProjectNavigationService {
         }
 
         const { sideNavComponent, homePage = '' } = definition;
-        const homePageLink = this.navLinksService?.get(homePage);
 
         if (sideNavComponent) {
           this.setSideNavComponent(sideNavComponent);
         }
 
-        if (homePageLink) {
-          this.setProjectHome(homePageLink.href);
-        } else {
-          this.waitForLink(homePage, (navLink: ChromeNavLink) => {
-            this.setProjectHome(navLink.href);
-          });
-        }
+        this.waitForLink(homePage, (navLink: ChromeNavLink) => {
+          this.setProjectHome(navLink.href);
+        });
 
         this.initNavigation(nextId, definition.navigationTree$);
       });
   }
 
+  /**
+   * This method waits for the chrome nav link to be available and then calls the callback.
+   * This is necessary to avoid race conditions when we register the solution navigation
+   * before the deep links are available (plugins can register them later).
+   *
+   * @param linkId The chrome nav link id
+   * @param cb The callback to call when the link is found
+   * @returns
+   */
   private waitForLink(linkId: string, cb: (chromeNavLink: ChromeNavLink) => undefined): void {
     if (!this.navLinksService) return;
 
-    const fiveSeconds = timer(5000);
-    let navLink: ChromeNavLink | undefined;
+    let navLink: ChromeNavLink | undefined = this.navLinksService.get(linkId);
+    if (navLink) {
+      cb(navLink);
+      return;
+    }
+
+    const stop$ = new Subject<void>();
+    const tenSeconds = timer(10000);
 
     this.navLinksService
       .getNavLinks$()
-      .pipe(takeUntil(fiveSeconds))
+      .pipe(takeUntil(tenSeconds), takeUntil(stop$))
       .subscribe((navLinks) => {
-        if (navLink) return; // already found and called the callback
-
         navLink = navLinks.find((link) => link.id === linkId);
+
         if (navLink) {
           cb(navLink);
+          stop$.next();
         }
       });
   }
