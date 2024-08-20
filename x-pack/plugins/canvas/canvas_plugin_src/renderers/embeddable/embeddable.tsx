@@ -58,10 +58,7 @@ const renderReactEmbeddable = ({
   // wrap in functional component to allow usage of hooks
   const RendererWrapper: FC<{}> = () => {
     const getAppContext = useGetAppContext(core);
-    const searchApi = useSearchApi({
-      filters: input.filters,
-      timeRange: input.timeRange,
-    });
+    const searchApi = useSearchApi({ filters: input.filters });
 
     return (
       <ReactEmbeddableRenderer
@@ -70,14 +67,15 @@ const renderReactEmbeddable = ({
         getParentApi={(): CanvasContainerApi => ({
           ...container,
           getAppContext,
-          getSerializedStateForChild: () => undefined,
-          getRuntimeStateForChild: () => omit(input, ['disableTriggers', 'filters']),
+          getSerializedStateForChild: () => ({
+            rawState: omit(input, ['disableTriggers', 'filters']),
+          }),
           ...searchApi,
         })}
         key={`${type}_${uuid}`}
-        onRuntimeStateChange={(runtimeState) => {
+        onAnyStateChange={(newState) => {
           const newExpression = embeddableInputToExpression(
-            runtimeState as unknown as EmbeddableInput,
+            newState.rawState as unknown as EmbeddableInput,
             type,
             undefined,
             true
