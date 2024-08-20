@@ -30295,7 +30295,7 @@ terser@^4.1.2, terser@^4.6.3:
     source-map "~0.6.1"
     source-map-support "~0.5.12"
 
-terser@^5.26.0, terser@^5.3.4, terser@^5.31.5, terser@^5.9.0:
+terser@^5.26.0, terser@^5.3.4, terser@^5.31.6, terser@^5.9.0:
   version "5.31.6"
   resolved "https://registry.yarnpkg.com/terser/-/terser-5.31.6.tgz#c63858a0f0703988d0266a82fcbf2d7ba76422b1"
   integrity sha512-PQ4DAriWzKj+qgehQ7LK5bQqCFNMmlhjR2PFFLuqGCpuCAauxemVBWwWOxo3UIwWQx8+Pr61Df++r76wDmkQBg==
