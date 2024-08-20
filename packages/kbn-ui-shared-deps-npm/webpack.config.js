@@ -18,14 +18,11 @@ const WEBPACK_SRC = require.resolve('webpack');
 
 const REPO_ROOT = Path.resolve(__dirname, '..', '..');
 
+/** @returns {import('webpack').Configuration} */
 module.exports = (_, argv) => {
   const outputPath = argv.outputPath ? Path.resolve(argv.outputPath) : UiSharedDepsNpm.distDir;
 
   return {
-    node: {
-      child_process: 'empty',
-      fs: 'empty',
-    },
     externals: {
       module: 'module',
     },
@@ -104,6 +101,7 @@ module.exports = (_, argv) => {
     },
     context: __dirname,
     devtool: 'cheap-source-map',
+    target: 'web',
     output: {
       path: outputPath,
       filename: '[name].dll.js',
@@ -111,7 +109,6 @@ module.exports = (_, argv) => {
       devtoolModuleFilenameTemplate: (info) =>
         `kbn-ui-shared-deps-npm/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
       library: '__kbnSharedDeps_npm__',
-      futureEmitAssets: true,
     },
 
     module: {
@@ -145,11 +142,17 @@ module.exports = (_, argv) => {
         'scheduler/tracing': 'scheduler/tracing-profiling',
       },
       extensions: ['.js', '.ts'],
+      fallback: {
+        child_process: false,
+        fs: false,
+        util: require.resolve('util'),
+        buffer: require.resolve('buffer'),
+      },
     },
 
     optimization: {
       minimize: false,
-      noEmitOnErrors: true,
+      emitOnErrors: false,
     },
 
     performance: {

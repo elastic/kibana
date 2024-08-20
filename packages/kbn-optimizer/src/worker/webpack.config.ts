@@ -9,11 +9,9 @@
 import Path from 'path';
 import Fs from 'fs';
 
-import { stringifyRequest } from 'loader-utils';
 import webpack from 'webpack';
-// @ts-expect-error
 import TerserPlugin from 'terser-webpack-plugin';
-import webpackMerge from 'webpack-merge';
+import { merge as webpackMerge } from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
@@ -39,7 +37,6 @@ export function getWebpackConfig(
   const ENTRY_CREATOR = require.resolve('./entry_point_creator');
 
   const commonConfig: webpack.Configuration = {
-    node: { fs: 'empty' },
     context: bundle.contextDir,
     cache: true,
     entry: {
@@ -54,12 +51,12 @@ export function getWebpackConfig(
       path: bundle.outputDir,
       filename: `${bundle.id}.${bundle.type}.js`,
       chunkFilename: `${bundle.id}.chunk.[id].js`,
-      devtoolModuleFilenameTemplate: (info) =>
+      devtoolModuleFilenameTemplate: (info: any) =>
         `/${bundle.type}:${bundle.id}/${Path.relative(
           bundle.sourceRoot,
           info.absoluteResourcePath
         )}${info.query}`,
-      jsonpFunction: `${bundle.id}_bundle_jsonpfunction`,
+      chunkLoadingGlobal: `jsonp_webpack_${bundle.id}`,
     },
 
     optimization: {
@@ -198,14 +195,17 @@ export function getWebpackConfig(
                 {
                   loader: 'sass-loader',
                   options: {
-                    additionalData(content: string, loaderContext: webpack.loader.LoaderContext) {
-                      return `@import ${stringifyRequest(
-                        loaderContext,
-                        Path.resolve(
-                          worker.repoRoot,
-                          `src/core/public/styles/core_app/_globals_${theme}.scss`
+                    additionalData(content: string, loaderContext: webpack.LoaderContext<any>) {
+                      const req = JSON.stringify(
+                        loaderContext.utils.contextify(
+                          loaderContext.context || loaderContext.rootContext,
+                          Path.resolve(
+                            worker.repoRoot,
+                            `src/core/public/styles/core_app/_globals_${theme}.scss`
+                          )
                         )
-                      )};\n${content}`;
+                      );
+                      return `@import ${req};\n${content}`;
                     },
                     implementation: require('sass-embedded'),
                     sassOptions: {
@@ -240,13 +240,6 @@ export function getWebpackConfig(
           ],
         },
         {
-          test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
-          loader: 'url-loader',
-          options: {
-            limit: 8192,
-          },
-        },
-        {
           test: /\.(js|tsx?)$/,
           exclude: /node_modules/,
           use: {
@@ -259,14 +252,26 @@ export function getWebpackConfig(
           },
         },
         {
-          test: /\.(html|md|txt|tmpl)$/,
-          use: {
-            loader: 'raw-loader',
-          },
-        },
-        {
           test: /\.peggy$/,
           loader: require.resolve('@kbn/peggy-loader'),
+        },
+        // emits a separate file and exports the URL. Previously achievable by using file-loader.
+        {
+          test: [
+            require.resolve('@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js'),
+            require.resolve('maplibre-gl/dist/maplibre-gl-csp-worker'),
+          ],
+          type: 'asset/resource',
+        },
+        // exports the source code of the asset. Previously achievable by using raw-loader.
+        {
+          test: [/\.(html|md|txt|tmpl)$/],
+          type: 'asset/source',
+        },
+        // automatically chooses between exporting a data URI and emitting a separate file. Previously achievable by using url-loader with asset size limit.
+        {
+          test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
+          type: 'asset',
         },
       ],
     },
@@ -280,6 +285,8 @@ export function getWebpackConfig(
           'src/core/public/styles/core_app/images'
         ),
         vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
+        child_process: false,
+        fs: false,
       },
     },
 
@@ -309,8 +316,6 @@ export function getWebpackConfig(
     optimization: {
       minimizer: [
         new TerserPlugin({
-          cache: false,
-          sourceMap: false,
           extractComments: false,
           parallel: false,
           terserOptions: {

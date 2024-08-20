@@ -9,7 +9,6 @@ require('@kbn/babel-register').install();
 
 const path = require('path');
 const webpack = require('webpack');
-const { stringifyRequest } = require('loader-utils');
 
 const { CiStatsPlugin } = require('./webpack/ci_stats_plugin');
 const {
@@ -21,6 +20,7 @@ const {
 
 const isProd = process.env.NODE_ENV === 'production';
 
+/** @type {import('webpack').Configuration} */
 module.exports = {
   context: KIBANA_ROOT,
   entry: {
@@ -35,6 +35,8 @@ module.exports = {
   resolve: {
     alias: {
       core_app_image_assets: path.resolve(KIBANA_ROOT, 'src/core/public/styles/core_app/images'),
+      [require.resolve('@elastic/eui/es/components/drag_and_drop')]: false,
+      [require.resolve('highlight.js')]: false,
     },
     extensions: ['.js', '.json', '.ts', '.tsx', '.scss'],
     mainFields: ['browser', 'main'],
@@ -160,10 +162,16 @@ module.exports = {
             loader: 'sass-loader',
             options: {
               additionalData(content, loaderContext) {
-                return `@import ${stringifyRequest(
-                  loaderContext,
-                  path.resolve(KIBANA_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
-                )};\n${content}`;
+                const req = JSON.stringify(
+                  loaderContext.utils.contextify(
+                    loaderContext.context || loaderContext.rootContext,
+                    path.resolve(
+                      KIBANA_ROOT,
+                      'src/core/public/styles/core_app/_globals_v8light.scss'
+                    )
+                  )
+                );
+                return `@import ${req};\n${content}`;
               },
               implementation: require('sass-embedded'),
               sassOptions: {
@@ -187,13 +195,6 @@ module.exports = {
         test: /\.html$/,
         loader: 'html-loader',
         exclude: /node_modules/,
-      },
-      {
-        test: [
-          require.resolve('@elastic/eui/es/components/drag_and_drop'),
-          require.resolve('highlight.js'),
-        ],
-        use: require.resolve('null-loader'),
       },
       {
         test: /\.peggy$/,

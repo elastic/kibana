@@ -74,7 +74,7 @@ module.exports = (request, options) => {
     }
   }
 
-  if (request.startsWith('file-loader!') || request.startsWith('!!file-loader!')) {
+  if (req.endsWith('?asUrl')) {
     return FILE_MOCK;
   }
 

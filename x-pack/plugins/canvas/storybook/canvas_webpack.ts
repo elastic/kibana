@@ -43,19 +43,14 @@ export const canvasWebpack = {
           },
         ],
       },
-      // Exclude large-dependency, troublesome or irrelevant modules.
-      {
-        test: [
-          resolve(KIBANA_ROOT, 'x-pack/plugins/canvas/public/components/embeddable_flyout'),
-          resolve(KIBANA_ROOT, 'x-pack/plugins/reporting/public'),
-        ],
-        use: 'null-loader',
-      },
     ],
   },
   resolve: {
     alias: {
       'src/plugins': resolve(KIBANA_ROOT, 'src/plugins'),
+      // Exclude large-dependency, troublesome or irrelevant modules.
+      [resolve(KIBANA_ROOT, 'x-pack/plugins/canvas/public/components/embeddable_flyout')]: false,
+      [resolve(KIBANA_ROOT, 'x-pack/plugins/reporting/public')]: false,
     },
   },
 };

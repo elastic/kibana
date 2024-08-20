@@ -41,7 +41,8 @@ webpack_cli(
     "@npm//terser-webpack-plugin",
     "@npm//@babel/runtime",
     "@npm//babel-loader",
-    "@npm//raw-loader",
+    "@npm//assert",
+    "@npm//buffer",
     "@npm//rxjs",
 
     "webpack.config.js",

@@ -15,7 +15,7 @@ webpack_cli(
     "@npm//moment",
     "@npm//babel-loader",
     "@npm//css-loader",
-    "@npm//url-loader",
+    "@npm//url",
     "@npm//@babel/plugin-transform-numeric-separator",
     "//packages/kbn-ui-shared-deps-npm",
     "//packages/kbn-babel-register",
