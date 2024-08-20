@@ -10,6 +10,7 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { getImportRulesSchemaMock } from '../../../../../../common/api/detection_engine/rule_management/mocks';
 import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 import { requestContextMock } from '../../../routes/__mocks__';
+import { prebuiltRulesImporterMock } from '../../../prebuilt_rules/logic/prebuilt_rules_importer.mock';
 
 import { importRules } from './import_rules_utils';
 import { createBulkErrorObject } from '../../../routes/utils';
@@ -19,11 +20,13 @@ describe('importRules', () => {
   const ruleToImport = getImportRulesSchemaMock();
 
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockPrebuiltRulesImporter: ReturnType<typeof prebuiltRulesImporterMock.create>;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
     savedObjectsClient = savedObjectsClientMock.create();
+    mockPrebuiltRulesImporter = prebuiltRulesImporterMock.create();
   });
 
   it('returns an empty rules response if no rules to import', async () => {
@@ -33,6 +36,7 @@ describe('importRules', () => {
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
       savedObjectsClient,
+      prebuiltRulesImporter: mockPrebuiltRulesImporter,
     });
 
     expect(result).toEqual([]);
@@ -44,6 +48,7 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
+      prebuiltRulesImporter: mockPrebuiltRulesImporter,
       savedObjectsClient,
     });
 
@@ -73,6 +78,7 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
+      prebuiltRulesImporter: mockPrebuiltRulesImporter,
       savedObjectsClient,
     });
 
@@ -99,6 +105,7 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
+      prebuiltRulesImporter: mockPrebuiltRulesImporter,
       savedObjectsClient,
     });
 
@@ -112,6 +119,7 @@ describe('importRules', () => {
       prebuiltRuleToImport = {
         ...getImportRulesSchemaMock(),
         immutable: true,
+        version: 1,
       };
     });
 
@@ -122,8 +130,34 @@ describe('importRules', () => {
         rulesResponseAcc: [],
         overwriteRules: false,
         detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
-        existingLists: {},
+        prebuiltRulesImporter: mockPrebuiltRulesImporter,
         allowPrebuiltRules: false,
+        savedObjectsClient,
+      });
+
+      expect(result).toEqual([
+        {
+          error: {
+            message:
+              'Importing prebuilt rules is not supported. To import this rule as a custom rule, remove its "immutable" property try again.',
+            status_code: 400,
+          },
+          rule_id: prebuiltRuleToImport.rule_id,
+        },
+      ]);
+    });
+
+    it('rejects a prebuilt rule when version is missing', async () => {
+      delete prebuiltRuleToImport.version;
+      const ruleChunk = [prebuiltRuleToImport];
+      const result = await importRules({
+        ruleChunks: [ruleChunk],
+        rulesResponseAcc: [],
+        overwriteRules: false,
+        detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
+        prebuiltRulesImporter: mockPrebuiltRulesImporter,
+        allowPrebuiltRules: false,
+        savedObjectsClient,
       });
 
       expect(result).toEqual([
@@ -150,8 +184,9 @@ describe('importRules', () => {
         rulesResponseAcc: [],
         overwriteRules: false,
         detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
-        existingLists: {},
         allowPrebuiltRules: true,
+        prebuiltRulesImporter: mockPrebuiltRulesImporter,
+        savedObjectsClient,
       });
 
       expect(result).toEqual([{ rule_id: prebuiltRuleToImport.rule_id, status_code: 200 }]);
