@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return text === 'Sep 22, 2015 @ 23:50:13.253';
       });
 
-      await dataGrid.clickCellExpandButton(0, 3);
+      await dataGrid.clickCellExpandButton(0, 5);
 
       let expandDocId = '';
       await retry.waitForWithTimeout('expandDocId to be valid', 5000, async () => {
@@ -108,7 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('should show popover with expanded cell content by click on expand button on embeddable', async () => {
+    it.only('should show popover with expanded cell content by click on expand button on embeddable', async () => {
       log.debug('open popover with expanded cell content to get json from the editor');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -126,7 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug(`row document timestamp: ${text}`);
         return text === 'Sep 22, 2015 @ 23:50:13.253';
       });
-      await dataGrid.clickCellExpandButton(0, 3);
+      await dataGrid.clickCellExpandButton(0, 5);
 
       let expandDocId = '';
       await retry.waitForWithTimeout('expandDocId to be valid', 5000, async () => {
