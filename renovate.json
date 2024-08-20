@@ -21,6 +21,14 @@
       "enabled": false
     },
     {
+      "groupName": "devcontainer",
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip", "backport:current-major"],
+      "enabled": true,
+      "matchManagers": ["devcontainer"]
+    },
+    {
       "groupName": "chainguard",
       "matchPackageNames": ["docker.elastic.co/wolfi/chainguard-base"],
       "reviewers": ["team:kibana-operations"],
