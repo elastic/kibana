@@ -30,9 +30,6 @@ interface AggsResponse {
   projectsAggs: {
     buckets: Buckets;
   };
-  monitorTypes: {
-    buckets: Buckets;
-  };
   monitorTypeAggs: {
     buckets: Buckets;
   };
