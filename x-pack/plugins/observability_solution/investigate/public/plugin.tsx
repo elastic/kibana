@@ -4,7 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type {
+  AuthenticatedUser,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/public';
+import { GetInvestigationResponse } from '@kbn/investigation-shared';
 import type { Logger } from '@kbn/logging';
 import { useMemo } from 'react';
 import { createUseInvestigation } from './hooks/use_investigation';
@@ -60,7 +67,13 @@ export class InvestigatePlugin
   start(coreStart: CoreStart, pluginsStart: InvestigateStartDependencies): InvestigatePublicStart {
     return {
       getWidgetDefinitions: this.widgetRegistry.getWidgetDefinitions,
-      useInvestigation: ({ user, from, to }) => {
+      useInvestigation: ({
+        user,
+        investigationData,
+      }: {
+        user: AuthenticatedUser;
+        investigationData?: GetInvestigationResponse;
+      }) => {
         const widgetDefinitions = useMemo(() => this.widgetRegistry.getWidgetDefinitions(), []);
 
         return createUseInvestigation({
@@ -68,8 +81,7 @@ export class InvestigatePlugin
           widgetDefinitions,
         })({
           user,
-          from,
-          to,
+          investigationData,
         });
       },
     };
