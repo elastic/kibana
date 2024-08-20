@@ -710,22 +710,21 @@ async function getExpressionSuggestionsByType(
             return [
               { ...pipeCompleteItem, text: ' | ' },
               { ...commaCompleteItem, text: ', ' },
-            ].map((s) => ({
+            ].map<SuggestionRawDefinition>((s) => ({
               ...s,
               filterText: textToUse,
               text: textToUse + s.text,
               command: TRIGGER_SUGGESTION_COMMAND,
-              range: {
-                startColumn: innerText.length - lastWord.length + 1,
-                endColumn: innerText.length,
-                startLineNumber: 1,
-                endLineNumber: 1,
+              rangeToReplace: {
+                start: innerText.length - lastWord.length + 1,
+                end: innerText.length,
               },
             }));
           } else {
             suggestions.push(
               ...fieldSuggestions.map((suggestion) => ({
                 ...suggestion,
+                command: TRIGGER_SUGGESTION_COMMAND,
                 rangeToReplace: {
                   start: innerText.length - lastWord.length + 1,
                   end: innerText.length,
@@ -735,7 +734,12 @@ async function getExpressionSuggestionsByType(
           }
         } else {
           // ... | <COMMAND> <suggest>
-          suggestions.push(...fieldSuggestions);
+          suggestions.push(
+            ...fieldSuggestions.map((suggestion) => ({
+              ...suggestion,
+              command: TRIGGER_SUGGESTION_COMMAND,
+            }))
+          );
         }
       }
     }

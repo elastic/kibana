@@ -1368,7 +1368,7 @@ describe('autocomplete', () => {
         'FROM a | KEEP doubleField/',
         ['doubleField, ', 'doubleField | '].map((text) => ({
           text,
-          range: { startColumn: 14, endColumn: 25, startLineNumber: 1, endLineNumber: 1 },
+          rangeToReplace: { start: 15, end: 25 },
         }))
       );
       testSuggestions('FROM a | KEEP doubleField /', ['| ', ',']);
