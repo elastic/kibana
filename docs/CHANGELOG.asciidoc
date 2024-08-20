@@ -83,6 +83,20 @@ include::CHANGELOG.asciidoc[tag=known-issue-186969]
 
 include::CHANGELOG.asciidoc[tag=known-issue-189394]
 
+=== Known issues
+
+[discrete]
+[[known-178114]]
+.Kibana fails to start when processing YAML configuration keys that contain dotted notation in objects in arrays
+[%collapsible]
+====
+*Details* +
+In 8.15.1, We fixed a bug when processing YAML configuration keys that contain dotted notation in objects in arrays.
+This can manifest as a validation error causing Kibana to not start.
+
+For more information, refer to {kibana-pull}190590[#190590].
+====
+
 [discrete]
 [[known-185691]]
 .When using the Observability AI Assistant with the OpenAI connector, function calling will result in an error
