@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+export type ObjectEntry<T> = [keyof T, T[keyof T]];
+
 export type Fields<TMeta extends Record<string, any> | undefined = undefined> = {
   '@timestamp'?: number;
 } & (TMeta extends undefined ? {} : Partial<{ meta: TMeta }>);
@@ -22,6 +24,16 @@ export class Entity<TFields extends Fields> {
       if (!(fieldName in this.fields)) {
         this.fields[fieldName] = defaults[fieldName] as any;
       }
+    });
+
+    return this;
+  }
+
+  overrides(overrides: Partial<TFields>) {
+    const overrideEntries = Object.entries(overrides) as Array<ObjectEntry<TFields>>;
+
+    overrideEntries.forEach(([fieldName, value]) => {
+      this.fields[fieldName] = value;
     });
 
     return this;

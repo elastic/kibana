@@ -63,6 +63,7 @@ export type LogDocument = Fields &
     'event.duration': number;
     'event.start': Date;
     'event.end': Date;
+    labels?: Record<string, string>;
   }>;
 
 class Log extends Serializable<LogDocument> {
@@ -139,6 +140,26 @@ function create(logsOptions: LogsOptions = defaultLogsOptions): Log {
   ).dataset('synth');
 }
 
+function createMinimal({
+  dataset = 'synth',
+  namespace = 'default',
+}: {
+  dataset?: string;
+  namespace?: string;
+} = {}): Log {
+  return new Log(
+    {
+      'input.type': 'logs',
+      'data_stream.namespace': namespace,
+      'data_stream.type': 'logs',
+      'data_stream.dataset': dataset,
+      'event.dataset': dataset,
+    },
+    { isLogsDb: false }
+  );
+}
+
 export const log = {
   create,
+  createMinimal,
 };
