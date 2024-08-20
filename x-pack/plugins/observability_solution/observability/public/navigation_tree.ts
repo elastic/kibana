@@ -233,10 +233,116 @@ const navTree: NavigationTreeDefinition = {
             { link: 'graph' },
           ],
         },
+      ],
+    },
+  ],
+  footer: [
+    { type: 'recentlyAccessed' },
+    {
+      type: 'navItem',
+      title: i18n.translate('xpack.observability.obltNav.getStarted', {
+        defaultMessage: 'Get started',
+      }),
+      link: 'observabilityOnboarding',
+      icon: 'launch',
+    },
+    {
+      type: 'navItem',
+      id: 'devTools',
+      title: i18n.translate('xpack.observability.obltNav.devTools', {
+        defaultMessage: 'Developer tools',
+      }),
+      link: 'dev_tools',
+      icon: 'editorCodeBlock',
+    },
+    {
+      type: 'navGroup',
+      id: 'project_settings_project_nav',
+      title: i18n.translate('xpack.observability.obltNav.management', {
+        defaultMessage: 'Management',
+      }),
+      icon: 'gear',
+      breadcrumbStatus: 'hidden',
+      children: [
+        {
+          link: 'management',
+          title: i18n.translate('xpack.observability.obltNav.stackManagement', {
+            defaultMessage: 'Stack Management',
+          }),
+          renderAs: 'panelOpener',
+          spaceBefore: null,
+          children: [
+            {
+              title: 'Ingest',
+              children: [{ link: 'management:ingest_pipelines' }, { link: 'management:pipelines' }],
+            },
+            {
+              title: 'Data',
+              children: [
+                { link: 'management:index_management' },
+                { link: 'management:index_lifecycle_management' },
+                { link: 'management:snapshot_restore' },
+                { link: 'management:rollup_jobs' },
+                { link: 'management:transform' },
+                { link: 'management:cross_cluster_replication' },
+                { link: 'management:remote_clusters' },
+                { link: 'management:migrate_data' },
+              ],
+            },
+            {
+              title: 'Alerts and Insights',
+              children: [
+                { link: 'management:triggersActions' },
+                { link: 'management:cases' },
+                { link: 'management:triggersActionsConnectors' },
+                { link: 'management:reporting' },
+                { link: 'management:jobsListLink' },
+                { link: 'management:watcher' },
+                { link: 'management:maintenanceWindows' },
+              ],
+            },
+            {
+              title: 'Security',
+              children: [
+                { link: 'management:users' },
+                { link: 'management:roles' },
+                { link: 'management:api_keys' },
+                { link: 'management:role_mappings' },
+              ],
+            },
+            {
+              title: 'Kibana',
+              children: [
+                { link: 'management:dataViews' },
+                { link: 'management:filesManagement' },
+                { link: 'management:objects' },
+                { link: 'management:tags' },
+                { link: 'management:search_sessions' },
+                { link: 'management:aiAssistantManagementSelection' },
+                { link: 'management:spaces' },
+                { link: 'management:settings' },
+              ],
+            },
+            {
+              title: 'Stack',
+              children: [
+                { link: 'management:license_management' },
+                { link: 'management:upgrade_assistant' },
+              ],
+            },
+          ],
+        },
+        {
+          link: 'integrations',
+        },
+        {
+          link: 'fleet',
+        },
         {
           id: 'machine_learning-landing',
           link: 'securitySolutionUI:machine_learning-landing',
           renderAs: 'panelOpener',
+          spaceBefore: null,
           children: [
             {
               children: [
@@ -360,111 +466,6 @@ const navTree: NavigationTreeDefinition = {
               ],
             },
           ],
-        },
-      ],
-    },
-  ],
-  footer: [
-    { type: 'recentlyAccessed' },
-    {
-      type: 'navItem',
-      title: i18n.translate('xpack.observability.obltNav.getStarted', {
-        defaultMessage: 'Get started',
-      }),
-      link: 'observabilityOnboarding',
-      icon: 'launch',
-    },
-    {
-      type: 'navItem',
-      id: 'devTools',
-      title: i18n.translate('xpack.observability.obltNav.devTools', {
-        defaultMessage: 'Developer tools',
-      }),
-      link: 'dev_tools',
-      icon: 'editorCodeBlock',
-    },
-    {
-      type: 'navGroup',
-      id: 'project_settings_project_nav',
-      title: i18n.translate('xpack.observability.obltNav.management', {
-        defaultMessage: 'Management',
-      }),
-      icon: 'gear',
-      breadcrumbStatus: 'hidden',
-      children: [
-        {
-          link: 'management',
-          title: i18n.translate('xpack.observability.obltNav.stackManagement', {
-            defaultMessage: 'Stack Management',
-          }),
-          renderAs: 'panelOpener',
-          spaceBefore: null,
-          children: [
-            {
-              title: 'Ingest',
-              children: [{ link: 'management:ingest_pipelines' }, { link: 'management:pipelines' }],
-            },
-            {
-              title: 'Data',
-              children: [
-                { link: 'management:index_management' },
-                { link: 'management:index_lifecycle_management' },
-                { link: 'management:snapshot_restore' },
-                { link: 'management:rollup_jobs' },
-                { link: 'management:transform' },
-                { link: 'management:cross_cluster_replication' },
-                { link: 'management:remote_clusters' },
-                { link: 'management:migrate_data' },
-              ],
-            },
-            {
-              title: 'Alerts and Insights',
-              children: [
-                { link: 'management:triggersActions' },
-                { link: 'management:cases' },
-                { link: 'management:triggersActionsConnectors' },
-                { link: 'management:reporting' },
-                { link: 'management:jobsListLink' },
-                { link: 'management:watcher' },
-                { link: 'management:maintenanceWindows' },
-              ],
-            },
-            {
-              title: 'Security',
-              children: [
-                { link: 'management:users' },
-                { link: 'management:roles' },
-                { link: 'management:api_keys' },
-                { link: 'management:role_mappings' },
-              ],
-            },
-            {
-              title: 'Kibana',
-              children: [
-                { link: 'management:dataViews' },
-                { link: 'management:filesManagement' },
-                { link: 'management:objects' },
-                { link: 'management:tags' },
-                { link: 'management:search_sessions' },
-                { link: 'management:aiAssistantManagementSelection' },
-                { link: 'management:spaces' },
-                { link: 'management:settings' },
-              ],
-            },
-            {
-              title: 'Stack',
-              children: [
-                { link: 'management:license_management' },
-                { link: 'management:upgrade_assistant' },
-              ],
-            },
-          ],
-        },
-        {
-          link: 'integrations',
-        },
-        {
-          link: 'fleet',
         },
         {
           id: 'cloudLinkUserAndRoles',
