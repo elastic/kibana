@@ -23,6 +23,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
+import { columnActions, DataGridDensity, DataLoadingState } from '@kbn/unified-data-table';
 import { DataLoadingState, useColumns } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 
@@ -147,6 +148,9 @@ export function SearchEmbeddableGridComponent({
       onUpdateSampleSize: (newSampleSize: number | undefined) => {
         stateManager.sampleSize.next(newSampleSize);
       },
+      onUpdateDataGridDensity: (newDensity: DataGridDensity | undefined) => {
+        stateManager.density.next(newDensity);
+      },
       onResize: (newGridSettings: { columnId: string; width: number | undefined }) => {
         stateManager.grid.next(onResizeGridColumn(newGridSettings, grid));
       },
@@ -219,6 +223,7 @@ export function SearchEmbeddableGridComponent({
       searchTitle={panelTitle || savedSearchTitle}
       services={discoverServices}
       showTimeCol={!discoverServices.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false)}
+      dataGridDensityState={savedSearch.density}
     />
   );
 }
