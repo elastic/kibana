@@ -42,7 +42,6 @@ export class DashboardPageObject extends FtrService {
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly dashboardAddPanel = this.ctx.getService('dashboardAddPanel');
-  private readonly dashboardPanelActions = this.ctx.getService('dashboardPanelActions');
   private readonly renderable = this.ctx.getService('renderable');
   private readonly listingTable = this.ctx.getService('listingTable');
   private readonly elasticChart = this.ctx.getService('elasticChart');
