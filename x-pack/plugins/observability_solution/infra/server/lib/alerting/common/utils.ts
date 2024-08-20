@@ -25,6 +25,7 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type {
   AssetDetailsLocatorParams,
   InventoryLocatorParams,
+  MetricsExplorerLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
 import {
   ALERT_RULE_PARAMETERS_NODE_TYPE,
@@ -177,12 +178,14 @@ export const getMetricsViewInAppUrlWithSpaceId = ({
   timestamp,
   groupBy,
   assetDetailsLocator,
+  metricsExplorerLocator,
 }: {
   basePath: IBasePath;
   spaceId: string;
   timestamp: string;
   groupBy?: string[];
   assetDetailsLocator?: LocatorPublic<AssetDetailsLocatorParams>;
+  metricsExplorerLocator?: LocatorPublic<MetricsExplorerLocatorParams>;
 }) => {
   const fields = {
     [TIMESTAMP]: timestamp,
@@ -195,6 +198,7 @@ export const getMetricsViewInAppUrlWithSpaceId = ({
       fields: parseTechnicalFields(fields, true),
       groupBy,
       assetDetailsLocator,
+      metricsExplorerLocator,
     })
   );
 };

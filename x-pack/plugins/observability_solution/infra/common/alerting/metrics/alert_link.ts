@@ -12,11 +12,12 @@ import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_te
 import { type InventoryItemType, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import {
+  MetricsExplorerLocatorParams,
   type AssetDetailsLocatorParams,
   type InventoryLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
 import { castArray } from 'lodash';
-import { fifteenMinutesInMilliseconds, METRICS_EXPLORER_URL } from '../../constants';
+import { fifteenMinutesInMilliseconds } from '../../constants';
 import { SupportedAssetTypes } from '../../asset_details/types';
 
 const ALERT_RULE_PARAMTERS_INVENTORY_METRIC_ID = `${ALERT_RULE_PARAMETERS}.criteria.metric`;
@@ -127,13 +128,19 @@ export const getMetricsViewInAppUrl = ({
   fields,
   groupBy,
   assetDetailsLocator,
+  metricsExplorerLocator,
 }: {
   fields: ParsedTechnicalFields & Record<string, any>;
   groupBy?: string[];
   assetDetailsLocator?: LocatorPublic<AssetDetailsLocatorParams>;
+  metricsExplorerLocator?: LocatorPublic<MetricsExplorerLocatorParams>;
 }) => {
-  if (!groupBy || !assetDetailsLocator) {
-    return METRICS_EXPLORER_URL;
+  if (!assetDetailsLocator || !metricsExplorerLocator) {
+    throw new Error('Locators for Asset Details and Metrics Explorer are required');
+  }
+
+  if (!groupBy) {
+    return metricsExplorerLocator.getRedirectUrl({});
   }
 
   // creates an object of asset details supported assetType by their assetId field name
@@ -143,7 +150,7 @@ export const getMetricsViewInAppUrl = ({
   }, {} as Record<string, InventoryItemType>);
 
   // detemines if the groupBy has a field that the asset details supports
-  const supportedAssetId = groupBy?.find((field) => !!assetTypeByAssetId[field]);
+  const supportedAssetId = groupBy.find((field) => !!assetTypeByAssetId[field]);
   // assigns a nodeType if the groupBy field is supported by asset details
   const supportedAssetType = supportedAssetId ? assetTypeByAssetId[supportedAssetId] : undefined;
 
@@ -158,7 +165,7 @@ export const getMetricsViewInAppUrl = ({
       assetDetailsLocator,
     });
   } else {
-    return METRICS_EXPLORER_URL;
+    return metricsExplorerLocator.getRedirectUrl({});
   }
 };
 

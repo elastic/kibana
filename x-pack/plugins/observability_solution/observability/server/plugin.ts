@@ -37,6 +37,11 @@ import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import {
+  AssetDetailsLocatorDefinition,
+  InventoryLocatorDefinition,
+  MetricsExplorerLocatorDefinition,
+} from '@kbn/observability-shared-plugin/common';
 import { ObservabilityConfig } from '.';
 import { casesFeatureId, observabilityFeatureId } from '../common';
 import {
@@ -99,6 +104,12 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     const config = this.initContext.config.get<ObservabilityConfig>();
 
     const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
+
+    // TODO: Move to Infra server?
+    plugins.share.url.locators.create(new AssetDetailsLocatorDefinition());
+    plugins.share.url.locators.create(new MetricsExplorerLocatorDefinition());
+    plugins.share.url.locators.create(new InventoryLocatorDefinition());
+
     const logsExplorerLocator =
       plugins.share.url.locators.get<LogsExplorerLocatorParams>(LOGS_EXPLORER_LOCATOR_ID);
 

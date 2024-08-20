@@ -33,6 +33,8 @@ import { convertToBuiltInComparators } from '@kbn/observability-plugin/common/ut
 import {
   ASSET_DETAILS_LOCATOR_ID,
   AssetDetailsLocatorParams,
+  METRICS_EXPLORER_LOCATOR_ID,
+  MetricsExplorerLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import { AlertStates } from '../../../../common/alerting/metrics';
@@ -124,6 +126,9 @@ export const createMetricThresholdExecutor =
     const alertsLocator = share.setup.url.locators.get<AlertsLocatorParams>(alertsLocatorID);
     const assetDetailsLocator =
       share.setup.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
+    const metricsExplorerLocator = share.setup.url.locators.get<MetricsExplorerLocatorParams>(
+      METRICS_EXPLORER_LOCATOR_ID
+    );
 
     const startTime = Date.now();
 
@@ -221,6 +226,7 @@ export const createMetricThresholdExecutor =
             timestamp,
             groupBy,
             assetDetailsLocator,
+            metricsExplorerLocator,
           }),
         };
 
@@ -430,6 +436,7 @@ export const createMetricThresholdExecutor =
             timestamp,
             groupBy,
             assetDetailsLocator,
+            metricsExplorerLocator,
           }),
           ...additionalContext,
         };
@@ -489,6 +496,7 @@ export const createMetricThresholdExecutor =
           timestamp: indexedStartedAt,
           groupBy,
           assetDetailsLocator,
+          metricsExplorerLocator,
         }),
 
         originalAlertState: translateActionGroupToAlertState(originalActionGroup),
