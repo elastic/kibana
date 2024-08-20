@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { test } from '@playwright/test';
+import fs from 'fs';
+import path from 'path';
+import { test } from '../../fixtures/saml';
 
 export const authFile = '.auth/user.json';
 
-test('login', async ({ request }) => {
+/*
+test('ess - login', async ({ request }) => {
   await request.post(`${process.env.KIBANA_URL}/internal/security/login`, {
     headers: {
       'kbn-xsrf': 'cypress-creds',
@@ -28,4 +31,27 @@ test('login', async ({ request }) => {
   });
 
   await request.storageState({ path: authFile });
+}); */
+
+test('serverless - login', async ({ samlSessionManager }) => {
+  const cookie = await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(
+    'platform_engineer'
+  );
+  const parsedUrl = new URL(process.env.KIBANA_URL!);
+  const domain = parsedUrl.hostname;
+
+  const authData = {
+    cookies: [
+      {
+        name: 'sid',
+        value: cookie,
+        domain,
+        path: '/',
+        httpOnly: true,
+      },
+    ],
+  };
+
+  fs.mkdirSync(path.dirname(authFile), { recursive: true });
+  fs.writeFileSync(authFile, JSON.stringify(authData, null, 2));
 });

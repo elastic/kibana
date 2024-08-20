@@ -21,19 +21,19 @@ test.afterAll(async ({ esArchiver }) => {
 });
 
 test.describe('Enable risk scores from dashboard', () => {
-  test.beforeEach(async ({ page }) => {
+  test.use({ storageState: '.auth/user.json' });
+  test.beforeEach(async ({ page, context }) => {
     entityAnalyticsPage = await PageFactory.createEntityAnalyticsPage(page);
+    const cookies = await context.cookies();
     entityAnalyticsPage.navigates();
   });
-  test.use({ storageState: '.auth/user.json' });
-
-  test('host risk enable button should redirect to entity management page', async ({ page }) => {
+  test('host risk enable button should redirect to entity management page', async () => {
     await entityAnalyticsPage.waitForEnableHostRiskScoreToBePresent();
     entityAnalyticsManagementPage = await entityAnalyticsPage.enableHostRisk();
     entityAnalyticsManagementPage.entityAnalyticsManagementPageTitleShouldBeDisplayed();
   });
 
-  test('user risk enable button should redirect to entity management page', async ({ page }) => {
+  test('user risk enable button should redirect to entity management page', async () => {
     await entityAnalyticsPage.waitForEnableUserRiskScoreToBePresent();
     entityAnalyticsManagementPage = await entityAnalyticsPage.enableUserRisk();
     entityAnalyticsManagementPage.entityAnalyticsManagementPageTitleShouldBeDisplayed();
