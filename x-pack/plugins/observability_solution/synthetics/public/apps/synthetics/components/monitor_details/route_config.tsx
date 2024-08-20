@@ -10,8 +10,6 @@ import React from 'react';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { EuiIcon, EuiPageHeaderProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { MonitorDetailsAlerts } from './monitor_alerts/monitor_detail_alerts';
-import { MonitorAlertsIcon } from './monitor_alerts/alerts_icon';
 import { RefreshButton } from '../common/components/refresh_button';
 import { MonitorNotFoundPage } from './monitor_not_found_page';
 import { MonitorDetailsPageTitle } from './monitor_details_page_title';
@@ -25,7 +23,6 @@ import { MonitorHistory } from './monitor_history/monitor_history';
 import { MonitorSummary } from './monitor_summary/monitor_summary';
 import { EditMonitorLink } from './monitor_summary/edit_monitor_link';
 import {
-  MONITOR_ALERTS_ROUTE,
   MONITOR_ERRORS_ROUTE,
   MONITOR_HISTORY_ROUTE,
   MONITOR_NOT_FOUND_ROUTE,
@@ -71,16 +68,6 @@ export const getMonitorDetailsRoute = (
       pageHeader: getMonitorSummaryHeader(history, syntheticsPath, 'errors'),
     },
     {
-      title: i18n.translate('xpack.synthetics.monitorErrors.title', {
-        defaultMessage: 'Synthetics Monitor Alerts | {baseTitle}',
-        values: { baseTitle },
-      }),
-      path: MONITOR_ALERTS_ROUTE,
-      component: MonitorDetailsAlerts,
-      dataTestSubj: 'syntheticsMonitorAlertsPage',
-      pageHeader: getMonitorSummaryHeader(history, syntheticsPath, 'alerts'),
-    },
-    {
       title: i18n.translate('xpack.synthetics.monitorNotFound.title', {
         defaultMessage: 'Synthetics Monitor Not Found | {baseTitle}',
         values: { baseTitle },
@@ -113,7 +100,7 @@ const getMonitorsBreadcrumb = (syntheticsPath: string) => ({
 const getMonitorSummaryHeader = (
   history: ReturnType<typeof useHistory>,
   syntheticsPath: string,
-  selectedTab: 'overview' | 'history' | 'errors' | 'alerts'
+  selectedTab: 'overview' | 'history' | 'errors'
 ): EuiPageHeaderProps => {
   // Not a component, but it doesn't matter. Hooks are just functions
   const match = useRouteMatch<{ monitorId: string }>(MONITOR_ROUTE); // eslint-disable-line react-hooks/rules-of-hooks
@@ -161,15 +148,6 @@ const getMonitorSummaryHeader = (
         isSelected: selectedTab === 'errors',
         href: `${syntheticsPath}${MONITOR_ERRORS_ROUTE.replace(':monitorId', monitorId)}${search}`,
         'data-test-subj': 'syntheticsMonitorErrorsTab',
-      },
-      {
-        label: i18n.translate('xpack.synthetics.monitorAlertsTab.title', {
-          defaultMessage: 'Alerts',
-        }),
-        prepend: <MonitorAlertsIcon />,
-        isSelected: selectedTab === 'alerts',
-        href: `${syntheticsPath}${MONITOR_ALERTS_ROUTE.replace(':monitorId', monitorId)}${search}`,
-        'data-test-subj': 'syntheticsMonitorAlertsTab',
       },
     ],
   };
