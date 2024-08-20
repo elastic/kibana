@@ -12,7 +12,7 @@ import type {
   IndicesIndexSettings,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { MAX_FILE_SIZE_BYTES } from '../common/constants';
+import { MAX_FILE_SIZE_BYTES, MAX_TIKA_FILE_SIZE_BYTES } from '../common/constants';
 import type { IngestPipelineWrapper, InputData } from '../common/types';
 import { wrapError } from './error_wrapper';
 import { importDataProvider } from './import_data';
@@ -339,7 +339,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
         tags: ['access:fileUpload:analyzeFile'],
         body: {
           accepts: ['application/json'],
-          maxBytes: MAX_FILE_SIZE_BYTES,
+          maxBytes: MAX_TIKA_FILE_SIZE_BYTES,
         },
       },
     })
