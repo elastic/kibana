@@ -41,7 +41,6 @@ const scriptOptions: RunOptions = {
       `,
   },
   log: {
-    context: 'Quick-checks',
     defaultLevel: process.env.CI === 'true' ? 'debug' : 'info',
   },
 };
