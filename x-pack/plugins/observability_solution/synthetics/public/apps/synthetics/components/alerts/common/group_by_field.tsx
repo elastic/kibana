@@ -29,6 +29,12 @@ const OPTIONS: Option[] = [
   },
 ];
 
+const isChecked = (key: 'groupByLocation' | 'ungrouped', groupByLocation: boolean) => {
+  const isGrouped = groupByLocation && key === 'groupByLocation';
+  const isUngrouped = !groupByLocation && key === 'ungrouped';
+  return isGrouped || isUngrouped ? 'on' : undefined;
+};
+
 export const GroupByExpression = ({
   groupByLocation,
   onChange,
@@ -44,12 +50,7 @@ export const GroupByExpression = ({
       OPTIONS.map((option) => ({
         key: option.key as 'groupByLocation' | 'ungrouped',
         label: option.label,
-        checked:
-          groupByLocation && option.key === 'groupByLocation'
-            ? 'on'
-            : option.key === 'ungrouped' && !groupByLocation
-            ? 'on'
-            : undefined,
+        checked: isChecked(option.key, groupByLocation),
       }))
     );
   }, [groupByLocation]);

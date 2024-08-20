@@ -124,19 +124,23 @@ export const ForTheLastExpression = ({ ruleParams, setRuleParams }: Props) => {
     );
   }, [condition, isTimeWindow]);
 
+  const getDescriptiveText = () => {
+    if (isLocationBased) {
+      return FROM_LOCATIONS_EXPRESSION;
+    }
+    if (isTimeWindow) {
+      return WITHIN_TIMERANGE_EXPRESSION;
+    }
+    return WITHIN_TOTAL_CHECKS_EXPRESSION;
+  };
+
   return (
     <EuiPopover
       id="checkPopover"
       panelPaddingSize="s"
       button={
         <EuiExpression
-          description={
-            isLocationBased
-              ? FROM_LOCATIONS_EXPRESSION
-              : isTimeWindow
-              ? WITHIN_TIMERANGE_EXPRESSION
-              : WITHIN_TOTAL_CHECKS_EXPRESSION
-          }
+          description={getDescriptiveText()}
           isActive={isOpen}
           onClick={() => setIsOpen(!isOpen)}
         />

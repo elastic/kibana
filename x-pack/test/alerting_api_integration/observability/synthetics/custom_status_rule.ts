@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   const ruleHelper = new SyntheticsRuleHelper(getService);
 
-  describe('SyntheticsCustomRules', () => {
+  describe('SyntheticsCustomStatusRule', () => {
     before(async () => {
       await server.savedObjects.cleanStandardList();
     });
