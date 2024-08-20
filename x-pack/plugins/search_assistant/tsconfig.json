@@ -18,7 +18,6 @@
     "@kbn/i18n-react",
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-page-kibana-template",
-    "@kbn/i18n",
     "@kbn/usage-collection-plugin",
     "@kbn/observability-ai-assistant-plugin"
   ],
