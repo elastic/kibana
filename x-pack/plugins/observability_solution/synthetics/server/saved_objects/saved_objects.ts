@@ -23,7 +23,10 @@ import {
   SYNTHETICS_SECRET_ENCRYPTED_TYPE,
   syntheticsParamSavedObjectType,
 } from './synthetics_param';
-import { PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE } from './private_locations';
+import {
+  LEGACY_PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE,
+  PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE,
+} from './private_locations';
 import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../constants/settings';
 import { DynamicSettingsAttributes } from '../runtime_types/settings';
 import {
@@ -36,6 +39,7 @@ export const registerSyntheticsSavedObjects = (
   savedObjectsService: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) => {
+  savedObjectsService.registerType(LEGACY_PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE);
   savedObjectsService.registerType(PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE);
 
   savedObjectsService.registerType(getSyntheticsMonitorSavedObjectType(encryptedSavedObjects));

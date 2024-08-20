@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import { toClientContract } from '../routes/settings/private_locations/helpers';
+import { toClientContractLegacy } from '../routes/settings/private_locations/helpers';
 import { getPrivateLocationsAndAgentPolicies } from '../routes/settings/private_locations/get_private_locations';
 import { SyntheticsServerSetup } from '../types';
 import { getServiceLocations } from './get_service_locations';
@@ -34,7 +34,7 @@ export async function getAllLocations({
       ),
       getServicePublicLocations(server, syntheticsMonitorClient),
     ]);
-    const pvtLocations = toClientContract({ locations: privateLocations }, agentPolicies);
+    const pvtLocations = toClientContractLegacy({ locations: privateLocations }, agentPolicies);
     return {
       publicLocations,
       privateLocations: pvtLocations,

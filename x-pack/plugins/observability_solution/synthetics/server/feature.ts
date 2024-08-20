@@ -13,7 +13,10 @@ import {
 } from '@kbn/features-plugin/common';
 import { syntheticsMonitorType, syntheticsParamType } from '../common/types/saved_objects';
 import { SYNTHETICS_RULE_TYPES } from '../common/constants/synthetics_alerts';
-import { privateLocationsSavedObjectName } from '../common/saved_objects/private_locations';
+import {
+  legacyPrivateLocationsSavedObjectName,
+  privateLocationsSavedObjectName,
+} from '../common/saved_objects/private_locations';
 import { PLUGIN } from '../common/constants/plugin';
 import {
   syntheticsSettingsObjectType,
@@ -70,6 +73,7 @@ export const syntheticsFeature = {
           syntheticsMonitorType,
           syntheticsApiKeyObjectType,
           privateLocationsSavedObjectName,
+          legacyPrivateLocationsSavedObjectName,
           syntheticsParamType,
           // uptime settings object is also registered here since feature is shared between synthetics and uptime
           uptimeSettingsObjectType,
@@ -100,7 +104,7 @@ export const syntheticsFeature = {
           syntheticsSettingsObjectType,
           syntheticsMonitorType,
           syntheticsApiKeyObjectType,
-          privateLocationsSavedObjectName,
+          legacyPrivateLocationsSavedObjectName,
           // uptime settings object is also registered here since feature is shared between synthetics and uptime
           uptimeSettingsObjectType,
         ],
