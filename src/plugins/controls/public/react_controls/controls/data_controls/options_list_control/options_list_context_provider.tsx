@@ -18,7 +18,7 @@ import {
 import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
 
 export type ContextStateManager = ControlStateManager<
-  Omit<OptionsListComponentState, 'exclude' | 'existsSelected' | 'selectedOptions'>
+  Omit<OptionsListComponentState, 'exclude' | 'existsSelected' | 'selections'>
 > & {
   selectedOptions: PublishingSubject<OptionsListSelection[] | undefined>;
   existsSelected: PublishingSubject<boolean | undefined>;

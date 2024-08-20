@@ -17,7 +17,7 @@ export function initializeOptionsListSelections(
   onSelectionChange: () => void
 ) {
   const selectedOptions$ = new BehaviorSubject<OptionsListSelection[] | undefined>(
-    initialState.selectedOptions ?? []
+    initialState.selections ?? []
   );
   const selectedOptionsComparatorFunction = (
     a: OptionsListSelection[] | undefined,
@@ -50,11 +50,11 @@ export function initializeOptionsListSelections(
     comparators: {
       exclude: [exclude$, setExclude],
       existsSelected: [existsSelected$, setExistsSelected],
-      selectedOptions: [selectedOptions$, setSelectedOptions, selectedOptionsComparatorFunction],
+      selections: [selectedOptions$, setSelectedOptions, selectedOptionsComparatorFunction],
     } as StateComparators<
-      Pick<OptionsListControlState, 'exclude' | 'existsSelected' | 'selectedOptions'>
+      Pick<OptionsListControlState, 'exclude' | 'existsSelected' | 'selections'>
     >,
-    hasInitialSelections: initialState.selectedOptions?.length || initialState.existsSelected,
+    hasInitialSelections: initialState.selections?.length || initialState.existsSelected,
     selectedOptions$: selectedOptions$ as PublishingSubject<OptionsListSelection[] | undefined>,
     setSelectedOptions,
     existsSelected$: existsSelected$ as PublishingSubject<boolean | undefined>,

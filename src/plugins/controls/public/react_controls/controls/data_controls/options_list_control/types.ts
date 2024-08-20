@@ -29,7 +29,7 @@ export interface OptionsListControlState
     OptionsListDisplaySettings {
   searchTechnique?: OptionsListSearchTechnique;
   sort?: OptionsListSortingType;
-  selectedOptions?: OptionsListSelection[];
+  selections?: OptionsListSelection[];
   existsSelected?: boolean;
   runPastTimeout?: boolean;
   singleSelect?: boolean;

@@ -84,7 +84,7 @@ describe('Options List Control Api', () => {
         {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
-          selectedOptions: ['cool', 'test'],
+          selections: ['cool', 'test'],
         },
         getMockedBuildApi(uuid, factory, controlGroupApi),
         uuid,
@@ -216,7 +216,7 @@ describe('Options List Control Api', () => {
         {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
-          selectedOptions: ['woof', 'bark'],
+          selections: ['woof', 'bark'],
         },
         getMockedBuildApi(uuid, factory, controlGroupApi),
         uuid,
@@ -248,7 +248,7 @@ describe('Options List Control Api', () => {
         {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
-          selectedOptions: ['woof', 'bark'],
+          selections: ['woof', 'bark'],
         },
         getMockedBuildApi(uuid, factory, controlGroupApi),
         uuid,
@@ -293,7 +293,7 @@ describe('Options List Control Api', () => {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           singleSelect: true,
-          selectedOptions: ['woof'],
+          selections: ['woof'],
         },
         getMockedBuildApi(uuid, factory, controlGroupApi),
         uuid,
