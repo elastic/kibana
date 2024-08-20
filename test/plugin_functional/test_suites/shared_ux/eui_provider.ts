@@ -26,12 +26,12 @@ export default function ({ getPageObjects, getService }: PluginFunctionalProvide
       ).to.not.be.empty();
 
       // clean up to ensure test suite will pass
-      // await Promise.all([
-      //   browser.removeSessionStorageItem('dev.euiProviderWarning.message'),
-      //   browser.removeSessionStorageItem('dev.euiProviderWarning.stack'),
-      //   browser.removeSessionStorageItem('dev.euiProviderWarning.pageHref'),
-      //   browser.removeSessionStorageItem('dev.euiProviderWarning.pageTitle'),
-      // ]);
+      await Promise.all([
+        browser.removeSessionStorageItem('dev.euiProviderWarning.message'),
+        browser.removeSessionStorageItem('dev.euiProviderWarning.stack'),
+        browser.removeSessionStorageItem('dev.euiProviderWarning.pageHref'),
+        browser.removeSessionStorageItem('dev.euiProviderWarning.pageTitle'),
+      ]);
     });
   });
 }
