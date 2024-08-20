@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { InvestigationGuideView } from './investigation_guide_view';
-import type { UseBasicDataFromDetailsDataResult } from '../../../flyout/document_details/shared/hooks/use_basic_data_from_details_data';
+import type { UseBasicDataFromDetailsDataResult } from '../../shared/hooks/use_basic_data_from_details_data';
 
 const defaultProps = {
   basicData: {

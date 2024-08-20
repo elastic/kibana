@@ -1969,9 +1969,9 @@ describe('Task Runner', () => {
   });
 
   test('should set unexpected errors as framework-error', async () => {
-    (getExecutorServicesModule.getExecutorServices as jest.Mock).mockRejectedValue(
-      new Error('test')
-    );
+    (getExecutorServicesModule.getExecutorServices as jest.Mock).mockImplementation(() => {
+      throw new Error('test');
+    });
 
     const taskRunner = new TaskRunner({
       ruleType,

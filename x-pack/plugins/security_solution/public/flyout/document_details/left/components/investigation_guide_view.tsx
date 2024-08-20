@@ -8,10 +8,17 @@
 import { EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
 import React, { createContext } from 'react';
 import styled from 'styled-components';
-import type { UseBasicDataFromDetailsDataResult } from '../../../flyout/document_details/shared/hooks/use_basic_data_from_details_data';
-import * as i18n from './translations';
-import { MarkdownRenderer } from '../markdown_editor';
-import { LineClamp } from '../line_clamp';
+import { i18n } from '@kbn/i18n';
+import type { UseBasicDataFromDetailsDataResult } from '../../shared/hooks/use_basic_data_from_details_data';
+import { LineClamp } from '../../../../common/components/line_clamp';
+import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
+
+const INVESTIGATION_GUIDE = i18n.translate(
+  'xpack.securitySolution.flyout.left.investigationGuide',
+  {
+    defaultMessage: 'Investigation guide',
+  }
+);
 
 export const Indent = styled.div`
   padding: 0 8px;
@@ -43,7 +50,6 @@ interface InvestigationGuideViewProps {
 /**
  * Investigation guide that shows the markdown text of rule.note
  */
-// TODO: MOVE TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
 const InvestigationGuideViewComponent: React.FC<InvestigationGuideViewProps> = ({
   basicData,
   ruleNote,
@@ -56,7 +62,7 @@ const InvestigationGuideViewComponent: React.FC<InvestigationGuideViewProps> = (
         <>
           <EuiSpacer size="l" />
           <EuiTitle size="xxxs" data-test-subj="summary-view-guide">
-            <h5>{i18n.INVESTIGATION_GUIDE}</h5>
+            <h5>{INVESTIGATION_GUIDE}</h5>
           </EuiTitle>
           <EuiSpacer size="s" />
         </>
