@@ -6,12 +6,14 @@
  */
 
 export const FIREHOSE_CLOUDFORMATION_STACK_NAME = 'Elastic-CloudwatchLogsAndMetricsToFirehose';
-export const FIREHOSE_STREAM_NAME = 'Elastic-AllCloudwatchLogsAndMetrics';
+export const FIREHOSE_LOGS_STREAM_NAME = 'Elastic-CloudwatchLogs';
+export const FIREHOSE_METRICS_STREAM_NAME = 'Elastic-CloudwatchMetrics';
 
 export const FIREHOSE_CLOUDFORMATION_TEMPLATE_URL =
-  'https://mykolaharmash-cf-template.s3.us-west-2.amazonaws.com/default_start.yml';
+  'https://elastic-cloudformation-templates.s3.amazonaws.com/v0.1.0/firehose_default_start.yml';
 
 export const AWS_INDEX_NAME_LIST = [
+  // Logs
   'logs-aws.vpcflow',
   'logs-aws.apigateway_logs',
   'logs-aws.cloudtrail',
@@ -20,7 +22,7 @@ export const AWS_INDEX_NAME_LIST = [
   'logs-aws.route53_resolver_logs',
   'logs-aws.waf',
   'logs-awsfirehose',
-
+  // Metrics
   'metrics-aws.apigateway_metrics',
   'metrics-aws.dynamodb',
   'metrics-aws.ebs',

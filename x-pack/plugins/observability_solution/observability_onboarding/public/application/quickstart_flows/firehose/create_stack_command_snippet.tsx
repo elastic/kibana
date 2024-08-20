@@ -18,7 +18,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   FIREHOSE_CLOUDFORMATION_STACK_NAME,
-  FIREHOSE_STREAM_NAME,
+  FIREHOSE_LOGS_STREAM_NAME,
+  FIREHOSE_METRICS_STREAM_NAME,
 } from '../../../../common/aws_firehose';
 import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
 import { buildCreateStackCommand, buildStackStatusCommand } from './utils';
@@ -41,7 +42,8 @@ export function CreateStackCommandSnippet({
   const createStackCommand = buildCreateStackCommand({
     templateUrl,
     stackName: FIREHOSE_CLOUDFORMATION_STACK_NAME,
-    streamName: FIREHOSE_STREAM_NAME,
+    logsStreamName: FIREHOSE_LOGS_STREAM_NAME,
+    metricsStreamName: FIREHOSE_METRICS_STREAM_NAME,
     encodedApiKey,
     elasticsearchUrl,
   });

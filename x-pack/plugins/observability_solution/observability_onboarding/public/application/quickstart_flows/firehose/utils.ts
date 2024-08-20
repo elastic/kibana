@@ -8,13 +8,15 @@
 export function buildCreateStackCommand({
   templateUrl,
   stackName,
-  streamName,
+  logsStreamName,
+  metricsStreamName,
   encodedApiKey,
   elasticsearchUrl,
 }: {
   templateUrl: string;
   stackName: string;
-  streamName: string;
+  logsStreamName: string;
+  metricsStreamName: string;
   encodedApiKey: string;
   elasticsearchUrl: string;
 }) {
@@ -25,7 +27,8 @@ export function buildCreateStackCommand({
     aws cloudformation create-stack
       --stack-name ${stackName}
       --template-url ${escapedTemplateUrl}
-      --parameters ParameterKey=FirehoseStreamName,ParameterValue=${streamName}
+      --parameters ParameterKey=FirehoseStreamNameForLogs,ParameterValue=${logsStreamName}
+                   ParameterKey=FirehoseStreamNameForMetrics,ParameterValue=${metricsStreamName}
                    ParameterKey=ElasticEndpointURL,ParameterValue=${escapedElasticsearchUrl}
                    ParameterKey=ElasticAPIKey,ParameterValue=${encodedApiKey}
       --capabilities CAPABILITY_IAM

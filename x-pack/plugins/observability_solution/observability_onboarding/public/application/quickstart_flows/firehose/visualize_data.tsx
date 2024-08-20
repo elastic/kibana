@@ -12,7 +12,7 @@ import React from 'react';
 import useInterval from 'react-use/lib/useInterval';
 import {
   FIREHOSE_CLOUDFORMATION_STACK_NAME,
-  FIREHOSE_STREAM_NAME,
+  FIREHOSE_LOGS_STREAM_NAME,
 } from '../../../../common/aws_firehose';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { AccordionWithIcon } from '../shared/accordion_with_icon';
@@ -34,7 +34,7 @@ export function VisualizeData() {
     return callApi('GET /internal/observability_onboarding/firehose/has-data', {
       params: {
         query: {
-          streamName: FIREHOSE_STREAM_NAME,
+          logsStreamName: FIREHOSE_LOGS_STREAM_NAME,
           stackName: FIREHOSE_CLOUDFORMATION_STACK_NAME,
         },
       },
