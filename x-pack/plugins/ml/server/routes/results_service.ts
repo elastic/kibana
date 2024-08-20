@@ -365,6 +365,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
             query: getCategorizerStatsSchema,
           },
         },
+        // validate: false,
       },
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {

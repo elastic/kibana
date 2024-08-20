@@ -651,7 +651,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
         version: '1',
         validate: {
           request: {
-            params: getModelSnapshotsSchema,
+            params: jobIdSchema,
           },
         },
       },
