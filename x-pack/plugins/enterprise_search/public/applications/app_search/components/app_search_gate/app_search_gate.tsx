@@ -403,7 +403,7 @@ const EducationPanel: React.FC<{ featureContent: string }> = ({ featureContent }
                   {i18n.translate(
                     'xpack.enterpriseSearch.workplaceSearch.gateForm.educationalPanel.learnMore',
                     {
-                      defaultMessage: 'Learn More',
+                      defaultMessage: 'Learn more',
                     }
                   )}
                 </EuiLink>
