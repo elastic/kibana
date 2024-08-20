@@ -26,6 +26,11 @@ components:
       minimum: 1
       description: The rule's version number.
 
+    RuleRevision:
+      type: integer
+      minimum: 0
+      description: The rule's revision number.
+
     QueryLanguage:
       type: string
       enum:
@@ -70,6 +75,9 @@ components:
             - external
         is_customized:
           $ref: '#/components/schemas/IsExternalRuleCustomized'
+        repository_id:
+          type: string
+          description: The name of the repository where the rule is stored.
       required:
         - type
         - is_customized

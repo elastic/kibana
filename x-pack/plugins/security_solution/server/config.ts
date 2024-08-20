@@ -144,6 +144,15 @@ export const configSchema = schema.object({
    * the package is not already installed.
    */
   prebuiltRulesPackageVersion: schema.maybe(schema.string()),
+  prebuiltRuleRepositories: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        repository: schema.string(),
+        username: schema.string(),
+        token: schema.string(),
+      })
+    )
+  ),
   enabled: schema.boolean({ defaultValue: true }),
   enableUiSettingsValidations: schema.boolean({ defaultValue: false }),
 

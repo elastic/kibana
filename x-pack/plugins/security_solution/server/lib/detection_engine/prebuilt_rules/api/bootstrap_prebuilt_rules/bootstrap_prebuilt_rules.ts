@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import execa from 'execa';
+import path from 'path';
 import { BOOTSTRAP_PREBUILT_RULES_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { BootstrapPrebuiltRulesResponse } from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
@@ -42,6 +44,35 @@ export const bootstrapPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter
             installPrebuiltRulesPackage(config, securityContext),
             installEndpointPackage(config, securityContext),
           ]);
+
+          if (config.prebuiltRuleRepositories) {
+            // Ensure the repositories directory exists
+            await execa('mkdir', ['-p', path.join(__dirname, './repositories')]);
+
+            await Promise.all(
+              config.prebuiltRuleRepositories.map(async (repository) => {
+                try {
+                  // Clone and update prebuilt rule repositories
+                  await execa('git', [
+                    'clone',
+                    '--depth',
+                    '1',
+                    `https://${repository.username}:${repository.token}@github.com//${repository.username}/${repository.repository}.git`,
+                    path.join(__dirname, `./repositories/${repository.repository}`),
+                  ]);
+                } catch (err) {
+                  // Ignore error if the repository already exists
+                  if (err.exitCode !== 128) {
+                    throw err;
+                  }
+                  // Update the repository
+                  await execa('git', ['pull'], {
+                    cwd: path.join(__dirname, `./repositories/${repository.repository}`),
+                  });
+                }
+              })
+            );
+          }
 
           const responseBody: BootstrapPrebuiltRulesResponse = {
             packages: results.map((result) => ({

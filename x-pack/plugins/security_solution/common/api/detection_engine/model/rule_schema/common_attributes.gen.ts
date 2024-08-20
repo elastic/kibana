@@ -40,6 +40,12 @@ export const RuleDescription = z.string().min(1);
 export type RuleVersion = z.infer<typeof RuleVersion>;
 export const RuleVersion = z.number().int().min(1);
 
+/**
+ * The rule's revision number.
+ */
+export type RuleRevision = z.infer<typeof RuleRevision>;
+export const RuleRevision = z.number().int().min(0);
+
 export type QueryLanguage = z.infer<typeof QueryLanguage>;
 export const QueryLanguage = z.enum(['kuery', 'lucene', 'eql', 'esql']);
 export type QueryLanguageEnum = typeof QueryLanguage.enum;
@@ -78,6 +84,10 @@ export type ExternalRuleSource = z.infer<typeof ExternalRuleSource>;
 export const ExternalRuleSource = z.object({
   type: z.literal('external'),
   is_customized: IsExternalRuleCustomized,
+  /**
+   * The name of the repository where the rule is stored.
+   */
+  repository_id: z.string().optional(),
 });
 
 /**
