@@ -52,6 +52,7 @@ export const migrateLegacyPrivateLocations = async ({
               location,
               {
                 id: location.id,
+                initialNamespaces: ['*'],
               }
             );
           },
