@@ -11,8 +11,8 @@
       border-top-right-radius: $euiBorderRadius;
       border-bottom-right-radius: $euiBorderRadius;
 
-      .euiFormControlLayoutDelimited__delimiter, .euiFormControlLayoutIcons--static {
-        height: auto !important;
+      .euiFormControlLayoutDelimited__delimiter, .euiFormControlLayoutIcons {
+        height: auto;
       }
     }
   }

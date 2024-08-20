@@ -201,7 +201,7 @@ export class TimePickerPageObject extends FtrService {
   }
 
   public async isOff() {
-    return await this.find.existsByCssSelector('.euiAutoRefresh .euiFormControlLayout--readOnly');
+    return await this.find.existsByCssSelector('.euiAutoRefresh .euiFormControlLayout-readOnly');
   }
 
   public async getRefreshConfig(keepQuickSelectOpen = false) {
