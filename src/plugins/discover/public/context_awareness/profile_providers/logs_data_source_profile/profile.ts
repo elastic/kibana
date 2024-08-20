@@ -19,6 +19,17 @@ export const createLogsDataSourceProfileProvider = (
   profile: {
     getRowIndicatorProvider,
     getCellRenderers,
+    getAdditionalCellActions: (prev) => () =>
+      [
+        ...prev(),
+        {
+          displayName: 'Example actions',
+          iconType: 'heart',
+          execute: () => {
+            alert('Example action executed');
+          },
+        },
+      ],
   },
   resolve: (params) => {
     const indexPattern = extractIndexPatternFrom(params);

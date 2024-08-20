@@ -60,6 +60,7 @@ import {
 } from './context_awareness';
 import { DiscoverSetup, DiscoverSetupPlugins, DiscoverStart, DiscoverStartPlugins } from './types';
 import { deserializeState } from './embeddable/utils/serialization_utils';
+import { DISCOVER_CELL_ACTIONS_TRIGGER } from './context_awareness/hooks/use_cell_actions';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -270,6 +271,7 @@ export class DiscoverPlugin
 
     plugins.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', viewSavedSearchAction);
     plugins.uiActions.registerTrigger(SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER);
+    plugins.uiActions.registerTrigger(DISCOVER_CELL_ACTIONS_TRIGGER);
     injectTruncateStyles(core.uiSettings.get(TRUNCATE_MAX_HEIGHT));
 
     const isEsqlEnabled = core.uiSettings.get(ENABLE_ESQL);

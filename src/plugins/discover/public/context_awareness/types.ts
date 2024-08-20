@@ -10,6 +10,8 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { CustomCellRenderer, UnifiedDataTableProps } from '@kbn/unified-data-table';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { CellAction, CellActionExecutionContext } from '@kbn/cell-actions';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
 export interface DocViewerExtension {
   title: string | undefined;
@@ -42,6 +44,23 @@ export interface RowControlsExtensionParams {
   dataView: DataView;
 }
 
+export interface DiscoverCellActionMetadata extends Record<string, unknown> {
+  instanceId?: string;
+}
+
+export interface DiscoverCellActionExecutionContext extends CellActionExecutionContext {
+  metadata: DiscoverCellActionMetadata | undefined;
+}
+
+export type DiscoverCellAction = CellAction<DiscoverCellActionExecutionContext>;
+
+export interface AdditionalCellAction {
+  displayName: string;
+  iconType: EuiIconType;
+  isCompatible?: () => boolean | Promise<boolean>;
+  execute: () => void | Promise<void>;
+}
+
 export interface Profile {
   getDefaultAppState: (params: DefaultAppStateExtensionParams) => DefaultAppStateExtension;
   // Data grid
@@ -52,6 +71,7 @@ export interface Profile {
   getRowAdditionalLeadingControls: (
     params: RowControlsExtensionParams
   ) => UnifiedDataTableProps['rowAdditionalLeadingControls'] | undefined;
+  getAdditionalCellActions: () => AdditionalCellAction[];
   // Doc viewer
   getDocViewer: (params: DocViewerExtensionParams) => DocViewerExtension;
 }

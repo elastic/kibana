@@ -8,3 +8,4 @@
 
 export { useProfileAccessor } from './use_profile_accessor';
 export { useRootProfile } from './use_root_profile';
+export { useCellActions } from './use_cell_actions';

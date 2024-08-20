@@ -72,7 +72,7 @@ import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
 import { useContextualGridCustomisations } from '../../hooks/grid_customisations';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
-import { useProfileAccessor } from '../../../../context_awareness';
+import { useCellActions, useProfileAccessor } from '../../../../context_awareness';
 
 const containerStyles = css`
   position: relative;
@@ -356,6 +356,8 @@ function DiscoverDocumentsComponent({
     [viewModeToggle, callouts, gridAnnouncementCallout, loadingIndicator]
   );
 
+  const { cellActionsTriggerId, cellActionsMetadata } = useCellActions();
+
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       <div className="dscDocuments__loading">
@@ -468,6 +470,9 @@ function DiscoverDocumentsComponent({
                 additionalFieldGroups={additionalFieldGroups}
                 dataGridDensityState={density}
                 onUpdateDataGridDensity={onUpdateDensity}
+                cellActionsTriggerId={cellActionsTriggerId}
+                cellActionsMetadata={cellActionsMetadata}
+                cellActionsHandling="append"
               />
             </CellActionsProvider>
           </div>
