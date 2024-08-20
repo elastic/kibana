@@ -31,8 +31,8 @@ function isSerializedSearchSource(
   return (
     typeof maybeSerializedSearchSource === 'object' &&
     maybeSerializedSearchSource !== null &&
-    !maybeSerializedSearchSource.hasOwnProperty('dependencies') &&
-    !maybeSerializedSearchSource.hasOwnProperty('fields')
+    !Object.hasOwn(maybeSerializedSearchSource, 'dependencies') &&
+    !Object.hasOwn(maybeSerializedSearchSource, 'fields')
   );
 }
 
