@@ -31,7 +31,7 @@ describe('useEuiTablePersist', () => {
     const { result } = renderHook(() => useEuiTablePersist({ tableId: 'testTable' }));
 
     expect(result.current.pageSize).toBe(50); // Default initialPageSize
-    expect(result.current.sorting).toBeUndefined();
+    expect(result.current.sorting).toBe(true); // Allow sorting by default
     expect(mockStorage.get).toHaveBeenCalledWith('testTable', undefined);
   });
 
@@ -90,7 +90,7 @@ describe('useEuiTablePersist', () => {
     expect(customOnTableChange).toHaveBeenCalledWith(nextCriteria);
   });
 
-  it('should maintain sort and pageSize if new criteria are not provided', () => {
+  it('should maintain sort and pageSize if new values are not provided on change', () => {
     const persistedData = { pageSize: 25, sort: { field: 'name', direction: 'asc' } };
     mockStorage.get.mockReturnValueOnce(persistedData);
 
@@ -105,7 +105,7 @@ describe('useEuiTablePersist', () => {
     expect(mockStorage.set).not.toHaveBeenCalled();
   });
 
-  it('should remove sort in state and local storage if criteria is missing field or direction', () => {
+  it('should remove sort in state and local storage if field is an empty string', () => {
     const persistedData = { pageSize: 25, sort: { field: 'name', direction: 'asc' } };
     mockStorage.get.mockReturnValueOnce(persistedData);
 
@@ -113,7 +113,7 @@ describe('useEuiTablePersist', () => {
 
     const nextCriteria = {
       page: { size: 100 },
-      sort: { direction: 'asc' },
+      sort: { field: '', direction: 'asc' },
     };
 
     act(() => {
@@ -121,7 +121,7 @@ describe('useEuiTablePersist', () => {
     });
 
     expect(result.current.pageSize).toBe(100);
-    expect(result.current.sorting).toEqual(undefined);
+    expect(result.current.sorting).toEqual(true);
     expect(mockStorage.set).toHaveBeenCalledWith('testTable', {
       pageSize: 100,
       sort: undefined,

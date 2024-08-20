@@ -51,7 +51,7 @@ export const useEuiTablePersist = <T extends object>({
     storagePageSize ?? initialPageSize ?? DEFAULT_INITIAL_PAGE_SIZE
   );
   const [sort, setSort] = useState<PropertySort<T> | undefined>(storageSort ?? initialSort);
-  const sorting = sort && { sort };
+  const sorting = sort ? { sort } : true; // If sort is undefined, return true to allow sorting
 
   const onTableChange = useCallback(
     (nextValues: Criteria<T>) => {
@@ -60,19 +60,26 @@ export const useEuiTablePersist = <T extends object>({
       }
 
       let nextSort: PropertySort<T> | undefined;
+      const isSortRemoved = nextValues.sort?.field?.toString() === ''; // `field` is an empty string when sort is removed from this field
       if (nextValues.sort?.field && nextValues.sort?.direction) {
         // Both field and direction are needed for a valid sort criteria
         nextSort = nextValues.sort;
-      } else if (!nextValues.sort?.field && !nextValues.sort?.direction) {
-        // If both field and direction are undefined, there is no change on sort so use the current one
-        nextSort = sort;
       }
 
-      const nextPageSize = nextValues.page?.size ?? pageSize;
-
-      if (nextPageSize !== storagePageSize || nextSort !== storageSort) {
-        setPageSize(nextPageSize);
+      if (nextValues.sort?.field || nextValues.sort?.direction) {
         setSort(nextSort);
+      }
+
+      const nextPageSize = nextValues.page?.size;
+      if (nextPageSize) {
+        setPageSize(nextPageSize);
+      }
+
+      if (
+        (nextPageSize && nextPageSize !== storagePageSize) ||
+        (nextSort && nextSort !== storageSort) ||
+        isSortRemoved
+      ) {
         const nextPersistData: PersistData<T> = {
           pageSize: nextPageSize,
           sort: nextSort,
@@ -80,7 +87,7 @@ export const useEuiTablePersist = <T extends object>({
         storage.set(tableId, nextPersistData);
       }
     },
-    [customOnTableChange, pageSize, sort, storage, storagePageSize, storageSort, tableId]
+    [customOnTableChange, storage, storagePageSize, storageSort, tableId]
   );
 
   return { pageSize, sorting, onTableChange };
