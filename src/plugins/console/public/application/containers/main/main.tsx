@@ -8,7 +8,16 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPageTemplate, EuiSplitPanel } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiPageTemplate,
+  EuiSplitPanel,
+  EuiButtonIcon,
+  EuiHorizontalRule,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { Editor } from '../editor';
 import { TopNavMenu, SomethingWentWrongCallout } from '../../components';
 import { useDataInit } from '../../hooks';
@@ -51,18 +60,46 @@ export function Main({ isEmbeddable = false }: MainProps) {
         <EuiFlexItem>
           <EuiSplitPanel.Outer grow={true} borderRadius={isEmbeddable ? 'none' : 'm'}>
             <EuiSplitPanel.Inner grow={false} className="consoleTabs">
-              <TopNavMenu
-                disabled={!done}
-                items={getTopNavConfig({
-                  selectedTab,
-                  setSelectedTab,
-                })}
-              />
+              <EuiFlexGroup direction="row" alignItems="center">
+                <EuiFlexItem>
+                  <TopNavMenu
+                    disabled={!done}
+                    items={getTopNavConfig({
+                      selectedTab,
+                      setSelectedTab,
+                    })}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon iconType="save" onClick={() => {}} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon iconType="keyboard" color="primary" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon iconType="questionInCircle" color="primary" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiSplitPanel.Inner>
+            <EuiHorizontalRule margin="none" />
             <EuiSplitPanel.Inner paddingSize="none">
               {selectedTab === SHELL_TAB_ID && (
                 <Editor loading={!done} setEditorInstance={() => {}} />
               )}
+            </EuiSplitPanel.Inner>
+            <EuiHorizontalRule margin="none" />
+            <EuiSplitPanel.Inner paddingSize="xs" grow={false}>
+              <EuiButtonEmpty
+                onClick={() => {}}
+                iconType="editorCodeBlock"
+                size="xs"
+                color="text"
+                css={{ fontWeight: 'normal' }}
+              >
+                {i18n.translate('console.variablesButton', {
+                  defaultMessage: 'Variables',
+                })}
+              </EuiButtonEmpty>
             </EuiSplitPanel.Inner>
           </EuiSplitPanel.Outer>
         </EuiFlexItem>
