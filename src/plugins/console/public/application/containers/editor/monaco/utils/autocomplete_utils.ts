@@ -58,7 +58,7 @@ export const getDocumentationLinkFromAutocomplete = (
  * Helper function that filters out suggestions without a name.
  */
 const filterTermsWithoutName = (terms: ResultTerm[]): ResultTerm[] =>
-  terms.filter((term) => term.name !== undefined);
+  terms.filter((term) => term.name !== undefined && term.name !== '');
 
 /*
  * This function returns an array of completion items for the request method
