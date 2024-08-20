@@ -7,7 +7,7 @@
 
 import { EuiButton, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { alertOriginSchema } from '@kbn/investigation-shared';
+import { alertOriginSchema } from '@kbn/investigation-shared/src/schema';
 import { ALERT_RULE_CATEGORY } from '@kbn/rule-data-utils/src/default_alerts_as_data';
 import React from 'react';
 import { useParams } from 'react-router-dom';

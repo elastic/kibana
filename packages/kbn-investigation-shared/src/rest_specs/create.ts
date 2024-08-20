@@ -8,7 +8,7 @@
 
 import * as t from 'io-ts';
 import { investigationResponseSchema } from './investigation';
-import { alertOriginSchema, blankOriginSchema } from './origin';
+import { alertOriginSchema, blankOriginSchema } from '../schema';
 
 const createInvestigationParamsSchema = t.type({
   body: t.type({
