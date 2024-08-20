@@ -162,7 +162,6 @@ packages/core/deprecations/core-deprecations-server-internal @elastic/kibana-cor
 packages/core/deprecations/core-deprecations-server-mocks @elastic/kibana-core
 packages/core/di/core-di-common @elastic/kibana-core
 packages/core/di/core-di-common-internal @elastic/kibana-core
-packages/core/di/core-di-server @elastic/kibana-core
 packages/core/di/core-di-server-mocks @elastic/kibana-core
 packages/core/doc-links/core-doc-links-browser @elastic/kibana-core
 packages/core/doc-links/core-doc-links-browser-internal @elastic/kibana-core

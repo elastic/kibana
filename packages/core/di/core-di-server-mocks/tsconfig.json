@@ -15,6 +15,5 @@
   ],
   "kbn_references": [
     "@kbn/core-di-common",
-    "@kbn/core-di-server",
   ]
 }

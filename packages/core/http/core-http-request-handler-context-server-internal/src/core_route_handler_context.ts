@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { PluginOpaqueId } from '@kbn/core-base-common';
-import type { CoreId } from '@kbn/core-base-common-internal';
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import {
   CoreElasticsearchRouteHandlerContext,
@@ -34,7 +32,6 @@ import {
   CoreUserProfileRouteHandlerContext,
   type InternalUserProfileServiceStart,
 } from '@kbn/core-user-profile-server-internal';
-import type { InternalCoreDiServiceStart } from '@kbn/core-di-common-internal';
 
 /**
  * Subset of `InternalCoreStart` used by {@link CoreRouteHandlerContext}
@@ -47,7 +44,6 @@ export interface CoreRouteHandlerContextParams {
   deprecations: InternalDeprecationsServiceStart;
   security: InternalSecurityServiceStart;
   userProfile: InternalUserProfileServiceStart;
-  injection: InternalCoreDiServiceStart;
 }
 
 /**
@@ -65,9 +61,7 @@ export class CoreRouteHandlerContext implements CoreRequestHandlerContext {
 
   constructor(
     private readonly coreStart: CoreRouteHandlerContextParams,
-    private readonly request: KibanaRequest,
-    private readonly response: KibanaResponseFactory,
-    private callerId: PluginOpaqueId | CoreId
+    private readonly request: KibanaRequest
   ) {}
 
   public get elasticsearch() {
