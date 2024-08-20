@@ -625,7 +625,6 @@ export const createPureDatasetQualityControllerStateMachine = (
             const type = meta._event.origin as DataStreamType;
 
             const dataStreamStats = event.data.dataStreamsStats as DataStreamStat[];
-            const datasetUserPrivileges = event.data.datasetUserPrivileges;
 
             // Check if any DataStreamStat has null; to check for serverless
             const isSizeStatsAvailable =
@@ -637,7 +636,16 @@ export const createPureDatasetQualityControllerStateMachine = (
                 [type]: dataStreamStats,
               },
               isSizeStatsAvailable,
-              datasetUserPrivileges,
+              datasetUserPrivileges: {
+                canMonitor:
+                  context.datasetUserPrivileges.canMonitor &&
+                  event.data.datasetUserPrivileges.canMonitor,
+                canRead:
+                  context.datasetUserPrivileges.canRead && event.data.datasetUserPrivileges.canRead,
+                canViewIntegrations:
+                  context.datasetUserPrivileges.canViewIntegrations &&
+                  event.data.datasetUserPrivileges.canViewIntegrations,
+              },
             };
           }
         ),

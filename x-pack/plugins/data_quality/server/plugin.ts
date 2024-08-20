@@ -22,7 +22,21 @@ export class DataQualityPlugin implements Plugin<void, void, any, any> {
           ui: [],
           requiredClusterPrivileges: [],
           requiredIndexPrivileges: {
-            ['*-*-*']: ['read'],
+            ['logs-*-*']: ['read'],
+          },
+        },
+        {
+          ui: [],
+          requiredClusterPrivileges: [],
+          requiredIndexPrivileges: {
+            ['traces-*-*']: ['read'],
+          },
+        },
+        {
+          ui: [],
+          requiredClusterPrivileges: [],
+          requiredIndexPrivileges: {
+            ['metrics-*-*']: ['read'],
           },
         },
       ],
