@@ -13,7 +13,7 @@ import { PROCESSOR_EVENT } from '../../../../common/es_fields/apm';
 import { getShouldMatchOrNotExistFilter } from '../utils/get_should_match_or_not_exist_filter';
 
 /**
- * Runs log rate analysis data an on index given some alert metadata.
+ * Runs log rate analysis data on an index given some alert metadata.
  */
 export async function getLogRateAnalysisForAlert({
   esClient,

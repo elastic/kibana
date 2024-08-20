@@ -36,7 +36,7 @@ interface QueueItem {
 }
 
 /**
- * Runs log rate analysis data an on index given some alert metadata.
+ * Runs log rate analysis data on an index given some alert metadata.
  */
 export async function fetchLogRateAnalysisForAlert({
   esClient,
