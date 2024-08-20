@@ -31,7 +31,7 @@ export const RawSamples = z.array(z.string());
  * mapping object to ECS Mapping Request.
  */
 export type Mapping = z.infer<typeof Mapping>;
-export const Mapping = z.object({});
+export const Mapping = z.object({}).passthrough();
 
 /**
  * LLM Connector to be used in each API request.
