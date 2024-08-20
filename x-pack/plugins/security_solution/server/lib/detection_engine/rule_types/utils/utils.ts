@@ -88,6 +88,7 @@ export const hasReadIndexPrivileges = async (args: {
     filteredIndexNames,
     (indexName) => privileges.index[indexName].read
   );
+  debugger;
 
   let warningStatusMessage;
 

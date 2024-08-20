@@ -1,0 +1,136 @@
+{
+  "rule_id": "00140285-b827-4aee-aa09-8113f58a08f3",
+  "name": "Potential Credential Access via Windows Utilities",
+  "type": "eql",
+  "risk_score": 73,
+  "description": "Identifies the execution of known Windows utilities often abused to dump LSASS memory or the Active Directory database (NTDS.dit) in preparation for credential access.",
+  "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n(\n  (\n    (?process.pe.original_file_name : \"procdump\" or process.name : \"procdump.exe\") and process.args : \"-ma\"\n  ) or\n  (\n    process.name : \"ProcessDump.exe\" and not process.parent.executable regex~ \"C:\\\\Program Files( \\(x86\\))?\\\\Cisco Systems\\\\.*\"\n  ) or\n  (\n    (?process.pe.original_file_name : \"WriteMiniDump.exe\" or process.name : \"WriteMiniDump.exe\") and\n      not process.parent.executable regex~ \"C:\\\\Program Files( \\(x86\\))?\\\\Steam\\\\.*\"\n  ) or\n  (\n    (?process.pe.original_file_name : \"RUNDLL32.EXE\" or process.name : \"RUNDLL32.exe\") and\n      (process.args : \"MiniDump*\" or process.command_line : \"*comsvcs.dll*#24*\")\n  ) or\n  (\n    (?process.pe.original_file_name : \"RdrLeakDiag.exe\" or process.name : \"RdrLeakDiag.exe\") and\n      process.args : \"/fullmemdmp\"\n  ) or\n  (\n    (?process.pe.original_file_name : \"SqlDumper.exe\" or process.name : \"SqlDumper.exe\") and\n      process.args : \"0x01100*\") or\n  (\n    (?process.pe.original_file_name : \"TTTracer.exe\" or process.name : \"TTTracer.exe\") and\n      process.args : \"-dumpFull\" and process.args : \"-attach\") or\n  (\n    (?process.pe.original_file_name : \"ntdsutil.exe\" or process.name : \"ntdsutil.exe\") and\n      process.args : \"create*full*\") or\n  (\n    (?process.pe.original_file_name : \"diskshadow.exe\" or process.name : \"diskshadow.exe\") and process.args : \"/s\")\n)",
+  "language": "eql",
+  "severity": "high",
+  "author": [
+    "Elastic"
+  ],
+  "false_positives": [
+    "This activity is unlikely to happen legitimately. Any activity that triggered the alert and is not inherently malicious must be monitored by the security team."
+  ],
+  "tags": [
+    "Domain: Endpoint",
+    "OS: Windows",
+    "Use Case: Threat Detection",
+    "Tactic: Credential Access",
+    "Tactic: Defense Evasion",
+    "Resources: Investigation Guide",
+    "Data Source: Elastic Endgame",
+    "Data Source: Elastic Defend"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0006",
+        "name": "Credential Access",
+        "reference": "https://attack.mitre.org/tactics/TA0006/"
+      },
+      "technique": [
+        {
+          "id": "T1003",
+          "name": "OS Credential Dumping",
+          "reference": "https://attack.mitre.org/techniques/T1003/",
+          "subtechnique": [
+            {
+              "id": "T1003.001",
+              "name": "LSASS Memory",
+              "reference": "https://attack.mitre.org/techniques/T1003/001/"
+            },
+            {
+              "id": "T1003.003",
+              "name": "NTDS",
+              "reference": "https://attack.mitre.org/techniques/T1003/003/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1218",
+          "name": "System Binary Proxy Execution",
+          "reference": "https://attack.mitre.org/techniques/T1218/",
+          "subtechnique": [
+            {
+              "id": "T1218.011",
+              "name": "Rundll32",
+              "reference": "https://attack.mitre.org/techniques/T1218/011/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "version": 113,
+  "references": [
+    "https://lolbas-project.github.io/"
+  ],
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2,\nevents will not define `event.ingested` and default fallback for EQL rules was not added until version 8.2.\nHence for this rule to work effectively, users will need to add a custom ingest pipeline to populate\n`event.ingested` to @timestamp.\nFor more details on adding a custom ingest pipeline refer - https://www.elastic.co/guide/en/fleet/current/data-streams-pipeline-tutorial.html",
+  "related_integrations": [
+    {
+      "package": "endpoint",
+      "version": "^8.2.0"
+    },
+    {
+      "package": "windows",
+      "version": "^1.5.0"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "host.os.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.command_line",
+      "type": "wildcard"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.parent.executable",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.pe.original_file_name",
+      "type": "keyword"
+    }
+  ],
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.process-*",
+    "logs-windows.*",
+    "endgame-*",
+    "logs-system.security*"
+  ]
+}

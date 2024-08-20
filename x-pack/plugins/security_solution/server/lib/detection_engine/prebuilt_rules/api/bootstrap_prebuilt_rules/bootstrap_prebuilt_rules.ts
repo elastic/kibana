@@ -6,7 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { IKibanaResponse } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { BOOTSTRAP_PREBUILT_RULES_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { BootstrapPrebuiltRulesResponse } from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
@@ -17,7 +17,10 @@ import {
 } from '../install_prebuilt_rules_and_timelines/install_prebuilt_rules_package';
 import { installLocalPrebuiltRuleAssets } from '../../logic/rule_assets/install_local_prebuilt_rule_assets';
 
-export const bootstrapPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter) => {
+export const bootstrapPrebuiltRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger
+) => {
   router.versioned
     .post({
       access: 'internal',
@@ -37,6 +40,7 @@ export const bootstrapPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter
         try {
           const ctx = await context.resolve(['securitySolution', 'core']);
           const savedObjectsClient = ctx.core.savedObjects.client;
+          const savedObjectsImporter = ctx.core.savedObjects.getImporter(savedObjectsClient);
           const securityContext = ctx.securitySolution;
           const config = securityContext.getConfig();
 
@@ -45,18 +49,22 @@ export const bootstrapPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter
             installEndpointPackage(config, securityContext),
           ]);
 
-          await installLocalPrebuiltRuleAssets(savedObjectsClient, securityContext);
+          const result = await installLocalPrebuiltRuleAssets(
+            savedObjectsClient,
+            savedObjectsImporter,
+            logger
+          );
 
-          const responseBody: BootstrapPrebuiltRulesResponse = {
-            packages: results.map((result) => ({
-              name: result.package.name,
-              version: result.package.version,
-              status: result.status,
-            })),
-          };
+          // const responseBody: BootstrapPrebuiltRulesResponse = {
+          //   packages: results.map((result) => ({
+          //     name: result.package.name,
+          //     version: result.package.version,
+          //     status: result.status,
+          //   })),
+          // };
 
           return response.ok({
-            body: responseBody,
+            body: result,
           });
         } catch (err) {
           const error = transformError(err);

@@ -1,0 +1,47 @@
+{
+  "rule_id": "eql-rule-001",
+  "name": "eql-rule-001_1",
+  "version": 1,
+  "type": "eql",
+  "risk_score": 75,
+  "description": "Detects attempts to disable PowerShell Script Block Logging, which could be an attempt to evade detection mechanisms.",
+  "query": "process where host.os.type == \"windows\" and event.type == \"start\" and (process.name : (\"powershell.exe\", \"pwsh.exe\") or process.pe.original_file_name == \"PowerShell.EXE\") and process.args : (\"*Set-PSReadlineOption*\", \"*-HistorySaveStyle*\", \"*SaveNothing*\")",
+  "language": "eql",
+  "severity": "high",
+  "author": [
+    "Elastic"
+  ],
+  "false_positives": [
+    "Administrators may legitimately disable Script Block Logging for performance reasons in controlled environments."
+  ],
+  "tags": [
+    "Domain: Endpoint",
+    "OS: Windows",
+    "Use Case: Threat Detection",
+    "Tactic: Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1562",
+          "name": "Impair Defenses",
+          "reference": "https://attack.mitre.org/techniques/T1562/",
+          "subtechnique": [
+            {
+              "id": "T1562.002",
+              "name": "Disable Windows Event Logging",
+              "reference": "https://attack.mitre.org/techniques/T1562/002/"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
