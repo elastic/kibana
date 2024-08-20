@@ -15,7 +15,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const datasetQualityApiClient = getService('datasetQualityApiClient');
 
-  const integrationPackages = ['postgresql', 'apm'];
+  const integrationPackages = ['nginx', 'apm'];
 
   async function callApiAs(integration: string) {
     const user = 'datasetQualityLogsUser' as DatasetQualityApiClientKey;
@@ -44,16 +44,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const expectedResult = {
           dashboards: [
             {
-              id: 'postgresql-158be870-87f4-11e7-ad9c-db80de0bf8d3',
-              title: '[Logs PostgreSQL] Overview',
+              id: 'nginx-023d2930-f1a5-11e7-a9ef-93c69af7b129',
+              title: '[Metrics Nginx] Overview',
             },
             {
-              id: 'postgresql-4288b790-b79f-11e9-a579-f5c0a5d81340',
-              title: '[Metrics PostgreSQL] Database Overview',
+              id: 'nginx-046212a0-a2a1-11e7-928f-5dbe6f6f5519',
+              title: '[Logs Nginx] Access and error logs',
             },
             {
-              id: 'postgresql-e4c5f230-87f3-11e7-ad9c-db80de0bf8d3',
-              title: '[Logs PostgreSQL] Query Duration Overview',
+              id: 'nginx-55a9e6e0-a29e-11e7-928f-5dbe6f6f5519',
+              title: '[Logs Nginx] Overview',
             },
           ],
         };
