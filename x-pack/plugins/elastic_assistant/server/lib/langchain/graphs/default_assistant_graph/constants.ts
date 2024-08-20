@@ -13,4 +13,5 @@ export const NodeType = {
   RESPOND: 'respond',
   MODEL_INPUT: 'modelInput',
   STEP_ROUTER: 'stepRouter',
+  END: 'end',
 } as const;

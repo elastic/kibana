@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { END } from '@langchain/langgraph';
+
 import { NodeType } from '../constants';
 import { AgentState } from '../types';
 import { NEW_CHAT } from '../../../../../routes/helpers';
@@ -19,7 +19,7 @@ export function stepRouter(state: AgentState): string {
   switch (state.lastNode) {
     case NodeType.AGENT:
       if (state.agentOutcome && 'returnValues' in state.agentOutcome) {
-        return state.hasRespondStep ? NodeType.RESPOND : END;
+        return state.hasRespondStep ? NodeType.RESPOND : NodeType.END;
       }
       return NodeType.TOOLS;
 
@@ -33,6 +33,6 @@ export function stepRouter(state: AgentState): string {
       return state.conversationId ? NodeType.GET_PERSISTED_CONVERSATION : NodeType.AGENT;
 
     default:
-      return END;
+      return NodeType.END;
   }
 }

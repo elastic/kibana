@@ -161,7 +161,7 @@ export const getDefaultAssistantGraph = ({
       .addConditionalEdges(NodeType.AGENT, stepRouter, {
         [NodeType.RESPOND]: NodeType.RESPOND,
         [NodeType.TOOLS]: NodeType.TOOLS,
-        end: END,
+        [NodeType.END]: END,
       });
     return graph.compile();
   } catch (e) {
