@@ -24,11 +24,11 @@ const getAtIndexOrRandom = <T>(values: T[], index?: number) =>
 const LOG_LEVELS: string[] = ['FATAL', 'ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE'];
 
 const JAVA_LOG_MESSAGES = [
-  `[main] com.example1.core.ApplicationCore - Critical failure: NullPointerException encountered during startup'`,
-  `[main] com.example2.event.UserEventHandler - {"event": "userLogin", "userId": "7890", "source": "mobile_app"}'`,
-  `[main] com.example3.util.JsonParser - Parsing JSON response from external API'`,
-  `[main] com.example4.security.AuthManager - Unauthorized access attempt detected for userId: 67890'`,
-  `[main] com.example5.dao.UserDao - Database query failed: java.sql.SQLException: Timeout expired'`,
+  '[main] com.example1.core.ApplicationCore - Critical failure: NullPointerException encountered during startup',
+  '[main] com.example.service.UserService - User registration completed for userId: 12345',
+  '[main] com.example3.util.JsonParser - Parsing JSON response from external API',
+  '[main] com.example4.security.AuthManager - Unauthorized access attempt detected for userId: 67890',
+  '[main] com.example5.dao.UserDao - Database query failed: java.sql.SQLException: Timeout expired',
 ];
 
 const IP_ADDRESSES = [
