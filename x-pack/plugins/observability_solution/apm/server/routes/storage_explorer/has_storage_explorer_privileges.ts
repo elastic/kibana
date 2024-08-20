@@ -23,7 +23,8 @@ export async function hasStorageExplorerPrivileges({
       transaction = 'traces-apm*,apm-*',
       span = 'traces-apm*,apm-*',
       metric = 'metrics-apm*,apm-*',
-      error = 'logs-apm*,apm-*' },
+      error = 'logs-apm*,apm-*'
+   },
   } = apmEventClient;
 
   const names = uniq(
