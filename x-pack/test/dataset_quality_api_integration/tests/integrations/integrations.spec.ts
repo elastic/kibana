@@ -67,16 +67,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
       });
 
-      it('returns only log based integrations and its datasets map', async () => {
+      it('returns all installed integrations and its datasets map', async () => {
         const resp = await callApiAs();
 
         expect(resp.body.integrations.map((integration) => integration.name)).to.eql([
           'apm',
+          'synthetics',
           'system',
         ]);
 
         expect(resp.body.integrations[0].datasets).not.empty();
         expect(resp.body.integrations[1].datasets).not.empty();
+        expect(resp.body.integrations[2].datasets).not.empty();
       });
 
       after(
