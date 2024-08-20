@@ -3611,6 +3611,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cloud-security-posture-common@link:x-pack/packages/kbn-cloud-security-posture-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/cloud-security-posture@link:x-pack/packages/kbn-cloud-security-posture":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cloud-integration-saml-provider-plugin@link:x-pack/test/cloud_integration/plugins/saml_provider":
   version "0.0.0"
   uid ""
