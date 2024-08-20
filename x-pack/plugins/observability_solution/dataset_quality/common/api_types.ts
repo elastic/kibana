@@ -52,12 +52,12 @@ export type IntegrationDashboardsResponse = rt.TypeOf<typeof integrationDashboar
 
 export const integrationIconRt = rt.intersection([
   rt.type({
-    path: rt.string,
     src: rt.string,
   }),
   rt.partial({
-    title: rt.string,
+    path: rt.string,
     size: rt.string,
+    title: rt.string,
     type: rt.string,
   }),
 ]);
