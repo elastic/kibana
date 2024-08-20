@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { IKibanaResponse } from '@kbn/core/server';
+import { Octokit } from '@octokit/rest';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import execa from 'execa';
-import path from 'path';
 import { BOOTSTRAP_PREBUILT_RULES_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { BootstrapPrebuiltRulesResponse } from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
@@ -17,8 +16,18 @@ import {
   installEndpointPackage,
   installPrebuiltRulesPackage,
 } from '../install_prebuilt_rules_and_timelines/install_prebuilt_rules_package';
+import { installExternalPrebuiltRuleAssets } from '../../logic/rule_assets/install_rule_assets';
 
-export const bootstrapPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter) => {
+interface PrebuiltRuleRepository {
+  repository: string;
+  username: string;
+  token: string;
+}
+
+export const bootstrapPrebuiltRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger
+) => {
   router.versioned
     .post({
       access: 'internal',
@@ -36,7 +45,9 @@ export const bootstrapPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const ctx = await context.resolve(['securitySolution']);
+          const ctx = await context.resolve(['securitySolution', 'core']);
+          const savedObjectsClient = ctx.core.savedObjects.client;
+          const savedObjectsImporter = ctx.core.savedObjects.getImporter(savedObjectsClient);
           const securityContext = ctx.securitySolution;
           const config = securityContext.getConfig();
 
@@ -46,31 +57,14 @@ export const bootstrapPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter
           ]);
 
           if (config.prebuiltRuleRepositories) {
-            // Ensure the repositories directory exists
-            await execa('mkdir', ['-p', path.join(__dirname, './repositories')]);
-
-            await Promise.all(
-              config.prebuiltRuleRepositories.map(async (repository) => {
-                try {
-                  // Clone and update prebuilt rule repositories
-                  await execa('git', [
-                    'clone',
-                    '--depth',
-                    '1',
-                    `https://${repository.username}:${repository.token}@github.com//${repository.username}/${repository.repository}.git`,
-                    path.join(__dirname, `./repositories/${repository.repository}`),
-                  ]);
-                } catch (err) {
-                  // Ignore error if the repository already exists
-                  if (err.exitCode !== 128) {
-                    throw err;
-                  }
-                  // Update the repository
-                  await execa('git', ['pull'], {
-                    cwd: path.join(__dirname, `./repositories/${repository.repository}`),
-                  });
-                }
-              })
+            const externalPrebuiltRuleBlobs = await fetchPrebuiltRuleFilenames(
+              config.prebuiltRuleRepositories
+            );
+            const res = await installExternalPrebuiltRuleAssets(
+              externalPrebuiltRuleBlobs,
+              savedObjectsClient,
+              savedObjectsImporter,
+              logger
             );
           }
 
@@ -95,3 +89,42 @@ export const bootstrapPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter
       }
     );
 };
+
+export interface ExternalRuleAssetBlob {
+  filename: string;
+  sha?: string;
+  repository: PrebuiltRuleRepository;
+}
+
+async function fetchPrebuiltRuleFilenames(
+  prebuiltRuleRepositories: PrebuiltRuleRepository[]
+): Promise<ExternalRuleAssetBlob[]> {
+  const allRules: ExternalRuleAssetBlob[] = [];
+
+  for (const repository of prebuiltRuleRepositories) {
+    const octokit = new Octokit({ auth: repository.token });
+
+    const { data } = await octokit.request('GET /repos/{owner}/{repo}/git/trees/{tree_sha}', {
+      owner: repository.username,
+      repo: repository.repository,
+      tree_sha: 'main',
+      recursive: 'true',
+      headers: {
+        'X-GitHub-Api-Version': '2022-11-28',
+      },
+    });
+
+    const files = data.tree
+      .filter((item) => item.type === 'blob')
+      .filter((item) => item.path && item.path.endsWith('.json'))
+      .map((item) => ({
+        filename: `${repository.repository}-${item.path}`,
+        sha: item.sha,
+        repository,
+      }));
+
+    allRules.push(...files);
+  }
+
+  return allRules;
+}
