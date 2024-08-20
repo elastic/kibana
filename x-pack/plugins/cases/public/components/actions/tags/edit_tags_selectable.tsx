@@ -70,22 +70,25 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
   const [searchValue, setSearchValue] = useState<string>('');
   const { euiTheme } = useEuiTheme();
 
-  const renderOption = useCallback((option: ItemSelectableOption, search: string) => {
-    const dataTestSubj = option.newItem
-      ? 'cases-actions-tags-edit-selectable-add-new-tag-icon'
-      : `cases-actions-tags-edit-selectable-tag-${option.label}-icon-${option.itemIcon}`;
+  const renderOption = useCallback(
+    (option: ItemSelectableOption, search: string) => {
+      const dataTestSubj = option.newItem
+        ? 'cases-actions-tags-edit-selectable-add-new-tag-icon'
+        : `cases-actions-tags-edit-selectable-tag-${option.label}-icon-${option.itemIcon}`;
 
-    return (
-      <>
-        <EuiIcon
-          type={option.itemIcon}
-          data-test-subj={dataTestSubj}
-          className="euiSelectableListItem__icon euiSelectableListItem__prepend"
-        />
-        <EuiHighlight search={search}>{option.label}</EuiHighlight>
-      </>
-    );
-  }, []);
+      return (
+        <>
+          <EuiIcon
+            type={option.itemIcon}
+            data-test-subj={dataTestSubj}
+            css={{ flexShrink: 0, marginRight: euiTheme.size.m }}
+          />
+          <EuiHighlight search={search}>{option.label}</EuiHighlight>
+        </>
+      );
+    },
+    [euiTheme]
+  );
 
   /**
    * While the user searches we need to add the ability
