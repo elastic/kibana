@@ -22,7 +22,6 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBetaBadge,
   EuiBadge,
   EuiSwitch,
 } from '@elastic/eui';
@@ -41,6 +40,8 @@ import {
   useGetAgentPolicies,
   useLicense,
   useUIExtension,
+  useLink,
+  useFleetStatus,
 } from '../../../../hooks';
 
 import { AgentPolicyPackageBadge } from '../../../../components';
@@ -60,6 +61,7 @@ import {
 } from './hooks';
 
 import { CustomFields } from './custom_fields';
+import { SpaceSelector } from './space_selector';
 
 interface Props {
   agentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
@@ -75,7 +77,11 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   validation,
   disabled = false,
 }) => {
+  const useSpaceAwareness = ExperimentalFeaturesService.get()?.useSpaceAwareness ?? false;
   const { docLinks } = useStartServices();
+  const { spaceId } = useFleetStatus();
+
+  const { getAbsolutePath } = useLink();
   const AgentTamperProtectionWrapper = useUIExtension(
     'endpoint',
     'endpoint-agent-tamper-protection'
@@ -257,6 +263,63 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
+      {useSpaceAwareness ? (
+        <EuiDescribedFormGroup
+          fullWidth
+          title={
+            <h3>
+              <FormattedMessage
+                id="xpack.fleet.agentPolicyForm.spaceFieldLabel"
+                defaultMessage="Space"
+              />
+            </h3>
+          }
+          description={
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.spaceDescription"
+              defaultMessage="Select a space for this policy or create a new one. {link}"
+              values={{
+                link: (
+                  <EuiLink
+                    target="_blank"
+                    href={getAbsolutePath('/app/management/kibana/spaces/create')}
+                    external
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.agentPolicyForm.createSpaceLink"
+                      defaultMessage="Create space"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
+        >
+          <EuiFormRow
+            fullWidth
+            key="space"
+            error={
+              touchedFields.description && validation.description ? validation.description : null
+            }
+            isDisabled={disabled}
+            isInvalid={Boolean(touchedFields.description && validation.description)}
+          >
+            <SpaceSelector
+              isDisabled={disabled}
+              value={
+                'space_ids' in agentPolicy && agentPolicy.space_ids
+                  ? agentPolicy.space_ids
+                  : [spaceId || 'default']
+              }
+              onChange={(newValue) => {
+                updateAgentPolicy({
+                  space_ids: newValue,
+                });
+              }}
+            />
+          </EuiFormRow>
+        </EuiDescribedFormGroup>
+      ) : null}
       <EuiDescribedFormGroup
         fullWidth
         title={
@@ -732,29 +795,14 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           <h3>
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutLabel"
-              defaultMessage="Unenrollment timeout"
+              defaultMessage="Inactive agent unenrollment timeout"
             />
-            &nbsp;
-            <EuiToolTip
-              content={i18n.translate('xpack.fleet.agentPolicyForm.unenrollmentTimeoutTooltip', {
-                defaultMessage:
-                  'This setting is deprecated and will be removed in a future release. Consider using inactivity timeout instead',
-              })}
-            >
-              <EuiBetaBadge
-                label={i18n.translate(
-                  'xpack.fleet.agentPolicyForm.unenrollmentTimeoutDeprecatedLabel',
-                  { defaultMessage: 'Deprecated' }
-                )}
-                size="s"
-              />
-            </EuiToolTip>
           </h3>
         }
         description={
           <FormattedMessage
             id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutDescription"
-            defaultMessage="An optional timeout in seconds. If provided, and fleet server is below version 8.7.0, an agent will automatically unenroll after being gone for this period of time."
+            defaultMessage="An optional timeout in seconds. If configured, inactive agents will be automatically unenrolled and their API keys will be invalidated after they've been inactive for this value in seconds. This can be useful for policies containing ephemeral agents, such as those in a Docker or Kubernetes environment."
           />
         }
       >
