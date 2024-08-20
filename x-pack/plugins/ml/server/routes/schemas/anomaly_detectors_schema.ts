@@ -197,7 +197,7 @@ export const getModelSnapshotsSchema = schema.object({
 });
 
 export const updateModelSnapshotsSchema = schema.object({
-  snapshotId: schema.maybe(schema.string({ meta: { description: 'Snapshot ID' } })),
+  snapshotId: schema.string({ meta: { description: 'Snapshot ID' } }),
   ...jobIdSchemaBasic,
 });
 
@@ -218,3 +218,10 @@ export const jobForCloningSchema = schema.object({
   ),
   ...jobIdSchemaBasic,
 });
+
+export const getAnomalyDetectorsResponse = () => {
+  return schema.object({
+    count: schema.number(),
+    jobs: schema.arrayOf(schema.any()),
+  });
+};
