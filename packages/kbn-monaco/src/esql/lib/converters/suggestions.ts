@@ -6,29 +6,34 @@
  * Side Public License, v 1.
  */
 
-import type { SuggestionRawDefinition } from '@kbn/esql-validation-autocomplete';
 import { monaco } from '../../../monaco_imports';
-import { MonacoAutocompleteCommandDefinition } from '../types';
+import {
+  MonacoAutocompleteCommandDefinition,
+  SuggestionRawDefinitionWithMonacoRange,
+} from '../types';
 
 export function wrapAsMonacoSuggestions(
-  suggestions: SuggestionRawDefinition[]
+  suggestions: SuggestionRawDefinitionWithMonacoRange[]
 ): MonacoAutocompleteCommandDefinition[] {
-  return suggestions.map(
-    ({ label, text, asSnippet, kind, detail, documentation, sortText, command }) => ({
-      label,
-      insertText: text,
-      kind:
-        kind in monaco.languages.CompletionItemKind
-          ? monaco.languages.CompletionItemKind[kind]
-          : monaco.languages.CompletionItemKind.Method, // fallback to Method
-      detail,
-      documentation,
-      sortText,
-      command,
-      insertTextRules: asSnippet
-        ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-        : undefined,
-      range: undefined as unknown as monaco.IRange,
-    })
+  return suggestions.map<MonacoAutocompleteCommandDefinition>(
+    ({ label, text, asSnippet, kind, detail, documentation, sortText, command, range }) => {
+      const monacoSuggestion: MonacoAutocompleteCommandDefinition = {
+        label,
+        insertText: text,
+        kind:
+          kind in monaco.languages.CompletionItemKind
+            ? monaco.languages.CompletionItemKind[kind]
+            : monaco.languages.CompletionItemKind.Method, // fallback to Method
+        detail,
+        documentation,
+        sortText,
+        command,
+        insertTextRules: asSnippet
+          ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+          : undefined,
+        range,
+      };
+      return monacoSuggestion;
+    }
   );
 }

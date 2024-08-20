@@ -4473,9 +4473,6 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row mv_count(to_geopoint("POINT (30 10)"))', []);
         testErrorsAndWarnings('row var = mv_count(to_geopoint(to_geopoint("POINT (30 10)")))', []);
         testErrorsAndWarnings('row var = mv_count(to_geoshape(to_geopoint("POINT (30 10)")))', []);
-        testErrorsAndWarnings('from a_index | where mv_count(dateNanosField) > 0', []);
-        testErrorsAndWarnings('from a_index | eval var = mv_count(dateNanosField)', []);
-        testErrorsAndWarnings('from a_index | eval mv_count(dateNanosField)', []);
       });
 
       describe('mv_dedupe', () => {
@@ -4779,8 +4776,6 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row mv_first(to_geopoint("POINT (30 10)"))', []);
         testErrorsAndWarnings('row var = mv_first(to_geopoint(to_geopoint("POINT (30 10)")))', []);
         testErrorsAndWarnings('row var = mv_first(to_geoshape(to_geopoint("POINT (30 10)")))', []);
-        testErrorsAndWarnings('from a_index | eval var = mv_first(dateNanosField)', []);
-        testErrorsAndWarnings('from a_index | eval mv_first(dateNanosField)', []);
       });
 
       describe('mv_last', () => {
@@ -4931,8 +4926,6 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row mv_last(to_geopoint("POINT (30 10)"))', []);
         testErrorsAndWarnings('row var = mv_last(to_geopoint(to_geopoint("POINT (30 10)")))', []);
         testErrorsAndWarnings('row var = mv_last(to_geoshape(to_geopoint("POINT (30 10)")))', []);
-        testErrorsAndWarnings('from a_index | eval var = mv_last(dateNanosField)', []);
-        testErrorsAndWarnings('from a_index | eval mv_last(dateNanosField)', []);
       });
 
       describe('mv_max', () => {
@@ -5020,8 +5013,6 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | eval mv_max(nullVar)', []);
         testErrorsAndWarnings('from a_index | eval mv_max("2022")', []);
         testErrorsAndWarnings('from a_index | eval mv_max(concat("20", "22"))', []);
-        testErrorsAndWarnings('from a_index | eval var = mv_max(dateNanosField)', []);
-        testErrorsAndWarnings('from a_index | eval mv_max(dateNanosField)', []);
       });
 
       describe('mv_median', () => {
@@ -5159,8 +5150,6 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | eval mv_min(nullVar)', []);
         testErrorsAndWarnings('from a_index | eval mv_min("2022")', []);
         testErrorsAndWarnings('from a_index | eval mv_min(concat("20", "22"))', []);
-        testErrorsAndWarnings('from a_index | eval var = mv_min(dateNanosField)', []);
-        testErrorsAndWarnings('from a_index | eval mv_min(dateNanosField)', []);
       });
 
       describe('mv_slice', () => {

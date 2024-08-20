@@ -258,12 +258,12 @@ export const CloudSecurityDataTable = ({
     [dataView, filterManager, setUrlQuery]
   );
 
-  const onResize = (colSettings: { columnId: string; width: number }) => {
+  const onResize = (colSettings: { columnId: string; width: number | undefined }) => {
     const grid = persistedSettings || {};
     const newColumns = { ...(grid.columns || {}) };
-    newColumns[colSettings.columnId] = {
-      width: Math.round(colSettings.width),
-    };
+    newColumns[colSettings.columnId] = colSettings.width
+      ? { width: Math.round(colSettings.width) }
+      : {};
     const newGrid = { ...grid, columns: newColumns };
     setPersistedSettings(newGrid);
   };
