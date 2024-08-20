@@ -36,6 +36,6 @@ export class ToolingLogCollectingWriter extends ToolingLogTextWriter {
       .filter(Boolean)
       .concat(msg.args);
 
-    return super.write(msg);
+    return super.write({ ...msg, args });
   }
 }
