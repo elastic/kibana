@@ -224,7 +224,7 @@ export const EvaluationSettings: React.FC = React.memo(() => {
           helpText={i18n.RUN_NAME_DESCRIPTION}
         >
           <EuiFieldText
-            aria-label="run-name-textfield"
+            aria-label={i18n.RUN_NAME_LABEL}
             compressed
             onChange={onRunNameChange}
             placeholder={i18n.RUN_NAME_PLACEHOLDER}
@@ -238,7 +238,7 @@ export const EvaluationSettings: React.FC = React.memo(() => {
           helpText={i18n.LANGSMITH_DATASET_DESCRIPTION}
         >
           <EuiComboBox
-            aria-label={'dataset-name-combobox'}
+            aria-label={i18n.EVALUATOR_DATASET_LABEL}
             placeholder={i18n.LANGSMITH_DATASET_PLACEHOLDER}
             singleSelection={{ asPlainText: true }}
             options={datasetOptions}
@@ -271,7 +271,7 @@ export const EvaluationSettings: React.FC = React.memo(() => {
               <EuiFieldText
                 value={traceOptions.apmUrl}
                 onChange={onApmUrlChange}
-                aria-label="apm-url-textfield"
+                aria-label={i18n.APM_URL_LABEL}
               />
             </EuiFormRow>
             <EuiFormRow
@@ -283,7 +283,7 @@ export const EvaluationSettings: React.FC = React.memo(() => {
               <EuiFieldText
                 value={traceOptions.langSmithProject}
                 onChange={onLangSmithProjectChange}
-                aria-label="langsmith-project-textfield"
+                aria-label={i18n.LANGSMITH_PROJECT_LABEL}
               />
             </EuiFormRow>
             <EuiFormRow
@@ -295,7 +295,7 @@ export const EvaluationSettings: React.FC = React.memo(() => {
               <EuiFieldText
                 value={traceOptions.langSmithApiKey}
                 onChange={onLangSmithApiKeyChange}
-                aria-label="langsmith-api-key-textfield"
+                aria-label={i18n.LANGSMITH_API_KEY_LABEL}
               />
             </EuiFormRow>
           </>
@@ -318,7 +318,7 @@ export const EvaluationSettings: React.FC = React.memo(() => {
           helpText={i18n.CONNECTORS_DESCRIPTION}
         >
           <EuiComboBox
-            aria-label={'model-selector'}
+            aria-label={i18n.CONNECTORS_LABEL}
             compressed
             options={modelOptions}
             selectedOptions={selectedModelOptions}
@@ -332,7 +332,7 @@ export const EvaluationSettings: React.FC = React.memo(() => {
           helpText={i18n.GRAPHS_DESCRIPTION}
         >
           <EuiComboBox
-            aria-label={'graph-selector'}
+            aria-label={i18n.GRAPHS_LABEL}
             compressed
             onCreateOption={onGraphOptionsCreate}
             options={graphOptions}
