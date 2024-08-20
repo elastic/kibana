@@ -19,7 +19,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     {
       // with dashboards
       name: 'postgresql',
-      version: '1.19.0',
+      version: '1.23.0',
     },
     {
       // without dashboards
