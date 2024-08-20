@@ -756,7 +756,7 @@ export const UnifiedDataTable = ({
 
   const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(
     () =>
-      cellActionsTriggerId && !isPlainRecord
+      cellActionsTriggerId
         ? visibleColumns.map(
             (columnName) =>
               dataView.getFieldByName(columnName)?.toSpec() ?? {
@@ -767,7 +767,7 @@ export const UnifiedDataTable = ({
               }
           )
         : undefined,
-    [cellActionsTriggerId, isPlainRecord, visibleColumns, dataView]
+    [cellActionsTriggerId, visibleColumns, dataView]
   );
   const allCellActionsMetadata = useMemo(
     () => ({ dataViewId: dataView.id, ...(cellActionsMetadata ?? {}) }),

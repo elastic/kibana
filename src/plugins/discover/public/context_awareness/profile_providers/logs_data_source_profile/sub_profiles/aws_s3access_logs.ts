@@ -27,6 +27,17 @@ export const createAwsS3accessLogsDataSourceProfileProvider = (
           MESSAGE_COLUMN,
         ],
       }),
+      getAdditionalCellActions: (prev) => () =>
+        [
+          ...prev(),
+          {
+            displayName: 'AWS action',
+            iconType: 'bell',
+            execute: () => {
+              alert('Example action executed');
+            },
+          },
+        ],
     },
     resolve: createResolve('logs-aws.s3access'),
   });

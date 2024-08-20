@@ -72,11 +72,7 @@ import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
 import { useContextualGridCustomisations } from '../../hooks/grid_customisations';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
-import {
-  DISCOVER_CELL_ACTIONS_TRIGGER,
-  useCellActions,
-  useProfileAccessor,
-} from '../../../../context_awareness';
+import { useCellActions, useProfileAccessor } from '../../../../context_awareness';
 
 const containerStyles = css`
   position: relative;
@@ -360,7 +356,7 @@ function DiscoverDocumentsComponent({
     [viewModeToggle, callouts, gridAnnouncementCallout, loadingIndicator]
   );
 
-  const { cellActionsMetadata } = useCellActions();
+  const { cellActionsTriggerId, cellActionsMetadata } = useCellActions();
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
@@ -472,11 +468,14 @@ function DiscoverDocumentsComponent({
                 customGridColumnsConfiguration={customGridColumnsConfiguration}
                 rowAdditionalLeadingControls={rowAdditionalLeadingControls}
                 additionalFieldGroups={additionalFieldGroups}
+<<<<<<< HEAD
                 dataGridDensityState={density}
                 onUpdateDataGridDensity={onUpdateDensity}
-                cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
+=======
+                cellActionsTriggerId={cellActionsTriggerId}
                 cellActionsMetadata={cellActionsMetadata}
                 cellActionsHandling="append"
+>>>>>>> 68000efd745 (Initial cell actions extension implementation)
               />
             </CellActionsProvider>
           </div>

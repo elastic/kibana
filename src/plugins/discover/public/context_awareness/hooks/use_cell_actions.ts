@@ -9,7 +9,6 @@
 import { createCellActionFactory } from '@kbn/cell-actions/actions';
 import { useEffect, useMemo, useState } from 'react';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
-import { useGeneratedHtmlId } from '@elastic/eui';
 import { uniqueId } from 'lodash';
 import type { DiscoverCellAction, DiscoverCellActionMetadata } from '../types';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
@@ -21,12 +20,9 @@ const DISCOVER_CELL_ACTION_TYPE = 'discover-cellAction-type';
 
 export const useCellActions = () => {
   const { uiActions } = useDiscoverServices();
-  const instanceId = useGeneratedHtmlId();
-  const [cellActionsTriggerId, setCellActionsTriggerId] = useState<string | undefined>();
-  const cellActionsMetadata = useMemo<DiscoverCellActionMetadata>(
-    () => ({ instanceId }),
-    [instanceId]
-  );
+  const [cellActionsMetadata, setCellActionMetadata] = useState<
+    DiscoverCellActionMetadata | undefined
+  >();
   const getAdditionalCellActionsAccessor = useProfileAccessor('getAdditionalCellActions');
   const additionalCellActions = useMemo(
     () => getAdditionalCellActionsAccessor(() => [])(),
@@ -34,6 +30,7 @@ export const useCellActions = () => {
   );
 
   useEffect(() => {
+    const instanceId = uniqueId();
     const actions = additionalCellActions.map((action, i) => {
       const factory = createCellActionFactory<DiscoverCellAction>(() => ({
         type: DISCOVER_CELL_ACTION_TYPE,
@@ -62,15 +59,17 @@ export const useCellActions = () => {
       uiActions.attachAction(DISCOVER_CELL_ACTIONS_TRIGGER.id, action.id);
     });
 
-    setCellActionsTriggerId(DISCOVER_CELL_ACTIONS_TRIGGER.id);
+    setCellActionMetadata({ instanceId });
 
     return () => {
       actions.forEach((action) => {
         uiActions.detachAction(DISCOVER_CELL_ACTIONS_TRIGGER.id, action.id);
         uiActions.unregisterAction(action.id);
       });
-    };
-  }, [additionalCellActions, instanceId, uiActions]);
 
-  return { cellActionsTriggerId, cellActionsMetadata };
+      setCellActionMetadata(undefined);
+    };
+  }, [additionalCellActions, uiActions]);
+
+  return { cellActionsMetadata };
 };

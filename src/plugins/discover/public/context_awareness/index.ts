@@ -10,4 +10,9 @@ export * from './types';
 export * from './profiles';
 export { getMergedAccessor } from './composable_profile';
 export { ProfilesManager } from './profiles_manager';
-export { useProfileAccessor, useRootProfile, useCellActions } from './hooks';
+export {
+  useProfileAccessor,
+  useRootProfile,
+  useCellActions,
+  DISCOVER_CELL_ACTIONS_TRIGGER,
+} from './hooks';
