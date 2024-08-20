@@ -8,13 +8,36 @@
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 
+export const MINIMUM_INDEX_PRIVILEGE_SET_EDITOR = [
+  'write',
+  'read',
+  'view_index_metadata',
+  'manage',
+  'auto_configure',
+];
+export const TOTAL_INDEX_PRIVILEGE_SET_EDITOR = [
+  'write',
+  'read',
+  'read_cross_cluster',
+  'view_index_metadata',
+  'manage',
+  'auto_configure',
+];
+export const MINIMUM_INDEX_PRIVILEGE_SET_VIEWER = ['read'];
+export const TOTAL_INDEX_PRIVILEGE_SET_VIEWER = ['read', 'read_cross_cluster'];
+
 export async function getGlobalDiagnosis(
   esClient: ElasticsearchClient,
   licensing: LicensingApiRequestHandlerContext
 ) {
   const licenseInfo = licensing.license.toJSON();
   const userWritePrivileges = await esClient.security.hasPrivileges({
-    index: [{ names: '.slo-*', privileges: ['write', 'read', 'view_index_metadata'] }],
+    index: [
+      {
+        names: '.slo-*',
+        privileges: ['write', 'read', 'view_index_metadata', 'manage', 'auto_configure'],
+      },
+    ],
   });
   const userReadPrivileges = await esClient.security.hasPrivileges({
     index: [{ names: '.slo-*', privileges: ['read'] }],

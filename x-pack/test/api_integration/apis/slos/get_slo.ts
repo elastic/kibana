@@ -35,6 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
+      await slo.createUser();
       await slo.deleteAllSLOs();
       await sloEsClient.deleteTestSourceData();
       await loadTestData(getService);
@@ -55,7 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
       await sloEsClient.deleteTestSourceData();
     });
 
-    it('gets slo by id and calculates SLI - occurances rolling', async () => {
+    it('gets slo by id and calculates SLI - occurrences rolling', async () => {
       const id = await createSLO({
         groupBy: '*',
       });
@@ -87,7 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
           groupBy: '*',
           groupings: {},
           id,
-          settings: { syncDelay: '1m', frequency: '1m' },
+          settings: { syncDelay: '1m', frequency: '1m', preventInitialBackfill: false },
           revision: 1,
           enabled: true,
           createdAt: getResponse.body.createdAt,
@@ -103,6 +104,9 @@ export default function ({ getService }: FtrProviderContext) {
               remaining: -49,
               isEstimated: false,
             },
+            fiveMinuteBurnRate: 40,
+            oneDayBurnRate: 50,
+            oneHourBurnRate: 50,
             status: 'VIOLATED',
           },
         });
@@ -383,11 +387,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('gets slo definitions', async () => {
       const id = await createSLO();
       const secondId = await createSLO({ name: 'test name int' });
-      const response = await supertestAPI
-        .get(`/api/observability/slos/_definitions`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
+      const response = await slo.getDefinitions();
 
       expect(response.body).toEqual({
         page: 1,
@@ -466,11 +466,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // can search by name
-      const searchResponse = await supertestAPI
-        .get(`/api/observability/slos/_definitions?search=api`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
+      const searchResponse = await slo.getDefinitions({ search: 'api' });
 
       expect(searchResponse.body.total).toEqual(1);
 
