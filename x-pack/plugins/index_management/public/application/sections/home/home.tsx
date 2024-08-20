@@ -151,6 +151,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   return (
     <Routes>
       <Route path={`/${Section.Indices}/index_details`} component={IndexDetailsPage} />
+      <Route path={`/${Section.Indices}/search_index_details`} component={IndexDetailsPage} />
       <Route render={() => indexManagementTabs} />
     </Routes>
   );
