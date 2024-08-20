@@ -6,11 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SavedObject } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   ImportExceptionsListSchema,
   ImportExceptionListItemSchema,
-  ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import type {
@@ -23,6 +22,7 @@ import { checkRuleExceptionReferences } from './check_rule_exception_references'
 import { calculateRuleSourceForImport } from './calculate_rule_source_for_import';
 import type { IDetectionRulesClient } from '../detection_rules_client/detection_rules_client_interface';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
+import { getReferencedExceptionLists } from './gather_referenced_exceptions';
 
 export type PromiseFromStreams = RuleToImport | Error;
 export interface RuleExceptionsPromiseFromStreams {
@@ -50,19 +50,19 @@ export const importRules = async ({
   rulesResponseAcc,
   overwriteRules,
   detectionRulesClient,
-  existingLists,
   prebuiltRuleAssets,
-  allowMissingConnectorSecrets,
   allowPrebuiltRules,
+  allowMissingConnectorSecrets,
+  savedObjectsClient,
 }: {
   ruleChunks: PromiseFromStreams[][];
   rulesResponseAcc: ImportRuleResponse[];
   overwriteRules: boolean;
   detectionRulesClient: IDetectionRulesClient;
-  existingLists: Record<string, ExceptionListSchema>;
   prebuiltRuleAssets?: PrebuiltRuleAsset[];
-  allowMissingConnectorSecrets?: boolean;
   allowPrebuiltRules?: boolean;
+  allowMissingConnectorSecrets?: boolean;
+  savedObjectsClient: SavedObjectsClientContract;
 }) => {
   let importRuleResponse: ImportRuleResponse[] = [...rulesResponseAcc];
 
@@ -74,6 +74,10 @@ export const importRules = async ({
 
   while (ruleChunks.length) {
     const batchParseObjects = ruleChunks.shift() ?? [];
+    const existingLists = await getReferencedExceptionLists({
+      rules: batchParseObjects,
+      savedObjectsClient,
+    });
     const newImportRuleResponse = await Promise.all(
       batchParseObjects.reduce<Array<Promise<ImportRuleResponse>>>((accum, parsedRule) => {
         const importsWorkerPromise = new Promise<ImportRuleResponse>(async (resolve, reject) => {
