@@ -18,7 +18,7 @@ interface IndexTablePaginationProps {
   setURLParam: any;
 }
 
-const PAGE_SIZE_OPTIONS = [10, 50, 100];
+export const PAGE_SIZE_OPTIONS = [10, 50, 100];
 
 export const IndexTablePagination = ({
   pager,
@@ -29,37 +29,32 @@ export const IndexTablePagination = ({
 }: IndexTablePaginationProps) => {
   const { pageSize, onTableChange } = useEuiTablePersist<IndexModule>({
     tableId: 'indices',
-    customOnTableChange: ({ page }) => {
-      setURLParam('pageSize', page?.size);
-      pageSizeChanged(page?.size);
-    },
     initialPageSize: pager.itemsPerPage,
+    pageSizeOptions: PAGE_SIZE_OPTIONS,
   });
-
-  if (pager.itemsPerPage !== pageSize) {
-    pageSizeChanged(pageSize);
-  }
 
   const { pageSize: urlParamPageSize } = readURLParams();
 
-  if (
-    urlParamPageSize !== undefined &&
-    urlParamPageSize !== pageSize &&
-    PAGE_SIZE_OPTIONS.includes(urlParamPageSize)
-  ) {
-    pageSizeChanged(urlParamPageSize);
+  // Update local storage if there is a url param for page size
+  if (PAGE_SIZE_OPTIONS.includes(urlParamPageSize) && urlParamPageSize !== pageSize) {
     onTableChange({ page: { size: urlParamPageSize, index: pager.getCurrentPageIndex() } });
+  }
+
+  if (pageSize !== pager.itemsPerPage) {
+    pageSizeChanged(pageSize);
   }
 
   return (
     <EuiTablePagination
       activePage={pager.getCurrentPageIndex()}
-      itemsPerPage={pageSize}
+      itemsPerPage={pager.itemsPerPage}
       itemsPerPageOptions={PAGE_SIZE_OPTIONS}
       pageCount={pager.getTotalPages()}
-      onChangeItemsPerPage={(size) =>
-        onTableChange({ page: { size, index: pager.getCurrentPageIndex() } })
-      }
+      onChangeItemsPerPage={(size) => {
+        setURLParam('pageSize', size);
+        pageSizeChanged(size);
+        onTableChange({ page: { size, index: pager.getCurrentPageIndex() } });
+      }}
       onChangePage={(pageIndex) => {
         setURLParam('pageIndex', pageIndex);
         pageChanged(pageIndex);

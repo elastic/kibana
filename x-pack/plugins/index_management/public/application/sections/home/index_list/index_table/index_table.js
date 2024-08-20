@@ -48,7 +48,7 @@ import { renderBadges } from '../../../../lib/render_badges';
 import { NoMatch, DataHealth } from '../../../../components';
 import { IndexActionsContextMenu } from '../index_actions_context_menu';
 import { CreateIndexButton } from '../create_index/create_index_button';
-import { IndexTablePagination } from './index_table_pagination';
+import { IndexTablePagination, PAGE_SIZE_OPTIONS } from './index_table_pagination';
 
 const getColumnConfigs = ({
   showIndexStats,
@@ -188,8 +188,9 @@ export class IndexTable extends Component {
   componentDidMount() {
     this.props.loadIndices();
 
-    const { filterChanged, toggleNameToVisibleMap, toggleChanged } = this.props;
-    const { filter, ...rest } = this.readURLParams();
+    const { filterChanged, pageSizeChanged, pageChanged, toggleNameToVisibleMap, toggleChanged } =
+      this.props;
+    const { filter, pageSize, pageIndex, ...rest } = this.readURLParams();
 
     if (filter) {
       try {
@@ -198,6 +199,12 @@ export class IndexTable extends Component {
       } catch (e) {
         this.setState({ filterError: e });
       }
+    }
+    if (pageSize && PAGE_SIZE_OPTIONS.includes(pageSize)) {
+      pageSizeChanged(pageSize);
+    }
+    if (pageIndex && pageIndex > -1) {
+      pageChanged(pageIndex);
     }
     const toggleParams = Object.keys(rest);
     const toggles = Object.keys(toggleNameToVisibleMap);
@@ -706,7 +713,7 @@ export class IndexTable extends Component {
                   pageChanged={pageChanged}
                   pageSizeChanged={pageSizeChanged}
                   readURLParams={() => this.readURLParams()}
-                  setURLParam={() => this.setURLParam()}
+                  setURLParam={(paramName, value) => this.setURLParam(paramName, value)}
                 />
               ) : null}
             </EuiPageSection>
