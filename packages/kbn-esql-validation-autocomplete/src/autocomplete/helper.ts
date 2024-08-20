@@ -117,13 +117,12 @@ export function getValidFunctionSignaturesForPreviousArgs(
   const relevantFuncSignatures = fnDefinition.signatures.filter(
     (s) =>
       s.params?.length >= argIndex &&
-      s.params
-        .slice(0, argIndex)
-        .every(
-          ({ type: esType }, idx) =>
-            esType === enrichedArgs[idx].esType ||
-            compareTypesWithLiterals(esType, enrichedArgs[idx].esType)
-        )
+      s.params.slice(0, argIndex).every(({ type: esType }, idx) => {
+        return (
+          esType === enrichedArgs[idx].esType ||
+          compareTypesWithLiterals(esType, enrichedArgs[idx].esType)
+        );
+      })
   );
   return relevantFuncSignatures;
 }

@@ -75,6 +75,7 @@ import {
   buildValueDefinitions,
   getDateLiterals,
   buildFieldsDefinitionsWithMetadata,
+  TIME_SYSTEM_PARAMS,
 } from './factories';
 import { EDITOR_MARKER, SINGLE_BACKTICK, METADATA_FIELDS } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
@@ -1229,7 +1230,13 @@ async function getFunctionArgsSuggestions(
   };
 
   const enrichedArgs = node.args.map((nodeArg) => {
-    const esType = extractFinalTypeFromArg(nodeArg, references);
+    let esType = extractFinalTypeFromArg(nodeArg, references);
+
+    // For named system time parameters ?start and ?end, make sure it's compatiable
+    if (isLiteralItem(nodeArg) && TIME_SYSTEM_PARAMS.includes(nodeArg.text)) {
+      esType = 'date';
+    }
+
     return { ...nodeArg, esType } as ESQLAstItem & { esType: string };
   });
 
@@ -1379,8 +1386,10 @@ async function getFunctionArgsSuggestions(
 
     // could also be in stats (bucket) but our autocomplete is not great yet
     if (
-      getTypesFromParamDefs(typesToSuggestNext).includes('date') &&
-      ['where', 'eval'].includes(command.name)
+      (getTypesFromParamDefs(typesToSuggestNext).includes('date') &&
+        ['where', 'eval'].includes(command.name)) ||
+      (command.name === 'stats' &&
+        typesToSuggestNext.some((t) => t && t.type === 'date' && t.constantOnly === true))
     )
       suggestions.push(
         ...getDateLiterals({
@@ -1389,7 +1398,6 @@ async function getFunctionArgsSuggestions(
         })
       );
   }
-
   // for eval and row commands try also to complete numeric literals with time intervals where possible
   if (arg) {
     if (command.name !== 'stats') {
