@@ -34,10 +34,11 @@ function stringifyToYaml(document: unknown): string {
     return safeDump(clearedDocument, {
       noRefs: true,
       sortKeys: sortYamlKeys,
+      skipInvalid: true, // Skip invalid types like `undefined`
     });
   } catch (e) {
     // Try to stringify with YAML Anchors enabled
-    return safeDump(document, { noRefs: false, sortKeys: sortYamlKeys });
+    return safeDump(document, { noRefs: false, sortKeys: sortYamlKeys, skipInvalid: true }); // Skip invalid types like `undefined`
   }
 }
 

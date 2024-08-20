@@ -56,7 +56,10 @@ function dumpSpecs(folderPath: string, oasSpecs: Record<string, OpenAPIV3.Docume
   mkdirSync(folderPath, { recursive: true });
 
   for (const [fileName, oasSpec] of Object.entries(oasSpecs)) {
-    writeFileSync(join(folderPath, `${fileName}.schema.yaml`), safeDump(oasSpec));
+    writeFileSync(
+      join(folderPath, `${fileName}.schema.yaml`),
+      safeDump(oasSpec, { skipInvalid: true }) // Skip invalid types like `undefined`
+    );
   }
 }
 
