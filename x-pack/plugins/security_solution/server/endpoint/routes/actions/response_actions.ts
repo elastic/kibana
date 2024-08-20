@@ -393,6 +393,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
           break;
 
         case 'upload':
+          //
           action = await responseActionsClient.upload(req.body as UploadActionApiRequestBody);
           break;
 
