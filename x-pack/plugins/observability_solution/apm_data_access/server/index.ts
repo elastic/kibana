@@ -16,13 +16,6 @@ const configSchema = schema.object({
     metric: schema.string({ defaultValue: 'metrics-apm*,apm-*,metrics-*.otel-*' }),
     onboarding: schema.string({ defaultValue: 'apm-*' }), // Unused: to be deleted
     sourcemap: schema.string({ defaultValue: 'apm-*' }), // Unused: to be deleted
-
-    // Index patterns for APM-only indices without OTel pattern
-    // Currently used for Storage Explorer tests, as those do not cover OTel
-    apmTransaction: schema.string({ defaultValue: 'traces-apm*,apm-*' }),
-    apmSpan: schema.string({ defaultValue: 'traces-apm*,apm-*,traces-*.otel-*' }),
-    apmError: schema.string({ defaultValue: 'logs-apm*,apm-*' }),
-    apmMetric: schema.string({ defaultValue: 'metrics-apm*,apm-*' }),
   }),
 });
 
