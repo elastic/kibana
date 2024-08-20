@@ -306,20 +306,19 @@ export const useColumns = ({
     [columns]
   );
 
-  const columnsWithoutInitialWidthForLastColumn = useMemo(
-    () =>
-      columns.map((col, inx) => {
-        if (inx !== columns.length - 1) {
-          return col;
-        }
-        return (({ initialWidth, ...object }) => object)(col);
-      }),
-    [columns]
-  );
+  const columnsWithoutInitialWidthForLastVisibleColumn = useMemo(() => {
+    const lastVisibleColumns = visibleColumns[visibleColumns.length - 1];
+    return columns.map((col) => {
+      if (col.id !== lastVisibleColumns) {
+        return col;
+      }
+      return (({ initialWidth, ...object }) => object)(col);
+    });
+  }, [columns, visibleColumns]);
 
   return useMemo(
     () => ({
-      columns: columnsWithoutInitialWidthForLastColumn,
+      columns: columnsWithoutInitialWidthForLastVisibleColumn,
       visibleColumns,
       isBrowserFieldDataLoading: fieldsQuery.isLoading,
       browserFields: selectedAlertsFields,
@@ -330,7 +329,7 @@ export const useColumns = ({
       fields: fieldsToFetch,
     }),
     [
-      columnsWithoutInitialWidthForLastColumn,
+      columnsWithoutInitialWidthForLastVisibleColumn,
       visibleColumns,
       fieldsQuery.isLoading,
       selectedAlertsFields,
