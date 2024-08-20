@@ -8,11 +8,7 @@ Returns all user activity for a case.
 
 deprecated::[8.1.0,Use <<cases-api-find-case-activity>> instead.]
 
-[NOTE]
-====
-For the most up-to-date API details, refer to the
-{kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[open API specification].
-====
+NOTE: For the latest details, refer to {api-kibana}/group/endpoint-cases[cases APIs].
 
 === {api-request-title}
 
