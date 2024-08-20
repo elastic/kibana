@@ -9,6 +9,7 @@
 import * as t from 'io-ts';
 
 const esqlItemSchema = t.type({
+  title: t.string,
   type: t.literal('esql'),
   params: t.type({
     esql: t.string,
