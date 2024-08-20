@@ -14,6 +14,8 @@ import { hideTokenCountEvents } from './hide_token_count_events';
 import { ChatEvent, TokenCountEvent } from '../../../../common/conversation_complete';
 import { LangTracer } from '../instrumentation/lang_tracer';
 
+export const TITLE_CONVERSATION_FUNCTION_NAME = 'title_conversation';
+
 type ChatFunctionWithoutConnectorAndTokenCount = (
   name: string,
   params: Omit<
@@ -59,7 +61,7 @@ export function getGeneratedTitle({
       ],
       functions: [
         {
-          name: 'title_conversation',
+          name: TITLE_CONVERSATION_FUNCTION_NAME,
           description:
             'Use this function to title the conversation. Do not wrap the title in quotes',
           parameters: {
@@ -73,7 +75,7 @@ export function getGeneratedTitle({
           },
         },
       ],
-      functionCall: 'title_conversation',
+      functionCall: TITLE_CONVERSATION_FUNCTION_NAME,
       tracer,
     }).pipe(
       hide(),
