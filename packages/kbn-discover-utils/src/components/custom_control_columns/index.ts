@@ -6,10 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './constants';
-export * as fieldConstants from './field_constants';
-export * from './hooks';
-export * from './utils';
-export * from './data_types';
-
-export * from './components/custom_control_columns';
+export { createDegradedDocsControl } from './degraded_docs_control';
+export { createStacktraceControl } from './stacktrace_control';

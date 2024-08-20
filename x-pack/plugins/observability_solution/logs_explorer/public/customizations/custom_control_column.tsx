@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  type UnifiedDataTableProps,
-  createDegradedDocsControl,
-  createStacktraceControl,
-} from '@kbn/unified-data-table';
+import { createDegradedDocsControl, createStacktraceControl } from '@kbn/discover-utils';
+import { type UnifiedDataTableProps } from '@kbn/unified-data-table';
 
 export const getRowAdditionalControlColumns =
   (): UnifiedDataTableProps['rowAdditionalLeadingControls'] => {

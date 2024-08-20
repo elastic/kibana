@@ -8,13 +8,13 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { DEGRADED_DOCS_FIELD } from '@kbn/discover-utils/src/field_constants';
 import {
   RowControlColumn,
   RowControlComponent,
   RowControlProps,
   RowControlRowProps,
-} from '../../types';
+} from './types';
+import { DEGRADED_DOCS_FIELD } from '../../field_constants';
 
 /**
  * Degraded docs control factory function.

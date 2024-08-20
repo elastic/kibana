@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { getFieldFromDoc, LogDocument, StackTraceFields } from '@kbn/discover-utils/src';
+import { getFieldFromDoc, LogDocument, StackTraceFields } from '..';
 import {
   ERROR_EXCEPTION_STACKTRACE,
   ERROR_LOG_STACKTRACE,
   ERROR_STACK_TRACE,
-} from '@kbn/discover-utils/src/field_constants';
+} from '../field_constants';
 
 export const getStacktraceFields = (doc: LogDocument): StackTraceFields => {
   const errorStackTrace = getFieldFromDoc(doc, ERROR_STACK_TRACE);

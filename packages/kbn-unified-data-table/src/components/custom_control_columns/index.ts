@@ -12,9 +12,3 @@ export {
 } from './color_indicator';
 
 export { getAdditionalRowControlColumns } from './additional_row_control';
-
-/**
- * Preset controls
- */
-export { createDegradedDocsControl } from './degraded_docs_control';
-export { createStacktraceControl } from './stacktrace_control';

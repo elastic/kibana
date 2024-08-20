@@ -8,14 +8,14 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { LogDocument } from '@kbn/discover-utils/src';
 import {
   RowControlColumn,
   RowControlComponent,
   RowControlProps,
   RowControlRowProps,
-} from '../../types';
-import { getStacktraceFields } from '../../utils/get_stack_trace';
+} from './types';
+import { getStacktraceFields } from '../../utils';
+import { LogDocument } from '../../data_types';
 
 /**
  * Stacktrace control factory function.

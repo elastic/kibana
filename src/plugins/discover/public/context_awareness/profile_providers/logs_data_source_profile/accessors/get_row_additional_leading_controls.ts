@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createDegradedDocsControl, createStacktraceControl } from '@kbn/unified-data-table';
+import { createDegradedDocsControl, createStacktraceControl } from '@kbn/discover-utils';
 import type { DataSourceProfileProvider } from '../../../profiles';
 
 export const getRowAdditionalLeadingControls: DataSourceProfileProvider['profile']['getRowAdditionalLeadingControls'] =

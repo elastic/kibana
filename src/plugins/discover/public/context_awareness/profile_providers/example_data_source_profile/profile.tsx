@@ -7,8 +7,7 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import type { DataTableRecord } from '@kbn/discover-utils';
-import type { RowControlColumn } from '@kbn/unified-data-table';
+import type { DataTableRecord, RowControlColumn } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { euiThemeVars } from '@kbn/ui-theme';
