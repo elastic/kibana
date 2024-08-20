@@ -7,6 +7,7 @@
  */
 
 import { ESQL_COMMON_NUMERIC_TYPES, ESQL_NUMBER_TYPES } from '../../shared/esql_types';
+import { roundParameterTypes } from './constants';
 import { setup, getFunctionSignaturesByReturnType, getFieldNamesByType } from './helpers';
 
 const allAggFunctions = getFunctionSignaturesByReturnType('stats', 'any', {
@@ -82,7 +83,6 @@ describe('autocomplete.suggest', () => {
             scalar: true,
           }).map((s) => ({ ...s, text: `${s.text},` })),
         ]);
-        const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
         await assertSuggestions('from a | stats round(/', [
           ...getFunctionSignaturesByReturnType('stats', roundParameterTypes, {
             agg: true,

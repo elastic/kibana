@@ -319,28 +319,28 @@ export const setup = async (caret = '/') => {
     expected: Array<string | PartialSuggestionWithText>,
     opts?: SuggestOptions
   ) => {
-    const result = await suggest(query, opts);
-    const resultTexts = [...result.map((suggestion) => suggestion.text)].sort();
-
-    const expectedTexts = expected
-      .map((suggestion) => (typeof suggestion === 'string' ? suggestion : suggestion.text ?? ''))
-      .sort();
-
     try {
+      const result = await suggest(query, opts);
+      const resultTexts = [...result.map((suggestion) => suggestion.text)].sort();
+
+      const expectedTexts = expected
+        .map((suggestion) => (typeof suggestion === 'string' ? suggestion : suggestion.text ?? ''))
+        .sort();
+
       expect(resultTexts).toEqual(expectedTexts);
+
+      const expectedNonStringSuggestions = expected.filter(
+        (suggestion) => typeof suggestion !== 'string'
+      ) as PartialSuggestionWithText[];
+
+      for (const expectedSuggestion of expectedNonStringSuggestions) {
+        const suggestion = result.find((s) => s.text === expectedSuggestion.text);
+        expect(suggestion).toEqual(expect.objectContaining(expectedSuggestion));
+      }
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error(`${query}\nExpected:${expectedTexts}\nResult:${resultTexts}`);
+      console.error(`Failed query\n-------------\n${query}`);
       throw error;
-    }
-
-    const expectedNonStringSuggestions = expected.filter(
-      (suggestion) => typeof suggestion !== 'string'
-    ) as PartialSuggestionWithText[];
-
-    for (const expectedSuggestion of expectedNonStringSuggestions) {
-      const suggestion = result.find((s) => s.text === expectedSuggestion.text);
-      expect(suggestion).toEqual(expect.objectContaining(expectedSuggestion));
     }
   };
 
@@ -350,4 +350,3 @@ export const setup = async (caret = '/') => {
     assertSuggestions,
   };
 };
-export const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;

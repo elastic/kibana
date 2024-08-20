@@ -11,7 +11,6 @@ import {
   getFunctionSignaturesByReturnType,
   getFieldNamesByType,
   createCustomCallbackMocks,
-  roundParameterTypes,
   getLiteralsByType,
   PartialSuggestionWithText,
   getDateLiteralsByFieldType,
@@ -19,7 +18,6 @@ import {
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../shared/esql_types';
 import { evalFunctionDefinitions } from '../../definitions/functions';
 import { timeUnitsToSuggest } from '../../definitions/literals';
-import { getUnitDuration } from '../factories';
 import {
   getParamAtPosition,
   getCompatibleTypesToSuggestNext,
@@ -34,6 +32,7 @@ import {
 } from '../../definitions/types';
 import { fieldNameFromType } from '../../validation/validation.test';
 import { ESQLAstItem } from '@kbn/esql-ast';
+import { roundParameterTypes } from './constants';
 
 describe('autocomplete.suggest', () => {
   describe('eval', () => {
@@ -558,7 +557,8 @@ describe('autocomplete.suggest', () => {
       const { assertSuggestions } = await setup();
       const dateSuggestions = timeUnitsToSuggest.map(({ name }) => name);
 
-      await assertSuggestions('from a | eval var0 = bucket(@timestamp, /', getUnitDuration(1), {
+      // Eval bucket is not a valid expression
+      await assertSuggestions('from a | eval var0 = bucket(@timestamp, /', [], {
         triggerCharacter: ' ',
       });
 
