@@ -108,7 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it.only('should show popover with expanded cell content by click on expand button on embeddable', async () => {
+    it('should show popover with expanded cell content by click on expand button on embeddable', async () => {
       log.debug('open popover with expanded cell content to get json from the editor');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.discover.waitUntilSearchingHasFinished();
