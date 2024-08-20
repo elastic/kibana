@@ -42,6 +42,7 @@ export class DashboardPageObject extends FtrService {
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly dashboardAddPanel = this.ctx.getService('dashboardAddPanel');
+  private readonly dashboardPanelActions = this.ctx.getService('dashboardPanelActions');
   private readonly renderable = this.ctx.getService('renderable');
   private readonly listingTable = this.ctx.getService('listingTable');
   private readonly elasticChart = this.ctx.getService('elasticChart');
@@ -717,7 +718,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async getDashboardPanels() {
-    return await this.testSubjects.findAll('embeddablePanel');
+    return await this.testSubjects.findAll('dashboardPanel');
   }
 
   public async addVisualizations(visualizations: string[]) {
@@ -853,9 +854,8 @@ export class DashboardPageObject extends FtrService {
     this.log.debug('getPanelDrilldownCount');
     const panel = (await this.getDashboardPanels())[panelIndex];
     try {
-      const count = await panel.findByTestSubject(
-        'embeddablePanelNotification-ACTION_PANEL_NOTIFICATIONS'
-      );
+      await this.dashboardPanelActions.openContextMenu(panel);
+      const count = await panel.findByTestSubject('manageDrilldownAction__count');
       return Number.parseInt(await count.getVisibleText(), 10);
     } catch (e) {
       // if not found then this is 0 (we don't show badge with 0)
