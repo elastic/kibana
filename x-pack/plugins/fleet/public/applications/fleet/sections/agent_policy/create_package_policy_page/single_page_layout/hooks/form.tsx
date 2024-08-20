@@ -378,17 +378,36 @@ export function useOnSubmit({
 
       const hasGoogleCloudShell = data?.item ? getCloudShellUrlFromPackagePolicy(data.item) : false;
 
-      if (agentCount > 0) {
+      // Check if agentless is configured in ESS and Serverless until Agentless API migrates to Serverless
+      const isAgentlessConfigured =
+        isAgentlessAgentPolicy(createdPolicy) || isAgentlessPackagePolicy(data!.item);
+
+      // Removing this code will disabled the Save and Continue button. We need code below update form state and trigger correct modal depending on agent count
+      if (hasFleetAddAgentsPrivileges && !isAgentlessConfigured) {
+        if (hasAzureArmTemplate) {
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_AZURE_ARM_TEMPLATE');
+        } else {
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+        }
+        if (hasCloudFormation) {
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_CLOUD_FORMATION');
+        } else {
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+        }
+        if (hasGoogleCloudShell) {
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_GOOGLE_CLOUD_SHELL');
+        } else {
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+        }
+      } else {
         setFormState('SUBMITTED');
-        return;
       }
+
+      setFormState('SUBMITTED');
 
       if (!error) {
         setSavedPackagePolicy(data!.item);
 
-        // Check if agentless is configured in ESS and Serverless until Agentless API migrates to Serverless
-        const isAgentlessConfigured =
-          isAgentlessAgentPolicy(createdPolicy) || isAgentlessPackagePolicy(data!.item);
         const promptForAgentEnrollment =
           !(agentCount && agentPolicies.length > 0) &&
           !isAgentlessConfigured &&
