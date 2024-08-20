@@ -65,3 +65,7 @@ export const dataVisualizerOverallStatsSchema = schema.object({
   /** Optional search time runtime fields */
   runtimeMappings: runtimeMappingsSchema,
 });
+
+export const dataVisualizerFieldHistogramsResponse = () => {
+  return schema.any();
+};
