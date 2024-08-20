@@ -204,7 +204,7 @@ export class StatusRuleExecutor {
       : 'now-2m';
 
     const condition = this.params.condition;
-    if (condition && 'percentOfLocations' in condition.window) {
+    if (condition && 'numberOfLocations' in condition.window) {
       from = moment().subtract(maxPeriod, 'milliseconds').subtract(5, 'minutes').toISOString();
       return { from, to: 'now' };
     }

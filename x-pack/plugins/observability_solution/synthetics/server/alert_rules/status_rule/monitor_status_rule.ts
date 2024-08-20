@@ -89,7 +89,7 @@ export const registerSyntheticsStatusCheckRule = (
 
       const isCustomRule = !isEmpty(params);
 
-      const { isLocationBased, downThreshold, percentOfLocations } = getConditionType(
+      const { isLocationBased, downThreshold, numberOfLocations } = getConditionType(
         params.condition
       );
 
@@ -111,7 +111,7 @@ export const registerSyntheticsStatusCheckRule = (
         const downConfigsById = getConfigsByIds();
         for (const [configId, configs] of downConfigsById) {
           const totalLocations = monitorLocationsMap[configId]?.length ?? 0;
-          const locationThreshold = Math.ceil((percentOfLocations / 100) * totalLocations);
+          const locationThreshold = numberOfLocations;
           const matchingLocations = configs.length;
           if (matchingLocations >= locationThreshold) {
             // make sure all locations are matching down threshold as well
@@ -122,7 +122,7 @@ export const registerSyntheticsStatusCheckRule = (
               const monitorSummary = statusRule.getLocationBasedDownSummary({
                 statusConfigs: configs,
                 downThreshold: locationThreshold,
-                percent: percentOfLocations,
+                percent: numberOfLocations,
               });
               const alertId = `${configId}_locations_based`;
               statusRule.scheduleAlert({

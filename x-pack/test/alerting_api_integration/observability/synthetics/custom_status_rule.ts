@@ -128,7 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
         const params: StatusRuleParams = {
           condition: {
             window: {
-              percentOfLocations: 100,
+              numberOfLocations: 100,
             },
             groupByLocation: true,
             downThreshold: 1,
@@ -228,7 +228,7 @@ export default function ({ getService }: FtrProviderContext) {
         const params: StatusRuleParams = {
           condition: {
             window: {
-              percentOfLocations: 50,
+              numberOfLocations: 50,
             },
             groupByLocation: true,
             downThreshold: 1,
