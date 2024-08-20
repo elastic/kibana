@@ -7,6 +7,7 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
+import rison from '@kbn/rison';
 import { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import {
   enableInfrastructureContainerAssetView,
@@ -65,6 +66,10 @@ const HOSTS = [
     cpuValue: 0.1,
   },
 ];
+interface QueryParams {
+  name?: string;
+  alertMetric?: string;
+}
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const observability = getService('observability');
@@ -82,19 +87,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     'timePicker',
   ]);
 
-  const getNodeDetailsUrl = (assetName: string) => {
-    const queryParams = new URLSearchParams();
-
-    queryParams.set('assetName', assetName);
-
-    return queryParams.toString();
+  const getNodeDetailsUrl = (queryParams?: QueryParams) => {
+    return rison.encodeUnknown(
+      Object.entries(queryParams ?? {}).reduce<Record<string, string>>((acc, [key, value]) => {
+        acc[key] = value;
+        return acc;
+      }, {})
+    );
   };
 
-  const navigateToNodeDetails = async (assetId: string, assetName: string, assetType: string) => {
+  const navigateToNodeDetails = async (
+    assetId: string,
+    assetType: string,
+    queryParams?: QueryParams
+  ) => {
     await pageObjects.common.navigateToUrlWithBrowserHistory(
       'infraOps',
       `/${NODE_DETAILS_PATH}/${assetType}/${assetId}`,
-      getNodeDetailsUrl(assetName),
+      `assetDetails=${getNodeDetailsUrl(queryParams)}`,
       {
         insertTimestamp: false,
         ensureCurrentUrl: false,
@@ -149,7 +159,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             hosts: HOSTS,
           })
         );
-        await navigateToNodeDetails('host-1', 'host-1', 'host');
+        await navigateToNodeDetails('host-1', 'host', {
+          name: 'host-1',
+        });
+
         await pageObjects.header.waitUntilLoadingHasFinished();
         await pageObjects.timePicker.setAbsoluteRange(
           START_HOST_DATE.format(DATE_PICKER_FORMAT),
@@ -297,7 +310,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const COLUMNS = 11;
           before(async () => {
             await esArchiver.load('x-pack/test/functional/es_archives/infra/alerts');
-            await navigateToNodeDetails('demo-stack-apache-01', 'demo-stack-apache-01', 'host');
+            await navigateToNodeDetails('demo-stack-apache-01', 'host', {
+              name: 'demo-stack-apache-01',
+            });
             await pageObjects.header.waitUntilLoadingHasFinished();
 
             await pageObjects.timePicker.setAbsoluteRange(
@@ -309,7 +324,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           after(async () => {
-            await navigateToNodeDetails('host-1', 'host-1', 'host');
+            await navigateToNodeDetails('host-1', 'host', {
+              name: 'host-1',
+            });
             await pageObjects.header.waitUntilLoadingHasFinished();
             await esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts');
           });
@@ -474,7 +491,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         before(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_hosts_processes');
           await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-          await navigateToNodeDetails('Jennys-MBP.fritz.box', 'Jennys-MBP.fritz.box', 'host');
+          await navigateToNodeDetails('Jennys-MBP.fritz.box', 'host', {
+            name: 'Jennys-MBP.fritz.box',
+          });
           await pageObjects.assetDetails.clickProcessesTab();
           await pageObjects.header.waitUntilLoadingHasFinished();
           await pageObjects.timePicker.setAbsoluteRange(
@@ -487,7 +506,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             'x-pack/test/functional/es_archives/infra/metrics_hosts_processes'
           );
           await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-          await navigateToNodeDetails('host-1', 'host-1', 'host');
+          await navigateToNodeDetails('host-1', 'host', { name: 'host-1' });
         });
 
         it('should render processes tab and with Total Value summary', async () => {
@@ -587,7 +606,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             to: DATE_WITH_HOSTS_DATA_TO,
           })
         );
-        await navigateToNodeDetails('demo-stack-kubernetes-01', 'demo-stack-kubernetes-01', 'host');
+        await navigateToNodeDetails('demo-stack-kubernetes-01', 'host', {
+          name: 'demo-stack-kubernetes-01',
+        });
         await pageObjects.header.waitUntilLoadingHasFinished();
         await pageObjects.timePicker.setAbsoluteRange(
           START_HOST_DATE.format(DATE_PICKER_FORMAT),
@@ -680,7 +701,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             count: 1,
           })
         );
-        await navigateToNodeDetails('container-id-0', 'container-id-0', 'container');
+        await navigateToNodeDetails('container-id-0', 'container', { name: 'container-id-0' });
         await pageObjects.header.waitUntilLoadingHasFinished();
         await pageObjects.timePicker.setAbsoluteRange(
           START_CONTAINER_DATE.format(DATE_PICKER_FORMAT),
@@ -695,7 +716,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       describe('when container asset view is disabled', () => {
         before(async () => {
           await setInfrastructureContainerAssetViewUiSetting(false);
-          await navigateToNodeDetails('container-id-0', 'container-id-0', 'container');
+          await navigateToNodeDetails('container-id-0', 'container', { name: 'container-id-0' });
           await pageObjects.header.waitUntilLoadingHasFinished();
           await pageObjects.timePicker.setAbsoluteRange(
             START_CONTAINER_DATE.format(DATE_PICKER_FORMAT),
@@ -711,7 +732,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       describe('when container asset view is enabled', () => {
         before(async () => {
           await setInfrastructureContainerAssetViewUiSetting(true);
-          await navigateToNodeDetails('container-id-0', 'container-id-0', 'container');
+          await navigateToNodeDetails('container-id-0', 'container', { name: 'container-id-0' });
           await pageObjects.header.waitUntilLoadingHasFinished();
           await pageObjects.timePicker.setAbsoluteRange(
             START_CONTAINER_DATE.format(DATE_PICKER_FORMAT),

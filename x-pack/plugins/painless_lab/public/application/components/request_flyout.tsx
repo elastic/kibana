@@ -40,7 +40,7 @@ export const RequestFlyout: FunctionComponent<Props> = ({
           <EuiFlexItem>
             {/* We need an extra div to get out of flex grow */}
             <div>
-              <EuiTitle size="m">
+              <EuiTitle size="m" data-test-subj="painlessLabRequestFlyoutHeader">
                 <h2>
                   {i18n.translate('xpack.painlessLab.flyoutTitle', {
                     defaultMessage: 'API request',

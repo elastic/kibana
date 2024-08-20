@@ -76,49 +76,52 @@ export function FiltersSection({
         const filterId = `filter-${idx}`;
         const selectOptions = getSelectOptions(filters, key);
         return (
-          <EuiFlexGroup key={filterId} gutterSize="s" alignItems="center">
-            <EuiFlexItem>
-              <EuiSelect
-                data-test-subj={filterId}
-                id={filterId}
-                fullWidth
-                options={selectOptions}
-                value={key}
-                prepend={i18n.translate('xpack.apm.settings.customLink.flyout.filters.prepend', {
-                  defaultMessage: 'Field',
-                })}
-                onChange={(e) =>
-                  // set value to empty string to reset value when new field is selected
-                  onChangeFilter(e.target.value as FilterKey, '', idx)
-                }
-                isInvalid={!isEmpty(value) && (isEmpty(key) || key === DEFAULT_OPTION.value)}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <SuggestionsSelect
-                key={key}
-                dataTestSubj={`${key}.value`}
-                fieldName={key}
-                placeholder={i18n.translate(
-                  'xpack.apm.settings.customLink.flyOut.filters.defaultOption.value',
-                  { defaultMessage: 'Value' }
-                )}
-                onChange={(selectedValue) => onChangeFilter(key, selectedValue as string, idx)}
-                defaultValue={value}
-                isInvalid={!isEmpty(key) && isEmpty(value)}
-                start={moment().subtract(24, 'h').toISOString()}
-                end={moment().toISOString()}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="apmCustomLinkFiltersSectionButton"
-                iconType="trash"
-                onClick={() => onRemoveFilter(idx)}
-                disabled={!value && !key && filters.length === 1}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <React.Fragment key={filterId}>
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem>
+                <EuiSelect
+                  data-test-subj={filterId}
+                  id={filterId}
+                  fullWidth
+                  options={selectOptions}
+                  value={key}
+                  prepend={i18n.translate('xpack.apm.settings.customLink.flyout.filters.prepend', {
+                    defaultMessage: 'Field',
+                  })}
+                  onChange={(e) =>
+                    // set value to empty string to reset value when new field is selected
+                    onChangeFilter(e.target.value as FilterKey, '', idx)
+                  }
+                  isInvalid={!isEmpty(value) && (isEmpty(key) || key === DEFAULT_OPTION.value)}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <SuggestionsSelect
+                  key={key}
+                  dataTestSubj={`${key}.value`}
+                  fieldName={key}
+                  placeholder={i18n.translate(
+                    'xpack.apm.settings.customLink.flyOut.filters.defaultOption.value',
+                    { defaultMessage: 'Value' }
+                  )}
+                  onChange={(selectedValue) => onChangeFilter(key, selectedValue as string, idx)}
+                  defaultValue={value}
+                  isInvalid={!isEmpty(key) && isEmpty(value)}
+                  start={moment().subtract(24, 'h').toISOString()}
+                  end={moment().toISOString()}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="apmCustomLinkFiltersSectionButton"
+                  iconType="trash"
+                  onClick={() => onRemoveFilter(idx)}
+                  disabled={!value && !key && filters.length === 1}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+          </React.Fragment>
         );
       })}
 

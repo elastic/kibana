@@ -60,10 +60,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1300
       );
       await ofComboBox.type('bytes');
-      const ofOptionsString = await comboBox.getOptionsList('availablefieldsOptionsComboBox');
+      const ofOptionsString = await comboBox.getOptionsList('availableFieldsOptionsComboBox');
       const ofOptions = ofOptionsString.trim().split('\n');
       expect(ofOptions.length > 0).to.be(true);
-      await comboBox.set('availablefieldsOptionsComboBox', ofOptions[0]);
+      await comboBox.set('availableFieldsOptionsComboBox', ofOptions[0]);
 
       await testSubjects.click('groupByExpression');
       await testSubjects.click('overExpressionSelect');

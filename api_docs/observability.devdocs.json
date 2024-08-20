@@ -3821,6 +3821,27 @@
             "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.investigate",
+            "type": "Object",
+            "tags": [],
+            "label": "investigate",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "investigate",
+                "scope": "public",
+                "docId": "kibInvestigatePluginApi",
+                "section": "def-public.InvestigatePublicStart",
+                "text": "InvestigatePublicStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -8722,10 +8743,10 @@
         "signature": [
           "{ [x: string]: { endpoint: string; params?: ",
           {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "server",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-server.RouteParamsRT",
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.RouteParamsRT",
             "text": "RouteParamsRT"
           },
           " | undefined; handler: ({}: any) => Promise<any>; } & Record<string, any>; }"
@@ -8861,7 +8882,13 @@
             "text": "ObservabilityRouteCreateOptions"
           },
           "; }[TEndpoint] extends { endpoint: any; params?: any; handler: ({}: any) => Promise<infer TReturnType>; } & ",
-          "ServerRouteCreateOptions",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRouteCreateOptions",
+            "text": "ServerRouteCreateOptions"
+          },
           " ? TReturnType extends ",
           {
             "pluginId": "@kbn/core-http-server",
