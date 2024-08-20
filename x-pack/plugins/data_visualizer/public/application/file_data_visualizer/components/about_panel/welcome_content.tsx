@@ -82,7 +82,7 @@ export const WelcomeContent: FC<Props> = ({ hasPermissionToImport }) => {
           <p>
             <FormattedMessage
               id="xpack.dataVisualizer.file.welcomeContent.supportedTikaFileFormatDescription"
-              defaultMessage="The following file formats are supported {maxTikaFileSize}:"
+              defaultMessage="The following file formats are supported up to {maxTikaFileSize}:"
               values={{ maxTikaFileSize }}
             />
           </p>
@@ -158,7 +158,7 @@ export const WelcomeContent: FC<Props> = ({ hasPermissionToImport }) => {
           <p>
             <FormattedMessage
               id="xpack.dataVisualizer.file.welcomeContent.supportedFileFormatDescription"
-              defaultMessage="The following file formats are supported {maxFileSize}:"
+              defaultMessage="The following file formats are supported up to {maxFileSize}:"
               values={{ maxFileSize }}
             />
           </p>

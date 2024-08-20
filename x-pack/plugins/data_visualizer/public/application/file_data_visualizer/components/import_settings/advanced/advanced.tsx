@@ -25,6 +25,7 @@ import { CombinedFieldsForm } from '../../../../common/components/combined_field
 
 import { CreateDataViewToolTip } from '../create_data_view_tooltip';
 import { IndexSettings, IngestPipeline, Mappings } from './inputs';
+import { SemanticTextInfo } from '../semantic_text_info';
 
 interface Props {
   index: string;
@@ -138,6 +139,8 @@ export const AdvancedSettings: FC<Props> = ({
           isInvalid={dataViewNameError !== ''}
         />
       </EuiFormRow>
+
+      <SemanticTextInfo results={results} />
 
       <CombinedFieldsForm
         mappingsString={mappingsString}
