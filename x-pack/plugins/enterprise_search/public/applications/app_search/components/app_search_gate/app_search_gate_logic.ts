@@ -59,29 +59,39 @@ export const AppSearchGateLogic = kea<MakeLogicType<AppSearchGateValues, AppSear
     additionalFeedback: [
       null,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
-        setAdditionalFeedback: (_, { additionalFeedback }) => additionalFeedback ?? undefined,
+        setAdditionalFeedback: (
+          _: AppSearchGateValues['additionalFeedback'],
+          { additionalFeedback }: { additionalFeedback: AppSearchGateValues['additionalFeedback'] }
+        ): AppSearchGateValues['additionalFeedback'] => additionalFeedback ?? null,
       },
     ],
     feature: [
       '',
       {
-        // @ts-expect-error upgrade typescript v5.1.6
-        setFeature: (_, { feature }) => feature,
+        setFeature: (
+          _: AppSearchGateValues['feature'],
+          { feature }: { feature: AppSearchGateValues['feature'] }
+        ): AppSearchGateValues['feature'] => feature ?? '',
       },
     ],
     featuresOther: [
       null,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
-        setFeaturesOther: (_, { featuresOther }) => featuresOther,
+        setFeaturesOther: (
+          _: AppSearchGateValues['featuresOther'],
+          { featuresOther }: { featuresOther: AppSearchGateValues['featuresOther'] }
+        ): AppSearchGateValues['featuresOther'] => featuresOther ?? null,
       },
     ],
     participateInUXLabs: [
       null,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
-        setParticipateInUXLabs: (_, { participateInUXLabs }) => participateInUXLabs,
+        setParticipateInUXLabs: (
+          _: AppSearchGateValues['participateInUXLabs'],
+          {
+            participateInUXLabs,
+          }: { participateInUXLabs: AppSearchGateValues['participateInUXLabs'] }
+        ): AppSearchGateValues['participateInUXLabs'] => participateInUXLabs ?? null,
       },
     ],
   }),

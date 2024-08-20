@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -295,35 +295,23 @@ const getOptionsFeaturesList = (): FeatureOptionsSelection[] => {
       };
     }
 
-    const featureTranslatePrefix = `${baseTranslatePrefix}.${feature.id}`;
-
     return {
       dropdownDisplay: (
-        <Fragment>
-          <strong>
-            {i18n.translate(`${featureTranslatePrefix}.title`, {
-              defaultMessage: feature.title,
-            })}
-          </strong>
+        <>
+          <strong>{feature.title}</strong>
           <EuiText size="s" color="subdued">
-            <p>
-              {i18n.translate(`${featureTranslatePrefix}.description`, {
-                defaultMessage: feature.description,
-              })}
-            </p>
+            <p>{feature.description}</p>
           </EuiText>
-        </Fragment>
+        </>
       ),
-      inputDisplay: i18n.translate(`${featureTranslatePrefix}.inputDisplay`, {
-        defaultMessage: feature.title,
-      }),
+      inputDisplay: feature.title,
       value: feature.id,
     };
   });
 
   featureList.push({
     dropdownDisplay: (
-      <Fragment>
+      <>
         <strong>
           {i18n.translate(`${baseTranslatePrefix}.other.title`, {
             defaultMessage: 'Other',
@@ -336,7 +324,7 @@ const getOptionsFeaturesList = (): FeatureOptionsSelection[] => {
             })}
           </p>
         </EuiText>
-      </Fragment>
+      </>
     ),
     inputDisplay: i18n.translate(`${baseTranslatePrefix}.other.inputDisplay`, {
       defaultMessage: 'Other',

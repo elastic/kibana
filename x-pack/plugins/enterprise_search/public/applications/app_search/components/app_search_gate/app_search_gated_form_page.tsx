@@ -17,7 +17,7 @@ import {
   PageTemplateProps,
   useEnterpriseSearchNav,
 } from '../../../shared/layout';
-import { SendWorkplaceSearchTelemetry } from '../../../shared/telemetry';
+import { SendAppSearchTelemetry } from '../../../shared/telemetry';
 
 import { AppSearchGate } from './app_search_gate';
 
@@ -43,7 +43,7 @@ export const AppSearchGatePage: React.FC<PageTemplateProps> = ({ isLoading }) =>
       isLoading={isLoading}
       hideEmbeddedConsole
     >
-      <SendWorkplaceSearchTelemetry action="viewed" metric="App Search Gate form" />
+      <SendAppSearchTelemetry action="viewed" metric="App Search Gate form" />
 
       <AppSearchGate />
     </EnterpriseSearchPageTemplateWrapper>
