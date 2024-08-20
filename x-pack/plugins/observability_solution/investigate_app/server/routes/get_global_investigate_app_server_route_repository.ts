@@ -8,6 +8,7 @@
 import {
   createInvestigationNoteParamsSchema,
   createInvestigationParamsSchema,
+  deleteInvestigationNoteParamsSchema,
   deleteInvestigationParamsSchema,
   findInvestigationsParamsSchema,
   getInvestigationNotesParamsSchema,
@@ -21,6 +22,7 @@ import { getInvestigation } from '../services/get_investigation';
 import { getInvestigationNotes } from '../services/get_investigation_notes';
 import { investigationRepositoryFactory } from '../services/investigation_repository';
 import { createInvestigateAppServerRoute } from './create_investigate_app_server_route';
+import { deleteInvestigationNote } from '../services/delete_investigation_note';
 
 const createInvestigationRoute = createInvestigateAppServerRoute({
   endpoint: 'POST /api/observability/investigations 2023-10-31',
@@ -28,11 +30,15 @@ const createInvestigationRoute = createInvestigateAppServerRoute({
     tags: [],
   },
   params: createInvestigationParamsSchema,
-  handler: async (params) => {
-    const soClient = (await params.context.core).savedObjects.client;
-    const repository = investigationRepositoryFactory({ soClient, logger: params.logger });
+  handler: async ({ params, context, request, logger }) => {
+    const user = (await context.core).coreStart.security.authc.getCurrentUser(request);
+    if (!user) {
+      throw new Error('User is not authenticated');
+    }
+    const soClient = (await context.core).savedObjects.client;
+    const repository = investigationRepositoryFactory({ soClient, logger });
 
-    return await createInvestigation(params.params.body, repository);
+    return await createInvestigation(params.body, { repository, user });
   },
 });
 
@@ -84,11 +90,15 @@ const createInvestigationNoteRoute = createInvestigateAppServerRoute({
     tags: [],
   },
   params: createInvestigationNoteParamsSchema,
-  handler: async (params) => {
-    const soClient = (await params.context.core).savedObjects.client;
-    const repository = investigationRepositoryFactory({ soClient, logger: params.logger });
+  handler: async ({ params, context, request, logger }) => {
+    const user = (await context.core).coreStart.security.authc.getCurrentUser(request);
+    if (!user) {
+      throw new Error('User is not authenticated');
+    }
+    const soClient = (await context.core).savedObjects.client;
+    const repository = investigationRepositoryFactory({ soClient, logger });
 
-    return await createInvestigationNote(params.params.path.id, params.params.body, repository);
+    return await createInvestigationNote(params.path.id, params.body, { repository, user });
   },
 });
 
@@ -106,6 +116,27 @@ const getInvestigationNotesRoute = createInvestigateAppServerRoute({
   },
 });
 
+const deleteInvestigationNotesRoute = createInvestigateAppServerRoute({
+  endpoint: 'DELETE /api/observability/investigations/{id}/notes/{noteId} 2023-10-31',
+  options: {
+    tags: [],
+  },
+  params: deleteInvestigationNoteParamsSchema,
+  handler: async ({ params, context, request, logger }) => {
+    const user = (await context.core).coreStart.security.authc.getCurrentUser(request);
+    if (!user) {
+      throw new Error('User is not authenticated');
+    }
+    const soClient = (await context.core).savedObjects.client;
+    const repository = investigationRepositoryFactory({ soClient, logger });
+
+    return await deleteInvestigationNote(params.path.id, params.path.noteId, {
+      repository,
+      user,
+    });
+  },
+});
+
 export function getGlobalInvestigateAppServerRouteRepository() {
   return {
     ...createInvestigationRoute,
@@ -114,6 +145,7 @@ export function getGlobalInvestigateAppServerRouteRepository() {
     ...deleteInvestigationRoute,
     ...createInvestigationNoteRoute,
     ...getInvestigationNotesRoute,
+    ...deleteInvestigationNotesRoute,
   };
 }
 

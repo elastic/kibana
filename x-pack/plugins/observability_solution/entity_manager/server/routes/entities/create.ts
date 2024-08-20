@@ -20,6 +20,40 @@ import { startTransform } from '../../lib/entities/start_transform';
 import { installEntityDefinition } from '../../lib/entities/install_entity_definition';
 import { EntityDefinitionIdInvalid } from '../../lib/entities/errors/entity_definition_id_invalid';
 
+/**
+ * @openapi
+ * /internal/entities/definition:
+ *   post:
+ *     description: Install an entity definition.
+ *     tags:
+ *       - definitions
+ *     parameters:
+ *       - in: query
+ *         name: installOnly
+ *         description: If true, the definition transforms will not be started
+ *         required: false
+ *         schema:
+ *           type: boolean
+ *           default: false
+ *     requestBody:
+ *       description: The entity definition to install
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/entityDefinitionSchema'
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/entityDefinitionSchema'
+ *       409:
+ *         description: An entity definition with this ID already exists
+ *       400:
+ *         description: The entity definition cannot be installed; see the error for more details
+ */
 export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
   server,
