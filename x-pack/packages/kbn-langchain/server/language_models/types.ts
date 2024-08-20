@@ -8,6 +8,11 @@
 import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import type OpenAI from 'openai';
 
+import { ActionsClientBedrockChatModel } from './bedrock_chat';
+import { ActionsClientChatOpenAI } from './chat_openai';
+import { ActionsClientGeminiChatModel } from './gemini_chat';
+import { ActionsClientSimpleChatModel } from './simple_chat_model';
+
 export interface InvokeAIActionParamsSchema {
   messages: Array<{
     role: string;
@@ -51,3 +56,9 @@ export interface TraceOptions {
   tags?: string[];
   tracers?: LangChainTracer[];
 }
+
+export type AssistantToolLlm =
+  | ActionsClientBedrockChatModel
+  | ActionsClientChatOpenAI
+  | ActionsClientGeminiChatModel
+  | ActionsClientSimpleChatModel;

@@ -36,6 +36,7 @@ import { DEFAULT_PLUGIN_NAME, isV2KnowledgeBaseEnabled, performChecks } from '..
 import { fetchLangSmithDataset } from './utils';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
+import { evaluateAttackDiscovery } from '../../lib/attack_discovery/evaluation';
 import {
   DefaultAssistantGraph,
   getDefaultAssistantGraph,
@@ -47,9 +48,12 @@ import {
   structuredChatAgentPrompt,
 } from '../../lib/langchain/graphs/default_assistant_graph/prompts';
 import { getLlmClass, getLlmType, isOpenSourceModel } from '../utils';
+import { getGraphsFromNames } from './get_graphs_from_names';
 
 const DEFAULT_SIZE = 20;
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
+const LANG_CHAIN_TIMEOUT = ROUTE_HANDLER_TIMEOUT - 10_000; // 9 minutes 50 seconds
+const CONNECTOR_TIMEOUT = LANG_CHAIN_TIMEOUT - 10_000; // 9 minutes 40 seconds
 
 export const postEvaluateRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -106,6 +110,7 @@ export const postEvaluateRoute = (
           const {
             alertsIndexPattern,
             datasetName,
+            evaluatorConnectorId,
             graphs: graphNames,
             langSmithApiKey,
             connectorIds,
@@ -169,6 +174,37 @@ export const postEvaluateRoute = (
 
           // Fetch any tools registered to the security assistant
           const assistantTools = assistantContext.getRegisteredTools(DEFAULT_PLUGIN_NAME);
+
+          const { attackDiscoveryGraphs } = getGraphsFromNames(graphNames);
+
+          if (attackDiscoveryGraphs.length > 0) {
+            try {
+              // NOTE: we don't wait for the evaluation to finish here, because
+              // the client will retry / timeout when evaluations take too long
+              void evaluateAttackDiscovery({
+                actionsClient,
+                alertsIndexPattern,
+                attackDiscoveryGraphs,
+                connectors,
+                connectorTimeout: CONNECTOR_TIMEOUT,
+                datasetName,
+                esClient,
+                evaluationId,
+                evaluatorConnectorId,
+                langSmithApiKey,
+                logger,
+                runName,
+                size,
+              });
+            } catch (err) {
+              logger.error(() => `Error evaluating attack discovery: ${err}`);
+            }
+
+            // Return early if we're only running attack discovery graphs
+            return response.ok({
+              body: { evaluationId, success: true },
+            });
+          }
 
           const graphs: Array<{
             name: string;
