@@ -144,6 +144,7 @@ export const getRangesliderControlFactory = (
           }
           loadingMinMax$.next(isLoading);
         },
+        controlGroupApi,
       }).subscribe(
         ({
           error,

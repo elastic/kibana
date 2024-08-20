@@ -29,30 +29,48 @@ import { formatSecrets, normalizeSecrets } from '../../synthetics_service/utils/
 
 export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
   DeleteParamsResponse[],
-  Record<string, any>,
-  Record<string, any>,
+  Record<string, string>,
+  Record<string, string>,
   { ids: string[] }
 > = () => ({
   method: 'DELETE',
-  path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
+  path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/{id?}',
   validate: {},
   validation: {
     request: {
-      body: schema.object({
-        ids: schema.arrayOf(schema.string(), {
-          minSize: 1,
-        }),
+      body: schema.nullable(
+        schema.object({
+          ids: schema.arrayOf(schema.string(), {
+            minSize: 1,
+          }),
+        })
+      ),
+      params: schema.object({
+        id: schema.maybe(schema.string()),
       }),
     },
   },
   handler: async (routeContext): Promise<any> => {
     const { request, response } = routeContext;
 
-    const { ids } = request.body;
+    const { ids } = request.body || {};
+    const { id: queryId } = request.params;
+
+    if (ids && queryId) {
+      return response.badRequest({
+        body: { message: 'id must be provided either via param or body.' },
+      });
+    }
 
     const result: Array<{ id: string; deleted: boolean; error?: string }> = [];
+    const idsToDelete = [...(ids ?? []), ...(queryId ? [queryId] : [])];
+    if (idsToDelete.length === 0) {
+      return response.badRequest({
+        body: { message: 'id must be provided via param or body.' },
+      });
+    }
 
-    await pMap(ids, async (id) => {
+    await pMap(idsToDelete, async (id) => {
       try {
         const { errors, res } = await deleteMonitor({
           routeContext,

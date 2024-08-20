@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { AttackDiscoveryPage } from './pages';
 
 import type { SecuritySubPluginRoutes } from '../app/types';
@@ -17,11 +16,9 @@ import { SecurityRoutePageWrapper } from '../common/components/security_route_pa
 
 export const AttackDiscoveryRoutes = () => (
   <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.attackDiscovery}>
-      <SecurityRoutePageWrapper pageName={SecurityPageName.attackDiscovery}>
-        <AttackDiscoveryPage />
-      </SecurityRoutePageWrapper>
-    </TrackApplicationView>
+    <SecurityRoutePageWrapper pageName={SecurityPageName.attackDiscovery}>
+      <AttackDiscoveryPage />
+    </SecurityRoutePageWrapper>
   </PluginTemplateWrapper>
 );
 
