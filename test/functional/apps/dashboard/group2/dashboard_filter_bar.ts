@@ -206,7 +206,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         if (isLegacyDefault) {
           await testSubjects.click('docTableCellFilter');
         } else {
-          await dataGrid.clickCellFilterForButtonExcludingControlColumns(1, 3);
+          await dataGrid.clickCellFilterForButtonExcludingControlColumns(1, 1);
         }
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);

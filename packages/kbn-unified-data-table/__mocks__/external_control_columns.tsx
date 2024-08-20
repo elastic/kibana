@@ -17,7 +17,7 @@ import {
   EuiSpacer,
   EuiDataGridControlColumn,
 } from '@elastic/eui';
-import type { RowControlColumn } from '../src/types';
+import { RowControlColumn } from '@kbn/discover-utils';
 
 const SelectionHeaderCell = () => {
   return (
