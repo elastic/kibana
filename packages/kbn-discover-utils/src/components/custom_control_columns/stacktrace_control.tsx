@@ -30,17 +30,17 @@ export const createStacktraceControl = (props?: Partial<RowControlProps>): RowCo
 });
 
 const actionsHeaderAriaLabelStacktraceAction = i18n.translate(
-  'unifiedDataTable.grid.additionalRowActions.stacktraceArialLabel',
+  'discover.customControl.stacktraceArialLabel',
   { defaultMessage: 'Access to available stacktraces' }
 );
 
 const stacktraceAvailableControlButton = i18n.translate(
-  'unifiedDataTable.grid.additionalRowActions.stacktrace.available',
+  'discover.customControl.stacktrace.available',
   { defaultMessage: 'Stacktraces available' }
 );
 
 const stacktraceNotAvailableControlButton = i18n.translate(
-  'unifiedDataTable.grid.additionalRowActions.stacktrace.notAvailable',
+  'discover.customControl.stacktrace.notAvailable',
   { defaultMessage: 'Stacktraces not available' }
 );
 

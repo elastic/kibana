@@ -29,12 +29,12 @@ export const createDegradedDocsControl = (props?: Partial<RowControlProps>): Row
 });
 
 const actionsHeaderAriaLabelDegradedAction = i18n.translate(
-  'unifiedDataTable.grid.additionalRowActions.degradedDocArialLabel',
+  'discover.customControl.degradedDocArialLabel',
   { defaultMessage: 'Access to degraded docs' }
 );
 
 const degradedDocButtonLabelWhenPresent = i18n.translate(
-  'unifiedDataTable.grid.additionalRowActions.degradedDocPresent',
+  'discover.customControl.degradedDocPresent',
   {
     defaultMessage:
       "This document couldn't be parsed correctly. Not all fields are properly populated",
@@ -42,7 +42,7 @@ const degradedDocButtonLabelWhenPresent = i18n.translate(
 );
 
 const degradedDocButtonLabelWhenNotPresent = i18n.translate(
-  'unifiedDataTable.grid.additionalRowActions.degradedDocNotPresent',
+  'discover.customControl.degradedDocNotPresent',
   { defaultMessage: 'All fields in this document were parsed correctly' }
 );
 
