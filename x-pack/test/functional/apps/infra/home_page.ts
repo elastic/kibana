@@ -527,10 +527,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             );
           });
 
-          // after(async () => {
-          //   return await synthEsClient.clean();
-          // });
-
           it('should redirect to Pod Details page', async () => {
             await pageObjects.infraHome.goToPods();
             await pageObjects.infraHome.goToTime(DATE_WITH_POD_DATA);
@@ -558,10 +554,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               })
             );
           });
-
-          // after(async () => {
-          //   return await synthEsClient.clean();
-          // });
 
           it('should redirect to Container Details page', async () => {
             await pageObjects.infraHome.goToContainer();
