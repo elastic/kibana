@@ -55,6 +55,23 @@ describe('Column Identifier Expressions', () => {
     ]);
   });
 
+  it('can mix quoted and un-quoted identifiers', () => {
+    const text = 'ROW part1.part2.`part``3️⃣`';
+    const { ast } = parse(text);
+
+    expect(ast).toMatchObject([
+      {
+        type: 'command',
+        args: [
+          {
+            type: 'column',
+            parts: ['part1', 'part2', 'part`3️⃣'],
+          },
+        ],
+      },
+    ]);
+  });
+
   it('in KEEP command', () => {
     const text = 'FROM a | KEEP a.b';
     const { ast } = parse(text);
