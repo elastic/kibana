@@ -14,3 +14,4 @@ fi
 .buildkite/scripts/steps/code_generation/elastic_assistant_codegen.sh
 .buildkite/scripts/steps/code_generation/security_solution_codegen.sh
 .buildkite/scripts/steps/code_generation/osquery_codegen.sh
+.buildkite/scripts/steps/openapi_bundling/final_merge.sh

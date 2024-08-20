@@ -6,5 +6,10 @@
  * Side Public License, v 1.
  */
 
-export * from './src/openapi_bundler';
-export * from './src/openapi_merger';
+import { OpenAPIV3 } from 'openapi-types';
+
+export interface MergeOptions {
+  skipServers: boolean;
+  skipSecurity: boolean;
+  addTags?: OpenAPIV3.TagObject[];
+}

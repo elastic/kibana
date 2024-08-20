@@ -18,27 +18,27 @@ import {
 } from 'fs';
 import { dump, load } from 'js-yaml';
 import { OpenAPIV3 } from 'openapi-types';
-import { bundle, BundlerConfig } from '../src/openapi_bundler';
+import { merge, MergerConfig } from '../../src/openapi_merger';
 
 const ROOT_PATH = join(__dirname, '..');
 
-// Suppress bundler logging via mocking the logger
-jest.mock('../src/logger');
+// Suppress merger logging via mocking the logger
+jest.mock('../../src/logger');
 
-export async function bundleSpecs(
+export async function mergeSpecs(
   oasSpecs: Record<string, OpenAPIV3.Document>,
-  options?: BundlerConfig['options']
+  options?: MergerConfig['options']
 ): Promise<Record<string, OpenAPIV3.Document>> {
   const randomStr = (Math.random() + 1).toString(36).substring(7);
-  const folderToBundlePath = join(ROOT_PATH, 'target', 'oas-test', randomStr);
-  const resultFolderPath = join(ROOT_PATH, 'target', 'oas-test-bundled-result', randomStr);
-  const bundledFilePathTemplate = join(resultFolderPath, '{version}.yaml');
+  const folderToMergePath = join(ROOT_PATH, 'target', 'oas-test', randomStr);
+  const resultFolderPath = join(ROOT_PATH, 'target', 'oas-test-merged-result', randomStr);
+  const mergedFilePathTemplate = join(resultFolderPath, '{version}.yaml');
 
-  dumpSpecs(folderToBundlePath, oasSpecs);
+  dumpSpecs(folderToMergePath, oasSpecs);
 
-  await bundleFolder(folderToBundlePath, bundledFilePathTemplate, options);
+  await mergeFolder(folderToMergePath, mergedFilePathTemplate, options);
 
-  return readBundledSpecs(resultFolderPath);
+  return readMergedSpecs(resultFolderPath);
 }
 
 function removeFolder(folderPath: string): void {
@@ -60,26 +60,26 @@ function dumpSpecs(folderPath: string, oasSpecs: Record<string, OpenAPIV3.Docume
   }
 }
 
-export function readBundledSpecs(folderPath: string): Record<string, OpenAPIV3.Document> {
-  const bundledSpecs: Record<string, OpenAPIV3.Document> = {};
+export function readMergedSpecs(folderPath: string): Record<string, OpenAPIV3.Document> {
+  const mergedSpecs: Record<string, OpenAPIV3.Document> = {};
 
   for (const fileName of readdirSync(folderPath)) {
     const yaml = readFileSync(join(folderPath, fileName), { encoding: 'utf8' });
 
-    bundledSpecs[fileName] = load(yaml);
+    mergedSpecs[fileName] = load(yaml);
   }
 
-  return bundledSpecs;
+  return mergedSpecs;
 }
 
-export async function bundleFolder(
-  folderToBundlePath: string,
-  bundledFilePathTemplate: string,
-  options?: BundlerConfig['options']
+export async function mergeFolder(
+  folderToMergePath: string,
+  mergedFilePathTemplate: string,
+  options?: MergerConfig['options']
 ): Promise<void> {
-  await bundle({
-    sourceGlob: join(folderToBundlePath, '*.schema.yaml'),
-    outputFilePath: bundledFilePathTemplate,
+  await merge({
+    sourceGlobs: [join(folderToMergePath, '*.schema.yaml')],
+    outputFilePath: mergedFilePathTemplate,
     options,
   });
 }

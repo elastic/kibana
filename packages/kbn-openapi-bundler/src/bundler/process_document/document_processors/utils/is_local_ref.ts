@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './src/openapi_bundler';
-export * from './src/openapi_merger';
+export function isLocalRef(ref: string): boolean {
+  return ref.startsWith('#/');
+}
