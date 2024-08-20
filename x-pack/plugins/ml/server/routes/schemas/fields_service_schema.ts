@@ -58,3 +58,15 @@ export const getTimeFieldRangeSchema = schema.object({
     schema.boolean({ meta: { description: 'Return times from the future' } })
   ),
 });
+
+export const getCardinalityOfFieldsResponse = () => {
+  return schema.recordOf(schema.string(), schema.number());
+};
+
+export const getTimeFieldRangeResponse = () => {
+  return schema.object({
+    start: schema.number(),
+    end: schema.number(),
+    success: schema.boolean(),
+  });
+};
