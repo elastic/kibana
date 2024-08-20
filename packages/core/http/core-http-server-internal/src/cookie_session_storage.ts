@@ -56,7 +56,7 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
   }
 
   public clear() {
-    return this.request.cookieAuth?.clear();
+    return this.request.cookieAuth.clear();
   }
 }
 
