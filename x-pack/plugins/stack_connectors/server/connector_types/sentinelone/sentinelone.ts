@@ -157,16 +157,9 @@ export class SentinelOneConnector extends SubActionConnector<
     });
   }
 
-  public async fetchAgentFiles({
-    files,
-    agentUUID,
-    zipPassCode,
-  }: SentinelOneFetchAgentFilesParams) {
-    const agent = await this.getAgents({ uuid: agentUUID });
-    const agentId = agent.data[0]?.id;
-
+  public async fetchAgentFiles({ files, agentId, zipPassCode }: SentinelOneFetchAgentFilesParams) {
     if (!agentId) {
-      throw new Error(`No agent found in SentinelOne for UUID [${agentUUID}]`);
+      throw new Error(`'agentId' parameter is required`);
     }
 
     return this.sentinelOneApiRequest({
@@ -182,12 +175,9 @@ export class SentinelOneConnector extends SubActionConnector<
     });
   }
 
-  public async downloadAgentFile({ agentUUID, activityId }: SentinelOneDownloadAgentFileParams) {
-    const agent = await this.getAgents({ uuid: agentUUID });
-    const agentId = agent.data[0]?.id;
-
+  public async downloadAgentFile({ agentId, activityId }: SentinelOneDownloadAgentFileParams) {
     if (!agentId) {
-      throw new Error(`No agent found in SentinelOne for UUID [${agentUUID}]`);
+      throw new Error(`'agentId' parameter is required`);
     }
 
     return this.sentinelOneApiRequest({

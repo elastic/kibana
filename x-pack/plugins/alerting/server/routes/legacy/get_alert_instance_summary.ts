@@ -39,6 +39,11 @@ export const getAlertInstanceSummaryRoute = (
         params: paramSchema,
         query: querySchema,
       },
+      options: {
+        summary: 'Get an alert summary',
+        tags: ['oas-tag:alerting'],
+        deprecated: true,
+      },
     },
     router.handleLegacyErrors(async function (context, req, res) {
       verifyApiAccess(licenseState);

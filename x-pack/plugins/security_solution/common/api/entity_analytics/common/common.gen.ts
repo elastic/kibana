@@ -18,6 +18,32 @@ import { z } from 'zod';
 
 import { AssetCriticalityLevel } from '../asset_criticality/common.gen';
 
+export type EntityAnalyticsPrivileges = z.infer<typeof EntityAnalyticsPrivileges>;
+export const EntityAnalyticsPrivileges = z.object({
+  has_all_required: z.boolean(),
+  has_read_permissions: z.boolean().optional(),
+  has_write_permissions: z.boolean().optional(),
+  privileges: z.object({
+    elasticsearch: z.object({
+      cluster: z
+        .object({
+          manage_index_templates: z.boolean().optional(),
+          manage_transform: z.boolean().optional(),
+        })
+        .optional(),
+      index: z
+        .object({})
+        .catchall(
+          z.object({
+            read: z.boolean().optional(),
+            write: z.boolean().optional(),
+          })
+        )
+        .optional(),
+    }),
+  }),
+});
+
 export type EntityAfterKey = z.infer<typeof EntityAfterKey>;
 export const EntityAfterKey = z.object({}).catchall(z.string());
 

@@ -363,23 +363,11 @@
             "description": [],
             "signature": [
               "{ optIn: (optInConfig: ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.OptInConfig",
-                "text": "OptInConfig"
-              },
+              "OptInConfig",
               ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.TelemetryCounter",
-                "text": "TelemetryCounter"
-              },
+              "TelemetryCounter",
               ">; }"
             ],
             "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",

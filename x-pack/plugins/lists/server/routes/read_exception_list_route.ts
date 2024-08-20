@@ -9,8 +9,8 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
-  GetExceptionListRequestQuery,
-  GetExceptionListResponse,
+  ReadExceptionListRequestQuery,
+  ReadExceptionListResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
 
 import type { ListsPluginRouter } from '../types';
@@ -30,7 +30,7 @@ export const readExceptionListRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            query: buildRouteValidationWithZod(GetExceptionListRequestQuery),
+            query: buildRouteValidationWithZod(ReadExceptionListRequestQuery),
           },
         },
         version: '2023-10-31',
@@ -57,7 +57,7 @@ export const readExceptionListRoute = (router: ListsPluginRouter): void => {
             });
           }
 
-          return response.ok({ body: GetExceptionListResponse.parse(exceptionList) });
+          return response.ok({ body: ReadExceptionListResponse.parse(exceptionList) });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

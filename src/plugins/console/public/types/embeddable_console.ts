@@ -16,6 +16,7 @@ export interface EmbeddableConsoleDependencies {
   setDispatch: (dispatch: Dispatch<EmbeddedConsoleAction> | null) => void;
   alternateView?: EmbeddedConsoleView;
   isMonacoEnabled: boolean;
+  isDevMode: boolean;
   getConsoleHeight: () => string | undefined;
   setConsoleHeight: (value: string) => void;
 }

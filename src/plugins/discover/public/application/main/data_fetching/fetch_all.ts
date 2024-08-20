@@ -8,7 +8,7 @@
 
 import { Adapters } from '@kbn/inspector-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
-import { BehaviorSubject, filter, firstValueFrom, map, merge, scan } from 'rxjs';
+import { BehaviorSubject, combineLatest, filter, firstValueFrom, switchMap } from 'rxjs';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { isEqual } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -53,7 +53,8 @@ export interface FetchDeps {
 export function fetchAll(
   dataSubjects: SavedSearchData,
   reset = false,
-  fetchDeps: FetchDeps
+  fetchDeps: FetchDeps,
+  onFetchRecordsComplete?: () => Promise<void>
 ): Promise<void> {
   const {
     initialFetchStatus,
@@ -177,10 +178,10 @@ export function fetchAll(
 
     // Return a promise that will resolve once all the requests have finished or failed
     return firstValueFrom(
-      merge(
-        fetchStatusByType(dataSubjects.documents$, 'documents'),
-        fetchStatusByType(dataSubjects.totalHits$, 'totalHits')
-      ).pipe(scan(toRequestFinishedMap, {}), filter(allRequestsFinished))
+      combineLatest([
+        isComplete(dataSubjects.documents$).pipe(switchMap(async () => onFetchRecordsComplete?.())),
+        isComplete(dataSubjects.totalHits$),
+      ])
     ).then(() => {
       // Send a complete message to main$ once all queries are done and if main$
       // is not already in an ERROR state, e.g. because the document query has failed.
@@ -250,16 +251,8 @@ export async function fetchMoreDocuments(
   }
 }
 
-const fetchStatusByType = <T extends DataMsg>(subject: BehaviorSubject<T>, type: string) =>
-  subject.pipe(map(({ fetchStatus }) => ({ type, fetchStatus })));
-
-const toRequestFinishedMap = (
-  currentMap: Record<string, boolean>,
-  { type, fetchStatus }: { type: string; fetchStatus: FetchStatus }
-) => ({
-  ...currentMap,
-  [type]: [FetchStatus.COMPLETE, FetchStatus.ERROR].includes(fetchStatus),
-});
-
-const allRequestsFinished = (requests: Record<string, boolean>) =>
-  Object.values(requests).every((finished) => finished);
+const isComplete = <T extends DataMsg>(subject: BehaviorSubject<T>) => {
+  return subject.pipe(
+    filter(({ fetchStatus }) => [FetchStatus.COMPLETE, FetchStatus.ERROR].includes(fetchStatus))
+  );
+};

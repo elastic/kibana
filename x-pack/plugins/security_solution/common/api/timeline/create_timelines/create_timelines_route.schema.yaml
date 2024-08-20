@@ -1,0 +1,82 @@
+openapi: 3.0.0
+info:
+  title: Elastic Security - Timeline - Create Timelines API
+  version: '2023-10-31'
+externalDocs:
+  url: https://www.elastic.co/guide/en/security/current/timeline-api-create.html
+  description: Documentation
+servers:
+  - url: 'http://{kibana_host}:{port}'
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+paths:
+  /api/timeline:
+    post:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: CreateTimelines
+      summary: Creates a new timeline.
+      tags:
+        - access:securitySolution
+      requestBody:
+        description: The required timeline fields used to create a new timeline along with optional fields that will be created if not provided.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - timeline
+              properties:
+                status:
+                  $ref: '../model/components.schema.yaml#/components/schemas/TimelineStatus'
+                  nullable: true
+                timelineId:
+                  type: string
+                  nullable: true
+                templateTimelineId:
+                  type: string
+                  nullable: true
+                templateTimelineVersion:
+                  type: number
+                  nullable: true
+                timelineType:
+                  $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
+                  nullable: true
+                version:
+                  type: string
+                  nullable: true
+                timeline:
+                  $ref: '../model/components.schema.yaml#/components/schemas/SavedTimeline'
+      responses:
+        '200':
+          description: Indicates the timeline was successfully created.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    required: [persistTimeline]
+                    properties:
+                      persistTimeline:
+                        type: object
+                        properties:
+                          timeline:
+                            $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
+        '405':
+          description: Indicates that there was an error in the timeline creation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: string
+                  statusCode:
+                    type: number

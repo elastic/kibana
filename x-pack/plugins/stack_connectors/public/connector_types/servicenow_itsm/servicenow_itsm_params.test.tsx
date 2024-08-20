@@ -304,6 +304,16 @@ describe('ServiceNowITSMParamsFields renders', () => {
       expect(wrapper.find('input[data-test-subj="short_descriptionInput"]').exists()).toBeFalsy();
     });
 
+    test('shows incident details when action group is undefined', () => {
+      const newProps = {
+        ...defaultProps,
+        selectedActionGroupId: undefined,
+      };
+      const wrapper = mountWithIntl(<ServiceNowITSMParamsFields {...newProps} />);
+      expect(wrapper.find('input[data-test-subj="short_descriptionInput"]').exists()).toBeTruthy();
+      expect(wrapper.find('input[data-test-subj="correlation_idInput"]').exists()).toBeTruthy();
+    });
+
     test('A short description change triggers editAction', () => {
       const wrapper = mountWithIntl(
         <ServiceNowITSMParamsFields

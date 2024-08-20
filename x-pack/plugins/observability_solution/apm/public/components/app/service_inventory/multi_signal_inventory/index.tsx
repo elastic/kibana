@@ -8,7 +8,6 @@ import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { ApmDocumentType } from '../../../../../common/document_type';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -24,20 +23,20 @@ import {
   ServiceInventoryFieldName,
 } from './table/multi_signal_services_table';
 import { ServiceListItem } from '../../../../../common/service_inventory';
-import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
-import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
 import { NoEntitiesEmptyState } from './table/no_entities_empty_state';
 import { Welcome } from '../../../shared/entity_enablement/welcome_modal';
-import { useServiceEcoTour } from '../../../../hooks/use_eco_tour';
 import { useKibana } from '../../../../context/kibana_context/use_kibana';
 import { ApmPluginStartDeps, ApmServices } from '../../../../plugin';
+import { useEntityManagerEnablementContext } from '../../../../context/entity_manager_context/use_entity_manager_enablement_context';
 
 type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/entities/services'>;
 
 const INITIAL_PAGE_SIZE = 25;
 const INITIAL_SORT_DIRECTION = 'desc';
 
-const INITIAL_DATA: MainStatisticsApiResponse & { requestId: string } = {
+type MainStatisticsApiResponseWithRequestId = MainStatisticsApiResponse & { requestId: string };
+
+const INITIAL_DATA: MainStatisticsApiResponseWithRequestId = {
   services: [],
   requestId: '',
 };
@@ -84,10 +83,12 @@ function useServicesEntitiesMainStatisticsFetcher() {
 }
 
 function useServicesEntitiesDetailedStatisticsFetcher({
-  mainStatisticsFetch,
+  mainStatisticsData,
+  mainStatisticsStatus,
   services,
 }: {
-  mainStatisticsFetch: ReturnType<typeof useServicesEntitiesMainStatisticsFetcher>;
+  mainStatisticsData: MainStatisticsApiResponseWithRequestId;
+  mainStatisticsStatus: FETCH_STATUS;
   services: ServiceListItem[];
 }) {
   const {
@@ -96,17 +97,7 @@ function useServicesEntitiesDetailedStatisticsFetcher({
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const dataSourceOptions = usePreferredDataSourceAndBucketSize({
-    start,
-    end,
-    kuery,
-    type: ApmDocumentType.ServiceTransactionMetric,
-    numBuckets: 20,
-  });
-
-  const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
-
-  const timeseriesDataFetch = useProgressiveFetcher(
+  const timeseriesDataFetch = useFetcher(
     (callApmApi) => {
       const serviceNames = services.map(({ serviceName }) => serviceName);
 
@@ -114,8 +105,7 @@ function useServicesEntitiesDetailedStatisticsFetcher({
         start &&
         end &&
         serviceNames.length > 0 &&
-        mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
-        dataSourceOptions
+        mainStatisticsStatus === FETCH_STATUS.SUCCESS
       ) {
         return callApmApi('POST /internal/apm/entities/services/detailed_statistics', {
           params: {
@@ -124,9 +114,6 @@ function useServicesEntitiesDetailedStatisticsFetcher({
               kuery,
               start,
               end,
-              documentType: dataSourceOptions.source.documentType,
-              rollupInterval: dataSourceOptions.source.rollupInterval,
-              bucketSizeInSeconds: dataSourceOptions.bucketSizeInSeconds,
             },
             body: {
               // Service name is sorted to guarantee the same order every time this API is called so the result can be cached.
@@ -149,8 +136,7 @@ export function MultiSignalInventory() {
   const [searchQuery, setSearchQuery] = React.useState('');
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { mainStatisticsData, mainStatisticsStatus } = useServicesEntitiesMainStatisticsFetcher();
-  const { tourState, hideModal } = useServiceEcoTour();
-  const mainStatisticsFetch = useServicesEntitiesMainStatisticsFetcher();
+  const { tourState, updateTourState } = useEntityManagerEnablementContext();
 
   const initialSortField = ServiceInventoryFieldName.Throughput;
 
@@ -161,7 +147,8 @@ export function MultiSignalInventory() {
   });
 
   const { timeseriesDataFetch } = useServicesEntitiesDetailedStatisticsFetcher({
-    mainStatisticsFetch,
+    mainStatisticsData,
+    mainStatisticsStatus,
     services: mainStatisticsData.services,
   });
 
@@ -174,6 +161,10 @@ export function MultiSignalInventory() {
       services.telemetry.reportEntityInventoryPageState({ state: 'available' });
     }
   }, [services.telemetry, data?.hasData]);
+
+  function handleModalClose() {
+    updateTourState({ isModalVisible: false, isTourActive: true });
+  }
 
   return (
     <>
@@ -219,8 +210,8 @@ export function MultiSignalInventory() {
       )}
       <Welcome
         isModalVisible={tourState.isModalVisible ?? false}
-        onClose={() => hideModal()}
-        onConfirm={() => hideModal()}
+        onClose={handleModalClose}
+        onConfirm={handleModalClose}
       />
     </>
   );

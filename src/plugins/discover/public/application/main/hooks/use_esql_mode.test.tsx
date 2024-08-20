@@ -23,6 +23,7 @@ import { DiscoverAppState } from '../state_management/discover_app_state_contain
 import { DiscoverStateContainer } from '../state_management/discover_state';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { dataViewAdHoc } from '../../../__mocks__/data_view_complex';
+import { buildDataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 
 function getHookProps(
   query: AggregateQuery | Query | undefined,
@@ -486,5 +487,96 @@ describe('useEsqlMode', () => {
         columns: ['field1'],
       });
     });
+  });
+
+  it('should call setResetDefaultProfileState correctly when index pattern changes', async () => {
+    const { stateContainer } = renderHookWithContext(false);
+    const documents$ = stateContainer.dataState.data$.documents$;
+    expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+      columns: false,
+      rowHeight: false,
+    });
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      query: { esql: 'from pattern1' },
+    });
+    await waitFor(() =>
+      expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+        columns: true,
+        rowHeight: true,
+      })
+    );
+    stateContainer.internalState.transitions.setResetDefaultProfileState({
+      columns: false,
+      rowHeight: false,
+    });
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      query: { esql: 'from pattern1' },
+    });
+    await waitFor(() =>
+      expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+        columns: false,
+        rowHeight: false,
+      })
+    );
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      query: { esql: 'from pattern2' },
+    });
+    await waitFor(() =>
+      expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+        columns: true,
+        rowHeight: true,
+      })
+    );
+  });
+
+  it('should call setResetDefaultProfileState correctly when columns change', async () => {
+    const { stateContainer } = renderHookWithContext(false);
+    const documents$ = stateContainer.dataState.data$.documents$;
+    const result1 = [buildDataTableRecord({ message: 'foo' } as EsHitRecord)];
+    const result2 = [buildDataTableRecord({ message: 'foo', extension: 'bar' } as EsHitRecord)];
+    expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+      columns: false,
+      rowHeight: false,
+    });
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      query: { esql: 'from pattern' },
+      result: result1,
+    });
+    await waitFor(() =>
+      expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+        columns: true,
+        rowHeight: true,
+      })
+    );
+    stateContainer.internalState.transitions.setResetDefaultProfileState({
+      columns: false,
+      rowHeight: false,
+    });
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      query: { esql: 'from pattern' },
+      result: result1,
+    });
+    await waitFor(() =>
+      expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+        columns: false,
+        rowHeight: false,
+      })
+    );
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      query: { esql: 'from pattern' },
+      result: result2,
+    });
+    await waitFor(() =>
+      expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+        columns: true,
+        rowHeight: false,
+      })
+    );
   });
 });

@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-export const SOLUTION_NAV_FEATURE_FLAG_NAME = 'solutionNavEnabled';
-
 export const DEFAULT_ROUTE_UI_SETTING_ID = 'defaultRoute';
 
 export const DEFAULT_ROUTES = {

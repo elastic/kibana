@@ -165,4 +165,62 @@ describe('test getDataStateContainer', () => {
 
     dataState.refetch$.next('fetch_more');
   });
+
+  it('should update app state from default profile state', async () => {
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    const dataState = stateContainer.dataState;
+    const dataUnsub = dataState.subscribe();
+    const appUnsub = stateContainer.appState.initAndSync();
+    discoverServiceMock.profilesManager.resolveDataSourceProfile({});
+    stateContainer.actions.setDataView(dataViewMock);
+    stateContainer.internalState.transitions.setResetDefaultProfileState({
+      columns: true,
+      rowHeight: true,
+    });
+    dataState.data$.totalHits$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: 0,
+    });
+    dataState.refetch$.next(undefined);
+    await waitFor(() => {
+      expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
+    });
+    expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+      columns: false,
+      rowHeight: false,
+    });
+    expect(stateContainer.appState.get().columns).toEqual(['message', 'extension']);
+    expect(stateContainer.appState.get().rowHeight).toEqual(3);
+    dataUnsub();
+    appUnsub();
+  });
+
+  it('should not update app state from default profile state', async () => {
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    const dataState = stateContainer.dataState;
+    const dataUnsub = dataState.subscribe();
+    const appUnsub = stateContainer.appState.initAndSync();
+    discoverServiceMock.profilesManager.resolveDataSourceProfile({});
+    stateContainer.actions.setDataView(dataViewMock);
+    stateContainer.internalState.transitions.setResetDefaultProfileState({
+      columns: false,
+      rowHeight: false,
+    });
+    dataState.data$.totalHits$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: 0,
+    });
+    dataState.refetch$.next(undefined);
+    await waitFor(() => {
+      expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
+    });
+    expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+      columns: false,
+      rowHeight: false,
+    });
+    expect(stateContainer.appState.get().columns).toEqual(['default_column']);
+    expect(stateContainer.appState.get().rowHeight).toBeUndefined();
+    dataUnsub();
+    appUnsub();
+  });
 });

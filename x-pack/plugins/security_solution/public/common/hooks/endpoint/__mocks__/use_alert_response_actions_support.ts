@@ -8,7 +8,7 @@
 import type { AlertResponseActionsSupport } from '../use_alert_response_actions_support';
 import {
   RESPONSE_ACTION_API_COMMANDS_NAMES,
-  RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD,
+  RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 
 const useAlertResponseActionsSupportMock = (): AlertResponseActionsSupport => {
@@ -19,7 +19,7 @@ const useAlertResponseActionsSupportMock = (): AlertResponseActionsSupport => {
     details: {
       agentId: '123',
       agentType: 'endpoint',
-      agentIdField: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.endpoint,
+      agentIdField: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.endpoint[0],
       hostName: 'host-a',
       platform: 'linux',
       agentSupport: RESPONSE_ACTION_API_COMMANDS_NAMES.reduce<

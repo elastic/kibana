@@ -133,7 +133,6 @@ describe('fetchFieldCandidates', () => {
       'event.type',
       'fileset.name',
       'host.architecture',
-      'host.containerized',
       'host.hostname',
       'host.ip',
       'host.mac',

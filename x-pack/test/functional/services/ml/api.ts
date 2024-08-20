@@ -1473,11 +1473,13 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       }
     },
 
-    async stopTrainedModelDeploymentES(deploymentId: string) {
+    async stopTrainedModelDeploymentES(deploymentId: string, force: boolean = false) {
       log.debug(`Stopping trained model deployment with id "${deploymentId}"`);
-      const { body, status } = await esSupertest.post(
-        `/_ml/trained_models/${deploymentId}/deployment/_stop`
-      );
+      const url = `/_ml/trained_models/${deploymentId}/deployment/_stop${
+        force ? '?force=true' : ''
+      }`;
+
+      const { body, status } = await esSupertest.post(url);
       this.assertResponseStatusCode(200, status, body);
 
       log.debug('> Trained model deployment stopped');
@@ -1570,8 +1572,13 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       );
     },
 
-    async importTrainedModel(modelId: string, modelName: SupportedTrainedModelNamesType) {
-      await this.createTrainedModel(modelId, this.getTrainedModelConfig(modelName));
+    async importTrainedModel(
+      modelId: string,
+      modelName: SupportedTrainedModelNamesType,
+      config?: PutTrainedModelConfig
+    ) {
+      const trainedModelConfig = config ?? this.getTrainedModelConfig(modelName);
+      await this.createTrainedModel(modelId, trainedModelConfig);
       await this.createTrainedModelVocabularyES(modelId, this.getTrainedModelVocabulary(modelName));
       await this.uploadTrainedModelDefinitionES(
         modelId,
