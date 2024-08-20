@@ -16,9 +16,12 @@ export default defineCypressConfig(
     responseTimeout: 60000,
     viewportHeight: 946,
     viewportWidth: 1680,
-
     env: {
-      grepTags: '@serverless --@brokenInServerless --@skipInServerless',
+      grepTags: '@serverless --@skipInServerless --@brokenInServerless --@skipInServerlessMKI',
+    },
+
+    e2e: {
+      experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
     },
   })
 );
