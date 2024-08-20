@@ -18,14 +18,14 @@ import { inputsActions } from '../../../common/store/inputs';
 
 import * as i18n from '../../pages/translations';
 import type {
-  TimelineTypeLiteralWithNull,
-  TimelineStatusLiteralWithNull,
+  TimelineType,
+  TimelineStatus,
   PageInfoTimeline,
   TimelineResult,
   SortTimeline,
   GetAllTimelineVariables,
 } from '../../../../common/api/timeline';
-import { TimelineType } from '../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../common/api/timeline';
 import { getAllTimelines } from '../api';
 
 export interface AllTimelinesArgs {
@@ -52,8 +52,8 @@ export interface AllTimelinesVariables {
   pageInfo: PageInfoTimeline;
   search: string;
   sort: SortTimeline;
-  status: TimelineStatusLiteralWithNull;
-  timelineType: TimelineTypeLiteralWithNull;
+  status: TimelineStatus | null;
+  timelineType: TimelineType | null;
 }
 
 export const ALL_TIMELINE_QUERY_ID = 'FETCH_ALL_TIMELINES';
@@ -93,7 +93,7 @@ export const getAllTimeline = memoizeOne(
       title: timeline.title,
       updated: timeline.updated,
       updatedBy: timeline.updatedBy,
-      timelineType: timeline.timelineType ?? TimelineType.default,
+      timelineType: timeline.timelineType ?? TimelineTypeEnum.default,
       templateTimelineId: timeline.templateTimelineId,
       queryType: getTimelineQueryTypes(timeline),
     }))

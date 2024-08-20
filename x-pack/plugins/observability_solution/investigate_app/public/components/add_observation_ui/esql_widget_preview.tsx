@@ -9,12 +9,11 @@ import { css } from '@emotion/css';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ESQLColumn, ESQLRow } from '@kbn/es-types';
 import {
-  createEsqlWidget,
   ESQL_WIDGET_NAME,
   GlobalWidgetParameters,
-  InvestigateWidgetColumnSpan,
   InvestigateWidgetCreate,
   OnWidgetAdd,
+  createEsqlWidget,
 } from '@kbn/investigate-plugin/public';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
@@ -33,16 +32,6 @@ function getWidgetFromSuggestion({
   query: string;
   suggestion: Suggestion;
 }): InvestigateWidgetCreate {
-  const makeItWide = suggestion.visualizationId !== 'lnsMetric';
-
-  const makeItTall = suggestion.visualizationId !== 'lnsMetric';
-
-  let rows = makeItTall ? 12 : 4;
-
-  if (suggestion.visualizationId === 'lnsDatatable') {
-    rows = 18;
-  }
-
   return createEsqlWidget({
     title: suggestion.title,
     type: ESQL_WIDGET_NAME,
@@ -50,9 +39,6 @@ function getWidgetFromSuggestion({
       esql: query,
       suggestion,
     },
-    columns: makeItWide ? InvestigateWidgetColumnSpan.Four : InvestigateWidgetColumnSpan.One,
-    rows,
-    locked: false,
   });
 }
 
@@ -79,7 +65,6 @@ function PreviewContainer({ children }: { children: React.ReactNode }) {
 export function EsqlWidgetPreview({
   esqlQuery,
   onWidgetAdd,
-  filters,
   timeRange,
 }: {
   esqlQuery: string;
@@ -91,10 +76,9 @@ export function EsqlWidgetPreview({
 
   const filter = useMemo(() => {
     return getEsFilterFromOverrides({
-      filters,
       timeRange,
     });
-  }, [filters, timeRange]);
+  }, [timeRange]);
 
   const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | undefined>(undefined);
 

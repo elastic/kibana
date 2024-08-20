@@ -476,6 +476,7 @@ export class ModelsProvider {
       const modelDefinitionResponse = {
         ...def,
         ...(recommended ? { recommended } : {}),
+        supported: !!def.default || recommended,
         model_id: modelId,
       };
 

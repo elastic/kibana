@@ -39,6 +39,7 @@ export const kbComponentTemplate: ClusterComponentTemplate['component_template']
           name: keyword,
         },
       },
+      type: keyword,
       labels: dynamic,
       conversation: {
         properties: {

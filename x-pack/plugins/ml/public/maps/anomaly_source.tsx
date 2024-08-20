@@ -284,7 +284,7 @@ export class AnomalySource implements IVectorSource {
       if (key === GEOJSON_FEATURE_ID_PROPERTY_NAME) {
         continue;
       }
-      if (properties.hasOwnProperty(key)) {
+      if (Object.hasOwn(properties, key)) {
         tooltipProperties.push(new AnomalySourceTooltipProperty(key, properties[key]));
       }
     }

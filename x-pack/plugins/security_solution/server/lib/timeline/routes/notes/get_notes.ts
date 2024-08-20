@@ -6,13 +6,16 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { NOTE_URL } from '../../../../../common/constants';
 
 import type { ConfigType } from '../../../..';
 
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
-import { buildFrameworkRequest, getNotesPaginated } from '../../utils/common';
+import { buildFrameworkRequest } from '../../utils/common';
+import { getNotesSchema } from '../../../../../common/api/timeline';
+import { buildRouteValidationWithExcess } from '../../../../utils/build_validation/route_validation';
 import { getAllSavedNote, MAX_UNASSOCIATED_NOTES } from '../../saved_object/notes';
 import { noteSavedObjectType } from '../../saved_object_mappings/notes';
 
@@ -28,7 +31,7 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter, _: ConfigTyp
     .addVersion(
       {
         validate: {
-          request: { query: getNotesPaginated },
+          request: { query: buildRouteValidationWithExcess(getNotesSchema) },
         },
         version: '2023-10-31',
       },
@@ -63,9 +66,9 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter, _: ConfigTyp
           } else {
             const perPage = queryParams?.perPage ? parseInt(queryParams.perPage, 10) : 10;
             const page = queryParams?.page ? parseInt(queryParams.page, 10) : 1;
-            const search = queryParams?.search;
-            const sortField = queryParams?.sortField;
-            const sortOrder = queryParams?.sortOrder;
+            const search = queryParams?.search ?? undefined;
+            const sortField = queryParams?.sortField ?? undefined;
+            const sortOrder = (queryParams?.sortOrder as SortOrder) ?? undefined;
             const filter = queryParams?.filter;
             const options = {
               type: noteSavedObjectType,

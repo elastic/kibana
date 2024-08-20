@@ -29,6 +29,10 @@ export const METRIC_FORMATTERS: MetricFormatters = {
     formatter: InfraFormatterType.percent,
     template: '{{value}}',
   },
+  ['cpuV2']: {
+    formatter: InfraFormatterType.percent,
+    template: '{{value}}',
+  },
   ['memory']: {
     formatter: InfraFormatterType.percent,
     template: '{{value}}',
