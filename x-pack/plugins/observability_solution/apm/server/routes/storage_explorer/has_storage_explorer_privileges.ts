@@ -19,8 +19,11 @@ export async function hasStorageExplorerPrivileges({
 }) {
   const {
     // Only use apm index patterns and ignore OTel, as the storage explorer only supports APM data
-    indices: { transaction = 'traces-apm*,apm-*', span = 'traces-apm*,apm-*', 
-      metric = 'metrics-apm*,apm-*', error = 'logs-apm*,apm-*' },
+    indices: {
+      transaction = 'traces-apm*,apm-*',
+      span = 'traces-apm*,apm-*',
+      metric = 'metrics-apm*,apm-*',
+      error = 'logs-apm*,apm-*' },
   } = apmEventClient;
 
   const names = uniq(
