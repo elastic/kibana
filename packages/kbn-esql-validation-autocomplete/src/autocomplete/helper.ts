@@ -59,6 +59,13 @@ export function getParamAtPosition(
   return params.length > position ? params[position] : minParams ? params[params.length - 1] : null;
 }
 
+export function strictlyGetParamAtPosition(
+  { params, minParams }: FunctionDefinition['signatures'][number],
+  position: number
+) {
+  return params[position] ? params[position] : null;
+}
+
 export function getQueryForFields(queryString: string, commands: ESQLCommand[]) {
   // If there is only one source command and it does not require fields, do not
   // fetch fields, hence return an empty string.

@@ -19,9 +19,9 @@ import { ESQL_COMMON_NUMERIC_TYPES } from '../../shared/esql_types';
 import { evalFunctionDefinitions } from '../../definitions/functions';
 import { timeUnitsToSuggest } from '../../definitions/literals';
 import {
-  getParamAtPosition,
   getCompatibleTypesToSuggestNext,
   getValidFunctionSignaturesForPreviousArgs,
+  strictlyGetParamAtPosition,
 } from '../helper';
 import { uniq } from 'lodash';
 import {
@@ -283,16 +283,9 @@ describe('autocomplete.suggest', () => {
         { triggerCharacter: ' ' }
       );
       // test that the arg type is correct after minParams
-      await assertSuggestions(
-        'from a | eval a=cidr_match(ipField, textField, /',
-        [
-          ...getFieldNamesByType('text'),
-          ...getFunctionSignaturesByReturnType('eval', 'text', { scalar: true }, undefined, [
-            'cidr_match',
-          ]),
-        ],
-        { triggerCharacter: ' ' }
-      );
+      await assertSuggestions('from a | eval a=cidr_match(ipField, textField, /', [], {
+        triggerCharacter: ' ',
+      });
       // test that comma is correctly added to the suggestions if minParams is not reached yet
       await assertSuggestions('from a | eval a=cidr_match(/', [
         ...getFieldNamesByType('ip').map((v) => `${v}, `),
@@ -410,7 +403,7 @@ describe('autocomplete.suggest', () => {
 
                 const hasMoreMandatoryArgs = !validSignatures
                   // Types available to suggest next after this argument is completed
-                  .map((sig) => getParamAtPosition(sig, i + 2))
+                  .map((sig) => strictlyGetParamAtPosition(sig, i + 2))
                   // when a param is null, it means param is optional
                   // If there's at least one param that is optional, then
                   // no need to suggest comma

@@ -16,7 +16,7 @@ import type {
   ESQLLiteral,
   ESQLSingleAstItem,
 } from '@kbn/esql-ast';
-import { ESQL_NUMBER_TYPES, compareTypesWithLiterals, isNumericType } from '../shared/esql_types';
+import { ESQL_NUMBER_TYPES, isNumericType } from '../shared/esql_types';
 import type { EditorContext, SuggestionRawDefinition } from './types';
 import {
   lookupColumn,
@@ -87,13 +87,14 @@ import {
 import { ESQLCallbacks } from '../shared/types';
 import {
   getFunctionsToIgnoreForStats,
-  getParamAtPosition,
   getQueryForFields,
   getSourcesFromCommands,
   getSupportedTypesForBinaryOperators,
   isAggFunctionUsedAlready,
   getCompatibleTypesToSuggestNext,
   removeQuoteForSuggestedSources,
+  getValidFunctionSignaturesForPreviousArgs,
+  strictlyGetParamAtPosition,
 } from './helper';
 import { FunctionParameter, FunctionReturnType, SupportedDataType } from '../definitions/types';
 
@@ -1212,34 +1213,17 @@ async function getFunctionArgsSuggestions(
   }
 
   const arg: ESQLAstItem = enrichedArgs[argIndex];
-  const existingTypes = node.args
-    .map((nodeArg) =>
-      extractFinalTypeFromArg(nodeArg, {
-        fields: fieldsMap,
-        variables: variablesExcludingCurrentCommandOnes,
-      })
-    )
-    .filter(nonNullable);
 
-  const validSignatures = fnDefinition.signatures
-    // if existing arguments are preset already, use them to filter out incompatible signatures
-    .filter((signature) => {
-      if (existingTypes.length) {
-        return existingTypes.every((type, index) =>
-          signature.params[index]
-            ? compareTypesWithLiterals(signature.params[index].type, type)
-            : false
-        );
-      }
-      return true;
-    });
-
+  const validSignatures = getValidFunctionSignaturesForPreviousArgs(
+    fnDefinition,
+    enrichedArgs,
+    argIndex
+  );
   // Retrieve unique of types that are compatiable for the current arg
   const typesToSuggestNext = getCompatibleTypesToSuggestNext(fnDefinition, enrichedArgs, argIndex);
-
   const hasMoreMandatoryArgs = !validSignatures
     // Types available to suggest next after this argument is completed
-    .map((signature) => getParamAtPosition(signature, argIndex + 1))
+    .map((signature) => strictlyGetParamAtPosition(signature, argIndex + 1))
     // when a param is null, it means param is optional
     // If there's at least one param that is optional, then
     // no need to suggest comma
