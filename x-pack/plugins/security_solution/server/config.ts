@@ -147,6 +147,7 @@ export const configSchema = schema.object({
   prebuiltRuleRepositories: schema.maybe(
     schema.arrayOf(
       schema.object({
+        id: schema.string(),
         repository: schema.string(),
         username: schema.string(),
         token: schema.string(),

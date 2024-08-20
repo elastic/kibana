@@ -8,6 +8,7 @@
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine';
 import { PUBLISH_PREBUILT_RULES_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import {
   PublishPrebuiltRulesRequestBody,
@@ -16,6 +17,7 @@ import {
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
+import { commitRulesToRepository } from './commit_rules_to_repository';
 
 export const publishPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -54,6 +56,10 @@ export const publishPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter) 
             });
           }
 
+          const repositoriesById = new Map(
+            config.prebuiltRuleRepositories.map((repository) => [repository.id, repository])
+          );
+
           const rulesClient = ctx.alerting.getRulesClient();
           const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 
@@ -61,8 +67,9 @@ export const publishPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter) 
           const currentRules = await ruleObjectsClient.fetchInstalledRulesByIds(
             rulesToPublish.map((rule) => rule.rule_id)
           );
-          const currentRulesById = new Map(currentRules.map((rule) => [rule.id, rule]));
+          const currentRulesById = new Map(currentRules.map((rule) => [rule.rule_id, rule]));
 
+          const rulesByRepository: Record<string, RuleResponse[]> = {};
           // Check that the rule revisions match the ones provided in the request
           rulesToPublish.forEach((rule) => {
             const currentRule = currentRulesById.get(rule.rule_id);
@@ -72,12 +79,36 @@ export const publishPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter) 
             if (currentRule.rule_source?.type !== 'external') {
               throw new Error(`Rule with id ${rule.rule_id} is not a prebuilt rule`);
             }
+            const repositoryId = currentRule.rule_source?.repository_id;
+            if (!repositoryId) {
+              throw new Error(`repository_id is missing for rule with id ${rule.rule_id}`);
+            }
+            if (!repositoriesById.has(repositoryId)) {
+              throw new Error(
+                `Rule with id ${rule.rule_id} is associated with an unknown repository`
+              );
+            }
+
             if (currentRule.revision !== rule.revision) {
               throw new Error(
                 `Revision mismatch for rule with id ${rule.rule_id}: expected ${currentRule.revision}, got ${rule.revision}`
               );
             }
+
+            rulesByRepository[repositoryId] = [
+              ...(rulesByRepository[repositoryId] ?? []),
+              currentRule,
+            ];
           });
+
+          await Promise.all(
+            Object.entries(rulesByRepository).map(([repositoryId, rules]) => {
+              return commitRulesToRepository({
+                repository: repositoriesById.get(repositoryId),
+                rules,
+              });
+            })
+          );
 
           const responseBody: PublishPrebuiltRulesResponse = {
             published_rules: [],
