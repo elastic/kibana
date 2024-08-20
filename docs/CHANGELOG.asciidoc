@@ -74,8 +74,26 @@ Review important information about the {kib} 8.x releases.
 [[release-notes-8.15.0]]
 == {kib} 8.15.0
 
-
 For information about the {kib} 8.15.0 release, review the following information.
+
+The 8.15.0 release includes the following known issues.
+
+[float]
+[[known-issues-8.15.0]]
+=== Known issues
+
+[discrete]
+[[known-178114]]
+.When using the Observability AI Assistant with the OpenAI connector, function calling will result in an error
+[%collapsible]
+====
+*Details* +
+In 8.15.1, We fixed a bug when processing YAML configuration keys that contain dotted notation in objects in arrays.
+This can manifest as a validation error causing Kibana to not start.
+
+For more information, refer to {kibana-pull}190590[#190590].
+====
+
 
 [float]
 [[deprecations-8.15.0]]
