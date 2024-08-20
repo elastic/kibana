@@ -14,7 +14,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
-  const toasts = getService('toasts');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const security = getService('security');
@@ -58,12 +57,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(initialSize.width).to.be.greaterThan(afterSize.width);
     });
 
-    it('should not send request with unsupported HTTP verbs', async () => {
+    it('should return statusCode 400 to unsupported HTTP verbs', async () => {
+      const expectedResponseContains = '"statusCode": 400';
       await PageObjects.console.monaco.clearEditorText();
       await PageObjects.console.monaco.enterText('OPTIONS /');
       await PageObjects.console.clickPlay();
       await retry.try(async () => {
-        expect(await toasts.getCount()).to.equal(1);
+        const actualResponse = await PageObjects.console.monaco.getOutputText();
+        log.debug(actualResponse);
+        expect(actualResponse).to.contain(expectedResponseContains);
+
+        expect(await PageObjects.console.hasSuccessBadge()).to.be(false);
       });
     });
 
