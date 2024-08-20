@@ -19,8 +19,6 @@
       "cloud",
       "usageCollection",
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "requiredBundles": []
   }
 }
