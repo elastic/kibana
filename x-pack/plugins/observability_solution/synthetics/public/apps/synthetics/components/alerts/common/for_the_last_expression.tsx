@@ -58,7 +58,6 @@ export const FROM_LOCATIONS_EXPRESSION = i18n.translate(
 );
 
 interface Option {
-  expression: string;
   label: string;
   key: 'checksWindow' | 'timeWindow' | 'locations';
 }
@@ -80,7 +79,7 @@ const OPTIONS: Option[] = [
 
 export const DEFAULT_CONDITION: StatusRuleCondition = {
   window: { numberOfChecks: 5 },
-  groupByLocation: true,
+  groupBy: 'locationId',
   downThreshold: 5,
 };
 const getCheckedOption = (option: Option, condition?: StatusRuleCondition) => {

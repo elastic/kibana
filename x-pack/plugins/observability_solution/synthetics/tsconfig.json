@@ -102,8 +102,7 @@
     "@kbn/search-types",
     "@kbn/slo-schema",
     "@kbn/alerting-types",
-    "@kbn/babel-register",
-    "@kbn/synthetics-e2e"
+    "@kbn/babel-register"
   ],
   "exclude": ["target/**/*"]
 }

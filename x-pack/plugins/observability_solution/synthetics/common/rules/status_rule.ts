@@ -26,7 +26,11 @@ export const NumberOfChecksSchema = schema.object({
 });
 
 export const StatusRuleConditionSchema = schema.object({
-  groupByLocation: schema.maybe(schema.boolean()),
+  groupBy: schema.maybe(
+    schema.string({
+      defaultValue: 'locationId',
+    })
+  ),
   downThreshold: schema.maybe(schema.number()),
   window: schema.oneOf([
     schema.object({

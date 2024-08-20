@@ -26,13 +26,18 @@ export const generateMonitors = async () => {
 };
 
 const createMonitor = async (monitor: any) => {
-  const { data } = await axios.request({
-    data: monitor,
-    method: 'post',
-    url: 'http://127.0.0.1:5601/test/api/synthetics/monitors',
-    auth: { username: 'elastic', password: 'jdpAyka8HBiq81dFAIB86Nkp' },
-    headers: { 'kbn-xsrf': 'true', 'elastic-api-version': '2023-10-31' },
-  });
+  await axios
+    .request({
+      data: monitor,
+      method: 'post',
+      url: 'http://127.0.0.1:5601/test/api/synthetics/monitors',
+      auth: { username: 'elastic', password: 'jdpAyka8HBiq81dFAIB86Nkp' },
+      headers: { 'kbn-xsrf': 'true', 'elastic-api-version': '2023-10-31' },
+    })
+    .catch((error) => {
+      // eslint-disable-next-line no-console
+      console.error(error);
+    });
 };
 
 const getHttpMonitor = (isDown?: boolean) => {

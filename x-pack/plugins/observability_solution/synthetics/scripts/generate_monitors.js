@@ -6,4 +6,4 @@
  */
 
 require('@kbn/babel-register').install();
-require('@kbn/synthetics-e2e/helpers/generate_monitors').generateMonitors();
+require('./tasks/generate_monitors').generateMonitors();

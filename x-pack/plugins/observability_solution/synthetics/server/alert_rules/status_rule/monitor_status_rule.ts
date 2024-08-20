@@ -84,8 +84,9 @@ export const registerSyntheticsStatusCheckRule = (
         options
       );
 
-      const { downConfigs, staleDownConfigs, upConfigs, monitorLocationsMap } =
-        await statusRule.getDownChecks(ruleState.meta?.downConfigs as StatusConfigs);
+      const { downConfigs, staleDownConfigs, upConfigs } = await statusRule.getDownChecks(
+        ruleState.meta?.downConfigs as StatusConfigs
+      );
 
       const isCustomRule = !isEmpty(params);
 
@@ -110,7 +111,6 @@ export const registerSyntheticsStatusCheckRule = (
         // lets build a map of monitors for each location
         const downConfigsById = getConfigsByIds();
         for (const [configId, configs] of downConfigsById) {
-          const totalLocations = monitorLocationsMap[configId]?.length ?? 0;
           const locationThreshold = numberOfLocations;
           const matchingLocations = configs.length;
           if (matchingLocations >= locationThreshold) {
@@ -136,7 +136,7 @@ export const registerSyntheticsStatusCheckRule = (
           }
         }
       } else {
-        const groupByLocation = Boolean(params.condition?.groupByLocation ?? true);
+        const groupByLocation = Boolean(params.condition?.groupBy === 'locationId');
         if (groupByLocation) {
           Object.entries(downConfigs).forEach(([idWithLocation, statusConfig]) => {
             const { checks } = statusConfig;

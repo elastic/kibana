@@ -53,7 +53,7 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
     (value: boolean) => {
       setRuleParams('condition', {
         ...(ruleParams?.condition ?? DEFAULT_CONDITION),
-        groupByLocation: value,
+        groupBy: value ? 'locationId' : undefined,
       });
     },
     [ruleParams?.condition, setRuleParams]
@@ -113,7 +113,7 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
       <EuiSpacer size="xs" />
       {!locBased && (
         <GroupByExpression
-          groupByLocation={ruleParams.condition?.groupByLocation ?? true}
+          groupByLocation={ruleParams.condition?.groupBy === 'locationId'}
           onChange={onGroupByChange}
         />
       )}
