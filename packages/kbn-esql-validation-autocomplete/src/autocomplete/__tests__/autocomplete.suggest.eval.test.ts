@@ -357,16 +357,16 @@ describe('autocomplete.suggest', () => {
 
       // // Test suggestions for each possible param, within each signature variation, for each function
       for (const fn of evalFunctionDefinitions) {
-        // @TODO: add test case eval(fn.name /)
-        const testedCases = new Set<string>();
         // skip this fn for the moment as it's quite hard to test
         // if (!['bucket', 'date_extract', 'date_diff', 'case'].includes(fn.name)) {
         if (!['bucket', 'date_extract', 'date_diff', 'case'].includes(fn.name)) {
           test(`${fn.name}`, async () => {
+            const testedCases = new Set<string>();
+
             const { assertSuggestions } = await setup();
 
             for (const signature of fn.signatures) {
-              // @ts-ignore Partial
+              // @ts-expect-error Partial type
               const enrichedArgs: Array<
                 ESQLAstItem & {
                   esType: string;
@@ -376,21 +376,29 @@ describe('autocomplete.suggest', () => {
                 esType: type,
               }));
 
-              for (const [i, param] of signature.params.entries()) {
-                if (param.type === 'time_duration') {
+              // Starting at -1 to include empty case e.g. to_string( / )
+              for (let i = -1; i < signature.params.length; i++) {
+                const param = signature.params[i];
+                if (param?.type === 'time_duration') {
                   continue;
                 }
                 const testCase = `${fn.name}(${signature.params
                   .slice(0, i + 1)
                   .map((p) =>
-                    p.type === 'time_literal' ? '1 year,' : `${fieldNameFromType(p.type)}, `
+                    p.type === 'time_literal'
+                      ? '1 year,'
+                      : `${
+                          typeof p.type === 'string' && isFieldType(p.type)
+                            ? fieldNameFromType(p.type)
+                            : 'field'
+                        }, `
                   )
                   .join('')} / )`;
 
+                // Avoid duplicate test cases that might start with first params that are exactly the same
                 if (testedCases.has(testCase)) {
                   continue;
                 }
-
                 testedCases.add(testCase);
 
                 const validSignatures = getValidFunctionSignaturesForPreviousArgs(
@@ -451,98 +459,42 @@ describe('autocomplete.suggest', () => {
                       ),
                       ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)),
                     ].map(addCommaIfRequired);
-                await assertSuggestions(`from a | eval var0 = ${testCase}`, expected, {
+
+                await assertSuggestions(`from a | eval ${testCase}`, expected, {
                   triggerCharacter: ' ',
                 });
 
-                // if (i < signature.params.length) {
-                //   // This ref signature thing is probably wrong in a few cases, but it matches
-                //   // the logic in getFunctionArgsSuggestions. They should both be updated
-                //   const refSignature = fn.signatures[0];
-                //   const requiresMoreArgs =
-                //     i + 1 < (refSignature.minParams ?? 0) ||
-                //     refSignature.params.filter(({ optional }, j) => !optional && j > i).length > 0;
-
-                //   const allParamDefs = fn.signatures
-                //     .map((s) => getParamAtPosition(s, i))
-                //     .filter(nonNullable);
-
-                //   // get all possible types for this param
-                //   const [constantOnlyParamDefs, acceptsFieldParamDefs] = partition(
-                //     allParamDefs,
-                //     (p) => p.constantOnly || /_literal/.test(p.type as string)
-                //   );
-
-                //   const getTypesFromParamDefs = (
-                //     paramDefs: FunctionParameter[]
-                //   ): SupportedDataType[] =>
-                //     Array.from(new Set(paramDefs.map((p) => p.type))).filter(isSupportedDataType);
-
-                //   const suggestedConstants = param.literalSuggestions || param.literalOptions;
-
-                //   const addCommaIfRequired = (s: string | PartialSuggestionWithText) => {
-                //     // don't add commas to the empty string or if there are no more required args
-                //     if (!requiresMoreArgs || s === '' || (typeof s === 'object' && s.text === '')) {
-                //       return s;
-                //     }
-                //     return typeof s === 'string' ? `${s}, ` : { ...s, text: `${s.text},` };
-                //   };
-
-                //   await assertSuggestions(
-                //     `from a | eval ${fn.name}(${Array(i).fill('field').join(', ')}${
-                //       i ? ',' : ''
-                //     } /)`,
-                //     suggestedConstants?.length
-                //       ? suggestedConstants.map(
-                //           (option) => `"${option}"${requiresMoreArgs ? ', ' : ''}`
-                //         )
-                //       : [
-                //           ...getDateLiteralsByFieldType(
-                //             getTypesFromParamDefs(acceptsFieldParamDefs).filter(isFieldType)
-                //           ),
-                //           ...getFieldNamesByType(
-                //             getTypesFromParamDefs(acceptsFieldParamDefs).filter(isFieldType)
-                //           ),
-                //           ...getFunctionSignaturesByReturnType(
-                //             'eval',
-                //             getTypesFromParamDefs(acceptsFieldParamDefs),
-                //             { scalar: true },
-                //             undefined,
-                //             [fn.name]
-                //           ),
-                //           ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)),
-                //         ].map(addCommaIfRequired),
-                //     { triggerCharacter: ' ' }
-                //   );
+                await assertSuggestions(`from a | eval var0 = ${testCase}`, expected, {
+                  triggerCharacter: ' ',
+                });
               }
             }
           });
         }
 
-        // @TODO
         // The above test fails cause it expects nested functions like
         // DATE_EXTRACT(concat("aligned_day_","of_week_in_month"), date) to also be suggested
         // which is actually valid according to func signature
         // but currently, our autocomplete only suggests the literal suggestions
-        // if (['date_extract', 'date_diff'].includes(fn.name)) {
-        //   test(`${fn.name}`, async () => {
-        //     const { assertSuggestions } = await setup();
-        //     const firstParam = fn.signatures[0].params[0];
-        //     const suggestedConstants = firstParam?.literalSuggestions || firstParam?.literalOptions;
-        //     const requiresMoreArgs = true;
+        if (['date_extract', 'date_diff'].includes(fn.name)) {
+          test(`${fn.name}`, async () => {
+            const { assertSuggestions } = await setup();
+            const firstParam = fn.signatures[0].params[0];
+            const suggestedConstants = firstParam?.literalSuggestions || firstParam?.literalOptions;
+            const requiresMoreArgs = true;
 
-        //     await assertSuggestions(
-        //       `from a | eval ${fn.name}(/`,
-        //       suggestedConstants?.length
-        //         ? [
-        //             ...suggestedConstants.map(
-        //               (option) => `"${option}"${requiresMoreArgs ? ', ' : ''}`
-        //             ),
-        //           ]
-        //         : []
-        //     );
-        //   });
-        // }
+            await assertSuggestions(
+              `from a | eval ${fn.name}(/`,
+              suggestedConstants?.length
+                ? [
+                    ...suggestedConstants.map(
+                      (option) => `"${option}"${requiresMoreArgs ? ', ' : ''}`
+                    ),
+                  ]
+                : []
+            );
+          });
+        }
       }
     });
 
