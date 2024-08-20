@@ -18,10 +18,10 @@ import type {
 } from '../../../../../../common/api/detection_engine/rule_management';
 import type { ImportRuleResponse } from '../../../routes/utils';
 import { createBulkErrorObject } from '../../../routes/utils';
+import type { PrebuiltRulesImporter } from '../../../prebuilt_rules/logic/prebuilt_rules_importer';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
 import { calculateRuleSourceForImport } from './calculate_rule_source_for_import';
 import type { IDetectionRulesClient } from '../detection_rules_client/detection_rules_client_interface';
-import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 import { getReferencedExceptionLists } from './gather_referenced_exceptions';
 
 export type PromiseFromStreams = RuleToImport | Error;
@@ -50,7 +50,7 @@ export const importRules = async ({
   rulesResponseAcc,
   overwriteRules,
   detectionRulesClient,
-  prebuiltRuleAssets,
+  prebuiltRulesImporter,
   allowPrebuiltRules,
   allowMissingConnectorSecrets,
   savedObjectsClient,
@@ -59,7 +59,7 @@ export const importRules = async ({
   rulesResponseAcc: ImportRuleResponse[];
   overwriteRules: boolean;
   detectionRulesClient: IDetectionRulesClient;
-  prebuiltRuleAssets?: PrebuiltRuleAsset[];
+  prebuiltRulesImporter: PrebuiltRulesImporter;
   allowPrebuiltRules?: boolean;
   allowMissingConnectorSecrets?: boolean;
   savedObjectsClient: SavedObjectsClientContract;
@@ -72,12 +72,19 @@ export const importRules = async ({
     return importRuleResponse;
   }
 
+  // TODO only call this if prebuilt rules are being imported?
+  prebuiltRulesImporter.setup();
+
   while (ruleChunks.length) {
     const batchParseObjects = ruleChunks.shift() ?? [];
     const existingLists = await getReferencedExceptionLists({
       rules: batchParseObjects,
       savedObjectsClient,
     });
+    const prebuiltRuleAssets = await prebuiltRulesImporter.fetchPrebuiltRuleAssets({
+      rules: batchParseObjects,
+    });
+
     const newImportRuleResponse = await Promise.all(
       batchParseObjects.reduce<Array<Promise<ImportRuleResponse>>>((accum, parsedRule) => {
         const importsWorkerPromise = new Promise<ImportRuleResponse>(async (resolve, reject) => {
@@ -133,7 +140,7 @@ export const importRules = async ({
 
               const ruleSource = calculateRuleSourceForImport({
                 rule: parsedRule,
-                prebuiltRuleAssets: prebuiltRuleAssets ?? [],
+                prebuiltRuleAssets,
                 installedRuleIds: [], // TODO
               });
 

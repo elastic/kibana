@@ -21,7 +21,7 @@ import type { ConfigType } from '../../../../../../config';
 import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { BulkError, ImportRuleResponse } from '../../../../routes/utils';
 import { buildSiemResponse, isBulkError, isImportRegular } from '../../../../routes/utils';
-import { preparePrebuiltRuleAssetsForImport } from '../../../../prebuilt_rules/logic/prepare_prebuilt_rules_for_import';
+import { PrebuiltRulesImporter } from '../../../../prebuilt_rules/logic/prebuilt_rules_importer';
 import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
 import { createRulesAndExceptionsStreamFromNdJson } from '../../../logic/import/create_rules_stream_from_ndjson';
 import type { RuleExceptionsPromiseFromStreams } from '../../../logic/import/import_rules_utils';
@@ -144,11 +144,10 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             ? []
             : rulesWithMigratedActions || migratedParsedObjectsWithoutDuplicateErrors;
 
-          const prebuiltRuleAssets = await preparePrebuiltRuleAssetsForImport({
+          const prebuiltRulesImporter = new PrebuiltRulesImporter({
             config,
             context: ctx.securitySolution,
             savedObjectsClient,
-            rules: parsedRules,
           });
 
           const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, parsedRules);
@@ -159,7 +158,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             overwriteRules: request.query.overwrite,
             detectionRulesClient,
             allowMissingConnectorSecrets: !!actionConnectors.length,
-            prebuiltRuleAssets,
+            prebuiltRulesImporter,
             allowPrebuiltRules: prebuiltRulesCustomizationEnabled,
             savedObjectsClient,
           });
