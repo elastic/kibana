@@ -423,16 +423,18 @@ describe('UnifiedDataTable', () => {
           "additionalControls": null,
           "showColumnSelector": false,
           "showDisplaySelector": Object {
-            "additionalDisplaySettings": <UnifiedDataTableAdditionalDisplaySettings
-              headerRowHeight="custom"
-              headerRowHeightLines={1}
-              onChangeRowHeight={[Function]}
-              onChangeRowHeightLines={[Function]}
-              onChangeSampleSize={[MockFunction]}
-              rowHeight="custom"
-              rowHeightLines={3}
-              sampleSize={150}
-            />,
+            "additionalDisplaySettings": <React.Fragment>
+              <UnifiedDataTableAdditionalDisplaySettings
+                headerRowHeight="custom"
+                headerRowHeightLines={1}
+                onChangeRowHeight={[Function]}
+                onChangeRowHeightLines={[Function]}
+                onChangeSampleSize={[MockFunction]}
+                rowHeight="custom"
+                rowHeightLines={3}
+                sampleSize={150}
+              />
+            </React.Fragment>,
             "allowDensity": false,
             "allowResetButton": false,
             "allowRowHeight": false,
@@ -455,15 +457,17 @@ describe('UnifiedDataTable', () => {
           "additionalControls": null,
           "showColumnSelector": false,
           "showDisplaySelector": Object {
-            "additionalDisplaySettings": <UnifiedDataTableAdditionalDisplaySettings
-              headerRowHeight="custom"
-              headerRowHeightLines={1}
-              onChangeRowHeight={[Function]}
-              onChangeRowHeightLines={[Function]}
-              rowHeight="custom"
-              rowHeightLines={3}
-              sampleSize={200}
-            />,
+            "additionalDisplaySettings": <React.Fragment>
+              <UnifiedDataTableAdditionalDisplaySettings
+                headerRowHeight="custom"
+                headerRowHeightLines={1}
+                onChangeRowHeight={[Function]}
+                onChangeRowHeightLines={[Function]}
+                rowHeight="custom"
+                rowHeightLines={3}
+                sampleSize={200}
+              />
+            </React.Fragment>,
             "allowDensity": false,
             "allowResetButton": false,
             "allowRowHeight": false,
@@ -741,7 +745,7 @@ describe('UnifiedDataTable', () => {
 
       expect(grid.hasClass('euiDataGrid--bordersHorizontal')).toBeTruthy();
       expect(grid.hasClass('euiDataGrid--fontSizeSmall')).toBeTruthy();
-      expect(grid.hasClass('euiDataGrid--paddingLarge')).toBeTruthy();
+      expect(grid.hasClass('euiDataGrid--paddingSmall')).toBeTruthy();
       expect(grid.hasClass('euiDataGrid--rowHoverHighlight')).toBeTruthy();
       expect(grid.hasClass('euiDataGrid--headerUnderline')).toBeTruthy();
       expect(grid.hasClass('euiDataGrid--stripes')).toBeTruthy();

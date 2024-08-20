@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import type { UseSessionPreviewParams } from './use_session_preview';
 import { useSessionPreview } from './use_session_preview';
 import type { SessionViewConfig } from '@kbn/securitysolution-data-table/common/types';
-import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
+import type { GetFieldsData } from '../../shared/hooks/use_get_fields_data';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { mockFieldData, mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 
