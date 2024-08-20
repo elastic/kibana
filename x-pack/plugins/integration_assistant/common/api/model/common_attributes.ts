@@ -43,7 +43,7 @@ export const Connector = z.string();
  * An array of processed documents.
  */
 export type Docs = z.infer<typeof Docs>;
-export const Docs = z.array(z.object({}));
+export const Docs = z.array(z.object({}).passthrough());
 
 /**
  * Format of the provided samples.
