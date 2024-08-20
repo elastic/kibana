@@ -84,7 +84,7 @@ The 8.15.0 release includes the following known issues.
 
 [discrete]
 [[known-178114]]
-.When using the Observability AI Assistant with the OpenAI connector, function calling will result in an error
+.Kibana fails to start when processing YAML configuration keys that contain dotted notation in objects in arrays
 [%collapsible]
 ====
 *Details* +
