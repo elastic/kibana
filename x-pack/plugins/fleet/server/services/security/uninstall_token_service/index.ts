@@ -50,6 +50,7 @@ interface UninstallTokenSOAttributes {
   policy_id: string;
   token: string;
   token_plain: string;
+  namespaces?: string[];
 }
 
 interface UninstallTokenSOAggregationBucket {
@@ -61,7 +62,7 @@ interface UninstallTokenSOAggregation {
   by_policy_id: AggregationsMultiBucketAggregateBase<UninstallTokenSOAggregationBucket>;
 }
 
-async function getNamespaceFiltering(namespace: string) {
+function getNamespaceFiltering(namespace: string) {
   if (namespace === DEFAULT_NAMESPACE_STRING) {
     return `(${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:default) or (not ${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:*)`;
   }
@@ -197,28 +198,20 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   }
 
   public async getToken(id: string): Promise<UninstallToken | null> {
+    const useSpaceAwareness = this.isScoped && (await isSpaceAwarenessEnabled());
+    const namespaceFilter = useSpaceAwareness
+      ? getNamespaceFiltering(this.soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID)
+      : undefined;
+
     const filter = `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:${id}"`;
-
-    const tokenObjects = await this.getDecryptedTokenObjects({ filter });
-    const token =
-      tokenObjects.length === 1
-        ? this.convertTokenObjectToToken(
-            await this.getPolicyIdNameDictionary([tokenObjects[0].attributes.policy_id]),
-            tokenObjects[0]
-          )
-        : null;
-
-    const useSpaceAwareness = await isSpaceAwarenessEnabled();
-
-    if (!useSpaceAwareness || !this.isScoped || !token) {
-      return token;
-    }
-
-    const namespace = this.soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
-
-    return (namespace === DEFAULT_SPACE_ID && !token.namespaces) ||
-      token.namespaces?.includes(namespace)
-      ? token
+    const tokenObjects = await this.getDecryptedTokenObjects({
+      filter: namespaceFilter ? `(${namespaceFilter}) and (${filter})` : filter,
+    });
+    return tokenObjects.length === 1
+      ? this.convertTokenObjectToToken(
+          await this.getPolicyIdNameDictionary([tokenObjects[0].attributes.policy_id]),
+          tokenObjects[0]
+        )
       : null;
   }
 
@@ -433,6 +426,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       policy_name: policyIdNameDictionary[attributes.policy_id] ?? null,
       token: attributes.token || attributes.token_plain,
       created_at: createdAt,
+      namespaces: attributes.namespaces,
     };
   };
 
@@ -446,9 +440,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
     const filter =
       this.isScoped && useSpaceAwareness
-        ? await getNamespaceFiltering(
-            this.soClient.getCurrentNamespace() || DEFAULT_NAMESPACE_STRING
-          )
+        ? getNamespaceFiltering(this.soClient.getCurrentNamespace() || DEFAULT_NAMESPACE_STRING)
         : undefined;
 
     const query: SavedObjectsCreatePointInTimeFinderOptions = {
