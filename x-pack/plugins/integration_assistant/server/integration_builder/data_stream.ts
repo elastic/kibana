@@ -20,6 +20,7 @@ export function createDataStream(
   const title = dataStream.title;
   const description = dataStream.description;
   const samplesFormat = dataStream.samplesFormat ?? { name: 'ndjson', multiline: false };
+  const useMultilineNDJSON = samplesFormat.name === 'ndjson' && samplesFormat.multiline === true;
 
   ensureDirSync(specificDataStreamDir);
   createDataStreamFolders(specificDataStreamDir, pipelineDir);
@@ -32,8 +33,8 @@ export function createDataStream(
       data_stream_description: description,
       package_name: packageName,
       data_stream_name: dataStreamName,
-      multiline_ndjson_toggle_display: samplesFormat.name === 'ndjson',
-      multiline_ndjson_toggle_default: samplesFormat.multiline ?? false,
+      multiline_ndjson_toggle_display: useMultilineNDJSON,
+      multiline_ndjson_toggle_default: useMultilineNDJSON,
     };
     const dataStreamManifest = nunjucks.render(
       `${inputType.replaceAll('-', '_')}_manifest.yml.njk`,
