@@ -22,6 +22,7 @@ export type PostEvaluateBody = z.infer<typeof PostEvaluateBody>;
 export const PostEvaluateBody = z.object({
   graphs: z.array(z.string()),
   datasetName: z.string(),
+  evaluatorConnectorId: z.string().optional(),
   connectorIds: z.array(z.string()),
   runName: z.string().optional(),
   alertsIndexPattern: z.string().optional().default('.alerts-security.alerts-default'),

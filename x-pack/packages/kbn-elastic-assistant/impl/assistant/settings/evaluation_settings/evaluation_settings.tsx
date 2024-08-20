@@ -17,8 +17,10 @@ import {
   EuiComboBox,
   EuiButton,
   EuiComboBoxOptionOption,
+  EuiComboBoxSingleSelectionShape,
   EuiTextColor,
   EuiFieldText,
+  EuiFieldNumber,
   EuiFlexItem,
   EuiFlexGroup,
   EuiLink,
@@ -33,11 +35,14 @@ import type {
 } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../../assistant_context';
+import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '../../../assistant_context/constants';
 import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
 import { getActionTypeTitle, getGenAiConfig } from '../../../connectorland/helpers';
 import { PRECONFIGURED_CONNECTOR } from '../../../connectorland/translations';
 import { usePerformEvaluation } from '../../api/evaluate/use_perform_evaluation';
 import { useEvaluationData } from '../../api/evaluate/use_evaluation_data';
+
+const AS_PLAIN_TEXT: EuiComboBoxSingleSelectionShape = { asPlainText: true };
 
 /**
  * Evaluation Settings -- development-only feature for evaluating models
@@ -121,6 +126,18 @@ export const EvaluationSettings: React.FC = React.memo(() => {
     },
     [setSelectedModelOptions]
   );
+
+  const [selectedEvaluatorModel, setSelectedEvaluatorModel] = useState<
+    Array<EuiComboBoxOptionOption<string>>
+  >([]);
+
+  const onSelectedEvaluatorModelChange = useCallback(
+    (selected: Array<EuiComboBoxOptionOption<string>>) => setSelectedEvaluatorModel(selected),
+    []
+  );
+
+  const [size, setSize] = useState<string>(`${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`);
+
   const visColorsBehindText = euiPaletteComplementary(connectors?.length ?? 0);
   const modelOptions = useMemo(() => {
     return (
@@ -170,19 +187,28 @@ export const EvaluationSettings: React.FC = React.memo(() => {
 
   // Perform Evaluation Button
   const handlePerformEvaluation = useCallback(async () => {
+    const evaluatorConnectorId =
+      selectedEvaluatorModel[0]?.key != null
+        ? { evaluatorConnectorId: selectedEvaluatorModel[0]?.key }
+        : {};
+
     const evalParams: PostEvaluateRequestBodyInput = {
       connectorIds: selectedModelOptions.flatMap((option) => option.key ?? []).sort(),
       graphs: selectedGraphOptions.map((option) => option.label).sort(),
       datasetName: selectedDatasetOptions[0]?.label,
+      ...evaluatorConnectorId,
       runName,
+      size: Number(size),
     };
     performEvaluation(evalParams);
   }, [
     performEvaluation,
     runName,
     selectedDatasetOptions,
+    selectedEvaluatorModel,
     selectedGraphOptions,
     selectedModelOptions,
+    size,
   ]);
 
   const getSection = (title: string, description: string) => (
@@ -354,6 +380,29 @@ export const EvaluationSettings: React.FC = React.memo(() => {
             selectedOptions={selectedGraphOptions}
             onChange={onGraphOptionsChange}
           />
+        </EuiFormRow>
+
+        <EuiFormRow
+          display="rowCompressed"
+          helpText={i18n.EVALUATOR_MODEL_DESCRIPTION}
+          label={i18n.EVALUATOR_MODEL}
+        >
+          <EuiComboBox
+            aria-label={i18n.EVALUATOR_MODEL}
+            compressed
+            onChange={onSelectedEvaluatorModelChange}
+            options={modelOptions}
+            selectedOptions={selectedEvaluatorModel}
+            singleSelection={AS_PLAIN_TEXT}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          display="rowCompressed"
+          helpText={i18n.DEFAULT_MAX_ALERTS_DESCRIPTION}
+          label={i18n.DEFAULT_MAX_ALERTS}
+        >
+          <EuiFieldNumber onChange={(e) => setSize(e.target.value)} value={size} />
         </EuiFormRow>
       </EuiAccordion>
       <EuiHorizontalRule margin={'s'} />
