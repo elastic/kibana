@@ -12,10 +12,10 @@ import { ConsoleOutputParserResult } from './types';
 const parser = createOutputParser();
 describe('console output parser', () => {
   it('returns errors if input is not correct', () => {
-    const input = '{';
+    const input = 'x';
     const parserResult = parser(input) as ConsoleOutputParserResult;
     // the parser logs 2 errors: for the unexpected method and a general syntax error
-    expect(parserResult.errors.length).toBe(1);
+    expect(parserResult.errors.length).toBe(2);
     // the parser logs a beginning of the request that it's trying to parse
     expect(parserResult.requests.length).toBe(1);
   });

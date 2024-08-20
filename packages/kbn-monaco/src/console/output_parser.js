@@ -299,6 +299,17 @@ export const createOutputParser = () => {
       if (ch == '{') {
         const parsedObject = object();
         addRequestData(parsedObject);
+      } else if (ch == '[') {
+        const parsedArray = array();
+        parsedArray.forEach(item => {
+          if (typeof item === 'object') {
+            addRequestData(item);
+          } else {
+            error('Array elements must be objects');
+          }
+        });
+      } else {
+        error('Invalid input');
       }
       // multi doc request
       strictWhite(); // advance to one new line
