@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { controlGroupStateBuilder } from '@kbn/controls-plugin/public';
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { COMMON_OPTIONS_LIST_CONTROL_INPUTS, TEST_IDS } from './constants';
@@ -51,15 +52,13 @@ export const FilterGroupContextMenu = () => {
 
   const resetSelection = useCallback(async () => {
     if (!controlGroupInputUpdates) return;
-
     // remove existing embeddables
-    controlGroup?.updateInput({
-      panels: {},
-    });
+
+    const newInput = { initialChildControlState: {} };
 
     for (let counter = 0; counter < initialControls.length; counter++) {
       const control = initialControls[counter];
-      await controlGroup?.addOptionsListControl({
+      controlGroupStateBuilder.addOptionsListControl(newInput, {
         controlId: String(counter),
         ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
         // option List controls will handle an invalid dataview
@@ -67,6 +66,7 @@ export const FilterGroupContextMenu = () => {
         dataViewId: dataViewId ?? '',
         ...control,
       });
+      controlGroup?.updateInput(newInput);
     }
 
     switchToViewMode();

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ControlGroupInput } from '@kbn/controls-plugin/common';
+import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useEffect, useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
@@ -18,9 +18,9 @@ interface UseControlGroupSyncToLocalStorageArgs {
 }
 
 type UseControlGroupSyncToLocalStorage = (args: UseControlGroupSyncToLocalStorageArgs) => {
-  controlGroupInput: ControlGroupInput | undefined;
-  setControlGroupInput: Dispatch<SetStateAction<ControlGroupInput>>;
-  getStoredControlGroupInput: () => ControlGroupInput | undefined;
+  controlGroupInput: ControlGroupRuntimeState | undefined;
+  setControlGroupInput: Dispatch<SetStateAction<ControlGroupRuntimeState>>;
+  getStoredControlGroupInput: () => ControlGroupRuntimeState | undefined;
 };
 
 export const useControlGroupSyncToLocalStorage: UseControlGroupSyncToLocalStorage = ({
@@ -31,7 +31,7 @@ export const useControlGroupSyncToLocalStorage: UseControlGroupSyncToLocalStorag
   const storage = useRef(new Storage(localStorage));
 
   const [controlGroupInput, setControlGroupInput] = useState(
-    () => (storage.current.get(storageKey) as ControlGroupInput) ?? undefined
+    () => (storage.current.get(storageKey) as ControlGroupRuntimeState) ?? undefined
   );
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export const useControlGroupSyncToLocalStorage: UseControlGroupSyncToLocalStorag
   }, [shouldSync, controlGroupInput, storageKey]);
 
   const getStoredControlGroupInput = () => {
-    return (storage.current.get(storageKey) as ControlGroupInput) ?? undefined;
+    return (storage.current.get(storageKey) as ControlGroupRuntimeState) ?? undefined;
   };
 
   return {

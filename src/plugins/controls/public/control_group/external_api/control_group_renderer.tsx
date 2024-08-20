@@ -54,7 +54,7 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
     const id = useMemo(() => uuidv4(), []);
     const [regenerateId, setRegenerateId] = useState(uuidv4());
     const lastInput = useRef<Partial<ControlGroupRuntimeState> | null>(null);
-    const input$ = useMemo(() => new BehaviorSubject<ControlGroupRuntimeState | null>(null), []);
+    const input$ = useMemo(() => new BehaviorSubject<ControlGroupSerializedState | null>(null), []);
 
     const [apiLoading, setApiLoading] = useState<boolean>(true);
     const [controlGroup, setControlGroup] = useState<ControlGroupRendererApi | undefined>();
@@ -67,8 +67,14 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
     });
     const viewMode$ = useMemo(
       () => new BehaviorSubject<ViewModeType>(viewMode ?? ViewMode.VIEW),
+      // viewMode only used as initial value - changes do not effect memoized value.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       []
     );
+    useEffect(() => {
+      if (viewMode) viewMode$.next(viewMode);
+    }, [viewMode, viewMode$]);
+
     const reload$ = useMemo(() => new BehaviorSubject<void>(undefined), []);
     const saveNotification$ = useMemo(() => new BehaviorSubject<void>(undefined), []);
 
@@ -83,17 +89,15 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
         const test =
           (await getCreationOptions?.(getDefaultControlGroupInput(), controlGroupStateBuilder)) ??
           {};
-        console.log('initialState', test);
         const { initialState, settings } = test;
         const state = {
-          ...omit(initialState, ['panels', 'ignoreParentSettings']),
+          ...omit(initialState, ['initialChildControlState', 'ignoreParentSettings']),
           settings,
           controlStyle: initialState?.labelPosition,
-          panelsJSON: JSON.stringify(initialState?.panels ?? {}),
+          panelsJSON: JSON.stringify(initialState?.initialChildControlState ?? {}),
           ignoreParentSettingsJSON: JSON.stringify(initialState?.ignoreParentSettings ?? {}),
         };
         if (!cancelled) {
-          console.log('state', state);
           setSerializedState(state as ControlGroupSerializedState);
           setApiLoading(false);
         }
@@ -115,13 +119,15 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
         maybeId={id}
         type={CONTROL_GROUP_TYPE}
         onAnyStateChange={(newState) => {
-          input$.next(newState);
+          input$.next(newState.rawState);
         }}
         getParentApi={() => ({
-          ...searchApi,
           reload$,
           viewMode: viewMode$,
           saveNotification$,
+          query$: searchApi.query$,
+          timeRange$: searchApi.timeRange$,
+          unifiedSearchFilters$: searchApi.filters$,
           getSerializedStateForChild: () => ({
             rawState: serializedState!,
           }),
@@ -139,9 +145,6 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
               setRegenerateId(uuidv4());
             },
             getInput$: () => input$,
-            // addOptionsListControl: (controlProps) => {
-            //   const panelState = getOptionsListPanelState(childApi.serializeState(), controlProps);
-            // },
           });
         }}
         hidePanelChrome

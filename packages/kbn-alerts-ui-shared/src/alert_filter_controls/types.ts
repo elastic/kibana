@@ -7,10 +7,7 @@
  */
 
 import type { ControlGroupInput, OptionsListEmbeddableInput } from '@kbn/controls-plugin/common';
-import type {
-  AddOptionsListControlProps,
-  ControlGroupContainer,
-} from '@kbn/controls-plugin/public';
+import type { AddOptionsListControlProps, ControlGroupApi } from '@kbn/controls-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -36,7 +33,7 @@ export type FilterControlConfig = Omit<AddOptionsListControlProps, 'controlId' |
   persist?: boolean;
 };
 
-export type FilterGroupHandler = ControlGroupContainer;
+export type FilterGroupHandler = ControlGroupApi;
 
 export interface FilterGroupProps
   extends Pick<ControlGroupInput, 'timeRange' | 'filters' | 'query' | 'chainingSystem'> {

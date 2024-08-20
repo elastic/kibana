@@ -6,19 +6,20 @@
  * Side Public License, v 1.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import {
   ControlGroupApi,
   ControlGroupRuntimeState,
+  ControlGroupSerializedState,
   ControlGroupSettings,
 } from '../../react_controls/control_group/types';
-import { BehaviorSubject } from 'rxjs';
 // import { AddOptionsListControlProps } from './control_group_input_builder';
 
 export type ControlGroupRendererApi = ControlGroupApi & {
   save: () => void;
   reload: () => void;
-  getInput$: () => BehaviorSubject<ControlGroupRuntimeState | null>;
+  getInput$: () => BehaviorSubject<ControlGroupSerializedState | null>;
   updateInput: (input: Partial<ControlGroupRuntimeState>) => void;
 
   // addOptionsListControl: (controlProps: AddOptionsListControlProps) => void;
