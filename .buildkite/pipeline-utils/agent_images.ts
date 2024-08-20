@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { dump } from 'js-yaml';
 import { BuildkiteClient, BuildkiteCommandStep } from './buildkite';
 
 type AgentImageConfig = BuildkiteCommandStep['agents'];
