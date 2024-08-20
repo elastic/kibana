@@ -44,7 +44,7 @@ export function MonitorDetailsAlerts() {
             configurationId={AlertConsumers.OBSERVABILITY}
             id={MONITOR_ALERTS_TABLE_ID}
             data-test-subj="monitorAlertsTable"
-            featureIds={[AlertConsumers.UPTIME, AlertConsumers.OBSERVABILITY]}
+            featureIds={[AlertConsumers.UPTIME]}
             query={{
               bool: {
                 filter: [
