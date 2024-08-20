@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiDataGridStyle } from '@elastic/eui';
+import type { EuiDataGridStyle } from '@elastic/eui';
 
 export const DEFAULT_CONTROL_COLUMN_WIDTH = 24;
 
 export const DEFAULT_ROWS_PER_PAGE = 100;
 export const MAX_LOADED_GRID_ROWS = 10000;
-
 export const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, DEFAULT_ROWS_PER_PAGE, 250, 500];
 /**
  * Row height might be a value from -1 to 20
@@ -29,13 +28,27 @@ export const defaultMonacoEditorWidth = 370;
 export const defaultTimeColumnWidth = 212;
 export const kibanaJSON = 'kibana-json';
 
-export const GRID_STYLE: EuiDataGridStyle = {
-  border: 'horizontal',
+export const DATA_GRID_STYLE_COMPACT: EuiDataGridStyle = {
+  cellPadding: 's',
   fontSize: 's',
+};
+
+export const DATA_GRID_STYLE_NORMAL: EuiDataGridStyle = {
+  cellPadding: 'm',
+  fontSize: 'm',
+};
+
+export const DATA_GRID_STYLE_EXPANDED: EuiDataGridStyle = {
   cellPadding: 'l',
+  fontSize: 'l',
+};
+
+export const DATA_GRID_STYLE_DEFAULT: EuiDataGridStyle = {
+  ...DATA_GRID_STYLE_COMPACT,
+  border: 'horizontal',
+  stripes: true,
   rowHover: 'highlight',
   header: 'underline',
-  stripes: true,
 };
 
 export const toolbarVisibility = {
@@ -44,3 +57,9 @@ export const toolbarVisibility = {
     allowReorder: true,
   },
 };
+
+export enum DataGridDensity {
+  COMPACT = 'compact',
+  NORMAL = 'normal',
+  EXPANDED = 'expanded',
+}
