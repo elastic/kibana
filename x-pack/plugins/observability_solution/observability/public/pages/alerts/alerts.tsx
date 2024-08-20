@@ -259,7 +259,7 @@ function InternalAlertsPage() {
                 from={alertSearchBarStateProps.rangeFrom}
                 to={alertSearchBarStateProps.rangeTo}
                 globalFilters={alertSearchBarStateProps.filters}
-                globalQuery={{ query: alertSearchBarStateProps.kuery, language: 'kql' }}
+                globalQuery={{ query: alertSearchBarStateProps.kuery, language: 'kuery' }}
                 groupingId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
                 defaultGroupingOptions={DEFAULT_GROUPING_OPTIONS}
                 getAggregationsByGroupingField={getAggregationsByGroupingField}
