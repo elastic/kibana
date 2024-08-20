@@ -9,7 +9,7 @@ import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'discover', 'svlCommonPage']);
+  const PageObjects = getPageObjects(['common', 'discover', 'svlCommonPage', 'header']);
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
   const dataGrid = getService('dataGrid');
