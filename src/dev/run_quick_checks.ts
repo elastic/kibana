@@ -7,7 +7,7 @@
  */
 
 import { exec } from 'child_process';
-import { cpus } from 'os';
+import { availableParallelism } from 'os';
 import { join, isAbsolute } from 'path';
 import { readdirSync, readFileSync } from 'fs';
 
@@ -15,7 +15,7 @@ import { run, RunOptions } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 
-const MAX_PARALLELISM = cpus().length - 1;
+const MAX_PARALLELISM = availableParallelism();
 const buildkiteQuickchecksFolder = join('.buildkite', 'scripts', 'steps', 'checks');
 const quickChecksList = join(buildkiteQuickchecksFolder, 'quick_checks.txt');
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
