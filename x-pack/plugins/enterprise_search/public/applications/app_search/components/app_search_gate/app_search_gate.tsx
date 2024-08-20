@@ -356,7 +356,7 @@ const EducationPanel: React.FC<{ featureContent: string }> = ({ featureContent }
                 <EuiText>
                   <h5>
                     {i18n.translate(
-                      'xpack.enterpriseSearch.workplaceSearch.gateForm.educationalPanel.title',
+                      'xpack.enterpriseSearch.appSearch.gateForm.educationalPanel.title',
                       {
                         defaultMessage: 'Elasticsearch native equivalent',
                       }
@@ -368,7 +368,7 @@ const EducationPanel: React.FC<{ featureContent: string }> = ({ featureContent }
                 <EuiText color="subdued" size="s">
                   <p>
                     {i18n.translate(
-                      'xpack.enterpriseSearch.workplaceSearch.gateForm.educationalPanel.subTitle',
+                      'xpack.enterpriseSearch.appSearch.gateForm.educationalPanel.subTitle',
                       {
                         defaultMessage: 'Based on your selection we recommend:',
                       }
@@ -401,7 +401,7 @@ const EducationPanel: React.FC<{ featureContent: string }> = ({ featureContent }
               <EuiFlexItem grow={false}>
                 <EuiLink href={feature.learnMore} target="_blank">
                   {i18n.translate(
-                    'xpack.enterpriseSearch.workplaceSearch.gateForm.educationalPanel.learnMore',
+                    'xpack.enterpriseSearch.appSearch.gateForm.educationalPanel.learnMore',
                     {
                       defaultMessage: 'Learn more',
                     }
@@ -428,12 +428,9 @@ const EducationPanel: React.FC<{ featureContent: string }> = ({ featureContent }
       <>
         <EuiSpacer />
         <EuiFormRow
-          label={i18n.translate(
-            'xpack.enterpriseSearch.workplaceSearch.gateForm.featureOther.Label',
-            {
-              defaultMessage: "Can you explain what other feature(s) you're looking for?",
-            }
-          )}
+          label={i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.featureOther.Label', {
+            defaultMessage: "Can you explain what other feature(s) you're looking for?",
+          })}
         >
           <EuiTextArea
             onChange={(e) => {
@@ -465,7 +462,7 @@ export const AppSearchGate: React.FC = () => {
           options={options}
           valueOfSelected={feature}
           placeholder={i18n.translate(
-            'xpack.enterpriseSearch.workplaceSearch.gateForm.features.selectOption',
+            'xpack.enterpriseSearch.appSearch.gateForm.features.selectOption',
             {
               defaultMessage: 'Select an option',
             }
@@ -481,13 +478,13 @@ export const AppSearchGate: React.FC = () => {
 
         <EuiFormRow
           label={i18n.translate(
-            'xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.Label',
+            'xpack.enterpriseSearch.appSearch.gateForm.additionalFeedback.Label',
             {
               defaultMessage: 'Would you like to share any additional feedback?',
             }
           )}
           labelAppend={i18n.translate(
-            'xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.optionalLabel',
+            'xpack.enterpriseSearch.appSearch.gateForm.additionalFeedback.optionalLabel',
             {
               defaultMessage: 'Optional',
             }
@@ -504,7 +501,7 @@ export const AppSearchGate: React.FC = () => {
             <EuiFlexItem>
               <EuiText color="subdued" size="xs">
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.description"
+                  id="xpack.enterpriseSearch.appSearch.gateForm.additionalFeedback.description"
                   defaultMessage=" By submitting feedback you acknowledge that you've read and agree to our {termsOfService}, and that Elastic may {contact} about our related products and services,
                       using the details you provide above. See {privacyStatementLink} for more
                       details or to opt-out at any time."
@@ -544,13 +541,13 @@ export const AppSearchGate: React.FC = () => {
 
         <EuiFormRow
           labelAppend={i18n.translate(
-            'xpack.enterpriseSearch.workplaceSearch.gateForm.participateUxLab.optionalLabel',
+            'xpack.enterpriseSearch.appSearch.gateForm.participateUxLab.optionalLabel',
             {
               defaultMessage: 'Optional',
             }
           )}
           label={i18n.translate(
-            'xpack.enterpriseSearch.workplaceSearch.gateForm.participateUxLab.Label',
+            'xpack.enterpriseSearch.appSearch.gateForm.participateUxLab.Label',
             {
               defaultMessage: 'Join our user research studies to improve Elasticsearch?',
             }
@@ -561,7 +558,7 @@ export const AppSearchGate: React.FC = () => {
             options={[
               {
                 text: i18n.translate(
-                  'xpack.enterpriseSearch.workplaceSearch.gateForm.participateUxLab.Label.Yes',
+                  'xpack.enterpriseSearch.appSearch.gateForm.participateUxLab.Label.Yes',
                   {
                     defaultMessage: 'Yes',
                   }
@@ -570,7 +567,7 @@ export const AppSearchGate: React.FC = () => {
               },
               {
                 text: i18n.translate(
-                  'xpack.enterpriseSearch.workplaceSearch.gateForm.participateUxLab.Label.No',
+                  'xpack.enterpriseSearch.appSearch.gateForm.participateUxLab.Label.No',
                   {
                     defaultMessage: 'No',
                   }
@@ -604,7 +601,7 @@ export const AppSearchGate: React.FC = () => {
               fill
               onClick={() => formSubmitRequest()}
             >
-              {i18n.translate('xpack.enterpriseSearch.workplaceSearch.gateForm.submit', {
+              {i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.submit', {
                 defaultMessage: 'Submit',
               })}
             </EuiButton>
