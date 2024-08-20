@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const totalPanels = await PageObjects.dashboard.getPanelCount();
       let panelsWithDrilldowns = 0;
       for (let panelIndex = 0; panelIndex < totalPanels; panelIndex++) {
-        if ((await PageObjects.dashboard.getPanelDrilldownCount(panelIndex)) === 1) {
+        if ((await dashboardDrilldownsManage.getPanelDrilldownCount(panelIndex)) === 1) {
           panelsWithDrilldowns++;
         }
       }

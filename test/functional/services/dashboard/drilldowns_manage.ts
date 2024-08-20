@@ -14,7 +14,10 @@ const MANAGE_DRILLDOWNS_FLYOUT_DATA_TEST_SUBJ = 'editDrilldownFlyout';
 const DESTINATION_DASHBOARD_SELECT = 'dashboardDrilldownSelectDashboard';
 const DRILLDOWN_WIZARD_SUBMIT = 'drilldownWizardSubmit';
 
-export function DashboardDrilldownsManageProvider({ getService }: FtrProviderContext) {
+export function DashboardDrilldownsManageProvider({
+  getService,
+  getPageObject,
+}: FtrProviderContext) {
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const flyout = getService('flyout');
@@ -22,6 +25,8 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
   const find = getService('find');
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
+  const dashboardPanelActions = getService('dashboardPanelActions');
+  const dashboard = getPageObject('dashboard');
   return new (class DashboardDrilldownsManage {
     readonly DASHBOARD_WITH_PIE_CHART_NAME = 'Dashboard with Pie Chart';
     readonly DASHBOARD_WITH_AREA_CHART_NAME = 'Dashboard With Area Chart';
@@ -141,6 +146,19 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
 
     async closeFlyout() {
       await flyout.ensureAllClosed();
+    }
+
+    async getPanelDrilldownCount(panelIndex = 0): Promise<number> {
+      log.debug('getPanelDrilldownCount');
+      const panel = (await dashboard.getDashboardPanels())[panelIndex];
+      try {
+        await dashboardPanelActions.openContextMenu(panel);
+        const count = await panel.findByTestSubject('manageDrilldownAction__count');
+        return Number.parseInt(await count.getVisibleText(), 10);
+      } catch (e) {
+        // if not found then this is 0 (we don't show badge with 0)
+        return 0;
+      }
     }
   })();
 }

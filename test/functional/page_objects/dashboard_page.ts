@@ -850,19 +850,6 @@ export class DashboardPageObject extends FtrService {
     return checkList.filter((viz) => viz.isPresent === false).map((viz) => viz.name);
   }
 
-  public async getPanelDrilldownCount(panelIndex = 0): Promise<number> {
-    this.log.debug('getPanelDrilldownCount');
-    const panel = (await this.getDashboardPanels())[panelIndex];
-    try {
-      await this.dashboardPanelActions.openContextMenu(panel);
-      const count = await panel.findByTestSubject('manageDrilldownAction__count');
-      return Number.parseInt(await count.getVisibleText(), 10);
-    } catch (e) {
-      // if not found then this is 0 (we don't show badge with 0)
-      return 0;
-    }
-  }
-
   public async getPanelChartDebugState(panelIndex: number) {
     return await this.elasticChart.getChartDebugData(undefined, panelIndex);
   }
