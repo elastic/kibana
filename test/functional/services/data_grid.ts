@@ -512,6 +512,18 @@ export class DataGridService extends FtrService {
     await option.click();
   }
 
+  public async getCurrentDensityValue() {
+    const buttonGroup = await this.testSubjects.find('densityButtonGroup');
+    const selectedButton = await buttonGroup.findByCssSelector('[aria-pressed=true]');
+    return selectedButton.getVisibleText();
+  }
+
+  public async changeDensityValue(newValue: string) {
+    const buttonGroup = await this.testSubjects.find('densityButtonGroup');
+    const option = await buttonGroup.findByCssSelector(`[data-text="${newValue}"]`);
+    await option.click();
+  }
+
   private async findSampleSizeInput() {
     return await this.find.byCssSelector(
       'input[type="number"][data-test-subj="unifiedDataTableSampleSizeInput"]'
@@ -565,6 +577,24 @@ export class DataGridService extends FtrService {
   public async clickFieldActionInFlyout(fieldName: string, actionName: string): Promise<void> {
     await this.showFieldCellActionInFlyout(fieldName, actionName);
     await this.testSubjects.click(`${actionName}-${fieldName}`);
+  }
+
+  public async isFieldPinnedInFlyout(fieldName: string): Promise<boolean> {
+    return !(
+      await this.testSubjects.getAttribute(`unifiedDocViewer_pinControl_${fieldName}`, 'class')
+    )?.includes('kbnDocViewer__fieldsGrid__pinAction');
+  }
+
+  public async togglePinActionInFlyout(fieldName: string): Promise<void> {
+    await this.testSubjects.moveMouseTo(`unifiedDocViewer_pinControl_${fieldName}`);
+    const isPinned = await this.isFieldPinnedInFlyout(fieldName);
+    await this.retry.waitFor('pin action to appear', async () => {
+      return this.testSubjects.exists(`unifiedDocViewer_pinControlButton_${fieldName}`);
+    });
+    await this.testSubjects.click(`unifiedDocViewer_pinControlButton_${fieldName}`);
+    await this.retry.waitFor('pin action to toggle', async () => {
+      return (await this.isFieldPinnedInFlyout(fieldName)) !== isPinned;
+    });
   }
 
   public async expandFieldNameCellInFlyout(fieldName: string): Promise<void> {

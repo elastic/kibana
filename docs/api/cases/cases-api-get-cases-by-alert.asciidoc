@@ -8,11 +8,7 @@ preview::[]
 
 Returns the cases associated with a specific alert.
 
-[NOTE]
-====
-For the most up-to-date API details, refer to the
-{kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[open API specification].
-====
+NOTE: For the latest details, refer to {api-kibana}/group/endpoint-cases[cases APIs].
 
 
 === {api-request-title}
