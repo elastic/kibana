@@ -913,3 +913,224 @@ Refer to {api-kibana}/group/endpoint-data-views[data views API].
 == Update data view API
 
 Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="create-rule-api"]
+== Create rule API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="delete-rule-api"]
+== Delete rule API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="disable-rule-api"]
+== Disable rule API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="enable-rule-api"]
+== Enable rule API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="find-rules-api"]
+== Find rules API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="get-rule-api"]
+== Get rule API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="get-alerting-framework-health-api"]
+== Get alerting framework health API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="list-rule-types-api"]
+== Get rule types API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="mute-alert-api"]
+== Mute alert API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="mute-all-alerts-api"]
+== Mute all alerts API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="unmute-alert-api"]
+== Unmute alert API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="unmute-all-alerts-api"]
+== Unmute all alerts API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="update-rule-api"]
+== Update rule API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="alerts-api"]
+== Deprecated 7.x APIs
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="update-connector-api"]
+== Update connector API
+
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
+
+[role="exclude",id="list-connector-types-api"]
+== List connector types API
+
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
+
+[role="exclude",id="get-connector-api"]
+== Get connector API
+
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
+
+[role="exclude",id="get-all-connectors-api"]
+== Get all connectors API
+
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
+
+[role="exclude",id="execute-connector-api"]
+== Run connector API
+
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
+
+[role="exclude",id="delete-connector-api"]
+== Delete connector API
+
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
+
+[role="exclude",id="create-connector-api"]
+== Create connector API
+
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
+
+[role="exclude",id="actions-and-connectors-legacy-apis"]
+== Deprecated 7.x APIs
+
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
+
+[role="exclude",id="cases-api-add-comment"]
+== Add comment to case API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-create"]
+== Create case API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-delete-cases"]
+== Delete cases API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-delete-comments"]
+== Delete comments from case API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-find-case-activity"]
+== Find case activity API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-find-cases"]
+== Find cases API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-find-connectors"]
+== Find connectors API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-alerts"]
+== Get alerts attached to case API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-case-activity"]
+== Get case activity API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-case"]
+== Get case API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-cases-by-alert"]
+== Get cases by alert API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-comments"]
+== Get comments API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-get-configuration"]
+== Get case configuration API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-reporters"]
+== Get reporters API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-status"]
+== Get case status API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-tag"]
+== Get tags API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-push"]
+== Push case API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-set-configuration"]
+== Set case configuration API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-update-comment"]
+== Update case comment API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-update-configuration"]
+== Update case configuration API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-update"]
+== Update cases API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="machine-learning-api-sync"]
+== Sync {ml} saved objects API
+
+Refer to {api-kibana}/group/endpoint-ml[machine learning APIs].
+

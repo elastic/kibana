@@ -41,7 +41,7 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
         screenContexts: [],
       }),
       // error is caught in client
-      client.fetchUserInstructions(),
+      client.getKnowledgeBaseUserInstructions(),
     ]);
 
     const functionDefinitions = functionClient.getFunctions().map((fn) => fn.definition);
@@ -51,9 +51,9 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
     return {
       functionDefinitions: functionClient.getFunctions().map((fn) => fn.definition),
       systemMessage: getSystemMessageFromInstructions({
-        registeredInstructions: functionClient.getInstructions(),
+        applicationInstructions: functionClient.getInstructions(),
         userInstructions,
-        requestInstructions: [],
+        adHocInstructions: [],
         availableFunctionNames,
       }),
     };
@@ -111,6 +111,7 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
       text: nonEmptyStringRt,
       confidence: t.union([t.literal('low'), t.literal('medium'), t.literal('high')]),
       is_correction: toBooleanRt,
+      type: t.union([t.literal('user_instruction'), t.literal('contextual')]),
       public: toBooleanRt,
       labels: t.record(t.string, t.string),
     }),
@@ -129,17 +130,19 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
       confidence,
       id,
       is_correction: isCorrection,
+      type,
       text,
       public: isPublic,
       labels,
     } = resources.params.body;
 
-    return client.createKnowledgeBaseEntry({
+    return client.addKnowledgeBaseEntry({
       entry: {
         confidence,
         id,
         doc_id: id,
         is_correction: isCorrection,
+        type,
         text,
         public: isPublic,
         labels,
