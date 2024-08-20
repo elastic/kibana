@@ -315,7 +315,8 @@ GET _search
       });
     });
 
-    describe('with conditional templates', () => {
+    // eslint-disable-next-line mocha/no-async-describe
+    describe('with conditional templates', async () => {
       const CONDITIONAL_TEMPLATES = [
         {
           type: 'fs',
