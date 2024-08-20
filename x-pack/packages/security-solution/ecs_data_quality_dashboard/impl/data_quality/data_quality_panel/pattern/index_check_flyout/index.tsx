@@ -27,10 +27,10 @@ import { EMPTY_STAT, getDocsCount, getSizeInBytes } from '../../../helpers';
 import { MeteringStatsIndex, PatternRollup } from '../../../types';
 import { useDataQualityContext } from '../../data_quality_context';
 import { IndexProperties } from '../../index_properties';
-import { CHECK_NOW } from '../../summary_table/translations';
 import { getIlmPhase } from '../helpers';
 import { IndexResultBadge } from '../../index_result_badge';
 import { useCurrentWindowWidth } from '../../../use_current_window_width';
+import { CHECK_NOW } from './translations';
 
 export interface Props {
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;

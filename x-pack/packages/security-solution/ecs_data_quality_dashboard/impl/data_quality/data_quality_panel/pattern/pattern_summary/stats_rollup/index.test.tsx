@@ -85,28 +85,24 @@ describe('StatsRollup', () => {
   describe.each([
     [
       'Docs',
-      'The total count of docs, in indices matching the {pattern} pattern',
-      'The total count of docs, in all indices',
+      'Total number of docs in indices matching this index pattern',
+      'Total number of docs in all indices',
     ],
     [
       'Incompatible fields',
-      'The total count of fields incompatible with ECS, in indices matching the {pattern} pattern',
-      'The total count of fields incompatible with ECS, in all indices that were checked',
+      'Total number of checked fields incompatible with ECS in indices matching this index pattern',
+      'Total number of checked fields incompatible with ECS',
     ],
-    [
-      'Indices',
-      'The total count of indices matching the {pattern} pattern',
-      'The total count of all indices',
-    ],
+    ['Indices', 'Total number of indices matching this index pattern', 'Total number of indices'],
     [
       'Indices checked',
-      'The total count of indices checked that match the {pattern} pattern',
-      'The total count of all indices checked',
+      'Total number of checked indices matching this index pattern',
+      'Total number of checked indices',
     ],
     [
       'Size',
-      'The total size of the primary indices matching the {pattern} pattern (does not include replicas)',
-      'The total size of all primary indices (does not include replicas)',
+      'Total size of indices (excluding replicas) matching this index pattern',
+      'Total size of indices (excluding replicas)',
     ],
   ])('%s count tooltips', (statLabelText, patternTooltipText, noPatternTooltipText) => {
     describe('when pattern is provided', () => {

@@ -58,7 +58,7 @@ const StatsRollupComponent: React.FC<Props> = ({
         <Stat
           tooltipText={
             pattern != null
-              ? i18n.INCOMPATIBLE_PATTERN_TOOL_TIP(pattern)
+              ? i18n.TOTAL_INCOMPATIBLE_PATTERN_TOOL_TIP
               : i18n.TOTAL_INCOMPATIBLE_TOOL_TIP
           }
           badgeText={incompatible != null ? formatNumber(incompatible) : EMPTY_STAT}
@@ -72,8 +72,8 @@ const StatsRollupComponent: React.FC<Props> = ({
         <Stat
           tooltipText={
             pattern != null
-              ? i18n.TOTAL_COUNT_OF_INDICES_CHECKED_MATCHING_PATTERN_TOOL_TIP(pattern)
-              : i18n.TOTAL_INDICES_CHECKED_TOOL_TIP
+              ? i18n.TOTAL_CHECKED_INDICES_PATTERN_TOOL_TIP
+              : i18n.TOTAL_CHECKED_INDICES_TOOL_TIP
           }
           badgeText={indicesChecked != null ? formatNumber(indicesChecked) : EMPTY_STAT}
         >
@@ -84,9 +84,7 @@ const StatsRollupComponent: React.FC<Props> = ({
       <StyledStatWrapperFlexItem grow={false}>
         <Stat
           tooltipText={
-            pattern != null
-              ? i18n.TOTAL_COUNT_OF_INDICES_MATCHING_PATTERN_TOOL_TIP(pattern)
-              : i18n.TOTAL_INDICES_TOOL_TIP
+            pattern != null ? i18n.TOTAL_INDICES_PATTERN_TOOL_TIP : i18n.TOTAL_INDICES_TOOL_TIP
           }
           badgeText={indices != null ? formatNumber(indices) : '0'}
         >
@@ -98,9 +96,7 @@ const StatsRollupComponent: React.FC<Props> = ({
         <StyledStatWrapperFlexItem grow={false}>
           <Stat
             tooltipText={
-              pattern != null
-                ? i18n.INDICES_SIZE_PATTERN_TOOL_TIP(pattern)
-                : i18n.TOTAL_SIZE_TOOL_TIP
+              pattern != null ? i18n.TOTAL_SIZE_PATTERN_TOOL_TIP : i18n.TOTAL_SIZE_TOOL_TIP
             }
             badgeText={sizeInBytes != null ? formatBytes(sizeInBytes) : EMPTY_STAT}
           >
@@ -112,7 +108,7 @@ const StatsRollupComponent: React.FC<Props> = ({
       <StyledStatWrapperFlexItem grow={false}>
         <Stat
           tooltipText={
-            pattern != null ? i18n.INDEX_DOCS_PATTERN_TOOL_TIP(pattern) : i18n.TOTAL_DOCS_TOOL_TIP
+            pattern != null ? i18n.TOTAL_DOCS_PATTERN_TOOL_TIP : i18n.TOTAL_DOCS_TOOL_TIP
           }
           badgeText={docsCount != null ? formatNumber(docsCount) : EMPTY_STAT}
         >

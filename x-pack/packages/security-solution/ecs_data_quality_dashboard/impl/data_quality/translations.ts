@@ -248,7 +248,7 @@ export const SELECT_ONE_OR_MORE_ILM_PHASES: string = i18n.translate(
 export const INDEX_SIZE_TOOLTIP = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.indexSizeTooltip',
   {
-    defaultMessage: 'The size of the primary index (does not include replicas)',
+    defaultMessage: 'Size of index (exluding replicas)',
   }
 );
 

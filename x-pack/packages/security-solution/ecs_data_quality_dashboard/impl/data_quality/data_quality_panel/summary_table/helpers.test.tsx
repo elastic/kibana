@@ -27,7 +27,7 @@ import {
   getSummaryTableSizeInBytesColumn,
   getToggleButtonId,
 } from './helpers';
-import { CHECK_NOW, VIEW_DETAILS } from './translations';
+import { CHECK_INDEX, VIEW_CHECK_DETAILS } from './translations';
 import { IndexSummaryTableItem } from '../pattern/types';
 import { getCheckState } from '../../stub/get_check_state';
 
@@ -131,11 +131,11 @@ describe('helpers', () => {
           width: '65px',
           actions: [
             {
-              name: 'View details',
+              name: 'View check details',
               render: expect.any(Function),
             },
             {
-              name: 'Check now',
+              name: 'Check index',
               render: expect.any(Function),
             },
           ],
@@ -175,7 +175,7 @@ describe('helpers', () => {
     });
 
     describe('action columns render()', () => {
-      test('it renders check now button', () => {
+      test('it renders check index button', () => {
         const columns = getSummaryTableColumns({
           formatBytes,
           formatNumber,
@@ -196,10 +196,10 @@ describe('helpers', () => {
           </TestExternalProviders>
         );
 
-        expect(screen.getByLabelText(CHECK_NOW)).toBeInTheDocument();
+        expect(screen.getByLabelText(CHECK_INDEX)).toBeInTheDocument();
       });
 
-      test('it invokes the `onCheckNowAction` with the index name when the check now button is clicked', () => {
+      test('it invokes the `onCheckNowAction` with the index name when the check index button is clicked', () => {
         const onCheckNowAction = jest.fn();
 
         const columns = getSummaryTableColumns({
@@ -222,13 +222,13 @@ describe('helpers', () => {
           </TestExternalProviders>
         );
 
-        const button = screen.getByLabelText(CHECK_NOW);
+        const button = screen.getByLabelText(CHECK_INDEX);
         userEvent.click(button);
 
         expect(onCheckNowAction).toBeCalledWith(indexSummaryTableItem.indexName);
       });
 
-      test('it renders disabled check now with loading indicator when check state is loading', () => {
+      test('it renders disabled check index with loading indicator when check state is loading', () => {
         const columns = getSummaryTableColumns({
           formatBytes,
           formatNumber,
@@ -250,11 +250,11 @@ describe('helpers', () => {
           </TestExternalProviders>
         );
 
-        expect(screen.getByLabelText(CHECK_NOW)).toBeDisabled();
+        expect(screen.getByLabelText(CHECK_INDEX)).toBeDisabled();
         expect(screen.getByLabelText('Loading')).toBeInTheDocument();
       });
 
-      test('it invokes the `onExpandAction` with the index name when the view details button is clicked', () => {
+      test('it invokes the `onExpandAction` with the index name when the view check details button is clicked', () => {
         const onExpandAction = jest.fn();
 
         const columns = getSummaryTableColumns({
@@ -278,7 +278,7 @@ describe('helpers', () => {
           </TestExternalProviders>
         );
 
-        const button = screen.getByLabelText(VIEW_DETAILS);
+        const button = screen.getByLabelText(VIEW_CHECK_DETAILS);
         userEvent.click(button);
 
         expect(onExpandAction).toBeCalledWith(indexSummaryTableItem.indexName);

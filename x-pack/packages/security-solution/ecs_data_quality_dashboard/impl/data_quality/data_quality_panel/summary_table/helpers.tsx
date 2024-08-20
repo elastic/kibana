@@ -135,13 +135,13 @@ export const getSummaryTableColumns = ({
     width: '65px',
     actions: [
       {
-        name: i18n.VIEW_DETAILS,
+        name: i18n.VIEW_CHECK_DETAILS,
         render: (item) => {
           return (
-            <EuiToolTip content={i18n.VIEW_DETAILS}>
+            <EuiToolTip content={i18n.VIEW_CHECK_DETAILS}>
               <EuiButtonIcon
                 iconType="expand"
-                aria-label={i18n.VIEW_DETAILS}
+                aria-label={i18n.VIEW_CHECK_DETAILS}
                 onClick={() => onExpandAction(item.indexName)}
               />
             </EuiToolTip>
@@ -149,14 +149,14 @@ export const getSummaryTableColumns = ({
         },
       },
       {
-        name: i18n.CHECK_NOW,
+        name: i18n.CHECK_INDEX,
         render: (item) => {
           const isChecking = checkState[item.indexName]?.isChecking ?? false;
           return (
-            <EuiToolTip content={i18n.CHECK_NOW}>
+            <EuiToolTip content={i18n.CHECK_INDEX}>
               <EuiButtonIcon
                 iconType="refresh"
-                aria-label={i18n.CHECK_NOW}
+                aria-label={i18n.CHECK_INDEX}
                 isLoading={isChecking}
                 onClick={() => onCheckNowAction(item.indexName)}
               />
@@ -217,7 +217,7 @@ export const getSummaryTableColumns = ({
     field: 'incompatible',
     name: i18n.INCOMPATIBLE_FIELDS,
     render: (_, { incompatible, indexName }) => (
-      <EuiToolTip content={INCOMPATIBLE_INDEX_TOOL_TIP(indexName)}>
+      <EuiToolTip content={INCOMPATIBLE_INDEX_TOOL_TIP}>
         <EuiText
           size="xs"
           data-test-subj="incompatibleStat"

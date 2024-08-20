@@ -21,10 +21,10 @@ export const DOCS = i18n.translate(
   }
 );
 
-export const VIEW_DETAILS = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.viewDetailsLabel',
+export const VIEW_CHECK_DETAILS = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.viewCheckDetailsLabel',
   {
-    defaultMessage: 'View details',
+    defaultMessage: 'View check details',
   }
 );
 
@@ -132,9 +132,9 @@ export const ACTIONS = i18n.translate(
   }
 );
 
-export const CHECK_NOW = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.checkNowButton',
+export const CHECK_INDEX = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.checkIndexButton',
   {
-    defaultMessage: 'Check now',
+    defaultMessage: 'Check index',
   }
 );
