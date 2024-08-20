@@ -72,6 +72,13 @@ const savedSearchAttributesSchema = schema.object(
         max: MAX_SAVED_SEARCH_SAMPLE_SIZE,
       })
     ),
+    density: schema.maybe(
+      schema.oneOf([
+        schema.literal('compact'),
+        schema.literal('normal'),
+        schema.literal('expanded'),
+      ])
+    ),
     breakdownField: schema.maybe(schema.string()),
     visContext: schema.maybe(
       schema.oneOf([

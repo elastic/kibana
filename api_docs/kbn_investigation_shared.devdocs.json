@@ -114,6 +114,21 @@
       },
       {
         "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.DeleteInvestigationNoteParams",
+        "type": "Type",
+        "tags": [],
+        "label": "DeleteInvestigationNoteParams",
+        "description": [],
+        "signature": [
+          "{ id: string; noteId: string; }"
+        ],
+        "path": "packages/kbn-investigation-shared/src/schema/delete_note.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
         "id": "def-common.DeleteInvestigationParams",
         "type": "Type",
         "tags": [],
@@ -198,6 +213,21 @@
           "{ id: string; title: string; createdAt: number; createdBy: string; params: { timeRange: { from: number; to: number; }; }; origin: { type: \"alert\"; id: string; } | { type: \"blank\"; }; status: \"closed\" | \"ongoing\"; notes: { id: string; content: string; createdAt: number; createdBy: string; }[]; }"
         ],
         "path": "packages/kbn-investigation-shared/src/schema/get.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.InvestigationNoteResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "InvestigationNoteResponse",
+        "description": [],
+        "signature": [
+          "{ id: string; content: string; createdAt: number; createdBy: string; }"
+        ],
+        "path": "packages/kbn-investigation-shared/src/schema/investigation_note.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -390,6 +420,28 @@
           "; }>>; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/schema/create.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.deleteInvestigationNoteParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "deleteInvestigationNoteParamsSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; noteId: ",
+          "StringC",
+          "; }>; }>"
+        ],
+        "path": "packages/kbn-investigation-shared/src/schema/delete_note.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -634,6 +686,30 @@
           "; }>>; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/schema/get.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.investigationNoteResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "investigationNoteResponseSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; content: ",
+          "StringC",
+          "; createdAt: ",
+          "NumberC",
+          "; createdBy: ",
+          "StringC",
+          "; }>"
+        ],
+        "path": "packages/kbn-investigation-shared/src/schema/investigation_note.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
