@@ -11,7 +11,9 @@ import { BACKGROUND_TASK_NODE_SO_NAME } from '../saved_objects';
 import { BackgroundTaskNode } from '../saved_objects/schemas/background_task_node';
 
 interface DiscoveryServiceParams {
+  activeNodesLookBack: number;
   currentNode: string;
+  discoveryInterval: number;
   savedObjectsRepository: ISavedObjectsRepository;
   logger: Logger;
 }
@@ -21,16 +23,23 @@ interface DiscoveryServiceUpsertParams {
   lastSeen: string;
 }
 
-export const DISCOVERY_INTERVAL = 1000 * 10;
-export const ACTIVE_NODES_LOOK_BACK = '30s';
-
 export class KibanaDiscoveryService {
+  private activeNodesLookBack: number;
   private currentNode: string;
+  private discoveryInterval: number;
   private started = false;
   private savedObjectsRepository: ISavedObjectsRepository;
   private logger: Logger;
 
-  constructor({ currentNode, savedObjectsRepository, logger }: DiscoveryServiceParams) {
+  constructor({
+    activeNodesLookBack,
+    currentNode,
+    discoveryInterval,
+    savedObjectsRepository,
+    logger,
+  }: DiscoveryServiceParams) {
+    this.activeNodesLookBack = activeNodesLookBack;
+    this.discoveryInterval = discoveryInterval;
     this.savedObjectsRepository = savedObjectsRepository;
     this.logger = logger;
     this.currentNode = currentNode;
@@ -60,7 +69,7 @@ export class KibanaDiscoveryService {
     } catch (e) {
       if (!this.started) {
         this.logger.error(
-          `Kibana Discovery Service couldn't be started and will be retried in ${DISCOVERY_INTERVAL}ms, error:${e.message}`
+          `Kibana Discovery Service couldn't be started and will be retried in ${this.discoveryInterval}ms, error:${e.message}`
         );
       } else {
         this.logger.error(
@@ -70,7 +79,7 @@ export class KibanaDiscoveryService {
     } finally {
       setTimeout(
         async () => await this.scheduleUpsertCurrentNode(),
-        DISCOVERY_INTERVAL - (Date.now() - lastSeenDate.getTime())
+        this.discoveryInterval - (Date.now() - lastSeenDate.getTime())
       );
     }
   }
@@ -93,7 +102,7 @@ export class KibanaDiscoveryService {
         type: BACKGROUND_TASK_NODE_SO_NAME,
         perPage: 10000,
         page: 1,
-        filter: `${BACKGROUND_TASK_NODE_SO_NAME}.attributes.last_seen > now-${ACTIVE_NODES_LOOK_BACK}`,
+        filter: `${BACKGROUND_TASK_NODE_SO_NAME}.attributes.last_seen > now-${this.activeNodesLookBack}s`,
       });
 
     return activeNodes;

@@ -12,8 +12,10 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "active_nodes_lookback": 30,
         "allow_reading_invalid_state": true,
         "claim_strategy": "default",
+        "discovery_interval": 10000,
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -22,6 +24,7 @@ describe('config validation', () => {
           "monitor": true,
           "warn_threshold": 5000,
         },
+        "kibanas_per_partition": 2,
         "max_attempts": 3,
         "metrics_reset_interval": 30000,
         "monitored_aggregated_stats_refresh_rate": 60000,
@@ -69,8 +72,10 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "active_nodes_lookback": 30,
         "allow_reading_invalid_state": true,
         "claim_strategy": "default",
+        "discovery_interval": 10000,
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -79,6 +84,7 @@ describe('config validation', () => {
           "monitor": true,
           "warn_threshold": 5000,
         },
+        "kibanas_per_partition": 2,
         "max_attempts": 3,
         "metrics_reset_interval": 30000,
         "monitored_aggregated_stats_refresh_rate": 60000,
@@ -124,8 +130,10 @@ describe('config validation', () => {
     };
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "active_nodes_lookback": 30,
         "allow_reading_invalid_state": true,
         "claim_strategy": "default",
+        "discovery_interval": 10000,
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -134,6 +142,7 @@ describe('config validation', () => {
           "monitor": true,
           "warn_threshold": 5000,
         },
+        "kibanas_per_partition": 2,
         "max_attempts": 3,
         "metrics_reset_interval": 30000,
         "monitored_aggregated_stats_refresh_rate": 60000,

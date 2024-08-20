@@ -32,6 +32,12 @@ export const DEFAULT_WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW = 5;
 export const CLAIM_STRATEGY_DEFAULT = 'default';
 export const CLAIM_STRATEGY_MGET = 'unsafe_mget';
 
+export const DEFAULT_DISCOVERY_INTERVAL_MS = 1000 * 10;
+
+export const DEFAULT_ACTIVE_NODES_LOOK_BACK_S = 30;
+
+export const DEFAULT_KIBANAS_PER_PARTITION = 2;
+
 export const taskExecutionFailureThresholdSchema = schema.object(
   {
     error_threshold: schema.number({
@@ -67,9 +73,17 @@ const requestTimeoutsConfig = schema.object({
 
 export const configSchema = schema.object(
   {
+    active_nodes_lookback: schema.number({
+      defaultValue: DEFAULT_ACTIVE_NODES_LOOK_BACK_S,
+      min: 10,
+    }),
     allow_reading_invalid_state: schema.boolean({ defaultValue: true }),
     /* The number of normal cost tasks that this Kibana instance will run simultaneously */
     capacity: schema.maybe(schema.number({ min: MIN_CAPACITY, max: MAX_CAPACITY })),
+    discovery_interval: schema.number({
+      defaultValue: DEFAULT_DISCOVERY_INTERVAL_MS,
+      min: DEFAULT_DISCOVERY_INTERVAL_MS,
+    }),
     ephemeral_tasks: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
       /* How many requests can Task Manager buffer before it rejects new requests. */
@@ -81,6 +95,10 @@ export const configSchema = schema.object(
       }),
     }),
     event_loop_delay: eventLoopDelaySchema,
+    kibanas_per_partition: schema.number({
+      defaultValue: DEFAULT_KIBANAS_PER_PARTITION,
+      min: 1,
+    }),
     /* The maximum number of times a task will be attempted before being abandoned as failed */
     max_attempts: schema.number({
       defaultValue: 3,
