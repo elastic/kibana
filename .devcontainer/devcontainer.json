@@ -33,6 +33,9 @@
     "ghcr.io/devcontainers/features/github-cli:1": {
       "installDirectlyFromGitHubRelease": true,
       "version": "latest"
+    },
+    "ghcr.io/kreemer/features/chrometesting:1": {
+      "version": "stable"
     }
   }
 }
