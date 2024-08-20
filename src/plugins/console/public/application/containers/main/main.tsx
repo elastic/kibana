@@ -60,7 +60,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
         <EuiFlexItem>
           <EuiSplitPanel.Outer grow={true} borderRadius={isEmbeddable ? 'none' : 'm'}>
             <EuiSplitPanel.Inner grow={false} className="consoleTabs">
-              <EuiFlexGroup direction="row" alignItems="center">
+              <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
                 <EuiFlexItem>
                   <TopNavMenu
                     disabled={!done}
@@ -74,10 +74,10 @@ export function Main({ isEmbeddable = false }: MainProps) {
                   <EuiButtonIcon iconType="save" onClick={() => {}} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon iconType="keyboard" color="primary" />
+                  <EuiButtonIcon iconType="keyboard" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon iconType="questionInCircle" color="primary" />
+                  <EuiButtonIcon iconType="questionInCircle" />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiSplitPanel.Inner>
@@ -89,13 +89,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
             </EuiSplitPanel.Inner>
             <EuiHorizontalRule margin="none" />
             <EuiSplitPanel.Inner paddingSize="xs" grow={false}>
-              <EuiButtonEmpty
-                onClick={() => {}}
-                iconType="editorCodeBlock"
-                size="xs"
-                color="text"
-                css={{ fontWeight: 'normal' }}
-              >
+              <EuiButtonEmpty onClick={() => {}} iconType="editorCodeBlock" size="xs" color="text">
                 {i18n.translate('console.variablesButton', {
                   defaultMessage: 'Variables',
                 })}
