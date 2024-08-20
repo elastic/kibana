@@ -43,12 +43,12 @@ export const ControlsContent: React.FC<Props> = ({
         chainingSystem: 'HIERARCHICAL',
         labelPosition: 'oneLine',
         defaultControlWidth: 'small',
-        panels: controlPanels,
+        initialChildControlState: controlPanels,
       };
 
       return { initialState: initialInput };
     },
-    [controlPanels, filters, query, timeRange]
+    [controlPanels]
   );
 
   const loadCompleteHandler = useCallback(

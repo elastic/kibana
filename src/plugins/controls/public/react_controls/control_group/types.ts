@@ -111,7 +111,6 @@ export interface ControlGroupRuntimeState<State extends DefaultControlState = De
   autoApplySelections: boolean;
   ignoreParentSettings?: ParentIgnoreSettings;
 
-  panels?: ControlPanelsState; // TODO: Remove in favour of initial child control state
   initialChildControlState: ControlPanelsState<State>;
 
   /*

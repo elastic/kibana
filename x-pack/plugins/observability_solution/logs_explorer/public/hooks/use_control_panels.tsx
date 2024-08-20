@@ -27,15 +27,14 @@ export const useControlPanels = (
 
   const getInitialState = useCallback(
     async (initialState: Partial<ControlGroupRuntimeState>) => {
-      console.log(controlPanels ?? initialState.panels);
       const state: Partial<ControlGroupRuntimeState> = {
         ...initialState,
-        panels: controlPanels ?? initialState.panels,
+        initialChildControlState: controlPanels ?? initialState.initialChildControlState,
       };
 
       return { initialState: state };
     },
-    [controlPanels, filters, fromDate, query, toDate]
+    [controlPanels]
   );
 
   const setControlGroupAPI = useCallback(
