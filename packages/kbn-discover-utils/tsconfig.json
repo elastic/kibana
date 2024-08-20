@@ -11,7 +11,7 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx", "src/components/custom_control_columns",
+    "**/*.tsx"
   ],
   "exclude": [
     "target/**/*"
