@@ -78,14 +78,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert a by reference TSVB viz to a Lens viz', async () => {
+      const visTitle = 'My TSVB to Lens viz 2';
       await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
       await dashboardAddPanel.clickEditorMenuButton();
       await dashboardAddPanel.clickVisType('metrics');
       await testSubjects.click('visualizesaveAndReturnButton');
-      // save it to library
-      const originalPanel = await testSubjects.find('embeddablePanelHeading-');
-      await panelActions.legacySaveToLibrary('My TSVB to Lens viz 2', originalPanel);
+      await panelActions.legacySaveToLibrary(visTitle);
 
       await dashboard.waitForRenderComplete();
       const originalEmbeddableCount = await canvas.getEmbeddableCount();
@@ -114,14 +113,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const embeddableCount = await canvas.getEmbeddableCount();
         expect(embeddableCount).to.eql(originalEmbeddableCount);
       });
-      const panel = await testSubjects.find(`embeddablePanelHeading-MyTSVBtoLensviz2(converted)`);
-      const descendants = await testSubjects.findAllDescendant(
-        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
-        panel
-      );
-      expect(descendants.length).to.equal(0);
       const titles = await dashboard.getPanelTitles();
-      expect(titles[0]).to.be('My TSVB to Lens viz 2 (converted)');
+      expect(titles[0]).to.be(`${visTitle} (converted)`);
+
+      await dashboardPanelActions.expectNotLinkedToLibrary(titles[0]);
       await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
       await panelActions.removePanel();
     });

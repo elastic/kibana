@@ -237,28 +237,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.clickByButtonText('lnsPieVis');
       await dashboardAddPanel.closeAddPanel();
 
-      const originalPanel = await testSubjects.find('embeddablePanelHeading-lnsPieVis');
-      await panelActions.legacyUnlinkFromLibrary(originalPanel);
+      await panelActions.legacyUnlinkFromLibraryByTitle('lnsPieVis');
       await testSubjects.existOrFail('unlinkPanelSuccess');
-
-      const updatedPanel = await testSubjects.find('embeddablePanelHeading-lnsPieVis');
-      const libraryActionExists = await testSubjects.descendantExists(
-        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
-        updatedPanel
-      );
-      expect(libraryActionExists).to.be(false);
     });
 
     it('save lens panel to embeddable library', async () => {
-      const originalPanel = await testSubjects.find('embeddablePanelHeading-lnsPieVis');
-      await panelActions.legacySaveToLibrary('lnsPieVis - copy', originalPanel);
-
-      const updatedPanel = await testSubjects.find('embeddablePanelHeading-lnsPieVis-copy');
-      const libraryActionExists = await testSubjects.descendantExists(
-        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
-        updatedPanel
-      );
-      expect(libraryActionExists).to.be(true);
+      const newTitle = 'lnsPieVis - copy';
+      await panelActions.legacySaveToLibraryByTitle('lnsPieVis - copy', 'lnsPieVis');
+      await panelActions.expectLinkedToLibrary(newTitle);
 
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.filterEmbeddableNames('lnsPieVis');

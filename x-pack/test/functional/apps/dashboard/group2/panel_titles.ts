@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('nick by reference', () => {
+    describe('by reference', () => {
       const VIS_LIBRARY_DESCRIPTION = 'Vis library description';
 
       let count = 0;
@@ -150,7 +150,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.setCustomPanelTitle('Custom title');
         await dashboardCustomizePanel.clickSaveButton();
-        await dashboardPanelActions.legacyUnlinkFromLibrary();
+        await dashboardPanelActions.legacyUnlinkFromLibraryByTitle('Custom title');
         const [newPanelTitle] = await PageObjects.dashboard.getPanelTitles();
         expect(newPanelTitle).to.equal('Custom title');
       });
@@ -168,7 +168,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('unlinking a by reference panel without a custom title will keep the library title', async () => {
-        await dashboardPanelActions.legacyUnlinkFromLibrary();
+        await dashboardPanelActions.legacyUnlinkFromLibraryByTitle(getVisTitle());
         const [newPanelTitle] = await PageObjects.dashboard.getPanelTitles();
         expect(newPanelTitle).to.equal(getVisTitle());
       });

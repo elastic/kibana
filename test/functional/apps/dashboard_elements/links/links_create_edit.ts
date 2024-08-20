@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await common.waitForSaveModalToClose();
         await testSubjects.exists('addObjectToDashboardSuccess');
         await testSubjects.existOrFail('links--component');
-        await testSubjects.existOrFail('embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION');
+        await dashboardPanelActions.expectLinkedToLibrary(LINKS_PANEL_NAME);
 
         expect(await dashboardLinks.getNumberOfLinksInPanel()).to.equal(4);
         await dashboard.clickDiscardChanges();
@@ -105,9 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dashboardLinks.clickPanelEditorSaveButton();
           await testSubjects.exists('addObjectToDashboardSuccess');
           await testSubjects.existOrFail('links--component');
-          await testSubjects.missingOrFail(
-            'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
-          );
+          await dashboardPanelActions.expectNotLinkedToLibrary();
 
           expect(await dashboardLinks.getNumberOfLinksInPanel()).to.equal(4);
         });

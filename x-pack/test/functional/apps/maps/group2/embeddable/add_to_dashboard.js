@@ -8,15 +8,14 @@
 import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects([
-    'common',
+  const { dashboard, header, maps, timeToVisualize } = getPageObjects([
     'dashboard',
     'header',
     'maps',
     'timeToVisualize',
-    'visualize',
   ]);
 
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
   const security = getService('security');
@@ -40,207 +39,188 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should allow new map be added by value to a new dashboard', async () => {
-      await PageObjects.maps.openNewMap();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.maps.waitForLayersToLoad();
+      await maps.openNewMap();
+      await header.waitUntilLoadingHasFinished();
+      await maps.waitForLayersToLoad();
 
       await testSubjects.click('mapSaveButton');
-      await PageObjects.timeToVisualize.saveFromModal('map 1', {
+      await timeToVisualize.saveFromModal('map 1', {
         addToDashboard: 'new',
         saveToLibrary: false,
       });
 
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.waitForRenderComplete();
 
-      const panelCount = await PageObjects.dashboard.getPanelCount();
+      const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      const isInLibrary = await PageObjects.timeToVisualize.libraryNotificationExists('map 1');
-      expect(isInLibrary).to.be(false);
-      await PageObjects.timeToVisualize.resetNewDashboard();
+      await dashboardPanelActions.expectNotLinkedToLibrary('map 1');
+      await timeToVisualize.resetNewDashboard();
     });
 
     it('should allow existing maps be added by value to a new dashboard', async () => {
-      await PageObjects.maps.loadSavedMap('document example');
+      await maps.loadSavedMap('document example');
 
       await testSubjects.click('mapSaveButton');
-      await PageObjects.timeToVisualize.saveFromModal('document example copy', {
+      await timeToVisualize.saveFromModal('document example copy', {
         saveToLibrary: false,
         addToDashboard: 'new',
         saveAsNew: true,
       });
 
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.waitForRenderComplete();
 
-      const panelCount = await PageObjects.dashboard.getPanelCount();
+      const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      const isInLibrary = await PageObjects.timeToVisualize.libraryNotificationExists(
-        'document example copy'
-      );
-      expect(isInLibrary).to.be(false);
-      await PageObjects.timeToVisualize.resetNewDashboard();
+      await dashboardPanelActions.expectNotLinkedToLibrary('document example copy');
+      await timeToVisualize.resetNewDashboard();
     });
 
     it('should allow new map be added by value to an existing dashboard', async () => {
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.clickNewDashboard();
+      await dashboard.navigateToApp();
+      await dashboard.clickNewDashboard();
 
-      await PageObjects.dashboard.saveDashboard('My Very Cool Dashboard');
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await dashboard.saveDashboard('My Very Cool Dashboard');
+      await dashboard.gotoDashboardLandingPage();
       await listingTable.searchAndExpectItemsCount('dashboard', 'My Very Cool Dashboard', 1);
 
-      await PageObjects.maps.openNewMap();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.maps.waitForLayersToLoad();
+      await maps.openNewMap();
+      await header.waitUntilLoadingHasFinished();
+      await maps.waitForLayersToLoad();
 
       await testSubjects.click('mapSaveButton');
-      await PageObjects.timeToVisualize.saveFromModal('My New Map 2', {
+      await timeToVisualize.saveFromModal('My New Map 2', {
         saveToLibrary: false,
         addToDashboard: 'existing',
         dashboardId: 'My Very Cool Dashboard',
       });
 
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.waitForRenderComplete();
 
-      const panelCount = await PageObjects.dashboard.getPanelCount();
+      const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      const isInLibrary = await PageObjects.timeToVisualize.libraryNotificationExists(
-        'My New Map 2'
-      );
-      expect(isInLibrary).to.be(false);
+      await dashboardPanelActions.expectNotLinkedToLibrary('My New Map 2');
     });
 
     it('should allow existing maps be added by value to an existing dashboard', async () => {
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.clickNewDashboard();
+      await dashboard.navigateToApp();
+      await dashboard.clickNewDashboard();
 
-      await PageObjects.dashboard.saveDashboard('My Wonderful Dashboard');
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await dashboard.saveDashboard('My Wonderful Dashboard');
+      await dashboard.gotoDashboardLandingPage();
       await listingTable.searchAndExpectItemsCount('dashboard', 'My Wonderful Dashboard', 1);
 
-      await PageObjects.maps.loadSavedMap('document example');
+      await maps.loadSavedMap('document example');
 
       await testSubjects.click('mapSaveButton');
-      await PageObjects.timeToVisualize.saveFromModal('document example copy 2', {
+      await timeToVisualize.saveFromModal('document example copy 2', {
         saveToLibrary: false,
         addToDashboard: 'existing',
         dashboardId: 'My Wonderful Dashboard',
         saveAsNew: true,
       });
 
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.waitForRenderComplete();
 
-      const panelCount = await PageObjects.dashboard.getPanelCount();
+      const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      const isInLibrary = await PageObjects.timeToVisualize.libraryNotificationExists(
-        'document example copy 2'
-      );
-      expect(isInLibrary).to.be(false);
+      await dashboardPanelActions.expectNotLinkedToLibrary('document example copy 2');
     });
 
     it('should allow new map be added by reference to a new dashboard', async () => {
-      await PageObjects.maps.openNewMap();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.maps.waitForLayersToLoad();
+      await maps.openNewMap();
+      await header.waitUntilLoadingHasFinished();
+      await maps.waitForLayersToLoad();
 
       await testSubjects.click('mapSaveButton');
-      await PageObjects.timeToVisualize.saveFromModal('map 1', {
+      await timeToVisualize.saveFromModal('map 1', {
         addToDashboard: 'new',
         saveToLibrary: true,
       });
 
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.waitForRenderComplete();
 
-      const panelCount = await PageObjects.dashboard.getPanelCount();
+      const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      const isInLibrary = await PageObjects.timeToVisualize.libraryNotificationExists('map 1');
-      expect(isInLibrary).to.be(true);
-      await PageObjects.timeToVisualize.resetNewDashboard();
+      await dashboardPanelActions.expectLinkedToLibrary('map 1');
+
+      await timeToVisualize.resetNewDashboard();
     });
 
     it('should allow existing maps be added by reference to a new dashboard', async () => {
-      await PageObjects.maps.loadSavedMap('document example');
+      await maps.loadSavedMap('document example');
 
       await testSubjects.click('mapSaveButton');
-      await PageObjects.timeToVisualize.saveFromModal('document example copy', {
+      await timeToVisualize.saveFromModal('document example copy', {
         saveToLibrary: true,
         addToDashboard: 'new',
         saveAsNew: true,
       });
 
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.waitForRenderComplete();
 
-      const panelCount = await PageObjects.dashboard.getPanelCount();
+      const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      const isInLibrary = await PageObjects.timeToVisualize.libraryNotificationExists(
-        'document example copy'
-      );
-      expect(isInLibrary).to.be(true);
-      await PageObjects.timeToVisualize.resetNewDashboard();
+      await dashboardPanelActions.expectLinkedToLibrary('document example copy');
+      await timeToVisualize.resetNewDashboard();
     });
 
     it('should allow new map be added by reference to an existing dashboard', async () => {
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.clickNewDashboard();
+      await dashboard.navigateToApp();
+      await dashboard.clickNewDashboard();
 
-      await PageObjects.dashboard.saveDashboard('My Super Cool Dashboard');
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await dashboard.saveDashboard('My Super Cool Dashboard');
+      await dashboard.gotoDashboardLandingPage();
       await listingTable.searchAndExpectItemsCount('dashboard', 'My Super Cool Dashboard', 1);
 
-      await PageObjects.maps.openNewMap();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.maps.waitForLayersToLoad();
+      await maps.openNewMap();
+      await header.waitUntilLoadingHasFinished();
+      await maps.waitForLayersToLoad();
 
       await testSubjects.click('mapSaveButton');
-      await PageObjects.timeToVisualize.saveFromModal('My New Map 2', {
+      await timeToVisualize.saveFromModal('My New Map 2', {
         saveToLibrary: true,
         addToDashboard: 'existing',
         dashboardId: 'My Super Cool Dashboard',
       });
 
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.waitForRenderComplete();
 
-      const panelCount = await PageObjects.dashboard.getPanelCount();
+      const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      const isInLibrary = await PageObjects.timeToVisualize.libraryNotificationExists(
-        'My New Map 2'
-      );
-      expect(isInLibrary).to.be(true);
+      await dashboardPanelActions.expectLinkedToLibrary('My New Map 2');
     });
 
     it('should allow existing maps be added by reference to an existing dashboard', async () => {
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.clickNewDashboard();
+      await dashboard.navigateToApp();
+      await dashboard.clickNewDashboard();
 
-      await PageObjects.dashboard.saveDashboard('My Amazing Dashboard');
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await dashboard.saveDashboard('My Amazing Dashboard');
+      await dashboard.gotoDashboardLandingPage();
       await listingTable.searchAndExpectItemsCount('dashboard', 'My Amazing Dashboard', 1);
 
-      await PageObjects.maps.loadSavedMap('document example');
+      await maps.loadSavedMap('document example');
 
       await testSubjects.click('mapSaveButton');
-      await PageObjects.timeToVisualize.saveFromModal('document example copy 2', {
+      await timeToVisualize.saveFromModal('document example copy 2', {
         saveToLibrary: true,
         addToDashboard: 'existing',
         dashboardId: 'My Amazing Dashboard',
         saveAsNew: true,
       });
 
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.waitForRenderComplete();
 
-      const panelCount = await PageObjects.dashboard.getPanelCount();
+      const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      const isInLibrary = await PageObjects.timeToVisualize.libraryNotificationExists(
-        'document example copy 2'
-      );
-      expect(isInLibrary).to.be(true);
+      await dashboardPanelActions.expectLinkedToLibrary('document example copy 2');
     });
   });
 }

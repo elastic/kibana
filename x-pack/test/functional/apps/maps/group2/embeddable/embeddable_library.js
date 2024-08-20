@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-
 export default function ({ getPageObjects, getService }) {
   const find = getService('find');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'maps', 'visualize']);
+  const { dashboard, header, maps, visualize } = getPageObjects([
+    'dashboard',
+    'header',
+    'maps',
+    'visualize',
+  ]);
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
+  const mapTitle = 'embeddable library map';
 
   describe('maps in embeddable library', () => {
     before(async () => {
@@ -31,14 +35,14 @@ export default function ({ getPageObjects, getService }) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
       });
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.clickNewDashboard();
+      await dashboard.navigateToApp();
+      await dashboard.clickNewDashboard();
       await dashboardAddPanel.clickEditorMenuButton();
-      await PageObjects.visualize.clickMapsApp();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.maps.waitForLayersToLoad();
-      await PageObjects.maps.clickSaveAndReturnButton();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await visualize.clickMapsApp();
+      await header.waitUntilLoadingHasFinished();
+      await maps.waitForLayersToLoad();
+      await maps.clickSaveAndReturnButton();
+      await dashboard.waitForRenderComplete();
     });
 
     after(async () => {
@@ -46,32 +50,19 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('save map panel to embeddable library', async () => {
-      await dashboardPanelActions.saveToLibrary('embeddable library map');
+      await dashboardPanelActions.saveToLibrary(mapTitle);
       await testSubjects.existOrFail('addPanelToLibrarySuccess');
-
-      const mapPanel = await testSubjects.find('embeddablePanelHeading-embeddablelibrarymap');
-      const libraryActionExists = await testSubjects.descendantExists(
-        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
-        mapPanel
-      );
-      expect(libraryActionExists).to.be(true);
+      await dashboardPanelActions.expectInLibrary(mapTitle);
     });
 
     it('unlink map panel from embeddable library', async () => {
-      const originalPanel = await testSubjects.find('embeddablePanelHeading-embeddablelibrarymap');
-      await dashboardPanelActions.unlinkFromLibrary(originalPanel);
+      await dashboardPanelActions.unlinkFromLibraryByTitle(mapTitle);
       await testSubjects.existOrFail('unlinkPanelSuccess');
-
-      const updatedPanel = await testSubjects.find('embeddablePanelHeading-embeddablelibrarymap');
-      const libraryActionExists = await testSubjects.descendantExists(
-        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
-        updatedPanel
-      );
-      expect(libraryActionExists).to.be(false);
+      await dashboardPanelActions.expectNotInLibrary(mapTitle);
 
       await dashboardAddPanel.clickOpenAddPanel();
-      await dashboardAddPanel.filterEmbeddableNames('embeddable library map');
-      await find.existsByLinkText('embeddable library map');
+      await dashboardAddPanel.filterEmbeddableNames(mapTitle);
+      await find.existsByLinkText(mapTitle);
       await dashboardAddPanel.closeAddPanel();
     });
   });
