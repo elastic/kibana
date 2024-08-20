@@ -46,16 +46,21 @@ export type Docs = z.infer<typeof Docs>;
 export const Docs = z.array(z.object({}).passthrough());
 
 /**
- * Format of the provided samples.
+ * The name of the log samples format.
  */
-export type SampleFormat = z.infer<typeof SampleFormat>;
-export const SampleFormat = z.object({
+export type SamplesFormatName = z.infer<typeof SamplesFormatName>;
+export const SamplesFormatName = z.enum(['ndjson', 'json']);
+export type SamplesFormatNameEnum = typeof SamplesFormatName.enum;
+export const SamplesFormatNameEnum = SamplesFormatName.enum;
+
+/**
+ * Format of the provided log samples.
+ */
+export type SamplesFormat = z.infer<typeof SamplesFormat>;
+export const SamplesFormat = z.object({
+  name: SamplesFormatName,
   /**
-   * The name of the sample format.
-   */
-  name: z.enum(['ndjson', 'json']),
-  /**
-   * For some formats, specifies if the samples can be multiline.
+   * For some formats, specifies whether the samples can be multiline.
    */
   multiline: z.boolean().optional(),
   /**
@@ -150,7 +155,7 @@ export const DataStream = z.object({
   /**
    * The format of log samples in this dataStream.
    */
-  sampleFormat: SampleFormat,
+  samplesFormat: SamplesFormat.optional(),
 });
 
 /**

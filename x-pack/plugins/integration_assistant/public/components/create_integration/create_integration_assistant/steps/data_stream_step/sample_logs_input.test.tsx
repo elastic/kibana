@@ -162,7 +162,7 @@ describe('SampleLogsInput', () => {
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
           logsSampleParsed: logsSampleRaw.split(','),
-          sampleFormat: { name: 'json', json_path: [] },
+          samplesFormat: { name: 'json', json_path: [] },
         });
       });
 
@@ -175,7 +175,7 @@ describe('SampleLogsInput', () => {
         it('should truncate the logs sample', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
             logsSampleParsed: tooLargeLogsSample.split(',').slice(0, 10),
-            sampleFormat: { name: 'json', json_path: [] },
+            samplesFormat: { name: 'json', json_path: [] },
           });
         });
         it('should add a notification toast', () => {
@@ -194,7 +194,7 @@ describe('SampleLogsInput', () => {
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
           logsSampleParsed: splitNDJSON,
-          sampleFormat: { name: 'json', json_path: ['events'] },
+          samplesFormat: { name: 'json', json_path: ['events'] },
         });
       });
     });
@@ -219,7 +219,7 @@ describe('SampleLogsInput', () => {
         it('should set the integrationSetting correctly', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
             logsSampleParsed: undefined,
-            sampleFormat: undefined,
+            samplesFormat: undefined,
           });
         });
       });
@@ -237,7 +237,7 @@ describe('SampleLogsInput', () => {
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
           logsSampleParsed: splitNDJSON,
-          sampleFormat: { name: 'ndjson', multiline: false },
+          samplesFormat: { name: 'ndjson', multiline: false },
         });
       });
 
@@ -250,7 +250,7 @@ describe('SampleLogsInput', () => {
         it('should truncate the logs sample', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
             logsSampleParsed: tooLargeLogsSample.split('\n').slice(0, 10),
-            sampleFormat: { name: 'ndjson', multiline: false },
+            samplesFormat: { name: 'ndjson', multiline: false },
           });
         });
         it('should add a notification toast', () => {
@@ -269,7 +269,7 @@ describe('SampleLogsInput', () => {
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
           logsSampleParsed: [splitNDJSON[0]],
-          sampleFormat: { name: 'ndjson', multiline: false },
+          samplesFormat: { name: 'ndjson', multiline: false },
         });
       });
     });
@@ -282,7 +282,7 @@ describe('SampleLogsInput', () => {
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
           logsSampleParsed: splitNDJSON,
-          sampleFormat: { name: 'ndjson', multiline: true },
+          samplesFormat: { name: 'ndjson', multiline: true },
         });
       });
     });
@@ -307,7 +307,7 @@ describe('SampleLogsInput', () => {
         it('should set the integrationSetting correctly', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
             logsSampleParsed: undefined,
-            sampleFormat: undefined,
+            samplesFormat: undefined,
           });
         });
       });

@@ -12,7 +12,7 @@ import { isPlainObject } from 'lodash/fp';
 import type { IntegrationSettings } from '../../types';
 import * as i18n from './translations';
 import { useActions } from '../../state';
-import type { SampleFormat } from '../../../../../../common';
+import type { SamplesFormat } from '../../../../../../common';
 
 const MaxLogsSampleRows = 10;
 
@@ -73,13 +73,13 @@ const parseLogsContent = (
   error?: string;
   isTruncated?: boolean;
   logsSampleParsed?: string[];
-  sampleFormat?: SampleFormat;
+  samplesFormat?: SamplesFormat;
 } => {
   if (fileContent == null) {
     return { error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_READ };
   }
   let parsedContent: unknown[];
-  let sampleFormat: SampleFormat;
+  let samplesFormat: SamplesFormat;
 
   try {
     parsedContent = parseNDJSON(fileContent);
@@ -89,9 +89,9 @@ const parseLogsContent = (
     //   for a one-line object {} -> do nothing (keep as NDJSON)
     if (parsedContent.length === 1 && Array.isArray(parsedContent[0])) {
       parsedContent = parsedContent[0];
-      sampleFormat = { name: 'json', json_path: [] };
+      samplesFormat = { name: 'json', json_path: [] };
     } else {
-      sampleFormat = { name: 'ndjson', multiline: false };
+      samplesFormat = { name: 'ndjson', multiline: false };
     }
   } catch (parseNDJSONError) {
     try {
@@ -100,11 +100,11 @@ const parseLogsContent = (
         return { error: i18n.LOGS_SAMPLE_ERROR.NOT_ARRAY };
       }
       parsedContent = entries;
-      sampleFormat = { name: 'json', json_path: pathToEntries };
+      samplesFormat = { name: 'json', json_path: pathToEntries };
     } catch (parseJSONError) {
       try {
         parsedContent = parseNDJSON(fileContent, true);
-        sampleFormat = { name: 'ndjson', multiline: true };
+        samplesFormat = { name: 'ndjson', multiline: true };
       } catch (parseMultilineNDJSONError) {
         return { error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_PARSE };
       }
@@ -126,7 +126,7 @@ const parseLogsContent = (
   }
 
   const logsSampleParsed = parsedContent.map((log) => JSON.stringify(log));
-  return { isTruncated, logsSampleParsed, sampleFormat };
+  return { isTruncated, logsSampleParsed, samplesFormat };
 };
 
 interface SampleLogsInputProps {
@@ -146,7 +146,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
         setIntegrationSettings({
           ...integrationSettings,
           logsSampleParsed: undefined,
-          sampleFormat: undefined,
+          samplesFormat: undefined,
         });
         return;
       }
@@ -154,7 +154,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
       const reader = new FileReader();
       reader.onload = function (e) {
         const fileContent = e.target?.result as string | undefined; // We can safely cast to string since we call `readAsText` to load the file.
-        const { error, isTruncated, logsSampleParsed, sampleFormat } =
+        const { error, isTruncated, logsSampleParsed, samplesFormat } =
           parseLogsContent(fileContent);
         setIsParsing(false);
         setSampleFileError(error);
@@ -162,7 +162,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
           setIntegrationSettings({
             ...integrationSettings,
             logsSampleParsed: undefined,
-            sampleFormat: undefined,
+            samplesFormat: undefined,
           });
           return;
         }
@@ -174,7 +174,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
         setIntegrationSettings({
           ...integrationSettings,
           logsSampleParsed,
-          sampleFormat,
+          samplesFormat,
         });
       };
       setIsParsing(true);

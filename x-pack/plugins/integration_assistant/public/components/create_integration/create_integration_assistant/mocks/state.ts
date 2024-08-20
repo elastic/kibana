@@ -420,7 +420,7 @@ export const mockState: State = {
     dataStreamDescription: 'Mocked Data Stream Description',
     inputTypes: ['filestream'],
     logsSampleParsed: rawSamples,
-    sampleFormat: { name: 'ndjson', multiline: false },
+    samplesFormat: { name: 'ndjson', multiline: false },
   },
   isGenerating: false,
   result,

@@ -22,7 +22,7 @@ export type {
   Integration,
   Pipeline,
   Docs,
-  SampleFormat,
+  SamplesFormat,
 } from './api/model/common_attributes';
 export type { ESProcessorItem } from './api/model/processor_attributes';
 

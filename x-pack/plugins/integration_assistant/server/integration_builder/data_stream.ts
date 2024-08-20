@@ -19,7 +19,7 @@ export function createDataStream(
   const pipelineDir = joinPath(specificDataStreamDir, 'elasticsearch', 'ingest_pipeline');
   const title = dataStream.title;
   const description = dataStream.description;
-  const sampleFormat = dataStream.sampleFormat ?? 'ndjson';
+  const samplesFormat = dataStream.samplesFormat ?? 'ndjson';
 
   ensureDirSync(specificDataStreamDir);
   createDataStreamFolders(specificDataStreamDir, pipelineDir);
@@ -32,8 +32,8 @@ export function createDataStream(
       data_stream_description: description,
       package_name: packageName,
       data_stream_name: dataStreamName,
-      multiline_ndjson_toggle_display: sampleFormat.name === 'ndjson',
-      multiline_ndjson_toggle_default: sampleFormat.multiline ?? false,
+      multiline_ndjson_toggle_display: samplesFormat.name === 'ndjson',
+      multiline_ndjson_toggle_default: samplesFormat.multiline ?? false,
     };
     const dataStreamManifest = nunjucks.render(
       `${inputType.replaceAll('-', '_')}_manifest.yml.njk`,

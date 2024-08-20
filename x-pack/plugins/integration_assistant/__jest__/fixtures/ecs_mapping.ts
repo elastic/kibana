@@ -446,7 +446,7 @@ export const ecsTestState = {
   missingKeys: [],
   invalidEcsFields: [],
   results: { test: 'testresults' },
-  sampleFormat: 'testsampleFormat',
+  samplesFormat: 'testsamplesFormat',
   ecsVersion: 'testversion',
   currentMapping: { test1: 'test1' },
   lastExecutedChain: 'testchain',

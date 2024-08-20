@@ -34,7 +34,7 @@ const parameters: BuildIntegrationRequestBody = {
         rawSamples: integrationSettings.logsSampleParsed!,
         docs: results.docs!,
         pipeline: results.pipeline,
-        sampleFormat: integrationSettings.sampleFormat!,
+        samplesFormat: integrationSettings.samplesFormat!,
       },
     ],
   },

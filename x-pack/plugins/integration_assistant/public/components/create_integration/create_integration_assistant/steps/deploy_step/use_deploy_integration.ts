@@ -46,9 +46,9 @@ export const useDeployIntegration = ({
 
     (async () => {
       try {
-        if (integrationSettings.sampleFormat == null) {
+        if (integrationSettings.samplesFormat == null) {
           throw new Error(
-            'Logic error: sampleFormat is required and cannot be null or undefined when creating integration.'
+            'Logic error: samplesFormat is required and cannot be null or undefined when creating integration.'
           );
         }
 
@@ -67,7 +67,7 @@ export const useDeployIntegration = ({
                 rawSamples: integrationSettings.logsSampleParsed ?? [],
                 docs: result.docs ?? [],
                 pipeline: result.pipeline,
-                sampleFormat: integrationSettings.sampleFormat,
+                samplesFormat: integrationSettings.samplesFormat,
               },
             ],
           },

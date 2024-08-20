@@ -173,7 +173,7 @@ export function createPipeline(state: EcsMappingState): IngestPipeline {
     ecs_version: state.ecsVersion,
     package_name: state.packageName,
     data_stream_name: state.dataStreamName,
-    log_format: state.sampleFormat,
+    log_format: state.samplesFormat,
     fields_to_remove: fieldsToRemove,
   };
   const templatesPath = joinPath(__dirname, '../../templates');
