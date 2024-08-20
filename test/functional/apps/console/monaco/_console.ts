@@ -30,9 +30,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show the default request', async () => {
-      const actualRequest = await PageObjects.console.monaco.getEditorText();
-      log.debug(actualRequest);
-      expect(DEFAULT_INPUT_VALUE.replace(/\s/g, '')).to.contain(actualRequest.replace(/\s/g, ''));
+      await retry.try(async () => {
+        const actualRequest = await PageObjects.console.monaco.getEditorText();
+        log.debug(actualRequest);
+        expect(DEFAULT_INPUT_VALUE.replace(/\s/g, '')).to.contain(actualRequest.replace(/\s/g, ''));
+      });
     });
 
     it('default request response should include `"timed_out" : false`', async () => {
