@@ -166,10 +166,23 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                 fieldName: timeField,
               });
 
+            const delayFilter = {
+              error_query: {
+                indices: [
+                  {
+                    name: 'qbserve-*',
+                    error_type: 'warning',
+                    message: "'Watch out!'",
+                    stall_time_seconds: 5,
+                  },
+                ],
+              },
+            };
+
             params.filter = buildEsQuery(
               undefined,
               input.query || [],
-              [...(input.filters ?? []), ...(timeFilter ? [timeFilter] : [])],
+              [delayFilter, ...(input.filters ?? []), ...(timeFilter ? [timeFilter] : [])],
               esQueryConfigs
             );
           }

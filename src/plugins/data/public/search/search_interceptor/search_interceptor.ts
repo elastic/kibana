@@ -453,6 +453,16 @@ export class SearchInterceptor {
             ...searchOptions,
           }),
         })
+        .then((response) => {
+          return response.rawResponse
+            ? response
+            : {
+                id: response.id,
+                rawResponse: response,
+                isPartial: response.is_partial,
+                isRunning: response.is_running,
+              };
+        })
         .catch((e: IHttpFetchError<KibanaServerError>) => {
           if (e?.body) {
             throw e.body;

@@ -394,11 +394,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         switchMap((searchRequest) =>
           strategy.search(searchRequest, options, deps).pipe(
             concatMap((response) => {
-              response = {
-                ...response,
-                isRestored: !!searchRequest.id,
-              };
-
+              response.isRestored = !!searchRequest.id;
               if (
                 options.sessionId && // if within search session
                 options.isStored && // and search session was saved (saved object exists)
