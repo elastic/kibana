@@ -100,7 +100,7 @@ export const AlertDefaultsForm = () => {
       >
         <EuiSpacer size="s" />
         <EuiSwitch
-          label={i18n.translate('xpack.synthetics.alertDefaultsForm.euiSwitch.enabledLabel', {
+          label={i18n.translate('xpack.synthetics.ruleStatusDefaultsForm.euiSwitch.enabledLabel', {
             defaultMessage: 'Status rule enabled',
           })}
           checked={formFields?.defaultStatusRuleEnabled ?? true}
@@ -113,7 +113,7 @@ export const AlertDefaultsForm = () => {
         />
         <EuiSpacer size="m" />
         <EuiSwitch
-          label={i18n.translate('xpack.synthetics.alertDefaultsForm.euiSwitch.enabledLabel', {
+          label={i18n.translate('xpack.synthetics.ruleTLSDefaultsForm.euiSwitch.enabledLabel', {
             defaultMessage: 'TLS rule enabled',
           })}
           checked={formFields?.defaultTLSRuleEnabled ?? true}
