@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React from 'react';
 
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FILE_FORMATS } from '../../../../../common/constants';
 
@@ -26,7 +26,7 @@ export const SemanticTextInfo: FC<Props> = ({ results }) => {
         title={
           <FormattedMessage
             id="xpack.dataVisualizer.semanticTextInfo.title"
-            defaultMessage="Semantic text field available"
+            defaultMessage="Semantic text field type now available"
           />
         }
         color="primary"
@@ -34,7 +34,23 @@ export const SemanticTextInfo: FC<Props> = ({ results }) => {
       >
         <FormattedMessage
           id="xpack.dataVisualizer.semanticTextInfo.body"
-          defaultMessage="It's possible automatically add a semantic text field to your index. In the Advanced tab, click 'add additional field' and choose 'Semantic text'."
+          defaultMessage="It's possible automatically add a {semanticText}  field to your index, doing so will enable better semantic search on the uploaded file content."
+          values={{
+            semanticText: (
+              <EuiLink
+                href="https://www.elastic.co/guide/en/elasticsearch/reference/current/semantic-text.html"
+                target="_blank"
+                external
+              >
+                <code css={{ fontWeight: 'bold' }}>semantic_text</code>
+              </EuiLink>
+            ),
+          }}
+        />
+        <br />
+        <FormattedMessage
+          id="xpack.dataVisualizer.semanticTextInfo.body2"
+          defaultMessage="In the Advanced tab, click 'Add additional field' and choose 'Add semantic text field' to get started."
         />
       </EuiCallOut>
 
