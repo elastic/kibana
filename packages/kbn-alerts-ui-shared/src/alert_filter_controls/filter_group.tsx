@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import deepEqual from 'fast-deep-equal';
 
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
@@ -45,7 +44,6 @@ import { FiltersChangedBanner } from './filters_changed_banner';
 import { FilterGroupContext } from './filter_group_context';
 import { COMMON_OPTIONS_LIST_CONTROL_INPUTS, TEST_IDS, TIMEOUTS, URL_PARAM_KEY } from './constants';
 import { URL_PARAM_ARRAY_EXCEPTION_MSG } from './translations';
-import { DefaultControlState } from '@kbn/controls-plugin/public/react_controls/controls/types';
 
 export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   const {
