@@ -25,7 +25,7 @@ import {
 } from '../../../state';
 import { ClientPluginsStart } from '../../../../../plugin';
 
-export const useSyntheticsAlert = (isOpen: boolean) => {
+export const useSyntheticsRules = (isOpen: boolean) => {
   const dispatch = useDispatch();
 
   const defaultRules = useSelector(selectSyntheticsAlerts);
