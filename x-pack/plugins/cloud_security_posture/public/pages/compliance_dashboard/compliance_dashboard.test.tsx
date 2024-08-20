@@ -13,7 +13,6 @@ import { TestProvider } from '../../test/test_provider';
 import { ComplianceDashboard, getDefaultTab } from '.';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
-import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { useKspmStatsApi, useCspmStatsApi } from '../../common/api/use_stats_api';
 import {
   CLOUD_DASHBOARD_CONTAINER,
@@ -43,7 +42,7 @@ import { MemoryRouter } from 'react-router-dom';
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/api/use_stats_api');
 jest.mock('../../common/api/use_license_management_locator_api');
-jest.mock('../../common/hooks/use_subscription_status');
+jest.mock('../../common/hooks/use_is_subscription_status_valid');
 jest.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
 jest.mock('../../common/navigation/use_csp_integration_link');
 
@@ -58,18 +57,12 @@ describe('<ComplianceDashboard />', () => {
       })
     );
 
-    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: true,
-      })
-    );
-
     (useCspmStatsApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
       })
     );
+
     (useKspmStatsApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
