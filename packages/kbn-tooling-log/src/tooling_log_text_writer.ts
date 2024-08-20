@@ -103,8 +103,7 @@ export class ToolingLogTextWriter implements Writer {
       }
     }
 
-    let prefix = has(MSG_PREFIXES, msg.type) ? MSG_PREFIXES[msg.type] : '';
-    prefix = msg.context ? prefix + `[${msg.context}] ` : prefix;
+    const prefix = has(MSG_PREFIXES, msg.type) ? MSG_PREFIXES[msg.type] : '';
     ToolingLogTextWriter.write(this.writeTo, prefix, msg);
     return true;
   }

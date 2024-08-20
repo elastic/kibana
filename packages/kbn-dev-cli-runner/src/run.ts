@@ -31,24 +31,18 @@ export interface RunOptions {
   description?: string;
   log?: {
     defaultLevel?: LogLevel;
-    context?: string;
   };
   flags?: FlagOptions;
 }
 
 export async function run<T>(fn: RunFn<T>, options: RunOptions = {}): Promise<T | undefined> {
   const flags = getFlags(process.argv.slice(2), options.flags, options.log?.defaultLevel);
-  const log = new ToolingLog(
-    {
-      level: pickLevelFromFlags(flags, {
-        default: options.log?.defaultLevel,
-      }),
-      writeTo: process.stdout,
-    },
-    {
-      context: options.log?.context,
-    }
-  );
+  const log = new ToolingLog({
+    level: pickLevelFromFlags(flags, {
+      default: options.log?.defaultLevel,
+    }),
+    writeTo: process.stdout,
+  });
 
   const metrics = new Metrics(log);
   const helpText = getHelp({
