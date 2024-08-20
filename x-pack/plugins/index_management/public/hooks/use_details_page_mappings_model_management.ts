@@ -45,7 +45,7 @@ const getCustomInferenceIdMap = (
           isDownloading: false,
           modelStats: undefined,
         };
-    inferenceMap[model.model_id] = inferenceEntry;
+    inferenceMap[model.inference_id] = inferenceEntry;
     return inferenceMap;
   }, {});
   const defaultInferenceIds = {
