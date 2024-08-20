@@ -29,7 +29,6 @@ export interface FindingsBaseEsQuery {
 }
 
 export interface CspClientPluginStartDeps {
-  // required
   data: DataPublicPluginStart;
   dataViews: DataViewsServicePublic;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
@@ -44,6 +43,5 @@ export interface CspClientPluginStartDeps {
   share: SharePluginStart;
   storage: Storage;
 
-  // optional
   usageCollection?: UsageCollectionStart;
 }

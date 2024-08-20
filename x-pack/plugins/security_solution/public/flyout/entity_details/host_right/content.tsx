@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
-import { useCspSetupStatusApi, isAllIndicesEmpty } from '@kbn/cloud-security-posture';
+import { useCspSetupStatusApi, isIndexWithDocsAvailable } from '@kbn/cloud-security-posture';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
@@ -49,7 +49,9 @@ export const HostPanelContent = ({
   const getSetupStatus = useCspSetupStatusApi({
     refetchInterval: 10000,
   });
-  const cspAllIndicesEmpty = isAllIndicesEmpty(getSetupStatus.data?.indicesDetails || []);
+  const notEmptyIndices = useMemo(() => {
+    return isIndexWithDocsAvailable(getSetupStatus.data?.indicesDetails || []);
+  }, [getSetupStatus.data?.indicesDetails]);
   return (
     <FlyoutBody>
       {riskScoreState.isModuleEnabled && riskScoreState.data?.length !== 0 && (
@@ -77,7 +79,7 @@ export const HostPanelContent = ({
         queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}
       />
       <EuiHorizontalRule />
-      {!cspAllIndicesEmpty && <InsightEntity hostName={hostName} />}
+      {notEmptyIndices && <InsightEntity hostName={hostName} />}
     </FlyoutBody>
   );
 };

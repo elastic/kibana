@@ -4,19 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { getDataTestSubjectSelector } from '../../../helpers/common';
+import { expandFirstAlertHostFlyout } from '../../../tasks/asset_criticality/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
+import { createRule } from '../../../tasks/api_calls/rules';
+import { getNewRule } from '../../../objects/rule';
+import { ALERTS_URL } from '../../../urls/navigation';
+import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
-import {
-  HOST_INSIGHT_MISCONFIGURATION,
-  HOST_INSIGHT_MISCONFIGURATION_TITLE,
-} from '../../../../screens/hosts/flyout_host_panel';
-import { expandFirstAlertHostFlyout } from '../../../../tasks/asset_criticality/common';
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
-import { login } from '../../../../tasks/login';
-import { visit } from '../../../../tasks/navigation';
-import { createRule } from '../../../../tasks/api_calls/rules';
-import { getNewRule } from '../../../../objects/rule';
-import { ALERTS_URL } from '../../../../urls/navigation';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+const HOST_INSIGHT_MISCONFIGURATION = getDataTestSubjectSelector(
+  'securitySolutionFlyoutInsightsMisconfigurationsLeftSection'
+);
+const HOST_INSIGHT_MISCONFIGURATION_TITLE = getDataTestSubjectSelector(
+  'securitySolutionFlyoutInsightsMisconfigurationsTitleText'
+);
 
 describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {

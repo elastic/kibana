@@ -12,5 +12,5 @@ export { useCspSetupStatusApi } from './src/hooks/use_csp_setup_status_api';
 export {
   getAggregationCount,
   getFindingsCountAggQuery,
-  isAllIndicesEmpty,
+  isIndexWithDocsAvailable,
 } from './src/utils/utils';

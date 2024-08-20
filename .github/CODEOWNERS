@@ -1428,6 +1428,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test/security_solution_cypress/cypress/screens/common @elastic/security-detections-response @elastic/security-threat-hunting
 /x-pack/test/security_solution_cypress/cypress/support @elastic/security-detections-response @elastic/security-threat-hunting
 /x-pack/test/security_solution_cypress/cypress/urls @elastic/security-threat-hunting-investigations @elastic/security-detection-engine
+/x-pack/test/security_solution_cypress/cypress/e2e/cloud_security_posture @elastic/kibana-cloud-security-posture
 
 /x-pack/plugins/security_solution/common/ecs @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/common/test @elastic/security-detections-response @elastic/security-threat-hunting

@@ -10,9 +10,3 @@ import { getDataTestSubjectSelector } from '../../helpers/common';
 export const HOST_PANEL_HEADER = getDataTestSubjectSelector('host-panel-header');
 export const HOST_PREVIEW_PANEL_FOOTER = getDataTestSubjectSelector('host-preview-footer');
 export const OPEN_HOST_FLYOUT_LINK = getDataTestSubjectSelector('open-host-flyout');
-export const HOST_INSIGHT_MISCONFIGURATION = getDataTestSubjectSelector(
-  'securitySolutionFlyoutInsightsMisconfigurationsLeftSection'
-);
-export const HOST_INSIGHT_MISCONFIGURATION_TITLE = getDataTestSubjectSelector(
-  'securitySolutionFlyoutInsightsMisconfigurationsTitleText'
-);

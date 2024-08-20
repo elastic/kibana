@@ -49,7 +49,6 @@ export const getMisconfigurationAggregationCount = (
   };
 };
 
-export const isAllIndicesEmpty = (indices: Array<IndexDetails | undefined>) => {
-  const notEmptyIndices = indices.find((indice) => indice?.status !== 'empty');
-  return notEmptyIndices ? false : true;
+export const isIndexWithDocsAvailable = (indices: Array<IndexDetails | undefined>) => {
+  return indices.some((indice) => indice?.status !== 'empty');
 };
