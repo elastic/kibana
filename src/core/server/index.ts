@@ -29,6 +29,7 @@
  * @packageDocumentation
  */
 
+import 'reflect-metadata';
 import { Type } from '@kbn/config-schema';
 import type { AppenderConfigType } from '@kbn/core-logging-server';
 import { appendersSchema } from '@kbn/core-logging-server-internal';
