@@ -27,6 +27,29 @@ import { getInfraSynthtraceEsClient } from '../../../common/utils/synthtrace/inf
 
 const DATE_WITHOUT_DATA = '10/09/2018 10:00:00 PM';
 
+const HOSTS = [
+  {
+    hostName: 'host-1',
+    cpuValue: 0.5,
+  },
+  {
+    hostName: 'host-2',
+    cpuValue: 0.7,
+  },
+  {
+    hostName: 'host-3',
+    cpuValue: 0.9,
+  },
+  {
+    hostName: 'host-4',
+    cpuValue: 0.3,
+  },
+  {
+    hostName: 'host-5',
+    cpuValue: 0.1,
+  },
+];
+
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const retry = getService('retry');
@@ -96,6 +119,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           generateHostData({
             from: DATE_WITH_HOSTS_DATA_FROM,
             to: DATE_WITH_HOSTS_DATA_TO,
+            hosts: HOSTS,
           })
         );
         await pageObjects.common.navigateToApp('infraOps');

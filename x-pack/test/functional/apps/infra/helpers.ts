@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { apm, timerange, infra } from '@kbn/apm-synthtrace-client';
+import { apm, timerange, infra, generateShortId, log } from '@kbn/apm-synthtrace-client';
 
 const SERVICE_PREFIX = 'service';
 // generates traces, metrics for services
@@ -70,33 +70,16 @@ export function generateDockerContainersData({
     );
 }
 
-export function generateHostData({ from, to }: { from: string; to: string }) {
+export function generateHostData({
+  from,
+  to,
+  hosts,
+}: {
+  from: string;
+  to: string;
+  hosts: Array<{ hostName: string; cpuValue: number }>;
+}) {
   const range = timerange(from, to);
-
-  // cpuValue is sent to the generator to simulate different 'system.cpu.total.norm.pct' metric
-  // that is the default metric in inventory and hosts view and host details page
-  const hosts = [
-    {
-      hostName: 'host-1',
-      cpuValue: 0.5,
-    },
-    {
-      hostName: 'host-2',
-      cpuValue: 0.7,
-    },
-    {
-      hostName: 'host-3',
-      cpuValue: 0.9,
-    },
-    {
-      hostName: 'host-4',
-      cpuValue: 0.3,
-    },
-    {
-      hostName: 'host-5',
-      cpuValue: 0.1,
-    },
-  ];
 
   return range
     .interval('30s')
@@ -167,5 +150,60 @@ export function generatePodsData({
         pod.metrics().timestamp(timestamp),
         pod.container(`container-${idx}`).metrics().timestamp(timestamp),
       ])
+    );
+}
+
+export function generateLogsDataForHosts({
+  from,
+  to,
+  hosts,
+}: {
+  from: string;
+  to: string;
+  hosts: Array<{ hostName: string }>;
+}) {
+  const range = timerange(from, to);
+
+  // Logs Data logic
+  const MESSAGE_LOG_LEVELS = [
+    { message: 'A simple log', level: 'info' },
+    { message: 'Yet another debug log', level: 'debug' },
+    { message: 'Error with certificate: "ca_trusted_fingerprint"', level: 'error' },
+  ];
+  const CLOUD_PROVIDERS = ['gcp', 'aws', 'azure'];
+  const CLOUD_REGION = ['eu-central-1', 'us-east-1', 'area-51'];
+
+  const CLUSTER = [
+    { clusterId: generateShortId(), clusterName: 'synth-cluster-1' },
+    { clusterId: generateShortId(), clusterName: 'synth-cluster-2' },
+    { clusterId: generateShortId(), clusterName: 'synth-cluster-3' },
+  ];
+
+  return range
+    .interval('30s')
+    .rate(1)
+    .generator((timestamp) =>
+      hosts.flatMap(({ hostName }) => {
+        const index = Math.floor(Math.random() * MESSAGE_LOG_LEVELS.length);
+        return log
+          .create()
+          .message(MESSAGE_LOG_LEVELS[index].message)
+          .logLevel(MESSAGE_LOG_LEVELS[index].level)
+          .hostName(hostName)
+          .defaults({
+            'trace.id': generateShortId(),
+            'agent.name': 'synth-agent',
+            'orchestrator.cluster.name': CLUSTER[index].clusterName,
+            'orchestrator.cluster.id': CLUSTER[index].clusterId,
+            'orchestrator.resource.id': generateShortId(),
+            'cloud.provider': CLOUD_PROVIDERS[index],
+            'cloud.region': CLOUD_REGION[index],
+            'cloud.availability_zone': `${CLOUD_REGION[index]}a`,
+            'cloud.project.id': generateShortId(),
+            'cloud.instance.id': generateShortId(),
+            'log.file.path': `/logs/${generateShortId()}/error.txt`,
+          })
+          .timestamp(timestamp);
+      })
     );
 }

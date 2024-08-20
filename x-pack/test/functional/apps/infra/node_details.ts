@@ -43,6 +43,29 @@ const END_HOST_DATE = moment.utc(DATE_WITH_HOSTS_DATA_TO);
 const START_CONTAINER_DATE = moment.utc(DATE_WITH_DOCKER_DATA_FROM);
 const END_CONTAINER_DATE = moment.utc(DATE_WITH_DOCKER_DATA_TO);
 
+const HOSTS = [
+  {
+    hostName: 'host-1',
+    cpuValue: 0.5,
+  },
+  {
+    hostName: 'host-2',
+    cpuValue: 0.7,
+  },
+  {
+    hostName: 'host-3',
+    cpuValue: 0.9,
+  },
+  {
+    hostName: 'host-4',
+    cpuValue: 0.3,
+  },
+  {
+    hostName: 'host-5',
+    cpuValue: 0.1,
+  },
+];
+
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const observability = getService('observability');
   const browser = getService('browser');
@@ -103,13 +126,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   describe('Node Details', () => {
+    let synthEsClient: InfraSynthtraceEsClient;
     before(async () => {
+      synthEsClient = await getInfraSynthtraceEsClient(esClient);
+      await synthEsClient.clean();
       await kibanaServer.savedObjects.cleanStandardList();
       await browser.setWindowSize(1600, 1200);
     });
 
+    after(async () => {
+      await synthEsClient.clean();
+    });
+
     describe('#Asset Type: host', () => {
-      let synthEsClient: InfraSynthtraceEsClient;
       before(async () => {
         synthEsClient = await getInfraSynthtraceEsClient(esClient);
         await synthEsClient.clean();
@@ -117,6 +146,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           generateHostData({
             from: DATE_WITH_HOSTS_DATA_FROM,
             to: DATE_WITH_HOSTS_DATA_TO,
+            hosts: HOSTS,
           })
         );
         await navigateToNodeDetails('host-1', 'host-1', 'host');
@@ -548,7 +578,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('#Asset type: host with kubernetes section', () => {
-      let synthEsClient: InfraSynthtraceEsClient;
       before(async () => {
         synthEsClient = await getInfraSynthtraceEsClient(esClient);
         await synthEsClient.clean();
@@ -641,7 +670,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('#Asset Type: container', () => {
-      let synthEsClient: InfraSynthtraceEsClient;
       before(async () => {
         synthEsClient = await getInfraSynthtraceEsClient(esClient);
         await synthEsClient.clean();
