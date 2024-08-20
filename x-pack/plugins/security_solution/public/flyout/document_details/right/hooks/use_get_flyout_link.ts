@@ -11,19 +11,36 @@ import { DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 import { buildAlertDetailPath } from '../../../../../common/utils/alert_detail_path';
 import { useAppUrl } from '../../../../common/lib/kibana/hooks';
 
-// TODO: MOVE TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
-export const useGetAlertDetailsFlyoutLink = ({
-  _id,
-  _index,
-  timestamp,
-}: {
-  _id: string;
-  _index: string;
+export interface UseGetFlyoutLinkProps {
+  /**
+   * Id of the document
+   */
+  eventId: string;
+  /**
+   * Name of the index used in the parent's page
+   */
+  indexName: string;
+  /**
+   * Timestamp of the document
+   */
   timestamp: string;
-}) => {
+}
+
+/**
+ * Hook to get the link to the alert details page
+ */
+export const useGetFlyoutLink = ({
+  eventId,
+  indexName,
+  timestamp,
+}: UseGetFlyoutLinkProps): string | null => {
   const { getAppUrl } = useAppUrl();
-  const alertDetailPath = buildAlertDetailPath({ alertId: _id, index: _index, timestamp });
-  const isPreviewAlert = _index.includes(DEFAULT_PREVIEW_INDEX);
+  const alertDetailPath = buildAlertDetailPath({
+    alertId: eventId,
+    index: indexName,
+    timestamp,
+  });
+  const isPreviewAlert = indexName.includes(DEFAULT_PREVIEW_INDEX);
 
   // getAppUrl accounts for the users selected space
   const alertDetailsLink = useMemo(() => {

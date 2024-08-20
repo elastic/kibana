@@ -3272,16 +3272,6 @@ const mvCountDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date_nanos',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'field',
           type: 'date',
           optional: false,
         },
@@ -3585,16 +3575,6 @@ const mvFirstDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date_nanos',
-          optional: false,
-        },
-      ],
-      returnType: 'date_nanos',
-    },
-    {
-      params: [
-        {
-          name: 'field',
           type: 'date',
           optional: false,
         },
@@ -3752,16 +3732,6 @@ const mvLastDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date_nanos',
-          optional: false,
-        },
-      ],
-      returnType: 'date_nanos',
-    },
-    {
-      params: [
-        {
-          name: 'field',
           type: 'date',
           optional: false,
         },
@@ -3894,16 +3864,6 @@ const mvMaxDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'date_nanos',
-          optional: false,
-        },
-      ],
-      returnType: 'date_nanos',
     },
     {
       params: [
@@ -4084,16 +4044,6 @@ const mvMinDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'date_nanos',
-          optional: false,
-        },
-      ],
-      returnType: 'date_nanos',
     },
     {
       params: [

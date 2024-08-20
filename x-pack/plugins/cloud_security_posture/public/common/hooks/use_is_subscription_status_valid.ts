@@ -12,9 +12,10 @@ import { useKibana } from './use_kibana';
 
 const SUBSCRIPTION_QUERY_KEY = 'csp_subscription_query_key';
 
-export const useSubscriptionStatus = () => {
+export const useIsSubscriptionStatusValid = () => {
   const { licensing } = useKibana().services;
   const { isCloudEnabled } = useContext(SetupContext);
+
   return useQuery([SUBSCRIPTION_QUERY_KEY], async () => {
     const license = await licensing.refresh();
     return isSubscriptionAllowed(isCloudEnabled, license);
