@@ -7,8 +7,6 @@
 
 import querystring from 'querystring';
 import rison from '@kbn/rison';
-import expect from '@kbn/expect';
-import { TimeUnitId } from '@elastic/eui';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import {
   DATA_QUALITY_URL_STATE_KEY,
