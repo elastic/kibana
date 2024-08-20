@@ -5,38 +5,20 @@
  * 2.0.
  */
 
-import type {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
-} from '@kbn/core/server';
+import type { Plugin } from '@kbn/core/server';
 
 import type { SearchAssistantPluginSetup, SearchAssistantPluginStart } from './types';
-import { defineRoutes } from './routes';
 
 export class SearchAssistantPlugin
   implements Plugin<SearchAssistantPluginSetup, SearchAssistantPluginStart>
 {
-  private readonly logger: Logger;
+  constructor() {}
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
-  }
-
-  public setup(core: CoreSetup) {
-    this.logger.debug('SearchAssistant: Setup');
-    const router = core.http.createRouter();
-
-    // Register server side APIs
-    defineRoutes(router);
-
+  public setup() {
     return {};
   }
 
-  public start(core: CoreStart) {
-    this.logger.debug('SearchAssistant: Started');
+  public start() {
     return {};
   }
 
