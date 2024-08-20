@@ -13,7 +13,7 @@ import {
   entitiesAliasPattern,
   ENTITY_SCHEMA_VERSION_V1,
 } from '@kbn/entities-schema';
-import { getEntityHistoryIndexTemplateV1 } from '../../../../common/helpers';
+import { generateHistoryIndexTemplateId } from '../helpers/generate_component_id';
 import {
   ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
   ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
@@ -21,10 +21,10 @@ import {
 } from '../../../../common/constants_entities';
 import { getCustomHistoryTemplateComponents } from '../../../templates/components/helpers';
 
-export const getEntitiesHistoryIndexTemplateConfig = (
+export const generateEntitiesHistoryIndexTemplateConfig = (
   definition: EntityDefinition
 ): IndicesPutIndexTemplateRequest => ({
-  name: getEntityHistoryIndexTemplateV1(definition.id),
+  name: generateHistoryIndexTemplateId(definition),
   _meta: {
     description:
       "Index template for indices managed by the Elastic Entity Model's entity discovery framework for the history dataset",

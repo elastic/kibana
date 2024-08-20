@@ -19,6 +19,8 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
+import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 import type { PackagePolicyClient } from '../services/package_policy_service';
 import type { AgentPolicyServiceInterface } from '../services';
@@ -59,7 +61,11 @@ export interface MockedFleetAppContext extends FleetAppContext {
 
 export const createAppContextStartContractMock = (
   configOverrides: Partial<FleetConfigType> = {},
-  isServerless: boolean = false
+  isServerless: boolean = false,
+  soClients: Partial<{
+    internal?: SavedObjectsClientContract;
+    withoutSpaceExtensions?: SavedObjectsClientContract;
+  }> = {}
 ): MockedFleetAppContext => {
   const config = {
     agents: { enabled: true, elasticsearch: {} },
@@ -70,12 +76,26 @@ export const createAppContextStartContractMock = (
 
   const config$ = of(config);
 
+  const mockedSavedObject = savedObjectsServiceMock.createStartContract();
+
+  const internalSoClient = soClients.internal ?? savedObjectsClientMock.create();
+  const internalSoClientWithoutSpaceExtension =
+    soClients.withoutSpaceExtensions ?? savedObjectsClientMock.create();
+
+  mockedSavedObject.getScopedClient.mockImplementation((request, options) => {
+    if (options?.excludedExtensions?.includes(SPACES_EXTENSION_ID)) {
+      return internalSoClientWithoutSpaceExtension;
+    }
+
+    return internalSoClient;
+  });
+
   return {
     elasticsearch: elasticsearchServiceMock.createStart(),
     data: dataPluginMock.createStartContract(),
     encryptedSavedObjectsStart: encryptedSavedObjectsMock.createStart(),
     encryptedSavedObjectsSetup: encryptedSavedObjectsMock.createSetup({ canEncrypt: true }),
-    savedObjects: savedObjectsServiceMock.createStartContract(),
+    savedObjects: mockedSavedObject,
     securityCoreStart: securityServiceMock.createStart(),
     securitySetup: securityMock.createSetup(),
     securityStart: securityMock.createStart(),
@@ -108,6 +128,7 @@ export const createAppContextStartContractMock = (
           },
         }
       : {}),
+    unenrollInactiveAgentsTask: {} as any,
   };
 };
 
@@ -116,6 +137,7 @@ export const createFleetRequestHandlerContextMock = (): jest.Mocked<
 > => {
   return {
     authz: createFleetAuthzMock(),
+    getAllSpaces: jest.fn(),
     agentClient: {
       asCurrentUser: agentServiceMock.createClient(),
       asInternalUser: agentServiceMock.createClient(),
@@ -167,21 +189,22 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     enrichPolicyWithDefaultsFromPackage: jest.fn(),
     findAllForAgentPolicy: jest.fn(),
     fetchAllItems: jest.fn((..._) => {
-      return {
+      return Promise.resolve({
         async *[Symbol.asyncIterator]() {
           yield Promise.resolve([PackagePolicyMocks.generatePackagePolicy({ id: '111' })]);
           yield Promise.resolve([PackagePolicyMocks.generatePackagePolicy({ id: '222' })]);
         },
-      };
+      });
     }),
     fetchAllItemIds: jest.fn((..._) => {
-      return {
+      return Promise.resolve({
         async *[Symbol.asyncIterator]() {
           yield Promise.resolve(['111']);
           yield Promise.resolve(['222']);
         },
-      };
+      });
     }),
+    removeOutputFromAll: jest.fn(),
   };
 };
 

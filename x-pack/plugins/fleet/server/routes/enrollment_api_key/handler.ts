@@ -23,19 +23,19 @@ import type {
 import * as APIKeyService from '../../services/api_keys';
 import { agentPolicyService } from '../../services/agent_policy';
 import { defaultFleetErrorHandler, AgentPolicyNotFoundError } from '../../errors';
-import { appContextService } from '../../services';
 import { getCurrentNamespace } from '../../services/spaces/get_current_namespace';
+import { isSpaceAwarenessEnabled } from '../../services/spaces/helpers';
 
 export const getEnrollmentApiKeysHandler: RequestHandler<
   undefined,
   TypeOf<typeof GetEnrollmentAPIKeysRequestSchema.query>
 > = async (context, request, response) => {
-  const { useSpaceAwareness } = appContextService.getExperimentalFeatures();
   // Use kibana_system and depend on authz checks on HTTP layer to prevent abuse
   const esClient = (await context.core).elasticsearch.client.asInternalUser;
   const soClient = (await context.core).savedObjects.client;
 
   try {
+    const useSpaceAwareness = await isSpaceAwarenessEnabled();
     const { items, total, page, perPage } = await APIKeyService.listEnrollmentApiKeys(esClient, {
       page: request.query.page,
       perPage: request.query.perPage,
@@ -91,7 +91,7 @@ export const deleteEnrollmentApiKeyHandler: RequestHandler<
   TypeOf<typeof DeleteEnrollmentAPIKeyRequestSchema.params>
 > = async (context, request, response) => {
   try {
-    const { useSpaceAwareness } = appContextService.getExperimentalFeatures();
+    const useSpaceAwareness = await isSpaceAwarenessEnabled();
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
     const currentNamespace = getCurrentNamespace(coreContext.savedObjects.client);
@@ -124,7 +124,7 @@ export const getOneEnrollmentApiKeyHandler: RequestHandler<
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
     const currentNamespace = getCurrentNamespace(coreContext.savedObjects.client);
-    const { useSpaceAwareness } = appContextService.getExperimentalFeatures();
+    const useSpaceAwareness = await isSpaceAwarenessEnabled();
 
     const apiKey = await APIKeyService.getEnrollmentAPIKey(
       esClient,

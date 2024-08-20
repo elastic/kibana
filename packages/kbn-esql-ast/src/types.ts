@@ -72,6 +72,14 @@ export interface ESQLCommandOption extends ESQLAstBaseItem {
   args: ESQLAstItem[];
 }
 
+/**
+ * Right now rename expressions ("clauses") are parsed as options in the
+ * RENAME command.
+ */
+export interface ESQLAstRenameExpression extends ESQLCommandOption {
+  name: 'as';
+}
+
 export interface ESQLCommandMode extends ESQLAstBaseItem {
   type: 'mode';
 }

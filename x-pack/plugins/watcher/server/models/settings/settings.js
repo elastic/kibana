@@ -51,7 +51,7 @@ function getNotifications(json) {
     return {};
   }
   return Object.values(json).reduce((accum, value) => {
-    if (value.hasOwnProperty('xpack') && value.xpack.hasOwnProperty('notification')) {
+    if (Object.hasOwn(value, 'xpack') && Object.hasOwn(value.xpack, 'notification')) {
       accum = merge(accum, value.xpack.notification);
     }
     return accum;
@@ -75,7 +75,7 @@ function getActionTypesSettings(upstreamJson) {
     // For actions types requiring setup, mark them as enabled
     // if upstream response contains them, indicating that they
     // are setup
-    if (upstreamActionTypes.hasOwnProperty(actionType)) {
+    if (Object.hasOwn(upstreamActionTypes, actionType)) {
       // If it exists in the upstream response, it's enabled
       actionTypeData.enabled = true;
 
