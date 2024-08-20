@@ -63,7 +63,7 @@ export function useGetCategoriesQuery(query: GetCategoriesRequest['query'] = {})
         query,
         version: API_VERSIONS.public.v1,
       }),
-    { retry: false, refetchOnWindowFocus: false }
+    { retry: (_, error) => !isRegistryConnectionError(error), refetchOnWindowFocus: false }
   );
 }
 
@@ -99,7 +99,7 @@ export const useGetPackagesQuery = (
         query,
       }),
     enabled: options?.enabled,
-    retry: false,
+    retry: (_, error) => !isRegistryConnectionError(error),
     refetchOnWindowFocus: false,
   });
 };
@@ -159,7 +159,7 @@ export const useGetPackageInfoByKeyQuery = (
     {
       enabled: queryOptions.enabled,
       refetchOnMount: queryOptions.refetchOnMount,
-      retry: false,
+      retry: (_, error) => !isRegistryConnectionError(error),
       refetchOnWindowFocus: false,
     }
   );
@@ -369,4 +369,8 @@ export function useGetInputsTemplatesQuery(
         version: API_VERSIONS.public.v1,
       })
   );
+}
+
+function isRegistryConnectionError(error: RequestError) {
+  return error.statusCode === 502;
 }
