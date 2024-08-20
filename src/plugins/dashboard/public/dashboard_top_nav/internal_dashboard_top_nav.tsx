@@ -7,7 +7,7 @@
  */
 
 import UseUnmount from 'react-use/lib/useUnmount';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   withSuspense,
@@ -283,10 +283,26 @@ export function InternalDashboardTopNav({
     viewMode,
   ]);
 
+  const maybeRedirect = useCallback(
+    (result?: SaveDashboardReturn) => {
+      if (!result) return;
+      const { redirectRequired, id } = result;
+      if (redirectRequired) {
+        redirectTo({
+          id,
+          editMode: true,
+          useReplace: true,
+          destination: 'dashboard',
+        });
+      }
+    },
+    [redirectTo]
+  );
+
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
-    redirectTo,
     isLabsShown,
     setIsLabsShown,
+    maybeRedirect,
     showResetChange,
   });
 
@@ -329,19 +345,6 @@ export function InternalDashboardTopNav({
         iconOnClick: () => setIsPopoverOpen(!isPopoverOpen),
         iconOnClickAriaLabel: dashboardManagedBadge.getAriaLabel(),
       } as TopNavMenuBadgeProps;
-
-      const maybeRedirect = (result?: SaveDashboardReturn) => {
-        if (!result) return;
-        const { redirectRequired, id } = result;
-        if (redirectRequired) {
-          redirectTo({
-            id,
-            editMode: true,
-            useReplace: true,
-            destination: 'dashboard',
-          });
-        }
-      };
 
       allBadges.push({
         renderCustomBadge: ({ badgeText }) => {
@@ -390,7 +393,7 @@ export function InternalDashboardTopNav({
     managed,
     isPopoverOpen,
     dashboard,
-    redirectTo,
+    maybeRedirect,
   ]);
 
   return (
