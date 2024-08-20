@@ -18,11 +18,11 @@ export async function hasStorageExplorerPrivileges({
   apmEventClient: APMEventClient;
 }) {
   const {
-    indices: { transaction, span, metric, error },
+    indices: { apmTransaction, apmSpan, apmMetric, apmError },
   } = apmEventClient;
 
   const names = uniq(
-    [transaction, span, metric, error].flatMap((indexPatternString) =>
+    [apmTransaction, apmSpan, apmMetric, apmError].flatMap((indexPatternString) =>
       indexPatternString.split(',').map((indexPattern) => indexPattern.trim())
     )
   );
