@@ -185,10 +185,9 @@ export const getAlertDetailsContextHandler = (
 
       return {
         key: 'logRateAnalysis',
-        description:
-          logRateAnalysisType === 'spike'
-            ? 'Statistically significant log metadata and log patterns that happened DURING the spike in logs.'
-            : 'Statistically significant log metadata and log patterns that happened BEFORE the dip in logs.',
+        description: `Statistically significant log metadata and log patterns that happened ${
+          logRateAnalysisType === 'spike' ? 'DURING the spike' : 'BEFORE the dip'
+        } in logs.`,
         data: significantItems,
       };
     });
