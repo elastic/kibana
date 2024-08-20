@@ -16,13 +16,7 @@ exports[`should render EMS UI when left source is BOUNDARIES_SOURCE.EMS 1`] = `
     <EuiSpacer
       size="m"
     />
-    <EuiFormRow
-      describedByIds={Array []}
-      display="row"
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
-      labelType="label"
-    >
+    <EuiFormRow>
       <EuiRadioGroup
         idSelected="EMS"
         onChange={[Function]}
@@ -67,13 +61,7 @@ exports[`should render elasticsearch UI when left source is BOUNDARIES_SOURCE.EL
     <EuiSpacer
       size="m"
     />
-    <EuiFormRow
-      describedByIds={Array []}
-      display="row"
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
-      labelType="label"
-    >
+    <EuiFormRow>
       <EuiRadioGroup
         idSelected="ELASTICSEARCH"
         onChange={[Function]}

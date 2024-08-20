@@ -21,15 +21,10 @@ exports[`Flyout apm part one should render normally 1`] = `
   <EuiFlyoutBody>
     <EuiForm>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         helpText="Typically a single URL. If multiple URLs, separate with a comma.
                 The running Metricbeat instance must be able to communicate with these Elasticsearch servers."
         label="URL of monitoring cluster"
-        labelType="label"
       >
         <EuiFieldText
           fullWidth={true}
@@ -349,15 +344,10 @@ exports[`Flyout beats part one should render normally 1`] = `
   <EuiFlyoutBody>
     <EuiForm>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         helpText="Typically a single URL. If multiple URLs, separate with a comma.
                 The running Metricbeat instance must be able to communicate with these Elasticsearch servers."
         label="URL of monitoring cluster"
-        labelType="label"
       >
         <EuiFieldText
           fullWidth={true}
@@ -719,15 +709,10 @@ exports[`Flyout elasticsearch part one should render normally 1`] = `
   <EuiFlyoutBody>
     <EuiForm>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         helpText="Typically a single URL. If multiple URLs, separate with a comma.
                 The running Metricbeat instance must be able to communicate with these Elasticsearch servers."
         label="URL of monitoring cluster"
-        labelType="label"
       >
         <EuiFieldText
           fullWidth={true}
@@ -1050,15 +1035,10 @@ exports[`Flyout kibana part one should render normally 1`] = `
   <EuiFlyoutBody>
     <EuiForm>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         helpText="Typically a single URL. If multiple URLs, separate with a comma.
                 The running Metricbeat instance must be able to communicate with these Elasticsearch servers."
         label="URL of monitoring cluster"
-        labelType="label"
       >
         <EuiFieldText
           fullWidth={true}
@@ -1388,15 +1368,10 @@ exports[`Flyout logstash part one should render normally 1`] = `
   <EuiFlyoutBody>
     <EuiForm>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         helpText="Typically a single URL. If multiple URLs, separate with a comma.
                 The running Metricbeat instance must be able to communicate with these Elasticsearch servers."
         label="URL of monitoring cluster"
-        labelType="label"
       >
         <EuiFieldText
           fullWidth={true}

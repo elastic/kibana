@@ -21,15 +21,10 @@ exports[`renders correctly 1`] = `
     }
   >
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       error="Enter a name."
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       isInvalid={true}
       label="Name"
-      labelType="label"
     >
       <EuiFieldText
         data-test-subj="addSpaceName"
@@ -42,11 +37,7 @@ exports[`renders correctly 1`] = `
     </EuiFormRow>
     <EuiFormRow
       data-test-subj="optionalDescription"
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       helpText="The description appears on the space selection screen."
       isInvalid={false}
       label="Description"
@@ -61,7 +52,6 @@ exports[`renders correctly 1`] = `
           />
         </EuiText>
       }
-      labelType="label"
     >
       <EuiTextArea
         data-test-subj="descriptionSpaceText"
@@ -74,12 +64,8 @@ exports[`renders correctly 1`] = `
       />
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       error="Enter a URL identifier."
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       helpText={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="You can't change the URL identifier once created."
@@ -93,7 +79,6 @@ exports[`renders correctly 1`] = `
           id="xpack.spaces.management.spaceIdentifier.urlIdentifierTitle"
         />
       }
-      labelType="label"
     >
       <EuiFieldText
         data-test-subj="spaceURLDisplay"

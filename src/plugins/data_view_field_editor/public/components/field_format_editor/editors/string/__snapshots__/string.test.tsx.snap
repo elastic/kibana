@@ -3,10 +3,6 @@
 exports[`StringFormatEditor should render normally 1`] = `
 <Fragment>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
       <Memo(MemoizedFormattedMessage)
@@ -14,7 +10,6 @@ exports[`StringFormatEditor should render normally 1`] = `
         id="indexPatternFieldEditor.string.transformLabel"
       />
     }
-    labelType="label"
   >
     <EuiSelect
       data-test-subj="stringEditorTransform"

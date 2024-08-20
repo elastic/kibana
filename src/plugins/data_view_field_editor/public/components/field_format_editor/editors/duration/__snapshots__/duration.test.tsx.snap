@@ -3,10 +3,6 @@
 exports[`DurationFormatEditor should not render show suffix on dynamic output 1`] = `
 <Fragment>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
       <Memo(MemoizedFormattedMessage)
@@ -14,7 +10,6 @@ exports[`DurationFormatEditor should not render show suffix on dynamic output 1`
         id="indexPatternFieldEditor.duration.inputFormatLabel"
       />
     }
-    labelType="label"
   >
     <EuiSelect
       data-test-subj="durationEditorInputFormat"
@@ -32,10 +27,6 @@ exports[`DurationFormatEditor should not render show suffix on dynamic output 1`
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
       <Memo(MemoizedFormattedMessage)
@@ -43,7 +34,6 @@ exports[`DurationFormatEditor should not render show suffix on dynamic output 1`
         id="indexPatternFieldEditor.duration.outputFormatLabel"
       />
     }
-    labelType="label"
   >
     <EuiSelect
       data-test-subj="durationEditorOutputFormat"
@@ -65,11 +55,7 @@ exports[`DurationFormatEditor should not render show suffix on dynamic output 1`
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
     error={null}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
       <Memo(MemoizedFormattedMessage)
@@ -77,7 +63,6 @@ exports[`DurationFormatEditor should not render show suffix on dynamic output 1`
         id="indexPatternFieldEditor.duration.decimalPlacesLabel"
       />
     }
-    labelType="label"
   >
     <EuiFieldNumber
       isInvalid={false}
@@ -87,13 +72,7 @@ exports[`DurationFormatEditor should not render show suffix on dynamic output 1`
       value={2}
     />
   </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
-  >
+  <EuiFormRow>
     <EuiSwitch
       checked={false}
       disabled={false}
@@ -106,13 +85,7 @@ exports[`DurationFormatEditor should not render show suffix on dynamic output 1`
       onChange={[Function]}
     />
   </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
-  >
+  <EuiFormRow>
     <EuiSwitch
       checked={true}
       disabled={false}
@@ -174,10 +147,6 @@ exports[`DurationFormatEditor should not render show suffix on dynamic output 1`
 exports[`DurationFormatEditor should render human readable output normally 1`] = `
 <Fragment>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
       <Memo(MemoizedFormattedMessage)
@@ -185,7 +154,6 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
         id="indexPatternFieldEditor.duration.inputFormatLabel"
       />
     }
-    labelType="label"
   >
     <EuiSelect
       data-test-subj="durationEditorInputFormat"
@@ -203,10 +171,6 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
       <Memo(MemoizedFormattedMessage)
@@ -214,7 +178,6 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
         id="indexPatternFieldEditor.duration.outputFormatLabel"
       />
     }
-    labelType="label"
   >
     <EuiSelect
       data-test-subj="durationEditorOutputFormat"
@@ -284,10 +247,6 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
 exports[`DurationFormatEditor should render non-human readable output normally 1`] = `
 <Fragment>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
       <Memo(MemoizedFormattedMessage)
@@ -295,7 +254,6 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
         id="indexPatternFieldEditor.duration.inputFormatLabel"
       />
     }
-    labelType="label"
   >
     <EuiSelect
       data-test-subj="durationEditorInputFormat"
@@ -313,10 +271,6 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
       <Memo(MemoizedFormattedMessage)
@@ -324,7 +278,6 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
         id="indexPatternFieldEditor.duration.outputFormatLabel"
       />
     }
-    labelType="label"
   >
     <EuiSelect
       data-test-subj="durationEditorOutputFormat"
@@ -346,11 +299,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
     error={null}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
       <Memo(MemoizedFormattedMessage)
@@ -358,7 +307,6 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
         id="indexPatternFieldEditor.duration.decimalPlacesLabel"
       />
     }
-    labelType="label"
   >
     <EuiFieldNumber
       isInvalid={false}
@@ -368,13 +316,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
       value={2}
     />
   </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
-  >
+  <EuiFormRow>
     <EuiSwitch
       checked={false}
       label={
@@ -386,13 +328,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
       onChange={[Function]}
     />
   </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
-  >
+  <EuiFormRow>
     <EuiSwitch
       checked={false}
       disabled={true}
@@ -405,13 +341,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
       onChange={[Function]}
     />
   </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
-  >
+  <EuiFormRow>
     <EuiSwitch
       checked={true}
       disabled={true}

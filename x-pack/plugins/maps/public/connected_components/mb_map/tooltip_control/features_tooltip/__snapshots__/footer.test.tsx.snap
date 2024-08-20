@@ -24,11 +24,7 @@ exports[`Footer multiple features, multiple layers: locked should show paginatio
       key="layerSelect"
     >
       <EuiFormRow
-        describedByIds={Array []}
         display="rowCompressed"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
-        labelType="label"
       >
         <EuiSelect
           aria-label="Filter results by layer"
