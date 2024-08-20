@@ -305,7 +305,6 @@
     "@kbn/core-deprecations-server-internal": "link:src/core/packages/deprecations/server-internal",
     "@kbn/core-di-common": "link:src/core/packages/di/common",
     "@kbn/core-di-common-internal": "link:src/core/packages/di/common-internal",
-    "@kbn/core-di-server": "link:src/core/packages/di/server",
     "@kbn/core-doc-links-browser": "link:src/core/packages/doc-links/browser",
     "@kbn/core-doc-links-browser-internal": "link:src/core/packages/doc-links/browser-internal",
     "@kbn/core-doc-links-server": "link:src/core/packages/doc-links/server",

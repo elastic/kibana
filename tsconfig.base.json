@@ -358,8 +358,6 @@
       "@kbn/core-di-common/*": ["src/core/packages/di/common/*"],
       "@kbn/core-di-common-internal": ["src/core/packages/di/common-internal"],
       "@kbn/core-di-common-internal/*": ["src/core/packages/di/common-internal/*"],
-      "@kbn/core-di-server": ["src/core/packages/di/server"],
-      "@kbn/core-di-server/*": ["src/core/packages/di/server/*"],
       "@kbn/core-di-server-mocks": ["src/core/packages/di/server-mocks"],
       "@kbn/core-di-server-mocks/*": ["src/core/packages/di/server-mocks/*"],
       "@kbn/core-doc-links-browser": ["src/core/packages/doc-links/browser"],

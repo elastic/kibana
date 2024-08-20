@@ -14,7 +14,6 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
-import { injectionServiceMock } from '@kbn/core-di-server-mocks';
 
 export const createCoreRouteHandlerContextParamsMock = () => {
   return {
@@ -25,6 +24,5 @@ export const createCoreRouteHandlerContextParamsMock = () => {
     deprecations: deprecationsServiceMock.createInternalStartContract(),
     security: securityServiceMock.createInternalStart(),
     userProfile: userProfileServiceMock.createInternalStart(),
-    injection: injectionServiceMock.createInternalStartContract(),
   };
 };
