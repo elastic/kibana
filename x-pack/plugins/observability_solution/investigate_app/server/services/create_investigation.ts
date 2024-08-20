@@ -24,6 +24,7 @@ export async function createInvestigation(
     createdBy: user.username,
     status: InvestigationStatus.ongoing,
     notes: [],
+    items: [],
   };
   await repository.save(investigation);
 
