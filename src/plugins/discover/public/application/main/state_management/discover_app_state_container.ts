@@ -26,6 +26,7 @@ import { IKbnUrlStateStorage, ISyncStateRef, syncState } from '@kbn/kibana-utils
 import { isEqual, omit } from 'lodash';
 import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
+import type { DataGridDensity } from '@kbn/unified-data-table';
 import type { DiscoverServices } from '../../../build_services';
 import { addLog } from '../../../utils/add_log';
 import { cleanupUrlState } from './utils/cleanup_url_state';
@@ -155,6 +156,10 @@ export interface DiscoverAppState {
    * Breakdown field of chart
    */
   breakdownField?: string;
+  /**
+   * Density of table
+   */
+  density?: DataGridDensity;
 }
 
 export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {
