@@ -384,26 +384,18 @@ export function useOnSubmit({
 
       // Removing this code will disabled the Save and Continue button. We need code below update form state and trigger correct modal depending on agent count
       if (hasFleetAddAgentsPrivileges && !isAgentlessConfigured) {
-        if (hasAzureArmTemplate) {
-          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_AZURE_ARM_TEMPLATE');
+        if (agentCount) {
+          setFormState('SUBMITTED');
+        } else if (hasAzureArmTemplate) {
+          setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
+        } else if (hasCloudFormation) {
+          setFormState('SUBMITTED_CLOUD_FORMATION');
+        } else if (hasGoogleCloudShell) {
+          setFormState('SUBMITTED_GOOGLE_CLOUD_SHELL');
         } else {
-          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+          setFormState('SUBMITTED_NO_AGENTS');
         }
-        if (hasCloudFormation) {
-          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_CLOUD_FORMATION');
-        } else {
-          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
-        }
-        if (hasGoogleCloudShell) {
-          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_GOOGLE_CLOUD_SHELL');
-        } else {
-          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
-        }
-      } else {
-        setFormState('SUBMITTED');
       }
-
-      setFormState('SUBMITTED');
 
       if (!error) {
         setSavedPackagePolicy(data!.item);
