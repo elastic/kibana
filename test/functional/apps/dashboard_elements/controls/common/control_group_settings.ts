@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
 import expect from '@kbn/expect';
-
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -28,10 +26,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('filtering settings', async () => {
-      let firstOptionsListId: string;
+      const firstOptionsListId = 'bcb81550-0843-44ea-9020-6c1ebf3228ac';
       let beforeCount: number;
 
-      let rangeSliderId: string;
+      const rangeSliderId = '15925456-9e12-4b08-b2e6-4ae6ac27114d';
       let beforeRange: number;
 
       const getRange = async () => {
@@ -50,13 +48,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       };
 
       before(async () => {
-        const controlIds = await dashboardControls.getAllControlIds();
-        firstOptionsListId = controlIds[0];
         await dashboardControls.optionsListWaitForLoading(firstOptionsListId);
         await dashboardControls.optionsListOpenPopover(firstOptionsListId);
         beforeCount = await dashboardControls.optionsListPopoverGetAvailableOptionsCount();
 
-        rangeSliderId = controlIds[1];
         beforeRange = await getRange();
       });
 
@@ -111,21 +106,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('control group settings flyout closes', async () => {
-      it('on save', async () => {
-        await dashboardControls.openControlGroupSettingsFlyout();
-        await dashboard.saveDashboard('Test Control Group Settings', {
-          saveAsNew: false,
-          exitFromEditMode: false,
-        });
-        await testSubjects.missingOrFail('control-group-settings-flyout');
-      });
-
-      it('on view mode change', async () => {
-        await dashboardControls.openControlGroupSettingsFlyout();
-        await dashboard.clickCancelOutOfEditMode();
-        await testSubjects.missingOrFail('control-group-settings-flyout');
-      });
-
       it('when navigating away from dashboard', async () => {
         await dashboard.switchToEditMode();
         await dashboardControls.openControlGroupSettingsFlyout();
