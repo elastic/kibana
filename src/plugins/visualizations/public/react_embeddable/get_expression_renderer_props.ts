@@ -17,8 +17,8 @@ interface GetExpressionRendererPropsParams {
   unifiedSearch: {
     filters?: Filter[];
     query?: Query | AggregateQuery;
-    timeRange?: TimeRange;
   };
+  timeRange?: TimeRange;
   disableTriggers?: boolean;
   settings: {
     syncColors?: boolean;
@@ -29,6 +29,7 @@ interface GetExpressionRendererPropsParams {
   searchSessionId?: string;
   abortController?: AbortController;
   vis: Vis<VisParams>;
+  timeslice?: [number, number];
   onRender: (renderCount: number) => void;
   onEvent: (event: ExpressionRendererEvent) => void;
   onData: ExpressionRendererParams['onData$'];
@@ -38,13 +39,14 @@ export const getExpressionRendererProps: (params: GetExpressionRendererPropsPara
   abortController: AbortController;
   params: ExpressionRendererParams | null;
 }> = async ({
-  unifiedSearch: { timeRange, query, filters },
+  unifiedSearch: { query, filters },
   settings: { syncColors = true, syncCursor = true, syncTooltips = false },
   disableTriggers = false,
   parentExecutionContext,
   searchSessionId,
   vis,
   abortController,
+  timeRange,
   onRender,
   onEvent,
   onData,
@@ -61,6 +63,7 @@ export const getExpressionRendererProps: (params: GetExpressionRendererPropsPara
     ...parentContext,
     childContext,
   };
+
   const timefilter = getTimeFilter();
   const expressionVariables = await vis.type.getExpressionVariables?.(vis, timefilter);
   const inspectorAdapters = vis.type.inspectorAdapters

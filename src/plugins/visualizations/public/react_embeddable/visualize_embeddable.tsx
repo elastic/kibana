@@ -24,6 +24,7 @@ import {
   apiHasExecutionContext,
   apiIsOfType,
   apiPublishesTimeRange,
+  apiPublishesTimeslice,
   apiPublishesUnifiedSearch,
   apiPublishesViewMode,
   fetch$,
@@ -343,7 +344,6 @@ export const getVisualizeEmbeddableFactory: (deps: {
               ? {
                   query: data.query,
                   filters: data.filters,
-                  timeRange: data.timeRange,
                 }
               : {};
             const searchSessionId = apiPublishesSearchSession(parentApi)
@@ -359,6 +359,24 @@ export const getVisualizeEmbeddableFactory: (deps: {
               : {};
 
             dataLoading$.next(true);
+
+            const timeslice = apiPublishesTimeslice(parentApi)
+              ? parentApi.timeslice$.getValue()
+              : undefined;
+
+            const customTimeRange = timeRange.api.timeRange$.getValue();
+            const parentTimeRange = apiPublishesTimeRange(parentApi) ? data.timeRange : undefined;
+            const timesliceTimeRange = timeslice
+              ? {
+                  from: new Date(timeslice[0]).toISOString(),
+                  to: new Date(timeslice[1]).toISOString(),
+                  mode: 'absolute' as 'absolute',
+                }
+              : undefined;
+
+            // Precedence should be: custom time range from timeRange API > timeslice time range > parent API time range from e.g. unified search
+            const timeRangeToRender = customTimeRange ?? timesliceTimeRange ?? parentTimeRange;
+
             updateExpressionParams = async () => {
               const { params, abortController } = await getExpressionRendererProps({
                 unifiedSearch,
@@ -368,6 +386,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
                 searchSessionId,
                 parentExecutionContext: executionContext,
                 abortController: expressionAbortController$.getValue(),
+                timeRange: timeRangeToRender,
                 onRender: async (renderCount) => {
                   if (renderCount === renderCount$.getValue()) return;
                   renderCount$.next(renderCount);
