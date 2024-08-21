@@ -246,7 +246,7 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
       expect(visualization.attributes.title).to.eql(`CTS vis 3 from ${destination} space`);
     };
 
-  const expectRouteForbiddenResponse = async (resp: TestResponse) => {
+  const expectRouteForbiddenResponse = (resp: TestResponse) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
@@ -254,7 +254,7 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
     });
   };
 
-  const expectRouteNotFoundResponse = async (resp: TestResponse) => {
+  const expectRouteNotFoundResponse = (resp: TestResponse) => {
     expect(resp.body).to.eql({
       statusCode: 404,
       error: 'Not Found',
