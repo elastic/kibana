@@ -52,7 +52,7 @@ export const bootstrapPrebuiltRulesRoute = (
           const config = securityContext.getConfig();
 
           const results = await Promise.all([
-            installPrebuiltRulesPackage(config, securityContext),
+            // installPrebuiltRulesPackage(config, securityContext),
             installEndpointPackage(config, securityContext),
           ]);
 
@@ -103,7 +103,7 @@ async function fetchPrebuiltRuleFilenames(
 
   for (const repository of prebuiltRuleRepositories) {
     const octokit = new Octokit({ auth: repository.token });
-
+    debugger;
     const { data } = await octokit.request('GET /repos/{owner}/{repo}/git/trees/{tree_sha}', {
       owner: repository.username,
       repo: repository.repository,

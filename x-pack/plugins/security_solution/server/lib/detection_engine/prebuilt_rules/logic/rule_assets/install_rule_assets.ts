@@ -31,7 +31,7 @@ export const installExternalPrebuiltRuleAssets = async (
     logger,
     savedObjectsImporter,
     kibanaAssets: assetsToInstall.map((rule) => ({
-      id: `${rule.rule_id}_${rule.version}`,
+      id: `${rule.external_source}_${rule.rule_id}_${rule.version}`,
       type: 'security-rule' as KibanaSavedObjectType,
       attributes: rule,
       references: [],

@@ -74,9 +74,11 @@ const fetchSingleRuleAsset = async (blob: ExternalRuleAssetBlob): Promise<FetchR
 
     const decodedContent = Buffer.from(response.data.content, 'base64').toString('utf-8');
     const rawAsset = JSON.parse(decodedContent);
+    const externalSource = `${blob.repository.username}/${blob.repository.repository}`;
     const rawAssetWithExternalSource = {
       ...rawAsset,
-      external_source: `${blob.repository.username}/${blob.repository.repository}`,
+      rule_id: `${externalSource}_${rawAsset.rule_id}`,
+      external_source: externalSource,
     };
     const asset = validatePrebuiltRuleAsset(rawAssetWithExternalSource);
     return { success: true, asset };
