@@ -13,7 +13,7 @@ import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistan
 import type { TimelineEventsDetailsItem } from '../../common/search_strategy';
 import type { Rule } from '../detection_engine/rule_management/logic';
 import { SendToTimelineButton } from './send_to_timeline';
-import { DETECTION_RULES_CREATE_FORM_CONVERSATION_ID } from '../detections/pages/detection_engine/rules/translations';
+import { DETECTION_RULES_CREATE_FORM_CONVERSATION_ID } from '../detections/pages/detection_engine/translations';
 export const LOCAL_STORAGE_KEY = `securityAssistant`;
 import { UpdateQueryInFormButton } from './update_query_in_form';
 export interface QueryField {

@@ -13,7 +13,7 @@ import { NewChat, AssistantAvatar } from '@kbn/elastic-assistant';
 
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/telemetry';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
-import * as i18nAssistant from '../../../../detections/pages/detection_engine/rules/translations';
+import * as i18nAssistant from '../../../../detections/pages/detection_engine/translations';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import type { FormHook, ValidationError } from '../../../../shared_imports';
 
@@ -79,7 +79,7 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
       const queryBar = queryField.value as DefineStepRule['queryBar'];
 
       // sometimes AI assistant include redundant backtick symbols in code block
-      const newQuery = codeBlock.trim('`');
+      const newQuery = codeBlock.replaceAll('`', '');
       if (queryBar.query.query !== newQuery) {
         setFieldValue('queryBar', {
           ...queryBar,
