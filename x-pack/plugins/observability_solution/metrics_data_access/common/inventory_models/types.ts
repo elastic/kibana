@@ -349,7 +349,7 @@ export type MetricsUIAggregation = rt.TypeOf<typeof MetricsUIAggregationRT>;
 
 export const SnapshotMetricTypeKeys = {
   count: null,
-  cpuTotal: null,
+  cpuV2: null,
   cpu: null,
   diskLatency: null,
   diskSpaceUsage: null,
@@ -423,6 +423,7 @@ export interface InventoryModel<TMetrics = InventoryMetrics> {
   };
   metrics: TMetrics;
   requiredMetrics: InventoryMetric[];
+  legacyMetrics?: SnapshotMetricType[];
   tooltipMetrics: SnapshotMetricType[];
   nodeFilter?: object[];
 }

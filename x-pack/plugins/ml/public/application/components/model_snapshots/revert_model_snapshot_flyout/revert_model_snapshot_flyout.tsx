@@ -193,7 +193,6 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
           {false && ( // disabled for now
             <>
               <EuiSpacer size="s" />
-
               <EuiFormRow
                 fullWidth
                 label={i18n.translate(
@@ -378,7 +377,6 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
           </EuiFlexGroup>
         </EuiFlyoutFooter>
       </EuiFlyout>
-
       {revertModalVisible && (
         <EuiConfirmModal
           title={i18n.translate('xpack.ml.newJob.wizard.revertModelSnapshotFlyout.deleteTitle', {

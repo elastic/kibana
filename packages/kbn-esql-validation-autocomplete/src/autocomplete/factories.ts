@@ -29,7 +29,7 @@ const allFunctions = statsAggregationFunctionDefinitions
   .concat(evalFunctionDefinitions)
   .concat(groupingFunctionDefinitions);
 
-export const TIME_SYSTEM_PARAMS = ['?start', '?end'];
+export const TIME_SYSTEM_PARAMS = ['?t_start', '?t_end'];
 
 export const TRIGGER_SUGGESTION_COMMAND = {
   title: 'Trigger Suggestion Dialog',
@@ -102,7 +102,8 @@ export const getCompatibleFunctionDefinition = (
   return fnSupportedByCommand
     .filter((mathDefinition) =>
       mathDefinition.signatures.some(
-        (signature) => returnTypes[0] === 'any' || returnTypes.includes(signature.returnType)
+        (signature) =>
+          returnTypes[0] === 'any' || returnTypes.includes(signature.returnType as string)
       )
     )
     .map(getSuggestionFunctionDefinition);
@@ -186,9 +187,9 @@ export const buildVariablesDefinitions = (variables: string[]): SuggestionRawDef
   }));
 
 export const buildSourcesDefinitions = (
-  sources: Array<{ name: string; isIntegration: boolean; title?: string }>
+  sources: Array<{ name: string; isIntegration: boolean; title?: string; type?: string }>
 ): SuggestionRawDefinition[] =>
-  sources.map(({ name, isIntegration, title }) => ({
+  sources.map(({ name, isIntegration, title, type }) => ({
     label: title ?? name,
     text: getSafeInsertSourceText(name) + (!isIntegration ? ' ' : ''),
     isSnippet: isIntegration,
@@ -198,7 +199,10 @@ export const buildSourcesDefinitions = (
           defaultMessage: `Integration`,
         })
       : i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.sourceDefinition', {
-          defaultMessage: `Index`,
+          defaultMessage: '{type}',
+          values: {
+            type: type ?? 'Index',
+          },
         }),
     sortText: 'A',
     command: TRIGGER_SUGGESTION_COMMAND,

@@ -147,7 +147,7 @@ export class GroupSelectorUI extends Component {
     }));
 
     for (const gId in selectedGroups) {
-      if (selectedGroups.hasOwnProperty(gId)) {
+      if (Object.hasOwn(selectedGroups, gId)) {
         const group = selectedGroups[gId];
         newJobs.forEach((j) => {
           if (group.partial === false || (group.partial === true && j.oldGroups.includes(gId))) {
@@ -165,7 +165,7 @@ export class GroupSelectorUI extends Component {
         let success = true;
         for (const jobId in resp) {
           // check success of each job update
-          if (resp.hasOwnProperty(jobId)) {
+          if (Object.hasOwn(resp, jobId)) {
             if (resp[jobId].success === false) {
               toastNotificationsService.displayErrorToast(resp[jobId].error);
               success = false;

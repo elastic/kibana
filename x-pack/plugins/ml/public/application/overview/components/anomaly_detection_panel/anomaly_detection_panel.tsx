@@ -138,7 +138,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ anomalyTimelineService, setLa
       const tempGroups = { ...groupsObject };
 
       for (const groupId in tempGroups) {
-        if (tempGroups.hasOwnProperty(groupId)) {
+        if (Object.hasOwn(tempGroups, groupId)) {
           tempGroups[groupId].overallSwimLane = groupsOverallScoreData[groupId];
         }
       }
