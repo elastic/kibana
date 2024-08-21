@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { AGENT_LOG_LEVELS, DEFAULT_LOG_LEVEL } from '../constants';
 
