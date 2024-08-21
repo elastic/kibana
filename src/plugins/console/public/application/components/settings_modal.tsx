@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
-import React, { useState, useCallback } from 'react';
+import { debounce } from 'lodash';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiButton,
   EuiFieldNumber,
-  EuiModalFooter,
   EuiSwitch,
   EuiSuperSelect,
   EuiTitle,
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import { SettingsGroup } from './settings_group';
@@ -31,6 +31,7 @@ import type { SenseEditor } from '../models';
 
 export type AutocompleteOptions = 'fields' | 'indices' | 'templates';
 
+const DEBOUNCE_DELAY = 500;
 const ON_LABEL = i18n.translate('console.settingsPage.onLabel', { defaultMessage: 'On' });
 const OFF_LABEL = i18n.translate('console.settingsPage.offLabel', { defaultMessage: 'Off' });
 
@@ -69,6 +70,8 @@ export interface DevToolsSettingsModalProps {
 }
 
 export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
+  const isMounted = useRef(false);
+
   const [fontSize, setFontSize] = useState(props.settings.fontSize);
   const [wrapMode, setWrapMode] = useState(props.settings.wrapMode);
   const [fields, setFields] = useState(props.settings.autocomplete.fields);
@@ -121,7 +124,7 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
     },
   ];
 
-  function saveSettings() {
+  const saveSettings = () => {
     props.onSaveSettings({
       fontSize,
       wrapMode,
@@ -138,7 +141,16 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
       isKeyboardShortcutsEnabled,
       isAccessibilityOverlayEnabled,
     });
-  }
+  };
+  const debouncedSaveSettings = debounce(saveSettings, DEBOUNCE_DELAY);
+
+  useEffect(() => {
+    if (isMounted.current) {
+      debouncedSaveSettings();
+    } else {
+      isMounted.current = true;
+    }
+  }, [fontSize, wrapMode, fields, indices, templates, dataStreams, polling, pollInterval, tripleQuotes, isHistoryEnabled, isKeyboardShortcutsEnabled, isAccessibilityOverlayEnabled]);
 
   const onPollingIntervalChange = useCallback((value: string) => {
     const sanitizedValue = parseInt(value, 10);
@@ -187,14 +199,14 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
       <SettingsFormRow label={i18n.translate('console.settingsPage.saveRequestsToHistoryLabel', { defaultMessage: 'Save requests to history' })}>
         <EuiSwitch
           checked={isHistoryEnabled}
-          label={isAccessibilityOverlayEnabled ? ON_LABEL : OFF_LABEL}
+          label={isHistoryEnabled ? ON_LABEL : OFF_LABEL}
           onChange={(e) => toggleSavingToHistory(e.target.checked)}
         />
       </SettingsFormRow>
       <SettingsFormRow label={i18n.translate('console.settingsPage.enableKeyboardShortcutsLabel', { defaultMessage: 'Keyboard shortcuts' })}>
         <EuiSwitch
           data-test-subj="enableKeyboardShortcuts"
-          label={isAccessibilityOverlayEnabled ? ON_LABEL : OFF_LABEL}
+          label={isKeyboardShortcutsEnabled ? ON_LABEL : OFF_LABEL}
           checked={isKeyboardShortcutsEnabled}
           onChange={(e) => toggleKeyboardShortcuts(e.target.checked)}
         />
@@ -228,7 +240,7 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
       <SettingsFormRow label={i18n.translate('console.settingsPage.wrapLongLinesLabel', { defaultMessage: 'Wrap long lines' })}>
         <EuiSwitch
           data-test-subj="settingsWrapLines"
-          label={isAccessibilityOverlayEnabled ? ON_LABEL : OFF_LABEL}
+          label={wrapMode ? ON_LABEL : OFF_LABEL}
           checked={wrapMode}
           onChange={(e) => setWrapMode(e.target.checked)}
           id="wrapLines"
@@ -237,7 +249,7 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
       <SettingsFormRow label={i18n.translate('console.settingsPage.tripleQuotesMessage', { defaultMessage: 'Triple quotes in output' })}>
         <EuiSwitch
           data-test-subj="tripleQuotes"
-          label={isAccessibilityOverlayEnabled ? ON_LABEL : OFF_LABEL}
+          label={tripleQuotes ? ON_LABEL : OFF_LABEL}
           checked={tripleQuotes}
           onChange={(e) => setTripleQuotes(e.target.checked)}
           id="tripleQuotes"
@@ -261,7 +273,10 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
       {(fields || indices || templates || dataStreams) && (
         <>
           <SettingsGroup title="Autocomplete refresh" description="Console refreshes autocomplete suggestions by querying Elasticsearch. Use less frequent refreshes to reduce bandwidth costs." />
-          <SettingsFormRow label={i18n.translate('console.settingsPage.refreshingDataLabel', { defaultMessage: 'Refresh frequency' })}>
+          <SettingsFormRow
+            label={i18n.translate('console.settingsPage.refreshingDataLabel', { defaultMessage: 'Refresh frequency' })}
+            labelWarning={i18n.translate('console.settingsPage.refreshingDataWarningLabel', { defaultMessage: 'Console refreshes autocomplete suggestions by querying Elasticsearch. Use less frequent refreshes to reduce bandwidth costs.' })}
+          >
             <EuiSuperSelect
               css={{ minWidth: '220px' }}
               compressed
@@ -295,12 +310,6 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
           </SettingsFormRow>
         </>
       )}
-
-      <EuiModalFooter>
-        <EuiButton fill data-test-subj="settings-save-button" onClick={saveSettings}>
-          <FormattedMessage id="console.settingsPage.saveButtonLabel" defaultMessage="Save" />
-        </EuiButton>
-      </EuiModalFooter>
     </EuiPanel>
   );
 };
