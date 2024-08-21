@@ -1184,7 +1184,7 @@ instanceStateValue: true
             reference,
             overwrites: {
               enabled: false,
-              schedule: { interval: '1s' },
+              schedule: { interval: '1m' },
             },
           });
 
