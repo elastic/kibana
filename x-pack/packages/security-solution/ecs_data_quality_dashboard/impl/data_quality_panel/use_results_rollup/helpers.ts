@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getIndexDocsCountFromRollup } from '../data_quality_summary/summary_actions/check_all/helpers';
+import { getIndexDocsCountFromRollup } from '../body/data_quality_summary/summary_actions/check_all/helpers';
 import { getIlmPhase } from '../pattern/helpers';
 import { getAllIncompatibleMarkdownComments } from '../tabs/incompatible_tab/helpers';
 import {

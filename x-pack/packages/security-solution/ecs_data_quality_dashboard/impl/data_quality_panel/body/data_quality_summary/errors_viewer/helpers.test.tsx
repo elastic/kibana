@@ -10,8 +10,8 @@ import { omit } from 'lodash/fp';
 import React from 'react';
 
 import { getErrorsViewerTableColumns } from './helpers';
-import { TestExternalProviders } from '../../mock/test_providers/test_providers';
-import { ErrorSummary } from '../../types';
+import { TestExternalProviders } from '../../../mock/test_providers/test_providers';
+import { ErrorSummary } from '../../../types';
 
 const errorSummary: ErrorSummary[] = [
   {

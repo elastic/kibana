@@ -11,11 +11,11 @@ import styled from 'styled-components';
 import { v4 as uuidv4 } from 'uuid';
 
 import { getAllIndicesToCheck } from './helpers';
-import { useResultsRollupContext } from '../../../contexts/results_rollup_context';
-import { checkIndex } from '../../../utils/check_index';
-import { useDataQualityContext } from '../../../data_quality_context';
-import * as i18n from '../../../translations';
-import type { IndexToCheck } from '../../../types';
+import { useResultsRollupContext } from '../../../../contexts/results_rollup_context';
+import { checkIndex } from '../../../../utils/check_index';
+import { useDataQualityContext } from '../../../../data_quality_context';
+import * as i18n from '../../../../translations';
+import type { IndexToCheck } from '../../../../types';
 
 const CheckAllButton = styled(EuiButton)`
   width: 112px;

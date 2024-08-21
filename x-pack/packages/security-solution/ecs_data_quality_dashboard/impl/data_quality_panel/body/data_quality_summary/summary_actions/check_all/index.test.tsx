@@ -10,16 +10,16 @@ import userEvent from '@testing-library/user-event';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
-import { mockMappingsResponse } from '../../../mock/mappings_response/mock_mappings_response';
+import { mockMappingsResponse } from '../../../../mock/mappings_response/mock_mappings_response';
 import {
   TestDataQualityProviders,
   TestExternalProviders,
-} from '../../../mock/test_providers/test_providers';
-import { mockUnallowedValuesResponse } from '../../../mock/unallowed_values/mock_unallowed_values';
-import { CANCEL, CHECK_ALL } from '../../../translations';
-import { OnCheckCompleted, UnallowedValueRequestItem } from '../../../types';
+} from '../../../../mock/test_providers/test_providers';
+import { mockUnallowedValuesResponse } from '../../../../mock/unallowed_values/mock_unallowed_values';
+import { CANCEL, CHECK_ALL } from '../../../../translations';
+import { OnCheckCompleted, UnallowedValueRequestItem } from '../../../../types';
 import { CheckAll } from '.';
-import { EMPTY_STAT } from '../../../helpers';
+import { EMPTY_STAT } from '../../../../helpers';
 
 const defaultBytesFormat = '0,0.[0]b';
 const mockFormatBytes = (value: number | undefined) =>
@@ -35,15 +35,15 @@ const mockFetchMappings = jest.fn(() =>
   )
 );
 
-jest.mock('../../../use_mappings/helpers', () => ({
+jest.mock('../../../../use_mappings/helpers', () => ({
   fetchMappings: (_: { abortController: AbortController; patternOrIndexName: string }) =>
     mockFetchMappings(),
 }));
 
 const mockFetchUnallowedValues = jest.fn(() => Promise.resolve(mockUnallowedValuesResponse));
 
-jest.mock('../../../use_unallowed_values/helpers', () => {
-  const original = jest.requireActual('../../../use_unallowed_values/helpers');
+jest.mock('../../../../use_unallowed_values/helpers', () => {
+  const original = jest.requireActual('../../../../use_unallowed_values/helpers');
 
   return {
     ...original,

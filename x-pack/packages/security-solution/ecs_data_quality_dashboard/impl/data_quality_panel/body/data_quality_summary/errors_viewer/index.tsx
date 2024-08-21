@@ -14,7 +14,7 @@ import {
   ERRORS_CONTAINER_MIN_WIDTH,
   getErrorsViewerTableColumns,
 } from './helpers';
-import type { ErrorSummary } from '../../types';
+import type { ErrorSummary } from '../../../types';
 
 const ErrorsViewerContainer = styled.div`
   max-width: ${ERRORS_CONTAINER_MAX_WIDTH}px;

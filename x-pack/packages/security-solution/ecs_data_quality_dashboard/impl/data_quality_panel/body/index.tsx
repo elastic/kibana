@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 
 import { DataQualityDetails } from './data_quality_details';
-import { DataQualitySummary } from '../data_quality_summary';
+import { DataQualitySummary } from './data_quality_summary';
 
 const BodyComponent: React.FC = () => {
   return (

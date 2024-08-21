@@ -12,8 +12,8 @@ import {
   FIELD,
   INDEX_MAPPING_TYPE_ACTUAL,
 } from '../../compare_fields_table/translations';
-import { ERRORS } from '../../data_quality_summary/errors_popover/translations';
-import { ERROR, INDEX, PATTERN } from '../../data_quality_summary/errors_viewer/translations';
+import { ERRORS } from '../../body/data_quality_summary/errors_popover/translations';
+import { ERROR, INDEX, PATTERN } from '../../body/data_quality_summary/errors_viewer/translations';
 import {
   escape,
   escapePreserveNewlines,

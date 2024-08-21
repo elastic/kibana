@@ -7,8 +7,8 @@
 
 import { orderBy } from 'lodash/fp';
 
-import { getDocsCount } from '../../../helpers';
-import type { IndexToCheck, MeteringStatsIndex, PatternRollup } from '../../../types';
+import { getDocsCount } from '../../../../helpers';
+import type { IndexToCheck, MeteringStatsIndex, PatternRollup } from '../../../../types';
 
 export const getIndexToCheck = ({
   indexName,

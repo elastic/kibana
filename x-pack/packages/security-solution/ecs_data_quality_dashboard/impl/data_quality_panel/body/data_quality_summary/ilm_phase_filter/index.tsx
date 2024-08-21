@@ -14,14 +14,14 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import { ilmPhaseOptionsStatic } from '../../constants';
-import { getIlmPhaseDescription } from '../../helpers';
+import { ilmPhaseOptionsStatic } from '../../../constants';
+import { getIlmPhaseDescription } from '../../../helpers';
 import {
   ILM_PHASE,
   INDEX_LIFECYCLE_MANAGEMENT_PHASES,
   SELECT_ONE_OR_MORE_ILM_PHASES,
-} from '../../translations';
-import { useDataQualityContext } from '../../data_quality_context';
+} from '../../../translations';
+import { useDataQualityContext } from '../../../data_quality_context';
 import { StyledFormControlLayout, StyledOption, StyledOptionLabel } from './styles';
 
 const renderOption = (

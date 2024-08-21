@@ -9,11 +9,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import { StatsRollup } from '../pattern/pattern_summary/stats_rollup';
+import { StatsRollup } from '../../pattern/pattern_summary/stats_rollup';
 import { SummaryActions } from './summary_actions';
 import { IlmPhaseFilter } from './ilm_phase_filter';
-import { useDataQualityContext } from '../data_quality_context';
-import { useResultsRollupContext } from '../contexts/results_rollup_context';
+import { useDataQualityContext } from '../../data_quality_context';
+import { useResultsRollupContext } from '../../contexts/results_rollup_context';
 
 const MAX_SUMMARY_ACTIONS_CONTAINER_WIDTH = 400;
 const MIN_SUMMARY_ACTIONS_CONTAINER_WIDTH = 235;

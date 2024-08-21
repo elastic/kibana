@@ -8,9 +8,9 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { TestExternalProviders } from '../../mock/test_providers/test_providers';
+import { TestExternalProviders } from '../../../mock/test_providers/test_providers';
 import { ERROR, INDEX, PATTERN } from './translations';
-import { ErrorSummary } from '../../types';
+import { ErrorSummary } from '../../../types';
 import { ErrorsViewer } from '.';
 
 interface ExpectedColumns {

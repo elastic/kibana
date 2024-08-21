@@ -13,7 +13,7 @@ import { IlmPhaseFilter } from '.';
 import {
   TestDataQualityProviders,
   TestExternalProviders,
-} from '../../mock/test_providers/test_providers';
+} from '../../../mock/test_providers/test_providers';
 import {
   COLD_DESCRIPTION,
   FROZEN_DESCRIPTION,
@@ -21,7 +21,7 @@ import {
   INDEX_LIFECYCLE_MANAGEMENT_PHASES,
   UNMANAGED_DESCRIPTION,
   WARM_DESCRIPTION,
-} from '../../translations';
+} from '../../../translations';
 
 describe('IlmPhaseFilter', () => {
   it('renders combobox with ilmPhase label and preselected hot, warm, unmanaged options', () => {

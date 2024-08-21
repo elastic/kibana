@@ -9,7 +9,7 @@ import userEvent from '@testing-library/user-event';
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { TestExternalProviders } from '../../mock/test_providers/test_providers';
+import { TestExternalProviders } from '../../../mock/test_providers/test_providers';
 import { ErrorsPopover } from '.';
 
 const mockCopyToClipboard = jest.fn((value) => true);

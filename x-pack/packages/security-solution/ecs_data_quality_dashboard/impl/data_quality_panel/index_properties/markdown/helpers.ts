@@ -14,7 +14,7 @@ import {
   READ,
   THE_FOLLOWING_PRIVILEGES_ARE_REQUIRED,
   VIEW_INDEX_METADATA,
-} from '../../data_quality_summary/errors_popover/translations';
+} from '../../body/data_quality_summary/errors_popover/translations';
 import {
   EMPTY_STAT,
   getTotalPatternIncompatible,

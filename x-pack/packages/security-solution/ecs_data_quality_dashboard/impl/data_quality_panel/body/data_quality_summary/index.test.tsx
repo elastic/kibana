@@ -9,15 +9,15 @@ import numeral from '@elastic/numeral';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { EMPTY_STAT } from '../helpers';
-import { alertIndexWithAllResults } from '../mock/pattern_rollup/mock_alerts_pattern_rollup';
-import { auditbeatWithAllResults } from '../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
-import { packetbeatNoResults } from '../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
+import { EMPTY_STAT } from '../../helpers';
+import { alertIndexWithAllResults } from '../../mock/pattern_rollup/mock_alerts_pattern_rollup';
+import { auditbeatWithAllResults } from '../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
+import { packetbeatNoResults } from '../../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
 import {
   TestDataQualityProviders,
   TestExternalProviders,
-} from '../mock/test_providers/test_providers';
-import { PatternRollup } from '../types';
+} from '../../mock/test_providers/test_providers';
+import { PatternRollup } from '../../types';
 import { DataQualitySummary } from '.';
 import {
   getTotalDocsCount,
@@ -25,7 +25,7 @@ import {
   getTotalIndices,
   getTotalIndicesChecked,
   getTotalSizeInBytes,
-} from '../use_results_rollup/helpers';
+} from '../../use_results_rollup/helpers';
 
 const defaultBytesFormat = '0,0.[0]b';
 const formatBytes = (value: number | undefined) =>
