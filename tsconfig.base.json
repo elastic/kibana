@@ -1254,6 +1254,8 @@
       "@kbn/observability-get-padded-alert-time-range-util/*": ["x-pack/packages/observability/get_padded_alert_time_range_util/*"],
       "@kbn/observability-logs-explorer-plugin": ["x-pack/plugins/observability_solution/observability_logs_explorer"],
       "@kbn/observability-logs-explorer-plugin/*": ["x-pack/plugins/observability_solution/observability_logs_explorer/*"],
+      "@kbn/observability-logs-overview": ["x-pack/packages/observability/logs_overview"],
+      "@kbn/observability-logs-overview/*": ["x-pack/packages/observability/logs_overview/*"],
       "@kbn/observability-onboarding-e2e": ["x-pack/plugins/observability_solution/observability_onboarding/e2e"],
       "@kbn/observability-onboarding-e2e/*": ["x-pack/plugins/observability_solution/observability_onboarding/e2e/*"],
       "@kbn/observability-onboarding-plugin": ["x-pack/plugins/observability_solution/observability_onboarding"],
