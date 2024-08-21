@@ -33,8 +33,7 @@ export function createDataStream(
       data_stream_description: description,
       package_name: packageName,
       data_stream_name: dataStreamName,
-      multiline_ndjson_toggle_display: useMultilineNDJSON,
-      multiline_ndjson_toggle_default: useMultilineNDJSON,
+      multiline_ndjson: useMultilineNDJSON,
     };
     const dataStreamManifest = nunjucks.render(
       `${inputType.replaceAll('-', '_')}_manifest.yml.njk`,
