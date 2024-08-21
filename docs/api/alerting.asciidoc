@@ -1,19 +1,4 @@
 [[alerting-apis]]
 == Alerting APIs
 
-NOTE: For the latest details, refer to {api-kibana}/group/endpoint-alerting[alerting APIs].
-
-include::alerting/create_rule.asciidoc[leveloffset=+1]
-include::alerting/delete_rule.asciidoc[leveloffset=+1]
-include::alerting/disable_rule.asciidoc[leveloffset=+1]
-include::alerting/enable_rule.asciidoc[leveloffset=+1]
-include::alerting/find_rules.asciidoc[leveloffset=+1]
-include::alerting/health.asciidoc[leveloffset=+1]
-include::alerting/get_rules.asciidoc[leveloffset=+1]
-include::alerting/list_rule_types.asciidoc[leveloffset=+1]
-include::alerting/update_rule.asciidoc[leveloffset=+1]
-include::alerting/mute_all_alerts.asciidoc[leveloffset=+1]
-include::alerting/mute_alert.asciidoc[leveloffset=+1]
-include::alerting/unmute_all_alerts.asciidoc[leveloffset=+1]
-include::alerting/unmute_alert.asciidoc[leveloffset=+1]
-include::alerting/legacy/index.asciidoc[]
+For the latest details, refer to {api-kibana}/group/endpoint-alerting[alerting APIs].
