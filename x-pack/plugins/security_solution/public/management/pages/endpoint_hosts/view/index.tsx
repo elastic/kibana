@@ -573,13 +573,15 @@ export const EndpointList = () => {
         </ManagementEmptyStateWrapper>
       );
     } else if (!policyItemsLoading && hasPolicyData) {
-      const selectionOptions: EuiSelectableProps['options'] = policyItems.map((item) => {
-        return {
-          key: item.policy_id,
-          label: item.name,
-          checked: selectedPolicyId === item.policy_id ? 'on' : undefined,
-        };
-      });
+      const selectionOptions: EuiSelectableProps['options'] = policyItems
+        .filter((item) => item.policy_id)
+        .map((item) => {
+          return {
+            key: item.policy_id as string,
+            label: item.name,
+            checked: selectedPolicyId === item.policy_id ? 'on' : undefined,
+          };
+        });
       return (
         <HostsEmptyState
           loading={loading}
