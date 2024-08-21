@@ -19,7 +19,7 @@ export function createDataStream(
   const pipelineDir = joinPath(specificDataStreamDir, 'elasticsearch', 'ingest_pipeline');
   const title = dataStream.title;
   const description = dataStream.description;
-  const samplesFormat = dataStream.samplesFormat ?? { name: 'ndjson', multiline: false };
+  const samplesFormat = dataStream.samplesFormat;
   const useMultilineNDJSON = samplesFormat.name === 'ndjson' && samplesFormat.multiline === true;
 
   ensureDirSync(specificDataStreamDir);

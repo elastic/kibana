@@ -155,7 +155,7 @@ export const DataStream = z.object({
   /**
    * The format of log samples in this dataStream.
    */
-  samplesFormat: SamplesFormat.optional(),
+  samplesFormat: SamplesFormat,
 });
 
 /**
