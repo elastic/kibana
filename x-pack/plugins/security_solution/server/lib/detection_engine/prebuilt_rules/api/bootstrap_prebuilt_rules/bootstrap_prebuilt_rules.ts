@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Octokit } from '@octokit/rest';
+import { Octokit } from 'octokit';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { BOOTSTRAP_PREBUILT_RULES_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
@@ -22,6 +22,7 @@ interface PrebuiltRuleRepository {
   repository: string;
   username: string;
   token: string;
+  id: string;
 }
 
 export const bootstrapPrebuiltRulesRoute = (

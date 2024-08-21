@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Octokit } from '@octokit/rest';
+import { Octokit } from 'octokit';
 import type { ExternalRuleAssetBlob } from '../../api/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import { validatePrebuiltRuleAsset } from './prebuilt_rule_assets_validation';
@@ -74,7 +74,7 @@ const fetchSingleRuleAsset = async (blob: ExternalRuleAssetBlob): Promise<FetchR
 
     const decodedContent = Buffer.from(response.data.content, 'base64').toString('utf-8');
     const rawAsset = JSON.parse(decodedContent);
-    const externalSource = `${blob.repository.username}/${blob.repository.repository}`;
+    const externalSource = `${blob.repository.id}`;
     const rawAssetWithExternalSource = {
       ...rawAsset,
       rule_id: `${externalSource}_${rawAsset.rule_id}`,
