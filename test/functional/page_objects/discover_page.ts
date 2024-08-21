@@ -8,7 +8,7 @@
 
 import expect from '@kbn/expect';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrService } from '../ftr_provider_context';
+import      { FtrService } from '../ftr_provider_context';
 
 export class DiscoverPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
