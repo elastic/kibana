@@ -18,9 +18,9 @@ interface UseControlGroupSyncToLocalStorageArgs {
 }
 
 type UseControlGroupSyncToLocalStorage = (args: UseControlGroupSyncToLocalStorageArgs) => {
-  controlGroupInput: ControlGroupRuntimeState | undefined;
-  setControlGroupInput: Dispatch<SetStateAction<ControlGroupRuntimeState>>;
-  getStoredControlGroupInput: () => ControlGroupRuntimeState | undefined;
+  controlGroupState: ControlGroupRuntimeState | undefined;
+  setControlGroupState: Dispatch<SetStateAction<ControlGroupRuntimeState>>;
+  getStoredControlGroupState: () => ControlGroupRuntimeState | undefined;
 };
 
 export const useControlGroupSyncToLocalStorage: UseControlGroupSyncToLocalStorage = ({
@@ -30,23 +30,23 @@ export const useControlGroupSyncToLocalStorage: UseControlGroupSyncToLocalStorag
 }) => {
   const storage = useRef(new Storage(localStorage));
 
-  const [controlGroupInput, setControlGroupInput] = useState(
+  const [controlGroupState, setControlGroupState] = useState(
     () => (storage.current.get(storageKey) as ControlGroupRuntimeState) ?? undefined
   );
 
   useEffect(() => {
-    if (shouldSync && controlGroupInput) {
-      storage.current.set(storageKey, controlGroupInput);
+    if (shouldSync && controlGroupState) {
+      storage.current.set(storageKey, controlGroupState);
     }
-  }, [shouldSync, controlGroupInput, storageKey]);
+  }, [shouldSync, controlGroupState, storageKey]);
 
-  const getStoredControlGroupInput = () => {
+  const getStoredControlGroupState = () => {
     return (storage.current.get(storageKey) as ControlGroupRuntimeState) ?? undefined;
   };
 
   return {
-    controlGroupInput,
-    setControlGroupInput,
-    getStoredControlGroupInput,
+    controlGroupState,
+    setControlGroupState,
+    getStoredControlGroupState,
   };
 };

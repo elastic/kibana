@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ControlGroupInput, OptionsListEmbeddableInput } from '@kbn/controls-plugin/common';
 import {
   getFilterItemObjListFromControlInput,
   mergeControls,
@@ -68,14 +67,13 @@ const defaultControlsObj = defaultControls.reduce((prev, current) => {
 describe('utils', () => {
   describe('getFilterItemObjListFromControlOutput', () => {
     it('should return ordered filterItem where passed in order', () => {
-      const filterItemObjList = getFilterItemObjListFromControlInput(
-        initialInputData as ControlGroupInput
-      );
+      const filterItemObjList = getFilterItemObjListFromControlInput(initialInputData);
 
       filterItemObjList.forEach((item, idx) => {
         const panelObj =
-          initialInputData.panels[String(idx) as keyof typeof initialInputData.panels]
-            .explicitInput;
+          initialInputData.initialChildControlState[
+            String(idx) as keyof typeof initialInputData.initialChildControlState
+          ];
         expect(item).toMatchObject({
           fieldName: panelObj.fieldName,
           selectedOptions: panelObj.selectedOptions,
@@ -89,16 +87,14 @@ describe('utils', () => {
     it('should return ordered filterItem where NOT passed in order', () => {
       const newInputData = {
         ...initialInputData,
-        panels: {
-          '0': initialInputData.panels['3'],
-          '1': initialInputData.panels['0'],
+        initialChildControlState: {
+          '0': initialInputData.initialChildControlState['3'],
+          '1': initialInputData.initialChildControlState['0'],
         },
       };
-      const filterItemObjList = getFilterItemObjListFromControlInput(
-        newInputData as ControlGroupInput
-      );
+      const filterItemObjList = getFilterItemObjListFromControlInput(newInputData);
 
-      let panelObj = newInputData.panels['1'].explicitInput as OptionsListEmbeddableInput;
+      let panelObj = newInputData.initialChildControlState['1'];
       expect(filterItemObjList[0]).toMatchObject({
         fieldName: panelObj.fieldName,
         selectedOptions: panelObj.selectedOptions,
@@ -107,7 +103,7 @@ describe('utils', () => {
         exclude: panelObj.exclude,
       });
 
-      panelObj = newInputData.panels['0'].explicitInput;
+      panelObj = newInputData.initialChildControlState['0'];
       expect(filterItemObjList[1]).toMatchObject({
         fieldName: panelObj.fieldName,
         selectedOptions: panelObj.selectedOptions,

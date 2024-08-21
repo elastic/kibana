@@ -19,6 +19,7 @@ export type {
   DataControlFactory,
   DataControlServices,
 } from './react_controls/controls/data_controls/types';
+export type { OptionsListControlState } from './react_controls/controls/data_controls/options_list_control/types';
 export { ACTION_EDIT_CONTROL } from './react_controls/actions/edit_control_action/edit_control_action';
 export {
   controlGroupStateBuilder,

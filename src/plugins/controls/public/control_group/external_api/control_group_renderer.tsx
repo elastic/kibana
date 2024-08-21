@@ -7,7 +7,15 @@
  */
 
 import { omit } from 'lodash';
-import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -75,16 +83,29 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
       ControlGroupSerializedState | undefined
     >();
 
+    const updateInput = useCallback(
+      (newState: Partial<ControlGroupRuntimeState>) => {
+        runtimeState$.next({
+          ...runtimeState$.getValue(),
+          ...newState,
+        });
+      },
+      [runtimeState$]
+    );
+
     // onMount
     useEffect(() => {
       let cancelled = false;
       (async () => {
-        const test =
+        const { initialState, editorConfig } =
           (await getCreationOptions?.(
             getDefaultControlGroupRuntimeState(),
             controlGroupStateBuilder
           )) ?? {};
-        const { initialState, editorConfig } = test;
+        updateInput({
+          ...initialState,
+          editorConfig,
+        });
         const state = {
           ...omit(initialState, ['initialChildControlState', 'ignoreParentSettings']),
           editorConfig,
@@ -92,6 +113,7 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
           panelsJSON: JSON.stringify(initialState?.initialChildControlState ?? {}),
           ignoreParentSettingsJSON: JSON.stringify(initialState?.ignoreParentSettings ?? {}),
         };
+
         if (!cancelled) {
           setSerializedState(state as ControlGroupSerializedState);
           setApiLoading(false);
@@ -104,6 +126,20 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    /**
+     * To mimic `input$`, subscribe to unsaved changes and snapshot the runtime state whenever
+     * something change
+     */
+    useEffect(() => {
+      if (!controlGroup) return;
+      const stateChangeSubscription = controlGroup.unsavedChanges.subscribe(() => {
+        runtimeState$.next(controlGroup.snapshotRuntimeState());
+      });
+      return () => {
+        stateChangeSubscription.unsubscribe();
+      };
+    }, [controlGroup, runtimeState$]);
+
     return apiLoading ? null : (
       <ReactEmbeddableRenderer<
         ControlGroupSerializedState,
@@ -112,15 +148,6 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
       >
         key={regenerateId} // forces unmount + mount when `updateInput` is called
         maybeId={id}
-        onAnyStateChange={() => {
-          if (!controlGroup) return;
-
-          /**
-           * on any state change is a callback the hands over the **serialized** state, but `input$`
-           * should be providing runtime state - so, snapshot runtime state on state change instead
-           */
-          runtimeState$.next(controlGroup?.snapshotRuntimeState());
-        }}
         type={CONTROL_GROUP_TYPE}
         getParentApi={() => ({
           viewMode: viewMode$,
@@ -138,10 +165,7 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
           setControlGroup({
             ...controlGroupApi,
             updateInput: (newInput) => {
-              runtimeState$.next({
-                ...runtimeState$.getValue(),
-                ...newInput,
-              });
+              updateInput(newInput);
               setRegenerateId(uuidv4());
             },
             getInput$: () => runtimeState$,

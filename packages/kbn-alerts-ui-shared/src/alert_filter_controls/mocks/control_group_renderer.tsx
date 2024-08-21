@@ -8,22 +8,22 @@
 
 import type {
   AwaitingControlGroupAPI,
-  ControlGroupContainer,
-  ControlGroupInputBuilder,
+  ControlGroupStateBuilder,
   ControlGroupRendererProps,
+  ControlGroupRendererApi,
 } from '@kbn/controls-plugin/public';
 import React, { useState, forwardRef, useEffect, useImperativeHandle } from 'react';
 import { TEST_IDS } from '../constants';
 import { getControlGroupMock } from './control_group';
 
 export const getMockedControlGroupRenderer = (
-  controlGroupContainerMock: ControlGroupContainer | undefined
+  controlGroupApiMock: ControlGroupRendererApi | undefined
 ) => {
-  const controlGroupMock = controlGroupContainerMock ?? getControlGroupMock();
+  const controlGroupMock = controlGroupApiMock ?? getControlGroupMock();
 
   const MockedControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlGroupRendererProps>(
     ({ getCreationOptions }, ref) => {
-      useImperativeHandle(ref, () => controlGroupMock as unknown as ControlGroupContainer, []);
+      useImperativeHandle(ref, () => controlGroupMock as unknown as ControlGroupRendererApi, []);
       const [creationOptionsCalled, setCreationOptionsCalled] = useState(false);
 
       useEffect(() => {
@@ -31,8 +31,8 @@ export const getMockedControlGroupRenderer = (
         setCreationOptionsCalled(true);
         if (getCreationOptions) {
           getCreationOptions({}, {
-            addOptionsListControl: controlGroupMock.addOptionsListControl,
-          } as unknown as ControlGroupInputBuilder);
+            addOptionsListControl: jest.fn(),
+          } as unknown as ControlGroupStateBuilder);
         }
       }, [getCreationOptions, creationOptionsCalled]);
       return <div data-test-subj={TEST_IDS.MOCKED_CONTROL} />;

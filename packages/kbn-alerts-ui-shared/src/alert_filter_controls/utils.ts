@@ -15,7 +15,6 @@ import type { FilterControlConfig } from './types';
 
 export const getPanelsInOrderFromControlsInput = (controlInput: ControlGroupRuntimeState) => {
   const panels = controlInput.initialChildControlState;
-
   return Object.values(panels).sort((a, b) => a.order - b.order);
 };
 

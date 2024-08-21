@@ -98,9 +98,9 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   } = useViewEditMode({});
 
   const {
-    controlGroupInput: controlGroupInputUpdates,
-    setControlGroupInput: setControlGroupInputUpdates,
-    getStoredControlGroupInput: getStoredControlInput,
+    controlGroupState: controlGroupStateUpdates,
+    setControlGroupState: setControlGroupStateUpdates,
+    getStoredControlGroupState: getStoredControlState,
   } = useControlGroupSyncToLocalStorage({
     Storage,
     storageKey: localStoragePageFilterKey,
@@ -108,13 +108,13 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   });
 
   useEffect(() => {
-    if (controlGroupInputUpdates) {
-      const formattedFilters = getFilterItemObjListFromControlInput(controlGroupInputUpdates);
+    if (controlGroupStateUpdates) {
+      const formattedFilters = getFilterItemObjListFromControlInput(controlGroupStateUpdates);
       if (!formattedFilters) return;
-      // if (controlGroupInputUpdates.viewMode !== 'view') return;
+      if (!isViewMode) return;
       setControlsUrlState?.(formattedFilters);
     }
-  }, [controlGroupInputUpdates, setControlsUrlState]);
+  }, [controlGroupStateUpdates, setControlsUrlState, isViewMode]);
 
   const [showFiltersChangedBanner, setShowFiltersChangedBanner] = useState(false);
 
@@ -154,28 +154,23 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     };
   }, [filters, query]);
 
-  const handleInputUpdates = useCallback(
-    (newInput?: Partial<ControlGroupRuntimeState>) => {
-      if (!controlGroup || !newInput) return;
-
-      const storedInput = getStoredControlInput();
-      const currentRuntimState = controlGroup.snapshotRuntimeState();
-      if (JSON.stringify(storedInput) === JSON.stringify(currentRuntimState)) {
+  const handleStateUpdates = useCallback(
+    (newState: ControlGroupRuntimeState) => {
+      if (isEqual(getStoredControlState(), newState)) {
         return;
       }
-      if (!isViewMode) {
+      if (
+        !isEqual(
+          newState?.initialChildControlState,
+          getStoredControlState()?.initialChildControlState
+        ) &&
+        !isViewMode
+      ) {
         setHasPendingChanges(true);
-      } else {
-        setControlGroupInputUpdates(currentRuntimState);
       }
+      setControlGroupStateUpdates(newState);
     },
-    [
-      setControlGroupInputUpdates,
-      getStoredControlInput,
-      isViewMode,
-      controlGroup,
-      setHasPendingChanges,
-    ]
+    [setControlGroupStateUpdates, getStoredControlState, isViewMode, setHasPendingChanges]
   );
 
   const handleOutputFilterUpdates = useCallback(
@@ -197,7 +192,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       if (!Array.isArray(controlsUrlState)) {
         throw new Error(URL_PARAM_ARRAY_EXCEPTION_MSG);
       }
-      const storedControlGroupInput = getStoredControlInput();
+      const storedControlGroupInput = getStoredControlState();
       if (storedControlGroupInput) {
         const panelsFormatted = getFilterItemObjListFromControlInput(storedControlGroupInput);
         if (
@@ -219,7 +214,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       console.error(err);
     }
     setUrlStateInitialized(true);
-  }, [controlsUrlState, getStoredControlInput, switchToEditMode]);
+  }, [controlsUrlState, getStoredControlState, switchToEditMode]);
 
   useEffect(() => {
     if (controlsUrlState && !urlStateInitialized) {
@@ -234,12 +229,8 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       next: debouncedFilterUpdates,
     });
 
-    // inputChangedSubscription.current = controlGroup.getInput$().subscribe({
-    //   next: handleInputUpdates,
-    // });
-
-    inputChangedSubscription.current = controlGroup.unsavedChanges.subscribe({
-      next: handleInputUpdates,
+    inputChangedSubscription.current = controlGroup.getInput$().subscribe({
+      next: handleStateUpdates,
     });
 
     return () => {
@@ -251,8 +242,8 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     controlGroup,
     controlsUrlState,
     debouncedFilterUpdates,
-    getStoredControlInput,
-    handleInputUpdates,
+    getStoredControlState,
+    handleStateUpdates,
     initializeUrlState,
     switchToEditMode,
     urlStateInitialized,
@@ -269,6 +260,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
 
   const selectControlsWithPriority = useCallback(() => {
     /*
+     *
      * Below is the priority of how controls are fetched.
      *  1. URL
      *  2. If not found in URL, see in Localstorage
@@ -277,7 +269,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
      * */
 
     let controlsFromLocalStorage: FilterControlConfig[] = [];
-    const storedControlGroupInput = getStoredControlInput();
+    const storedControlGroupInput = getStoredControlState();
     if (storedControlGroupInput) {
       controlsFromLocalStorage = getFilterItemObjListFromControlInput(storedControlGroupInput);
     }
@@ -303,7 +295,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       controls: overridingControls,
       defaultControls,
     });
-  }, [getStoredControlInput, controlsFromUrl, defaultControlsObj, defaultControls]);
+  }, [getStoredControlState, controlsFromUrl, defaultControlsObj, defaultControls]);
 
   const getCreationOptions: ControlGroupRendererProps['getCreationOptions'] = useCallback(
     async (
@@ -314,20 +306,26 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
         ...defaultInput,
         defaultControlWidth: 'small',
         chainingSystem,
+        ignoreParentSettings: {
+          ignoreValidations: true,
+        },
       };
 
       const finalControls = selectControlsWithPriority();
       urlDataApplied.current = true;
 
       finalControls.forEach((control, idx) => {
-        addOptionsListControl(initialState, {
-          controlId: String(idx),
-          ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
-          // option List controls will handle an invalid dataview
-          // & display an appropriate message
-          dataViewId: dataViewId ?? '',
-          ...control,
-        });
+        addOptionsListControl(
+          initialState,
+          {
+            ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
+            // option List controls will handle an invalid dataview
+            // & display an appropriate message
+            dataViewId: dataViewId ?? '',
+            ...control,
+          },
+          String(idx)
+        );
       });
 
       return {
@@ -346,12 +344,12 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   const discardChangesHandler = useCallback(async () => {
     if (hasPendingChanges) {
       controlGroup?.updateInput({
-        initialChildControlState: getStoredControlInput()?.initialChildControlState,
+        initialChildControlState: getStoredControlState()?.initialChildControlState,
       });
     }
     switchToViewMode();
     setShowFiltersChangedBanner(false);
-  }, [controlGroup, switchToViewMode, getStoredControlInput, hasPendingChanges]);
+  }, [controlGroup, switchToViewMode, getStoredControlState, hasPendingChanges]);
 
   const upsertPersistableControls = useCallback(async () => {
     if (!controlGroup) return;
@@ -429,7 +427,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
         initialControls: defaultControls,
         isViewMode,
         controlGroup,
-        controlGroupInputUpdates,
+        controlGroupInputUpdates: controlGroupStateUpdates,
         hasPendingChanges,
         pendingChangesPopoverOpen,
         setHasPendingChanges,
@@ -463,8 +461,8 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
                 <AddControl
                   onClick={addControlsHandler}
                   isDisabled={
-                    controlGroupInputUpdates &&
-                    Object.values(controlGroupInputUpdates.initialChildControlState).length >=
+                    controlGroupStateUpdates &&
+                    Object.values(controlGroupStateUpdates.initialChildControlState).length >=
                       maxControls
                   }
                 />
