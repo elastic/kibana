@@ -93,7 +93,7 @@ function printCommandArgument(
     return param.name || '';
   }
   return `${param.name}${param.optional ? ':?' : ':'} ${param.type}${
-    param.innerType ? `{${param.innerType}}` : ''
+    param.innerTypes ? `{${param.innerTypes}}` : ''
   }`;
 }
 

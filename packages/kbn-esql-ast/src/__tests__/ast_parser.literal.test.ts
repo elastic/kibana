@@ -22,4 +22,28 @@ describe('literal expression', () => {
       value: 1,
     });
   });
+
+  it('decimals vs integers', () => {
+    const text = 'ROW a(1.0, 1)';
+    const { ast } = parse(text);
+
+    expect(ast[0]).toMatchObject({
+      type: 'command',
+      args: [
+        {
+          type: 'function',
+          args: [
+            {
+              type: 'literal',
+              literalType: 'decimal',
+            },
+            {
+              type: 'literal',
+              literalType: 'integer',
+            },
+          ],
+        },
+      ],
+    });
+  });
 });
