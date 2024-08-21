@@ -54,13 +54,7 @@ interface Props {
   api: ControlGroupApi; // controls must always have a parent API
 }
 
-export const ControlGroupEditor = ({
-  onCancel,
-  onSave,
-  onDeleteAll,
-  stateManager,
-  api,
-}: Props) => {
+export const ControlGroupEditor = ({ onCancel, onSave, onDeleteAll, stateManager, api }: Props) => {
   const [
     children,
     selectedLabelPosition,
