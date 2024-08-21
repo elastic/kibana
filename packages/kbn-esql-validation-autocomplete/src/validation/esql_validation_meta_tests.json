@@ -16334,21 +16334,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | where mv_count(dateNanosField) > 0",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = mv_count(dateNanosField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval mv_count(dateNanosField)",
-      "error": [],
-      "warning": []
-    },
-    {
       "query": "row var = mv_dedupe(true)",
       "error": [],
       "warning": []
@@ -17312,16 +17297,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = mv_first(dateNanosField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval mv_first(dateNanosField)",
-      "error": [],
-      "warning": []
-    },
-    {
       "query": "row var = mv_last(true)",
       "error": [],
       "warning": []
@@ -17811,16 +17786,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = mv_last(dateNanosField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval mv_last(dateNanosField)",
-      "error": [],
-      "warning": []
-    },
-    {
       "query": "row var = mv_max(true)",
       "error": [],
       "warning": []
@@ -18137,16 +18102,6 @@
     },
     {
       "query": "from a_index | eval mv_max(concat(\"20\", \"22\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = mv_max(dateNanosField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval mv_max(dateNanosField)",
       "error": [],
       "warning": []
     },
@@ -18617,16 +18572,6 @@
     },
     {
       "query": "from a_index | eval mv_min(concat(\"20\", \"22\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = mv_min(dateNanosField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval mv_min(dateNanosField)",
       "error": [],
       "warning": []
     },
