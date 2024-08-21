@@ -92,9 +92,8 @@ export const selectConversation = (conversationName: string) => {
 
 export const updateConversationTitle = (newTitle: string) => {
   cy.get(CONVERSATION_TITLE + ' h2').click();
-  cy.get(CONVERSATION_TITLE + ' input')
-    .clear()
-    .type(newTitle);
+  cy.get(CONVERSATION_TITLE + ' input').clear();
+  cy.get(CONVERSATION_TITLE + ' input').type(newTitle);
   cy.get(CONVERSATION_TITLE + ' input').type('{enter}');
   cy.get(CONVERSATION_TITLE + ' h2').should('have.text', newTitle);
 };
