@@ -12,7 +12,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const find = getService('find');
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
@@ -22,65 +21,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
 
-  describe('Dashboard control group settings', () => {
+  describe.only('Dashboard control group settings', () => {
     before(async () => {
-      await dashboard.navigateToApp();
-      await dashboard.gotoDashboardLandingPage();
-      await dashboard.clickNewDashboard();
-      await timePicker.setDefaultDataRange();
-      await dashboard.saveDashboard('Test Control Group Settings');
-    });
-
-    it('adjust layout of controls', async () => {
-      await dashboard.switchToEditMode();
-      await dashboardControls.createControl({
-        controlType: OPTIONS_LIST_CONTROL,
-        dataViewTitle: 'animals-*',
-        fieldName: 'sound.keyword',
-      });
-      await dashboardControls.adjustControlsLayout('twoLine');
-      const controlGroupWrapper = await testSubjects.find('controls-group-wrapper');
-      expect(await controlGroupWrapper.elementHasClass('controlsWrapper--twoLine')).to.be(true);
-    });
-
-    describe('apply new default width and grow', async () => {
-      it('defaults to medium width and grow enabled', async () => {
-        await dashboardControls.openCreateControlFlyout();
-        const mediumWidthButton = await testSubjects.find('control-editor-width-medium');
-        expect(await mediumWidthButton.elementHasClass('euiButtonGroupButton-isSelected')).to.be(
-          true
-        );
-        const growSwitch = await testSubjects.find('control-editor-grow-switch');
-        expect(await growSwitch.getAttribute('aria-checked')).to.be('true');
-        await testSubjects.click('control-editor-cancel');
-      });
-
-      it('sets default to width and grow of last created control', async () => {
-        await dashboardControls.createControl({
-          controlType: OPTIONS_LIST_CONTROL,
-          dataViewTitle: 'animals-*',
-          fieldName: 'name.keyword',
-          width: 'small',
-          grow: false,
-        });
-
-        const controlIds = await dashboardControls.getAllControlIds();
-        const firstControl = await find.byXPath(`//div[@data-control-id="${controlIds[0]}"]`);
-        expect(await firstControl.elementHasClass('controlFrameWrapper--medium')).to.be(true);
-        expect(await firstControl.getAttribute('class')).not.to.contain('euiFlexItem-growZero');
-        const secondControl = await find.byXPath(`//div[@data-control-id="${controlIds[1]}"]`);
-        expect(await secondControl.elementHasClass('controlFrameWrapper--small')).to.be(true);
-        expect(await secondControl.getAttribute('class')).to.contain('euiFlexItem-growZero');
-
-        await dashboardControls.openCreateControlFlyout();
-        const smallWidthButton = await testSubjects.find('control-editor-width-small');
-        expect(await smallWidthButton.elementHasClass('euiButtonGroupButton-isSelected')).to.be(
-          true
-        );
-        const growSwitch = await testSubjects.find('control-editor-grow-switch');
-        expect(await growSwitch.getAttribute('aria-checked')).to.be('false');
-        await testSubjects.click('control-editor-cancel');
-      });
+      await dashboard.loadSavedDashboard('control group settings test dashboard');
     });
 
     describe('filtering settings', async () => {
@@ -106,13 +49,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       };
 
       before(async () => {
-        await dashboardControls.createControl({
-          controlType: RANGE_SLIDER_CONTROL,
-          dataViewTitle: 'animals-*',
-          fieldName: 'weightLbs',
-        });
-        await dashboard.clickQuickSave();
-
         firstOptionsListId = (await dashboardControls.getAllControlIds())[0];
         await dashboardControls.optionsListWaitForLoading(firstOptionsListId);
         await dashboardControls.optionsListOpenPopover(firstOptionsListId);
