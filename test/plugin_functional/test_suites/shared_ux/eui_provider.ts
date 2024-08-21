@@ -35,7 +35,9 @@ export default function ({ getPageObjects, getService }: PluginFunctionalProvide
       expect(errorStack).to.not.be.empty();
       expect(errorPageHref).to.not.be.empty();
       expect(errorPageTitle).to.be(pageTitle);
+    });
 
+    after(async () => {
       // clean up to ensure test suite will pass
       await browser.removeSessionStorageItem('dev.euiProviderWarning');
     });
