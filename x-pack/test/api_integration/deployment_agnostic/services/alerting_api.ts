@@ -88,7 +88,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
           index: indexName,
           rest_total_hits_as_int: true,
         });
-        logger.debug(`Found ${response.hits.total} docs, looking for atleast ${docCountTarget}.`);
+        logger.debug(`Found ${response.hits.total} docs, looking for at least ${docCountTarget}.`);
 
         if (
           !response.hits.total ||
