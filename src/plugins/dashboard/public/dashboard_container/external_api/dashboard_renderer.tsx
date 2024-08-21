@@ -218,6 +218,6 @@ const ParentClassController = ({
     } else {
       parentDiv.classList.remove('dshDashboardViewportWrapper');
     }
-  }, [dashboard.expandedPanelId.value, maximizedPanelId, viewportRef.parentElement]);
+  }, [maximizedPanelId, viewportRef.parentElement]);
   return null;
 };

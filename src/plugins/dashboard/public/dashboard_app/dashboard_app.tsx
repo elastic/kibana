@@ -209,7 +209,7 @@ export function DashboardApp({
       kbnUrlStateStorage.kbnUrlControls.update(newUrl, true);
     });
     return () => stopWatchingAppStateInUrl();
-  }, [dashboardAPI, kbnUrlStateStorage, savedDashboardId, expandedPanelId]);
+  }, [dashboardAPI, kbnUrlStateStorage, savedDashboardId]);
 
   const locator = useMemo(() => url?.locators.get(DASHBOARD_APP_LOCATOR), [url]);
 
