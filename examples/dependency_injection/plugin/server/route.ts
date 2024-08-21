@@ -15,7 +15,7 @@ import {
   type KibanaResponseFactory,
   ResponseToken,
 } from '@kbn/core-http-server';
-import { EchoService, type Echo } from '@kbn/dependency-injection-service-example-plugin/server';
+import { EchoService, type Echo } from '@kbn/dependency-injection-example-service/server';
 
 export type EchoRequest = KibanaRequest<never, never, TypeOf<typeof EchoRoute.validate.body>>;
 
