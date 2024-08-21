@@ -108,7 +108,7 @@ export interface WebpackIgnoredModule {
 }
 
 export function isIgnoredModule(module: any): module is WebpackIgnoredModule {
-  return module?.constructor?.name === 'RawModule' && module.identifierStr?.startsWith('ignored ');
+  return module?.constructor?.name === 'RawModule' && module.identifierStr?.startsWith('ignored');
 }
 
 /** module replacing imports for webpack externals */
@@ -154,4 +154,8 @@ export function isDelegatedModule(module: any): module is WebpackDelegatedModule
 export function getModulePath(module: WebpackNormalModule) {
   const queryIndex = module.resource.indexOf('?');
   return queryIndex === -1 ? module.resource : module.resource.slice(0, queryIndex);
+}
+
+export function isRuntimeModule(module: any): boolean {
+  return module instanceof webpack.RuntimeModule;
 }

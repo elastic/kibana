@@ -21,7 +21,7 @@ interface RequestData {
 }
 
 type Callback<T> = (error?: any, result?: T) => void;
-type ModuleFactory = (data: RequestData, callback: Callback<BundleRemoteModule>) => void;
+// type ModuleFactory = (data: RequestData, callback: Callback<BundleRemoteModule>) => void;
 
 export class BundleRemotesPlugin {
   private allowedBundleIds = new Set<string>();
@@ -34,40 +34,40 @@ export class BundleRemotesPlugin {
   public apply(compiler: webpack.Compiler) {
     // called whenever the compiler starts to compile, passed the params
     // that will be used to create the compilation
-    compiler.hooks.compile.tap('BundleRemotesPlugin', (compilationParams: any) => {
+    compiler.hooks.normalModuleFactory.tap('BundleRemotesPlugin', (normalModuleFactory: any) => {
       const moduleCache = new Map<string, BundleRemoteModule | null>();
-
       // hook into the creation of NormalModule instances in webpack, if the import
       // statement leading to the creation of the module is pointing to a bundleRef
       // entry then create a BundleRefModule instead of a NormalModule.
-      compilationParams.normalModuleFactory.hooks.factory.tap(
+      normalModuleFactory.hooks.factorize.tapAsync(
         'BundleRefsPlugin/normalModuleFactory/factory',
-        (wrappedFactory: ModuleFactory): ModuleFactory =>
-          (data, callback) => {
-            const { request } = data.dependencies[0];
+        (data: RequestData, callback: Callback<BundleRemoteModule>) => {
+          const { request } = data.dependencies[0];
 
-            const cached = moduleCache.get(request);
-            if (cached === null) {
-              return wrappedFactory(data, callback);
-            }
-            if (cached !== undefined) {
-              return callback(null, cached);
-            }
-
-            this.resolve(request, (error, result) => {
-              if (error || result === undefined) {
-                return callback(error);
-              }
-
-              moduleCache.set(request, result);
-
-              if (result === null) {
-                return wrappedFactory(data, callback);
-              }
-
-              callback(null, result);
-            });
+          const cached = moduleCache.get(request);
+          if (cached === null) {
+            // return normalModuleFactory(data, callback);
+            return callback(null, undefined);
           }
+          if (cached !== undefined) {
+            return callback(null, cached);
+          }
+
+          this.resolve(request, (error, result) => {
+            if (error || result === undefined) {
+              return callback(error);
+            }
+
+            moduleCache.set(request, result);
+
+            if (result === null) {
+              // return normalModuleFactory(data, callback);
+              return callback(null, undefined);
+            }
+
+            callback(null, result);
+          });
+        }
       );
     });
 
@@ -96,7 +96,7 @@ export class BundleRemotesPlugin {
             .join(', ');
 
           if (unusedBundleIds) {
-            const error = new Error(
+            const error = new webpack.WebpackError(
               `Bundle for [${this.bundle.id}] lists [${unusedBundleIds}] as a required bundle, but does not use it. Please remove it.`
             );
             (error as any).file = manifestPath;

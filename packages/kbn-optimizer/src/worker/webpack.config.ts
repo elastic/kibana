@@ -288,6 +288,9 @@ export function getWebpackConfig(
         child_process: false,
         fs: false,
       },
+      fallback: {
+        path: require.resolve('path-browserify'),
+      }
     },
 
     performance: {

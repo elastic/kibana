@@ -16,6 +16,7 @@ import {
   isIgnoredModule,
   isConcatenatedModule,
   isDelegatedModule,
+  isRuntimeModule,
   getModulePath,
 } from '@kbn/optimizer-webpack-helpers';
 
@@ -130,7 +131,7 @@ export class PopulateBundleCachePlugin {
             continue;
           }
 
-          if (isExternalModule(module) || isIgnoredModule(module)) {
+          if (isExternalModule(module) || isIgnoredModule(module) || isRuntimeModule(module)) {
             continue;
           }
 

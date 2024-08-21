@@ -24,4 +24,5 @@ export {
   isExternalModule,
   isIgnoredModule,
   isNormalModule,
+  isRuntimeModule,
 } from './src/webpack_helpers';
