@@ -11,29 +11,7 @@ import { test } from '../../fixtures/saml';
 
 export const authFile = '.auth/user.json';
 
-/*
-test('ess - login', async ({ request }) => {
-  await request.post(`${process.env.KIBANA_URL}/internal/security/login`, {
-    headers: {
-      'kbn-xsrf': 'cypress-creds',
-      'x-elastic-internal-origin': 'security-solution',
-      'elastic-api-version': '2023-10-31',
-    },
-    data: {
-      providerType: 'basic',
-      providerName: 'basic',
-      currentURL: '/',
-      params: {
-        username: process.env.ELASTICSEARCH_USERNAME,
-        password: process.env.ELASTICSEARCH_PASSWORD,
-      },
-    },
-  });
-
-  await request.storageState({ path: authFile });
-}); */
-
-test('serverless - login', async ({ samlSessionManager }) => {
+test('serverless', { tag: '@serverless' }, async ({ samlSessionManager }) => {
   const cookie = await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(
     'platform_engineer'
   );

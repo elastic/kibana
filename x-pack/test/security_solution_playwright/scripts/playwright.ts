@@ -276,6 +276,7 @@ ${JSON.stringify(playwrightConfigFile, null, 2)}
                   KIBANA_PASSWORD: config.get('servers.kibana.password'),
                   IS_SERVERLESS: config.get('serverless'),
                 };
+
                 log.info(`
                 ----------------------------------------------
                 Playwright run ENV for file: ${filePath}:
@@ -284,9 +285,10 @@ ${JSON.stringify(playwrightConfigFile, null, 2)}
                 ----------------------------------------------
                 `);
 
+                const project = playwrightCustomEnv.IS_SERVERLESS ? 'serverless' : 'ess';
                 if (isOpen) {
                   await execa.command(
-                    `npx playwright test --config ${playwrightConfigFilePath}  --ui`,
+                    `npx playwright test --config ${playwrightConfigFilePath} --ui --project ${project}`,
                     {
                       env: {
                         ...playwrightCustomEnv,

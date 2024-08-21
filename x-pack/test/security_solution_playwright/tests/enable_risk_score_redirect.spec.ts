@@ -20,7 +20,7 @@ test.afterAll(async ({ esArchiver }) => {
   await esArchiver.unload('auditbeat_single');
 });
 
-test.describe('Enable risk scores from dashboard', () => {
+test.describe('Enable risk scores from dashboard', { tag: ['@serverless', '@ess'] }, () => {
   test.use({ storageState: '.auth/user.json' });
   test.beforeEach(async ({ page, context }) => {
     entityAnalyticsPage = await PageFactory.createEntityAnalyticsPage(page);

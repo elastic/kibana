@@ -25,13 +25,22 @@ export default defineConfig({
   },
   projects: [
     {
-      name: 'login',
-      testMatch: '**/setup/login.ts',
+      name: 'login_ess',
+      testMatch: '**/setup/login_ess.ts',
     },
     {
-      name: 'chromium',
+      name: 'login_serverless',
+      testMatch: '**/setup/login_serverless.ts',
+    },
+    {
+      name: 'ess',
       use: { ...devices['Desktop Chrome'] },
-      dependencies: ['login'],
+      dependencies: ['login_ess'],
+    },
+    {
+      name: 'serverless',
+      use: { ...devices['Desktop Chrome'] },
+      dependencies: ['login_serverless'],
     },
   ],
 });
