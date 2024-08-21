@@ -211,5 +211,6 @@
     "@kbn/esql-ast",
     "@kbn/esql-validation-autocomplete",
     "@kbn/config",
+    "@kbn/zod",
   ]
 }

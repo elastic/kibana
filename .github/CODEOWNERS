@@ -87,6 +87,8 @@ x-pack/plugins/cloud_integrations/cloud_full_story @elastic/kibana-core
 x-pack/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_links @elastic/kibana-core
 x-pack/plugins/cloud @elastic/kibana-core
+x-pack/packages/kbn-cloud-security-posture @elastic/kibana-cloud-security-posture
+x-pack/packages/kbn-cloud-security-posture-common @elastic/kibana-cloud-security-posture
 x-pack/plugins/cloud_security_posture @elastic/kibana-cloud-security-posture
 packages/shared-ux/code_editor/impl @elastic/appex-sharedux
 packages/shared-ux/code_editor/mocks @elastic/appex-sharedux
@@ -848,6 +850,7 @@ packages/shared-ux/router/types @elastic/appex-sharedux
 packages/shared-ux/storybook/config @elastic/appex-sharedux
 packages/shared-ux/storybook/mock @elastic/appex-sharedux
 packages/shared-ux/modal/tabbed @elastic/appex-sharedux
+packages/shared-ux/table_persist @elastic/appex-sharedux
 packages/kbn-shared-ux-utility @elastic/appex-sharedux
 x-pack/plugins/observability_solution/slo @elastic/obs-ux-management-team
 x-pack/packages/kbn-slo-schema @elastic/obs-ux-management-team
@@ -1148,7 +1151,6 @@ x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /x-pack/test/api_integration/apis/monitoring_collection @elastic/stack-monitoring
 
 # Fleet
-/fleet_packages.json @elastic/fleet
 /x-pack/test/fleet_api_integration @elastic/fleet
 /x-pack/test/fleet_cypress @elastic/fleet
 /x-pack/test/fleet_functional @elastic/fleet
