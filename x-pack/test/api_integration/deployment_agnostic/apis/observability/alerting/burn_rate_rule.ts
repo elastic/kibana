@@ -4,46 +4,41 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 
 import { cleanup, Dataset, generate, PartialConfig } from '@kbn/data-forge';
+import { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
+import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
-  const supertest = getService('supertest');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
+  const samlAuth = getService('samlAuth');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const logger = getService('log');
   const alertingApi = getService('alertingApi');
   const dataViewApi = getService('dataViewApi');
   const sloApi = getService('sloApi');
-  const svlUserManager = getService('svlUserManager');
-  const svlCommonApi = getService('svlCommonApi');
-  let roleAuthc: RoleCredentials;
-  let internalReqHeader: InternalRequestHeader;
+  const config = getService('config');
+  const isServerless = config.get('serverless');
+  const expectedConsumer = isServerless ? 'observability' : 'slo';
 
   describe('Burn rate rule', () => {
     const RULE_TYPE_ID = 'slo.rules.burnRate';
     const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
     const RULE_ALERT_INDEX = '.alerts-observability.slo.alerts-default';
-
     const ALERT_ACTION_INDEX = 'alert-action-slo';
     const DATA_VIEW_ID = 'data-view-id';
     let dataForgeConfig: PartialConfig;
     let dataForgeIndices: string[];
     let actionId: string;
     let ruleId: string;
+    let adminRoleAuthc: RoleCredentials;
+    let internalHeaders: InternalRequestHeader;
 
     before(async () => {
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+      adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+      internalHeaders = samlAuth.getInternalRequestHeader();
       dataForgeConfig = {
         schedule: [
           {
@@ -60,37 +55,49 @@ export default function ({ getService }: FtrProviderContext) {
         indexing: { dataset: 'fake_hosts' as Dataset, eventsPerCycle: 1, interval: 10000 },
       };
       dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
-      await alertingApi.waitForDocumentInIndex({ indexName: DATA_VIEW, docCountTarget: 360 });
+      await alertingApi.waitForDocumentInIndex({
+        indexName: DATA_VIEW,
+        docCountTarget: 360,
+      });
       await dataViewApi.create({
+        roleAuthc: adminRoleAuthc,
         name: DATA_VIEW,
         id: DATA_VIEW_ID,
         title: DATA_VIEW,
       });
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
 
     after(async () => {
-      await supertest.delete(`/api/alerting/rule/${ruleId}`).set(internalReqHeader);
-      await supertest.delete(`/api/actions/connector/${actionId}`).set(internalReqHeader);
+      await supertestWithoutAuth
+        .delete(`/api/alerting/rule/${ruleId}`)
+        .set(adminRoleAuthc.apiKeyHeader)
+        .set(internalHeaders);
+      await supertestWithoutAuth
+        .delete(`/api/actions/connector/${actionId}`)
+        .set(adminRoleAuthc.apiKeyHeader)
+        .set(internalHeaders);
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
         query: { term: { 'rule.id': ruleId } },
         conflicts: 'proceed',
       });
       await dataViewApi.delete({
+        roleAuthc: adminRoleAuthc,
         id: DATA_VIEW_ID,
       });
-      await supertest.delete('/api/observability/slos/my-custom-id').set(internalReqHeader);
-
+      await supertestWithoutAuth
+        .delete('/api/observability/slos/my-custom-id')
+        .set(adminRoleAuthc.apiKeyHeader)
+        .set(internalHeaders);
       await esDeleteAllIndices([ALERT_ACTION_INDEX, ...dataForgeIndices]);
       await cleanup({ client: esClient, config: dataForgeConfig, logger });
-      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
     });
 
     describe('Rule creation', () => {
       it('creates rule successfully', async () => {
         actionId = await alertingApi.createIndexConnector({
-          roleAuthc,
+          roleAuthc: adminRoleAuthc,
           name: 'Index Connector: Slo Burn rate API test',
           indexName: ALERT_ACTION_INDEX,
         });
@@ -119,13 +126,13 @@ export default function ({ getService }: FtrProviderContext) {
             },
             groupBy: '*',
           },
-          roleAuthc
+          adminRoleAuthc
         );
 
         const dependencyRule = await alertingApi.createRule({
-          roleAuthc,
+          roleAuthc: adminRoleAuthc,
           tags: ['observability'],
-          consumer: 'observability',
+          consumer: expectedConsumer,
           name: 'SLO Burn Rate rule - Dependency',
           ruleTypeId: RULE_TYPE_ID,
           schedule: {
@@ -196,9 +203,9 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         const createdRule = await alertingApi.createRule({
-          roleAuthc,
+          roleAuthc: adminRoleAuthc,
           tags: ['observability'],
-          consumer: 'observability',
+          consumer: expectedConsumer,
           name: 'SLO Burn Rate rule',
           ruleTypeId: RULE_TYPE_ID,
           schedule: {
@@ -279,7 +286,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should be active', async () => {
         const executionStatus = await alertingApi.waitForRuleStatus({
-          roleAuthc,
+          roleAuthc: adminRoleAuthc,
           ruleId,
           expectedStatus: 'active',
         });
@@ -299,9 +306,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should find the created rule with correct information about the consumer', async () => {
-        const match = await alertingApi.findRule(roleAuthc, ruleId);
+        const match = await alertingApi.findRule(ruleId, adminRoleAuthc);
         expect(match).not.to.be(undefined);
-        expect(match.consumer).to.be('observability');
+        expect(match.consumer).to.be(expectedConsumer);
       });
     });
   });
