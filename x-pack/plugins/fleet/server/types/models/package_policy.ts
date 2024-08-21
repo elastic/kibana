@@ -96,7 +96,7 @@ const PackagePolicyBaseSchema = {
   name: schema.string(),
   description: schema.maybe(schema.string()),
   namespace: schema.maybe(PackagePolicyNamespaceSchema),
-  policy_id: schema.maybe(schema.string()),
+  policy_id: schema.nullable(schema.maybe(schema.string())),
   policy_ids: schema.maybe(schema.arrayOf(schema.string())),
   output_id: schema.nullable(schema.maybe(schema.string())),
   enabled: schema.boolean(),
@@ -221,7 +221,7 @@ export const SimplifiedPackagePolicyPreconfiguredSchema = SimplifiedPackagePolic
 
 export const SimplifiedCreatePackagePolicyRequestBodySchema =
   SimplifiedPackagePolicyBaseSchema.extends({
-    policy_id: schema.maybe(schema.string()),
+    policy_id: schema.nullable(schema.maybe(schema.string())),
     policy_ids: schema.maybe(schema.arrayOf(schema.string())),
     force: schema.maybe(schema.boolean()),
     package: schema.object({

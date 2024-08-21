@@ -416,8 +416,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
   keepPolicyIdInSync(packagePolicy: NewPackagePolicy): void {
     if (packagePolicy.policy_ids) {
-      if (packagePolicy.policy_ids.length === 0) {
-        packagePolicy.policy_id = undefined;
+      if (packagePolicy.policy_ids.length === 0 && packagePolicy.policy_id !== undefined) {
+        packagePolicy.policy_id = null;
       }
     } else {
       packagePolicy.policy_ids = [];
@@ -997,7 +997,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       },
       {
         version,
-        mergeAttributes: false,
       }
     );
 
@@ -1194,7 +1193,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             updated_by: options?.user?.username ?? 'system',
           },
           version,
-          mergeAttributes: false,
         });
       } catch (error) {
         failedPolicies.push({ packagePolicy: packagePolicyUpdate, error });
@@ -1818,7 +1816,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             experimental_data_stream_features: newPolicy.package?.experimental_data_stream_features,
           },
           policy_id: newPolicy.policy_id ?? undefined,
-          policy_ids: newPolicy.policy_ids ?? [],
+          policy_ids: newPolicy.policy_ids ?? undefined,
           output_id: newPolicy.output_id,
           inputs: newPolicy.inputs[0]?.streams ? newPolicy.inputs : inputs,
           vars: newPolicy.vars || newPP.vars,
@@ -2602,7 +2600,7 @@ function _enforceFrozenVars(
 
 export interface NewPackagePolicyWithId extends NewPackagePolicy {
   id?: string;
-  policy_id?: string;
+  policy_id?: string | null;
   version?: string;
 }
 

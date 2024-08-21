@@ -386,6 +386,8 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         name: restOfBody.name ?? packagePolicy.name,
         description: restOfBody.description ?? packagePolicy.description,
         namespace: restOfBody.namespace ?? packagePolicy?.namespace,
+        policy_id:
+          restOfBody.policy_id === undefined ? packagePolicy.policy_id : restOfBody.policy_id,
         enabled:
           'enabled' in restOfBody
             ? restOfBody.enabled ?? packagePolicy.enabled
