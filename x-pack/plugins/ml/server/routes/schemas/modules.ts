@@ -119,3 +119,58 @@ export const recognizeModulesSchema = schema.object({
 export const moduleFilterSchema = schema.object({
   filter: schema.maybe(schema.string()),
 });
+
+export const recognizeModulesSchemaResponse = () =>
+  schema.arrayOf(
+    schema.object({
+      id: schema.string(),
+      title: schema.string(),
+      query: schema.any(),
+      description: schema.string(),
+      logo: schema.any(),
+    })
+  );
+
+const moduleSchema = schema.object({
+  id: schema.string(),
+  title: schema.string(),
+  description: schema.string(),
+  type: schema.string(),
+  logo: schema.maybe(schema.any()),
+  logoFile: schema.maybe(schema.string()),
+  defaultIndexPattern: schema.string(),
+  query: schema.any(),
+  jobs: schema.arrayOf(schema.any()),
+  datafeeds: schema.arrayOf(schema.any()),
+  kibana: schema.any(),
+  tags: schema.maybe(schema.arrayOf(schema.string())),
+});
+
+export const getModulesSchemaResponse = () =>
+  schema.oneOf([moduleSchema, schema.arrayOf(moduleSchema)]);
+
+/**
+ *
+ * @link DataRecognizerConfigResponse
+ */
+export const dataRecognizerConfigResponse = () =>
+  schema.object({
+    datafeeds: schema.arrayOf(schema.any()),
+    jobs: schema.arrayOf(schema.any()),
+    kibana: schema.any(),
+  });
+
+export const jobExistsResponse = () =>
+  schema.object({
+    jobsExist: schema.boolean(),
+    jobs: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          id: schema.string(),
+          earliestTimestampMs: schema.number(),
+          latestTimestampMs: schema.number(),
+          latestResultsTimestampMs: schema.maybe(schema.number()),
+        })
+      )
+    ),
+  });
