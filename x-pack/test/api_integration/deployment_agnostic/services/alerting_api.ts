@@ -96,7 +96,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
             ? response.hits.total < docCountTarget
             : response.hits.total.value < docCountTarget)
         ) {
-          throw new Error('No hits found');
+          throw new Error('No hits or not enough hits found');
         }
 
         return response;
