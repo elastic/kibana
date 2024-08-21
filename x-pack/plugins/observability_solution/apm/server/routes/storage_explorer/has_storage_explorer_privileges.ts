@@ -29,7 +29,11 @@ export async function hasStorageExplorerPrivileges({
 
   const names = uniq(
     [transaction, span, metric, error].flatMap((indexPatternString) =>
-      indexPatternString.split(',').map((indexPattern) => indexPattern.trim())
+      indexPatternString
+        .split(',')
+        .map((indexPattern) => indexPattern.trim())
+        // At this point we do not do any work for storage explorer + OTel data. So remove any otel related index
+        .filter((indexPattern) => !indexPattern.includes('otel'))
     )
   );
 
