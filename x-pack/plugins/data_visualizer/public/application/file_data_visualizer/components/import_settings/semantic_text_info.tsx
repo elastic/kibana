@@ -34,7 +34,7 @@ export const SemanticTextInfo: FC<Props> = ({ results }) => {
       >
         <FormattedMessage
           id="xpack.dataVisualizer.semanticTextInfo.body"
-          defaultMessage="You can easily add a {semanticText} field to your index, to enable semantic search on uploaded file content."
+          defaultMessage="You can add a {semanticText} field when importing this file to easily enable semantic search on the content."
           values={{
             semanticText: (
               <EuiLink
@@ -50,7 +50,7 @@ export const SemanticTextInfo: FC<Props> = ({ results }) => {
         <br />
         <FormattedMessage
           id="xpack.dataVisualizer.semanticTextInfo.body2"
-          defaultMessage="In the Advanced tab, click 'Add additional field' and choose 'Add semantic text field' to get started."
+          defaultMessage="In the Advanced tab, click 'Add additional field' and choose 'Add semantic text field'."
         />
       </EuiCallOut>
 
