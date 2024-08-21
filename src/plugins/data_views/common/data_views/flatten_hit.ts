@@ -126,7 +126,7 @@ export function flattenHitWrapper<T>(dataView: DataView, metaFields = {}, cache 
     const decorateFlattened = decorateFlattenedWrapper(hit, metaFields);
     const cached = cache.get(hit);
     const flattened = cached || flattenHit(dataView, hit, deep);
-    if (!cached) {
+    if (!cached && hit) {
       cache.set(hit, { ...flattened });
     }
     return decorateFlattened(flattened);

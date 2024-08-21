@@ -58,7 +58,7 @@ export const getMultiTermsBucketAgg = () => {
     getKey(bucket, key, agg) {
       let keys = keyCaches.get(agg);
 
-      if (!keys) {
+      if (!keys && agg) {
         keys = new Map();
         keyCaches.set(agg, keys);
       }
