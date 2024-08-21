@@ -6684,6 +6684,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-table-persist@link:packages/shared-ux/table_persist":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-utility@link:packages/kbn-shared-ux-utility":
   version "0.0.0"
   uid ""
