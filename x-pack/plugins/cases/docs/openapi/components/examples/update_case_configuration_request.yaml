@@ -12,6 +12,7 @@ value:
       label: my-text-field
       required: true
       type: text
+      defaultValue: "A new default value."
     - key: fcc6840d-eb14-42df-8aaf-232201a705ec
       label: my-toggle
       required: false

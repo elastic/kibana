@@ -10,9 +10,10 @@ import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { ApiKey } from './tabs/api_keys_tab/views/success_form/types';
 import type { Format } from './tabs/api_keys_tab/views/success_form/format_select';
-import type { ConnectionDetailsOpts } from './types';
+import type { ConnectionDetailsOpts, TabID, ConnectionDetailsTelemetryEvents } from './types';
 
 export class ConnectionDetailsService {
+  public readonly tabId$ = new BehaviorSubject<TabID>('endpoints');
   public readonly showCloudId$ = new BehaviorSubject<boolean>(false);
   public readonly apiKeyName$ = new BehaviorSubject<string>('');
   public readonly apiKeyStatus$ = new BehaviorSubject<'configuring' | 'creating'>('configuring');
@@ -33,7 +34,12 @@ export class ConnectionDetailsService {
       });
   }
 
+  public readonly setTab = (tab: TabID) => {
+    this.tabId$.next(tab);
+  };
+
   public readonly toggleShowCloudId = () => {
+    this.emitTelemetryEvent(['show_cloud_id_toggled']);
     this.showCloudId$.next(!this.showCloudId$.getValue());
   };
 
@@ -43,6 +49,7 @@ export class ConnectionDetailsService {
   };
 
   public readonly setApiKeyFormat = (format: Format) => {
+    this.emitTelemetryEvent(['key_encoding_changed', { format }]);
     this.apiKeyFormat$.next(format);
   };
 
@@ -71,6 +78,7 @@ export class ConnectionDetailsService {
         name: this.apiKeyName$.getValue(),
       });
       this.apiKey$.next(apiKey);
+      this.emitTelemetryEvent(['new_api_key_created']);
     } catch (error) {
       this.apiKeyError$.next(error);
     } finally {
@@ -82,5 +90,14 @@ export class ConnectionDetailsService {
     this.createKeyAsync().catch((error) => {
       this.apiKeyError$.next(error);
     });
+  };
+
+  public readonly emitTelemetryEvent = (event: ConnectionDetailsTelemetryEvents) => {
+    try {
+      this.opts.onTelemetryEvent?.(event);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error emitting telemetry event', error);
+    }
   };
 }

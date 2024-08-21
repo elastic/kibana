@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { HealthStatus } from '../types';
+import { HealthStatus } from '@kbn/alerting-types';
 
 /**
  * WARNING: Do not modify the existing versioned schema(s) below, instead define a new version (ex: 2, 3, 4).

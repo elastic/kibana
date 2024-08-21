@@ -108,6 +108,7 @@ describe('StepConfigurePackage', () => {
       description: 'desc',
       namespace: 'default',
       policy_id: '',
+      policy_ids: [''],
       enabled: true,
       inputs: [
         {

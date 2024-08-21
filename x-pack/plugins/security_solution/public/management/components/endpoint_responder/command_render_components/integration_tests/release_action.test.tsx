@@ -134,8 +134,17 @@ describe('When using the release action from response actions console', () => {
     const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
       path: '/api/endpoint/action/1.2.3',
     });
+    pendingDetailResponse.data.command = 'unisolate';
     pendingDetailResponse.data.wasSuccessful = false;
     pendingDetailResponse.data.errors = ['error one', 'error two'];
+    pendingDetailResponse.data.agentState = {
+      'agent-a': {
+        isCompleted: true,
+        wasSuccessful: false,
+        errors: ['error one', 'error two'],
+        completedAt: new Date().toISOString(),
+      },
+    };
     apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
     await render();
     enterConsoleCommand(renderResult, 'release');
@@ -202,6 +211,7 @@ describe('When using the release action from response actions console', () => {
       const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
         path: '/api/endpoint/action/1.2.3',
       });
+      pendingDetailResponse.data.command = 'unisolate';
       pendingDetailResponse.data.isCompleted = false;
       apiMocks.responseProvider.actionDetails.mockClear();
       apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);

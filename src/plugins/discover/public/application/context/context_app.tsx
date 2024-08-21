@@ -23,8 +23,9 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
-import { popularizeField, useColumns } from '@kbn/unified-data-table';
+import { UseColumnsProps, popularizeField, useColumns } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
 import { AppState, GlobalState, isEqualFilters } from './services/context_state';
@@ -69,15 +70,23 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
   const prevAppState = useRef<AppState>();
   const prevGlobalState = useRef<GlobalState>({ filters: [] });
 
+  const setAppState = useCallback<UseColumnsProps['setAppState']>(
+    ({ settings, ...rest }) => {
+      stateContainer.setAppState({ ...rest, grid: settings as DiscoverGridSettings });
+    },
+    [stateContainer]
+  );
+
   const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useColumns({
     capabilities,
     defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
     dataView,
     dataViews,
     useNewFieldsApi,
-    setAppState: stateContainer.setAppState,
+    setAppState,
     columns: appState.columns,
     sort: appState.sort,
+    settings: appState.grid,
   });
 
   useEffect(() => {
@@ -141,7 +150,7 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
         await fetchContextRows();
       }
 
-      if (analytics) {
+      if (analytics && fetchType) {
         const fetchDuration = window.performance.now() - startTime;
         reportPerformanceMetricEvent(analytics, {
           eventName: 'discoverSurroundingDocsFetch',
@@ -260,6 +269,7 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
                 useNewFieldsApi={useNewFieldsApi}
                 isLegacy={isLegacy}
                 columns={columns}
+                grid={appState.grid}
                 onAddColumn={onAddColumn}
                 onRemoveColumn={onRemoveColumn}
                 onSetColumns={onSetColumns}

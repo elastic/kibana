@@ -9,8 +9,8 @@ import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core/public';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 import { cloneDeep } from 'lodash';
-import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 
+import { LegendValue } from '@elastic/charts';
 import { layerTypes } from '../../../common/layer_types';
 import { AnnotationGroups } from '../../types';
 import {
@@ -278,7 +278,7 @@ function convertToLegendStats(state: XYState & { valuesInLegend?: unknown }) {
         ...state.legend,
         legendStats: [
           ...new Set([
-            ...(valuesInLegend ? [XYLegendValue.CurrentAndLastValue] : []),
+            ...(valuesInLegend ? [LegendValue.CurrentAndLastValue] : []),
             ...(state.legend.legendStats || []),
           ]),
         ],

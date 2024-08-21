@@ -8,7 +8,6 @@
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
-import type { estypes } from '@elastic/elasticsearch';
 import apm from 'elastic-apm-node';
 import minimatch from 'minimatch';
 import { Subject, Observable, from, of } from 'rxjs';
@@ -17,8 +16,8 @@ import { groupBy, pick } from 'lodash';
 
 import { asOk } from '../lib/result_type';
 import { TaskTypeDictionary } from '../task_type_dictionary';
-import { TaskClaimerOpts, ClaimOwnershipResult } from '.';
-import { ConcreteTaskInstance, TaskPriority } from '../task';
+import { TaskClaimerOpts, ClaimOwnershipResult, getEmptyClaimOwnershipResult } from '.';
+import { ConcreteTaskInstance } from '../task';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import { isLimited, TASK_MANAGER_MARK_AS_CLAIMED } from '../queries/task_claiming';
 import { TaskClaim, asTaskClaimEvent, startTaskTimer } from '../task_events';
@@ -29,7 +28,7 @@ import {
   IdleTaskWithExpiredRunAt,
   InactiveTasks,
   RunningOrClaimingTaskWithExpiredRetryAt,
-  SortByRunAtAndRetryAt,
+  getClaimSort,
   tasksClaimedByOwner,
   tasksOfType,
   EnabledTask,
@@ -225,20 +224,8 @@ async function sweepForClaimedTasks(
   return docs;
 }
 
-function emptyClaimOwnershipResult() {
-  return {
-    stats: {
-      tasksUpdated: 0,
-      tasksConflicted: 0,
-      tasksClaimed: 0,
-      tasksRejected: 0,
-    },
-    docs: [],
-  };
-}
-
 function accumulateClaimOwnershipResults(
-  prev: ClaimOwnershipResult = emptyClaimOwnershipResult(),
+  prev: ClaimOwnershipResult = getEmptyClaimOwnershipResult(),
   next?: ClaimOwnershipResult
 ) {
   if (next) {
@@ -255,39 +242,4 @@ function accumulateClaimOwnershipResults(
     return res;
   }
   return prev;
-}
-
-function getClaimSort(definitions: TaskTypeDictionary): estypes.SortCombinations[] {
-  // Sort by descending priority, then by ascending runAt/retryAt time
-  return [
-    {
-      _script: {
-        type: 'number',
-        order: 'desc',
-        script: {
-          lang: 'painless',
-          // Use priority if explicitly specified in task definition, otherwise default to 50 (Normal)
-          source: `
-            String taskType = doc['task.taskType'].value;
-            if (params.priority_map.containsKey(taskType)) {
-              return params.priority_map[taskType];
-            } else {
-              return ${TaskPriority.Normal};
-            }
-          `,
-          params: {
-            priority_map: definitions
-              .getAllDefinitions()
-              .reduce<Record<string, TaskPriority>>((acc, taskDefinition) => {
-                if (taskDefinition.priority) {
-                  acc[taskDefinition.type] = taskDefinition.priority;
-                }
-                return acc;
-              }, {}),
-          },
-        },
-      },
-    },
-    SortByRunAtAndRetryAt,
-  ];
 }

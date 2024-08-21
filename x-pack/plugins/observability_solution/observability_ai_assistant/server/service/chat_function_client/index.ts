@@ -16,7 +16,7 @@ import type {
   FunctionCallChatFunction,
   FunctionHandler,
   FunctionHandlerRegistry,
-  RegisteredInstruction,
+  InstructionOrCallback,
   RegisterFunction,
   RegisterInstruction,
 } from '../types';
@@ -31,8 +31,10 @@ const ajv = new Ajv({
   strict: false,
 });
 
+export const GET_DATA_ON_SCREEN_FUNCTION_NAME = 'get_data_on_screen';
+
 export class ChatFunctionClient {
-  private readonly instructions: RegisteredInstruction[] = [];
+  private readonly instructions: InstructionOrCallback[] = [];
   private readonly functionRegistry: FunctionHandlerRegistry = new Map();
   private readonly validators: Map<string, ValidateFunction> = new Map();
 
@@ -46,7 +48,7 @@ export class ChatFunctionClient {
     if (allData.length) {
       this.registerFunction(
         {
-          name: 'get_data_on_screen',
+          name: GET_DATA_ON_SCREEN_FUNCTION_NAME,
           description: dedent(`Get data that is on the screen:
             ${allData.map((data) => `${data.name}: ${data.description}`).join('\n')}
           `),
@@ -105,7 +107,7 @@ export class ChatFunctionClient {
     }
   }
 
-  getInstructions(): RegisteredInstruction[] {
+  getInstructions(): InstructionOrCallback[] {
     return this.instructions;
   }
 

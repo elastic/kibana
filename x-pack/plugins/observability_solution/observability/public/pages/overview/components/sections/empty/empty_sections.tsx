@@ -10,6 +10,7 @@ import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { HttpSetup } from '@kbn/core/public';
+import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
 import { useKibana } from '../../../../../utils/kibana_react';
@@ -18,11 +19,14 @@ import { useHasData } from '../../../../../hooks/use_has_data';
 import { EmptySection, Section } from './empty_section';
 
 export function EmptySections() {
-  const { http } = useKibana().services;
+  const { http, share } = useKibana().services;
+  const onboardingMetricsHref = share?.url.locators
+    .get(OBSERVABILITY_ONBOARDING_LOCATOR)
+    ?.useUrl({ category: 'metrics' });
   const theme = useContext(ThemeContext);
   const { hasDataMap } = useHasData();
 
-  const appEmptySections = getEmptySections({ http }).filter(({ id }) => {
+  const appEmptySections = getEmptySections({ http, onboardingMetricsHref }).filter(({ id }) => {
     const app = hasDataMap[id];
     if (app) {
       return app.status === FETCH_STATUS.FAILURE || !app.hasData;
@@ -57,7 +61,13 @@ export function EmptySections() {
   );
 }
 
-const getEmptySections = ({ http }: { http: HttpSetup }): Section[] => {
+const getEmptySections = ({
+  http,
+  onboardingMetricsHref,
+}: {
+  http: HttpSetup;
+  onboardingMetricsHref?: string;
+}): Section[] => {
   return [
     {
       id: 'infra_logs',
@@ -101,7 +111,7 @@ const getEmptySections = ({ http }: { http: HttpSetup }): Section[] => {
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.metrics.link', {
         defaultMessage: 'Install Metricbeat',
       }),
-      href: http.basePath.prepend('/app/home#/tutorial_directory/metrics'),
+      href: onboardingMetricsHref ?? http.basePath.prepend('/app/home#/tutorial_directory/metrics'),
     },
     {
       id: 'uptime',

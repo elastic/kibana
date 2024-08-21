@@ -1,0 +1,80 @@
+openapi: 3.0.0
+info:
+  title: Create list API endpoint
+  version: '2023-10-31'
+paths:
+  /api/lists:
+    post:
+      x-labels: [serverless, ess]
+      operationId: CreateList
+      x-codegen-enabled: true
+      summary: Creates a list
+      requestBody:
+        description: List's properties
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  $ref: '../model/list_common.schema.yaml#/components/schemas/ListId'
+                name:
+                  $ref: '../model/list_common.schema.yaml#/components/schemas/ListName'
+                description:
+                  $ref: '../model/list_common.schema.yaml#/components/schemas/ListDescription'
+                type:
+                  $ref: '../model/list_common.schema.yaml#/components/schemas/ListType'
+                serializer:
+                  type: string
+                deserializer:
+                  type: string
+                meta:
+                  $ref: '../model/list_common.schema.yaml#/components/schemas/ListMetadata'
+                version:
+                  type: integer
+                  minimum: 1
+                  default: 1
+              required:
+                - name
+                - description
+                - type
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '../model/list_schemas.schema.yaml#/components/schemas/List'
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        403:
+          description: Not enough privileges response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        409:
+          description: List already exists response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'

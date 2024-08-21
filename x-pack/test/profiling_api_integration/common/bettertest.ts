@@ -23,7 +23,7 @@ export type BetterTest = <T extends any>(options: {
  * This is useful for tests that expect a 200 response
  * It also makes it easier to debug tests that fail because of a 500 response.
  */
-export function getBettertest(st: supertest.SuperTest<supertest.Test>): BetterTest {
+export function getBettertest(st: supertest.Agent): BetterTest {
   return async ({ pathname, method = 'get', query, body }) => {
     const url = format({ pathname, query });
 
@@ -60,7 +60,7 @@ export class BetterTestError extends Error {
     const req = res.req as any;
     super(
       `Unhandled BetterTestError:
-Status: "${res.status}"      
+Status: "${res.status}"
 Path: "${req.method} ${req.path}"
 Body: ${JSON.stringify(res.body)}`
     );

@@ -26,14 +26,14 @@ interface ContextServices {
   autocompleteInfo: AutocompleteInfo;
 }
 
-export interface ContextValue {
+export interface ContextValue extends ConsoleStartServices {
   services: ContextServices;
   docLinkVersion: string;
   docLinks: DocLinksStart['links'];
-  config?: {
+  config: {
     isMonacoEnabled: boolean;
+    isDevMode: boolean;
   };
-  startServices: ConsoleStartServices;
 }
 
 interface ContextProps {

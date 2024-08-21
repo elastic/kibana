@@ -37,6 +37,10 @@ export type FrameMock = jest.Mocked<FramePublicAPI>;
 export const createMockFramePublicAPI = (overrides: Partial<FramePublicAPI> = {}): FrameMock => ({
   datasourceLayers: {},
   dateRange: {
+    fromDate: 'now-1d',
+    toDate: 'now',
+  },
+  absDateRange: {
     fromDate: '2022-03-17T08:25:00.000Z',
     toDate: '2022-04-17T08:25:00.000Z',
   },

@@ -20,5 +20,6 @@ export * from './model/execution_result.gen';
 export * from './model/execution_settings';
 export * from './model/execution_status.gen';
 export * from './model/execution_status';
+export * from './model/execution_run_type.gen';
 export * from './model/execution_summary.gen';
 export * from './model/log_level';

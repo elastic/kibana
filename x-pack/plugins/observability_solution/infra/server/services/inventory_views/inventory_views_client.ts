@@ -13,6 +13,7 @@ import {
   SavedObjectsUtils,
 } from '@kbn/core/server';
 import Boom from '@hapi/boom';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import {
   inventoryViewAttributesRT,
   staticInventoryViewAttributes,
@@ -23,7 +24,6 @@ import type {
   InventoryViewRequestQuery,
 } from '../../../common/http_api/latest';
 import type { InventoryView, InventoryViewAttributes } from '../../../common/inventory_views';
-import { decodeOrThrow } from '../../../common/runtime_types';
 import type { IInfraSources } from '../../lib/sources';
 import { inventoryViewSavedObjectName } from '../../saved_objects/inventory_view';
 import { inventoryViewSavedObjectRT } from '../../saved_objects/inventory_view/types';

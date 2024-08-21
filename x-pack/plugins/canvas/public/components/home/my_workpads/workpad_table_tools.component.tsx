@@ -126,7 +126,7 @@ const strings = {
     }),
   getDeleteSingleWorkpadModalTitle: (workpadName: string) =>
     i18n.translate('xpack.canvas.workpadTableTools.deleteSingleWorkpadModalTitle', {
-      defaultMessage: `Delete workpad '{workpadName}'?`,
+      defaultMessage: `Delete workpad ''{workpadName}''?`,
       values: {
         workpadName,
       },

@@ -10,9 +10,12 @@ import type { OpenAPIV3 } from 'openapi-types';
 import * as mutations from './mutations';
 import type { IContext } from './context';
 import { isAnyType } from './mutations/utils';
+import { isReferenceObject } from '../../common';
+
+type Schema = OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject;
 
 interface PostProcessMutationsArgs {
-  schema: OpenAPIV3.SchemaObject;
+  schema: Schema;
   ctx: IContext;
 }
 
@@ -23,7 +26,9 @@ export const postProcessMutations = ({ ctx, schema }: PostProcessMutationsArgs) 
 
 const arrayContainers: Array<keyof OpenAPIV3.SchemaObject> = ['allOf', 'oneOf', 'anyOf'];
 
-const walkSchema = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void => {
+const walkSchema = (ctx: IContext, schema: Schema): void => {
+  if (isReferenceObject(schema)) return;
+
   if (isAnyType(schema)) {
     mutations.processAnyType(schema);
     return;
@@ -41,7 +46,7 @@ const walkSchema = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void => {
         walkSchema(ctx, value as OpenAPIV3.SchemaObject);
       });
     }
-    mutations.processObject(ctx, schema);
+    mutations.processObject(schema);
   } else if (type === 'string') {
     mutations.processString(schema);
   } else if (type === 'record') {
@@ -55,10 +60,10 @@ const walkSchema = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void => {
   } else {
     for (const arrayContainer of arrayContainers) {
       if (schema[arrayContainer]) {
-        schema[arrayContainer].forEach((s: OpenAPIV3.SchemaObject, idx: number) => {
+        schema[arrayContainer].forEach((s: OpenAPIV3.SchemaObject) => {
           walkSchema(ctx, s);
-          schema[arrayContainer][idx] = ctx.processRef(s);
         });
+        mutations.processEnum(schema);
         break;
       }
     }

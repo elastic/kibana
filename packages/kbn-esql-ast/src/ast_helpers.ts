@@ -11,15 +11,19 @@
  */
 
 import { type Token, type ParserRuleContext, type TerminalNode } from 'antlr4';
-import type {
-  ArithmeticUnaryContext,
-  DecimalValueContext,
-  IntegerValueContext,
-  QualifiedIntegerLiteralContext,
+import {
+  QualifiedNameContext,
+  type ArithmeticUnaryContext,
+  type DecimalValueContext,
+  type InlineCastContext,
+  type IntegerValueContext,
+  type QualifiedIntegerLiteralContext,
+  QualifiedNamePatternContext,
 } from './antlr/esql_parser';
 import { getPosition } from './ast_position_utils';
 import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
 import type {
+  ESQLAstBaseItem,
   ESQLCommand,
   ESQLLiteral,
   ESQLList,
@@ -31,10 +35,28 @@ import type {
   ESQLCommandOption,
   ESQLAstItem,
   ESQLCommandMode,
+  ESQLInlineCast,
+  ESQLUnknownItem,
+  ESQLNumericLiteralType,
+  FunctionSubtype,
+  ESQLNumericLiteral,
 } from './types';
+import { parseIdentifier } from './parser/helpers';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
+}
+
+export function createAstBaseItem<Name = string>(
+  name: Name,
+  ctx: ParserRuleContext
+): ESQLAstBaseItem<Name> {
+  return {
+    name,
+    text: ctx.getText(),
+    location: getPosition(ctx.start, ctx.stop),
+    incomplete: Boolean(ctx.exception),
+  };
 }
 
 export function createCommand(name: string, ctx: ParserRuleContext): ESQLCommand {
@@ -43,6 +65,17 @@ export function createCommand(name: string, ctx: ParserRuleContext): ESQLCommand
     name,
     text: ctx.getText(),
     args: [],
+    location: getPosition(ctx.start, ctx.stop),
+    incomplete: Boolean(ctx.exception),
+  };
+}
+
+export function createInlineCast(ctx: InlineCastContext): Omit<ESQLInlineCast, 'value'> {
+  return {
+    type: 'inlineCast',
+    name: 'inlineCast',
+    text: ctx.getText(),
+    castType: ctx.dataType().getText(),
     location: getPosition(ctx.start, ctx.stop),
     incomplete: Boolean(ctx.exception),
   };
@@ -59,11 +92,14 @@ export function createList(ctx: ParserRuleContext, values: ESQLLiteral[]): ESQLL
   };
 }
 
-export function createNumericLiteral(ctx: DecimalValueContext | IntegerValueContext): ESQLLiteral {
+export function createNumericLiteral(
+  ctx: DecimalValueContext | IntegerValueContext,
+  literalType: ESQLNumericLiteralType
+): ESQLLiteral {
   const text = ctx.getText();
   return {
     type: 'literal',
-    literalType: 'number',
+    literalType,
     text,
     name: text,
     value: Number(text),
@@ -72,10 +108,13 @@ export function createNumericLiteral(ctx: DecimalValueContext | IntegerValueCont
   };
 }
 
-export function createFakeMultiplyLiteral(ctx: ArithmeticUnaryContext): ESQLLiteral {
+export function createFakeMultiplyLiteral(
+  ctx: ArithmeticUnaryContext,
+  literalType: ESQLNumericLiteralType
+): ESQLLiteral {
   return {
     type: 'literal',
-    literalType: 'number',
+    literalType,
     text: ctx.getText(),
     name: ctx.getText(),
     value: ctx.PLUS() ? 1 : -1,
@@ -107,11 +146,20 @@ export function textExistsAndIsValid(text: string | undefined): text is string {
 
 export function createLiteral(
   type: ESQLLiteral['literalType'],
-  node: TerminalNode | undefined
-): ESQLLiteral | undefined {
+  node: TerminalNode | null
+): ESQLLiteral {
   if (!node) {
-    return;
+    return {
+      type: 'literal',
+      name: 'unknown',
+      text: 'unknown',
+      value: 'unknown',
+      literalType: type,
+      location: { min: 0, max: 0 },
+      incomplete: false,
+    } as ESQLLiteral;
   }
+
   const text = node.getText();
 
   const partialLiteral: Omit<ESQLLiteral, 'literalType' | 'value'> = {
@@ -121,18 +169,21 @@ export function createLiteral(
     location: getPosition(node.symbol),
     incomplete: isMissingText(text),
   };
-  if (type === 'number') {
+  if (type === 'decimal' || type === 'integer') {
     return {
       ...partialLiteral,
       literalType: type,
       value: Number(text),
-    };
+      paramType: 'number',
+    } as ESQLNumericLiteral<'decimal'> | ESQLNumericLiteral<'integer'>;
+  } else if (type === 'param') {
+    throw new Error('Should never happen');
   }
   return {
     ...partialLiteral,
     literalType: type,
     value: text,
-  };
+  } as ESQLLiteral;
 }
 
 export function createTimeUnit(ctx: QualifiedIntegerLiteralContext): ESQLTimeInterval {
@@ -149,12 +200,13 @@ export function createTimeUnit(ctx: QualifiedIntegerLiteralContext): ESQLTimeInt
   };
 }
 
-export function createFunction(
+export function createFunction<Subtype extends FunctionSubtype>(
   name: string,
   ctx: ParserRuleContext,
-  customPosition?: ESQLLocation
-): ESQLFunction {
-  return {
+  customPosition?: ESQLLocation,
+  subtype?: Subtype
+): ESQLFunction<Subtype> {
+  const node: ESQLFunction<Subtype> = {
     type: 'function',
     name,
     text: ctx.getText(),
@@ -162,6 +214,10 @@ export function createFunction(
     args: [],
     incomplete: Boolean(ctx.exception),
   };
+  if (subtype) {
+    node.subtype = subtype;
+  }
+  return node;
 }
 
 function walkFunctionStructure(
@@ -212,13 +268,13 @@ export function computeLocationExtends(fn: ESQLFunction) {
 
 /* SCRIPT_MARKER_START */
 function getQuotedText(ctx: ParserRuleContext) {
-  return [67 /* esql_parser.QUOTED_IDENTIFIER */]
+  return [27 /* esql_parser.QUOTED_STRING */, 68 /* esql_parser.QUOTED_IDENTIFIER */]
     .map((keyCode) => ctx.getToken(keyCode, 0))
     .filter(nonNullable)[0];
 }
 
 function getUnquotedText(ctx: ParserRuleContext) {
-  return [66 /* esql_parser.UNQUOTED_IDENTIFIER */, 72 /* esql_parser.FROM_UNQUOTED_IDENTIFIER */]
+  return [67 /* esql_parser.UNQUOTED_IDENTIFIER */, 73 /* esql_parser.FROM_UNQUOTED_IDENTIFIER */]
     .map((keyCode) => ctx.getToken(keyCode, 0))
     .filter(nonNullable)[0];
 }
@@ -237,12 +293,26 @@ function safeBackticksRemoval(text: string | undefined) {
   return text?.replace(TICKS_REGEX, '').replace(DOUBLE_TICKS_REGEX, SINGLE_BACKTICK) || '';
 }
 
+function sanitizeSourceString(ctx: ParserRuleContext) {
+  const contextText = ctx.getText();
+  // If wrapped by triple quote, remove
+  if (contextText.startsWith(`"""`) && contextText.endsWith(`"""`)) {
+    return contextText.replace(/\"\"\"/g, '');
+  }
+  // If wrapped by single quote, remove
+  if (contextText.startsWith(`"`) && contextText.endsWith(`"`)) {
+    return contextText.slice(1, -1);
+  }
+  return contextText;
+}
+
 export function sanitizeIdentifierString(ctx: ParserRuleContext) {
-  return (
+  const result =
     getUnquotedText(ctx)?.getText() ||
     safeBackticksRemoval(getQuotedText(ctx)?.getText()) ||
-    safeBackticksRemoval(ctx.getText()) // for some reason some quoted text is not detected correctly by the parser
-  );
+    safeBackticksRemoval(ctx.getText()); // for some reason some quoted text is not detected correctly by the parser
+  // TODO - understand why <missing null> is now returned as the match text for the FROM command
+  return result === '<missing null>' ? '' : result;
 }
 
 export function wrapIdentifierAsArray<T extends ParserRuleContext>(identifierCtx: T | T[]): T[] {
@@ -281,7 +351,7 @@ export function createSource(
   ctx: ParserRuleContext,
   type: 'index' | 'policy' = 'index'
 ): ESQLSource {
-  const text = sanitizeIdentifierString(ctx);
+  const text = sanitizeSourceString(ctx);
   return {
     type: 'source',
     name: text,
@@ -293,10 +363,13 @@ export function createSource(
 }
 
 export function createColumnStar(ctx: TerminalNode): ESQLColumn {
+  const text = ctx.getText();
+
   return {
     type: 'column',
-    name: ctx.getText(),
-    text: ctx.getText(),
+    name: text,
+    parts: [text],
+    text,
     location: getPosition(ctx.symbol),
     incomplete: ctx.getText() === '',
     quoted: false,
@@ -304,11 +377,22 @@ export function createColumnStar(ctx: TerminalNode): ESQLColumn {
 }
 
 export function createColumn(ctx: ParserRuleContext): ESQLColumn {
+  const parts: string[] = [];
+  if (ctx instanceof QualifiedNamePatternContext) {
+    parts.push(
+      ...ctx.identifierPattern_list().map((identifier) => parseIdentifier(identifier.getText()))
+    );
+  } else if (ctx instanceof QualifiedNameContext) {
+    parts.push(...ctx.identifier_list().map((identifier) => parseIdentifier(identifier.getText())));
+  } else {
+    parts.push(sanitizeIdentifierString(ctx));
+  }
   const text = sanitizeIdentifierString(ctx);
   const hasQuotes = Boolean(getQuotedText(ctx) || isQuoted(ctx.getText()));
   return {
     type: 'column' as const,
     name: text,
+    parts,
     text: ctx.getText(),
     location: getPosition(ctx.start, ctx.stop),
     incomplete: Boolean(ctx.exception || text === ''),
@@ -330,5 +414,15 @@ export function createOption(name: string, ctx: ParserRuleContext): ESQLCommandO
           return Boolean(c.isErrorNode);
         })
     ),
+  };
+}
+
+export function createUnknownItem(ctx: ParserRuleContext): ESQLUnknownItem {
+  return {
+    type: 'unknown',
+    name: 'unknown',
+    text: ctx.getText(),
+    location: getPosition(ctx.start, ctx.stop),
+    incomplete: Boolean(ctx.exception),
   };
 }

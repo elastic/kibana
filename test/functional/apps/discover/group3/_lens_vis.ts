@@ -179,7 +179,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('should show ESQL histogram for text-based query', async () => {
+    it('should show ESQL histogram for ES|QL query', async () => {
       await PageObjects.discover.selectTextBaseLang();
 
       await monacoEditor.setCodeEditorValue('from logstash-* | limit 10');

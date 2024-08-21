@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
-  const supertest = getService('supertestWithoutAuth');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('security/authentication/http', function () {
     describe('JWT', () => {
@@ -28,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
           '/internal/task_manager/_background_task_utilization',
           '/api/task_manager/metrics',
         ]) {
-          await supertest
+          await supertestWithoutAuth
             .get(allowedPath)
             .set('Authorization', `Bearer ${jsonWebToken}`)
             .set('ES-Client-Authentication', 'SharedSecret my_super_secret')
@@ -37,14 +37,14 @@ export default function ({ getService }: FtrProviderContext) {
         }
 
         // Make sure it's not possible to use JWT to have interactive sessions.
-        await supertest
+        await supertestWithoutAuth
           .get('/')
           .set('Authorization', `Bearer ${jsonWebToken}`)
           .set('ES-Client-Authentication', 'SharedSecret my_super_secret')
           .expect(401);
 
         // Make sure it's not possible to use JWT to access any other APIs.
-        await supertest
+        await supertestWithoutAuth
           .get('/internal/security/me')
           .set('Authorization', `Bearer ${jsonWebToken}`)
           .set('ES-Client-Authentication', 'SharedSecret my_super_secret')

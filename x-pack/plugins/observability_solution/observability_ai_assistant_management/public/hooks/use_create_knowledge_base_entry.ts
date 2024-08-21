@@ -9,18 +9,20 @@ import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAppContext } from './use_app_context';
+
 import { REACT_QUERY_KEYS } from '../constants';
+import { useKibana } from './use_kibana';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useCreateKnowledgeBaseEntry() {
   const {
-    notifications: { toasts },
     observabilityAIAssistant,
-  } = useAppContext();
+    notifications: { toasts },
+  } = useKibana().services;
+
   const queryClient = useQueryClient();
-  const observabilityAIAssistantApi = observabilityAIAssistant?.service.callApi;
+  const observabilityAIAssistantApi = observabilityAIAssistant.service.callApi;
 
   return useMutation<
     void,
@@ -28,17 +30,13 @@ export function useCreateKnowledgeBaseEntry() {
     {
       entry: Omit<
         KnowledgeBaseEntry,
-        '@timestamp' | 'confidence' | 'is_correction' | 'public' | 'labels' | 'role' | 'doc_id'
+        '@timestamp' | 'confidence' | 'is_correction' | 'role' | 'doc_id'
       >;
     }
   >(
     [REACT_QUERY_KEYS.CREATE_KB_ENTRIES],
     ({ entry }) => {
-      if (!observabilityAIAssistantApi) {
-        return Promise.reject('Error with observabilityAIAssistantApi: API not found.');
-      }
-
-      return observabilityAIAssistantApi?.(
+      return observabilityAIAssistantApi(
         'POST /internal/observability_ai_assistant/kb/entries/save',
         {
           signal: null,
@@ -57,8 +55,7 @@ export function useCreateKnowledgeBaseEntry() {
           i18n.translate(
             'xpack.observabilityAiAssistantManagement.kb.addManualEntry.successNotification',
             {
-              defaultMessage: 'Successfully created {name}',
-              values: { name: entry.id },
+              defaultMessage: 'Entry saved',
             }
           )
         );

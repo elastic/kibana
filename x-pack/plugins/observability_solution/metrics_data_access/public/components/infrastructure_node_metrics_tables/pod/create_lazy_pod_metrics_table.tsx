@@ -19,7 +19,6 @@ export function createLazyPodMetricsTable(core: CoreStart, metricsClient: Metric
         <LazyIntegratedPodMetricsTable
           core={core}
           metricsClient={metricsClient}
-          theme$={core.theme.theme$}
           sourceId={sourceId || 'default'}
           timerange={timerange}
           filterClauseDsl={filterClauseDsl}

@@ -42,6 +42,8 @@ export const Table = () => {
     closeFlyout,
     showInactiveDatasets,
     showFullDatasetNames,
+    canUserMonitorDataset,
+    canUserMonitorAnyDataStream,
     toggleInactiveDatasets,
     toggleFullDatasetNames,
   } = useDatasetQualityTable();
@@ -60,17 +62,21 @@ export const Table = () => {
         </EuiText>
         <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
           <DescriptiveSwitch
+            testSubject="datasetQualityFullDatasetNameSwitch"
             label={fullDatasetNameLabel}
             checked={showFullDatasetNames}
             tooltipText={fullDatasetNameDescription}
             onToggle={toggleFullDatasetNames}
           />
-          <DescriptiveSwitch
-            label={inactiveDatasetsLabel}
-            checked={showInactiveDatasets}
-            tooltipText={inactiveDatasetsDescription}
-            onToggle={toggleInactiveDatasets}
-          />
+          {canUserMonitorDataset && canUserMonitorAnyDataStream && (
+            <DescriptiveSwitch
+              testSubject="datasetQualityInactiveDatasetsSwitch"
+              label={inactiveDatasetsLabel}
+              checked={showInactiveDatasets}
+              tooltipText={inactiveDatasetsDescription}
+              onToggle={toggleInactiveDatasets}
+            />
+          )}
         </EuiFlexGroup>
       </EuiFlexGroup>
       <EuiSpacer size="s" />

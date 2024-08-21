@@ -17,9 +17,8 @@ import {
   getTabCountsMarkdownComment,
   escape,
 } from '../../index_properties/markdown/helpers';
-import { getFillColor } from '../summary_tab/helpers';
 import * as i18n from '../../index_properties/translations';
-import type { EnrichedFieldMetadata, IlmPhase, PartitionedFieldMetadata } from '../../../types';
+import type { EcsBasedFieldMetadata, IlmPhase, PartitionedFieldMetadata } from '../../../types';
 import {
   INCOMPATIBLE_FIELD_MAPPINGS_TABLE_TITLE,
   INCOMPATIBLE_FIELD_VALUES_TABLE_TITLE,
@@ -44,17 +43,13 @@ ${i18n.MAPPINGS_THAT_CONFLICT_WITH_ECS}
     title: i18n.INCOMPATIBLE_CALLOUT_TITLE(incompatible),
   });
 
-export const showInvalidCallout = (enrichedFieldMetadata: EnrichedFieldMetadata[]): boolean =>
-  enrichedFieldMetadata.length > 0;
-
-export const getIncompatibleColor = (): string => getFillColor('incompatible');
-
-export const getSameFamilyColor = (): string => getFillColor('same-family');
+export const showInvalidCallout = (ecsBasedFieldMetadata: EcsBasedFieldMetadata[]): boolean =>
+  ecsBasedFieldMetadata.length > 0;
 
 export const getIncompatibleMappings = (
-  enrichedFieldMetadata: EnrichedFieldMetadata[]
-): EnrichedFieldMetadata[] =>
-  enrichedFieldMetadata.filter(
+  ecsBasedFieldMetadata: EcsBasedFieldMetadata[]
+): EcsBasedFieldMetadata[] =>
+  ecsBasedFieldMetadata.filter(
     (x) =>
       !x.isEcsCompliant &&
       x.type !== x.indexFieldType &&
@@ -62,9 +57,9 @@ export const getIncompatibleMappings = (
   );
 
 export const getIncompatibleMappingsFields = (
-  enrichedFieldMetadata: EnrichedFieldMetadata[]
+  ecsBasedFieldMetadata: EcsBasedFieldMetadata[]
 ): string[] =>
-  enrichedFieldMetadata.reduce<string[]>((acc, x) => {
+  ecsBasedFieldMetadata.reduce<string[]>((acc, x) => {
     if (
       !x.isEcsCompliant &&
       x.type !== x.indexFieldType &&
@@ -78,8 +73,8 @@ export const getIncompatibleMappingsFields = (
     return acc;
   }, []);
 
-export const getSameFamilyFields = (enrichedFieldMetadata: EnrichedFieldMetadata[]): string[] =>
-  enrichedFieldMetadata.reduce<string[]>((acc, x) => {
+export const getSameFamilyFields = (ecsBasedFieldMetadata: EcsBasedFieldMetadata[]): string[] =>
+  ecsBasedFieldMetadata.reduce<string[]>((acc, x) => {
     if (!x.isEcsCompliant && x.type !== x.indexFieldType && x.isInSameFamily) {
       const field = escape(x.indexFieldName);
       if (field != null) {
@@ -90,14 +85,14 @@ export const getSameFamilyFields = (enrichedFieldMetadata: EnrichedFieldMetadata
   }, []);
 
 export const getIncompatibleValues = (
-  enrichedFieldMetadata: EnrichedFieldMetadata[]
-): EnrichedFieldMetadata[] =>
-  enrichedFieldMetadata.filter((x) => !x.isEcsCompliant && x.indexInvalidValues.length > 0);
+  ecsBasedFieldMetadata: EcsBasedFieldMetadata[]
+): EcsBasedFieldMetadata[] =>
+  ecsBasedFieldMetadata.filter((x) => !x.isEcsCompliant && x.indexInvalidValues.length > 0);
 
 export const getIncompatibleValuesFields = (
-  enrichedFieldMetadata: EnrichedFieldMetadata[]
+  ecsBasedFieldMetadata: EcsBasedFieldMetadata[]
 ): string[] =>
-  enrichedFieldMetadata.reduce<string[]>((acc, x) => {
+  ecsBasedFieldMetadata.reduce<string[]>((acc, x) => {
     if (!x.isEcsCompliant && x.indexInvalidValues.length > 0) {
       const field = escape(x.indexFieldName);
       if (field != null) {
@@ -112,8 +107,8 @@ export const getIncompatibleFieldsMarkdownTablesComment = ({
   incompatibleValues,
   indexName,
 }: {
-  incompatibleMappings: EnrichedFieldMetadata[];
-  incompatibleValues: EnrichedFieldMetadata[];
+  incompatibleMappings: EcsBasedFieldMetadata[];
+  incompatibleValues: EcsBasedFieldMetadata[];
   indexName: string;
 }): string => `
 ${

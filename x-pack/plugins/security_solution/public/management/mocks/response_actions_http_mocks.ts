@@ -17,12 +17,15 @@ import {
   GET_PROCESSES_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
   KILL_PROCESS_ROUTE,
+  SCAN_ROUTE,
   SUSPEND_PROCESS_ROUTE,
   UNISOLATE_HOST_ROUTE_V2,
   UPLOAD_ROUTE,
 } from '../../../common/endpoint/constants';
-import type { ResponseProvidersInterface } from '../../common/mock/endpoint/http_handler_mock_factory';
-import { httpHandlerMockFactory } from '../../common/mock/endpoint/http_handler_mock_factory';
+import {
+  httpHandlerMockFactory,
+  type ResponseProvidersInterface,
+} from '../../common/mock/endpoint/http_handler_mock_factory';
 import type {
   ActionDetails,
   ActionDetailsApiResponse,
@@ -34,7 +37,9 @@ import type {
   ResponseActionExecuteOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
+  ResponseActionScanOutputContent,
   ResponseActionsExecuteParameters,
+  ResponseActionScanParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
 } from '../../../common/endpoint/types';
@@ -66,6 +71,8 @@ export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
     ResponseActionUploadOutputContent,
     ResponseActionUploadParameters
   >;
+
+  scan: () => ActionDetailsApiResponse<ResponseActionScanOutputContent>;
 }>;
 
 export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHttpMocksInterface>([
@@ -208,6 +215,7 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
           name: 'test.txt',
           size: 1234,
           status: 'READY',
+          agentType: 'endpoint',
         },
       };
     },
@@ -244,6 +252,25 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
         ResponseActionUploadParameters
       >({
         command: 'upload',
+      });
+
+      return { data: response };
+    },
+  },
+  {
+    id: 'scan',
+    path: SCAN_ROUTE,
+    method: 'post',
+    handler: (): ActionDetailsApiResponse<
+      ResponseActionScanOutputContent,
+      ResponseActionScanParameters
+    > => {
+      const generator = new EndpointActionGenerator('seed');
+      const response = generator.generateActionDetails<
+        ResponseActionScanOutputContent,
+        ResponseActionScanParameters
+      >({
+        command: 'scan',
       });
 
       return { data: response };

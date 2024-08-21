@@ -8,10 +8,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import { FlamegraphLocator } from '@kbn/observability-shared-plugin/public/locators/profiling/flamegraph_locator';
-import { TopNFunctionsLocator } from '@kbn/observability-shared-plugin/public/locators/profiling/topn_functions_locator';
-import { StacktracesLocator } from '@kbn/observability-shared-plugin/public/locators/profiling/stacktraces_locator';
-import { HOST_FIELD } from '../../../../../common/constants';
+import {
+  TopNFunctionsLocator,
+  StacktracesLocator,
+  FlamegraphLocator,
+} from '@kbn/observability-shared-plugin/common';
+import { HOST_NAME_FIELD } from '../../../../../common/constants';
 
 const PROFILING_FEEDBACK_URL = 'https://ela.st/profiling-feedback';
 
@@ -31,7 +33,7 @@ export function ProfilingLinks({
   profilingLinkLabel,
 }: Props) {
   const profilingLinkURL = profilingLinkLocator.getRedirectUrl({
-    kuery: `${HOST_FIELD}:"${hostname}"`,
+    kuery: `${HOST_NAME_FIELD}:"${hostname}"`,
     rangeFrom: from,
     rangeTo: to,
   });

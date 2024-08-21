@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EcsFlat } from '@elastic/ecs';
 import { renderHook } from '@testing-library/react-hooks';
 import React, { FC, PropsWithChildren } from 'react';
 
@@ -13,9 +12,11 @@ import { getUnallowedValueRequestItems } from '../data_quality_panel/allowed_val
 import { DataQualityProvider } from '../data_quality_panel/data_quality_context';
 import { mockUnallowedValuesResponse } from '../mock/unallowed_values/mock_unallowed_values';
 import { ERROR_LOADING_UNALLOWED_VALUES } from '../translations';
-import { EcsMetadata, UnallowedValueRequestItem } from '../types';
+import { UnallowedValueRequestItem } from '../types';
 import { useUnallowedValues, UseUnallowedValues } from '.';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { EcsFlatTyped } from '../constants';
+import { Theme } from '@elastic/charts';
 
 const mockHttpFetch = jest.fn();
 const mockReportDataQualityIndexChecked = jest.fn();
@@ -32,15 +33,53 @@ const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
     telemetryEvents={mockTelemetryEvents}
     isILMAvailable={true}
     toasts={toasts}
+    addSuccessToast={jest.fn()}
+    canUserCreateAndReadCases={jest.fn(() => true)}
+    endDate={null}
+    formatBytes={jest.fn()}
+    formatNumber={jest.fn()}
+    isAssistantEnabled={true}
+    lastChecked={'2023-03-28T22:27:28.159Z'}
+    openCreateCaseFlyout={jest.fn()}
+    patterns={['auditbeat-*']}
+    setLastChecked={jest.fn()}
+    startDate={null}
+    theme={{
+      background: {
+        color: '#000',
+      },
+    }}
+    baseTheme={
+      {
+        background: {
+          color: '#000',
+        },
+      } as Theme
+    }
+    ilmPhases={['hot', 'warm', 'unmanaged']}
+    selectedIlmPhaseOptions={[
+      {
+        label: 'Hot',
+        value: 'hot',
+      },
+      {
+        label: 'Warm',
+        value: 'warm',
+      },
+      {
+        label: 'Unmanaged',
+        value: 'unmanaged',
+      },
+    ]}
+    setSelectedIlmPhaseOptions={jest.fn()}
   >
     {children}
   </DataQualityProvider>
 );
 
-const ecsMetadata = EcsFlat as unknown as Record<string, EcsMetadata>;
 const indexName = 'auditbeat-custom-index-1';
 const requestItems = getUnallowedValueRequestItems({
-  ecsMetadata,
+  ecsMetadata: EcsFlatTyped,
   indexName,
 });
 

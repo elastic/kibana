@@ -57,7 +57,7 @@ import {
 import { SAME_FAMILY } from '../../same_family/translations';
 import { INCOMPATIBLE_FIELD_MAPPINGS_TABLE_TITLE } from '../../tabs/incompatible_tab/translations';
 import {
-  EnrichedFieldMetadata,
+  EcsBasedFieldMetadata,
   ErrorSummary,
   PatternRollup,
   UnallowedValueCount,
@@ -230,17 +230,6 @@ describe('helpers', () => {
         '| host.name.keyword | `keyword` | `--` |\n| some.field | `text` | `--` |\n| some.field.keyword | `keyword` | `--` |\n| source.ip.keyword | `keyword` | `--` |'
       );
     });
-
-    test('it returns the expected table rows when some have allowed values', () => {
-      const withAllowedValues = [
-        ...mockCustomFields,
-        eventCategory, // note: this is not a real-world use case, because custom fields don't have allowed values
-      ];
-
-      expect(getCustomMarkdownTableRows(withAllowedValues)).toEqual(
-        '| host.name.keyword | `keyword` | `--` |\n| some.field | `text` | `--` |\n| some.field.keyword | `keyword` | `--` |\n| source.ip.keyword | `keyword` | `--` |\n| event.category | `keyword` | `authentication`, `configuration`, `database`, `driver`, `email`, `file`, `host`, `iam`, `intrusion_detection`, `malware`, `network`, `package`, `process`, `registry`, `session`, `threat`, `vulnerability`, `web` |'
-      );
-    });
   });
 
   describe('getSameFamilyBadge', () => {
@@ -265,7 +254,7 @@ describe('helpers', () => {
 
   describe('getIncompatibleMappingsMarkdownTableRows', () => {
     test('it returns the expected table rows when the field is in the same family', () => {
-      const eventCategoryWithWildcard: EnrichedFieldMetadata = {
+      const eventCategoryWithWildcard: EcsBasedFieldMetadata = {
         ...eventCategory, // `event.category` is a `keyword` per the ECS spec
         indexFieldType: 'wildcard', // this index has a mapping of `wildcard` instead of `keyword`
         isInSameFamily: true, // `wildcard` and `keyword` are in the same family
@@ -282,7 +271,7 @@ describe('helpers', () => {
     });
 
     test('it returns the expected table rows when the field is NOT in the same family', () => {
-      const eventCategoryWithText: EnrichedFieldMetadata = {
+      const eventCategoryWithText: EcsBasedFieldMetadata = {
         ...eventCategory, // `event.category` is a `keyword` per the ECS spec
         indexFieldType: 'text', // this index has a mapping of `text` instead of `keyword`
         isInSameFamily: false, // `text` and `keyword` are NOT in the same family

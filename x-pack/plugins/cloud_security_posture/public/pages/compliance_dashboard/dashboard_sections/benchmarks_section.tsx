@@ -20,7 +20,10 @@ import type {
 } from '../../../../common/types_old';
 import { RisksTable } from '../compliance_charts/risks_table';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
-import { LOCAL_STORAGE_DASHBOARD_BENCHMARK_SORT_KEY } from '../../../common/constants';
+import {
+  LOCAL_STORAGE_DASHBOARD_BENCHMARK_SORT_KEY,
+  FINDINGS_GROUPING_OPTIONS,
+} from '../../../common/constants';
 import { NavFilter, useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
 import { dashboardColumnsGrow, getPolicyTemplateQuery } from './summary_section';
 import {
@@ -59,13 +62,17 @@ export const BenchmarksSection = ({
 
   const navToFindingsByBenchmarkAndEvaluation = (
     benchmark: BenchmarkData,
-    evaluation: Evaluation
+    evaluation: Evaluation,
+    groupBy: string[] = [FINDINGS_GROUPING_OPTIONS.NONE]
   ) => {
-    navToFindings({
-      ...getPolicyTemplateQuery(dashboardType),
-      ...getBenchmarkIdQuery(benchmark),
-      'result.evaluation': evaluation,
-    });
+    navToFindings(
+      {
+        ...getPolicyTemplateQuery(dashboardType),
+        ...getBenchmarkIdQuery(benchmark),
+        'result.evaluation': evaluation,
+      },
+      groupBy
+    );
   };
 
   const navToFailedFindingsByBenchmarkAndSection = (
@@ -73,16 +80,21 @@ export const BenchmarksSection = ({
     ruleSection: string,
     resultEvaluation: 'passed' | 'failed' = RULE_FAILED
   ) => {
-    navToFindings({
-      ...getPolicyTemplateQuery(dashboardType),
-      ...getBenchmarkIdQuery(benchmark),
-      'rule.section': ruleSection,
-      'result.evaluation': resultEvaluation,
-    });
+    navToFindings(
+      {
+        ...getPolicyTemplateQuery(dashboardType),
+        ...getBenchmarkIdQuery(benchmark),
+        'rule.section': ruleSection,
+        'result.evaluation': resultEvaluation,
+      },
+      [FINDINGS_GROUPING_OPTIONS.NONE]
+    );
   };
 
   const navToFailedFindingsByBenchmark = (benchmark: BenchmarkData) => {
-    navToFindingsByBenchmarkAndEvaluation(benchmark, RULE_FAILED);
+    navToFindingsByBenchmarkAndEvaluation(benchmark, RULE_FAILED, [
+      FINDINGS_GROUPING_OPTIONS.RULE_SECTION,
+    ]);
   };
 
   const toggleBenchmarkSortingDirection = () => {

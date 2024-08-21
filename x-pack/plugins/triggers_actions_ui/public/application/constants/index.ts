@@ -38,8 +38,7 @@ export const recoveredActionGroupMessage = i18n.translate(
 export const summaryMessage = i18n.translate(
   'xpack.triggersActionsUI.sections.actionForm.SummaryMessage',
   {
-    defaultMessage:
-      'The system has detected \\{\\{alerts.new.count\\}\\} new, \\{\\{alerts.ongoing.count\\}\\} ongoing, and \\{\\{alerts.recovered.count\\}\\} recovered alerts.',
+    defaultMessage: `The system has detected '{{alerts.new.count}}' new, '{{alerts.ongoing.count}}' ongoing, and '{{alerts.recovered.count}}' recovered alerts.`,
   }
 );
 

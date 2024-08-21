@@ -80,6 +80,7 @@ export function ExpressionWrapper({
         className="lnsExpressionRenderer__component"
         padding={noPadding ? undefined : 's'}
         variables={variables}
+        allowCache={true}
         expression={expression}
         interactive={interactive}
         searchContext={searchContext}

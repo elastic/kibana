@@ -49,7 +49,7 @@ describe('Search Playground routes', () => {
       prompt: 'You are an assistant',
       citations: true,
       elasticsearch_query: {},
-      summarization_model: 'GPT-4',
+      summarization_model: 'gpt-4o',
       doc_size: 3,
       source_fields: '{}',
     };

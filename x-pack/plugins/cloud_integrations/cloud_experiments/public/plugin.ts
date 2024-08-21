@@ -55,9 +55,10 @@ export class CloudExperimentsPlugin
       metadata_refresh_interval: string;
     }>();
 
-    this.metadataService = new MetadataService({
-      metadata_refresh_interval: duration(config.metadata_refresh_interval),
-    });
+    this.metadataService = new MetadataService(
+      { metadata_refresh_interval: duration(config.metadata_refresh_interval) },
+      this.logger.get('metadata')
+    );
 
     if (config.flag_overrides) {
       this.flagOverrides = config.flag_overrides;

@@ -96,7 +96,9 @@ const PackagePolicyBaseSchema = {
   name: schema.string(),
   description: schema.maybe(schema.string()),
   namespace: schema.maybe(PackagePolicyNamespaceSchema),
-  policy_id: schema.string(),
+  policy_id: schema.maybe(schema.string()),
+  policy_ids: schema.maybe(schema.arrayOf(schema.string())),
+  output_id: schema.nullable(schema.maybe(schema.string())),
   enabled: schema.boolean(),
   is_managed: schema.maybe(schema.boolean()),
   package: schema.maybe(
@@ -105,10 +107,9 @@ const PackagePolicyBaseSchema = {
       title: schema.string(),
       version: schema.string(),
       experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeatures),
+      requires_root: schema.maybe(schema.boolean()),
     })
   ),
-  // Deprecated TODO create remove issue
-  output_id: schema.maybe(schema.string()),
   inputs: schema.arrayOf(schema.object(PackagePolicyInputsSchema)),
   vars: schema.maybe(ConfigRecordSchema),
   overrides: schema.maybe(
@@ -140,7 +141,6 @@ export const NewPackagePolicySchema = schema.object({
 
 const CreatePackagePolicyProps = {
   ...PackagePolicyBaseSchema,
-  policy_id: schema.maybe(schema.string()),
   enabled: schema.maybe(schema.boolean()),
   package: schema.maybe(
     schema.object({
@@ -148,10 +148,9 @@ const CreatePackagePolicyProps = {
       title: schema.maybe(schema.string()),
       version: schema.string(),
       experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeatures),
+      requires_root: schema.maybe(schema.boolean()),
     })
   ),
-  // Deprecated TODO create remove issue
-  output_id: schema.maybe(schema.string()),
   inputs: schema.arrayOf(
     schema.object({
       ...PackagePolicyInputsSchema,
@@ -175,6 +174,11 @@ const SimplifiedVarsSchema = schema.recordOf(
       schema.number(),
       schema.arrayOf(schema.string()),
       schema.arrayOf(schema.number()),
+      // Secrets
+      schema.object({
+        id: schema.string(),
+        isSecretRef: schema.boolean(),
+      }),
     ])
   )
 );
@@ -184,6 +188,7 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object({
   name: schema.string(),
   description: schema.maybe(schema.string()),
   namespace: schema.maybe(schema.string()),
+  output_id: schema.nullable(schema.maybe(schema.string())),
   vars: schema.maybe(SimplifiedVarsSchema),
   inputs: schema.maybe(
     schema.recordOf(
@@ -216,12 +221,14 @@ export const SimplifiedPackagePolicyPreconfiguredSchema = SimplifiedPackagePolic
 
 export const SimplifiedCreatePackagePolicyRequestBodySchema =
   SimplifiedPackagePolicyBaseSchema.extends({
-    policy_id: schema.string(),
+    policy_id: schema.maybe(schema.string()),
+    policy_ids: schema.maybe(schema.arrayOf(schema.string())),
     force: schema.maybe(schema.boolean()),
     package: schema.object({
       name: schema.string(),
       version: schema.string(),
       experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeatures),
+      requires_root: schema.maybe(schema.boolean()),
     }),
   });
 

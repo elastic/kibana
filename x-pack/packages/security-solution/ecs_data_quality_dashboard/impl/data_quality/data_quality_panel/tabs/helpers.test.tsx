@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import { DARK_THEME } from '@elastic/charts';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { omit } from 'lodash/fp';
 
 import {
   eventCategory,
-  someField,
   timestamp,
 } from '../../mock/enriched_field_metadata/mock_enriched_field_metadata';
 import { mockPartitionedFieldMetadata } from '../../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
 import { mockStatsAuditbeatIndex } from '../../mock/stats/mock_stats_packetbeat_index';
 import {
-  getEcsCompliantColor,
+  getEcsCompliantBadgeColor,
   getMissingTimestampComment,
   getTabs,
   showMissingTimestampCallout,
@@ -38,19 +35,17 @@ describe('helpers', () => {
     });
 
     test('it returns false when `enrichedFieldMetadata` contains an @timestamp field', () => {
-      expect(showMissingTimestampCallout([timestamp, eventCategory, someField])).toBe(false);
+      expect(showMissingTimestampCallout([timestamp, eventCategory])).toBe(false);
     });
 
     test('it returns true when `enrichedFieldMetadata` does NOT contain an @timestamp field', () => {
-      expect(showMissingTimestampCallout([eventCategory, someField])).toBe(true);
+      expect(showMissingTimestampCallout([eventCategory])).toBe(true);
     });
   });
 
-  describe('getEcsCompliantColor', () => {
+  describe('getEcsCompliantBadgeColor', () => {
     test('it returns the expected color for the ECS compliant data when the data includes an @timestamp', () => {
-      expect(getEcsCompliantColor(mockPartitionedFieldMetadata)).toEqual(
-        euiThemeVars.euiColorSuccess
-      );
+      expect(getEcsCompliantBadgeColor(mockPartitionedFieldMetadata)).toBe('hollow');
     });
 
     test('it returns the expected color for the ECS compliant data does NOT includes an @timestamp', () => {
@@ -61,7 +56,7 @@ describe('helpers', () => {
         ),
       };
 
-      expect(getEcsCompliantColor(noTimestamp)).toEqual(euiThemeVars.euiColorDanger);
+      expect(getEcsCompliantBadgeColor(noTimestamp)).toEqual('danger');
     });
   });
 
@@ -69,28 +64,16 @@ describe('helpers', () => {
     test('it returns the expected tabs', () => {
       expect(
         getTabs({
-          addSuccessToast: jest.fn(),
-          addToNewCaseDisabled: false,
           docsCount: 4,
           formatBytes: jest.fn(),
           formatNumber: jest.fn(),
-          getGroupByFieldsOnClick: jest.fn(),
           ilmPhase: 'unmanaged',
           indexName: 'auditbeat-custom-index-1',
-          isAssistantEnabled: true,
-          onAddToNewCase: jest.fn(),
           partitionedFieldMetadata: mockPartitionedFieldMetadata,
-          pattern: 'auditbeat-*',
           patternDocsCount: 57410,
-          setSelectedTabId: jest.fn(),
           stats: mockStatsAuditbeatIndex,
-          baseTheme: DARK_THEME,
         }).map((x) => omit(['append', 'content'], x))
       ).toEqual([
-        {
-          id: 'summaryTab',
-          name: 'Summary',
-        },
         {
           id: 'incompatibleTab',
           name: 'Incompatible fields',

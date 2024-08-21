@@ -9,6 +9,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
 
+import { isEqual } from 'lodash';
+
+import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
 import type {
   AgentPolicy,
   NewPackagePolicy,
@@ -45,9 +48,9 @@ import {
   getCloudShellUrlFromPackagePolicy,
 } from '../../../../../../../components/cloud_security_posture/services';
 
-import { useAgentlessPolicy } from './setup_technology';
+import { useAgentless } from './setup_technology';
 
-async function createAgentPolicy({
+export async function createAgentPolicy({
   packagePolicy,
   newAgentPolicy,
   withSysMonitoring,
@@ -70,6 +73,45 @@ async function createAgentPolicy({
   return resp.data.item;
 }
 
+export const createAgentPolicyIfNeeded = async ({
+  selectedPolicyTab,
+  withSysMonitoring,
+  newAgentPolicy,
+  packagePolicy,
+  packageInfo,
+}: {
+  selectedPolicyTab: SelectedPolicyTab;
+  withSysMonitoring: boolean;
+  newAgentPolicy: NewAgentPolicy;
+  packagePolicy: NewPackagePolicy;
+  packageInfo?: PackageInfo;
+}): Promise<AgentPolicy | undefined> => {
+  if (selectedPolicyTab === SelectedPolicyTab.NEW) {
+    if ((withSysMonitoring || newAgentPolicy.monitoring_enabled?.length) ?? 0 > 0) {
+      const packagesToPreinstall: Array<string | { name: string; version: string }> = [];
+      // skip preinstall of input package, to be able to rollback when package policy creation fails
+      if (packageInfo && packageInfo.type !== 'input') {
+        packagesToPreinstall.push({ name: packageInfo.name, version: packageInfo.version });
+      }
+      if (withSysMonitoring) {
+        packagesToPreinstall.push(FLEET_SYSTEM_PACKAGE);
+      }
+      if (newAgentPolicy.monitoring_enabled?.length ?? 0 > 0) {
+        packagesToPreinstall.push(FLEET_ELASTIC_AGENT_PACKAGE);
+      }
+
+      if (packagesToPreinstall.length > 0) {
+        await sendBulkInstallPackages([...new Set(packagesToPreinstall)]);
+      }
+    }
+    return await createAgentPolicy({
+      newAgentPolicy,
+      packagePolicy,
+      withSysMonitoring,
+    });
+  }
+};
+
 async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) {
   const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(pkgPolicy);
   const result = await sendCreatePackagePolicy({
@@ -85,6 +127,7 @@ const DEFAULT_PACKAGE_POLICY = {
   description: '',
   namespace: '',
   policy_id: '',
+  policy_ids: [''],
   enabled: true,
   inputs: [],
 };
@@ -110,6 +153,7 @@ export function useOnSubmit({
 }) {
   const { notifications } = useStartServices();
   const confirmForceInstall = useConfirmForceInstall();
+  const spaceSettings = useSpaceSettingsContext();
   // only used to store the resulting package policy once saved
   const [savedPackagePolicy, setSavedPackagePolicy] = useState<PackagePolicy>();
   // Form state
@@ -120,7 +164,7 @@ export function useOnSubmit({
   // Used to initialize the package policy once
   const isInitializedRef = useRef(false);
 
-  const [agentPolicy, setAgentPolicy] = useState<AgentPolicy | undefined>();
+  const [agentPolicies, setAgentPolicies] = useState<AgentPolicy[]>([]);
   // New package policy state
   const [packagePolicy, setPackagePolicy] = useState<NewPackagePolicy>({
     ...DEFAULT_PACKAGE_POLICY,
@@ -131,25 +175,29 @@ export function useOnSubmit({
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
-  const { isAgentlessPolicyId } = useAgentlessPolicy();
+  const { isAgentlessIntegration, isAgentlessAgentPolicy, isAgentlessPackagePolicy } =
+    useAgentless();
 
   // Update agent policy method
-  const updateAgentPolicy = useCallback(
-    (updatedAgentPolicy: AgentPolicy | undefined) => {
-      if (updatedAgentPolicy) {
-        setAgentPolicy(updatedAgentPolicy);
+  const updateAgentPolicies = useCallback(
+    (updatedAgentPolicies: AgentPolicy[]) => {
+      if (isEqual(updatedAgentPolicies, agentPolicies)) {
+        return;
+      }
+      if (updatedAgentPolicies.length > 0) {
+        setAgentPolicies(updatedAgentPolicies);
         if (packageInfo) {
           setHasAgentPolicyError(false);
         }
       } else {
         setHasAgentPolicyError(true);
-        setAgentPolicy(undefined);
+        setAgentPolicies([]);
       }
 
       // eslint-disable-next-line no-console
-      console.debug('Agent policy updated', updatedAgentPolicy);
+      console.debug('Agent policy updated', updatedAgentPolicies);
     },
-    [packageInfo, setAgentPolicy]
+    [packageInfo, agentPolicies]
   );
   // Update package policy validation
   const updatePackagePolicyValidation = useCallback(
@@ -158,7 +206,8 @@ export function useOnSubmit({
         const newValidationResult = validatePackagePolicy(
           newPackagePolicy || packagePolicy,
           packageInfo,
-          safeLoad
+          safeLoad,
+          spaceSettings
         );
         setValidationResults(newValidationResult);
         // eslint-disable-next-line no-console
@@ -167,7 +216,7 @@ export function useOnSubmit({
         return newValidationResult;
       }
     },
-    [packagePolicy, packageInfo]
+    [packagePolicy, packageInfo, spaceSettings]
   );
   // Update package policy method
   const updatePackagePolicy = useCallback(
@@ -185,7 +234,8 @@ export function useOnSubmit({
       const hasValidationErrors = newValidationResults
         ? validationHasErrors(newValidationResults)
         : false;
-      const hasAgentPolicy = newPackagePolicy.policy_id && newPackagePolicy.policy_id !== '';
+      const hasAgentPolicy =
+        newPackagePolicy.policy_ids.length > 0 && newPackagePolicy.policy_ids[0] !== '';
       if (
         hasPackage &&
         (hasAgentPolicy || selectedPolicyTab === SelectedPolicyTab.NEW) &&
@@ -218,7 +268,7 @@ export function useOnSubmit({
       updatePackagePolicy(
         packageToPackagePolicy(
           packageInfo,
-          agentPolicy?.id || '',
+          agentPolicies.map((policy) => policy.id),
           '',
           DEFAULT_PACKAGE_POLICY.name || incrementedName,
           DEFAULT_PACKAGE_POLICY.description,
@@ -228,15 +278,21 @@ export function useOnSubmit({
       setIsInitialized(true);
     }
     init();
-  }, [packageInfo, agentPolicy, updatePackagePolicy, integrationToEnable, isInitialized]);
+  }, [packageInfo, agentPolicies, updatePackagePolicy, integrationToEnable, isInitialized]);
 
   useEffect(() => {
-    if (agentPolicy && packagePolicy.policy_id !== agentPolicy.id) {
+    if (
+      agentPolicies.length > 0 &&
+      !isEqual(
+        agentPolicies.map((policy) => policy.id),
+        packagePolicy.policy_ids
+      )
+    ) {
       updatePackagePolicy({
-        policy_id: agentPolicy.id,
+        policy_ids: agentPolicies.map((policy) => policy.id),
       });
     }
-  }, [packagePolicy, agentPolicy, updatePackagePolicy]);
+  }, [packagePolicy, agentPolicies, updatePackagePolicy]);
 
   const onSaveNavigate = useOnSaveNavigate({
     packagePolicy,
@@ -260,40 +316,28 @@ export function useOnSubmit({
       }
       if (
         agentCount !== 0 &&
-        !isAgentlessPolicyId(packagePolicy?.policy_id) &&
+        !(isAgentlessIntegration(packageInfo) || isAgentlessPackagePolicy(packagePolicy)) &&
         formState !== 'CONFIRM'
       ) {
         setFormState('CONFIRM');
         return;
       }
       let createdPolicy = overrideCreatedAgentPolicy;
-      if (selectedPolicyTab === SelectedPolicyTab.NEW && !overrideCreatedAgentPolicy) {
+      if (!overrideCreatedAgentPolicy) {
         try {
           setFormState('LOADING');
-          if ((withSysMonitoring || newAgentPolicy.monitoring_enabled?.length) ?? 0 > 0) {
-            const packagesToPreinstall: Array<string | { name: string; version: string }> = [];
-            if (packageInfo) {
-              packagesToPreinstall.push({ name: packageInfo.name, version: packageInfo.version });
-            }
-            if (withSysMonitoring) {
-              packagesToPreinstall.push(FLEET_SYSTEM_PACKAGE);
-            }
-            if (newAgentPolicy.monitoring_enabled?.length ?? 0 > 0) {
-              packagesToPreinstall.push(FLEET_ELASTIC_AGENT_PACKAGE);
-            }
-
-            if (packagesToPreinstall.length > 0) {
-              await sendBulkInstallPackages([...new Set(packagesToPreinstall)]);
-            }
-          }
-
-          createdPolicy = await createAgentPolicy({
+          const newPolicy = await createAgentPolicyIfNeeded({
             newAgentPolicy,
             packagePolicy,
             withSysMonitoring,
+            packageInfo,
+            selectedPolicyTab,
           });
-          setAgentPolicy(createdPolicy);
-          updatePackagePolicy({ policy_id: createdPolicy.id });
+          if (newPolicy) {
+            createdPolicy = newPolicy;
+            setAgentPolicies([createdPolicy]);
+            updatePackagePolicy({ policy_ids: [createdPolicy.id] });
+          }
         } catch (e) {
           setFormState('VALID');
           notifications.toasts.addError(e, {
@@ -305,15 +349,22 @@ export function useOnSubmit({
         }
       }
 
-      const agentPolicyIdToSave = createdPolicy?.id ?? packagePolicy.policy_id;
-      const shouldForceInstallOnAgentless = isAgentlessPolicyId(agentPolicyIdToSave);
+      const agentPolicyIdToSave = createdPolicy?.id
+        ? [createdPolicy?.id]
+        : packagePolicy.policy_ids;
+
+      const shouldForceInstallOnAgentless =
+        isAgentlessAgentPolicy(createdPolicy) ||
+        isAgentlessIntegration(packageInfo) ||
+        isAgentlessPackagePolicy(packagePolicy);
+
       const forceInstall = force || shouldForceInstallOnAgentless;
 
       setFormState('LOADING');
       // passing pkgPolicy with policy_id here as setPackagePolicy doesn't propagate immediately
       const { error, data } = await savePackagePolicy({
         ...packagePolicy,
-        policy_id: agentPolicyIdToSave,
+        policy_ids: agentPolicyIdToSave,
         force: forceInstall,
       });
 
@@ -327,31 +378,22 @@ export function useOnSubmit({
 
       const hasGoogleCloudShell = data?.item ? getCloudShellUrlFromPackagePolicy(data.item) : false;
 
-      if (hasFleetAddAgentsPrivileges) {
-        if (hasAzureArmTemplate) {
-          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_AZURE_ARM_TEMPLATE');
-        } else {
-          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
-        }
-        if (hasCloudFormation) {
-          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_CLOUD_FORMATION');
-        } else {
-          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
-        }
-        if (hasGoogleCloudShell) {
-          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_GOOGLE_CLOUD_SHELL');
-        } else {
-          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
-        }
-      } else {
+      if (agentCount > 0) {
         setFormState('SUBMITTED');
+        return;
       }
 
       if (!error) {
         setSavedPackagePolicy(data!.item);
 
+        // Check if agentless is configured in ESS and Serverless until Agentless API migrates to Serverless
+        const isAgentlessConfigured =
+          isAgentlessAgentPolicy(createdPolicy) || isAgentlessPackagePolicy(data!.item);
         const promptForAgentEnrollment =
-          !(agentCount && agentPolicy) && hasFleetAddAgentsPrivileges;
+          !(agentCount && agentPolicies.length > 0) &&
+          !isAgentlessConfigured &&
+          hasFleetAddAgentsPrivileges;
+
         if (promptForAgentEnrollment && hasAzureArmTemplate) {
           setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
           return;
@@ -372,16 +414,16 @@ export function useOnSubmit({
 
         notifications.toasts.addSuccess({
           title: i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationTitle', {
-            defaultMessage: `'{packagePolicyName}' integration added.`,
+            defaultMessage: `''{packagePolicyName}'' integration added.`,
             values: {
               packagePolicyName: packagePolicy.name,
             },
           }),
           text: promptForAgentEnrollment
             ? i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationMessage', {
-                defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy.`,
+                defaultMessage: `Fleet will deploy updates to all agents that use the ''{agentPolicyNames}'' policies.`,
                 values: {
-                  agentPolicyName: agentPolicy!.name,
+                  agentPolicyNames: agentPolicies.map((policy) => policy.name).join(', '),
                 },
               })
             : undefined,
@@ -410,24 +452,26 @@ export function useOnSubmit({
       formState,
       hasErrors,
       agentCount,
-      packagePolicy,
+      isAgentlessIntegration,
+      packageInfo,
       selectedPolicyTab,
-      isAgentlessPolicyId,
+      packagePolicy,
+      isAgentlessAgentPolicy,
+      isAgentlessPackagePolicy,
+      hasFleetAddAgentsPrivileges,
       withSysMonitoring,
       newAgentPolicy,
       updatePackagePolicy,
-      packageInfo,
       notifications.toasts,
-      agentPolicy,
+      agentPolicies,
       onSaveNavigate,
       confirmForceInstall,
-      hasFleetAddAgentsPrivileges,
     ]
   );
 
   return {
-    agentPolicy,
-    updateAgentPolicy,
+    agentPolicies,
+    updateAgentPolicies,
     packagePolicy,
     updatePackagePolicy,
     savedPackagePolicy,

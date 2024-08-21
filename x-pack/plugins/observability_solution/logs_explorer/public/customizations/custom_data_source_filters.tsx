@@ -46,6 +46,10 @@ const ControlGroupContainer = euiStyled.div`
   display: none;
 }
 
+[data-test-subj='controls-group-wrapper'] {
+  min-height: 32px;
+}
+
 [data-test-subj='optionsListControl__sortingOptionsButton'] {
   display: none;
 }

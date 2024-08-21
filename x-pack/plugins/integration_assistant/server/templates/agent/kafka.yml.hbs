@@ -1,0 +1,100 @@
+{{#if hosts}}
+hosts:
+{{#each hosts as |host i|}}
+  - {{host}}
+{{/each}}
+{{/if}}
+{{#if topics}}
+topics:
+{{#each topics as |topic i|}}
+  - {{topic}}
+{{/each}}
+{{/if}}
+{{#if group_id}}
+group_id: {{group_id}}
+{{/if}}
+{{#if client_id}}
+client_id: {{client_id}}
+{{/if}}
+{{#if username}}
+username: {{username}}
+{{/if}}
+{{#if password}}
+password: {{password}}
+{{/if}}
+{{#if version}}
+version: {{version}}
+{{/if}}
+{{#if initial_offset}}
+initial_offset: {{initial_offset}}
+{{/if}}
+{{#if connect_backoff}}
+connect_backoff: {{connect_backoff}}
+{{/if}}
+{{#if consume_backoff}}
+consume_backoff: {{consume_backoff}}
+{{/if}}
+{{#if max_wait_time}}
+max_wait_time: {{max_wait_time}}
+{{/if}}
+{{#if wait_close}}
+wait_close: {{wait_close}}
+{{/if}}
+{{#if isolation_level}}
+isolation_level: {{isolation_level}}
+{{/if}}
+{{#if expand_event_list_from_field}}
+expand_event_list_from_field: {{expand_event_list_from_field}}
+{{/if}}
+{{#if fetch_min}}
+fetch.min: {{fetch_min}}
+{{/if}}
+{{#if fetch_default}}
+fetch.default: {{fetch_default}}
+{{/if}}
+{{#if fetch_max}}
+fetch.max: {{fetch_max}}
+{{/if}}
+{{#if rebalance_strategy}}
+rebalance.strategy: {{rebalance_strategy}}
+{{/if}}
+{{#if rebalance_timeout}}
+rebalance.timeout: {{rebalance_timeout}}
+{{/if}}
+{{#if rebalance_max_retries}}
+rebalance.max_retries: {{rebalance_max_retries}}
+{{/if}}
+{{#if rebalance_retry_backoff}}
+rebalance.retry_backoff: {{rebalance_retry_backoff}}
+{{/if}}
+{{#if parsers}}
+parsers: 
+{{parsers}}
+{{/if}}
+{{#if kerberos_enabled}}
+kerberos.enabled: {{kerberos_enabled}}
+{{/if}}
+{{#if kerberos_auth_type}}
+kerberos.auth_type: {{kerberos_auth_type}}
+{{/if}}
+{{#if kerberos_config_path}}
+kerberos.config_path: {{kerberos_config_path}}
+{{/if}}
+{{#if kerberos_username}}
+kerberos.username: {{kerberos_username}}
+{{/if}}
+{{#if kerberos_password}}
+kerberos.password: {{kerberos_password}}
+{{/if}}
+{{#if kerberos_keytab}}
+kerberos.keytab: {{kerberos_keytab}}
+{{/if}}
+{{#if kerberos_service_name}}
+kerberos.service_name: {{kerberos_service_name}}
+{{/if}}
+{{#if kerberos_realm}}
+kerberos.realm: {{kerberos_realm}}
+{{/if}}
+{{#if kerberos_enable_krb5_fast}}
+kerberos.enable_krb5_fast: {{kerberos_enable_krb5_fast}}
+{{/if}}

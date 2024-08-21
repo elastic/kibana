@@ -22,6 +22,17 @@ export interface IScopedClusterClient {
    * on behalf of the internal Kibana user.
    */
   readonly asInternalUser: ElasticsearchClient;
+
+  /**
+   * A {@link ElasticsearchClient | client} to be used to query the elasticsearch cluster
+   * with the internal Kibana user as primary auth and the current user as secondary auth
+   * (using the `es-secondary-authorization` header).
+   *
+   * Note that only a subset of Elasticsearch APIs support secondary authentication, and that only those endpoints
+   * should be called with this client.
+   */
+  readonly asSecondaryAuthUser: ElasticsearchClient;
+
   /**
    * A {@link ElasticsearchClient | client} to be used to query the elasticsearch cluster
    * on behalf of the user that initiated the request to the Kibana server.

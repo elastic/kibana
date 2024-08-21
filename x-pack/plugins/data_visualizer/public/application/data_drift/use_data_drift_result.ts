@@ -753,7 +753,7 @@ export const useFetchDataComparisonResult = (
 
         setProgressMessage(
           i18n.translate('xpack.dataVisualizer.dataDrift.progress.loadedFields', {
-            defaultMessage: `Loaded fields from index '{referenceIndex}' to analyze.`,
+            defaultMessage: `Loaded fields from index ''{referenceIndex}'' to analyze.`,
             values: { referenceIndex },
           })
         );

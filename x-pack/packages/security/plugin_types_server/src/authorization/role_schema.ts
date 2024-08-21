@@ -23,6 +23,19 @@ export const elasticsearchRoleSchema = schema.object({
   cluster: schema.maybe(schema.arrayOf(schema.string())),
 
   /**
+   * An optional list of remote cluster privileges. These privileges define the remote cluster level actions that
+   * users with this role are able to execute
+   */
+  remote_cluster: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        privileges: schema.arrayOf(schema.string(), { minSize: 1 }),
+        clusters: schema.arrayOf(schema.string(), { minSize: 1 }),
+      })
+    )
+  ),
+
+  /**
    * An optional list of indices permissions entries.
    */
   indices: schema.maybe(

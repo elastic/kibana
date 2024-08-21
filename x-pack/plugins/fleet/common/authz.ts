@@ -144,8 +144,7 @@ export const calculateAuthz = ({
         // These are currently used by Fleet Server setup
         setup: fleet.all || fleet.setup,
         readEnrollmentTokens: (fleet.all || fleet.setup || fleet.agents?.all) ?? false,
-        readAgentPolicies:
-          (fleet.all || fleet.read || fleet.setup || fleet.agentPolicies?.read) ?? false,
+        readAgentPolicies: (fleet.all || fleet.setup) ?? false,
       };
 
   return {
@@ -158,8 +157,8 @@ export const calculateAuthz = ({
       removePackages: writeIntegrationPolicies && integrations.all,
       uploadPackages: writeIntegrationPolicies && integrations.all,
 
-      readPackageSettings: hasFleetAll && integrations.all,
-      writePackageSettings: hasFleetAll && integrations.all,
+      readPackageSettings: integrations.read,
+      writePackageSettings: writeIntegrationPolicies && integrations.all,
 
       readIntegrationPolicies,
       writeIntegrationPolicies,

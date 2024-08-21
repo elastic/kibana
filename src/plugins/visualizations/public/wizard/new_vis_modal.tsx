@@ -106,6 +106,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
             visTypesRegistry={this.props.visTypesRegistry}
             docLinks={this.props.docLinks}
             toggleGroups={(flag: boolean) => this.setState({ showGroups: flag })}
+            openedAsRoot={this.props.showAggsSelection && !this.props.selectedVisType}
           />
         </EuiModal>
       );

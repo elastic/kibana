@@ -10,8 +10,8 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiHorizontalRule,
+  EuiLink,
   EuiSpacer,
   EuiTablePagination,
   EuiText,
@@ -19,27 +19,28 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import React, { memo, useState } from 'react';
 import { GroupSummary } from '@kbn/slo-schema';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { useKibana } from '../../../../utils/kibana_react';
+import React, { memo, useState } from 'react';
 import { paths } from '../../../../../common/locators/paths';
 import { useFetchSloList } from '../../../../hooks/use_fetch_slo_list';
-import { SLI_OPTIONS } from '../../../slo_edit/constants';
+import { useKibana } from '../../../../utils/kibana_react';
 import { useSloFormattedSLIValue } from '../../hooks/use_slo_summary';
+import type { SortDirection, SortField } from '../../hooks/use_url_search_state';
 import { SlosView } from '../slos_view';
+import { GroupByField } from '../slo_list_group_by';
 import { SLOView } from '../toggle_slo_view';
-import type { SortDirection } from '../../hooks/use_url_search_state';
+import { useGroupName } from './hooks/use_group_name';
 
 interface Props {
   group: string;
   kqlQuery?: string;
-  sloView: SLOView;
-  sort?: string;
+  view: SLOView;
+  sort?: SortField;
   direction?: SortDirection;
-  groupBy: string;
+  groupBy: GroupByField;
   summary?: GroupSummary;
   filters?: Filter[];
 }
@@ -47,7 +48,7 @@ interface Props {
 export function GroupListView({
   group,
   kqlQuery,
-  sloView,
+  view,
   sort,
   direction,
   groupBy,
@@ -56,26 +57,7 @@ export function GroupListView({
 }: Props) {
   const groupQuery = `"${groupBy}": "${group}"`;
   const query = kqlQuery ? `${groupQuery} and ${kqlQuery}` : groupQuery;
-  let groupName = group.toLowerCase();
-  if (groupBy === 'slo.indicator.type') {
-    groupName = SLI_OPTIONS.find((option) => option.value === group)?.text ?? group;
-  }
-  if (groupBy === '_index') {
-    // get remote cluster name from index name
-    if (groupName.includes(':.')) {
-      const [remoteClusterName] = groupName.split(':.');
-      groupName = i18n.translate('xpack.slo.group.remoteCluster', {
-        defaultMessage: 'Remote Cluster: {remoteClusterName}',
-        values: {
-          remoteClusterName,
-        },
-      });
-    } else {
-      groupName = i18n.translate('xpack.slo.group.remoteCluster.localKibana', {
-        defaultMessage: 'Local Kibana',
-      });
-    }
-  }
+  const groupName = useGroupName(groupBy, group, summary);
 
   const [page, setPage] = useState(0);
   const [accordionState, setAccordionState] = useState<'open' | 'closed'>('closed');
@@ -155,45 +137,59 @@ export function GroupListView({
                     })}
                   </EuiBadge>
                 </EuiFlexItem>
+
                 <EuiFlexItem>
-                  <EuiToolTip
-                    content={
-                      <>
-                        <EuiText size="s">
-                          {i18n.translate('xpack.slo.group.totalSloViolatedTooltip', {
-                            defaultMessage: 'SLO: {name}',
-                            values: {
-                              name: summary?.worst.slo?.name,
-                            },
-                          })}
-                        </EuiText>
-                        <EuiText size="s">
-                          {i18n.translate('xpack.slo.group.totalSloViolatedTooltip.instance', {
-                            defaultMessage: 'Instance: {instance}',
-                            values: {
-                              instance: summary?.worst.slo?.instanceId,
-                            },
-                          })}
-                        </EuiText>
-                      </>
-                    }
-                  >
-                    <EuiLink
-                      data-test-subj="o11yGroupListViewLink"
-                      href={basePath.prepend(
-                        paths.sloDetails(summary!.worst.slo?.id, summary!.worst.slo?.instanceId)
-                      )}
-                    >
+                  {group === 'NO_DATA' ? (
+                    <span>
                       {i18n.translate('xpack.slo.group.worstPerforming', {
                         defaultMessage: 'Worst performing: ',
                       })}
-                      <EuiTextColor
-                        color={summary?.worst.status !== 'HEALTHY' ? 'danger' : undefined}
+                      <strong>
+                        {i18n.translate('xpack.slo.group.worstPerforming.notAvailable', {
+                          defaultMessage: 'N/A',
+                        })}
+                      </strong>
+                    </span>
+                  ) : (
+                    <EuiToolTip
+                      content={
+                        <>
+                          <EuiText size="s">
+                            {i18n.translate('xpack.slo.group.totalSloViolatedTooltip', {
+                              defaultMessage: 'SLO: {name}',
+                              values: {
+                                name: summary?.worst.slo?.name,
+                              },
+                            })}
+                          </EuiText>
+                          <EuiText size="s">
+                            {i18n.translate('xpack.slo.group.totalSloViolatedTooltip.instance', {
+                              defaultMessage: 'Instance: {instance}',
+                              values: {
+                                instance: summary?.worst.slo?.instanceId,
+                              },
+                            })}
+                          </EuiText>
+                        </>
+                      }
+                    >
+                      <EuiLink
+                        data-test-subj="o11yGroupListViewLink"
+                        href={basePath.prepend(
+                          paths.sloDetails(summary!.worst.slo?.id, summary!.worst.slo?.instanceId)
+                        )}
                       >
-                        <strong>{worstSLI}</strong>
-                      </EuiTextColor>
-                    </EuiLink>
-                  </EuiToolTip>
+                        {i18n.translate('xpack.slo.group.worstPerforming', {
+                          defaultMessage: 'Worst performing: ',
+                        })}
+                        <EuiTextColor
+                          color={summary?.worst.status !== 'HEALTHY' ? 'danger' : undefined}
+                        >
+                          <strong>{worstSLI}</strong>
+                        </EuiTextColor>
+                      </EuiLink>
+                    </EuiToolTip>
+                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
@@ -207,16 +203,21 @@ export function GroupListView({
                   sloList={results}
                   loading={isLoading || isRefetching}
                   error={isError}
-                  sloView={sloView}
+                  view={view}
                 />
                 <EuiSpacer size="m" />
-                <EuiTablePagination
-                  pageCount={Math.ceil(total / itemsPerPage)}
-                  activePage={page}
-                  onChangePage={handlePageClick}
-                  itemsPerPage={itemsPerPage}
-                  onChangeItemsPerPage={(perPage) => setItemsPerPage(perPage)}
-                />
+                {total > 0 && total > itemsPerPage ? (
+                  <EuiTablePagination
+                    pageCount={Math.ceil(total / itemsPerPage)}
+                    activePage={page}
+                    onChangePage={handlePageClick}
+                    itemsPerPage={itemsPerPage}
+                    onChangeItemsPerPage={(perPage) => {
+                      setPage(0);
+                      setItemsPerPage(perPage);
+                    }}
+                  />
+                ) : null}
               </>
             )}
           </MemoEuiAccordion>

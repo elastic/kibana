@@ -55,32 +55,45 @@ export const SecretFormRow: React.FC<{
   const [editMode, setEditMode] = useState(isConvertedToSecret || !initialValue);
   const valueHiddenPanel = (
     <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
-      <EuiText size="s" color="subdued">
-        <FormattedMessage
-          id="xpack.fleet.outputForm.secretValueHiddenMessage"
-          defaultMessage="The saved {varName} is hidden. You can only replace the {varName}."
-          values={{
-            varName: title,
-          }}
-        />
-      </EuiText>
-      <EuiSpacer size="s" />
-      <EuiButtonEmpty
-        disabled={disabled}
-        onClick={() => setEditMode(true)}
-        color="primary"
-        iconType="refresh"
-        iconSide="left"
-        size="xs"
-      >
-        <FormattedMessage
-          id="xpack.fleet.outputForm.editSecretValue"
-          defaultMessage="Replace {varName}"
-          values={{
-            varName: title,
-          }}
-        />
-      </EuiButtonEmpty>
+      {disabled ? (
+        <EuiText size="s" color="subdued">
+          <FormattedMessage
+            id="xpack.fleet.outputForm.secretValueHiddenAndDisabledMessage"
+            defaultMessage="The saved {varName} is hidden."
+            values={{
+              varName: title,
+            }}
+          />
+        </EuiText>
+      ) : (
+        <>
+          <EuiText size="s" color="subdued">
+            <FormattedMessage
+              id="xpack.fleet.outputForm.secretValueHiddenMessage"
+              defaultMessage="The saved {varName} is hidden. You can only replace the {varName}."
+              values={{
+                varName: title,
+              }}
+            />
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiButtonEmpty
+            onClick={() => setEditMode(true)}
+            color="primary"
+            iconType="refresh"
+            iconSide="left"
+            size="xs"
+          >
+            <FormattedMessage
+              id="xpack.fleet.outputForm.editSecretValue"
+              defaultMessage="Replace {varName}"
+              values={{
+                varName: title,
+              }}
+            />
+          </EuiButtonEmpty>
+        </>
+      )}
     </EuiPanel>
   );
 
@@ -134,6 +147,7 @@ export const SecretFormRow: React.FC<{
   );
 
   const helpText = useMemo(() => {
+    if (disabled) return null;
     if (isConvertedToSecret)
       return (
         <EuiCallOut size="s" color="warning">
@@ -172,9 +186,9 @@ export const SecretFormRow: React.FC<{
         />
       );
     return undefined;
-  }, [initialValue, isConvertedToSecret, onToggleSecretStorage]);
+  }, [disabled, initialValue, isConvertedToSecret, onToggleSecretStorage]);
 
-  const plainTextHelp = (
+  const plainTextHelp = disabled ? null : (
     <FormattedMessage
       id="xpack.fleet.settings.editOutputFlyout.secretInputCalloutTitle"
       defaultMessage="This field should be stored as a secret, currently it is set to be stored as plain text. {enableSecretLink}"

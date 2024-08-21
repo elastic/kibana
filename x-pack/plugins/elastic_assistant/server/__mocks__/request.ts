@@ -5,8 +5,14 @@
  * 2.0.
  */
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { CAPABILITIES, EVALUATE, KNOWLEDGE_BASE } from '../../common/constants';
 import {
+  ATTACK_DISCOVERY,
+  ATTACK_DISCOVERY_BY_CONNECTOR_ID,
+  ATTACK_DISCOVERY_CANCEL_BY_CONNECTOR_ID,
+  CAPABILITIES,
+} from '../../common/constants';
+import {
+  AttackDiscoveryPostRequestBody,
   ConversationCreateProps,
   ConversationUpdateProps,
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
@@ -16,10 +22,11 @@ import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID_MESSAGES,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
+  ELASTIC_AI_ASSISTANT_EVALUATE_URL,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
   PostEvaluateRequestBodyInput,
-  PostEvaluateRequestQueryInput,
 } from '@kbn/elastic-assistant-common';
 import {
   getAppendConversationMessagesSchemaMock,
@@ -42,21 +49,21 @@ export const requestMock = {
 export const getGetKnowledgeBaseStatusRequest = (resource?: string) =>
   requestMock.create({
     method: 'get',
-    path: KNOWLEDGE_BASE,
+    path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
     query: { resource },
   });
 
 export const getPostKnowledgeBaseRequest = (resource?: string) =>
   requestMock.create({
     method: 'post',
-    path: KNOWLEDGE_BASE,
+    path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
     query: { resource },
   });
 
 export const getDeleteKnowledgeBaseRequest = (resource?: string) =>
   requestMock.create({
     method: 'delete',
-    path: KNOWLEDGE_BASE,
+    path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
     query: { resource },
   });
 
@@ -66,18 +73,11 @@ export const getGetCapabilitiesRequest = () =>
     path: CAPABILITIES,
   });
 
-export const getPostEvaluateRequest = ({
-  body,
-  query,
-}: {
-  body: PostEvaluateRequestBodyInput;
-  query: PostEvaluateRequestQueryInput;
-}) =>
+export const getPostEvaluateRequest = ({ body }: { body: PostEvaluateRequestBodyInput }) =>
   requestMock.create({
     body,
     method: 'post',
-    path: EVALUATE,
-    query,
+    path: ELASTIC_AI_ASSISTANT_EVALUATE_URL,
   });
 
 export const getCurrentUserFindRequest = () =>
@@ -186,4 +186,25 @@ export const getAnonymizationFieldsBulkActionRequest = (
         ids: deleteIds,
       },
     },
+  });
+
+export const getCancelAttackDiscoveryRequest = (connectorId: string) =>
+  requestMock.create({
+    method: 'put',
+    path: ATTACK_DISCOVERY_CANCEL_BY_CONNECTOR_ID,
+    params: { connectorId },
+  });
+
+export const getAttackDiscoveryRequest = (connectorId: string) =>
+  requestMock.create({
+    method: 'get',
+    path: ATTACK_DISCOVERY_BY_CONNECTOR_ID,
+    params: { connectorId },
+  });
+
+export const postAttackDiscoveryRequest = (body: AttackDiscoveryPostRequestBody) =>
+  requestMock.create({
+    method: 'post',
+    path: ATTACK_DISCOVERY,
+    body,
   });

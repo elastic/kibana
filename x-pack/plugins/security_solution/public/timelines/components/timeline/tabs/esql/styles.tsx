@@ -21,4 +21,9 @@ export const TimelineESQLGlobalStyles = createGlobalStyle`
   body:has(.timeline-portal-overlay-mask) .DiscoverFlyout {
     z-index: 1002; // For its usage in the Security Solution timeline, we need Discover flyout to be above the timeline flyout (which has a z-index of 1001)
   }
+
+  // TODO this should be removed when we change the ES|QL tab to be our own component instead of Discover (hopefully 8.15)
+  .unifiedDataTable__fullScreen .dscPageBody * {
+    z-index: unset !important;
+  }
 `;

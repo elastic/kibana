@@ -3444,9 +3444,9 @@
               "(req: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
@@ -3474,9 +3474,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -5277,7 +5277,7 @@
               "\nAttributes to update."
             ],
             "signature": [
-              "{ name: string; meta: unknown; alt: string | undefined; }"
+              "{ meta: unknown; name: string; alt: string | undefined; }"
             ],
             "path": "src/plugins/files/server/file_service/file_action_types.ts",
             "deprecated": false,
@@ -5367,6 +5367,10 @@
             {
               "plugin": "cases",
               "path": "x-pack/plugins/cases/server/files/index.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/server/files/index.test.ts"
             },
             {
               "plugin": "cases",
@@ -6869,7 +6873,7 @@
           "\nThe set of file metadata that can be updated."
         ],
         "signature": [
-          "{ name: string; meta: Meta | undefined; alt: string | undefined; }"
+          "{ meta: Meta | undefined; name: string; alt: string | undefined; }"
         ],
         "path": "src/plugins/files/common/types.ts",
         "deprecated": false,

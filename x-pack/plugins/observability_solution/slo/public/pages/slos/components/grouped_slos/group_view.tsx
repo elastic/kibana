@@ -5,21 +5,22 @@
  * 2.0.
  */
 import { EuiEmptyPrompt, EuiFlexItem, EuiLoadingSpinner, EuiTablePagination } from '@elastic/eui';
-import React, { useEffect } from 'react';
 import { Filter } from '@kbn/es-query';
+import React, { useEffect } from 'react';
 import { useFetchSloGroups } from '../../../../hooks/use_fetch_slo_groups';
-import { useUrlSearchState } from '../../hooks/use_url_search_state';
+import type { SortDirection } from '../../hooks/use_url_search_state';
+import { SortField, useUrlSearchState } from '../../hooks/use_url_search_state';
+import { GroupByField } from '../slo_list_group_by';
 import { SLOView } from '../toggle_slo_view';
 import { SloGroupListEmpty } from './group_list_empty';
 import { SloGroupListError } from './group_list_error';
 import { GroupListView } from './group_list_view';
-import type { SortDirection } from '../../hooks/use_url_search_state';
 
 interface Props {
-  groupBy: string;
+  groupBy: GroupByField;
   kqlQuery?: string;
-  sloView: SLOView;
-  sort?: string;
+  view: SLOView;
+  sort?: SortField;
   direction?: SortDirection;
   filters?: Filter[];
   lastRefreshTime?: number;
@@ -28,7 +29,7 @@ interface Props {
 
 export function GroupView({
   kqlQuery,
-  sloView,
+  view,
   sort,
   direction,
   groupBy,
@@ -82,7 +83,7 @@ export function GroupView({
           <GroupListView
             groupBy={result.groupBy}
             key={result.group}
-            sloView={sloView}
+            view={view}
             group={result.group}
             kqlQuery={kqlQuery}
             sort={sort}
@@ -92,7 +93,7 @@ export function GroupView({
           />
         ))}
 
-      {total > 0 ? (
+      {total > 0 && total > perPage ? (
         <EuiFlexItem>
           <EuiTablePagination
             data-test-subj="sloGroupListPagination"
@@ -102,7 +103,7 @@ export function GroupView({
             itemsPerPage={perPage}
             itemsPerPageOptions={[10, 25, 50, 100]}
             onChangeItemsPerPage={(newPerPage) => {
-              onStateChange({ perPage: newPerPage });
+              onStateChange({ perPage: newPerPage, page: 0 });
             }}
           />
         </EuiFlexItem>

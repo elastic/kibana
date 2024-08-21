@@ -125,7 +125,7 @@ export const AgentRequestDiagnosticsModal: React.FunctionComponent<Props> = ({
       <p>
         <FormattedMessage
           id="xpack.fleet.requestDiagnostics.description"
-          defaultMessage="Diagnostics files are stored in Elasticsearch, and as such can incur storage costs."
+          defaultMessage="Diagnostics files are stored in Elasticsearch, and as such can incur storage costs. By default, files are periodically deleted via an ILM policy."
         />
       </p>
       <p>

@@ -90,6 +90,12 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
         category: ['rollups'],
         schema: schema.boolean(),
         requiresPageReload: true,
+        deprecation: {
+          message: i18n.translate('xpack.rollupJobs.rollupDataViewsDeprecation', {
+            defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.0.',
+          }),
+          docLinksKey: 'rollupSettings',
+        },
       },
     });
 

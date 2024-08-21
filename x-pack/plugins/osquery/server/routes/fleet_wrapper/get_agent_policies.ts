@@ -6,24 +6,15 @@
  */
 
 import pMap from 'p-map';
-import { filter, uniq, map } from 'lodash';
+import { filter, uniq, flatMap } from 'lodash';
 import { satisfies } from 'semver';
 import type { GetAgentPoliciesResponseItem, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
-import type {
-  GetAgentPoliciesRequestParamsSchema,
-  GetAgentPoliciesRequestQuerySchema,
-} from '../../../common/api';
-import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getInternalSavedObjectsClient } from '../utils';
-import {
-  getAgentPoliciesRequestParamsSchema,
-  getAgentPoliciesRequestQuerySchema,
-} from '../../../common/api';
 
 export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -35,18 +26,7 @@ export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAp
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
-        validate: {
-          request: {
-            params: buildRouteValidation<
-              typeof getAgentPoliciesRequestParamsSchema,
-              GetAgentPoliciesRequestParamsSchema
-            >(getAgentPoliciesRequestParamsSchema),
-            query: buildRouteValidation<
-              typeof getAgentPoliciesRequestQuerySchema,
-              GetAgentPoliciesRequestQuerySchema
-            >(getAgentPoliciesRequestQuerySchema),
-          },
-        },
+        validate: {},
       },
       async (context, request, response) => {
         const internalSavedObjectsClient = await getInternalSavedObjectsClient(
@@ -67,7 +47,7 @@ export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAp
         const supportedPackagePolicyIds = filter(packagePolicies, (packagePolicy) =>
           satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')
         );
-        const agentPolicyIds = uniq(map(supportedPackagePolicyIds, 'policy_id'));
+        const agentPolicyIds = uniq(flatMap(supportedPackagePolicyIds, 'policy_ids'));
         const agentPolicies = await agentPolicyService?.getByIds(
           internalSavedObjectsClient,
           agentPolicyIds

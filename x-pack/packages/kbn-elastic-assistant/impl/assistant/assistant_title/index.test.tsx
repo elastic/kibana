@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { AssistantTitle } from '.';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 
@@ -14,7 +14,6 @@ const testProps = {
   title: 'Test Title',
   docLinks: { ELASTIC_WEBSITE_URL: 'https://www.elastic.co/', DOC_LINK_VERSION: '7.15' },
   selectedConversation: undefined,
-  isFlyoutMode: false,
   onChange: jest.fn(),
   refetchConversationsState: jest.fn(),
 };
@@ -27,23 +26,5 @@ describe('AssistantTitle', () => {
       </TestProviders>
     );
     expect(getByText('Test Title')).toBeInTheDocument();
-  });
-
-  it('clicking on the popover button opens the popover with the correct link', () => {
-    const { getByTestId, queryByTestId } = render(
-      <TestProviders>
-        <AssistantTitle {...testProps} />
-      </TestProviders>,
-      {
-        wrapper: TestProviders,
-      }
-    );
-    expect(queryByTestId('tooltipContent')).not.toBeInTheDocument();
-    fireEvent.click(getByTestId('tooltipIcon'));
-    expect(getByTestId('tooltipContent')).toBeInTheDocument();
-    expect(getByTestId('externalDocumentationLink')).toHaveAttribute(
-      'href',
-      'https://www.elastic.co/guide/en/security/7.15/security-assistant.html'
-    );
   });
 });

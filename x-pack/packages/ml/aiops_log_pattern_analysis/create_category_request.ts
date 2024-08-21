@@ -9,6 +9,8 @@ import type {
   QueryDslQueryContainer,
   AggregationsCustomCategorizeTextAnalyzer,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object/src/is_populated_object';
 
 import type { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
@@ -29,10 +31,12 @@ export function createCategoryRequest(
   timeField: string,
   timeRange: { from: number; to: number } | undefined,
   queryIn: QueryDslQueryContainer,
+  runtimeMappings: MappingRuntimeFields | undefined,
   wrap: ReturnType<typeof createRandomSamplerWrapper>['wrap'],
   intervalMs?: number,
   additionalFilter?: CategorizationAdditionalFilter,
-  useStandardTokenizer: boolean = true
+  useStandardTokenizer: boolean = true,
+  includeSparkline: boolean = true
 ) {
   const query = createCategorizeQuery(queryIn, timeField, timeRange);
   const aggs = {
@@ -50,7 +54,7 @@ export function createCategoryRequest(
             _source: field,
           },
         },
-        ...(intervalMs
+        ...(intervalMs && includeSparkline
           ? {
               sparkline: {
                 date_histogram: {
@@ -76,6 +80,16 @@ export function createCategoryRequest(
                       _source: field,
                     },
                   },
+                  ...(intervalMs
+                    ? {
+                        sparkline: {
+                          date_histogram: {
+                            field: timeField,
+                            fixed_interval: `${intervalMs}ms`,
+                          },
+                        },
+                      }
+                    : {}),
                   ...(additionalFilter.field
                     ? {
                         sub_field: {
@@ -98,10 +112,11 @@ export function createCategoryRequest(
   return {
     params: {
       index,
-      size: 0,
       body: {
         query,
         aggs: wrap(aggs),
+        ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+        size: 0,
       },
     },
   };

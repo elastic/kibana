@@ -30,7 +30,7 @@ import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
-import { PluginSetupContract } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import {
   TaskManagerSetupContract,
@@ -38,7 +38,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { TelemetryEventsSender } from './telemetry/sender';
 import { UptimeConfig } from '../common/config';
-import { UptimeEsClient } from './lib';
+import { SyntheticsEsClient } from './lib';
 
 export interface SyntheticsServerSetup {
   router: UptimeRouter;
@@ -54,7 +54,7 @@ export interface SyntheticsServerSetup {
   stackVersion: string;
   logger: Logger;
   telemetry: TelemetryEventsSender;
-  uptimeEsClient: UptimeEsClient;
+  syntheticsEsClient: SyntheticsEsClient;
   basePath: IBasePath;
   isDev?: boolean;
   coreStart: CoreStart;
@@ -63,7 +63,7 @@ export interface SyntheticsServerSetup {
 }
 
 export interface SyntheticsPluginsSetupDependencies {
-  features: PluginSetupContract;
+  features: FeaturesPluginSetup;
   alerting: any;
   observability: ObservabilityPluginSetup;
   usageCollection: UsageCollectionSetup;

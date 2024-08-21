@@ -54,6 +54,11 @@ export interface GetAgentUploadsResponse {
   items: AgentDiagnostics[];
 }
 
+export interface DeleteAgentUploadResponse {
+  id: string;
+  deleted: boolean;
+}
+
 export interface PostNewAgentActionRequest {
   body: {
     action: Omit<NewAgentAction, 'agents'>;

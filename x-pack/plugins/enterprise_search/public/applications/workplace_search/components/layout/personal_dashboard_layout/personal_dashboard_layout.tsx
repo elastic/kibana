@@ -10,14 +10,7 @@ import { useRouteMatch } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
-import {
-  EuiPageSidebar,
-  EuiPageBody,
-  EuiPageSection,
-  EuiCallOut,
-  EuiSpacer,
-  EuiPageTemplate,
-} from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 
 import { AccountHeader, AccountSettingsSidebar, PrivateSourcesSidebar } from '..';
 import { FlashMessages } from '../../../../shared/flash_messages';
@@ -47,8 +40,8 @@ export const PersonalDashboardLayout: FC<PropsWithChildren<LayoutProps>> = ({
     <>
       {pageChrome && <SetWorkplaceSearchChrome trail={pageChrome} />}
       <AccountHeader />
-      <EuiPageTemplate className="personalDashboardLayout" paddingSize="none">
-        <EuiPageSidebar
+      <EuiPageTemplate className="personalDashboardLayout" paddingSize="none" panelled>
+        <EuiPageTemplate.Sidebar
           role="navigation"
           className="personalDashboardLayout__sideBar"
           sticky
@@ -56,28 +49,26 @@ export const PersonalDashboardLayout: FC<PropsWithChildren<LayoutProps>> = ({
         >
           {useRouteMatch(PRIVATE_SOURCES_PATH) && <PrivateSourcesSidebar />}
           {useRouteMatch(PERSONAL_SETTINGS_PATH) && <AccountSettingsSidebar />}
-        </EuiPageSidebar>
-        <EuiPageBody component="main" panelled role="main">
-          <EuiPageSection
-            className="personalDashboardLayout__body"
-            paddingSize="none"
-            restrictWidth
-          >
-            {readOnlyMode && (
-              <>
-                <EuiCallOut
-                  color="warning"
-                  iconType="lock"
-                  title={PERSONAL_DASHBOARD_READ_ONLY_MODE_WARNING}
-                />
-                <EuiSpacer />
-              </>
-            )}
-            <FlashMessages />
+        </EuiPageTemplate.Sidebar>
+        <EuiPageTemplate.Section
+          className="personalDashboardLayout__body"
+          paddingSize="none"
+          restrictWidth
+        >
+          {readOnlyMode && (
+            <>
+              <EuiCallOut
+                color="warning"
+                iconType="lock"
+                title={PERSONAL_DASHBOARD_READ_ONLY_MODE_WARNING}
+              />
+              <EuiSpacer />
+            </>
+          )}
+          <FlashMessages />
 
-            {isLoading ? <Loading /> : children}
-          </EuiPageSection>
-        </EuiPageBody>
+          {isLoading ? <Loading /> : children}
+        </EuiPageTemplate.Section>
       </EuiPageTemplate>
     </>
   );

@@ -31,8 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
   const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
   const es = getService('es');
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
   describe('@ess @serverless update_rules', () => {
     describe('update rules', () => {
@@ -59,14 +58,14 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).toEqual(expectedRule);
       });
 
       it('should update a rule with defaultable fields', async () => {
-        const expectedRule = getCustomQueryRuleParams({
+        const ruleUpdateProperties = getCustomQueryRuleParams({
           rule_id: 'rule-1',
           max_signals: 200,
           setup: '# some setup markdown',
@@ -74,7 +73,13 @@ export default ({ getService }: FtrProviderContext) => {
             { package: 'package-a', version: '^1.2.3' },
             { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
           ],
+          required_fields: [{ name: '@timestamp', type: 'date' }],
         });
+
+        const expectedRule = {
+          ...ruleUpdateProperties,
+          required_fields: [{ name: '@timestamp', type: 'date', ecs: true }],
+        };
 
         await securitySolutionApi.createRule({
           body: getCustomQueryRuleParams({ rule_id: 'rule-1' }),
@@ -82,7 +87,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { body: updatedRuleResponse } = await securitySolutionApi
           .updateRule({
-            body: expectedRule,
+            body: ruleUpdateProperties,
           })
           .expect(200);
 
@@ -130,7 +135,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutputWithoutRuleId();
         outputRule.name = 'some other name';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
         expect(bodyToCompare).toEqual(expectedRule);
@@ -150,7 +155,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).toEqual(expectedRule);
@@ -170,7 +175,7 @@ export default ({ getService }: FtrProviderContext) => {
         outputRule.enabled = false;
         outputRule.severity = 'low';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).toEqual(expectedRule);
@@ -195,7 +200,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
         outputRule.revision = 2;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).toEqual(expectedRule);
@@ -271,6 +276,33 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body.message).toEqual(
             '[request body]: max_signals: Number must be greater than or equal to 1'
           );
+        });
+      });
+
+      describe('required_fields', () => {
+        it('should reset required fields field to default value on update when not present', async () => {
+          const expectedRule = getCustomQueryRuleParams({
+            rule_id: 'required-fields-default-value-test',
+            required_fields: [],
+          });
+
+          await securitySolutionApi.createRule({
+            body: getCustomQueryRuleParams({
+              rule_id: 'required-fields-default-value-test',
+              required_fields: [{ name: 'host.name', type: 'keyword' }],
+            }),
+          });
+
+          const { body: updatedRuleResponse } = await securitySolutionApi
+            .updateRule({
+              body: getCustomQueryRuleParams({
+                rule_id: 'required-fields-default-value-test',
+                required_fields: undefined,
+              }),
+            })
+            .expect(200);
+
+          expect(updatedRuleResponse).toMatchObject(expectedRule);
         });
       });
     });

@@ -8,7 +8,7 @@
     "browser": true,
     "configPath": ["xpack", "index_management"],
     "requiredPlugins": ["home", "management", "features", "share"],
-    "optionalPlugins": ["security", "usageCollection", "fleet", "cloud", "ml", "console"],
+    "optionalPlugins": ["security", "usageCollection", "fleet", "cloud", "ml", "console","licensing"],
     "requiredBundles": ["kibanaReact", "esUiShared", "runtimeFields"]
   }
 }

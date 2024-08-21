@@ -62,6 +62,9 @@ export function getBaseMappings(): IndexMapping {
       updated_at: {
         type: 'date',
       },
+      updated_by: {
+        type: 'keyword',
+      },
       created_at: {
         type: 'date',
       },
@@ -103,7 +106,7 @@ function validateAndMerge(
     if (k.startsWith('_')) {
       throw new Error(`Invalid mapping "${k}". Mappings cannot start with _.`);
     }
-    if (dest.hasOwnProperty(k)) {
+    if (Object.hasOwn(dest, k)) {
       throw new Error(`Cannot redefine core mapping "${k}".`);
     }
   });

@@ -6,20 +6,21 @@
  */
 
 import type { StartServicesAccessor } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { MlDependencies } from '../../application/app';
 import { HttpService } from '../../application/services/http_service';
 import { AnomalyExplorerChartsService } from '../../application/services/anomaly_explorer_charts_service';
-import type { SingleMetricViewerEmbeddableServices } from '../types';
+import type { SingleMetricViewerEmbeddableServices, SingleMetricViewerServices } from '../types';
 
 /**
- * Provides the services required by the Anomaly Swimlane Embeddable.
+ * Provides the ML services required by the Single Metric Viewer Embeddable.
  */
-export const getServices = async (
-  getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
-): Promise<SingleMetricViewerEmbeddableServices> => {
+export const getMlServices = async (
+  coreStart: CoreStart,
+  pluginsStart: MlStartDependencies
+): Promise<SingleMetricViewerServices> => {
   const [
-    [coreStart, pluginsStart],
     { AnomalyDetectorService },
     { fieldFormatServiceFactory },
     { indexServiceFactory },
@@ -31,7 +32,6 @@ export const getServices = async (
     { timeSeriesSearchServiceFactory },
     { toastNotificationServiceProvider },
   ] = await Promise.all([
-    await getStartServices(),
     await import('../../application/services/anomaly_detector_service'),
     await import('../../application/services/field_format_service_factory'),
     await import('../../application/util/index_service'),
@@ -64,7 +64,6 @@ export const getServices = async (
     mlApiServices,
     mlResultsService
   );
-
   // Note on the following services:
   // - `mlIndexUtils` is just instantiated here to be passed on to `mlFieldFormatService`,
   //   but it's not being made available as part of global services. Since it's just
@@ -76,21 +75,28 @@ export const getServices = async (
   //   way this manages its own state right now doesn't consider React component lifecycles.
   const mlIndexUtils = indexServiceFactory(pluginsStart.data.dataViews);
   const mlFieldFormatService = fieldFormatServiceFactory(mlApiServices, mlIndexUtils);
+  return {
+    anomalyDetectorService,
+    anomalyExplorerService,
+    mlApiServices,
+    mlCapabilities,
+    mlFieldFormatService,
+    mlJobService,
+    mlResultsService,
+    mlTimeSeriesSearchService,
+    mlTimeSeriesExplorerService,
+    toastNotificationService,
+  };
+};
 
-  return [
-    coreStart,
-    pluginsStart as MlDependencies,
-    {
-      anomalyDetectorService,
-      anomalyExplorerService,
-      mlApiServices,
-      mlCapabilities,
-      mlFieldFormatService,
-      mlJobService,
-      mlResultsService,
-      mlTimeSeriesSearchService,
-      mlTimeSeriesExplorerService,
-      toastNotificationService,
-    },
-  ];
+/**
+ * Provides the services required by the Single Metric Viewer Embeddable.
+ */
+export const getServices = async (
+  getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
+): Promise<SingleMetricViewerEmbeddableServices> => {
+  const [coreStart, pluginsStart] = await getStartServices();
+  const mlServices = await getMlServices(coreStart, pluginsStart);
+
+  return [coreStart, pluginsStart as MlDependencies, mlServices];
 };

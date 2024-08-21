@@ -15,7 +15,6 @@ import {
   ML_DETECTOR_RULE_OPERATOR,
 } from '@kbn/ml-anomaly-utils';
 
-import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
 import { processCreatedBy } from '../../../../common/util/job_utils';
 
@@ -70,7 +69,7 @@ export function isValidRule(rule) {
   return isValid;
 }
 
-export function saveJobRule(job, detectorIndex, ruleIndex, editedRule) {
+export function saveJobRule(job, detectorIndex, ruleIndex, editedRule, mlApiServices) {
   const detector = job.analysis_config.detectors[detectorIndex];
 
   // Filter out any scope expression where the UI=specific 'enabled'
@@ -103,16 +102,16 @@ export function saveJobRule(job, detectorIndex, ruleIndex, editedRule) {
     }
   }
 
-  return updateJobRules(job, detectorIndex, rules);
+  return updateJobRules(job, detectorIndex, rules, mlApiServices);
 }
 
-export function deleteJobRule(job, detectorIndex, ruleIndex) {
+export function deleteJobRule(job, detectorIndex, ruleIndex, mlApiServices) {
   const detector = job.analysis_config.detectors[detectorIndex];
   let customRules = [];
   if (detector.custom_rules !== undefined && ruleIndex < detector.custom_rules.length) {
     customRules = cloneDeep(detector.custom_rules);
     customRules.splice(ruleIndex, 1);
-    return updateJobRules(job, detectorIndex, customRules);
+    return updateJobRules(job, detectorIndex, customRules, mlApiServices);
   } else {
     return Promise.reject(
       new Error(
@@ -128,7 +127,7 @@ export function deleteJobRule(job, detectorIndex, ruleIndex) {
   }
 }
 
-export function updateJobRules(job, detectorIndex, rules) {
+export function updateJobRules(job, detectorIndex, rules, mlApiServices) {
   // Pass just the detector with the edited rule to the updateJob endpoint.
   const jobId = job.job_id;
   const jobData = {
@@ -146,19 +145,21 @@ export function updateJobRules(job, detectorIndex, rules) {
     processCreatedBy(customSettings);
     jobData.custom_settings = customSettings;
   }
-
   return new Promise((resolve, reject) => {
-    ml.updateJob({ jobId: jobId, job: jobData })
+    mlApiServices
+      .updateJob({ jobId: jobId, job: jobData })
       .then(() => {
-        // Refresh the job data in the job service before resolving.
-        mlJobService
-          .refreshJob(jobId)
-          .then(() => {
-            resolve({ success: true });
-          })
-          .catch((refreshResp) => {
-            reject(refreshResp);
-          });
+        // If using mlJobService, refresh the job data in the job service before resolving.
+        if (mlJobService) {
+          mlJobService
+            .refreshJob(jobId)
+            .then(() => {
+              resolve({ success: true });
+            })
+            .catch((refreshResp) => {
+              reject(refreshResp);
+            });
+        }
       })
       .catch((resp) => {
         reject(resp);
@@ -168,9 +169,9 @@ export function updateJobRules(job, detectorIndex, rules) {
 
 // Updates an ML filter used in the scope part of a rule,
 // adding an item to the filter with the specified ID.
-export function addItemToFilter(item, filterId) {
+export function addItemToFilter(item, filterId, mlApiServices) {
   return new Promise((resolve, reject) => {
-    ml.filters
+    mlApiServices.filters
       .updateFilter(filterId, undefined, [item], undefined)
       .then((updatedFilter) => {
         resolve(updatedFilter);

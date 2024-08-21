@@ -7,6 +7,7 @@
 
 import type SuperTest from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
+import limit from 'p-limit';
 
 import type {
   Type,
@@ -41,7 +42,7 @@ import { countDownTest } from '../../../common/utils/security_solution';
  * @param supertest The supertest client library
  */
 export const createListsIndex = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog
 ): Promise<void> => {
   return countDownTest(
@@ -61,7 +62,7 @@ export const createListsIndex = async (
  * @param supertest The supertest client library
  */
 export const deleteListsIndex = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog
 ): Promise<void> => {
   return countDownTest(
@@ -82,7 +83,7 @@ export const deleteListsIndex = async (
  * @param supertest The supertest client library
  */
 export const createExceptionListsIndex = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog
 ): Promise<void> => {
   return countDownTest(
@@ -205,7 +206,7 @@ export const binaryToString = (res: any, callback: any): void => {
  * @param supertest The supertest handle
  */
 export const deleteAllExceptions = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog
 ): Promise<void> => {
   await deleteAllExceptionsByType(supertest, log, 'single');
@@ -218,7 +219,7 @@ export const deleteAllExceptions = async (
  * @param supertest The supertest handle
  */
 export const deleteAllExceptionsByType = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   type: NamespaceType
 ): Promise<void> => {
@@ -229,12 +230,16 @@ export const deleteAllExceptionsByType = async (
         .set('kbn-xsrf', 'true')
         .send();
       const ids: string[] = body.data.map((exception: ExceptionList) => exception.id);
-      for await (const id of ids) {
-        await supertest
-          .delete(`${EXCEPTION_LIST_URL}?id=${id}&namespace_type=${type}`)
-          .set('kbn-xsrf', 'true')
-          .send();
-      }
+      const limiter = limit(10);
+      const promises = ids.map((id) =>
+        limiter(() =>
+          supertest
+            .delete(`${EXCEPTION_LIST_URL}?id=${id}&namespace_type=${type}`)
+            .set('kbn-xsrf', 'true')
+            .send()
+        )
+      );
+      await Promise.all(promises);
       const { body: finalCheck } = await supertest
         .get(`${EXCEPTION_LIST_URL}/_find?namespace_type=${type}`)
         .set('kbn-xsrf', 'true')
@@ -260,7 +265,7 @@ export const deleteAllExceptionsByType = async (
  * @param testValues Optional test values in case you're using CIDR or range based lists
  */
 export const importFile = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   type: Type,
   contents: string[],
@@ -297,7 +302,7 @@ export const importFile = async (
  * @param fileName filename to import as
  */
 export const importTextFile = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   type: Type,
   contents: string[],
@@ -330,7 +335,7 @@ export const importTextFile = async (
  * @param itemValue The item value to wait for
  */
 export const waitForListItem = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   itemValue: string,
   fileName: string
@@ -362,7 +367,7 @@ export const waitForListItem = async (
  * @param itemValue The item value to wait for
  */
 export const waitForListItems = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   itemValues: string[],
   fileName: string
@@ -378,7 +383,7 @@ export const waitForListItems = async (
  * @param itemValue The item value to wait for
  */
 export const waitForTextListItem = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   itemValue: string,
   fileName: string
@@ -417,7 +422,7 @@ export const waitForTextListItem = async (
  * @param itemValue The item value to wait for
  */
 export const waitForTextListItems = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   itemValues: string[],
   fileName: string

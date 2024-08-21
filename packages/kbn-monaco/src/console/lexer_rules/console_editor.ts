@@ -11,6 +11,7 @@ import {
   consoleSharedLexerRules,
   matchTokensWithEOL,
   matchToken,
+  matchTokens,
 } from './shared';
 import { monaco } from '../../monaco_imports';
 
@@ -20,16 +21,22 @@ export const languageConfiguration: monaco.languages.LanguageConfiguration = {
 
 export const lexerRules: monaco.languages.IMonarchLanguage = {
   ...consoleSharedLexerRules,
+  ignoreCase: true,
   tokenizer: {
     ...consoleSharedLexerRules.tokenizer,
     root: [
       ...consoleSharedLexerRules.tokenizer.root,
       // method
-      matchTokensWithEOL('method', /([a-zA-Z]+)/, 'root', 'method_sep'),
+      matchTokensWithEOL('method', /get|post|put|patch|delete|head/, 'root', 'method_sep'),
       // whitespace
       matchToken('whitespace', '\\s+'),
       // text
       matchToken('text', '.+?'),
+    ],
+    comments: [
+      // line comment indicated by #
+      matchTokens(['comment.punctuation', 'comment.line'], /(#)(.*$)/),
+      ...consoleSharedLexerRules.tokenizer.comments,
     ],
     method_sep: [
       // protocol host with slash

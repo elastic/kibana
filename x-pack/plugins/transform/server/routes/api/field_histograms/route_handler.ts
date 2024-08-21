@@ -23,14 +23,16 @@ export const routeHandler: RequestHandler<
 
   try {
     const esClient = (await ctx.core).elasticsearch.client;
-    const resp = await fetchHistogramsForFields(
-      esClient.asCurrentUser,
-      dataViewTitle,
-      query,
-      fields,
-      samplerShardSize,
-      runtimeMappings
-    );
+    const resp = await fetchHistogramsForFields({
+      esClient: esClient.asCurrentUser,
+      arguments: {
+        indexPattern: dataViewTitle,
+        query,
+        fields,
+        samplerShardSize,
+        runtimeMappings,
+      },
+    });
 
     return res.ok({ body: resp });
   } catch (e) {

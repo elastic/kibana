@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useSourceContext } from '../../../../containers/metrics_source';
+import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import { AutocompleteField } from '../../../../components/autocomplete_field';
 import { WithKueryAutocompletion } from '../../../../containers/with_kuery_autocompletion';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
 
 export const SearchBar = () => {
-  const { createDerivedIndexPattern } = useSourceContext();
+  const { metricsView } = useMetricsDataViewContext();
   const {
     applyFilterQueryFromKueryExpression,
     filterQueryDraft,
@@ -21,7 +21,7 @@ export const SearchBar = () => {
     setFilterQueryDraftFromKueryExpression,
   } = useWaffleFiltersContext();
   return (
-    <WithKueryAutocompletion indexPattern={createDerivedIndexPattern()}>
+    <WithKueryAutocompletion dataView={metricsView?.dataViewReference}>
       {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
         <AutocompleteField
           isLoadingSuggestions={isLoadingSuggestions}
@@ -34,7 +34,7 @@ export const SearchBar = () => {
           })}
           suggestions={suggestions}
           value={filterQueryDraft ? filterQueryDraft : ''}
-          autoFocus={true}
+          autoFocus
         />
       )}
     </WithKueryAutocompletion>

@@ -27,7 +27,7 @@ import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
-import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
+import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../common/inventory/types';
 import { useNodeDetailsRedirect } from '../../../../link_to';
 import { navigateToUptime } from '../../lib/navigate_to_uptime';
 
@@ -90,17 +90,16 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
       return { label: '', value: '' };
     }, [nodeType, node.ip, node.id]);
 
-    const nodeDetailMenuItemLinkProps = useLinkProps({
-      ...getNodeDetailUrl({
-        assetType: nodeType,
-        assetId: node.id,
-        search: {
-          from: nodeDetailFrom,
-          to: currentTime,
-          name: node.name,
-        },
-      }),
+    const nodeDetailMenuItemLinkProps = getNodeDetailUrl({
+      assetType: nodeType,
+      assetId: node.id,
+      search: {
+        from: nodeDetailFrom,
+        to: currentTime,
+        name: node.name,
+      },
     });
+
     const apmTracesMenuItemLinkProps = useLinkProps({
       app: 'apm',
       hash: 'traces',
@@ -128,7 +127,8 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
         defaultMessage: '{inventoryName} metrics',
         values: { inventoryName: inventoryModel.singularDisplayName },
       }),
-      ...nodeDetailMenuItemLinkProps,
+      href: nodeDetailMenuItemLinkProps.href,
+      onClick: nodeDetailMenuItemLinkProps.onClick,
       isDisabled: !showDetail,
     };
 

@@ -35,6 +35,7 @@ export const parseMappings = (
     dynamic_date_formats,
     dynamic_templates,
     /* eslint-enable @typescript-eslint/naming-convention */
+    subobjects,
   } = mappingsDefinition;
 
   const parsed = {
@@ -47,6 +48,7 @@ export const parseMappings = (
       numeric_detection,
       date_detection,
       dynamic_date_formats,
+      subobjects,
     },
     fields: properties,
     templates: {

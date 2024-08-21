@@ -19,7 +19,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { flyoutSummaryText } from '../../../../common/translations';
-import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
+import { TimeRangeConfig } from '../../../../common/types';
 
 export function FlyoutSummaryHeader({
   timeRange,
@@ -73,6 +73,6 @@ export function FlyoutSummaryHeader({
 const flyoutSummaryTooltip = (
   <FormattedMessage
     id="xpack.datasetQuality.flyoutSummaryTooltip"
-    defaultMessage="Stats of the dataset within the selected time range."
+    defaultMessage="Stats of the data set within the selected time range."
   />
 );

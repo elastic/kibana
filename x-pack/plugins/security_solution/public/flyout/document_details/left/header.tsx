@@ -14,7 +14,7 @@ import { FlyoutHeader } from '../../shared/components/flyout_header';
 import type { LeftPanelTabType } from './tabs';
 import { getField } from '../shared/utils';
 import { EventKind } from '../shared/constants/event_kinds';
-import { useLeftPanelContext } from './context';
+import { useDocumentDetailsContext } from '../shared/context';
 
 export interface PanelHeaderProps {
   /**
@@ -38,7 +38,7 @@ export interface PanelHeaderProps {
  */
 export const PanelHeader: FC<PanelHeaderProps> = memo(
   ({ selectedTabId, setSelectedTabId, tabs }) => {
-    const { getFieldsData } = useLeftPanelContext();
+    const { getFieldsData } = useDocumentDetailsContext();
     const isEventKindSignal = getField(getFieldsData('event.kind')) === EventKind.signal;
 
     const onSelectedTabChanged = (id: LeftPanelPaths) => setSelectedTabId(id);

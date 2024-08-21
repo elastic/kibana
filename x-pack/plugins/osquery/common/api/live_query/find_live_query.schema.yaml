@@ -4,13 +4,6 @@ info:
   version: '2023-10-31'
 paths: { }
 components:
-  parameters:
-    FindLiveQueryRequestQueryParameter:
-      name: query
-      in: query
-      required: true
-      schema:
-        $ref: '#/components/schemas/FindLiveQueryRequestQuery'
   schemas:
     FindLiveQueryRequestQuery:
       type: object
@@ -25,7 +18,3 @@ components:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
         sortOrder:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
-    SuccessResponse:
-      type: object
-      properties: {}
-      # Define properties for the success response if needed

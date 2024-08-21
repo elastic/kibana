@@ -6,13 +6,14 @@
  */
 
 import type { VFC } from 'react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFlexItem, EuiLink } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { SentinelOneAgentStatus } from '../../../../detections/components/host_isolation/sentinel_one_agent_status';
-import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../common/utils/sentinelone_alert_check';
-import { EndpointAgentStatusById } from '../../../../common/components/endpoint/endpoint_agent_status';
-import { useRightPanelContext } from '../context';
+import { getAgentTypeForAgentIdField } from '../../../../common/lib/endpoint/utils/get_agent_type_for_agent_id_field';
+import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
+import { AgentStatus } from '../../../../common/components/endpoint/agents/agent_status';
+import { useDocumentDetailsContext } from '../../shared/context';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import {
   AGENT_STATUS_FIELD_NAME,
   HOST_NAME_FIELD_NAME,
@@ -20,6 +21,7 @@ import {
 } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
+import { useKibana } from '../../../../common/lib/kibana';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import {
   HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID,
@@ -27,8 +29,16 @@ import {
   HIGHLIGHTED_FIELDS_CELL_TEST_ID,
   HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID,
 } from './test_ids';
+import { HostPreviewPanelKey } from '../../../entity_details/host_right';
+import { HOST_PREVIEW_BANNER } from './host_entity_overview';
+import { UserPreviewPanelKey } from '../../../entity_details/user_right';
+import { USER_PREVIEW_BANNER } from './user_entity_overview';
 
 interface LinkFieldCellProps {
+  /**
+   * Highlighted field's field name
+   */
+  field: string;
   /**
    * Highlighted field's value to display as a EuiLink to open the expandable left panel
    * (used for host name and username fields)
@@ -39,9 +49,11 @@ interface LinkFieldCellProps {
 /**
  * // Currently we can use the same component for both host name and username
  */
-const LinkFieldCell: VFC<LinkFieldCellProps> = ({ value }) => {
-  const { scopeId, eventId, indexName } = useRightPanelContext();
-  const { openLeftPanel } = useExpandableFlyoutApi();
+const LinkFieldCell: VFC<LinkFieldCellProps> = ({ field, value }) => {
+  const { scopeId, eventId, indexName } = useDocumentDetailsContext();
+  const { openLeftPanel, openPreviewPanel } = useExpandableFlyoutApi();
+  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
+  const { telemetry } = useKibana().services;
 
   const goToInsightsEntities = useCallback(() => {
     openLeftPanel({
@@ -55,8 +67,48 @@ const LinkFieldCell: VFC<LinkFieldCellProps> = ({ value }) => {
     });
   }, [eventId, indexName, openLeftPanel, scopeId]);
 
+  const openHostPreview = useCallback(() => {
+    openPreviewPanel({
+      id: HostPreviewPanelKey,
+      params: {
+        hostName: value,
+        scopeId,
+        banner: HOST_PREVIEW_BANNER,
+      },
+    });
+    telemetry.reportDetailsFlyoutOpened({
+      location: scopeId,
+      panel: 'preview',
+    });
+  }, [openPreviewPanel, value, scopeId, telemetry]);
+
+  const openUserPreview = useCallback(() => {
+    openPreviewPanel({
+      id: UserPreviewPanelKey,
+      params: {
+        userName: value,
+        scopeId,
+        banner: USER_PREVIEW_BANNER,
+      },
+    });
+    telemetry.reportDetailsFlyoutOpened({
+      location: scopeId,
+      panel: 'preview',
+    });
+  }, [openPreviewPanel, value, scopeId, telemetry]);
+
+  const onClick = useMemo(() => {
+    if (isPreviewEnabled && field === HOST_NAME_FIELD_NAME) {
+      return openHostPreview;
+    }
+    if (isPreviewEnabled && field === USER_NAME_FIELD_NAME) {
+      return openUserPreview;
+    }
+    return goToInsightsEntities;
+  }, [isPreviewEnabled, field, openHostPreview, openUserPreview, goToInsightsEntities]);
+
   return (
-    <EuiLink onClick={goToInsightsEntities} data-test-subj={HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID}>
+    <EuiLink onClick={onClick} data-test-subj={HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID}>
       {value}
     </EuiLink>
   );
@@ -83,35 +135,36 @@ export interface HighlightedFieldsCellProps {
 export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
   values,
   field,
-  originalField,
-}) => (
-  <>
-    {values != null &&
-      values.map((value, i) => {
-        return (
-          <EuiFlexItem
-            grow={false}
-            key={`${i}-${value}`}
-            data-test-subj={`${value}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}
-          >
-            {field === HOST_NAME_FIELD_NAME || field === USER_NAME_FIELD_NAME ? (
-              <LinkFieldCell value={value} />
-            ) : field === AGENT_STATUS_FIELD_NAME &&
-              originalField === SENTINEL_ONE_AGENT_ID_FIELD ? (
-              <SentinelOneAgentStatus
-                agentId={String(value ?? '')}
-                data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
-              />
-            ) : field === AGENT_STATUS_FIELD_NAME ? (
-              <EndpointAgentStatusById
-                endpointAgentId={String(value ?? '')}
-                data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
-              />
-            ) : (
-              <span data-test-subj={HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID}>{value}</span>
-            )}
-          </EuiFlexItem>
-        );
-      })}
-  </>
-);
+  originalField = '',
+}) => {
+  const agentType: ResponseActionAgentType = useMemo(() => {
+    return getAgentTypeForAgentIdField(originalField);
+  }, [originalField]);
+
+  return (
+    <>
+      {values != null &&
+        values.map((value, i) => {
+          return (
+            <EuiFlexItem
+              grow={false}
+              key={`${i}-${value}`}
+              data-test-subj={`${value}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}
+            >
+              {field === HOST_NAME_FIELD_NAME || field === USER_NAME_FIELD_NAME ? (
+                <LinkFieldCell field={field} value={value} />
+              ) : field === AGENT_STATUS_FIELD_NAME ? (
+                <AgentStatus
+                  agentId={String(value ?? '')}
+                  agentType={agentType}
+                  data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
+                />
+              ) : (
+                <span data-test-subj={HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID}>{value}</span>
+              )}
+            </EuiFlexItem>
+          );
+        })}
+    </>
+  );
+};

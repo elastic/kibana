@@ -59,6 +59,7 @@ export const OMIT_FIELDS: string[] = [
   '_version',
   '_score',
   '_tier',
+  '_ignored',
 ];
 
 export const NON_AGGREGATABLE_FIELD_TYPES = new Set<string>([

@@ -9,9 +9,10 @@ import { i18n } from '@kbn/i18n';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUES,
+  ALERT_GROUP,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { isEqual } from 'lodash';
+import { castArray, isEqual } from 'lodash';
 import {
   ActionGroupIdsOf,
   AlertInstanceContext as AlertContext,
@@ -19,11 +20,22 @@ import {
   RecoveredActionGroup,
 } from '@kbn/alerting-plugin/common';
 import { AlertsClientError, RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
-import type { TimeUnitChar } from '@kbn/observability-plugin/common';
-import { getAlertUrl } from '@kbn/observability-plugin/common';
+import {
+  AlertsLocatorParams,
+  TimeUnitChar,
+  alertsLocatorID,
+  getAlertUrl,
+} from '@kbn/observability-plugin/common';
 import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { getEcsGroups, type Group } from '@kbn/observability-alerting-rule-utils';
+import { convertToBuiltInComparators } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
+import {
+  ASSET_DETAILS_LOCATOR_ID,
+  AssetDetailsLocatorParams,
+} from '@kbn/observability-shared-plugin/common';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
-import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
+import { AlertStates } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import { InfraBackendLibs } from '../../infra_types';
 import {
@@ -43,6 +55,7 @@ import {
   validGroupByForContext,
   flattenAdditionalContext,
   getGroupByObject,
+  getFormattedGroupBy,
 } from '../common/utils';
 import { getEvaluationValues, getThresholds } from '../common/get_values';
 
@@ -52,11 +65,12 @@ import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_mi
 
 export type MetricThresholdAlert = Omit<
   ObservabilityMetricsAlert,
-  'kibana.alert.evaluation.values'
+  'kibana.alert.evaluation.values' | 'kibana.alert.evaluation.threshold' | 'kibana.alert.group'
 > & {
   // Defining a custom type for this because the schema generation script doesn't allow explicit null values
   [ALERT_EVALUATION_VALUES]?: Array<number | null>;
   [ALERT_EVALUATION_THRESHOLD]?: Array<number | null>;
+  [ALERT_GROUP]?: Group[];
 };
 
 export type MetricThresholdRuleParams = Record<string, any>;
@@ -83,15 +97,16 @@ type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
   typeof FIRED_ACTIONS | typeof WARNING_ACTIONS | typeof NO_DATA_ACTIONS
 >;
 
-type MetricThresholdAlertReporter = (
-  id: string,
-  reason: string,
-  actionGroup: MetricThresholdActionGroup,
-  context: MetricThresholdAlertContext,
-  additionalContext?: AdditionalContext | null,
-  evaluationValues?: Array<number | null>,
-  thresholds?: Array<number | null>
-) => void;
+type MetricThresholdAlertReporter = (params: {
+  id: string;
+  reason: string;
+  actionGroup: MetricThresholdActionGroup;
+  context: MetricThresholdAlertContext;
+  additionalContext?: AdditionalContext | null;
+  evaluationValues?: Array<number | null>;
+  groups?: Group[];
+  thresholds?: Array<number | null>;
+}) => void;
 
 export const createMetricThresholdExecutor =
   (libs: InfraBackendLibs) =>
@@ -105,6 +120,11 @@ export const createMetricThresholdExecutor =
       MetricThresholdAlert
     >
   ) => {
+    const { share } = libs.plugins;
+    const alertsLocator = share.setup.url.locators.get<AlertsLocatorParams>(alertsLocatorID);
+    const assetDetailsLocator =
+      share.setup.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
+
     const startTime = Date.now();
 
     const {
@@ -120,6 +140,8 @@ export const createMetricThresholdExecutor =
     const { criteria } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
 
+    const groupBy = castArray<string>(params.groupBy);
+
     const logger = createScopedLogger(libs.logger, 'metricThresholdRule', {
       alertId: ruleId,
       executionId,
@@ -130,15 +152,16 @@ export const createMetricThresholdExecutor =
       throw new AlertsClientError();
     }
 
-    const alertReporter: MetricThresholdAlertReporter = async (
+    const alertReporter: MetricThresholdAlertReporter = async ({
       id,
       reason,
       actionGroup,
-      contextWithoutAlertDetailsUrl,
+      context: contextWithoutAlertDetailsUrl,
       additionalContext,
       evaluationValues,
-      thresholds
-    ) => {
+      groups,
+      thresholds,
+    }) => {
       const { uuid, start } = alertsClient.report({
         id,
         actionGroup,
@@ -150,7 +173,9 @@ export const createMetricThresholdExecutor =
           [ALERT_REASON]: reason,
           [ALERT_EVALUATION_VALUES]: evaluationValues,
           [ALERT_EVALUATION_THRESHOLD]: thresholds,
+          [ALERT_GROUP]: groups,
           ...flattenAdditionalContext(additionalContext),
+          ...getEcsGroups(groups),
         },
         context: {
           ...contextWithoutAlertDetailsUrl,
@@ -158,7 +183,7 @@ export const createMetricThresholdExecutor =
             uuid,
             spaceId,
             start ?? startedAt.toISOString(),
-            libs.alertsLocator,
+            alertsLocator,
             libs.basePath.publicBaseUrl
           ),
         },
@@ -194,16 +219,23 @@ export const createMetricThresholdExecutor =
             basePath: libs.basePath,
             spaceId,
             timestamp,
+            groupBy,
+            assetDetailsLocator,
           }),
         };
 
-        await alertReporter(UNGROUPED_FACTORY_KEY, reason, actionGroupId, alertContext);
+        await alertReporter({
+          id: UNGROUPED_FACTORY_KEY,
+          reason,
+          actionGroup: actionGroupId,
+          context: alertContext,
+        });
 
         return {
           state: {
             lastRunTimestamp: startedAt.valueOf(),
             missingGroups: [],
-            groupBy: params.groupBy,
+            groupBy,
             filterQuery: params.filterQuery,
           },
         };
@@ -252,13 +284,14 @@ export const createMetricThresholdExecutor =
     }
 
     const groupByKeysObjectMapping = getGroupByObject(params.groupBy, resultGroupSet);
-    const groups = [...resultGroupSet];
+    const groupByMapping = getFormattedGroupBy(params.groupBy, resultGroupSet);
+    const groupArray = [...resultGroupSet];
     const nextMissingGroups = new Set<MissingGroupsRecord>();
-    const hasGroups = !isEqual(groups, [UNGROUPED_FACTORY_KEY]);
+    const hasGroups = !isEqual(groupArray, [UNGROUPED_FACTORY_KEY]);
     let scheduledActionsCount = 0;
 
-    // The key of `groups` is the alert instance ID.
-    for (const group of groups) {
+    // The key of `groupArray` is the alert instance ID.
+    for (const group of groupArray) {
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = alertResults.every((result) => result[group]?.shouldFire);
       const shouldAlertWarn = alertResults.every((result) => result[group]?.shouldWarn);
@@ -283,7 +316,16 @@ export const createMetricThresholdExecutor =
         reason = alertResults
           .map((result) =>
             buildFiredAlertReason({
-              ...formatAlertResult(result[group], nextState === AlertStates.WARNING),
+              ...formatAlertResult(
+                {
+                  ...result[group],
+                  comparator: convertToBuiltInComparators(result[group].comparator),
+                  warningComparator: result[group].comparator
+                    ? convertToBuiltInComparators(result[group].comparator)
+                    : undefined,
+                },
+                nextState === AlertStates.WARNING
+              ),
               group,
             })
           )
@@ -340,6 +382,7 @@ export const createMetricThresholdExecutor =
 
         const evaluationValues = getEvaluationValues<Evaluation>(alertResults, group);
         const thresholds = getThresholds<any>(criteria);
+        const groups: Group[] = groupByMapping[group];
 
         const alertContext = {
           alertState: stateToAlertMessage[nextState],
@@ -353,40 +396,54 @@ export const createMetricThresholdExecutor =
           }),
           reason,
           threshold: mapToConditionsLookup(alertResults, (result, index) => {
-            const evaluation = result[group];
+            const evaluation = result[group] as Evaluation;
             if (!evaluation) {
               return criteria[index].threshold;
             }
-            return formatAlertResult(evaluation).threshold;
+            return formatAlertResult({
+              ...evaluation,
+              comparator: convertToBuiltInComparators(evaluation.comparator),
+              warningComparator: evaluation.warningComparator
+                ? convertToBuiltInComparators(evaluation.warningComparator)
+                : undefined,
+            }).threshold;
           }),
           timestamp,
           value: mapToConditionsLookup(alertResults, (result, index) => {
-            const evaluation = result[group];
+            const evaluation = result[group] as Evaluation;
             if (!evaluation && criteria[index].aggType === 'count') {
               return 0;
             } else if (!evaluation) {
               return null;
             }
-            return formatAlertResult(evaluation).currentValue;
+            return formatAlertResult({
+              ...evaluation,
+              comparator: convertToBuiltInComparators(evaluation.comparator),
+              warningComparator: evaluation.warningComparator
+                ? convertToBuiltInComparators(evaluation.warningComparator)
+                : undefined,
+            }).currentValue;
           }),
           viewInAppUrl: getMetricsViewInAppUrlWithSpaceId({
             basePath: libs.basePath,
             spaceId,
             timestamp,
-            hostName: additionalContext?.host?.name,
+            groupBy,
+            assetDetailsLocator,
           }),
           ...additionalContext,
         };
 
-        await alertReporter(
-          `${group}`,
+        await alertReporter({
+          id: `${group}`,
           reason,
-          actionGroupId,
-          alertContext,
+          actionGroup: actionGroupId,
+          context: alertContext,
           additionalContext,
           evaluationValues,
-          thresholds
-        );
+          groups,
+          thresholds,
+        });
         scheduledActionsCount++;
       }
     }
@@ -412,7 +469,7 @@ export const createMetricThresholdExecutor =
           alertUuid,
           spaceId,
           indexedStartedAt,
-          libs.alertsLocator,
+          alertsLocator,
           libs.basePath.publicBaseUrl
         ),
         alertState: stateToAlertMessage[AlertStates.OK],
@@ -430,7 +487,8 @@ export const createMetricThresholdExecutor =
           basePath: libs.basePath,
           spaceId,
           timestamp: indexedStartedAt,
-          hostName: additionalContext?.host?.name,
+          groupBy,
+          assetDetailsLocator,
         }),
 
         originalAlertState: translateActionGroupToAlertState(originalActionGroup),
@@ -448,7 +506,7 @@ export const createMetricThresholdExecutor =
       state: {
         lastRunTimestamp: startedAt.valueOf(),
         missingGroups: [...nextMissingGroups],
-        groupBy: params.groupBy,
+        groupBy,
         filterQuery: params.filterQuery,
       },
     };
@@ -503,9 +561,9 @@ const formatAlertResult = <AlertResult>(
     metric: string;
     currentValue: number | null;
     threshold: number[];
-    comparator: Comparator;
+    comparator: COMPARATORS;
     warningThreshold?: number[];
-    warningComparator?: Comparator;
+    warningComparator?: COMPARATORS;
     timeSize: number;
     timeUnit: TimeUnitChar;
   } & AlertResult,
@@ -529,7 +587,7 @@ const formatAlertResult = <AlertResult>(
       threshold: Array.isArray(thresholdToFormat)
         ? thresholdToFormat.map((v: number) => formatter(v))
         : formatter(thresholdToFormat),
-      comparator: comparatorToUse,
+      comparator: convertToBuiltInComparators(comparatorToUse),
     };
   }
 

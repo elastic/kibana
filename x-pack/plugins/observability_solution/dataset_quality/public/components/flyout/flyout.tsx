@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
@@ -19,13 +19,16 @@ import {
   EuiPanel,
   EuiSkeletonRectangle,
 } from '@elastic/eui';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { flyoutCancelText } from '../../../common/translations';
-import { useDatasetQualityFlyout } from '../../hooks';
+import { useDatasetQualityFlyout, useDatasetDetailsTelemetry } from '../../hooks';
 import { DatasetSummary, DatasetSummaryLoading } from './dataset_summary';
 import { Header } from './header';
-import { IntegrationSummary } from './integration_summary';
 import { FlyoutProps } from './types';
-import { FlyoutSummary } from './flyout_summary/flyout_summary';
+import { BasicDataStream } from '../../../common/types';
+
+const FlyoutSummary = dynamic(() => import('./flyout_summary/flyout_summary'));
+const IntegrationSummary = dynamic(() => import('./integration_summary'));
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
@@ -34,11 +37,29 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
     dataStreamStat,
     dataStreamSettings,
     dataStreamDetails,
+    isNonAggregatable,
     fieldFormats,
     timeRange,
     loadingState,
     flyoutLoading,
+    integration,
   } = useDatasetQualityFlyout();
+
+  const linkDetails: BasicDataStream = {
+    name: dataset.name,
+    rawName: dataset.rawName,
+    integration: integration?.integrationDetails,
+    type: dataset.type,
+    namespace: dataset.namespace,
+  };
+
+  const title = integration?.integrationDetails?.datasets?.[dataset.name] ?? dataset.name;
+
+  const { startTracking } = useDatasetDetailsTelemetry();
+
+  useEffect(() => {
+    startTracking();
+  }, [startTracking]);
 
   return (
     <EuiFlyout
@@ -51,7 +72,12 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
         <EuiSkeletonRectangle width="100%" height={80} />
       ) : (
         <>
-          <Header dataStreamStat={dataset} />
+          <Header
+            linkDetails={linkDetails}
+            loading={!loadingState.datasetIntegrationDone}
+            title={title}
+            timeRange={timeRange}
+          />
           <EuiFlyoutBody css={flyoutBodyStyles} data-test-subj="datasetQualityFlyoutBody">
             <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
               <FlyoutSummary
@@ -60,6 +86,7 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
                 dataStreamDetails={dataStreamDetails}
                 dataStreamDetailsLoading={loadingState.dataStreamDetailsLoading}
                 timeRange={timeRange}
+                isNonAggregatable={isNonAggregatable}
               />
             </EuiPanel>
 
@@ -78,12 +105,13 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
                     fieldFormats={fieldFormats}
                   />
 
-                  {dataStreamStat.integration && (
+                  {integration?.integrationDetails && (
                     <>
                       <EuiSpacer />
                       <IntegrationSummary
-                        integration={dataStreamStat.integration}
-                        dashboardsLoading={loadingState.datasetIntegrationsLoading}
+                        integration={integration.integrationDetails}
+                        dashboards={integration?.dashboards ?? []}
+                        dashboardsLoading={loadingState.datasetIntegrationDashboardLoading}
                       />
                     </>
                   )}

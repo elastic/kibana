@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { SecurityRequestHandlerContext } from '@kbn/core-security-server';
 
 export interface GetUserOptions {
-  security: SecurityPluginStart | null | undefined;
-  request: KibanaRequest;
+  security: SecurityRequestHandlerContext;
 }
 
-export const getUser = ({ security, request }: GetUserOptions): string => {
+export const getUser = ({ security }: GetUserOptions): string => {
   if (security != null) {
-    const authenticatedUser = security.authc.getCurrentUser(request);
+    const authenticatedUser = security.authc.getCurrentUser();
     if (authenticatedUser != null) {
       return authenticatedUser.username;
     } else {

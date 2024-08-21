@@ -22,10 +22,12 @@ interface FindingsSearchBarProps {
   setQuery(v: Partial<SearchBarQueryProps>): void;
   loading: boolean;
   placeholder?: string;
+  query: SearchBarQueryProps;
 }
 
 export const FindingsSearchBar = ({
   loading,
+  query,
   setQuery,
   placeholder = i18n.translate('xpack.csp.findings.searchBar.searchPlaceholder', {
     defaultMessage: 'Search findings (eg. rule.section : "API Server" )',
@@ -55,6 +57,11 @@ export const FindingsSearchBar = ({
         onQuerySubmit={setQuery}
         onFiltersUpdated={(value: Filter[]) => setQuery({ filters: value })}
         placeholder={placeholder}
+        query={{
+          query: query?.query?.query || '',
+          language: query?.query?.language || 'kuery',
+        }}
+        filters={query?.filters || []}
       />
     </div>
   );

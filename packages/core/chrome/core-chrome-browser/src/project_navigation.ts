@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { ComponentType } from 'react';
+import type { ComponentType, MouseEventHandler } from 'react';
 import type { Location } from 'history';
-import type { EuiThemeSizes, IconType } from '@elastic/eui';
+import type { EuiSideNavItemType, EuiThemeSizes, IconType } from '@elastic/eui';
 import type { Observable } from 'rxjs';
 import type { AppId as DevToolsApp, DeepLinkId as DevToolsLink } from '@kbn/deeplinks-devtools';
 import type {
@@ -104,7 +104,10 @@ export type SideNavNodeStatus = 'hidden' | 'visible';
 
 export type RenderAs = 'block' | 'accordion' | 'panelOpener' | 'item';
 
-export type EuiThemeSize = Exclude<typeof EuiThemeSizes[number], 'base' | 'xxs' | 'xxxl' | 'xxxxl'>;
+export type EuiThemeSize = Exclude<
+  (typeof EuiThemeSizes)[number],
+  'base' | 'xxs' | 'xxxl' | 'xxxxl'
+>;
 
 export type GetIsActiveFn = (params: {
   /** The current path name including the basePath + hash value but **without** any query params */
@@ -128,6 +131,10 @@ interface NodeDefinitionBase {
    * href for absolute links only. Internal links should use "link".
    */
   href?: string;
+  /**
+   * Custom handler to execute when clicking on the node. This handler takes precedence over the "link" or "href" props.
+   */
+  onClick?: MouseEventHandler<HTMLButtonElement | HTMLElement>;
   /**
    * Optional status to indicate if the breadcrumb should be hidden when this node is active.
    * @default 'visible'
@@ -427,10 +434,22 @@ export interface SolutionNavigationDefinition<LinkId extends AppDeepLinkId = App
   icon?: IconType;
   /** React component to render in the side nav for the navigation */
   sideNavComponent?: SideNavComponent;
-  /** The page to navigate to when switching to this solution navigation. */
+  /** The page to navigate to when clicking on the Kibana (or custom) logo. */
   homePage?: LinkId;
 }
 
 export interface SolutionNavigationDefinitions {
   [id: string]: SolutionNavigationDefinition;
 }
+
+/**
+ * Temporary helper interface while we have to maintain both the legacy side navigation
+ * and the new "solution view" one. The legacy uses EuiSideNavItemType and its properties are not fully compatible
+ * with the NodeDefinition. Solution teams declare their "classic" navigation using the EuiSideNavItemType.
+ * Converting those to the `NodeDefinition` require some additional props.
+ */
+export type EuiSideNavItemTypeEnhanced<T = unknown> = Omit<EuiSideNavItemType<T>, 'items'> & {
+  items?: Array<EuiSideNavItemTypeEnhanced<unknown>>;
+  iconToString?: string;
+  nameToString?: string;
+};

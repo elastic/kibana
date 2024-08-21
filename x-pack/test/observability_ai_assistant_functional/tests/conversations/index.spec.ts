@@ -9,9 +9,9 @@ import expect from '@kbn/expect';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { ChatFeedback } from '@kbn/observability-ai-assistant-plugin/public/analytics/schemas/chat_feedback';
 import { pick } from 'lodash';
-import type OpenAI from 'openai';
 import {
   createLlmProxy,
+  isFunctionTitleRequest,
   LlmProxy,
 } from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { interceptRequest } from '../../common/intercept_request';
@@ -31,17 +31,17 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
   const toasts = getService('toasts');
 
-  const { header } = getPageObjects(['header', 'common']);
+  const { header } = getPageObjects(['header', 'security']);
 
   const flyoutService = getService('flyout');
 
   async function deleteConversations() {
-    const response = await observabilityAIAssistantAPIClient.testUser({
+    const response = await observabilityAIAssistantAPIClient.editorUser({
       endpoint: 'POST /internal/observability_ai_assistant/conversations',
     });
 
     for (const conversation of response.body.conversations) {
-      await observabilityAIAssistantAPIClient.testUser({
+      await observabilityAIAssistantAPIClient.editorUser({
         endpoint: `DELETE /internal/observability_ai_assistant/conversation/{conversationId}`,
         params: {
           path: {
@@ -53,7 +53,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   }
 
   async function deleteConnectors() {
-    const response = await observabilityAIAssistantAPIClient.testUser({
+    const response = await observabilityAIAssistantAPIClient.editorUser({
       endpoint: 'GET /internal/observability_ai_assistant/connectors',
     });
 
@@ -66,7 +66,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   }
 
   async function createOldConversation() {
-    await observabilityAIAssistantAPIClient.testUser({
+    await observabilityAIAssistantAPIClient.editorUser({
       endpoint: 'POST /internal/observability_ai_assistant/conversation',
       params: {
         body: {
@@ -94,7 +94,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   content: '',
                   function_call: {
                     name: 'context',
-                    arguments: '{"queries":[],"categories":[]}',
+                    arguments: '{}',
                     trigger: MessageRole.Assistant,
                   },
                 },
@@ -150,7 +150,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
       proxy = await createLlmProxy(log);
 
-      await ui.auth.login();
+      await ui.auth.login('editor');
 
       await ui.router.goto('/conversations/new', { path: {}, query: {} });
     });
@@ -204,7 +204,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
           });
 
           it('creates a connector', async () => {
-            const response = await observabilityAIAssistantAPIClient.testUser({
+            const response = await observabilityAIAssistantAPIClient.editorUser({
               endpoint: 'GET /internal/observability_ai_assistant/connectors',
             });
 
@@ -227,20 +227,15 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
             describe('and sending over some text', () => {
               before(async () => {
-                const titleInterceptor = proxy.intercept(
-                  'title',
-                  (body) =>
-                    (
-                      JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
-                    ).tools?.find((fn) => fn.function.name === 'title_conversation') !== undefined
+                const titleInterceptor = proxy.intercept('title', (body) =>
+                  isFunctionTitleRequest(body)
                 );
 
                 const conversationInterceptor = proxy.intercept(
                   'conversation',
                   (body) =>
-                    (
-                      JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
-                    ).tools?.find((fn) => fn.function.name === 'title_conversation') === undefined
+                    body.tools?.find((fn) => fn.function.name === 'title_conversation') ===
+                    undefined
                 );
 
                 await testSubjects.setValue(ui.pages.conversations.chatInput, 'hello');
@@ -264,7 +259,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
               });
 
               it('creates a conversation and updates the URL', async () => {
-                const response = await observabilityAIAssistantAPIClient.testUser({
+                const response = await observabilityAIAssistantAPIClient.editorUser({
                   endpoint: 'POST /internal/observability_ai_assistant/conversations',
                 });
 
@@ -290,7 +285,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
                 expect(pick(contextRequest.function_call, 'name', 'arguments')).to.eql({
                   name: 'context',
-                  arguments: JSON.stringify({ queries: [], categories: [] }),
                 });
 
                 expect(contextResponse.name).to.eql('context');
@@ -331,7 +325,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                 });
 
                 it('does not create another conversation', async () => {
-                  const response = await observabilityAIAssistantAPIClient.testUser({
+                  const response = await observabilityAIAssistantAPIClient.editorUser({
                     endpoint: 'POST /internal/observability_ai_assistant/conversations',
                   });
 
@@ -339,7 +333,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                 });
 
                 it('appends to the existing one', async () => {
-                  const response = await observabilityAIAssistantAPIClient.testUser({
+                  const response = await observabilityAIAssistantAPIClient.editorUser({
                     endpoint: 'POST /internal/observability_ai_assistant/conversations',
                   });
 
@@ -354,7 +348,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
                   expect(pick(contextRequest.function_call, 'name', 'arguments')).to.eql({
                     name: 'context',
-                    arguments: JSON.stringify({ queries: [], categories: [] }),
                   });
 
                   expect(contextResponse.name).to.eql('context');
@@ -398,7 +391,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   expect(conversation.conversation.title).to.eql('My title');
                   expect(conversation.namespace).to.eql('default');
                   expect(conversation.public).to.eql(false);
-                  expect(conversation.user?.name).to.eql('test_user');
+                  expect(conversation.user?.name).to.eql('editor');
 
                   const { messages } = conversation;
 
@@ -475,7 +468,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                     expect(conversation.conversation.title).to.eql('My old conversation');
                     expect(conversation.namespace).to.eql('default');
                     expect(conversation.public).to.eql(false);
-                    expect(conversation.user?.name).to.eql('test_user');
+                    expect(conversation.user?.name).to.eql('editor');
 
                     const { messages } = conversation;
 

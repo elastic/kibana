@@ -9,7 +9,7 @@
 import type { ActionErrorTypeMap as BaseActionErrorTypeMap } from '../../actions';
 
 export {
-  initAction as init,
+  fetchIndices,
   waitForIndexStatus,
   createIndex,
   updateAliases,
@@ -25,7 +25,6 @@ export {
   transformDocs,
   bulkOverwriteTransformedDocuments,
   noop,
-  type InitActionParams,
   type IncompatibleClusterRoutingAllocation,
   type RetryableEsClientError,
   type WaitForTaskCompletionTimeout,

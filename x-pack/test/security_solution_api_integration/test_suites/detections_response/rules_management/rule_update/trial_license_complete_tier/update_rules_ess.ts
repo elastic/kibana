@@ -37,8 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
   // TODO: add a new service for pulling kibana username, similar to getService('es')
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
   describe('@ess update_rules - ESS specific logic', () => {
     describe('update rules', () => {
@@ -97,7 +96,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = updateUsername(
           getSimpleRuleOutputWithoutRuleId(),
-          ELASTICSEARCH_USERNAME
+          await utils.getUsername()
         );
         outputRule.name = 'some other name';
         outputRule.revision = 1;

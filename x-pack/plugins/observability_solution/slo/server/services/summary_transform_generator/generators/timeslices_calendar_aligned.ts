@@ -6,7 +6,6 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { DurationUnit, SLODefinition } from '../../../domain/models';
 import {
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
@@ -14,7 +13,9 @@ import {
   SLO_RESOURCES_VERSION,
   SLO_SUMMARY_DESTINATION_INDEX_NAME,
 } from '../../../../common/constants';
+import { DurationUnit, SLODefinition } from '../../../domain/models';
 import { getGroupBy } from './common';
+import { buildBurnRateAgg } from './utils';
 
 export function generateSummaryTransformForTimeslicesAndCalendarAligned(
   slo: SLODefinition
@@ -142,6 +143,9 @@ export function generateSummaryTransformForTimeslicesAndCalendarAligned(
             field: '@timestamp',
           },
         },
+        ...buildBurnRateAgg('fiveMinuteBurnRate', slo),
+        ...buildBurnRateAgg('oneHourBurnRate', slo),
+        ...buildBurnRateAgg('oneDayBurnRate', slo),
       },
     },
     description: `Summarise the rollup data of SLO: ${slo.name} [id: ${slo.id}, revision: ${slo.revision}].`,

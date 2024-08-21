@@ -7,9 +7,13 @@
 
 import React from 'react';
 
+import { screen, render } from '@testing-library/react';
+
 import { shallow } from 'enzyme';
 
 import { EuiCallOut, EuiPanel, EuiSwitch } from '@elastic/eui';
+
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { DocumentPermissionsField } from './document_permissions_field';
 
@@ -29,9 +33,13 @@ describe('DocumentPermissionsField', () => {
   });
 
   it('renders doc-level permissions message when not available', () => {
-    const wrapper = shallow(<DocumentPermissionsField {...props} needsPermissions={false} />);
+    render(
+      <I18nProvider>
+        <DocumentPermissionsField {...props} needsPermissions={false} />
+      </I18nProvider>
+    );
 
-    expect(wrapper.find('FormattedMessage')).toHaveLength(1);
+    expect(screen.getByTestId('needsPermissionText')).toBeInTheDocument();
   });
 
   it('renders callout when not synced', () => {

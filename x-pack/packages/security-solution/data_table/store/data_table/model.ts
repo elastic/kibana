@@ -8,7 +8,6 @@
 import type { EuiDataGridColumn } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
-import { ExpandedDetail } from '../../common/types/detail_panel';
 import type {
   ColumnHeaderOptions,
   SessionViewConfig,
@@ -44,8 +43,6 @@ export interface DataTableModel extends DataTableModelSettings {
   dataViewId: string | null; // null if legacy pre-8.0 data table
   /** Events to not be rendered **/
   deletedEventIds: string[];
-  /** This holds the view information for the flyout when viewing data in a consuming view (i.e. hosts page) or the side panel in the primary data view */
-  expandedDetail: ExpandedDetail;
   filters?: Filter[];
   /** When non-empty, display a graph view for this event */
   graphEventId?: string;
@@ -82,7 +79,6 @@ export type SubsetDataTableModel = Readonly<
     | 'defaultColumns'
     | 'dataViewId'
     | 'deletedEventIds'
-    | 'expandedDetail'
     | 'filters'
     | 'indexNames'
     | 'isLoading'

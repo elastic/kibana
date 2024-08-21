@@ -5,6 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import epct from 'expect';
 import moment from 'moment/moment';
 import { v4 as uuidv4 } from 'uuid';
 import { omit, omitBy } from 'lodash';
@@ -139,6 +140,36 @@ export default function ({ getService }: FtrProviderContext) {
           ...newMonitor,
         })
       );
+    });
+
+    it('can disable retries', async () => {
+      const maxAttempts = 1;
+      const newMonitor = {
+        max_attempts: maxAttempts,
+        urls: 'https://elastic.co',
+        name: `Sample name ${uuidv4()}`,
+        type: 'http',
+        locations: [localLoc],
+      };
+
+      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+
+      epct(apiResponse).toEqual(epct.objectContaining({ max_attempts: maxAttempts }));
+    });
+
+    it('can enable retries', async () => {
+      const maxAttempts = 2;
+      const newMonitor = {
+        max_attempts: maxAttempts,
+        urls: 'https://elastic.co',
+        name: `Sample name ${uuidv4()}`,
+        type: 'http',
+        locations: [localLoc],
+      };
+
+      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+
+      epct(apiResponse).toEqual(epct.objectContaining({ max_attempts: maxAttempts }));
     });
 
     it('cannot create a invalid monitor without a monitor type', async () => {

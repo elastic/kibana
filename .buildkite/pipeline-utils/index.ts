@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+export * from './agent_images';
 export * from './buildkite';
 export * as CiStats from './ci-stats';
 export * from './github';

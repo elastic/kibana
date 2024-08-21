@@ -56,4 +56,6 @@ export type {
   NavigationTreeDefinitionUI,
   SolutionNavigationDefinition,
   SolutionNavigationDefinitions,
+  EuiSideNavItemTypeEnhanced,
+  RenderAs,
 } from './src';

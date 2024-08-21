@@ -62,9 +62,9 @@ export interface DocTableProps {
   filters?: Filter[];
   /**
    * Flag which identifies if Discover operates
-   * in text based mode (ESQL)
+   * in ES|QL mode
    */
-  isPlainRecord?: boolean;
+  isEsqlMode?: boolean;
   /**
    * Saved search id
    */
@@ -114,7 +114,7 @@ export const DocTableWrapper = forwardRef(
       render,
       columns,
       filters,
-      isPlainRecord,
+      isEsqlMode,
       savedSearchId,
       rows,
       dataView,
@@ -186,7 +186,7 @@ export const DocTableWrapper = forwardRef(
             shouldShowFieldHandler={shouldShowFieldHandler}
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
-            isPlainRecord={isPlainRecord}
+            isEsqlMode={isEsqlMode}
             rows={rows}
           />
         ));
@@ -201,7 +201,7 @@ export const DocTableWrapper = forwardRef(
         shouldShowFieldHandler,
         onAddColumn,
         onRemoveColumn,
-        isPlainRecord,
+        isEsqlMode,
         rows,
       ]
     );

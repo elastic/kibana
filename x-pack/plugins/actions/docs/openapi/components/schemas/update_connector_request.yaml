@@ -2,6 +2,7 @@ title: Update connector request body properties
 description: The properties vary depending on the connector type.
 oneOf:
   - $ref: 'update_connector_request_bedrock.yaml'
+  - $ref: 'update_connector_request_gemini.yaml'
   - $ref: 'update_connector_request_cases_webhook.yaml'
   - $ref: 'update_connector_request_d3security.yaml'
   - $ref: 'update_connector_request_email.yaml'

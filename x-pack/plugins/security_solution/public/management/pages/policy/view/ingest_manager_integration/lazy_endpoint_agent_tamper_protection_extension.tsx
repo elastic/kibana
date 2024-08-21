@@ -6,7 +6,7 @@
  */
 
 import { lazy } from 'react';
-import type { FleetUiExtensionGetterOptions } from './types';
+import type { FleetUiExtensionGetterOptions } from '../../../../../common/types';
 
 export const getLazyEndpointAgentTamperProtectionExtension = ({
   coreStart,
@@ -16,7 +16,7 @@ export const getLazyEndpointAgentTamperProtectionExtension = ({
   lazy(async () => {
     const [{ withSecurityContext }, { EndpointAgentTamperProtectionExtension }] = await Promise.all(
       [
-        import('./components/with_security_context/with_security_context'),
+        import('../../../../../common/components/with_security_context/with_security_context'),
         import('./endpoint_agent_tamper_protection_extension'),
       ]
     );

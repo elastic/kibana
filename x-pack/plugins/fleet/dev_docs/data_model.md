@@ -58,10 +58,6 @@ The total schema for actions is represented by the `FleetServerAgentAction` type
 
 - Cleanup model: N/A
 
-### `.fleet-servers`
-
-- Cleanup model: N/A
-
 ### `.fleet-artifacts`
 
 - Cleanup model: N/A

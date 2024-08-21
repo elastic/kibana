@@ -186,4 +186,10 @@ export const configurationFormSchema: FormSchema = {
       defaultValue: false,
     },
   },
+  subobjects: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.subobjectsLabel', {
+      defaultMessage: 'Allow objects to hold further subobjects',
+    }),
+    defaultValue: true,
+  },
 };

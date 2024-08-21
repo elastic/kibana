@@ -279,4 +279,56 @@ describe('map_to_columns', () => {
       }
     `);
   });
+
+  describe('map_to_columns_text_based', () => {
+    it('should keep columns that exist in idMap only', async () => {
+      const input: Datatable = {
+        type: 'datatable',
+        columns: [
+          { id: 'a', name: 'A', meta: { type: 'number' } },
+          { id: 'b', name: 'B', meta: { type: 'number' } },
+          { id: 'c', name: 'C', meta: { type: 'string' } },
+        ],
+        rows: [
+          { a: 1, b: 2, c: '3' },
+          { a: 3, b: 4, c: '5' },
+          { a: 5, b: 6, c: '7' },
+          { a: 7, b: 8, c: '9' },
+        ],
+      };
+
+      const idMap = {
+        a: [
+          {
+            id: 'a',
+            label: 'A',
+          },
+        ],
+        b: [
+          {
+            id: 'b',
+            label: 'B',
+          },
+        ],
+      };
+
+      const result = await mapToColumns.fn(
+        input,
+        { idMap: JSON.stringify(idMap), isTextBased: true },
+        createMockExecutionContext()
+      );
+
+      expect(result.columns).toStrictEqual([
+        { id: 'a', name: 'A', meta: { type: 'number' } },
+        { id: 'b', name: 'B', meta: { type: 'number' } },
+      ]);
+
+      expect(result.rows).toStrictEqual([
+        { a: 1, b: 2 },
+        { a: 3, b: 4 },
+        { a: 5, b: 6 },
+        { a: 7, b: 8 },
+      ]);
+    });
+  });
 });

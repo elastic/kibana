@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { AgentPolicy } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { runPrivilegeTests } from '../../privileges_helpers';
 import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
-import { generateNPolicies } from '../../helpers';
+import { generateNAgentPolicies } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -27,12 +26,8 @@ export default function (providerContext: FtrProviderContext) {
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
-    let generatedPolicies: Map<string, AgentPolicy>;
     before(async () => {
-      const generatedPoliciesArray = await generateNPolicies(supertest, 2);
-
-      generatedPolicies = new Map();
-      generatedPoliciesArray.forEach((policy) => generatedPolicies.set(policy.id, policy));
+      await generateNAgentPolicies(supertest, 2);
     });
 
     skipIfNoDockerRegistry(providerContext);

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -95,6 +96,7 @@ export function ServiceMap({
   const license = useLicenseContext();
   const serviceName = useServiceName();
   const { config } = useApmPluginContext();
+  const { onPageReady } = usePerformanceContext();
 
   const {
     data = { elements: [] },
@@ -170,6 +172,10 @@ export function ServiceMap({
         <TimeoutPrompt isGlobalServiceMap={!serviceName} />
       </PromptContainer>
     );
+  }
+
+  if (status === FETCH_STATUS.SUCCESS) {
+    onPageReady();
   }
 
   return (

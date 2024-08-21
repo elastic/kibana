@@ -10,6 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import {
   createRandomSamplerWrapper,
   type RandomSamplerWrapper,
@@ -22,6 +23,10 @@ import { RANDOM_SAMPLER_SEED } from '../constants';
 import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 
 import { getQueryWithParams } from './get_query_with_params';
+
+export const isMsearchResponseItemWithAggs = (
+  arg: unknown
+): arg is estypes.MsearchMultiSearchItem => isPopulatedObject(arg, ['aggregations']);
 
 // Filter that includes docs from both the baseline and deviation time range.
 export const getBaselineOrDeviationFilter = (
@@ -75,9 +80,11 @@ export const getCategoryRequest = (
     timeFieldName,
     undefined,
     query,
+    undefined,
     wrap,
     undefined,
     undefined,
+    false,
     false
   );
 
@@ -97,10 +104,10 @@ export const fetchCategories = async (
   esClient: ElasticsearchClient,
   params: AiopsLogRateAnalysisSchema,
   fieldNames: string[],
-  logger: Logger,
+  logger?: Logger,
   // The default value of 1 means no sampling will be used
   sampleProbability: number = 1,
-  emitError: (m: string) => void,
+  emitError?: (m: string) => void,
   abortSignal?: AbortSignal
 ): Promise<FetchCategoriesResponse[]> => {
   const randomSamplerWrapper = createRandomSamplerWrapper({
@@ -110,73 +117,82 @@ export const fetchCategories = async (
 
   const result: FetchCategoriesResponse[] = [];
 
-  const settledPromises = await Promise.allSettled(
-    fieldNames.map((fieldName) => {
-      const request = getCategoryRequest(params, fieldName, randomSamplerWrapper);
-      return esClient.search(request, {
-        signal: abortSignal,
-        maxRetries: 0,
-      });
-    })
-  );
+  const searches: estypes.MsearchRequestItem[] = fieldNames.flatMap((fieldName) => [
+    { index: params.index },
+    getCategoryRequest(params, fieldName, randomSamplerWrapper)
+      .body as estypes.MsearchMultisearchBody,
+  ]);
 
-  function reportError(fieldName: string, error: unknown) {
+  let mSearchResponse;
+
+  try {
+    mSearchResponse = await esClient.msearch({ searches }, { signal: abortSignal, maxRetries: 0 });
+  } catch (error) {
     if (!isRequestAbortedError(error)) {
-      logger.error(
-        `Failed to fetch category aggregation for fieldName "${fieldName}", got: \n${JSON.stringify(
-          error,
-          null,
-          2
-        )}`
-      );
-      emitError(`Failed to fetch category aggregation for fieldName "${fieldName}".`);
+      if (logger) {
+        logger.error(
+          `Failed to fetch category aggregation for field names ${fieldNames.join()}, got: \n${JSON.stringify(
+            error,
+            null,
+            2
+          )}`
+        );
+      }
+
+      if (emitError) {
+        emitError(`Failed to fetch category aggregation for field names "${fieldNames.join()}".`);
+      }
     }
+    return result;
   }
 
-  for (const [index, settledPromise] of settledPromises.entries()) {
+  for (const [index, resp] of mSearchResponse.responses.entries()) {
     const fieldName = fieldNames[index];
 
-    if (settledPromise.status === 'rejected') {
-      reportError(fieldName, settledPromise.reason);
-      // Still continue the analysis even if individual category queries fail.
-      continue;
+    if (isMsearchResponseItemWithAggs(resp)) {
+      const { aggregations } = resp;
+
+      const {
+        categories: { buckets },
+      } = randomSamplerWrapper.unwrap(
+        aggregations as unknown as Record<string, estypes.AggregationsAggregate>
+      ) as CategoriesAgg;
+
+      const categories: Category[] = buckets.map((b) => {
+        const sparkline =
+          b.sparkline === undefined
+            ? {}
+            : b.sparkline.buckets.reduce<Record<number, number>>((acc2, cur2) => {
+                acc2[cur2.key] = cur2.doc_count;
+                return acc2;
+              }, {});
+
+        return {
+          key: b.key,
+          count: b.doc_count,
+          examples: b.examples.hits.hits.map((h) => get(h._source, fieldName)),
+          sparkline,
+          regex: b.regex,
+        };
+      });
+      result.push({
+        categories,
+      });
+    } else {
+      if (logger) {
+        logger.error(
+          `Failed to fetch category aggregation for field "${fieldName}", got: \n${JSON.stringify(
+            resp,
+            null,
+            2
+          )}`
+        );
+      }
+
+      if (emitError) {
+        emitError(`Failed to fetch category aggregation for field "${fieldName}".`);
+      }
     }
-
-    const resp = settledPromise.value;
-    const { aggregations } = resp;
-
-    if (aggregations === undefined) {
-      reportError(fieldName, resp);
-      // Still continue the analysis even if individual category queries fail.
-      continue;
-    }
-
-    const {
-      categories: { buckets },
-    } = randomSamplerWrapper.unwrap(
-      aggregations as unknown as Record<string, estypes.AggregationsAggregate>
-    ) as CategoriesAgg;
-
-    const categories: Category[] = buckets.map((b) => {
-      const sparkline =
-        b.sparkline === undefined
-          ? {}
-          : b.sparkline.buckets.reduce<Record<number, number>>((acc2, cur2) => {
-              acc2[cur2.key] = cur2.doc_count;
-              return acc2;
-            }, {});
-
-      return {
-        key: b.key,
-        count: b.doc_count,
-        examples: b.examples.hits.hits.map((h) => get(h._source, fieldName)),
-        sparkline,
-        regex: b.regex,
-      };
-    });
-    result.push({
-      categories,
-    });
   }
 
   return result;

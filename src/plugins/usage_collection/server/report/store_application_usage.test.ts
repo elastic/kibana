@@ -110,6 +110,7 @@ const expectedIncrementParams = (
         viewId,
         timestamp: moment(`${moment(dayId).format('YYYY-MM-DD')}T00:00:00Z`).toISOString(),
       },
+      refresh: false,
     },
   ];
 };

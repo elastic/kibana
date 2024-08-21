@@ -7,7 +7,7 @@
  */
 
 import Path from 'path';
-
+import Fs from 'fs';
 import { untar, GlobalTask, copy } from '../../lib';
 import { getNodeDownloadInfo } from './node_download_info';
 
@@ -17,15 +17,19 @@ export const ExtractNodeBuilds: GlobalTask = {
   async run(config) {
     await Promise.all(
       config.getNodePlatforms().map(async (platform) => {
-        const { downloadPath, extractDir } = getNodeDownloadInfo(config, platform);
-        if (platform.isWindows()) {
-          // windows executable is not extractable, it's just an .exe file
-          await copy(downloadPath, Path.resolve(extractDir, 'node.exe'), {
-            clone: true,
-          });
-        } else {
-          await untar(downloadPath, extractDir, { strip: 1 });
-        }
+        await Promise.all(
+          getNodeDownloadInfo(config, platform).map((nodeInfo) => {
+            if (Fs.existsSync(nodeInfo.extractDir)) return;
+            if (platform.isWindows()) {
+              // windows executable is not extractable, it's just an .exe file
+              return copy(nodeInfo.downloadPath, Path.resolve(nodeInfo.extractDir, 'node.exe'), {
+                clone: true,
+              });
+            } else {
+              return untar(nodeInfo.downloadPath, nodeInfo.extractDir, { strip: 1 });
+            }
+          })
+        );
       })
     );
   },

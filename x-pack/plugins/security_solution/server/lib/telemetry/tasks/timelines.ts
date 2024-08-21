@@ -30,13 +30,12 @@ export function createTelemetryTimelineTaskConfig() {
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const log = newTelemetryLogger(logger.get('timelines'));
+      const mdc = { task_id: taskId, task_execution_period: taskExecutionPeriod };
+      const log = newTelemetryLogger(logger.get('timelines'), mdc);
       const fetcher = new TelemetryTimelineFetcher(receiver);
       const trace = taskMetricsService.start(taskType);
 
-      log.l(
-        `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
-      );
+      log.l('Running telemetry task');
 
       try {
         let counter = 0;
@@ -49,7 +48,7 @@ export function createTelemetryTimelineTaskConfig() {
         }
         const alerts = await receiver.fetchTimelineAlerts(alertsIndex, rangeFrom, rangeTo);
 
-        log.l(`found ${alerts.length} alerts to process`);
+        log.l('found alerts to process', { length: alerts.length });
 
         for (const alert of alerts) {
           const result = await fetcher.fetchTimeline(alert);
@@ -70,16 +69,17 @@ export function createTelemetryTimelineTaskConfig() {
             await sender.sendOnDemand(TELEMETRY_CHANNEL_TIMELINE, [result.timeline]);
             counter += 1;
           } else {
-            log.l('no events in timeline');
+            log.debug('no events in timeline');
           }
         }
 
-        log.l(`sent ${counter} timelines. Concluding timeline task.`);
+        log.l('Concluding timeline task.', { counter });
 
         await taskMetricsService.end(trace);
 
         return counter;
       } catch (err) {
+        logger.error('could not complete task', { error: err });
         await taskMetricsService.end(trace, err);
         return 0;
       }

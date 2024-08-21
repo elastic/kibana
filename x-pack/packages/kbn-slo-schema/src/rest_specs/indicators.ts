@@ -15,6 +15,7 @@ import {
   kqlWithFiltersSchema,
   metricCustomIndicatorSchema,
   querySchema,
+  filtersSchema,
   groupingsSchema,
   syntheticsAvailabilityIndicatorSchema,
   timesliceMetricBasicMetricWithField,
@@ -42,6 +43,7 @@ type HistogramIndicator = t.OutputOf<typeof histogramIndicatorSchema>;
 type KQLCustomIndicator = t.OutputOf<typeof kqlCustomIndicatorSchema>;
 type KqlWithFiltersSchema = t.TypeOf<typeof kqlWithFiltersSchema>;
 type QuerySchema = t.TypeOf<typeof querySchema>;
+type FiltersSchema = t.TypeOf<typeof filtersSchema>;
 type GroupingsSchema = t.TypeOf<typeof groupingsSchema>;
 
 export type {
@@ -59,5 +61,6 @@ export type {
   KQLCustomIndicator,
   KqlWithFiltersSchema,
   QuerySchema,
+  FiltersSchema,
   GroupingsSchema,
 };

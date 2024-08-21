@@ -52,15 +52,11 @@ export const CaseSettingsRt = rt.strict({
   syncAlerts: rt.boolean,
 });
 
-const CaseBasicRt = rt.strict({
+const CaseBaseFields = {
   /**
    * The description of the case
    */
   description: rt.string,
-  /**
-   * The current status of the case (open, closed, in-progress)
-   */
-  status: CaseStatusRt,
   /**
    * The identifying strings for filter a case
    */
@@ -73,14 +69,6 @@ const CaseBasicRt = rt.strict({
    * The external system that the case can be synced with
    */
   connector: CaseConnectorRt,
-  /**
-   * The alert sync settings
-   */
-  settings: CaseSettingsRt,
-  /**
-   * The plugin owner of the case
-   */
-  owner: rt.string,
   /**
    * The severity of the case
    */
@@ -98,6 +86,28 @@ const CaseBasicRt = rt.strict({
    * user-configured custom fields.
    */
   customFields: CaseCustomFieldsRt,
+  /**
+   * The alert sync settings
+   */
+  settings: CaseSettingsRt,
+};
+
+export const CaseBaseOptionalFieldsRt = rt.exact(
+  rt.partial({
+    ...CaseBaseFields,
+  })
+);
+
+const CaseBasicRt = rt.strict({
+  /**
+   * The current status of the case (open, closed, in-progress)
+   */
+  status: CaseStatusRt,
+  /**
+   * The plugin owner of the case
+   */
+  owner: rt.string,
+  ...CaseBaseFields,
 });
 
 export const CaseAttributesRt = rt.intersection([
@@ -151,3 +161,4 @@ export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
 export type CaseSettings = rt.TypeOf<typeof CaseSettingsRt>;
 export type RelatedCase = rt.TypeOf<typeof RelatedCaseRt>;
 export type AttachmentTotals = rt.TypeOf<typeof AttachmentTotalsRt>;
+export type CaseBaseOptionalFields = rt.TypeOf<typeof CaseBaseOptionalFieldsRt>;

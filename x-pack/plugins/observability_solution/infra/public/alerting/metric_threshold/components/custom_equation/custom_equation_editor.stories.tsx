@@ -9,11 +9,8 @@ import { Meta, Story } from '@storybook/react/types-6-0';
 import React, { useCallback, useEffect, useState } from 'react';
 import { TimeUnitChar } from '@kbn/observability-plugin/common';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  Aggregators,
-  Comparator,
-  MetricExpressionParams,
-} from '../../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
 import { CustomEquationEditor, CustomEquationEditorProps } from './custom_equation_editor';
 import { aggregationType } from '../expression_row';
@@ -33,24 +30,6 @@ export default {
     onChange: { action: 'changed' },
   },
 } as Meta;
-
-const fakeDataView = {
-  title: 'metricbeat-*',
-  fields: [
-    {
-      name: 'system.cpu.user.pct',
-      type: 'number',
-    },
-    {
-      name: 'system.cpu.system.pct',
-      type: 'number',
-    },
-    {
-      name: 'system.cpu.cores',
-      type: 'number',
-    },
-  ],
-};
 
 const CustomEquationEditorTemplate: Story<CustomEquationEditorProps> = (args) => {
   const [expression, setExpression] = useState<MetricExpression>(args.expression);
@@ -78,7 +57,6 @@ const CustomEquationEditorTemplate: Story<CustomEquationEditorProps> = (args) =>
       errors={errors}
       expression={expression}
       onChange={handleExpressionChange}
-      dataView={fakeDataView}
     />
   );
 };
@@ -93,7 +71,7 @@ const BASE_ARGS = {
     timeSize: 1,
     timeUnit: 'm' as TimeUnitChar,
     threshold: [1],
-    comparator: Comparator.GT,
+    comparator: COMPARATORS.GREATER_THAN,
   },
   fields: [
     { name: 'system.cpu.user.pct', normalizedType: 'number' },

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSuperSelect } from '@elastic/eui';
 import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/public';
 
-interface LegendSizeSettingsProps {
+export interface LegendSizeSettingsProps {
   legendSize?: LegendSize;
   onLegendSizeChange: (size?: LegendSize) => void;
   isVerticalLegend: boolean;
@@ -85,7 +85,7 @@ export const LegendSizeSettings = ({
     <EuiFormRow
       display="columnCompressed"
       label={i18n.translate('xpack.lens.shared.legendSizeSetting.label', {
-        defaultMessage: 'Legend width',
+        defaultMessage: 'Width',
       })}
       fullWidth
     >

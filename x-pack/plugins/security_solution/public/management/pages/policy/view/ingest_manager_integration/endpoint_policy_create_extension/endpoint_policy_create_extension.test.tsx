@@ -55,6 +55,7 @@ const getMockNewPackage = (): NewPackagePolicy => {
     namespace: 'someNamespace',
     enabled: true,
     policy_id: 'somePolicyid',
+    policy_ids: ['somePolicyid'],
   };
   return mockNewPackage;
 };
@@ -217,6 +218,7 @@ describe('Onboarding Component new section', () => {
           name: 'someName',
           namespace: 'someNamespace',
           policy_id: 'somePolicyid',
+          policy_ids: ['somePolicyid'],
         },
       });
     });
@@ -258,6 +260,7 @@ describe('Onboarding Component new section', () => {
           name: 'someName',
           namespace: 'someNamespace',
           policy_id: 'somePolicyid',
+          policy_ids: ['somePolicyid'],
         },
       });
     });

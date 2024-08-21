@@ -221,7 +221,12 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+            <EuiButtonEmpty
+              iconType="cross"
+              onClick={onClose}
+              flush="left"
+              data-test-subj="closeDetailsFlyout"
+            >
               {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.closeButtonLabel', {
                 defaultMessage: 'Close',
               })}

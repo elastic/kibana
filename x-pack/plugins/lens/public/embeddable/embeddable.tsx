@@ -106,7 +106,6 @@ import {
   IndexPatternRef,
   FramePublicAPI,
   AddUserMessages,
-  isMessageRemovable,
   UserMessagesGetter,
   UserMessagesDisplayLocationId,
 } from '../types';
@@ -186,6 +185,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
     data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
   ) => void;
   abortController?: AbortController;
+  onBeforeBadgesRender?: (userMessages: UserMessage[]) => UserMessage[];
 }
 
 export type LensByValueInput = {
@@ -611,6 +611,22 @@ export class Embeddable
 
   private fullAttributes: LensSavedObjectAttributes | undefined;
 
+  private handleExternalUserMessage = (messages: UserMessage[]) => {
+    if (this.input.onBeforeBadgesRender) {
+      // we need something else to better identify those errors
+      const [messagesToHandle, originalMessages] = partition(messages, (message) =>
+        message.displayLocations.some((location) => location.id === 'embeddableBadge')
+      );
+
+      if (messagesToHandle.length > 0) {
+        const customBadgeMessages = this.input.onBeforeBadgesRender(messagesToHandle);
+        return [...originalMessages, ...customBadgeMessages];
+      }
+    }
+
+    return messages;
+  };
+
   public getUserMessages: UserMessagesGetter = (locationId, filters) => {
     const userMessages: UserMessage[] = [];
     userMessages.push(
@@ -638,8 +654,9 @@ export class Embeddable
     );
 
     if (!this.savedVis) {
-      return userMessages;
+      return this.handleExternalUserMessage(userMessages);
     }
+
     const mergedSearchContext = this.getMergedSearchContext();
 
     const framePublicAPI: FramePublicAPI = {
@@ -663,6 +680,10 @@ export class Embeddable
         fromDate: mergedSearchContext.timeRange?.from ?? '',
         toDate: mergedSearchContext.timeRange?.to ?? '',
       },
+      absDateRange: {
+        fromDate: mergedSearchContext.timeRange?.from ?? '',
+        toDate: mergedSearchContext.timeRange?.to ?? '',
+      },
       activeData: this.activeData,
     };
 
@@ -680,10 +701,12 @@ export class Embeddable
       }) ?? [])
     );
 
-    return filterAndSortUserMessages(
-      [...userMessages, ...Object.values(this.additionalUserMessages)],
-      locationId,
-      filters ?? {}
+    return this.handleExternalUserMessage(
+      filterAndSortUserMessages(
+        [...userMessages, ...Object.values(this.additionalUserMessages)],
+        locationId,
+        filters ?? {}
+      )
     );
   };
 
@@ -769,22 +792,28 @@ export class Embeddable
         ...viz.state.datasourceStates,
         [activeDatasourceId]: datasourceState,
       };
-      const references = extractReferencesFromState({
-        activeDatasources: Object.keys(datasourceStates).reduce(
-          (acc, datasourceId) => ({
-            ...acc,
-            [datasourceId]: this.deps.datasourceMap[datasourceId],
-          }),
-          {}
-        ),
-        datasourceStates: Object.fromEntries(
-          Object.entries(datasourceStates).map(([id, state]) => [id, { isLoading: false, state }])
-        ),
-        visualizationState,
-        activeVisualization: this.activeVisualizationId
-          ? this.deps.visualizationMap[visualizationType ?? this.activeVisualizationId]
-          : undefined,
-      });
+      const references =
+        activeDatasourceId === 'formBased'
+          ? extractReferencesFromState({
+              activeDatasources: Object.keys(datasourceStates).reduce(
+                (acc, datasourceId) => ({
+                  ...acc,
+                  [datasourceId]: this.deps.datasourceMap[datasourceId],
+                }),
+                {}
+              ),
+              datasourceStates: Object.fromEntries(
+                Object.entries(datasourceStates).map(([id, state]) => [
+                  id,
+                  { isLoading: false, state },
+                ])
+              ),
+              visualizationState,
+              activeVisualization: this.activeVisualizationId
+                ? this.deps.visualizationMap[visualizationType ?? this.activeVisualizationId]
+                : undefined,
+            })
+          : [];
       const attrs = {
         ...viz,
         state: {
@@ -853,7 +882,7 @@ export class Embeddable
     this.updateInput({ attributes: attrs, savedObjectId });
   }
 
-  async openConfingPanel(
+  async openConfigPanel(
     startDependencies: LensPluginStartDependencies,
     isNewPanel?: boolean,
     deletePanel?: () => void
@@ -996,9 +1025,7 @@ export class Embeddable
 
     this.removeActiveDataWarningMessages();
     const searchWarningMessages = this.getSearchWarningMessages(adapters);
-    this.removeActiveDataWarningMessages = this.addUserMessages(
-      searchWarningMessages.filter(isMessageRemovable)
-    );
+    this.removeActiveDataWarningMessages = this.addUserMessages(searchWarningMessages);
 
     this.activeData = newActiveData;
 
@@ -1144,7 +1171,7 @@ export class Embeddable
               handleEvent={this.handleEvent}
               onData$={this.updateActiveData}
               onRender$={this.onRender}
-              interactive={!input.disableTriggers && !this.isTextBasedLanguage()}
+              interactive={!input.disableTriggers}
               renderMode={input.renderMode}
               syncColors={input.syncColors}
               syncTooltips={input.syncTooltips}
@@ -1365,6 +1392,7 @@ export class Embeddable
     } else if (isLensTableRowContextMenuClickEvent(event)) {
       eventHandler = this.input.onTableRowClick;
     }
+    const esqlQuery = this.isTextBasedLanguage() ? this.savedVis?.state.query : undefined;
 
     eventHandler?.({
       ...event.data,
@@ -1380,6 +1408,7 @@ export class Embeddable
             ...event.data,
             timeFieldName:
               event.data.timeFieldName || inferTimeField(this.deps.data.datatableUtilities, event),
+            query: esqlQuery,
           },
           embeddable: this,
         });

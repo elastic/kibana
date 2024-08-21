@@ -26,25 +26,6 @@ export type ReactEmbeddableSavedObject<
 
 const registry: Map<string, ReactEmbeddableSavedObject<any>> = new Map();
 
-/**
- * Register an embeddable API saved object with the Add from library flyout.
- *
- * @example
- *  registerReactEmbeddableSavedObject({
- *    onAdd: (container, savedObject) => {
- *      container.addNewPanel({
- *        panelType: CONTENT_ID,
- *        initialState: savedObject.attributes,
- *      });
- *    },
- *    embeddableType: CONTENT_ID,
- *    savedObjectType: MAP_SAVED_OBJECT_TYPE,
- *    savedObjectName: i18n.translate('xpack.maps.mapSavedObjectLabel', {
- *      defaultMessage: 'Map',
- *    }),
- *    getIconForSavedObject: () => APP_ICON,
- *  });
- */
 export const registerReactEmbeddableSavedObject = <
   TSavedObjectAttributes extends FinderAttributes
 >({

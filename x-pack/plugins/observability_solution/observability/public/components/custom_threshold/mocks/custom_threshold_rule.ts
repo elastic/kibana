@@ -7,8 +7,9 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { CustomThresholdAlertFields } from '../types';
-import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
+import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 
 import { CustomThresholdAlert, CustomThresholdRule } from '../components/types';
 
@@ -16,12 +17,11 @@ export const buildCustomThresholdRule = (
   rule: Partial<CustomThresholdRule> = {}
 ): CustomThresholdRule => {
   return {
-    alertTypeId: 'metrics.alert.threshold',
+    ruleTypeId: 'metrics.alert.threshold',
     createdBy: 'admin',
     updatedBy: 'admin',
     createdAt: new Date('2023-02-20T15:25:32.125Z'),
     updatedAt: new Date('2023-03-02T16:24:41.177Z'),
-    apiKey: 'apiKey',
     apiKeyOwner: 'admin',
     notifyWhen: null,
     muteAll: false,
@@ -61,7 +61,7 @@ export const buildCustomThresholdRule = (
     params: {
       criteria: [
         {
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           metrics: [
             {
               name: 'A',
@@ -73,7 +73,7 @@ export const buildCustomThresholdRule = (
           timeUnit: 'm',
         },
         {
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           metrics: [
             {
               name: 'B',
@@ -84,11 +84,9 @@ export const buildCustomThresholdRule = (
           threshold: [4],
           timeSize: 15,
           timeUnit: 'm',
-          warningComparator: Comparator.GT,
-          warningThreshold: [2.2],
         },
         {
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           metrics: [
             {
               name: 'C',
@@ -101,7 +99,7 @@ export const buildCustomThresholdRule = (
           timeUnit: 'm',
         },
         {
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           metrics: [
             {
               name: 'A',
@@ -116,7 +114,7 @@ export const buildCustomThresholdRule = (
             'A + A + A + A + A + A + A + A + A + A + A + A + A + A + A + A + A + A + A + A + A',
         },
         {
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           metrics: [
             {
               name: 'C',
@@ -134,7 +132,7 @@ export const buildCustomThresholdRule = (
           timeUnit: 'm',
         },
         {
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           metrics: [
             {
               name: 'CAD',
@@ -210,7 +208,7 @@ export const buildCustomThresholdAlert = (
       'kibana.alert.rule.parameters': {
         criteria: [
           {
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             metrics: [
               {
                 name: 'A',
@@ -223,7 +221,7 @@ export const buildCustomThresholdAlert = (
             timeUnit: 'm',
           },
           {
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             metrics: [
               {
                 name: 'B',
@@ -234,7 +232,7 @@ export const buildCustomThresholdAlert = (
             threshold: [4],
             timeSize: 15,
             timeUnit: 'm',
-            warningComparator: Comparator.GT,
+            warningComparator: COMPARATORS.GREATER_THAN,
             warningThreshold: [2.2],
           },
         ],

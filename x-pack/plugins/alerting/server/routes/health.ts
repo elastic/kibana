@@ -40,6 +40,11 @@ export const healthRoute = (
   router.get(
     {
       path: `${BASE_ALERTING_API_PATH}/_health`,
+      options: {
+        access: 'public',
+        summary: `Get the alerting framework health`,
+        tags: ['oas-tag:alerting'],
+      },
       validate: false,
     },
     router.handleLegacyErrors(

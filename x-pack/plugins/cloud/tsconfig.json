@@ -13,7 +13,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/usage-collection-plugin",
-    "@kbn/analytics-client",
     "@kbn/config-schema",
     "@kbn/logging-mocks",
     "@kbn/logging",

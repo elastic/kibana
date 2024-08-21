@@ -56,8 +56,8 @@ describe('POST /api/saved_objects/{type} with allowApiAccess true', () => {
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
     const logger = loggerMock.create();
     const config = setupConfig(true);
-
-    registerCreateRoute(router, { config, coreUsageData, logger });
+    const access = 'public';
+    registerCreateRoute(router, { config, coreUsageData, logger, access });
 
     handlerContext.savedObjects.typeRegistry.getType.mockImplementation((typename: string) => {
       return testTypes

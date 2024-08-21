@@ -22,15 +22,12 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import { timelineActions } from '../../../../store';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../../common/hooks/use_selector';
-import { TimelineTabs } from '../../../../../../common/types/timeline';
-import { TimelineStatus } from '../../../../../../common/api/timeline';
+import { TimelineStatusEnum } from '../../../../../../common/api/timeline';
 import { appSelectors } from '../../../../../common/store/app';
 import { AddNote } from '../../../notes/add_note';
 import { CREATED_BY, NOTES } from '../../../notes/translations';
@@ -38,13 +35,12 @@ import { PARTICIPANTS } from '../../translations';
 import { NotePreviews } from '../../../open_timeline/note_previews';
 import type { TimelineResultNote } from '../../../open_timeline/types';
 import { getTimelineNoteSelector } from './selectors';
-import { DetailsPanel } from '../../../side_panel';
 import { getScrollToTopSelector } from '../selectors';
 import { useScrollToTop } from '../../../../../common/components/scroll_to_top';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { FullWidthFlexGroup, VerticalRule } from '../shared/layout';
 
-const ScrollableFlexItem = styled(EuiFlexItem)`
+const ScrollableDiv = styled.div`
   overflow-x: hidden;
   overflow-y: auto;
   padding-inline: ${({ theme }) => (theme as EuiTheme).eui.euiSizeM};
@@ -135,19 +131,16 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
   const getTimelineNotes = useMemo(() => getTimelineNoteSelector(), []);
   const {
     createdBy,
-    expandedDetail,
     eventIdToNoteIds,
     noteIds,
     status: timelineStatus,
   } = useDeepEqualSelector((state) => getTimelineNotes(state, timelineId));
-  const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.timeline);
-
   const getNotesAsCommentsList = useMemo(
     () => appSelectors.selectNotesAsCommentsListSelector(),
     []
   );
   const [newNote, setNewNote] = useState('');
-  const isImmutable = timelineStatus === TimelineStatus.immutable;
+  const isImmutable = timelineStatus === TimelineStatusEnum.immutable;
   const appNotes: TimelineResultNote[] = useDeepEqualSelector(getNotesAsCommentsList);
 
   const allTimelineNoteIds = useMemo(() => {
@@ -171,24 +164,6 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
     [dispatch, timelineId]
   );
 
-  const handleOnPanelClosed = useCallback(() => {
-    dispatch(timelineActions.toggleDetailPanel({ tabType: TimelineTabs.notes, id: timelineId }));
-  }, [dispatch, timelineId]);
-
-  const DetailsPanelContent = useMemo(
-    () =>
-      expandedDetail[TimelineTabs.notes]?.panelView ? (
-        <DetailsPanel
-          browserFields={browserFields}
-          handleOnPanelClosed={handleOnPanelClosed}
-          runtimeMappings={runtimeMappings}
-          tabType={TimelineTabs.notes}
-          scopeId={timelineId}
-        />
-      ) : null,
-    [browserFields, expandedDetail, handleOnPanelClosed, runtimeMappings, timelineId]
-  );
-
   const SidebarContent = useMemo(
     () => (
       <>
@@ -210,7 +185,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
 
   return (
     <FullWidthFlexGroup gutterSize="none">
-      <ScrollableFlexItem grow={2} id="scrollableNotes">
+      <EuiFlexItem component={ScrollableDiv} grow={2} id="scrollableNotes">
         <StyledPanel paddingSize="none">
           <EuiTitle>
             <h3>{NOTES}</h3>
@@ -226,9 +201,11 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
             />
           )}
         </StyledPanel>
-      </ScrollableFlexItem>
+      </EuiFlexItem>
       <VerticalRule />
-      <ScrollableFlexItem grow={1}>{DetailsPanelContent ?? SidebarContent}</ScrollableFlexItem>
+      <EuiFlexItem component={ScrollableDiv} grow={1}>
+        {SidebarContent}
+      </EuiFlexItem>
     </FullWidthFlexGroup>
   );
 };

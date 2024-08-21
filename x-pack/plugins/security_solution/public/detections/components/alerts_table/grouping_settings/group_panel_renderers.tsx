@@ -19,7 +19,7 @@ import {
 import { euiThemeVars } from '@kbn/ui-theme';
 import { isArray } from 'lodash/fp';
 import React from 'react';
-import type { GroupPanelRenderer } from '@kbn/securitysolution-grouping/src';
+import type { GroupPanelRenderer } from '@kbn/grouping/src';
 import type { AlertsGroupingAggregation } from './types';
 import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
 import type { GenericBuckets } from '../../../../../common/search_strategy';

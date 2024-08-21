@@ -60,6 +60,11 @@ export interface SecurityLicenseFeatures {
   readonly allowRoleRemoteIndexPrivileges: boolean;
 
   /**
+   * Indicates whether we allow users to define remote cluster privileges in roles.
+   */
+  readonly allowRemoteClusterPrivileges: boolean;
+
+  /**
    * Indicates whether we allow Role-based access control (RBAC).
    */
   readonly allowRbac: boolean;
@@ -78,4 +83,10 @@ export interface SecurityLicenseFeatures {
    * Describes the layout of the login form if it's displayed.
    */
   readonly layout?: LoginLayout;
+
+  /**
+   * Indicates whether we allow FIPS mode
+   */
+
+  readonly allowFips: boolean;
 }

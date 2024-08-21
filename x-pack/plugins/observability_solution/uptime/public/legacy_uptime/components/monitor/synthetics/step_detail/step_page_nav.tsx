@@ -24,6 +24,14 @@ export const NEXT_CHECK_BUTTON_TEXT = i18n.translate(
   }
 );
 
+export const CURRENT_CHECK_ARIA_LABEL = (timestamp: string) =>
+  i18n.translate('xpack.uptime.synthetics.stepDetail.currentCheckAriaLabel', {
+    defaultMessage: 'Current check: {timestamp}',
+    values: {
+      timestamp,
+    },
+  });
+
 interface Props {
   previousCheckGroup?: string;
   dateFormat: string;
@@ -40,6 +48,8 @@ export const StepPageNavigation = ({
   checkTimestamp,
   nextCheckGroup,
 }: Props) => {
+  const formattedTimestamp = moment(checkTimestamp).format(dateFormat);
+
   return (
     <EuiFlexGroup alignItems="center" justifyContent="flexEnd" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -54,7 +64,9 @@ export const StepPageNavigation = ({
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size="s">{moment(checkTimestamp).format(dateFormat)}</EuiText>
+        <EuiText size="s" aria-label={CURRENT_CHECK_ARIA_LABEL(formattedTimestamp)}>
+          {formattedTimestamp}
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty

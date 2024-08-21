@@ -8,10 +8,7 @@
 
 import { cloneDeep } from 'lodash';
 import * as Either from 'fp-ts/lib/Either';
-import { delayRetryState } from '../../../model/retry_state';
-import { throwBadResponse } from '../../../model/helpers';
 import type { MigrationLog } from '../../../types';
-import { isTypeof } from '../../actions';
 import { getAliases } from '../../../model/helpers';
 import {
   getCurrentIndex,
@@ -33,16 +30,6 @@ export const init: ModelStage<
   | 'INDEX_STATE_UPDATE_DONE'
   | 'FATAL'
 > = (state, res, context) => {
-  if (Either.isLeft(res)) {
-    const left = res.left;
-    if (isTypeof(left, 'incompatible_cluster_routing_allocation')) {
-      const retryErrorMessage = `[${left.type}] Incompatible Elasticsearch cluster settings detected. Remove the persistent and transient Elasticsearch cluster setting 'cluster.routing.allocation.enable' or set it to a value of 'all' to allow migrations to proceed. Refer to ${context.migrationDocLinks.routingAllocationDisabled} for more information on how to resolve the issue.`;
-      return delayRetryState(state, retryErrorMessage, context.maxRetryAttempts);
-    } else {
-      return throwBadResponse(state, left);
-    }
-  }
-
   const types = context.types.map((type) => context.typeRegistry.getType(type)!);
   const logs: MigrationLog[] = [...state.logs];
 

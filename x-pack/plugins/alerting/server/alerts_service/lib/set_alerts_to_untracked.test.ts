@@ -13,7 +13,7 @@ import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 import { setAlertsToUntracked } from './set_alerts_to_untracked';
 
 let clusterClient: ElasticsearchClientMock;
-let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
+let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 
 const getAuthorizedRuleTypesMock = jest.fn();
 
@@ -426,6 +426,8 @@ describe('setAlertsToUntracked()', () => {
       },
     });
 
+    clusterClient.updateByQuery.mockResponseOnce({ total: 2, updated: 2 });
+
     const result = await setAlertsToUntracked({
       isUsingQuery: true,
       query: [
@@ -522,5 +524,100 @@ describe('setAlertsToUntracked()', () => {
         'kibana.alert.uuid': 'test-alert-id-2',
       },
     ]);
+  });
+
+  test('should return an empty array if the search returns zero results', async () => {
+    getAuthorizedRuleTypesMock.mockResolvedValue([
+      {
+        id: 'test-rule-type',
+      },
+    ]);
+    getAlertIndicesAliasMock.mockResolvedValue(['test-alert-index']);
+
+    clusterClient.search.mockResponseOnce({
+      took: 1,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        hits: [],
+      },
+      aggregations: {
+        ruleTypeIds: {
+          buckets: [
+            {
+              key: 'some rule type',
+              consumers: {
+                buckets: [{ key: 'o11y' }],
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    clusterClient.updateByQuery.mockResponseOnce({ total: 0, updated: 0 });
+
+    const result = await setAlertsToUntracked({
+      isUsingQuery: true,
+      query: [
+        {
+          bool: {
+            must: {
+              term: {
+                'kibana.alert.rule.name': 'test',
+              },
+            },
+          },
+        },
+      ],
+      featureIds: ['o11y'],
+      spaceId: 'default',
+      getAuthorizedRuleTypes: getAuthorizedRuleTypesMock,
+      getAlertIndicesAlias: getAlertIndicesAliasMock,
+      ensureAuthorized: ensureAuthorizedMock,
+      logger,
+      esClient: clusterClient,
+    });
+
+    expect(getAlertIndicesAliasMock).lastCalledWith(['test-rule-type'], 'default');
+
+    expect(clusterClient.updateByQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          query: {
+            bool: {
+              must: [
+                {
+                  term: {
+                    'kibana.alert.status': {
+                      value: 'active', // This has to be active
+                    },
+                  },
+                },
+              ],
+              filter: [
+                {
+                  bool: {
+                    must: {
+                      term: {
+                        'kibana.alert.rule.name': 'test',
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        }),
+      })
+    );
+
+    expect(clusterClient.search).not.toHaveBeenCalledWith();
+    expect(result).toEqual([]);
   });
 });

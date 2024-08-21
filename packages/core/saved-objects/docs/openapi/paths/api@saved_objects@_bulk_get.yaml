@@ -1,5 +1,5 @@
 post:
-  summary: Retrieve multiple Kibana saved objects by identifier.
+  summary: Get saved objects
   operationId: bulkGetSavedObjects
   deprecated: true
   tags:

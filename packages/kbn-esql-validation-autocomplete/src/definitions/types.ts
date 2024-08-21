@@ -8,6 +8,92 @@
 
 import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '@kbn/esql-ast';
 
+/**
+ * All supported field types in ES|QL. This is all the types
+ * that can come back in the table from a query.
+ */
+export const fieldTypes = [
+  'boolean',
+  'date',
+  'double',
+  'ip',
+  'keyword',
+  'integer',
+  'long',
+  'text',
+  'unsigned_long',
+  'version',
+  'cartesian_point',
+  'cartesian_shape',
+  'geo_point',
+  'geo_shape',
+  'counter_integer',
+  'counter_long',
+  'counter_double',
+  'unsupported',
+  'date_nanos',
+] as const;
+
+export type FieldType = (typeof fieldTypes)[number];
+
+export const isFieldType = (type: string | FunctionParameterType): type is FieldType =>
+  fieldTypes.includes(type as FieldType);
+
+/**
+ * This is the list of all data types that are supported in ES|QL.
+ *
+ * Not all of these can be used as field types. Some can only be literals,
+ * others may be the value of a field, but cannot be used in the index mapping.
+ *
+ * This is a partial list. The full list is here and we may need to expand this type as
+ * the capabilities of the client-side engines grow.
+ * https://github.com/elastic/elasticsearch/blob/main/x-pack/plugin/esql-core/src/main/java/org/elasticsearch/xpack/esql/core/type/DataType.java
+ */
+export const dataTypes = [
+  ...fieldTypes,
+  'null',
+  'time_literal', // @TODO consider merging time_literal with time_duration
+  'time_duration',
+  'date_period',
+] as const;
+
+export type SupportedDataType = (typeof dataTypes)[number];
+
+export const isSupportedDataType = (
+  type: string | FunctionParameterType
+): type is SupportedDataType => dataTypes.includes(type as SupportedDataType);
+
+/**
+ * This is a set of array types. These aren't official ES|QL types, but they are
+ * currently used in the function definitions in a couple of specific scenarios.
+ *
+ * The fate of these is uncertain. They may be removed in the future.
+ */
+type ArrayType =
+  | 'double[]'
+  | 'unsigned_long[]'
+  | 'long[]'
+  | 'integer[]'
+  | 'counter_integer[]'
+  | 'counter_long[]'
+  | 'counter_double[]'
+  | 'keyword[]'
+  | 'text[]'
+  | 'boolean[]'
+  | 'any[]'
+  | 'date[]'
+  | 'date_period[]';
+
+/**
+ * This is the type of a parameter in a function definition.
+ */
+export type FunctionParameterType = Omit<SupportedDataType, 'unsupported'> | ArrayType | 'any';
+
+/**
+ * This is the return type of a function definition.
+ */
+export type FunctionReturnType = Omit<SupportedDataType, 'unsupported'> | 'any' | 'void';
+
 export interface FunctionDefinition {
   type: 'builtin' | 'agg' | 'eval';
   ignoreAsSuggestion?: boolean;
@@ -19,7 +105,7 @@ export interface FunctionDefinition {
   signatures: Array<{
     params: Array<{
       name: string;
-      type: string;
+      type: FunctionParameterType;
       optional?: boolean;
       noNestingFunctions?: boolean;
       supportsWildcard?: boolean;
@@ -52,9 +138,9 @@ export interface FunctionDefinition {
       literalSuggestions?: string[];
     }>;
     minParams?: number;
-    returnType: string;
-    examples?: string[];
+    returnType: FunctionReturnType;
   }>;
+  examples?: string[];
   validate?: (fnDef: ESQLFunction) => ESQLMessage[];
 }
 
@@ -62,15 +148,19 @@ export interface CommandBaseDefinition {
   name: string;
   alias?: string;
   description: string;
+  /**
+   * Whether to show or hide in autocomplete suggestion list
+   */
+  hidden?: boolean;
   signature: {
     multipleParams: boolean;
-    // innerType here is useful to drill down the type in case of "column"
+    // innerTypes here is useful to drill down the type in case of "column"
     // i.e. column of type string
     params: Array<{
       name: string;
       type: string;
       optional?: boolean;
-      innerType?: string;
+      innerTypes?: string[];
       values?: string[];
       valueDescriptions?: string[];
       constantOnly?: boolean;
@@ -114,4 +204,4 @@ export type SignatureType =
   | CommandOptionsDefinition['signature'];
 export type SignatureArgType = SignatureType['params'][number];
 
-export type FunctionArgSignature = FunctionDefinition['signatures'][number]['params'][number];
+export type FunctionParameter = FunctionDefinition['signatures'][number]['params'][number];

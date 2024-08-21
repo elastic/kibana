@@ -27,6 +27,7 @@ export const buildEcsObjects = (hit: EventHit): Ecs => {
       }
       return acc;
     },
-    { _id: hit._id, timestamp: getTimestamp(hit), _index: hit._index }
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    { _id: hit._id!, timestamp: getTimestamp(hit), _index: hit._index }
   );
 };

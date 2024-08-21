@@ -8,7 +8,7 @@
 import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
 import React from 'react';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
-import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator';
+import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator.stories';
 import { ChatBody as Component } from './chat_body';
 import { buildSystemMessage } from '../../utils/builders';
 

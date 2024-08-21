@@ -81,13 +81,13 @@ export function* setDynamicSettingsEffect() {
         yield call(setDynamicSettings, { settings: action.payload });
         yield put(updateDefaultAlertingAction.get());
         yield put(setDynamicSettingsAction.success(action.payload));
-        kibanaService.core.notifications.toasts.addSuccess(
+        kibanaService.coreSetup.notifications.toasts.addSuccess(
           i18n.translate('xpack.synthetics.settings.saveSuccess', {
             defaultMessage: 'Settings saved!',
           })
         );
       } catch (err) {
-        kibanaService.core.notifications.toasts.addError(err, {
+        kibanaService.coreSetup.notifications.toasts.addError(err, {
           title: couldNotSaveSettingsText,
         });
         yield put(setDynamicSettingsAction.fail(err));

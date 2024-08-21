@@ -13,30 +13,18 @@ import type {
   RectAnnotationSpec,
 } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
-import type { LogRateHistogramItem, WindowParameters } from '@kbn/aiops-log-rate-analysis';
-import {
-  DocumentCountChartWithAutoAnalysisStart,
-  type BrushSelectionUpdateHandler,
-} from '@kbn/aiops-components';
+import { useAppSelector } from '@kbn/aiops-log-rate-analysis/state';
+import { DocumentCountChartRedux } from '@kbn/aiops-components';
 
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
-import type { DocumentCountStats } from '../../../get_document_stats';
 
 import { TotalCountHeader } from '../total_count_header';
 
 export interface DocumentCountContentProps {
-  brushSelectionUpdateHandler: BrushSelectionUpdateHandler;
-  documentCountStats?: DocumentCountStats;
-  documentCountStatsSplit?: DocumentCountStats;
-  documentCountStatsSplitLabel?: string;
-  isBrushCleared: boolean;
-  totalCount: number;
-  sampleProbability: number;
   /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
-  windowParameters?: WindowParameters;
   baselineLabel?: string;
   deviationLabel?: string;
   barStyleAccessor?: BarStyleAccessor;
@@ -45,51 +33,19 @@ export interface DocumentCountContentProps {
 }
 
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
-  brushSelectionUpdateHandler,
-  documentCountStats,
-  documentCountStatsSplit,
-  documentCountStatsSplitLabel = '',
-  isBrushCleared,
-  totalCount,
-  sampleProbability,
   barColorOverride,
   barHighlightColorOverride,
-  windowParameters,
   ...docCountChartProps
 }) => {
   const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
 
-  const bucketTimestamps = Object.keys(documentCountStats?.buckets ?? {}).map((time) => +time);
-  const splitBucketTimestamps = Object.keys(documentCountStatsSplit?.buckets ?? {}).map(
-    (time) => +time
-  );
-  const timeRangeEarliest = Math.min(...[...bucketTimestamps, ...splitBucketTimestamps]);
-  const timeRangeLatest = Math.max(...[...bucketTimestamps, ...splitBucketTimestamps]);
+  const { documentStats } = useAppSelector((s) => s.logRateAnalysis);
+  const { sampleProbability, totalCount, documentCountStats } = documentStats;
 
-  if (
-    documentCountStats === undefined ||
-    documentCountStats.buckets === undefined ||
-    timeRangeEarliest === undefined ||
-    timeRangeLatest === undefined
-  ) {
+  if (documentCountStats === undefined) {
     return totalCount !== undefined ? (
       <TotalCountHeader totalCount={totalCount} sampleProbability={sampleProbability} />
     ) : null;
-  }
-
-  const chartPoints: LogRateHistogramItem[] = Object.entries(documentCountStats.buckets).map(
-    ([time, value]) => ({
-      time: +time,
-      value,
-    })
-  );
-
-  let chartPointsSplit: LogRateHistogramItem[] | undefined;
-  if (documentCountStatsSplit?.buckets !== undefined) {
-    chartPointsSplit = Object.entries(documentCountStatsSplit?.buckets).map(([time, value]) => ({
-      time: +time,
-      value,
-    }));
   }
 
   return (
@@ -97,25 +53,15 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
       <EuiFlexItem>
         <TotalCountHeader totalCount={totalCount} sampleProbability={sampleProbability} />
       </EuiFlexItem>
-      {documentCountStats.interval !== undefined && (
-        <EuiFlexItem>
-          <DocumentCountChartWithAutoAnalysisStart
-            dependencies={{ data, uiSettings, fieldFormats, charts }}
-            brushSelectionUpdateHandler={brushSelectionUpdateHandler}
-            chartPoints={chartPoints}
-            chartPointsSplit={chartPointsSplit}
-            timeRangeEarliest={timeRangeEarliest}
-            timeRangeLatest={timeRangeLatest}
-            interval={documentCountStats.interval}
-            chartPointsSplitLabel={documentCountStatsSplitLabel}
-            isBrushCleared={isBrushCleared}
-            barColorOverride={barColorOverride}
-            barHighlightColorOverride={barHighlightColorOverride}
-            changePoint={documentCountStats.changePoint}
-            {...docCountChartProps}
-          />
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem>
+        <DocumentCountChartRedux
+          dependencies={{ data, uiSettings, fieldFormats, charts }}
+          barColorOverride={barColorOverride}
+          barHighlightColorOverride={barHighlightColorOverride}
+          changePoint={documentCountStats.changePoint}
+          {...docCountChartProps}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

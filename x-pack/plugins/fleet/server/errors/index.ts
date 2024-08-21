@@ -44,13 +44,18 @@ export class PackageRemovalError extends FleetError {}
 export class PackageESError extends FleetError {}
 export class ConcurrentInstallOperationError extends FleetError {}
 export class PackageSavedObjectConflictError extends FleetError {}
-
 export class KibanaSOReferenceError extends FleetError {}
 export class PackageAlreadyInstalledError extends FleetError {}
 
 export class AgentPolicyError extends FleetError {}
 export class AgentRequestInvalidError extends FleetError {}
 export class AgentPolicyInvalidError extends FleetError {}
+
+export class AgentlessAgentCreateError extends FleetError {
+  constructor(message: string) {
+    super(`Error creating agentless agent in Fleet, ${message}`);
+  }
+}
 
 export class AgentPolicyNameExistsError extends AgentPolicyError {}
 export class AgentReassignmentError extends FleetError {}
@@ -60,6 +65,8 @@ export class PackagePolicyNameExistsError extends FleetError {}
 export class BundledPackageLocationNotFoundError extends FleetError {}
 
 export class PackagePolicyRequestError extends FleetError {}
+export class PackagePolicyMultipleAgentPoliciesError extends FleetError {}
+export class PackagePolicyOutputError extends FleetError {}
 
 export class EnrollmentKeyNameExistsError extends FleetError {}
 export class HostedAgentPolicyRestrictionRelatedError extends FleetError {
@@ -81,6 +88,7 @@ export class FleetSetupError extends FleetError {}
 export class GenerateServiceTokenError extends FleetError {}
 export class FleetUnauthorizedError extends FleetError {}
 export class FleetNotFoundError extends FleetError {}
+export class FleetTooManyRequestsError extends FleetError {}
 
 export class OutputUnauthorizedError extends FleetError {}
 export class OutputInvalidError extends FleetError {}

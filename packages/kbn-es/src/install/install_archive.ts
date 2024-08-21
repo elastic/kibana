@@ -18,7 +18,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { BASE_PATH, ES_CONFIG, ES_KEYSTORE_BIN } from '../paths';
 import { Artifact } from '../artifact';
 import { parseSettings, SettingsFilter } from '../settings';
-import { log as defaultLog } from '../utils/log';
+import { log as defaultLog, isFile, copyFileSync } from '../utils';
 import { InstallArchiveOptions } from './types';
 
 const isHttpUrl = (str: string) => {
@@ -40,6 +40,8 @@ export async function installArchive(archive: string, options?: InstallArchiveOp
     installPath = path.resolve(basePath, path.basename(archive, '.tar.gz')),
     log = defaultLog,
     esArgs = [],
+    disableEsTmpDir = process.env.FTR_DISABLE_ES_TMPDIR?.toLowerCase() === 'true',
+    resources,
   } = options || {};
 
   let dest = archive;
@@ -62,9 +64,16 @@ export async function installArchive(archive: string, options?: InstallArchiveOp
   });
   log.info('extracted to %s', chalk.bold(installPath));
 
-  const tmpdir = path.resolve(installPath, 'ES_TMPDIR');
-  fs.mkdirSync(tmpdir, { recursive: true });
-  log.info('created %s', chalk.bold(tmpdir));
+  /**
+   * If we're running inside a Vagrant VM, and this is running in a synced folder,
+   * ES will fail to start due to ML being unable to write a pipe in the synced folder.
+   * Disabling allows ES to write to the OS's /tmp directory.
+   */
+  if (!disableEsTmpDir) {
+    const tmpdir = path.resolve(installPath, 'ES_TMPDIR');
+    fs.mkdirSync(tmpdir, { recursive: true });
+    log.info('created %s', chalk.bold(tmpdir));
+  }
 
   // starting in 6.3, security is disabled by default. Since we bootstrap
   // the keystore, we can enable security ourselves.
@@ -76,7 +85,24 @@ export async function installArchive(archive: string, options?: InstallArchiveOp
     ...parseSettings(esArgs, { filter: SettingsFilter.SecureOnly }),
   ]);
 
-  return { installPath };
+  // copy resources to ES config directory
+  if (resources) {
+    resources.forEach((resource) => {
+      if (!isFile(resource)) {
+        throw new Error(
+          `Invalid resource: '${resource}'.\nOnly valid files can be copied to ES config directory`
+        );
+      }
+
+      const filename = path.basename(resource);
+      const destPath = path.resolve(installPath, 'config', filename);
+
+      copyFileSync(resource, destPath);
+      log.info('moved %s in config to %s', resource, destPath);
+    });
+  }
+
+  return { installPath, disableEsTmpDir };
 }
 
 /**

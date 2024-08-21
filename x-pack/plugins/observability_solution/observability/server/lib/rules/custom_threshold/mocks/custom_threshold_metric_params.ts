@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import {
   Aggregators,
-  Comparator,
   CustomMetricExpressionParams,
 } from '../../../../../common/custom_threshold_rule/types';
 
@@ -28,7 +28,7 @@ export const criteriaMultipleConditions: CustomMetricExpressionParams[] = [
     timeUnit: 'm',
     timeSize: 1,
     threshold: [1],
-    comparator: Comparator.GT,
+    comparator: COMPARATORS.GREATER_THAN,
   },
   {
     metrics: [
@@ -46,7 +46,7 @@ export const criteriaMultipleConditions: CustomMetricExpressionParams[] = [
     timeUnit: 'm',
     timeSize: 1,
     threshold: [4],
-    comparator: Comparator.GT,
+    comparator: COMPARATORS.GREATER_THAN,
   },
 ];
 
@@ -67,7 +67,7 @@ export const criteriaMultipleConditionsWithIsBetween: CustomMetricExpressionPara
     timeUnit: 'm',
     timeSize: 1,
     threshold: [1, 2],
-    comparator: Comparator.BETWEEN,
+    comparator: COMPARATORS.BETWEEN,
   },
   {
     metrics: [
@@ -85,6 +85,6 @@ export const criteriaMultipleConditionsWithIsBetween: CustomMetricExpressionPara
     timeUnit: 'm',
     timeSize: 1,
     threshold: [4],
-    comparator: Comparator.GT,
+    comparator: COMPARATORS.GREATER_THAN,
   },
 ];

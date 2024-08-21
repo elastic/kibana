@@ -14,18 +14,12 @@ import {
   DataViewType,
 } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { ROLLUP_DEPRECATION_BADGE_LABEL } from '@kbn/rollup';
 
 const defaultIndexPatternListName = i18n.translate(
   'indexPatternManagement.editIndexPattern.list.defaultIndexPatternListName',
   {
     defaultMessage: 'Default',
-  }
-);
-
-const rollupIndexPatternListName = i18n.translate(
-  'indexPatternManagement.editIndexPattern.list.rollupIndexPatternListName',
-  {
-    defaultMessage: 'Rollup',
   }
 );
 
@@ -85,7 +79,7 @@ export const getTags = (
   if (isRollup(indexPattern.type) && rollupsEnabled) {
     tags.push({
       key: DataViewType.ROLLUP,
-      name: rollupIndexPatternListName,
+      name: ROLLUP_DEPRECATION_BADGE_LABEL,
       'data-test-subj': 'rollup-tag',
     });
   }

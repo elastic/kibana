@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { LegendValue } from '@elastic/charts';
 import { cloneDeep } from 'lodash';
-import { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { PieLayerState, PieVisualizationState } from '../../../common/types';
 
 type PersistedPieLayerState = PieLayerState & {
@@ -28,7 +28,7 @@ function convertToLegendStats(state: PieVisualizationState) {
     if ('showValuesInLegend' in l) {
       l.legendStats = [
         ...new Set([
-          ...(l.showValuesInLegend ? [PartitionLegendValue.Value] : []),
+          ...(l.showValuesInLegend ? [LegendValue.Value] : []),
           ...(l.legendStats || []),
         ]),
       ];

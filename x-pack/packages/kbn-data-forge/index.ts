@@ -19,3 +19,4 @@ export { cli } from './src/cli';
 export { generate } from './src/generate';
 export { cleanup } from './src/cleanup';
 export { createConfig, readConfig } from './src/lib/create_config';
+export { DEFAULTS } from './src/constants';

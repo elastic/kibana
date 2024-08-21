@@ -23,7 +23,7 @@ import { waitFor } from '../../../../../../common/utils/security_solution';
  * @param osTypes The os types to optionally add or not to add to the container
  */
 export const createContainerWithEntries = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   entries: NonEmptyEntriesArray[]
 ): Promise<ListArray> => {

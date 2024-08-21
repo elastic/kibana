@@ -30,7 +30,7 @@ export function DiscoverDocTableEmbeddable(renderProps: DocTableEmbeddableProps)
       searchDescription={renderProps.searchDescription}
       sharedItemTitle={renderProps.sharedItemTitle}
       isLoading={renderProps.isLoading}
-      isPlainRecord={renderProps.isPlainRecord}
+      isEsqlMode={renderProps.isEsqlMode}
       interceptedWarnings={renderProps.interceptedWarnings}
     />
   );

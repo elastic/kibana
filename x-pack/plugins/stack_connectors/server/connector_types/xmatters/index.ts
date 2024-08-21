@@ -14,7 +14,10 @@ import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
 } from '@kbn/actions-plugin/server/types';
-import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common/types';
+import {
+  AlertingConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from '@kbn/actions-plugin/common/types';
 import { postXmatters } from './post_xmatters';
 
 export type XmattersConnectorType = ConnectorType<
@@ -66,7 +69,7 @@ export function getConnectorType(): XmattersConnectorType {
     name: i18n.translate('xpack.stackConnectors.xmatters.title', {
       defaultMessage: 'xMatters',
     }),
-    supportedFeatureIds: [AlertingConnectorFeatureId],
+    supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
     validate: {
       config: {
         schema: ConfigSchema,
@@ -102,7 +105,7 @@ function validateConnectorTypeConfig(
       i18n.translate('xpack.stackConnectors.xmatters.configurationErrorNoHostname', {
         defaultMessage: 'Error configuring xMatters action: unable to parse url: {err}',
         values: {
-          err,
+          err: err.message,
         },
       })
     );
@@ -207,7 +210,7 @@ function validateConnectorTypeSecrets(
         i18n.translate('xpack.stackConnectors.xmatters.invalidUrlError', {
           defaultMessage: 'Invalid secretsUrl: {err}',
           values: {
-            err,
+            err: err.toString(),
           },
         })
       );

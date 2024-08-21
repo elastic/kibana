@@ -30,6 +30,7 @@ export {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
   defaultAnnotationLabel,
+  defaultRangeAnnotationLabel,
   getDefaultManualAnnotation,
   getDefaultQueryAnnotation,
   createCopiedAnnotation,

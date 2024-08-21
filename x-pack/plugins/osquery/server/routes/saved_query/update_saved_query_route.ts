@@ -51,7 +51,7 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
       async (context, request, response) => {
         const coreContext = await context.core;
         const savedObjectsClient = coreContext.savedObjects.client;
-        const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
+        const currentUser = coreContext.security.authc.getCurrentUser()?.username;
 
         const {
           id,

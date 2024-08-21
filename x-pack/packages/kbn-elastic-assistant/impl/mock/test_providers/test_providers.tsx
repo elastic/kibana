@@ -49,6 +49,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
   });
   const mockGetComments = jest.fn(() => []);
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
+  const mockNavigateToApp = jest.fn();
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -78,7 +79,9 @@ export const TestProvidersComponent: React.FC<Props> = ({
             getComments={mockGetComments}
             http={mockHttp}
             baseConversations={{}}
+            navigateToApp={mockNavigateToApp}
             {...providerContext}
+            currentAppId={'test'}
           >
             {children}
           </AssistantProvider>

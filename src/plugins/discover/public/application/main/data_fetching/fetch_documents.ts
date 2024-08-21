@@ -10,7 +10,6 @@ import { filter, map } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { isRunningResponse, ISearchSource } from '@kbn/data-plugin/public';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
-import type { EsHitRecord } from '@kbn/discover-utils/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { RecordsFetchResponse } from '../../types';
@@ -67,7 +66,11 @@ export const fetchDocuments = (
     .pipe(
       filter((res) => !isRunningResponse(res)),
       map((res) => {
-        return buildDataTableRecordList(res.rawResponse.hits.hits as EsHitRecord[], dataView);
+        return buildDataTableRecordList({
+          records: res.rawResponse.hits.hits,
+          dataView,
+          processRecord: (record) => services.profilesManager.resolveDocumentProfile({ record }),
+        });
       })
     );
 

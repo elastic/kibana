@@ -194,7 +194,6 @@ export function RuleDetailsPage() {
       : '';
 
   if (isLoading || isRuleDeleting) return <CenterJustifiedSpinner />;
-
   if (!rule || isError) return <NoRuleFoundPanel />;
 
   return (

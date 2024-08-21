@@ -135,11 +135,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await panelActions.expectMissingEditPanelAction();
       });
 
-      it(`Permalinks shows create short-url button`, async () => {
-        await PageObjects.share.openShareMenuItem('Permalinks');
-        await PageObjects.share.createShortUrlExistOrFail();
-      });
-
       it(`does not allow a map to be edited`, async () => {
         await PageObjects.dashboard.gotoDashboardEditMode('dashboard with map');
         await panelActions.expectMissingEditPanelAction();
@@ -327,13 +322,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await panelActions.expectMissingPanelAction('embeddablePanelAction-copyToDashboard');
       });
 
-      it(`Permalinks doesn't show create short-url button`, async () => {
-        await PageObjects.share.openShareMenuItem('Permalinks');
-        await PageObjects.share.createShortUrlMissingOrFail();
-        // close the menu
-        await PageObjects.share.clickShareTopNavButton();
-      });
-
       it('allows loading a saved query via the saved query management component', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         const queryString = await queryBar.getQueryString();
@@ -423,11 +411,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`can view existing Dashboard`, async () => {
         await PageObjects.dashboard.gotoDashboardURL({ id: 'i-exist', args: navigationArgs });
         await testSubjects.existOrFail('embeddablePanelHeading-APie', { timeout: 10000 });
-      });
-
-      it(`Permalinks shows create short-url button`, async () => {
-        await PageObjects.share.openShareMenuItem('Permalinks');
-        await PageObjects.share.createShortUrlExistOrFail();
       });
 
       it('allows loading a saved query via the saved query management component', async () => {

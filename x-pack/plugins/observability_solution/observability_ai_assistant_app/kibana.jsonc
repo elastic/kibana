@@ -20,13 +20,12 @@
       "uiActions",
       "triggersActionsUi",
       "share",
-      "security",
       "licensing",
       "ml",
       "alerting",
       "features"
     ],
-    "requiredBundles": ["kibanaReact"],
+    "requiredBundles": ["kibanaReact", "esqlDataGrid"],
     "optionalPlugins": ["cloud"],
     "extraPublicDirs": []
   }

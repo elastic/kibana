@@ -26,6 +26,16 @@ export const USER_AGENT_HEADER = 'user-agent';
 /**
  * @internal
  */
+export const AUTHORIZATION_HEADER = 'authorization';
+
+/**
+ * @internal
+ */
+export const ES_SECONDARY_AUTH_HEADER = 'es-secondary-authorization';
+
+/**
+ * @internal
+ */
 export const RESERVED_HEADERS = deepFreeze([PRODUCT_ORIGIN_HEADER, USER_AGENT_HEADER]);
 
 /**

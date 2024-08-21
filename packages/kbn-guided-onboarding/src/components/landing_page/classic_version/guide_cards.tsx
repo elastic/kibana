@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { groupBy, keys } from 'lodash';
 
-import { ApplicationStart } from '@kbn/core-application-browser';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 
 import { GuideId, GuideState } from '../../../types';
 import { GuideFilterValues } from './guide_filters';

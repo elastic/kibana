@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
@@ -88,8 +89,8 @@ export const getAnomalySwimLaneEmbeddableFactory = (
 ) => {
   const factory: ReactEmbeddableFactory<
     AnomalySwimLaneEmbeddableState,
-    AnomalySwimLaneEmbeddableApi,
-    AnomalySwimlaneRuntimeState
+    AnomalySwimlaneRuntimeState,
+    AnomalySwimLaneEmbeddableApi
   > = {
     type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
     deserializeState: (state) => state.rawState,
@@ -138,6 +139,32 @@ export const getAnomalySwimLaneEmbeddableFactory = (
 
       const api = buildApi(
         {
+          isEditingEnabled: () => true,
+          getTypeDisplayName: () =>
+            i18n.translate('xpack.ml.swimlaneEmbeddable.typeDisplayName', {
+              defaultMessage: 'swim lane',
+            }),
+          onEdit: async () => {
+            try {
+              const { resolveAnomalySwimlaneUserInput } = await import(
+                './anomaly_swimlane_setup_flyout'
+              );
+
+              const result = await resolveAnomalySwimlaneUserInput(
+                { ...coreStartServices, ...pluginsStartServices },
+                parentApi,
+                uuid,
+                {
+                  ...serializeTitles(),
+                  ...serializeSwimLaneState(),
+                }
+              );
+
+              swimLaneControlsApi.updateUserInput(result);
+            } catch (e) {
+              return Promise.reject();
+            }
+          },
           ...titlesApi,
           ...timeRangeApi,
           ...swimLaneControlsApi,
@@ -172,7 +199,6 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           ...swimLaneComparators,
         }
       );
-
       const appliedTimeRange$: Observable<TimeRange | undefined> = combineLatest([
         api.timeRange$,
         apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)

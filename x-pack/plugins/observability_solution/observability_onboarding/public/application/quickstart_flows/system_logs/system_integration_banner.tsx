@@ -11,9 +11,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { MouseEvent } from 'react';
 import {
-  SystemIntegrationError,
-  useInstallSystemIntegration,
-} from '../../../hooks/use_install_system_integration';
+  IntegrationInstallationError,
+  useInstallIntegrations,
+} from '../../../hooks/use_install_integrations';
 import { useKibanaNavigation } from '../../../hooks/use_kibana_navigation';
 import { PopoverTooltip } from '../shared/popover_tooltip';
 
@@ -22,29 +22,29 @@ export type SystemIntegrationBannerState = 'pending' | 'resolved' | 'rejected';
 export function SystemIntegrationBanner({
   onStatusChange,
 }: {
-  onStatusChange: (status: SystemIntegrationBannerState) => void;
+  onStatusChange?: (status: SystemIntegrationBannerState) => void;
 }) {
   const { navigateToAppUrl } = useKibanaNavigation();
   const [integrationVersion, setIntegrationVersion] = useState<string>();
-  const [error, setError] = useState<SystemIntegrationError>();
+  const [error, setError] = useState<IntegrationInstallationError>();
 
   const onIntegrationCreationSuccess = useCallback(
-    ({ version }: { version?: string }) => {
-      setIntegrationVersion(version);
-      onStatusChange('resolved');
+    ({ versions }: { versions?: string[] }) => {
+      setIntegrationVersion(versions?.[0]);
+      onStatusChange?.('resolved');
     },
     [onStatusChange]
   );
 
   const onIntegrationCreationFailure = useCallback(
-    (e: SystemIntegrationError) => {
+    (e: IntegrationInstallationError) => {
       setError(e);
-      onStatusChange('rejected');
+      onStatusChange?.('rejected');
     },
     [onStatusChange]
   );
 
-  const { performRequest, requestState } = useInstallSystemIntegration({
+  const { performRequest, requestState } = useInstallIntegrations({
     onIntegrationCreationSuccess,
     onIntegrationCreationFailure,
   });

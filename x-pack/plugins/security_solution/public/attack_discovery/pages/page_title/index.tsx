@@ -5,26 +5,23 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiTitle,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 
 import * as i18n from './translations';
 
-const BETA_BADGE_SIZE = 24; // px
-
 const PageTitleComponent: React.FC = () => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiFlexGroup alignItems="center" data-test-subj="pageTitle" gutterSize="none">
+    <EuiFlexGroup
+      alignItems="center"
+      data-test-subj="pageTitle"
+      gutterSize="none"
+      responsive={false}
+      wrap={true}
+    >
       <EuiFlexItem grow={false}>
         <EuiTitle data-test-subj="attackDiscoveryPageTitle" size="l">
           <h1>{i18n.ATTACK_DISCOVERY_PAGE_TITLE}</h1>
@@ -33,27 +30,23 @@ const PageTitleComponent: React.FC = () => {
 
       <EuiFlexItem
         css={css`
-          border: 1px solid ${euiTheme.colors.lightShade};
-          border-radius: 50%;
-          height: ${BETA_BADGE_SIZE}px;
-          margin-left: ${euiTheme.size.m};
-          overflow: hidden;
-          transform: translate(0, 9px);
-          width: ${BETA_BADGE_SIZE}px;
+          margin: ${euiTheme.size.m} 0 0 ${euiTheme.size.m};
         `}
         grow={false}
       >
-        <EuiToolTip content={i18n.BETA}>
-          <EuiIcon
-            css={css`
-              transform: translate(3px, 2px);
-            `}
-            color="hollow"
-            data-test-subj="betaIcon"
-            size="m"
-            type="beta"
-          />
-        </EuiToolTip>
+        <EuiBetaBadge
+          iconType={'beaker'}
+          label={i18n.BETA}
+          tooltipContent={i18n.BETA_TOOLTIP}
+          size="m"
+          color="hollow"
+          css={css`
+            .euiBetaBadge__icon {
+              position: relative;
+              top: 5px;
+            }
+          `}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

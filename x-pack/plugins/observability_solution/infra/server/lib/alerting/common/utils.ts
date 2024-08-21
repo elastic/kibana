@@ -19,8 +19,15 @@ import {
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { set } from '@kbn/safer-lodash-set';
 import { Alert } from '@kbn/alerts-as-data-utils';
+import { type Group } from '@kbn/observability-alerting-rule-utils';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type {
+  AssetDetailsLocatorParams,
+  InventoryLocatorParams,
+} from '@kbn/observability-shared-plugin/common';
 import {
+  ALERT_RULE_PARAMETERS_NODE_TYPE,
   getInventoryViewInAppUrl,
   getMetricsViewInAppUrl,
 } from '../../../../common/alerting/metrics/alert_link';
@@ -129,6 +136,8 @@ export const getInventoryViewInAppUrlWithSpaceId = ({
   spaceId,
   timestamp,
   hostName,
+  assetDetailsLocator,
+  inventoryLocator,
 }: {
   basePath: IBasePath;
   criteria: InventoryMetricConditions[];
@@ -136,6 +145,8 @@ export const getInventoryViewInAppUrlWithSpaceId = ({
   spaceId: string;
   timestamp: string;
   hostName?: string;
+  assetDetailsLocator?: LocatorPublic<AssetDetailsLocatorParams>;
+  inventoryLocator?: LocatorPublic<InventoryLocatorParams>;
 }) => {
   const { metric, customMetric } = criteria[0];
 
@@ -144,7 +155,7 @@ export const getInventoryViewInAppUrlWithSpaceId = ({
     [`${ALERT_RULE_PARAMETERS}.criteria.customMetric.id`]: [customMetric?.id],
     [`${ALERT_RULE_PARAMETERS}.criteria.customMetric.aggregation`]: [customMetric?.aggregation],
     [`${ALERT_RULE_PARAMETERS}.criteria.customMetric.field`]: [customMetric?.field],
-    [`${ALERT_RULE_PARAMETERS}.nodeType`]: [nodeType],
+    [ALERT_RULE_PARAMETERS_NODE_TYPE]: [nodeType],
     [TIMESTAMP]: timestamp,
     [HOST_NAME]: hostName,
   };
@@ -152,7 +163,11 @@ export const getInventoryViewInAppUrlWithSpaceId = ({
   return addSpaceIdToPath(
     basePath.publicBaseUrl,
     spaceId,
-    getInventoryViewInAppUrl(parseTechnicalFields(fields, true))
+    getInventoryViewInAppUrl({
+      fields: parseTechnicalFields(fields, true),
+      assetDetailsLocator,
+      inventoryLocator,
+    })
   );
 };
 
@@ -160,22 +175,27 @@ export const getMetricsViewInAppUrlWithSpaceId = ({
   basePath,
   spaceId,
   timestamp,
-  hostName,
+  groupBy,
+  assetDetailsLocator,
 }: {
   basePath: IBasePath;
   spaceId: string;
   timestamp: string;
-  hostName?: string;
+  groupBy?: string[];
+  assetDetailsLocator?: LocatorPublic<AssetDetailsLocatorParams>;
 }) => {
   const fields = {
     [TIMESTAMP]: timestamp,
-    [HOST_NAME]: hostName,
   };
 
   return addSpaceIdToPath(
     basePath.publicBaseUrl,
     spaceId,
-    getMetricsViewInAppUrl(parseTechnicalFields(fields, true))
+    getMetricsViewInAppUrl({
+      fields: parseTechnicalFields(fields, true),
+      groupBy,
+      assetDetailsLocator,
+    })
   );
 };
 
@@ -195,7 +215,7 @@ export const doFieldsExist = async (
   // Get all supported fields
   const respMapping = await esClient.fieldCaps({
     index,
-    fields: '*',
+    fields,
   });
 
   const fieldsExisted: Record<string, boolean> = {};
@@ -309,6 +329,25 @@ export const getGroupByObject = (
             }, {})
           : { [groupBy]: groupSet }
       );
+    });
+  }
+  return groupByKeysObjectMapping;
+};
+
+export const getFormattedGroupBy = (
+  groupBy: string | string[] | undefined,
+  groupSet: Set<string>
+): Record<string, Group[]> => {
+  const groupByKeysObjectMapping: Record<string, Group[]> = {};
+  if (groupBy) {
+    groupSet.forEach((group) => {
+      const groupSetKeys = group.split(',');
+      groupByKeysObjectMapping[group] = Array.isArray(groupBy)
+        ? groupBy.reduce((result: Group[], groupByItem, index) => {
+            result.push({ field: groupByItem, value: groupSetKeys[index]?.trim() });
+            return result;
+          }, [])
+        : [{ field: groupBy, value: group }];
     });
   }
   return groupByKeysObjectMapping;

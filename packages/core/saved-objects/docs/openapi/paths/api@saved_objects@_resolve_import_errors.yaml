@@ -1,8 +1,8 @@
 post:
-  summary: Resolve errors from the Import objects API.
+  summary: Resolve import errors
   operationId: resolveImportErrors
   description: |
-    To resolve errors, you can:
+    To resolve errors from the Import objects API, you can:
 
     * Retry certain saved objects
     * Overwrite specific saved objects

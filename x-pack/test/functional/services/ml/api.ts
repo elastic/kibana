@@ -73,7 +73,7 @@ export const SUPPORTED_TRAINED_MODELS = {
   },
 } as const;
 export type SupportedTrainedModelNamesType =
-  typeof SUPPORTED_TRAINED_MODELS[keyof typeof SUPPORTED_TRAINED_MODELS]['name'];
+  (typeof SUPPORTED_TRAINED_MODELS)[keyof typeof SUPPORTED_TRAINED_MODELS]['name'];
 
 export interface TrainedModelVocabulary {
   vocabulary: string[];
@@ -212,6 +212,16 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return body.hits.hits.length > 0;
     },
 
+    async addForecast(jobId: string, requestBody: { duration: string }): Promise<void> {
+      log.debug(`Creating forecast for ${jobId}...`);
+      const { body, status } = await kbnSupertest
+        .post(`/internal/ml/anomaly_detectors/${jobId}/_forecast`)
+        .set(getCommonRequestHeader('1'))
+        .send(requestBody);
+      this.assertResponseStatusCode(200, status, body);
+      log.debug(`> Forecast for ${jobId} created`);
+    },
+
     async assertForecastResultsExist(jobId: string) {
       await retry.waitForWithTimeout(
         `forecast results for job ${jobId} to exist`,
@@ -224,6 +234,36 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           }
         }
       );
+    },
+
+    async getInferenceEndpoint(inferenceId: string) {
+      const { status } = await esSupertest.get(`/_inference/${inferenceId}`);
+      return status === 200;
+    },
+
+    async createInferenceEndpoint(inferenceId: string, taskType: string, requestBody: object) {
+      const found = await this.getInferenceEndpoint(inferenceId);
+      if (found) {
+        log.debug(`Inference endpoint '${inferenceId}' already exists. Nothing to create.`);
+        return;
+      }
+      const response = await kbnSupertest
+        .put(`/internal/ml/_inference/${taskType}/${inferenceId}`)
+        .set(getCommonRequestHeader('1'))
+        .send(requestBody);
+
+      this.assertResponseStatusCode(200, response.status, response.body);
+      log.debug('> Inference endpoint created');
+      return response;
+    },
+
+    async deleteInferenceEndpoint(inferenceId: string, taskType: string) {
+      const { body, status } = await esSupertest.delete(`/_inference/${taskType}/${inferenceId}`);
+      this.assertResponseStatusCode(200, status, body);
+      expect(body)
+        .to.have.property('acknowledged')
+        .eql(true, 'Response for delete inference endpoint should be acknowledged');
+      return body;
     },
 
     async createIndex(
@@ -1433,11 +1473,13 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       }
     },
 
-    async stopTrainedModelDeploymentES(deploymentId: string) {
+    async stopTrainedModelDeploymentES(deploymentId: string, force: boolean = false) {
       log.debug(`Stopping trained model deployment with id "${deploymentId}"`);
-      const { body, status } = await esSupertest.post(
-        `/_ml/trained_models/${deploymentId}/deployment/_stop`
-      );
+      const url = `/_ml/trained_models/${deploymentId}/deployment/_stop${
+        force ? '?force=true' : ''
+      }`;
+
+      const { body, status } = await esSupertest.post(url);
       this.assertResponseStatusCode(200, status, body);
 
       log.debug('> Trained model deployment stopped');
@@ -1530,8 +1572,13 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       );
     },
 
-    async importTrainedModel(modelId: string, modelName: SupportedTrainedModelNamesType) {
-      await this.createTrainedModel(modelId, this.getTrainedModelConfig(modelName));
+    async importTrainedModel(
+      modelId: string,
+      modelName: SupportedTrainedModelNamesType,
+      config?: PutTrainedModelConfig
+    ) {
+      const trainedModelConfig = config ?? this.getTrainedModelConfig(modelName);
+      await this.createTrainedModel(modelId, trainedModelConfig);
       await this.createTrainedModelVocabularyES(modelId, this.getTrainedModelVocabulary(modelName));
       await this.uploadTrainedModelDefinitionES(
         modelId,

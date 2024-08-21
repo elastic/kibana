@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Position, ScaleType as ECScaleType } from '@elastic/charts';
+import { LegendValue, Position, ScaleType as ECScaleType } from '@elastic/charts';
 import {
   SeriesTypes,
   Column,
@@ -15,7 +15,6 @@ import {
   XYReferenceLineLayerConfig,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { Vis } from '@kbn/visualizations-plugin/public';
-import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { Layer } from '..';
 import { ChartType } from '../../../common';
 import {
@@ -237,7 +236,7 @@ export const getConfiguration = (
       maxLines: vis.params.maxLegendLines ?? vis.type.visConfig.defaults.maxLegendLines,
       showSingleSeries: true,
       legendStats: Boolean(vis.params.labels.show ?? vis.type.visConfig.defaults.labels?.show)
-        ? [XYLegendValue.CurrentAndLastValue]
+        ? [LegendValue.CurrentAndLastValue]
         : undefined,
     },
     fittingFunction: fittingFunction

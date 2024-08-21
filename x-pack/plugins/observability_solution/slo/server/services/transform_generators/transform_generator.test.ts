@@ -11,27 +11,14 @@ import { ApmTransactionErrorRateTransformGenerator } from './apm_transaction_err
 const generator = new ApmTransactionErrorRateTransformGenerator();
 
 describe('Transform Generator', () => {
-  it('builds common runtime mappings without group by', async () => {
+  it('builds empty runtime mappings without group by', async () => {
     const slo = createSLO({
       id: 'irrelevant',
       indicator: createAPMTransactionErrorRateIndicator(),
     });
-    const transform = generator.buildCommonRuntimeMappings(slo);
+    const commonRuntime = generator.buildCommonRuntimeMappings(slo);
 
-    expect(transform).toEqual({
-      'slo.id': {
-        script: {
-          source: "emit('irrelevant')",
-        },
-        type: 'keyword',
-      },
-      'slo.revision': {
-        script: {
-          source: 'emit(1)',
-        },
-        type: 'long',
-      },
-    });
+    expect(commonRuntime).toEqual({});
 
     const commonGroupBy = generator.buildCommonGroupBy(slo);
 
@@ -40,16 +27,6 @@ describe('Transform Generator', () => {
         date_histogram: {
           field: '@timestamp',
           fixed_interval: '1m',
-        },
-      },
-      'slo.id': {
-        terms: {
-          field: 'slo.id',
-        },
-      },
-      'slo.revision': {
-        terms: {
-          field: 'slo.revision',
         },
       },
     });
@@ -66,20 +43,7 @@ describe('Transform Generator', () => {
       });
       const commonRuntime = generator.buildCommonRuntimeMappings(slo);
 
-      expect(commonRuntime).toEqual({
-        'slo.id': {
-          script: {
-            source: "emit('irrelevant')",
-          },
-          type: 'keyword',
-        },
-        'slo.revision': {
-          script: {
-            source: 'emit(1)',
-          },
-          type: 'long',
-        },
-      });
+      expect(commonRuntime).toEqual({});
 
       const commonGroupBy = generator.buildCommonGroupBy(slo);
 
@@ -95,16 +59,6 @@ describe('Transform Generator', () => {
             field: 'example',
           },
         },
-        'slo.id': {
-          terms: {
-            field: 'slo.id',
-          },
-        },
-        'slo.revision': {
-          terms: {
-            field: 'slo.revision',
-          },
-        },
       });
     }
   );
@@ -118,20 +72,7 @@ describe('Transform Generator', () => {
     });
     const commonRuntime = generator.buildCommonRuntimeMappings(slo);
 
-    expect(commonRuntime).toEqual({
-      'slo.id': {
-        script: {
-          source: "emit('irrelevant')",
-        },
-        type: 'keyword',
-      },
-      'slo.revision': {
-        script: {
-          source: 'emit(1)',
-        },
-        type: 'long',
-      },
-    });
+    expect(commonRuntime).toEqual({});
 
     const commonGroupBy = generator.buildCommonGroupBy(slo);
 
@@ -150,16 +91,6 @@ describe('Transform Generator', () => {
       'slo.groupings.example2': {
         terms: {
           field: 'example2',
-        },
-      },
-      'slo.id': {
-        terms: {
-          field: 'slo.id',
-        },
-      },
-      'slo.revision': {
-        terms: {
-          field: 'slo.revision',
         },
       },
     });

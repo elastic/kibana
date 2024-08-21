@@ -54,4 +54,11 @@ describe('CdnConfig', () => {
     const cdnConfig = CdnConfig.from({ url: '' });
     expect(cdnConfig.getCspConfig()).toEqual({});
   });
+
+  it('accepts "null" URL', () => {
+    const cdnConfig = CdnConfig.from({ url: null });
+    expect(cdnConfig.baseHref).toBeUndefined();
+    expect(cdnConfig.host).toBeUndefined();
+    expect(cdnConfig.getCspConfig()).toEqual({});
+  });
 });

@@ -25,6 +25,8 @@ import { HOT, WARM, COLD, FROZEN, UNMANAGED } from '../../../ilm_phases_empty_pr
 import * as i18n from '../translations';
 import type {
   AllowedValue,
+  CustomFieldMetadata,
+  EcsBasedFieldMetadata,
   EnrichedFieldMetadata,
   ErrorSummary,
   IlmExplainPhaseCounts,
@@ -85,23 +87,21 @@ export const getIndexInvalidValues = (indexInvalidValues: UnallowedValueCount[])
         .map(({ fieldName, count }) => `${getCodeFormattedValue(escape(fieldName))} (${count})`)
         .join(', '); // newlines are instead joined with spaces
 
-export const getCustomMarkdownTableRows = (
-  enrichedFieldMetadata: EnrichedFieldMetadata[]
-): string =>
-  enrichedFieldMetadata
+export const getCustomMarkdownTableRows = (customFieldMetadata: CustomFieldMetadata[]): string =>
+  customFieldMetadata
     .map(
       (x) =>
         `| ${escape(x.indexFieldName)} | ${getCodeFormattedValue(
           x.indexFieldType
-        )} | ${getAllowedValues(x.allowed_values)} |`
+        )} | ${getAllowedValues(undefined)} |`
     )
     .join('\n');
 
-export const getSameFamilyBadge = (enrichedFieldMetadata: EnrichedFieldMetadata): string =>
-  enrichedFieldMetadata.isInSameFamily ? getCodeFormattedValue(SAME_FAMILY) : '';
+export const getSameFamilyBadge = (ecsBasedFieldMetadata: EcsBasedFieldMetadata): string =>
+  ecsBasedFieldMetadata.isInSameFamily ? getCodeFormattedValue(SAME_FAMILY) : '';
 
 export const getIncompatibleMappingsMarkdownTableRows = (
-  incompatibleMappings: EnrichedFieldMetadata[]
+  incompatibleMappings: EcsBasedFieldMetadata[]
 ): string =>
   incompatibleMappings
     .map(
@@ -113,7 +113,7 @@ export const getIncompatibleMappingsMarkdownTableRows = (
     .join('\n');
 
 export const getIncompatibleValuesMarkdownTableRows = (
-  incompatibleValues: EnrichedFieldMetadata[]
+  incompatibleValues: EcsBasedFieldMetadata[]
 ): string =>
   incompatibleValues
     .map(
@@ -173,14 +173,14 @@ ${getMarkdownTableRows(errorSummary)}
 `
     : '';
 
-export const getMarkdownTable = ({
+export const getMarkdownTable = <T extends EnrichedFieldMetadata[]>({
   enrichedFieldMetadata,
   getMarkdownTableRows,
   headerNames,
   title,
 }: {
-  enrichedFieldMetadata: EnrichedFieldMetadata[];
-  getMarkdownTableRows: (enrichedFieldMetadata: EnrichedFieldMetadata[]) => string;
+  enrichedFieldMetadata: T;
+  getMarkdownTableRows: (enrichedFieldMetadata: T) => string;
   headerNames: string[];
   title: string;
 }): string =>

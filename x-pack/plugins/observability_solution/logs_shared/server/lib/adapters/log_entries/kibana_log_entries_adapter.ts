@@ -28,6 +28,21 @@ import { TIMESTAMP_FIELD, TIEBREAKER_FIELD } from '../../../../common/constants'
 
 const TIMESTAMP_FORMAT = 'epoch_millis';
 
+const MAX_BUCKETS = 1000;
+
+function getBucketIntervalStarts(
+  startTimestamp: number,
+  endTimestamp: number,
+  bucketSize: number
+): Date[] {
+  // estimated number of buckets
+  const bucketCount = Math.ceil((endTimestamp - startTimestamp) / bucketSize);
+  if (bucketCount > MAX_BUCKETS) {
+    throw new Error(`Requested too many buckets: ${bucketCount} > ${MAX_BUCKETS}`);
+  }
+  return timeMilliseconds(new Date(startTimestamp), new Date(endTimestamp), bucketSize);
+}
+
 export class LogsSharedKibanaLogEntriesAdapter implements LogEntriesAdapter {
   constructor(private readonly framework: KibanaFramework) {}
 
@@ -134,11 +149,7 @@ export class LogsSharedKibanaLogEntriesAdapter implements LogEntriesAdapter {
     bucketSize: number,
     filterQuery?: LogEntryQuery
   ): Promise<LogSummaryBucket[]> {
-    const bucketIntervalStarts = timeMilliseconds(
-      new Date(startTimestamp),
-      new Date(endTimestamp),
-      bucketSize
-    );
+    const bucketIntervalStarts = getBucketIntervalStarts(startTimestamp, endTimestamp, bucketSize);
 
     const query = {
       allow_no_indices: true,
@@ -225,7 +236,7 @@ function mapHitsToLogEntryDocuments(hits: SortedSearchHit[], fields: string[]): 
     );
 
     return {
-      id: hit._id,
+      id: hit._id!,
       index: hit._index,
       cursor: { time: hit.sort[0], tiebreaker: hit.sort[1] },
       fields: logFields,

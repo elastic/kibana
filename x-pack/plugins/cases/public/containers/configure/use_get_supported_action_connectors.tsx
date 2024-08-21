@@ -27,6 +27,7 @@ export function useGetSupportedActionConnectors() {
       return getSupportedActionConnectors({ signal });
     },
     {
+      staleTime: 60 * 1000, // one minute
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {
           toasts.addError(

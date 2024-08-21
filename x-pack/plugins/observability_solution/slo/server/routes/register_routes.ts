@@ -8,15 +8,22 @@ import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { CoreSetup, KibanaRequest, Logger, RouteRegistrar } from '@kbn/core/server';
-import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 import {
+  AlertsClient,
+  RuleDataPluginService,
+  RuleRegistryPluginSetupContract,
+} from '@kbn/rule-registry-plugin/server';
+import {
+  IoTsParamsObject,
   decodeRequestParams,
+  stripNullishRequestParameters,
   parseEndpoint,
-  routeValidationObject,
+  passThroughValidationObject,
 } from '@kbn/server-route-repository';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import axios from 'axios';
 import * as t from 'io-ts';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { SloConfig } from '..';
 import { getHTTPResponseCode, ObservabilityError } from '../errors';
 import { SloRequestHandlerContext } from '../types';
@@ -33,10 +40,13 @@ interface RegisterRoutes {
 export interface RegisterRoutesDependencies {
   pluginsSetup: {
     core: CoreSetup;
+    ruleRegistry: RuleRegistryPluginSetupContract;
   };
   getSpacesStart: () => Promise<SpacesPluginStart | undefined>;
   ruleDataService: RuleDataPluginService;
   getRulesClientWithRequest: (request: KibanaRequest) => Promise<RulesClientApi>;
+  getRacClientWithRequest: (request: KibanaRequest) => Promise<AlertsClient>;
+  getDataViewsStart: () => Promise<DataViewsServerPluginStart>;
 }
 
 export function registerRoutes({ config, repository, core, logger, dependencies }: RegisterRoutes) {
@@ -51,18 +61,18 @@ export function registerRoutes({ config, repository, core, logger, dependencies 
     (router[method] as RouteRegistrar<typeof method, SloRequestHandlerContext>)(
       {
         path: pathname,
-        validate: routeValidationObject,
+        validate: passThroughValidationObject,
         options,
       },
       async (context, request, response) => {
         try {
           const decodedParams = decodeRequestParams(
-            {
+            stripNullishRequestParameters({
               params: request.params,
               body: request.body,
               query: request.query,
-            },
-            params ?? t.strict({})
+            }),
+            (params as IoTsParamsObject) ?? t.strict({})
           );
 
           const data = await handler({

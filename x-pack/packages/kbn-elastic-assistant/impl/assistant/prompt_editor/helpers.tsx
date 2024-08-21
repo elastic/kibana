@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { Prompt } from '../types';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 
 export const getPromptById = ({
   prompts,
   id,
 }: {
-  prompts: Prompt[];
+  prompts: PromptResponse[];
   id: string;
-}): Prompt | undefined => prompts.find((p) => p.id === id);
+}): PromptResponse | undefined => prompts.find((p) => p.id === id);

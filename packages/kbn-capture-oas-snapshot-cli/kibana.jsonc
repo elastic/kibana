@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/capture-oas-snapshot-cli",
+  "owner": "@elastic/kibana-core",
+  "devOnly": true
+}

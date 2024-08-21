@@ -7,7 +7,7 @@
 
 import { formatNumber } from '@elastic/eui';
 import type { useKibanaContextForPlugin } from '../../../utils';
-import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
+import type { useDatasetDetailsTelemetry } from '../../../hooks';
 
 import {
   BYTE_NUMBER_FORMAT,
@@ -16,7 +16,7 @@ import {
   MAX_HOSTS_METRIC_VALUE,
 } from '../../../../common/constants';
 import {
-  flyoutDegradedDocsText,
+  overviewDegradedDocsText,
   flyoutDocsCountTotalText,
   flyoutHostsText,
   flyoutServicesText,
@@ -24,6 +24,7 @@ import {
   flyoutSizeText,
 } from '../../../../common/translations';
 import { getSummaryKpis } from './get_summary_kpis';
+import { TimeRangeConfig } from '../../../../common/types';
 
 const dataStreamDetails = {
   services: {
@@ -46,7 +47,11 @@ const timeRange: TimeRangeConfig = {
   to: 'now',
 };
 
-const degradedDocsHref = 'http://exploratory-view/degraded-docs';
+const degradedDocsLinkProps = {
+  linkProps: { href: 'http://exploratory-view/degraded-docs', onClick: () => {} },
+  navigate: () => {},
+  isLogsExplorerAvailable: true,
+};
 const hostsRedirectUrl = 'http://hosts/metric/';
 
 const hostsLocator = {
@@ -55,41 +60,51 @@ const hostsLocator = {
   typeof useKibanaContextForPlugin
 >['services']['observabilityShared']['locators']['infra']['hostsLocator'];
 
+const telemetry = {
+  trackDetailsNavigated: () => {},
+} as unknown as ReturnType<typeof useDatasetDetailsTelemetry>;
+
 describe('getSummaryKpis', () => {
   it('should return the correct KPIs', () => {
     const result = getSummaryKpis({
       dataStreamDetails,
       timeRange,
-      degradedDocsHref,
+      degradedDocsLinkProps,
       hostsLocator,
+      telemetry,
     });
 
     expect(result).toEqual([
       {
         title: flyoutDocsCountTotalText,
         value: '1,000',
+        userHasPrivilege: true,
       },
       {
         title: flyoutSizeText,
         value: formatNumber(dataStreamDetails.sizeBytes ?? 0, BYTE_NUMBER_FORMAT),
+        userHasPrivilege: false,
       },
       {
         title: flyoutServicesText,
         value: '3',
         link: undefined,
+        userHasPrivilege: true,
       },
       {
         title: flyoutHostsText,
         value: '3',
         link: undefined,
+        userHasPrivilege: true,
       },
       {
-        title: flyoutDegradedDocsText,
+        title: overviewDegradedDocsText,
         value: '200',
         link: {
           label: flyoutShowAllText,
-          href: degradedDocsHref,
+          props: degradedDocsLinkProps.linkProps,
         },
+        userHasPrivilege: true,
       },
     ]);
   });
@@ -114,36 +129,42 @@ describe('getSummaryKpis', () => {
     const result = getSummaryKpis({
       dataStreamDetails: detailsWithMaxPlusHosts,
       timeRange,
-      degradedDocsHref,
+      degradedDocsLinkProps,
       hostsLocator,
+      telemetry,
     });
 
     expect(result).toEqual([
       {
         title: flyoutDocsCountTotalText,
         value: '1,000',
+        userHasPrivilege: true,
       },
       {
         title: flyoutSizeText,
         value: formatNumber(dataStreamDetails.sizeBytes ?? 0, BYTE_NUMBER_FORMAT),
+        userHasPrivilege: false,
       },
       {
         title: flyoutServicesText,
         value: '50+',
         link: undefined,
+        userHasPrivilege: true,
       },
       {
         title: flyoutHostsText,
         value: '54+',
         link: undefined,
+        userHasPrivilege: true,
       },
       {
-        title: flyoutDegradedDocsText,
+        title: overviewDegradedDocsText,
         value: '200',
         link: {
           label: flyoutShowAllText,
-          href: degradedDocsHref,
+          props: degradedDocsLinkProps.linkProps,
         },
+        userHasPrivilege: true,
       },
     ]);
   });

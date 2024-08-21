@@ -60,6 +60,7 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
   theme: { theme$ },
   globalStyles: globalStylesProp,
   colorMode: colorModeProp,
+  modify,
   children,
 }) => {
   const theme = useObservable(theme$, defaultTheme);
@@ -74,7 +75,7 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
   const globalStyles = globalStylesProp === false ? false : undefined;
 
   return (
-    <EuiProvider {...{ cache, colorMode, globalStyles, utilityClasses: globalStyles }}>
+    <EuiProvider {...{ cache, modify, colorMode, globalStyles, utilityClasses: globalStyles }}>
       {children}
     </EuiProvider>
   );

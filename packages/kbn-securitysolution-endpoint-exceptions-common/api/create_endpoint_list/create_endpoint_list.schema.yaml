@@ -1,0 +1,45 @@
+openapi: 3.0.0
+info:
+  title: Create endpoint list API endpoint
+  version: '2023-10-31'
+paths:
+  /api/endpoint_list:
+    post:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: CreateEndpointList
+      summary: Creates an endpoint list
+      description: Creates an endpoint list or does nothing if the list already exists
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '../model/endpoint_list_common.schema.yaml#/components/schemas/EndpointList'
+        400:
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        401:
+          description: Unsuccessful authentication
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        403:
+          description: Insufficient privileges
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'

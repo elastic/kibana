@@ -18,6 +18,7 @@ import {
 } from '@kbn/unified-histogram-plugin/public';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { isEqual, isFunction } from 'lodash';
+import { VIEW_MODE } from '../../../../common/constants';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { updateSavedSearch } from './utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
@@ -400,6 +401,16 @@ function getSavedSearchFieldForComparison(
       visContext.attributes.title = 'same';
     }
     return visContext;
+  }
+
+  if (fieldName === 'breakdownField') {
+    return savedSearch.breakdownField || ''; // ignore the difference between an empty string and undefined
+  }
+
+  if (fieldName === 'viewMode') {
+    // By default, viewMode: undefined is equivalent to documents view
+    // So they should be treated as same
+    return savedSearch.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
   }
 
   return savedSearch[fieldName];

@@ -9,6 +9,7 @@ import axios, { AxiosResponse } from 'axios';
 import { Logger } from '@kbn/core/server';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
+import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
 
 interface PostXmattersOptions {
   url: string;
@@ -42,7 +43,10 @@ export async function postXmatters(
     method: 'post',
     url,
     logger,
-    ...basicAuth,
+    headers: combineHeadersWithBasicAuthHeader({
+      username: basicAuth?.auth.username,
+      password: basicAuth?.auth.password,
+    }),
     data,
     configurationUtilities,
     validateStatus: () => true,

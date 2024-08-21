@@ -70,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await supertest
         .get(FIELDS_PATH)
-        .set('If-None-Match', response.get('etag'))
+        .set('If-None-Match', response.get('etag')!)
         .query({
           pattern: '*',
           include_unmapped: true,

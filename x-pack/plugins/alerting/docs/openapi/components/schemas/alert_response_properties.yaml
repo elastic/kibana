@@ -7,66 +7,53 @@ properties:
       type: object
   alertTypeId:
     type: string
-    examples:
-      - ".index-threshold"
+    example: ".index-threshold"
   apiKeyOwner:
-    type:
-      - "string"
-      - "null"
-    examples:
-      - elastic
+    type: string
+    nullable: true
+    example: elastic
   createdAt:
     type: string
     description: The date and time that the alert was created.
     format: date-time
-    examples:
-      - '2022-12-05T23:36:58.284Z'
+    example: '2022-12-05T23:36:58.284Z'
   createdBy:
     type: string
     description: The identifier for the user that created the alert.
-    examples:
-      - elastic
+    example: elastic
   enabled:
     type: boolean
     description: Indicates whether the alert is currently enabled.
-    examples:
-      - true
+    example: true
   executionStatus:
     type: object
     properties:
       lastExecutionDate:
         type: string
         format: date-time
-        examples:
-          - '2022-12-06T00:13:43.890Z'
+        example: '2022-12-06T00:13:43.890Z'
       status:
         type: string
-        examples:
-          - ok
+        example: ok
   id:
     type: string
     description: The identifier for the alert.
-    examples:
-      - b530fed0-74f5-11ed-9801-35303b735aef
+    example: b530fed0-74f5-11ed-9801-35303b735aef
   muteAll:
     type: boolean
-    examples:
-      - false
+    example: false
   mutedInstanceIds:
-    type:
-      - "array"
-      - "null"
+    type: array
+    nullable: true
     items:
       type: string
   name:
     type: string
     description: The name of the alert.
-    examples:
-      - my alert
+    example: my alert
   notifyWhen:
     type: string
-    examples:
-      - onActionGroupChange
+    example: onActionGroupChange
   params:
     type: object
     additionalProperties: true
@@ -77,24 +64,19 @@ properties:
         type: string
   scheduledTaskId:
     type: string
-    examples:
-      - b530fed0-74f5-11ed-9801-35303b735aef
+    example: b530fed0-74f5-11ed-9801-35303b735aef
   tags:
     type: array
     items:
       type: string
   throttle:
-    type: 
-      - "string"
-      - "null"
+    type: string
+    nullable: true
   updatedAt:
     type: string
-    examples:
-      - '2022-12-05T23:36:58.284Z'
+    example: '2022-12-05T23:36:58.284Z'
   updatedBy:
-    type:
-      - "string"
-      - "null"
+    type: string
     description: The identifier for the user that updated this alert most recently.
-    examples:
-      - elastic
+    nullable: true
+    example: elastic

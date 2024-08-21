@@ -82,8 +82,13 @@ describe('Input package create and edit package policy', () => {
 
     cy.getBySel(EXISTING_HOSTS_TAB).click();
 
-    cy.getBySel(POLICY_EDITOR.AGENT_POLICY_SELECT).click().get(`#${agentPolicyId}`).click();
-    cy.wait(500); // wait for policy id to be set
+    cy.getBySel(POLICY_EDITOR.AGENT_POLICY_SELECT).click();
+    cy.getBySel('agentPolicyMultiItem').each(($el) => {
+      if ($el.text() === agentPolicyName) {
+        $el.trigger('click');
+      }
+    });
+    cy.wait(1000); // wait for policy id to be set
     cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
 
     cy.getBySel(CONFIRM_MODAL.CANCEL_BUTTON).click();
@@ -150,8 +155,13 @@ describe('Integration package with custom dataset create and edit package policy
 
     cy.getBySel(EXISTING_HOSTS_TAB).click();
 
-    cy.getBySel(POLICY_EDITOR.AGENT_POLICY_SELECT).click().get(`#${agentPolicyId}`).click();
-    cy.wait(500); // wait for policy id to be set
+    cy.getBySel(POLICY_EDITOR.AGENT_POLICY_SELECT).click();
+    cy.getBySel('agentPolicyMultiItem').each(($el) => {
+      if ($el.text() === agentPolicyName) {
+        $el.trigger('click');
+      }
+    });
+    cy.wait(1000); // wait for policy id to be set
     cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
 
     cy.getBySel(CONFIRM_MODAL.CANCEL_BUTTON).click();
@@ -210,8 +220,13 @@ describe('Integration package with fixed dataset create and edit package policy'
 
     cy.getBySel(EXISTING_HOSTS_TAB).click();
 
-    cy.getBySel(POLICY_EDITOR.AGENT_POLICY_SELECT).click().get(`#${agentPolicyId}`).click();
-    cy.wait(500); // wait for policy id to be set
+    cy.getBySel(POLICY_EDITOR.AGENT_POLICY_SELECT).click();
+    cy.getBySel('agentPolicyMultiItem').each(($el) => {
+      if ($el.text() === agentPolicyName) {
+        $el.trigger('click');
+      }
+    });
+    cy.wait(1000); // wait for policy id to be set
     cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
 
     cy.getBySel(CONFIRM_MODAL.CANCEL_BUTTON).click();

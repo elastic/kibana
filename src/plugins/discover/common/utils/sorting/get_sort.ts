@@ -14,14 +14,10 @@ export type SortPairObj = Record<string, string>;
 export type SortPair = SortOrder | SortPairObj;
 export type SortInput = SortPair | SortPair[];
 
-export function isSortable(
-  fieldName: string,
-  dataView: DataView,
-  isTextBasedQueryMode: boolean
-): boolean {
-  if (isTextBasedQueryMode) {
-    // in-memory sorting is used for text-based queries
-    // would be great to have a way to determine if a text-based column is sortable
+export function isSortable(fieldName: string, dataView: DataView, isEsqlMode: boolean): boolean {
+  if (isEsqlMode) {
+    // in-memory sorting is used for ES|QL queries
+    // would be great to have a way to determine if a ES|QL column is sortable
     return fieldName !== '_source';
   }
   const field = dataView.getFieldByName(fieldName);
@@ -31,18 +27,18 @@ export function isSortable(
 function createSortObject(
   sortPair: SortInput,
   dataView: DataView,
-  isTextBasedQueryMode: boolean
+  isEsqlMode: boolean
 ): SortPairObj | undefined {
   if (
     Array.isArray(sortPair) &&
     sortPair.length === 2 &&
-    isSortable(String(sortPair[0]), dataView, isTextBasedQueryMode)
+    isSortable(String(sortPair[0]), dataView, isEsqlMode)
   ) {
     const [field, direction] = sortPair as SortOrder;
     return { [field]: direction };
   } else if (
     isPlainObject(sortPair) &&
-    isSortable(Object.keys(sortPair)[0], dataView, isTextBasedQueryMode)
+    isSortable(Object.keys(sortPair)[0], dataView, isEsqlMode)
   ) {
     return sortPair as SortPairObj;
   }
@@ -59,13 +55,13 @@ export function isLegacySort(sort: SortPair[] | SortPair): sort is SortPair {
  * @param {array} sort two dimensional array [[fieldToSort, directionToSort]]
  *  or an array of objects [{fieldToSort: directionToSort}]
  * @param {object} dataView used for determining default sort
- * @param {boolean} isTextBasedQueryMode
+ * @param {boolean} isEsqlMode
  * @returns Array<{object}> an array of sort objects
  */
 export function getSort(
   sort: SortPair[] | SortPair,
   dataView: DataView,
-  isTextBasedQueryMode: boolean
+  isEsqlMode: boolean
 ): SortPairObj[] {
   if (Array.isArray(sort)) {
     if (isLegacySort(sort)) {
@@ -73,7 +69,7 @@ export function getSort(
       return [{ [sort[0]]: sort[1] }];
     }
     return sort
-      .map((sortPair: SortPair) => createSortObject(sortPair, dataView, isTextBasedQueryMode))
+      .map((sortPair: SortPair) => createSortObject(sortPair, dataView, isEsqlMode))
       .filter((sortPairObj) => typeof sortPairObj === 'object') as SortPairObj[];
   }
   return [];
@@ -86,9 +82,9 @@ export function getSort(
 export function getSortArray(
   sort: SortInput,
   dataView: DataView,
-  isTextBasedQueryMode: boolean
+  isEsqlMode: boolean
 ): SortOrder[] {
-  return getSort(sort, dataView, isTextBasedQueryMode).reduce((acc: SortOrder[], sortPair) => {
+  return getSort(sort, dataView, isEsqlMode).reduce((acc: SortOrder[], sortPair) => {
     const entries = Object.entries(sortPair);
     if (entries && entries[0]) {
       acc.push(entries[0]);

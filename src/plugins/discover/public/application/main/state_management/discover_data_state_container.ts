@@ -5,42 +5,44 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { BehaviorSubject, filter, map, mergeMap, Observable, share, Subject, tap } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { AggregateQuery, Query } from '@kbn/es-query';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { SEARCH_FIELDS_FROM_SOURCE, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
-import { getDataViewByTextBasedQueryLang } from './utils/get_data_view_by_text_based_query_lang';
-import { isTextBasedQuery } from '../utils/is_text_based_query';
-import { getRawRecordType } from '../utils/get_raw_record_type';
-import { DiscoverAppState } from './discover_app_state_container';
-import { DiscoverServices } from '../../../build_services';
-import { DiscoverSearchSessionManager } from './discover_search_session';
+import {
+  DEFAULT_COLUMNS_SETTING,
+  SEARCH_FIELDS_FROM_SOURCE,
+  SEARCH_ON_PAGE_LOAD_SETTING,
+} from '@kbn/discover-utils';
+import { getEsqlDataView } from './utils/get_esql_data_view';
+import type { DiscoverAppStateContainer } from './discover_app_state_container';
+import type { DiscoverServices } from '../../../build_services';
+import type { DiscoverSearchSessionManager } from './discover_search_session';
 import { FetchStatus } from '../../types';
 import { validateTimeRange } from './utils/validate_time_range';
 import { fetchAll, fetchMoreDocuments } from '../data_fetching/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
-import { InternalState } from './discover_internal_state_container';
+import type { DiscoverInternalStateContainer } from './discover_internal_state_container';
+import { getDefaultProfileState } from './utils/get_default_profile_state';
 
 export interface SavedSearchData {
   main$: DataMain$;
   documents$: DataDocuments$;
   totalHits$: DataTotalHits$;
-  availableFields$: AvailableFields$;
 }
 
 export type DataMain$ = BehaviorSubject<DataMainMsg>;
 export type DataDocuments$ = BehaviorSubject<DataDocumentsMsg>;
 export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
-export type AvailableFields$ = BehaviorSubject<DataAvailableFieldsMsg>;
 export type DataFetch$ = Observable<{
   options: {
     reset: boolean;
@@ -51,23 +53,11 @@ export type DataFetch$ = Observable<{
 
 export type DataRefetch$ = Subject<DataRefetchMsg>;
 
-export enum RecordRawType {
-  /**
-   * Documents returned Elasticsearch, nested structure
-   */
-  DOCUMENT = 'document',
-  /**
-   * Data returned e.g. ES|QL queries, flat structure
-   * */
-  PLAIN = 'plain',
-}
-
 export type DataRefetchMsg = 'reset' | 'fetch_more' | undefined;
 
 export interface DataMsg {
   fetchStatus: FetchStatus;
   error?: Error;
-  recordRawType?: RecordRawType;
   query?: AggregateQuery | Query | undefined;
 }
 
@@ -77,8 +67,8 @@ export interface DataMainMsg extends DataMsg {
 
 export interface DataDocumentsMsg extends DataMsg {
   result?: DataTableRecord[];
-  textBasedQueryColumns?: DatatableColumn[]; // columns from text-based request
-  textBasedHeaderWarning?: string;
+  esqlQueryColumns?: DatatableColumn[]; // columns from ES|QL request
+  esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[]; // warnings (like shard failures)
 }
 
@@ -122,7 +112,7 @@ export interface DiscoverDataStateContainer {
   /**
    * resetting all data observable to initial state
    */
-  reset: (savedSearch: SavedSearch) => void;
+  reset: () => void;
 
   /**
    * cancels the running queries
@@ -153,23 +143,22 @@ export interface DiscoverDataStateContainer {
 export function getDataStateContainer({
   services,
   searchSessionManager,
-  getAppState,
-  getInternalState,
+  appStateContainer,
+  internalStateContainer,
   getSavedSearch,
   setDataView,
 }: {
   services: DiscoverServices;
   searchSessionManager: DiscoverSearchSessionManager;
-  getAppState: () => DiscoverAppState;
-  getInternalState: () => InternalState;
+  appStateContainer: DiscoverAppStateContainer;
+  internalStateContainer: DiscoverInternalStateContainer;
   getSavedSearch: () => SavedSearch;
   setDataView: (dataView: DataView) => void;
 }): DiscoverDataStateContainer {
-  const { data, uiSettings, toastNotifications } = services;
+  const { data, uiSettings, toastNotifications, profilesManager } = services;
   const { timefilter } = data.query.timefilter;
   const inspectorAdapters = { requests: new RequestAdapter() };
-  const appState = getAppState();
-  const recordRawType = getRawRecordType(appState.query);
+
   /**
    * The observable to trigger data fetching in UI
    * By refetch$.next('reset') rows and fieldcounts are reset to allow e.g. editing of runtime fields
@@ -189,12 +178,11 @@ export function getDataStateContainer({
    * The observables the UI (aka React component) subscribes to get notified about
    * the changes in the data fetching process (high level: fetching started, data was received)
    */
-  const initialState = { fetchStatus: getInitialFetchStatus(), recordRawType };
+  const initialState = { fetchStatus: getInitialFetchStatus() };
   const dataSubjects: SavedSearchData = {
     main$: new BehaviorSubject<DataMainMsg>(initialState),
     documents$: new BehaviorSubject<DataDocumentsMsg>(initialState),
     totalHits$: new BehaviorSubject<DataTotalHitsMsg>(initialState),
-    availableFields$: new BehaviorSubject<DataAvailableFieldsMsg>(initialState),
   };
 
   let autoRefreshDone: AutoRefreshDoneFn | undefined;
@@ -238,8 +226,8 @@ export function getDataStateContainer({
             inspectorAdapters,
             searchSessionId,
             services,
-            getAppState,
-            getInternalState,
+            getAppState: appStateContainer.getState,
+            getInternalState: internalStateContainer.getState,
             savedSearch: getSavedSearch(),
             useNewFieldsApi: !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
           };
@@ -249,28 +237,65 @@ export function getDataStateContainer({
 
           if (options.fetchMore) {
             abortControllerFetchMore = new AbortController();
-
             const fetchMoreStartTime = window.performance.now();
+
             await fetchMoreDocuments(dataSubjects, {
               abortController: abortControllerFetchMore,
               ...commonFetchDeps,
             });
+
             const fetchMoreDuration = window.performance.now() - fetchMoreStartTime;
             reportPerformanceMetricEvent(services.analytics, {
               eventName: 'discoverFetchMore',
               duration: fetchMoreDuration,
             });
+
             return;
           }
 
+          await profilesManager.resolveDataSourceProfile({
+            dataSource: appStateContainer.getState().dataSource,
+            dataView: getSavedSearch().searchSource.getField('index'),
+            query: appStateContainer.getState().query,
+          });
+
           abortController = new AbortController();
           const prevAutoRefreshDone = autoRefreshDone;
-
           const fetchAllStartTime = window.performance.now();
-          await fetchAll(dataSubjects, options.reset, {
-            abortController,
-            ...commonFetchDeps,
-          });
+
+          await fetchAll(
+            dataSubjects,
+            options.reset,
+            {
+              abortController,
+              ...commonFetchDeps,
+            },
+            async () => {
+              const { resetDefaultProfileState, dataView } = internalStateContainer.getState();
+              const { esqlQueryColumns } = dataSubjects.documents$.getValue();
+              const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
+
+              if (dataView) {
+                const stateUpdate = getDefaultProfileState({
+                  profilesManager,
+                  resetDefaultProfileState,
+                  defaultColumns,
+                  dataView,
+                  esqlQueryColumns,
+                });
+
+                if (stateUpdate) {
+                  await appStateContainer.replaceUrlState(stateUpdate);
+                }
+              }
+
+              internalStateContainer.transitions.setResetDefaultProfileState({
+                columns: false,
+                rowHeight: false,
+              });
+            }
+          );
+
           const fetchAllDuration = window.performance.now() - fetchAllStartTime;
           reportPerformanceMetricEvent(services.analytics, {
             eventName: 'discoverFetchAll',
@@ -297,11 +322,11 @@ export function getDataStateContainer({
   }
 
   const fetchQuery = async (resetQuery?: boolean) => {
-    const query = getAppState().query;
+    const query = appStateContainer.getState().query;
     const currentDataView = getSavedSearch().searchSource.getField('index');
 
-    if (isTextBasedQuery(query)) {
-      const nextDataView = await getDataViewByTextBasedQueryLang(query, currentDataView, services);
+    if (isOfAggregateQueryType(query)) {
+      const nextDataView = await getEsqlDataView(query, currentDataView, services);
       if (nextDataView !== currentDataView) {
         setDataView(nextDataView);
       }
@@ -312,6 +337,7 @@ export function getDataStateContainer({
     } else {
       refetch$.next(undefined);
     }
+
     return refetch$;
   };
 
@@ -320,9 +346,8 @@ export function getDataStateContainer({
     return refetch$;
   };
 
-  const reset = (savedSearch: SavedSearch) => {
-    const recordType = getRawRecordType(savedSearch.searchSource.getField('query'));
-    sendResetMsg(dataSubjects, getInitialFetchStatus(), recordType);
+  const reset = () => {
+    sendResetMsg(dataSubjects, getInitialFetchStatus());
   };
 
   const cancel = () => {

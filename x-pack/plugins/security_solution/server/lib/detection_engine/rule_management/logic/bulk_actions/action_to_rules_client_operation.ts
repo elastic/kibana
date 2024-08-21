@@ -6,12 +6,12 @@
  */
 
 import type { BulkEditOperation } from '@kbn/alerting-plugin/server';
-import { transformNormalizedRuleToAlertAction } from '../../../../../../common/detection_engine/transform_actions';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import type { BulkActionEditForRuleAttributes } from '../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import { assertUnreachable } from '../../../../../../common/utility_types';
-import { transformToActionFrequency } from '../../normalization/rule_actions';
+import { parseAndTransformRuleActions } from './utils';
 
 /**
  * converts bulk edit action to format of rulesClient.bulkEdit operation
@@ -19,6 +19,7 @@ import { transformToActionFrequency } from '../../normalization/rule_actions';
  * @returns rulesClient BulkEditOperation
  */
 export const bulkEditActionToRulesClientOperation = (
+  actionsClient: ActionsClient,
   action: BulkActionEditForRuleAttributes
 ): BulkEditOperation[] => {
   switch (action.type) {
@@ -56,8 +57,10 @@ export const bulkEditActionToRulesClientOperation = (
         {
           field: 'actions',
           operation: 'add',
-          value: transformToActionFrequency(action.value.actions, action.value.throttle).map(
-            transformNormalizedRuleToAlertAction
+          value: parseAndTransformRuleActions(
+            actionsClient,
+            action.value.actions,
+            action.value.throttle
           ),
         },
       ];
@@ -67,8 +70,10 @@ export const bulkEditActionToRulesClientOperation = (
         {
           field: 'actions',
           operation: 'set',
-          value: transformToActionFrequency(action.value.actions, action.value.throttle).map(
-            transformNormalizedRuleToAlertAction
+          value: parseAndTransformRuleActions(
+            actionsClient,
+            action.value.actions,
+            action.value.throttle
           ),
         },
       ];

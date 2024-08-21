@@ -28,6 +28,7 @@ webpack_cli(
     "//packages/kbn-monaco",
     "//packages/kbn-datemath",
     "//packages/kbn-analytics",
+    "//packages/kbn-crypto-browser",
     "//packages/kbn-es-query",
     "//packages/kbn-search-errors",
     "//packages/kbn-std",

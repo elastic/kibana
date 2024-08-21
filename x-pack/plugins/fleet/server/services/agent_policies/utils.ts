@@ -13,13 +13,12 @@ import type { AgentPolicySOAttributes } from '../../types';
 export const mapAgentPolicySavedObjectToAgentPolicy = ({
   /* eslint-disable @typescript-eslint/naming-convention */
   id,
-  attributes: {
-    name,
-    namespace,
+  namespaces,
+  version,
+  attributes,
+}: SavedObject<AgentPolicySOAttributes>): AgentPolicy => {
+  const {
     monitoring_enabled,
-    revision,
-    updated_at,
-    updated_by,
     agent_features,
     agents,
     data_output_id,
@@ -30,26 +29,22 @@ export const mapAgentPolicySavedObjectToAgentPolicy = ({
     inactivity_timeout,
     is_default,
     is_default_fleet_server,
-    is_managed,
     is_preconfigured,
-    is_protected,
     monitoring_output_id,
     overrides,
     package_policies,
     schema_version,
-    status,
     unenroll_timeout,
-  },
-}: SavedObject<AgentPolicySOAttributes>): AgentPolicy => {
+  } = attributes || {};
+
   return {
     id,
-    name,
-    namespace,
+    version,
+    space_ids: namespaces,
     description,
     is_default,
     is_default_fleet_server,
     has_fleet_server,
-    is_managed,
     monitoring_enabled,
     unenroll_timeout,
     inactivity_timeout,
@@ -60,13 +55,9 @@ export const mapAgentPolicySavedObjectToAgentPolicy = ({
     fleet_server_host_id,
     schema_version,
     agent_features,
-    is_protected,
     overrides,
-    status,
     package_policies,
     agents,
-    revision,
-    updated_at,
-    updated_by,
+    ...attributes,
   };
 };

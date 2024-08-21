@@ -22,6 +22,15 @@ import { FieldsAccordion } from './fields_accordion';
 import { NoFieldsCallout } from './no_fields_callout';
 import { useGroupedFields, type GroupedFieldsParams } from '../../hooks/use_grouped_fields';
 
+jest.mock('lodash', () => {
+  const original = jest.requireActual('lodash');
+
+  return {
+    ...original,
+    debounce: (fn: unknown) => fn,
+  };
+});
+
 describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
   let defaultProps: FieldListGroupedProps<DataViewField>;
   let mockedServices: GroupedFieldsParams<DataViewField>['services'];

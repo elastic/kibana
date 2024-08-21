@@ -20,6 +20,8 @@ import {
   EuiCodeBlock,
   EuiSpacer,
 } from '@elastic/eui';
+import { reactRouterNavigate } from '../../../../../../shared_imports';
+import { useAppContext } from '../../../../../app_context';
 import { serializeAsESLifecycle } from '../../../../../../../common/lib/data_stream_serialization';
 import { getLifecycleValue } from '../../../../../lib/data_streams';
 import { TemplateDeserialized } from '../../../../../../../common';
@@ -59,6 +61,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
 
   const numIndexPatterns = indexPatterns.length;
 
+  const { history } = useAppContext();
   const ilmPolicyLink = useIlmLocator(ILM_PAGES_POLICY_EDIT, ilmPolicy?.name);
 
   return (
@@ -135,9 +138,11 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
                     <ul>
                       {composedOf.map((component) => (
                         <li key={component}>
-                          <EuiTitle size="xs">
+                          <EuiLink
+                            {...reactRouterNavigate(history, `/component_templates/${component}`)}
+                          >
                             <span>{component}</span>
-                          </EuiTitle>
+                          </EuiLink>
                         </li>
                       ))}
                     </ul>

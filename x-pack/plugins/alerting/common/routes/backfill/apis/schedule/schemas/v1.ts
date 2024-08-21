@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { validateBackfillSchedule } from '../../../../..';
 import { MAX_SCHEDULE_BACKFILL_BULK_SIZE } from '../../../../../constants';
 import { backfillResponseSchemaV1, errorResponseSchemaV1 } from '../../../response';
 
@@ -17,22 +18,7 @@ export const scheduleBodySchema = schema.arrayOf(
     },
     {
       validate({ start, end }) {
-        const parsedStart = Date.parse(start);
-        if (isNaN(parsedStart)) {
-          return `Backfill start must be valid date`;
-        }
-
-        if (end) {
-          const parsedEnd = Date.parse(end);
-          if (isNaN(parsedEnd)) {
-            return `Backfill end must be valid date`;
-          }
-          const startMs = new Date(start).valueOf();
-          const endMs = new Date(end).valueOf();
-          if (endMs <= startMs) {
-            return `Backfill end must be greater than backfill start`;
-          }
-        }
+        return validateBackfillSchedule(start, end);
       },
     }
   ),

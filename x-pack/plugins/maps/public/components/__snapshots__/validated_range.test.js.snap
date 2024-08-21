@@ -9,7 +9,7 @@ exports[`Should display error message when value is outside of range 1`] = `
     value="11"
   />
   <EuiFormErrorText>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Must be between {min} and {max}"
       id="xpack.maps.validatedRange.rangeErrorMessage"
       values={

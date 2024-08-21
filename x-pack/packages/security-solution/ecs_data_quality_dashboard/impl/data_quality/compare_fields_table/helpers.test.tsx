@@ -10,7 +10,6 @@ import { omit } from 'lodash/fp';
 import React from 'react';
 
 import {
-  EMPTY_PLACEHOLDER,
   getCustomTableColumns,
   getEcsCompliantTableColumns,
   getIncompatibleValuesTableColumns,
@@ -20,7 +19,7 @@ import {
   eventCategoryWithUnallowedValues,
   someField,
 } from '../mock/enriched_field_metadata/mock_enriched_field_metadata';
-import { TestProviders } from '../mock/test_providers/test_providers';
+import { TestExternalProviders } from '../mock/test_providers/test_providers';
 
 describe('helpers', () => {
   describe('getCustomTableColumns', () => {
@@ -49,12 +48,12 @@ describe('helpers', () => {
         const indexFieldTypeRender = columns[1].render;
 
         render(
-          <TestProviders>
+          <TestExternalProviders>
             <>
               {indexFieldTypeRender != null &&
                 indexFieldTypeRender(someField.indexFieldType, someField)}
             </>
-          </TestProviders>
+          </TestExternalProviders>
         );
 
         expect(screen.getByTestId('indexFieldType')).toHaveTextContent(someField.indexFieldType);
@@ -70,7 +69,7 @@ describe('helpers', () => {
           name: 'Field',
           sortable: true,
           truncateText: false,
-          width: '25%',
+          width: '15%',
         },
         {
           field: 'type',
@@ -91,7 +90,7 @@ describe('helpers', () => {
           name: 'ECS description',
           sortable: false,
           truncateText: false,
-          width: '25%',
+          width: '35%',
         },
       ]);
     });
@@ -103,9 +102,9 @@ describe('helpers', () => {
           const typeRender = columns[1].render;
 
           render(
-            <TestProviders>
+            <TestExternalProviders>
               <>{typeRender != null && typeRender(eventCategory.type, eventCategory)}</>
-            </TestProviders>
+            </TestExternalProviders>
           );
         });
 
@@ -117,31 +116,6 @@ describe('helpers', () => {
           expect(screen.queryByTestId('typePlaceholder')).not.toBeInTheDocument();
         });
       });
-
-      describe('when `type` is undefined', () => {
-        beforeEach(() => {
-          const withUndefinedType = {
-            ...eventCategory,
-            type: undefined, // <--
-          };
-          const columns = getEcsCompliantTableColumns();
-          const typeRender = columns[1].render;
-
-          render(
-            <TestProviders>
-              <>{typeRender != null && typeRender(withUndefinedType.type, withUndefinedType)}</>
-            </TestProviders>
-          );
-        });
-
-        test('it does NOT render the `type`', () => {
-          expect(screen.queryByTestId('type')).not.toBeInTheDocument();
-        });
-
-        test('it renders the placeholder', () => {
-          expect(screen.getByTestId('typePlaceholder')).toHaveTextContent(EMPTY_PLACEHOLDER);
-        });
-      });
     });
 
     describe('allowed values render()', () => {
@@ -151,12 +125,12 @@ describe('helpers', () => {
           const allowedValuesRender = columns[2].render;
 
           render(
-            <TestProviders>
+            <TestExternalProviders>
               <>
                 {allowedValuesRender != null &&
                   allowedValuesRender(eventCategory.allowed_values, eventCategory)}
               </>
-            </TestProviders>
+            </TestExternalProviders>
           );
         });
 
@@ -182,7 +156,7 @@ describe('helpers', () => {
           const allowedValuesRender = columns[2].render;
 
           render(
-            <TestProviders>
+            <TestExternalProviders>
               <>
                 {allowedValuesRender != null &&
                   allowedValuesRender(
@@ -190,7 +164,7 @@ describe('helpers', () => {
                     withUndefinedAllowedValues
                   )}
               </>
-            </TestProviders>
+            </TestExternalProviders>
           );
         });
 
@@ -211,12 +185,12 @@ describe('helpers', () => {
           const descriptionRender = columns[3].render;
 
           render(
-            <TestProviders>
+            <TestExternalProviders>
               <>
                 {descriptionRender != null &&
                   descriptionRender(eventCategory.description, eventCategory)}
               </>
-            </TestProviders>
+            </TestExternalProviders>
           );
         });
 
@@ -230,35 +204,6 @@ describe('helpers', () => {
           expect(screen.queryByTestId('emptyPlaceholder')).not.toBeInTheDocument();
         });
       });
-
-      describe('when `description` is undefined', () => {
-        const withUndefinedDescription = {
-          ...eventCategory,
-          description: undefined, // <--
-        };
-
-        beforeEach(() => {
-          const columns = getEcsCompliantTableColumns();
-          const descriptionRender = columns[3].render;
-
-          render(
-            <TestProviders>
-              <>
-                {descriptionRender != null &&
-                  descriptionRender(withUndefinedDescription.description, withUndefinedDescription)}
-              </>
-            </TestProviders>
-          );
-        });
-
-        test('it does NOT render the `description`', () => {
-          expect(screen.queryByTestId('description')).not.toBeInTheDocument();
-        });
-
-        test('it renders the placeholder', () => {
-          expect(screen.getByTestId('emptyPlaceholder')).toBeInTheDocument();
-        });
-      });
     });
   });
 
@@ -270,7 +215,7 @@ describe('helpers', () => {
           name: 'Field',
           sortable: true,
           truncateText: false,
-          width: '25%',
+          width: '15%',
         },
         {
           field: 'allowed_values',
@@ -291,7 +236,7 @@ describe('helpers', () => {
           name: 'ECS description',
           sortable: false,
           truncateText: false,
-          width: '25%',
+          width: '35%',
         },
       ]);
     });
@@ -303,12 +248,12 @@ describe('helpers', () => {
           const allowedValuesRender = columns[1].render;
 
           render(
-            <TestProviders>
+            <TestExternalProviders>
               <>
                 {allowedValuesRender != null &&
                   allowedValuesRender(eventCategory.allowed_values, eventCategory)}
               </>
-            </TestProviders>
+            </TestExternalProviders>
           );
         });
 
@@ -334,7 +279,7 @@ describe('helpers', () => {
           const allowedValuesRender = columns[1].render;
 
           render(
-            <TestProviders>
+            <TestExternalProviders>
               <>
                 {allowedValuesRender != null &&
                   allowedValuesRender(
@@ -342,7 +287,7 @@ describe('helpers', () => {
                     withUndefinedAllowedValues
                   )}
               </>
-            </TestProviders>
+            </TestExternalProviders>
           );
         });
 
@@ -363,7 +308,7 @@ describe('helpers', () => {
           const indexInvalidValuesRender = columns[2].render;
 
           render(
-            <TestProviders>
+            <TestExternalProviders>
               <>
                 {indexInvalidValuesRender != null &&
                   indexInvalidValuesRender(
@@ -371,7 +316,7 @@ describe('helpers', () => {
                     eventCategoryWithUnallowedValues
                   )}
               </>
-            </TestProviders>
+            </TestExternalProviders>
           );
         });
 
@@ -392,12 +337,12 @@ describe('helpers', () => {
           const indexInvalidValuesRender = columns[2].render;
 
           render(
-            <TestProviders>
+            <TestExternalProviders>
               <>
                 {indexInvalidValuesRender != null &&
                   indexInvalidValuesRender(eventCategory.indexInvalidValues, eventCategory)}
               </>
-            </TestProviders>
+            </TestExternalProviders>
           );
         });
 

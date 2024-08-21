@@ -85,6 +85,16 @@ describe('entity risk score calculation route', () => {
     expect(response.status).toEqual(200);
   });
 
+  it('should schedule transform when risk scores are persisted ', async () => {
+    const request = buildRequest();
+
+    const response = await server.inject(request, requestContextMock.convertContext(context));
+
+    expect(mockRiskScoreService.scheduleLatestTransformNow).toHaveBeenCalled();
+
+    expect(response.status).toEqual(200);
+  });
+
   it('should call "calculateAndPersistScores" with entity filter', async () => {
     const request = buildRequest();
 
@@ -92,7 +102,9 @@ describe('entity risk score calculation route', () => {
 
     expect(response.status).toEqual(200);
     expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledWith(
-      expect.objectContaining({ filter: [{ term: { 'host.name': 'test-host-name' } }] })
+      expect.objectContaining({
+        filter: { bool: { filter: [{ term: { 'host.name': 'test-host-name' } }] } },
+      })
     );
   });
 
@@ -118,9 +130,9 @@ describe('entity risk score calculation route', () => {
 
       expect(response.body).toEqual({
         message: 'No Risk engine configuration found',
-        status_code: 405,
+        status_code: 400,
       });
-      expect(response.status).toEqual(405);
+      expect(response.status).toEqual(400);
     });
 
     it('returns an error if the risk engine is disabled', async () => {
@@ -133,9 +145,9 @@ describe('entity risk score calculation route', () => {
 
       expect(response.body).toEqual({
         message: 'Risk engine is disabled',
-        status_code: 405,
+        status_code: 400,
       });
-      expect(response.status).toEqual(405);
+      expect(response.status).toEqual(400);
     });
 
     it('filter by user provided filter when it is defined', async () => {
@@ -149,7 +161,9 @@ describe('entity risk score calculation route', () => {
 
       expect(response.status).toEqual(200);
       expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledWith(
-        expect.objectContaining({ filter: expect.arrayContaining([userFilter]) })
+        expect.objectContaining({
+          filter: { bool: { filter: expect.arrayContaining([userFilter]) } },
+        })
       );
     });
   });

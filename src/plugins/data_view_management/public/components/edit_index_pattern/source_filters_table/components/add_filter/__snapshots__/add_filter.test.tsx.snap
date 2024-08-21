@@ -19,10 +19,9 @@ exports[`AddFilter should ignore strings with just spaces 1`] = `
       isDisabled={true}
       onClick={[Function]}
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Add"
         id="indexPatternManagement.editIndexPattern.source.addButtonLabel"
-        values={Object {}}
       />
     </EuiButton>
   </EuiFlexItem>
@@ -48,10 +47,9 @@ exports[`AddFilter should render normally 1`] = `
       isDisabled={true}
       onClick={[Function]}
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Add"
         id="indexPatternManagement.editIndexPattern.source.addButtonLabel"
-        values={Object {}}
       />
     </EuiButton>
   </EuiFlexItem>

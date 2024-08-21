@@ -14,7 +14,12 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 describe('useRuleTypeIdsByFeatureId', () => {
   it('should correctly reverse the rule types index', () => {
     const { result } = renderHook(() => useRuleTypeIdsByFeatureId(ruleTypesIndex));
-    expect(Object.keys(result.current)).toEqual(['stackAlerts', 'observability', 'ml', 'siem']);
+    expect(Object.keys(result.current)).toEqual([
+      'stackAlerts',
+      'observability',
+      'monitoring',
+      'siem',
+    ]);
     Object.values(result.current).forEach((ruleTypes) => {
       expect(ruleTypes).not.toHaveLength(0);
     });
@@ -35,20 +40,6 @@ describe('useRuleTypeIdsByFeatureId', () => {
         'metrics.alert.inventory.threshold',
         'observability.rules.custom_threshold',
         'logs.alert.document.count',
-        'monitoring_alert_license_expiration',
-        'monitoring_alert_cluster_health',
-        'monitoring_alert_cpu_usage',
-        'monitoring_alert_disk_usage',
-        'monitoring_alert_nodes_changed',
-        'monitoring_alert_elasticsearch_version_mismatch',
-        'monitoring_alert_kibana_version_mismatch',
-        'monitoring_alert_logstash_version_mismatch',
-        'monitoring_alert_jvm_memory_usage',
-        'monitoring_alert_missing_monitoring_data',
-        'monitoring_alert_thread_pool_search_rejections',
-        'monitoring_alert_thread_pool_write_rejections',
-        'monitoring_ccr_read_exceptions',
-        'monitoring_shard_size',
         'apm.error_rate',
         'apm.transaction_error_rate',
         'apm.transaction_duration',

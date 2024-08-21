@@ -22,13 +22,15 @@ export function FieldsList({
   title,
   fields,
   actionsMenu: ActionsMenu,
+  dataTestSubj = `datasetQualityFlyoutFieldsList-${title.toLowerCase().split(' ').join('_')}`,
 }: {
   title: string;
   fields: Array<{ fieldTitle: string; fieldValue: ReactNode; isLoading: boolean }>;
   actionsMenu?: ReactNode;
+  dataTestSubj?: string;
 }) {
   return (
-    <EuiPanel hasBorder grow={false}>
+    <EuiPanel hasBorder grow={false} data-test-subj={dataTestSubj}>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiTitle size="s">
           <span>{title}</span>

@@ -72,6 +72,10 @@ describe('TableListView', () => {
     jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
   afterAll(() => {
     jest.useRealTimers();
   });
@@ -506,7 +510,7 @@ describe('TableListView', () => {
       ]);
     });
 
-    test('filter select should change the sort order', async () => {
+    test('filter select should change the sort order and remember the order', async () => {
       let testBed: TestBed;
 
       await act(async () => {
@@ -515,7 +519,7 @@ describe('TableListView', () => {
         });
       });
 
-      const { component, table, find } = testBed!;
+      let { component, table, find } = testBed!;
       const { openSortSelect } = getActions(testBed!);
       component.update();
 
@@ -538,6 +542,26 @@ describe('TableListView', () => {
       });
       component.update();
 
+      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
+
+      expect(tableCellsValues).toEqual([
+        ['z-foo', twoDaysAgoToString],
+        ['a-foo', yesterdayToString],
+      ]);
+
+      expect(localStorage.getItem('tableSort:test')).toBe(
+        '{"field":"attributes.title","direction":"desc"}'
+      );
+
+      component.unmount();
+      await act(async () => {
+        testBed = await setupColumnSorting({
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+        });
+      });
+
+      ({ component, table, find } = testBed!);
+      component.update();
       ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
 
       expect(tableCellsValues).toEqual([
@@ -623,6 +647,91 @@ describe('TableListView', () => {
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
         'Name A-Z ',
         'Name Z-A. Checked option. ', // now this option is checked
+        'Recently updated ',
+        'Least recently updated ',
+      ]);
+    });
+  });
+
+  describe('column sorting with recently accessed', () => {
+    const setupColumnSorting = registerTestBed<string, TableListViewTableProps>(
+      WithServices<TableListViewTableProps>(TableListViewTable, {
+        TagList: getTagList({ references: [] }),
+      }),
+      {
+        defaultProps: {
+          ...requiredProps,
+          recentlyAccessed: { get: () => [{ id: '123', link: '', label: '' }] },
+        },
+        memoryRouter: { wrapComponent: true },
+      }
+    );
+
+    const hits: UserContentCommonSchema[] = [
+      {
+        id: '123',
+        updatedAt: twoDaysAgo.toISOString(), // first asc, last desc
+        type: 'dashboard',
+        attributes: {
+          title: 'z-foo', // first desc, last asc
+        },
+        references: [{ id: 'id-tag-1', name: 'tag-1', type: 'tag' }],
+      },
+      {
+        id: '456',
+        updatedAt: yesterday.toISOString(), // first desc, last asc
+        type: 'dashboard',
+        attributes: {
+          title: 'a-foo', // first asc, last desc
+        },
+        references: [],
+      },
+    ];
+
+    test('should initially sort by "Recently Accessed"', async () => {
+      let testBed: TestBed;
+
+      await act(async () => {
+        testBed = await setupColumnSorting({
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+        });
+      });
+
+      const { component, table } = testBed!;
+      component.update();
+
+      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+
+      expect(tableCellsValues).toEqual([
+        ['z-foo', twoDaysAgoToString],
+        ['a-foo', yesterdayToString],
+      ]);
+    });
+
+    test('filter select should have 5 options', async () => {
+      let testBed: TestBed;
+
+      await act(async () => {
+        testBed = await setupColumnSorting({
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+        });
+      });
+      const { openSortSelect } = getActions(testBed!);
+      const { component, find } = testBed!;
+      component.update();
+
+      act(() => {
+        openSortSelect();
+      });
+      component.update();
+
+      const filterOptions = find('sortSelect').find('li');
+
+      expect(filterOptions.length).toBe(5);
+      expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
+        'Recently viewed. Checked option.Additional information ',
+        'Name A-Z ',
+        'Name Z-A ',
         'Recently updated ',
         'Least recently updated ',
       ]);

@@ -15,7 +15,7 @@ import { OsCgroupMetricsCollector } from './cgroup';
 
 const getos = promisify(getosAsync);
 
-export interface OpsMetricsCollectorOptions {
+export interface OsMetricsCollectorOptions {
   logger: Logger;
   cpuPath?: string;
   cpuAcctPath?: string;
@@ -24,7 +24,7 @@ export interface OpsMetricsCollectorOptions {
 export class OsMetricsCollector implements MetricsCollector<OpsOsMetrics> {
   private readonly cgroupCollector: OsCgroupMetricsCollector;
 
-  constructor(options: OpsMetricsCollectorOptions) {
+  constructor(options: OsMetricsCollectorOptions) {
     this.cgroupCollector = new OsCgroupMetricsCollector({
       ...options,
       logger: options.logger.get('cgroup'),

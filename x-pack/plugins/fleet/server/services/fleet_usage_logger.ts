@@ -32,7 +32,9 @@ export function registerFleetUsageLogger(
             try {
               const usageData = await fetchUsage();
               if (appContextService.getLogger().isLevelEnabled('debug')) {
-                appContextService.getLogger().debug(`Fleet Usage: ${JSON.stringify(usageData)}`);
+                appContextService
+                  .getLogger()
+                  .debug(() => `Fleet Usage: ${JSON.stringify(usageData)}`);
               } else {
                 appContextService.getLogger().info(`Fleet Usage: ${JSON.stringify(usageData)}`);
               }

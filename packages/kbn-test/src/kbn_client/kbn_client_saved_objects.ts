@@ -118,16 +118,20 @@ const STANDARD_LIST_TYPES = [
   'infrastructure-monitoring-log-view',
   'apm-indices',
   // Fleet saved object types
+  'ingest_manager_settings',
   'ingest-outputs',
   'ingest-download-sources',
   'ingest-agent-policies',
+  'fleet-agent-policies',
   'ingest-package-policies',
+  'fleet-package-policies',
   'epm-packages',
   'epm-packages-assets',
   'fleet-preconfiguration-deletion-record',
   'fleet-fleet-server-host',
   'fleet-proxy',
   'fleet-uninstall-tokens',
+  'fleet-space-settings',
 ];
 
 /**

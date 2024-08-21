@@ -24,6 +24,7 @@ import {
 import {
   disableProtections,
   ensureOnlyEventCollectionIsAllowed,
+  isBillablePolicy,
 } from '../../../common/endpoint/models/policy_config_helpers';
 import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 
@@ -60,6 +61,8 @@ export const createDefaultPolicy = (
   if (!productFeatures.isEnabled(ProductFeatureSecurityKey.endpointPolicyProtections)) {
     defaultPolicyPerType = ensureOnlyEventCollectionIsAllowed(defaultPolicyPerType);
   }
+
+  defaultPolicyPerType.meta.billable = isBillablePolicy(defaultPolicyPerType);
 
   return defaultPolicyPerType;
 };

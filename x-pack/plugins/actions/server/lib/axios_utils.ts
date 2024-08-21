@@ -18,6 +18,7 @@ import { Logger } from '@kbn/core/server';
 import { getCustomAgents } from './get_custom_agents';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { SSLSettings } from '../types';
+import { combineHeadersWithBasicAuthHeader } from './get_basic_auth_header';
 
 export const request = async <T = unknown>({
   axios,
@@ -55,10 +56,18 @@ export const request = async <T = unknown>({
   const { maxContentLength, timeout: settingsTimeout } =
     configurationUtilities.getResponseSettings();
 
-  return await axios(url, {
-    ...config,
-    method,
+  const { auth, ...restConfig } = config;
+
+  const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
+    username: auth?.username,
+    password: auth?.password,
     headers,
+  });
+
+  return await axios(url, {
+    ...restConfig,
+    method,
+    headers: headersWithBasicAuth,
     ...(data ? { data } : {}),
     // use httpAgent and httpsAgent and set axios proxy: false, to be able to handle fail on invalid certs
     httpAgent,

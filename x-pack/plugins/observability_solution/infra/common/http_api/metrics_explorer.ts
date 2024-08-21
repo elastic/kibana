@@ -23,7 +23,7 @@ export const METRIC_EXPLORER_AGGREGATIONS = [
 
 export const OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS = ['custom', 'rate', 'p95', 'p99'];
 
-type MetricExplorerAggregations = typeof METRIC_EXPLORER_AGGREGATIONS[number];
+type MetricExplorerAggregations = (typeof METRIC_EXPLORER_AGGREGATIONS)[number];
 
 const metricsExplorerAggregationKeys = METRIC_EXPLORER_AGGREGATIONS.reduce<
   Record<MetricExplorerAggregations, null>
@@ -91,6 +91,7 @@ export const afterKeyObjectRT = rt.record(rt.string, rt.union([rt.string, rt.nul
 
 export const metricsExplorerRequestBodyOptionalFieldsRT = rt.partial({
   groupBy: rt.union([groupByRT, rt.array(groupByRT)]),
+  groupInstance: rt.union([groupByRT, rt.array(groupByRT)]),
   afterKey: rt.union([rt.string, rt.null, rt.undefined, afterKeyObjectRT]),
   limit: rt.union([rt.number, rt.null, rt.undefined]),
   filterQuery: rt.union([rt.string, rt.null, rt.undefined]),

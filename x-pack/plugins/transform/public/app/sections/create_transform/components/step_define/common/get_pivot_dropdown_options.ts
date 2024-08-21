@@ -69,7 +69,7 @@ export function getPivotDropdownOptions(
   const aggOptions: DropDownOptionWithField[] = [];
   const aggOptionsData: PivotAggsConfigWithUiSupportDict = {};
 
-  const ignoreFieldNames = ['_id', '_index', '_type'];
+  const ignoreFieldNames = ['_id', '_index', '_type', '_ignored'];
   const dataViewFields = dataView.fields
     .filter(
       (field) =>

@@ -24,6 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import {
   SnapshotCustomAggregation,
@@ -32,7 +33,6 @@ import {
   SnapshotCustomMetricInputRT,
   SNAPSHOT_CUSTOM_AGGREGATIONS,
 } from '../../../../common/http_api/snapshot_api';
-import { DerivedIndexPattern } from '../../../containers/metrics_source';
 
 interface Props {
   metric?: { value: string; text: string };
@@ -41,7 +41,6 @@ interface Props {
   onChange: (metric?: string) => void;
   onChangeCustom: (customMetric?: SnapshotCustomMetricInput) => void;
   customMetric?: SnapshotCustomMetricInput;
-  fields: DerivedIndexPattern['fields'];
   popupPosition?:
     | 'upCenter'
     | 'upLeft'
@@ -56,6 +55,14 @@ interface Props {
     | 'rightUp'
     | 'rightDown';
 }
+
+type V2MetricType = 'txV2' | 'rxV2' | 'cpuV2';
+
+const V2ToLegacyMapping: Record<V2MetricType, string> = {
+  txV2: 'tx',
+  rxV2: 'rx',
+  cpuV2: 'cpu',
+};
 
 const AGGREGATION_LABELS = {
   ['avg']: i18n.translate('xpack.infra.waffle.customMetrics.aggregationLables.avg', {
@@ -80,7 +87,6 @@ export const MetricExpression = ({
   metric,
   metrics,
   customMetric,
-  fields,
   errors,
   onChange,
   onChangeCustom,
@@ -90,6 +96,7 @@ export const MetricExpression = ({
   const [customMetricTabOpen, setCustomMetricTabOpen] = useState(metric?.value === 'custom');
   const [selectedOption, setSelectedOption] = useState(metric?.value);
   const [fieldDisplayedCustomLabel, setFieldDisplayedCustomLabel] = useState(customMetric?.label);
+  const { metricsView } = useMetricsDataViewContext();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const firstFieldOption = {
@@ -101,10 +108,10 @@ export const MetricExpression = ({
 
   const fieldOptions = useMemo(
     () =>
-      fields
+      (metricsView?.fields ?? [])
         .filter((f) => f.aggregatable && f.type === 'number' && !(customMetric?.field === f.name))
         .map((f) => ({ label: f.name })),
-    [fields, customMetric?.field]
+    [metricsView?.fields, customMetric?.field]
   );
 
   const expressionDisplayValue = useMemo(() => {
@@ -165,9 +172,25 @@ export const MetricExpression = ({
     [customMetric, debouncedOnChangeCustom]
   );
 
-  const availablefieldsOptions = metrics.map((m) => {
-    return { label: m.text, value: m.value };
-  }, []);
+  const metricsToRemove: string[] = metrics
+    .map((currentMetric) => {
+      return V2ToLegacyMapping[currentMetric.value as V2MetricType];
+    })
+    .filter((m): m is string => !!m);
+
+  const availableFieldsOptions = useMemo(
+    () =>
+      metrics
+        .filter(
+          (availableMetric) =>
+            metric?.value === availableMetric.value ||
+            !metricsToRemove.includes(availableMetric.value)
+        )
+        .map((m) => {
+          return { label: m.text, value: m.value };
+        }),
+    [metric?.value, metrics, metricsToRemove]
+  );
 
   return (
     <EuiPopover
@@ -181,6 +204,7 @@ export const MetricExpression = ({
             }
           )}
           value={expressionDisplayValue}
+          // @ts-expect-error upgrade typescript v5.1.6
           isActive={Boolean(popoverOpen || (errors.metric && errors.metric.length > 0))}
           onClick={() => {
             setPopoverOpen(true);
@@ -256,6 +280,7 @@ export const MetricExpression = ({
                     options={fieldOptions}
                     onChange={onFieldChange}
                     isClearable={false}
+                    // @ts-expect-error upgrade typescript v5.1.6
                     isInvalid={errors.metric.length > 0}
                   />
                 </EuiFlexItem>
@@ -270,6 +295,7 @@ export const MetricExpression = ({
               helpText={i18n.translate('xpack.infra.waffle.alerting.customMetrics.helpText', {
                 defaultMessage:
                   'Choose a name to help identify your custom metric. Defaults to "<function> of <field name>".',
+                ignoreTag: true,
               })}
             >
               <EuiFieldText
@@ -291,13 +317,14 @@ export const MetricExpression = ({
                 <EuiComboBox
                   fullWidth
                   singleSelection={{ asPlainText: true }}
-                  data-test-subj="availablefieldsOptionsComboBox"
+                  data-test-subj="availableFieldsOptionsComboBox"
+                  // @ts-expect-error upgrade typescript v5.1.6
                   isInvalid={errors.metric.length > 0}
                   placeholder={firstFieldOption.text}
-                  options={availablefieldsOptions}
-                  noSuggestions={!availablefieldsOptions.length}
+                  options={availableFieldsOptions}
+                  noSuggestions={!availableFieldsOptions.length}
                   selectedOptions={
-                    metric ? availablefieldsOptions.filter((a) => a.value === metric.value) : []
+                    metric ? availableFieldsOptions.filter((a) => a.value === metric.value) : []
                   }
                   renderOption={(o: any) => o.label}
                   onChange={(selectedOptions) => {

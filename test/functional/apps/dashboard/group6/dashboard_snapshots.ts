@@ -63,7 +63,6 @@ export default function ({
 
       await PageObjects.dashboard.saveDashboard('tsvb');
       await PageObjects.dashboard.clickFullScreenMode();
-      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickExpandPanelToggle();
 
       await PageObjects.dashboard.waitForRenderComplete();
@@ -85,7 +84,6 @@ export default function ({
 
       await PageObjects.dashboard.saveDashboard('area');
       await PageObjects.dashboard.clickFullScreenMode();
-      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickExpandPanelToggle();
 
       await PageObjects.dashboard.waitForRenderComplete();

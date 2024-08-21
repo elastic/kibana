@@ -13,8 +13,8 @@ import {
   RESPONSE_SECTION_CONTENT_TEST_ID,
   RESPONSE_SECTION_HEADER_TEST_ID,
 } from './test_ids';
-import { RightPanelContext } from '../context';
-import { mockContextValue } from '../mocks/mock_context';
+import { DocumentDetailsContext } from '../../shared/context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import { ResponseSection } from './response_section';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { useExpandSection } from '../hooks/use_expand_section';
@@ -22,14 +22,15 @@ import { useExpandSection } from '../hooks/use_expand_section';
 jest.mock('../hooks/use_expand_section');
 
 const PREVIEW_MESSAGE = 'Response is not available in alert preview.';
+const OPEN_FLYOUT_MESSAGE = 'Open alert details to access response actions.';
 
 const renderResponseSection = () =>
   render(
     <IntlProvider locale="en">
       <TestProvider>
-        <RightPanelContext.Provider value={mockContextValue}>
+        <DocumentDetailsContext.Provider value={mockContextValue}>
           <ResponseSection />
-        </RightPanelContext.Provider>
+        </DocumentDetailsContext.Provider>
       </TestProvider>
     </IntlProvider>
   );
@@ -70,14 +71,14 @@ describe('<ResponseSection />', () => {
     const { getByTestId } = render(
       <IntlProvider locale="en">
         <TestProvider>
-          <RightPanelContext.Provider
+          <DocumentDetailsContext.Provider
             value={{
               ...mockContextValue,
               getFieldsData: mockGetFieldsData,
             }}
           >
             <ResponseSection />
-          </RightPanelContext.Provider>
+          </DocumentDetailsContext.Provider>
         </TestProvider>
       </IntlProvider>
     );
@@ -90,13 +91,28 @@ describe('<ResponseSection />', () => {
     const { getByTestId } = render(
       <IntlProvider locale="en">
         <TestProvider>
-          <RightPanelContext.Provider value={{ ...mockContextValue, isPreview: true }}>
+          <DocumentDetailsContext.Provider value={{ ...mockContextValue, isPreview: true }}>
             <ResponseSection />
-          </RightPanelContext.Provider>
+          </DocumentDetailsContext.Provider>
         </TestProvider>
       </IntlProvider>
     );
     expect(getByTestId(RESPONSE_SECTION_CONTENT_TEST_ID)).toHaveTextContent(PREVIEW_MESSAGE);
+  });
+
+  it('should render open details flyout message if flyout is in preview', () => {
+    (useExpandSection as jest.Mock).mockReturnValue(true);
+
+    const { getByTestId } = render(
+      <IntlProvider locale="en">
+        <TestProvider>
+          <DocumentDetailsContext.Provider value={{ ...mockContextValue, isPreviewMode: true }}>
+            <ResponseSection />
+          </DocumentDetailsContext.Provider>
+        </TestProvider>
+      </IntlProvider>
+    );
+    expect(getByTestId(RESPONSE_SECTION_CONTENT_TEST_ID)).toHaveTextContent(OPEN_FLYOUT_MESSAGE);
   });
 
   it('should render empty component if document is not signal', () => {
@@ -111,14 +127,14 @@ describe('<ResponseSection />', () => {
     const { container } = render(
       <IntlProvider locale="en">
         <TestProvider>
-          <RightPanelContext.Provider
+          <DocumentDetailsContext.Provider
             value={{
               ...mockContextValue,
               getFieldsData: mockGetFieldsData,
             }}
           >
             <ResponseSection />
-          </RightPanelContext.Provider>
+          </DocumentDetailsContext.Provider>
         </TestProvider>
       </IntlProvider>
     );

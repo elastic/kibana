@@ -24,13 +24,11 @@ import {
   EuiListGroupItem,
 } from '@elastic/eui';
 import { css, cx } from '@emotion/css';
-import { useKibanaHeader } from '../../../../hooks/use_kibana_header';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 
 export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: React.ReactNode }>(
   ({ children }, ref) => {
-    const { actionMenuHeight } = useKibanaHeader();
     const { euiTheme } = useEuiTheme();
     const { renderMode } = useAssetDetailsRenderPropsContext();
     const { scrollTo, setScrollTo } = useTabSwitcherContext();
@@ -48,7 +46,7 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
     const kibanaHeaderOffset =
       renderMode.mode === 'flyout'
         ? `0px`
-        : `calc(${actionMenuHeight}px + var(--euiFixedHeadersOffset, 0))`;
+        : `var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0))`;
 
     const quickAccessHorizontalOffset = isLargeScreen
       ? `${euiTheme.size.s} - 1px` // arbitrary value to align with the content

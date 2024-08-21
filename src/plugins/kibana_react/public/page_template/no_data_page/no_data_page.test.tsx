@@ -8,11 +8,11 @@
 
 import React from 'react';
 import { NoDataPage } from './no_data_page';
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 
 describe('NoDataPage', () => {
   test('render', () => {
-    const component = shallowWithIntl(
+    const component = shallowWithI18nProvider(
       <NoDataPage
         solution="Elastic"
         actions={{

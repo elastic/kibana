@@ -31,7 +31,7 @@ import { createRule } from '../../../../../common/utils/security_solution';
  * @param osTypes The os types to optionally add or not to add to the container
  */
 export const createRuleWithExceptionEntries = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   rule: RuleCreateProps,
   entries: NonEmptyEntriesArray[],

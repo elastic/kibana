@@ -13,7 +13,7 @@ import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import '../jest_matchers';
 import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
-import { delay, parseLogFile } from '../test_utils';
+import { parseLogFile } from '../test_utils';
 import {
   getBaseMigratorParams,
   getSampleAType,
@@ -31,7 +31,6 @@ describe('ZDT upgrades - encountering conversion failures', () => {
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(10);
   });
 
   beforeEach(async () => {

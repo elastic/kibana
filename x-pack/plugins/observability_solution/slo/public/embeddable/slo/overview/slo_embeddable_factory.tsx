@@ -8,8 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { EuiFlexItem, EuiLink, EuiFlexGroup } from '@elastic/eui';
-import { Router } from '@kbn/shared-ux-router';
+import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   initializeTitles,
@@ -17,37 +16,48 @@ import {
   fetch$,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { createBrowserHistory } from 'history';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from './constants';
 import { SloCardChartList } from './slo_overview_grid';
 import { SloOverview } from './slo_overview';
 import { GroupSloView } from './group_view/group_view';
-import {
-  SloOverviewEmbeddableState,
-  SloEmbeddableDeps,
-  SloOverviewApi,
-  GroupSloCustomInput,
-} from './types';
-import { EDIT_SLO_OVERVIEW_ACTION } from '../../../ui_actions/edit_slo_overview_panel';
-import { PluginContext } from '../../../context/plugin_context';
+import { SloOverviewEmbeddableState, SloOverviewApi, GroupSloCustomInput } from './types';
+import { SloPublicPluginsStart, SloPublicStart } from '../../../types';
+import { SloEmbeddableContext } from '../common/slo_embeddable_context';
 
-const queryClient = new QueryClient();
 export const getOverviewPanelTitle = () =>
   i18n.translate('xpack.slo.sloEmbeddable.displayName', {
     defaultMessage: 'SLO Overview',
   });
-export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
-  const factory: ReactEmbeddableFactory<SloOverviewEmbeddableState, SloOverviewApi> = {
+export const getOverviewEmbeddableFactory = (
+  getStartServices: StartServicesAccessor<SloPublicPluginsStart, SloPublicStart>
+) => {
+  const factory: ReactEmbeddableFactory<
+    SloOverviewEmbeddableState,
+    SloOverviewEmbeddableState,
+    SloOverviewApi
+  > = {
     type: SLO_OVERVIEW_EMBEDDABLE_ID,
     deserializeState: (state) => {
       return state.rawState as SloOverviewEmbeddableState;
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
+      const [coreStart, pluginStart] = await getStartServices();
+      const deps = { ...coreStart, ...pluginStart };
+      async function onEdit() {
+        try {
+          const { openSloConfiguration } = await import('./slo_overview_open_configuration');
+
+          const result = await openSloConfiguration(
+            coreStart,
+            pluginStart,
+            api.getSloGroupOverviewConfig()
+          );
+          api.updateSloGroupOverviewConfig(result as GroupSloCustomInput);
+        } catch (e) {
+          return Promise.reject();
+        }
+      }
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
       const sloId$ = new BehaviorSubject(state.sloId);
@@ -62,6 +72,14 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
         {
           ...titlesApi,
           defaultPanelTitle: defaultTitle$,
+          getTypeDisplayName: () =>
+            i18n.translate('xpack.slo.editSloOverviewEmbeddableTitle.typeDisplayName', {
+              defaultMessage: 'criteria',
+            }),
+          isEditingEnabled: () => api.getSloGroupOverviewConfig().overviewMode === 'groups',
+          onEdit: async () => {
+            onEdit();
+          },
           serializeState: () => {
             return {
               rawState: {
@@ -123,7 +141,6 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
             groupFilters$,
             remoteName$
           );
-          const { observabilityRuleTypeRegistry } = deps.observability;
 
           useEffect(() => {
             return () => {
@@ -137,41 +154,22 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
               const groups = groupFilters?.groups ?? [];
               return (
                 <Wrapper>
-                  <EuiFlexGroup
-                    data-shared-item=""
-                    justifyContent="flexEnd"
-                    wrap
-                    css={`
-                      margin-bottom: 20px;
-                    `}
-                  >
-                    <EuiFlexItem grow={false}>
-                      <EuiLink
-                        onClick={() => {
-                          const trigger = deps.uiActions.getTrigger(CONTEXT_MENU_TRIGGER);
-                          deps.uiActions.getAction(EDIT_SLO_OVERVIEW_ACTION).execute({
-                            trigger,
-                            embeddable: api,
-                          } as ActionExecutionContext);
-                        }}
-                        data-test-subj="o11ySloAlertsWrapperSlOsIncludedLink"
-                      >
-                        {i18n.translate('xpack.slo.overviewEmbeddable.editCriteriaLabel', {
-                          defaultMessage: 'Edit criteria',
-                        })}
-                      </EuiLink>
+                  <EuiFlexGroup data-test-subj="sloGroupOverviewPanel" data-shared-item="">
+                    <EuiFlexItem
+                      css={`
+                        margin-top: 20px;
+                      `}
+                    >
+                      <GroupSloView
+                        view="cardView"
+                        groupBy={groupBy}
+                        groups={groups}
+                        kqlQuery={kqlQuery}
+                        filters={groupFilters?.filters}
+                        reloadSubject={reload$}
+                      />
                     </EuiFlexItem>
                   </EuiFlexGroup>
-                  <EuiFlexItem grow={false}>
-                    <GroupSloView
-                      sloView="cardView"
-                      groupBy={groupBy}
-                      groups={groups}
-                      kqlQuery={kqlQuery}
-                      filters={groupFilters?.filters}
-                      reloadSubject={reload$}
-                    />
-                  </EuiFlexItem>
                 </Wrapper>
               );
             } else {
@@ -187,21 +185,9 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
             }
           };
           return (
-            <Router history={createBrowserHistory()}>
-              <EuiThemeProvider darkMode={true}>
-                <KibanaContextProvider services={deps}>
-                  <PluginContext.Provider value={{ observabilityRuleTypeRegistry }}>
-                    <QueryClientProvider client={queryClient}>
-                      {showAllGroupByInstances ? (
-                        <SloCardChartList sloId={sloId!} />
-                      ) : (
-                        renderOverview()
-                      )}
-                    </QueryClientProvider>
-                  </PluginContext.Provider>
-                </KibanaContextProvider>
-              </EuiThemeProvider>
-            </Router>
+            <SloEmbeddableContext deps={deps}>
+              {showAllGroupByInstances ? <SloCardChartList sloId={sloId!} /> : renderOverview()}
+            </SloEmbeddableContext>
           );
         },
       };

@@ -358,7 +358,8 @@ export class SearchInterceptor {
     );
 
     const cancel = async () => {
-      if (!id || isSavedToBackground) return;
+      // If the request times out, we handle cancellation after we make the last call to retrieve the results
+      if (!id || isSavedToBackground || searchAbortController.isTimeout()) return;
       try {
         await sendCancelRequest();
       } catch (e) {
@@ -400,9 +401,22 @@ export class SearchInterceptor {
           : response;
       }),
       catchError((e: Error) => {
-        searchTracker?.error();
-        cancel();
-        return throwError(e);
+        // If we aborted (search:timeout advanced setting) and there was a partial response, return it instead of just erroring out
+        if (searchAbortController.isTimeout()) {
+          return from(
+            this.runSearch({ id, ...request }, { ...options, retrieveResults: true })
+          ).pipe(
+            map(toPartialResponseAfterTimeout),
+            tap(async () => {
+              await sendCancelRequest();
+              this.handleSearchError(e, request?.params?.body ?? {}, options, true);
+            })
+          );
+        } else {
+          searchTracker?.error();
+          cancel();
+          return throwError(e);
+        }
       }),
       finalize(() => {
         searchAbortController.cleanup();
@@ -534,17 +548,6 @@ export class SearchInterceptor {
         return response$.pipe(
           takeUntil(aborted$),
           catchError((e) => {
-            // If we aborted (search:timeout advanced setting) and there was a partial response, return it instead of just erroring out
-            if (searchAbortController.isTimeout()) {
-              return from(
-                this.runSearch(request, { ...searchOptions, retrieveResults: true })
-              ).pipe(
-                tap(() =>
-                  this.handleSearchError(e, request?.params?.body ?? {}, searchOptions, true)
-                ),
-                map(toPartialResponseAfterTimeout)
-              );
-            }
             return throwError(
               this.handleSearchError(
                 e,

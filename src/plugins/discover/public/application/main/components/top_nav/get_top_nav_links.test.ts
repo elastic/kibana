@@ -17,6 +17,9 @@ const services = {
       save: true,
     },
   },
+  uiSettings: {
+    get: jest.fn(() => true),
+  },
 } as unknown as DiscoverServices;
 
 const state = {} as unknown as DiscoverStateContainer;
@@ -27,12 +30,23 @@ test('getTopNavLinks result', () => {
     onOpenInspector: jest.fn(),
     services,
     state,
-    isTextBased: false,
+    isEsqlMode: false,
     adHocDataViews: [],
     topNavCustomization: undefined,
+    shouldShowESQLToDataViewTransitionModal: false,
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
+      Object {
+        "color": "text",
+        "emphasize": true,
+        "fill": false,
+        "id": "esql",
+        "label": "Try ES|QL",
+        "run": [Function],
+        "testId": "select-text-based-language-btn",
+        "tooltip": "ES|QL is Elastic's powerful new piped query language.",
+      },
       Object {
         "description": "New Search",
         "id": "new",
@@ -80,12 +94,23 @@ test('getTopNavLinks result for ES|QL mode', () => {
     onOpenInspector: jest.fn(),
     services,
     state,
-    isTextBased: true,
+    isEsqlMode: true,
     adHocDataViews: [],
     topNavCustomization: undefined,
+    shouldShowESQLToDataViewTransitionModal: false,
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
+      Object {
+        "color": "text",
+        "emphasize": true,
+        "fill": false,
+        "id": "esql",
+        "label": "Switch to classic",
+        "run": [Function],
+        "testId": "switch-to-dataviews",
+        "tooltip": "Switch to KQL or Lucene syntax.",
+      },
       Object {
         "description": "New Search",
         "id": "new",

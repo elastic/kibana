@@ -52,6 +52,7 @@ export function openEditControlGroupFlyout(this: ControlGroupContainer) {
       { theme, i18n }
     ),
     {
+      size: 's',
       'aria-label': ControlGroupStrings.manageControl.getFlyoutCreateTitle(),
       outsideClickCloses: false,
       onClose: () => {

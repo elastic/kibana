@@ -11,8 +11,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/182126
-  describe.skip('discover/group2', function () {
+  describe('discover/group2', function () {
+    this.tags(['esGate']);
+
     before(async function () {
       await browser.setWindowSize(1600, 1200);
     });

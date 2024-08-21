@@ -6,24 +6,33 @@
  * Side Public License, v 1.
  */
 
-import { TimeRange, Filter, Query, AggregateQuery } from '@kbn/es-query';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { useEffect, useMemo } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { PublishingSubject } from '../../publishing_subject';
 
-export interface PublishesTimeRange {
+export interface PublishesTimeslice {
+  timeslice$: PublishingSubject<[number, number] | undefined>;
+}
+
+export interface PublishesTimeRange extends Partial<PublishesTimeslice> {
   timeRange$: PublishingSubject<TimeRange | undefined>;
   timeRestore$?: PublishingSubject<boolean | undefined>;
-  timeslice$?: PublishingSubject<[number, number] | undefined>;
 }
 
 export type PublishesWritableTimeRange = PublishesTimeRange & {
   setTimeRange: (timeRange: TimeRange | undefined) => void;
 };
 
-export type PublishesUnifiedSearch = PublishesTimeRange & {
-  isCompatibleWithUnifiedSearch?: () => boolean;
+export interface PublishesFilters {
   filters$: PublishingSubject<Filter[] | undefined>;
-  query$: PublishingSubject<Query | AggregateQuery | undefined>;
-};
+}
+
+export type PublishesUnifiedSearch = PublishesTimeRange &
+  PublishesFilters & {
+    isCompatibleWithUnifiedSearch?: () => boolean;
+    query$: PublishingSubject<Query | AggregateQuery | undefined>;
+  };
 
 export type PublishesWritableUnifiedSearch = PublishesUnifiedSearch &
   PublishesWritableTimeRange & {
@@ -31,10 +40,20 @@ export type PublishesWritableUnifiedSearch = PublishesUnifiedSearch &
     setQuery: (query: Query | undefined) => void;
   };
 
+export const apiPublishesTimeslice = (
+  unknownApi: null | unknown
+): unknownApi is PublishesTimeslice => {
+  return Boolean(unknownApi && (unknownApi as PublishesTimeslice)?.timeslice$ !== undefined);
+};
+
 export const apiPublishesTimeRange = (
   unknownApi: null | unknown
 ): unknownApi is PublishesTimeRange => {
   return Boolean(unknownApi && (unknownApi as PublishesTimeRange)?.timeRange$ !== undefined);
+};
+
+export const apiPublishesFilters = (unknownApi: unknown): unknownApi is PublishesFilters => {
+  return Boolean(unknownApi && (unknownApi as PublishesFilters)?.filters$ !== undefined);
 };
 
 export const apiPublishesUnifiedSearch = (
@@ -43,7 +62,7 @@ export const apiPublishesUnifiedSearch = (
   return Boolean(
     unknownApi &&
       apiPublishesTimeRange(unknownApi) &&
-      (unknownApi as PublishesUnifiedSearch)?.filters$ !== undefined &&
+      apiPublishesFilters(unknownApi) &&
       (unknownApi as PublishesUnifiedSearch)?.query$ !== undefined
   );
 };
@@ -53,7 +72,7 @@ export const apiPublishesPartialUnifiedSearch = (
 ): unknownApi is Partial<PublishesUnifiedSearch> => {
   return Boolean(
     apiPublishesTimeRange(unknownApi) ||
-      (unknownApi as PublishesUnifiedSearch)?.filters$ !== undefined ||
+      apiPublishesFilters(unknownApi) ||
       (unknownApi as PublishesUnifiedSearch)?.query$ !== undefined
   );
 };
@@ -68,3 +87,40 @@ export const apiPublishesWritableUnifiedSearch = (
     typeof (unknownApi as PublishesWritableUnifiedSearch).setQuery === 'function'
   );
 };
+
+/**
+ * React hook that converts search props into search observable API
+ */
+export function useSearchApi({
+  filters,
+  query,
+  timeRange,
+}: {
+  filters?: Filter[];
+  query?: Query | AggregateQuery;
+  timeRange?: TimeRange;
+}) {
+  const searchApi = useMemo(() => {
+    return {
+      filters$: new BehaviorSubject<Filter[] | undefined>(filters),
+      query$: new BehaviorSubject<Query | AggregateQuery | undefined>(query),
+      timeRange$: new BehaviorSubject<TimeRange | undefined>(timeRange),
+    };
+    // filters, query, timeRange only used as initial values. Changes do not effect memoized value
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    searchApi.filters$.next(filters);
+  }, [filters, searchApi.filters$]);
+
+  useEffect(() => {
+    searchApi.query$.next(query);
+  }, [query, searchApi.query$]);
+
+  useEffect(() => {
+    searchApi.timeRange$.next(timeRange);
+  }, [timeRange, searchApi.timeRange$]);
+
+  return searchApi;
+}

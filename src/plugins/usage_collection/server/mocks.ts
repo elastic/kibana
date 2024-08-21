@@ -13,9 +13,9 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 
-import { CollectorOptions, CollectorSet } from './collector';
+import { type CollectorOptions, CollectorSet } from './collector';
 import { Collector } from './collector/collector';
-import { UsageCollectionSetup, CollectorFetchContext } from '.';
+import type { UsageCollectionSetup, CollectorFetchContext } from '.';
 import { usageCountersServiceMock } from './usage_counters/usage_counters_service.mock';
 export type { CollectorOptions };
 export { Collector };
@@ -26,12 +26,12 @@ export const createUsageCollectionSetupMock = () => {
     executionContext: executionContextServiceMock.createSetupContract(),
     maximumWaitTimeForAllCollectorsInS: 1,
   });
-  const { createUsageCounter, getUsageCounterByType } =
+  const { createUsageCounter, getUsageCounterByDomainId } =
     usageCountersServiceMock.createSetupContract();
 
   const usageCollectionSetupMock: jest.Mocked<UsageCollectionSetup> = {
     createUsageCounter,
-    getUsageCounterByType,
+    getUsageCounterByDomainId,
     bulkFetch: jest.fn().mockImplementation(collectorSet.bulkFetch),
     getCollectorByType: jest.fn().mockImplementation(collectorSet.getCollectorByType),
     toApiFieldNames: jest.fn().mockImplementation(collectorSet.toApiFieldNames),

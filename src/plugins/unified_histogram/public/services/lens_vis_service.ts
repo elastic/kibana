@@ -455,13 +455,7 @@ export class LensVisService {
     queryParams: QueryParams;
   }): Suggestion | undefined => {
     const { dataView, query, timeRange } = queryParams;
-    if (
-      dataView.isTimeBased() &&
-      query &&
-      isOfAggregateQueryType(query) &&
-      getAggregateQueryMode(query) === 'esql' &&
-      timeRange
-    ) {
+    if (dataView.isTimeBased() && query && isOfAggregateQueryType(query) && timeRange) {
       const isOnHistogramMode = shouldDisplayHistogram(query);
       if (!isOnHistogramMode) return undefined;
 

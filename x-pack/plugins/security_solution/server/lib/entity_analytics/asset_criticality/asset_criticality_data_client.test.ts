@@ -92,7 +92,21 @@ describe('AssetCriticalityDataClient', () => {
       await subject.search({ query: { match_all: {} } });
 
       expect(esClientMock.search).toHaveBeenCalledWith(
-        expect.objectContaining({ body: { query: { match_all: {} } } })
+        expect.objectContaining({ query: { match_all: {} } })
+      );
+    });
+
+    it('accepts a from parameter', async () => {
+      await subject.search({ query: { match_all: {} }, from: 100 });
+
+      expect(esClientMock.search).toHaveBeenCalledWith(expect.objectContaining({ from: 100 }));
+    });
+
+    it('accepts a sort parameter', async () => {
+      await subject.search({ query: { match_all: {} }, sort: [{ '@timestamp': 'asc' }] });
+
+      expect(esClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({ sort: [{ '@timestamp': 'asc' }] })
       );
     });
 

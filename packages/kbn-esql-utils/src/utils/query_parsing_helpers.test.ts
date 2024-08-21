@@ -10,6 +10,8 @@ import {
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
+  hasTransformationalCommand,
+  getTimeFieldFromESQLQuery,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -52,23 +54,40 @@ describe('esql query helpers', () => {
 
       const idxPattern13 = getIndexPatternFromESQLQuery('ROW a = 1, b = "two", c = null');
       expect(idxPattern13).toBe('');
+
+      const idxPattern14 = getIndexPatternFromESQLQuery('METRICS tsdb');
+      expect(idxPattern14).toBe('tsdb');
+
+      const idxPattern15 = getIndexPatternFromESQLQuery('METRICS tsdb max(cpu) BY host');
+      expect(idxPattern15).toBe('tsdb');
+
+      const idxPattern16 = getIndexPatternFromESQLQuery(
+        'METRICS pods load=avg(cpu), writes=max(rate(indexing_requests)) BY pod | SORT pod'
+      );
+      expect(idxPattern16).toBe('pods');
+
+      const idxPattern17 = getIndexPatternFromESQLQuery('FROM "$foo%"');
+      expect(idxPattern17).toBe('$foo%');
+
+      const idxPattern18 = getIndexPatternFromESQLQuery('FROM """foo-{{mm-dd_yy}}"""');
+      expect(idxPattern18).toBe('foo-{{mm-dd_yy}}');
     });
   });
 
   describe('getLimitFromESQLQuery', () => {
     it('should return default limit when ES|QL query is empty', () => {
       const limit = getLimitFromESQLQuery('');
-      expect(limit).toBe(500);
+      expect(limit).toBe(1000);
     });
 
     it('should return default limit when ES|QL query does not contain LIMIT command', () => {
       const limit = getLimitFromESQLQuery('FROM foo');
-      expect(limit).toBe(500);
+      expect(limit).toBe(1000);
     });
 
     it('should return default limit when ES|QL query contains invalid LIMIT command', () => {
       const limit = getLimitFromESQLQuery('FROM foo | LIMIT iAmNotANumber');
-      expect(limit).toBe(500);
+      expect(limit).toBe(1000);
     });
 
     it('should return limit when ES|QL query contains LIMIT command', () => {
@@ -76,7 +95,7 @@ describe('esql query helpers', () => {
       expect(limit).toBe(10000);
     });
 
-    it('should return last limit when ES|QL query contains multiple LIMIT command', () => {
+    it('should return minimum limit when ES|QL query contains multiple LIMIT command', () => {
       const limit = getLimitFromESQLQuery('FROM foo | LIMIT 200 | LIMIT 0');
       expect(limit).toBe(0);
     });
@@ -93,6 +112,67 @@ describe('esql query helpers', () => {
           'from a | drop @timestamp | drop a | drop b | keep c | drop d'
         )
       ).toBe('from a | keep c ');
+    });
+  });
+
+  describe('hasTransformationalCommand', () => {
+    it('should return false for non transformational command', () => {
+      expect(hasTransformationalCommand('from a | eval b = 1')).toBeFalsy();
+    });
+
+    it('should return true for stats', () => {
+      expect(hasTransformationalCommand('from a | stats count() as total by a=b')).toBeTruthy();
+    });
+
+    it('should return true for keep', () => {
+      expect(hasTransformationalCommand('from a | keep field1, field2')).toBeTruthy();
+    });
+
+    it('should return false for commented out transformational command', () => {
+      expect(
+        hasTransformationalCommand(`from logstash-*
+      // | stats  var0 = avg(bytes) by geo.dest`)
+      ).toBeFalsy();
+    });
+
+    it('should return false for metrics with no aggregation', () => {
+      expect(hasTransformationalCommand('metrics a')).toBeFalsy();
+    });
+
+    it('should return true for metrics with aggregations', () => {
+      expect(hasTransformationalCommand('metrics a var = avg(b)')).toBeTruthy();
+    });
+  });
+
+  describe('getTimeFieldFromESQLQuery', () => {
+    it('should return undefined if there are no time params', () => {
+      expect(getTimeFieldFromESQLQuery('from a | eval b = 1')).toBeUndefined();
+    });
+
+    it('should return the time field if there is at least one time param', () => {
+      expect(getTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?t_start')).toBe(
+        'time'
+      );
+    });
+
+    it('should return undefined if there is one named param but is not ?t_start or ?t_end', () => {
+      expect(
+        getTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?late')
+      ).toBeUndefined();
+    });
+
+    it('should return undefined if there is one named param but is used without a time field', () => {
+      expect(
+        getTimeFieldFromESQLQuery('from a | eval b = DATE_TRUNC(1 day, ?t_start)')
+      ).toBeUndefined();
+    });
+
+    it('should return the time field if there is at least one time param in the bucket function', () => {
+      expect(
+        getTimeFieldFromESQLQuery(
+          'from a | stats meow = avg(bytes) by bucket(event.timefield, 200, ?t_start, ?t_end)'
+        )
+      ).toBe('event.timefield');
     });
   });
 });

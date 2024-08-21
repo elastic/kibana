@@ -12,15 +12,6 @@ import { ESQL_TOKEN_POSTFIX } from './constants';
 import { monaco } from '../../monaco_imports';
 
 const buildRuleGroup = themeRuleGroupBuilderFactory(ESQL_TOKEN_POSTFIX);
-const COMMANDS_COLORS = {
-  dark: '#a68ac5',
-  light: '#765b96',
-};
-
-const FUNCTIONS_COLORS = {
-  dark: '#d97797',
-  light: '#a34a68',
-};
 
 export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
   base: darkMode ? 'vs-dark' : 'vs',
@@ -30,41 +21,38 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
     ...buildRuleGroup(
       [
         'explain',
-        'row',
-        'limit',
         'ws',
         'assign',
         'comma',
         'dot',
-        'first',
-        'last',
         'opening_bracket',
         'closing_bracket',
         'quoted_identifier',
-        'src_ws',
         'unquoted_identifier',
         'pipe',
-        'not',
-        'percent',
-        'integer_literal',
-        'decimal_literal',
-        'src_unquoted_identifier',
-        'src_quoted_identifier',
-        'string',
       ],
       euiThemeVars.euiTextColor
+    ),
+
+    // source commands
+    ...buildRuleGroup(
+      ['from', 'row', 'show'],
+      euiThemeVars.euiColorPrimaryText,
+      true // isBold
     ),
 
     // commands
     ...buildRuleGroup(
       [
-        'from',
+        'metrics',
+        'meta',
         'metadata',
+        'match',
         'mv_expand',
         'stats',
+        'inlinestats',
         'dissect',
         'grok',
-        'project',
         'keep',
         'rename',
         'drop',
@@ -78,42 +66,79 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'rlike',
         'in',
         'as',
-        'expr_ws',
-        'row',
-        'show',
-        'meta',
         'limit',
-        'nulls_ordering_direction',
-        'nulls_ordering',
+        'lookup',
         'null',
         'enrich',
         'on',
         'with',
+        'asc',
+        'desc',
+        'nulls_order',
       ],
-      darkMode ? COMMANDS_COLORS.dark : COMMANDS_COLORS.light
+      euiThemeVars.euiColorAccentText,
+      true // isBold
     ),
 
     // functions
-    ...buildRuleGroup(['functions'], darkMode ? FUNCTIONS_COLORS.dark : FUNCTIONS_COLORS.light),
+    ...buildRuleGroup(['functions'], euiThemeVars.euiColorPrimaryText),
 
     // operators
     ...buildRuleGroup(
-      ['or', 'and', 'rp', 'lp', 'plus', 'minus', 'asterisk', 'slash'],
-      euiThemeVars.euiTextSubduedColor
+      [
+        'or',
+        'and',
+        'rp', // ')'
+        'lp', // '('
+        'eq', // '=='
+        'cieq', // '=~'
+        'neq', // '!='
+        'lt', //  '<'
+        'lte', // '<='
+        'gt', //  '>'
+        'gte', // '>='
+        'plus', // '+'
+        'minus', // '-'
+        'asterisk', // '*'
+        'slash', // '/'
+        'percent', // '%'
+        'cast_op', // '::'
+      ],
+      euiThemeVars.euiColorPrimaryText
     ),
 
     // comments
     ...buildRuleGroup(
+      ['line_comment', 'multiline_comment', 'expr_line_comment', 'expr_multiline_comment'],
+      euiThemeVars.euiColorDisabledText
+    ),
+
+    // values
+    ...buildRuleGroup(
       [
-        'line_comment',
-        'multiline_comment',
-        'expr_line_comment',
-        'expr_multiline_comment',
-        'src_line_comment',
-        'src_multiline_comment',
+        'quoted_string',
+        'integer_literal',
+        'decimal_literal',
+        'named_or_positional_param',
+        'param',
+        'timespan_literal',
       ],
-      darkMode ? euiThemeVars.euiColorDarkestShade : euiThemeVars.euiColorMediumShade
+      euiThemeVars.euiColorSuccessText
     ),
   ],
-  colors: {},
+  colors: {
+    'editor.foreground': euiThemeVars.euiTextColor,
+    'editor.background': euiThemeVars.euiColorEmptyShade,
+    'editor.lineHighlightBackground': euiThemeVars.euiColorLightestShade,
+    'editor.lineHighlightBorder': euiThemeVars.euiColorLightestShade,
+    'editor.selectionHighlightBackground': euiThemeVars.euiColorLightestShade,
+    'editor.selectionHighlightBorder': euiThemeVars.euiColorLightShade,
+    'editorSuggestWidget.background': euiThemeVars.euiColorEmptyShade,
+    'editorSuggestWidget.border': euiThemeVars.euiColorEmptyShade,
+    'editorSuggestWidget.focusHighlightForeground': euiThemeVars.euiColorEmptyShade,
+    'editorSuggestWidget.foreground': euiThemeVars.euiTextColor,
+    'editorSuggestWidget.highlightForeground': euiThemeVars.euiColorPrimary,
+    'editorSuggestWidget.selectedBackground': euiThemeVars.euiColorPrimary,
+    'editorSuggestWidget.selectedForeground': euiThemeVars.euiColorEmptyShade,
+  },
 });

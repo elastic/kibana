@@ -22,11 +22,13 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
     complete: [
       ProductFeatureKey.advancedInsights,
       ProductFeatureKey.assistant,
+      ProductFeatureKey.attackDiscovery,
       ProductFeatureKey.investigationGuide,
       ProductFeatureKey.investigationGuideInteractions,
       ProductFeatureKey.threatIntelligence,
       ProductFeatureKey.casesConnectors,
       ProductFeatureKey.externalRuleActions,
+      ProductFeatureKey.integrationAssistant,
     ],
   },
   endpoint: {
@@ -44,7 +46,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
     ],
   },
   cloud: {
-    essentials: [],
+    essentials: [ProductFeatureKey.cloudSecurityPosture],
     complete: [],
   },
 } as const;

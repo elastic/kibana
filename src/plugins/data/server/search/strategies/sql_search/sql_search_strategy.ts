@@ -120,7 +120,7 @@ export const sqlSearchStrategyProvider = (
      * @throws `KbnSearchError`
      */
     search: (request, options: IAsyncSearchOptions, deps) => {
-      logger.debug(`sql search: search request=${JSON.stringify(request)}`);
+      logger.debug(() => `sql search: search request=${JSON.stringify(request)}`);
 
       return asyncSearch(request, options, deps);
     },

@@ -12,6 +12,10 @@ import { useToasts } from '../../../../common/lib/kibana';
 import { api } from '../../api';
 import { createReactQueryWrapper } from '../../../../common/mock';
 
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn(),
+}));
+
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../api');
 

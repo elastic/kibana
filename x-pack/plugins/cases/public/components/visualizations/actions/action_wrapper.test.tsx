@@ -11,7 +11,8 @@ import { SECURITY_SOLUTION_OWNER } from '../../../../common';
 import { canUseCases } from '../../../client/helpers/can_use_cases';
 import CasesProvider from '../../cases_context';
 import { ActionWrapper } from './action_wrapper';
-import { getMockCaseUiActionProps } from './mocks';
+import { getMockServices } from './mocks';
+import type { CasesActionContextProps } from './types';
 
 jest.mock('../../cases_context', () =>
   jest.fn().mockImplementation(({ children, ...props }) => <div {...props}>{children}</div>)
@@ -28,7 +29,11 @@ jest.mock('../../../client/helpers/can_use_cases', () => {
 const mockCasePermissions = jest.fn().mockReturnValue({ create: true, update: true });
 
 describe('ActionWrapper', () => {
-  const props = { ...getMockCaseUiActionProps(), currentAppId: 'securitySolutionUI' };
+  const props = {
+    casesActionContextProps: {} as unknown as CasesActionContextProps,
+    currentAppId: 'securitySolutionUI',
+    services: getMockServices(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();

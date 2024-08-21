@@ -63,7 +63,7 @@ describe('DataViewFieldEditorPlugin', () => {
     };
     const { openEditor } = plugin.start(coreStartMocked, pluginStart);
 
-    openEditor({ onSave: onSaveSpy, ctx: { dataView: {} as any } });
+    await openEditor({ onSave: onSaveSpy, ctx: { dataView: {} as any } });
 
     expect(openFlyout).toHaveBeenCalled();
 
@@ -82,7 +82,7 @@ describe('DataViewFieldEditorPlugin', () => {
   test('should return a handler to close the flyout', async () => {
     const { openEditor } = plugin.start(coreStart, pluginStart);
 
-    const closeEditorHandler = openEditor({ onSave: noop, ctx: { dataView: {} as any } });
+    const closeEditorHandler = await openEditor({ onSave: noop, ctx: { dataView: {} as any } });
     expect(typeof closeEditorHandler).toBe('function');
   });
 
@@ -118,7 +118,7 @@ describe('DataViewFieldEditorPlugin', () => {
       isPersisted: () => true,
     } as unknown as DataView;
 
-    openDeleteModal({
+    await openDeleteModal({
       onDelete: onDeleteSpy,
       ctx: { dataView: indexPatternMock },
       fieldName: ['a', 'b', 'c'],
@@ -147,7 +147,7 @@ describe('DataViewFieldEditorPlugin', () => {
   test('should return a handler to close the modal', async () => {
     const { openDeleteModal } = plugin.start(coreStart, pluginStart);
 
-    const closeModal = openDeleteModal({ fieldName: ['a'], ctx: { dataView: {} as any } });
+    const closeModal = await openDeleteModal({ fieldName: ['a'], ctx: { dataView: {} as any } });
     expect(typeof closeModal).toBe('function');
   });
 

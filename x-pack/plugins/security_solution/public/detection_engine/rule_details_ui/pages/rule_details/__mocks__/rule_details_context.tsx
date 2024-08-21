@@ -31,6 +31,8 @@ export const useRuleDetailsContextMock = {
           sortField: 'timestamp',
           sortDirection: 'desc',
         },
+        runTypeFilters: [],
+        showSourceEventTimeRange: true,
       },
       actions: {
         setEnd: jest.fn(),
@@ -45,6 +47,8 @@ export const useRuleDetailsContextMock = {
         setSortField: jest.fn(),
         setStart: jest.fn(),
         setStatusFilters: jest.fn(),
+        setRunTypeFilters: jest.fn(),
+        setShowSourceEventTimeRange: jest.fn(),
       },
     },
   }),

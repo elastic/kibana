@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiFormRow, EuiText, EuiBadge } from '@elastic/eui';
 import { useState, MutableRefObject, useCallback } from 'react';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { TagcloudState } from './types';
 import { PalettePanelContainer, PalettePicker } from '../../shared_components';

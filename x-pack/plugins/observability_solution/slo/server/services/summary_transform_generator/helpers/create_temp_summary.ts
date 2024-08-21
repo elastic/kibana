@@ -11,6 +11,7 @@ import * as t from 'io-ts';
 import { Indicator, IndicatorTypes, SLODefinition, Status } from '../../../domain/models';
 
 export interface EsSummaryDocument {
+  // apm specific fields
   service: {
     environment: string | null;
     name: string | null;
@@ -19,6 +20,18 @@ export interface EsSummaryDocument {
     name: string | null;
     type: string | null;
   };
+  // synthetics specific fields
+  monitor: {
+    config_id: string | null;
+    name: string | null;
+  };
+  observer: {
+    geo: {
+      name: string | null;
+    };
+    name: string | null;
+  };
+  // common fields
   slo: {
     // >= 8.14: Add indicator.params on the temporary summary as well as real summary through summary pipeline
     indicator: { type: IndicatorTypes } | Indicator;
@@ -50,6 +63,22 @@ export interface EsSummaryDocument {
   kibanaUrl?: string; // >= 8.14
   summaryUpdatedAt: string | null;
   latestSliTimestamp: string | null;
+  // >= 8.15
+  fiveMinuteBurnRate?: {
+    totalEvents: number;
+    goodEvents: number;
+    value: number;
+  };
+  oneHourBurnRate?: {
+    totalEvents: number;
+    goodEvents: number;
+    value: number;
+  };
+  oneDayBurnRate?: {
+    totalEvents: number;
+    goodEvents: number;
+    value: number;
+  };
 }
 
 export function createTempSummaryDocument(
@@ -60,6 +89,7 @@ export function createTempSummaryDocument(
   const apmParams = 'environment' in slo.indicator.params ? slo.indicator.params : null;
 
   const doc = {
+    // apm specific fields
     service: {
       environment: apmParams?.environment ?? null,
       name: apmParams?.service ?? null,
@@ -67,6 +97,17 @@ export function createTempSummaryDocument(
     transaction: {
       name: apmParams?.transactionName ?? null,
       type: apmParams?.transactionType ?? null,
+    },
+    // synthetics specific fields
+    monitor: {
+      name: null,
+      config_id: null,
+    },
+    observer: {
+      name: null,
+      geo: {
+        name: null,
+      },
     },
     slo: {
       // 8.14 adds indicator.params through transform summary pipeline, i.e. indicator.params might be undefined
@@ -106,6 +147,22 @@ export function createTempSummaryDocument(
     kibanaUrl: basePath.publicBaseUrl ?? '', // added in 8.14, i.e. might be undefined
     summaryUpdatedAt: null,
     latestSliTimestamp: null,
+    // Added in 8.15
+    fiveMinuteBurnRate: {
+      totalEvents: 0,
+      goodEvents: 0,
+      value: 0,
+    },
+    oneHourBurnRate: {
+      totalEvents: 0,
+      goodEvents: 0,
+      value: 0,
+    },
+    oneDayBurnRate: {
+      totalEvents: 0,
+      goodEvents: 0,
+      value: 0,
+    },
   };
 
   return doc;

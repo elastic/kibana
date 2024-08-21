@@ -45,6 +45,7 @@ describe('FindSLO', () => {
             "page": 1,
             "perPage": 25,
           },
+          undefined,
         ]
       `);
 
@@ -79,6 +80,7 @@ describe('FindSLO', () => {
             settings: {
               syncDelay: '1m',
               frequency: '1m',
+              preventInitialBackfill: false,
             },
             summary: {
               status: 'HEALTHY',
@@ -89,6 +91,9 @@ describe('FindSLO', () => {
                 remaining: 0.9,
                 isEstimated: false,
               },
+              fiveMinuteBurnRate: 0,
+              oneHourBurnRate: 0,
+              oneDayBurnRate: 0,
             },
             tags: ['critical', 'k8s'],
             createdAt: slo.createdAt.toISOString(),
@@ -139,6 +144,7 @@ describe('FindSLO', () => {
             "page": 2,
             "perPage": 10,
           },
+          undefined,
         ]
       `);
     });
@@ -177,6 +183,9 @@ function summarySearchResult(slo: SLODefinition): Paginated<SummaryResult> {
             remaining: 0.9,
             isEstimated: false,
           },
+          fiveMinuteBurnRate: 0,
+          oneHourBurnRate: 0,
+          oneDayBurnRate: 0,
         },
       },
     ],

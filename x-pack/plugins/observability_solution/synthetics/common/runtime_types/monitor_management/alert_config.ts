@@ -6,7 +6,6 @@
  */
 
 import * as t from 'io-ts';
-import { schema } from '@kbn/config-schema';
 
 export const AlertConfigCodec = t.intersection([
   t.interface({
@@ -20,17 +19,6 @@ export const AlertConfigCodec = t.intersection([
 export const AlertConfigsCodec = t.partial({
   tls: AlertConfigCodec,
   status: AlertConfigCodec,
-});
-
-export const AlertConfigSchema = schema.object({
-  tls: schema.maybe(
-    schema.object({
-      enabled: schema.boolean(),
-    })
-  ),
-  status: schema.object({
-    enabled: schema.boolean(),
-  }),
 });
 
 export type AlertConfig = t.TypeOf<typeof AlertConfigCodec>;

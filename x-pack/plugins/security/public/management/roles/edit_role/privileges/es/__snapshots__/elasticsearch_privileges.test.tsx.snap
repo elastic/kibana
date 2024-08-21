@@ -8,30 +8,27 @@ exports[`it renders correctly in serverless mode 1`] = `
   <EuiDescribedFormGroup
     description={
       <p>
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Manage the actions this role can perform against your cluster. "
           id="xpack.security.management.editRole.elasticSearchPrivileges.manageRoleActionsDescription"
-          values={Object {}}
         />
         <EuiLink
           className="editRole__learnMore"
           href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-privileges.html#privileges-list-cluster"
           target="_blank"
         >
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Learn more"
             id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
-            values={Object {}}
           />
         </EuiLink>
       </p>
     }
     title={
       <h3>
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Cluster privileges"
           id="xpack.security.management.editRole.elasticSearchPrivileges.clusterPrivilegesTitle"
-          values={Object {}}
         />
       </h3>
     }
@@ -59,6 +56,7 @@ exports[`it renders correctly in serverless mode 1`] = `
             "elasticsearch": Object {
               "cluster": Array [],
               "indices": Array [],
+              "remote_cluster": Array [],
               "run_as": Array [],
             },
             "kibana": Array [],
@@ -73,10 +71,9 @@ exports[`it renders correctly in serverless mode 1`] = `
     size="xs"
   >
     <h3>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Index privileges"
         id="xpack.security.management.editRole.elasticSearchPrivileges.indexPrivilegesTitle"
-        values={Object {}}
       />
     </h3>
   </EuiTitle>
@@ -88,20 +85,18 @@ exports[`it renders correctly in serverless mode 1`] = `
     size="s"
   >
     <p>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Control access to the data in your cluster. "
         id="xpack.security.management.editRole.elasticSearchPrivileges.controlAccessToClusterDataDescription"
-        values={Object {}}
       />
       <EuiLink
         className="editRole__learnMore"
         href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-privileges.html#privileges-list-indices"
         target="_blank"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Learn more"
           id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
-          values={Object {}}
         />
       </EuiLink>
     </p>
@@ -129,6 +124,7 @@ exports[`it renders correctly in serverless mode 1`] = `
           "_subscribe": [Function],
         },
         "getFeatures": [MockFunction],
+        "getLicenseType": [MockFunction],
         "getUnavailableReason": [MockFunction],
         "hasAtLeast": [MockFunction],
         "isEnabled": [MockFunction],
@@ -141,6 +137,7 @@ exports[`it renders correctly in serverless mode 1`] = `
         "elasticsearch": Object {
           "cluster": Array [],
           "indices": Array [],
+          "remote_cluster": Array [],
           "run_as": Array [],
         },
         "kibana": Array [],
@@ -164,30 +161,27 @@ exports[`it renders without crashing 1`] = `
   <EuiDescribedFormGroup
     description={
       <p>
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Manage the actions this role can perform against your cluster. "
           id="xpack.security.management.editRole.elasticSearchPrivileges.manageRoleActionsDescription"
-          values={Object {}}
         />
         <EuiLink
           className="editRole__learnMore"
           href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-privileges.html#privileges-list-cluster"
           target="_blank"
         >
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Learn more"
             id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
-            values={Object {}}
           />
         </EuiLink>
       </p>
     }
     title={
       <h3>
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Cluster privileges"
           id="xpack.security.management.editRole.elasticSearchPrivileges.clusterPrivilegesTitle"
-          values={Object {}}
         />
       </h3>
     }
@@ -215,6 +209,7 @@ exports[`it renders without crashing 1`] = `
             "elasticsearch": Object {
               "cluster": Array [],
               "indices": Array [],
+              "remote_cluster": Array [],
               "run_as": Array [],
             },
             "kibana": Array [],
@@ -228,30 +223,27 @@ exports[`it renders without crashing 1`] = `
   <EuiDescribedFormGroup
     description={
       <p>
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Allow requests to be submitted on the behalf of other users. "
           id="xpack.security.management.editRole.elasticSearchPrivileges.howToBeSubmittedOnBehalfOfOtherUsersDescription"
-          values={Object {}}
         />
         <EuiLink
           className="editRole__learnMore"
           href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-privileges.html#_run_as_privilege"
           target="_blank"
         >
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Learn more"
             id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
-            values={Object {}}
           />
         </EuiLink>
       </p>
     }
     title={
       <h3>
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Run As privileges"
           id="xpack.security.management.editRole.elasticSearchPrivileges.runAsPrivilegesTitle"
-          values={Object {}}
         />
       </h3>
     }
@@ -278,10 +270,9 @@ exports[`it renders without crashing 1`] = `
     size="xs"
   >
     <h3>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Index privileges"
         id="xpack.security.management.editRole.elasticSearchPrivileges.indexPrivilegesTitle"
-        values={Object {}}
       />
     </h3>
   </EuiTitle>
@@ -293,20 +284,18 @@ exports[`it renders without crashing 1`] = `
     size="s"
   >
     <p>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Control access to the data in your cluster. "
         id="xpack.security.management.editRole.elasticSearchPrivileges.controlAccessToClusterDataDescription"
-        values={Object {}}
       />
       <EuiLink
         className="editRole__learnMore"
         href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-privileges.html#privileges-list-indices"
         target="_blank"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Learn more"
           id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
-          values={Object {}}
         />
       </EuiLink>
     </p>
@@ -334,6 +323,7 @@ exports[`it renders without crashing 1`] = `
           "_subscribe": [Function],
         },
         "getFeatures": [MockFunction],
+        "getLicenseType": [MockFunction],
         "getUnavailableReason": [MockFunction],
         "hasAtLeast": [MockFunction],
         "isEnabled": [MockFunction],
@@ -346,6 +336,7 @@ exports[`it renders without crashing 1`] = `
         "elasticsearch": Object {
           "cluster": Array [],
           "indices": Array [],
+          "remote_cluster": Array [],
           "run_as": Array [],
         },
         "kibana": Array [],

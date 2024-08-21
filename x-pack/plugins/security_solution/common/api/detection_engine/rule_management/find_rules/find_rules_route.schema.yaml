@@ -5,9 +5,11 @@ info:
 paths:
   /api/detection_engine/rules/_find:
     get:
-      operationId: FindRules
+      x-labels: [ess, serverless]
       x-codegen-enabled: true
-      description: Finds rules that match the given query.
+      operationId: FindRules
+      summary: List all detection rules
+      description: Retrieve a paginated list of detection rules. By default, the first page is returned, with 20 results per page.
       tags:
         - Rules API
       parameters:

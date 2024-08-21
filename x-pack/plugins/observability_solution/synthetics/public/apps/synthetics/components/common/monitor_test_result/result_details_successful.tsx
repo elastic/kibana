@@ -25,14 +25,22 @@ export const ResultDetailsSuccessful = ({
 }) => {
   const { euiTheme } = useEuiTheme();
 
+  const timestamp = step['@timestamp'];
+  const monitorId = step.monitor.id;
+  const stepIndex = Number(step.synthetics.step?.index);
+  const location = step.observer?.geo?.name;
+
   const { data, loading } = useFetcher(() => {
     return fetchLastSuccessfulCheck({
-      timestamp: step['@timestamp'],
-      monitorId: step.monitor.id,
-      stepIndex: Number(step.synthetics.step?.index),
-      location: step.observer?.geo?.name,
+      timestamp,
+      monitorId,
+      stepIndex,
+      location,
     });
-  }, [step._id, step['@timestamp']]);
+    // FIXME: Dario is not sure what step._id is being used for,
+    // so he'll leave it in place
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timestamp, monitorId, stepIndex, location, step._id]);
 
   const { currentStep } = useJourneySteps(
     data?.monitor.check_group,

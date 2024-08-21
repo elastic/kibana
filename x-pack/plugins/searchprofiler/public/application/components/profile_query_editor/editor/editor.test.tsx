@@ -8,12 +8,16 @@
 import 'brace';
 import 'brace/mode/json';
 
+import { coreMock } from '@kbn/core/public/mocks';
 import { registerTestBed } from '@kbn/test-jest-helpers';
 import { Editor, Props } from './editor';
+
+const coreStart = coreMock.createStart();
 
 describe('Editor Component', () => {
   it('renders', async () => {
     const props: Props = {
+      ...coreStart,
       initialValue: '',
       licenseEnabled: true,
       onEditorReady: (e: any) => {},

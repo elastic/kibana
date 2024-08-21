@@ -36,7 +36,7 @@ export function periodToMs(schedule: { number: string; unit: Unit }) {
  * @returns The counts of up/down/disabled monitor by location, and a map of each monitor:location status.
  */
 export async function getStatus(context: RouteContext, params: OverviewStatusQuery) {
-  const { uptimeEsClient, syntheticsMonitorClient, savedObjectsClient, server } = context;
+  const { syntheticsEsClient, syntheticsMonitorClient, savedObjectsClient, server } = context;
 
   const { query, scopeStatusByLocation = true } = params;
 
@@ -97,7 +97,7 @@ export async function getStatus(context: RouteContext, params: OverviewStatusQue
   };
 
   const { up, down, pending, upConfigs, downConfigs, pendingConfigs } = await queryMonitorStatus(
-    uptimeEsClient,
+    syntheticsEsClient,
     listOfLocationAfterFilter,
     range,
     enabledMonitorQueryIds,

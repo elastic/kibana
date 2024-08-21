@@ -6,7 +6,14 @@
  */
 
 import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
-import { EuiBadge, EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -34,6 +41,7 @@ type Option = EuiComboBoxOptionOption<{
   isSystem: boolean;
   isAdmin: boolean;
   deprecatedReason?: string;
+  description?: string;
 }>;
 
 export const RoleComboBox = (props: Props) => {
@@ -57,6 +65,7 @@ export const RoleComboBox = (props: Props) => {
         isSystem,
         isAdmin,
         deprecatedReason: roleDefinition?.metadata?._deprecated_reason,
+        description: roleDefinition?.description,
       },
     };
   };
@@ -134,7 +143,15 @@ export const RoleComboBox = (props: Props) => {
 function renderOption(option: Option) {
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-      <EuiFlexItem>{option.label}</EuiFlexItem>
+      <EuiFlexItem>
+        {option.value?.description ? (
+          <EuiToolTip position="left" content={option.value?.description}>
+            <EuiText size="s">{option.label}</EuiText>
+          </EuiToolTip>
+        ) : (
+          <EuiText size="s">{option.label}</EuiText>
+        )}
+      </EuiFlexItem>
       {option.value?.isDeprecated ? (
         <EuiFlexItem grow={false}>
           <EuiBadge color={option.color}>

@@ -20,9 +20,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-common.Plugin",
+            "section": "def-public.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -63,9 +63,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-plugins-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCorePluginsBrowserPluginApi",
-                    "section": "def-common.PluginInitializerContext",
+                    "section": "def-public.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<",
@@ -587,9 +587,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any> | undefined"
@@ -1864,9 +1864,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsClientContract",
+                "section": "def-server.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
               }
             ],
@@ -2305,9 +2305,9 @@
           "(source: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.KibanaRequest",
+            "section": "def-server.KibanaRequest",
             "text": "KibanaRequest"
           },
           "<unknown, unknown, unknown, any>) => ",
@@ -2327,9 +2327,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>"
@@ -2421,6 +2421,39 @@
               ", \"name\">"
             ],
             "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-server.getBasicAuthHeader",
+        "type": "Function",
+        "tags": [],
+        "label": "getBasicAuthHeader",
+        "description": [],
+        "signature": [
+          "({ username, password }: GetBasicAuthHeaderArgs) => { Authorization: string; }"
+        ],
+        "path": "x-pack/plugins/actions/server/lib/get_basic_auth_header.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.getBasicAuthHeader.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ username, password }",
+            "description": [],
+            "signature": [
+              "GetBasicAuthHeaderArgs"
+            ],
+            "path": "x-pack/plugins/actions/server/lib/get_basic_auth_header.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3066,9 +3099,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any> | undefined"
@@ -3438,9 +3471,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any> | undefined"
@@ -3844,6 +3877,62 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "actions",
+          "id": "def-server.PluginSetupContract.isActionTypeEnabled",
+          "type": "Function",
+          "tags": [],
+          "label": "isActionTypeEnabled",
+          "description": [],
+          "signature": [
+            "(id: string, options?: { notifyUsage: boolean; } | undefined) => boolean"
+          ],
+          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "actions",
+              "id": "def-server.PluginSetupContract.isActionTypeEnabled.$1",
+              "type": "string",
+              "tags": [],
+              "label": "id",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "actions",
+              "id": "def-server.PluginSetupContract.isActionTypeEnabled.$2",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [],
+              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "children": [
+                {
+                  "parentPluginId": "actions",
+                  "id": "def-server.PluginSetupContract.isActionTypeEnabled.$2.notifyUsage",
+                  "type": "boolean",
+                  "tags": [],
+                  "label": "notifyUsage",
+                  "description": [],
+                  "path": "x-pack/plugins/actions/server/plugin.ts",
+                  "deprecated": false,
+                  "trackAdoption": false
+                }
+              ]
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -4014,9 +4103,9 @@
             "(request: ",
             {
               "pluginId": "@kbn/core-http-server",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-common.KibanaRequest",
+              "section": "def-server.KibanaRequest",
               "text": "KibanaRequest"
             },
             "<unknown, unknown, unknown, any>) => Promise<",
@@ -4051,9 +4140,9 @@
               "signature": [
                 {
                   "pluginId": "@kbn/core-http-server",
-                  "scope": "common",
+                  "scope": "server",
                   "docId": "kibKbnCoreHttpServerPluginApi",
-                  "section": "def-common.KibanaRequest",
+                  "section": "def-server.KibanaRequest",
                   "text": "KibanaRequest"
                 },
                 "<unknown, unknown, unknown, any>"
@@ -4077,9 +4166,9 @@
             "(request: ",
             {
               "pluginId": "@kbn/core-http-server",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-common.KibanaRequest",
+              "section": "def-server.KibanaRequest",
               "text": "KibanaRequest"
             },
             "<unknown, unknown, unknown, any>) => ",
@@ -4114,9 +4203,9 @@
               "signature": [
                 {
                   "pluginId": "@kbn/core-http-server",
-                  "scope": "common",
+                  "scope": "server",
                   "docId": "kibKbnCoreHttpServerPluginApi",
-                  "section": "def-common.KibanaRequest",
+                  "section": "def-server.KibanaRequest",
                   "text": "KibanaRequest"
                 },
                 "<unknown, unknown, unknown, any>"

@@ -38,11 +38,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/166291
-    describe.skip('not found', () => {
+    describe('not found', () => {
       it('should redirect to main page when trying to access invalid route', async () => {
         await PageObjects.common.navigateToUrl('discover', '#/invalid-route', {
           useActualUrl: true,
+          ensureCurrentUrl: false,
         });
         await PageObjects.header.awaitKibanaChrome();
 

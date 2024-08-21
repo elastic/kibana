@@ -33,6 +33,7 @@ import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../../../../common/constants';
 import type { Sort } from '../../../timelines/components/timeline/body/sort';
 import type {
@@ -49,8 +50,8 @@ import { inputsActions } from '../../store/actions';
 import { InspectButtonContainer } from '../inspect';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { eventsViewerSelector } from './selectors';
-import type { SourcererScopeName } from '../../store/sourcerer/model';
-import { useSourcererDataView } from '../../containers/sourcerer';
+import type { SourcererScopeName } from '../../../sourcerer/store/model';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { useKibana } from '../../lib/kibana';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
@@ -179,7 +180,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     browserFields,
     dataViewId,
     indexPattern,
-    runtimeMappings,
+    sourcererDataView,
     selectedPatterns,
     dataViewId: selectedDataViewId,
     loading: isLoadingIndexPattern,
@@ -219,8 +220,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     scopeId: tableId,
   });
 
-  const { DetailsPanel, SessionView } = useSessionView({
-    entityType,
+  const { SessionView } = useSessionView({
     scopeId: tableId,
   });
 
@@ -316,7 +316,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
       id: tableId,
       indexNames: indexNames ?? selectedPatterns,
       limit: itemsPerPage,
-      runtimeMappings,
+      runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
       skip: !canQueryTimeline,
       sort: sortField,
       startDate: start,
@@ -617,7 +617,6 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
           </StyledEuiPanel>
         </InspectButtonContainer>
       </FullScreenContainer>
-      {DetailsPanel}
     </>
   );
 };

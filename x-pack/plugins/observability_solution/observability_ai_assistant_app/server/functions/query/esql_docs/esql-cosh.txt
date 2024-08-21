@@ -1,12 +1,21 @@
-COSH
+## COSH
 
-Syntax
-Parameters
-angle
-An angle, in radians. If null, the function returns null.
-DescriptionReturns the hyperbolic cosine of an angle.Supported types
-Example
+The `COSH` function in ES|QL returns the hyperbolic cosine of an angle. The angle should be provided in radians. If the provided angle is null, the function will return null.
+
+### Examples
+
+Here are a couple of examples of how you can use the `COSH` function in ES|QL:
+
 ```esql
 ROW a=1.8
-| EVAL cosh=COSH(a)
+| EVAL cosh = COSH(a)
 ```
+
+In this example, the `COSH` function is used to calculate the hyperbolic cosine of the angle `1.8` radians.
+
+```esql
+ROW a=0
+| EVAL cosh = COSH(a)
+```
+
+In this second example, the `COSH` function is used to calculate the hyperbolic cosine of the angle `0` radians.

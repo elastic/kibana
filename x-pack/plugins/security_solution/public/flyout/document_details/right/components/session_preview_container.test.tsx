@@ -8,7 +8,7 @@
 import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import React from 'react';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { SessionPreviewContainer } from './session_preview_container';
 import { useSessionPreview } from '../hooks/use_session_preview';
 import { useLicense } from '../../../../common/hooks/use_license';
@@ -32,7 +32,7 @@ const UPSELL_TEXT = 'This feature requires an Enterprise subscription';
 
 const panelContextValue = {
   getFieldsData: mockGetFieldsData,
-} as unknown as RightPanelContext;
+} as unknown as DocumentDetailsContext;
 
 const sessionViewConfig = {
   index: {},
@@ -43,9 +43,9 @@ const sessionViewConfig = {
 const renderSessionPreview = (context = panelContextValue) =>
   render(
     <TestProviders>
-      <RightPanelContext.Provider value={context}>
+      <DocumentDetailsContext.Provider value={context}>
         <SessionPreviewContainer />
-      </RightPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 

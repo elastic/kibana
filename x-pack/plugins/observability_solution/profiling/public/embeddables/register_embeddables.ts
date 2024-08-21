@@ -5,37 +5,36 @@
  * 2.0.
  */
 
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import {
   EMBEDDABLE_FLAMEGRAPH,
   EMBEDDABLE_FUNCTIONS,
   EMBEDDABLE_PROFILING_SEARCH_BAR,
   EMBEDDABLE_STACK_TRACES,
 } from '@kbn/observability-shared-plugin/public';
-import { EmbeddableFlamegraphFactory } from './flamegraph/embeddable_flamegraph_factory';
-import { EmbeddableFunctionsFactory } from './functions/embeddable_functions_factory';
-import { GetProfilingEmbeddableDependencies } from './profiling_embeddable_provider';
-import { EmbeddableSearchBarFactory } from './search_bar/embeddable_search_bar_factory';
-import { EmbeddableStackTracesFactory } from './stack_traces/embeddable_stack_traces_factory';
+import { getEmbeddableFlamegraphComponent } from './flamegraph';
+import { getEmbeddableFunctionsComponent } from './functions';
+import { ProfilingEmbeddablesDependencies } from './profiling_embeddable_provider';
+import { getEmbeddableStackTracesComponent } from './stack_traces';
+import { getEmbeddableSearchBarComponent } from './search_bar';
 
-export function registerEmbeddables(
-  embeddable: EmbeddableSetup,
-  getProfilingEmbeddableDependencies: GetProfilingEmbeddableDependencies
-) {
-  embeddable.registerEmbeddableFactory(
+export function registerEmbeddables(deps: ProfilingEmbeddablesDependencies) {
+  const {
+    pluginsSetup: { observabilityShared },
+  } = deps;
+  observabilityShared.registerProfilingComponent(
     EMBEDDABLE_FLAMEGRAPH,
-    new EmbeddableFlamegraphFactory(getProfilingEmbeddableDependencies)
+    getEmbeddableFlamegraphComponent(deps)
   );
-  embeddable.registerEmbeddableFactory(
+  observabilityShared.registerProfilingComponent(
     EMBEDDABLE_FUNCTIONS,
-    new EmbeddableFunctionsFactory(getProfilingEmbeddableDependencies)
+    getEmbeddableFunctionsComponent(deps)
   );
-  embeddable.registerEmbeddableFactory(
+  observabilityShared.registerProfilingComponent(
     EMBEDDABLE_PROFILING_SEARCH_BAR,
-    new EmbeddableSearchBarFactory(getProfilingEmbeddableDependencies)
+    getEmbeddableSearchBarComponent(deps)
   );
-  embeddable.registerEmbeddableFactory(
+  observabilityShared.registerProfilingComponent(
     EMBEDDABLE_STACK_TRACES,
-    new EmbeddableStackTracesFactory(getProfilingEmbeddableDependencies)
+    getEmbeddableStackTracesComponent(deps)
   );
 }

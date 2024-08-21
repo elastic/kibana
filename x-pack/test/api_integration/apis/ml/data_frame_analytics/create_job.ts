@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   const jobTypes = Object.values(ANALYSIS_CONFIG_TYPE);
-  type JobType = typeof jobTypes[number];
+  type JobType = (typeof jobTypes)[number];
   const jobAnalyses = {
     classification: {
       dependent_variable: 'y',

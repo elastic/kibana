@@ -14,6 +14,8 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { esTestConfig } from '@kbn/test';
 import { CliArgs } from '@kbn/config';
+import { kibanaDevServiceAccount } from '@kbn/dev-utils';
+import { systemIndicesSuperuser } from '@kbn/test';
 import { createRoot, type TestElasticsearchUtils, type TestKibanaUtils } from './create_root';
 
 export type TestServerlessESUtils = Pick<TestElasticsearchUtils, 'stop' | 'es'> & {
@@ -27,7 +29,6 @@ export interface TestServerlessUtils {
 }
 
 const ES_BASE_PATH_DIR = Path.join(REPO_ROOT, '.es/es_test_serverless');
-
 const projectType: ServerlessProjectType = 'es';
 
 /**
@@ -38,13 +39,18 @@ const projectType: ServerlessProjectType = 'es';
  */
 export function createTestServerlessInstances({
   adjustTimeout,
+  kibana = {},
 }: {
-  adjustTimeout: (timeout: number) => void;
-}): TestServerlessUtils {
+  kibana?: {
+    settings?: {};
+    cliArgs?: Partial<CliArgs>;
+  };
+  adjustTimeout?: (timeout: number) => void;
+} = {}): TestServerlessUtils {
   adjustTimeout?.(150_000);
 
   const esUtils = createServerlessES();
-  const kbUtils = createServerlessKibana();
+  const kbUtils = createServerlessKibana(kibana.settings, kibana.cliArgs);
 
   return {
     startES: async () => {
@@ -92,8 +98,6 @@ function createServerlessES() {
         kill: true,
         waitForReady: true,
         ...esServerlessImageParams,
-        // security is enabled by default, if needed kibana requires serviceAccountToken
-        esArgs: ['xpack.security.enabled=false'],
       });
       const client = getServerlessESClient({ port: esPort });
 
@@ -111,6 +115,7 @@ const getServerlessESClient = ({ port }: { port: number }) => {
   return new Client({
     node: `http://localhost:${port}`,
     Connection: HttpConnection,
+    auth: { ...systemIndicesSuperuser },
   });
 };
 
@@ -125,6 +130,7 @@ const getServerlessDefault = () => {
     },
     elasticsearch: {
       hosts: [`http://localhost:${esTestConfig.getPort()}`],
+      serviceAccountToken: kibanaDevServiceAccount.token,
     },
     migrations: {
       algorithm: 'zdt',

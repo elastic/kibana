@@ -54,7 +54,7 @@ class FollowerIndexUnfollowProviderUi extends PureComponent {
       ? i18n.translate(
           'xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.unfollowSingleTitle',
           {
-            defaultMessage: `Unfollow leader index of '{name}'?`,
+            defaultMessage: `Unfollow leader index of ''{name}''?`,
             values: { name: ids[0] },
           }
         )

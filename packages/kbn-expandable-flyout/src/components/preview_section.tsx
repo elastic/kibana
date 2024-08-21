@@ -14,6 +14,7 @@ import {
   EuiText,
   useEuiTheme,
   EuiSplitPanel,
+  transparentize,
 } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
@@ -69,10 +70,6 @@ interface PreviewSectionProps {
    */
   leftPosition: number;
   /**
-   * Display the back button in the header
-   */
-  showBackButton: boolean;
-  /**
    * Preview banner shown at the top of preview panel
    */
   banner?: PreviewBanner;
@@ -84,7 +81,6 @@ interface PreviewSectionProps {
  */
 export const PreviewSection: React.FC<PreviewSectionProps> = ({
   component,
-  showBackButton,
   leftPosition,
   banner,
 }: PreviewSectionProps) => {
@@ -103,7 +99,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
       />
     </EuiFlexItem>
   );
-  const header = showBackButton ? (
+  const header = (
     <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
@@ -119,18 +115,14 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
       </EuiFlexItem>
       {closeButton}
     </EuiFlexGroup>
-  ) : (
-    <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-      {closeButton}
-    </EuiFlexGroup>
   );
 
   return (
     <div
       css={css`
         position: absolute;
-        top: 4px;
-        bottom: 12px;
+        top: 8px;
+        bottom: 8px;
         right: 4px;
         left: ${left}px;
         z-index: 1000;
@@ -139,22 +131,22 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
       <EuiSplitPanel.Outer
         css={css`
           margin: ${euiTheme.size.xs};
-          box-shadow: 0 0 4px 4px ${euiTheme.colors.darkShade};
+          box-shadow: 0 0 16px 0px ${transparentize(euiTheme.colors.mediumShade, 0.5)};
         `}
-        className="eui-yScroll"
         data-test-subj={PREVIEW_SECTION_TEST_ID}
+        className="eui-fullHeight"
       >
         {isPreviewBanner(banner) && (
           <EuiSplitPanel.Inner
             grow={false}
             color={banner.backgroundColor}
-            paddingSize="none"
+            paddingSize="xs"
             data-test-subj={`${PREVIEW_SECTION_TEST_ID}BannerPanel`}
           >
             <EuiText
               textAlign="center"
               color={banner.textColor}
-              size="s"
+              size="xs"
               data-test-subj={`${PREVIEW_SECTION_TEST_ID}BannerText`}
             >
               {banner.title}
@@ -168,7 +160,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
         >
           {header}
         </EuiSplitPanel.Inner>
-        <EuiSplitPanel.Inner paddingSize="none">{component}</EuiSplitPanel.Inner>
+        {component}
       </EuiSplitPanel.Outer>
     </div>
   );

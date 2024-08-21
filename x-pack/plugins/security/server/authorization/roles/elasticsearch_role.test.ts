@@ -16,6 +16,7 @@ const roles = [
   {
     name: 'global-base-all',
     cluster: [],
+    remote_cluster: [],
     indices: [],
     applications: [
       {
@@ -33,6 +34,7 @@ const roles = [
   {
     name: 'global-base-read',
     cluster: [],
+    remote_cluster: [],
     indices: [],
     applications: [
       {
@@ -50,6 +52,7 @@ const roles = [
   {
     name: 'global-foo-all',
     cluster: [],
+    remote_cluster: [],
     indices: [],
     applications: [
       {
@@ -67,6 +70,7 @@ const roles = [
   {
     name: 'global-foo-read',
     cluster: [],
+    remote_cluster: [],
     indices: [],
     applications: [
       {
@@ -84,6 +88,7 @@ const roles = [
   {
     name: 'global-malformed',
     cluster: [],
+    remote_cluster: [],
     indices: [],
     applications: [
       {
@@ -101,6 +106,7 @@ const roles = [
   {
     name: 'default-base-all',
     cluster: [],
+    remote_cluster: [],
     indices: [],
     applications: [
       {
@@ -118,6 +124,7 @@ const roles = [
   {
     name: 'default-base-read',
     cluster: [],
+    remote_cluster: [],
     indices: [],
     applications: [
       {
@@ -135,6 +142,7 @@ const roles = [
   {
     name: 'default-foo-all',
     cluster: [],
+    remote_cluster: [],
     indices: [],
     applications: [
       {
@@ -152,6 +160,7 @@ const roles = [
   {
     name: 'default-foo-read',
     cluster: [],
+    remote_cluster: [],
     indices: [],
     applications: [
       {
@@ -169,6 +178,7 @@ const roles = [
   {
     name: 'default-malformed',
     cluster: [],
+    remote_cluster: [],
     indices: [],
     applications: [
       {
@@ -294,6 +304,7 @@ describe('#transformElasticsearchRoleToRole', () => {
     const role = {
       name: 'global-all',
       cluster: [],
+      remote_cluster: [],
       indices: [],
       applications: [
         {

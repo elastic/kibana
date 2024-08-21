@@ -8,10 +8,13 @@
 jest.mock('./nav', () => ({
   useAppSearchNav: () => [],
 }));
+import '../../../__mocks__/shallow_useeffect.mock';
+import { setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
+import { of } from 'rxjs';
 
 import { SetAppSearchChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper } from '../../../shared/layout';
@@ -19,7 +22,16 @@ import { SendAppSearchTelemetry } from '../../../shared/telemetry';
 
 import { AppSearchPageTemplate } from './page_template';
 
+const mockValues = {
+  getChromeStyle$: () => of('classic'),
+  updateSideNavDefinition: jest.fn(),
+};
+
 describe('AppSearchPageTemplate', () => {
+  beforeEach(() => {
+    setMockValues({ ...mockValues });
+  });
+
   it('renders', () => {
     const wrapper = shallow(
       <AppSearchPageTemplate>

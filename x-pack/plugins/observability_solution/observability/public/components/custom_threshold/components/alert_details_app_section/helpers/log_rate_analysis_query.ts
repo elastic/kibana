@@ -10,12 +10,10 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { getGroupFilters } from '../../../../../../common/custom_threshold_rule/helpers/get_group';
 import { Aggregators } from '../../../../../../common/custom_threshold_rule/types';
 import { buildEsQuery } from '../../../../../utils/build_es_query';
-import type {
-  CustomThresholdExpressionMetric,
-  Group,
-} from '../../../../../../common/custom_threshold_rule/types';
+import type { CustomThresholdExpressionMetric } from '../../../../../../common/custom_threshold_rule/types';
 import type { TopAlert } from '../../../../../typings/alerts';
 import type { CustomThresholdRuleTypeParams } from '../../../types';
+import { Group } from '../../../../../../common/typings';
 
 const getKuery = (metrics: CustomThresholdExpressionMetric[], filter?: string) => {
   let query = '';

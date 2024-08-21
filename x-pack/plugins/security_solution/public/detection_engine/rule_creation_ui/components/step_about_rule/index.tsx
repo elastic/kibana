@@ -42,7 +42,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useRuleIndices } from '../../../rule_management/logic/use_rule_indices';
 import { EsqlAutocomplete } from '../esql_autocomplete';
 import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
-import { useInvestigationFields } from '../../hooks/use_investigation_fields';
+import { useAllEsqlRuleFields } from '../../hooks';
 import { MaxSignals } from '../max_signals';
 
 const CommonUseField = getUseField({ component: Field });
@@ -133,10 +133,11 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     [getFields]
   );
 
-  const { investigationFields, isLoading: isInvestigationFieldsLoading } = useInvestigationFields({
-    esqlQuery: isEsqlRuleValue ? esqlQuery : undefined,
-    indexPatternsFields: indexPattern.fields,
-  });
+  const { fields: investigationFields, isLoading: isInvestigationFieldsLoading } =
+    useAllEsqlRuleFields({
+      esqlQuery: isEsqlRuleValue ? esqlQuery : undefined,
+      indexPatternsFields: indexPattern.fields,
+    });
 
   return (
     <>

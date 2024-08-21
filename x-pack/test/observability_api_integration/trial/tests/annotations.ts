@@ -33,7 +33,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
     }
   }
 
-  describe('Observability annotations', () => {
+  describe('ObservabilityAnnotations', () => {
     describe('when creating an annotation', () => {
       afterEach(async () => {
         const indexExists = await es.indices.exists({ index: DEFAULT_INDEX_NAME });
@@ -105,12 +105,9 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
         expect(response.body).to.eql({
           _index,
           _id,
-          _primary_term: 1,
-          _seq_no: 0,
-          _version: 1,
-          found: true,
           _source: {
             annotation: {
+              title: 'test message',
               type: 'deployment',
             },
             '@timestamp': timestamp,

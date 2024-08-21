@@ -15,6 +15,7 @@ import {
   EuiLoadingSpinner,
   EuiTitle,
   EuiCallOut,
+  EuiScreenReaderLive,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -153,6 +154,13 @@ function getButtonContent({
   journeyStarted,
   completedSteps,
 }: CheckGroupResult) {
+  const completedText = i18n.translate('xpack.synthetics.monitorManagement.stepCompleted', {
+    defaultMessage: '{stepCount, number} {stepCount, plural, one {step} other {steps}}  completed',
+    values: {
+      stepCount: completedSteps ?? 0,
+    },
+  });
+
   return (
     <div>
       <TestResultHeader
@@ -165,16 +173,9 @@ function getButtonContent({
       />
       <EuiText size="s">
         <p>
-          <EuiText color="subdued">
-            {i18n.translate('xpack.synthetics.monitorManagement.stepCompleted', {
-              defaultMessage:
-                '{stepCount, number} {stepCount, plural, one {step} other {steps}}  completed',
-              values: {
-                stepCount: completedSteps ?? 0,
-              },
-            })}
-          </EuiText>
+          <EuiText color="subdued">{completedText}</EuiText>
         </p>
+        <EuiScreenReaderLive>{completedText}</EuiScreenReaderLive>
       </EuiText>
     </div>
   );

@@ -35,6 +35,7 @@ interface VisTypeListEntry {
 }
 
 interface AggBasedSelectionProps {
+  openedAsRoot?: boolean;
   onVisTypeSelected: (visType: BaseVisType) => void;
   visTypesRegistry: TypesStart;
   toggleGroups: (flag: boolean) => void;
@@ -58,13 +59,15 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             <FormattedMessage
-              id="visualizations.newVisWizard.title"
-              defaultMessage="New visualization"
+              id="visualizations.newAggVisWizard.title"
+              defaultMessage="New aggregation based visualization"
             />
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
-          <DialogNavigation goBack={() => this.props.toggleGroups(true)} />
+          {this.props.openedAsRoot ? null : (
+            <DialogNavigation goBack={() => this.props.toggleGroups(true)} />
+          )}
           <EuiFieldSearch
             placeholder="Filter"
             value={query}

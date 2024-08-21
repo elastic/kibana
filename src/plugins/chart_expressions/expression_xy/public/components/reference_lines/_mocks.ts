@@ -25,10 +25,10 @@ const stringToAxesId = { l: 'yLeft', r: 'yRight', x: 'x' } as const;
 const posToId = { left: 'yLeft', right: 'yRight', bottom: 'x' } as const;
 
 export type StringPos = keyof typeof stringToPos;
-export type PosType = typeof stringToPos[StringPos];
+export type PosType = (typeof stringToPos)[StringPos];
 
 export type StringId = keyof typeof stringToAxesId;
-export type AxisTypeId = typeof stringToAxesId[StringId];
+export type AxisTypeId = (typeof stringToAxesId)[StringId];
 
 function buildPositionObject<T extends unknown>(
   posString: string,

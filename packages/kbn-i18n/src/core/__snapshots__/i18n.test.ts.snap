@@ -1,51 +1,96 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`I18n engine addMessages should throw error if locale is not specified or empty 1`] = `"[I18n] A \`locale\` must be a non-empty string to add messages."`;
-
-exports[`I18n engine addMessages should throw error if locale is not specified or empty 2`] = `"[I18n] A \`locale\` must be a non-empty string to add messages."`;
-
-exports[`I18n engine addMessages should throw error if locale specified in messages is different from one provided as second argument 1`] = `"[I18n] A \`locale\` in the translation object is different from the one provided as a second argument."`;
-
-exports[`I18n engine translate should throw error if id is not a non-empty string 1`] = `"[I18n] An \`id\` must be a non-empty string to translate a message."`;
-
-exports[`I18n engine translate should throw error if id is not a non-empty string 2`] = `"[I18n] An \`id\` must be a non-empty string to translate a message."`;
-
-exports[`I18n engine translate should throw error if id is not a non-empty string 3`] = `"[I18n] An \`id\` must be a non-empty string to translate a message."`;
-
-exports[`I18n engine translate should throw error if id is not a non-empty string 4`] = `"[I18n] An \`id\` must be a non-empty string to translate a message."`;
-
-exports[`I18n engine translate should throw error if id is not a non-empty string 5`] = `"[I18n] An \`id\` must be a non-empty string to translate a message."`;
-
-exports[`I18n engine translate should throw error if id is not a non-empty string 6`] = `"[I18n] An \`id\` must be a non-empty string to translate a message."`;
-
-exports[`I18n engine translate should throw error if translation message and defaultMessage are not provided 1`] = `"[I18n] Cannot format message: \\"foo\\". Default message must be provided."`;
-
-exports[`I18n engine translate should throw error if used format is not specified 1`] = `
-"[I18n] Error formatting message: \\"a.b.c\\" for locale: \\"en\\".
-SyntaxError: Expected \\"date\\", \\"number\\", \\"plural\\", \\"select\\", \\"selectordinal\\" or \\"time\\" but \\"f\\" found."
-`;
-
 exports[`I18n engine translate should throw error if used format is not specified 2`] = `
 "[I18n] Error formatting the default message for: \\"d.e.f\\".
-SyntaxError: Expected \\"date\\", \\"number\\", \\"plural\\", \\"select\\", \\"selectordinal\\" or \\"time\\" but \\"b\\" found."
-`;
+Error: [@formatjs/intl Error FORMAT_ERROR] Error formatting default message for: \\"d.e.f\\", rendering default message verbatim
+MessageID: d.e.f
+Default Message: Your total is {total, bar}
+Description: undefined
 
-exports[`I18n engine translate should throw error if wrong context is provided to the translation string 1`] = `
-"[I18n] Error formatting message: \\"a.b.c\\" for locale: \\"en\\".
-Error: The intl string context variable 'numPhotos' was not provided to the string 'You have {numPhotos, plural,
-                      =0 {no photos.}
-                      =1 {one photo.}
-                      other {# photos.}
-                   }'"
+Locale: en
+
+
+INVALID_ARGUMENT_TYPE
+SyntaxError: INVALID_ARGUMENT_TYPE
+    at Function.parse [as __parse] (/Users/bamieh/Bamieh/elastic/kibana/node_modules/@formatjs/icu-messageformat-parser/index.js:34:21)
+    at new IntlMessageFormat (/Users/bamieh/Bamieh/elastic/kibana/node_modules/intl-messageformat/src/core.js:140:42)
+    at /Users/bamieh/Bamieh/elastic/kibana/node_modules/@formatjs/intl/src/utils.js:115:20
+    at variadic (/Users/bamieh/Bamieh/elastic/kibana/node_modules/@formatjs/fast-memoize/index.js:37:28)
+    at formatMessage (/Users/bamieh/Bamieh/elastic/kibana/node_modules/@formatjs/intl/src/message.js:72:39)
+    at Object.formatMessage [as translate] (/Users/bamieh/Bamieh/elastic/kibana/packages/kbn-i18n/src/core/i18n.ts:150:17)
+    at translate (/Users/bamieh/Bamieh/elastic/kibana/packages/kbn-i18n/src/core/i18n.test.ts:604:14)
+    at _toThrowErrorMatchingSnapshot (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-snapshot/build/index.js:569:7)
+    at Object.toThrowErrorMatchingSnapshot (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-snapshot/build/index.js:469:10)
+    at __EXTERNAL_MATCHER_TRAP__ (/Users/bamieh/Bamieh/elastic/kibana/node_modules/expect/build/index.js:325:30)
+    at Object.throwingMatcher [as toThrowErrorMatchingSnapshot] (/Users/bamieh/Bamieh/elastic/kibana/node_modules/expect/build/index.js:326:15)
+    at Object.toThrowErrorMatchingSnapshot (/Users/bamieh/Bamieh/elastic/kibana/packages/kbn-i18n/src/core/i18n.test.ts:608:9)
+    at Promise.then.completed (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/utils.js:300:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/utils.js:233:10)
+    at _callCircusTest (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/run.js:314:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/run.js:250:3)
+    at _runTestsForDescribeBlock (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/run.js:125:9)
+    at _runTestsForDescribeBlock (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/run.js:120:9)
+    at _runTestsForDescribeBlock (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/run.js:120:9)
+    at run (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/run.js:70:3)
+    at runAndTransformResultsToJestFormat (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-runner/build/runTest.js:444:34)
+    at Object.worker (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-runner/build/testWorker.js:106:12)"
 `;
 
 exports[`I18n engine translate should throw error if wrong context is provided to the translation string 2`] = `
 "[I18n] Error formatting the default message for: \\"d.e.f\\".
-Error: The intl string context variable 'numPhotos' was not provided to the string 'You have {numPhotos, plural,
+Error: [@formatjs/intl Error FORMAT_ERROR] Error formatting default message for: \\"d.e.f\\", rendering default message verbatim
+MessageID: d.e.f
+Default Message: You have {numPhotos, plural,
                              =0 {no photos.}
                              =1 {one photo.}
                              other {# photos.}
-                          }'"
-`;
+                          }
+Description: undefined
 
-exports[`I18n engine translateUsingPseudoLocale should translate message using pseudo-locale 1`] = `"Ṁéšššàĝĝé ŵîîţĥ àà [ɱàŕŕķðôôŵñ ļļîñķķ](http://localhost:5601/url) àñðð àñ <strong>ĥĥţɱļļ éļééɱéññţ</strong>"`;
+Locale: en
+
+
+The intl string context variable \\"numPhotos\\" was not provided to the string \\"You have {numPhotos, plural,
+                             =0 {no photos.}
+                             =1 {one photo.}
+                             other {# photos.}
+                          }\\"
+Error: The intl string context variable \\"numPhotos\\" was not provided to the string \\"You have {numPhotos, plural,
+                             =0 {no photos.}
+                             =1 {one photo.}
+                             other {# photos.}
+                          }\\"
+    at MissingValueError.FormatError (/Users/bamieh/Bamieh/elastic/kibana/node_modules/intl-messageformat/src/error.js:17:28)
+    at new MissingValueError (/Users/bamieh/Bamieh/elastic/kibana/node_modules/intl-messageformat/src/error.js:47:23)
+    at formatToParts (/Users/bamieh/Bamieh/elastic/kibana/node_modules/intl-messageformat/src/formatters.js:70:19)
+    at IntlMessageFormat.formatToParts (/Users/bamieh/Bamieh/elastic/kibana/node_modules/intl-messageformat/src/core.js:120:51)
+    at IntlMessageFormat.format (/Users/bamieh/Bamieh/elastic/kibana/node_modules/intl-messageformat/src/core.js:98:31)
+    at formatMessage (/Users/bamieh/Bamieh/elastic/kibana/node_modules/@formatjs/intl/src/message.js:73:34)
+    at Object.formatMessage [as translate] (/Users/bamieh/Bamieh/elastic/kibana/packages/kbn-i18n/src/core/i18n.ts:150:17)
+    at translate (/Users/bamieh/Bamieh/elastic/kibana/packages/kbn-i18n/src/core/i18n.test.ts:432:14)
+    at _toThrowErrorMatchingSnapshot (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-snapshot/build/index.js:569:7)
+    at Object.toThrowErrorMatchingSnapshot (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-snapshot/build/index.js:469:10)
+    at __EXTERNAL_MATCHER_TRAP__ (/Users/bamieh/Bamieh/elastic/kibana/node_modules/expect/build/index.js:325:30)
+    at Object.throwingMatcher [as toThrowErrorMatchingSnapshot] (/Users/bamieh/Bamieh/elastic/kibana/node_modules/expect/build/index.js:326:15)
+    at Object.toThrowErrorMatchingSnapshot (/Users/bamieh/Bamieh/elastic/kibana/packages/kbn-i18n/src/core/i18n.test.ts:440:9)
+    at Promise.then.completed (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/utils.js:300:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/utils.js:233:10)
+    at _callCircusTest (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/run.js:314:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/run.js:250:3)
+    at _runTestsForDescribeBlock (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/run.js:125:9)
+    at _runTestsForDescribeBlock (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/run.js:120:9)
+    at _runTestsForDescribeBlock (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/run.js:120:9)
+    at run (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/run.js:70:3)
+    at runAndTransformResultsToJestFormat (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-runner/build/runTest.js:444:34)
+    at Object.worker (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-runner/build/testWorker.js:106:12)"
+`;

@@ -30,16 +30,20 @@ import {
   visitPolicyList,
 } from '../../../screens';
 
-// Failing: See https://github.com/elastic/kibana/issues/179274
-describe.skip(
+describe(
   'User Roles for Security Complete PLI with Endpoint Complete addon',
   {
-    tags: ['@serverless'],
+    tags: ['@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         productTypes: [
           { product_line: 'security', product_tier: 'complete' },
           { product_line: 'endpoint', product_tier: 'complete' },
+        ],
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'responseActionScanEnabled',
+          ])}`,
         ],
       },
     },
@@ -119,7 +123,8 @@ describe.skip(
         'kill-process',
         'suspend-process',
         'get-file',
-        'upload'
+        'upload',
+        'scan'
       );
 
       const deniedResponseActions = pick(consoleHelpPanelResponseActionsTestSubj, 'execute');
@@ -152,8 +157,7 @@ describe.skip(
         ensureFleetPermissionDeniedScreen();
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/179281
-      describe.skip('Response Actions access', () => {
+      describe('Response Actions access', () => {
         beforeEach(() => {
           visitEndpointList();
           openConsoleFromEndpointList();

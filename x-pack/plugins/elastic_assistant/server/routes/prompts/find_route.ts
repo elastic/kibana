@@ -59,7 +59,7 @@ export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
             page: query.page,
             sortField: query.sort_field,
             sortOrder: query.sort_order,
-            filter: query.filter,
+            filter: query.filter ? decodeURIComponent(query.filter) : undefined,
             fields: query.fields,
           });
 

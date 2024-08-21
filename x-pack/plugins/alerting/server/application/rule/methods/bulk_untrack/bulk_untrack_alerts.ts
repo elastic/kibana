@@ -9,6 +9,7 @@ import { omitBy } from 'lodash';
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
 import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
+import { AuditLogger } from '@kbn/core-security-server';
 import { bulkUntrackBodySchema } from './schemas';
 import type { BulkUntrackBody } from './types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
@@ -64,7 +65,13 @@ async function bulkUntrackAlertsWithOCC(context: RulesClientContext, params: Bul
     });
 
     // Clear alert instances from their corresponding tasks so that they can remain untracked
-    const taskIds = [...new Set(result.map((doc) => doc[ALERT_RULE_UUID]))];
+    const taskIds = [...new Set(result.map((doc) => doc[ALERT_RULE_UUID]).filter(Boolean))];
+
+    if (taskIds.length === 0) {
+      auditLogSuccess(context.auditLogger);
+      return;
+    }
+
     await context.taskManager.bulkUpdateState(taskIds, (state, id) => {
       try {
         const uuidsToClear = result
@@ -90,12 +97,7 @@ async function bulkUntrackAlertsWithOCC(context: RulesClientContext, params: Bul
       }
     });
 
-    context.auditLogger?.log(
-      ruleAuditEvent({
-        action: RuleAuditAction.UNTRACK_ALERT,
-        outcome: 'success',
-      })
-    );
+    auditLogSuccess(context.auditLogger);
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
@@ -106,3 +108,12 @@ async function bulkUntrackAlertsWithOCC(context: RulesClientContext, params: Bul
     throw error;
   }
 }
+
+const auditLogSuccess = (auditLogger?: AuditLogger) => {
+  auditLogger?.log(
+    ruleAuditEvent({
+      action: RuleAuditAction.UNTRACK_ALERT,
+      outcome: 'success',
+    })
+  );
+};

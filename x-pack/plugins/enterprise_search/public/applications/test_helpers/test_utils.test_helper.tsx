@@ -12,6 +12,8 @@ import { render as testingLibraryRender } from '@testing-library/react';
 
 import { LogicWrapper, Provider, resetContext } from 'kea';
 
+import { of } from 'rxjs';
+
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { ApplicationStart } from '@kbn/core-application-browser';
@@ -49,15 +51,18 @@ export const mockKibanaProps: KibanaLogicProps = {
     },
   },
   connectorTypes: [],
+  coreSecurity: undefined,
   data: dataPluginMock.createStartContract(),
   esConfig: {
     elasticsearch_host: 'https://your_deployment_url',
   },
+  getChromeStyle$: jest.fn().mockReturnValue(of('classic')),
   guidedOnboarding: {},
   history: mockHistory,
   indexMappingComponent: () => {
     return <></>;
   },
+  isSearchHomepageEnabled: false,
   isSidebarEnabled: true,
   lens: {
     EmbeddableComponent: jest.fn(),
@@ -80,6 +85,7 @@ export const mockKibanaProps: KibanaLogicProps = {
     hasWebCrawler: true,
   },
   renderHeaderActions: jest.fn(),
+  searchHomepage: undefined,
   searchPlayground: searchPlaygroundMock.createStart(),
   security: securityMock.createStart(),
   setBreadcrumbs: jest.fn(),
@@ -87,7 +93,7 @@ export const mockKibanaProps: KibanaLogicProps = {
   setDocTitle: jest.fn(),
   share: sharePluginMock.createStartContract(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
-  user: null,
+  updateSideNavDefinition: jest.fn(),
 };
 
 type LogicFile = LogicWrapper<any>;
@@ -110,7 +116,7 @@ interface TestHelper {
   defaultMockValues: typeof DEFAULT_VALUES;
   mountLogic: (logicFile: LogicFile, props?: object) => void;
   prepare: (options?: PrepareOptions) => void;
-  render: (children: JSX.Element) => void;
+  render: (children: JSX.Element) => ReturnType<typeof testingLibraryRender>;
 }
 
 export const TestHelper: TestHelper = {
@@ -143,7 +149,7 @@ export const TestHelper: TestHelper = {
     TestHelper.actionsToRun.forEach((action) => {
       action();
     });
-    testingLibraryRender(
+    return testingLibraryRender(
       <I18nProvider>
         <Provider>{children}</Provider>
       </I18nProvider>

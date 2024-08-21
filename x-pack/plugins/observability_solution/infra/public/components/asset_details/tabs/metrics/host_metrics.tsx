@@ -6,13 +6,13 @@
  */
 
 import React, { useRef } from 'react';
-import { HostMetricTypes } from '../../hooks/use_metrics_charts';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDataViewsContext } from '../../hooks/use_data_views';
 import { useIntersectingState } from '../../hooks/use_intersecting_state';
 import { MetricsTemplate } from './metrics_template';
-import { HostCharts, KubernetesCharts } from '../../charts';
+import { HostCharts, KubernetesNodeCharts } from '../../charts';
+import { HostMetricTypes } from '../../charts/types';
 
 const METRIC_TYPES: Array<Exclude<HostMetricTypes, 'kpi'>> = [
   'cpu',
@@ -41,7 +41,7 @@ export const HostMetrics = () => {
           metric={metric}
         />
       ))}
-      <KubernetesCharts
+      <KubernetesNodeCharts
         assetId={asset.id}
         dataView={metrics.dataView}
         dateRange={state.dateRange}

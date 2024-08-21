@@ -27,6 +27,7 @@ export const getLensAliasConfig = (): VisTypeAlias => ({
   note: i18n.translate('xpack.lens.visTypeAlias.note', {
     defaultMessage: 'Recommended for most users.',
   }),
+  order: 60,
   icon: 'lensApp',
   stage: 'production',
   appExtensions: {

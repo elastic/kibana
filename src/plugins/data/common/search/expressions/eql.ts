@@ -58,6 +58,7 @@ export const getEqlFn = ({
     name,
     type: 'eql_raw_response',
     inputTypes: ['kibana_context', 'null'],
+    allowCache: true,
     help: i18n.translate('data.search.eql.help', {
       defaultMessage: 'Run Elasticsearch request',
     }),

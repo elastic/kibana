@@ -11,7 +11,7 @@ import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_so
 import { of, throwError } from 'rxjs';
 import { wrapSearchSourceClient } from './wrap_search_source_client';
 
-const logger = loggingSystemMock.create().get();
+let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
 const rule = {
   name: 'test-rule',
@@ -36,6 +36,10 @@ const createSearchSourceClientMock = () => {
 describe('wrapSearchSourceClient', () => {
   beforeAll(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
+  });
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
   });
 
   afterAll(() => {
@@ -84,7 +88,7 @@ describe('wrapSearchSourceClient', () => {
         requestTimeout: 5000,
       },
     });
-    expect(logger.debug).toHaveBeenCalledWith(
+    expect(loggingSystemMock.collect(logger).debug.map((params) => params[0])).toContain(
       `executing query for rule .test-rule-type:abcdefg in space my-space - with options {} and 5000ms requestTimeout`
     );
   });
@@ -136,7 +140,7 @@ describe('wrapSearchSourceClient', () => {
     expect(stats.numSearches).toEqual(3);
     expect(stats.esSearchDurationMs).toEqual(999);
 
-    expect(logger.debug).toHaveBeenCalledWith(
+    expect(loggingSystemMock.collect(logger).debug.map((params) => params[0])).toContain(
       `executing query for rule .test-rule-type:abcdefg in space my-space - with options {}`
     );
   });

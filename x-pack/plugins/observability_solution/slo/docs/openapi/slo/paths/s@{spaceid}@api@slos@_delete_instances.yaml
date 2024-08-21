@@ -1,7 +1,8 @@
 post:
-  summary: Batch delete rollup and summary data for the matching list of sloId and instanceId
+  summary: Batch delete rollup and summary data
   operationId: deleteSloInstancesOp
   description: >
+    The deletion occurs for the specified list of `sloId` and `instanceId`.
     You must have `all` privileges for the **SLOs** feature in the
     **Observability** section of the Kibana feature privileges.
   tags:

@@ -51,7 +51,7 @@ export const setThirdPartyToMapping = (
 export const getNoneConnector = (): CaseConnector => ({
   id: 'none',
   name: 'none',
-  type: ConnectorTypes.none,
+  type: ConnectorTypes.none as const,
   fields: null,
 });
 

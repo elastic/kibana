@@ -10,7 +10,7 @@ import type { Datatable } from '@kbn/expressions-plugin/public';
 import { checkTableForContainsSmallValues, getLegendStats } from './render_helpers';
 import { PieLayerState } from '../../../common/types';
 import { PieChartTypes } from '../../../common/constants';
-import { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
+import { LegendValue } from '@elastic/charts';
 
 describe('render helpers', () => {
   describe('#checkTableForContainsSmallValues', () => {
@@ -72,28 +72,22 @@ describe('render helpers', () => {
   describe('#getLegendStats', () => {
     it('should firstly read the state value', () => {
       expect(
-        getLegendStats(
-          { legendStats: [PartitionLegendValue.Value] } as PieLayerState,
-          PieChartTypes.WAFFLE
-        )
-      ).toEqual([PartitionLegendValue.Value]);
+        getLegendStats({ legendStats: [LegendValue.Value] } as PieLayerState, PieChartTypes.WAFFLE)
+      ).toEqual([LegendValue.Value]);
 
       expect(
-        getLegendStats(
-          { legendStats: [] as PartitionLegendValue[] } as PieLayerState,
-          PieChartTypes.WAFFLE
-        )
+        getLegendStats({ legendStats: [] as LegendValue[] } as PieLayerState, PieChartTypes.WAFFLE)
       ).toEqual([]);
     });
 
     it('should read value from meta in case of value in state is undefined', () => {
       expect(getLegendStats({} as PieLayerState, PieChartTypes.WAFFLE)).toEqual([
-        PartitionLegendValue.Value,
+        LegendValue.Value,
       ]);
 
       expect(
         getLegendStats({ legendStats: undefined } as PieLayerState, PieChartTypes.WAFFLE)
-      ).toEqual([PartitionLegendValue.Value]);
+      ).toEqual([LegendValue.Value]);
 
       expect(getLegendStats({} as PieLayerState, PieChartTypes.PIE)).toEqual(undefined);
     });

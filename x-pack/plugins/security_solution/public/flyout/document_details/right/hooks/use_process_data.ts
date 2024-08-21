@@ -7,9 +7,9 @@
 
 import { useMemo } from 'react';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
+import type { GetFieldsData } from '../../shared/hooks/use_get_fields_data';
 import { getField } from '../../shared/utils';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 
 const FIELD_USER_NAME = 'process.entry_leader.user.name' as const;
 const FIELD_USER_ID = 'process.entry_leader.user.id' as const;
@@ -40,7 +40,7 @@ export const getUserDisplayName = (getFieldsData: GetFieldsData): string => {
  * Returns memoized process-related values for the session preview component
  */
 export const useProcessData = () => {
-  const { getFieldsData } = useRightPanelContext();
+  const { getFieldsData } = useDocumentDetailsContext();
 
   return useMemo(
     () => ({

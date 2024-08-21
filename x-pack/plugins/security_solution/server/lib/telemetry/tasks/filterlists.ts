@@ -32,31 +32,30 @@ export function createTelemetryFilterListArtifactTaskConfig() {
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const log = newTelemetryLogger(logger.get('filterlists'));
+      const mdc = { task_id: taskId, task_execution_period: taskExecutionPeriod };
+      const log = newTelemetryLogger(logger.get('filterlists'), mdc);
       const trace = taskMetricsService.start(taskType);
 
-      log.l(
-        `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
-      );
+      log.l('Running telemetry task');
 
       try {
         const artifactName = 'telemetry-filterlists-v1';
         const manifest = await artifactService.getArtifact(artifactName);
         if (manifest.notModified) {
-          log.l('No new filterlist artifact found, skipping...');
+          log.debug('No new filterlist artifact found, skipping...');
           await taskMetricsService.end(trace);
           return 0;
         }
 
         const artifact = manifest.data as unknown as TelemetryFilterListArtifact;
-        log.l(`New filterlist artifact: ${JSON.stringify(artifact)}`);
+        log.l('New filterlist artifact', { artifact });
         filterList.endpointAlerts = artifact.endpoint_alerts;
         filterList.exceptionLists = artifact.exception_lists;
         filterList.prebuiltRulesAlerts = artifact.prebuilt_rules_alerts;
         await taskMetricsService.end(trace);
         return 0;
       } catch (err) {
-        log.l(`Failed to set telemetry filterlist artifact due to ${err.message}`);
+        log.l('Failed to set telemetry filterlist artifact', { error: err.message });
         filterList.resetAllToDefault();
         await taskMetricsService.end(trace, err);
         return 0;

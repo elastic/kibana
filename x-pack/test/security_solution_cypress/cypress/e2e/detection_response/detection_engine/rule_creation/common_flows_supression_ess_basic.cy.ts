@@ -8,12 +8,14 @@
 import {
   THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX,
   ALERT_SUPPRESSION_DURATION_INPUT,
+  MACHINE_LEARNING_TYPE,
 } from '../../../../screens/create_new_rule';
 
 import {
   selectIndicatorMatchType,
   selectNewTermsRuleType,
   selectThresholdRuleType,
+  selectEsqlRuleType,
   openSuppressionFieldsTooltipAndCheckLicense,
 } from '../../../../tasks/create_new_rule';
 import { startBasicLicense } from '../../../../tasks/api_calls/licensing';
@@ -47,6 +49,12 @@ describe(
 
         selectNewTermsRuleType();
         openSuppressionFieldsTooltipAndCheckLicense();
+
+        selectEsqlRuleType();
+        openSuppressionFieldsTooltipAndCheckLicense();
+
+        // ML Rules require Platinum license
+        cy.get(MACHINE_LEARNING_TYPE).get('button').should('be.disabled');
 
         selectThresholdRuleType();
         cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).should('be.disabled');

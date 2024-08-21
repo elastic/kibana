@@ -19,6 +19,7 @@ import {
   EuiIconTip,
   EuiSkeletonTitle,
 } from '@elastic/eui';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { InfoIndicators } from '../../../../common/types';
 import { useSummaryPanelContext } from '../../../hooks';
 import {
@@ -31,10 +32,26 @@ import {
 import { mapPercentagesToQualityCounts } from '../../quality_indicator';
 
 export function DatasetsQualityIndicators() {
-  const { datasetsQuality, isDatasetsQualityLoading, datasetsActivity } = useSummaryPanelContext();
+  const { onPageReady } = usePerformanceContext();
+  const {
+    datasetsQuality,
+    isDatasetsQualityLoading,
+    datasetsActivity,
+    numberOfDatasets,
+    numberOfDocuments,
+  } = useSummaryPanelContext();
   const qualityCounts = mapPercentagesToQualityCounts(datasetsQuality.percentages);
   const datasetsWithoutIgnoredField =
     datasetsActivity.total > 0 ? datasetsActivity.total - datasetsQuality.percentages.length : 0;
+
+  if (!isDatasetsQualityLoading && (numberOfDatasets || numberOfDocuments)) {
+    onPageReady({
+      key1: 'datasets',
+      value1: numberOfDatasets,
+      key2: 'documents',
+      value2: numberOfDocuments,
+    });
+  }
 
   return (
     <EuiPanel hasBorder>

@@ -8,24 +8,23 @@
 import React, { useCallback } from 'react';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
-import { Replacements } from '@kbn/elastic-assistant-common';
+import { PromptResponse, Replacements } from '@kbn/elastic-assistant-common';
 import type { ClientMessage } from '../../assistant_context/types';
 import { SelectedPromptContext } from '../prompt_context/types';
 import { useSendMessage } from '../use_send_message';
 import { useConversation } from '../use_conversation';
 import { getCombinedMessage } from '../prompt/helpers';
-import { Conversation, Prompt, useAssistantContext } from '../../..';
+import { Conversation, useAssistantContext } from '../../..';
 import { getMessageFromRawResponse } from '../helpers';
-import { getDefaultSystemPrompt } from '../use_conversation/helpers';
+import { getDefaultSystemPrompt, getDefaultNewSystemPrompt } from '../use_conversation/helpers';
 
 export interface UseChatSendProps {
-  allSystemPrompts: Prompt[];
+  allSystemPrompts: PromptResponse[];
   currentConversation?: Conversation;
   editingSystemPromptId: string | undefined;
   http: HttpSetup;
   selectedPromptContexts: Record<string, SelectedPromptContext>;
   setEditingSystemPromptId: React.Dispatch<React.SetStateAction<string | undefined>>;
-  setPromptTextPreview: React.Dispatch<React.SetStateAction<string>>;
   setSelectedPromptContexts: React.Dispatch<
     React.SetStateAction<Record<string, SelectedPromptContext>>
   >;
@@ -35,7 +34,7 @@ export interface UseChatSendProps {
 
 export interface UseChatSend {
   abortStream: () => void;
-  handleOnChatCleared: () => void;
+  handleOnChatCleared: () => Promise<void>;
   handlePromptChange: (prompt: string) => void;
   handleSendMessage: (promptText: string) => void;
   handleRegenerateResponse: () => void;
@@ -54,22 +53,16 @@ export const useChatSend = ({
   http,
   selectedPromptContexts,
   setEditingSystemPromptId,
-  setPromptTextPreview,
   setSelectedPromptContexts,
   setUserPrompt,
   setCurrentConversation,
 }: UseChatSendProps): UseChatSend => {
-  const {
-    assistantTelemetry,
-    knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
-    toasts,
-  } = useAssistantContext();
+  const { assistantTelemetry, toasts } = useAssistantContext();
 
   const { isLoading, sendMessage, abortStream } = useSendMessage();
   const { clearConversation, removeLastMessage } = useConversation();
 
   const handlePromptChange = (prompt: string) => {
-    setPromptTextPreview(prompt);
     setUserPrompt(prompt);
   };
 
@@ -120,7 +113,6 @@ export const useChatSend = ({
 
       // Reset prompt context selection and preview before sending:
       setSelectedPromptContexts({});
-      setPromptTextPreview('');
 
       const rawResponse = await sendMessage({
         apiConfig: currentConversation.apiConfig,
@@ -133,8 +125,6 @@ export const useChatSend = ({
       assistantTelemetry?.reportAssistantMessageSent({
         conversationId: currentConversation.title,
         role: userMessage.role,
-        isEnabledKnowledgeBase,
-        isEnabledRAGAlerts,
         actionTypeId: currentConversation.apiConfig.actionTypeId,
         model: currentConversation.apiConfig.model,
         provider: currentConversation.apiConfig.provider,
@@ -153,8 +143,6 @@ export const useChatSend = ({
         actionTypeId: currentConversation.apiConfig.actionTypeId,
         model: currentConversation.apiConfig.model,
         provider: currentConversation.apiConfig.provider,
-        isEnabledKnowledgeBase,
-        isEnabledRAGAlerts,
       });
     },
     [
@@ -163,12 +151,9 @@ export const useChatSend = ({
       currentConversation,
       editingSystemPromptId,
       http,
-      isEnabledKnowledgeBase,
-      isEnabledRAGAlerts,
       selectedPromptContexts,
       sendMessage,
       setCurrentConversation,
-      setPromptTextPreview,
       setSelectedPromptContexts,
       toasts,
     ]
@@ -209,12 +194,12 @@ export const useChatSend = ({
   }, [currentConversation, http, removeLastMessage, sendMessage, setCurrentConversation, toasts]);
 
   const handleOnChatCleared = useCallback(async () => {
-    const defaultSystemPromptId = getDefaultSystemPrompt({
-      allSystemPrompts,
-      conversation: currentConversation,
-    })?.id;
+    const defaultSystemPromptId =
+      getDefaultSystemPrompt({
+        allSystemPrompts,
+        conversation: currentConversation,
+      })?.id ?? getDefaultNewSystemPrompt(allSystemPrompts)?.id;
 
-    setPromptTextPreview('');
     setUserPrompt('');
     setSelectedPromptContexts({});
     if (currentConversation) {
@@ -230,7 +215,6 @@ export const useChatSend = ({
     currentConversation,
     setCurrentConversation,
     setEditingSystemPromptId,
-    setPromptTextPreview,
     setSelectedPromptContexts,
     setUserPrompt,
   ]);

@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { FILTERS, BooleanRelation, FilterStateStore } from '@kbn/es-query';
 import type { QueryOperator, DataProvider } from '@kbn/timelines-plugin/common';
-import { DataProviderType } from '../../../../../../common/api/timeline';
+import { DataProviderTypeEnum } from '../../../../../../common/api/timeline';
 import { replaceParamsQuery } from './replace_params_query';
 import type { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
 import {
@@ -64,7 +64,7 @@ const dataProviderStub: DataProvider = {
   name: '',
   excluded: false,
   kqlQuery: '',
-  type: DataProviderType.default,
+  type: DataProviderTypeEnum.default,
   queryMatch: {
     field: '',
     value: '',
@@ -88,7 +88,7 @@ const buildDataProviders = (
           name: field,
           excluded,
           kqlQuery: '',
-          type: isTemplate ? DataProviderType.template : DataProviderType.default,
+          type: isTemplate ? DataProviderTypeEnum.template : DataProviderTypeEnum.default,
           queryMatch: {
             field,
             value: result,
@@ -102,7 +102,7 @@ const buildDataProviders = (
           name: field,
           excluded,
           kqlQuery: '',
-          type: isTemplate ? DataProviderType.template : DataProviderType.default,
+          type: isTemplate ? DataProviderTypeEnum.template : DataProviderTypeEnum.default,
           queryMatch: {
             field,
             value: result,

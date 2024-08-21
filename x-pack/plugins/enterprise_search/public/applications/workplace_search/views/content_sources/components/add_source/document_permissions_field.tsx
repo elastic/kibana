@@ -58,7 +58,7 @@ export const DocumentPermissionsField: React.FC<Props> = ({
         <EuiSpacer size="s" />
         <EuiText color="subdued" size="s">
           {!needsPermissions && (
-            <span>
+            <span data-test-subj={`needsPermissionText`}>
               <FormattedMessage
                 id="xpack.enterpriseSearch.workplaceSearch.contentSource.connect.docPermissionsUnavailable.message"
                 defaultMessage="Document-level permissions are not yet available for this source. {link}"

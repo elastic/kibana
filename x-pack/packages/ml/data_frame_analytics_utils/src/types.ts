@@ -210,7 +210,7 @@ export function isDataFrameAnalyticsConfigs(arg: unknown): arg is DataFrameAnaly
  * Union type of DFA anlaysis config types
  */
 export type DataFrameAnalysisConfigType =
-  typeof ANALYSIS_CONFIG_TYPE[keyof typeof ANALYSIS_CONFIG_TYPE];
+  (typeof ANALYSIS_CONFIG_TYPE)[keyof typeof ANALYSIS_CONFIG_TYPE];
 
 /**
  * Union type of DFA task states

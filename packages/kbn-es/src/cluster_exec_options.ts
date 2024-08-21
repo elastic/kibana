@@ -7,7 +7,7 @@
  */
 
 export interface EsClusterExecOptions {
-  skipNativeRealmSetup?: boolean;
+  skipSecuritySetup?: boolean;
   reportTime?: (...args: any[]) => void;
   startTime?: number;
   esArgs?: string[] | string;
@@ -17,4 +17,6 @@ export interface EsClusterExecOptions {
   readyTimeout?: number;
   onEarlyExit?: (msg: string) => void;
   writeLogsToPath?: string;
+  /** Disable creating a temp directory, allowing ES to write to OS's /tmp directory */
+  disableEsTmpDir?: boolean;
 }

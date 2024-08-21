@@ -22,9 +22,26 @@ describe('Data table record utils', () => {
 
   describe('buildDataTableRecordList', () => {
     test('should return a list of DataTableRecord', () => {
-      const result = buildDataTableRecordList(esHitsMock, dataViewMock);
+      const result = buildDataTableRecordList({
+        records: esHitsMock,
+        dataView: dataViewMock,
+      });
       result.forEach((doc) => {
         expect(doc).toHaveProperty('id');
+        expect(doc).toHaveProperty('raw');
+        expect(doc).toHaveProperty('flattened');
+        expect(doc).toHaveProperty('isAnchor');
+      });
+    });
+
+    test('should support processing each record', () => {
+      const result = buildDataTableRecordList({
+        records: esHitsMock,
+        dataView: dataViewMock,
+        processRecord: (record) => ({ ...record, id: 'custom-id' }),
+      });
+      result.forEach((doc) => {
+        expect(doc).toHaveProperty('id', 'custom-id');
         expect(doc).toHaveProperty('raw');
         expect(doc).toHaveProperty('flattened');
         expect(doc).toHaveProperty('isAnchor');

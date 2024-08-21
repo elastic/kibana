@@ -26,7 +26,10 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { getFindingsDetectionRuleSearchTagsFromArrayOfRules } from '../../../common/utils/detection_rules';
-import { RuleStateAttributesWithoutStates, useChangeCspRuleState } from './change_csp_rule_state';
+import {
+  RuleStateAttributesWithoutStates,
+  useChangeCspRuleState,
+} from './use_change_csp_rule_state';
 import { CspBenchmarkRulesWithStates } from './rules_container';
 import { MultiSelectFilter } from '../../common/component/multi_select_filter';
 import { showChangeBenchmarkRuleStatesSuccessToast } from '../../components/take_action';
@@ -39,8 +42,6 @@ export const RULES_SELECT_ALL_RULES = 'select-all-rules-button';
 export const RULES_CLEAR_ALL_RULES_SELECTION = 'clear-rules-selection-button';
 export const RULES_DISABLED_FILTER = 'rules-disabled-filter';
 export const RULES_ENABLED_FILTER = 'rules-enabled-filter';
-export const CIS_SECTION_FILTER = 'cis-section-filter';
-export const RULE_NUMBER_FILTER = 'rule-number-filter';
 
 interface RulesTableToolbarProps {
   search: (value: string) => void;
@@ -53,7 +54,6 @@ interface RulesTableToolbarProps {
   isSearching: boolean;
   pageSize: number;
   selectedRules: CspBenchmarkRulesWithStates[];
-  refetchRulesStates: () => void;
   setEnabledDisabledItemsFilter: (filterState: string) => void;
   enabledDisabledItemsFilterState: string;
   setSelectAllRules: () => void;
@@ -64,7 +64,6 @@ interface RuleTableCount {
   pageSize: number;
   total: number;
   selectedRules: CspBenchmarkRulesWithStates[];
-  refetchRulesStates: () => void;
   setSelectAllRules: () => void;
   setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
 }
@@ -80,7 +79,6 @@ export const RulesTableHeader = ({
   sectionSelectOptions,
   ruleNumberSelectOptions,
   selectedRules,
-  refetchRulesStates,
   setEnabledDisabledItemsFilter,
   enabledDisabledItemsFilterState,
   setSelectAllRules,
@@ -198,7 +196,6 @@ export const RulesTableHeader = ({
           pageSize={pageSize}
           total={totalRulesCount}
           selectedRules={selectedRules}
-          refetchRulesStates={refetchRulesStates}
           setSelectAllRules={setSelectAllRules}
           setSelectedRules={setSelectedRules}
         />
@@ -240,7 +237,6 @@ const CurrentPageOfTotal = ({
   pageSize,
   total,
   selectedRules,
-  refetchRulesStates,
   setSelectAllRules,
   setSelectedRules,
 }: RuleTableCount) => {
@@ -249,7 +245,8 @@ const CurrentPageOfTotal = ({
     setIsPopoverOpen((e) => !e);
   };
 
-  const { data: rulesData } = useFetchDetectionRulesByTags(
+  const { mutate: mutateRulesStates } = useChangeCspRuleState();
+  const { data: detectionRulesForSelectedRules } = useFetchDetectionRulesByTags(
     getFindingsDetectionRuleSearchTagsFromArrayOfRules(selectedRules.map((rule) => rule.metadata)),
     { match: 'any' }
   );
@@ -257,7 +254,6 @@ const CurrentPageOfTotal = ({
   const { notifications, analytics, i18n: i18nStart, theme } = useKibana().services;
   const startServices = { notifications, analytics, i18n: i18nStart, theme };
 
-  const postRequestChangeRulesState = useChangeCspRuleState();
   const changeRulesState = async (state: 'mute' | 'unmute') => {
     const bulkSelectedRules: RuleStateAttributesWithoutStates[] = selectedRules.map(
       (e: CspBenchmarkRulesWithStates) => ({
@@ -269,12 +265,14 @@ const CurrentPageOfTotal = ({
     );
     // Only do the API Call IF there are no undefined value for rule number in the selected rules
     if (!bulkSelectedRules.some((rule) => rule.rule_number === undefined)) {
-      await postRequestChangeRulesState(state, bulkSelectedRules);
-      refetchRulesStates();
+      mutateRulesStates({
+        newState: state,
+        ruleIds: bulkSelectedRules,
+      });
       setIsPopoverOpen(false);
       showChangeBenchmarkRuleStatesSuccessToast(startServices, state !== 'mute', {
         numberOfRules: bulkSelectedRules.length,
-        numberOfDetectionRules: rulesData?.total || 0,
+        numberOfDetectionRules: detectionRulesForSelectedRules?.total || 0,
       });
     }
   };
@@ -333,8 +331,13 @@ const CurrentPageOfTotal = ({
           <EuiText size="xs" textAlign="left" color="subdued" style={{ marginLeft: '8px' }}>
             <FormattedMessage
               id="xpack.csp.rules.rulesTable.showingPageOfTotalLabel"
-              defaultMessage="Showing {pageSize} of {total, plural, one {# rule} other {# rules}} \u2000|\u2000 Selected {selectedRulesAmount, plural, one {# rule} other {# rules}}"
-              values={{ pageSize, total, selectedRulesAmount: selectedRules.length || 0 }}
+              defaultMessage="Showing {pageSize} of {total, plural, one {# rule} other {# rules}} {pipe} Selected {selectedRulesAmount, plural, one {# rule} other {# rules}}"
+              values={{
+                pageSize,
+                total,
+                selectedRulesAmount: selectedRules.length || 0,
+                pipe: '\u2000|\u2000',
+              }}
             />
           </EuiText>
         </EuiFlexItem>

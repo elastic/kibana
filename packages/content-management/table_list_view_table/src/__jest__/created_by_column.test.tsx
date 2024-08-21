@@ -44,6 +44,16 @@ const hits: UserContentCommonSchema[] = [
     createdBy: 'u_2',
     references: [],
   },
+  {
+    id: 'item-4',
+    type: 'dashboard',
+    updatedAt: '2020-01-01T00:00:00Z',
+    attributes: {
+      title: 'Item 4',
+    },
+    references: [],
+    managed: true,
+  },
 ];
 
 describe('created_by column', () => {
@@ -135,5 +145,6 @@ describe('created_by column', () => {
 
     expect(await screen.findByTestId(/userAvatarTip-user1/)).toBeVisible();
     expect(await screen.findByTestId(/userAvatarTip-user2/)).toBeVisible();
+    expect(await screen.findByTestId(/managedAvatarTip/)).toBeVisible();
   });
 });

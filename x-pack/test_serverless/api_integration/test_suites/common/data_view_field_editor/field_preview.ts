@@ -14,13 +14,17 @@ import {
   INITIAL_REST_VERSION,
 } from '@kbn/data-view-field-editor-plugin/common/constants';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
 
 const INDEX_NAME = 'api-integration-test-field-preview';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const es = getService('es');
   const svlCommonApi = getService('svlCommonApi');
+
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
 
   const document = { foo: 1, bar: 'hello' };
 
@@ -49,8 +53,14 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('Field preview', function () {
-    before(async () => await createIndex());
-    after(async () => await deleteIndex());
+    before(async () => {
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+      await createIndex();
+    });
+    after(async () => {
+      await deleteIndex();
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+    });
 
     describe('should return the script value', () => {
       const tests = [
@@ -86,13 +96,14 @@ export default function ({ getService }: FtrProviderContext) {
             index: INDEX_NAME,
           };
 
-          const { body: response } = await supertest
+          const { body: response } = await supertestWithoutAuth
             .post(FIELD_PREVIEW_PATH)
             .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
             // TODO: API requests in Serverless require internal request headers
             .set(svlCommonApi.getInternalRequestHeader())
             .send(payload)
             .set('kbn-xsrf', 'xxx')
+            .set(roleAuthc.apiKeyHeader)
             .expect(200);
 
           expect(response.values).eql([test.expected]);
@@ -102,7 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('payload validation', () => {
       it('should require a script', async () => {
-        await supertest
+        await supertestWithoutAuth
           .post(FIELD_PREVIEW_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           // TODO: API requests in Serverless require internal request headers
@@ -112,11 +123,12 @@ export default function ({ getService }: FtrProviderContext) {
             index: INDEX_NAME,
           })
           .set('kbn-xsrf', 'xxx')
+          .set(roleAuthc.apiKeyHeader)
           .expect(400);
       });
 
       it('should require a context', async () => {
-        await supertest
+        await supertestWithoutAuth
           .post(FIELD_PREVIEW_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           // TODO: API requests in Serverless require internal request headers
@@ -126,11 +138,12 @@ export default function ({ getService }: FtrProviderContext) {
             index: INDEX_NAME,
           })
           .set('kbn-xsrf', 'xxx')
+          .set(roleAuthc.apiKeyHeader)
           .expect(400);
       });
 
       it('should require an index', async () => {
-        await supertest
+        await supertestWithoutAuth
           .post(FIELD_PREVIEW_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           // TODO: API requests in Serverless require internal request headers
@@ -140,6 +153,7 @@ export default function ({ getService }: FtrProviderContext) {
             context: 'keyword_field',
           })
           .set('kbn-xsrf', 'xxx')
+          .set(roleAuthc.apiKeyHeader)
           .expect(400);
       });
     });
@@ -149,7 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
       // does not change overtime as we rely on it to extract our own error code.
       // If this test fail we'll need to update the "getErrorCodeFromErrorReason()" handler
       it('should detect a script casting error', async () => {
-        const { body: response } = await supertest
+        const { body: response } = await supertestWithoutAuth
           .post(FIELD_PREVIEW_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           // TODO: API requests in Serverless require internal request headers
@@ -159,7 +173,8 @@ export default function ({ getService }: FtrProviderContext) {
             context: 'keyword_field',
             index: INDEX_NAME,
           })
-          .set('kbn-xsrf', 'xxx');
+          .set('kbn-xsrf', 'xxx')
+          .set(roleAuthc.apiKeyHeader);
 
         const errorCode = getErrorCodeFromErrorReason(response.error?.caused_by?.reason);
 

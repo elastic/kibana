@@ -62,6 +62,10 @@ describe('<JobList />', () => {
       startMock.http.get.mockClear();
     });
 
+    test('should have a deprecation callout', () => {
+      expect(exists('rollupDeprecationCallout')).toBe(true);
+    });
+
     test('should open the detail panel when clicking on a job in the table', () => {
       const { rows } = table.getMetaData('rollupJobsListTable');
       const button = rows[0].columns[1].reactWrapper.find('button');

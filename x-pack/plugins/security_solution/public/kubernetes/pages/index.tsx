@@ -18,7 +18,7 @@ import { SiemSearchBar } from '../../common/components/search_bar';
 import { showGlobalFilters } from '../../timelines/components/timeline/helpers';
 import { inputsSelectors } from '../../common/store';
 import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../sourcerer/containers';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { convertToBuildEsQuery } from '../../common/lib/kuery';

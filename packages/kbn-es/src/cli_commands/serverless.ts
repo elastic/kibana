@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
+import chalk from 'chalk';
 import dedent from 'dedent';
 import getopts from 'getopts';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
+import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 
 import { basename } from 'path';
 import { SERVERLESS_RESOURCES_PATHS } from '../paths';
@@ -44,8 +46,8 @@ export const serverless: Command = {
       --kill              Kill running ES serverless nodes if detected on startup
       --host              Publish ES docker container on additional host IP
       --port              The port to bind to on 127.0.0.1 [default: ${DEFAULT_PORT}]
-      --ssl               Enable HTTP SSL on the ES cluster
-      --kibanaUrl         Fully qualified URL where Kibana is hosted (including base path). [default: https://localhost:5601/]
+      --ssl               Enable HTTP SSL on the ES cluster [default: true]
+      --kibanaUrl         Fully qualified URL where Kibana is hosted (including base path). [default: http://localhost:5601/]
       --skipTeardown      If this process exits, leave the ES cluster running in the background
       --waitForReady      Wait for the ES cluster to be ready to serve requests
       --resources         Overrides resources under ES 'config/' directory, which are by default
@@ -103,7 +105,12 @@ export const serverless: Command = {
       ],
       boolean: ['clean', 'ssl', 'kill', 'background', 'skipTeardown', 'waitForReady'],
 
-      default: { ...defaults, kibanaUrl: 'https://localhost:5601/', dataPath: 'stateless' },
+      default: {
+        ...defaults,
+        kibanaUrl: 'http://localhost:5601/',
+        dataPath: 'stateless',
+        ssl: true,
+      },
     }) as unknown as ServerlessOptions;
 
     if (!options.projectType) {
@@ -114,7 +121,16 @@ export const serverless: Command = {
 
     if (!isServerlessProjectType(options.projectType)) {
       throw createCliError(
-        `Invalid projectPype '${options.projectType}', supported values: ${supportedProjectTypesStr}`
+        `Invalid projectType '${options.projectType}', supported values: ${supportedProjectTypesStr}`
+      );
+    }
+
+    // In case `--no-ssl` CLI argument is provided.
+    if (!options.ssl) {
+      log.warning(
+        `Serverless ES cluster cannot configure ${chalk.bold.cyan(
+          MOCK_IDP_REALM_NAME
+        )} realm since TLS is disabled.`
       );
     }
 

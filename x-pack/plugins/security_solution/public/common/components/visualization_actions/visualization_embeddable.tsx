@@ -16,7 +16,7 @@ import { InputsModelId } from '../../store/inputs/constants';
 import { useRefetchByRestartingSession } from '../page/use_refetch_by_session';
 import { LensEmbeddable } from './lens_embeddable';
 import type { EmbeddableData, VisualizationEmbeddableProps } from './types';
-import { useSourcererDataView } from '../../containers/sourcerer';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useVisualizationResponse } from './use_visualization_response';
 
 const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> = (props) => {

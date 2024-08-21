@@ -58,7 +58,9 @@ describe('POST /api/saved_objects/{type}', () => {
     const logger = loggerMock.create();
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
     const config = setupConfig();
-    registerCreateRoute(router, { config, coreUsageData, logger });
+    const access = 'public';
+
+    registerCreateRoute(router, { config, coreUsageData, logger, access });
 
     handlerContext.savedObjects.typeRegistry.getType.mockImplementation((typename: string) => {
       return testTypes

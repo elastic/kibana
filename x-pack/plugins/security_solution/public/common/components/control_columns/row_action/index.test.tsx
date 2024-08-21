@@ -6,18 +6,16 @@
  */
 
 import { TableId } from '@kbn/securitysolution-data-table';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { RowAction } from '.';
 import { defaultHeaders, TestProviders } from '../../../mock';
 import { getDefaultControlColumn } from '../../../../timelines/components/timeline/body/control_columns';
-import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
-
-jest.mock('../../../hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
-}));
-const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
-useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
+import { useRouteSpy } from '../../../utils/route/use_route_spy';
+import type { RouteSpyState } from '../../../utils/route/types';
+import { SecurityPageName } from '@kbn/deeplinks-security';
+import { createTelemetryServiceMock } from '../../../lib/telemetry/telemetry_service.mock';
+import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -28,7 +26,46 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
+const mockOpenFlyout = jest.fn();
 
+jest.mock('../../../utils/route/use_route_spy');
+
+jest.mock('@kbn/expandable-flyout', () => {
+  return {
+    useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout }),
+    useExpandableFlyoutState: () => ({ left: false }),
+  };
+});
+
+const mockedTelemetry = createTelemetryServiceMock();
+jest.mock('../../../lib/kibana', () => {
+  const original = jest.requireActual('../../../lib/kibana');
+  return {
+    ...original,
+    useKibana: () => ({
+      ...original.useKibana(),
+      services: {
+        ...original.useKibana().services,
+        telemetry: mockedTelemetry,
+      },
+    }),
+  };
+});
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+  };
+});
+jest.mock('../../guided_onboarding_tour/tour_step');
+
+const mockRouteSpy: RouteSpyState = {
+  pageName: SecurityPageName.overview,
+  detailName: undefined,
+  tabName: undefined,
+  search: '',
+  pathName: '/',
+};
 describe('RowAction', () => {
   const sampleData = {
     _id: '1',
@@ -63,6 +100,12 @@ describe('RowAction', () => {
     tabType: 'query',
     showCheckboxes: false,
   };
+
+  beforeEach(() => {
+    (useRouteSpy as jest.Mock).mockReturnValue([mockRouteSpy]);
+    jest.clearAllMocks();
+  });
+
   test('displays expand events button', () => {
     const wrapper = render(
       <TestProviders>
@@ -70,5 +113,28 @@ describe('RowAction', () => {
       </TestProviders>
     );
     expect(wrapper.getAllByTestId('expand-event')).not.toBeNull();
+  });
+
+  test('should always show expandable flyout if the page is attackDiscovery', () => {
+    (useRouteSpy as jest.Mock).mockReturnValue([
+      { ...mockRouteSpy, pageName: SecurityPageName.attackDiscovery },
+    ]);
+    const wrapper = render(
+      <TestProviders>
+        <RowAction {...defaultProps} />
+      </TestProviders>
+    );
+    fireEvent.click(wrapper.getByTestId('expand-event'));
+    expect(mockDispatch).not.toHaveBeenCalled();
+    expect(mockOpenFlyout).toHaveBeenCalledWith({
+      right: {
+        id: DocumentDetailsRightPanelKey,
+        params: {
+          id: '1',
+          indexName: undefined,
+          scopeId: 'table-test',
+        },
+      },
+    });
   });
 });

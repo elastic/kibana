@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import levenshtein from 'js-levenshtein';
-import type { AstProviderFn, ESQLAst, ESQLCommand, EditorError, ESQLMessage } from '@kbn/esql-ast';
+import { distance } from 'fastest-levenshtein';
+import type { AstProviderFn, ESQLAst, EditorError, ESQLMessage } from '@kbn/esql-ast';
 import { uniqBy } from 'lodash';
 import {
   getFieldsByTypeHelper,
@@ -23,7 +23,7 @@ import {
 } from '../shared/helpers';
 import { ESQLCallbacks } from '../shared/types';
 import { buildQueryForFieldsFromSource } from '../validation/helpers';
-import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
+import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX, METADATA_FIELDS } from '../shared/constants';
 import type { CodeAction, Callbacks, CodeActionOptions } from './types';
 import { getAstContext } from '../shared/context';
 import { wrapAsEditorMessage } from './utils';
@@ -62,19 +62,6 @@ function getSourcesRetriever(resourceRetriever?: ESQLCallbacks) {
   };
 }
 
-export function getMetaFieldsRetriever(
-  queryString: string,
-  commands: ESQLCommand[],
-  callbacks?: ESQLCallbacks
-) {
-  return async () => {
-    if (!callbacks || !callbacks.getMetaFields) {
-      return [];
-    }
-    return await callbacks.getMetaFields();
-  };
-}
-
 export const getCompatibleFunctionDefinitions = (
   command: string,
   option: string | undefined
@@ -103,8 +90,7 @@ function createAction(title: string, solution: string, error: EditorError): Code
 async function getSpellingPossibilities(fn: () => Promise<string[]>, errorText: string) {
   const allPossibilities = await fn();
   const allSolutions = allPossibilities.reduce((solutions, item) => {
-    const distance = levenshtein(item, errorText);
-    if (distance < 3) {
+    if (distance(item, errorText) < 3) {
       solutions.push(item);
     }
     return solutions;
@@ -126,7 +112,7 @@ async function getSpellingActionForColumns(
   }
   // @TODO add variables support
   const possibleFields = await getSpellingPossibilities(async () => {
-    const availableFields = await getFieldsByType('any');
+    const availableFields = (await getFieldsByType('any')).map(({ name }) => name);
     const enrichPolicies = ast.filter(({ name }) => name === 'enrich');
     if (enrichPolicies.length) {
       const enrichPolicyNames = enrichPolicies.flatMap(({ args }) =>
@@ -223,7 +209,7 @@ async function getQuotableActionForColumns(
         )
       );
     } else {
-      const availableFields = new Set(await getFieldsByType('any'));
+      const availableFields = new Set((await getFieldsByType('any')).map(({ name }) => name));
       if (availableFields.has(errorText) || availableFields.has(solution)) {
         actions.push(
           createAction(
@@ -315,14 +301,18 @@ async function getSpellingActionForMetadata(
   error: EditorError,
   queryString: string,
   ast: ESQLAst,
-  options: CodeActionOptions,
-  { getMetaFields }: Partial<Callbacks>
+  options: CodeActionOptions
 ) {
-  if (!getMetaFields) {
-    return [];
-  }
   const errorText = queryString.substring(error.startColumn - 1, error.endColumn - 1);
-  const possibleMetafields = await getSpellingPossibilities(getMetaFields, errorText);
+  const allSolutions = METADATA_FIELDS.reduce((solutions, item) => {
+    const dist = distance(item, errorText);
+    if (dist < 3) {
+      solutions.push(item);
+    }
+    return solutions;
+  }, [] as string[]);
+  // filter duplicates
+  const possibleMetafields = Array.from(new Set(allSolutions));
   return wrapIntoSpellingChangeAction(error, possibleMetafields);
 }
 
@@ -409,14 +399,12 @@ export async function getActions(
   const { getFieldsByType } = getFieldsByTypeRetriever(queryForFields, resourceRetriever);
   const getSources = getSourcesRetriever(resourceRetriever);
   const { getPolicies, getPolicyFields } = getPolicyRetriever(resourceRetriever);
-  const getMetaFields = getMetaFieldsRetriever(innerText, ast, resourceRetriever);
 
   const callbacks = {
     getFieldsByType: resourceRetriever?.getFieldsFor ? getFieldsByType : undefined,
     getSources: resourceRetriever?.getSources ? getSources : undefined,
     getPolicies: resourceRetriever?.getPolicies ? getPolicies : undefined,
     getPolicyFields: resourceRetriever?.getPolicies ? getPolicyFields : undefined,
-    getMetaFields: resourceRetriever?.getMetaFields ? getMetaFields : undefined,
   };
 
   // Markers are sent only on hover and are limited to the hovered area
@@ -473,8 +461,7 @@ export async function getActions(
           error,
           innerText,
           ast,
-          options,
-          callbacks
+          options
         );
         actions.push(...metadataSpellChanges);
         break;

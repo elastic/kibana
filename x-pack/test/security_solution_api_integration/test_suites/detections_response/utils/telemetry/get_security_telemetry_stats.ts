@@ -21,7 +21,7 @@ import {
  * @returns The detection metrics
  */
 export const getSecurityTelemetryStats = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog
 ): Promise<any> => {
   const response = await supertest

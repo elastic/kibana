@@ -8,12 +8,12 @@
 import { PathsOf, TypeAsArgs, TypeOf } from '@kbn/typed-react-router-config';
 import { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useAppContext } from './use_app_context';
 import {
   AIAssistantManagementObservabilityRouter,
   AIAssistantManagementObservabilityRoutes,
 } from '../routes/config';
 import { aIAssistantManagementObservabilityRouter } from '../routes/config';
+import { useKibana } from './use_kibana';
 
 interface StatefulObservabilityAIAssistantRouter extends AIAssistantManagementObservabilityRouter {
   push<T extends PathsOf<AIAssistantManagementObservabilityRoutes>>(
@@ -29,7 +29,7 @@ interface StatefulObservabilityAIAssistantRouter extends AIAssistantManagementOb
 export function useObservabilityAIAssistantManagementRouter(): StatefulObservabilityAIAssistantRouter {
   const history = useHistory();
 
-  const { http } = useAppContext();
+  const { http } = useKibana().services;
 
   const link = (...args: any[]) => {
     // @ts-ignore

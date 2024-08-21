@@ -223,10 +223,9 @@ describe('SecurityNavControl', () => {
                     size="m"
                     type="user"
                   />,
-                  "name": <FormattedMessage
+                  "name": <Memo(MemoizedFormattedMessage)
                     defaultMessage="Edit profile"
                     id="xpack.security.navControlComponent.editProfileLinkText"
-                    values={Object {}}
                   />,
                   "onClick": [Function],
                 },
@@ -277,10 +276,9 @@ describe('SecurityNavControl', () => {
                     size="m"
                     type="exit"
                   />,
-                  "name": <FormattedMessage
+                  "name": <Memo(MemoizedFormattedMessage)
                     defaultMessage="Log out"
                     id="xpack.security.navControlComponent.logoutLinkText"
-                    values={Object {}}
                   />,
                 },
               ]
@@ -358,10 +356,9 @@ describe('SecurityNavControl', () => {
                     size="m"
                     type="exit"
                   />,
-                  "name": <FormattedMessage
+                  "name": <Memo(MemoizedFormattedMessage)
                     defaultMessage="Log out"
                     id="xpack.security.navControlComponent.logoutLinkText"
-                    values={Object {}}
                   />,
                 },
               ]
@@ -401,10 +398,9 @@ describe('SecurityNavControl', () => {
                     size="m"
                     type="user"
                   />,
-                  "name": <FormattedMessage
+                  "name": <Memo(MemoizedFormattedMessage)
                     defaultMessage="Edit profile"
                     id="xpack.security.navControlComponent.editProfileLinkText"
-                    values={Object {}}
                   />,
                   "onClick": [Function],
                 },
@@ -425,10 +421,9 @@ describe('SecurityNavControl', () => {
                     size="m"
                     type="exit"
                   />,
-                  "name": <FormattedMessage
+                  "name": <Memo(MemoizedFormattedMessage)
                     defaultMessage="Close project"
                     id="xpack.security.navControlComponent.closeProjectLinkText"
-                    values={Object {}}
                   />,
                 },
               ]
@@ -477,10 +472,9 @@ describe('SecurityNavControl', () => {
                     size="m"
                     type="exit"
                   />,
-                  "name": <FormattedMessage
+                  "name": <Memo(MemoizedFormattedMessage)
                     defaultMessage="Log in"
                     id="xpack.security.navControlComponent.loginLinkText"
-                    values={Object {}}
                   />,
                 },
               ]

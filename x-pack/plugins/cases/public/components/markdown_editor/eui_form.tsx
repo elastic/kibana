@@ -34,7 +34,7 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   bottomRightContent?: React.ReactNode;
   caseTitle?: string;
   caseTags?: string[];
-  draftStorageKey: string;
+  draftStorageKey?: string;
   disabledUiPlugins?: string[];
   initialValue?: string;
 };
@@ -59,7 +59,7 @@ export const MarkdownEditorForm = React.memo(
       const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
       const { hasConflicts } = useMarkdownSessionStorage({
         field,
-        sessionKey: draftStorageKey,
+        sessionKey: draftStorageKey ?? '',
         initialValue,
       });
       const { euiTheme } = useEuiTheme();

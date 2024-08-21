@@ -174,7 +174,7 @@ describe('data state', () => {
         has an error: false
         has more children: false
         has more ancestors: false
-        parameters to fetch: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}
+        parameters to fetch: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{},\\"agentId\\":\\"\\"}
         requires a pending request to be aborted: null"
       `);
     });
@@ -185,7 +185,7 @@ describe('data state', () => {
       actions = [
         appRequestedResolverData({
           id,
-          parameters: { databaseDocumentID, indices: [], filters: {} },
+          parameters: { databaseDocumentID, indices: [], filters: {}, agentId: '' },
         }),
       ];
     });
@@ -204,7 +204,7 @@ describe('data state', () => {
         has more children: false
         has more ancestors: false
         parameters to fetch: null
-        requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}"
+        requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{},\\"agentId\\":\\"\\"}"
       `);
     });
   });
@@ -226,7 +226,7 @@ describe('data state', () => {
         }),
         appRequestedResolverData({
           id,
-          parameters: { databaseDocumentID, indices: [], filters: {} },
+          parameters: { databaseDocumentID, indices: [], filters: {}, agentId: '' },
         }),
       ];
     });
@@ -251,7 +251,7 @@ describe('data state', () => {
         actions.push(
           serverFailedToReturnResolverData({
             id,
-            parameters: { databaseDocumentID, indices: [], filters: {} },
+            parameters: { databaseDocumentID, indices: [], filters: {}, agentId: '' },
           })
         );
       });
@@ -294,7 +294,12 @@ describe('data state', () => {
         // this happens when the middleware starts the request
         appRequestedResolverData({
           id,
-          parameters: { databaseDocumentID: firstDatabaseDocumentID, indices: [], filters: {} },
+          parameters: {
+            databaseDocumentID: firstDatabaseDocumentID,
+            indices: [],
+            filters: {},
+            agentId: '',
+          },
         }),
         // receive a different databaseDocumentID. this should cause the middleware to abort the existing request and start a new one
         appReceivedNewExternalProperties({
@@ -331,8 +336,8 @@ describe('data state', () => {
         has an error: false
         has more children: false
         has more ancestors: false
-        parameters to fetch: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}
-        requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"first databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}"
+        parameters to fetch: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{},\\"agentId\\":\\"\\"}
+        requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"first databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{},\\"agentId\\":\\"\\"}"
       `);
     });
     describe('and when the old request was aborted', () => {
@@ -340,7 +345,12 @@ describe('data state', () => {
         actions.push(
           appAbortedResolverDataRequest({
             id,
-            parameters: { databaseDocumentID: firstDatabaseDocumentID, indices: [], filters: {} },
+            parameters: {
+              databaseDocumentID: firstDatabaseDocumentID,
+              indices: [],
+              filters: {},
+              agentId: '',
+            },
           })
         );
       });
@@ -361,7 +371,7 @@ describe('data state', () => {
           has an error: false
           has more children: false
           has more ancestors: false
-          parameters to fetch: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}
+          parameters to fetch: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{},\\"agentId\\":\\"\\"}
           requires a pending request to be aborted: null"
         `);
       });
@@ -374,6 +384,7 @@ describe('data state', () => {
                 databaseDocumentID: secondDatabaseDocumentID,
                 indices: [],
                 filters: {},
+                agentId: '',
               },
             })
           );
@@ -423,14 +434,14 @@ describe('data state', () => {
           }),
           appRequestedResolverData({
             id,
-            parameters: { databaseDocumentID, indices: [], filters: {} },
+            parameters: { databaseDocumentID, indices: [], filters: {}, agentId: '' },
           }),
           serverReturnedResolverData({
             id,
             result: resolverTree,
             dataSource,
             schema,
-            parameters: { databaseDocumentID, indices: [], filters: {} },
+            parameters: { databaseDocumentID, indices: [], filters: {}, agentId: '' },
           }),
         ];
       });
@@ -461,6 +472,7 @@ describe('data state', () => {
                 databaseDocumentID,
                 indices: [],
                 filters: timeRangeFilters,
+                agentId: '',
               },
             }),
             serverReturnedResolverData({
@@ -472,6 +484,7 @@ describe('data state', () => {
                 databaseDocumentID,
                 indices: [],
                 filters: timeRangeFilters,
+                agentId: '',
               },
             }),
           ];
@@ -680,6 +693,7 @@ describe('data state', () => {
             databaseDocumentID: '',
             indices: ['someNonDefaultIndex'],
             filters: {},
+            agentId: '',
           },
         }),
       ];
@@ -709,6 +723,7 @@ describe('data state', () => {
             databaseDocumentID: '',
             indices: ['defaultIndex'],
             filters: {},
+            agentId: '',
           },
         }),
         appReceivedNewExternalProperties({
@@ -726,6 +741,7 @@ describe('data state', () => {
             databaseDocumentID: '',
             indices: ['someNonDefaultIndex', 'someOtherIndex'],
             filters: {},
+            agentId: '',
           },
         }),
       ];

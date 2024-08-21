@@ -51,6 +51,7 @@ export type {
   RouteConfigOptionsBody,
   RouteContentType,
   SafeRouteMethod,
+  RouteAccess,
 } from './route';
 export { validBodyOutput } from './route';
 export type {

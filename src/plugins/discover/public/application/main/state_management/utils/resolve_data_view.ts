@@ -89,7 +89,7 @@ export async function loadDataView({
   if (!fetchedDataView) {
     try {
       defaultDataView = await dataViews.getDefaultDataView({
-        displayErrors: false,
+        displayErrors: true, // notify the user about access issues
         refreshFields: true,
       });
     } catch (e) {
@@ -115,7 +115,7 @@ export function resolveDataView(
   ip: DataViewData,
   savedSearch: SavedSearch | undefined,
   toastNotifications: ToastsStart,
-  isTextBasedQuery?: boolean
+  isEsqlMode?: boolean
 ) {
   const { loaded: loadedDataView, stateVal, stateValFound } = ip;
 
@@ -126,8 +126,8 @@ export function resolveDataView(
     return ownDataView;
   }
 
-  // no warnings for text based mode
-  if (stateVal && !stateValFound && !Boolean(isTextBasedQuery)) {
+  // no warnings for ES|QL mode
+  if (stateVal && !stateValFound && !Boolean(isEsqlMode)) {
     const warningTitle = i18n.translate('discover.valueIsNotConfiguredDataViewIDWarningTitle', {
       defaultMessage: '{stateVal} is not a configured data view ID',
       values: {
@@ -172,12 +172,12 @@ export const loadAndResolveDataView = async (
     id,
     dataViewSpec,
     savedSearch,
-    isTextBasedQuery,
+    isEsqlMode,
   }: {
     id?: string;
     dataViewSpec?: DataViewSpec;
     savedSearch?: SavedSearch;
-    isTextBasedQuery?: boolean;
+    isEsqlMode?: boolean;
   },
   {
     internalStateContainer,
@@ -198,7 +198,7 @@ export const loadAndResolveDataView = async (
     nextDataViewData,
     savedSearch,
     services.toastNotifications,
-    isTextBasedQuery
+    isEsqlMode
   );
   return { fallback: !nextDataViewData.stateValFound, dataView: nextDataView };
 };

@@ -16,8 +16,8 @@ import {
   EuiPageHeaderSection,
   EuiTitle,
 } from '@elastic/eui';
-
-import { AppMountParameters } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 
 const App = ({ appName }: { appName: string }) => (
   <EuiPage>
@@ -41,7 +41,12 @@ const App = ({ appName }: { appName: string }) => (
   </EuiPage>
 );
 
-export const renderApp = (appName: string, { element }: AppMountParameters) => {
-  render(<App appName={appName} />, element);
+export const renderApp = (appName: string, { element }: AppMountParameters, core: CoreStart) => {
+  render(
+    <KibanaRenderContextProvider {...core}>
+      <App appName={appName} />
+    </KibanaRenderContextProvider>,
+    element
+  );
   return () => unmountComponentAtNode(element);
 };

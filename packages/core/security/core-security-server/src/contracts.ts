@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { CoreFipsService } from './fips';
 import type { CoreAuthenticationService } from './authc';
 import type { CoreSecurityDelegateContract } from './api_provider';
 import type { CoreAuditService } from './audit';
@@ -21,6 +22,11 @@ export interface SecurityServiceSetup {
    * @remark this should **exclusively** be used by the security plugin.
    */
   registerSecurityDelegate(api: CoreSecurityDelegateContract): void;
+
+  /**
+   * The {@link CoreFipsService | FIPS service}
+   */
+  fips: CoreFipsService;
 }
 
 /**

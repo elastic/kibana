@@ -7,7 +7,7 @@
 
 import { ComponentStory } from '@storybook/react';
 import React from 'react';
-import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator';
+import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator.stories';
 import { FunctionListPopover as Component } from './function_list_popover';
 
 export default {
@@ -25,9 +25,9 @@ const Template: ComponentStory<typeof Component> = (props: FunctionListPopover) 
 const defaultProps: FunctionListPopover = {
   onSelectFunction: () => {},
   disabled: false,
-  mode: 'prompt',
-  selectedFunctionName: 'foo',
+  mode: 'function',
+  selectedFunctionName: '',
 };
 
-export const ConversationList = Template.bind({});
-ConversationList.args = defaultProps;
+export const FunctionListPopover = Template.bind({});
+FunctionListPopover.args = defaultProps;

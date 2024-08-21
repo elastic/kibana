@@ -6,13 +6,11 @@
  */
 
 import { defineRoleMappingDeleteRoutes } from './delete';
-import { defineRoleMappingFeatureCheckRoute } from './feature_check';
 import { defineRoleMappingGetRoutes } from './get';
 import { defineRoleMappingPostRoutes } from './post';
 import type { RouteDefinitionParams } from '..';
 
 export function defineRoleMappingRoutes(params: RouteDefinitionParams) {
-  defineRoleMappingFeatureCheckRoute(params);
   defineRoleMappingGetRoutes(params);
   defineRoleMappingPostRoutes(params);
   defineRoleMappingDeleteRoutes(params);

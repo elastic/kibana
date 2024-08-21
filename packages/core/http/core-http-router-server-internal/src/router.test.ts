@@ -43,7 +43,15 @@ describe('Router', () => {
       const router = new Router('', logger, enhanceWithContext, routerOptions);
       const validation = schema.object({ foo: schema.string() });
       router.post(
-        { path: '/', validate: { body: validation, query: validation, params: validation } },
+        {
+          path: '/',
+          validate: { body: validation, query: validation, params: validation },
+          options: {
+            deprecated: true,
+            summary: 'post test summary',
+            description: 'post test description',
+          },
+        },
         (context, req, res) => res.ok()
       );
       const routes = router.getRoutes();
@@ -55,6 +63,11 @@ describe('Router', () => {
         path: '/',
         validationSchemas: { body: validation, query: validation, params: validation },
         isVersioned: false,
+        options: {
+          deprecated: true,
+          summary: 'post test summary',
+          description: 'post test description',
+        },
       });
     });
 
@@ -151,14 +164,14 @@ describe('Router', () => {
         isConfigSchema(
           (
             validationSchemas as () => RouteValidatorRequestAndResponses<unknown, unknown, unknown>
-          )().response![200].body()
+          )().response![200].body!()
         )
       ).toBe(true);
       expect(
         isConfigSchema(
           (
             validationSchemas as () => RouteValidatorRequestAndResponses<unknown, unknown, unknown>
-          )().response![404].body()
+          )().response![404].body!()
         )
       ).toBe(true);
     }
@@ -195,7 +208,7 @@ describe('Router', () => {
           (context, req, res) => res.ok({})
         )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Expected a valid validation logic declared with '@kbn/config-schema' package or a RouteValidationFunction at key: [params]."`
+        `"Expected a valid validation logic declared with '@kbn/config-schema' package, '@kbn/zod' package or a RouteValidationFunction at key: [params]."`
       );
     });
 

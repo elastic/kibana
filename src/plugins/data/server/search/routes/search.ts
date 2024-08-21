@@ -36,6 +36,7 @@ export function registerSearchRoute(router: DataPluginRouter): void {
                 sessionId: schema.maybe(schema.string()),
                 isStored: schema.maybe(schema.boolean()),
                 isRestore: schema.maybe(schema.boolean()),
+                retrieveResults: schema.maybe(schema.boolean()),
               },
               { unknowns: 'allow' }
             ),
@@ -48,6 +49,7 @@ export function registerSearchRoute(router: DataPluginRouter): void {
           sessionId,
           isStored,
           isRestore,
+          retrieveResults,
           ...searchRequest
         } = request.body;
         const { strategy, id } = request.params;
@@ -65,6 +67,7 @@ export function registerSearchRoute(router: DataPluginRouter): void {
                 sessionId,
                 isStored,
                 isRestore,
+                retrieveResults,
               }
             )
             .pipe(first())

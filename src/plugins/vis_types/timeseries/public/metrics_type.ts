@@ -104,7 +104,8 @@ export const metricsVisDefinition: VisTypeDefinition<
     defaultMessage: 'Perform advanced analysis of your time series data.',
   }),
   icon: 'visVisualBuilder',
-  group: VisGroups.PROMOTED,
+  group: VisGroups.LEGACY,
+  order: 10,
   visConfig: {
     defaults: {
       id: () => uuidv4(),

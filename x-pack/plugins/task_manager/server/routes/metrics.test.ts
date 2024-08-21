@@ -5,21 +5,25 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/core/server';
 import { of, Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { httpServiceMock } from '@kbn/core/server/mocks';
+import { httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { metricsRoute } from './metrics';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 
 describe('metricsRoute', () => {
+  let logger: Logger;
   beforeEach(() => {
     jest.resetAllMocks();
+    logger = loggingSystemMock.createLogger();
   });
 
   it('registers route', async () => {
     const router = httpServiceMock.createRouter();
     metricsRoute({
       router,
+      logger,
       metrics$: of(),
       resetMetrics$: new Subject<boolean>(),
       taskManagerId: uuidv4(),
@@ -41,6 +45,7 @@ describe('metricsRoute', () => {
     const router = httpServiceMock.createRouter();
     metricsRoute({
       router,
+      logger,
       metrics$: of(),
       resetMetrics$,
       taskManagerId: uuidv4(),
@@ -66,6 +71,7 @@ describe('metricsRoute', () => {
     const router = httpServiceMock.createRouter();
     metricsRoute({
       router,
+      logger,
       metrics$: of(),
       resetMetrics$,
       taskManagerId: uuidv4(),

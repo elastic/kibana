@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { Integration, IntegrationDashboards } from '../../../common/api_types';
+import { IntegrationType, IntegrationDashboardsResponse } from '../../../common/api_types';
 import { typeRt } from '../../types/default_api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
 import { getIntegrations } from './get_integrations';
@@ -21,7 +21,7 @@ const integrationsRoute = createDatasetQualityServerRoute({
     tags: [],
   },
   async handler(resources): Promise<{
-    integrations: Integration[];
+    integrations: IntegrationType[];
   }> {
     const { params, plugins, logger } = resources;
 
@@ -44,7 +44,7 @@ const integrationDashboardsRoute = createDatasetQualityServerRoute({
   options: {
     tags: [],
   },
-  async handler(resources): Promise<IntegrationDashboards> {
+  async handler(resources): Promise<IntegrationDashboardsResponse> {
     const { context, params, plugins } = resources;
     const { integration } = params.path;
     const { savedObjects } = await context.core;

@@ -6,15 +6,19 @@
  * Side Public License, v 1.
  */
 
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DataTableRecord, ShouldShowFieldInTableHandler, FormattedHit } from '../types';
+import type {
+  DataTableRecord,
+  ShouldShowFieldInTableHandler,
+  FormattedHit,
+  EsHitRecord,
+} from '../types';
 import { formatFieldValue } from './format_value';
 
 const formattedHitCache = new WeakMap<
-  SearchHit,
+  EsHitRecord,
   { formattedHit: FormattedHit; maxEntries: number }
 >();
 

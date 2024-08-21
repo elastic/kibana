@@ -9,6 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiPageTemplate, EuiSideNav } from '@elastic/eui';
@@ -24,65 +25,67 @@ export const renderApp = (
   { element, history }: AppMountParameters
 ) => {
   ReactDOM.render(
-    <Router history={history}>
-      <RedirectAppLinks coreStart={core}>
-        <EuiPageTemplate offset={0}>
-          <EuiPageTemplate.Sidebar>
-            <EuiSideNav
-              items={[
-                {
-                  id: 'Examples',
-                  name: 'Examples',
-                  items: [
-                    {
-                      id: 'todos',
-                      name: 'Todo app',
-                      'data-test-subj': 'todosExample',
-                      href: '/app/contentManagementExamples/todos',
-                    },
-                    {
-                      id: 'msearch',
-                      name: 'MSearch',
-                      'data-test-subj': 'msearchExample',
-                      href: '/app/contentManagementExamples/msearch',
-                    },
-                    {
-                      id: 'finder',
-                      name: 'Finder',
-                      'data-test-subj': 'finderExample',
-                      href: '/app/contentManagementExamples/finder',
-                    },
-                  ],
-                },
-              ]}
-            />
-          </EuiPageTemplate.Sidebar>
+    <KibanaRenderContextProvider {...core}>
+      <Router history={history}>
+        <RedirectAppLinks coreStart={core}>
+          <EuiPageTemplate offset={0}>
+            <EuiPageTemplate.Sidebar>
+              <EuiSideNav
+                items={[
+                  {
+                    id: 'Examples',
+                    name: 'Examples',
+                    items: [
+                      {
+                        id: 'todos',
+                        name: 'Todo app',
+                        'data-test-subj': 'todosExample',
+                        href: '/app/contentManagementExamples/todos',
+                      },
+                      {
+                        id: 'msearch',
+                        name: 'MSearch',
+                        'data-test-subj': 'msearchExample',
+                        href: '/app/contentManagementExamples/msearch',
+                      },
+                      {
+                        id: 'finder',
+                        name: 'Finder',
+                        'data-test-subj': 'finderExample',
+                        href: '/app/contentManagementExamples/finder',
+                      },
+                    ],
+                  },
+                ]}
+              />
+            </EuiPageTemplate.Sidebar>
 
-          <EuiPageTemplate.Section>
-            <Routes>
-              <Redirect from="/" to="/todos" exact />
-              <Route path="/todos">
-                <TodoApp contentClient={contentManagement.client} />
-              </Route>
-              <Route path="/msearch">
-                <MSearchApp
-                  contentClient={contentManagement.client}
-                  core={core}
-                  savedObjectsTagging={savedObjectsTaggingOss}
-                />
-              </Route>
-              <Route path="/finder">
-                <FinderApp
-                  contentClient={contentManagement.client}
-                  core={core}
-                  savedObjectsTagging={savedObjectsTaggingOss}
-                />
-              </Route>
-            </Routes>
-          </EuiPageTemplate.Section>
-        </EuiPageTemplate>
-      </RedirectAppLinks>
-    </Router>,
+            <EuiPageTemplate.Section>
+              <Routes>
+                <Redirect from="/" to="/todos" exact />
+                <Route path="/todos">
+                  <TodoApp contentClient={contentManagement.client} />
+                </Route>
+                <Route path="/msearch">
+                  <MSearchApp
+                    contentClient={contentManagement.client}
+                    core={core}
+                    savedObjectsTagging={savedObjectsTaggingOss}
+                  />
+                </Route>
+                <Route path="/finder">
+                  <FinderApp
+                    contentClient={contentManagement.client}
+                    core={core}
+                    savedObjectsTagging={savedObjectsTaggingOss}
+                  />
+                </Route>
+              </Routes>
+            </EuiPageTemplate.Section>
+          </EuiPageTemplate>
+        </RedirectAppLinks>
+      </Router>
+    </KibanaRenderContextProvider>,
     element
   );
 

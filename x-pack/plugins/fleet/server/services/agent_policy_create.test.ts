@@ -50,6 +50,7 @@ function getPackagePolicy(name: string, policyId = '') {
     namespace: 'default',
     enabled: true,
     policy_id: policyId,
+    policy_ids: [policyId],
     inputs: [],
   };
 }

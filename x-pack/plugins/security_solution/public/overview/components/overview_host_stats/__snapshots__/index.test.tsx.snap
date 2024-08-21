@@ -17,10 +17,9 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
           grow={false}
         >
           <EuiText>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Auditbeat"
               id="xpack.securitySolution.overview.hostStatGroupAuditbeat"
-              values={Object {}}
             />
           </EuiText>
         </EuiFlexItem>
@@ -53,10 +52,9 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             size="s"
           >
             <styled.div>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Audit"
                 id="xpack.securitySolution.overview.auditBeatAuditTitle"
-                values={Object {}}
               />
             </styled.div>
           </EuiText>
@@ -88,10 +86,9 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             size="s"
           >
             <styled.div>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="File Integrity Module"
                 id="xpack.securitySolution.overview.auditBeatFimTitle"
-                values={Object {}}
               />
             </styled.div>
           </EuiText>
@@ -123,10 +120,9 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             size="s"
           >
             <styled.div>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Login"
                 id="xpack.securitySolution.overview.auditBeatLoginTitle"
-                values={Object {}}
               />
             </styled.div>
           </EuiText>
@@ -158,10 +154,9 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             size="s"
           >
             <styled.div>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Package"
                 id="xpack.securitySolution.overview.auditBeatPackageTitle"
-                values={Object {}}
               />
             </styled.div>
           </EuiText>
@@ -193,10 +188,9 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             size="s"
           >
             <styled.div>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Process"
                 id="xpack.securitySolution.overview.auditBeatProcessTitle"
-                values={Object {}}
               />
             </styled.div>
           </EuiText>
@@ -228,10 +222,9 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             size="s"
           >
             <styled.div>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="User"
                 id="xpack.securitySolution.overview.auditBeatUserTitle"
-                values={Object {}}
               />
             </styled.div>
           </EuiText>
@@ -265,10 +258,9 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
           grow={false}
         >
           <EuiText>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Endpoint Security"
               id="xpack.securitySolution.overview.hostStatGroupElasticEndpointSecurity"
-              values={Object {}}
             />
           </EuiText>
         </EuiFlexItem>
@@ -301,10 +293,9 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             size="s"
           >
             <styled.div>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="DNS"
                 id="xpack.securitySolution.overview.endgameDnsTitle"
-                values={Object {}}
               />
             </styled.div>
           </EuiText>
@@ -336,10 +327,9 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             size="s"
           >
             <styled.div>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="File"
                 id="xpack.securitySolution.overview.endgameFileTitle"
-                values={Object {}}
               />
             </styled.div>
           </EuiText>
@@ -371,10 +361,9 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             size="s"
           >
             <styled.div>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Image Load"
                 id="xpack.securitySolution.overview.endgameImageLoadTitle"
-                values={Object {}}
               />
             </styled.div>
           </EuiText>
@@ -406,10 +395,9 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             size="s"
           >
             <styled.div>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Network"
                 id="xpack.securitySolution.overview.endgameNetworkTitle"
-                values={Object {}}
               />
             </styled.div>
           </EuiText>
@@ -441,10 +429,9 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             size="s"
           >
             <styled.div>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Process"
                 id="xpack.securitySolution.overview.endgameProcessTitle"
-                values={Object {}}
               />
             </styled.div>
           </EuiText>
@@ -476,10 +463,9 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             size="s"
           >
             <styled.div>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Registry"
                 id="xpack.securitySolution.overview.endgameRegistryTitle"
-                values={Object {}}
               />
             </styled.div>
           </EuiText>
@@ -511,10 +497,9 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             size="s"
           >
             <styled.div>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Security"
                 id="xpack.securitySolution.overview.endgameSecurityTitle"
-                values={Object {}}
               />
             </styled.div>
           </EuiText>
@@ -548,10 +533,9 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
           grow={false}
         >
           <EuiText>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Filebeat"
               id="xpack.securitySolution.overview.hostStatGroupFilebeat"
-              values={Object {}}
             />
           </EuiText>
         </EuiFlexItem>
@@ -584,10 +568,9 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             size="s"
           >
             <styled.div>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="System Module"
                 id="xpack.securitySolution.overview.filebeatSystemModuleTitle"
-                values={Object {}}
               />
             </styled.div>
           </EuiText>
@@ -621,10 +604,9 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
           grow={false}
         >
           <EuiText>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Winlogbeat"
               id="xpack.securitySolution.overview.hostStatGroupWinlogbeat"
-              values={Object {}}
             />
           </EuiText>
         </EuiFlexItem>
@@ -657,10 +639,9 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             size="s"
           >
             <styled.div>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Security"
                 id="xpack.securitySolution.overview.winlogbeatSecurityTitle"
-                values={Object {}}
               />
             </styled.div>
           </EuiText>
@@ -692,10 +673,9 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             size="s"
           >
             <styled.div>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Microsoft-Windows-Sysmon/Operational"
                 id="xpack.securitySolution.overview.winlogbeatMWSysmonOperational"
-                values={Object {}}
               />
             </styled.div>
           </EuiText>

@@ -5,28 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { EuiErrorBoundary } from '@elastic/eui';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
-import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Router, Routes, Route } from '@kbn/shared-ux-router';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { i18n } from '@kbn/i18n';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
-
-import { i18n } from '@kbn/i18n';
-import { usePluginContext } from './hooks/use_plugin_context';
-import { PluginContext } from './context/plugin_context';
-
-import { SloPublicPluginsStart } from './types';
-import { getRoutes } from './routes/routes';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { ExperimentalFeatures } from '../common/config';
+import { PluginContext } from './context/plugin_context';
+import { usePluginContext } from './hooks/use_plugin_context';
+import { getRoutes } from './routes/routes';
+import { SloPublicPluginsStart } from './types';
 
 function App() {
   const { isServerless } = usePluginContext();
@@ -72,7 +71,6 @@ export const renderApp = ({
   experimentalFeatures: ExperimentalFeatures;
 }) => {
   const { element, history, theme$ } = appMountParameters;
-  const i18nCore = core.i18n;
   const isDarkMode = core.theme.getTheme().darkMode;
 
   // ensure all divs are .kbnAppWrappers
@@ -110,8 +108,8 @@ export const renderApp = ({
   });
 
   ReactDOM.render(
-    <PresentationContextProvider>
-      <EuiErrorBoundary>
+    <KibanaRenderContextProvider {...core}>
+      <PresentationContextProvider>
         <ApplicationUsageTrackingProvider>
           <KibanaThemeProvider {...{ theme: { theme$ } }}>
             <CloudProvider>
@@ -137,16 +135,16 @@ export const renderApp = ({
                 >
                   <Router history={history}>
                     <EuiThemeProvider darkMode={isDarkMode}>
-                      <i18nCore.Context>
-                        <RedirectAppLinks
-                          coreStart={core}
-                          data-test-subj="observabilityMainContainer"
-                        >
+                      <RedirectAppLinks
+                        coreStart={core}
+                        data-test-subj="observabilityMainContainer"
+                      >
+                        <PerformanceContextProvider>
                           <QueryClientProvider client={queryClient}>
                             <App />
                           </QueryClientProvider>
-                        </RedirectAppLinks>
-                      </i18nCore.Context>
+                        </PerformanceContextProvider>
+                      </RedirectAppLinks>
                     </EuiThemeProvider>
                   </Router>
                 </PluginContext.Provider>
@@ -154,8 +152,8 @@ export const renderApp = ({
             </CloudProvider>
           </KibanaThemeProvider>
         </ApplicationUsageTrackingProvider>
-      </EuiErrorBoundary>
-    </PresentationContextProvider>,
+      </PresentationContextProvider>
+    </KibanaRenderContextProvider>,
     element
   );
 

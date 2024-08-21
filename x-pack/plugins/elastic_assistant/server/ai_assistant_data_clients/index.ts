@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
-import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { estypes } from '@elastic/elasticsearch';
 import { IIndexPatternString } from '../types';
 import { getIndexTemplateAndPattern } from '../lib/data_stream/helpers';
@@ -21,7 +20,7 @@ export interface AIAssistantDataClientParams {
   kibanaVersion: string;
   spaceId: string;
   logger: Logger;
-  indexPatternsResorceName: string;
+  indexPatternsResourceName: string;
   currentUser: AuthenticatedUser | null;
 }
 
@@ -38,7 +37,7 @@ export class AIAssistantDataClient {
 
   constructor(public readonly options: AIAssistantDataClientParams) {
     this.indexTemplateAndPattern = getIndexTemplateAndPattern(
-      this.options.indexPatternsResorceName,
+      this.options.indexPatternsResourceName,
       this.options.spaceId ?? DEFAULT_NAMESPACE_STRING
     );
     this.currentUser = this.options.currentUser;

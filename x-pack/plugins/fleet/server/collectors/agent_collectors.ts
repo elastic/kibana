@@ -69,6 +69,10 @@ export interface AgentData {
     error: number;
     degraded: number;
   };
+  agents_per_privileges: {
+    root: number;
+    unprivileged: number;
+  };
   agents_per_policy: number[];
   agents_per_os: Array<{
     name: string;
@@ -89,6 +93,10 @@ const DEFAULT_AGENT_DATA = {
   agents_per_version: [],
   agents_per_os: [],
   upgrade_details: [],
+  agents_per_privileges: {
+    root: 0,
+    unprivileged: 0,
+  },
 };
 
 export const getAgentData = async (
@@ -159,6 +167,18 @@ export const getAgentData = async (
               ],
             },
           },
+          privileges: {
+            filters: {
+              other_bucket_key: 'root',
+              filters: {
+                unprivileged: {
+                  match: {
+                    'local_metadata.elastic.agent.unprivileged': true,
+                  },
+                },
+              },
+            },
+          },
         },
       },
       { signal: abortController.signal }
@@ -175,6 +195,12 @@ export const getAgentData = async (
         offline: 0,
       })
     );
+
+    const agentsPerPrivileges = {
+      root: (response?.aggregations?.privileges as any)?.buckets?.root?.doc_count ?? 0,
+      unprivileged:
+        (response?.aggregations?.privileges as any)?.buckets?.unprivileged?.doc_count ?? 0,
+    };
 
     const getAgentStatusesPerVersion = async (version: string) => {
       return await getAgentStatusForAgentPolicy(
@@ -227,6 +253,7 @@ export const getAgentData = async (
       agent_checkin_status: statuses,
       agents_per_policy: agentsPerPolicy,
       agents_per_version: agentsPerVersion,
+      agents_per_privileges: agentsPerPrivileges,
       agents_per_os: agentsPerOS,
       upgrade_details: upgradeDetails,
     };

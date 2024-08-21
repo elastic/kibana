@@ -108,7 +108,7 @@ const policy = {
   name: 'apm-1',
   description: '',
   namespace: 'default',
-  policy_id: 'policy-elastic-agent-on-cloud',
+  policy_ids: ['policy-elastic-agent-on-cloud'],
   enabled: true,
   inputs: [
     {
@@ -330,7 +330,7 @@ const newPolicy = {
   name: 'apm-1',
   description: '',
   namespace: 'default',
-  policy_id: 'policy-elastic-agent-on-cloud',
+  policy_ids: ['policy-elastic-agent-on-cloud'],
   enabled: true,
   package: {
     name: 'apm',

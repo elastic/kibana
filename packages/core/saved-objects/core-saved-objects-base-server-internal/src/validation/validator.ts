@@ -9,6 +9,7 @@
 import Semver from 'semver';
 import type { Logger } from '@kbn/logging';
 import type {
+  SavedObjectsValidationSpec,
   SavedObjectsValidationMap,
   SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';
@@ -56,10 +57,10 @@ export class SavedObjectsTypeValidator {
     }
     const schemaVersion = previousVersionWithSchema(this.orderedVersions, usedVersion);
 
-    if (!schemaVersion || !this.validationMap[schemaVersion]) {
-      return;
+    let validationRule: SavedObjectsValidationSpec | undefined;
+    if (schemaVersion && this.validationMap[schemaVersion]) {
+      validationRule = this.validationMap[schemaVersion];
     }
-    const validationRule = this.validationMap[schemaVersion];
 
     try {
       const validationSchema = createSavedObjectSanitizedDocSchema(validationRule);

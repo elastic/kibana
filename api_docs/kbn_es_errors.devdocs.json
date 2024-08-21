@@ -21,6 +21,74 @@
     "functions": [
       {
         "parentPluginId": "@kbn/es-errors",
+        "id": "def-common.isMaximumResponseSizeExceededError",
+        "type": "Function",
+        "tags": [],
+        "label": "isMaximumResponseSizeExceededError",
+        "description": [],
+        "signature": [
+          "(error: unknown) => boolean"
+        ],
+        "path": "packages/kbn-es-errors/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-errors",
+            "id": "def-common.isMaximumResponseSizeExceededError.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-es-errors/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-errors",
+        "id": "def-common.isRequestAbortedError",
+        "type": "Function",
+        "tags": [],
+        "label": "isRequestAbortedError",
+        "description": [
+          "\nChecks if the provided `error` is an {@link errors.RequestAbortedError | elasticsearch request aborted error}"
+        ],
+        "signature": [
+          "(error: unknown) => boolean"
+        ],
+        "path": "packages/kbn-es-errors/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-errors",
+            "id": "def-common.isRequestAbortedError.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-es-errors/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-errors",
         "id": "def-common.isResponseError",
         "type": "Function",
         "tags": [],

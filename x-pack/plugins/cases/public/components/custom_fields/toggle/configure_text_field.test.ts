@@ -24,6 +24,7 @@ describe('configureToggleCustomFieldFactory ', () => {
         { key: 'on', label: 'On', value: true },
         { key: 'off', label: 'Off', value: false },
       ],
+      getDefaultValue: expect.any(Function),
     });
   });
 });

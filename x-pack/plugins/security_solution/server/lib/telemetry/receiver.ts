@@ -10,6 +10,7 @@ import { cloneDeep } from 'lodash';
 
 import type {
   Logger,
+  LogMeta,
   CoreStart,
   IScopedClusterClient,
   ElasticsearchClient,
@@ -100,6 +101,8 @@ export interface ITelemetryReceiver {
   getClusterInfo(): Nullable<ESClusterInfo>;
 
   fetchClusterInfo(): Promise<ESClusterInfo>;
+
+  getLicenseInfo(): Nullable<ESLicense>;
 
   fetchLicenseInfo(): Promise<Nullable<ESLicense>>;
 
@@ -203,6 +206,7 @@ export interface ITelemetryReceiver {
   }>;
 
   fetchPrebuiltRuleAlertsBatch(
+    index: string,
     executeFrom: string,
     executeTo: string
   ): AsyncGenerator<TelemetryEvent[], void, unknown>;
@@ -217,7 +221,8 @@ export interface ITelemetryReceiver {
     entityId: string,
     resolverSchema: ResolverSchema,
     startOfDay: string,
-    endOfDay: string
+    endOfDay: string,
+    agentId: string
   ): TreeResponse;
 
   fetchTimelineEvents(
@@ -231,6 +236,7 @@ export interface ITelemetryReceiver {
   getExperimentalFeatures(): ExperimentalFeatures | undefined;
 
   setMaxPageSizeBytes(bytes: number): void;
+
   setNumDocsToSample(n: number): void;
 }
 
@@ -244,6 +250,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   private getIndexForType?: (type: string) => string;
   private alertsIndex?: string;
   private clusterInfo?: ESClusterInfo;
+  private licenseInfo?: Nullable<ESLicense>;
   private processTreeFetcher?: Fetcher;
   private packageService?: PackageService;
   private experimentalFeatures: ExperimentalFeatures | undefined;
@@ -276,6 +283,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     this.soClient =
       core?.savedObjects.createInternalRepository() as unknown as SavedObjectsClientContract;
     this.clusterInfo = await this.fetchClusterInfo();
+    this.licenseInfo = await this.fetchLicenseInfo();
     this.experimentalFeatures = endpointContextService?.experimentalFeatures;
     const elasticsearch = core?.elasticsearch.client as unknown as IScopedClusterClient;
     this.processTreeFetcher = new Fetcher(elasticsearch);
@@ -285,6 +293,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
   public getClusterInfo(): ESClusterInfo | undefined {
     return this.clusterInfo;
+  }
+
+  public getLicenseInfo(): Nullable<ESLicense> {
+    return this.licenseInfo;
   }
 
   public getAlertsIndex(): string | undefined {
@@ -309,6 +321,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         ?.listAgents({
           perPage: this.maxRecords,
           showInactive: true,
+          kuery: 'status:*', // include unenrolled agents
           sortField: 'enrolled_at',
           sortOrder: 'desc',
         })
@@ -417,9 +430,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
               latest_metrics: {
                 top_hits: {
                   size: 1,
-                  _source: {
-                    excludes: ['*'],
-                  },
+                  _source: false,
                   sort: [
                     {
                       '@timestamp': {
@@ -521,6 +532,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         const buckets = endpointMetadataResponse?.aggregations?.endpoint_metadata?.buckets ?? [];
 
         return buckets.reduce((cache, endpointAgentId) => {
+          // const id = endpointAgentId.latest_metadata.hits.hits[0]._id;
           const doc = endpointAgentId.latest_metadata.hits.hits[0]._source;
           cache.set(endpointAgentId.key, doc);
           return cache;
@@ -529,10 +541,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   }
 
   public async *fetchDiagnosticAlertsBatch(executeFrom: string, executeTo: string) {
-    this.logger.l('Searching diagnostic alerts', {
+    this.logger.debug('Searching diagnostic alerts', {
       from: executeFrom,
       to: executeTo,
-    });
+    } as LogMeta);
 
     let pitId = await this.openPointInTime(DEFAULT_DIAGNOSTIC_INDEX);
     let fetchMore = true;
@@ -573,7 +585,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           fetchMore = false;
         }
 
-        this.logger.l('Diagnostic alerts to return', { numOfHits });
+        this.logger.debug('Diagnostic alerts to return', { numOfHits } as LogMeta);
         fetchMore = numOfHits > 0 && numOfHits < telemetryConfiguration.telemetry_max_buffer_size;
       } catch (e) {
         this.logger.l('Error fetching alerts', { error: JSON.stringify(e) });
@@ -744,13 +756,17 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     };
   }
 
-  public async *fetchPrebuiltRuleAlertsBatch(executeFrom: string, executeTo: string) {
-    this.logger.l('Searching prebuilt rule alerts from', {
+  public async *fetchPrebuiltRuleAlertsBatch(
+    index: string,
+    executeFrom: string,
+    executeTo: string
+  ) {
+    this.logger.debug('Searching prebuilt rule alerts from', {
       executeFrom,
       executeTo,
-    });
+    } as LogMeta);
 
-    let pitId = await this.openPointInTime(DEFAULT_DIAGNOSTIC_INDEX);
+    let pitId = await this.openPointInTime(index);
     let fetchMore = true;
     let searchAfter: SortResults | undefined;
 
@@ -883,7 +899,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           pitId = response?.pit_id;
         }
 
-        this.logger.l('Prebuilt rule alerts to return', { alerts: alerts.length });
+        this.logger.debug('Prebuilt rule alerts to return', { alerts: alerts.length } as LogMeta);
 
         yield alerts;
       }
@@ -1034,7 +1050,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     entityId: string,
     resolverSchema: ResolverSchema,
     startOfDay: string,
-    endOfDay: string
+    endOfDay: string,
+    agentId: string
   ): TreeResponse {
     if (this.processTreeFetcher === undefined || this.processTreeFetcher === null) {
       throw Error(
@@ -1053,6 +1070,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       nodes: [entityId],
       indexPatterns: [`${this.alertsIndex}*`, 'logs-*'],
       descendantLevels: 20,
+      agentId,
     };
 
     return this.processTreeFetcher.tree(request, true);

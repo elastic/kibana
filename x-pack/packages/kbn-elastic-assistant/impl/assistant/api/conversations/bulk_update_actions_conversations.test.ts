@@ -63,7 +63,7 @@ describe('bulkUpdateConversations', () => {
       ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
       {
         method: 'POST',
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         body: JSON.stringify({
           update: [],
           create: [],
@@ -89,7 +89,7 @@ describe('bulkUpdateConversations', () => {
       ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
       {
         method: 'POST',
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         body: JSON.stringify({
           update: [],
           create: [conversation1, conversation2],
@@ -114,7 +114,7 @@ describe('bulkUpdateConversations', () => {
       ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
       {
         method: 'POST',
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         body: JSON.stringify({
           update: [conversation1, conversation2],
           delete: { ids: [] },

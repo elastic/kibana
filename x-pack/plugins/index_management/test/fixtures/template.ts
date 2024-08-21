@@ -67,6 +67,8 @@ export const getTemplate = ({
   indexPatterns = [],
   template: { settings, aliases, mappings } = {},
   dataStream,
+  composedOf,
+  ignoreMissingComponentTemplates,
   hasDatastream = false,
   isLegacy = false,
   type = 'default',
@@ -98,6 +100,8 @@ export const getTemplate = ({
       hasDatastream: dataStream !== undefined ? true : hasDatastream,
       isLegacy,
     },
+    composedOf,
+    ignoreMissingComponentTemplates,
   };
 
   return indexTemplate;

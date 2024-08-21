@@ -18,12 +18,15 @@ import type {
   InternalApplicationSetup,
   InternalApplicationStart,
 } from '@kbn/core-application-browser-internal';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import { renderApp as renderStatusApp } from './status';
 import {
   renderApp as renderErrorApp,
   setupPublicBaseUrlConfigWarning,
   setupUrlOverflowDetection,
 } from './errors';
-import { renderApp as renderStatusApp } from './status';
 
 export interface CoreAppsServiceSetupDeps {
   application: InternalApplicationSetup;
@@ -38,6 +41,9 @@ export interface CoreAppsServiceStartDeps {
   http: InternalHttpStart;
   notifications: NotificationsStart;
   uiSettings: IUiSettingsClient;
+  analytics: AnalyticsServiceStart;
+  i18n: I18nStart;
+  theme: ThemeServiceStart;
 }
 
 export class CoreAppsService {
@@ -79,6 +85,9 @@ export class CoreAppsService {
     http,
     notifications,
     uiSettings,
+    analytics,
+    i18n,
+    theme,
   }: CoreAppsServiceStartDeps) {
     if (!application.history) {
       return;
@@ -91,7 +100,7 @@ export class CoreAppsService {
       uiSettings,
     });
 
-    setupPublicBaseUrlConfigWarning({ docLinks, http, notifications });
+    setupPublicBaseUrlConfigWarning({ docLinks, http, notifications, analytics, i18n, theme });
   }
 
   public stop() {

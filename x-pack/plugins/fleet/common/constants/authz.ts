@@ -162,6 +162,12 @@ export const ENDPOINT_PRIVILEGES: Record<string, PrivilegeMapObject> = deepFreez
     privilegeType: 'api',
     privilegeName: 'writeExecuteOperations',
   },
+  writeScanOperations: {
+    appId: DEFAULT_APP_CATEGORIES.security.id,
+    privilegeSplit: '-',
+    privilegeType: 'api',
+    privilegeName: 'writeScanOperations',
+  },
 });
 
 export const ENDPOINT_EXCEPTIONS_PRIVILEGES: Record<string, PrivilegeMapObject> = deepFreeze({

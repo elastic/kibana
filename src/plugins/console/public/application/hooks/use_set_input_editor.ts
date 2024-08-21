@@ -10,12 +10,13 @@ import { useCallback } from 'react';
 import { useEditorActionContext } from '../contexts/editor_context';
 import { instance as registry } from '../contexts/editor_context/editor_registry';
 import { SenseEditor } from '../models';
+import { MonacoEditorActionsProvider } from '../containers/editor/monaco/monaco_editor_actions_provider';
 
 export const useSetInputEditor = () => {
   const dispatch = useEditorActionContext();
 
   return useCallback(
-    (editor: SenseEditor) => {
+    (editor: SenseEditor | MonacoEditorActionsProvider) => {
       dispatch({ type: 'setInputEditor', payload: editor });
       registry.setInputEditor(editor);
     },

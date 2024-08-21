@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export * from './after_keys';
 export * from './risk_weights';
 export * from './identifier_types';
 export * from './range';

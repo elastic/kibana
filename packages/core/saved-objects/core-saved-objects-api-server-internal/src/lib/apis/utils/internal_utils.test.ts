@@ -102,6 +102,8 @@ describe('#getSavedObjectFromSource', () => {
   const updated_at = 'updatedAt';
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const created_by = 'createdBy';
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const updated_by = 'updatedBy';
   const managed = false;
 
   function createRawDoc(
@@ -123,6 +125,7 @@ describe('#getSavedObjectFromSource', () => {
         originId,
         updated_at,
         created_by,
+        updated_by,
         ...namespaceAttrs,
       },
     };
@@ -145,6 +148,7 @@ describe('#getSavedObjectFromSource', () => {
       references,
       type,
       updated_at,
+      updated_by,
       created_by,
       version: encodeHitVersion(doc),
     });

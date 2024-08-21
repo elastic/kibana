@@ -122,7 +122,7 @@ export class RemoteClusterEdit extends Component {
             <p>
               <FormattedMessage
                 id="xpack.remoteClusters.edit.loadingErrorMessage"
-                defaultMessage="The remote cluster '{name}' does not exist."
+                defaultMessage="The remote cluster ''{name}'' does not exist."
                 values={{ name: clusterName }}
               />
             </p>

@@ -1,0 +1,62 @@
+- input: filestream
+  template_path: filestream.yml.hbs
+  title: |
+    {{ data_stream_title }}
+  description: |
+    {{ data_stream_description }}
+  vars:
+    - name: paths
+      type: text
+      title: Paths
+      multi: true
+      required: true
+      show_user: true
+      default:
+        - '/test/path'
+      description: The full path to the related log file.
+    - name: exclude_files
+      type: text
+      title: Exclude Files
+      description: A list of regular expressions to match the files that you want Filebeat to ignore.
+      required: false
+      show_user: true
+      default: 
+        - '\.gz$'
+    - name: custom
+      type: yaml
+      title: Additional Filestream Configuration Options
+      required: false
+      show_user: false
+      description: >-
+          Configuration options that can be used to further change input configuration. Check the [Filebeat documentation](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-filestream.html) for more information.
+      default: |-
+        #encoding: plain
+        prospector.scanner.recursive_glob: true
+        #prospector.scanner.symlinks: true
+        #prospector.scanner.include_files: ['']
+        #prospector.scanner.resend_on_touch: false
+        #prospector.scanner.check_interval: 10s
+        #prospector.scanner.fingerprint.enabled: false
+        #prospector.scanner.fingerprint.offset: 0
+        #prospector.scanner.fingerprint.length: 1024
+        #ignore_older: 0
+        #ignore_inactive: ''
+        #close.on_state_change.inactive: 5m
+        #close.on_state_change.renamed: false
+        #close.on_state_change.removed: false
+        #close.reader.on_eof: false
+        #close.reader.after_interval: 0
+        #clean_inactive: 0
+        #clean_removed: true
+        #backoff.init: 2s
+        #backoff.max: 10s
+        #file_identity.native: ~
+        #file_identity.path: ''
+        #file_identity.inode_marker.path: ''
+        #file_identity.fingerprint: ~
+        #rotation.external.strategy.copytruncate.suffix_regex: '\.\d$'
+        #rotation.external.strategy.copytruncate.dateformat: '-20060102'
+        #include_lines: ['sometext']
+        #exclude_lines: ['^DBG']
+        #buffer_size: 16384
+        #message_max_bytes: 1048576

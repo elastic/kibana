@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  EuiToolTip,
-  EuiButtonIcon,
-} from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
 import styled from 'styled-components';
@@ -21,8 +14,8 @@ import type {
   OnOpenTimeline,
   OpenTimelineResult,
 } from '../../../timelines/components/open_timeline/types';
-import { WithHoverActions } from '../../../common/components/with_hover_actions';
-import { TimelineType } from '../../../../common/api/timeline';
+import { HoverPopover } from '../../../common/components/hover_popover';
+import { TimelineTypeEnum } from '../../../../common/api/timeline';
 
 import { RecentTimelineCounts } from './counts';
 import * as i18n from './translations';
@@ -53,56 +46,42 @@ const RecentTimelinesItem = React.memo<RecentTimelinesItemProps>(
       [onOpenTimeline, timeline.savedObjectId]
     );
 
-    const render = useCallback(
-      (showHoverContent) => (
-        <EuiFlexGroup
-          gutterSize="none"
-          justifyContent="spaceBetween"
-          data-test-subj="overview-recent-timelines"
-        >
-          <EuiFlexItem grow={false}>
-            <RecentTimelineHeader onOpenTimeline={onOpenTimeline} timeline={timeline} />
-            <RecentTimelineCounts timeline={timeline} />
-            {timeline.description && timeline.description.length && (
-              <EuiText color="subdued" size="xs">
-                <ClampText>{timeline.description}</ClampText>
-              </EuiText>
-            )}
-          </EuiFlexItem>
-
-          {showHoverContent && (
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={
-                  timeline.timelineType === TimelineType.default
+    return (
+      <>
+        <HoverPopover
+          anchorPosition="rightDown"
+          hoverContent={
+            <EuiToolTip
+              content={
+                timeline.timelineType === TimelineTypeEnum.default
+                  ? i18n.OPEN_AS_DUPLICATE
+                  : i18n.OPEN_AS_DUPLICATE_TEMPLATE
+              }
+            >
+              <EuiButtonIcon
+                aria-label={
+                  timeline.timelineType === TimelineTypeEnum.default
                     ? i18n.OPEN_AS_DUPLICATE
                     : i18n.OPEN_AS_DUPLICATE_TEMPLATE
                 }
-              >
-                <EuiButtonIcon
-                  aria-label={
-                    timeline.timelineType === TimelineType.default
-                      ? i18n.OPEN_AS_DUPLICATE
-                      : i18n.OPEN_AS_DUPLICATE_TEMPLATE
-                  }
-                  data-test-subj="open-duplicate"
-                  isDisabled={timeline.savedObjectId == null}
-                  iconSize="s"
-                  iconType="copy"
-                  onClick={handleClick}
-                  size="s"
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
+                data-test-subj="open-duplicate"
+                isDisabled={timeline.savedObjectId == null}
+                iconSize="s"
+                iconType="copy"
+                onClick={handleClick}
+                size="s"
+              />
+            </EuiToolTip>
+          }
+        >
+          <RecentTimelineHeader onOpenTimeline={onOpenTimeline} timeline={timeline} />
+          <RecentTimelineCounts timeline={timeline} />
+          {timeline.description && timeline.description.length && (
+            <EuiText color="subdued" size="xs">
+              <ClampText>{timeline.description}</ClampText>
+            </EuiText>
           )}
-        </EuiFlexGroup>
-      ),
-      [handleClick, onOpenTimeline, timeline]
-    );
-
-    return (
-      <>
-        <WithHoverActions render={render} />
+        </HoverPopover>
         <>{!isLastItem && <EuiSpacer size="l" />}</>
       </>
     );
@@ -142,7 +121,7 @@ export const RecentTimelines = React.memo<RecentTimelinesProps>(
       );
     }
 
-    return <>{content}</>;
+    return <div data-test-subj="overview-recent-timelines">{content}</div>;
   }
 );
 

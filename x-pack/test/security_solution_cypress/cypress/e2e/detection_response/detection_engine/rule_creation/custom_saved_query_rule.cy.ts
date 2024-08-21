@@ -132,22 +132,27 @@ describe('Saved query rules', { tags: ['@ess', '@serverless'] }, () => {
           cy.get(TOASTER).should('contain', FAILED_TO_LOAD_ERROR);
         });
 
-        it('Allows to update saved_query rule with non-existent query', () => {
-          cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).should('exist');
+        // https://github.com/elastic/kibana/issues/187623
+        it(
+          'Allows to update saved_query rule with non-existent query',
+          { tags: ['@skipInServerlessMKI'] },
+          () => {
+            cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).should('exist');
 
-          cy.intercept('PUT', '/api/detection_engine/rules').as('editedRule');
-          saveEditedRule();
+            cy.intercept('PUT', '/api/detection_engine/rules').as('editedRule');
+            saveEditedRule();
 
-          cy.wait('@editedRule').then(({ response }) => {
-            // updated rule type shouldn't change
-            cy.wrap(response?.body.type).should('equal', 'saved_query');
-          });
+            cy.wait('@editedRule').then(({ response }) => {
+              // updated rule type shouldn't change
+              cy.wrap(response?.body.type).should('equal', 'saved_query');
+            });
 
-          cy.get(DEFINE_RULE_PANEL_PROGRESS).should('not.exist');
+            cy.get(DEFINE_RULE_PANEL_PROGRESS).should('not.exist');
 
-          assertDetailsNotExist(SAVED_QUERY_NAME_DETAILS);
-          assertDetailsNotExist(SAVED_QUERY_DETAILS);
-        });
+            assertDetailsNotExist(SAVED_QUERY_NAME_DETAILS);
+            assertDetailsNotExist(SAVED_QUERY_DETAILS);
+          }
+        );
       });
     });
 

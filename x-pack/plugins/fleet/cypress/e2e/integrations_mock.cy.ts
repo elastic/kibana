@@ -51,6 +51,7 @@ describe('Add Integration - Mock API', () => {
             description: '',
             namespace: 'default',
             policy_id: 'policy-1',
+            policy_ids: ['policy-1'],
             package: {
               name: 'apache',
               version: oldVersion,
@@ -66,6 +67,7 @@ describe('Add Integration - Mock API', () => {
         package: { name: 'apache', version: oldVersion },
         enabled: true,
         policy_id: 'policy-1',
+        policy_ids: ['policy-1'],
         inputs: [],
       };
       cy.intercept('/api/fleet/package_policies/apache-2', {
@@ -89,9 +91,18 @@ describe('Add Integration - Mock API', () => {
         namespace: 'default',
         monitoring_enabled: [],
         status: 'active',
-        package_policies: [{ id: 'apache-2', name: 'apache-2', policy_id: 'policy-1', inputs: [] }],
+        package_policies: [
+          {
+            id: 'apache-2',
+            name: 'apache-2',
+            policy_id: 'policy-1',
+            policy_ids: ['policy-1'],
+            inputs: [],
+          },
+        ],
       };
       cy.intercept('/api/fleet/agent_policies?*', { items: [agentPolicy] });
+      cy.intercept('/api/fleet/agent_policies/_bulk_get', { items: [agentPolicy] });
       cy.intercept('/api/fleet/agent_policies/policy-1', {
         item: agentPolicy,
       });
@@ -140,6 +151,7 @@ describe('Add Integration - Mock API', () => {
           package: { name: 'apache', version: newVersion },
           enabled: true,
           policy_id: 'policy-1',
+          policy_ids: ['policy-1'],
           inputs: [],
         },
       }).as('updateApachePolicy');

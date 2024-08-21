@@ -72,7 +72,7 @@ export class SearchAPI {
         });
 
         return from(
-          extendSearchParamsWithRuntimeFields(indexPatterns, requestParams, request.index)
+          extendSearchParamsWithRuntimeFields(indexPatterns, requestParams, `${request.index}`)
         ).pipe(
           tap((params) => {
             /** inspect request data **/

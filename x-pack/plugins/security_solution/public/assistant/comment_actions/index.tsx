@@ -23,16 +23,15 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 
 interface Props {
   message: ClientMessage;
-  isFlyoutMode: boolean;
 }
 
-const CommentActionsComponent: React.FC<Props> = ({ message, isFlyoutMode }) => {
+const CommentActionsComponent: React.FC<Props> = ({ message }) => {
   const toasts = useToasts();
   const { cases } = useKibana().services;
   const dispatch = useDispatch();
   const isModelEvaluationEnabled = useIsExperimentalFeatureEnabled('assistantModelEvaluation');
 
-  const { showAssistantOverlay, traceOptions } = useAssistantContext();
+  const { traceOptions } = useAssistantContext();
 
   const associateNote = useCallback(
     (noteId: string) => dispatch(timelineActions.addNote({ id: TimelineId.active, noteId })),
@@ -65,10 +64,6 @@ const CommentActionsComponent: React.FC<Props> = ({ message, isFlyoutMode }) => 
   });
 
   const onAddToExistingCase = useCallback(() => {
-    if (!isFlyoutMode) {
-      showAssistantOverlay({ showOverlay: false });
-    }
-
     selectCaseModal.open({
       getAttachments: () => [
         {
@@ -78,7 +73,7 @@ const CommentActionsComponent: React.FC<Props> = ({ message, isFlyoutMode }) => 
         },
       ],
     });
-  }, [content, isFlyoutMode, selectCaseModal, showAssistantOverlay]);
+  }, [content, selectCaseModal]);
 
   // Note: This feature is behind the `isModelEvaluationEnabled` FF. If ever released, this URL should be configurable
   // as APM data may not go to the same cluster where the Kibana instance is running
@@ -112,7 +107,6 @@ const CommentActionsComponent: React.FC<Props> = ({ message, isFlyoutMode }) => 
           </EuiToolTip>
         </EuiFlexItem>
       )}
-
       <EuiFlexItem grow={false}>
         <EuiToolTip position="top" content={i18n.ADD_NOTE_TO_TIMELINE}>
           <EuiButtonIcon
@@ -123,7 +117,6 @@ const CommentActionsComponent: React.FC<Props> = ({ message, isFlyoutMode }) => 
           />
         </EuiToolTip>
       </EuiFlexItem>
-
       <EuiFlexItem grow={false}>
         <EuiToolTip position="top" content={i18n.ADD_TO_CASE_EXISTING_CASE}>
           <EuiButtonIcon
@@ -134,7 +127,6 @@ const CommentActionsComponent: React.FC<Props> = ({ message, isFlyoutMode }) => 
           />
         </EuiToolTip>
       </EuiFlexItem>
-
       <EuiFlexItem grow={false}>
         <EuiToolTip position="top" content={i18n.COPY_TO_CLIPBOARD}>
           <EuiCopy textToCopy={content}>
