@@ -14,7 +14,6 @@ import { i18n } from '@kbn/i18n';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
 import { TAB_ID_CONTENT, TAB_ID_GENERAL, TAB_ID_ROLES } from './constants';
-// import { filterRolesAssignedToSpace } from './utils';
 import type { Space } from '../../../common';
 
 // FIXME: rename to EditSpaceTab
@@ -95,12 +94,10 @@ export const getTabs = ({
   ];
 
   if (canUserViewRoles) {
-    // const rolesAssignedToSpace = filterRolesAssignedToSpace(roles, space);
-
     tabsDefinition.push({
       id: TAB_ID_ROLES,
       name: i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.roles.heading', {
-        defaultMessage: 'Roles',
+        defaultMessage: 'Assigned roles',
       }),
       append: (
         <EuiNotificationBadge className="eui-alignCenter" color="subdued" size="m">

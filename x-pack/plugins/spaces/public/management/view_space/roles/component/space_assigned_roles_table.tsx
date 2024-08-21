@@ -360,6 +360,8 @@ export const SpaceAssignedRolesTable = ({
                   panels={[
                     {
                       id: 0,
+                      size: 's',
+                      width: 180,
                       items: [
                         {
                           icon: <EuiIcon type="pencil" />,
@@ -473,7 +475,7 @@ export const SpaceAssignedRolesTable = ({
           pagination={{
             pageSize: pagination.size,
             pageIndex: pagination.index,
-            pageSizeOptions: [50, 25, 10, 0],
+            pageSizeOptions: [50, 25, 10],
           }}
           onChange={onTableChange}
         />
