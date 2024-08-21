@@ -20,12 +20,7 @@ import {
   RecoveredActionGroup,
 } from '@kbn/alerting-plugin/common';
 import { AlertsClientError, RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
-import {
-  AlertsLocatorParams,
-  TimeUnitChar,
-  alertsLocatorID,
-  getAlertUrl,
-} from '@kbn/observability-plugin/common';
+import { TimeUnitChar, getAlertUrl } from '@kbn/observability-plugin/common';
 import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { getEcsGroups, type Group } from '@kbn/observability-alerting-rule-utils';
@@ -105,7 +100,10 @@ type MetricThresholdAlertReporter = (params: {
 }) => void;
 
 export const createMetricThresholdExecutor =
-  (libs: InfraBackendLibs, { assetDetailsLocator, metricsExplorerLocator }: InfraLocators) =>
+  (
+    libs: InfraBackendLibs,
+    { alertsLocator, assetDetailsLocator, metricsExplorerLocator }: InfraLocators
+  ) =>
   async (
     options: RuleExecutorOptions<
       MetricThresholdRuleParams,
@@ -116,9 +114,6 @@ export const createMetricThresholdExecutor =
       MetricThresholdAlert
     >
   ) => {
-    const { share } = libs.plugins;
-    const alertsLocator = share.setup.url.locators.get<AlertsLocatorParams>(alertsLocatorID);
-
     const startTime = Date.now();
 
     const {

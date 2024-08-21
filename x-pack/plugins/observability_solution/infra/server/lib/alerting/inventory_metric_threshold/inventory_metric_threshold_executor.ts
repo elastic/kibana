@@ -21,12 +21,7 @@ import {
   AlertInstanceState as AlertState,
 } from '@kbn/alerting-plugin/common';
 import { AlertsClientError, RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
-import {
-  AlertsLocatorParams,
-  alertsLocatorID,
-  convertToBuiltInComparators,
-  getAlertUrl,
-} from '@kbn/observability-plugin/common';
+import { convertToBuiltInComparators, getAlertUrl } from '@kbn/observability-plugin/common';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
@@ -80,7 +75,10 @@ export type InventoryMetricThresholdAlert = Omit<
 };
 
 export const createInventoryMetricThresholdExecutor =
-  (libs: InfraBackendLibs, { assetDetailsLocator, inventoryLocator }: InfraLocators) =>
+  (
+    libs: InfraBackendLibs,
+    { alertsLocator, assetDetailsLocator, inventoryLocator }: InfraLocators
+  ) =>
   async (
     options: RuleExecutorOptions<
       InventoryMetricThresholdParams & Record<string, unknown>,
@@ -100,9 +98,6 @@ export const createInventoryMetricThresholdExecutor =
       rule: { id: ruleId, tags: ruleTags },
       getTimeRange,
     } = options;
-
-    const { share } = libs.plugins;
-    const alertsLocator = share.setup.url.locators.get<AlertsLocatorParams>(alertsLocatorID);
 
     const startTime = Date.now();
 

@@ -15,6 +15,7 @@ import type {
   InventoryLocator,
   MetricsExplorerLocator,
 } from '@kbn/observability-shared-plugin/common';
+import type { AlertsLocator } from '@kbn/observability-plugin/common';
 import { RulesServiceSetup } from '../services/rules';
 import { InfraConfig, InfraPluginStartServicesAccessor } from '../types';
 import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
@@ -53,6 +54,7 @@ export interface InfraBackendLibs extends InfraDomainLibs {
 }
 
 export interface InfraLocators {
+  alertsLocator: AlertsLocator;
   assetDetailsLocator: AssetDetailsLocator;
   metricsExplorerLocator: MetricsExplorerLocator;
   inventoryLocator: InventoryLocator;
