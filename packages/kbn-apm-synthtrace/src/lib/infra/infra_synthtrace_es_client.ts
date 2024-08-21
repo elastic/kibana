@@ -22,7 +22,14 @@ export class InfraSynthtraceEsClient extends SynthtraceEsClient<InfraDocument> {
       ...options,
       pipeline: infraPipeline(),
     });
-    this.dataStreams = ['metrics-*', 'metricbeat-*', 'logs-*'];
+    this.dataStreams = [
+      'metrics-system*',
+      'metrics-kubernetes*',
+      'metrics-docker*',
+      'metrics-aws*',
+      'metricbeat-*',
+      'logs-*',
+    ];
   }
 }
 

@@ -227,7 +227,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const loginWithReadOnlyUserAndNavigateToHostsFlyout = async () => {
     await security.role.create('global_hosts_read_privileges_role', {
       elasticsearch: {
-        indices: [{ names: ['metricbeat-*'], privileges: ['read', 'view_index_metadata'] }],
+        indices: [
+          { names: ['metrics-*'], privileges: ['read', 'view_index_metadata'] },
+          { names: ['metricbeat-*'], privileges: ['read', 'view_index_metadata'] },
+        ],
       },
       kibana: [
         {
@@ -1000,7 +1003,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      describe.skip('#Permissions: Read Only User - Single Host Flyout', () => {
+      describe('#Permissions: Read Only User - Single Host Flyout', () => {
         describe('Dashboards Tab', () => {
           before(async () => {
             await setCustomDashboardsEnabled(true);
