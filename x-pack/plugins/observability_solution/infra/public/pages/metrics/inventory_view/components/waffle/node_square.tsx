@@ -221,6 +221,7 @@ export const NodeSquare = ({
       onFocus={showToolTip}
       onMouseLeave={hideToolTip}
       color={color}
+      tabIndex={0}
     />
   );
 };
