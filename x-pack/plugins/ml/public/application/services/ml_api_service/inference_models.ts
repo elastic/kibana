@@ -12,7 +12,7 @@ import type { HttpService } from '../http_service';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 
 // TODO remove inference_id when esType has been updated to include it
-interface GetInferenceEndpointsResponse extends estypes.InferenceModelConfigContainer {
+export interface GetInferenceEndpointsResponse extends estypes.InferenceModelConfigContainer {
   inference_id: string;
 }
 
