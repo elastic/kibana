@@ -299,14 +299,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('Asset Details flyout for a container', async () => {
         before(async () => {
-          // await synthEsClient.index(
-          //   generateDockerContainersData({
-          //     from: DATE_WITH_DOCKER_DATA_FROM,
-          //     to: DATE_WITH_DOCKER_DATA_TO,
-          //     count: 5,
-          //   })
-          // );
-
           await pageObjects.infraHome.goToContainer();
           await pageObjects.infraHome.goToTime(DATE_WITH_DOCKER_DATA);
           await pageObjects.infraHome.clickOnFirstNode();
@@ -545,16 +537,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         describe('Redirect to Container Details page', () => {
-          before(async () => {
-            await synthEsClient.index(
-              generateDockerContainersData({
-                from: DATE_WITH_DOCKER_DATA_FROM,
-                to: DATE_WITH_DOCKER_DATA_TO,
-                count: 5,
-              })
-            );
-          });
-
           it('should redirect to Container Details page', async () => {
             await pageObjects.infraHome.goToContainer();
             await pageObjects.infraHome.goToTime(DATE_WITH_DOCKER_DATA);
