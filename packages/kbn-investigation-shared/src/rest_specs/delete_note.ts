@@ -8,11 +8,16 @@
 
 import * as t from 'io-ts';
 
-const investigationNoteSchema = t.type({
-  id: t.string,
-  content: t.string,
-  createdAt: t.number,
-  createdBy: t.string,
+const deleteInvestigationNoteParamsSchema = t.type({
+  path: t.type({
+    investigationId: t.string,
+    noteId: t.string,
+  }),
 });
 
-export { investigationNoteSchema };
+type DeleteInvestigationNoteParams = t.TypeOf<
+  typeof deleteInvestigationNoteParamsSchema.props.path
+>;
+
+export { deleteInvestigationNoteParamsSchema };
+export type { DeleteInvestigationNoteParams };

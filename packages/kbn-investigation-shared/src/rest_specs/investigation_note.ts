@@ -7,12 +7,11 @@
  */
 
 import * as t from 'io-ts';
+import { investigationNoteSchema } from '../schema';
 
-const investigationNoteSchema = t.type({
-  id: t.string,
-  content: t.string,
-  createdAt: t.number,
-  createdBy: t.string,
-});
+const investigationNoteResponseSchema = investigationNoteSchema;
 
-export { investigationNoteSchema };
+type InvestigationNoteResponse = t.OutputOf<typeof investigationNoteResponseSchema>;
+
+export { investigationNoteResponseSchema };
+export type { InvestigationNoteResponse };

@@ -5,11 +5,17 @@
  * 2.0.
  */
 
+import {
+  GetInvestigationItemsResponse,
+  getInvestigationItemsResponseSchema,
+} from '@kbn/investigation-shared';
 import { InvestigationRepository } from './investigation_repository';
 
-export async function deleteInvestigation(
+export async function getInvestigationItems(
   investigationId: string,
   repository: InvestigationRepository
-): Promise<void> {
-  await repository.deleteById(investigationId);
+): Promise<GetInvestigationItemsResponse> {
+  const investigation = await repository.findById(investigationId);
+
+  return getInvestigationItemsResponseSchema.encode(investigation.items);
 }

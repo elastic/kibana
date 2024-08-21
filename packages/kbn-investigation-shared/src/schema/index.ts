@@ -6,13 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
-
-const investigationNoteSchema = t.type({
-  id: t.string,
-  content: t.string,
-  createdAt: t.number,
-  createdBy: t.string,
-});
-
-export { investigationNoteSchema };
+export * from './investigation';
+export * from './investigation_item';
+export * from './investigation_note';
+export * from './origin';
