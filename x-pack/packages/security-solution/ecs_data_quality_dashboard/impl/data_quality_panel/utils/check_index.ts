@@ -16,7 +16,7 @@ import { getUnallowedValueRequestItems } from '../allowed_values/helpers';
 import {
   getMappingsProperties,
   getSortedPartitionedFieldMetadata,
-} from '../index_properties/helpers';
+} from '../body/data_quality_details/indices_details/pattern/index_check_flyout/index_properties/helpers';
 import * as i18n from '../body/data_quality_summary/summary_actions/check_all/translations';
 import type {
   OnCheckCompleted,

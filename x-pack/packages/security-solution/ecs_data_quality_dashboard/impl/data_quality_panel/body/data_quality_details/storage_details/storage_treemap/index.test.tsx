@@ -22,7 +22,7 @@ import {
 } from '../../../../mock/test_providers/test_providers';
 import type { Props } from '.';
 import { StorageTreemap } from '.';
-import { DEFAULT_MAX_CHART_HEIGHT } from '../../../../tabs/styles';
+import { DEFAULT_MAX_CHART_HEIGHT } from '../../indices_details/pattern/index_check_flyout/index_properties/index_check_fields/tabs/styles';
 import { NO_DATA_LABEL } from './translations';
 import { PatternRollup } from '../../../../types';
 

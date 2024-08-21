@@ -45,7 +45,7 @@ import {
   getIncompatibleMappingsFields,
   getIncompatibleValuesFields,
   getSameFamilyFields,
-} from '../tabs/incompatible_tab/helpers';
+} from '../body/data_quality_details/indices_details/pattern/index_check_flyout/index_properties/index_check_fields/tabs/incompatible_tab/helpers';
 import { UseResultsRollupReturnValue } from './types';
 import { useIsMounted } from '../use_is_mounted';
 

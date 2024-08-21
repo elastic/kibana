@@ -21,7 +21,7 @@ import {
   getPatternSummaryMarkdownComment,
   getSummaryTableMarkdownHeader,
   getSummaryTableMarkdownRow,
-} from '../../../index_properties/markdown/helpers';
+} from '../../data_quality_details/indices_details/pattern/index_check_flyout/index_properties/markdown/helpers';
 import {
   defaultSort,
   getSummaryTableItems,

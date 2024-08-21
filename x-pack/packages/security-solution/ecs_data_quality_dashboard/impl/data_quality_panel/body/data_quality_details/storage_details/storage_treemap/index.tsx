@@ -30,7 +30,7 @@ import {
 } from '../helpers';
 import { ChartLegendItem } from './chart_legend_item';
 import { NoData } from './no_data';
-import { ChartFlexItem, LegendContainer } from '../../../../tabs/styles';
+import { ChartFlexItem, LegendContainer } from '../../indices_details/pattern/index_check_flyout/index_properties/index_check_fields/tabs/styles';
 import { PatternRollup, SelectedIndex } from '../../../../types';
 import { useDataQualityContext } from '../../../../data_quality_context';
 

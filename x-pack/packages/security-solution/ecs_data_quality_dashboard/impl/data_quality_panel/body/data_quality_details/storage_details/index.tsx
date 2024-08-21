@@ -10,7 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useResultsRollupContext } from '../../../contexts/results_rollup_context';
 import { getFlattenedBuckets } from './helpers';
 import { StorageTreemap } from './storage_treemap';
-import { DEFAULT_MAX_CHART_HEIGHT } from '../../../tabs/styles';
+import { DEFAULT_MAX_CHART_HEIGHT } from '../indices_details/pattern/index_check_flyout/index_properties/index_check_fields/tabs/styles';
 import { SelectedIndex } from '../../../types';
 import { useDataQualityContext } from '../../../data_quality_context';
 import { DOCS_UNIT } from './translations';
