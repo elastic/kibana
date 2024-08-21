@@ -200,15 +200,15 @@ describe('getNewControlState', () => {
     });
   });
 
-  test('should contain values of last control when there are existing controls', () => {
+  test('should start with defaults if there are existing controls', () => {
     const controlsManager = initControlsManager(
       {
         alpha: {
           type: 'testControl',
           order: 1,
           dataViewId: 'myOtherDataViewId',
-          width: 'small',
-          grow: false,
+          width: 'medium',
+          grow: true,
         } as ControlPanelState & Pick<DefaultDataControlState, 'dataViewId'>,
       },
       DEFAULT_DATA_VIEW_ID
