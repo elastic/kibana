@@ -12,7 +12,7 @@ import {
   ALERT_GROUP,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { isEqual } from 'lodash';
+import { castArray, isEqual } from 'lodash';
 import {
   ActionGroupIdsOf,
   AlertInstanceContext as AlertContext,
@@ -20,11 +20,20 @@ import {
   RecoveredActionGroup,
 } from '@kbn/alerting-plugin/common';
 import { AlertsClientError, RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
-import { TimeUnitChar, getAlertUrl } from '@kbn/observability-plugin/common';
+import {
+  AlertsLocatorParams,
+  TimeUnitChar,
+  alertsLocatorID,
+  getAlertUrl,
+} from '@kbn/observability-plugin/common';
 import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { getEcsGroups, type Group } from '@kbn/observability-alerting-rule-utils';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
+import {
+  ASSET_DETAILS_LOCATOR_ID,
+  AssetDetailsLocatorParams,
+} from '@kbn/observability-shared-plugin/common';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import { AlertStates } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
@@ -111,6 +120,11 @@ export const createMetricThresholdExecutor =
       MetricThresholdAlert
     >
   ) => {
+    const { share } = libs.plugins;
+    const alertsLocator = share.setup.url.locators.get<AlertsLocatorParams>(alertsLocatorID);
+    const assetDetailsLocator =
+      share.setup.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
+
     const startTime = Date.now();
 
     const {
@@ -125,6 +139,8 @@ export const createMetricThresholdExecutor =
 
     const { criteria } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
+
+    const groupBy = castArray<string>(params.groupBy);
 
     const logger = createScopedLogger(libs.logger, 'metricThresholdRule', {
       alertId: ruleId,
@@ -167,7 +183,7 @@ export const createMetricThresholdExecutor =
             uuid,
             spaceId,
             start ?? startedAt.toISOString(),
-            libs.alertsLocator,
+            alertsLocator,
             libs.basePath.publicBaseUrl
           ),
         },
@@ -203,6 +219,8 @@ export const createMetricThresholdExecutor =
             basePath: libs.basePath,
             spaceId,
             timestamp,
+            groupBy,
+            assetDetailsLocator,
           }),
         };
 
@@ -217,7 +235,7 @@ export const createMetricThresholdExecutor =
           state: {
             lastRunTimestamp: startedAt.valueOf(),
             missingGroups: [],
-            groupBy: params.groupBy,
+            groupBy,
             filterQuery: params.filterQuery,
           },
         };
@@ -410,7 +428,8 @@ export const createMetricThresholdExecutor =
             basePath: libs.basePath,
             spaceId,
             timestamp,
-            hostName: additionalContext?.host?.name,
+            groupBy,
+            assetDetailsLocator,
           }),
           ...additionalContext,
         };
@@ -450,7 +469,7 @@ export const createMetricThresholdExecutor =
           alertUuid,
           spaceId,
           indexedStartedAt,
-          libs.alertsLocator,
+          alertsLocator,
           libs.basePath.publicBaseUrl
         ),
         alertState: stateToAlertMessage[AlertStates.OK],
@@ -468,7 +487,8 @@ export const createMetricThresholdExecutor =
           basePath: libs.basePath,
           spaceId,
           timestamp: indexedStartedAt,
-          hostName: additionalContext?.host?.name,
+          groupBy,
+          assetDetailsLocator,
         }),
 
         originalAlertState: translateActionGroupToAlertState(originalActionGroup),
@@ -486,7 +506,7 @@ export const createMetricThresholdExecutor =
       state: {
         lastRunTimestamp: startedAt.valueOf(),
         missingGroups: [...nextMissingGroups],
-        groupBy: params.groupBy,
+        groupBy,
         filterQuery: params.filterQuery,
       },
     };

@@ -730,16 +730,16 @@
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SerializedSearchSourceFields",
-            "text": "SerializedSearchSourceFields"
+            "section": "def-common.ISearchSource",
+            "text": "ISearchSource"
           },
           " | ",
           {
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ISearchSource",
-            "text": "ISearchSource"
+            "section": "def-common.SerializedSearchSourceFields",
+            "text": "SerializedSearchSourceFields"
           },
           ", managed: boolean, serialized?: Serialized) => ReturnType"
         ],
@@ -804,16 +804,16 @@
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SerializedSearchSourceFields",
-                "text": "SerializedSearchSourceFields"
+                "section": "def-common.ISearchSource",
+                "text": "ISearchSource"
               },
               " | ",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchSource",
-                "text": "ISearchSource"
+                "section": "def-common.SerializedSearchSourceFields",
+                "text": "SerializedSearchSourceFields"
               }
             ],
             "path": "src/plugins/saved_search/common/saved_searches_utils.ts",
