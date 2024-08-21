@@ -80,7 +80,10 @@ export function ColorMappingByTerms({
         }
         isInlineEditing={isInlineEditing}
       >
-        <div className="lnsPalettePanel__section lnsPalettePanel__section--shaded lnsIndexPatternDimensionEditor--padded">
+        <div
+          data-test-subj="lns-palettePanel-terms"
+          className="lnsPalettePanel__section lnsPalettePanel__section--shaded lnsIndexPatternDimensionEditor--padded"
+        >
           <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
             <EuiFlexItem>
               <EuiSwitch

@@ -54,7 +54,10 @@ export function ColorMappingByValues<T>({
         })}
         isInlineEditing={isInlineEditing}
       >
-        <div className="lnsPalettePanel__section lnsPalettePanel__section--shaded lnsIndexPatternDimensionEditor--padded">
+        <div
+          data-test-subj="lns-palettePanel-values"
+          className="lnsPalettePanel__section lnsPalettePanel__section--shaded lnsIndexPatternDimensionEditor--padded"
+        >
           <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
             <EuiFlexItem>
               <CustomizablePalette

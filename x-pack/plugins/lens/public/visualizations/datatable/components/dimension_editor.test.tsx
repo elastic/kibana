@@ -17,13 +17,13 @@ import {
   OperationDescriptor,
   VisualizationDimensionEditorProps,
   DatasourcePublicAPI,
+  DataType,
 } from '../../../types';
 import { DatatableVisualizationState } from '../visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
 import { TableDimensionEditor } from './dimension_editor';
 import { ColumnState } from '../../../../common/expressions';
 import { capitalize } from 'lodash';
-import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 
 describe('data table dimension editor', () => {
   let frame: FramePublicAPI;
@@ -134,7 +134,7 @@ describe('data table dimension editor', () => {
   });
 
   it('should render default alignment for number', () => {
-    frame.activeData!.first.columns[0].meta.type = 'number';
+    mockOperationForFirstColumn({ dataType: 'number' });
     renderTableDimensionEditor();
     expect(btnGroups.alignment.selected).toHaveTextContent('Right');
   });
@@ -178,10 +178,10 @@ describe('data table dimension editor', () => {
     expect(screen.queryByTestId('lns_dynamicColoring_edit')).not.toBeInTheDocument();
   });
 
-  it.each<DatatableColumnType>(['date'])(
+  it.each<DataType>(['date'])(
     'should not show the dynamic coloring option for "%s" columns',
     (dataType) => {
-      frame.activeData!.first.columns[0].meta.type = dataType;
+      mockOperationForFirstColumn({ dataType });
       renderTableDimensionEditor();
       expect(screen.queryByTestId('lnsDatatable_dynamicColoring_groups')).not.toBeInTheDocument();
       expect(screen.queryByTestId('lns_dynamicColoring_edit')).not.toBeInTheDocument();
@@ -228,12 +228,22 @@ describe('data table dimension editor', () => {
     });
   });
 
-  it('should open the palette panel when "Settings" link is clicked in the palette input', () => {
-    state.columns[0].colorMode = 'cell';
-    renderTableDimensionEditor();
-    userEvent.click(screen.getByLabelText('Edit colors'));
-    expect(screen.getByTestId('lns-palettePanelFlyout')).toBeInTheDocument();
-  });
+  it.each<{ flyout: 'terms' | 'values'; isBucketed: boolean; dataType: DataType }>([
+    { flyout: 'terms', isBucketed: true, dataType: 'number' },
+    { flyout: 'terms', isBucketed: false, dataType: 'string' },
+    { flyout: 'values', isBucketed: false, dataType: 'number' },
+  ])(
+    'should show color by $flyout flyout when bucketing is $isBucketed with $dataType column',
+    ({ flyout, isBucketed, dataType }) => {
+      state.columns[0].colorMode = 'cell';
+      mockOperationForFirstColumn({ isBucketed, dataType });
+      renderTableDimensionEditor();
+
+      userEvent.click(screen.getByLabelText('Edit colors'));
+
+      expect(screen.getByTestId(`lns-palettePanel-${flyout}`)).toBeInTheDocument();
+    }
+  );
 
   it('should show the dynamic coloring option for a bucketed operation', () => {
     state.columns[0].colorMode = 'cell';
