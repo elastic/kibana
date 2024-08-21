@@ -24,3 +24,4 @@ export {
   DEFAULT_APP_VISIBILITY,
   DEFAULT_LINK_VISIBILITY,
 } from './src/utils';
+export { applicationModule } from './src/module';

@@ -34,7 +34,7 @@ import { OverlayService } from '@kbn/core-overlays-browser-internal';
 import { SavedObjectsService } from '@kbn/core-saved-objects-browser-internal';
 import { NotificationsService } from '@kbn/core-notifications-browser-internal';
 import { ChromeService } from '@kbn/core-chrome-browser-internal';
-import { ApplicationService } from '@kbn/core-application-browser-internal';
+import { ApplicationService, applicationModule } from '@kbn/core-application-browser-internal';
 import { RenderingService } from '@kbn/core-rendering-browser-internal';
 import { CoreAppsService } from '@kbn/core-apps-browser-internal';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-browser-internal';
@@ -293,6 +293,9 @@ export class CoreSystem {
         security,
         userProfile,
       };
+
+      const container = injection.getContainer();
+      container.load(applicationModule);
 
       // Services that do not expose contracts at setup
       await this.plugins.setup(core);
