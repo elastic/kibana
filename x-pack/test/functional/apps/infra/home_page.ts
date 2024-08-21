@@ -251,6 +251,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             })
           );
 
+          await pageObjects.infraHome.clickDismissKubernetesTourButton();
           await pageObjects.infraHome.goToContainer();
           await pageObjects.infraHome.goToTime(DATE_WITH_DOCKER_DATA);
           await pageObjects.infraHome.clickOnFirstNode();
