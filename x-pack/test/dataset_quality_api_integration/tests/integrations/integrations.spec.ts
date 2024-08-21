@@ -20,7 +20,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const datasetQualityApiClient = getService('datasetQualityApiClient');
 
-  const integrationPackages = ['system', 'apm', 'synthetics'];
+  const integrationPackages = ['system', 'apm', 'endpoint', 'synthetics'];
 
   const customIntegrations: CustomIntegration[] = [
     {
@@ -58,11 +58,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(resp.body.integrations.map((integration) => integration.name)).to.eql([
           'apm',
+          'endpoint',
           'system',
         ]);
 
         expect(resp.body.integrations[0].datasets).not.empty();
         expect(resp.body.integrations[1].datasets).not.empty();
+        expect(resp.body.integrations[2].datasets).not.empty();
       });
 
       after(
