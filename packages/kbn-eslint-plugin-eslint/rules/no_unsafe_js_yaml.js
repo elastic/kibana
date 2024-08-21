@@ -12,7 +12,6 @@ module.exports = {
     schema: [],
   },
   create(context) {
-    const sourceCode = context.getSourceCode();
     const jsYamlIdentifiers = new Set();
     const isUnsafeMethod = (node) => node.name === 'load' || node.name === 'dump';
 
@@ -43,7 +42,7 @@ module.exports = {
         const callee = node.callee;
 
         if (isUnsafeMethod(callee)) {
-          const scope = sourceCode.getScope(node);
+          const scope = context.getScope(node);
           const variable = scope.variables.find((v) => v.name === callee.name);
 
           if (variable && variable.defs.length) {
