@@ -40,10 +40,6 @@ export class DefaultAlertService {
 
   async setupDefaultAlerts() {
     this.settings = await savedObjectsAdapter.getSyntheticsDynamicSettings(this.soClient);
-    if ((this.settings?.defaultConnectors ?? []).length === 0) {
-      // we skip created default rules if user hasn't configured it
-      return;
-    }
 
     const [statusRule, tlsRule] = await Promise.allSettled([
       this.setupStatusRule(),
