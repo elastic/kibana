@@ -44,5 +44,6 @@ export default function (providerContext: FtrProviderContext) {
     loadTestFile(require.resolve('./endpoint_telemetry'));
     loadTestFile(require.resolve('./endpoint_permissions'));
     loadTestFile(require.resolve('./endpoint_solution_integrations'));
+    loadTestFile(require.resolve('./endpoint_transform'));
   });
 }
