@@ -5592,19 +5592,19 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dependency-injection-example-plugin@link:examples/dependency_injection/plugin":
+  version "0.0.0"
+  uid ""
+
+"@kbn/dependency-injection-example-service@link:examples/dependency_injection/service":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dependency-ownership@link:packages/kbn-dependency-ownership":
   version "0.0.0"
   uid ""
 
 "@kbn/dependency-usage@link:packages/kbn-dependency-usage":
-  version "0.0.0"
-  uid ""
-
-"@kbn/dependency-injection-example-plugin@link:examples/dependency_injection_example":
-  version "0.0.0"
-  uid ""
-
-"@kbn/dependency-injection-service-example-plugin@link:examples/dependency_injection_service_example":
   version "0.0.0"
   uid ""
 
