@@ -27,6 +27,7 @@ export const UpdateQueryInFormButton: FC<PropsWithChildren<UpdateQueryInFormButt
 
   return (
     <EuiButtonEmpty
+      data-test-subj="update-query-in-form-button"
       aria-label={UPDATE_QUERY_IN_FORM_TOOLTIP}
       onClick={handleClick}
       color="text"
