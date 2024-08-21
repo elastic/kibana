@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import moment from 'moment';
 
 export const arrayOfStringsSchema = z.array(z.string());

@@ -24,7 +24,7 @@ import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import { memoize } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { GRID_STYLE } from '../../constants';
+import { DATA_GRID_STYLE_DEFAULT } from '../../constants';
 import { ComparisonControls } from './comparison_controls';
 import { renderComparisonToolbar } from './comparison_toolbar';
 import { useComparisonCellValue } from './hooks/use_comparison_cell_value';
@@ -55,7 +55,7 @@ export interface CompareDocumentsProps {
 
 const COMPARISON_ROW_HEIGHT: EuiDataGridRowHeightsOptions = { defaultHeight: 'auto' };
 const COMPARISON_IN_MEMORY: EuiDataGridInMemory = { level: 'sorting' };
-const COMPARISON_GRID_STYLE: EuiDataGridStyle = { ...GRID_STYLE, stripes: undefined };
+const COMPARISON_GRID_STYLE: EuiDataGridStyle = { ...DATA_GRID_STYLE_DEFAULT, stripes: undefined };
 
 const getStorageKey = (consumer: string, key: string) => `${consumer}:dataGridComparison${key}`;
 

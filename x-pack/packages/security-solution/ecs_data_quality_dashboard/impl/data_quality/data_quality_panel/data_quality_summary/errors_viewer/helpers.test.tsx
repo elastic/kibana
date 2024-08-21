@@ -10,7 +10,7 @@ import { omit } from 'lodash/fp';
 import React from 'react';
 
 import { getErrorsViewerTableColumns } from './helpers';
-import { TestProviders } from '../../../mock/test_providers/test_providers';
+import { TestExternalProviders } from '../../../mock/test_providers/test_providers';
 import { ErrorSummary } from '../../../types';
 
 const errorSummary: ErrorSummary[] = [
@@ -67,9 +67,9 @@ describe('helpers', () => {
           const indexNameRender = columns[1].render;
 
           render(
-            <TestProviders>
+            <TestExternalProviders>
               {indexNameRender != null && indexNameRender(hasIndexName.indexName, hasIndexName)}
-            </TestProviders>
+            </TestExternalProviders>
           );
         });
 
@@ -88,9 +88,9 @@ describe('helpers', () => {
           const indexNameRender = columns[1].render;
 
           render(
-            <TestProviders>
+            <TestExternalProviders>
               {indexNameRender != null && indexNameRender(noIndexName.indexName, noIndexName)}
-            </TestProviders>
+            </TestExternalProviders>
           );
         });
 
@@ -110,9 +110,9 @@ describe('helpers', () => {
         const indexNameRender = columns[2].render;
 
         render(
-          <TestProviders>
+          <TestExternalProviders>
             {indexNameRender != null && indexNameRender(hasIndexName.error, hasIndexName)}
-          </TestProviders>
+          </TestExternalProviders>
         );
 
         expect(screen.getByTestId('error')).toHaveTextContent(hasIndexName.error);
