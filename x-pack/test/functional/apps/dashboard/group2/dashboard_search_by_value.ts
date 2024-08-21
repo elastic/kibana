@@ -16,13 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const { common, dashboard, header, timePicker, discover } = getPageObjects([
-    'common',
-    'dashboard',
-    'header',
-    'timePicker',
-    'discover',
-  ]);
+  const { common, dashboard, header } = getPageObjects(['common', 'dashboard', 'header']);
 
   describe('saved searches by value', () => {
     before(async () => {

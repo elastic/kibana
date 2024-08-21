@@ -15,14 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardBadgeActions = getService('dashboardBadgeActions');
   const dashboardCustomizePanel = getService('dashboardCustomizePanel');
-  const { common, dashboard, visualize, visEditor, timePicker, lens } = getPageObjects([
-    'common',
-    'dashboard',
-    'visualize',
-    'visEditor',
-    'timePicker',
-    'lens',
-  ]);
+  const { dashboard, lens } = getPageObjects(['dashboard', 'lens']);
 
   const DASHBOARD_NAME = 'Custom panel time range test';
 
