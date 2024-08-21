@@ -95,7 +95,7 @@ export class DefaultAlertService {
       options: {
         page: 1,
         perPage: 1,
-        filter: `alert.attributes.alertTypeId:(${ruleType})`,
+        filter: `alert.attributes.alertTypeId:(${ruleType}) AND alert.attributes.tags:"SYNTHETICS_DEFAULT_ALERT"`,
       },
     });
 
