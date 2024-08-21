@@ -14,7 +14,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { enableInfrastructureAssetCustomDashboards } from '@kbn/observability-plugin/common';
-import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { capitalize, isEmpty } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -26,7 +25,6 @@ import { LinkToNodeDetails } from '../links';
 import { ContentTabIds, type LinkOptions, type RouteState, type Tab, type TabIds } from '../types';
 import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
 import { useTabSwitcherContext } from './use_tab_switcher';
-import { getApmField } from '../utils';
 
 type TabItem = NonNullable<Pick<EuiPageHeaderProps, 'tabs'>['tabs']>[number];
 
@@ -143,7 +141,6 @@ const useFeatureFlagTabs = () => {
 
 const useTabs = (tabs: Tab[]) => {
   const { showTab, activeTabId } = useTabSwitcherContext();
-  const { asset } = useAssetDetailsRenderPropsContext();
   const { isTabEnabled } = useFeatureFlagTabs();
 
   const onTabClick = useCallback(
@@ -152,14 +149,6 @@ const useTabs = (tabs: Tab[]) => {
     },
     [showTab]
   );
-
-  const apmTracesMenuItemLinkProps = useLinkProps({
-    app: 'apm',
-    hash: 'traces',
-    search: {
-      kuery: `${getApmField(asset.type)}:"${asset.id}"`,
-    },
-  });
 
   const tabEntries: TabItem[] = useMemo(
     () =>
