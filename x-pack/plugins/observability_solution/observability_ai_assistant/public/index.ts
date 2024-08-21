@@ -93,10 +93,8 @@ export type {
 } from './api';
 
 export type { UseChatResult } from './hooks/use_chat';
-export { LANGUAGE_OPTIONS, DEFAULT_LANGUAGE_OPTION } from '../common/ui_settings/language_options';
 
 export {
-  aiAssistantResponseLanguage,
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,

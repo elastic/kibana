@@ -38,9 +38,7 @@ describe('getGeneratedTitle', () => {
     };
   }
 
-  function callGenerateTitle(
-    ...rest: [ChatEvent[]] | [{ responseLanguage?: string }, ChatEvent[]]
-  ) {
+  function callGenerateTitle(...rest: [ChatEvent[]] | [{}, ChatEvent[]]) {
     const options = rest.length === 1 ? {} : rest[0];
     const chunks = rest.length === 1 ? rest[0] : rest[1];
 
@@ -120,19 +118,14 @@ describe('getGeneratedTitle', () => {
   });
 
   it('mentions the given response language in the instruction', async () => {
-    const { chatSpy, title$ } = callGenerateTitle(
-      {
-        responseLanguage: 'Orcish',
-      },
-      [
-        createChatCompletionChunk({
-          function_call: {
-            name: 'title_conversation',
-            arguments: JSON.stringify({ title: 'My title' }),
-          },
-        }),
-      ]
-    );
+    const { chatSpy, title$ } = callGenerateTitle([
+      createChatCompletionChunk({
+        function_call: {
+          name: 'title_conversation',
+          arguments: JSON.stringify({ title: 'My title' }),
+        },
+      }),
+    ]);
 
     await lastValueFrom(title$);
 

@@ -1603,7 +1603,6 @@ describe('Observability AI Assistant client', () => {
         signal: new AbortController().signal,
         title: 'My predefined title',
         persist: false,
-        responseLanguage: 'Orcish',
       })
       .subscribe(() => {}); // To trigger call to chat
     await nextTick();

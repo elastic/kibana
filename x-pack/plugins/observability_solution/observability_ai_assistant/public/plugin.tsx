@@ -16,7 +16,6 @@ import { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observ
 import { ObservabilityAIAssistantProvider } from './context/observability_ai_assistant_provider';
 import { useGenAIConnectorsWithoutContext } from './hooks/use_genai_connectors';
 import { useObservabilityAIAssistantChatService } from './hooks/use_observability_ai_assistant_chat_service';
-import { useUserPreferredLanguage } from './hooks/use_user_preferred_language';
 import { createUseChat } from './hooks/use_chat';
 import { createService } from './service/create_service';
 import { createScreenContextAction } from './utils/create_screen_context_action';
@@ -97,7 +96,6 @@ export class ObservabilityAIAssistantPlugin
       useChat: createUseChat({
         notifications: coreStart.notifications,
       }),
-      useUserPreferredLanguage,
       ObservabilityAIAssistantMultipaneFlyoutContext,
       ObservabilityAIAssistantChatServiceContext,
       useObservabilityAIAssistantChatService,

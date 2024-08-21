@@ -29,7 +29,6 @@ import { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observ
 import { useChat } from './hooks/use_chat';
 import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
 import { useObservabilityAIAssistantChatService } from './hooks/use_observability_ai_assistant_chat_service';
-import type { UseUserPreferredLanguageResult } from './hooks/use_user_preferred_language';
 import { createScreenContextAction } from './utils/create_screen_context_action';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
@@ -67,7 +66,6 @@ export interface ObservabilityAIAssistantChatService {
           except: string[];
         };
     signal: AbortSignal;
-    responseLanguage?: string;
     instructions?: AdHocInstruction[];
   }) => Observable<StreamingChatResponseEventWithoutError>;
   getFunctions: (options?: { contexts?: string[]; filter?: string }) => FunctionDefinition[];
@@ -135,7 +133,6 @@ export interface ObservabilityAIAssistantPublicStart {
   useObservabilityAIAssistantChatService: typeof useObservabilityAIAssistantChatService;
   useGenAIConnectors: () => UseGenAIConnectorsResult;
   useChat: typeof useChat;
-  useUserPreferredLanguage: () => UseUserPreferredLanguageResult;
   getContextualInsightMessages: ({}: { message: string; instructions: string }) => Message[];
   createScreenContextAction: typeof createScreenContextAction;
 }

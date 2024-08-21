@@ -9,7 +9,6 @@ import React from 'react';
 import { BottomBarActions, useEditableSettings } from '@kbn/observability-shared-plugin/public';
 import {
   aiAssistantLogsIndexPattern,
-  aiAssistantResponseLanguage,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
 } from '@kbn/observability-ai-assistant-plugin/public';
@@ -21,7 +20,6 @@ import { useKibana } from '../../../hooks/use_kibana';
 
 const settingsKeys = [
   aiAssistantLogsIndexPattern,
-  aiAssistantResponseLanguage,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
 ];

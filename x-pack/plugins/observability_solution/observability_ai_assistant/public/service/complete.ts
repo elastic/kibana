@@ -42,7 +42,6 @@ export function complete(
     persist,
     disableFunctions,
     signal,
-    responseLanguage,
     instructions,
   }: {
     client: Pick<ObservabilityAIAssistantChatService, 'chat' | 'complete'>;
@@ -65,7 +64,6 @@ export function complete(
           disableFunctions,
           screenContexts,
           conversationId,
-          responseLanguage,
           instructions,
         },
       },
@@ -131,7 +129,6 @@ export function complete(
               messages: initialMessages.concat(nextMessages),
               signal,
               persist,
-              responseLanguage,
               disableFunctions,
               instructions,
             },
