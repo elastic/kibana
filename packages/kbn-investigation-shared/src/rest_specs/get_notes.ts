@@ -11,7 +11,7 @@ import { investigationNoteResponseSchema } from './investigation_note';
 
 const getInvestigationNotesParamsSchema = t.type({
   path: t.type({
-    id: t.string,
+    investigationId: t.string,
   }),
 });
 

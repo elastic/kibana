@@ -11,7 +11,7 @@ import { investigationResponseSchema } from './investigation';
 
 const getInvestigationParamsSchema = t.type({
   path: t.type({
-    id: t.string,
+    investigationId: t.string,
   }),
 });
 
