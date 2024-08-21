@@ -8,7 +8,10 @@
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { APMEventClient } from './create_es_client/create_apm_event_client';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { MinimalAPMOnlyRouteHandlerResources, MinimalAPMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
+import {
+  MinimalAPMOnlyRouteHandlerResources,
+  MinimalAPMRouteHandlerResources,
+} from '../../routes/apm_routes/register_apm_server_routes';
 import { inspectableEsQueriesMap } from '../../routes/apm_routes/register_apm_server_routes';
 
 export async function getApmEventClient({
@@ -41,7 +44,6 @@ export async function getApmEventClient({
     });
   });
 }
-
 
 export async function getApmEventClientWithApmOnlyIndices({
   context,

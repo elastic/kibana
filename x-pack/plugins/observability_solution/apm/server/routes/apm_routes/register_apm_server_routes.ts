@@ -281,7 +281,6 @@ export interface APMRouteHandlerResources extends RouteHandlerResources {
   getApmIndices: () => Promise<APMIndices>;
 }
 
-
-export interface APMOnlyRouteHandlerResources extends RouteHandlerResources{
+export interface APMOnlyRouteHandlerResources extends RouteHandlerResources {
   getApmIndices: () => Promise<APMOnlyIndices>;
 }
