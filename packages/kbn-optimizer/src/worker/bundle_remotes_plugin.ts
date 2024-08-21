@@ -34,20 +34,20 @@ export class BundleRemotesPlugin {
   public apply(compiler: webpack.Compiler) {
     // called whenever the compiler starts to compile, passed the params
     // that will be used to create the compilation
-    compiler.hooks.normalModuleFactory.tap('BundleRemotesPlugin', (normalModuleFactory: any) => {
+    compiler.hooks.compile.tap('BundleRemotesPlugin', (compilationParams: any) => {
       const moduleCache = new Map<string, BundleRemoteModule | null>();
+
       // hook into the creation of NormalModule instances in webpack, if the import
       // statement leading to the creation of the module is pointing to a bundleRef
       // entry then create a BundleRefModule instead of a NormalModule.
-      normalModuleFactory.hooks.factorize.tapAsync(
-        'BundleRefsPlugin/normalModuleFactory/factory',
+      compilationParams.normalModuleFactory.hooks.factorize.tapAsync(
+        'BundleRefsPlugin/normalModuleFactory/factorize',
         (data: RequestData, callback: Callback<BundleRemoteModule>) => {
           const { request } = data.dependencies[0];
 
           const cached = moduleCache.get(request);
           if (cached === null) {
-            // return normalModuleFactory(data, callback);
-            return callback(null, undefined);
+            return callback();
           }
           if (cached !== undefined) {
             return callback(null, cached);
@@ -61,8 +61,7 @@ export class BundleRemotesPlugin {
             moduleCache.set(request, result);
 
             if (result === null) {
-              // return normalModuleFactory(data, callback);
-              return callback(null, undefined);
+              return callback();
             }
 
             callback(null, result);
