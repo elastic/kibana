@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React, { Component } from 'react';
 import { Observable, Subscription } from 'rxjs';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
