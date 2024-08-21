@@ -9,10 +9,16 @@ import React, { useMemo } from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
 import { PlaygroundProvider } from './providers/playground_provider';
 
-import { App } from './components/app';
 import { useKibana } from './hooks/use_kibana';
+import { PlaygroundPageMode } from './types';
+import { App } from './components/app';
 
-export const ChatPlaygroundOverview: React.FC = () => {
+interface PlaygroundOverviewProps {
+  pageMode?: PlaygroundPageMode;
+}
+export const PlaygroundOverview: React.FC<PlaygroundOverviewProps> = ({
+  pageMode = PlaygroundPageMode.chat,
+}) => {
   const {
     services: { console: consolePlugin },
   } = useKibana();
@@ -31,7 +37,7 @@ export const ChatPlaygroundOverview: React.FC = () => {
         grow={false}
         panelled={false}
       >
-        <App showDocs />
+        <App showDocs pageMode={pageMode} />
         {embeddableConsole}
       </EuiPageTemplate>
     </PlaygroundProvider>
