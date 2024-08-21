@@ -42,5 +42,9 @@ export async function previewTikaContents(
     ],
   });
 
+  if (!resp.docs[0].doc?._source.attachment) {
+    throw new Error('Failed to extract text from file.');
+  }
+
   return resp.docs[0].doc?._source.attachment;
 }
