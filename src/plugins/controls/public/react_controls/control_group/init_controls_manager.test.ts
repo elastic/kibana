@@ -214,8 +214,8 @@ describe('getNewControlState', () => {
       DEFAULT_DATA_VIEW_ID
     );
     expect(controlsManager.getNewControlState()).toEqual({
-      grow: false,
-      width: 'small',
+      grow: true,
+      width: 'medium',
       dataViewId: 'myOtherDataViewId',
     });
   });
