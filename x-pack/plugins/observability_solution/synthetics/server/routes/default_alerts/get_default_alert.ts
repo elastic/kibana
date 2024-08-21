@@ -23,8 +23,8 @@ export const getDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => ({
     const tlsRule = defaultAlertService.getExistingAlert(SYNTHETICS_TLS_RULE);
     const [status, tls] = await Promise.all([statusRule, tlsRule]);
     return {
-      statusRule: status,
-      tlsRule: tls,
+      statusRule: status || null,
+      tlsRule: tls || null,
     };
   },
 });

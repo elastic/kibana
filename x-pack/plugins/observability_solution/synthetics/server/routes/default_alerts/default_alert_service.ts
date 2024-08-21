@@ -67,7 +67,7 @@ export class DefaultAlertService {
   }
 
   setupStatusRule() {
-    if (!this.settings?.defaultStatusRuleEnabled) {
+    if (this.settings?.defaultStatusRuleEnabled === false) {
       return;
     }
     return this.createDefaultAlertIfNotExist(
@@ -78,7 +78,7 @@ export class DefaultAlertService {
   }
 
   setupTlsRule() {
-    if (!this.settings?.defaultTLSRuleEnabled) {
+    if (this.settings?.defaultTLSRuleEnabled === false) {
       return;
     }
     return this.createDefaultAlertIfNotExist(
