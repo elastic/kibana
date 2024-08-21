@@ -132,7 +132,7 @@ export const getControlGroupEmbeddableFactory = (services: {
       const api = setApi({
         ...controlsManager.api,
         disabledActionIds: disabledActionIds$,
-        // getEditorConfig: () => initialRuntimeState.settings?.editorConfig,
+        getEditorConfig: () => initialRuntimeState.editorConfig,
         setDisabledActionIds: (ids) => disabledActionIds$.next(ids),
         getLastSavedControlState: (controlUuid: string) => {
           return lastSavedRuntimeState.initialChildControlState[controlUuid] ?? {};
@@ -161,7 +161,6 @@ export const getControlGroupEmbeddableFactory = (services: {
             autoApplySelections: autoApplySelections$.getValue(),
             ignoreParentSettings: ignoreParentSettings$.getValue(),
             initialChildControlState: controlsManager.snapshotControlsRuntimeState(),
-            settings: initialRuntimeState.settings,
           };
         },
         dataLoading: dataLoading$,
