@@ -26,7 +26,7 @@ import { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import apm from 'elastic-apm-node';
 import { VersionedRouteRegistrar } from '@kbn/core-http-server';
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices, APMOnlyIndices } from '@kbn/apm-data-access-plugin/server';
 import { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import type {
   APMCore,
@@ -255,7 +255,11 @@ export type MinimalAPMRouteHandlerResources = Omit<APMRouteHandlerResources, 'co
   context: MinimalApmPluginRequestHandlerContext;
 };
 
-export interface APMRouteHandlerResources {
+export type MinimalAPMOnlyRouteHandlerResources = Omit<APMOnlyRouteHandlerResources, 'context'> & {
+  context: MinimalApmPluginRequestHandlerContext;
+};
+
+interface RouteHandlerResources {
   request: KibanaRequest;
   context: ApmPluginRequestHandlerContext;
   params: {
@@ -271,5 +275,13 @@ export interface APMRouteHandlerResources {
   ruleDataClient: IRuleDataClient;
   telemetryUsageCounter?: TelemetryUsageCounter;
   kibanaVersion: string;
+}
+
+export interface APMRouteHandlerResources extends RouteHandlerResources {
   getApmIndices: () => Promise<APMIndices>;
+}
+
+
+export interface APMOnlyRouteHandlerResources extends RouteHandlerResources{
+  getApmIndices: () => Promise<APMOnlyIndices>;
 }

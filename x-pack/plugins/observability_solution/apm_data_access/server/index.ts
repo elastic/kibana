@@ -8,7 +8,22 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 
+// Uses APM + OTel index patterns 
+// This should be used by most of the APM UIs
 const configSchema = schema.object({
+  indices: schema.object({
+    transaction: schema.string({ defaultValue: 'traces-apm*,apm-*' }), // TODO: remove apm-* pattern in 9.0
+    span: schema.string({ defaultValue: 'traces-apm*,apm-*' }),
+    error: schema.string({ defaultValue: 'logs-apm*,apm-*' }),
+    metric: schema.string({ defaultValue: 'metrics-apm*,apm-*' }),
+    onboarding: schema.string({ defaultValue: 'apm-*' }), // Unused: to be deleted
+    sourcemap: schema.string({ defaultValue: 'apm-*' }), // Unused: to be deleted
+  }),
+});
+
+// Uses APM Only index patterns and does not contain OTel index patterns
+// This should be used by UIs that do not support OTel data yet - example: Storage Explorer
+const apmOnlyConfigSchema = schema.object({
   indices: schema.object({
     transaction: schema.string({ defaultValue: 'traces-apm*,apm-*' }), // TODO: remove apm-* pattern in 9.0
     span: schema.string({ defaultValue: 'traces-apm*,apm-*' }),
@@ -76,6 +91,9 @@ export const config: PluginConfigDescriptor<APMDataAccessConfig> = {
 };
 export type APMDataAccessConfig = TypeOf<typeof configSchema>;
 export type APMIndices = APMDataAccessConfig['indices'];
+
+export type APMOnlyDataAccessConfig = TypeOf<typeof apmOnlyConfigSchema>;
+export type APMOnlyIndices = APMDataAccessConfig['indices'];
 
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { ApmDataAccessPlugin } = await import('./plugin');

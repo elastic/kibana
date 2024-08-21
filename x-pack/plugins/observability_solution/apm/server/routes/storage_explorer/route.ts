@@ -13,7 +13,7 @@ import {
   indexLifecyclePhaseRt,
   IndexLifecyclePhaseSelectOption,
 } from '../../../common/storage_explorer_types';
-import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { getApmEventClient, getApmEventClientWithApmOnlyIndices } from '../../lib/helpers/get_apm_event_client';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -189,7 +189,7 @@ const storageExplorerPrivilegesRoute = createApmServerRoute({
       throw Boom.internal(SECURITY_REQUIRED_MESSAGE);
     }
 
-    const apmEventClient = await getApmEventClient(resources);
+    const apmEventClient = await getApmEventClientWithApmOnlyIndices(resources);
     const hasPrivileges = await hasStorageExplorerPrivileges({
       context,
       apmEventClient,
