@@ -127,7 +127,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
       }
 
       /**
-       * Canvas does not support references
+       * Canvas by-value embeddables do not support references
        */
       if (apiIsOfType(parentApi, 'canvas')) {
         return {
