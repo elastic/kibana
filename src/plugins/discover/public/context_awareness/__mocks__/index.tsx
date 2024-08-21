@@ -63,6 +63,10 @@ export const createContextAwarenessMocks = ({
             name: 'foo',
             width: 300,
           },
+          {
+            name: 'bar',
+            width: 400,
+          },
         ],
         rowHeight: 3,
       })),
