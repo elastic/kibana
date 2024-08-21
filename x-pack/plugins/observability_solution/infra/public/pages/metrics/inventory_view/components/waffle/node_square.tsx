@@ -155,8 +155,6 @@ const Value = ({ children, ...props }: NodeProps & { color: string }) => (
 export const NodeSquare = ({
   squareSize,
   togglePopover,
-  showToolTip,
-  hideToolTip,
   color,
   nodeName,
   value,
@@ -164,8 +162,6 @@ export const NodeSquare = ({
 }: {
   squareSize: number;
   togglePopover: UseBooleanHandlers['toggle'];
-  showToolTip: () => void;
-  hideToolTip: () => void;
   color: string;
   nodeName: string;
   value: string;
@@ -185,9 +181,6 @@ export const NodeSquare = ({
       style={{ width: squareSize || 0, height: squareSize || 0 }}
       onClick={togglePopover}
       onKeyPress={togglePopover}
-      onFocus={showToolTip}
-      onMouseOver={showToolTip}
-      onMouseLeave={hideToolTip}
       className="buttonContainer"
     >
       <SquareOuter color={color} style={style}>
@@ -218,9 +211,6 @@ export const NodeSquare = ({
       style={{ width: squareSize || 0, height: squareSize || 0, ...style }}
       onClick={togglePopover}
       onKeyPress={togglePopover}
-      onMouseOver={showToolTip}
-      onFocus={showToolTip}
-      onMouseLeave={hideToolTip}
       color={color}
       tabIndex={0}
     />

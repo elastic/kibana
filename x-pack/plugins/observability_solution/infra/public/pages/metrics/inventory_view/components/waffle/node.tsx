@@ -48,7 +48,6 @@ export const Node = ({
   setFlyoutUrlState,
   detailsItemId,
 }: Props) => {
-  const [{ off: hideToolTip, on: showToolTip }] = useBoolean(false);
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
 
   const metric = first(node.metrics);
@@ -78,8 +77,6 @@ export const Node = ({
         <NodeSquare
           squareSize={squareSize}
           togglePopover={toggleAssetPopover}
-          showToolTip={showToolTip}
-          hideToolTip={hideToolTip}
           color={color}
           nodeName={node.name}
           value={value}
