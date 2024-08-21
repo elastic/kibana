@@ -106,7 +106,7 @@ describe('capacity based claiming', () => {
     const setupResult = await setupTestServers({
       xpack: {
         task_manager: {
-          claim_strategy: `unsafe_mget`,
+          claim_strategy: `mget`,
           capacity: 10,
           poll_interval: POLLING_INTERVAL,
           unsafe: {
