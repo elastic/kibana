@@ -51,22 +51,12 @@ export function initControlsManager(
     getControlsInOrder(initialControlPanelsState)
   );
   const lastUsedDataViewId$ = new BehaviorSubject<string | undefined>(
-    (getLastControlValue('dataViewId', controlsInOrder$.value, initialControlPanelsState) as
-      | string
-      | undefined) ??
+    getLastUsedDataViewId(controlsInOrder$.value, initialControlPanelsState) ??
       defaultDataViewId ??
       undefined
   );
-  const lastUsedWidth$ = new BehaviorSubject<ControlWidth>(
-    (getLastControlValue('width', controlsInOrder$.value, initialControlPanelsState) as
-      | ControlWidth
-      | undefined) ?? DEFAULT_CONTROL_WIDTH
-  );
-  const lastUsedGrow$ = new BehaviorSubject<boolean>(
-    (getLastControlValue('grow', controlsInOrder$.value, initialControlPanelsState) as
-      | boolean
-      | undefined) ?? DEFAULT_CONTROL_GROW
-  );
+  const lastUsedWidth$ = new BehaviorSubject<ControlWidth>(DEFAULT_CONTROL_WIDTH);
+  const lastUsedGrow$ = new BehaviorSubject<boolean>(DEFAULT_CONTROL_GROW);
 
   function untilControlLoaded(
     id: string
@@ -263,18 +253,20 @@ export function initControlsManager(
   };
 }
 
-export function getLastControlValue(
-  key: keyof DefaultDataControlState,
+export function getLastUsedDataViewId(
   controlsInOrder: ControlsInOrder,
   initialControlPanelsState: ControlPanelsState<
     ControlPanelState & Partial<DefaultDataControlState>
   >
 ) {
+  let dataViewId: string | undefined;
   for (let i = controlsInOrder.length - 1; i >= 0; i--) {
     const controlId = controlsInOrder[i].id;
     const controlState = initialControlPanelsState[controlId];
-    if (Object.hasOwn(controlState, key) && typeof controlState[key] !== undefined) {
-      return controlState[key];
+    if (controlState?.dataViewId) {
+      dataViewId = controlState.dataViewId;
+      break;
     }
   }
+  return dataViewId;
 }

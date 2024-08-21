@@ -8,7 +8,7 @@
 
 import { DefaultDataControlState } from '../controls/data_controls/types';
 import { DefaultControlApi } from '../controls/types';
-import { initControlsManager, getLastControlValue } from './init_controls_manager';
+import { initControlsManager, getLastUsedDataViewId } from './init_controls_manager';
 import { ControlPanelState } from './types';
 
 jest.mock('uuid', () => ({
@@ -160,10 +160,9 @@ describe('snapshotControlsRuntimeState', () => {
   });
 });
 
-describe('getLastControlValue', () => {
+describe('getLastUsedDataViewId', () => {
   test('should return last used data view id', () => {
-    const dataViewId = getLastControlValue(
-      'dataViewId',
+    const dataViewId = getLastUsedDataViewId(
       [
         { id: 'alpha', type: 'testControl' },
         { id: 'bravo', type: 'testControl' },
@@ -179,12 +178,12 @@ describe('getLastControlValue', () => {
   });
 
   test('should return undefined when there are no controls', () => {
-    const dataViewId = getLastControlValue('dataViewId', [], {});
+    const dataViewId = getLastUsedDataViewId([], {});
     expect(dataViewId).toBeUndefined();
   });
 
   test('should return undefined when there are no controls with data views', () => {
-    const dataViewId = getLastControlValue('dataViewId', [{ id: 'alpha', type: 'testControl' }], {
+    const dataViewId = getLastUsedDataViewId([{ id: 'alpha', type: 'testControl' }], {
       alpha: { type: 'testControl', order: 0 },
     });
     expect(dataViewId).toBeUndefined();
