@@ -10,7 +10,7 @@ import { omit } from 'lodash/fp';
 import React from 'react';
 
 import { SAME_FAMILY } from '../../data_quality_panel/same_family/translations';
-import { TestProviders } from '../../mock/test_providers/test_providers';
+import { TestExternalProviders } from '../../mock/test_providers/test_providers';
 import { eventCategory } from '../../mock/enriched_field_metadata/mock_enriched_field_metadata';
 import { EcsBasedFieldMetadata } from '../../types';
 import { getIncompatibleMappingsTableColumns } from '.';
@@ -25,7 +25,7 @@ describe('getIncompatibleMappingsTableColumns', () => {
         name: 'Field',
         sortable: true,
         truncateText: false,
-        width: '25%',
+        width: '15%',
       },
       {
         field: 'type',
@@ -46,7 +46,7 @@ describe('getIncompatibleMappingsTableColumns', () => {
         name: 'ECS description',
         sortable: false,
         truncateText: false,
-        width: '25%',
+        width: '35%',
       },
     ]);
   });
@@ -58,9 +58,9 @@ describe('getIncompatibleMappingsTableColumns', () => {
       const expected = 'keyword';
 
       render(
-        <TestProviders>
+        <TestExternalProviders>
           {typeColumnRender != null && typeColumnRender(eventCategory.type, eventCategory)}
-        </TestProviders>
+        </TestExternalProviders>
       );
 
       expect(screen.getByTestId('codeSuccess')).toHaveTextContent(expected);
@@ -82,13 +82,13 @@ describe('getIncompatibleMappingsTableColumns', () => {
         };
 
         render(
-          <TestProviders>
+          <TestExternalProviders>
             {indexFieldTypeColumnRender != null &&
               indexFieldTypeColumnRender(
                 withTypeMismatchSameFamily.indexFieldType,
                 withTypeMismatchSameFamily
               )}
-          </TestProviders>
+          </TestExternalProviders>
         );
       });
 
@@ -115,13 +115,13 @@ describe('getIncompatibleMappingsTableColumns', () => {
         };
 
         render(
-          <TestProviders>
+          <TestExternalProviders>
             {indexFieldTypeColumnRender != null &&
               indexFieldTypeColumnRender(
                 withTypeMismatchDifferentFamily.indexFieldType,
                 withTypeMismatchDifferentFamily
               )}
-          </TestProviders>
+          </TestExternalProviders>
         );
 
         expect(screen.getByTestId('codeDanger')).toHaveTextContent(indexFieldType);
