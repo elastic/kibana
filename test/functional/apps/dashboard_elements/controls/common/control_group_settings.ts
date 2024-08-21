@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -24,6 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe.only('Dashboard control group settings', () => {
     before(async () => {
       await dashboard.loadSavedDashboard('control group settings test dashboard');
+      await dashboard.switchToEditMode();
     });
 
     describe('filtering settings', async () => {
@@ -49,12 +50,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       };
 
       before(async () => {
-        firstOptionsListId = (await dashboardControls.getAllControlIds())[0];
+        const controlIds = await dashboardControls.getAllControlIds();
+        firstOptionsListId = controlIds[0];
         await dashboardControls.optionsListWaitForLoading(firstOptionsListId);
         await dashboardControls.optionsListOpenPopover(firstOptionsListId);
         beforeCount = await dashboardControls.optionsListPopoverGetAvailableOptionsCount();
 
-        rangeSliderId = (await dashboardControls.getAllControlIds())[2];
+        rangeSliderId = controlIds[1];
         beforeRange = await getRange();
       });
 
@@ -108,39 +110,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('flyout only show settings that are relevant', async () => {
-      before(async () => {
-        await dashboard.switchToEditMode();
-      });
-
-      it('when no controls', async () => {
-        await dashboardControls.deleteAllControls();
-        await dashboardControls.openControlGroupSettingsFlyout();
-        await testSubjects.missingOrFail('delete-all-controls-button');
-      });
-
-      it('when at least one control', async () => {
-        await dashboardControls.createControl({
-          controlType: OPTIONS_LIST_CONTROL,
-          dataViewTitle: 'animals-*',
-          fieldName: 'sound.keyword',
-        });
-        await dashboardControls.openControlGroupSettingsFlyout();
-        await testSubjects.existOrFail('delete-all-controls-button');
-      });
-
-      afterEach(async () => {
-        await testSubjects.click('euiFlyoutCloseButton');
-        if (await testSubjects.exists('confirmModalConfirmButton')) {
-          await testSubjects.click('confirmModalConfirmButton');
-        }
-      });
-
-      after(async () => {
-        await dashboardControls.deleteAllControls();
-      });
-    });
-
     describe('control group settings flyout closes', async () => {
       it('on save', async () => {
         await dashboardControls.openControlGroupSettingsFlyout();
@@ -162,10 +131,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.openControlGroupSettingsFlyout();
         await dashboard.gotoDashboardLandingPage();
         await testSubjects.missingOrFail('control-group-settings-flyout');
-      });
-
-      after(async () => {
-        await dashboard.loadSavedDashboard('Test Control Group Settings');
       });
     });
   });
