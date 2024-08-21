@@ -15,7 +15,7 @@ import { ClusterAddressForm } from './cluster_address_form';
 import { Providers } from './plugin';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
-  htmlIdGenerator: () => () => `id-${Math.random()}`,
+  useGeneratedHtmlId: () => `id-${Math.random()}`,
 }));
 
 describe('ClusterAddressForm', () => {
