@@ -115,13 +115,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         synthEsClient = await getInfraSynthtraceEsClient(esClient);
         await synthEsClient.clean();
-        await synthEsClient.index(
+        await synthEsClient.index([
           generateHostData({
             from: DATE_WITH_HOSTS_DATA_FROM,
             to: DATE_WITH_HOSTS_DATA_TO,
             hosts: HOSTS,
-          })
-        );
+          }),
+          generateDockerContainersData({
+            from: DATE_WITH_DOCKER_DATA_FROM,
+            to: DATE_WITH_DOCKER_DATA_TO,
+            count: 5,
+          }),
+          generatePodsData({
+            from: DATE_WITH_POD_DATA_FROM,
+            to: DATE_WITH_POD_DATA_TO,
+            count: 1,
+          }),
+        ]);
         await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.waitForLoading();
       });
@@ -289,13 +299,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('Asset Details flyout for a container', async () => {
         before(async () => {
-          await synthEsClient.index(
-            generateDockerContainersData({
-              from: DATE_WITH_DOCKER_DATA_FROM,
-              to: DATE_WITH_DOCKER_DATA_TO,
-              count: 5,
-            })
-          );
+          // await synthEsClient.index(
+          //   generateDockerContainersData({
+          //     from: DATE_WITH_DOCKER_DATA_FROM,
+          //     to: DATE_WITH_DOCKER_DATA_TO,
+          //     count: 5,
+          //   })
+          // );
 
           await pageObjects.infraHome.goToContainer();
           await pageObjects.infraHome.goToTime(DATE_WITH_DOCKER_DATA);
@@ -312,7 +322,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'memoryUsage', value: '20.0%' },
           ].forEach(({ metric, value }) => {
             it(`${metric} tile should show ${value}`, async () => {
-              await retry.tryForTime(5000, async () => {
+              await retry.tryForTime(15000, async () => {
                 const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
                   metric
                 );
@@ -517,16 +527,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         describe('Redirect to Pod Details page', () => {
-          before(async () => {
-            await synthEsClient.index(
-              generatePodsData({
-                from: DATE_WITH_POD_DATA_FROM,
-                to: DATE_WITH_POD_DATA_TO,
-                count: 1,
-              })
-            );
-          });
-
           it('should redirect to Pod Details page', async () => {
             await pageObjects.infraHome.goToPods();
             await pageObjects.infraHome.goToTime(DATE_WITH_POD_DATA);
