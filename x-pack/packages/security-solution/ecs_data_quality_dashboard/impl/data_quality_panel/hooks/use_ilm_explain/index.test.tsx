@@ -8,9 +8,9 @@
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 
-import { DataQualityProvider } from '../data_quality_context';
-import { mockIlmExplain } from '../mock/ilm_explain/mock_ilm_explain';
-import { ERROR_LOADING_ILM_EXPLAIN } from '../translations';
+import { DataQualityProvider } from '../../data_quality_context';
+import { mockIlmExplain } from '../../mock/ilm_explain/mock_ilm_explain';
+import { ERROR_LOADING_ILM_EXPLAIN } from '../../translations';
 import { useIlmExplain, UseIlmExplain } from '.';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { Theme } from '@elastic/charts';

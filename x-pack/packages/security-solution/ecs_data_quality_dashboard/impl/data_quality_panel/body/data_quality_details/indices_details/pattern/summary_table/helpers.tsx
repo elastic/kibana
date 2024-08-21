@@ -23,7 +23,7 @@ import { INCOMPATIBLE_INDEX_TOOL_TIP } from '../../../../../stat_label/translati
 import { INDEX_SIZE_TOOLTIP } from '../../../../../translations';
 import * as i18n from './translations';
 import { IndexSummaryTableItem } from '../types';
-import { UseIndicesCheckCheckState } from '../../../../../use_indices_check/types';
+import { UseIndicesCheckCheckState } from '../../../../../hooks/use_indices_check/types';
 import { IndexResultBadge } from '../../../../../index_result_badge';
 import { getIndexResultToolTip } from '../../../../../index_result_badge/helpers';
 import { Stat } from '../../../../stat';

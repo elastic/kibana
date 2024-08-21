@@ -25,7 +25,7 @@ import {
   getTotalIndices,
   getTotalIndicesChecked,
   getTotalSizeInBytes,
-} from '../../use_results_rollup/helpers';
+} from '../../hooks/use_results_rollup/helpers';
 
 const defaultBytesFormat = '0,0.[0]b';
 const formatBytes = (value: number | undefined) =>

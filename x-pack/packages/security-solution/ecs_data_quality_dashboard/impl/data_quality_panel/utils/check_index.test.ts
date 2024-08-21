@@ -15,7 +15,7 @@ import {
   getSortedPartitionedFieldMetadata,
 } from '../body/data_quality_details/indices_details/pattern/index_check_flyout/index_properties/helpers';
 import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
-import { getUnallowedValues } from '../use_unallowed_values/helpers';
+import { getUnallowedValues } from '../hooks/use_unallowed_values/helpers';
 import { getUnallowedValueRequestItems } from '../allowed_values/helpers';
 import { EcsFlatTyped } from '../constants';
 
@@ -24,7 +24,7 @@ let mockFetchMappings = jest.fn(
     Promise.resolve(mockMappingsResponse)
 );
 
-jest.mock('../use_mappings/helpers', () => ({
+jest.mock('../hooks/use_mappings/helpers', () => ({
   fetchMappings: ({
     abortController,
     patternOrIndexName,
@@ -46,8 +46,8 @@ const mockFetchUnallowedValues = jest.fn(
   }) => Promise.resolve(mockUnallowedValuesResponse)
 );
 
-jest.mock('../use_unallowed_values/helpers', () => {
-  const original = jest.requireActual('../use_unallowed_values/helpers');
+jest.mock('../hooks/use_unallowed_values/helpers', () => {
+  const original = jest.requireActual('../hooks/use_unallowed_values/helpers');
 
   return {
     ...original,

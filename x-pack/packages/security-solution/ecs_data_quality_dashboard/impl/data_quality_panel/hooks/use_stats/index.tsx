@@ -8,10 +8,10 @@
 import { useEffect, useState } from 'react';
 import { HttpFetchQuery } from '@kbn/core/public';
 
-import { useDataQualityContext } from '../data_quality_context';
-import * as i18n from '../translations';
-import { INTERNAL_API_VERSION } from '../helpers';
-import { MeteringStatsIndex } from '../types';
+import { useDataQualityContext } from '../../data_quality_context';
+import * as i18n from '../../translations';
+import { INTERNAL_API_VERSION } from '../../helpers';
+import { MeteringStatsIndex } from '../../types';
 import { useIsMounted } from '../use_is_mounted';
 
 const STATS_ENDPOINT = '/internal/ecs_data_quality_dashboard/stats';

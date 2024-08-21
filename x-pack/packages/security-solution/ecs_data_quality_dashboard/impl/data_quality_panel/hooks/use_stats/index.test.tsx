@@ -8,9 +8,9 @@
 import { renderHook } from '@testing-library/react-hooks';
 import React, { FC, PropsWithChildren } from 'react';
 
-import { DataQualityProvider } from '../data_quality_context';
-import { mockStatsAuditbeatIndex } from '../mock/stats/mock_stats_packetbeat_index';
-import { ERROR_LOADING_STATS } from '../translations';
+import { DataQualityProvider } from '../../data_quality_context';
+import { mockStatsAuditbeatIndex } from '../../mock/stats/mock_stats_packetbeat_index';
+import { ERROR_LOADING_STATS } from '../../translations';
 import { useStats, UseStats } from '.';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { Theme } from '@elastic/charts';

@@ -26,7 +26,7 @@ import {
   getTotalIndices,
   getTotalIndicesChecked,
   getTotalSizeInBytes,
-} from '../../../use_results_rollup/helpers';
+} from '../../../hooks/use_results_rollup/helpers';
 
 const mockCopyToClipboard = jest.fn((value) => true);
 jest.mock('@elastic/eui', () => {

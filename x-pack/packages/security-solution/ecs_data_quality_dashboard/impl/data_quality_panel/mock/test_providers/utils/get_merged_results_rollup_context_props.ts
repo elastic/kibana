@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UseResultsRollupReturnValue } from '../../../use_results_rollup/types';
+import { UseResultsRollupReturnValue } from '../../../hooks/use_results_rollup/types';
 import { auditbeatWithAllResults } from '../../pattern_rollup/mock_auditbeat_pattern_rollup';
 
 export const getMergeResultsRollupContextProps = (

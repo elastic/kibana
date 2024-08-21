@@ -9,7 +9,7 @@ import { getCheckState } from '../../../stub/get_check_state';
 import {
   UseIndicesCheckCheckState,
   UseIndicesCheckReturnValue,
-} from '../../../use_indices_check/types';
+} from '../../../hooks/use_indices_check/types';
 
 export const getMergedIndicesCheckContextProps = (
   patternIndexNames: Record<string, string[]>,

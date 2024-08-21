@@ -8,9 +8,9 @@
 import { renderHook } from '@testing-library/react-hooks';
 import React, { FC, PropsWithChildren } from 'react';
 
-import { DataQualityProvider } from '../data_quality_context';
-import { mockMappingsResponse } from '../mock/mappings_response/mock_mappings_response';
-import { ERROR_LOADING_MAPPINGS } from '../translations';
+import { DataQualityProvider } from '../../data_quality_context';
+import { mockMappingsResponse } from '../../mock/mappings_response/mock_mappings_response';
+import { ERROR_LOADING_MAPPINGS } from '../../translations';
 import { useMappings, UseMappings } from '.';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { Theme } from '@elastic/charts';

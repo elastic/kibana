@@ -8,9 +8,9 @@
 import type { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 import { useEffect, useState } from 'react';
 
-import { useDataQualityContext } from '../data_quality_context';
-import { INTERNAL_API_VERSION } from '../helpers';
-import * as i18n from '../translations';
+import { useDataQualityContext } from '../../data_quality_context';
+import { INTERNAL_API_VERSION } from '../../helpers';
+import * as i18n from '../../translations';
 import { useIsMounted } from '../use_is_mounted';
 
 const ILM_EXPLAIN_ENDPOINT = '/internal/ecs_data_quality_dashboard/ilm_explain';

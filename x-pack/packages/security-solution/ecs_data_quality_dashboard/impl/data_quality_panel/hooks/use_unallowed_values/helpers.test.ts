@@ -13,9 +13,9 @@ import {
   getUnallowedValues,
   isBucket,
 } from './helpers';
-import { mockUnallowedValuesResponse } from '../mock/unallowed_values/mock_unallowed_values';
-import { UnallowedValueRequestItem, UnallowedValueSearchResult } from '../types';
-import { INTERNAL_API_VERSION } from '../helpers';
+import { mockUnallowedValuesResponse } from '../../mock/unallowed_values/mock_unallowed_values';
+import { UnallowedValueRequestItem, UnallowedValueSearchResult } from '../../types';
+import { INTERNAL_API_VERSION } from '../../helpers';
 
 describe('helpers', () => {
   let originalFetch: (typeof global)['fetch'];

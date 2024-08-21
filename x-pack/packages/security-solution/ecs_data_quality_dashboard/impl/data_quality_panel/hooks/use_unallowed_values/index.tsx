@@ -7,9 +7,9 @@
 
 import { useEffect, useState } from 'react';
 
-import { useDataQualityContext } from '../data_quality_context';
+import { useDataQualityContext } from '../../data_quality_context';
 import { fetchUnallowedValues, getUnallowedValues } from './helpers';
-import type { UnallowedValueCount, UnallowedValueRequestItem } from '../types';
+import type { UnallowedValueCount, UnallowedValueRequestItem } from '../../types';
 import { useIsMounted } from '../use_is_mounted';
 
 export interface UseUnallowedValues {

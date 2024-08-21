@@ -9,14 +9,14 @@ import { act, renderHook } from '@testing-library/react-hooks';
 
 import { useIndicesCheck } from '.';
 
-import * as utilsCheckIndex from '../utils/check_index';
-import { mockUnallowedValuesResponse } from '../mock/unallowed_values/mock_unallowed_values';
-import { mockMappingsResponse } from '../mock/mappings_response/mock_mappings_response';
+import * as utilsCheckIndex from '../../utils/check_index';
+import { mockUnallowedValuesResponse } from '../../mock/unallowed_values/mock_unallowed_values';
+import { mockMappingsResponse } from '../../mock/mappings_response/mock_mappings_response';
 import { HttpHandler } from '@kbn/core-http-browser';
 import { MappingsError } from '../use_mappings/helpers';
 import { UnallowedValuesError } from '../use_unallowed_values/helpers';
 import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
-import { UnallowedValueSearchResult } from '../types';
+import { UnallowedValueSearchResult } from '../../types';
 import { getInitialCheckStateValue } from './reducer';
 
 const getSpies = () => {

@@ -15,16 +15,16 @@ import {
   getTotalSameFamily,
   updateResultOnCheckCompleted,
 } from './helpers';
-import { auditbeatWithAllResults } from '../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
+import { auditbeatWithAllResults } from '../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import {
   mockPacketbeatPatternRollup,
   packetbeatNoResults,
   packetbeatWithSomeErrors,
-} from '../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
-import { DataQualityCheckResult, MeteringStatsIndex, PatternRollup } from '../types';
-import { EMPTY_STAT } from '../helpers';
-import { mockPartitionedFieldMetadata } from '../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
-import { alertIndexWithAllResults } from '../mock/pattern_rollup/mock_alerts_pattern_rollup';
+} from '../../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
+import { DataQualityCheckResult, MeteringStatsIndex, PatternRollup } from '../../types';
+import { EMPTY_STAT } from '../../helpers';
+import { mockPartitionedFieldMetadata } from '../../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
+import { alertIndexWithAllResults } from '../../mock/pattern_rollup/mock_alerts_pattern_rollup';
 import { EcsVersion } from '@elastic/ecs';
 
 const defaultBytesFormat = '0,0.[0]b';

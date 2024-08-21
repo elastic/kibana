@@ -18,8 +18,8 @@ import { EMPTY_STAT } from './helpers';
 import { ReportDataQualityCheckAllCompleted, ReportDataQualityIndexChecked } from './types';
 import { ResultsRollupContext } from './contexts/results_rollup_context';
 import { IndicesCheckContext } from './contexts/indices_check_context';
-import { useIndicesCheck } from './use_indices_check';
-import { useResultsRollup } from './use_results_rollup';
+import { useIndicesCheck } from './hooks/use_indices_check';
+import { useResultsRollup } from './hooks/use_results_rollup';
 import { ilmPhaseOptionsStatic } from './constants';
 
 interface Props {

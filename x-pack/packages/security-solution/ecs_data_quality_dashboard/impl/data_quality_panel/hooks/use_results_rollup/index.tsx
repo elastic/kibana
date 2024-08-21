@@ -26,7 +26,7 @@ import type {
   OnCheckCompleted,
   PatternRollup,
   TelemetryEvents,
-} from '../types';
+} from '../../types';
 import {
   getDocsCount,
   getIndexId,
@@ -36,16 +36,16 @@ import {
   postStorageResult,
   formatStorageResult,
   formatResultFromStorage,
-} from '../helpers';
+} from '../../helpers';
 import {
   getIlmPhase,
   getIndexIncompatible,
-} from '../body/data_quality_details/indices_details/pattern/helpers';
+} from '../../body/data_quality_details/indices_details/pattern/helpers';
 import {
   getIncompatibleMappingsFields,
   getIncompatibleValuesFields,
   getSameFamilyFields,
-} from '../body/data_quality_details/indices_details/pattern/index_check_flyout/index_properties/index_check_fields/tabs/incompatible_tab/helpers';
+} from '../../body/data_quality_details/indices_details/pattern/index_check_flyout/index_properties/index_check_fields/tabs/incompatible_tab/helpers';
 import { UseResultsRollupReturnValue } from './types';
 import { useIsMounted } from '../use_is_mounted';
 

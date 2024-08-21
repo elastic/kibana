@@ -8,14 +8,14 @@
 import { renderHook } from '@testing-library/react-hooks';
 import React, { FC, PropsWithChildren } from 'react';
 
-import { getUnallowedValueRequestItems } from '../allowed_values/helpers';
-import { DataQualityProvider } from '../data_quality_context';
-import { mockUnallowedValuesResponse } from '../mock/unallowed_values/mock_unallowed_values';
-import { ERROR_LOADING_UNALLOWED_VALUES } from '../translations';
-import { UnallowedValueRequestItem } from '../types';
+import { getUnallowedValueRequestItems } from '../../allowed_values/helpers';
+import { DataQualityProvider } from '../../data_quality_context';
+import { mockUnallowedValuesResponse } from '../../mock/unallowed_values/mock_unallowed_values';
+import { ERROR_LOADING_UNALLOWED_VALUES } from '../../translations';
+import { UnallowedValueRequestItem } from '../../types';
 import { useUnallowedValues, UseUnallowedValues } from '.';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { EcsFlatTyped } from '../constants';
+import { EcsFlatTyped } from '../../constants';
 import { Theme } from '@elastic/charts';
 
 const mockHttpFetch = jest.fn();

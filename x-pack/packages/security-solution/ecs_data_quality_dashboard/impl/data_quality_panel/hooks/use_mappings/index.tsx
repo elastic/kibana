@@ -8,7 +8,7 @@
 import type { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 import { useEffect, useState } from 'react';
 
-import { useDataQualityContext } from '../data_quality_context';
+import { useDataQualityContext } from '../../data_quality_context';
 import { fetchMappings } from './helpers';
 import { useIsMounted } from '../use_is_mounted';
 
