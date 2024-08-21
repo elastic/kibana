@@ -50,6 +50,7 @@ import { observabilityAIAssistantServiceFactory } from './observability_ai_assis
 import { userProfileServiceFactory } from './user_profile/user_profile_service';
 import { dashboardRecentlyAccessedFactory } from './dashboard_recently_accessed/dashboard_recently_accessed';
 import { dashboardFavoritesServiceFactory } from './dashboard_favorites/dashboard_favorites_service';
+import { dashboardContentInsightsServiceFactory } from './dashboard_content_insights/dashboard_content_insights_service';
 
 const providers: PluginServiceProviders<DashboardServices, DashboardPluginServiceParams> = {
   dashboardContentManagement: new PluginServiceProvider(dashboardContentManagementServiceFactory, [
@@ -99,6 +100,7 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
   observabilityAIAssistant: new PluginServiceProvider(observabilityAIAssistantServiceFactory),
   userProfile: new PluginServiceProvider(userProfileServiceFactory),
   dashboardRecentlyAccessed: new PluginServiceProvider(dashboardRecentlyAccessedFactory, ['http']),
+  dashboardContentInsights: new PluginServiceProvider(dashboardContentInsightsServiceFactory),
   dashboardFavorites: new PluginServiceProvider(dashboardFavoritesServiceFactory),
 };
 

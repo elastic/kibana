@@ -32,6 +32,7 @@ import {
   POSTURE_TYPE_ALL,
   LATEST_VULNERABILITIES_RETENTION_POLICY,
   LATEST_FINDINGS_RETENTION_POLICY,
+  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
 } from '../../../common/constants';
 import type {
   CspApiRequestHandlerContext,
@@ -142,6 +143,43 @@ const assertResponse = (resp: CspSetupStatus, logger: CspApiRequestHandlerContex
   }
 };
 
+const checkIndexHasFindings = async (
+  esClient: ElasticsearchClient,
+  index: string,
+  retentionPolicy: string,
+  logger: Logger
+) => {
+  try {
+    const response = await esClient.search({
+      index,
+      size: 0, // We only need to know if there are any hits, so we don't need to retrieve documents
+      query: {
+        bool: {
+          filter: [
+            {
+              range: {
+                '@timestamp': {
+                  gte: `now-${retentionPolicy}`,
+                  lte: 'now',
+                },
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    // Check the number of hits
+    const totalHits =
+      typeof response.hits.total === 'object' ? response.hits.total.value : response.hits.total;
+
+    return !!totalHits;
+  } catch (err) {
+    logger.error(`Error checking if index ${index} has findings`);
+    logger.error(err);
+  }
+};
+
 export const getCspStatus = async ({
   logger,
   esClient,
@@ -153,6 +191,7 @@ export const getCspStatus = async ({
   isPluginInitialized,
 }: CspStatusDependencies): Promise<CspSetupStatus> => {
   const [
+    hasMisconfigurationsFindings,
     findingsLatestIndexStatus,
     findingsIndexStatus,
     scoreIndexStatus,
@@ -171,6 +210,12 @@ export const getCspStatus = async ({
     installedPackagePoliciesVulnMgmt,
     installedPolicyTemplates,
   ] = await Promise.all([
+    checkIndexHasFindings(
+      esClient,
+      CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+      LATEST_FINDINGS_RETENTION_POLICY,
+      logger
+    ),
     checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, {
       postureType: POSTURE_TYPE_ALL,
       retentionTime: LATEST_VULNERABILITIES_RETENTION_POLICY,
@@ -357,6 +402,7 @@ export const getCspStatus = async ({
   const response: CspSetupStatus = {
     ...statusResponseInfo,
     installedPackageVersion: installation?.install_version,
+    hasMisconfigurationsFindings,
   };
 
   assertResponse(response, logger);
