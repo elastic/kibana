@@ -85,7 +85,7 @@ const arrayTypes = [
   'date_period[]',
 ] as const;
 
-type ArrayType = (typeof arrayTypes)[number];
+export type ArrayType = (typeof arrayTypes)[number];
 
 /**
  * This is the type of a parameter in a function definition.

@@ -40,6 +40,7 @@ import {
   FunctionDefinition,
   FunctionParameterType,
   FunctionReturnType,
+  ArrayType,
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
@@ -273,11 +274,11 @@ export function getColumnByName(
 
 const ARRAY_REGEXP = /\[\]$/;
 
-export function isArrayType(type: string) {
+export function isArrayType(type: string): type is ArrayType {
   return ARRAY_REGEXP.test(type);
 }
 
-const arrayToSingularMap: Map<FunctionParameterType, FunctionParameterType> = new Map([
+const arrayToSingularMap: Map<ArrayType, FunctionParameterType> = new Map([
   ['double[]', 'double'],
   ['unsigned_long[]', 'unsigned_long'],
   ['long[]', 'long'],
@@ -287,7 +288,7 @@ const arrayToSingularMap: Map<FunctionParameterType, FunctionParameterType> = ne
   ['counter_double[]', 'counter_double'],
   ['keyword[]', 'keyword'],
   ['text[]', 'text'],
-  ['datetime[]', 'date'],
+  ['date[]', 'date'],
   ['date_period[]', 'date_period'],
   ['boolean[]', 'boolean'],
   ['any[]', 'any'],
@@ -297,7 +298,7 @@ const arrayToSingularMap: Map<FunctionParameterType, FunctionParameterType> = ne
  * Given an array type for example `string[]` it will return `string`
  */
 export function extractSingularType(type: FunctionParameterType): FunctionParameterType {
-  return arrayToSingularMap.get(type) ?? type;
+  return isArrayType(type) ? arrayToSingularMap.get(type)! : type;
 }
 
 export function createMapFromList<T extends { name: string }>(arr: T[]): Map<string, T> {
