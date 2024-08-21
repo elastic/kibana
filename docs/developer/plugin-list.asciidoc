@@ -796,7 +796,7 @@ It uses Chromium and Puppeteer underneath to run the browser in headless mode.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/search_assistant/README.md[searchAssistant]
-|Search specific AI assistant solution based on Observability AI Assistant solution. 
+|Search specific AI assistant solution based on Observability AI Assistant solution.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/search_connectors/README.mdx[searchConnectors]
