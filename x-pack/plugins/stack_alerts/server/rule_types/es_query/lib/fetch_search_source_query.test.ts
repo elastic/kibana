@@ -10,6 +10,7 @@ import {
   createSearchSourceMock,
   searchSourceInstanceMock,
 } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   updateSearchSource,
@@ -28,8 +29,12 @@ import { Comparator } from '../../../../common/comparator_types';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { publicRuleResultServiceMock } from '@kbn/alerting-plugin/server/monitoring/rule_result_service.mock';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import {
+  getErrorSource,
+  TaskErrorSource,
+} from '@kbn/task-manager-plugin/server/task_running/errors';
 
 const createDataView = () => {
   const id = 'test-id';
@@ -623,6 +628,54 @@ describe('fetchSearchSourceQuery', () => {
       expect(mockRuleResultService.setLastRunOutcomeMessage).toHaveBeenCalledWith(
         `Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.`
       );
+    });
+
+    it('should throw user error if data view is not found', async () => {
+      searchSourceCommonMock.createLazy.mockImplementationOnce(() => {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError('index-pattern', 'abc');
+      });
+
+      try {
+        await fetchSearchSourceQuery({
+          ruleId: 'abc',
+          params: defaultParams,
+          // @ts-expect-error
+          services: {
+            logger,
+            searchSourceClient: searchSourceCommonMock,
+          },
+          spacePrefix: '',
+          dateStart: new Date().toISOString(),
+          dateEnd: new Date().toISOString(),
+        });
+      } catch (err) {
+        expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
+        expect(err.message).toBe('Saved object [index-pattern/abc] not found');
+      }
+    });
+
+    it('should re-throw error for generic errors', async () => {
+      searchSourceCommonMock.createLazy.mockImplementationOnce(() => {
+        throw new Error('fail');
+      });
+
+      try {
+        await fetchSearchSourceQuery({
+          ruleId: 'abc',
+          params: defaultParams,
+          // @ts-expect-error
+          services: {
+            logger,
+            searchSourceClient: searchSourceCommonMock,
+          },
+          spacePrefix: '',
+          dateStart: new Date().toISOString(),
+          dateEnd: new Date().toISOString(),
+        });
+      } catch (err) {
+        expect(getErrorSource(err)).not.toBeDefined();
+        expect(err.message).toBe('fail');
+      }
     });
   });
 

@@ -36,10 +36,6 @@ export type AzureCredentialsType =
   | 'service_principal_with_client_username_and_password'
   | 'managed_identity';
 
-export type AzureCredentialsTypeFieldMap = {
-  [key in AzureCredentialsType]: string[];
-};
-
 export type Evaluation = 'passed' | 'failed' | 'NA';
 
 export type PostureTypes = 'cspm' | 'kspm' | 'vuln_mgmt' | 'all';
@@ -137,6 +133,7 @@ export interface BaseCspSetupStatus {
   vuln_mgmt: BaseCspSetupBothPolicy;
   isPluginInitialized: boolean;
   installedPackageVersion?: string | undefined;
+  hasMisconfigurationsFindings?: boolean;
 }
 
 export type CspSetupStatus = BaseCspSetupStatus;

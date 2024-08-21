@@ -12,7 +12,7 @@ import { OPTIONS_LIST_CONTROL } from '../../../common';
 import { ControlOutput } from '../../types';
 import { ControlGroupInput } from '../types';
 import { pluginServices } from '../../services';
-import { EditControlAction } from './edit_control_action';
+import { EditLegacyEmbeddableControlAction } from './edit_control_action';
 import { DeleteControlAction } from './delete_control_action';
 import { TimeSliderEmbeddableFactory } from '../../time_slider';
 import { OptionsListEmbeddableFactory, OptionsListEmbeddableInput } from '../../options_list';
@@ -24,7 +24,7 @@ const controlGroupInput = { chainingSystem: 'NONE', panels: {} } as ControlGroup
 const deleteControlAction = new DeleteControlAction();
 
 test('Action is incompatible with Error Embeddables', async () => {
-  const editControlAction = new EditControlAction(deleteControlAction);
+  const editControlAction = new EditLegacyEmbeddableControlAction(deleteControlAction);
   const errorEmbeddable = new ErrorEmbeddable('Wow what an awful error', { id: ' 404' });
   expect(await editControlAction.isCompatible({ embeddable: errorEmbeddable as any })).toBe(false);
 });
@@ -35,7 +35,7 @@ test('Action is incompatible with embeddables that are not editable', async () =
   pluginServices.getServices().controls.getControlFactory = mockGetFactory;
   pluginServices.getServices().embeddable.getEmbeddableFactory = mockGetFactory;
 
-  const editControlAction = new EditControlAction(deleteControlAction);
+  const editControlAction = new EditLegacyEmbeddableControlAction(deleteControlAction);
   const emptyContainer = new ControlGroupContainer(mockedReduxEmbeddablePackage, controlGroupInput);
   await emptyContainer.untilInitialized();
   await emptyContainer.addTimeSliderControl();
@@ -53,7 +53,7 @@ test('Action is compatible with embeddables that are editable', async () => {
   pluginServices.getServices().controls.getControlFactory = mockGetFactory;
   pluginServices.getServices().embeddable.getEmbeddableFactory = mockGetFactory;
 
-  const editControlAction = new EditControlAction(deleteControlAction);
+  const editControlAction = new EditLegacyEmbeddableControlAction(deleteControlAction);
   const emptyContainer = new ControlGroupContainer(mockedReduxEmbeddablePackage, controlGroupInput);
   await emptyContainer.untilInitialized();
   const control = await emptyContainer.addOptionsListControl({
@@ -73,7 +73,7 @@ test('Action is compatible with embeddables that are editable', async () => {
 });
 
 test('Execute throws an error when called with an embeddable not in a parent', async () => {
-  const editControlAction = new EditControlAction(deleteControlAction);
+  const editControlAction = new EditLegacyEmbeddableControlAction(deleteControlAction);
   const optionsListEmbeddable = new OptionsListEmbeddable(
     mockedReduxEmbeddablePackage,
     {} as OptionsListEmbeddableInput,
@@ -99,7 +99,7 @@ test('Execute should open a flyout', async () => {
   })) as OptionsListEmbeddable;
   expect(emptyContainer.getInput().panels[control.getInput().id].type).toBe(OPTIONS_LIST_CONTROL);
 
-  const editControlAction = new EditControlAction(deleteControlAction);
+  const editControlAction = new EditLegacyEmbeddableControlAction(deleteControlAction);
   await editControlAction.execute({ embeddable: control });
   expect(spyOn).toHaveBeenCalled();
 });

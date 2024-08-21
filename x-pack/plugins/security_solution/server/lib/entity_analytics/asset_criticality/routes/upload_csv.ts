@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { schema } from '@kbn/config-schema';
 import Papa from 'papaparse';
@@ -57,7 +57,11 @@ export const assetCriticalityPublicCSVUploadRoute = (
           },
         },
       },
-      async (context, request, response) => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<UploadAssetCriticalityRecordsResponse>> => {
         const { errorRetries, maxBulkRequestBodySizeBytes } =
           config.entityAnalytics.assetCriticality.csvUpload;
 

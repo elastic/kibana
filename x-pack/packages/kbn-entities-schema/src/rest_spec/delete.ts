@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export const deleteEntityDefinitionParamsSchema = z.object({
   id: z.string(),
@@ -14,3 +14,5 @@ export const deleteEntityDefinitionParamsSchema = z.object({
 export const deleteEntityDefinitionQuerySchema = z.object({
   deleteData: z.optional(z.coerce.boolean().default(false)),
 });
+
+export type DeleteEntityDefinitionQuery = z.infer<typeof deleteEntityDefinitionQuerySchema>;

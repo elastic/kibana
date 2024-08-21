@@ -21,7 +21,7 @@ import {
   persistTimeline,
 } from '../../../saved_object/timelines';
 import { draftTimelineDefaults } from '../../../utils/default_timeline';
-import { cleanDraftTimelineSchema, TimelineType } from '../../../../../../common/api/timeline';
+import { cleanDraftTimelineSchema, TimelineTypeEnum } from '../../../../../../common/api/timeline';
 
 export const cleanDraftTimelinesRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
   router.versioned
@@ -70,7 +70,7 @@ export const cleanDraftTimelinesRoute = (router: SecuritySolutionPluginRouter, _
             });
           }
           const templateTimelineData =
-            request.body.timelineType === TimelineType.template
+            request.body.timelineType === TimelineTypeEnum.template
               ? {
                   timelineType: request.body.timelineType,
                   templateTimelineId: uuidv4(),

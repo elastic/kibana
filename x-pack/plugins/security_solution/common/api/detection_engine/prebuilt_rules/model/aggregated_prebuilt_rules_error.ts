@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-export interface AggregatedPrebuiltRuleError {
-  message: string;
-  status_code?: number;
-  rules: Array<{
-    rule_id: string;
-    name?: string;
-  }>;
-}
+import { z } from '@kbn/zod';
+import { RuleName, RuleSignatureId } from '../../model/rule_schema/common_attributes.gen';
+
+export type AggregatedPrebuiltRuleError = z.infer<typeof AggregatedPrebuiltRuleError>;
+export const AggregatedPrebuiltRuleError = z.object({
+  message: z.string(),
+  status_code: z.number().optional(),
+  rules: z.array(
+    z.object({
+      rule_id: RuleSignatureId,
+      name: RuleName.optional(),
+    })
+  ),
+});

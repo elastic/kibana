@@ -22,9 +22,10 @@ import {
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { Logger } from '@kbn/core/server';
+import { Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { OnlySearchSourceRuleParams } from '../types';
 import { getComparatorScript } from '../../../../common';
 import { checkForShardFailures } from '../util';
@@ -59,7 +60,16 @@ export async function fetchSearchSourceQuery({
   const { logger, searchSourceClient, ruleResultService } = services;
   const isGroupAgg = isGroupAggregation(params.termField);
   const isCountAgg = isCountAggregation(params.aggType);
-  const initialSearchSource = await searchSourceClient.createLazy(params.searchConfiguration);
+
+  let initialSearchSource;
+  try {
+    initialSearchSource = await searchSourceClient.createLazy(params.searchConfiguration);
+  } catch (err) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+      throw createTaskRunError(err, TaskErrorSource.USER);
+    }
+    throw err;
+  }
 
   const index = initialSearchSource.getField('index') as DataView;
   const { searchSource, filterToExcludeHitsFromPreviousRun } = await updateSearchSource(

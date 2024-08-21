@@ -51,14 +51,10 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     logger,
     getTimeRange,
   } = options;
-  const {
-    alertsClient,
-    scopedClusterClient,
-    searchSourceClient,
-    share,
-    dataViews,
-    ruleResultService,
-  } = services;
+  const { alertsClient, ruleResultService, scopedClusterClient, share } = services;
+  const searchSourceClient = await services.getSearchSourceClient();
+  const dataViews = await services.getDataViews();
+
   if (!alertsClient) {
     throw new AlertsClientError();
   }

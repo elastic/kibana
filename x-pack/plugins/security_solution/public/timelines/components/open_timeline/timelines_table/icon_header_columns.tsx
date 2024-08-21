@@ -13,8 +13,7 @@ import { ACTION_COLUMN_WIDTH } from './common_styles';
 import { getNotesCount, getPinnedEventCount } from '../helpers';
 import * as i18n from '../translations';
 import type { FavoriteTimelineResult, OpenTimelineResult } from '../types';
-import type { TimelineTypeLiteralWithNull } from '../../../../../common/api/timeline';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 /**
  * Returns the columns that have icon headers
@@ -22,7 +21,7 @@ import { TimelineType } from '../../../../../common/api/timeline';
 export const getIconHeaderColumns = ({
   timelineType,
 }: {
-  timelineType: TimelineTypeLiteralWithNull;
+  timelineType: TimelineType | null;
 }): Array<EuiTableFieldDataColumnType<object>> => {
   const columns = {
     note: {
@@ -77,5 +76,5 @@ export const getIconHeaderColumns = ({
   };
   const templateColumns = [columns.note, columns.favorite];
   const defaultColumns = [columns.pinnedEvent, columns.note, columns.favorite];
-  return timelineType === TimelineType.template ? templateColumns : defaultColumns;
+  return timelineType === TimelineTypeEnum.template ? templateColumns : defaultColumns;
 };
