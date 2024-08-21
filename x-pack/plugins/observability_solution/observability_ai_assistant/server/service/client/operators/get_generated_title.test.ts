@@ -13,7 +13,7 @@ import {
 } from '../../../../common';
 import { ChatEvent } from '../../../../common/conversation_complete';
 import { LangTracer } from '../instrumentation/lang_tracer';
-import { getGeneratedTitle } from './get_generated_title';
+import { TITLE_CONVERSATION_FUNCTION_NAME, getGeneratedTitle } from './get_generated_title';
 
 describe('getGeneratedTitle', () => {
   const messages: Message[] = [
@@ -83,7 +83,7 @@ describe('getGeneratedTitle', () => {
     const { chatSpy, title$ } = callGenerateTitle([
       createChatCompletionChunk({
         function_call: {
-          name: 'title_conversation',
+          name: TITLE_CONVERSATION_FUNCTION_NAME,
           arguments: JSON.stringify({ title: 'My title' }),
         },
       }),
