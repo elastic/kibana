@@ -25,22 +25,11 @@ const defaultPageState: datasetQualityUrlSchemaV1.UrlSchema = {
     page: 0,
   },
   filters: {},
-  flyout: {
-    degradedFields: {
-      table: {
-        page: 0,
-        rowsPerPage: 10,
-        sort: {
-          field: DEFAULT_DEGRADED_FIELD_SORT_FIELD,
-          direction: DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
-        },
-      },
-    },
-  },
 };
 
-const defaultDetailsPageState = {
+const defaultDetailsPageState: datasetQualityDetailsUrlSchemaV1.UrlSchema = {
   v: 1,
+  dataStream: 'logs-synth.1-default',
   degradedFields: {
     table: {
       page: 0,
