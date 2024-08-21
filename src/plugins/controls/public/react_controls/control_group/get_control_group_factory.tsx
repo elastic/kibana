@@ -36,7 +36,7 @@ import {
 import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
 import { initControlsManager } from './init_controls_manager';
 import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
-import { deserializeControlGroup } from './serialization_utils';
+import { deserializeControlGroup } from './utils/serialization_utils';
 import { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState } from './types';
 import { ControlGroup } from './components/control_group';
 import { initSelectionsManager } from './selections_manager';

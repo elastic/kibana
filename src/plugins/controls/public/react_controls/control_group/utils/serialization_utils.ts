@@ -8,8 +8,8 @@
 
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { omit } from 'lodash';
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../common';
-import { ControlGroupRuntimeState, ControlGroupSerializedState } from './types';
+import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../../common';
+import { ControlGroupRuntimeState, ControlGroupSerializedState } from '../types';
 
 export const deserializeControlGroup = (
   state: SerializedPanelState<ControlGroupSerializedState>
@@ -48,6 +48,5 @@ export const deserializeControlGroup = (
     labelPosition: state.rawState.controlStyle, // Rename "controlStyle" to "labelPosition"
     defaultControlGrow: DEFAULT_CONTROL_GROW,
     defaultControlWidth: DEFAULT_CONTROL_WIDTH,
-    settings: state.rawState.settings,
   };
 };

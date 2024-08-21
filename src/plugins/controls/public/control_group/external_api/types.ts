@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { BehaviorSubject } from 'rxjs';
 import {
   ControlGroupApi,
   ControlGroupEditorConfig,
@@ -23,9 +23,15 @@ export type ControlGroupRendererApi = ControlGroupApi & {
    * and call those setters instead.
    */
   updateInput: (input: Partial<ControlGroupRuntimeState>) => void;
+
+  /**
+   * @deprecated
+   * Instead of subscribing to the whole runtime state, it is more efficient to subscribe to the individual
+   * publishing subjects of the control group API.
+   */
+  getInput$: () => BehaviorSubject<ControlGroupRuntimeState>;
 };
 
-export type FieldFilterPredicate = (f: DataViewField) => boolean;
 export type AwaitingControlGroupApi = ControlGroupRendererApi | null;
 
 export interface ControlGroupCreationOptions {

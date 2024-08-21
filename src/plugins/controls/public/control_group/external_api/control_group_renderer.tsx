@@ -7,14 +7,7 @@
  */
 
 import { omit } from 'lodash';
-import React, {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -22,7 +15,7 @@ import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useSearchApi, type ViewMode as ViewModeType } from '@kbn/presentation-publishing';
 
-import { CONTROL_GROUP_TYPE, getDefaultControlGroupInput } from '../../../common';
+import { CONTROL_GROUP_TYPE } from '../../../common';
 import {
   ControlGroupApi,
   ControlGroupRuntimeState,
@@ -31,12 +24,13 @@ import {
 import {
   type ControlGroupStateBuilder,
   controlGroupStateBuilder,
-} from '../../react_controls/control_group/control_group_state_builder';
+} from '../../react_controls/control_group/utils/control_group_state_builder';
 import {
   AwaitingControlGroupApi,
   ControlGroupCreationOptions,
   ControlGroupRendererApi,
 } from './types';
+import { getDefaultControlGroupRuntimeState } from '../../react_controls/control_group/utils/initialization_utils';
 
 export interface ControlGroupRendererProps {
   getCreationOptions?: (
@@ -53,7 +47,6 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
   ({ getCreationOptions, filters, timeRange, query, viewMode }, ref) => {
     const id = useMemo(() => uuidv4(), []);
     const [regenerateId, setRegenerateId] = useState(uuidv4());
-    const lastInput = useRef<Partial<ControlGroupRuntimeState> | null>(null);
 
     const [apiLoading, setApiLoading] = useState<boolean>(true);
     const [controlGroup, setControlGroup] = useState<ControlGroupRendererApi | undefined>();
@@ -74,6 +67,10 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
       if (viewMode) viewMode$.next(viewMode);
     }, [viewMode, viewMode$]);
 
+    const runtimeState$ = useMemo(
+      () => new BehaviorSubject<ControlGroupRuntimeState>(getDefaultControlGroupRuntimeState()),
+      []
+    );
     const [serializedState, setSerializedState] = useState<
       ControlGroupSerializedState | undefined
     >();
@@ -83,8 +80,10 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
       let cancelled = false;
       (async () => {
         const test =
-          (await getCreationOptions?.(getDefaultControlGroupInput(), controlGroupStateBuilder)) ??
-          {};
+          (await getCreationOptions?.(
+            getDefaultControlGroupRuntimeState(),
+            controlGroupStateBuilder
+          )) ?? {};
         const { initialState, editorConfig } = test;
         const state = {
           ...omit(initialState, ['initialChildControlState', 'ignoreParentSettings']),
@@ -113,6 +112,15 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
       >
         key={regenerateId} // forces unmount + mount when `updateInput` is called
         maybeId={id}
+        onAnyStateChange={() => {
+          if (!controlGroup) return;
+
+          /**
+           * on any state change is a callback the hands over the **serialized** state, but `input$`
+           * should be providing runtime state - so, snapshot runtime state on state change instead
+           */
+          runtimeState$.next(controlGroup?.snapshotRuntimeState());
+        }}
         type={CONTROL_GROUP_TYPE}
         getParentApi={() => ({
           viewMode: viewMode$,
@@ -123,16 +131,20 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
             rawState: serializedState!,
           }),
           getRuntimeStateForChild: () => {
-            return lastInput.current;
+            return runtimeState$.getValue();
           },
         })}
         onApiAvailable={(controlGroupApi) => {
           setControlGroup({
             ...controlGroupApi,
             updateInput: (newInput) => {
-              lastInput.current = newInput;
+              runtimeState$.next({
+                ...runtimeState$.getValue(),
+                ...newInput,
+              });
               setRegenerateId(uuidv4());
             },
+            getInput$: () => runtimeState$,
           });
         }}
         hidePanelChrome

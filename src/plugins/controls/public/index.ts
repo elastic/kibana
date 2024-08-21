@@ -23,7 +23,7 @@ export { ACTION_EDIT_CONTROL } from './react_controls/actions/edit_control_actio
 export {
   controlGroupStateBuilder,
   type ControlGroupStateBuilder,
-} from './react_controls/control_group/control_group_state_builder';
+} from './react_controls/control_group/utils/control_group_state_builder';
 
 /**
  * TODO: remove all exports below this when control group embeddable is removed
