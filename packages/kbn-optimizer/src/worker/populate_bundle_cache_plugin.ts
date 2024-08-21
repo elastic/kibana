@@ -7,6 +7,7 @@
  */
 
 import Path from 'path';
+import Fs from 'fs';
 import { inspect } from 'util';
 
 import webpack from 'webpack';
@@ -17,7 +18,6 @@ import {
   isConcatenatedModule,
   isDelegatedModule,
   isRuntimeModule,
-  getModulePath,
 } from '@kbn/optimizer-webpack-helpers';
 
 import {
@@ -29,6 +29,11 @@ import {
   ParsedDllManifest,
 } from '../common';
 import { BundleRemoteModule } from './bundle_remote_module';
+
+interface InputFileSystem {
+  readFileSync: (path: string, encoding?: null | undefined) => Buffer;
+  statSync: (path: string) => Fs.Stats;
+}
 
 /**
  * sass-loader creates about a 40% overhead on the overall optimizer runtime, and
@@ -48,12 +53,17 @@ export class PopulateBundleCachePlugin {
 
   public apply(compiler: webpack.Compiler) {
     const { bundle, workerConfig } = this;
+    const inputFs = compiler.inputFileSystem as InputFileSystem;
+    if (!inputFs) {
+      throw new Error('expected inputFs to be defined');
+    }
 
     compiler.hooks.emit.tap(
-      {
-        name: 'PopulateBundleCachePlugin',
-        before: ['BundleMetricsPlugin'],
-      },
+      // {
+      //   name: 'PopulateBundleCachePlugin',
+      //   before: ['BundleMetricsPlugin'],
+      // },
+      'PopulateBundleCachePlugin',
       (compilation) => {
         const bundleRefExportIds: string[] = [];
         let moduleCount = 0;
@@ -69,7 +79,7 @@ export class PopulateBundleCachePlugin {
           paths.add(path);
           let content: Buffer;
           try {
-            content = compiler.inputFileSystem.readFileSync(path);
+            content = inputFs.readFileSync(path);
           } catch {
             return rawHashes.set(path, null);
           }
@@ -83,35 +93,38 @@ export class PopulateBundleCachePlugin {
           addReferenced(bundle.manifestPath);
         }
 
+        // add all files from the fileDependencies (which includes a bunch of directories) to the cache
+        for (const path of compilation.fileDependencies) {
+          const stat = inputFs.statSync(path);
+          if (!stat.isFile()) {
+            continue;
+          }
+
+          addReferenced(path);
+          if (path.endsWith('.scss')) {
+            workUnits += EXTRA_SCSS_WORK_UNITS;
+            continue;
+          }
+
+          const parsedPath = parseFilePath(path);
+          if (!parsedPath.dirs.includes('node_modules')) {
+            continue;
+          }
+
+          const nmIndex = parsedPath.dirs.lastIndexOf('node_modules');
+          const isScoped = parsedPath.dirs[nmIndex + 1].startsWith('@');
+          const pkgJsonPath = Path.join(
+            parsedPath.root,
+            ...parsedPath.dirs.slice(0, nmIndex + 1 + (isScoped ? 2 : 1)),
+            'package.json'
+          );
+          addReferenced(pkgJsonPath);
+          continue;
+        }
+
         for (const module of compilation.modules) {
           if (isNormalModule(module)) {
             moduleCount += 1;
-            const path = getModulePath(module);
-            const parsedPath = parseFilePath(path);
-
-            // TODO: Does this need to be updated to support @kbn/ packages?
-            if (!parsedPath.dirs.includes('node_modules')) {
-              addReferenced(path);
-
-              if (path.endsWith('.scss')) {
-                workUnits += EXTRA_SCSS_WORK_UNITS;
-
-                for (const depPath of module.buildInfo.fileDependencies) {
-                  addReferenced(depPath);
-                }
-              }
-
-              continue;
-            }
-
-            const nmIndex = parsedPath.dirs.lastIndexOf('node_modules');
-            const isScoped = parsedPath.dirs[nmIndex + 1].startsWith('@');
-            const pkgJsonPath = Path.join(
-              parsedPath.root,
-              ...parsedPath.dirs.slice(0, nmIndex + 1 + (isScoped ? 2 : 1)),
-              'package.json'
-            );
-            addReferenced(pkgJsonPath);
             continue;
           }
 
