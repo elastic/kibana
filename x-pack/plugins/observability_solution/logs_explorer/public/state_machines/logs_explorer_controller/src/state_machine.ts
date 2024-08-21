@@ -289,7 +289,6 @@ export const createPureLogsExplorerControllerStateMachine = (
             : {}
         ),
         storeControlGroupAPI: actions.assign((_context, event) => {
-          console.log('STORE CONTROL GROUP API', event);
           return 'controlGroupAPI' in event ? { controlGroupAPI: event.controlGroupAPI } : {};
         }),
         storeControlPanels: actions.assign((_context, event) =>
