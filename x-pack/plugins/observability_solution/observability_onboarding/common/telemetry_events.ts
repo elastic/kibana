@@ -9,6 +9,7 @@ import { type EventTypeOpts } from '@elastic/ebt/client';
 
 export const OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT: EventTypeOpts<{
   flow?: string;
+  integrations?: string[];
   step?: string;
   step_status?: string;
   step_message?: string;
@@ -21,6 +22,18 @@ export const OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT: EventTypeOpts<{
       _meta: {
         description:
           "The current onboarding flow user is going through (e.g. 'system_logs', 'nginx'). If not present, user is on the landing screen.",
+        optional: true,
+      },
+    },
+    integrations: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'The integration(s) that the user is attempting to onboard.',
+        },
+      },
+      _meta: {
         optional: true,
       },
     },
