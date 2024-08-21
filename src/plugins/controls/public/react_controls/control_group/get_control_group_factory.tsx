@@ -181,12 +181,6 @@ export const getControlGroupEmbeddableFactory = (services: {
               dataViewId: controlsManager.api.lastUsedDataViewId$.value,
             },
             onSave: ({ type: controlType, state: initialState }) => {
-              if (initialState.width) {
-                width.next(initialState.width);
-              }
-              if (typeof initialState.grow === 'boolean') {
-                grow.next(initialState.grow);
-              }
               api.addNewPanel({
                 panelType: controlType,
                 initialState: controlInputTransform!(
