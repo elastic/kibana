@@ -84,34 +84,6 @@ export const ADD_CONNECTOR_MISSING_PRIVILEGES_DESCRIPTION = i18n.translate(
   }
 );
 
-export const CONNECTOR_SETUP_USER_YOU = i18n.translate(
-  'xpack.elasticAssistant.assistant.connectors.setup.userYouTitle',
-  {
-    defaultMessage: 'You',
-  }
-);
-
-export const CONNECTOR_SETUP_USER_ASSISTANT = i18n.translate(
-  'xpack.elasticAssistant.assistant.connectors.setup.userAssistantTitle',
-  {
-    defaultMessage: 'Assistant',
-  }
-);
-
-export const CONNECTOR_SETUP_TIMESTAMP_AT = i18n.translate(
-  'xpack.elasticAssistant.assistant.connectors.setup.timestampAtTitle',
-  {
-    defaultMessage: 'at',
-  }
-);
-
-export const CONNECTOR_SETUP_SKIP = i18n.translate(
-  'xpack.elasticAssistant.assistant.connectors.setup.skipTitle',
-  {
-    defaultMessage: 'Click to skip...',
-  }
-);
-
 export const MISSING_CONNECTOR_CALLOUT_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.connectors.connectorMissingCallout.calloutTitle',
   {
@@ -123,19 +95,5 @@ export const MISSING_CONNECTOR_CONVERSATION_SETTINGS_LINK = i18n.translate(
   'xpack.elasticAssistant.assistant.connectors.connectorMissingCallout.conversationSettingsLink',
   {
     defaultMessage: 'Conversation Settings',
-  }
-);
-
-export const CREATE_CONNECTOR_BUTTON = i18n.translate(
-  'xpack.elasticAssistant.assistant.connectors.createConnectorButton',
-  {
-    defaultMessage: 'Connector',
-  }
-);
-
-export const REFRESH_CONNECTORS_BUTTON = i18n.translate(
-  'xpack.elasticAssistant.assistant.connectors.refreshConnectorsButton',
-  {
-    defaultMessage: 'Refresh',
   }
 );
