@@ -25,9 +25,9 @@
     {% if multiline_ndjson_toggle_display %}
     - name: multiline_ndjson
       type: bool
-      title: Parse multiline newline-delimited JSON events
+      title: Parse multiline JSON events
       description: >-
-          Enables parsing of JSON-formatted events that take more than one line. Each event must start with the curly brace at the first column.
+          Enables parsing of newline-delimited JSON-formatted events that take more than one line. Each event must start with the curly brace at the first column.
       required: false
       show_user: false
       default: {{ multiline_ndjson_toggle_default }}
