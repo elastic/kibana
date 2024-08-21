@@ -91,7 +91,7 @@ export function TableDimensionEditor(
 
   const activePalette = column?.palette ?? {
     type: 'palette',
-    name: defaultPaletteParams.name,
+    name: showColorByTerms ? 'default' : defaultPaletteParams.name,
   };
   // need to tell the helper that the colorStops are required to display
   const displayStops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
