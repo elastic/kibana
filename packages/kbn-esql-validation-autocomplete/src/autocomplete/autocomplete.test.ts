@@ -269,11 +269,7 @@ describe('autocomplete', () => {
       `dissect keywordField ${constantPattern} |`,
     ];
     for (const subExpression of subExpressions) {
-      // Unskip once https://github.com/elastic/kibana/issues/190070 is fixed
-      testSuggestions.skip(
-        `from a | ${subExpression} grok /`,
-        getFieldNamesByType(ESQL_STRING_TYPES)
-      );
+      testSuggestions(`from a | ${subExpression} grok /`, getFieldNamesByType(ESQL_STRING_TYPES));
       testSuggestions(`from a | ${subExpression} grok keywordField /`, [constantPattern], ' ');
       testSuggestions(`from a | ${subExpression} grok keywordField ${constantPattern} /`, ['| ']);
     }
@@ -1024,8 +1020,7 @@ describe('autocomplete', () => {
     ]);
 
     // DISSECT field
-    // enable once https://github.com/elastic/kibana/issues/190070 is fixed
-    testSuggestions.skip('FROM index1 | DISSECT b/', getFieldNamesByType(ESQL_STRING_TYPES));
+    testSuggestions('FROM index1 | DISSECT b/', getFieldNamesByType(ESQL_STRING_TYPES));
 
     // DROP (first field)
     testSuggestions('FROM index1 | DROP f/', getFieldNamesByType('any'));
@@ -1057,8 +1052,7 @@ describe('autocomplete', () => {
     ]);
 
     // GROK field
-    // enable once https://github.com/elastic/kibana/issues/190070
-    testSuggestions.skip('FROM index1 | GROK f/', getFieldNamesByType(ESQL_STRING_TYPES));
+    testSuggestions('FROM index1 | GROK f/', getFieldNamesByType(ESQL_STRING_TYPES), undefined);
 
     // KEEP (first field)
     testSuggestions('FROM index1 | KEEP f/', getFieldNamesByType('any'));
@@ -1363,5 +1357,92 @@ describe('autocomplete', () => {
         ['keyword']
       ).map((s) => (s.text.toLowerCase().includes('null') ? s : attachTriggerCommand(s)))
     );
+  });
+
+  describe('Replacement ranges are attached when needed', () => {
+    testSuggestions('FROM a | WHERE doubleField IS NOT N/', [
+      { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 35 } },
+      { text: 'IS NULL', rangeToReplace: { start: 35, end: 35 } },
+      '!= $0',
+      '< $0',
+      '<= $0',
+      '== $0',
+      '> $0',
+      '>= $0',
+      'IN $0',
+    ]);
+    testSuggestions('FROM a | WHERE doubleField IS N/', [
+      { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 31 } },
+      { text: 'IS NULL', rangeToReplace: { start: 28, end: 31 } },
+      { text: '!= $0', rangeToReplace: { start: 31, end: 31 } },
+      '< $0',
+      '<= $0',
+      '== $0',
+      '> $0',
+      '>= $0',
+      'IN $0',
+    ]);
+    testSuggestions('FROM a | EVAL doubleField IS NOT N/', [
+      { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 34 } },
+      'IS NULL',
+      '% $0',
+      '* $0',
+      '+ $0',
+      '- $0',
+      '/ $0',
+      '!= $0',
+      '< $0',
+      '<= $0',
+      '== $0',
+      '> $0',
+      '>= $0',
+      'IN $0',
+    ]);
+    testSuggestions('FROM a | SORT doubleField IS NOT N/', [
+      { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 34 } },
+      'IS NULL',
+      '% $0',
+      '* $0',
+      '+ $0',
+      '- $0',
+      '/ $0',
+      '!= $0',
+      '< $0',
+      '<= $0',
+      '== $0',
+      '> $0',
+      '>= $0',
+      'IN $0',
+    ]);
+    describe('dot-separated field names', () => {
+      testSuggestions(
+        'FROM a | KEEP field.nam/',
+        [{ text: 'field.name', rangeToReplace: { start: 15, end: 23 } }],
+        undefined,
+        [[{ name: 'field.name', type: 'double' }]]
+      );
+      // multi-line
+      testSuggestions(
+        'FROM a\n| KEEP field.nam/',
+        [{ text: 'field.name', rangeToReplace: { start: 15, end: 23 } }],
+        undefined,
+        [[{ name: 'field.name', type: 'double' }]]
+      );
+      // triple separator
+      testSuggestions(
+        'FROM a\n| KEEP field.name.f/',
+        [{ text: 'field.name.foo', rangeToReplace: { start: 15, end: 26 } }],
+        undefined,
+        [[{ name: 'field.name.foo', type: 'double' }]]
+      );
+      // whitespace — we can't support this case yet because
+      // we are relying on string checking instead of the AST :(
+      testSuggestions.skip(
+        'FROM a | KEEP field . n/',
+        [{ text: 'field . name', rangeToReplace: { start: 15, end: 23 } }],
+        undefined,
+        [[{ name: 'field.name', type: 'double' }]]
+      );
+    });
   });
 });

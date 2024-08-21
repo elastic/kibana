@@ -8,7 +8,10 @@
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { TestProviders } from '../../../mock/test_providers/test_providers';
+import {
+  TestDataQualityProviders,
+  TestExternalProviders,
+} from '../../../mock/test_providers/test_providers';
 import { IndexToCheck } from '../../../types';
 import { CheckStatus, EMPTY_LAST_CHECKED_DATE } from '.';
 
@@ -23,17 +26,16 @@ describe('CheckStatus', () => {
   describe('when `indexToCheck` is not null', () => {
     beforeEach(() => {
       render(
-        <TestProviders>
-          <CheckStatus
-            addSuccessToast={jest.fn()}
-            checkAllIndiciesChecked={checkAllIndiciesChecked}
-            checkAllTotalIndiciesToCheck={checkAllTotalIndiciesToCheck}
-            errorSummary={[]}
-            indexToCheck={indexToCheck}
-            lastChecked={''}
-            setLastChecked={jest.fn()}
-          />
-        </TestProviders>
+        <TestExternalProviders>
+          <TestDataQualityProviders dataQualityContextProps={{ lastChecked: '' }}>
+            <CheckStatus
+              checkAllIndiciesChecked={checkAllIndiciesChecked}
+              checkAllTotalIndiciesToCheck={checkAllTotalIndiciesToCheck}
+              errorSummary={[]}
+              indexToCheck={indexToCheck}
+            />
+          </TestDataQualityProviders>
+        </TestExternalProviders>
       );
     });
 
@@ -65,17 +67,16 @@ describe('CheckStatus', () => {
   describe('when `indexToCheck` is null', () => {
     beforeEach(() => {
       render(
-        <TestProviders>
-          <CheckStatus
-            addSuccessToast={jest.fn()}
-            checkAllIndiciesChecked={checkAllIndiciesChecked}
-            checkAllTotalIndiciesToCheck={checkAllTotalIndiciesToCheck}
-            errorSummary={[]}
-            indexToCheck={null}
-            lastChecked={''}
-            setLastChecked={jest.fn()}
-          />
-        </TestProviders>
+        <TestExternalProviders>
+          <TestDataQualityProviders dataQualityContextProps={{ lastChecked: '' }}>
+            <CheckStatus
+              checkAllIndiciesChecked={checkAllIndiciesChecked}
+              checkAllTotalIndiciesToCheck={checkAllTotalIndiciesToCheck}
+              errorSummary={[]}
+              indexToCheck={null}
+            />
+          </TestDataQualityProviders>
+        </TestExternalProviders>
       );
     });
 
@@ -102,17 +103,16 @@ describe('CheckStatus', () => {
     ];
 
     render(
-      <TestProviders>
-        <CheckStatus
-          addSuccessToast={jest.fn()}
-          checkAllIndiciesChecked={checkAllIndiciesChecked}
-          checkAllTotalIndiciesToCheck={checkAllTotalIndiciesToCheck}
-          errorSummary={errorSummary}
-          indexToCheck={null}
-          lastChecked={''}
-          setLastChecked={jest.fn()}
-        />
-      </TestProviders>
+      <TestExternalProviders>
+        <TestDataQualityProviders dataQualityContextProps={{ lastChecked: '' }}>
+          <CheckStatus
+            checkAllIndiciesChecked={checkAllIndiciesChecked}
+            checkAllTotalIndiciesToCheck={checkAllTotalIndiciesToCheck}
+            errorSummary={errorSummary}
+            indexToCheck={null}
+          />
+        </TestDataQualityProviders>
+      </TestExternalProviders>
     );
 
     expect(screen.getByTestId('errorsPopover')).toBeInTheDocument();
@@ -120,17 +120,16 @@ describe('CheckStatus', () => {
 
   test('it does NOT render the errors popover when errors have NOT occurred', () => {
     render(
-      <TestProviders>
-        <CheckStatus
-          addSuccessToast={jest.fn()}
-          checkAllIndiciesChecked={checkAllIndiciesChecked}
-          checkAllTotalIndiciesToCheck={checkAllTotalIndiciesToCheck}
-          errorSummary={[]} // <-- no errors
-          indexToCheck={null}
-          lastChecked={''}
-          setLastChecked={jest.fn()}
-        />
-      </TestProviders>
+      <TestExternalProviders>
+        <TestDataQualityProviders dataQualityContextProps={{ lastChecked: '' }}>
+          <CheckStatus
+            checkAllIndiciesChecked={checkAllIndiciesChecked}
+            checkAllTotalIndiciesToCheck={checkAllTotalIndiciesToCheck}
+            errorSummary={[]} // <-- no errors
+            indexToCheck={null}
+          />
+        </TestDataQualityProviders>
+      </TestExternalProviders>
     );
 
     expect(screen.queryByTestId('errorsPopover')).not.toBeInTheDocument();
@@ -144,17 +143,16 @@ describe('CheckStatus', () => {
     const setLastChecked = jest.fn();
 
     render(
-      <TestProviders>
-        <CheckStatus
-          addSuccessToast={jest.fn()}
-          checkAllIndiciesChecked={checkAllIndiciesChecked}
-          checkAllTotalIndiciesToCheck={checkAllTotalIndiciesToCheck}
-          errorSummary={[]}
-          indexToCheck={indexToCheck}
-          lastChecked={''}
-          setLastChecked={setLastChecked}
-        />
-      </TestProviders>
+      <TestExternalProviders>
+        <TestDataQualityProviders dataQualityContextProps={{ lastChecked: '', setLastChecked }}>
+          <CheckStatus
+            checkAllIndiciesChecked={checkAllIndiciesChecked}
+            checkAllTotalIndiciesToCheck={checkAllTotalIndiciesToCheck}
+            errorSummary={[]}
+            indexToCheck={indexToCheck}
+          />
+        </TestDataQualityProviders>
+      </TestExternalProviders>
     );
 
     expect(setLastChecked).toBeCalledWith(date);
@@ -167,17 +165,16 @@ describe('CheckStatus', () => {
     jest.setSystemTime(new Date(date));
 
     const { rerender } = render(
-      <TestProviders>
-        <CheckStatus
-          addSuccessToast={jest.fn()}
-          checkAllIndiciesChecked={checkAllIndiciesChecked}
-          checkAllTotalIndiciesToCheck={checkAllTotalIndiciesToCheck}
-          errorSummary={[]}
-          indexToCheck={indexToCheck}
-          lastChecked={''}
-          setLastChecked={jest.fn()}
-        />
-      </TestProviders>
+      <TestExternalProviders>
+        <TestDataQualityProviders dataQualityContextProps={{ lastChecked: '' }}>
+          <CheckStatus
+            checkAllIndiciesChecked={checkAllIndiciesChecked}
+            checkAllTotalIndiciesToCheck={checkAllTotalIndiciesToCheck}
+            errorSummary={[]}
+            indexToCheck={indexToCheck}
+          />
+        </TestDataQualityProviders>
+      </TestExternalProviders>
     );
 
     // re-render with an updated `lastChecked`
@@ -188,17 +185,16 @@ describe('CheckStatus', () => {
     });
 
     rerender(
-      <TestProviders>
-        <CheckStatus
-          addSuccessToast={jest.fn()}
-          checkAllIndiciesChecked={checkAllIndiciesChecked}
-          checkAllTotalIndiciesToCheck={checkAllTotalIndiciesToCheck}
-          errorSummary={[]}
-          indexToCheck={null} // <-- also updated
-          lastChecked={lastChecked}
-          setLastChecked={jest.fn()}
-        />
-      </TestProviders>
+      <TestExternalProviders>
+        <TestDataQualityProviders dataQualityContextProps={{ lastChecked }}>
+          <CheckStatus
+            checkAllIndiciesChecked={checkAllIndiciesChecked}
+            checkAllTotalIndiciesToCheck={checkAllTotalIndiciesToCheck}
+            errorSummary={[]}
+            indexToCheck={null} // <-- also updated
+          />
+        </TestDataQualityProviders>
+      </TestExternalProviders>
     );
 
     act(() => {

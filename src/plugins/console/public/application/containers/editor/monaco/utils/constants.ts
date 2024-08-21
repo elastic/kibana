@@ -41,6 +41,10 @@ export const END_OF_URL_TOKEN = '__url_path_end__';
  */
 export const methodWhitespaceRegex = /^\s*(GET|POST|PUT|PATCH|DELETE)\s+$/i;
 /*
+ * This regex matches a string that starts with a method (optional whitespace before the method)
+ */
+export const startsWithMethodRegex = /^\s*(GET|POST|PUT|PATCH|DELETE)/i;
+/*
  * This regex matches a string that has
  * a method and some parts of an url ending with a slash, a question mark or an equals sign,
  * for example "GET _search/", "GET _search?", "GET _search?param=".

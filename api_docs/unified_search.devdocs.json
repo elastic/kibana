@@ -233,7 +233,13 @@
         ],
         "signature": [
           "React.ForwardRefExoticComponent<",
-          "DataViewPickerPropsExtended",
+          {
+            "pluginId": "unifiedSearch",
+            "scope": "public",
+            "docId": "kibUnifiedSearchPluginApi",
+            "section": "def-public.DataViewPickerProps",
+            "text": "DataViewPickerProps"
+          },
           " & ",
           {
             "pluginId": "@kbn/shared-ux-utility",

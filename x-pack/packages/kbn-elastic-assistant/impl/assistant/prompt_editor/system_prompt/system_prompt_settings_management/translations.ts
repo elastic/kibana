@@ -27,13 +27,6 @@ export const SYSTEM_PROMPTS_TABLE_COLUMN_DATE_UPDATED = i18n.translate(
   }
 );
 
-export const SYSTEM_PROMPTS_TABLE_COLUMN_ACTIONS = i18n.translate(
-  'xpack.elasticAssistant.assistant.promptsTable.systemPromptsTableColumnActions',
-  {
-    defaultMessage: 'Actions',
-  }
-);
-
 export const SYSTEM_PROMPTS_TABLE_SETTINGS_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.assistant.promptsTable.settingsDescription',
   {
