@@ -2,17 +2,16 @@
 
 This folder contains ML API routes in Kibana.
 
-Each route handler requires [apidoc-markdown](https://github.com/apidoc/apidoc-markdown) annotations in order
-to generate documentation.
+Each route handler requires `summary` and `description` properties for API documentation. Schemas for validation are also used to 
 
-There are custom parser and worker (`x-pack/plugins/ml/server/routes/apidoc_scripts`) to process api schemas for each documentation entry. It's written with typescript so make sure all the scripts in the folder are compiled before executing `apidoc` command.
+To generate an OpenAPI spec file, make sure the OAS Kibana endpoint is enabled in `kibana.dev.yml`
 
-Make sure you have run `yarn kbn bootstrap` to get all requires dev dependencies. Then execute the following command from the ml plugin folder: 
 ```
-yarn run apiDocs
+server.oas.enabled: true
 ```
-It compiles all the required scripts and generates the documentation both in HTML and Markdown formats.
 
+And after starting Kibana, call the `oas` endpoint and output to a file, e.g. 
 
-It will create a new directory `routes_doc` (next to the `routes` folder) which contains the documentation in HTML format 
-as well as `ML_API.md` file.
+```
+curl -s -uelastic:qaf_admin http://localhost:5601/api/oas\?pathStartsWith\=/internal/ml\&access\=internal -o ml_kibana_openapi.json
+```
