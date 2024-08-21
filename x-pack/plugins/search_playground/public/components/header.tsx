@@ -22,7 +22,7 @@ import { PlaygroundHeaderDocs } from './playground_header_docs';
 import { Toolbar } from './toolbar';
 import { ViewMode } from './app';
 import { PlaygroundPageMode } from '../types';
-import { useKibana } from '../hooks/use_kibana';
+import { useSearchPlaygroundFeatureFlag } from '../hooks/use_search_playground_feature_flag';
 
 interface HeaderProps {
   showDocs?: boolean;
@@ -41,9 +41,7 @@ export const Header: React.FC<HeaderProps> = ({
   selectedPageMode,
   onSelectPageModeChange,
 }) => {
-  const {
-    services: { featureFlags },
-  } = useKibana();
+  const isSearchModeEnabled = useSearchPlaygroundFeatureFlag();
   const { euiTheme } = useEuiTheme();
   const options = [
     {
@@ -82,7 +80,7 @@ export const Header: React.FC<HeaderProps> = ({
               <FormattedMessage id="xpack.searchPlayground.pageTitle" defaultMessage="Playground" />
             </h2>
           </EuiTitle>
-          {featureFlags?.searchPlaygroundEnabled && (
+          {isSearchModeEnabled && (
             <EuiSelect
               data-test-subj="page-mode-select"
               options={[

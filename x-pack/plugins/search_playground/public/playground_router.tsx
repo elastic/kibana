@@ -11,13 +11,11 @@ import { Redirect } from 'react-router-dom';
 import { PlaygroundOverview } from './playground_overview';
 
 import { ROOT_PATH, SEARCH_PLAYGROUND_CHAT_PATH, SEARCH_PLAYGROUND_SEARCH_PATH } from './routes';
-import { useKibana } from './hooks/use_kibana';
 import { PlaygroundPageMode } from './types';
+import { useSearchPlaygroundFeatureFlag } from './hooks/use_search_playground_feature_flag';
 
 export const PlaygroundRouter: React.FC = () => {
-  const {
-    services: { featureFlags },
-  } = useKibana();
+  const isSearchModeEnabled = useSearchPlaygroundFeatureFlag();
 
   return (
     <Routes>
@@ -25,7 +23,7 @@ export const PlaygroundRouter: React.FC = () => {
       <Route path={SEARCH_PLAYGROUND_CHAT_PATH}>
         <PlaygroundOverview pageMode={PlaygroundPageMode.chat} />
       </Route>
-      {featureFlags.searchPlaygroundEnabled && (
+      {isSearchModeEnabled && (
         <Route path={SEARCH_PLAYGROUND_SEARCH_PATH}>
           <PlaygroundOverview pageMode={PlaygroundPageMode.search} />
         </Route>

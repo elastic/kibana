@@ -52,9 +52,6 @@ export interface AppPluginStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   share: SharePluginStart;
   console?: ConsolePluginStart;
-  featureFlags: {
-    searchPlaygroundEnabled: boolean;
-  };
 }
 
 export interface AppServicesContext {

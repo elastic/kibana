@@ -23,7 +23,6 @@ import type {
   SearchPlaygroundPluginSetup,
   SearchPlaygroundPluginStart,
 } from './types';
-import { isSearchModeEnabled } from './utils/feature_flags';
 import { registerLocators } from './locators';
 
 export class SearchPlaygroundPlugin
@@ -40,9 +39,6 @@ export class SearchPlaygroundPlugin
     deps: AppPluginSetupDependencies
   ): SearchPlaygroundPluginSetup {
     if (!this.config.ui?.enabled) return {};
-    const featureFlags = {
-      searchPlaygroundEnabled: isSearchModeEnabled(core.uiSettings),
-    };
 
     core.application.register({
       id: PLUGIN_ID,
@@ -54,7 +50,6 @@ export class SearchPlaygroundPlugin
         const startDeps: AppPluginStartDependencies = {
           ...depsStart,
           history,
-          featureFlags,
         };
 
         return renderApp(coreStart, startDeps, element);
