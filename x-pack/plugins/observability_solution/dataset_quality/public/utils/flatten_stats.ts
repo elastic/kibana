@@ -7,15 +7,10 @@
 
 import { DataStreamType } from '../../common/types';
 
-export function flattenStats<T>(stats: Record<DataStreamType, T[]>): T[] {
-  return Object.keys(stats)
-    .map((type) =>
-      stats[type as DataStreamType]?.map((dataStream) => {
-        return {
-          ...dataStream,
-          type,
-        };
-      })
-    )
-    .flat();
+export function flattenStats<T>(
+  stats: Record<DataStreamType, T[]>
+): Array<T & { type: DataStreamType }> {
+  return Object.entries(stats).flatMap(([type, dataStreams]) =>
+    dataStreams.map((dataStream) => ({ ...dataStream, type: type as DataStreamType }))
+  );
 }

@@ -10,37 +10,18 @@ import React, { useState } from 'react';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
 
-const selectorLabel = i18n.translate('xpack.datasetQuality.selector.label', {
-  defaultMessage: 'Options',
-});
-
 const selectorLoading = i18n.translate('xpack.datasetQuality.selector.loading', {
   defaultMessage: 'Loading',
-});
-
-const selectorSearchPlaceholder = i18n.translate(
-  'xpack.datasetQuality.selector.search.placeholder',
-  {
-    defaultMessage: 'Filter options',
-  }
-);
-
-const selectorNoneAvailable = i18n.translate('xpack.datasetQuality.selector.noneAvailable', {
-  defaultMessage: 'No options available',
-});
-
-const selectorNoneMatching = i18n.translate('xpack.datasetQuality.selector.noneMatching', {
-  defaultMessage: 'No options found',
 });
 
 interface SelectorProps {
   isLoading?: boolean;
   options: Item[];
   loadingMessage?: string;
-  label?: string;
-  searchPlaceholder?: string;
-  noneAvailableMessage?: string;
-  noneMatchingMessage?: string;
+  label: string;
+  searchPlaceholder: string;
+  noneAvailableMessage: string;
+  noneMatchingMessage: string;
   onOptionsChange: (options: Item[]) => void;
 }
 
@@ -82,7 +63,7 @@ export function Selector({
       hasActiveFilters={!!options.find((item) => item.checked === 'on')}
       numActiveFilters={options.filter((item) => item.checked === 'on').length}
     >
-      {label ?? selectorLabel}
+      {label}
     </EuiFilterButton>
   );
 
@@ -97,16 +78,16 @@ export function Selector({
         data-test-subj="datasetQualitySelectableOptions"
         searchable
         searchProps={{
-          placeholder: searchPlaceholder ?? selectorSearchPlaceholder,
+          placeholder: searchPlaceholder,
           compressed: true,
         }}
-        aria-label={label ?? selectorLabel}
+        aria-label={label}
         options={options}
         onChange={onOptionsChange}
         isLoading={isLoading}
         loadingMessage={loadingMessage ?? selectorLoading}
-        emptyMessage={noneAvailableMessage ?? selectorNoneAvailable}
-        noMatchesMessage={noneMatchingMessage ?? selectorNoneMatching}
+        emptyMessage={noneAvailableMessage}
+        noMatchesMessage={noneMatchingMessage}
         renderOption={(option) => renderOption(option)}
       >
         {(list, search) => (

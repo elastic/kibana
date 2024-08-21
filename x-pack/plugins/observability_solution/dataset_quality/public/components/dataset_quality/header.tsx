@@ -38,7 +38,7 @@ export default function Header() {
             types: KNOWN_TYPES.map((type, index) => {
               return (
                 <>
-                  {index > 0 && <>, </>}
+                  {index > 0 && ', '}
                   <EuiCode>{type}</EuiCode>
                 </>
               );
