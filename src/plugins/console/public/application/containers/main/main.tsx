@@ -71,13 +71,34 @@ export function Main({ isEmbeddable = false }: MainProps) {
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon iconType="save" onClick={() => {}} />
+                  <EuiButtonIcon
+                    iconType="save"
+                    onClick={() => {}}
+                    aria-label={i18n.translate('console.importExportButtonAriaLabel', {
+                      defaultMessage: 'Import/Export',
+                    })}
+                    data-test-subj="consoleImportExportButton"
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon iconType="keyboard" />
+                  <EuiButtonIcon
+                    iconType="keyboard"
+                    onClick={() => {}}
+                    aria-label={i18n.translate('console.shortcutsButtonAriaLabel', {
+                      defaultMessage: 'Keyboard shortcuts',
+                    })}
+                    data-test-subj="consoleShortcutsButton"
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon iconType="questionInCircle" />
+                  <EuiButtonIcon
+                    iconType="questionInCircle"
+                    onClick={() => {}}
+                    aria-label={i18n.translate('console.helpButtonAriaLabel', {
+                      defaultMessage: 'Help',
+                    })}
+                    data-test-subj="consoleHelpButton"
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiSplitPanel.Inner>
