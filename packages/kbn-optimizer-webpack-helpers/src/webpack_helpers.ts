@@ -89,7 +89,7 @@ export interface WebpackNormalModule {
   resource: string;
   buildInfo: {
     cacheable: boolean;
-    fileDependencies: Set<string>;
+    buildDependencies: Set<string>;
   };
   dependencies: Dependency[];
 }

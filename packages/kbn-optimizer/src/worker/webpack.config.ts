@@ -56,7 +56,8 @@ export function getWebpackConfig(
           bundle.sourceRoot,
           info.absoluteResourcePath
         )}${info.query}`,
-      chunkLoadingGlobal: `jsonp_webpack_${bundle.id}`,
+      chunkLoadingGlobal: `${bundle.id}_bundle_jsonpfunction`,
+      chunkLoading: 'jsonp',
     },
 
     optimization: {
@@ -266,6 +267,10 @@ export function getWebpackConfig(
         // exports the source code of the asset. Previously achievable by using raw-loader.
         {
           test: [/\.(html|md|txt|tmpl)$/],
+          type: 'asset/source',
+        },
+        {
+          resourceQuery: '?raw',
           type: 'asset/source',
         },
         // automatically chooses between exporting a data URI and emitting a separate file. Previously achievable by using url-loader with asset size limit.
