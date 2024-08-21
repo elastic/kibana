@@ -29,6 +29,7 @@ export function getTopNavConfig({ selectedTab, setSelectedTab }: Props) {
       },
       testId: 'consoleShellButton',
       isSelected: selectedTab === SHELL_TAB_ID,
+      tourStep: 1,
     },
     {
       id: HISTORY_TAB_ID,
@@ -43,6 +44,7 @@ export function getTopNavConfig({ selectedTab, setSelectedTab }: Props) {
       },
       testId: 'consoleHistoryButton',
       isSelected: selectedTab === HISTORY_TAB_ID,
+      tourStep: 3,
     },
     {
       id: CONFIG_TAB_ID,
@@ -57,6 +59,7 @@ export function getTopNavConfig({ selectedTab, setSelectedTab }: Props) {
       },
       testId: 'consoleConfigButton',
       isSelected: selectedTab === CONFIG_TAB_ID,
+      tourStep: 4,
     },
   ];
 }

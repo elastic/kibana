@@ -7,7 +7,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiTabs, EuiTab, EuiTourStep, EuiTourStepProps } from '@elastic/eui';
 
 export interface TopNavMenuItem {
   id: string;
@@ -16,18 +16,20 @@ export interface TopNavMenuItem {
   onClick: () => void;
   testId: string;
   isSelected: boolean;
+  tourStep?: number;
 }
 
 interface Props {
   disabled?: boolean;
   items: TopNavMenuItem[];
+  tourStepProps: EuiTourStepProps[];
 }
 
-export const TopNavMenu: FunctionComponent<Props> = ({ items, disabled }) => {
+export const TopNavMenu: FunctionComponent<Props> = ({ items, disabled, tourStepProps }) => {
   return (
     <EuiTabs size="s">
       {items.map((item, idx) => {
-        return (
+        const tab = (
           <EuiTab
             key={idx}
             disabled={disabled}
@@ -39,6 +41,27 @@ export const TopNavMenu: FunctionComponent<Props> = ({ items, disabled }) => {
             {item.label}
           </EuiTab>
         );
+
+        if (item.tourStep) {
+          const tourProps = tourStepProps[item.tourStep - 1];
+          const { step, isStepOpen, onFinish, title, content, stepsTotal, footerAction } = tourProps;
+
+          return (
+            <EuiTourStep
+              step={step}
+              isStepOpen={isStepOpen}
+              title={title}
+              content={content}
+              stepsTotal={stepsTotal}
+              onFinish={() => onFinish()}
+              footerAction={footerAction}
+            >
+              {tab}
+            </EuiTourStep>
+          );
+        }
+
+        return tab;
       })}
     </EuiTabs>
   );

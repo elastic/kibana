@@ -8,7 +8,7 @@
 
 import React, { useCallback, memo, useEffect, useState } from 'react';
 import { debounce } from 'lodash';
-import { EuiProgress } from '@elastic/eui';
+import { EuiProgress, EuiTourStep } from '@elastic/eui';
 
 import { EditorContentSpinner } from '../../components';
 import { Panel, PanelsContainer } from '..';
@@ -24,9 +24,10 @@ const PANEL_MIN_WIDTH = '100px';
 interface Props {
   loading: boolean;
   setEditorInstance: (instance: SenseEditor) => void;
+  tourStepProps: EuiTourStepProps;
 }
 
-export const Editor = memo(({ loading, setEditorInstance }: Props) => {
+export const Editor = memo(({ loading, setEditorInstance, tourStepProps }: Props) => {
   const {
     services: { storage },
     config: { isMonacoEnabled } = {},
@@ -59,6 +60,8 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
 
   if (!currentTextObject) return null;
 
+  const { step, isStepOpen, title, onFinish, content, stepsTotal, footerAction } = tourStepProps;
+
   return (
     <>
       {requestInFlight || fetchingMappings ? (
@@ -74,7 +77,17 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
           {loading ? (
             <EditorContentSpinner />
           ) : isMonacoEnabled ? (
-            <MonacoEditor initialTextValue={currentTextObject.text} />
+            <EuiTourStep
+              step={step}
+              isStepOpen={isStepOpen}
+              title={title}
+              content={content}
+              stepsTotal={stepsTotal}
+              onFinish={onFinish}
+              footerAction={footerAction}
+            >
+              <MonacoEditor initialTextValue={currentTextObject.text} />
+            </EuiTourStep>
           ) : (
             <EditorUI
               initialTextValue={currentTextObject.text}
