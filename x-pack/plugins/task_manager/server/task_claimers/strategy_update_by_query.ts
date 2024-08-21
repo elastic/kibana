@@ -53,7 +53,7 @@ interface OwnershipClaimingOpts {
   taskMaxAttempts: Record<string, number>;
 }
 
-export function claimAvailableTasksDefault(
+export function claimAvailableTasksUpdateByQuery(
   opts: TaskClaimerOpts
 ): Observable<ClaimOwnershipResult> {
   const { getCapacity, claimOwnershipUntil, batches, events$, taskStore } = opts;
