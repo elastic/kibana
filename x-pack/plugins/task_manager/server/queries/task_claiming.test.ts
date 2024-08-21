@@ -90,7 +90,7 @@ describe('TaskClaiming', () => {
     });
 
     expect(taskManagerLogger.warn).toHaveBeenCalledWith(
-      'Unknown task claiming strategy "non-default", falling back to default'
+      'Unknown task claiming strategy "non-default", falling back to update_by_query'
     );
   });
 

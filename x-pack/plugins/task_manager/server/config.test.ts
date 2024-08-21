@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { configSchema, CLAIM_STRATEGY_DEFAULT, CLAIM_STRATEGY_MGET } from './config';
+import { configSchema, CLAIM_STRATEGY_UPDATE_BY_QUERY, CLAIM_STRATEGY_MGET } from './config';
 
 describe('config validation', () => {
   test('task manager defaults', () => {
@@ -14,7 +14,7 @@ describe('config validation', () => {
       Object {
         "active_nodes_lookback": 30,
         "allow_reading_invalid_state": true,
-        "claim_strategy": "default",
+        "claim_strategy": "update_by_query",
         "discovery_interval": 10000,
         "ephemeral_tasks": Object {
           "enabled": false,
@@ -74,7 +74,7 @@ describe('config validation', () => {
       Object {
         "active_nodes_lookback": 30,
         "allow_reading_invalid_state": true,
-        "claim_strategy": "default",
+        "claim_strategy": "update_by_query",
         "discovery_interval": 10000,
         "ephemeral_tasks": Object {
           "enabled": false,
@@ -132,7 +132,7 @@ describe('config validation', () => {
       Object {
         "active_nodes_lookback": 30,
         "allow_reading_invalid_state": true,
-        "claim_strategy": "default",
+        "claim_strategy": "update_by_query",
         "discovery_interval": 10000,
         "ephemeral_tasks": Object {
           "enabled": false,
@@ -253,7 +253,7 @@ describe('config validation', () => {
   });
 
   test('default claim strategy defaults poll interval to 3000ms', () => {
-    const result = configSchema.validate({ claim_strategy: CLAIM_STRATEGY_DEFAULT });
+    const result = configSchema.validate({ claim_strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY });
     expect(result.poll_interval).toEqual(3000);
   });
 
