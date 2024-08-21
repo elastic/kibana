@@ -8,7 +8,7 @@
 import { WELCOME_CONVERSATION_TITLE } from '@kbn/elastic-assistant';
 import type { Conversation } from '@kbn/elastic-assistant';
 import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from '@kbn/ecs-data-quality-dashboard';
-        
+
 import {
   DETECTION_RULES_CONVERSATION_ID,
   DETECTION_RULES_CREATE_FORM_CONVERSATION_ID,
