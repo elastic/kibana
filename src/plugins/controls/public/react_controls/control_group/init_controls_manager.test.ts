@@ -207,8 +207,8 @@ describe('getNewControlState', () => {
           type: 'testControl',
           order: 1,
           dataViewId: 'myOtherDataViewId',
-          width: 'medium',
-          grow: true,
+          width: 'small',
+          grow: false,
         } as ControlPanelState & Pick<DefaultDataControlState, 'dataViewId'>,
       },
       DEFAULT_DATA_VIEW_ID
