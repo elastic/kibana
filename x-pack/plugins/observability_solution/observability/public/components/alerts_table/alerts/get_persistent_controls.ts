@@ -53,9 +53,8 @@ export const getPersistentControlsHook =
       groupingId,
       onGroupChange,
       fields: dataView?.fields ?? [],
-      defaultGroupingOptions: grouping.options?.filter(
-        (option) => !grouping.activeGroups.includes(option.key)
-      ),
+      defaultGroupingOptions:
+        grouping.options?.filter((option) => !grouping.activeGroups.includes(option.key)) ?? [],
       maxGroupingLevels,
     });
 
