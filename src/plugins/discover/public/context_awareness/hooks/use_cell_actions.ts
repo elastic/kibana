@@ -10,7 +10,12 @@ import { createCellActionFactory } from '@kbn/cell-actions/actions';
 import { useEffect, useMemo, useState } from 'react';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import { uniqueId } from 'lodash';
-import type { DiscoverCellAction, DiscoverCellActionMetadata } from '../types';
+import type {
+  AdditionalCellActionContext,
+  DiscoverCellAction,
+  DiscoverCellActionExecutionContext,
+  DiscoverCellActionMetadata,
+} from '../types';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useProfileAccessor } from './use_profile_accessor';
 
@@ -18,11 +23,15 @@ export const DISCOVER_CELL_ACTIONS_TRIGGER: Trigger = { id: 'DISCOVER_CELL_ACTIO
 
 const DISCOVER_CELL_ACTION_TYPE = 'discover-cellAction-type';
 
-export const useCellActions = () => {
+export const useCellActions = ({
+  dataSource,
+  dataView,
+  query,
+  filters,
+  timeRange,
+}: Omit<AdditionalCellActionContext, 'field' | 'value'>) => {
   const { uiActions } = useDiscoverServices();
-  const [cellActionsMetadata, setCellActionMetadata] = useState<
-    DiscoverCellActionMetadata | undefined
-  >();
+  const [instanceId, setInstanceId] = useState<string | undefined>();
   const getAdditionalCellActionsAccessor = useProfileAccessor('getAdditionalCellActions');
   const additionalCellActions = useMemo(
     () => getAdditionalCellActionsAccessor(() => [])(),
@@ -30,28 +39,32 @@ export const useCellActions = () => {
   );
 
   useEffect(() => {
-    const instanceId = uniqueId();
+    const currentInstanceId = uniqueId();
     const actions = additionalCellActions.map((action, i) => {
-      const factory = createCellActionFactory<DiscoverCellAction>(() => ({
+      const createFactory = createCellActionFactory<DiscoverCellAction>(() => ({
         type: DISCOVER_CELL_ACTION_TYPE,
-        getIconType: ({ data }) => action.iconType,
-        getDisplayName: ({ data }) => action.displayName,
-        getDisplayNameTooltip: ({ data }) => action.displayName,
+        getIconType: (context) => action.getIconType(toCellActionContext(context)),
+        getDisplayName: (context) => action.getDisplayName(toCellActionContext(context)),
+        getDisplayNameTooltip: (context) => action.getDisplayName(toCellActionContext(context)),
+        execute: async (context) => action.execute(toCellActionContext(context)),
         isCompatible: async ({ data, metadata }) => {
-          if (metadata?.instanceId !== instanceId) {
+          if (metadata?.instanceId !== currentInstanceId || data.length !== 1) {
             return false;
           }
-          //   const field = data[0]?.field;
-          return action.isCompatible?.() ?? true;
-        },
-        execute: async ({ data }) => {
-          //   const field = data[0]?.field;
-          //   const value = data[0]?.value;
-          return action.execute();
+
+          const field = data[0]?.field;
+
+          if (!field || !metadata.dataView?.getFieldByName(field.name)) {
+            return false;
+          }
+
+          return action.isCompatible?.({ field, ...metadata }) ?? true;
         },
       }));
 
-      return factory()({ id: uniqueId(), order: i });
+      const factory = createFactory();
+
+      return factory({ id: uniqueId(), order: i });
     });
 
     actions.forEach((action) => {
@@ -59,7 +72,7 @@ export const useCellActions = () => {
       uiActions.attachAction(DISCOVER_CELL_ACTIONS_TRIGGER.id, action.id);
     });
 
-    setCellActionMetadata({ instanceId });
+    setInstanceId(currentInstanceId);
 
     return () => {
       actions.forEach((action) => {
@@ -67,9 +80,20 @@ export const useCellActions = () => {
         uiActions.unregisterAction(action.id);
       });
 
-      setCellActionMetadata(undefined);
+      setInstanceId(undefined);
     };
   }, [additionalCellActions, uiActions]);
 
-  return { cellActionsMetadata };
+  return useMemo<DiscoverCellActionMetadata>(
+    () => ({ instanceId, dataSource, dataView, query, filters, timeRange }),
+    [dataSource, dataView, filters, instanceId, query, timeRange]
+  );
 };
+
+const toCellActionContext = ({
+  data,
+  metadata,
+}: DiscoverCellActionExecutionContext): AdditionalCellActionContext => ({
+  ...data[0],
+  ...metadata,
+});

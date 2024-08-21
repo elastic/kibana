@@ -10,8 +10,11 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { CustomCellRenderer, UnifiedDataTableProps } from '@kbn/unified-data-table';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { CellAction, CellActionExecutionContext } from '@kbn/cell-actions';
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import type { CellAction, CellActionExecutionContext, CellActionsData } from '@kbn/cell-actions';
+import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { OmitIndexSignature } from 'type-fest';
+import type { DiscoverDataSource } from '../../common/data_sources';
 
 export interface DocViewerExtension {
   title: string | undefined;
@@ -46,6 +49,11 @@ export interface RowControlsExtensionParams {
 
 export interface DiscoverCellActionMetadata extends Record<string, unknown> {
   instanceId?: string;
+  dataSource?: DiscoverDataSource;
+  dataView?: DataView;
+  query?: Query | AggregateQuery;
+  filters?: Filter[];
+  timeRange?: TimeRange;
 }
 
 export interface DiscoverCellActionExecutionContext extends CellActionExecutionContext {
@@ -54,11 +62,16 @@ export interface DiscoverCellActionExecutionContext extends CellActionExecutionC
 
 export type DiscoverCellAction = CellAction<DiscoverCellActionExecutionContext>;
 
+export type AdditionalCellActionContext = CellActionsData &
+  Omit<OmitIndexSignature<DiscoverCellActionMetadata>, 'instanceId'>;
+
 export interface AdditionalCellAction {
-  displayName: string;
-  iconType: EuiIconType;
-  isCompatible?: () => boolean | Promise<boolean>;
-  execute: () => void | Promise<void>;
+  getDisplayName: (context: AdditionalCellActionContext) => string;
+  getIconType: (context: AdditionalCellActionContext) => EuiIconType;
+  isCompatible?: (
+    context: Omit<AdditionalCellActionContext, 'value'>
+  ) => boolean | Promise<boolean>;
+  execute: (context: AdditionalCellActionContext) => void | Promise<void>;
 }
 
 export interface Profile {

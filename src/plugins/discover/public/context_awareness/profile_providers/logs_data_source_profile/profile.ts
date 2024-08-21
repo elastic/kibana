@@ -23,8 +23,8 @@ export const createLogsDataSourceProfileProvider = (
       [
         ...prev(),
         {
-          displayName: 'Example actions',
-          iconType: 'heart',
+          getDisplayName: () => 'Example actions',
+          getIconType: () => 'heart',
           execute: () => {
             alert('Example action executed');
           },

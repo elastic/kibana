@@ -31,8 +31,8 @@ export const createAwsS3accessLogsDataSourceProfileProvider = (
         [
           ...prev(),
           {
-            displayName: 'AWS action',
-            iconType: 'bell',
+            getDisplayName: () => 'AWS action',
+            getIconType: () => 'bell',
             execute: () => {
               alert('Example action executed');
             },
