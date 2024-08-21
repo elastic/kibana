@@ -6,7 +6,6 @@
  */
 
 import { DEFAULT_SYSTEM_PROMPT_NON_I18N } from '@kbn/security-solution-plugin/public/assistant/content/prompts/system/translations';
-import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { TIMELINE_CHECKBOX } from '../screens/timelines';
 import { CLOSE_FLYOUT } from '../screens/alerts';
 import {
@@ -26,7 +25,6 @@ import {
   USER_PROMPT,
   SUBMIT_CHAT,
   CONVERSATION_MESSAGE_ERROR,
-  CONVERSATION_TITLE_SAVE_BUTTON,
   CLEAR_SYSTEM_PROMPT,
   CHAT_CONTEXT_MENU,
   CLEAR_CHAT,
@@ -79,51 +77,12 @@ export const selectConnector = (connectorName: string) => {
   cy.get(CONNECTOR_SELECT(connectorName)).click();
   assertConnectorSelected(connectorName);
 };
-
-export const assertNewConversation = (isWelcome: boolean, title: string) => {
-  if (isWelcome) {
-    cy.get(WELCOME_SETUP).should('exist');
-  } else {
-    cy.get(EMPTY_CONVO).should('exist');
-  }
-  cy.get(CONVERSATION_TITLE + ' h2').should('have.text', title);
-};
-
-export const assertMessageSent = (message: string, hasDefaultPrompt = false, prompt?: string) => {
-  cy.get(CONVERSATION_MESSAGE)
-    .first()
-    .should(
-      'contain',
-      hasDefaultPrompt ? `${prompt ?? DEFAULT_SYSTEM_PROMPT_NON_I18N}\n${message}` : message
-    );
-};
-export const clearSystemPrompt = () => {
-  cy.get(CLEAR_SYSTEM_PROMPT).click();
-};
 export const resetConversation = () => {
   cy.get(CHAT_CONTEXT_MENU).click();
   cy.get(CLEAR_CHAT).click();
   cy.get(CONFIRM_CLEAR_CHAT).click();
   cy.get(EMPTY_CONVO).should('exist');
 };
-export const typeAndSendMessage = (message: string) => {
-  cy.get(USER_PROMPT).type(message);
-  cy.get(SUBMIT_CHAT).click();
-};
-export const sendQuickPrompt = (prompt: string) => {
-  cy.get(QUICK_PROMPT_BADGE(prompt)).click();
-  cy.get(SUBMIT_CHAT).click();
-};
-
-export const selectRule = (ruleId: string) => {
-  cy.get(TIMELINE_CHECKBOX(ruleId)).should('exist');
-  cy.get(TIMELINE_CHECKBOX(ruleId)).click();
-};
-
-export const assertErrorResponse = () => {
-  cy.get(CONVERSATION_MESSAGE_ERROR).should('exist');
-};
-
 export const selectConversation = (conversationName: string) => {
   cy.get(FLYOUT_NAV_TOGGLE).click();
   cy.get(CONVERSATION_SELECT(conversationName)).click();
@@ -131,8 +90,18 @@ export const selectConversation = (conversationName: string) => {
   cy.get(FLYOUT_NAV_TOGGLE).click();
 };
 
-export const assertSystemPrompt = (systemPrompt: string) => {
-  cy.get(SYSTEM_PROMPT).should('have.text', systemPrompt);
+export const typeAndSendMessage = (message: string) => {
+  cy.get(USER_PROMPT).type(message);
+  cy.get(SUBMIT_CHAT).click();
+};
+
+export const clearSystemPrompt = () => {
+  cy.get(CLEAR_SYSTEM_PROMPT).click();
+};
+
+export const sendQuickPrompt = (prompt: string) => {
+  cy.get(QUICK_PROMPT_BADGE(prompt)).click();
+  cy.get(SUBMIT_CHAT).click();
 };
 
 export const selectSystemPrompt = (systemPrompt: string) => {
@@ -173,6 +142,41 @@ export const createQuickPrompt = (
   }
   cy.get(MODAL_SAVE_BUTTON).click();
 };
+
+export const selectRule = (ruleId: string) => {
+  cy.get(TIMELINE_CHECKBOX(ruleId)).should('exist');
+  cy.get(TIMELINE_CHECKBOX(ruleId)).click();
+};
+
+/**
+ * Assertions
+ */
+export const assertNewConversation = (isWelcome: boolean, title: string) => {
+  if (isWelcome) {
+    cy.get(WELCOME_SETUP).should('exist');
+  } else {
+    cy.get(EMPTY_CONVO).should('exist');
+  }
+  cy.get(CONVERSATION_TITLE + ' h2').should('have.text', title);
+};
+
+export const assertMessageSent = (message: string, hasDefaultPrompt = false, prompt?: string) => {
+  cy.get(CONVERSATION_MESSAGE)
+    .first()
+    .should(
+      'contain',
+      hasDefaultPrompt ? `${prompt ?? DEFAULT_SYSTEM_PROMPT_NON_I18N}\n${message}` : message
+    );
+};
+
+export const assertErrorResponse = () => {
+  cy.get(CONVERSATION_MESSAGE_ERROR).should('exist');
+};
+
+export const assertSystemPrompt = (systemPrompt: string) => {
+  cy.get(SYSTEM_PROMPT).should('have.text', systemPrompt);
+};
+
 export const assertConnectorSelected = (connectorName: string) => {
   cy.get(CONNECTOR_SELECTOR).should('have.text', connectorName);
 };
@@ -197,22 +201,4 @@ export const assertConversationReadOnly = () => {
   cy.get(FLYOUT_NAV_TOGGLE).should('be.disabled');
   cy.get(NEW_CHAT).should('be.disabled');
   cy.get(ASSISTANT_SETTINGS_BUTTON).should('be.disabled');
-};
-
-export const updateConversationTitle = (newTitle: string) => {
-  cy.get(CONVERSATION_TITLE + ' h2').click();
-  cy.get(CONVERSATION_TITLE + ' input').clear();
-  cy.get(CONVERSATION_TITLE + ' input').type(newTitle);
-  cy.get(CONVERSATION_TITLE_SAVE_BUTTON).click();
-  cy.get(CONVERSATION_TITLE + ' h2').should('have.text', newTitle);
-};
-
-export const mock = () => {
-  cy.intercept('PATCH', `${LIST_ITEM_URL}`, {
-    statusCode: 400,
-    body: {
-      message: 'error to update list item',
-      status_code: 400,
-    },
-  });
 };
