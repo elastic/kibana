@@ -43,7 +43,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
 
   useAutoDetectTelemetry(
     status,
-    installedIntegrations.map((integration) => integration.pkgName)
+    installedIntegrations.map((integration) => integration.title)
   );
 
   if (error) {
