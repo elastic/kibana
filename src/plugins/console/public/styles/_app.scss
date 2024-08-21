@@ -93,8 +93,8 @@
 
 .conApp__editorActions {
   button {
-    height: $euiSize;
-    width: $euiSize;
+    height: $euiSize * 1.1;
+    width: $euiSize * 1.1;
   }
 
   position: absolute;
@@ -103,11 +103,12 @@
   // Adjust for possible scrollbars
   right: $euiSize;
   // For IE11
-  min-width: $euiSizeXXL;
-  height: $euiSize * 1.2;
+  min-width: $euiSizeXXL * 1.15;
+  height: $euiSizeL;
   background-color: $euiFormBackgroundColor;
   border-radius: $euiSizeXS;
   box-shadow: 0 0 $euiSizeXS $euiSizeXS transparentize($euiShadowColor, 0.9);
+  padding-top: $euiSize * 0.1;
 }
 
 .conApp__resizer {
@@ -145,9 +146,22 @@
  * The highlighting for the selected requests in the monaco editor
  */
 .console__monaco_editor__selectedRequests {
+  position: relative;
+  padding: $euiSizeXS; /* Adds space between border and text */
+}
+
+/* Adding a pseudo-element to create padding between the border and the line in the Monaco editor */
+.console__monaco_editor__selectedRequests::before {
+  content: '';
+  position: absolute;
+  top: -$euiSize * 0.2;
+  bottom: -$euiSize * 0.2;
+  left: -$euiSize * 3;
+  right: 0px;
   background: transparentize($euiColorPrimary, .9);
-  border: solid;
+  border: $euiBorderThin;
   border-color: $euiColorPrimary;
+  pointer-events: none; /* Ensures the pseudo-element doesn't block interactions */
 }
 
 /*

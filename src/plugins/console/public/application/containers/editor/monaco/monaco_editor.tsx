@@ -152,6 +152,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
               aria-label={i18n.translate('console.monaco.sendRequestButtonTooltipAriaLabel', {
                 defaultMessage: 'Click to send request',
               })}
+              iconSize={'s'}
             />
           </EuiToolTip>
         </EuiFlexItem>

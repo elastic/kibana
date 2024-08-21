@@ -117,7 +117,7 @@ export class MonacoEditorActionsProvider {
       const offset = this.editor.getTopForLineNumber(lineNumber) - this.editor.getScrollTop();
       this.setEditorActionsCss({
         visibility: 'visible',
-        top: offset + 1, //  Move position down by 1 px
+        top: offset - 2, //  Move position up by 2 px
       });
     }
   }
