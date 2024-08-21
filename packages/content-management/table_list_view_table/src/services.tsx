@@ -14,6 +14,10 @@ import {
   ContentEditorKibanaProvider,
   type SavedObjectsReference,
 } from '@kbn/content-management-content-editor';
+import {
+  ContentInsightsClientPublic,
+  ContentInsightsProvider,
+} from '@kbn/content-management-content-insights-public';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
@@ -174,6 +178,11 @@ export interface TableListViewKibanaDependencies {
    * The favorites client to enable the favorites feature.
    */
   favorites?: FavoritesClientPublic;
+
+  /**
+   * Content insights client to enable content insights features.
+   */
+  contentInsightsClient?: ContentInsightsClientPublic;
 }
 
 /**
@@ -240,37 +249,42 @@ export const TableListViewKibanaProvider: FC<
     <RedirectAppLinksKibanaProvider coreStart={core}>
       <UserProfilesKibanaProvider core={core}>
         <ContentEditorKibanaProvider core={core} savedObjectsTagging={savedObjectsTagging}>
-          <FavoritesContextProvider
-            favoritesClient={services.favorites}
-            notifyError={(title, text) => {
-              notifications.toasts.addDanger({ title: toMountPoint(title, startServices), text });
-            }}
-          >
-            <TableListViewProvider
-              canEditAdvancedSettings={Boolean(application.capabilities.advancedSettings?.save)}
-              getListingLimitSettingsUrl={() =>
-                application.getUrlForApp('management', {
-                  path: `/kibana/settings?query=savedObjects:listingLimit`,
-                })
-              }
+          <ContentInsightsProvider contentInsightsClient={services.contentInsightsClient}>
+            <FavoritesContextProvider
+              favoritesClient={services.favorites}
               notifyError={(title, text) => {
                 notifications.toasts.addDanger({ title: toMountPoint(title, startServices), text });
               }}
-              searchQueryParser={searchQueryParser}
-              DateFormatterComp={(props) => <FormattedRelative {...props} />}
-              currentAppId$={application.currentAppId$}
-              navigateToUrl={application.navigateToUrl}
-              isTaggingEnabled={() => Boolean(savedObjectsTagging)}
-              isFavoritesEnabled={() => Boolean(services.favorites)}
-              getTagList={getTagList}
-              TagList={TagList}
-              itemHasTags={itemHasTags}
-              getTagIdsFromReferences={getTagIdsFromReferences}
-              getTagManagementUrl={() => core.http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
             >
-              {children}
-            </TableListViewProvider>
-          </FavoritesContextProvider>
+              <TableListViewProvider
+                canEditAdvancedSettings={Boolean(application.capabilities.advancedSettings?.save)}
+                getListingLimitSettingsUrl={() =>
+                  application.getUrlForApp('management', {
+                    path: `/kibana/settings?query=savedObjects:listingLimit`,
+                  })
+                }
+                notifyError={(title, text) => {
+                  notifications.toasts.addDanger({
+                    title: toMountPoint(title, startServices),
+                    text,
+                  });
+                }}
+                searchQueryParser={searchQueryParser}
+                DateFormatterComp={(props) => <FormattedRelative {...props} />}
+                currentAppId$={application.currentAppId$}
+                navigateToUrl={application.navigateToUrl}
+                isTaggingEnabled={() => Boolean(savedObjectsTagging)}
+                isFavoritesEnabled={() => Boolean(services.favorites)}
+                getTagList={getTagList}
+                TagList={TagList}
+                itemHasTags={itemHasTags}
+                getTagIdsFromReferences={getTagIdsFromReferences}
+                getTagManagementUrl={() => core.http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
+              >
+                {children}
+              </TableListViewProvider>
+            </FavoritesContextProvider>
+          </ContentInsightsProvider>
         </ContentEditorKibanaProvider>
       </UserProfilesKibanaProvider>
     </RedirectAppLinksKibanaProvider>

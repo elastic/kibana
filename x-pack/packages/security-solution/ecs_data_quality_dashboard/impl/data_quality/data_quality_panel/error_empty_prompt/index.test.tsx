@@ -8,7 +8,7 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { TestProviders } from '../../mock/test_providers/test_providers';
+import { TestExternalProviders } from '../../mock/test_providers/test_providers';
 import { ErrorEmptyPrompt } from '.';
 
 describe('ErrorEmptyPrompt', () => {
@@ -16,9 +16,9 @@ describe('ErrorEmptyPrompt', () => {
     const title = 'This is the title of this work';
 
     render(
-      <TestProviders>
+      <TestExternalProviders>
         <ErrorEmptyPrompt title={title} />
-      </TestProviders>
+      </TestExternalProviders>
     );
 
     expect(screen.getByTestId('errorEmptyPrompt').textContent?.includes(title)).toBe(true);

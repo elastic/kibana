@@ -9,6 +9,7 @@ import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { deploymentAgnosticServices } from './deployment_agnostic_services';
 import { DataViewApiProvider } from './data_view_api';
 import { SloApiProvider } from './slo_api';
+import { AlertingApiProvider } from './alerting_api';
 import { RoleScopedSupertestProvider, SupertestWithRoleScope } from './role_scoped_supertest';
 
 export type {
@@ -21,6 +22,7 @@ export const services = {
   ...deploymentAgnosticServices,
   supertestWithoutAuth: commonFunctionalServices.supertestWithoutAuth,
   samlAuth: commonFunctionalServices.samlAuth,
+  alertingApi: AlertingApiProvider,
   dataViewApi: DataViewApiProvider,
   sloApi: SloApiProvider,
   roleScopedSupertest: RoleScopedSupertestProvider,
