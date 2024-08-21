@@ -34,5 +34,5 @@ export const createManifest = (assetOptions: AssetOptions) => {
     },
   };
 
-  return yaml.dump(manifest);
+  return yaml.safeDump(manifest);
 };

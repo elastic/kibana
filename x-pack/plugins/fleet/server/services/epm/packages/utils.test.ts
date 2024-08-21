@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { dump } from 'js-yaml';
-
 import type { AssetsMap } from '../../../../common/types';
 
 import type { RegistryDataStream } from '../../../../common';

@@ -25,5 +25,5 @@ export const createDefaultPipeline = (dataset: string, type: string) => {
       managed: true,
     },
   };
-  return yaml.dump(pipeline);
+  return yaml.safeDump(pipeline);
 };
