@@ -6,15 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIconTip,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
@@ -30,7 +22,7 @@ import { getUserDisplayName } from '@kbn/user-profile-components';
 import { Item } from '../types';
 
 export interface ActivityViewProps {
-  item: Pick<Item, 'createdBy' | 'createdAt' | 'updatedBy' | 'updatedAt' | 'managed'>;
+  item: Pick<Partial<Item>, 'createdBy' | 'createdAt' | 'updatedBy' | 'updatedAt' | 'managed'>;
 }
 
 export const ActivityView = ({ item }: ActivityViewProps) => {
@@ -54,78 +46,53 @@ export const ActivityView = ({ item }: ActivityViewProps) => {
   );
 
   return (
-    <EuiFormRow
-      label={
-        <>
-          <FormattedMessage
-            id="contentManagement.contentEditor.metadataForm.activityLabel"
-            defaultMessage="Activity"
-          />{' '}
-          <EuiIconTip
-            type={'iInCircle'}
-            iconProps={{ style: { verticalAlign: 'bottom' } }}
-            content={
-              <FormattedMessage
-                id="contentManagement.contentEditor.activity.activityLabelHelpText"
-                defaultMessage="Activity data is auto-generated and cannot be updated."
-              />
-            }
-          />
-        </>
-      }
-      fullWidth
-      data-test-subj={'activityView'}
-    >
-      <>
-        <EuiFlexGroup gutterSize={'s'}>
-          <EuiFlexItem grow={1} css={{ flexBasis: '50%', minWidth: 0 }}>
-            <ActivityCard
-              what={i18n.translate('contentManagement.contentEditor.activity.createdByLabelText', {
-                defaultMessage: 'Created by',
-              })}
-              who={
-                item.createdBy ? (
-                  <UserLabel uid={item.createdBy} />
-                ) : item.managed ? (
-                  <>{ManagedUserLabel}</>
-                ) : (
-                  <>
-                    {UnknownUserLabel}
-                    <NoCreatorTip />
-                  </>
-                )
-              }
-              when={item.createdAt}
-              data-test-subj={'createdByCard'}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={1} css={{ flexBasis: '50%', minWidth: 0 }}>
-            {showLastUpdated && (
-              <ActivityCard
-                what={i18n.translate(
-                  'contentManagement.contentEditor.activity.lastUpdatedByLabelText',
-                  { defaultMessage: 'Last updated by' }
-                )}
-                who={
-                  item.updatedBy ? (
-                    <UserLabel uid={item.updatedBy} />
-                  ) : item.managed ? (
-                    <>{ManagedUserLabel}</>
-                  ) : (
-                    <>
-                      {UnknownUserLabel}
-                      <NoUpdaterTip />
-                    </>
-                  )
-                }
-                when={item.updatedAt}
-                data-test-subj={'updatedByCard'}
-              />
+    <EuiFlexGroup gutterSize={'s'} data-test-subj={'activityView'}>
+      <EuiFlexItem grow={1} css={{ flexBasis: '50%', minWidth: 0 }}>
+        <ActivityCard
+          what={i18n.translate('contentManagement.contentEditor.activity.createdByLabelText', {
+            defaultMessage: 'Created by',
+          })}
+          who={
+            item.createdBy ? (
+              <UserLabel uid={item.createdBy} />
+            ) : item.managed ? (
+              <>{ManagedUserLabel}</>
+            ) : (
+              <>
+                {UnknownUserLabel}
+                <NoCreatorTip />
+              </>
+            )
+          }
+          when={item.createdAt}
+          data-test-subj={'createdByCard'}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={1} css={{ flexBasis: '50%', minWidth: 0 }}>
+        {showLastUpdated && (
+          <ActivityCard
+            what={i18n.translate(
+              'contentManagement.contentEditor.activity.lastUpdatedByLabelText',
+              { defaultMessage: 'Last updated by' }
             )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
-    </EuiFormRow>
+            who={
+              item.updatedBy ? (
+                <UserLabel uid={item.updatedBy} />
+              ) : item.managed ? (
+                <>{ManagedUserLabel}</>
+              ) : (
+                <>
+                  {UnknownUserLabel}
+                  <NoUpdaterTip />
+                </>
+              )
+            }
+            when={item.updatedAt}
+            data-test-subj={'updatedByCard'}
+          />
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
