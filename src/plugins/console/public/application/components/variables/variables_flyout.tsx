@@ -11,15 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
-  EuiFlyout,
-  EuiFlyoutHeader,
   EuiTitle,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
-  EuiButtonEmpty,
   EuiBasicTable,
   EuiFieldText,
   useGeneratedHtmlId,
@@ -34,7 +29,6 @@ import {
 import * as utils from './utils';
 
 export interface DevToolsVariablesFlyoutProps {
-  onClose: () => void;
   onSaveVariables: (newVariables: DevToolsVariable[]) => void;
   variables: [];
 }
@@ -150,65 +144,39 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
   ];
 
   return (
-    <EuiFlyout onClose={props.onClose}>
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle>
-          <h2>
-            <FormattedMessage id="console.variablesPage.pageTitle" defaultMessage="Variables" />
-          </h2>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText color="subdued">
-          <p>
-            <FormattedMessage
-              id="console.variablesPage.descriptionText"
-              defaultMessage="Define variables and use them in your requests in the form of {variable}."
-              values={{
-                variable: (
-                  <code>
-                    <FormattedMessage
-                      id="console.variablesPage.descriptionText.variableNameText"
-                      defaultMessage="{variableName}"
-                      values={{
-                        variableName: '${variableName}',
-                      }}
-                    />
-                  </code>
-                ),
-              }}
-            />
-          </p>
-        </EuiText>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiForm id={formId} component="form" onSubmit={onSubmit}>
-          <EuiBasicTable items={variables} columns={columns} />
-          <EuiButtonEmpty
-            data-test-subj="variablesAddButton"
-            iconType="plus"
-            onClick={addNewVariable}
-          >
-            <FormattedMessage id="console.variablesPage.addButtonLabel" defaultMessage="Add" />
-          </EuiButtonEmpty>
-        </EuiForm>
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty data-test-subj="variablesCancelButton" onClick={props.onClose}>
-              <FormattedMessage
-                id="console.variablesPage.cancelButtonLabel"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton fill data-test-subj="variablesSaveButton" type="submit" form={formId}>
-              <FormattedMessage id="console.variablesPage.saveButtonLabel" defaultMessage="Save" />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+    <>
+      <EuiTitle>
+        <h2>
+          <FormattedMessage id="console.variablesPage.pageTitle" defaultMessage="Variables" />
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiText color="subdued">
+        <p>
+          <FormattedMessage id="console.variablesPage.pageDescription" defaultMessage="Define and reuse placeholders for dynamic values in your queries." />
+        </p>
+      </EuiText>
+      <EuiSpacer size="l" />
+
+      <EuiForm id={formId} component="form" onSubmit={onSubmit}>
+        <EuiBasicTable items={variables} columns={columns} />
+        <EuiSpacer size="m" />
+        <EuiButton
+          data-test-subj="variablesAddButton"
+          iconType="plusInCircle"
+          onClick={addNewVariable}
+        >
+          <FormattedMessage id="console.variablesPage.addButtonLabel" defaultMessage="Add variable" />
+        </EuiButton>
+      </EuiForm>
+
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiButton fill data-test-subj="variablesSaveButton" type="submit" form={formId}>
+            <FormattedMessage id="console.variablesPage.saveButtonLabel" defaultMessage="Save" />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 };

@@ -33,7 +33,7 @@ export const SettingsGroup = ({ title, description }: DevToolsSettingsModalProps
       {description && (
         <>
           <EuiSpacer size="s" />
-          <EuiText>
+          <EuiText color="subdued">
             <p>
               {description}
             </p>

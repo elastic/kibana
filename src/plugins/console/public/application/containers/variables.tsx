@@ -12,22 +12,16 @@ import { useServicesContext } from '../contexts';
 import { StorageKeys } from '../../services';
 import { DEFAULT_VARIABLES } from '../../../common/constants';
 
-interface VariablesProps {
-  onClose: () => void;
-}
-
-export function Variables({ onClose }: VariablesProps) {
+export function Variables() {
   const {
     services: { storage },
   } = useServicesContext();
 
   const onSaveVariables = (newVariables: DevToolsVariable[]) => {
     storage.set(StorageKeys.VARIABLES, newVariables);
-    onClose();
   };
   return (
     <DevToolsVariablesFlyout
-      onClose={onClose}
       onSaveVariables={onSaveVariables}
       variables={storage.get(StorageKeys.VARIABLES, DEFAULT_VARIABLES)}
     />

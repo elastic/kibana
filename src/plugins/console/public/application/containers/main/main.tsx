@@ -14,7 +14,7 @@ import { TopNavMenu, SomethingWentWrongCallout } from '../../components';
 import { useDataInit } from '../../hooks';
 import { getTopNavConfig } from './get_top_nav';
 import { SHELL_TAB_ID, CONFIG_TAB_ID } from './tab_ids';
-import { Settings } from '../settings';
+import { Config } from '../config';
 
 interface MainProps {
   isEmbeddable?: boolean;
@@ -51,7 +51,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiSplitPanel.Outer grow={true} borderRadius={isEmbeddable ? 'none' : 'm'}>
-            <EuiSplitPanel.Inner grow={false} className="consoleTabs">
+            <EuiSplitPanel.Inner paddingSize="none" grow={false}>
               <TopNavMenu
                 disabled={!done}
                 items={getTopNavConfig({
@@ -66,7 +66,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
               )}
 
               {selectedTab === CONFIG_TAB_ID && (
-                <Settings
+                <Config
                   editorInstance={null}
                 />
               )}
