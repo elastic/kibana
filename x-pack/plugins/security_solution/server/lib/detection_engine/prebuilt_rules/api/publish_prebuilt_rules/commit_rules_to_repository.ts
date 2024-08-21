@@ -8,6 +8,7 @@
 import { Octokit } from 'octokit';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine';
 import { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
+import type { IDetectionRulesClient } from '../../../rule_management/logic/detection_rules_client/detection_rules_client_interface';
 
 interface CommitRulesArgs {
   repository: {
@@ -16,10 +17,11 @@ interface CommitRulesArgs {
     token: string;
   };
   rules: RuleResponse[];
+  detectionRulesClient: IDetectionRulesClient;
 }
 
 export const commitRulesToRepository = async (args: CommitRulesArgs) => {
-  const { repository, rules } = args;
+  const { repository, rules, detectionRulesClient } = args;
   const octoKitClient = new Octokit({
     auth: repository.token,
   });
@@ -42,12 +44,18 @@ export const commitRulesToRepository = async (args: CommitRulesArgs) => {
 
   const ruleBlobs = await Promise.all(
     rules.map(async (rule) => {
-      const prebuiltRuleAsset = PrebuiltRuleAsset.parse(rule);
-      // TODO increment rule version and write it to DB before committing; Newly created rules have version 1, do not increment version in this case
+      // Increment the rule version before publishing so it will be added as a new file
+      const updatedRule = await detectionRulesClient.updateRule({
+        ruleUpdate: {
+          ...rule,
+          version: rule.version + 1,
+        },
+      });
+      const prebuiltRuleAsset = PrebuiltRuleAsset.parse(updatedRule);
       const blobData = await octoKitClient.rest.git.createBlob({
         owner,
         repo,
-        content: JSON.stringify(prebuiltRuleAsset),
+        content: JSON.stringify(prebuiltRuleAsset, null, 2),
         encoding: 'utf-8',
       });
       return {
