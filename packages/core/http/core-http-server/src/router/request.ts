@@ -12,7 +12,7 @@ import type { Observable } from 'rxjs';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { HttpProtocol } from '../http_contract';
 import type { IKibanaSocket } from './socket';
-import type { RouteMethod, RouteConfigOptions } from './route';
+import type { RouteMethod, RouteConfigOptions, RouteSecurity } from './route';
 import type { Headers } from './headers';
 
 /**
@@ -21,6 +21,7 @@ import type { Headers } from './headers';
 export interface KibanaRouteOptions extends RouteOptionsApp {
   xsrfRequired: boolean;
   access: 'internal' | 'public';
+  security?: RouteSecurity;
 }
 
 /**
@@ -31,6 +32,7 @@ export interface KibanaRequestState extends RequestApplicationState {
   requestUuid: string;
   rewrittenUrl?: URL;
   traceId?: string;
+  authzResult?: Record<string, boolean>;
   measureElu?: () => void;
 }
 
@@ -135,6 +137,8 @@ export interface KibanaRequest<
    * Even if the API facade is the same, fake requests have some stubbed functionalities.
    */
   readonly isFakeRequest: boolean;
+
+  readonly authzResult?: Record<string, boolean>;
 
   /**
    * An internal request has access to internal routes.

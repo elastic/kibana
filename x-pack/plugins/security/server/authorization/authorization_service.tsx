@@ -70,6 +70,8 @@ interface AuthorizationServiceSetupParams {
   getCurrentUser(request: KibanaRequest): AuthenticatedUser | null;
 
   customBranding: CustomBrandingSetup;
+
+  buildFlavor: string;
 }
 
 interface AuthorizationServiceStartParams {
@@ -107,6 +109,7 @@ export class AuthorizationService {
     getSpacesService,
     getCurrentUser,
     customBranding,
+    buildFlavor,
   }: AuthorizationServiceSetupParams): AuthorizationServiceSetupInternal {
     this.logger = loggers.get('authorization');
     this.applicationName = `${APPLICATION_PREFIX}${kibanaIndexName}`;
@@ -166,7 +169,7 @@ export class AuthorizationService {
       }
     );
 
-    initAPIAuthorization(http, authz, loggers.get('api-authorization'));
+    initAPIAuthorization(http, authz, buildFlavor, loggers.get('api-authorization'));
     initAppAuthorization(http, authz, loggers.get('app-authorization'), features);
 
     http.registerOnPreResponse(async (request, preResponse, toolkit) => {

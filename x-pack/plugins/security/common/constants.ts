@@ -102,3 +102,10 @@ export const SESSION_ROUTE = '/internal/security/session';
  * Allowed image file types for uploading an image as avatar
  */
 export const IMAGE_FILE_TYPES = ['image/svg+xml', 'image/jpeg', 'image/png', 'image/gif'];
+
+export enum ApiActionPermission {
+  ManageSpaces = 'manageSpaces',
+  TaskManager = 'taskManager',
+  Features = 'features',
+  DecryptedTelemetry = 'decryptedTelemetry',
+}

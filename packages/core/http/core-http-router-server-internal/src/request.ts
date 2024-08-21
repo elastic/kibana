@@ -136,6 +136,8 @@ export class CoreKibanaRequest<
   public readonly httpVersion: string;
   /** {@inheritDoc KibanaRequest.protocol} */
   public readonly protocol: HttpProtocol;
+  /** {@inheritDoc KibanaRequest.authzResult} */
+  public readonly authzResult: any;
 
   /** @internal */
   protected readonly [requestSymbol]!: Request;
@@ -158,6 +160,7 @@ export class CoreKibanaRequest<
     this.id = appState?.requestId ?? uuidv4();
     this.uuid = appState?.requestUuid ?? uuidv4();
     this.rewrittenUrl = appState?.rewrittenUrl;
+    this.authzResult = appState?.authzResult;
 
     this.url = request.url ?? new URL('https://fake-request/url');
     this.headers = isRealReq ? deepFreeze({ ...request.headers }) : request.headers;
@@ -203,6 +206,7 @@ export class CoreKibanaRequest<
         isAuthenticated: this.auth.isAuthenticated,
       },
       route: this.route,
+      authzResult: this.authzResult,
     };
   }
 
@@ -255,6 +259,7 @@ export class CoreKibanaRequest<
         true, // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
       access: this.getAccess(request),
       tags: request.route?.settings?.tags || [],
+      security: ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)?.security,
       timeout: {
         payload: payloadTimeout,
         idleSocket: socketTimeout === 0 ? undefined : socketTimeout,

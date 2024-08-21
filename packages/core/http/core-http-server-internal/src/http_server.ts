@@ -699,6 +699,7 @@ export class HttpServer {
     const kibanaRouteOptions: KibanaRouteOptions = {
       xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
       access: route.options.access ?? 'internal',
+      security: route.security,
     };
     // Log HTTP API target consumer.
     optionsLogger.debug(
@@ -712,6 +713,15 @@ export class HttpServer {
       method: route.method,
       path: route.path,
       options: {
+        // ext: {
+        //   onPostAuth: {
+        //     method(request, h) {
+        //       // After moving authz to core, check it here ?
+
+        //       return h.continue;
+        //     },
+        //   },
+        // },
         auth: this.getAuthOption(authRequired),
         app: kibanaRouteOptions,
         tags: tags ? Array.from(tags) : undefined,

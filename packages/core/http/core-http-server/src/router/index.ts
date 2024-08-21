@@ -55,6 +55,15 @@ export type {
 } from './route';
 export { validBodyOutput } from './route';
 export type {
+  AuthzDisabled,
+  AuthzEnabled,
+  RouteAuthz,
+  RouteAuthc,
+  AuthcDisabled,
+  AuthcEnabled,
+  RouteSecurity,
+} from './route';
+export type {
   RouteValidationFunction,
   RouteValidationResultFactory,
   RouteValidationSpec,

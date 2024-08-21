@@ -26,6 +26,7 @@ export type {
   AuthToolkit,
   OnPostAuthHandler,
   OnPostAuthNextResult,
+  OnPostAuthAuthzResult,
   OnPostAuthToolkit,
   OnPostAuthResult,
   OnPreAuthHandler,
@@ -106,6 +107,13 @@ export type {
   RouteValidatorFullConfigResponse,
   LazyValidator,
   RouteAccess,
+  AuthzDisabled,
+  AuthzEnabled,
+  RouteAuthz,
+  RouteAuthc,
+  AuthcDisabled,
+  AuthcEnabled,
+  RouteSecurity,
 } from './src/router';
 export {
   validBodyOutput,

@@ -28,6 +28,7 @@ import type {
 } from '@kbn/core-http-server';
 import { isZod } from '@kbn/zod';
 import { validBodyOutput, getRequestValidation } from '@kbn/core-http-server';
+import type { RouteSecurity } from '@kbn/core-http-server';
 import { RouteValidator } from './validator';
 import { CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest } from './request';
@@ -154,6 +155,7 @@ export type InternalRegistrar<M extends Method, C extends RequestHandlerContextB
 /** @internal */
 export interface InternalRouterRoute extends RouterRoute {
   readonly isVersioned: boolean;
+  readonly security?: RouteSecurity;
 }
 
 /** @internal */
@@ -203,6 +205,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
           method,
           path: getRouteFullPath(this.routerPath, route.path),
           options: validOptions(method, route),
+          security: route.security,
           /** Below is added for introspection */
           validationSchemas: route.validate,
           isVersioned: internalOptions.isVersioned,

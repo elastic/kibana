@@ -32,6 +32,41 @@ export type SafeRouteMethod = 'get' | 'options';
  */
 export type RouteMethod = SafeRouteMethod | DestructiveRouteMethod;
 
+type Privilege = string;
+
+interface PrivilegeSet {
+  anyRequired?: Privilege[];
+  allRequired?: Privilege[];
+  offering?: string;
+}
+
+type Privileges = Array<Privilege | PrivilegeSet>;
+
+export interface AuthzEnabled {
+  requiredPrivileges: Privileges;
+}
+
+export interface AuthzDisabled {
+  enabled: false;
+  reason: string;
+}
+
+export interface AuthcEnabled {
+  enabled: true | 'optional';
+}
+
+export interface AuthcDisabled {
+  enabled: false;
+  reason: string;
+}
+
+export type RouteAuthc = AuthcEnabled | AuthcDisabled;
+export type RouteAuthz = AuthzEnabled | AuthzDisabled;
+export interface RouteSecurity {
+  authz: RouteAuthz;
+  authc?: RouteAuthc;
+}
+
 /**
  * The set of supported parseable Content-Types
  * @public
@@ -206,6 +241,11 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * @remarks This will be surfaced in OAS documentation.
    */
   deprecated?: boolean;
+
+  /**
+   * The required capabilities to access this route.
+   */
+  security?: RouteSecurity;
 }
 
 /**
@@ -285,6 +325,8 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    * ```
    */
   validate: RouteValidator<P, Q, B> | (() => RouteValidator<P, Q, B>) | false;
+
+  security?: RouteSecurity;
 
   /**
    * Additional route options {@link RouteConfigOptions}.
