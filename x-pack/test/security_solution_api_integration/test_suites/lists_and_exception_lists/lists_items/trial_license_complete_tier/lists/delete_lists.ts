@@ -212,7 +212,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           // delete that list by its auto-generated id and ignoreReferences
-          supertest
+          await supertest
             .delete(`${LIST_URL}?id=${valueListBody.id}&ignoreReferences=true`)
             .set('kbn-xsrf', 'true')
             .expect(409);
