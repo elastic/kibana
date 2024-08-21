@@ -11,9 +11,9 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { CheckAll } from './check_all';
-import { CheckStatus } from '../check_status';
-import { ERROR, INDEX, PATTERN } from '../errors_viewer/translations';
-import { ERRORS } from '../errors_popover/translations';
+import { CheckStatus } from './check_status';
+import { ERROR, INDEX, PATTERN } from './check_status/errors_popover/errors_viewer/translations';
+import { ERRORS } from './check_status/errors_popover/translations';
 import {
   getDataQualitySummaryMarkdownComment,
   getErrorsMarkdownTable,

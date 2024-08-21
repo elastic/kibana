@@ -16,15 +16,15 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { ErrorsViewer } from '../errors_viewer';
-import { ERRORS_CONTAINER_MAX_WIDTH } from '../errors_viewer/helpers';
+import { ErrorsViewer } from './errors_viewer';
+import { ERRORS_CONTAINER_MAX_WIDTH } from './errors_viewer/helpers';
 import {
   getErrorsMarkdownTable,
   getErrorsMarkdownTableRows,
-} from '../../../index_properties/markdown/helpers';
+} from '../../../../../index_properties/markdown/helpers';
 import * as i18n from './translations';
-import type { ErrorSummary } from '../../../types';
-import { ERROR, INDEX, PATTERN } from '../errors_viewer/translations';
+import type { ErrorSummary } from '../../../../../types';
+import { ERROR, INDEX, PATTERN } from './errors_viewer/translations';
 
 const CallOut = styled(EuiCallOut)`
   max-width: ${ERRORS_CONTAINER_MAX_WIDTH}px;

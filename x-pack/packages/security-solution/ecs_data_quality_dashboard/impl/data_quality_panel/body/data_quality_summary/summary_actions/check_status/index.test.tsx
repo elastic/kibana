@@ -11,8 +11,8 @@ import React from 'react';
 import {
   TestDataQualityProviders,
   TestExternalProviders,
-} from '../../../mock/test_providers/test_providers';
-import { IndexToCheck } from '../../../types';
+} from '../../../../mock/test_providers/test_providers';
+import { IndexToCheck } from '../../../../types';
 import { CheckStatus, EMPTY_LAST_CHECKED_DATE } from '.';
 
 const indexToCheck: IndexToCheck = {
