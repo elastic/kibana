@@ -90,6 +90,15 @@ export const selectConversation = (conversationName: string) => {
   cy.get(FLYOUT_NAV_TOGGLE).click();
 };
 
+export const updateConversationTitle = (newTitle: string) => {
+  cy.get(CONVERSATION_TITLE + ' h2').click();
+  cy.get(CONVERSATION_TITLE + ' input')
+    .clear()
+    .type(newTitle);
+  cy.get(CONVERSATION_TITLE + ' input').type('{enter}');
+  cy.get(CONVERSATION_TITLE + ' h2').should('have.text', newTitle);
+};
+
 export const typeAndSendMessage = (message: string) => {
   cy.get(USER_PROMPT).type(message);
   cy.get(SUBMIT_CHAT).click();

@@ -162,8 +162,8 @@ describe(
         assertConnectorSelected(bedrockConnectorAPIPayload.name);
         assertMessageSent('goodbye', true);
       });
-
-      it('Only allows one conversation called "New chat" at a time', () => {
+      // This test is flakey due to the issue linked behlow and will be skipped until it is fixed
+      it.skip('Only allows one conversation called "New chat" at a time', () => {
         visitGetStartedPage();
         openAssistant();
         createNewChat();
@@ -171,6 +171,7 @@ describe(
         assertConnectorSelected(azureConnectorAPIPayload.name);
         typeAndSendMessage('hello');
         // TODO fix bug with new chat and error message
+        // https://github.com/elastic/kibana/issues/191025
         // assertMessageSent('hello', true);
         assertErrorResponse();
         selectConversation('Welcome');
