@@ -71,18 +71,13 @@ export function DashboardApp({
   expandedPanelId,
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
-  useMount(() => {
-    (async () => {
-      setShowNoDataPage(await isDashboardAppInNoDataState());
-    })();
-  });
+  useMount(() => (async () => setShowNoDataPage(await isDashboardAppInNoDataState()))());
   const [dashboardAPI, setDashboardAPI] = useState<AwaitingDashboardAPI>(null);
 
   /**
    * Unpack & set up dashboard services
    */
   const {
-    application: { getUrlForApp },
     screenshotMode: { isScreenshotMode, getScreenshotContext },
     coreContext: { executionContext },
     embeddable: { getStateTransfer },
@@ -214,7 +209,7 @@ export function DashboardApp({
       kbnUrlStateStorage.kbnUrlControls.update(newUrl, true);
     });
     return () => stopWatchingAppStateInUrl();
-  }, [dashboardAPI, kbnUrlStateStorage, savedDashboardId, expandedPanelId, getUrlForApp]);
+  }, [dashboardAPI, kbnUrlStateStorage, savedDashboardId, expandedPanelId]);
 
   const locator = useMemo(() => url?.locators.get(DASHBOARD_APP_LOCATOR), [url]);
 

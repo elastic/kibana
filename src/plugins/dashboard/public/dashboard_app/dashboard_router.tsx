@@ -123,14 +123,12 @@ export async function mountApp({
     const routeParams = parse(routeProps.history.location.search);
     const title = (routeParams.title as string) || undefined;
     const filter = (routeParams.filter as string) || undefined;
-    const expandedPanelId = (routeParams.expandedPanelId as string) || undefined;
     return (
       <DashboardListingPage
         initialFilter={filter}
         title={title}
         kbnUrlStateStorage={getUrlStateStorage(routeProps.history)}
         redirectTo={redirect}
-        expandedPanelId={expandedPanelId}
       />
     );
   };
