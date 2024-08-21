@@ -25,8 +25,8 @@ export function getColorAccessorFn(
   );
 
   return (value) => {
-    if (value === undefined || value === null || typeof value === 'number') return null;
+    if (value === undefined || value === null) return null;
 
-    return getColor(value);
+    return getColor(String(value));
   };
 }

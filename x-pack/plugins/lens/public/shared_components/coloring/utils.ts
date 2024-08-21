@@ -18,13 +18,16 @@ import {
   CUSTOM_PALETTE,
   enforceColorContrast,
 } from '@kbn/coloring';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import { Datatable, DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { DataType } from '../../types';
 
 /**
  * Bucketed numerical columns should be treated as categorical
  */
-export function shouldColorByTerms(dataType?: DataType, isBucketed?: boolean) {
+export function shouldColorByTerms(
+  dataType?: DataType | DatatableColumnType,
+  isBucketed?: boolean
+) {
   return isBucketed || dataType !== 'number';
 }
 

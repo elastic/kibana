@@ -207,7 +207,7 @@ export const getDatatableVisualization = ({
   getConfiguration({ state, frame, layerId }) {
     const isDarkMode = kibanaTheme.getTheme().darkMode;
     const { sortedColumns, datasource } =
-      getDataSourceAndSortedColumns(state, frame.datasourceLayers, layerId) || {};
+      getDataSourceAndSortedColumns(state, frame.datasourceLayers) || {};
 
     const columnMap: Record<string, ColumnState> = {};
     state.columns.forEach((column) => {
@@ -439,7 +439,7 @@ export const getDatatableVisualization = ({
     datasourceExpressionsByLayers = {}
   ): Ast | null {
     const { sortedColumns, datasource } =
-      getDataSourceAndSortedColumns(state, datasourceLayers, state.layerId) || {};
+      getDataSourceAndSortedColumns(state, datasourceLayers) || {};
     const isTextBasedLanguage = datasource?.isTextBasedLanguage();
 
     if (
@@ -664,8 +664,7 @@ export const getDatatableVisualization = ({
   },
 
   getSortedColumns(state, datasourceLayers) {
-    const { sortedColumns } =
-      getDataSourceAndSortedColumns(state, datasourceLayers || {}, state.layerId) || {};
+    const { sortedColumns } = getDataSourceAndSortedColumns(state, datasourceLayers || {}) || {};
     return sortedColumns;
   },
 
@@ -718,8 +717,7 @@ export const getDatatableVisualization = ({
 
 function getDataSourceAndSortedColumns(
   state: DatatableVisualizationState,
-  datasourceLayers: DatasourceLayers,
-  layerId: string
+  datasourceLayers: DatasourceLayers
 ) {
   const datasource = datasourceLayers[state.layerId];
   const originalOrder = datasource?.getTableSpec().map(({ columnId }) => columnId);

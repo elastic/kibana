@@ -37,7 +37,7 @@ import type { FormatFactory } from '../../../../common/types';
 import { RowHeightMode } from '../../../../common/types';
 import { getOriginalId, isTransposeId, LensGridDirection } from '../../../../common/expressions';
 import { VisualizationContainer } from '../../../visualization_container';
-import { findMinMaxByColumnId } from '../../../shared_components';
+import { findMinMaxByColumnId, shouldColorByTerms } from '../../../shared_components';
 import type {
   DataContextType,
   DatatableRenderProps,
@@ -58,7 +58,7 @@ import {
 } from './table_actions';
 import { getFinalSummaryConfiguration } from '../../../../common/expressions/datatable/summary';
 import { DEFAULT_HEADER_ROW_HEIGHT, DEFAULT_HEADER_ROW_HEIGHT_LINES } from './constants';
-import { isNumericFieldForDatatable } from '../../../../common/expressions/datatable/utils';
+import { getFieldTypeFromDatatable } from '../../../../common/expressions/datatable/utils';
 import { CellColorFn, getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 
 export const DataContext = React.createContext<DataContextType>({});
@@ -402,14 +402,12 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         return cellColorFnMap.get(originalId)!;
       }
 
-      const isNumeric = isNumericFieldForDatatable(firstLocalTable, originalId);
-      const data: ColorMappingInputData = isNumeric
+      const dataType = getFieldTypeFromDatatable(firstLocalTable, originalId);
+      const isBucketed = bucketColumns.some((id) => columnId);
+      const colorByTerms = shouldColorByTerms(dataType, isBucketed);
+
+      const data: ColorMappingInputData = colorByTerms
         ? {
-            type: 'ranges',
-            bins: 0,
-            ...minMaxByColumnId[originalId],
-          }
-        : {
             type: 'categories',
             categories: getColorCategories(
               firstLocalTable.rows,
@@ -417,11 +415,16 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
               isTransposeId(columnId),
               [null]
             ),
+          }
+        : {
+            type: 'ranges',
+            bins: 0,
+            ...minMaxByColumnId[originalId],
           };
       const colorFn = getCellColorFn(
         props.paletteService,
         data,
-        isNumeric,
+        colorByTerms,
         isDarkMode,
         syncColors,
         palette,
@@ -447,6 +450,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     props.args.fitRowToContent,
     props.paletteService,
     firstLocalTable,
+    bucketColumns,
     minMaxByColumnId,
     syncColors,
   ]);

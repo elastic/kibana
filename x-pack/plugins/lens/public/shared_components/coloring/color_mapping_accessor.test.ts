@@ -9,7 +9,9 @@ import { getColorAccessorFn } from './color_mapping_accessor';
 
 jest.mock('@kbn/coloring', () => ({
   ...jest.requireActual('@kbn/coloring'),
-  getColorFactory: jest.fn().mockReturnValue(() => 'red'),
+  getColorFactory: jest
+    .fn()
+    .mockReturnValue((v: string | number) => (v === '123' ? 'blue' : 'red')),
 }));
 
 describe('getColorAccessorFn', () => {
@@ -24,8 +26,8 @@ describe('getColorAccessorFn', () => {
     expect(getColorAccessor(undefined)).toBe(null);
   });
 
-  it('should return null for numbers values', () => {
-    expect(getColorAccessor(123)).toBe(null);
+  it('should return stringified value for numbers', () => {
+    expect(getColorAccessor(123)).toBe('blue');
   });
 
   it('should return color for string values', () => {

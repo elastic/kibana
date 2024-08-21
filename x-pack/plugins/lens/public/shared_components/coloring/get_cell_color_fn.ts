@@ -19,13 +19,13 @@ export type CellColorFn = (value?: number | string | null) => string | null;
 export function getCellColorFn(
   paletteService: PaletteRegistry,
   data: ColorMappingInputData,
-  isNumeric: boolean,
+  colorByTerms: boolean,
   isDarkMode: boolean,
   syncColors: boolean,
   palette?: PaletteOutput<CustomPaletteState>,
   colorMapping?: string
 ): CellColorFn {
-  if (isNumeric && palette && data.type === 'ranges') {
+  if (!colorByTerms && palette && data.type === 'ranges') {
     return (value) => {
       if (value === null || value === undefined || typeof value !== 'number') return null;
 
@@ -35,20 +35,21 @@ export function getCellColorFn(
     };
   }
 
-  if (!isNumeric && data.type === 'categories') {
+  if (colorByTerms && data.type === 'categories') {
     if (colorMapping) {
       return getColorAccessorFn(colorMapping, data, isDarkMode);
     } else if (palette) {
       return (category) => {
-        if (category === undefined || category === null || typeof category === 'number')
-          return null;
+        if (category === undefined || category === null) return null;
+
+        const strCategory = String(category); // can be a number as a string
 
         return paletteService.get(palette.name).getCategoricalColor(
           [
             {
-              name: getSpecialString(category), // needed to sync special categories (i.e. '')
+              name: getSpecialString(strCategory), // needed to sync special categories (i.e. '')
               rankAtDepth: Math.max(
-                data.categories.findIndex((v) => v === category),
+                data.categories.findIndex((v) => v === strCategory),
                 0
               ),
               totalSeriesAtDepth: data.categories.length || 1,

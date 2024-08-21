@@ -18,6 +18,7 @@ import {
   applyPaletteParams,
   defaultPaletteParams,
   findMinMaxByColumnId,
+  shouldColorByTerms,
 } from '../../../shared_components';
 import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 
