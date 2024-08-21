@@ -153,6 +153,7 @@ describe('getLinksEmbeddableFactory', () => {
       savedObjectId: '123',
       title: 'my links',
       description: 'just a few links',
+      hidePanelTitles: false,
     } as LinksSerializedState;
 
     const expectedRuntimeState = {
@@ -163,6 +164,7 @@ describe('getLinksEmbeddableFactory', () => {
       description: 'just a few links',
       title: 'my links',
       savedObjectId: '123',
+      hidePanelTitles: false,
     };
 
     let parent: LinksParentApi;
@@ -210,7 +212,7 @@ describe('getLinksEmbeddableFactory', () => {
             savedObjectId: '123',
             title: 'my links',
             description: 'just a few links',
-            hidePanelTitles: undefined,
+            hidePanelTitles: false,
           },
           references: [],
         });
@@ -238,7 +240,7 @@ describe('getLinksEmbeddableFactory', () => {
           rawState: {
             title: 'my links',
             description: 'just a few links',
-            hidePanelTitles: undefined,
+            hidePanelTitles: false,
             attributes: {
               description: 'some links',
               title: 'links 001',
@@ -261,6 +263,7 @@ describe('getLinksEmbeddableFactory', () => {
       },
       description: 'just a few links',
       title: 'my links',
+      hidePanelTitles: true,
     } as LinksSerializedState;
 
     const expectedRuntimeState = {
@@ -271,6 +274,7 @@ describe('getLinksEmbeddableFactory', () => {
       description: 'just a few links',
       title: 'my links',
       savedObjectId: undefined,
+      hidePanelTitles: true,
     };
 
     let parent: LinksParentApi;
@@ -315,7 +319,7 @@ describe('getLinksEmbeddableFactory', () => {
           rawState: {
             title: 'my links',
             description: 'just a few links',
-            hidePanelTitles: undefined,
+            hidePanelTitles: true,
             attributes: {
               links: getLinks(),
               layout: 'horizontal',
@@ -356,7 +360,7 @@ describe('getLinksEmbeddableFactory', () => {
             savedObjectId: '333',
             title: 'my links',
             description: 'just a few links',
-            hidePanelTitles: undefined,
+            hidePanelTitles: true,
           },
           references: [],
         });

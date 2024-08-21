@@ -139,6 +139,9 @@ export default async () => {
         })}`,
         '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
         `--server.publicBaseUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
+        // configure security reponse header report-to settings to mimic MKI configuration
+        `--csp.report_to=${JSON.stringify(['violations-endpoint'])}`,
+        `--permissionsPolicy.report_to=${JSON.stringify(['violations-endpoint'])}`,
       ],
     },
 

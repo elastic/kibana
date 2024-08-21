@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type DocumentIds = z.infer<typeof DocumentIds>;
 export const DocumentIds = z.union([z.array(z.string()), z.string()]);

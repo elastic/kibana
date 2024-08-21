@@ -22,6 +22,7 @@
     "@kbn/i18n",
     "@kbn/shared-ux-storybook-mock",
     "@kbn/core-http-browser",
+    "@kbn/core-analytics-browser",
   ],
   "exclude": [
     "target/**/*"

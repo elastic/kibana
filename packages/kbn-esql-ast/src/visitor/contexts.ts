@@ -16,13 +16,16 @@ import type {
   ESQLAstCommand,
   ESQLAstItem,
   ESQLAstNodeWithArgs,
+  ESQLAstRenameExpression,
   ESQLColumn,
   ESQLCommandOption,
+  ESQLDecimalLiteral,
   ESQLFunction,
   ESQLInlineCast,
+  ESQLIntegerLiteral,
   ESQLList,
   ESQLLiteral,
-  ESQLNumberLiteral,
+  ESQLSingleAstItem,
   ESQLSource,
   ESQLTimeInterval,
 } from '../types';
@@ -34,7 +37,9 @@ import type {
   ExpressionVisitorOutput,
   UndefinedToVoid,
   VisitorAstNode,
+  VisitorInput,
   VisitorMethods,
+  VisitorOutput,
 } from './types';
 import { Builder } from '../builder';
 
@@ -65,8 +70,8 @@ export class VisitorContext<
   ) {}
 
   public *visitArguments(
-    input: ExpressionVisitorInput<Methods>
-  ): Iterable<ExpressionVisitorOutput<Methods>> {
+    input: VisitorInput<Methods, 'visitExpression'>
+  ): Iterable<VisitorOutput<Methods, 'visitExpression'>> {
     this.ctx.assertMethodExists('visitExpression');
 
     const node = this.node;
@@ -76,14 +81,56 @@ export class VisitorContext<
     }
 
     for (const arg of singleItems(node.args)) {
+      if (arg.type === 'option' && arg.name !== 'as') {
+        continue;
+      }
       yield this.visitExpression(arg, input as any);
     }
   }
 
+  public arguments(): ESQLAstExpressionNode[] {
+    const node = this.node;
+
+    if (!isNodeWithArgs(node)) {
+      throw new Error('Node does not have arguments');
+    }
+
+    const args: ESQLAstExpressionNode[] = [];
+
+    for (const arg of singleItems(node.args)) {
+      args.push(arg);
+    }
+
+    return args;
+  }
+
+  public visitArgument(
+    index: number,
+    input: VisitorInput<Methods, 'visitExpression'>
+  ): VisitorOutput<Methods, 'visitExpression'> {
+    this.ctx.assertMethodExists('visitExpression');
+
+    const node = this.node;
+
+    if (!isNodeWithArgs(node)) {
+      throw new Error('Node does not have arguments');
+    }
+
+    let i = 0;
+    for (const arg of singleItems(node.args)) {
+      if (i === index) {
+        return this.visitExpression(arg, input as any);
+      }
+      i++;
+    }
+
+    throw new Error(`Argument at index ${index} not found`);
+  }
+
   public visitExpression(
     expressionNode: ESQLAstExpressionNode,
-    input: ExpressionVisitorInput<Methods>
-  ): ExpressionVisitorOutput<Methods> {
+    input: VisitorInput<Methods, 'visitExpression'>
+  ): VisitorOutput<Methods, 'visitExpression'> {
     return this.ctx.visitExpression(this, expressionNode, input);
   }
 
@@ -130,6 +177,8 @@ export class CommandVisitorContext<
         continue;
       }
       if (arg.type === 'option') {
+        // We treat "AS" options as rename expressions, not as command options.
+        if (arg.name === 'as') continue;
         yield arg;
       }
     }
@@ -148,7 +197,7 @@ export class CommandVisitorContext<
     }
   }
 
-  public *arguments(option: '' | string = ''): Iterable<ESQLAstItem> {
+  public *args(option: '' | string = ''): Iterable<ESQLAstItem> {
     option = option.toLowerCase();
 
     if (!option) {
@@ -158,6 +207,9 @@ export class CommandVisitorContext<
           continue;
         }
         if (arg.type !== 'option') {
+          yield arg;
+        } else if (arg.name === 'as') {
+          // We treat "AS" options as rename expressions, not as command options.
           yield arg;
         }
       }
@@ -172,20 +224,21 @@ export class CommandVisitorContext<
     }
   }
 
-  public *visitArguments(
-    input: ExpressionVisitorInput<Methods>,
+  public *visitArgs(
+    input:
+      | VisitorInput<Methods, 'visitExpression'>
+      | (() => VisitorInput<Methods, 'visitExpression'>),
     option: '' | string = ''
   ): Iterable<ExpressionVisitorOutput<Methods>> {
     this.ctx.assertMethodExists('visitExpression');
 
-    const node = this.node;
-
-    if (!isNodeWithArgs(node)) {
-      throw new Error('Node does not have arguments');
-    }
-
-    for (const arg of singleItems(this.arguments(option))) {
-      yield this.visitExpression(arg, input as any);
+    for (const arg of singleItems(this.args(option))) {
+      yield this.visitExpression(
+        arg,
+        typeof input === 'function'
+          ? (input as () => VisitorInput<Methods, 'visitExpression'>)()
+          : (input as VisitorInput<Methods, 'visitExpression'>)
+      );
     }
   }
 
@@ -260,10 +313,14 @@ export class LimitCommandVisitorContext<
   /**
    * @returns The first numeric literal argument of the command.
    */
-  public numericLiteral(): ESQLNumberLiteral | undefined {
+  public numericLiteral(): ESQLIntegerLiteral | ESQLDecimalLiteral | undefined {
     const arg = firstItem(this.node.args);
 
-    if (arg && arg.type === 'literal' && arg.literalType === 'number') {
+    if (
+      arg &&
+      arg.type === 'literal' &&
+      (arg.literalType === 'integer' || arg.literalType === 'decimal')
+    ) {
       return arg;
     }
   }
@@ -413,7 +470,25 @@ export class SourceExpressionVisitorContext<
 export class FunctionCallExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
-> extends VisitorContext<Methods, Data, ESQLFunction> {}
+> extends VisitorContext<Methods, Data, ESQLFunction> {
+  /**
+   * @returns Returns a printable uppercase function name or operator.
+   */
+  public operator(): string {
+    const operator = this.node.name;
+
+    switch (operator) {
+      case 'note_like': {
+        return 'NOT LIKE';
+      }
+      case 'not_rlike': {
+        return 'NOT RLIKE';
+      }
+    }
+
+    return operator.toUpperCase();
+  }
+}
 
 export class LiteralExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
@@ -425,7 +500,17 @@ export class ListLiteralExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData,
   Node extends ESQLList = ESQLList
-> extends ExpressionVisitorContext<Methods, Data, Node> {}
+> extends ExpressionVisitorContext<Methods, Data, Node> {
+  public *visitElements(
+    input: ExpressionVisitorInput<Methods>
+  ): Iterable<ExpressionVisitorOutput<Methods>> {
+    this.ctx.assertMethodExists('visitExpression');
+
+    for (const value of this.node.values) {
+      yield this.visitExpression(value, input as any);
+    }
+  }
+}
 
 export class TimeIntervalLiteralExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
@@ -435,4 +520,25 @@ export class TimeIntervalLiteralExpressionVisitorContext<
 export class InlineCastExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
-> extends ExpressionVisitorContext<Methods, Data, ESQLInlineCast> {}
+> extends ExpressionVisitorContext<Methods, Data, ESQLInlineCast> {
+  public value(): ESQLSingleAstItem {
+    this.ctx.assertMethodExists('visitExpression');
+
+    const value = firstItem([this.node.value])!;
+
+    return value;
+  }
+
+  public visitValue(
+    input: VisitorInput<Methods, 'visitExpression'>
+  ): VisitorOutput<Methods, 'visitExpression'> {
+    this.ctx.assertMethodExists('visitExpression');
+
+    return this.visitExpression(this.value(), input as any);
+  }
+}
+
+export class RenameExpressionVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends VisitorContext<Methods, Data, ESQLAstRenameExpression> {}

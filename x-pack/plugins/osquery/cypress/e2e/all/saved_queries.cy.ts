@@ -203,7 +203,8 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('prebuilt', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/169787
+  describe.skip('prebuilt', () => {
     let packName: string;
     let packId: string;
     let savedQueryId: string;

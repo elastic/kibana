@@ -67,7 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
         inferenceEndpoints.some(
           (endpoint: InferenceAPIConfigResponse) => endpoint.inference_id === inferenceId
         )
-      ).to.be(true);
+      ).to.eql(true, `${inferenceId} not found in the GET _inference/_all response`);
     });
     it('can delete inference endpoint', async () => {
       log.debug(`Deleting inference endpoint`);

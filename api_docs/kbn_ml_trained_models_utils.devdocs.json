@@ -180,6 +180,19 @@
           },
           {
             "parentPluginId": "@kbn/ml-trained-models-utils",
+            "id": "def-common.ModelDefinition.supported",
+            "type": "boolean",
+            "tags": [],
+            "label": "supported",
+            "description": [
+              "Indicates if model version is supported by the cluster"
+            ],
+            "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-trained-models-utils",
             "id": "def-common.ModelDefinition.hidden",
             "type": "CompoundType",
             "tags": [],
@@ -619,7 +632,7 @@
         "label": "ELASTIC_MODEL_DEFINITIONS",
         "description": [],
         "signature": [
-          "{ [x: string]: ",
+          "{ [x: string]: Omit<",
           {
             "pluginId": "@kbn/ml-trained-models-utils",
             "scope": "common",
@@ -627,7 +640,7 @@
             "section": "def-common.ModelDefinition",
             "text": "ModelDefinition"
           },
-          "; }"
+          ", \"supported\">; }"
         ],
         "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,

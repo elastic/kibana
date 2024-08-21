@@ -2017,12 +2017,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       },
       use_document_level_security: {
         default_value: null,
-        depends_on: [
-          {
-            field: 'data_source',
-            value: 'jira_cloud',
-          },
-        ],
+        depends_on: [],
         display: DisplayType.TOGGLE,
         label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
         options: [],

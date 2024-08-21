@@ -45,12 +45,15 @@ export const useIndexErrors = (
           if (!model) {
             return {
               field,
-              error: i18n.translate('xpack.idxMgmt.indexOverview.indexErrors.missingModelError', {
-                defaultMessage: 'Model not found for inference endpoint {inferenceId}',
-                values: {
-                  inferenceId: field.source.inference_id as string,
-                },
-              }),
+              error: i18n.translate(
+                'xpack.idxMgmt.indexOverview.indexErrors.missingInferenceEndpointError',
+                {
+                  defaultMessage: 'Inference endpoint {inferenceId} not found',
+                  values: {
+                    inferenceId: field.source.inference_id as string,
+                  },
+                }
+              ),
             };
           }
           if (isLocalModel(model)) {

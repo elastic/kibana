@@ -61,7 +61,8 @@ export async function updateTagsBatch(
     total?: number;
     kuery?: string;
     retryCount?: number;
-  }
+  },
+  spaceId?: string
 ): Promise<{ actionId: string; updated?: number; took?: number }> {
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
   const hostedAgentError = `Cannot modify tags on a hosted agent`;
@@ -149,8 +150,7 @@ export async function updateTagsBatch(
   const versionConflictCount = res.version_conflicts ?? 0;
   const versionConflictIds = isLastRetry ? getUuidArray(versionConflictCount) : [];
 
-  const currentNameSpace = soClient.getCurrentNamespace();
-  const namespaces = currentNameSpace ? [currentNameSpace] : [];
+  const namespaces = spaceId ? { namespaces: [spaceId] } : {};
 
   // creating an action doc so that update tags  shows up in activity
   // the logic only saves agent count in the action that updated, failed or in case of last retry, conflicted
@@ -160,7 +160,7 @@ export async function updateTagsBatch(
     agents: updatedIds
       .concat(failures.map((failure) => failure.id))
       .concat(isLastRetry ? versionConflictIds : []),
-    namespaces,
+    ...namespaces,
     created_at: new Date().toISOString(),
     type: 'UPDATE_TAGS',
     total: options.total ?? res.total,
@@ -180,7 +180,7 @@ export async function updateTagsBatch(
       updatedIds.map((id) => ({
         agentId: id,
         actionId,
-        namespaces,
+        ...namespaces,
       }))
     );
     appContextService.getLogger().debug(`action updated result wrote on ${updatedCount} agents`);
@@ -193,7 +193,7 @@ export async function updateTagsBatch(
       failures.map((failure) => ({
         agentId: failure.id,
         actionId,
-        namespace: currentNameSpace,
+        namespace: spaceId,
         error: failure.cause.reason,
       }))
     );
@@ -208,7 +208,7 @@ export async function updateTagsBatch(
         versionConflictIds.map((id) => ({
           agentId: id,
           actionId,
-          namespace: currentNameSpace,
+          namespace: spaceId,
           error: 'version conflict on last retry',
         }))
       );
