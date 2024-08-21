@@ -18,7 +18,7 @@ import {
   toArray,
 } from 'rxjs';
 import { get } from 'lodash';
-import type { Event } from '@kbn/ebt/client';
+import type { Event } from '@elastic/ebt/client';
 import type { GetEventsOptions } from './types';
 
 export async function fetchEvents(

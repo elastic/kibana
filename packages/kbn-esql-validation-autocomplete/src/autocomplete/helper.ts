@@ -80,3 +80,54 @@ export function removeQuoteForSuggestedSources(suggestions: SuggestionRawDefinit
     text: d.text.startsWith('"') && d.text.endsWith('"') ? d.text.slice(1, -1) : d.text,
   }));
 }
+
+export function getSupportedTypesForBinaryOperators(
+  fnDef: FunctionDefinition | undefined,
+  previousType: string
+) {
+  // Retrieve list of all 'right' supported types that match the left hand side of the function
+  return fnDef && Array.isArray(fnDef?.signatures)
+    ? fnDef.signatures
+        .filter(({ params }) => params.find((p) => p.name === 'left' && p.type === previousType))
+        .map(({ params }) => params[1].type)
+    : [previousType];
+}
+
+/**
+ * Checks the suggestion text for overlap with the current query.
+ *
+ * This is useful to determine the range of the existing query that should be
+ * replaced if the suggestion is accepted.
+ *
+ * For example
+ * QUERY: FROM source | WHERE field IS NO
+ * SUGGESTION: IS NOT NULL
+ *
+ * The overlap is "IS NO" and the range to replace is "IS NO" in the query.
+ *
+ * @param query
+ * @param suggestionText
+ * @returns
+ */
+export function getOverlapRange(
+  query: string,
+  suggestionText: string
+): { start: number; end: number } {
+  let overlapLength = 0;
+
+  // Convert both strings to lowercase for case-insensitive comparison
+  const lowerQuery = query.toLowerCase();
+  const lowerSuggestionText = suggestionText.toLowerCase();
+
+  for (let i = 0; i <= lowerSuggestionText.length; i++) {
+    const substr = lowerSuggestionText.substring(0, i);
+    if (lowerQuery.endsWith(substr)) {
+      overlapLength = i;
+    }
+  }
+
+  return {
+    start: Math.min(query.length - overlapLength + 1, query.length),
+    end: query.length,
+  };
+}

@@ -9,8 +9,6 @@ paths:
       x-codegen-enabled: true
       operationId: DeleteEndpointListItem
       summary: Deletes an endpoint list item
-      tags:
-        - Endpoint exceptions API
       parameters:
         - name: id
           in: query

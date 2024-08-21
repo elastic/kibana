@@ -9361,7 +9361,7 @@
         "label": "buildAggregation",
         "description": [],
         "signature": [
-          "({ timeSeries, aggType, aggField, termField, termSize, sourceFieldsParams, condition, topHitsSize, }: ",
+          "({ timeSeries, aggType, aggField, termField, termSize, sourceFieldsParams, condition, topHitsSize, loggerCb, }: ",
           {
             "pluginId": "triggersActionsUi",
             "scope": "common",
@@ -9382,7 +9382,7 @@
             "id": "def-common.buildAggregation.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  timeSeries,\n  aggType,\n  aggField,\n  termField,\n  termSize,\n  sourceFieldsParams,\n  condition,\n  topHitsSize,\n}",
+            "label": "{\n  timeSeries,\n  aggType,\n  aggField,\n  termField,\n  termSize,\n  sourceFieldsParams,\n  condition,\n  topHitsSize,\n  loggerCb,\n}",
             "description": [],
             "signature": [
               {
@@ -9875,6 +9875,38 @@
             "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/build_agg.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.BuildAggregationOpts.loggerCb",
+            "type": "Function",
+            "tags": [],
+            "label": "loggerCb",
+            "description": [],
+            "signature": [
+              "((message: string) => void) | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/build_agg.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-common.BuildAggregationOpts.loggerCb.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/build_agg.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

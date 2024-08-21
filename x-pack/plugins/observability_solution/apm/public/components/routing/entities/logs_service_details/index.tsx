@@ -19,6 +19,7 @@ import { ServiceDashboards } from '../../../app/service_dashboards';
 import { ServiceLogs } from '../../../app/service_logs';
 import { LogsServiceOverview } from '../../../app/entities/logs/logs_service_overview';
 import { RedirectToDefaultLogsServiceRouteView } from '../../service_detail/redirect_to_default_service_route_view';
+import { SearchBar } from '../../../shared/search_bar/search_bar';
 
 export function page({
   title,
@@ -29,13 +30,7 @@ export function page({
   title: string;
   tabKey: React.ComponentProps<typeof LogsServiceTemplate>['selectedTabKey'];
   element: React.ReactElement<any, any>;
-  searchBarOptions?: {
-    showUnifiedSearchBar?: boolean;
-    showTransactionTypeSelector?: boolean;
-    showTimeComparison?: boolean;
-    showMobileFilters?: boolean;
-    hidden?: boolean;
-  };
+  searchBarOptions?: React.ComponentProps<typeof SearchBar>;
 }): {
   element: React.ReactElement<any, any>;
 } {
@@ -101,6 +96,7 @@ export const logsServiceDetailsRoute = {
           }),
           searchBarOptions: {
             showUnifiedSearchBar: true,
+            showQueryInput: false,
           },
         }),
         params: t.partial({

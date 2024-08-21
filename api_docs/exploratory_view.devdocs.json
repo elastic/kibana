@@ -1810,7 +1810,7 @@
             "label": "dataType",
             "description": [],
             "signature": [
-              "\"uptime\" | \"alerts\" | \"synthetics\" | \"ux\" | \"infra_logs\" | \"infra_metrics\" | \"apm\" | \"mobile\""
+              "\"uptime\" | \"alerts\" | \"apm\" | \"synthetics\" | \"ux\" | \"infra_logs\" | \"infra_metrics\" | \"mobile\""
             ],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,

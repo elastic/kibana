@@ -10,11 +10,12 @@ import { AlertConsumers, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { BrushEndListener, type XYBrushEvent } from '@elastic/charts';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
 import { useBoolean } from '@kbn/react-hooks';
+import type { TimeRange } from '@kbn/es-query';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 import { HeightRetainer } from '../../../../../../components/height_retainer';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { useAlertsQuery } from '../../../hooks/use_alerts_query';
-import { HostsState, HostsStateUpdater } from '../../../hooks/use_unified_search_url_state';
+import type { HostsState } from '../../../hooks/use_unified_search_url_state';
 import { AlertsEsQuery } from '../../../../../../utils/filters/create_alerts_es_query';
 import {
   ALERTS_PER_PAGE,
@@ -35,7 +36,7 @@ export const AlertsTabContent = () => {
   const { alertStatus, setAlertStatus, alertsEsQueryByStatus } = useAlertsQuery();
   const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
 
-  const { onSubmit, searchCriteria } = useUnifiedSearchContext();
+  const { onDateRangeChange, searchCriteria } = useUnifiedSearchContext();
 
   const { triggersActionsUi } = services;
 
@@ -71,7 +72,7 @@ export const AlertsTabContent = () => {
           <MemoAlertSummaryWidget
             alertsQuery={alertsEsQueryByStatus}
             dateRange={searchCriteria.dateRange}
-            onRangeSelection={onSubmit}
+            onRangeSelection={onDateRangeChange}
           />
         </EuiFlexItem>
         {alertsEsQueryByStatus && (
@@ -102,7 +103,7 @@ export const AlertsTabContent = () => {
 interface MemoAlertSummaryWidgetProps {
   alertsQuery: AlertsEsQuery;
   dateRange: HostsState['dateRange'];
-  onRangeSelection: HostsStateUpdater;
+  onRangeSelection: (dateRange: TimeRange) => void;
 }
 
 const MemoAlertSummaryWidget = React.memo(
@@ -122,7 +123,7 @@ const MemoAlertSummaryWidget = React.memo(
         const from = new Date(start).toISOString();
         const to = new Date(end).toISOString();
 
-        onRangeSelection({ dateRange: { from, to } });
+        onRangeSelection({ from, to });
       }
     };
 

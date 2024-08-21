@@ -16,7 +16,6 @@ import { ConfigType } from '..';
 import {
   ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
-  APP_SEARCH_PLUGIN,
   AI_SEARCH_PLUGIN,
 } from '../../common/constants';
 
@@ -103,14 +102,6 @@ export function getSearchResultProvider(
         ...(config.hasConnectors ? connectorTypes : []),
         ...(config.canDeployEntSearch
           ? [
-              {
-                keywords: ['app', 'search', 'engines'],
-                name: i18n.translate('xpack.enterpriseSearch.searchProvider.appSearch.name', {
-                  defaultMessage: 'App Search',
-                }),
-                serviceType: 'app_search',
-                url: APP_SEARCH_PLUGIN.URL,
-              },
               {
                 keywords: ['esre', 'search'],
                 name: i18n.translate('xpack.enterpriseSearch.searchProvider.aiSearch.name', {

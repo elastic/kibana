@@ -5,9 +5,10 @@
  * 2.0.
  */
 import { uniqBy } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ElasticsearchClient } from '@kbn/core/server';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 import {
