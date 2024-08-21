@@ -217,6 +217,13 @@ export const ERROR_LOADING_UNALLOWED_VALUES_TITLE = i18n.translate(
   }
 );
 
+export const ERROR_GENERIC_CHECK_TITLE = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.emptyErrorPrompt.errorGenericCheckTitle',
+  {
+    defaultMessage: 'An error occurred during the check',
+  }
+);
+
 export const ECS_COMPLIANT_FIELDS_TABLE_TITLE = (indexName: string) =>
   i18n.translate(
     'securitySolutionPackages.ecsDataQualityDashboard.customTab.ecsComplaintFieldsTableTitle',
@@ -240,10 +247,10 @@ export const LOADING_UNALLOWED_VALUES = i18n.translate(
   }
 );
 
-export const SUMMARY = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.summaryTab',
+export const CHECKING_INDEX = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.emptyLoadingPrompt.checkingIndexPrompt',
   {
-    defaultMessage: 'Summary',
+    defaultMessage: 'Checking index',
   }
 );
 
