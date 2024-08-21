@@ -178,7 +178,7 @@ function printResults(startTimestamp: number, results: CheckResult[]) {
 
   results.forEach((result) => {
     logger.write(
-      `---- ${result.success ? '✅' : '❌'} ${result.script}: ${humanizeTime(result.durationMs)}`
+      `--- ${result.success ? '✅' : '❌'} ${result.script}: ${humanizeTime(result.durationMs)}`
     );
     if (result.success) {
       logger.debug(result.output);
