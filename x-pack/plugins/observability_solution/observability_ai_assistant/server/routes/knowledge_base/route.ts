@@ -63,9 +63,6 @@ const resetKnowledgeBase = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/kb/reset',
   options: {
     tags: ['access:ai_assistant'],
-    timeout: {
-      idleSocket: 20 * 60 * 1000, // 20 minutes
-    },
   },
   handler: async (resources): Promise<{ result: string }> => {
     const client = await resources.service.getClient({ request: resources.request });

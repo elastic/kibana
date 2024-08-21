@@ -10,9 +10,9 @@ import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import pLimit from 'p-limit';
+import pRetry from 'p-retry';
 import { map, orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
-import { createConcreteWriteIndex, getDataStreamAdapter } from '@kbn/alerting-plugin/server';
 import { resourceNames } from '..';
 import {
   Instruction,
@@ -114,32 +114,10 @@ export class KnowledgeBaseService {
     asCurrentUser: ElasticsearchClient;
     asInternalUser: ElasticsearchClient;
   }) {
-    const kbAliasName = resourceNames.aliases.kb;
-
-    await createConcreteWriteIndex({
-      esClient: esClient.asInternalUser,
-      logger: this.dependencies.logger,
-      totalFieldsLimit: 10000,
-      indexPatterns: {
-        alias: kbAliasName,
-        pattern: `${kbAliasName}*`,
-        basePattern: `${kbAliasName}*`,
-        name: `${kbAliasName}-000001`,
-        template: resourceNames.indexTemplate.kb,
-      },
-      dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
-    });
-
     return createInferenceEndpoint({ esClient, logger: this.dependencies.logger });
   }
 
   async reset(esClient: { asCurrentUser: ElasticsearchClient }) {
-    const kbAliasName = resourceNames.aliases.kb;
-    await esClient.asCurrentUser.indices.delete({
-      index: `${kbAliasName}-000001`,
-      ignore_unavailable: true,
-    });
-
     try {
       await deleteInferenceEndpoint({ esClient, logger: this.dependencies.logger });
     } catch (error) {
@@ -151,7 +129,19 @@ export class KnowledgeBaseService {
     }
   }
 
-  async getStatus() {
+  async waitForElserModelReady() {
+    return pRetry(
+      async () => {
+        const status = await this.getElserModelStatus();
+        if (status?.ready !== true) {
+          throw new Error('Elser model not ready');
+        }
+      },
+      { forever: true, maxTimeout: 60_000 }
+    );
+  }
+
+  async getElserModelStatus() {
     try {
       const endpoint = await getInferenceEndpoint({
         esClient: this.dependencies.esClient,
@@ -177,7 +167,7 @@ export class KnowledgeBaseService {
       return;
     }
 
-    const kbStatus = await this.getStatus();
+    const kbStatus = await this.getElserModelStatus();
     if (!kbStatus.ready) {
       this.dependencies.logger.debug(`Bailing on queue task: KB is not ready yet`);
       return;

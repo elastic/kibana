@@ -14,6 +14,7 @@ import {
 import { Logger } from '@kbn/core/server';
 import { KnowledgeBaseEntry } from '../../../common';
 import { resourceNames } from '..';
+import { KnowledgeBaseService } from '../knowledge_base_service';
 
 const TASK_ID = 'ai-assistant-knowledge-base-migration-task-id';
 const TASK_TYPE = 'ai-assistant-knowledge-base-migration-task';
@@ -24,13 +25,15 @@ const TASK_TYPE = 'ai-assistant-knowledge-base-migration-task';
 export async function registerMigrateKnowledgeBaseEntriesTask({
   taskManager,
   logger,
-  getEsClient,
+  getKbService,
   getTaskManagerStart,
+  getEsClient,
 }: {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
-  getEsClient: () => Promise<ElasticsearchClient>;
+  getKbService: () => KnowledgeBaseService | undefined;
   getTaskManagerStart: () => Promise<TaskManagerStartContract>;
+  getEsClient: () => Promise<ElasticsearchClient>;
 }) {
   logger.debug(`Register task "${TASK_TYPE}"`);
   taskManager.registerTaskDefinitions({
@@ -44,7 +47,13 @@ export async function registerMigrateKnowledgeBaseEntriesTask({
           async run() {
             logger.debug(`Run task: "${TASK_TYPE}"`);
             const esClient = await getEsClient();
-            await runSemanticTextKnowledgeBaseMigration({ esClient, logger });
+
+            const kbService = getKbService();
+            if (!kbService) {
+              throw new Error('Knowledge base service is not available');
+            }
+
+            await runSemanticTextKnowledgeBaseMigration({ esClient, logger, kbService });
           },
         };
       },
@@ -66,9 +75,11 @@ export async function registerMigrateKnowledgeBaseEntriesTask({
 export async function runSemanticTextKnowledgeBaseMigration({
   esClient,
   logger,
+  kbService,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
+  kbService: KnowledgeBaseService;
 }) {
   logger.debug('Knowledge base migration: Running migration');
 
@@ -98,6 +109,8 @@ export async function runSemanticTextKnowledgeBaseMigration({
 
     logger.debug(`Knowledge base migration: Found ${response.hits.hits.length} entries to migrate`);
 
+    await kbService.waitForElserModelReady();
+
     // Limit the number of concurrent requests to avoid overloading the cluster
     const limiter = pLimit(10);
     const promises = response.hits.hits.map((hit) => {
@@ -121,7 +134,7 @@ export async function runSemanticTextKnowledgeBaseMigration({
 
     await Promise.all(promises);
     logger.debug(`Knowledge base migration: Migrated ${promises.length} entries`);
-    await runSemanticTextKnowledgeBaseMigration({ esClient, logger });
+    await runSemanticTextKnowledgeBaseMigration({ esClient, logger, kbService });
   } catch (e) {
     logger.error('Knowledge base migration: Failed to migrate entries');
     logger.error(e);

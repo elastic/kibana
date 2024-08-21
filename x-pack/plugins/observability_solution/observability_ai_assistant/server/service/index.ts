@@ -103,11 +103,12 @@ export class ObservabilityAIAssistantService {
     registerMigrateKnowledgeBaseEntriesTask({
       taskManager,
       logger,
+      getKbService: () => this.kbService,
+      getTaskManagerStart,
       getEsClient: async () => {
         const [coreStart] = await core.getStartServices();
         return coreStart.elasticsearch.client.asInternalUser;
       },
-      getTaskManagerStart,
     });
   }
 
@@ -124,6 +125,7 @@ export class ObservabilityAIAssistantService {
 
   private doInit = async () => {
     try {
+      this.logger.info('Setting up index assets');
       const [coreStart, pluginsStart] = await this.core.getStartServices();
 
       const esClient = {
@@ -166,12 +168,14 @@ export class ObservabilityAIAssistantService {
         dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
       });
 
+      // Knowledge base: component template
       await esClient.asInternalUser.cluster.putComponentTemplate({
         create: false,
         name: resourceNames.componentTemplate.kb,
         template: kbComponentTemplate,
       });
 
+      // Knowledge base: index template
       await esClient.asInternalUser.indices.putIndexTemplate({
         name: resourceNames.indexTemplate.kb,
         composed_of: [resourceNames.componentTemplate.kb],
@@ -186,6 +190,23 @@ export class ObservabilityAIAssistantService {
         },
       });
 
+      const kbAliasName = resourceNames.aliases.kb;
+
+      // Knowledge base: write index
+      await createConcreteWriteIndex({
+        esClient: esClient.asInternalUser,
+        logger: this.logger,
+        totalFieldsLimit: 10000,
+        indexPatterns: {
+          alias: kbAliasName,
+          pattern: `${kbAliasName}*`,
+          basePattern: `${kbAliasName}*`,
+          name: `${kbAliasName}-000001`,
+          template: resourceNames.indexTemplate.kb,
+        },
+        dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
+      });
+
       this.kbService = new KnowledgeBaseService({
         logger: this.logger.get('kb'),
         esClient,
@@ -195,7 +216,7 @@ export class ObservabilityAIAssistantService {
 
       this.logger.info('Successfully set up index assets');
     } catch (error) {
-      this.logger.error(`Failed to initialize service: ${error.message}`);
+      this.logger.error(`Failed setting up index assets: ${error.message}`);
       this.logger.debug(error);
       throw error;
     }

@@ -725,7 +725,7 @@ export class ObservabilityAIAssistantClient {
   };
 
   getKnowledgeBaseStatus = () => {
-    return this.dependencies.knowledgeBaseService.getStatus();
+    return this.dependencies.knowledgeBaseService.getElserModelStatus();
   };
 
   setupKnowledgeBase = () => {
