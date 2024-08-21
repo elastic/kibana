@@ -13,9 +13,12 @@ import { EMPTY_STAT } from '../../helpers';
 import { alertIndexWithAllResults } from '../../mock/pattern_rollup/mock_alerts_pattern_rollup';
 import { auditbeatWithAllResults } from '../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import { packetbeatNoResults } from '../../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
-import { TestProviders } from '../../mock/test_providers/test_providers';
+import {
+  TestDataQualityProviders,
+  TestExternalProviders,
+} from '../../mock/test_providers/test_providers';
 import { PatternRollup } from '../../types';
-import { Props, DataQualitySummary } from '.';
+import { DataQualitySummary } from '.';
 import {
   getTotalDocsCount,
   getTotalIncompatible,
@@ -62,34 +65,33 @@ const totalIndices = getTotalIndices(patternRollups);
 const totalIndicesChecked = getTotalIndicesChecked(patternRollups);
 const totalSizeInBytes = getTotalSizeInBytes(patternRollups);
 
-const defaultProps: Props = {
-  addSuccessToast: jest.fn(),
-  canUserCreateAndReadCases: jest.fn(),
-  formatBytes,
-  formatNumber,
-  ilmPhases,
-  lastChecked,
-  openCreateCaseFlyout: jest.fn(),
-  patternIndexNames,
-  patternRollups,
-  patterns,
-  setLastChecked: jest.fn(),
-  totalDocsCount,
-  totalIncompatible,
-  totalIndices,
-  totalIndicesChecked,
-  totalSizeInBytes,
-  onCheckCompleted: jest.fn(),
-};
-
 describe('DataQualitySummary', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
     render(
-      <TestProviders>
-        <DataQualitySummary {...defaultProps} />
-      </TestProviders>
+      <TestExternalProviders>
+        <TestDataQualityProviders
+          dataQualityContextProps={{
+            formatBytes,
+            formatNumber,
+            ilmPhases,
+            lastChecked,
+            patterns,
+          }}
+          resultsRollupContextProps={{
+            patternIndexNames,
+            patternRollups,
+            totalDocsCount,
+            totalIncompatible,
+            totalIndices,
+            totalIndicesChecked,
+            totalSizeInBytes,
+          }}
+        >
+          <DataQualitySummary />
+        </TestDataQualityProviders>
+      </TestExternalProviders>
     );
   });
 
