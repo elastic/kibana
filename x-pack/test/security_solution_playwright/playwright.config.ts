@@ -15,7 +15,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: 0,
   workers: 1,
-  reporter: 'html',
+  reporter: [['list', { printSteps: true }]],
   use: {
     trace: 'on-first-retry',
     baseURL: process.env.KIBANA_URL,
