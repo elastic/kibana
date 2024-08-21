@@ -7,3 +7,4 @@
  */
 
 export * from './rest_specs';
+export * from './schema';

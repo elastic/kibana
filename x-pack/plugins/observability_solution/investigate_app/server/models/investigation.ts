@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { investigationSchema } from '@kbn/investigation-shared/src/schema';
+import { investigationSchema } from '@kbn/investigation-shared';
 import * as t from 'io-ts';
 
 export type Investigation = t.TypeOf<typeof investigationSchema>;

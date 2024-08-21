@@ -6,7 +6,7 @@
  */
 
 import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { investigationSchema } from '@kbn/investigation-shared/src/schema';
+import { investigationSchema } from '@kbn/investigation-shared';
 import { isLeft } from 'fp-ts/lib/Either';
 import { Investigation, StoredInvestigation } from '../models/investigation';
 import { Paginated, Pagination } from '../models/pagination';

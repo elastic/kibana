@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { investigationNoteSchema } from '@kbn/investigation-shared/src/schema';
+import { investigationNoteSchema } from '@kbn/investigation-shared';
 
 export type InvestigationNote = t.TypeOf<typeof investigationNoteSchema>;
 export type StoredInvestigationNote = t.OutputOf<typeof investigationNoteSchema>;
