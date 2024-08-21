@@ -10,7 +10,7 @@ import React from 'react';
 
 import { INCOMPATIBLE_FIELD_MAPPINGS_TABLE_TITLE } from '../data_quality_panel/tabs/incompatible_tab/translations';
 import { eventCategory } from '../mock/enriched_field_metadata/mock_enriched_field_metadata';
-import { TestProviders } from '../mock/test_providers/test_providers';
+import { TestExternalProviders } from '../mock/test_providers/test_providers';
 import { CompareFieldsTable } from '.';
 import { getIncompatibleMappingsTableColumns } from './get_incompatible_mappings_table_columns';
 
@@ -18,13 +18,13 @@ describe('CompareFieldsTable', () => {
   describe('rendering', () => {
     beforeEach(() => {
       render(
-        <TestProviders>
+        <TestExternalProviders>
           <CompareFieldsTable
             enrichedFieldMetadata={[eventCategory]}
             getTableColumns={getIncompatibleMappingsTableColumns}
             title={INCOMPATIBLE_FIELD_MAPPINGS_TABLE_TITLE('foo')}
           />
-        </TestProviders>
+        </TestExternalProviders>
       );
     });
 

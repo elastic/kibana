@@ -14,9 +14,12 @@ import { EMPTY_STAT } from '../../../helpers';
 import { alertIndexWithAllResults } from '../../../mock/pattern_rollup/mock_alerts_pattern_rollup';
 import { auditbeatWithAllResults } from '../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import { packetbeatNoResults } from '../../../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
-import { TestProviders } from '../../../mock/test_providers/test_providers';
+import {
+  TestDataQualityProviders,
+  TestExternalProviders,
+} from '../../../mock/test_providers/test_providers';
 import { PatternRollup } from '../../../types';
-import { Props, SummaryActions } from '.';
+import { SummaryActions } from '.';
 import {
   getTotalDocsCount,
   getTotalIncompatible,
@@ -64,6 +67,8 @@ const patternIndexNames: Record<string, string[]> = {
   ],
 };
 
+const addSuccessToast = jest.fn();
+
 const lastChecked = '2023-03-28T23:27:28.159Z';
 
 const totalDocsCount = getTotalDocsCount(patternRollups);
@@ -72,35 +77,34 @@ const totalIndices = getTotalIndices(patternRollups);
 const totalIndicesChecked = getTotalIndicesChecked(patternRollups);
 const totalSizeInBytes = getTotalSizeInBytes(patternRollups);
 
-const defaultProps: Props = {
-  addSuccessToast: jest.fn(),
-  canUserCreateAndReadCases: () => true,
-  errorSummary: [],
-  formatBytes,
-  formatNumber,
-  ilmPhases,
-  lastChecked,
-  openCreateCaseFlyout: jest.fn(),
-  onCheckCompleted: jest.fn(),
-  patternIndexNames,
-  patternRollups,
-  patterns,
-  setLastChecked: jest.fn(),
-  totalDocsCount,
-  totalIncompatible,
-  totalIndices,
-  totalIndicesChecked,
-  sizeInBytes: totalSizeInBytes,
-};
-
 describe('SummaryActions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
     render(
-      <TestProviders>
-        <SummaryActions {...defaultProps} />
-      </TestProviders>
+      <TestExternalProviders>
+        <TestDataQualityProviders
+          dataQualityContextProps={{
+            formatBytes,
+            formatNumber,
+            ilmPhases,
+            patterns,
+            lastChecked,
+            addSuccessToast,
+          }}
+          resultsRollupContextProps={{
+            patternIndexNames,
+            totalDocsCount,
+            totalIncompatible,
+            totalIndices,
+            totalIndicesChecked,
+            totalSizeInBytes,
+            patternRollups,
+          }}
+        >
+          <SummaryActions />
+        </TestDataQualityProviders>
+      </TestExternalProviders>
     );
   });
 
@@ -121,7 +125,7 @@ describe('SummaryActions', () => {
 
     userEvent.click(button);
 
-    expect(defaultProps.addSuccessToast).toBeCalledWith({
+    expect(addSuccessToast).toBeCalledWith({
       title: 'Copied results to the clipboard',
     });
   });

@@ -116,6 +116,12 @@ module.exports = {
           exclude: [/packages[\/\\]kbn-i18n-react[\/\\]/],
         },
         {
+          from: 'zod',
+          to: '@kbn/zod',
+          disallowedMessage: `import from @kbn/zod instead`,
+          exclude: [/packages[\/\\]kbn-zod[\/\\]/],
+        },
+        {
           from: 'styled-components',
           to: false,
           exclude: USES_STYLED_COMPONENTS,
@@ -312,5 +318,9 @@ module.exports = {
     '@kbn/imports/uniform_imports': 'error',
     '@kbn/imports/no_unused_imports': 'error',
     '@kbn/imports/no_boundary_crossing': 'error',
+
+    'no-new-func': 'error',
+    'no-implied-eval': 'error',
+    'no-prototype-builtins': 'error',
   },
 };

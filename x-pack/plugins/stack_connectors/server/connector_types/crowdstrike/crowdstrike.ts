@@ -172,7 +172,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
         headers: {
           accept: 'application/json',
           'Content-Type': 'application/x-www-form-urlencoded',
-          authorization: 'Basic ' + this.base64encodedToken,
+          authorization: 'Basic ' + CrowdstrikeConnector.base64encodedToken,
         },
         responseSchema: CrowdstrikeGetTokenResponseSchema,
       },

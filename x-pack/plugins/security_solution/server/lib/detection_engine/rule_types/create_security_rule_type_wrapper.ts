@@ -132,7 +132,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             params,
             previousStartedAt,
             startedAt,
-            startedAtOverridden,
             services,
             spaceId,
             state,
@@ -344,9 +343,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             !isQueryParams(params) &&
             !isEqlParams(params)
           ) {
+            const dataViews = await services.getDataViews();
             inputIndexFields = await getFieldsForWildcard({
               index: inputIndex,
-              dataViews: services.dataViews,
+              dataViews,
               language: params.language,
               ruleExecutionLogger,
             });
@@ -366,13 +366,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               lists: params.exceptionsList,
             });
 
-            const alertTimestampOverride = isPreview || startedAtOverridden ? startedAt : undefined;
+            const alertTimestampOverride = isPreview ? startedAt : undefined;
             const bulkCreate = bulkCreateFactory(
               alertWithPersistence,
               refresh,
               ruleExecutionLogger,
-              experimentalFeatures,
-              alertTimestampOverride
+              experimentalFeatures
             );
 
             const legacySignalFields: string[] = Object.keys(aadFieldConversion);

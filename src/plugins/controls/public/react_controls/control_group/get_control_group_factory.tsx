@@ -23,6 +23,7 @@ import {
   PublishesDataViews,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
+import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { ControlStyle, ParentIgnoreSettings } from '../..';
 import {
   ControlGroupChainingSystem,
@@ -72,7 +73,13 @@ export const getControlGroupEmbeddableFactory = (services: {
       } = initialRuntimeState;
 
       const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
-      const controlsManager = initControlsManager(initialChildControlState);
+      const parentDataViewId = apiPublishesDataViews(parentApi)
+        ? parentApi.dataViews.value?.[0]?.id
+        : undefined;
+      const controlsManager = initControlsManager(
+        initialChildControlState,
+        parentDataViewId ?? (await services.dataViews.getDefaultId())
+      );
       const selectionsManager = initSelectionsManager({
         ...controlsManager.api,
         autoApplySelections$,
@@ -171,6 +178,7 @@ export const getControlGroupEmbeddableFactory = (services: {
             initialState: {
               grow: api.grow.getValue(),
               width: api.width.getValue(),
+              dataViewId: controlsManager.api.lastUsedDataViewId$.value,
             },
             onSave: ({ type: controlType, state: initialState }) => {
               api.addNewPanel({
@@ -205,6 +213,7 @@ export const getControlGroupEmbeddableFactory = (services: {
         saveNotification$: apiHasSaveNotification(parentApi)
           ? parentApi.saveNotification$
           : undefined,
+        reload$: apiPublishesReload(parentApi) ? parentApi.reload$ : undefined,
       });
 
       /** Subscribe to all children's output data views, combine them, and output them */
