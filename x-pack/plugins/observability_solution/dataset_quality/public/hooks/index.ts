@@ -10,7 +10,6 @@ export * from './use_degraded_docs_chart';
 export * from './use_redirect_link';
 export * from './use_summary_panel';
 export * from './use_create_dataview';
-export * from './use_dataset_quality_degraded_field';
 export * from './use_redirect_link_telemetry';
 export * from './use_dataset_quality_details_state';
 export * from './use_degraded_fields';
