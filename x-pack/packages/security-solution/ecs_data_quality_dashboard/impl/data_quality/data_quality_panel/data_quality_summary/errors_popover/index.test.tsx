@@ -9,7 +9,7 @@ import userEvent from '@testing-library/user-event';
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { TestProviders } from '../../../mock/test_providers/test_providers';
+import { TestExternalProviders } from '../../../mock/test_providers/test_providers';
 import { ErrorsPopover } from '.';
 
 const mockCopyToClipboard = jest.fn((value) => true);
@@ -36,9 +36,9 @@ describe('ErrorsPopover', () => {
 
   test('it disables the view errors button when `errorSummary` is empty', () => {
     render(
-      <TestProviders>
+      <TestExternalProviders>
         <ErrorsPopover addSuccessToast={jest.fn()} errorSummary={[]} />
-      </TestProviders>
+      </TestExternalProviders>
     );
 
     expect(screen.getByTestId('viewErrors')).toBeDisabled();
@@ -46,9 +46,9 @@ describe('ErrorsPopover', () => {
 
   test('it enables the view errors button when `errorSummary` is NOT empty', () => {
     render(
-      <TestProviders>
+      <TestExternalProviders>
         <ErrorsPopover addSuccessToast={jest.fn()} errorSummary={errorSummary} />
-      </TestProviders>
+      </TestExternalProviders>
     );
 
     expect(screen.getByTestId('viewErrors')).not.toBeDisabled();
@@ -61,9 +61,9 @@ describe('ErrorsPopover', () => {
       jest.resetAllMocks();
 
       render(
-        <TestProviders>
+        <TestExternalProviders>
           <ErrorsPopover addSuccessToast={addSuccessToast} errorSummary={errorSummary} />
-        </TestProviders>
+        </TestExternalProviders>
       );
 
       const viewErrorsButton = screen.getByTestId('viewErrors');
