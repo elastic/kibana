@@ -207,13 +207,6 @@ export class InfraServerPlugin
     );
     const inventoryLocator = plugins.share.url.locators.create(new InventoryLocatorDefinition());
 
-    const locators = {
-      alertsLocator,
-      assetDetailsLocator,
-      metricsExplorerLocator,
-      inventoryLocator,
-    };
-
     // Setup infra services
     const inventoryViews = this.inventoryViews.setup();
     const metricsExplorerViews = this.metricsExplorerViews?.setup();
@@ -290,7 +283,12 @@ export class InfraServerPlugin
       ]);
     }
 
-    registerRuleTypes(plugins.alerting, this.libs, this.config, locators);
+    registerRuleTypes(plugins.alerting, this.libs, this.config, {
+      alertsLocator,
+      assetDetailsLocator,
+      metricsExplorerLocator,
+      inventoryLocator,
+    });
 
     core.http.registerRouteHandlerContext<InfraPluginRequestHandlerContext, 'infra'>(
       'infra',
