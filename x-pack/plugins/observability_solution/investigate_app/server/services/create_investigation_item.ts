@@ -7,7 +7,7 @@
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import {
-  CreateInvestigationItemInput,
+  CreateInvestigationItemParams,
   CreateInvestigationItemResponse,
 } from '@kbn/investigation-shared';
 import { v4 } from 'uuid';
@@ -15,7 +15,7 @@ import { InvestigationRepository } from './investigation_repository';
 
 export async function createInvestigationItem(
   investigationId: string,
-  params: CreateInvestigationItemInput,
+  params: CreateInvestigationItemParams,
   { repository, user }: { repository: InvestigationRepository; user: AuthenticatedUser }
 ): Promise<CreateInvestigationItemResponse> {
   const investigation = await repository.findById(investigationId);

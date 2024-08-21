@@ -14,7 +14,7 @@ const deleteInvestigationParamsSchema = t.type({
   }),
 });
 
-type DeleteInvestigationParams = t.TypeOf<typeof deleteInvestigationParamsSchema.props.path>; // Parsed payload used by the backend
+type DeleteInvestigationParams = t.TypeOf<typeof deleteInvestigationParamsSchema.props.path>;
 
 export { deleteInvestigationParamsSchema };
 export type { DeleteInvestigationParams };

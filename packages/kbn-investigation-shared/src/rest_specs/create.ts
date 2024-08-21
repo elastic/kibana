@@ -23,9 +23,8 @@ const createInvestigationParamsSchema = t.type({
 
 const createInvestigationResponseSchema = investigationResponseSchema;
 
-type CreateInvestigationInput = t.OutputOf<typeof createInvestigationParamsSchema.props.body>; // Raw payload sent by the frontend
-type CreateInvestigationParams = t.TypeOf<typeof createInvestigationParamsSchema.props.body>; // Parsed payload used by the backend
-type CreateInvestigationResponse = t.OutputOf<typeof createInvestigationResponseSchema>; // Raw response sent to the frontend
+type CreateInvestigationParams = t.TypeOf<typeof createInvestigationParamsSchema.props.body>;
+type CreateInvestigationResponse = t.OutputOf<typeof createInvestigationResponseSchema>;
 
 export { createInvestigationParamsSchema, createInvestigationResponseSchema };
-export type { CreateInvestigationInput, CreateInvestigationParams, CreateInvestigationResponse };
+export type { CreateInvestigationParams, CreateInvestigationResponse };

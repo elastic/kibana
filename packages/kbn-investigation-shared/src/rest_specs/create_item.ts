@@ -19,17 +19,10 @@ const createInvestigationItemParamsSchema = t.type({
 
 const createInvestigationItemResponseSchema = investigationItemResponseSchema;
 
-type CreateInvestigationItemInput = t.OutputOf<
-  typeof createInvestigationItemParamsSchema.props.body
->;
 type CreateInvestigationItemParams = t.TypeOf<
   typeof createInvestigationItemParamsSchema.props.body
 >;
 type CreateInvestigationItemResponse = t.OutputOf<typeof createInvestigationItemResponseSchema>;
 
 export { createInvestigationItemParamsSchema, createInvestigationItemResponseSchema };
-export type {
-  CreateInvestigationItemInput,
-  CreateInvestigationItemParams,
-  CreateInvestigationItemResponse,
-};
+export type { CreateInvestigationItemParams, CreateInvestigationItemResponse };
