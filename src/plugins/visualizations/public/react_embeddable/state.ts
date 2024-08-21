@@ -36,6 +36,7 @@ import {
   VisualizeRuntimeState,
   VisualizeSavedVisInputState,
   ExtraSavedObjectProperties,
+  isVisualizeRuntimeState,
 } from './types';
 
 export const deserializeState = async (
@@ -50,6 +51,8 @@ export const deserializeState = async (
   let serializedState = cloneDeep(state.rawState);
   if (isVisualizeSavedObjectState(serializedState)) {
     serializedState = await deserializeSavedObjectState(serializedState);
+  } else if (isVisualizeRuntimeState(serializedState)) {
+    return serializedState as VisualizeRuntimeState;
   }
 
   const references: Reference[] = state.references ?? [];
@@ -71,7 +74,7 @@ export const deserializeSavedVisState = (
     indexRefName: string;
   };
   let serializedReferences = [...references];
-  if (!('indexRefName' in data.searchSource)) {
+  if (data.searchSource && !('indexRefName' in data.searchSource)) {
     // due to a bug in 8.0, some visualizations were saved with an injected state - re-extract in that case and inject the upstream references because they might have changed
     const [extractedSearchSource, extractedReferences] =
       extractSearchSourceReferences(serializedSearchSource);

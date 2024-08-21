@@ -78,6 +78,14 @@ export const isVisualizeSavedObjectState = (
   );
 };
 
+export const isVisualizeRuntimeState = (state: unknown): state is VisualizeRuntimeState => {
+  return (
+    !isVisualizeSavedObjectState(state) &&
+    !('savedVis' in (state as VisualizeRuntimeState)) &&
+    (state as VisualizeRuntimeState).serializedVis !== undefined
+  );
+};
+
 export type VisualizeApi = HasEditCapabilities &
   PublishesDataViews &
   PublishesDataLoading &
