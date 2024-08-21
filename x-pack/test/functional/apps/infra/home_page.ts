@@ -314,7 +314,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'memoryUsage', value: '20.0%' },
           ].forEach(({ metric, value }) => {
             it(`${metric} tile should show ${value}`, async () => {
-              await retry.tryForTime(15000, async () => {
+              await retry.tryForTime(5000, async () => {
                 const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
                   metric
                 );
