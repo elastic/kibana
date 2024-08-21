@@ -31,6 +31,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
 
   // Failing: See https://github.com/elastic/kibana/issues/190960
+  // Failing: See https://github.com/elastic/kibana/issues/190952
   describe.skip('@ess @serverless @skipInServerlessMKI Prebuilt Rules status', () => {
     describe('get_prebuilt_rules_status', () => {
       beforeEach(async () => {
