@@ -12,16 +12,22 @@ import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public'
 import { Capabilities } from '@kbn/core/public';
 import { isEqual } from 'lodash';
 import { getStateColumnActions } from '../components/actions/columns';
+import { UnifiedDataTableSettings } from '../types';
 
-interface UseColumnsProps {
+export interface UseColumnsProps {
   capabilities: Capabilities;
   dataView: DataView;
   dataViews: DataViewsContract;
   useNewFieldsApi: boolean;
-  setAppState: (state: { columns: string[]; sort?: string[][] }) => void;
+  setAppState: (state: {
+    columns: string[];
+    sort?: string[][];
+    settings?: UnifiedDataTableSettings;
+  }) => void;
   columns?: string[];
   sort?: string[][];
   defaultOrder?: string;
+  settings?: UnifiedDataTableSettings;
 }
 
 export const useColumns = ({
@@ -33,6 +39,7 @@ export const useColumns = ({
   columns,
   sort,
   defaultOrder = 'desc',
+  settings,
 }: UseColumnsProps) => {
   const [usedColumns, setUsedColumns] = useState(getColumns(columns, useNewFieldsApi));
   useEffect(() => {
@@ -53,6 +60,7 @@ export const useColumns = ({
         columns: usedColumns,
         sort,
         defaultOrder,
+        settings,
       }),
     [
       capabilities,
@@ -60,6 +68,7 @@ export const useColumns = ({
       dataViews,
       defaultOrder,
       setAppState,
+      settings,
       sort,
       useNewFieldsApi,
       usedColumns,

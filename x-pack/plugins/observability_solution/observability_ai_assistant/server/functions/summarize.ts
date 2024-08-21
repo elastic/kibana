@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { KnowledgeBaseType } from '../../common/types';
 import type { FunctionRegistrationParameters } from '.';
 import { KnowledgeBaseEntryRole } from '../../common';
 
@@ -66,13 +67,14 @@ export function registerSummarizationFunction({
       signal
     ) => {
       return client
-        .createKnowledgeBaseEntry({
+        .addKnowledgeBaseEntry({
           entry: {
             doc_id: id,
             role: KnowledgeBaseEntryRole.AssistantSummarization,
             id,
             text,
             is_correction: isCorrection,
+            type: KnowledgeBaseType.Contextual,
             confidence,
             public: isPublic,
             labels: {},
