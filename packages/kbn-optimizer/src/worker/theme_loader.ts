@@ -18,7 +18,7 @@ const compare = (a: ThemeTag, b: ThemeTag) =>
 export default function (this: webpack.LoaderContext<any>) {
   this.cacheable(true);
 
-  const options = this.getOptions(this);
+  const options = this.getOptions();
   const bundleId = options.bundleId as string;
   const themeTags = parseThemeTags(options.themeTags);
 
