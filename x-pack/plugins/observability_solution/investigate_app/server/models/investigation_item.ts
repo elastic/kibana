@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { InvestigationRepository } from './investigation_repository';
+import * as t from 'io-ts';
+import { investigationItemSchema } from '@kbn/investigation-shared';
 
-export async function deleteInvestigation(
-  investigationId: string,
-  repository: InvestigationRepository
-): Promise<void> {
-  await repository.deleteById(investigationId);
-}
+export type InvestigationItem = t.TypeOf<typeof investigationItemSchema>;
+export type StoredInvestigationItem = t.OutputOf<typeof investigationItemSchema>;

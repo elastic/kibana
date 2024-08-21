@@ -10,11 +10,11 @@ import * as t from 'io-ts';
 
 const deleteInvestigationParamsSchema = t.type({
   path: t.type({
-    id: t.string,
+    investigationId: t.string,
   }),
 });
 
-type DeleteInvestigationParams = t.TypeOf<typeof deleteInvestigationParamsSchema.props.path>; // Parsed payload used by the backend
+type DeleteInvestigationParams = t.TypeOf<typeof deleteInvestigationParamsSchema.props.path>;
 
 export { deleteInvestigationParamsSchema };
 export type { DeleteInvestigationParams };
