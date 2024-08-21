@@ -13,7 +13,7 @@ import {
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { TestProviders } from '../../mock/test_providers/test_providers';
+import { TestExternalProviders } from '../../mock/test_providers/test_providers';
 import { IlmPhaseCounts } from '.';
 import { getIlmExplainPhaseCounts } from '../pattern/helpers';
 
@@ -74,9 +74,9 @@ const pattern = 'packetbeat-*';
 describe('IlmPhaseCounts', () => {
   test('it renders the expected counts', () => {
     render(
-      <TestProviders>
+      <TestExternalProviders>
         <IlmPhaseCounts ilmExplainPhaseCounts={ilmExplainPhaseCounts} pattern={pattern} />
-      </TestProviders>
+      </TestExternalProviders>
     );
 
     expect(screen.getByTestId('ilmPhaseCounts')).toHaveTextContent(

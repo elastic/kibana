@@ -24,3 +24,9 @@ export const EntityAnalyticsUpsellingPageLazy = lazy(() =>
     default: EntityAnalyticsUpsellingPageESS,
   }))
 );
+
+export const AttackDiscoveryUpsellingPageLazy = lazy(() =>
+  import('./pages/attack_discovery').then(({ AttackDiscoveryUpsellingPageESS }) => ({
+    default: AttackDiscoveryUpsellingPageESS,
+  }))
+);

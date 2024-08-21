@@ -22,7 +22,7 @@ export function useCreateKnowledgeBaseEntry() {
   } = useKibana().services;
 
   const queryClient = useQueryClient();
-  const observabilityAIAssistantApi = observabilityAIAssistant?.service.callApi;
+  const observabilityAIAssistantApi = observabilityAIAssistant.service.callApi;
 
   return useMutation<
     void,
@@ -36,11 +36,7 @@ export function useCreateKnowledgeBaseEntry() {
   >(
     [REACT_QUERY_KEYS.CREATE_KB_ENTRIES],
     ({ entry }) => {
-      if (!observabilityAIAssistantApi) {
-        return Promise.reject('Error with observabilityAIAssistantApi: API not found.');
-      }
-
-      return observabilityAIAssistantApi?.(
+      return observabilityAIAssistantApi(
         'POST /internal/observability_ai_assistant/kb/entries/save',
         {
           signal: null,
@@ -59,8 +55,7 @@ export function useCreateKnowledgeBaseEntry() {
           i18n.translate(
             'xpack.observabilityAiAssistantManagement.kb.addManualEntry.successNotification',
             {
-              defaultMessage: 'Successfully created {name}',
-              values: { name: entry.id },
+              defaultMessage: 'Entry saved',
             }
           )
         );

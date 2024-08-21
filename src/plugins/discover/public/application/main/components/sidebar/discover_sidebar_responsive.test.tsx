@@ -136,7 +136,7 @@ const mockCalcFieldCounts = jest.fn(() => {
   return mockfieldCounts;
 });
 
-jest.mock('../../utils/calc_field_counts', () => ({
+jest.mock('@kbn/discover-utils/src/utils/calc_field_counts', () => ({
   calcFieldCounts: () => mockCalcFieldCounts(),
 }));
 
