@@ -67,7 +67,7 @@ const NodeContainerSmall = ({ children, ...props }: NodeProps & { color: string 
   </div>
 );
 const ValueInner = ({ children, ...props }: NodeProps<HTMLButtonElement>) => (
-  <button
+  <div
     css={css`
       position: absolute;
       top: 0;
@@ -89,10 +89,11 @@ const ValueInner = ({ children, ...props }: NodeProps<HTMLButtonElement>) => (
         box-shadow: none;
       }
     `}
+    tabIndex={0}
     {...props}
   >
     {children}
-  </button>
+  </div>
 );
 const SquareOuter = ({ children, ...props }: NodeProps & { color: string }) => (
   <div
