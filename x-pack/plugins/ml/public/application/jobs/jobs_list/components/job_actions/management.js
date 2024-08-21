@@ -77,7 +77,7 @@ export function actionsMenuContent(
         if (isManagedJob(item)) {
           showStopDatafeedsConfirmModal([item]);
         } else {
-          stopDatafeeds([item], refreshJobs);
+          stopDatafeeds(toastNotifications, mlJobService, [item], refreshJobs);
         }
 
         closeMenu(true);

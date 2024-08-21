@@ -41,6 +41,11 @@ export declare interface MlJobService {
     start: number | undefined,
     end: number | undefined
   ): Promise<any>;
+  forceStartDatafeeds(
+    dIds: string[],
+    start: number | undefined,
+    end: number | undefined
+  ): Promise<any>;
   createResultsUrl(jobId: string[], start: number, end: number, location: string): string;
   getJobAndGroupIds(): Promise<ExistingJobsAndGroups>;
   getJob(jobId: string): CombinedJob;

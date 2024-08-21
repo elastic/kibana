@@ -92,7 +92,7 @@ export function forceStartDatafeeds(
   mlJobService
     .forceStartDatafeeds(datafeedIds, start, end)
     .then((resp) => {
-      showResults(resp, DATAFEED_STATE.STARTED);
+      showResults(toastNotifications, resp, DATAFEED_STATE.STARTED);
       finish();
     })
     .catch((error) => {
@@ -111,7 +111,7 @@ export function stopDatafeeds(toastNotifications, mlJobService, jobs, finish = (
   mlJobService
     .stopDatafeeds(datafeedIds)
     .then((resp) => {
-      showResults(resp, DATAFEED_STATE.STOPPED);
+      showResults(toastNotifications, resp, DATAFEED_STATE.STOPPED);
       finish();
     })
     .catch((error) => {
@@ -299,7 +299,7 @@ export function closeJobs(toastNotifications, mlJobService, jobs, finish = () =>
   mlJobService
     .closeJobs(jobIds)
     .then((resp) => {
-      showResults(resp, JOB_STATE.CLOSED);
+      showResults(toastNotifications, resp, JOB_STATE.CLOSED);
       finish();
     })
     .catch((error) => {
@@ -323,7 +323,7 @@ export function resetJobs(
   mlJobService
     .resetJobs(jobIds, deleteUserAnnotations)
     .then((resp) => {
-      showResults(resp, JOB_ACTION.RESET);
+      showResults(toastNotifications, resp, JOB_ACTION.RESET);
       finish();
     })
     .catch((error) => {
@@ -349,7 +349,7 @@ export function deleteJobs(
   mlJobService
     .deleteJobs(jobIds, deleteUserAnnotations, deleteAlertingRules)
     .then((resp) => {
-      showResults(resp, JOB_STATE.DELETED);
+      showResults(toastNotifications, resp, JOB_STATE.DELETED);
       finish();
     })
     .catch((error) => {

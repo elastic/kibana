@@ -27,6 +27,8 @@ export function forceStartDatafeeds(
   toastNotifications: ToastsStart,
   mlJobService: MlJobService,
   jobs: CombinedJobWithStats[],
+  start: number | undefined,
+  end: number | undefined,
   finish?: () => void
 ): Promise<void>;
 export function stopDatafeeds(
