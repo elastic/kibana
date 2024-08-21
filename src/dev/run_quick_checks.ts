@@ -46,7 +46,7 @@ const scriptOptions: RunOptions = {
 };
 
 let logger: ToolingLog;
-run(async ({ log, flagsReader }) => {
+void run(async ({ log, flagsReader }) => {
   logger = log;
 
   const scriptsToRun = collectScriptsToRun({
@@ -67,22 +67,14 @@ run(async ({ log, flagsReader }) => {
 
   const failedChecks = results.filter((check) => !check.success);
   if (failedChecks.length > 0) {
-    throw new Error(`Failed ${failedChecks.length} checks.`);
+    logger.write(`--- ${failedChecks.length} quick check(s) failed. ❌`);
+    logger.write(`See above for details.`);
+    process.exitCode = 1;
   } else {
+    logger.write('--- All checks passed. ✅');
     return results;
   }
-}, scriptOptions)
-  .then(() => {
-    logger.write('--- All checks passed. ✅');
-
-    process.exit(0);
-  })
-  .catch((error) => {
-    logger.write('--- Some quick checks failed. ❌');
-    logger.error(error);
-
-    process.exit(1);
-  });
+}, scriptOptions);
 
 function collectScriptsToRun(inputOptions: {
   targetFile: string | undefined;
