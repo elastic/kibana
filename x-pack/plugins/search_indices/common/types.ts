@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
-import type { Logger } from '@kbn/logging';
+export interface IndicesStatusResponse {
+  indexNames: string[];
+}
 
-import { registerStatusRoutes } from './status';
-
-export function defineRoutes(router: IRouter, logger: Logger) {
-  registerStatusRoutes(router, logger);
+export interface UserStartPrivilegesResponse {
+  privileges: {
+    canCreateApiKeys: boolean;
+    canCreateIndex: boolean;
+  };
 }
