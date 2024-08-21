@@ -1421,6 +1421,7 @@ async function getFunctionArgsSuggestions(
         await getFieldsByType(getTypesFromParamDefs(paramDefsWhichSupportFields) as string[], [], {
           addComma: shouldAddComma,
           advanceCursor: hasMoreMandatoryArgs,
+          openSuggestions: hasMoreMandatoryArgs,
         }),
         true
       )
