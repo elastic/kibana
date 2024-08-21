@@ -9,8 +9,8 @@ import { EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import { SameFamilyCallout } from '../callouts/same_family_callout';
-import { CompareFieldsTable } from '../../../../../../../../../compare_fields_table';
-import { getIncompatibleMappingsTableColumns } from '../../../../../../../../../compare_fields_table/get_incompatible_mappings_table_columns';
+import { CompareFieldsTable } from '../compare_fields_table';
+import { getIncompatibleMappingsTableColumns } from '../compare_fields_table/get_incompatible_mappings_table_columns';
 import { useDataQualityContext } from '../../../../../../../../../data_quality_context';
 import { getAllSameFamilyMarkdownComments, getSameFamilyMappings } from './helpers';
 import { SAME_FAMILY_FIELD_MAPPINGS_TABLE_TITLE } from './translations';

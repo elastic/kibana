@@ -11,7 +11,7 @@ import {
   ECS_MAPPING_TYPE_EXPECTED,
   FIELD,
   INDEX_MAPPING_TYPE_ACTUAL,
-} from '../../../../../../../compare_fields_table/translations';
+} from '../index_check_fields/tabs/compare_fields_table/translations';
 import { ERRORS } from '../../../../../../data_quality_summary/summary_actions/check_status/errors_popover/translations';
 import {
   ERROR,

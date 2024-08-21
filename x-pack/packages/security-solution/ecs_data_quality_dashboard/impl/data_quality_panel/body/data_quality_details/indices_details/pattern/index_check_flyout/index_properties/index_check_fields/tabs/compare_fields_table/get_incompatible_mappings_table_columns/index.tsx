@@ -8,10 +8,10 @@
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import React from 'react';
 
-import { SameFamily } from '../../same_family';
-import { CodeDanger, CodeSuccess } from '../../styles';
+import { SameFamily } from '../../../../../../../../../../same_family';
+import { CodeDanger, CodeSuccess } from '../../../../../../../../../../styles';
 import * as i18n from '../translations';
-import type { EcsBasedFieldMetadata } from '../../types';
+import type { EcsBasedFieldMetadata } from '../../../../../../../../../../types';
 
 export const EMPTY_PLACEHOLDER = '--';
 

@@ -9,13 +9,13 @@ import { render, screen } from '@testing-library/react';
 import { omit } from 'lodash/fp';
 import React from 'react';
 
-import { SAME_FAMILY } from '../../same_family/translations';
+import { SAME_FAMILY } from '../../../../../../../../../../same_family/translations';
 import {
   eventCategory,
   someField,
   eventCategoryWithUnallowedValues,
-} from '../../mock/enriched_field_metadata/mock_enriched_field_metadata';
-import { TestExternalProviders } from '../../mock/test_providers/test_providers';
+} from '../../../../../../../../../../mock/enriched_field_metadata/mock_enriched_field_metadata';
+import { TestExternalProviders } from '../../../../../../../../../../mock/test_providers/test_providers';
 import {
   DOCUMENT_VALUES_ACTUAL,
   ECS_DESCRIPTION,
@@ -24,7 +24,7 @@ import {
   FIELD,
   INDEX_MAPPING_TYPE_ACTUAL,
 } from '../translations';
-import { EnrichedFieldMetadata } from '../../types';
+import { EnrichedFieldMetadata } from '../../../../../../../../../../types';
 import { EMPTY_PLACEHOLDER, getCommonTableColumns } from '.';
 
 describe('getCommonTableColumns', () => {

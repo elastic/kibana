@@ -10,7 +10,7 @@ import { EuiInMemoryTable, EuiTitle, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import * as i18n from './translations';
-import type { EnrichedFieldMetadata } from '../types';
+import type { EnrichedFieldMetadata } from '../../../../../../../../../types';
 
 const search: Search = {
   box: {

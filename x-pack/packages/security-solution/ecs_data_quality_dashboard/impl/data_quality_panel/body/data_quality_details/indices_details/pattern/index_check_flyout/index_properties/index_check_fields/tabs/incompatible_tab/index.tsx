@@ -9,9 +9,9 @@ import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import { IncompatibleCallout } from '../callouts/incompatible_callout';
-import { CompareFieldsTable } from '../../../../../../../../../compare_fields_table';
-import { getIncompatibleMappingsTableColumns } from '../../../../../../../../../compare_fields_table/get_incompatible_mappings_table_columns';
-import { getIncompatibleValuesTableColumns } from '../../../../../../../../../compare_fields_table/helpers';
+import { CompareFieldsTable } from '../compare_fields_table';
+import { getIncompatibleMappingsTableColumns } from '../compare_fields_table/get_incompatible_mappings_table_columns';
+import { getIncompatibleValuesTableColumns } from '../compare_fields_table/helpers';
 import { EmptyPromptBody } from '../../../empty_prompt_body';
 import { EmptyPromptTitle } from '../../../empty_prompt_title';
 import {

@@ -9,8 +9,8 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { EMPTY_PLACEHOLDER } from '../helpers';
-import { TestExternalProviders } from '../../mock/test_providers/test_providers';
-import { UnallowedValueCount } from '../../types';
+import { TestExternalProviders } from '../../../../../../../../../../mock/test_providers/test_providers';
+import { UnallowedValueCount } from '../../../../../../../../../../types';
 import { IndexInvalidValues } from '.';
 
 describe('IndexInvalidValues', () => {

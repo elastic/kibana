@@ -26,7 +26,7 @@ import { IndexSummaryTableItem } from '../types';
 import { UseIndicesCheckCheckState } from '../../../../../use_indices_check/types';
 import { IndexResultBadge } from '../../../../../index_result_badge';
 import { getIndexResultToolTip } from '../../../../../index_result_badge/helpers';
-import { Stat } from '../pattern_summary/stats_rollup/stat';
+import { Stat } from '../../../../stat';
 
 const ProgressContainer = styled.div`
   width: 150px;

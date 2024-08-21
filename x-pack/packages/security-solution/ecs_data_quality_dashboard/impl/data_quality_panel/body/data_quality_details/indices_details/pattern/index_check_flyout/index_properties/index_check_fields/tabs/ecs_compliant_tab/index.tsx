@@ -11,8 +11,8 @@ import { EuiCallOut, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { CompareFieldsTable } from '../../../../../../../../../compare_fields_table';
-import { getEcsCompliantTableColumns } from '../../../../../../../../../compare_fields_table/helpers';
+import { CompareFieldsTable } from '../compare_fields_table';
+import { getEcsCompliantTableColumns } from '../compare_fields_table/helpers';
 import { EmptyPromptBody } from '../../../empty_prompt_body';
 import { EmptyPromptTitle } from '../../../empty_prompt_title';
 import { showMissingTimestampCallout } from '../helpers';

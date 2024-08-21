@@ -11,14 +11,14 @@ import React from 'react';
 
 import { EcsAllowedValues } from './ecs_allowed_values';
 import { IndexInvalidValues } from './index_invalid_values';
-import { CodeSuccess } from '../styles';
+import { CodeSuccess } from '../../../../../../../../../styles';
 import * as i18n from './translations';
 import type {
   AllowedValue,
   CustomFieldMetadata,
   EcsBasedFieldMetadata,
   UnallowedValueCount,
-} from '../types';
+} from '../../../../../../../../../types';
 
 export const EMPTY_PLACEHOLDER = '--';
 

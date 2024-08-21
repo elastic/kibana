@@ -9,8 +9,8 @@ import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import { CustomCallout } from '../callouts/custom_callout';
-import { CompareFieldsTable } from '../../../../../../../../../compare_fields_table';
-import { getCustomTableColumns } from '../../../../../../../../../compare_fields_table/helpers';
+import { CompareFieldsTable } from '../compare_fields_table';
+import { getCustomTableColumns } from '../compare_fields_table/helpers';
 import { EmptyPromptBody } from '../../../empty_prompt_body';
 import { EmptyPromptTitle } from '../../../empty_prompt_title';
 import { getAllCustomMarkdownComments, showCustomCallout } from './helpers';

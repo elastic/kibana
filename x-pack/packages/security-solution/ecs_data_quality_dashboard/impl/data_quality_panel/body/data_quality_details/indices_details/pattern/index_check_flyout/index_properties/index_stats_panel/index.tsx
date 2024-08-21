@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import { DOCS } from '../translations';
 import { ILM_PHASE } from '../../../../../../../translations';
 import { SIZE } from '../../../summary_table/translations';
-import { Stat } from '../../../pattern_summary/stats_rollup/stat';
+import { Stat } from '../../../../../../stat';
 import { getIlmPhaseDescription } from '../../../../../../../helpers';
 
 const StyledFlexItem = styled(EuiFlexItem)`

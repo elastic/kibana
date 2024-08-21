@@ -10,7 +10,7 @@ import React from 'react';
 
 import type { IlmExplainPhaseCounts } from '../../../../../types';
 import { PatternLabel } from './pattern_label';
-import { StatsRollup } from './stats_rollup';
+import { StatsRollup } from '../../../../stats_rollup';
 
 interface Props {
   ilmExplainPhaseCounts: IlmExplainPhaseCounts | undefined;

@@ -12,7 +12,7 @@ import userEvent from '@testing-library/user-event';
 import {
   TestDataQualityProviders,
   TestExternalProviders,
-} from '../../../../../../mock/test_providers/test_providers';
+} from '../../mock/test_providers/test_providers';
 import { StatsRollup } from '.';
 
 describe('StatsRollup', () => {

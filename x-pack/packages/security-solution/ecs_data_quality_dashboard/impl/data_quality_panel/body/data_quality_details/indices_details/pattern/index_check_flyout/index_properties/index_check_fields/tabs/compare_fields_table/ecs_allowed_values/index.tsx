@@ -9,8 +9,8 @@ import { EuiCode, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
 import { EMPTY_PLACEHOLDER } from '../helpers';
-import { CodeSuccess } from '../../styles';
-import type { AllowedValue } from '../../types';
+import { CodeSuccess } from '../../../../../../../../../../styles';
+import type { AllowedValue } from '../../../../../../../../../../types';
 
 interface Props {
   allowedValues: AllowedValue[] | undefined;

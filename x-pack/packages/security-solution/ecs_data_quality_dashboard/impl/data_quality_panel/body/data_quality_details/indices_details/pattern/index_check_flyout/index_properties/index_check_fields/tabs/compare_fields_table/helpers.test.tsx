@@ -18,8 +18,8 @@ import {
   eventCategory,
   eventCategoryWithUnallowedValues,
   someField,
-} from '../mock/enriched_field_metadata/mock_enriched_field_metadata';
-import { TestExternalProviders } from '../mock/test_providers/test_providers';
+} from '../../../../../../../../../mock/enriched_field_metadata/mock_enriched_field_metadata';
+import { TestExternalProviders } from '../../../../../../../../../mock/test_providers/test_providers';
 
 describe('helpers', () => {
   describe('getCustomTableColumns', () => {

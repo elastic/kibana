@@ -8,9 +8,9 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { INCOMPATIBLE_FIELD_MAPPINGS_TABLE_TITLE } from '../body/data_quality_details/indices_details/pattern/index_check_flyout/index_properties/index_check_fields/tabs/incompatible_tab/translations';
-import { eventCategory } from '../mock/enriched_field_metadata/mock_enriched_field_metadata';
-import { TestExternalProviders } from '../mock/test_providers/test_providers';
+import { INCOMPATIBLE_FIELD_MAPPINGS_TABLE_TITLE } from '../incompatible_tab/translations';
+import { eventCategory } from '../../../../../../../../../mock/enriched_field_metadata/mock_enriched_field_metadata';
+import { TestExternalProviders } from '../../../../../../../../../mock/test_providers/test_providers';
 import { CompareFieldsTable } from '.';
 import { getIncompatibleMappingsTableColumns } from './get_incompatible_mappings_table_columns';
 

@@ -29,7 +29,7 @@ import {
   INDEX_MAPPING_TYPE_ACTUAL,
   DOCUMENT_VALUES_ACTUAL,
   ECS_VALUES_EXPECTED,
-} from '../../../../../../../../../compare_fields_table/translations';
+} from '../compare_fields_table/translations';
 import { getIsInSameFamily } from '../../../../../../../../../helpers';
 
 export const getIncompatibleFieldsMarkdownComment = (incompatible: number): string =>

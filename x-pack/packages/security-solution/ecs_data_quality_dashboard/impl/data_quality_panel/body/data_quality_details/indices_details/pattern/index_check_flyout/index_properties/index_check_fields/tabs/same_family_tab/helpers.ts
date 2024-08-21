@@ -11,7 +11,7 @@ import {
   FIELD,
   ECS_MAPPING_TYPE_EXPECTED,
   INDEX_MAPPING_TYPE_ACTUAL,
-} from '../../../../../../../../../compare_fields_table/translations';
+} from '../compare_fields_table/translations';
 import {
   getSummaryMarkdownComment,
   getIncompatibleMappingsMarkdownTableRows,
@@ -22,7 +22,11 @@ import {
 } from '../../../markdown/helpers';
 import * as i18n from '../../../translations';
 import { SAME_FAMILY_FIELD_MAPPINGS_TABLE_TITLE } from './translations';
-import type { EcsBasedFieldMetadata, IlmPhase, PartitionedFieldMetadata } from '../../../../../../../../../types';
+import type {
+  EcsBasedFieldMetadata,
+  IlmPhase,
+  PartitionedFieldMetadata,
+} from '../../../../../../../../../types';
 
 export const getSameFamilyMarkdownComment = (fieldsInSameFamily: number): string =>
   getMarkdownComment({

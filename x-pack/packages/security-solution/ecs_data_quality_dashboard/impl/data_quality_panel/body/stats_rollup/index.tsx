@@ -9,10 +9,10 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import { EMPTY_STAT, getIncompatibleStatBadgeColor } from '../../../../../../helpers';
-import { useDataQualityContext } from '../../../../../../data_quality_context';
-import * as i18n from '../../../../../../stat_label/translations';
-import { Stat } from './stat';
+import { EMPTY_STAT, getIncompatibleStatBadgeColor } from '../../helpers';
+import { useDataQualityContext } from '../../data_quality_context';
+import * as i18n from '../../stat_label/translations';
+import { Stat } from '../stat';
 
 const StyledStatWrapperFlexItem = styled(EuiFlexItem)`
   padding: 0 ${({ theme }) => theme.eui.euiSize};
