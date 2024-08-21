@@ -20,8 +20,7 @@ import {
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
 } from '../../../common/constants/synthetics_alerts';
-
-type DefaultRuleType = typeof SYNTHETICS_STATUS_RULE | typeof SYNTHETICS_TLS_RULE;
+import { DefaultRuleType } from '../../../common/types/default_alerts';
 export class DefaultAlertService {
   context: UptimeRequestHandlerContext;
   soClient: SavedObjectsClientContract;
@@ -61,8 +60,8 @@ export class DefaultAlertService {
     }
 
     return {
-      statusRule: statusRule.status === 'fulfilled' ? statusRule.value : null,
-      tlsRule: tlsRule.status === 'fulfilled' ? tlsRule.value : null,
+      statusRule: statusRule.status === 'fulfilled' && statusRule.value ? statusRule.value : null,
+      tlsRule: tlsRule.status === 'fulfilled' && tlsRule.value ? tlsRule.value : null,
     };
   }
 
@@ -148,7 +147,7 @@ export class DefaultAlertService {
       );
     } else {
       const rulesClient = (await this.context.alerting)?.getRulesClient();
-      return rulesClient.bulkDeleteRules({
+      await rulesClient.bulkDeleteRules({
         filter: `alert.attributes.alertTypeId:"${SYNTHETICS_STATUS_RULE}" AND alert.attributes.tags:"SYNTHETICS_DEFAULT_ALERT"`,
       });
     }
@@ -159,7 +158,7 @@ export class DefaultAlertService {
       return this.updateDefaultAlert(SYNTHETICS_TLS_RULE, `Synthetics internal TLS rule`, '1m');
     } else {
       const rulesClient = (await this.context.alerting)?.getRulesClient();
-      return rulesClient.bulkDeleteRules({
+      await rulesClient.bulkDeleteRules({
         filter: `alert.attributes.alertTypeId:"${SYNTHETICS_TLS_RULE}" AND alert.attributes.tags:"SYNTHETICS_DEFAULT_ALERT"`,
       });
     }
