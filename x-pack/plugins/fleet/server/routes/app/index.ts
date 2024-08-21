@@ -151,6 +151,35 @@ export const generateServiceTokenHandler: RequestHandler<
   }
 };
 
+export const getAgentPoliciesSpacesHandler: FleetRequestHandler<
+  null,
+  null,
+  TypeOf<typeof GenerateServiceTokenRequestSchema.body>
+> = async (context, request, response) => {
+  try {
+    const spaces = await (await context.fleet).getAllSpaces();
+    const security = appContextService.getSecurity();
+    const spaceIds = spaces.map(({ id }) => id);
+    const res = await security.authz.checkPrivilegesWithRequest(request).atSpaces(spaceIds, {
+      kibana: [security.authz.actions.api.get(`fleet-agent-policies-all`)],
+    });
+
+    const authorizedSpaces = spaces.filter(
+      (space) =>
+        res.privileges.kibana.find((privilege) => privilege.resource === space.id)?.authorized ??
+        false
+    );
+
+    return response.ok({
+      body: {
+        items: authorizedSpaces,
+      },
+    });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
 const serviceTokenBodyValidation = (data: any, validationResult: RouteValidationResultFactory) => {
   const { ok } = validationResult;
   if (!data) {
@@ -190,6 +219,22 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         validate: { request: CheckPermissionsRequestSchema },
       },
       getCheckPermissionsHandler
+    );
+
+  router.versioned
+    .get({
+      path: APP_API_ROUTES.AGENT_POLICIES_SPACES,
+      access: 'internal',
+      fleetAuthz: {
+        fleet: { allAgentPolicies: true },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {},
+      },
+      getAgentPoliciesSpacesHandler
     );
 
   router.versioned

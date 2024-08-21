@@ -15,9 +15,9 @@ import { useDocumentDetailsContext } from '../../shared/context';
 import { useInvestigationTimeEnrichment } from '../../shared/hooks/use_investigation_enrichment';
 import type { RouteSpyState } from '../../../../common/utils/route/types';
 import {
-  type GetBasicDataFromDetailsData,
+  type UseBasicDataFromDetailsDataResult,
   useBasicDataFromDetailsData,
-} from '../../../../timelines/components/side_panel/event_details/helpers';
+} from '../../shared/hooks/use_basic_data_from_details_data';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 
 jest.mock('../../../../timelines/containers/details');
@@ -25,7 +25,7 @@ jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../../common/utils/route/use_route_spy');
 jest.mock('../../shared/context');
 jest.mock('../../shared/hooks/use_investigation_enrichment');
-jest.mock('../../../../timelines/components/side_panel/event_details/helpers');
+jest.mock('../../shared/hooks/use_basic_data_from_details_data');
 
 describe('useThreatIntelligenceDetails', () => {
   beforeEach(() => {
@@ -42,14 +42,13 @@ describe('useThreatIntelligenceDetails', () => {
 
     jest
       .mocked(useBasicDataFromDetailsData)
-      .mockReturnValue({ isAlert: true } as unknown as GetBasicDataFromDetailsData);
+      .mockReturnValue({ isAlert: true } as unknown as UseBasicDataFromDetailsDataResult);
 
     jest.mocked(useSourcererDataView).mockReturnValue({
       browserFields: {},
       dataViewId: '',
       loading: false,
       indicesExist: true,
-      patternList: [],
       selectedPatterns: [],
       indexPattern: { fields: [], title: '' },
       sourcererDataView: undefined,
