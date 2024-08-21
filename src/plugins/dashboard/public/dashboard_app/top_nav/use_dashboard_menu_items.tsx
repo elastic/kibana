@@ -73,7 +73,6 @@ export const useDashboardMenuItems = ({
         savedObjectId: lastSavedId,
         isDirty: Boolean(hasUnsavedChanges),
         getDashboardState: () => dashboard.getState().explicitInput,
-        hasExpandedPanel: dashboard.getExpandedPanelId(),
       });
     },
     [dashboardTitle, hasUnsavedChanges, lastSavedId, dashboard]
