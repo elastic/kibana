@@ -9,7 +9,7 @@
 import { createCellActionFactory } from '@kbn/cell-actions/actions';
 import { useEffect, useMemo, useState } from 'react';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
-import { uniqueId } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import type {
   AdditionalCellActionContext,
   DiscoverCellAction,
@@ -39,7 +39,7 @@ export const useAdditionalCellActions = ({
   );
 
   useEffect(() => {
-    const currentInstanceId = uniqueId();
+    const currentInstanceId = uuidv4();
     const actions = additionalCellActions.map((action, i) => {
       const createFactory = createCellActionFactory<DiscoverCellAction>(() => ({
         type: DISCOVER_CELL_ACTION_TYPE,
@@ -64,7 +64,7 @@ export const useAdditionalCellActions = ({
 
       const factory = createFactory();
 
-      return factory({ id: uniqueId(), order: i });
+      return factory({ id: uuidv4(), order: i });
     });
 
     actions.forEach((action) => {
