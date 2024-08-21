@@ -636,11 +636,16 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
                     options={operatorOptions}
                     valueOfSelected={blocklistEntry.type}
                     onChange={handleOperatorUpdate}
-                    data-test-subj={getTestId('operator-select')}
+                    data-test-subj={getTestId('operator-select-multi')}
                     fullWidth
                   />
                 ) : (
-                  <EuiFieldText name="operator" value={isOneOfOperator.message} readOnly />
+                  <EuiFieldText
+                    name="operator"
+                    value={isOneOfOperator.message}
+                    data-test-subj={getTestId('operator-select-single')}
+                    readOnly
+                  />
                 )}
               </EuiFormRow>
             </EuiFlexItem>

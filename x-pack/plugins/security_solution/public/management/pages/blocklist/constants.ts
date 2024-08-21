@@ -14,6 +14,7 @@ import {
   ENDPOINT_BLOCKLISTS_LIST_ID,
   ENDPOINT_BLOCKLISTS_LIST_NAME,
 } from '@kbn/securitysolution-list-constants';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
 
 export const BLOCKLISTS_LIST_TYPE: ExceptionListType = ExceptionListTypeEnum.ENDPOINT_BLOCKLISTS;
 
@@ -32,4 +33,56 @@ export const SEARCHABLE_FIELDS: Readonly<string[]> = [
   `entries.value`,
   `entries.entries.value`,
   `comments.comment`,
+];
+
+export const blocklistOperatorFieldTestCases = [
+  {
+    os: OperatingSystem.LINUX,
+    field: 'file.path',
+    fieldText: 'Path, ',
+    osText: 'Linux, ',
+    isMulti: false,
+  },
+  {
+    os: OperatingSystem.LINUX,
+    field: 'file.hash.*',
+    fieldText: 'Hash, ',
+    osText: 'Linux, ',
+    isMulti: false,
+  },
+  {
+    os: OperatingSystem.WINDOWS,
+    field: 'file.path.caseless',
+    fieldText: 'Path, ',
+    osText: 'Windows, ',
+    isMulti: false,
+  },
+  {
+    os: OperatingSystem.WINDOWS,
+    field: 'file.hash.*',
+    fieldText: 'Hash, ',
+    osText: 'Windows, ',
+    isMulti: false,
+  },
+  {
+    os: OperatingSystem.WINDOWS,
+    field: 'file.Ext.code_signature',
+    fieldText: 'Signature, ',
+    osText: 'Windows, ',
+    isMulti: true,
+  },
+  {
+    os: OperatingSystem.MAC,
+    field: 'file.path.caseless',
+    fieldText: 'Path, ',
+    osText: 'Mac, ',
+    isMulti: false,
+  },
+  {
+    os: OperatingSystem.MAC,
+    field: 'file.hash.*',
+    fieldText: 'Hash, ',
+    osText: 'Mac, ',
+    isMulti: false,
+  },
 ];

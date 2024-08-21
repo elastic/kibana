@@ -26,6 +26,7 @@ import type { PolicyData } from '../../../../../../common/endpoint/types';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../../../common/endpoint/service/artifacts';
 import { ListOperatorEnum, ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { blocklistOperatorFieldTestCases } from '../../constants';
 
 jest.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
@@ -186,6 +187,41 @@ describe('blocklist form', () => {
     render();
     expect(screen.getByTestId('blocklist-form-field-select').textContent).toEqual('Hash, ');
   });
+
+  describe.each(blocklistOperatorFieldTestCases)(
+    'should correctly render operator field for $os OS, $fieldText',
+    ({ os, field, fieldText, osText, isMulti }) => {
+      it(`should correctly render operator field for ${os} OS, ${fieldText}`, () => {
+        const validItem: ArtifactFormComponentProps['item'] = {
+          list_id: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
+          name: 'test name',
+          description: 'test description',
+          entries: [createEntry(field as BlocklistConditionEntryField, isMulti ? ['hello'] : [])],
+          os_types: [os],
+          tags: [GLOBAL_ARTIFACT_TAG],
+          type: 'simple',
+        };
+
+        render(createProps({ item: validItem }));
+        expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual(osText);
+        expect(screen.getByTestId('blocklist-form-field-select').textContent).toEqual(fieldText);
+
+        if (isMulti) {
+          expect(screen.queryByTestId('blocklist-form-operator-select-single')).toBeNull();
+          const element = screen.getByTestId('blocklist-form-operator-select-multi');
+          expect(element).toBeTruthy();
+          expect(element.textContent).toEqual('is one of, ');
+          expect(element).not.toHaveAttribute('readonly');
+        } else {
+          expect(screen.queryByTestId('blocklist-form-operator-select-multi')).toBeNull();
+          const element = screen.getByTestId('blocklist-form-operator-select-single');
+          expect(element).toBeTruthy();
+          expect(element).toHaveValue('is one of');
+          expect(element).toHaveAttribute('readonly');
+        }
+      });
+    }
+  );
 
   it('should allow all 3 fields when Windows OS is selected', () => {
     render();
