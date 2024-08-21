@@ -45,7 +45,7 @@ export function useMonitorListColumns({
 }: {
   loading: boolean;
   overviewStatus: OverviewStatusState | null;
-  setMonitorPendingDeletion: (config: EncryptedSyntheticsSavedMonitor) => void;
+  setMonitorPendingDeletion: (configs: string[]) => void;
 }): Array<EuiBasicTableColumn<EncryptedSyntheticsSavedMonitor>> {
   const history = useHistory();
   const { http } = useKibana().services;
@@ -200,7 +200,7 @@ export function useMonitorListColumns({
         },
         {
           'data-test-subj': 'syntheticsMonitorCopyAction',
-          isPrimary: true,
+          isPrimary: false,
           name: (fields) => (
             <NoPermissionsTooltip
               canEditSynthetics={canEditSynthetics}
@@ -239,7 +239,7 @@ export function useMonitorListColumns({
           enabled: (fields) =>
             canEditSynthetics && !isActionLoading(fields) && isPublicLocationsAllowed(fields),
           onClick: (fields) => {
-            setMonitorPendingDeletion(fields);
+            setMonitorPendingDeletion([fields[ConfigKey.CONFIG_ID]]);
           },
         },
         {
