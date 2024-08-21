@@ -1484,7 +1484,17 @@
   },
   "favorites": {
     "dynamic": false,
-    "properties": {}
+    "properties": {
+      "favoriteIds": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "userId": {
+        "type": "keyword"
+      }
+    }
   },
   "file": {
     "dynamic": false,
