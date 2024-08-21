@@ -7,30 +7,32 @@
  */
 
 import _ from 'lodash';
-import React, { Fragment, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiFieldNumber,
-  EuiFormRow,
-  EuiCheckboxGroup,
-  EuiModal,
-  EuiModalBody,
   EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiSwitch,
   EuiSuperSelect,
+  EuiTitle,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 
+import { SettingsGroup } from './settings_group';
+import { SettingsFormRow } from './settings_form_row';
 import { DevToolsSettings } from '../../services';
 import { unregisterCommands } from '../containers/editor/legacy/console_editor/keyboard_shortcuts';
 import type { SenseEditor } from '../models';
 
 export type AutocompleteOptions = 'fields' | 'indices' | 'templates';
+
+const ON_LABEL = i18n.translate('console.settingsPage.onLabel', { defaultMessage: 'On' });
+const OFF_LABEL = i18n.translate('console.settingsPage.offLabel', { defaultMessage: 'Off' });
 
 const onceTimeInterval = () =>
   i18n.translate('console.settingsPage.refreshInterval.onceTimeInterval', {
@@ -61,7 +63,6 @@ const intervalOptions = PRESETS_IN_MINUTES.map((value) => ({
 
 export interface DevToolsSettingsModalProps {
   onSaveSettings: (newSettings: DevToolsSettings) => void;
-  onClose: () => void;
   refreshAutocompleteSettings: (selectedSettings: DevToolsSettings['autocomplete']) => void;
   settings: DevToolsSettings;
   editorInstance: SenseEditor | null;
@@ -92,6 +93,7 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
         defaultMessage: 'Fields',
       }),
       stateSetter: setFields,
+      checked: fields,
     },
     {
       id: 'indices',
@@ -99,6 +101,7 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
         defaultMessage: 'Indices and aliases',
       }),
       stateSetter: setIndices,
+      checked: indices,
     },
     {
       id: 'templates',
@@ -106,6 +109,7 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
         defaultMessage: 'Templates',
       }),
       stateSetter: setTemplates,
+      checked: templates,
     },
     {
       id: 'dataStreams',
@@ -113,22 +117,9 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
         defaultMessage: 'Data streams',
       }),
       stateSetter: setDataStreams,
+      checked: dataStreams,
     },
   ];
-
-  const checkboxIdToSelectedMap = {
-    fields,
-    indices,
-    templates,
-    dataStreams,
-  };
-
-  const onAutocompleteChange = (optionId: AutocompleteOptions) => {
-    const option = _.find(autoCompleteCheckboxes, (item) => item.id === optionId);
-    if (option) {
-      option.stateSetter(!checkboxIdToSelectedMap[optionId]);
-    }
-  };
 
   function saveSettings() {
     props.onSaveSettings({
@@ -177,214 +168,139 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
     []
   );
 
-  // It only makes sense to show polling options if the user needs to fetch any data.
-  const pollingFields =
-    fields || indices || templates || dataStreams ? (
-      <Fragment>
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="console.settingsPage.refreshingDataLabel"
-              defaultMessage="Refresh frequency"
-            />
-          }
-          helpText={
-            <FormattedMessage
-              id="console.settingsPage.refreshingDataDescription"
-              defaultMessage="Console refreshes autocomplete suggestions by querying Elasticsearch.
-              Use less frequent refreshes to reduce bandwidth costs."
-            />
-          }
-        >
-          <EuiSuperSelect
-            options={intervalOptions}
-            valueOfSelected={pollInterval.toString()}
-            onChange={onPollingIntervalChange}
-          />
-        </EuiFormRow>
-
-        <EuiButton
-          data-test-subj="autocompletePolling"
-          id="autocompletePolling"
-          onClick={() => {
-            // Only refresh the currently selected settings.
-            props.refreshAutocompleteSettings({
-              fields,
-              indices,
-              templates,
-              dataStreams,
-            });
-          }}
-        >
-          <FormattedMessage
-            defaultMessage="Refresh autocomplete suggestions"
-            id="console.settingsPage.refreshButtonLabel"
-          />
-        </EuiButton>
-      </Fragment>
-    ) : undefined;
-
   return (
-    <EuiModal
-      data-test-subj="devToolsSettingsModal"
-      className="conApp__settingsModal"
-      onClose={props.onClose}
-    >
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>
+    <EuiPanel paddingSize="l" hasShadow={false} borderRadius="none">
+      <EuiTitle>
+        <h2>
           <FormattedMessage id="console.settingsPage.pageTitle" defaultMessage="Console settings" />
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiText>
+        <p>
+          <FormattedMessage id="console.settingsPage.pageDescription" defaultMessage="Customize the console to make it work better for you." />
+        </p>
+      </EuiText>
 
-      <EuiModalBody>
-        <EuiFormRow
-          label={
-            <FormattedMessage id="console.settingsPage.fontSizeLabel" defaultMessage="Font size" />
-          }
-        >
-          <EuiFieldNumber
-            autoFocus
-            data-test-subj="setting-font-size-input"
-            value={fontSize}
-            min={6}
-            max={50}
-            onChange={(e) => {
-              const val = parseInt(e.target.value, 10);
-              if (!val) return;
-              setFontSize(val);
-            }}
-          />
-        </EuiFormRow>
+      {/* GENERAL SETTINGS */}
+      <SettingsGroup title="General settings" />
+      <SettingsFormRow label={i18n.translate('console.settingsPage.saveRequestsToHistoryLabel', { defaultMessage: 'Save requests to history' })}>
+        <EuiSwitch
+          checked={isHistoryEnabled}
+          label={isAccessibilityOverlayEnabled ? ON_LABEL : OFF_LABEL}
+          onChange={(e) => toggleSavingToHistory(e.target.checked)}
+        />
+      </SettingsFormRow>
+      <SettingsFormRow label={i18n.translate('console.settingsPage.enableKeyboardShortcutsLabel', { defaultMessage: 'Keyboard shortcuts' })}>
+        <EuiSwitch
+          data-test-subj="enableKeyboardShortcuts"
+          label={isAccessibilityOverlayEnabled ? ON_LABEL : OFF_LABEL}
+          checked={isKeyboardShortcutsEnabled}
+          onChange={(e) => toggleKeyboardShortcuts(e.target.checked)}
+        />
+      </SettingsFormRow>
+      <SettingsFormRow label={i18n.translate('console.settingsPage.enableAccessibilityOverlayLabel', { defaultMessage: 'Accessibility overlay' })}>
+        <EuiSwitch
+          data-test-subj="enableA11yOverlay"
+          label={isAccessibilityOverlayEnabled ? ON_LABEL : OFF_LABEL}
+          checked={isAccessibilityOverlayEnabled}
+          onChange={(e) => toggleAccessibilityOverlay(e.target.checked)}
+        />
+      </SettingsFormRow>
 
-        <EuiFormRow>
+      {/* DISPLAY SETTINGS */}
+      <SettingsGroup title="Display" />
+      <SettingsFormRow label={i18n.translate('console.settingsPage.fontSizeLabel', { defaultMessage: 'Font size' })}>
+        <EuiFieldNumber
+          css={{ minWidth: '220px' }}
+          compressed
+          data-test-subj="setting-font-size-input"
+          value={fontSize}
+          min={6}
+          max={50}
+          onChange={(e) => {
+            const val = parseInt(e.target.value, 10);
+            if (!val) return;
+            setFontSize(val);
+          }}
+        />
+      </SettingsFormRow>
+      <SettingsFormRow label={i18n.translate('console.settingsPage.wrapLongLinesLabel', { defaultMessage: 'Wrap long lines' })}>
+        <EuiSwitch
+          data-test-subj="settingsWrapLines"
+          label={isAccessibilityOverlayEnabled ? ON_LABEL : OFF_LABEL}
+          checked={wrapMode}
+          onChange={(e) => setWrapMode(e.target.checked)}
+          id="wrapLines"
+        />
+      </SettingsFormRow>
+      <SettingsFormRow label={i18n.translate('console.settingsPage.tripleQuotesMessage', { defaultMessage: 'Triple quotes in output' })}>
+        <EuiSwitch
+          data-test-subj="tripleQuotes"
+          label={isAccessibilityOverlayEnabled ? ON_LABEL : OFF_LABEL}
+          checked={tripleQuotes}
+          onChange={(e) => setTripleQuotes(e.target.checked)}
+          id="tripleQuotes"
+        />
+      </SettingsFormRow>
+
+      {/* AUTOCOMPLETE SETTINGS */}
+      <SettingsGroup title="Autocomplete" />
+      {autoCompleteCheckboxes.map((opts) => (
+        <SettingsFormRow key={opts.id} label={opts.label}>
           <EuiSwitch
-            checked={wrapMode}
-            data-test-subj="settingsWrapLines"
-            id="wrapLines"
-            label={
-              <FormattedMessage
-                defaultMessage="Wrap long lines"
-                id="console.settingsPage.wrapLongLinesLabelText"
-              />
-            }
-            onChange={(e) => setWrapMode(e.target.checked)}
+            data-test-subj={`autocomplete-settings-${opts.id}`}
+            label={opts.checked ? ON_LABEL : OFF_LABEL}
+            checked={opts.checked}
+            onChange={(e) => opts.stateSetter(e.target.checked)}
           />
-        </EuiFormRow>
+        </SettingsFormRow>
+      ))}
 
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="console.settingsPage.jsonSyntaxLabel"
-              defaultMessage="JSON syntax"
+      {/* AUTOCOMPLETE REFRESH SETTINGS */}
+      {(fields || indices || templates || dataStreams) && (
+        <>
+          <SettingsGroup title="Autocomplete refresh" description="Console refreshes autocomplete suggestions by querying Elasticsearch. Use less frequent refreshes to reduce bandwidth costs." />
+          <SettingsFormRow label={i18n.translate('console.settingsPage.refreshingDataLabel', { defaultMessage: 'Refresh frequency' })}>
+            <EuiSuperSelect
+              css={{ minWidth: '220px' }}
+              compressed
+              options={intervalOptions}
+              valueOfSelected={pollInterval.toString()}
+              onChange={onPollingIntervalChange}
             />
-          }
-        >
-          <EuiSwitch
-            checked={tripleQuotes}
-            data-test-subj="tripleQuotes"
-            id="tripleQuotes"
-            label={
+          </SettingsFormRow>
+
+          <SettingsFormRow label={i18n.translate('console.settingsPage.manualRefreshLabel', { defaultMessage: 'Manually refresh autocomplete suggestions' })}>
+            <EuiButton
+              iconType="refresh"
+              size="s"
+              data-test-subj="autocompletePolling"
+              id="autocompletePolling"
+              onClick={() => {
+                // Only refresh the currently selected settings.
+                props.refreshAutocompleteSettings({
+                  fields,
+                  indices,
+                  templates,
+                  dataStreams,
+              });
+              }}
+            >
               <FormattedMessage
-                defaultMessage="Use triple quotes in output"
-                id="console.settingsPage.tripleQuotesMessage"
+                defaultMessage="Refresh"
+                id="console.settingsPage.refreshButtonLabel"
               />
-            }
-            onChange={(e) => setTripleQuotes(e.target.checked)}
-          />
-        </EuiFormRow>
-
-        <EuiFormRow
-          label={
-            <FormattedMessage id="console.settingsPage.historyLabel" defaultMessage="History" />
-          }
-        >
-          <EuiSwitch
-            checked={isHistoryEnabled}
-            label={
-              <FormattedMessage
-                defaultMessage="Save requests to history"
-                id="console.settingsPage.saveRequestsToHistoryLabel"
-              />
-            }
-            onChange={(e) => toggleSavingToHistory(e.target.checked)}
-          />
-        </EuiFormRow>
-
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="console.settingsPage.keyboardShortcutsLabel"
-              defaultMessage="Keyboard shortcuts"
-            />
-          }
-        >
-          <EuiSwitch
-            checked={isKeyboardShortcutsEnabled}
-            data-test-subj="enableKeyboardShortcuts"
-            label={
-              <FormattedMessage
-                defaultMessage="Enable keyboard shortcuts"
-                id="console.settingsPage.enableKeyboardShortcutsLabel"
-              />
-            }
-            onChange={(e) => toggleKeyboardShortcuts(e.target.checked)}
-          />
-        </EuiFormRow>
-
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="console.settingsPage.accessibilityOverlayLabel"
-              defaultMessage="Accessibility overlay"
-            />
-          }
-        >
-          <EuiSwitch
-            data-test-subj="enableA11yOverlay"
-            checked={isAccessibilityOverlayEnabled}
-            label={
-              <FormattedMessage
-                defaultMessage="Enable accessibility overlay"
-                id="console.settingsPage.enableAccessibilityOverlayLabel"
-              />
-            }
-            onChange={(e) => toggleAccessibilityOverlay(e.target.checked)}
-          />
-        </EuiFormRow>
-
-        <EuiFormRow
-          labelType="legend"
-          label={
-            <FormattedMessage
-              id="console.settingsPage.autocompleteLabel"
-              defaultMessage="Autocomplete"
-            />
-          }
-        >
-          <EuiCheckboxGroup
-            options={autoCompleteCheckboxes.map((opts) => {
-              const { stateSetter, ...rest } = opts;
-              return rest;
-            })}
-            idToSelectedMap={checkboxIdToSelectedMap}
-            onChange={(e: unknown) => {
-              onAutocompleteChange(e as AutocompleteOptions);
-            }}
-          />
-        </EuiFormRow>
-
-        {pollingFields}
-      </EuiModalBody>
+            </EuiButton>
+          </SettingsFormRow>
+        </>
+      )}
 
       <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="settingsCancelButton" onClick={props.onClose}>
-          <FormattedMessage id="console.settingsPage.cancelButtonLabel" defaultMessage="Cancel" />
-        </EuiButtonEmpty>
-
         <EuiButton fill data-test-subj="settings-save-button" onClick={saveSettings}>
           <FormattedMessage id="console.settingsPage.saveButtonLabel" defaultMessage="Save" />
         </EuiButton>
       </EuiModalFooter>
-    </EuiModal>
+    </EuiPanel>
   );
 };

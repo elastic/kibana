@@ -25,11 +25,10 @@ const getAutocompleteDiff = (
 };
 
 export interface Props {
-  onClose: () => void;
   editorInstance: SenseEditor | null;
 }
 
-export function Settings({ onClose, editorInstance }: Props) {
+export function Settings({ editorInstance }: Props) {
   const {
     services: { settings, autocompleteInfo },
   } = useServicesContext();
@@ -91,12 +90,10 @@ export function Settings({ onClose, editorInstance }: Props) {
       type: 'updateSettings',
       payload: newSettings,
     });
-    onClose();
   };
 
   return (
     <DevToolsSettingsModal
-      onClose={onClose}
       onSaveSettings={onSaveSettings}
       refreshAutocompleteSettings={(selectedSettings) =>
         refreshAutocompleteSettings(settings, selectedSettings)

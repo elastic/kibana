@@ -13,7 +13,8 @@ import { Editor } from '../editor';
 import { TopNavMenu, SomethingWentWrongCallout } from '../../components';
 import { useDataInit } from '../../hooks';
 import { getTopNavConfig } from './get_top_nav';
-import { SHELL_TAB_ID } from './tab_ids';
+import { SHELL_TAB_ID, CONFIG_TAB_ID } from './tab_ids';
+import { Settings } from '../settings';
 
 interface MainProps {
   isEmbeddable?: boolean;
@@ -62,6 +63,12 @@ export function Main({ isEmbeddable = false }: MainProps) {
             <EuiSplitPanel.Inner paddingSize="none">
               {selectedTab === SHELL_TAB_ID && (
                 <Editor loading={!done} setEditorInstance={() => {}} />
+              )}
+
+              {selectedTab === CONFIG_TAB_ID && (
+                <Settings
+                  editorInstance={null}
+                />
               )}
             </EuiSplitPanel.Inner>
           </EuiSplitPanel.Outer>
