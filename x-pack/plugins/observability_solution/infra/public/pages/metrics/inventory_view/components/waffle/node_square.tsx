@@ -66,7 +66,7 @@ const NodeContainerSmall = ({ children, ...props }: NodeProps & { color: string 
     {children}
   </div>
 );
-const ValueInner = ({ children, ...props }: NodeProps<HTMLButtonElement>) => (
+const ValueInner = ({ children, ...props }: NodeProps) => (
   <div
     css={css`
       position: absolute;
