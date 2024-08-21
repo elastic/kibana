@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import { useResultsRollupContext } from '../../../contexts/results_rollup_context';
 import { getFlattenedBuckets } from './helpers';
-import { StorageTreemap } from '../../../storage_treemap';
+import { StorageTreemap } from './storage_treemap';
 import { DEFAULT_MAX_CHART_HEIGHT } from '../../../tabs/styles';
 import { SelectedIndex } from '../../../types';
 import { useDataQualityContext } from '../../../data_quality_context';

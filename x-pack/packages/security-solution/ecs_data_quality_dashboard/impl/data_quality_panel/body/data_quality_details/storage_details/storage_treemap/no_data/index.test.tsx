@@ -11,7 +11,7 @@ import React from 'react';
 import * as i18n from '../translations';
 
 import { NoData } from '.';
-import { TestExternalProviders } from '../../mock/test_providers/test_providers';
+import { TestExternalProviders } from '../../../../../mock/test_providers/test_providers';
 
 describe('NoData', () => {
   test('renders the expected "no data" message', () => {

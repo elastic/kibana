@@ -27,12 +27,12 @@ import {
   getLayersMultiDimensional,
   getLegendItems,
   getPathToFlattenedBucketMap,
-} from '../body/data_quality_details/storage_details/helpers';
+} from '../helpers';
 import { ChartLegendItem } from './chart_legend_item';
 import { NoData } from './no_data';
-import { ChartFlexItem, LegendContainer } from '../tabs/styles';
-import { PatternRollup, SelectedIndex } from '../types';
-import { useDataQualityContext } from '../data_quality_context';
+import { ChartFlexItem, LegendContainer } from '../../../../tabs/styles';
+import { PatternRollup, SelectedIndex } from '../../../../types';
+import { useDataQualityContext } from '../../../../data_quality_context';
 
 export const DEFAULT_MIN_CHART_HEIGHT = 240; // px
 export const LEGEND_WIDTH = 220; // px
