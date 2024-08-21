@@ -8,6 +8,7 @@ import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('Serverless Observability - Deployment-agnostic api integration tests', () => {
+    // load new oblt and platform deployment-agnostic test here
     loadTestFile(require.resolve('../../apis/console'));
     loadTestFile(require.resolve('../../apis/core'));
     loadTestFile(require.resolve('../../apis/painless_lab'));
