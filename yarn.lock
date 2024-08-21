@@ -6196,7 +6196,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/screenshotting-server@link:x-pack/packages/kbn-screenshotting/server":
+"@kbn/screenshotting-server@link:packages/kbn-screenshotting-server":
   version "0.0.0"
   uid ""
 
