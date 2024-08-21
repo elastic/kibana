@@ -52,7 +52,7 @@ export const getEcsCompliantTableColumns = (): Array<
     name: i18n.FIELD,
     sortable: true,
     truncateText: false,
-    width: '25%',
+    width: '15%',
   },
   {
     field: 'type',
@@ -78,7 +78,7 @@ export const getEcsCompliantTableColumns = (): Array<
     render: (description: string) => <span data-test-subj="description">{description}</span>,
     sortable: false,
     truncateText: false,
-    width: '25%',
+    width: '35%',
   },
 ];
 
@@ -90,7 +90,7 @@ export const getIncompatibleValuesTableColumns = (): Array<
     name: i18n.FIELD,
     sortable: true,
     truncateText: false,
-    width: '25%',
+    width: '15%',
   },
   {
     field: 'allowed_values',
@@ -117,6 +117,6 @@ export const getIncompatibleValuesTableColumns = (): Array<
     name: i18n.ECS_DESCRIPTION,
     sortable: false,
     truncateText: false,
-    width: '25%',
+    width: '35%',
   },
 ];
