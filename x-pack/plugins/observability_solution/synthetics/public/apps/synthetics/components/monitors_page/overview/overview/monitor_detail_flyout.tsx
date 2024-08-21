@@ -11,6 +11,7 @@ import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
+  EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -40,6 +41,7 @@ import {
   selectOverviewState,
   selectServiceLocationsState,
   selectSyntheticsMonitor,
+  selectSyntheticsMonitorError,
   selectSyntheticsMonitorLoading,
   setFlyoutConfig,
 } from '../../../../state';
@@ -250,6 +252,7 @@ export function MonitorDetailFlyout(props: Props) {
   const upsertStatus = useSelector(selectMonitorUpsertStatus(configId));
   const monitorObject = useSelector(selectSyntheticsMonitor);
   const isLoading = useSelector(selectSyntheticsMonitorLoading);
+  const error = useSelector(selectSyntheticsMonitorError);
 
   const upsertSuccess = upsertStatus?.status === 'success';
 
@@ -274,6 +277,7 @@ export function MonitorDetailFlyout(props: Props) {
       onClose={props.onClose}
       paddingSize="none"
     >
+      {error && !isLoading && <EuiErrorBoundary>{error?.body?.message}</EuiErrorBoundary>}
       {isLoading && <LoadingState />}
       {monitorObject && (
         <>

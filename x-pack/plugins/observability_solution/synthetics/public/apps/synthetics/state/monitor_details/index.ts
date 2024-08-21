@@ -6,7 +6,7 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { Ping, SyntheticsMonitor } from '../../../../../common/runtime_types';
+import { Ping, SyntheticsMonitorWithId } from '../../../../../common/runtime_types';
 import { checkIsStalePing } from '../../utils/monitor_test_result/check_pings';
 import { enableMonitorAlertAction } from '../monitor_list/actions';
 
@@ -34,7 +34,7 @@ export interface MonitorDetailsState {
     loaded: boolean;
   };
   syntheticsMonitorLoading: boolean;
-  syntheticsMonitor: SyntheticsMonitor | null;
+  syntheticsMonitor: SyntheticsMonitorWithId | null;
   syntheticsMonitorError?: IHttpSerializedFetchError | null;
   syntheticsMonitorDispatchedAt: number;
   error: IHttpSerializedFetchError | null;

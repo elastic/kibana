@@ -12,10 +12,11 @@ import {
   EncryptedSyntheticsMonitor,
   SyntheticsMonitor,
   ServiceLocationErrorsResponse,
+  SyntheticsMonitorWithId,
 } from '../../../../../common/runtime_types';
 import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
-export type UpsertMonitorResponse = ServiceLocationErrorsResponse | EncryptedSyntheticsMonitor;
+export type UpsertMonitorResponse = ServiceLocationErrorsResponse | SyntheticsMonitorWithId;
 
 export const createMonitorAPI = async ({
   monitor,

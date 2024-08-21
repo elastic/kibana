@@ -81,8 +81,6 @@ describe('mergeSourceMonitor', () => {
           enabled: true,
         },
       },
-      'check.request.method': 'GET',
-      'check.response.status': ['404'],
       config_id: 'ae88f0aa-9c7d-4a5f-96dc-89d65a0ca947',
       custom_heartbeat_id: 'todos-lightweight-test-projects-default',
       enabled: true,
@@ -107,9 +105,6 @@ describe('mergeSourceMonitor', () => {
       original_space: 'default',
       project_id: 'test-projects',
       proxy_url: '',
-      'response.include_body': 'on_error',
-      'response.include_body_max_bytes': '1024',
-      'response.include_headers': true,
       retest_on_failure: true,
       revision: 21,
       schedule: {
@@ -129,12 +124,21 @@ describe('mergeSourceMonitor', () => {
         verification_mode: 'full',
         key: 'test-key',
       },
+      response: {
+        include_body: 'on_error',
+        include_body_max_bytes: '1024',
+        include_headers: true,
+      },
+      check: {
+        'request.method': 'GET',
+        'response.status': ['404'],
+      },
     });
   });
 
   it('should not omit null or undefined values with ui', () => {
     const result = mapSavedObjectToMonitor({
-      monitor: { attributes: testMonitor },
+      monitor: { attributes: { ...testMonitor } },
       ui: true,
     } as any);
 
@@ -176,9 +180,6 @@ describe('mergeSourceMonitor', () => {
       original_space: 'default',
       project_id: 'test-projects',
       proxy_url: '',
-      'response.include_body': 'on_error',
-      'response.include_body_max_bytes': '1024',
-      'response.include_headers': true,
       revision: 21,
       schedule: {
         number: '3',
@@ -187,8 +188,12 @@ describe('mergeSourceMonitor', () => {
       'service.name': '',
       'ssl.certificate': '',
       'ssl.certificate_authorities': '',
+      'ssl.key': 'test-key',
       'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
       'ssl.verification_mode': 'full',
+      'response.include_body': 'on_error',
+      'response.include_body_max_bytes': '1024',
+      'response.include_headers': true,
       tags: [],
       timeout: '16',
       type: 'http',
@@ -199,7 +204,6 @@ describe('mergeSourceMonitor', () => {
       max_attempts: 2,
       origin: 'project',
       urls: '${devUrl}',
-      'ssl.key': 'test-key',
     });
   });
 });

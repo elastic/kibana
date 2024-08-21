@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitors, isMonitorsQueryFiltered, QuerySchema } from '../common';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { mapSavedObjectToMonitor } from './saved_object_to_monitor';
 
 export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',

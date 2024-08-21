@@ -11,7 +11,7 @@ import {
   EncryptedSyntheticsMonitorCodec,
   PingsResponse,
   PingsResponseType,
-  SyntheticsMonitor,
+  SyntheticsMonitorWithId,
 } from '../../../../../common/runtime_types';
 import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
@@ -67,8 +67,8 @@ export const fetchSyntheticsMonitor = async ({
   monitorId,
 }: {
   monitorId: string;
-}): Promise<SyntheticsMonitor> => {
-  return apiService.get<SyntheticsMonitor>(
+}): Promise<SyntheticsMonitorWithId> => {
+  return apiService.get<SyntheticsMonitorWithId>(
     SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId),
     {
       ui: true,

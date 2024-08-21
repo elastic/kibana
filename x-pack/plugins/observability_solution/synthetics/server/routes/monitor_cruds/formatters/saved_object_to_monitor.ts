@@ -11,6 +11,7 @@ import {
   ConfigKey,
   EncryptedSyntheticsMonitor,
   MonitorFields,
+  MonitorFieldsResult,
 } from '../../../../common/runtime_types';
 
 const keysToOmit = [
@@ -24,11 +25,13 @@ const keysToOmit = [
   ConfigKey.MONITOR_SOURCE_TYPE,
 ];
 
-type Result = MonitorFields & {
+type Result = MonitorFieldsResult & {
   url?: string;
   host?: string;
   inline_script?: string;
   ssl: Record<string, any>;
+  response: Record<string, any>;
+  check: Record<string, any>;
 };
 
 export const transformPublicKeys = (result: Result, ui?: boolean) => {
@@ -44,10 +47,16 @@ export const transformPublicKeys = (result: Result, ui?: boolean) => {
     inline_script: result[ConfigKey.SOURCE_INLINE] ? result[ConfigKey.SOURCE_INLINE] : undefined,
     host: result[ConfigKey.HOSTS] ? result[ConfigKey.HOSTS] : undefined,
     ssl: formatNestedFields(result, 'ssl'),
+    response: formatNestedFields(result, 'response'),
+    check: formatNestedFields(result, 'check'),
   };
   const res = omit(formattedResult, keysToOmit) as Result;
 
-  return omitBy(res, (value, key) => key.startsWith('response.') || key.startsWith('ssl.'));
+  return omitBy(
+    res,
+    (value, key) =>
+      key.startsWith('response.') || key.startsWith('ssl.') || key.startsWith('check.')
+  );
 };
 
 export function mapSavedObjectToMonitor({
@@ -57,10 +66,11 @@ export function mapSavedObjectToMonitor({
   monitor: SavedObject<MonitorFields | EncryptedSyntheticsMonitor>;
   ui?: boolean;
 }) {
-  const result = Object.assign(monitor.attributes, {
+  const result = {
+    ...monitor.attributes,
     created_at: monitor.created_at,
     updated_at: monitor.updated_at,
-  }) as Result;
+  } as Result;
   return transformPublicKeys(result, ui);
 }
 export function mergeSourceMonitor(
@@ -105,7 +115,7 @@ const formatPWOptions = (config: MonitorFields) => {
 };
 
 // combine same nested fields into same object
-const formatNestedFields = (config: MonitorFields, nestedKey: 'ssl' | 'response') => {
+const formatNestedFields = (config: MonitorFields, nestedKey: 'ssl' | 'response' | 'check') => {
   const nestedFields = Object.keys(config).filter((key) =>
     key.startsWith(`${nestedKey}.`)
   ) as ConfigKey[];

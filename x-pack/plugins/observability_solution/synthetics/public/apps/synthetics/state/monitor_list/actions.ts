@@ -11,7 +11,7 @@ import {
   MonitorManagementListResult,
   MonitorFiltersResult,
   EncryptedSyntheticsSavedMonitor,
-  SyntheticsMonitor,
+  SyntheticsMonitorWithId,
 } from '../../../../../common/runtime_types';
 import { createAsyncAction } from '../utils/actions';
 
@@ -35,7 +35,7 @@ export const fetchUpsertFailureAction = createAction<UpsertMonitorError>(
 
 export const enableMonitorAlertAction = createAsyncAction<
   UpsertMonitorRequest,
-  SyntheticsMonitor,
+  SyntheticsMonitorWithId,
   UpsertMonitorError
 >('enableMonitorAlertAction');
 
