@@ -699,6 +699,11 @@ async function getExpressionSuggestionsByType(
         if (lastWord !== '') {
           // ... | <COMMAND> <word><suggest>
 
+          const rangeToReplace = {
+            start: innerText.length - lastWord.length + 1,
+            end: innerText.length + 1,
+          };
+
           // check if lastWord is an existing field
           const column = getColumnByName(lastWord, references);
           if (column) {
@@ -715,20 +720,14 @@ async function getExpressionSuggestionsByType(
               filterText: textToUse,
               text: textToUse + s.text,
               command: TRIGGER_SUGGESTION_COMMAND,
-              rangeToReplace: {
-                start: innerText.length - lastWord.length + 1,
-                end: innerText.length,
-              },
+              rangeToReplace,
             }));
           } else {
             suggestions.push(
               ...fieldSuggestions.map((suggestion) => ({
                 ...suggestion,
                 command: TRIGGER_SUGGESTION_COMMAND,
-                rangeToReplace: {
-                  start: innerText.length - lastWord.length + 1,
-                  end: innerText.length,
-                },
+                rangeToReplace,
               }))
             );
           }

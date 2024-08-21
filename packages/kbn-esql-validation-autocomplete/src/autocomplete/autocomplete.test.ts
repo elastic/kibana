@@ -1361,34 +1361,52 @@ describe('autocomplete', () => {
       // KEEP field
       testSuggestions('FROM a | KEEP /', getFieldNamesByType('any').map(attachTriggerCommand));
       testSuggestions(
+        'FROM a | KEEP d/',
+        getFieldNamesByType('any')
+          .map<PartialSuggestionWithText>((text) => ({
+            text,
+            rangeToReplace: { start: 15, end: 16 },
+          }))
+          .map(attachTriggerCommand)
+      );
+      testSuggestions(
         'FROM a | KEEP doubleFiel/',
         getFieldNamesByType('any').map(attachTriggerCommand)
       );
       testSuggestions(
         'FROM a | KEEP doubleField/',
-        ['doubleField, ', 'doubleField | '].map((text) => ({
-          text,
-          rangeToReplace: { start: 15, end: 25 },
-        }))
+        ['doubleField, ', 'doubleField | ']
+          .map((text) => ({
+            text,
+            filterText: 'doubleField',
+            rangeToReplace: { start: 15, end: 26 },
+          }))
+          .map(attachTriggerCommand)
       );
       testSuggestions('FROM a | KEEP doubleField /', ['| ', ',']);
 
       // Let's get funky with the field names
       testSuggestions(
         'FROM a | KEEP @timestamp/',
-        ['@timestamp, ', '@timestamp | '].map((text) => ({
-          text,
-          range: { startColumn: 14, endColumn: 24, startLineNumber: 1, endLineNumber: 1 },
-        })),
+        ['@timestamp, ', '@timestamp | ']
+          .map((text) => ({
+            text,
+            filterText: '@timestamp',
+            rangeToReplace: { start: 15, end: 25 },
+          }))
+          .map(attachTriggerCommand),
         undefined,
         [[{ name: '@timestamp', type: 'date' }]]
       );
       testSuggestions(
         'FROM a | KEEP foo.bar/',
-        ['foo.bar, ', 'foo.bar | '].map((text) => ({
-          text,
-          range: { startColumn: 14, endColumn: 21, startLineNumber: 1, endLineNumber: 1 },
-        })),
+        ['foo.bar, ', 'foo.bar | ']
+          .map((text) => ({
+            text,
+            filterText: 'foo.bar',
+            rangeToReplace: { start: 15, end: 22 },
+          }))
+          .map(attachTriggerCommand),
         undefined,
         [[{ name: 'foo.bar', type: 'double' }]]
       );
