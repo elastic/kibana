@@ -149,12 +149,12 @@ export function InternalDashboardTopNav({
     const subscription = getChromeIsVisible$().subscribe((visible) => setIsChromeVisible(visible));
     if (lastSavedId && title) {
       chromeRecentlyAccessed.add(
-        getFullEditPath(lastSavedId, dashboard.getExpandedPanelId(), viewMode === ViewMode.EDIT),
+        getFullEditPath(lastSavedId, dashboard.expandedPanelId.value, viewMode === ViewMode.EDIT),
         title,
         lastSavedId
       );
       dashboardRecentlyAccessed.add(
-        getFullEditPath(lastSavedId, dashboard.getExpandedPanelId(), viewMode === ViewMode.EDIT),
+        getFullEditPath(lastSavedId, dashboard.expandedPanelId.value, viewMode === ViewMode.EDIT),
         title,
         lastSavedId
       );

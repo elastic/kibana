@@ -71,6 +71,7 @@ export function DashboardApp({
   expandedPanelId,
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
+
   useMount(() => (async () => setShowNoDataPage(await isDashboardAppInNoDataState()))());
   const [dashboardAPI, setDashboardAPI] = useState<AwaitingDashboardAPI>(null);
 
@@ -174,8 +175,7 @@ export function DashboardApp({
       isEmbeddedExternally: Boolean(embedSettings), // embed settings are only sent if the dashboard URL has `embed=true`
       getEmbeddableAppContext: (dashboardId) => ({
         currentAppId: DASHBOARD_APP_ID,
-        getCurrentPath: () =>
-          `#${createDashboardEditUrl(dashboardId, dashboardAPI?.expandedPanelId.value)}`,
+        getCurrentPath: () => `#${createDashboardEditUrl(dashboardId, expandedPanelId)}`,
       }),
     });
   }, [
@@ -187,7 +187,7 @@ export function DashboardApp({
     isScreenshotMode,
     getScreenshotContext,
     getStateTransfer,
-    dashboardAPI?.expandedPanelId.value,
+    expandedPanelId,
   ]);
 
   /**
