@@ -22,9 +22,8 @@ test.afterAll(async ({ esArchiver }) => {
 
 test.describe('Enable risk scores from dashboard', { tag: ['@serverless', '@ess'] }, () => {
   test.use({ storageState: '.auth/user.json' });
-  test.beforeEach(async ({ page, context }) => {
+  test.beforeEach(async ({ page }) => {
     entityAnalyticsPage = await PageFactory.createEntityAnalyticsPage(page);
-    const cookies = await context.cookies();
     entityAnalyticsPage.navigates();
   });
   test('host risk enable button should redirect to entity management page', async () => {

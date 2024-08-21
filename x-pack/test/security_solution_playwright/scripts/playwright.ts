@@ -75,12 +75,8 @@ ${JSON.stringify(playwrightConfigFile, null, 2)}
 
       const specConfig = playwrightConfigFile.testMatch;
       const specArg = argv.spec;
-      let specPattern = specArg ?? specConfig;
-
-      specPattern = './tests/enable_risk_score_redirect.spec.ts';
-
+      const specPattern = specArg ?? specConfig;
       const files = retrieveIntegrations(globby.sync(specPattern));
-
       const esPorts: number[] = [9200, 9220];
       const kibanaPorts: number[] = [5601, 5620];
       const fleetServerPorts: number[] = [8220];
@@ -292,6 +288,17 @@ ${JSON.stringify(playwrightConfigFile, null, 2)}
                     {
                       env: {
                         ...playwrightCustomEnv,
+                      },
+                      stdout: process.stdout,
+                    }
+                  );
+                } else {
+                  await execa.command(
+                    `npx playwright test --config ${playwrightConfigFilePath} --project ${project} --grep @${project}`,
+                    {
+                      env: {
+                        ...playwrightCustomEnv,
+                        FILE_PATH: filePath,
                       },
                       stdout: process.stdout,
                     }
