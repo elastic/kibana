@@ -17,7 +17,10 @@
       &:hover {
         background-color: $euiColorPrimary;
       }
-      visibility: visible;
+
+      & {
+        visibility: visible;
+      }
     }
 
     &--unavailable {
