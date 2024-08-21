@@ -38,6 +38,7 @@ import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount
 import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../dashboard_constants';
 import './_dashboard_top_nav.scss';
 import { DashboardRedirect } from '../dashboard_container/types';
+import { IgnoreFilterTour } from '../dashboard_app/top_nav/ignore_filter_tour';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -86,6 +87,9 @@ export function InternalDashboardTopNav({
     dashboardRecentlyAccessed,
   } = pluginServices.getServices();
   const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
+  const isCourierIgnoreFilterEnabled = uiSettings.get(
+    UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX
+  );
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
 
   const dashboard = useDashboardAPI();
@@ -103,10 +107,12 @@ export function InternalDashboardTopNav({
 
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
   const query = dashboard.select((state) => state.explicitInput.query);
+  const filters = dashboard.select((state) => state.explicitInput.filters);
   const title = dashboard.select((state) => state.explicitInput.title);
 
   // store data views in state & subscribe to dashboard data view changes.
   const [allDataViews, setAllDataViews] = useState<DataView[]>([]);
+
   useEffect(() => {
     setAllDataViews(dashboard.getAllDataViews());
     const subscription = dashboard.onDataViewsUpdate$.subscribe((dataViews) =>
@@ -367,7 +373,10 @@ export function InternalDashboardTopNav({
       {viewMode === ViewMode.EDIT ? (
         <DashboardEditingToolbar isDisabled={!!focusedPanelId} />
       ) : null}
-      {showBorderBottom && <EuiHorizontalRule margin="none" />}
+      {showBorderBottom && <EuiHorizontalRule id="dashboardTopNavHorizontalRule" margin="none" />}
+      {isCourierIgnoreFilterEnabled && allDataViews.length > 1 && filters.length > 0 && (
+        <IgnoreFilterTour dataViews={allDataViews} />
+      )}
     </div>
   );
 }

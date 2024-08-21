@@ -41,8 +41,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
       );
-      await kibanaServer.uiSettings.update({ 'courier:ignoreFilterIfFieldNotInIndex': true });
-
       await PageObjects.maps.openNewMap();
     });
 

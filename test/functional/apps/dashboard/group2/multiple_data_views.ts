@@ -22,7 +22,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('dashboard multiple data views', () => {
     before(async () => {
-      await kibanaServer.uiSettings.update({ 'courier:ignoreFilterIfFieldNotInIndex': true });
       await PageObjects.common.navigateToApp('home');
       await PageObjects.home.goToSampleDataPage();
       await PageObjects.home.addSampleDataSet('flights');
@@ -43,8 +42,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.unset('courier:ignoreFilterIfFieldNotInIndex');
     });
 
-    it('ignores filters on panels using a data view without the filter field', async () => {
+    it('shows tour explaining default filter behavior changes', async () => {
+      await testSubjects.missingOrFail('ignore_filter_tour');
       await filterBar.addFilter({ field: 'Carrier', operation: 'exists' });
+      await testSubjects.existOrFail('ignore_filter_tour');
+      await PageObjects.dashboard.dismissFilterTour();
+    });
+
+    it('ignores filters on panels using a data view without the filter field by default', async () => {
       const logsSavedSearchPanel = (await testSubjects.findAll('embeddedSavedSearchDocTable'))[1];
       expect(
         await (

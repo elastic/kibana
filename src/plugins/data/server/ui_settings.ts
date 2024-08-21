@@ -179,7 +179,7 @@ export function getUiSettings(
       name: i18n.translate('data.advancedSettings.courier.ignoreFilterTitle', {
         defaultMessage: 'Ignore filter(s)',
       }),
-      value: false,
+      value: true,
       description: i18n.translate('data.advancedSettings.courier.ignoreFilterText', {
         defaultMessage:
           'This configuration enhances support for dashboards containing visualizations accessing dissimilar indexes. ' +
