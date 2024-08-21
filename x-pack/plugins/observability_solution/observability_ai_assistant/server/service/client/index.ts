@@ -742,6 +742,7 @@ export class ObservabilityAIAssistantClient {
     return runSemanticTextKnowledgeBaseMigration({
       esClient: this.dependencies.esClient.asInternalUser,
       logger: this.dependencies.logger,
+      kbService: this.dependencies.knowledgeBaseService,
     });
   };
 
