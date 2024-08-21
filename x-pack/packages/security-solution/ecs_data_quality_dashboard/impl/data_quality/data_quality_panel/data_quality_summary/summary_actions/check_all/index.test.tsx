@@ -11,14 +11,13 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { mockMappingsResponse } from '../../../../mock/mappings_response/mock_mappings_response';
-import { TestProviders } from '../../../../mock/test_providers/test_providers';
+import {
+  TestDataQualityProviders,
+  TestExternalProviders,
+} from '../../../../mock/test_providers/test_providers';
 import { mockUnallowedValuesResponse } from '../../../../mock/unallowed_values/mock_unallowed_values';
 import { CANCEL, CHECK_ALL } from '../../../../translations';
-import {
-  OnCheckCompleted,
-  PartitionedFieldMetadata,
-  UnallowedValueRequestItem,
-} from '../../../../types';
+import { OnCheckCompleted, UnallowedValueRequestItem } from '../../../../types';
 import { CheckAll } from '.';
 import { EMPTY_STAT } from '../../../../helpers';
 
@@ -30,64 +29,29 @@ const defaultNumberFormat = '0,0.[000]';
 const mockFormatNumber = (value: number | undefined) =>
   value != null ? numeral(value).format(defaultNumberFormat) : EMPTY_STAT;
 
-const mockFetchMappings = jest.fn(
-  ({
-    abortController,
-    patternOrIndexName,
-  }: {
-    abortController: AbortController;
-    patternOrIndexName: string;
-  }) =>
-    new Promise((resolve) => {
-      resolve(mockMappingsResponse); // happy path
-    })
+const mockFetchMappings = jest.fn(() =>
+  Promise.resolve(
+    mockMappingsResponse // happy path
+  )
 );
 
 jest.mock('../../../../use_mappings/helpers', () => ({
-  fetchMappings: ({
-    abortController,
-    patternOrIndexName,
-  }: {
-    abortController: AbortController;
-    patternOrIndexName: string;
-  }) =>
-    mockFetchMappings({
-      abortController,
-      patternOrIndexName,
-    }),
+  fetchMappings: (_: { abortController: AbortController; patternOrIndexName: string }) =>
+    mockFetchMappings(),
 }));
 
-const mockFetchUnallowedValues = jest.fn(
-  ({
-    abortController,
-    indexName,
-    requestItems,
-  }: {
-    abortController: AbortController;
-    indexName: string;
-    requestItems: UnallowedValueRequestItem[];
-  }) => new Promise((resolve) => resolve(mockUnallowedValuesResponse))
-);
+const mockFetchUnallowedValues = jest.fn(() => Promise.resolve(mockUnallowedValuesResponse));
 
 jest.mock('../../../../use_unallowed_values/helpers', () => {
   const original = jest.requireActual('../../../../use_unallowed_values/helpers');
 
   return {
     ...original,
-    fetchUnallowedValues: ({
-      abortController,
-      indexName,
-      requestItems,
-    }: {
+    fetchUnallowedValues: (_: {
       abortController: AbortController;
       indexName: string;
       requestItems: UnallowedValueRequestItem[];
-    }) =>
-      mockFetchUnallowedValues({
-        abortController,
-        indexName,
-        requestItems,
-      }),
+    }) => mockFetchUnallowedValues(),
   };
 });
 
@@ -120,20 +84,26 @@ describe('CheckAll', () => {
 
   test('it renders the expected button text when a check is NOT running', () => {
     render(
-      <TestProviders>
-        <CheckAll
-          formatBytes={mockFormatBytes}
-          formatNumber={mockFormatNumber}
-          ilmPhases={ilmPhases}
-          incrementCheckAllIndiciesChecked={jest.fn()}
-          onCheckCompleted={jest.fn()}
-          patternIndexNames={patternIndexNames}
-          patterns={[]}
-          setCheckAllIndiciesChecked={jest.fn()}
-          setCheckAllTotalIndiciesToCheck={jest.fn()}
-          setIndexToCheck={jest.fn()}
-        />
-      </TestProviders>
+      <TestExternalProviders>
+        <TestDataQualityProviders
+          dataQualityContextProps={{
+            ilmPhases,
+            formatNumber: mockFormatNumber,
+            formatBytes: mockFormatBytes,
+            patterns: [],
+          }}
+          resultsRollupContextProps={{
+            patternIndexNames,
+          }}
+        >
+          <CheckAll
+            incrementCheckAllIndiciesChecked={jest.fn()}
+            setCheckAllIndiciesChecked={jest.fn()}
+            setCheckAllTotalIndiciesToCheck={jest.fn()}
+            setIndexToCheck={jest.fn()}
+          />
+        </TestDataQualityProviders>
+      </TestExternalProviders>
     );
 
     expect(screen.getByTestId('checkAll')).toHaveTextContent(CHECK_ALL);
@@ -141,20 +111,26 @@ describe('CheckAll', () => {
 
   test('it renders a disabled button when ILM available and ilmPhases is an empty array', () => {
     render(
-      <TestProviders>
-        <CheckAll
-          formatBytes={mockFormatBytes}
-          formatNumber={mockFormatNumber}
-          ilmPhases={[]}
-          incrementCheckAllIndiciesChecked={jest.fn()}
-          onCheckCompleted={jest.fn()}
-          patternIndexNames={patternIndexNames}
-          patterns={[]}
-          setCheckAllIndiciesChecked={jest.fn()}
-          setCheckAllTotalIndiciesToCheck={jest.fn()}
-          setIndexToCheck={jest.fn()}
-        />
-      </TestProviders>
+      <TestExternalProviders>
+        <TestDataQualityProviders
+          dataQualityContextProps={{
+            ilmPhases: [],
+            formatNumber: mockFormatNumber,
+            formatBytes: mockFormatBytes,
+            patterns: [],
+          }}
+          resultsRollupContextProps={{
+            patternIndexNames,
+          }}
+        >
+          <CheckAll
+            incrementCheckAllIndiciesChecked={jest.fn()}
+            setCheckAllIndiciesChecked={jest.fn()}
+            setCheckAllTotalIndiciesToCheck={jest.fn()}
+            setIndexToCheck={jest.fn()}
+          />
+        </TestDataQualityProviders>
+      </TestExternalProviders>
     );
 
     expect(screen.getByTestId('checkAll').hasAttribute('disabled')).toBeTruthy();
@@ -162,20 +138,27 @@ describe('CheckAll', () => {
 
   test('it renders the expected button when ILM is NOT available', () => {
     render(
-      <TestProviders isILMAvailable={false}>
-        <CheckAll
-          formatBytes={mockFormatBytes}
-          formatNumber={mockFormatNumber}
-          ilmPhases={[]}
-          incrementCheckAllIndiciesChecked={jest.fn()}
-          onCheckCompleted={jest.fn()}
-          patternIndexNames={patternIndexNames}
-          patterns={[]}
-          setCheckAllIndiciesChecked={jest.fn()}
-          setCheckAllTotalIndiciesToCheck={jest.fn()}
-          setIndexToCheck={jest.fn()}
-        />
-      </TestProviders>
+      <TestExternalProviders>
+        <TestDataQualityProviders
+          dataQualityContextProps={{
+            isILMAvailable: false,
+            ilmPhases: [],
+            formatNumber: mockFormatNumber,
+            formatBytes: mockFormatBytes,
+            patterns: [],
+          }}
+          resultsRollupContextProps={{
+            patternIndexNames,
+          }}
+        >
+          <CheckAll
+            incrementCheckAllIndiciesChecked={jest.fn()}
+            setCheckAllIndiciesChecked={jest.fn()}
+            setCheckAllTotalIndiciesToCheck={jest.fn()}
+            setIndexToCheck={jest.fn()}
+          />
+        </TestDataQualityProviders>
+      </TestExternalProviders>
     );
 
     expect(screen.getByTestId('checkAll').hasAttribute('disabled')).toBeFalsy();
@@ -183,20 +166,27 @@ describe('CheckAll', () => {
 
   test('it renders the expected button text when a check is running', () => {
     render(
-      <TestProviders>
-        <CheckAll
-          formatBytes={mockFormatBytes}
-          formatNumber={mockFormatNumber}
-          ilmPhases={ilmPhases}
-          incrementCheckAllIndiciesChecked={jest.fn()}
-          onCheckCompleted={jest.fn()}
-          patternIndexNames={patternIndexNames}
-          patterns={[]}
-          setCheckAllIndiciesChecked={jest.fn()}
-          setCheckAllTotalIndiciesToCheck={jest.fn()}
-          setIndexToCheck={jest.fn()}
-        />
-      </TestProviders>
+      <TestExternalProviders>
+        <TestDataQualityProviders
+          dataQualityContextProps={{
+            isILMAvailable: false,
+            ilmPhases,
+            formatNumber: mockFormatNumber,
+            formatBytes: mockFormatBytes,
+            patterns: [],
+          }}
+          resultsRollupContextProps={{
+            patternIndexNames,
+          }}
+        >
+          <CheckAll
+            incrementCheckAllIndiciesChecked={jest.fn()}
+            setCheckAllIndiciesChecked={jest.fn()}
+            setCheckAllTotalIndiciesToCheck={jest.fn()}
+            setIndexToCheck={jest.fn()}
+          />
+        </TestDataQualityProviders>
+      </TestExternalProviders>
     );
 
     const button = screen.getByTestId('checkAll');
@@ -211,40 +201,35 @@ describe('CheckAll', () => {
       /** stores the result of invoking `CheckAll`'s `formatNumber` function */
       let formatNumberResult = '';
 
-      const onCheckCompleted: OnCheckCompleted = jest.fn(
-        ({
-          formatBytes,
-          formatNumber,
-        }: {
-          error: string | null;
-          formatBytes: (value: number | undefined) => string;
-          formatNumber: (value: number | undefined) => string;
-          indexName: string;
-          partitionedFieldMetadata: PartitionedFieldMetadata | null;
-          pattern: string;
-          version: string;
-        }) => {
-          const value = 123456789; // numeric input to `CheckAll`'s `formatNumber` function
+      const onCheckCompleted: OnCheckCompleted = jest.fn(({ formatBytes, formatNumber }) => {
+        const value = 123456789; // numeric input to `CheckAll`'s `formatNumber` function
 
-          formatNumberResult = formatNumber(value);
-        }
-      );
+        formatNumberResult = formatNumber(value);
+      });
 
       render(
-        <TestProviders>
-          <CheckAll
-            formatBytes={mockFormatBytes}
-            formatNumber={mockFormatNumber}
-            ilmPhases={ilmPhases}
-            incrementCheckAllIndiciesChecked={jest.fn()}
-            onCheckCompleted={onCheckCompleted}
-            patternIndexNames={patternIndexNames}
-            patterns={[]}
-            setCheckAllIndiciesChecked={jest.fn()}
-            setCheckAllTotalIndiciesToCheck={jest.fn()}
-            setIndexToCheck={jest.fn()}
-          />
-        </TestProviders>
+        <TestExternalProviders>
+          <TestDataQualityProviders
+            dataQualityContextProps={{
+              isILMAvailable: false,
+              ilmPhases,
+              formatNumber: mockFormatNumber,
+              formatBytes: mockFormatBytes,
+              patterns: [],
+            }}
+            resultsRollupContextProps={{
+              patternIndexNames,
+              onCheckCompleted,
+            }}
+          >
+            <CheckAll
+              incrementCheckAllIndiciesChecked={jest.fn()}
+              setCheckAllIndiciesChecked={jest.fn()}
+              setCheckAllTotalIndiciesToCheck={jest.fn()}
+              setIndexToCheck={jest.fn()}
+            />
+          </TestDataQualityProviders>
+        </TestExternalProviders>
       );
 
       const button = screen.getByTestId('checkAll');
@@ -260,40 +245,34 @@ describe('CheckAll', () => {
       /** stores the result of invoking `CheckAll`'s `formatNumber` function */
       let formatNumberResult = '';
 
-      const onCheckCompleted: OnCheckCompleted = jest.fn(
-        ({
-          formatBytes,
-          formatNumber,
-        }: {
-          error: string | null;
-          formatBytes: (value: number | undefined) => string;
-          formatNumber: (value: number | undefined) => string;
-          indexName: string;
-          partitionedFieldMetadata: PartitionedFieldMetadata | null;
-          pattern: string;
-          version: string;
-        }) => {
-          const value = undefined; // undefined input to `CheckAll`'s `formatNumber` function
-
-          formatNumberResult = formatNumber(value);
-        }
-      );
+      const onCheckCompleted: OnCheckCompleted = jest.fn(({ formatBytes, formatNumber }) => {
+        const value = undefined; // undefined input to `CheckAll`'s `formatNumber` function
+        formatNumberResult = formatNumber(value);
+      });
 
       render(
-        <TestProviders>
-          <CheckAll
-            formatBytes={mockFormatBytes}
-            formatNumber={mockFormatNumber}
-            ilmPhases={ilmPhases}
-            incrementCheckAllIndiciesChecked={jest.fn()}
-            onCheckCompleted={onCheckCompleted}
-            patternIndexNames={patternIndexNames}
-            patterns={[]}
-            setCheckAllIndiciesChecked={jest.fn()}
-            setCheckAllTotalIndiciesToCheck={jest.fn()}
-            setIndexToCheck={jest.fn()}
-          />
-        </TestProviders>
+        <TestExternalProviders>
+          <TestDataQualityProviders
+            dataQualityContextProps={{
+              isILMAvailable: false,
+              ilmPhases,
+              formatNumber: mockFormatNumber,
+              formatBytes: mockFormatBytes,
+              patterns: [],
+            }}
+            resultsRollupContextProps={{
+              patternIndexNames,
+              onCheckCompleted,
+            }}
+          >
+            <CheckAll
+              incrementCheckAllIndiciesChecked={jest.fn()}
+              setCheckAllIndiciesChecked={jest.fn()}
+              setCheckAllTotalIndiciesToCheck={jest.fn()}
+              setIndexToCheck={jest.fn()}
+            />
+          </TestDataQualityProviders>
+        </TestExternalProviders>
       );
 
       const button = screen.getByTestId('checkAll');
@@ -314,20 +293,27 @@ describe('CheckAll', () => {
       jest.clearAllMocks();
 
       render(
-        <TestProviders>
-          <CheckAll
-            formatBytes={mockFormatBytes}
-            formatNumber={mockFormatNumber}
-            ilmPhases={ilmPhases}
-            incrementCheckAllIndiciesChecked={jest.fn()}
-            onCheckCompleted={jest.fn()}
-            patternIndexNames={patternIndexNames}
-            patterns={[]}
-            setCheckAllIndiciesChecked={setCheckAllIndiciesChecked}
-            setCheckAllTotalIndiciesToCheck={setCheckAllTotalIndiciesToCheck}
-            setIndexToCheck={jest.fn()}
-          />
-        </TestProviders>
+        <TestExternalProviders>
+          <TestDataQualityProviders
+            dataQualityContextProps={{
+              isILMAvailable: false,
+              ilmPhases,
+              formatNumber: mockFormatNumber,
+              formatBytes: mockFormatBytes,
+              patterns: [],
+            }}
+            resultsRollupContextProps={{
+              patternIndexNames,
+            }}
+          >
+            <CheckAll
+              incrementCheckAllIndiciesChecked={jest.fn()}
+              setCheckAllIndiciesChecked={setCheckAllIndiciesChecked}
+              setCheckAllTotalIndiciesToCheck={setCheckAllTotalIndiciesToCheck}
+              setIndexToCheck={jest.fn()}
+            />
+          </TestDataQualityProviders>
+        </TestExternalProviders>
       );
 
       const button = screen.getByTestId('checkAll');
@@ -358,20 +344,28 @@ describe('CheckAll', () => {
       jest.useFakeTimers();
 
       render(
-        <TestProviders>
-          <CheckAll
-            formatBytes={mockFormatBytes}
-            formatNumber={mockFormatNumber}
-            ilmPhases={ilmPhases}
-            incrementCheckAllIndiciesChecked={jest.fn()}
-            onCheckCompleted={onCheckCompleted}
-            patternIndexNames={patternIndexNames}
-            patterns={[]}
-            setCheckAllIndiciesChecked={jest.fn()}
-            setCheckAllTotalIndiciesToCheck={jest.fn()}
-            setIndexToCheck={setIndexToCheck}
-          />
-        </TestProviders>
+        <TestExternalProviders>
+          <TestDataQualityProviders
+            dataQualityContextProps={{
+              isILMAvailable: false,
+              ilmPhases,
+              formatNumber: mockFormatNumber,
+              formatBytes: mockFormatBytes,
+              patterns: [],
+            }}
+            resultsRollupContextProps={{
+              patternIndexNames,
+              onCheckCompleted,
+            }}
+          >
+            <CheckAll
+              incrementCheckAllIndiciesChecked={jest.fn()}
+              setCheckAllIndiciesChecked={jest.fn()}
+              setCheckAllTotalIndiciesToCheck={jest.fn()}
+              setIndexToCheck={setIndexToCheck}
+            />
+          </TestDataQualityProviders>
+        </TestExternalProviders>
       );
 
       const button = screen.getByTestId('checkAll');
