@@ -35,7 +35,6 @@ export interface ShowShareModalProps {
   dashboardTitle?: string;
   anchorElement: HTMLElement;
   getDashboardState: () => DashboardContainerInput;
-  hasExpandedPanel?: string;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
@@ -52,7 +51,6 @@ export function ShowShareModal({
   savedObjectId,
   dashboardTitle,
   getDashboardState,
-  hasExpandedPanel,
 }: ShowShareModalProps) {
   const {
     dashboardCapabilities: { createShortUrl: allowShortUrl },
@@ -201,7 +199,7 @@ export function ShowShareModal({
 
   const shareableUrl = setStateToKbnUrl(
     '_a',
-    { ...unsavedStateForLocator, expandedPanelId: hasExpandedPanel },
+    unsavedStateForLocator,
     { useHash: false, storeInHashQuery: true },
     unhashUrl(baseUrl)
   );

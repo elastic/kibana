@@ -36,13 +36,14 @@ import { pluginServices } from '../services/plugin_services';
 import { AwaitingDashboardAPI } from '../dashboard_container';
 import { DashboardRedirect } from '../dashboard_container/types';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
-import { createDashboardEditUrl, DASHBOARD_APP_ID, getFullEditPath } from '../dashboard_constants';
+import { createDashboardEditUrl, DASHBOARD_APP_ID } from '../dashboard_constants';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import { loadDashboardHistoryLocationState } from './locator/load_dashboard_history_location_state';
 import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
 import { DashboardTopNav } from '../dashboard_top_nav';
 import { DashboardTabTitleSetter } from './tab_title_setter/dashboard_tab_title_setter';
 import { useObservabilityAIAssistantContext } from './hooks/use_observability_ai_assistant_context';
+import { getDashboardListItemLink } from './listing_page/get_dashboard_list_item_link';
 
 export interface DashboardAppProps {
   history: History;
@@ -204,11 +205,13 @@ export function DashboardApp({
       dashboardAPI,
     });
     dashboardAPI.expandedPanelId.subscribe(() => {
-      const newUrl = getFullEditPath(
-        dashboardAPI.getDashboardSavedObjectId(),
+      const newUrl = getDashboardListItemLink(
+        kbnUrlStateStorage,
+        savedDashboardId!,
+        true,
         dashboardAPI.expandedPanelId.value
       );
-      console.log('newUrl', newUrl);
+      kbnUrlStateStorage.kbnUrlControls.update(newUrl, true);
     });
     return () => stopWatchingAppStateInUrl();
   }, [dashboardAPI, kbnUrlStateStorage, savedDashboardId, expandedPanelId, getUrlForApp]);
