@@ -16,7 +16,6 @@ export const getGroupStats: GetGroupStats<AlertsByGroupingAgg> = (selectedGroup,
       badge: {
         value: bucket.doc_count,
         width: 50,
-        color: 'primary',
       },
     },
   ];
