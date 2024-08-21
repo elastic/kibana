@@ -10,6 +10,11 @@ import type { IBasePath } from '@kbn/core/server';
 import type { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import { ObservabilityConfig } from '@kbn/observability-plugin/server';
 import type { ILogsSharedLogEntriesDomain } from '@kbn/logs-shared-plugin/server';
+import type {
+  AssetDetailsLocator,
+  InventoryLocator,
+  MetricsExplorerLocator,
+} from '@kbn/observability-shared-plugin/common';
 import { RulesServiceSetup } from '../services/rules';
 import { InfraConfig, InfraPluginStartServicesAccessor } from '../types';
 import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
@@ -45,4 +50,10 @@ export interface InfraBackendLibs extends InfraDomainLibs {
   handleEsError: typeof handleEsError;
   logger: Logger;
   plugins: Plugins;
+}
+
+export interface InfraLocators {
+  assetDetailsLocator: AssetDetailsLocator;
+  metricsExplorerLocator: MetricsExplorerLocator;
+  inventoryLocator: InventoryLocator;
 }

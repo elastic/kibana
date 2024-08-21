@@ -30,16 +30,10 @@ import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { getEcsGroups, type Group } from '@kbn/observability-alerting-rule-utils';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
-import {
-  ASSET_DETAILS_LOCATOR_ID,
-  AssetDetailsLocatorParams,
-  METRICS_EXPLORER_LOCATOR_ID,
-  MetricsExplorerLocatorParams,
-} from '@kbn/observability-shared-plugin/common';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import { AlertStates } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
-import { InfraBackendLibs } from '../../infra_types';
+import { InfraBackendLibs, InfraLocators } from '../../infra_types';
 import {
   buildFiredAlertReason,
   buildInvalidQueryAlertReason,
@@ -111,7 +105,7 @@ type MetricThresholdAlertReporter = (params: {
 }) => void;
 
 export const createMetricThresholdExecutor =
-  (libs: InfraBackendLibs) =>
+  (libs: InfraBackendLibs, { assetDetailsLocator, metricsExplorerLocator }: InfraLocators) =>
   async (
     options: RuleExecutorOptions<
       MetricThresholdRuleParams,
@@ -124,11 +118,6 @@ export const createMetricThresholdExecutor =
   ) => {
     const { share } = libs.plugins;
     const alertsLocator = share.setup.url.locators.get<AlertsLocatorParams>(alertsLocatorID);
-    const assetDetailsLocator =
-      share.setup.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
-    const metricsExplorerLocator = share.setup.url.locators.get<MetricsExplorerLocatorParams>(
-      METRICS_EXPLORER_LOCATOR_ID
-    );
 
     const startTime = Date.now();
 
