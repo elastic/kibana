@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type PaginationInputPaginatedInput = z.input<typeof pagination>;
 

@@ -1151,7 +1151,6 @@ x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /x-pack/test/api_integration/apis/monitoring_collection @elastic/stack-monitoring
 
 # Fleet
-/fleet_packages.json @elastic/fleet
 /x-pack/test/fleet_api_integration @elastic/fleet
 /x-pack/test/fleet_cypress @elastic/fleet
 /x-pack/test/fleet_functional @elastic/fleet
