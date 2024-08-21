@@ -74,9 +74,6 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
       if (viewMode) viewMode$.next(viewMode);
     }, [viewMode, viewMode$]);
 
-    const reload$ = useMemo(() => new BehaviorSubject<void>(undefined), []);
-    const saveNotification$ = useMemo(() => new BehaviorSubject<void>(undefined), []);
-
     const [serializedState, setSerializedState] = useState<
       ControlGroupSerializedState | undefined
     >();
@@ -88,10 +85,10 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
         const test =
           (await getCreationOptions?.(getDefaultControlGroupInput(), controlGroupStateBuilder)) ??
           {};
-        const { initialState, settings } = test;
+        const { initialState, editorConfig } = test;
         const state = {
           ...omit(initialState, ['initialChildControlState', 'ignoreParentSettings']),
-          settings,
+          editorConfig,
           controlStyle: initialState?.labelPosition,
           panelsJSON: JSON.stringify(initialState?.initialChildControlState ?? {}),
           ignoreParentSettingsJSON: JSON.stringify(initialState?.ignoreParentSettings ?? {}),
@@ -118,9 +115,7 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
         maybeId={id}
         type={CONTROL_GROUP_TYPE}
         getParentApi={() => ({
-          reload$,
           viewMode: viewMode$,
-          saveNotification$,
           query$: searchApi.query$,
           timeRange$: searchApi.timeRange$,
           unifiedSearchFilters$: searchApi.filters$,
@@ -134,8 +129,6 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
         onApiAvailable={(controlGroupApi) => {
           setControlGroup({
             ...controlGroupApi,
-            reload: () => reload$.next(),
-            save: () => saveNotification$.next(),
             updateInput: (newInput) => {
               lastInput.current = newInput;
               setRegenerateId(uuidv4());

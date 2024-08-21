@@ -70,18 +70,19 @@ export type ControlGroupApi = PresentationContainer &
   PublishesTimeslice &
   PublishesDisabledActionIds &
   Partial<HasParentApi<PublishesUnifiedSearch> & HasSaveNotification & PublishesReload> & {
-    asyncResetUnsavedChanges: () => Promise<void>;
-    autoApplySelections$: PublishingSubject<boolean>;
-    controlFetch$: (controlUuid: string) => Observable<ControlFetchContext>;
-    getLastSavedControlState: (controlUuid: string) => object;
-    ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
     allowExpensiveQueries$: PublishingSubject<boolean>;
-    untilInitialized: () => Promise<void>;
+    autoApplySelections$: PublishingSubject<boolean>;
+    ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
+    lastUsedDataViewId$: PublishingSubject<string | undefined>;
+
+    asyncResetUnsavedChanges: () => Promise<void>;
+    controlFetch$: (controlUuid: string) => Observable<ControlFetchContext>;
+    getEditorConfig: () => ControlGroupEditorConfig | undefined;
+    getLastSavedControlState: (controlUuid: string) => object;
     openAddDataControlFlyout: (settings?: {
       controlInputTransform?: ControlInputTransform;
     }) => void;
-    // getEditorConfig: () => ControlGroupEditorConfig | undefined;
-    lastUsedDataViewId$: PublishingSubject<string | undefined>;
+    untilInitialized: () => Promise<void>;
   };
 
 /**
@@ -90,11 +91,6 @@ export type ControlGroupApi = PresentationContainer &
  * ----------------------------------------------------------------
  */
 
-export interface ControlGroupSettings {
-  showAddButton?: boolean;
-  editorConfig?: ControlGroupEditorConfig;
-}
-
 export interface ControlGroupEditorConfig {
   hideDataViewSelector?: boolean;
   hideWidthSettings?: boolean;
@@ -102,8 +98,7 @@ export interface ControlGroupEditorConfig {
   fieldFilterPredicate?: FieldFilterPredicate;
 }
 
-export interface ControlGroupRuntimeState<State extends DefaultControlState = DefaultControlState>
-  extends Partial<ControlGroupSettings> {
+export interface ControlGroupRuntimeState<State extends DefaultControlState = DefaultControlState> {
   chainingSystem: ControlGroupChainingSystem;
   defaultControlGrow?: boolean;
   defaultControlWidth?: ControlWidth;
@@ -117,13 +112,13 @@ export interface ControlGroupRuntimeState<State extends DefaultControlState = De
    * Configuration settings that are never persisted
    * - remove after https://github.com/elastic/kibana/issues/189939 is resolved
    */
-  settings?: ControlGroupSettings;
+  editorConfig?: ControlGroupEditorConfig;
 }
 
 export interface ControlGroupSerializedState
   extends Pick<
     ControlGroupRuntimeState,
-    'chainingSystem' | 'defaultControlGrow' | 'defaultControlWidth' | 'settings'
+    'chainingSystem' | 'defaultControlGrow' | 'defaultControlWidth' | 'editorConfig'
   > {
   panelsJSON: string; // stringified version of ControlSerializedState
   ignoreParentSettingsJSON: string;
@@ -154,15 +149,3 @@ export type ControlPanelState<State extends DefaultControlState = DefaultControl
   type: string;
   order: number;
 };
-
-/**
- * `SerializedControlPanelState` is flattened and converted to `ControlPanelState` via the deserialize method of the
- * control group, so the type is only relevent to the control group (no individual control ever sees `explicitInput`)
- */
-export interface SerializedControlPanelState<
-  State extends DefaultControlState = DefaultControlState
-> extends DefaultControlState {
-  type: string;
-  order: number;
-  explicitInput: Omit<State, keyof DefaultControlState> & { id: string };
-}

@@ -16,6 +16,7 @@ import {
   type ControlGroupRendererProps,
   type ControlGroupRuntimeState,
   type DataControlInput,
+  type ControlGroupCreationOptions,
   controlGroupStateBuilder,
   ControlGroupStateBuilder,
 } from '@kbn/controls-plugin/public';
@@ -23,10 +24,6 @@ import React, { PropsWithChildren, useCallback, useEffect, useMemo, useRef, useS
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { Subscription } from 'rxjs';
 import { debounce, isEqual, isEqualWith } from 'lodash';
-import type {
-  ControlGroupCreationOptions,
-  FieldFilterPredicate,
-} from '@kbn/controls-plugin/public/control_group/types';
 import type { FilterGroupProps, FilterControlConfig } from './types';
 import './index.scss';
 import { FilterGroupLoading } from './loading';
@@ -308,8 +305,6 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     });
   }, [getStoredControlInput, controlsFromUrl, defaultControlsObj, defaultControls]);
 
-  const fieldFilterPredicate: FieldFilterPredicate = useCallback((f) => f.type !== 'number', []);
-
   const getCreationOptions: ControlGroupRendererProps['getCreationOptions'] = useCallback(
     async (
       defaultInput: Partial<ControlGroupRuntimeState>,
@@ -337,18 +332,15 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
 
       return {
         initialState,
-        settings: {
-          staticDataViewId: dataViewId ?? '',
-          editorConfig: {
-            hideWidthSettings: true,
-            hideDataViewSelector: true,
-            hideAdditionalSettings: true,
-          },
+        editorConfig: {
+          hideWidthSettings: true,
+          hideDataViewSelector: true,
+          hideAdditionalSettings: true,
+          fieldFilterPredicate: (f) => f.type !== 'number',
         },
-        fieldFilterPredicate,
       } as ControlGroupCreationOptions;
     },
-    [dataViewId, chainingSystem, selectControlsWithPriority, fieldFilterPredicate]
+    [dataViewId, chainingSystem, selectControlsWithPriority]
   );
 
   const discardChangesHandler = useCallback(async () => {

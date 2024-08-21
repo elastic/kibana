@@ -55,16 +55,11 @@ export {
 } from '../common';
 
 export {
-  type AddDataControlProps,
-  type AddOptionsListControlProps,
-  type AddRangeSliderControlProps,
   type ControlGroupContainer,
   ControlGroupContainerFactory,
   type ControlGroupInput,
-  type ControlGroupInputBuilder,
   type AwaitingControlGroupApi,
   type ControlGroupOutput,
-  controlGroupInputBuilder,
 } from './control_group';
 
 export {
@@ -86,7 +81,10 @@ export {
   type ControlGroupRendererProps,
 } from './control_group';
 
-export type { ControlGroupRendererApi } from './control_group/external_api/types';
+export type {
+  ControlGroupRendererApi,
+  ControlGroupCreationOptions,
+} from './control_group/external_api/types';
 
 /** TODO: Remove this once it is no longer needed in the examples plugin */
 export { CONTROL_WIDTH_OPTIONS } from './control_group/editor/editor_constants';
