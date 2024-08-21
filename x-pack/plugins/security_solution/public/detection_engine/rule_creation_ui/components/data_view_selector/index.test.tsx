@@ -32,6 +32,37 @@ describe('data_view_selector', () => {
     expect(wrapper.dive().find('[data-test-subj="pick-rule-data-source"]')).toHaveLength(1);
   });
 
+  it('displays selected dataview', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <DataViewSelector
+          kibanaDataViews={{
+            'security-solution-default': {
+              id: 'security-solution-default',
+              title:
+                '-*elastic-cloud-logs-*,.alerts-security.alerts-default,apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*',
+            },
+            '1234': {
+              id: '1234',
+              title: 'logs-*',
+              name: 'foobar',
+            },
+          }}
+          field={useFormFieldMock<string | undefined>({
+            value: 'security-solution-default',
+          })}
+        />
+      </TestProviders>
+    );
+
+    wrapper.find('button[data-test-subj="detectionsDataViewSelectorDropdown"]').simulate('click');
+    wrapper.find('button[id="1234"]').simulate('click');
+
+    expect(wrapper.find('button[data-test-subj="detectionsDataViewSelectorDropdown"]').text()).toBe(
+      'foobar'
+    );
+  });
+
   it('displays alerts on alerts warning when default security view selected', () => {
     const wrapper = mount(
       <TestProviders>

@@ -7,8 +7,8 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiCallOut, EuiComboBox, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import type { EuiSuperSelectOption } from '@elastic/eui';
+import { EuiCallOut, EuiSuperSelect, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { FieldHook } from '../../../../shared_imports';
@@ -48,24 +48,23 @@ export const DataViewSelector = ({ kibanaDataViews, field }: DataViewSelectorPro
       !Object.hasOwn(kibanaDataViews, dataViewId),
     [kibanaDataViewsDefined, dataViewId, kibanaDataViews]
   );
-  const [selectedOption, setSelectedOption] = useState<Array<EuiComboBoxOptionOption<string>>>(
+  const [selectedOption, setSelectedOption] = useState<string | undefined>(
     !selectedDataViewNotFound && dataViewId != null && dataViewId !== ''
-      ? [{ id: kibanaDataViews[dataViewId].id, label: kibanaDataViews[dataViewId].title }]
-      : []
+      ? kibanaDataViews[dataViewId].id
+      : undefined
   );
 
   const [showDataViewAlertsOnAlertsWarning, setShowDataViewAlertsOnAlertsWarning] = useState(false);
 
   useEffect(() => {
     if (!selectedDataViewNotFound && dataViewId) {
-      const dataViewsTitle = kibanaDataViews[dataViewId].title;
       const dataViewsId = kibanaDataViews[dataViewId].id;
 
       setShowDataViewAlertsOnAlertsWarning(dataViewsId === 'security-solution-default');
 
-      setSelectedOption([{ id: dataViewsId, label: dataViewsTitle }]);
+      setSelectedOption(dataViewsId);
     } else {
-      setSelectedOption([]);
+      setSelectedOption(undefined);
     }
   }, [
     dataViewId,
@@ -77,25 +76,32 @@ export const DataViewSelector = ({ kibanaDataViews, field }: DataViewSelectorPro
 
   // TODO: optimize this, pass down array of data view ids
   // at the same time we grab the data views in the top level form component
-  const dataViewOptions = useMemo(() => {
+  const dataViewOptions = useMemo((): Array<EuiSuperSelectOption<string>> => {
     return kibanaDataViewsDefined
       ? Object.values(kibanaDataViews).map((dv) => ({
-          label: dv.title,
-          id: dv.id,
+          value: dv.id,
+          inputDisplay: dv.name ?? dv.title,
+          dropdownDisplay:
+            dv.name && dv.name !== dv.title ? (
+              <>
+                <strong>{dv.name}</strong>
+                <EuiText size="xs" color="subdued">
+                  <p>{dv.title}</p>
+                </EuiText>
+              </>
+            ) : (
+              <strong>{dv.title}</strong>
+            ),
         }))
       : [];
   }, [kibanaDataViewsDefined, kibanaDataViews]);
 
-  const onChangeDataViews = (options: Array<EuiComboBoxOptionOption<string>>) => {
+  const onChangeDataViews = (options: string) => {
     const selectedDataViewOption = options;
     setSelectedOption(selectedDataViewOption ?? []);
 
-    if (
-      selectedDataViewOption != null &&
-      selectedDataViewOption.length > 0 &&
-      selectedDataViewOption[0].id != null
-    ) {
-      const selectedDataViewId = selectedDataViewOption[0].id;
+    if (selectedDataViewOption != null && selectedDataViewOption.length > 0) {
+      const selectedDataViewId = selectedDataViewOption;
       field?.setValue(selectedDataViewId);
     } else {
       field?.setValue(undefined);
@@ -136,12 +142,10 @@ export const DataViewSelector = ({ kibanaDataViews, field }: DataViewSelectorPro
         isInvalid={isInvalid}
         data-test-subj="pick-rule-data-source"
       >
-        <EuiComboBox
-          isClearable
-          singleSelection={{ asPlainText: true }}
+        <EuiSuperSelect
           onChange={onChangeDataViews}
           options={dataViewOptions}
-          selectedOptions={selectedOption}
+          valueOfSelected={selectedOption}
           aria-label={i18n.PICK_INDEX_PATTERNS}
           placeholder={i18n.PICK_INDEX_PATTERNS}
           data-test-subj="detectionsDataViewSelectorDropdown"
