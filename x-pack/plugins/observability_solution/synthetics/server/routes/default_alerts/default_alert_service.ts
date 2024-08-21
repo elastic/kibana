@@ -38,8 +38,15 @@ export class DefaultAlertService {
     this.soClient = soClient;
   }
 
+  async getSettings() {
+    if (!this.settings) {
+      this.settings = await savedObjectsAdapter.getSyntheticsDynamicSettings(this.soClient);
+    }
+    return this.settings;
+  }
+
   async setupDefaultAlerts() {
-    this.settings = await savedObjectsAdapter.getSyntheticsDynamicSettings(this.soClient);
+    this.settings = await this.getSettings();
 
     const [statusRule, tlsRule] = await Promise.allSettled([
       this.setupStatusRule(),
@@ -98,6 +105,7 @@ export class DefaultAlertService {
     const { actions = [], systemActions = [], ...alert } = data[0];
     return { ...alert, actions: [...actions, ...systemActions], ruleTypeId: alert.alertTypeId };
   }
+
   async createDefaultAlertIfNotExist(ruleType: DefaultRuleType, name: string, interval: string) {
     const alert = await this.getExistingAlert(ruleType);
     if (alert) {
@@ -131,11 +139,30 @@ export class DefaultAlertService {
     };
   }
 
-  updateStatusRule() {
-    return this.updateDefaultAlert(SYNTHETICS_STATUS_RULE, `Synthetics status internal rule`, '1m');
+  async updateStatusRule(enabled?: boolean) {
+    if (enabled) {
+      return this.updateDefaultAlert(
+        SYNTHETICS_STATUS_RULE,
+        `Synthetics status internal rule`,
+        '1m'
+      );
+    } else {
+      const rulesClient = (await this.context.alerting)?.getRulesClient();
+      return rulesClient.bulkDeleteRules({
+        filter: `alert.attributes.alertTypeId:"${SYNTHETICS_STATUS_RULE}" AND alert.attributes.tags:"SYNTHETICS_DEFAULT_ALERT"`,
+      });
+    }
   }
-  updateTlsRule() {
-    return this.updateDefaultAlert(SYNTHETICS_TLS_RULE, `Synthetics internal TLS rule`, '1m');
+
+  async updateTlsRule(enabled?: boolean) {
+    if (enabled) {
+      return this.updateDefaultAlert(SYNTHETICS_TLS_RULE, `Synthetics internal TLS rule`, '1m');
+    } else {
+      const rulesClient = (await this.context.alerting)?.getRulesClient();
+      return rulesClient.bulkDeleteRules({
+        filter: `alert.attributes.alertTypeId:"${SYNTHETICS_TLS_RULE}" AND alert.attributes.tags:"SYNTHETICS_DEFAULT_ALERT"`,
+      });
+    }
   }
 
   async updateDefaultAlert(ruleType: DefaultRuleType, name: string, interval: string) {
