@@ -22,7 +22,7 @@ jobs:
       issue_ids: ${{ steps.issues_to_label.outputs.value }}
       label_ids: ${{ steps.label_ids.outputs.value }}
     steps:
-      - uses: octokit/graphql-action@v2.x
+      - uses: octokit/graphql-action@8ad880e4d437783ea2ab17010324de1075228110 # v2.3.2
         id: closing_issues
         with:
           query: |
@@ -78,7 +78,7 @@ jobs:
 
     name: Label issue ${{ matrix.issueId }} with ${{ matrix.labelId }}
     steps:
-      - uses: octokit/graphql-action@v2.x
+      - uses: octokit/graphql-action@8ad880e4d437783ea2ab17010324de1075228110 # v2.3.2
         id: add_labels_to_closed_issue
         with:
           query: |
