@@ -19,7 +19,7 @@ import {
   type InlineCastContext,
   type IntegerValueContext,
   type QualifiedIntegerLiteralContext,
-  QualifiedNamePatternContext
+  QualifiedNamePatternContext,
 } from './antlr/esql_parser';
 import { getPosition } from './ast_position_utils';
 import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
