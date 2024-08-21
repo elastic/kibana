@@ -15,8 +15,12 @@ export async function deleteIndices(
   logger: Logger
 ) {
   try {
+    const { indices: historyIndices } = await esClient.indices.resolveIndex({
+      name: `${generateHistoryIndexName(definition)}.*`,
+      expand_wildcards: 'all',
+    });
     const indices = [
-      `${generateHistoryIndexName(definition)}.*`,
+      ...historyIndices.map(({ name }) => name),
       generateLatestIndexName(definition),
     ];
     await esClient.indices.delete({ index: indices, ignore_unavailable: true });

@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import {
-  copyToClipboard,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiEmptyPrompt,
-  EuiSpacer,
-} from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import React, { useMemo } from 'react';
 
 import { CustomCallout } from '../callouts/custom_callout';
 import { CompareFieldsTable } from '../../../compare_fields_table';
@@ -22,12 +15,11 @@ import { EmptyPromptBody } from '../../index_properties/empty_prompt_body';
 import { EmptyPromptTitle } from '../../index_properties/empty_prompt_title';
 import { getAllCustomMarkdownComments, showCustomCallout } from './helpers';
 import * as i18n from '../../index_properties/translations';
-import { COPIED_RESULTS_TOAST_TITLE } from '../../../translations';
 import type { IlmPhase, PartitionedFieldMetadata } from '../../../types';
 import { useDataQualityContext } from '../../data_quality_context';
+import { StickyActions } from '../sticky_actions';
 
 interface Props {
-  addSuccessToast: (toast: { title: string }) => void;
   docsCount: number;
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
@@ -39,7 +31,6 @@ interface Props {
 }
 
 const CustomTabComponent: React.FC<Props> = ({
-  addSuccessToast,
   docsCount,
   formatBytes,
   formatNumber,
@@ -50,7 +41,7 @@ const CustomTabComponent: React.FC<Props> = ({
   sizeInBytes,
 }) => {
   const { isILMAvailable } = useDataQualityContext();
-  const markdownComments: string[] = useMemo(
+  const markdownComment: string = useMemo(
     () =>
       getAllCustomMarkdownComments({
         docsCount,
@@ -62,7 +53,7 @@ const CustomTabComponent: React.FC<Props> = ({
         partitionedFieldMetadata,
         patternDocsCount,
         sizeInBytes,
-      }),
+      }).join('\n'),
     [
       docsCount,
       formatBytes,
@@ -79,27 +70,11 @@ const CustomTabComponent: React.FC<Props> = ({
   const body = useMemo(() => <EmptyPromptBody body={i18n.CUSTOM_EMPTY} />, []);
   const title = useMemo(() => <EmptyPromptTitle title={i18n.CUSTOM_EMPTY_TITLE} />, []);
 
-  const onCopy = useCallback(() => {
-    copyToClipboard(markdownComments.join('\n'));
-
-    addSuccessToast({
-      title: COPIED_RESULTS_TOAST_TITLE,
-    });
-  }, [addSuccessToast, markdownComments]);
-
   return (
-    <>
+    <div data-test-subj="customTabContent">
       {showCustomCallout(partitionedFieldMetadata.custom) ? (
         <>
-          <CustomCallout customFieldMetadata={partitionedFieldMetadata.custom}>
-            <EuiFlexGroup alignItems="center" gutterSize="none">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty aria-label={i18n.COPY_TO_CLIPBOARD} flush="both" onClick={onCopy}>
-                  {i18n.COPY_TO_CLIPBOARD}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </CustomCallout>
+          <CustomCallout customFieldMetadata={partitionedFieldMetadata.custom} />
 
           <EuiSpacer />
 
@@ -108,11 +83,14 @@ const CustomTabComponent: React.FC<Props> = ({
             getTableColumns={getCustomTableColumns}
             title={i18n.CUSTOM_FIELDS_TABLE_TITLE(indexName)}
           />
+
+          <EuiSpacer size="m" />
+          <StickyActions markdownComment={markdownComment} showCopyToClipboardAction={true} />
         </>
       ) : (
         <EuiEmptyPrompt body={body} title={title} titleSize="s" />
       )}
-    </>
+    </div>
   );
 };
 
