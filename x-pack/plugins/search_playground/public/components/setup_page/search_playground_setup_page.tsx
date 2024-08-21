@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { useEffect } from 'react';
+
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -13,65 +15,40 @@ import {
   EuiLoadingSpinner,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CreateIndexButton } from './create_index_button';
 import { useQueryIndices } from '../../hooks/use_query_indices';
-import { docLinks } from '../../../common/doc_links';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { AnalyticsEvents } from '../../analytics/constants';
-import { ConnectLLMButton } from './connect_llm_button';
 import { AddDataSources } from './add_data_sources';
 
-export const SetupPage: React.FC = () => {
+export const SearchPlaygroundSetupPage: React.FC = () => {
   const usageTracker = useUsageTracker();
-  const { indices, isLoading: isIndicesLoading } = useQueryIndices();
+  const { isLoading: isIndicesLoading } = useQueryIndices();
 
   useEffect(() => {
-    usageTracker?.load(AnalyticsEvents.setupChatPageLoaded);
+    usageTracker?.load(AnalyticsEvents.setupSearchPageLoaded);
   }, [usageTracker]);
 
   return (
     <EuiEmptyPrompt
-      iconType="discuss"
+      iconType="indexOpen"
       data-test-subj="setupPage"
       title={
         <h2>
           <FormattedMessage
-            id="xpack.searchPlayground.setupPage.title"
-            defaultMessage="Set up a chat experience"
+            id="xpack.searchPlayground.setupPage.queryBuilder.title"
+            defaultMessage="Add data to query"
           />
         </h2>
-      }
-      body={
-        <>
-          <p>
-            <FormattedMessage
-              id="xpack.searchPlayground.setupPage.description"
-              defaultMessage="Experiment with combining your Elasticsearch data with powerful large language models (LLMs) using Playground for retrieval augmented generation (RAG)."
-            />
-          </p>
-          <p>
-            <FormattedMessage
-              id="xpack.searchPlayground.setupPage.descriptionLLM"
-              defaultMessage="Connect to your LLM provider and select your data sources to get started."
-            />
-          </p>
-        </>
       }
       actions={
         <EuiFlexGroup justifyContent="center">
           {isIndicesLoading ? (
             <EuiLoadingSpinner />
           ) : (
-            <>
-              <EuiFlexItem grow={false}>
-                <ConnectLLMButton />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {indices.length ? <AddDataSources /> : <CreateIndexButton />}
-              </EuiFlexItem>
-            </>
+            <EuiFlexItem grow={false}>
+              <AddDataSources />
+            </EuiFlexItem>
           )}
         </EuiFlexGroup>
       }
@@ -85,7 +62,7 @@ export const SetupPage: React.FC = () => {
               />
             </span>
           </EuiTitle>{' '}
-          <EuiLink href={docLinks.chatPlayground} target="_blank" external>
+          <EuiLink href="todo" target="_blank" external>
             <FormattedMessage
               id="xpack.searchPlayground.setupPage.documentationLink"
               defaultMessage="Read documentation"
