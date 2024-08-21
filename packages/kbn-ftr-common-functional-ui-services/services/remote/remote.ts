@@ -104,13 +104,23 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   lifecycle.afterTestSuite.add(async () => {
     await tryWebDriverCall(async () => {
       // collect error message stashed in SessionStorage that indicate EuiProvider implementation error
-      const [errorMessage, errorStack, pageHref, pageTitle] = await Promise.all([
-        getSessionStorageItem('dev.euiProviderWarning.message'),
-        getSessionStorageItem('dev.euiProviderWarning.stack'),
-        getSessionStorageItem('dev.euiProviderWarning.pageHref'),
-        getSessionStorageItem('dev.euiProviderWarning.pageTitle'),
-      ]);
-      if (errorMessage != null) {
+      const euiProviderWarning = await getSessionStorageItem('dev.euiProviderWarning');
+      if (euiProviderWarning != null) {
+        let errorMessage: string;
+        let errorStack: string;
+        let pageHref: string;
+        let pageTitle: string;
+        try {
+          ({
+            message: errorMessage,
+            stack: errorStack,
+            pageHref,
+            pageTitle,
+          } = JSON.parse(euiProviderWarning));
+        } catch (error) {
+          throw new Error(`Found EuiProvider dev error, but the details could not be parsed`);
+        }
+
         log.error(`pageTitle: ${pageTitle}`);
         log.error(`pageHref: ${pageHref}`);
         log.error(`Error: ${errorMessage}`);

@@ -16,22 +16,28 @@ export default function ({ getPageObjects, getService }: PluginFunctionalProvide
 
   describe('EUI Provider Dev Warning', () => {
     it('shows error toast to developer', async () => {
+      const pageTitle = 'EuiProvider test - Elastic';
+
       await PageObjects.common.navigateToApp('euiProviderDevWarning');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await browser.getTitle()).eql('EuiProvider test - Elastic');
+      expect(await browser.getTitle()).eql(pageTitle);
       await testSubjects.existOrFail('core-chrome-euiDevProviderWarning-toast');
 
-      expect(
-        await browser.getSessionStorageItem('dev.euiProviderWarning.message')
-      ).to.not.be.empty();
+      // check that the error has been detected and stored in session storage
+      const euiProviderWarning = await browser.getSessionStorageItem('dev.euiProviderWarning');
+      const {
+        message: errorMessage,
+        stack: errorStack,
+        pageHref: errorPageHref,
+        pageTitle: errorPageTitle,
+      } = JSON.parse(euiProviderWarning!);
+      expect(errorMessage).to.not.be.empty();
+      expect(errorStack).to.not.be.empty();
+      expect(errorPageHref).to.not.be.empty();
+      expect(errorPageTitle).to.be(pageTitle);
 
       // clean up to ensure test suite will pass
-      await Promise.all([
-        browser.removeSessionStorageItem('dev.euiProviderWarning.message'),
-        browser.removeSessionStorageItem('dev.euiProviderWarning.stack'),
-        browser.removeSessionStorageItem('dev.euiProviderWarning.pageHref'),
-        browser.removeSessionStorageItem('dev.euiProviderWarning.pageTitle'),
-      ]);
+      await browser.removeSessionStorageItem('dev.euiProviderWarning');
     });
   });
 }

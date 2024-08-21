@@ -185,10 +185,13 @@ export class ChromeService {
         console.error(errorObject);
 
         // 2. store error in sessionStorage so it can be detected in testing
-        sessionStorage.setItem('dev.euiProviderWarning.message', providerError.toString());
-        sessionStorage.setItem('dev.euiProviderWarning.stack', errorObject.stack ?? 'undefined');
-        sessionStorage.setItem('dev.euiProviderWarning.pageHref', window.location.href);
-        sessionStorage.setItem('dev.euiProviderWarning.pageTitle', document.title);
+        const storedError = {
+          message: providerError.toString(),
+          stack: errorObject.stack ?? 'undefined',
+          pageHref: window.location.href,
+          pageTitle: document.title,
+        };
+        sessionStorage.setItem('dev.euiProviderWarning', JSON.stringify(storedError));
 
         // 3. error toast / popup
         notifications.toasts.addDanger({
