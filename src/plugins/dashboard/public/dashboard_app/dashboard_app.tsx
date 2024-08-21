@@ -16,7 +16,6 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { DashboardContainerInput } from '../../common';
 import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
@@ -71,15 +70,9 @@ export function DashboardApp({
   expandedPanelId,
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
-  console.log('expandedPanelId passed into app', expandedPanelId);
   useMount(() => {
     (async () => {
       setShowNoDataPage(await isDashboardAppInNoDataState());
-      // if given a shareable URL with an expanded panel, this is needed to open to the expanded panel when the dashboard loads
-      const state: DashboardContainerInput | null = kbnUrlStateStorage.get(
-        DASHBOARD_STATE_STORAGE_KEY
-      );
-      if (state) setRedirectToExpandedPanel(state?.expandedPanelId);
     })();
   });
   const [dashboardAPI, setDashboardAPI] = useState<AwaitingDashboardAPI>(null);
@@ -211,14 +204,11 @@ export function DashboardApp({
       dashboardAPI,
     });
     dashboardAPI.expandedPanelId.subscribe(() => {
-      // update url here to look like `/app/dashboards/{dashboardId}/{expandedPanelId}`
-      console.log(dashboardAPI.expandedPanelId.value, 'expandedPanelId in app useEffect hook');
-
       const newUrl = getFullEditPath(
         dashboardAPI.getDashboardSavedObjectId(),
         dashboardAPI.expandedPanelId.value
       );
-      dashboardAPI.updateInput(newUrl);
+      console.log('newUrl', newUrl);
     });
     return () => stopWatchingAppStateInUrl();
   }, [dashboardAPI, kbnUrlStateStorage, savedDashboardId, expandedPanelId, getUrlForApp]);
