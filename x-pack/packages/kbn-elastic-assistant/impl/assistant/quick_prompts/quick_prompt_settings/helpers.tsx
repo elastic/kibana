@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { euiPaletteColorBlind } from '@elastic/eui';
 
-export const getPromptById = ({
-  prompts,
-  id,
-}: {
-  prompts: PromptResponse[];
-  id: string;
-}): PromptResponse | undefined => prompts.find((p) => p.id === id);
+const euiVisPalette = euiPaletteColorBlind();
+export const getRandomEuiColor = () => {
+  const randomIndex = Math.floor(Math.random() * euiVisPalette.length);
+  return euiVisPalette[randomIndex];
+};
