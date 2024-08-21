@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
 
-  describe.only('Dashboard control group settings', () => {
+  describe('Dashboard control group settings', () => {
     before(async () => {
       await dashboard.loadSavedDashboard('control group settings test dashboard');
       await dashboard.switchToEditMode();
