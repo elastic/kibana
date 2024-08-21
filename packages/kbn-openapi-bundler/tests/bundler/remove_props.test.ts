@@ -108,8 +108,6 @@ describe('OpenAPI Bundler - remove custom x- props', () => {
     expect(bundledSpec.paths['/api/some_api']!.post).not.toMatchObject({
       'x-codegen-enabled': expect.anything(),
     });
-    // As we have switched to using the js-yaml safeDump function, we are stripping
-    // out invalid types like 'undefined' when the spec is written to file.
     expect(bundledSpec.paths['/api/some_api']!.put).not.toMatchObject({
       'x-codegen-enabled': expect.anything(),
     });

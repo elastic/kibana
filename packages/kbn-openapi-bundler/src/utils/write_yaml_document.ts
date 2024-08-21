@@ -23,22 +23,16 @@ export async function writeYamlDocument(filePath: string, document: unknown): Pr
 
 function stringifyToYaml(document: unknown): string {
   try {
-    // We don't want to have `undefined` values serialized into YAML.
-    // `JSON.stringify()` simply skips `undefined` values while js-yaml v 3.14 DOES NOT.
-    // js-yaml >= v4 has it fixed so `dump()`'s behavior is consistent with  `JSON.stringify()`.
-    // Until js-yaml is updated to v4 use the hack with JSON serialization/deserialization.
-    const clearedDocument = JSON.parse(JSON.stringify(document));
-
     // Disable YAML Anchors https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases
     // It makes YAML much more human readable
-    return safeDump(clearedDocument, {
+    return safeDump(document, {
       noRefs: true,
       sortKeys: sortYamlKeys,
       skipInvalid: true, // Skip invalid types like `undefined`
     });
   } catch (e) {
     // Try to stringify with YAML Anchors enabled
-    return safeDump(document, { noRefs: false, sortKeys: sortYamlKeys, skipInvalid: true }); // Skip invalid types like `undefined`
+    return safeDump(document, { noRefs: false, sortKeys: sortYamlKeys, skipInvalid: true });
   }
 }
 
