@@ -6,7 +6,7 @@
  */
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
@@ -51,99 +51,111 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history, .
     history,
   });
 
-  const onChangeSpaceSettings = (formValues: FormValues & Partial<Space>) => {
-    const {
-      customIdentifier,
-      avatarType,
-      customAvatarInitials,
-      customAvatarColor,
-      ...updatedSpace
-    } = formValues;
-    setSpaceSettings({ ...spaceSettings, ...updatedSpace });
-    setIsDirty(true);
-  };
+  const onChangeSpaceSettings = useCallback(
+    (formValues: FormValues & Partial<Space>) => {
+      const {
+        customIdentifier,
+        avatarType,
+        customAvatarInitials,
+        customAvatarColor,
+        ...updatedSpace
+      } = formValues;
+      setSpaceSettings({ ...spaceSettings, ...updatedSpace });
+      setIsDirty(true);
+    },
+    [spaceSettings]
+  );
 
-  const onChangeFeatures = (updatedSpace: Partial<Space>) => {
-    setSpaceSettings({ ...spaceSettings, ...updatedSpace });
-    setIsDirty(true);
-    setShowUserImpactWarning(true);
-  };
+  const onChangeFeatures = useCallback(
+    (updatedSpace: Partial<Space>) => {
+      setSpaceSettings({ ...spaceSettings, ...updatedSpace });
+      setIsDirty(true);
+      setShowUserImpactWarning(true);
+    },
+    [spaceSettings]
+  );
 
-  const onSolutionViewChange = (updatedSpace: Partial<Space>) => {
-    setSolution(updatedSpace.solution);
-    onChangeFeatures(updatedSpace);
-  };
+  const onSolutionViewChange = useCallback(
+    (updatedSpace: Partial<Space>) => {
+      setSolution(updatedSpace.solution);
+      onChangeFeatures(updatedSpace);
+    },
+    [onChangeFeatures]
+  );
 
-  const onClickSubmit = () => {
+  const backToSpacesList = useCallback(() => {
+    history.push('/');
+  }, [history]);
+
+  const onClickCancel = useCallback(() => {
+    setShowAlteringActiveSpaceDialog(false);
+    setShowUserImpactWarning(false);
+    backToSpacesList();
+  }, [backToSpacesList]);
+
+  const onClickDeleteSpace = useCallback(() => {
+    setShowConfirmDeleteModal(true);
+  }, []);
+
+  // TODO cancel previous request, if there is one pending
+  // TODO flush analytics
+  const performSave = useCallback(
+    async ({ requiresReload = false }) => {
+      const { id, name, disabledFeatures } = spaceSettings;
+      if (!id) {
+        throw new Error(`Can not update space without id field!`);
+      }
+      if (!name) {
+        throw new Error(`Can not update space without name field!`);
+      }
+
+      setIsLoading(true);
+
+      try {
+        await spacesManager.updateSpace({
+          id,
+          name,
+          disabledFeatures: disabledFeatures ?? [],
+          ...spaceSettings,
+        });
+
+        notifications.toasts.addSuccess(
+          i18n.translate(
+            'xpack.spaces.management.spaceDetails.spaceSuccessfullySavedNotificationMessage',
+            {
+              defaultMessage: 'Space "{name}" was saved.',
+              values: { name },
+            }
+          )
+        );
+
+        setIsDirty(false);
+        backToSpacesList();
+        if (requiresReload) {
+          window.location.reload();
+        }
+      } catch (error) {
+        const message = error?.body?.message ?? error.toString();
+        notifications.toasts.addDanger(
+          i18n.translate('xpack.spaces.management.spaceDetails.errorSavingSpaceTitle', {
+            defaultMessage: 'Error saving space: {message}',
+            values: { message },
+          })
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [backToSpacesList, notifications.toasts, spaceSettings, spacesManager]
+  );
+
+  const onClickSubmit = useCallback(() => {
     if (showUserImpactWarning) {
       setShowAlteringActiveSpaceDialog(true);
     } else {
       performSave({ requiresReload: false });
     }
-  };
-
-  const backToSpacesList = () => {
-    history.push('/');
-  };
-
-  const onClickCancel = () => {
-    setShowAlteringActiveSpaceDialog(false);
-    setShowUserImpactWarning(false);
-    backToSpacesList();
-  };
-
-  const onClickDeleteSpace = () => {
-    setShowConfirmDeleteModal(true);
-  };
-
-  // TODO cancel previous request, if there is one pending
-  // TODO flush analytics
-  const performSave = async ({ requiresReload = false }) => {
-    const { id, name, disabledFeatures } = spaceSettings;
-    if (!id) {
-      throw new Error(`Can not update space without id field!`);
-    }
-    if (!name) {
-      throw new Error(`Can not update space without name field!`);
-    }
-
-    setIsLoading(true);
-
-    try {
-      await spacesManager.updateSpace({
-        id,
-        name,
-        disabledFeatures: disabledFeatures ?? [],
-        ...spaceSettings,
-      });
-
-      notifications.toasts.addSuccess(
-        i18n.translate(
-          'xpack.spaces.management.spaceDetails.spaceSuccessfullySavedNotificationMessage',
-          {
-            defaultMessage: 'Space "{name}" was saved.',
-            values: { name },
-          }
-        )
-      );
-
-      setIsDirty(false);
-      backToSpacesList();
-      if (requiresReload) {
-        window.location.reload();
-      }
-    } catch (error) {
-      const message = error?.body?.message ?? error.toString();
-      notifications.toasts.addDanger(
-        i18n.translate('xpack.spaces.management.spaceDetails.errorSavingSpaceTitle', {
-          defaultMessage: 'Error saving space: {message}',
-          values: { message },
-        })
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [performSave, showUserImpactWarning]);
 
   const doShowAlteringActiveSpaceDialog = () => {
     return (
