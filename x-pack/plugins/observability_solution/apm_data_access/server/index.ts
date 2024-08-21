@@ -8,7 +8,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 
-// Uses APM + OTel index patterns 
+// Uses APM + OTel index patterns
 // This should be used by most of the APM UIs
 const configSchema = schema.object({
   indices: schema.object({
