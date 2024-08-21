@@ -4,42 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { debounce } from 'lodash';
 import React, { useState, useCallback, useMemo, useEffect, useContext } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiCode,
   EuiCallOut,
-  EuiForm,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiComboBox,
-  EuiDescribedFormGroup,
   EuiLoadingSpinner,
   EuiText,
   EuiSpacer,
   EuiTitle,
   useEuiTheme,
+  EuiAccordion,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment, { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
 import { FeatureFeedbackButton, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { css } from '@emotion/react';
-import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 import { useMetricHostsModuleContext } from '../../../containers/ml/modules/metrics_hosts/module';
 import { useMetricK8sModuleContext } from '../../../containers/ml/modules/metrics_k8s/module';
-import { FixedDatePicker } from '../../fixed_datepicker';
 import { DEFAULT_K8S_PARTITION_FIELD } from '../../../containers/ml/modules/metrics_k8s/module_descriptor';
-import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { INFRA_ML_FLYOUT_FEEDBACK_LINK } from './flyout_home';
 import { KibanaEnvironmentContext } from '../../../hooks/use_kibana';
-import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
+import { JobAdvancedSettings } from './job_advanced_settings';
 
 interface Props {
   jobType: 'hosts' | 'kubernetes';
@@ -54,8 +47,6 @@ export const JobSetupScreen = (props: Props) => {
   const [partitionField, setPartitionField] = useState<string[] | null>(null);
   const host = useMetricHostsModuleContext();
   const kubernetes = useMetricK8sModuleContext();
-  const { metricsView } = useMetricsDataViewContext();
-  const [filter, setFilter] = useState<string>('');
   const [filterQuery, setFilterQuery] = useState<string>('');
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
   const { kibanaVersion, isCloudEnv, isServerlessEnv } = useContext(KibanaEnvironmentContext);
@@ -95,10 +86,6 @@ export const JobSetupScreen = (props: Props) => {
     }
   }, [props.jobType, kubernetes.jobSummaries, host.jobSummaries]);
 
-  const updateStart = useCallback((date: Moment) => {
-    setStartDate(date);
-  }, []);
-
   const createJobs = useCallback(() => {
     if (hasSummaries) {
       cleanUpAndSetUpModule(
@@ -126,21 +113,6 @@ export const JobSetupScreen = (props: Props) => {
     partitionField,
     startDate,
   ]);
-
-  const onFilterChange = useCallback(
-    (f: string) => {
-      setFilter(f || '');
-      setFilterQuery(convertKueryToElasticSearchQuery(f, metricsView?.dataViewReference) || '');
-    },
-    [metricsView?.dataViewReference]
-  );
-
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const debouncedOnFilterChange = useCallback(debounce(onFilterChange, 500), [onFilterChange]);
-
-  const onPartitionFieldChange = useCallback((value: Array<{ label: string }>) => {
-    setPartitionField(value.map((v) => v.label));
-  }, []);
 
   useEffect(() => {
     if (props.jobType === 'kubernetes') {
@@ -243,125 +215,27 @@ export const JobSetupScreen = (props: Props) => {
               <p>
                 <FormattedMessage
                   id="xpack.infra.ml.steps.setupProcess.description"
-                  defaultMessage="Settings can not be changed once the jobs are created. You can recreate jobs anytime, however, the previously detected anomalies are removed."
+                  defaultMessage="Enable anomaly detection using our recommended settings or fine-tune your jobs using the advanced settings. If you need to make changes after creating your jobs, you can recreate them at any time (previous anomalies will be removed)."
                 />
               </p>
             </EuiText>
 
             <EuiSpacer size="l" />
-            <EuiForm>
-              <EuiDescribedFormGroup
-                title={
-                  <h3>
-                    <FormattedMessage
-                      id="xpack.infra.ml.steps.setupProcess.when.title"
-                      defaultMessage="When does your model begin?"
-                    />
-                  </h3>
-                }
-                description={
-                  <FormattedMessage
-                    id="xpack.infra.ml.steps.setupProcess.when.description"
-                    defaultMessage="By default, machine learning jobs analyze the last 4 weeks of data and continue to run indefinitely."
-                  />
-                }
-              >
-                <EuiFormRow
-                  label={
-                    <FormattedMessage
-                      id="xpack.infra.ml.steps.setupProcess.when.timePicker.label"
-                      defaultMessage="Start date"
-                    />
-                  }
-                >
-                  <FixedDatePicker
-                    showTimeSelect
-                    selected={startDate}
-                    onChange={updateStart}
-                    maxDate={now}
-                  />
-                </EuiFormRow>
-              </EuiDescribedFormGroup>
-
-              <EuiDescribedFormGroup
-                title={
-                  <h3>
-                    <FormattedMessage
-                      id="xpack.infra.ml.steps.setupProcess.partition.title"
-                      defaultMessage="How do you want to partition your data?"
-                    />
-                  </h3>
-                }
-                description={
-                  <FormattedMessage
-                    id="xpack.infra.ml.steps.setupProcess.partition.description"
-                    defaultMessage="Partitions enable you to build independent models for groups of data that share similar behavior. For example, you can partition by machine type or cloud availability zone."
-                  />
-                }
-              >
-                <EuiFormRow
-                  label={
-                    <FormattedMessage
-                      id="xpack.infra.ml.steps.setupProcess.partition.label"
-                      defaultMessage="Partition field"
-                    />
-                  }
-                  display="rowCompressed"
-                >
-                  <EuiComboBox
-                    placeholder={i18n.translate('xpack.infra.metricsExplorer.groupByLabel', {
-                      defaultMessage: 'Everything',
-                    })}
-                    aria-label={i18n.translate('xpack.infra.metricsExplorer.groupByAriaLabel', {
-                      defaultMessage: 'Graph per',
-                    })}
-                    fullWidth
-                    singleSelection={true}
-                    selectedOptions={
-                      partitionField ? partitionField.map((p) => ({ label: p })) : undefined
-                    }
-                    options={(metricsView?.fields ?? [])
-                      .filter((f) => f.aggregatable && f.type === 'string')
-                      .map((f) => ({ label: f.name }))}
-                    onChange={onPartitionFieldChange}
-                    isClearable={true}
-                  />
-                </EuiFormRow>
-              </EuiDescribedFormGroup>
-
-              <EuiDescribedFormGroup
-                title={
-                  <h3>
-                    <FormattedMessage
-                      id="xpack.infra.ml.steps.setupProcess.filter.title"
-                      defaultMessage="Filter"
-                    />
-                  </h3>
-                }
-                description={
-                  <FormattedMessage
-                    id="xpack.infra.ml.steps.setupProcess.filter.description"
-                    defaultMessage="By default, machine learning jobs analyze all of your metric data."
-                  />
-                }
-              >
-                <EuiFormRow
-                  display="rowCompressed"
-                  label={
-                    <FormattedMessage
-                      id="xpack.infra.ml.steps.setupProcess.filter.label"
-                      defaultMessage="Filter (optional)"
-                    />
-                  }
-                >
-                  <MetricsExplorerKueryBar
-                    onSubmit={onFilterChange}
-                    onChange={debouncedOnFilterChange}
-                    value={filter}
-                  />
-                </EuiFormRow>
-              </EuiDescribedFormGroup>
-            </EuiForm>
+            <EuiAccordion
+              id="advancedSettingsAccordionId"
+              buttonContent="Advanced Settings"
+              paddingSize="m"
+            >
+              <JobAdvancedSettings
+                jobType={props.jobType}
+                setFilterQuery={setFilterQuery}
+                startDate={startDate}
+                now={now}
+                setStartDate={setStartDate}
+                partitionField={partitionField}
+                setPartitionField={setPartitionField}
+              />
+            </EuiAccordion>
           </>
         )}
       </EuiFlyoutBody>
