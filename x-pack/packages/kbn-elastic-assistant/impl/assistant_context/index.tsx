@@ -239,7 +239,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   const [selectedSettingsTab, setSelectedSettingsTab] = useState<SettingsTabs | null>(null);
 
   /**
-   * Setting code block that can be send through callback to parent component
+   * Setting code block ref that can be used to store callback from parent components
    */
   const codeBlockRef = useRef(() => {});
 
