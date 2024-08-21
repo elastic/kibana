@@ -12,7 +12,7 @@ import {
   FleetUnauthorizedError,
   type PackageClient,
 } from '@kbn/fleet-plugin/server';
-import { safeDump } from 'js-yaml';
+import { dump } from 'js-yaml';
 import { PackageDataStreamTypes } from '@kbn/fleet-plugin/common/types';
 import { getObservabilityOnboardingFlow, saveObservabilityOnboardingFlow } from '../../lib/state';
 import type { SavedObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
@@ -531,7 +531,7 @@ const generateAgentConfigYAML = ({
   elasticsearchUrl: string[];
   installedIntegrations: InstalledIntegration[];
 }) => {
-  return safeDump({
+  return dump({
     outputs: {
       default: {
         type: 'elasticsearch',

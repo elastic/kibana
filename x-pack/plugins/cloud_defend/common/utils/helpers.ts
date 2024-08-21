@@ -107,5 +107,5 @@ export function getYamlFromSelectorsAndResponses(selectors: Selector[], response
     return current;
   }, schema);
 
-  return yaml.safeDump(schema);
+  return yaml.dump(schema);
 }
