@@ -95,3 +95,10 @@ export const ML_RULES_UNAVAILABLE = (totalRules: number) =>
     defaultMessage:
       '{totalRules} {totalRules, plural, =1 {rule requires} other {rules require}} Machine Learning to enable.',
   });
+
+export const DETECTION_RULES_CREATE_FORM_CONVERSATION_ID = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagement.detectionRulesCreateEditFormConversationId',
+  {
+    defaultMessage: 'Detection Rules Create form',
+  }
+);
