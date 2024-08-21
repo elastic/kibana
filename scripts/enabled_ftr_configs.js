@@ -12,7 +12,7 @@ var yaml = require('js-yaml');
 var fs = require('fs');
 
 try {
-  yaml.load(fs.readFileSync('.buildkite/ftr_configs.yml', 'utf8')).enabled.forEach(function (x) {
+  yaml.safeLoad(fs.readFileSync('.buildkite/ftr_configs.yml', 'utf8')).enabled.forEach(function (x) {
     console.log(x);
   });
 } catch (e) {
