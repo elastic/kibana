@@ -25,10 +25,8 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const security = getService('security');
 
-  const { transform } = getService('esArchiver');
-
   return {
-    async createUser(params: CreateUserParams) {
+    async createUser() {
       const username = 'slo_editor';
       const roleName = 'slo_editor';
       try {

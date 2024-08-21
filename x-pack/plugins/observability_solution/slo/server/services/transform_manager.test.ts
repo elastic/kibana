@@ -7,7 +7,6 @@
 /* eslint-disable max-classes-per-file */
 
 import {
-  ElasticsearchClientMock,
   ScopedClusterClientMock,
   elasticsearchServiceMock,
   loggingSystemMock,
@@ -31,13 +30,11 @@ import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
 import { DataViewsService } from '@kbn/data-views-plugin/common';
 
 describe('TransformManager', () => {
-  let esClientMock: ElasticsearchClientMock;
   let scopedClusterClientMock: ScopedClusterClientMock;
   let loggerMock: jest.Mocked<MockedLogger>;
   const spaceId = 'default';
 
   beforeEach(() => {
-    esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     scopedClusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
     loggerMock = loggingSystemMock.createLogger();
   });
