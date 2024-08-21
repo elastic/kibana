@@ -56,6 +56,8 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined
       });
     }
 
-    await savedObjectsClient.delete(privateLocationsSavedObjectName, locationId);
+    await savedObjectsClient.delete(privateLocationsSavedObjectName, locationId, {
+      force: true,
+    });
   },
 });
