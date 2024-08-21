@@ -161,29 +161,9 @@ const useTabs = (tabs: Tab[]) => {
     },
   });
 
-  const getTabToApmTraces = useCallback(
-    (name: string) => ({
-      ...apmTracesMenuItemLinkProps,
-      'data-test-subj': 'infraAssetDetailsApmServicesLinkTab',
-      label: (
-        <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="popout" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{name}</EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-    }),
-    [apmTracesMenuItemLinkProps]
-  );
-
   const tabEntries: TabItem[] = useMemo(
     () =>
       tabs.filter(isTabEnabled).map(({ name, ...tab }) => {
-        if (tab.id === ContentTabIds.LINK_TO_APM) {
-          return getTabToApmTraces(name);
-        }
-
         return {
           ...tab,
           'data-test-subj': `infraAssetDetails${capitalize(tab.id)}Tab`,
@@ -192,7 +172,7 @@ const useTabs = (tabs: Tab[]) => {
           label: name,
         };
       }),
-    [activeTabId, isTabEnabled, getTabToApmTraces, onTabClick, tabs]
+    [activeTabId, isTabEnabled, onTabClick, tabs]
   );
 
   return { tabEntries };
