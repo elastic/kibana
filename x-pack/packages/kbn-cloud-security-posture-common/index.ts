@@ -8,6 +8,7 @@
 export * from './types';
 export * from './constants';
 export * from './schema/csp_finding';
+export * from './schema/rules';
 export type { CspBenchmarkRulesStates } from './types/latest';
 /* TODO: Uncomment this in phase 3*/
 // export { showErrorToast } from './utils/show_error_toast';

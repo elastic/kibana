@@ -7,7 +7,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 export type CspBenchmarkRulesStates = TypeOf<typeof rulesStates>;
-const ruleStateAttributes = schema.object({
+export const ruleStateAttributes = schema.object({
   muted: schema.boolean(),
   benchmark_id: schema.string(),
   benchmark_version: schema.string(),
@@ -15,4 +15,4 @@ const ruleStateAttributes = schema.object({
   rule_id: schema.string(),
 });
 
-const rulesStates = schema.recordOf(schema.string(), ruleStateAttributes);
+export const rulesStates = schema.recordOf(schema.string(), ruleStateAttributes);

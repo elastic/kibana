@@ -29,13 +29,14 @@ import aksLogo from '../assets/icons/cis_aks_logo.svg';
 import gkeLogo from '../assets/icons/cis_gke_logo.svg';
 import googleCloudLogo from '../assets/icons/google_cloud_logo.svg';
 
+export { MAX_FINDINGS_TO_LOAD } from '@kbn/cloud-security-posture-common';
+
 export const statusColors = {
   passed: euiThemeVars.euiColorSuccess,
   failed: euiThemeVars.euiColorVis9,
 };
 
 export const CSP_MOMENT_FORMAT = 'MMMM D, YYYY @ HH:mm:ss.SSS';
-export const MAX_FINDINGS_TO_LOAD = 500;
 export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
 
 export const LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY = 'cloudPosture:dataTable:pageSize';

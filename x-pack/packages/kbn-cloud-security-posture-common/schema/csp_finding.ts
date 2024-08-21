@@ -5,36 +5,7 @@
  * 2.0.
  */
 import type { EcsDataStream, EcsEvent } from '@elastic/ecs';
-import { TypeOf, schema } from '@kbn/config-schema';
-import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../constants';
-
-export type CspBenchmarkRuleMetadata = TypeOf<typeof cspBenchmarkRuleMetadataSchema>;
-
-export const cspBenchmarkRuleMetadataSchema = schema.object({
-  audit: schema.string(),
-  benchmark: schema.object({
-    name: schema.string(),
-    posture_type: schema.maybe(
-      schema.oneOf([schema.literal(CSPM_POLICY_TEMPLATE), schema.literal(KSPM_POLICY_TEMPLATE)])
-    ),
-    id: schema.string(),
-    version: schema.string(),
-    rule_number: schema.maybe(schema.string()),
-  }),
-  default_value: schema.maybe(schema.string()),
-  description: schema.string(),
-  id: schema.string(),
-  impact: schema.maybe(schema.string()),
-  name: schema.string(),
-  profile_applicability: schema.string(),
-  rationale: schema.string(),
-  references: schema.maybe(schema.string()),
-  rego_rule_id: schema.string(),
-  remediation: schema.string(),
-  section: schema.string(),
-  tags: schema.arrayOf(schema.string()),
-  version: schema.string(),
-});
+import { CspBenchmarkRuleMetadata } from './rules';
 
 export interface CspFinding {
   '@timestamp': string;

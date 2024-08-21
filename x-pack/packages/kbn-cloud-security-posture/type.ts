@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -20,6 +21,7 @@ import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 import type { BoolQuery } from '@kbn/es-query';
 export interface FindingsBaseEsQuery {
@@ -29,6 +31,7 @@ export interface FindingsBaseEsQuery {
 }
 
 export interface CspClientPluginStartDeps {
+  // required
   data: DataPublicPluginStart;
   dataViews: DataViewsServicePublic;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
@@ -42,6 +45,9 @@ export interface CspClientPluginStartDeps {
   licensing: LicensingPluginStart;
   share: SharePluginStart;
   storage: Storage;
+  spaces: SpacesPluginStart;
+  cloud: CloudSetup;
 
+  // optional
   usageCollection?: UsageCollectionStart;
 }
