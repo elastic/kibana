@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -16,6 +16,6 @@
     "@kbn/core-di-common",
     "@kbn/core-http-browser",
     "@kbn/core-http-server",
-    "@kbn/dependency-injection-service-example-plugin",
+    "@kbn/dependency-injection-example-service",
   ]
 }
