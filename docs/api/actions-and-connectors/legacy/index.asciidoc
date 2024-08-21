@@ -1,6 +1,0 @@
-[[actions-and-connectors-legacy-apis]]
-=== Deprecated 7.x APIs
-
-These APIs are deprecated and will be removed in a future release.
-
-NOTE: For the latest details, refer to {api-kibana}/group/endpoint-connectors[connector APIs].

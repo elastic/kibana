@@ -1531,7 +1531,7 @@ export const updateTimelineColumnWidth = ({
   columnId: string;
   id: string;
   timelineById: TimelineById;
-  width: number;
+  width?: number;
 }): TimelineById => {
   const timeline = timelineById[id];
 
