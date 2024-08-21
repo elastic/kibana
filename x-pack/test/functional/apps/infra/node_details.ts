@@ -594,6 +594,41 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.assetDetails.profilingTabMissing();
         });
       });
+
+      describe('Callouts', () => {
+        describe('Legacy alert metric callout', () => {
+          [{ metric: 'cpu' }, { metric: 'rx' }, { metric: 'tx' }].forEach(({ metric }) => {
+            it(`Should show for: ${metric}`, async () => {
+              await navigateToNodeDetails('host-1', 'host', {
+                name: 'host-1',
+                alertMetric: metric,
+              });
+              await pageObjects.header.waitUntilLoadingHasFinished();
+
+              await retry.try(async () => {
+                expect(await pageObjects.assetDetails.legacyMetricAlertCalloutExists()).to.be(true);
+              });
+            });
+          });
+
+          [{ metric: 'cpuV2' }, { metric: 'rxV2' }, { metric: 'txV2' }].forEach(({ metric }) => {
+            it(`Should not show for: ${metric}`, async () => {
+              await navigateToNodeDetails('host-1', 'host', {
+                name: 'host-1',
+                alertMetric: metric,
+              });
+
+              await pageObjects.header.waitUntilLoadingHasFinished();
+
+              await retry.try(async () => {
+                expect(await pageObjects.assetDetails.legacyMetricAlertCalloutExists()).to.be(
+                  false
+                );
+              });
+            });
+          });
+        });
+      });
     });
 
     describe('#Asset type: host with kubernetes section', () => {
