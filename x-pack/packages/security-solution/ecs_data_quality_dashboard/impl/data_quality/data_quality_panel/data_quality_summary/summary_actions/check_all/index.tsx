@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { EcsVersion } from '@elastic/ecs';
-
 import { EuiButton } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { v4 as uuidv4 } from 'uuid';
 
-import { checkIndex } from './check_index';
+import { useResultsRollupContext } from '../../../../contexts/results_rollup_context';
+import { checkIndex } from '../../../../utils/check_index';
 import { useDataQualityContext } from '../../../data_quality_context';
 import { getAllIndicesToCheck } from './helpers';
 import * as i18n from '../../../../translations';
-import type { IndexToCheck, OnCheckCompleted } from '../../../../types';
-import { EcsFlatTyped } from '../../../../constants';
+import type { IndexToCheck } from '../../../../types';
 
 const CheckAllButton = styled(EuiButton)`
   width: 112px;
@@ -35,13 +33,7 @@ async function wait(ms: number) {
 }
 
 interface Props {
-  formatBytes: (value: number | undefined) => string;
-  formatNumber: (value: number | undefined) => string;
-  ilmPhases: string[];
   incrementCheckAllIndiciesChecked: () => void;
-  onCheckCompleted: OnCheckCompleted;
-  patternIndexNames: Record<string, string[]>;
-  patterns: string[];
   setCheckAllIndiciesChecked: (checkAllIndiciesChecked: number) => void;
   setCheckAllTotalIndiciesToCheck: (checkAllTotalIndiciesToCheck: number) => void;
   setIndexToCheck: (indexToCheck: IndexToCheck | null) => void;
@@ -50,18 +42,14 @@ interface Props {
 const DELAY_AFTER_EVERY_CHECK_COMPLETES = 3000; // ms
 
 const CheckAllComponent: React.FC<Props> = ({
-  formatBytes,
-  formatNumber,
-  ilmPhases,
   incrementCheckAllIndiciesChecked,
-  onCheckCompleted,
-  patternIndexNames,
-  patterns,
   setCheckAllIndiciesChecked,
   setCheckAllTotalIndiciesToCheck,
   setIndexToCheck,
 }) => {
-  const { httpFetch, isILMAvailable } = useDataQualityContext();
+  const { httpFetch, isILMAvailable, formatBytes, formatNumber, ilmPhases, patterns } =
+    useDataQualityContext();
+  const { onCheckCompleted, patternIndexNames } = useResultsRollupContext();
   const abortController = useRef(new AbortController());
   const [isRunning, setIsRunning] = useState<boolean>(false);
 
@@ -98,16 +86,15 @@ const CheckAllComponent: React.FC<Props> = ({
             abortController: abortController.current,
             batchId,
             checkAllStartTime: startTime,
-            ecsMetadata: EcsFlatTyped,
             formatBytes,
             formatNumber,
+            isCheckAll: true,
             httpFetch,
             indexName,
             isLastCheck:
               allIndicesToCheck.length > 0 ? checked === allIndicesToCheck.length - 1 : true,
             onCheckCompleted,
             pattern,
-            version: EcsVersion,
           });
 
           if (!abortController.current.signal.aborted) {
