@@ -6,5 +6,9 @@
   "exclude": ["target/**/*"],
   "extends": "../../tsconfig.base.json",
   "include": ["**/*.ts"],
-  "kbn_references": ["@kbn/datemath", "@kbn/core"]
+  "kbn_references": [
+    "@kbn/datemath",
+    "@kbn/core",
+    "@kbn/zod",
+  ]
 }

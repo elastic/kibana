@@ -14,9 +14,10 @@
  *   version: 1
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type GetEvaluateResponse = z.infer<typeof GetEvaluateResponse>;
 export const GetEvaluateResponse = z.object({
-  agentExecutors: z.array(z.string()),
+  datasets: z.array(z.string()),
+  graphs: z.array(z.string()),
 });
