@@ -19,7 +19,6 @@ import {
   defaultPaletteParams,
   findMinMaxByColumnId,
 } from '../../../shared_components';
-import { getFieldTypeFromDatatable } from '../../../../common/expressions/datatable/utils';
 import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 
 import './dimension_editor.scss';
@@ -73,9 +72,10 @@ export function TableDimensionEditor(
   if (column.isTransposed) return null;
 
   const currentData = frame.activeData?.[localState.layerId];
-  const dataType = getFieldTypeFromDatatable(currentData, accessor);
-  const isNumeric = dataType === 'number';
-  const currentAlignment = column?.alignment || (isNumeric ? 'right' : 'left');
+  const datasource = frame.datasourceLayers?.[localState.layerId];
+  const { dataType, isBucketed } = datasource?.getOperationForColumnId(accessor) ?? {};
+  const showColorByTerms = shouldColorByTerms(dataType, isBucketed);
+  const currentAlignment = column?.alignment || (dataType === 'number' ? 'right' : 'left');
   const currentColorMode = column?.colorMode || 'none';
   const hasDynamicColoring = currentColorMode !== 'none';
   const showDynamicColoringFeature = dataType !== 'date';
@@ -210,18 +210,7 @@ export function TableDimensionEditor(
           </EuiFormRow>
 
           {hasDynamicColoring &&
-            (isNumeric ? (
-              <ColorMappingByValues
-                palette={activePalette}
-                isInlineEditing={isInlineEditing}
-                setPalette={(newPalette) => {
-                  updateColumnState(accessor, { palette: newPalette });
-                }}
-                paletteService={props.paletteService}
-                panelRef={props.panelRef}
-                dataBounds={currentMinMax}
-              />
-            ) : (
+            (showColorByTerms ? (
               <ColorMappingByTerms
                 isDarkMode={isDarkMode}
                 colorMapping={column.colorMapping}
@@ -236,6 +225,17 @@ export function TableDimensionEditor(
                 paletteService={props.paletteService}
                 panelRef={props.panelRef}
                 categories={categories}
+              />
+            ) : (
+              <ColorMappingByValues
+                palette={activePalette}
+                isInlineEditing={isInlineEditing}
+                setPalette={(newPalette) => {
+                  updateColumnState(accessor, { palette: newPalette });
+                }}
+                paletteService={props.paletteService}
+                panelRef={props.panelRef}
+                dataBounds={currentMinMax}
               />
             ))}
         </>

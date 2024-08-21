@@ -19,6 +19,14 @@ import {
   enforceColorContrast,
 } from '@kbn/coloring';
 import { Datatable } from '@kbn/expressions-plugin/common';
+import { DataType } from '../../types';
+
+/**
+ * Bucketed numerical columns should be treated as categorical
+ */
+export function shouldColorByTerms(dataType?: DataType, isBucketed?: boolean) {
+  return isBucketed || dataType !== 'number';
+}
 
 export function getContrastColor(
   color: string,

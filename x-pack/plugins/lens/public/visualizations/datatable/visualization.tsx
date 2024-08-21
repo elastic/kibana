@@ -42,6 +42,7 @@ import {
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
   DEFAULT_ROW_HEIGHT,
 } from './components/constants';
+import { shouldColorByTerms } from '../../shared_components';
 export interface DatatableVisualizationState {
   columns: ColumnState[];
   layerId: string;
@@ -498,18 +499,17 @@ export const getDatatableVisualization = ({
                 : [],
             reverse: false, // managed at UI level
           };
-          const sortingHint = datasource!.getOperationForColumnId(column.columnId)!.sortingHint;
+          const { dataType, isBucketed, sortingHint, inMetricDimension } =
+            datasource?.getOperationForColumnId(column.columnId) ?? {};
           const hasNoSummaryRow = column.summaryRow == null || column.summaryRow === 'none';
-          const dataType = datasource!.getOperationForColumnId(column.columnId)?.dataType;
           const canColor = dataType !== 'date';
-          const isNumeric = dataType === 'number';
+          const colorByTerms = shouldColorByTerms(dataType, isBucketed);
           let isTransposable =
             !isTextBasedLanguage &&
             !datasource!.getOperationForColumnId(column.columnId)?.isBucketed;
 
           if (isTextBasedLanguage) {
-            const operation = datasource!.getOperationForColumnId(column.columnId);
-            isTransposable = Boolean(column?.isMetric || operation?.inMetricDimension);
+            isTransposable = Boolean(column?.isMetric || inMetricDimension);
           }
 
           const datatableColumnFn = buildExpressionFunction<DatatableColumnFn>(
@@ -526,8 +526,8 @@ export const getDatatableVisualization = ({
               palette: !canColor
                 ? undefined
                 : paletteService
-                    // The palette for numeric values is a pseudo custom palette that is only custom from params level
-                    .get(isNumeric ? CUSTOM_PALETTE : column.palette?.name || CUSTOM_PALETTE)
+                    // The by value palette is a pseudo custom palette that is only custom from params level
+                    .get(colorByTerms ? column.palette?.name || CUSTOM_PALETTE : CUSTOM_PALETTE)
                     .toExpression(paletteParams),
               colorMapping:
                 canColor && column.colorMapping ? JSON.stringify(column.colorMapping) : undefined,
