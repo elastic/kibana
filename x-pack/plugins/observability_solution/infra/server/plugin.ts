@@ -23,7 +23,7 @@ import {
   InventoryLocatorDefinition,
   MetricsExplorerLocatorDefinition,
 } from '@kbn/observability-shared-plugin/common';
-import { AlertsLocatorDefinition } from '@kbn/observability-plugin/common';
+import { type AlertsLocatorParams, alertsLocatorID } from '@kbn/observability-plugin/common';
 import { mapValues } from 'lodash';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { publicConfigKeys } from '../common/plugin_config_types';
@@ -198,7 +198,7 @@ export class InfraServerPlugin
       { sources }
     );
 
-    const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
+    const alertsLocator = plugins.share.url.locators.get<AlertsLocatorParams>(alertsLocatorID);
     const assetDetailsLocator = plugins.share.url.locators.create(
       new AssetDetailsLocatorDefinition()
     );

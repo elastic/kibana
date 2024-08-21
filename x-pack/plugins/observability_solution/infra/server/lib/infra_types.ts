@@ -54,7 +54,7 @@ export interface InfraBackendLibs extends InfraDomainLibs {
 }
 
 export interface InfraLocators {
-  alertsLocator: AlertsLocator;
+  alertsLocator?: AlertsLocator;
   assetDetailsLocator: AssetDetailsLocator;
   metricsExplorerLocator: MetricsExplorerLocator;
   inventoryLocator: InventoryLocator;
