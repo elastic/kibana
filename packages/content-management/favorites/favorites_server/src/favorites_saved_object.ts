@@ -47,5 +47,22 @@ export const favoritesSavedObjectType: SavedObjectsType = {
         create: schemaV1,
       },
     },
+    2: {
+      // the model stays the same, but we added the mappings for the snapshot telemetry needs
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            userId: { type: 'keyword' },
+            type: { type: 'keyword' },
+            favoriteIds: { type: 'keyword' },
+          },
+        },
+      ],
+      schemas: {
+        forwardCompatibility: schemaV1.extends({}, { unknowns: 'ignore' }),
+        create: schemaV1,
+      },
+    },
   },
 };
