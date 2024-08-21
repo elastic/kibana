@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 type TimeUnits = 's' | 'm' | 'h' | 'd' | 'w' | 'y';
 
