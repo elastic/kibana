@@ -34,7 +34,7 @@ export function getColorCategories(
           // The categories needs to be stringified in their unformatted version.
           // We can't distinguish between a number and a string from a text input and the match should
           // work with both numeric field values and string values.
-          const key = (isMultiFieldKey(v) ? [...v.keys] : [v]).map(String);
+          const key = (isMultiFieldKey(v) ? v.keys : [v]).map(String);
           const stringifiedKeys = key.join(',');
           return { key, stringifiedKeys };
         })
