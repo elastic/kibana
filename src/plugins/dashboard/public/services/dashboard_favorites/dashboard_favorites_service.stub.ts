@@ -14,5 +14,7 @@ import { DashboardFavoritesService } from './types';
 export type DashboardFavoritesServiceFactory = PluginServiceFactory<DashboardFavoritesService>;
 
 export const dashboardFavoritesServiceFactory: DashboardFavoritesServiceFactory = () => {
-  return new FavoritesClient('dashboard', { http: httpServiceMock.createStartContract() });
+  return new FavoritesClient('dashboards', 'dashboard', {
+    http: httpServiceMock.createStartContract(),
+  });
 };
