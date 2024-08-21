@@ -85,10 +85,14 @@ export const mappings = (specService: SpecDefinitionsService) => {
           // index_prefixes: { min_chars, max_chars },
 
           index_options: {
+            // leave the first item blank because the default depends on type
             __one_of: [
               '',
               // text-based types
-              { __one_of: ['positions', 'docs', 'freqs', 'offsets'] },
+              'docs',
+              'freqs',
+              'positions',
+              'offsets',
               // dense_vector type
               {
                 type: {
@@ -227,12 +231,17 @@ export const mappings = (specService: SpecDefinitionsService) => {
             },
           },
           similarity: {
+            // leave the first item blank because the default depends on type
             __one_of: [
               '',
               // text-based types
-              { __one_of: ['BM25', 'boolean'] },
+              'BM25',
+              'boolean',
               // dense_vector type
-              { __one_of: ['l2_norm', 'dot_product', 'cosine', 'max_inner_product'] },
+              'l2_norm',
+              'dot_product',
+              'cosine',
+              'max_inner_product',
             ],
           },
 
