@@ -1602,7 +1602,7 @@
     "@types/webpack": "^5.28.5",
     "@types/webpack-bundle-analyzer": "^4.7.0",
     "@types/webpack-env": "^1.18.5",
-    "@types/webpack-sources": "^0.1.4",
+    "@types/webpack-sources": "^3.2.3",
     "@types/xml2js": "^0.4.11",
     "@types/yargs": "^15.0.0",
     "@types/yauzl": "^2.9.1",
