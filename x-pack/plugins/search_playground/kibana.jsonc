@@ -25,7 +25,8 @@
       "usageCollection",
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "unifiedDocViewer"
     ]
   }
 }

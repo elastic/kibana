@@ -13,7 +13,13 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React from 'react';
+import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
+
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
+
+import React, { useState } from 'react';
 
 const DEMO_DATA = [
   { id: '123321', name: 'John Doe', age: 25 },
@@ -28,14 +34,43 @@ const DEMO_DATA = [
   { id: '123321', name: 'John Doe', age: 25 },
 ];
 
+const hit = {
+  flattened: {
+    bytes: 123,
+    destination: 'Amsterdam',
+  },
+  id: '1',
+  raw: {
+    bytes: 123,
+    destination: 'Amsterdam',
+  },
+} as unknown as DataTableRecord;
+
+const hits = [hit];
+const dataView = {
+  title: 'foo',
+  id: 'foo',
+  name: 'foo',
+  toSpec: () => {},
+  toMinimalSpec: () => {},
+  isPersisted: () => false,
+  fields: {
+    getByName: () => {},
+    getAll: () => [],
+  },
+  timeFieldName: 'timestamp',
+};
+
 export const ResultList: React.FC = () => {
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+
   return (
     <EuiPanel grow={false}>
       <EuiFlexGroup direction="column" gutterSize="none">
         {DEMO_DATA.map((item, index) => {
           return (
             <>
-              <EuiFlexItem key={item.id + '-' + index} grow>
+              <EuiFlexItem key={item.id + '-' + index} onClick={setIsFlyoutOpen(true)} grow>
                 <EuiFlexGroup direction="column" gutterSize="xs">
                   <EuiFlexItem grow>
                     <EuiTitle size="xs">
@@ -53,6 +88,21 @@ export const ResultList: React.FC = () => {
             </>
           );
         })}
+        {isFlyoutOpen && (
+          <UnifiedDocViewerFlyout
+            services={{}}
+            onClose={() => setIsFlyoutOpen(false)}
+            isEsqlQuery={false}
+            columns={['column1', 'column2']}
+            hit={hit}
+            hits={hits}
+            dataView={dataView as unknown as DataView}
+            onAddColumn={() => {}}
+            onRemoveColumn={() => {}}
+            setExpandedDoc={() => {}}
+            flyoutType="push"
+          />
+        )}
       </EuiFlexGroup>
     </EuiPanel>
   );
