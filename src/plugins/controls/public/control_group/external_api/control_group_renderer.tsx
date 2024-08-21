@@ -26,7 +26,7 @@ import {
   controlGroupStateBuilder,
 } from '../../react_controls/control_group/utils/control_group_state_builder';
 import {
-  AwaitingControlGroupApi,
+  AwaitingControlGroupAPI,
   ControlGroupCreationOptions,
   ControlGroupRendererApi,
 } from './types';
@@ -43,7 +43,7 @@ export interface ControlGroupRendererProps {
   query?: Query;
 }
 
-export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlGroupRendererProps>(
+export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlGroupRendererProps>(
   ({ getCreationOptions, filters, timeRange, query, viewMode }, ref) => {
     const id = useMemo(() => uuidv4(), []);
     const [regenerateId, setRegenerateId] = useState(uuidv4());

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AwaitingControlGroupApi, ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
+import { AwaitingControlGroupAPI, ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
@@ -38,7 +38,7 @@ export const useControlPanels = (
   );
 
   const setControlGroupAPI = useCallback(
-    (controlGroupAPI: AwaitingControlGroupApi) => {
+    (controlGroupAPI: AwaitingControlGroupAPI) => {
       if (controlGroupAPI)
         logsExplorerControllerStateService.send({
           type: 'INITIALIZE_CONTROL_GROUP_API',

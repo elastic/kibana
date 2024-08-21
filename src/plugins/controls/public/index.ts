@@ -58,7 +58,7 @@ export {
   type ControlGroupContainer,
   ControlGroupContainerFactory,
   type ControlGroupInput,
-  type AwaitingControlGroupApi,
+  type AwaitingControlGroupAPI,
   type ControlGroupOutput,
 } from './control_group';
 

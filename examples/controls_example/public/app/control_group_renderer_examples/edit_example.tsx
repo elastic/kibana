@@ -32,7 +32,7 @@ import {
   ACTION_EDIT_CONTROL,
   ControlGroupRenderer,
 } from '@kbn/controls-plugin/public';
-import { AwaitingControlGroupApi } from '@kbn/controls-plugin/public/control_group/external_api/types';
+import { AwaitingControlGroupAPI } from '@kbn/controls-plugin/public/control_group/external_api/types';
 
 const INPUT_KEY = 'kbnControls:saveExample:input';
 
@@ -41,7 +41,7 @@ const WITH_CUSTOM_PLACEHOLDER = 'Custom Placeholder';
 export const EditExample = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [controlGroupAPI, setControlGroupAPI] = useState<AwaitingControlGroupApi>(null);
+  const [controlGroupAPI, setControlGroupAPI] = useState<AwaitingControlGroupAPI>(null);
   const [toggleIconIdToSelectedMapIcon, setToggleIconIdToSelectedMapIcon] = useState<{
     [id: string]: boolean;
   }>({});

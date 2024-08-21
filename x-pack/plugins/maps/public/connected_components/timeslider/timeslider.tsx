@@ -9,10 +9,10 @@ import React, { Component } from 'react';
 import { Observable, Subscription } from 'rxjs';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
-  type ControlGroupInputBuilder,
+  type ControlGroupStateBuilder,
   ControlGroupRenderer,
   type ControlGroupRuntimeState,
-  type AwaitingControlGroupApi,
+  type AwaitingControlGroupAPI,
 } from '@kbn/controls-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { Timeslice } from '../../../common/descriptor_types';
@@ -38,19 +38,15 @@ export class Timeslider extends Component<Props, {}> {
 
   _getCreationOptions = async (
     initialState: Partial<ControlGroupRuntimeState>,
-    builder: ControlGroupInputBuilder
+    builder: ControlGroupStateBuilder
   ) => {
     builder.addTimeSliderControl(initialState);
     return {
-      initialState: {
-        ...initialState,
-        viewMode: ViewMode.VIEW,
-        timeRange: this.props.timeRange,
-      },
+      initialState,
     };
   };
 
-  _onLoadComplete = (controlGroup: AwaitingControlGroupApi) => {
+  _onLoadComplete = (controlGroup: AwaitingControlGroupAPI) => {
     if (!this._isMounted || !controlGroup) {
       return;
     }
