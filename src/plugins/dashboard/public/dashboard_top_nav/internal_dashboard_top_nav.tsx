@@ -339,11 +339,11 @@ export function InternalDashboardTopNav({
     }
     if (showWriteControls && managed) {
       const badgeProps = {
-        ...getManagedContentBadge(dashboardManagedBadge.getAriaLabel()),
+        ...getManagedContentBadge(dashboardManagedBadge.getBadgeAriaLabel()),
         onClick: () => setIsPopoverOpen(!isPopoverOpen),
-        onClickAriaLabel: dashboardManagedBadge.getAriaLabel(),
+        onClickAriaLabel: dashboardManagedBadge.getBadgeAriaLabel(),
         iconOnClick: () => setIsPopoverOpen(!isPopoverOpen),
-        iconOnClickAriaLabel: dashboardManagedBadge.getAriaLabel(),
+        iconOnClickAriaLabel: dashboardManagedBadge.getBadgeAriaLabel(),
       } as TopNavMenuBadgeProps;
 
       allBadges.push({
@@ -368,7 +368,7 @@ export function InternalDashboardTopNav({
                           .runInteractiveSave(viewMode)
                           .then((result) => maybeRedirect(result));
                       }}
-                      aria-label={dashboardManagedBadge.getDuplicateText()}
+                      aria-label={dashboardManagedBadge.getDuplicateButtonAriaLabel()}
                     >
                       <FormattedMessage
                         id="dashboard.managedContentPopoverButtonText"
