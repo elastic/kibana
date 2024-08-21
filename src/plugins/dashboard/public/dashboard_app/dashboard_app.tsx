@@ -203,7 +203,7 @@ export function DashboardApp({
       const newUrl = getDashboardListItemLink(
         kbnUrlStateStorage,
         savedDashboardId!,
-        true,
+        false,
         dashboardAPI.expandedPanelId.value
       );
       kbnUrlStateStorage.kbnUrlControls.update(newUrl, true);
