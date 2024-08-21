@@ -681,7 +681,8 @@ export class TimeSeriesExplorer extends React.Component {
    * @param callback to invoke after a state update.
    */
   getControlsForDetector = () => {
-    const { selectedDetectorIndex, selectedEntities, selectedJob } = this.props;
+    const { selectedDetectorIndex, selectedEntities, selectedJobId } = this.props;
+    const selectedJob = this.mlJobService.getJob(selectedJobId);
     return getControlsForDetector(selectedDetectorIndex, selectedEntities, selectedJob);
   };
 
