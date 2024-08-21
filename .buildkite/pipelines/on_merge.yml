@@ -429,6 +429,11 @@ steps:
       preemptible: true
     artifact_paths:
       "target/plugin_so_types_snapshot.json"
+    timeout_in_minutes: 30
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
 
   - wait: ~
     continue_on_failure: true
