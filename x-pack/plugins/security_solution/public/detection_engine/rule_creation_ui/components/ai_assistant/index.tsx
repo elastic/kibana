@@ -78,10 +78,12 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
       const queryField = getFields().queryBar;
       const queryBar = queryField.value as DefineStepRule['queryBar'];
 
-      if (queryBar.query.query !== codeBlock) {
+      // sometimes AI assistant include redundant backtick symbols in code block
+      const newQuery = codeBlock.trim('`');
+      if (queryBar.query.query !== newQuery) {
         setFieldValue('queryBar', {
           ...queryBar,
-          query: { ...queryBar.query, query: codeBlock },
+          query: { ...queryBar.query, query: newQuery },
         });
       }
     },

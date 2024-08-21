@@ -60,7 +60,7 @@ const NewChatComponent: React.FC<Props> = ({
     tooltip,
     isAssistantEnabled
   );
-  const { codeBlock } = useAssistantContext();
+  const { codeBlockRef } = useAssistantContext();
 
   const showOverlay = useCallback(() => {
     showAssistantOverlay(true);
@@ -68,10 +68,16 @@ const NewChatComponent: React.FC<Props> = ({
   }, [showAssistantOverlay, onShowOverlay]);
 
   useEffect(() => {
-    if (codeBlock) {
-      onExportCodeBlock?.(codeBlock);
+    if (onExportCodeBlock) {
+      codeBlockRef.current = onExportCodeBlock;
     }
-  }, [codeBlock, onExportCodeBlock]);
+
+    return () => {
+      if (onExportCodeBlock) {
+        codeBlockRef.current = () => {};
+      }
+    };
+  }, [codeBlockRef, onExportCodeBlock]);
 
   const icon = useMemo(() => {
     if (iconType === null) {

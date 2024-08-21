@@ -19,10 +19,10 @@ export interface UpdateQueryInFormButtonProps {
 export const UpdateQueryInFormButton: FC<PropsWithChildren<UpdateQueryInFormButtonProps>> = ({
   query,
 }) => {
-  const { setCodeBlock } = useAssistantContext();
+  const { codeBlockRef } = useAssistantContext();
 
   const handleClick = () => {
-    setCodeBlock(query);
+    codeBlockRef?.current?.(query);
   };
 
   return (
