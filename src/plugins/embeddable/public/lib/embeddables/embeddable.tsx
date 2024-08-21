@@ -137,6 +137,7 @@ export abstract class Embeddable<
       defaultPanelDescription: this.defaultPanelDescription,
       canLinkToLibrary: this.canLinkToLibrary,
       disabledActionIds: this.disabledActionIds,
+      setDisabledActionIds: this.setDisabledActionIds,
       unlinkFromLibrary: this.unlinkFromLibrary,
       setHidePanelTitle: this.setHidePanelTitle,
       defaultPanelTitle: this.defaultPanelTitle,
@@ -179,6 +180,7 @@ export abstract class Embeddable<
   public panelDescription: LegacyEmbeddableAPI['panelDescription'];
   public defaultPanelDescription: LegacyEmbeddableAPI['defaultPanelDescription'];
   public disabledActionIds: LegacyEmbeddableAPI['disabledActionIds'];
+  public setDisabledActionIds: LegacyEmbeddableAPI['setDisabledActionIds'];
   public unlinkFromLibrary: LegacyEmbeddableAPI['unlinkFromLibrary'];
   public setTimeRange: LegacyEmbeddableAPI['setTimeRange'];
   public defaultPanelTitle: LegacyEmbeddableAPI['defaultPanelTitle'];
