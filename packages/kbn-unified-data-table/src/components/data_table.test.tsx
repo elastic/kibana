@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { ReactWrapper } from 'enzyme';
 import {
   EuiButton,
@@ -33,6 +33,10 @@ import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CELL_CLASS } from '../utils/get_render_cell_value';
+import { defaultTimeColumnWidth } from '../constants';
+import { useColumns } from '../hooks/use_data_grid_columns';
+import { capabilitiesServiceMock } from '@kbn/core-capabilities-browser-mocks';
+import { dataViewsMock } from '../../__mocks__/data_views';
 
 const mockUseDataGridColumnsCellActions = jest.fn((prop: unknown) => []);
 jest.mock('@kbn/cell-actions', () => ({
@@ -89,6 +93,56 @@ const DataTable = (props: Partial<UnifiedDataTableProps>) => (
     <UnifiedDataTable {...getProps()} {...props} />
   </KibanaContextProvider>
 );
+
+const capabilities = capabilitiesServiceMock.createStartContract().capabilities;
+
+const renderDataTable = (props: Partial<UnifiedDataTableProps>) => {
+  const DataTableWrapped = () => {
+    const [columns, setColumns] = useState(props.columns ?? []);
+    const [settings, setSettings] = useState(props.settings);
+
+    const { onSetColumns } = useColumns({
+      capabilities,
+      dataView: dataViewMock,
+      dataViews: dataViewsMock,
+      setAppState: useCallback((state) => {
+        if (state.columns) {
+          setColumns(state.columns);
+        }
+        if (state.settings) {
+          setSettings(state.settings);
+        }
+      }, []),
+      useNewFieldsApi: true,
+      columns,
+      settings,
+    });
+
+    return (
+      <IntlProvider locale="en">
+        <DataTable
+          {...props}
+          columns={columns}
+          onSetColumns={onSetColumns}
+          settings={settings}
+          onResize={({ columnId, width }) => {
+            setSettings({
+              ...settings,
+              columns: {
+                ...settings?.columns,
+                [columnId]: {
+                  width,
+                },
+              },
+            });
+          }}
+        />
+      </IntlProvider>
+    );
+  };
+
+  render(<DataTableWrapped />);
+};
 
 async function getComponent(props: UnifiedDataTableProps = getProps()) {
   const component = mountWithIntl(<DataTable {...props} />);
@@ -265,34 +319,19 @@ describe('UnifiedDataTable', () => {
 
   describe('edit field button', () => {
     it('should render the edit field button if onFieldEdited is provided', async () => {
-      const component = await getComponent({
-        ...getProps(),
-        columns: ['message'],
-        onFieldEdited: jest.fn(),
-      });
-      expect(findTestSubject(component, 'dataGridHeaderCellActionGroup-message').exists()).toBe(
-        false
-      );
-      findTestSubject(component, 'dataGridHeaderCell-message').find('button').simulate('click');
-      expect(findTestSubject(component, 'dataGridHeaderCellActionGroup-message').exists()).toBe(
-        true
-      );
-      expect(findTestSubject(component, 'gridEditFieldButton').exists()).toBe(true);
+      renderDataTable({ columns: ['message'], onFieldEdited: jest.fn() });
+      expect(screen.queryByTestId('dataGridHeaderCellActionGroup-message')).not.toBeInTheDocument();
+      userEvent.click(screen.getByRole('button', { name: 'message' }));
+      expect(screen.getByTestId('dataGridHeaderCellActionGroup-message')).toBeInTheDocument();
+      expect(screen.getByTestId('gridEditFieldButton')).toBeInTheDocument();
     });
 
     it('should not render the edit field button if onFieldEdited is not provided', async () => {
-      const component = await getComponent({
-        ...getProps(),
-        columns: ['message'],
-      });
-      expect(findTestSubject(component, 'dataGridHeaderCellActionGroup-message').exists()).toBe(
-        false
-      );
-      findTestSubject(component, 'dataGridHeaderCell-message').find('button').simulate('click');
-      expect(findTestSubject(component, 'dataGridHeaderCellActionGroup-message').exists()).toBe(
-        true
-      );
-      expect(findTestSubject(component, 'gridEditFieldButton').exists()).toBe(false);
+      renderDataTable({ columns: ['message'] });
+      expect(screen.queryByTestId('dataGridHeaderCellActionGroup-message')).not.toBeInTheDocument();
+      userEvent.click(screen.getByRole('button', { name: 'message' }));
+      expect(screen.getByTestId('dataGridHeaderCellActionGroup-message')).toBeInTheDocument();
+      expect(screen.queryByTestId('gridEditFieldButton')).not.toBeInTheDocument();
     });
   });
 
@@ -423,16 +462,18 @@ describe('UnifiedDataTable', () => {
           "additionalControls": null,
           "showColumnSelector": false,
           "showDisplaySelector": Object {
-            "additionalDisplaySettings": <UnifiedDataTableAdditionalDisplaySettings
-              headerRowHeight="custom"
-              headerRowHeightLines={1}
-              onChangeRowHeight={[Function]}
-              onChangeRowHeightLines={[Function]}
-              onChangeSampleSize={[MockFunction]}
-              rowHeight="custom"
-              rowHeightLines={3}
-              sampleSize={150}
-            />,
+            "additionalDisplaySettings": <React.Fragment>
+              <UnifiedDataTableAdditionalDisplaySettings
+                headerRowHeight="custom"
+                headerRowHeightLines={1}
+                onChangeRowHeight={[Function]}
+                onChangeRowHeightLines={[Function]}
+                onChangeSampleSize={[MockFunction]}
+                rowHeight="custom"
+                rowHeightLines={3}
+                sampleSize={150}
+              />
+            </React.Fragment>,
             "allowDensity": false,
             "allowResetButton": false,
             "allowRowHeight": false,
@@ -455,15 +496,17 @@ describe('UnifiedDataTable', () => {
           "additionalControls": null,
           "showColumnSelector": false,
           "showDisplaySelector": Object {
-            "additionalDisplaySettings": <UnifiedDataTableAdditionalDisplaySettings
-              headerRowHeight="custom"
-              headerRowHeightLines={1}
-              onChangeRowHeight={[Function]}
-              onChangeRowHeightLines={[Function]}
-              rowHeight="custom"
-              rowHeightLines={3}
-              sampleSize={200}
-            />,
+            "additionalDisplaySettings": <React.Fragment>
+              <UnifiedDataTableAdditionalDisplaySettings
+                headerRowHeight="custom"
+                headerRowHeightLines={1}
+                onChangeRowHeight={[Function]}
+                onChangeRowHeightLines={[Function]}
+                rowHeight="custom"
+                rowHeightLines={3}
+                sampleSize={200}
+              />
+            </React.Fragment>,
             "allowDensity": false,
             "allowResetButton": false,
             "allowRowHeight": false,
@@ -741,7 +784,7 @@ describe('UnifiedDataTable', () => {
 
       expect(grid.hasClass('euiDataGrid--bordersHorizontal')).toBeTruthy();
       expect(grid.hasClass('euiDataGrid--fontSizeSmall')).toBeTruthy();
-      expect(grid.hasClass('euiDataGrid--paddingLarge')).toBeTruthy();
+      expect(grid.hasClass('euiDataGrid--paddingSmall')).toBeTruthy();
       expect(grid.hasClass('euiDataGrid--rowHoverHighlight')).toBeTruthy();
       expect(grid.hasClass('euiDataGrid--headerUnderline')).toBeTruthy();
       expect(grid.hasClass('euiDataGrid--stripes')).toBeTruthy();
@@ -789,14 +832,6 @@ describe('UnifiedDataTable', () => {
   });
 
   describe('document comparison', () => {
-    const renderDataTable = (props: Partial<UnifiedDataTableProps>) => {
-      render(
-        <IntlProvider locale="en">
-          <DataTable {...props} />
-        </IntlProvider>
-      );
-    };
-
     const getSelectedDocumentsButton = () => screen.queryByTestId('unifiedDataTableSelectionBtn');
 
     const selectDocument = (document: EsHitRecord) =>
@@ -914,6 +949,77 @@ describe('UnifiedDataTable', () => {
       });
 
       expect(findTestSubject(component, 'dataGridHeaderCell-colorIndicator').exists()).toBeFalsy();
+    });
+  });
+
+  describe('columns', () => {
+    // Default column width in EUI is hardcoded to 100px for Jest envs
+    const EUI_DEFAULT_COLUMN_WIDTH = '100px';
+    const getColumnHeader = (name: string) => screen.getByRole('columnheader', { name });
+    const queryColumnHeader = (name: string) => screen.queryByRole('columnheader', { name });
+    const getButton = (name: string) => screen.getByRole('button', { name });
+    const queryButton = (name: string) => screen.queryByRole('button', { name });
+
+    it('should reset the last column to auto width if only absolute width columns remain', async () => {
+      renderDataTable({
+        columns: ['message', 'extension', 'bytes'],
+        settings: {
+          columns: {
+            extension: { width: 50 },
+            bytes: { width: 50 },
+          },
+        },
+      });
+      expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
+      expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
+      expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
+      userEvent.click(getButton('message'));
+      userEvent.click(getButton('Remove column'), undefined, { skipPointerEventsCheck: true });
+      expect(queryColumnHeader('message')).not.toBeInTheDocument();
+      expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
+      expect(getColumnHeader('bytes')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
+    });
+
+    it('should not reset the last column to auto width when there are remaining auto width columns', async () => {
+      renderDataTable({
+        columns: ['message', 'extension', 'bytes'],
+        settings: {
+          columns: {
+            bytes: { width: 50 },
+          },
+        },
+      });
+      expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
+      expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
+      expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
+      userEvent.click(getButton('message'));
+      userEvent.click(getButton('Remove column'), undefined, { skipPointerEventsCheck: true });
+      expect(queryColumnHeader('message')).not.toBeInTheDocument();
+      expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
+      expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
+    });
+
+    it('should show the reset width button only for absolute width columns, and allow resetting to default width', async () => {
+      renderDataTable({
+        columns: ['message', 'extension'],
+        settings: {
+          columns: {
+            '@timestamp': { width: 50 },
+            extension: { width: 50 },
+          },
+        },
+      });
+      expect(getColumnHeader('@timestamp')).toHaveStyle({ width: '50px' });
+      userEvent.click(getButton('@timestamp'));
+      userEvent.click(getButton('Reset width'), undefined, { skipPointerEventsCheck: true });
+      expect(getColumnHeader('@timestamp')).toHaveStyle({ width: `${defaultTimeColumnWidth}px` });
+      expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
+      userEvent.click(getButton('message'));
+      expect(queryButton('Reset width')).not.toBeInTheDocument();
+      expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
+      userEvent.click(getButton('extension'));
+      userEvent.click(getButton('Reset width'), undefined, { skipPointerEventsCheck: true });
+      expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
     });
   });
 });

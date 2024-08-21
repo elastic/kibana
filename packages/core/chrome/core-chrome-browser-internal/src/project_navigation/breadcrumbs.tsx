@@ -144,6 +144,7 @@ function buildRootCrumb({
             color="text"
             iconType="gear"
             data-test-subj="manageDeploymentBtn"
+            size="s"
           >
             {i18n.translate('core.ui.primaryNav.cloud.breadCrumbDropdown.manageDeploymentLabel', {
               defaultMessage: 'Manage this deployment',
@@ -157,6 +158,7 @@ function buildRootCrumb({
             color="text"
             iconType="spaces"
             data-test-subj="viewDeploymentsBtn"
+            size="s"
           >
             {cloudLinks.deployments.title}
           </EuiButtonEmpty>
@@ -164,9 +166,9 @@ function buildRootCrumb({
       </>
     ),
     popoverProps: {
-      panelPaddingSize: 'm',
+      panelPaddingSize: 's',
       zIndex: 6000,
-      panelStyle: { width: 260 },
+      panelStyle: { maxWidth: 240 },
       panelProps: {
         'data-test-subj': 'deploymentLinksPanel',
       },
