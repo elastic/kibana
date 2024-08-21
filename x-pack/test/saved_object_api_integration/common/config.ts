@@ -16,10 +16,14 @@ import { services } from './services';
 interface CreateTestConfigOptions {
   license: string;
   disabledPlugins?: string[];
+  suiteTags?: {
+    include:? string[],
+    exclude:? string[],
+  }
 }
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
-  const { license = 'trial', disabledPlugins = [] } = options;
+  const { license = 'trial', disabledPlugins = [], suiteTags = { exclude: []} } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const config = {
@@ -41,7 +45,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       junit: {
         reportName: 'X-Pack Saved Object API Integration Tests -- ' + name,
       },
-
+      suiteTags,
       esTestCluster: {
         ...config.xpack.api.get('esTestCluster'),
         license,

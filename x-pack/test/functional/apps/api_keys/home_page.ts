@@ -221,6 +221,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Readonly API key', function () {
+      this.tags('skipFIPS');
       before(async () => {
         await security.role.create('read_security_role', {
           elasticsearch: {

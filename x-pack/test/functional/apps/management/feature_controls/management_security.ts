@@ -26,7 +26,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    describe('no management privileges', () => {
+    describe('no management privileges', function() {
+      this.tags('skipFIPS');
+
       before(async () => {
         await security.testUser.setRoles(['global_dashboard_read']);
       });
