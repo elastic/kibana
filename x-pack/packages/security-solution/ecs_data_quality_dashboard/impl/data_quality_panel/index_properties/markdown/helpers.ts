@@ -35,7 +35,7 @@ import type {
   PatternRollup,
   UnallowedValueCount,
 } from '../../types';
-import { getDocsCountPercent } from '../../summary_table/helpers';
+import { getDocsCountPercent } from '../../body/data_quality_details/indices_details/pattern/summary_table/helpers';
 import {
   DOCS,
   ILM_PHASE,
@@ -45,7 +45,7 @@ import {
   INDICES_CHECKED,
   RESULT,
   SIZE,
-} from '../../summary_table/translations';
+} from '../../body/data_quality_details/indices_details/pattern/summary_table/translations';
 import { DATA_QUALITY_TITLE } from '../../translations';
 
 export const EMPTY_PLACEHOLDER = '--';

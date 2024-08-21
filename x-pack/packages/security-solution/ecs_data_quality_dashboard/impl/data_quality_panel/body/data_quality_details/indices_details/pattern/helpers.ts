@@ -15,8 +15,8 @@ import type {
   PatternRollup,
   SortConfig,
   MeteringStatsIndex,
-} from '../types';
-import { getDocsCount, getSizeInBytes } from '../helpers';
+} from '../../../../types';
+import { getDocsCount, getSizeInBytes } from '../../../../helpers';
 import { IndexSummaryTableItem } from './types';
 
 export const isManaged = (

@@ -22,7 +22,10 @@ import {
   getSummaryTableMarkdownHeader,
   getSummaryTableMarkdownRow,
 } from '../../../index_properties/markdown/helpers';
-import { defaultSort, getSummaryTableItems } from '../../../pattern/helpers';
+import {
+  defaultSort,
+  getSummaryTableItems,
+} from '../../data_quality_details/indices_details/pattern/helpers';
 import type { DataQualityCheckResult, IndexToCheck, PatternRollup } from '../../../types';
 import { getErrorSummaries, getSizeInBytes } from '../../../helpers';
 import { useDataQualityContext } from '../../../data_quality_context';

@@ -9,13 +9,13 @@ import numeral from '@elastic/numeral';
 import { render, screen } from '@testing-library/react';
 import React, { ComponentProps } from 'react';
 
-import { EMPTY_STAT } from '../helpers';
+import { EMPTY_STAT } from '../../../../helpers';
 import {
   TestDataQualityProviders,
   TestExternalProviders,
-} from '../mock/test_providers/test_providers';
+} from '../../../../mock/test_providers/test_providers';
 import { Pattern } from '.';
-import { getCheckState } from '../stub/get_check_state';
+import { getCheckState } from '../../../../stub/get_check_state';
 
 const indexName = 'auditbeat-custom-index-1';
 const defaultBytesFormat = '0,0.[0]b';
@@ -26,7 +26,7 @@ const defaultNumberFormat = '0,0.[000]';
 const formatNumber = (value: number | undefined) =>
   value != null ? numeral(value).format(defaultNumberFormat) : EMPTY_STAT;
 
-jest.mock('../use_stats', () => ({
+jest.mock('../../../../use_stats', () => ({
   useStats: jest.fn(() => ({
     stats: {},
     error: null,
@@ -34,7 +34,7 @@ jest.mock('../use_stats', () => ({
   })),
 }));
 
-jest.mock('../use_ilm_explain', () => ({
+jest.mock('../../../../use_ilm_explain', () => ({
   useIlmExplain: jest.fn(() => ({
     error: null,
     ilmExplain: {},

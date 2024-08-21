@@ -18,15 +18,15 @@ import moment from 'moment';
 import styled from 'styled-components';
 
 import { euiThemeVars } from '@kbn/ui-theme';
-import { EMPTY_STAT, getIlmPhaseDescription } from '../helpers';
-import { INCOMPATIBLE_INDEX_TOOL_TIP } from '../stat_label/translations';
-import { INDEX_SIZE_TOOLTIP } from '../translations';
+import { EMPTY_STAT, getIlmPhaseDescription } from '../../../../../helpers';
+import { INCOMPATIBLE_INDEX_TOOL_TIP } from '../../../../../stat_label/translations';
+import { INDEX_SIZE_TOOLTIP } from '../../../../../translations';
 import * as i18n from './translations';
-import { IndexSummaryTableItem } from '../pattern/types';
-import { UseIndicesCheckCheckState } from '../use_indices_check/types';
-import { IndexResultBadge } from '../index_result_badge';
-import { getIndexResultToolTip } from '../index_result_badge/helpers';
-import { Stat } from '../pattern/pattern_summary/stats_rollup/stat';
+import { IndexSummaryTableItem } from '../types';
+import { UseIndicesCheckCheckState } from '../../../../../use_indices_check/types';
+import { IndexResultBadge } from '../../../../../index_result_badge';
+import { getIndexResultToolTip } from '../../../../../index_result_badge/helpers';
+import { Stat } from '../pattern_summary/stats_rollup/stat';
 
 const ProgressContainer = styled.div`
   width: 150px;

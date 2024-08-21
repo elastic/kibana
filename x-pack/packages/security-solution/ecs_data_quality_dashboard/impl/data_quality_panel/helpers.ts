@@ -9,7 +9,7 @@ import type { HttpHandler } from '@kbn/core-http-browser';
 import type { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 import { has, sortBy } from 'lodash/fp';
 import { IToasts } from '@kbn/core-notifications-browser';
-import { getIlmPhase } from './pattern/helpers';
+import { getIlmPhase } from './body/data_quality_details/indices_details/pattern/helpers';
 
 import * as i18n from './translations';
 

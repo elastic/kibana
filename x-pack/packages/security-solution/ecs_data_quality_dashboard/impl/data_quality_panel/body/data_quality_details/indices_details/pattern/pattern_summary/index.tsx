@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
-import type { IlmExplainPhaseCounts } from '../../types';
+import type { IlmExplainPhaseCounts } from '../../../../../types';
 import { PatternLabel } from './pattern_label';
 import { StatsRollup } from './stats_rollup';
 

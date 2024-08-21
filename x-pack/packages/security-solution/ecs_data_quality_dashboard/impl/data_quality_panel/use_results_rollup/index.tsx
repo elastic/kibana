@@ -37,7 +37,10 @@ import {
   formatStorageResult,
   formatResultFromStorage,
 } from '../helpers';
-import { getIlmPhase, getIndexIncompatible } from '../pattern/helpers';
+import {
+  getIlmPhase,
+  getIndexIncompatible,
+} from '../body/data_quality_details/indices_details/pattern/helpers';
 import {
   getIncompatibleMappingsFields,
   getIncompatibleValuesFields,

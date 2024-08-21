@@ -8,7 +8,7 @@
 import { EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { ErrorEmptyPrompt } from '../error_empty_prompt';
+import { ErrorEmptyPrompt } from '../../../../error_empty_prompt';
 import {
   defaultSort,
   getIlmExplainPhaseCounts,
@@ -24,21 +24,21 @@ import {
   getTotalPatternIncompatible,
   getTotalPatternIndicesChecked,
   getTotalSizeInBytes,
-} from '../helpers';
-import { LoadingEmptyPrompt } from '../loading_empty_prompt';
+} from '../../../../helpers';
+import { LoadingEmptyPrompt } from '../../../../loading_empty_prompt';
 import { PatternSummary } from './pattern_summary';
-import { RemoteClustersCallout } from '../remote_clusters_callout';
-import { SummaryTable } from '../summary_table';
-import { getSummaryTableColumns } from '../summary_table/helpers';
+import { RemoteClustersCallout } from './remote_clusters_callout';
+import { SummaryTable } from './summary_table';
+import { getSummaryTableColumns } from './summary_table/helpers';
 import * as i18n from './translations';
-import type { PatternRollup, SelectedIndex, SortConfig } from '../types';
-import { useIlmExplain } from '../use_ilm_explain';
-import { useStats } from '../use_stats';
-import { useDataQualityContext } from '../data_quality_context';
+import type { PatternRollup, SelectedIndex, SortConfig } from '../../../../types';
+import { useIlmExplain } from '../../../../use_ilm_explain';
+import { useStats } from '../../../../use_stats';
+import { useDataQualityContext } from '../../../../data_quality_context';
 import { PatternAccordion, PatternAccordionChildren } from './styles';
 import { IndexCheckFlyout } from './index_check_flyout';
-import { useResultsRollupContext } from '../contexts/results_rollup_context';
-import { useIndicesCheckContext } from '../contexts/indices_check_context';
+import { useResultsRollupContext } from '../../../../contexts/results_rollup_context';
+import { useIndicesCheckContext } from '../../../../contexts/indices_check_context';
 
 const EMPTY_INDEX_NAMES: string[] = [];
 

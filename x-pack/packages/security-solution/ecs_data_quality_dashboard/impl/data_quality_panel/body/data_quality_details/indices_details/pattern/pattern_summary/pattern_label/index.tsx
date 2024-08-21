@@ -9,10 +9,10 @@ import { EuiTitle, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
 import { getPatternResultTooltip, showResult } from './helpers';
-import { IlmPhaseCounts } from '../../../ilm_phase_counts';
+import { IlmPhaseCounts } from '../../../../../../ilm_phase_counts';
 import * as i18n from '../translations';
-import type { IlmExplainPhaseCounts } from '../../../types';
-import { IndexResultBadge } from '../../../index_result_badge';
+import type { IlmExplainPhaseCounts } from '../../../../../../types';
+import { IndexResultBadge } from '../../../../../../index_result_badge';
 
 interface Props {
   incompatible: number | undefined;

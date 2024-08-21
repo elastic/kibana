@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { ErrorEmptyPrompt } from '../error_empty_prompt';
 import { LoadingEmptyPrompt } from '../loading_empty_prompt';
-import { getIndexPropertiesContainerId } from '../pattern/helpers';
+import { getIndexPropertiesContainerId } from '../body/data_quality_details/indices_details/pattern/helpers';
 import * as i18n from './translations';
 import type { IlmPhase, PatternRollup } from '../types';
 import { useIndicesCheckContext } from '../contexts/indices_check_context';

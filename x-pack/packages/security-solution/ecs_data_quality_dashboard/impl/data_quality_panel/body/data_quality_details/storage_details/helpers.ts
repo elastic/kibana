@@ -10,7 +10,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { orderBy } from 'lodash/fp';
 
 import { getDocsCount, getSizeInBytes } from '../../../helpers';
-import { getIlmPhase } from '../../../pattern/helpers';
+import { getIlmPhase } from '../indices_details/pattern/helpers';
 import { PatternRollup } from '../../../types';
 
 export interface LegendItem {

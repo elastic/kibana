@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IlmPhase } from '../types';
+import { IlmPhase } from '../../../../types';
 
 export interface IndexSummaryTableItem {
   docsCount: number;

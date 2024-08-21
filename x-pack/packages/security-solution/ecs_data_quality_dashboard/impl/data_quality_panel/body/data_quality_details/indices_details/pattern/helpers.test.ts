@@ -24,12 +24,12 @@ import {
   shouldCreateIndexNames,
   shouldCreatePatternRollup,
 } from './helpers';
-import { mockIlmExplain } from '../mock/ilm_explain/mock_ilm_explain';
-import { mockDataQualityCheckResult } from '../mock/data_quality_check_result/mock_index';
-import { auditbeatWithAllResults } from '../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
-import { mockStats } from '../mock/stats/mock_stats';
-import { DataQualityCheckResult } from '../types';
-import { getIndexNames, getTotalDocsCount } from '../helpers';
+import { mockIlmExplain } from '../../../../mock/ilm_explain/mock_ilm_explain';
+import { mockDataQualityCheckResult } from '../../../../mock/data_quality_check_result/mock_index';
+import { auditbeatWithAllResults } from '../../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
+import { mockStats } from '../../../../mock/stats/mock_stats';
+import { DataQualityCheckResult } from '../../../../types';
+import { getIndexNames, getTotalDocsCount } from '../../../../helpers';
 import { IndexSummaryTableItem } from './types';
 
 const hot: IlmExplainLifecycleLifecycleExplainManaged = {

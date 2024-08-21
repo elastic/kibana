@@ -16,8 +16,8 @@ import userEvent from '@testing-library/user-event';
 import { omit } from 'lodash/fp';
 import React from 'react';
 
-import { TestExternalProviders } from '../mock/test_providers/test_providers';
-import { EMPTY_STAT } from '../helpers';
+import { TestExternalProviders } from '../../../../../mock/test_providers/test_providers';
+import { EMPTY_STAT } from '../../../../../helpers';
 import {
   getDocsCountPercent,
   getIncompatibleStatColor,
@@ -28,8 +28,8 @@ import {
   getToggleButtonId,
 } from './helpers';
 import { CHECK_INDEX, VIEW_CHECK_DETAILS } from './translations';
-import { IndexSummaryTableItem } from '../pattern/types';
-import { getCheckState } from '../stub/get_check_state';
+import { IndexSummaryTableItem } from '../types';
+import { getCheckState } from '../../../../../stub/get_check_state';
 
 const defaultBytesFormat = '0,0.[0]b';
 const formatBytes = (value: number | undefined) =>

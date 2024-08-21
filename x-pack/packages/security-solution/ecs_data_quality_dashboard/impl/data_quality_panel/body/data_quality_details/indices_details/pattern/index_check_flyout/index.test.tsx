@@ -14,10 +14,10 @@ import { IndexCheckFlyout } from '.';
 import {
   TestDataQualityProviders,
   TestExternalProviders,
-} from '../../mock/test_providers/test_providers';
-import { mockIlmExplain } from '../../mock/ilm_explain/mock_ilm_explain';
-import { auditbeatWithAllResults } from '../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
-import { mockStats } from '../../mock/stats/mock_stats';
+} from '../../../../../mock/test_providers/test_providers';
+import { mockIlmExplain } from '../../../../../mock/ilm_explain/mock_ilm_explain';
+import { auditbeatWithAllResults } from '../../../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
+import { mockStats } from '../../../../../mock/stats/mock_stats';
 
 describe('IndexCheckFlyout', () => {
   beforeEach(() => {

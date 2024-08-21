@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import { StatsRollup } from '../../pattern/pattern_summary/stats_rollup';
+import { StatsRollup } from '../data_quality_details/indices_details/pattern/pattern_summary/stats_rollup';
 import { SummaryActions } from './summary_actions';
 import { IlmPhaseFilter } from './ilm_phase_filter';
 import { useDataQualityContext } from '../../data_quality_context';

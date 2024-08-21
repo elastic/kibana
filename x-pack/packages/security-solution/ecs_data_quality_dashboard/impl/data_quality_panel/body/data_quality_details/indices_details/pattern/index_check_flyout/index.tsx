@@ -21,15 +21,15 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect } from 'react';
 import moment from 'moment';
-import { useIndicesCheckContext } from '../../contexts/indices_check_context';
+import { useIndicesCheckContext } from '../../../../../contexts/indices_check_context';
 
-import { EMPTY_STAT, getDocsCount, getSizeInBytes } from '../../helpers';
-import { MeteringStatsIndex, PatternRollup } from '../../types';
-import { useDataQualityContext } from '../../data_quality_context';
-import { IndexProperties } from '../../index_properties';
+import { EMPTY_STAT, getDocsCount, getSizeInBytes } from '../../../../../helpers';
+import { MeteringStatsIndex, PatternRollup } from '../../../../../types';
+import { useDataQualityContext } from '../../../../../data_quality_context';
+import { IndexProperties } from '../../../../../index_properties';
 import { getIlmPhase } from '../helpers';
-import { IndexResultBadge } from '../../index_result_badge';
-import { useCurrentWindowWidth } from '../../use_current_window_width';
+import { IndexResultBadge } from '../../../../../index_result_badge';
+import { useCurrentWindowWidth } from '../../../../../use_current_window_width';
 import { CHECK_NOW } from './translations';
 
 export interface Props {

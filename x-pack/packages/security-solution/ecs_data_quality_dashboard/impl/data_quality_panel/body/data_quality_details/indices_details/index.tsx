@@ -10,7 +10,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { useResultsRollupContext } from '../../../contexts/results_rollup_context';
-import { Pattern } from '../../../pattern';
+import { Pattern } from './pattern';
 import { SelectedIndex } from '../../../types';
 import { useDataQualityContext } from '../../../data_quality_context';
 

@@ -15,7 +15,7 @@ import React from 'react';
 
 import { TestExternalProviders } from '../mock/test_providers/test_providers';
 import { IlmPhaseCounts } from '.';
-import { getIlmExplainPhaseCounts } from '../pattern/helpers';
+import { getIlmExplainPhaseCounts } from '../body/data_quality_details/indices_details/pattern/helpers';
 
 const hot: IlmExplainLifecycleLifecycleExplainManaged = {
   index: '.ds-packetbeat-8.6.1-2023.02.04-000001',

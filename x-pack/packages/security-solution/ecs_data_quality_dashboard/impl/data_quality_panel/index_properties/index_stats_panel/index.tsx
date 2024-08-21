@@ -10,8 +10,8 @@ import React from 'react';
 import styled from 'styled-components';
 import { DOCS } from '../translations';
 import { ILM_PHASE } from '../../translations';
-import { SIZE } from '../../summary_table/translations';
-import { Stat } from '../../pattern/pattern_summary/stats_rollup/stat';
+import { SIZE } from '../../body/data_quality_details/indices_details/pattern/summary_table/translations';
+import { Stat } from '../../body/data_quality_details/indices_details/pattern/pattern_summary/stats_rollup/stat';
 import { getIlmPhaseDescription } from '../../helpers';
 
 const StyledFlexItem = styled(EuiFlexItem)`

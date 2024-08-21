@@ -9,17 +9,17 @@ import numeral from '@elastic/numeral';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { EMPTY_STAT } from '../helpers';
+import { EMPTY_STAT } from '../../../../../helpers';
 import { getSummaryTableColumns } from './helpers';
-import { mockIlmExplain } from '../mock/ilm_explain/mock_ilm_explain';
-import { auditbeatWithAllResults } from '../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
-import { mockStats } from '../mock/stats/mock_stats';
+import { mockIlmExplain } from '../../../../../mock/ilm_explain/mock_ilm_explain';
+import { auditbeatWithAllResults } from '../../../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
+import { mockStats } from '../../../../../mock/stats/mock_stats';
 import {
   TestDataQualityProviders,
   TestExternalProviders,
-} from '../mock/test_providers/test_providers';
-import { getSummaryTableItems } from '../pattern/helpers';
-import { SortConfig } from '../types';
+} from '../../../../../mock/test_providers/test_providers';
+import { getSummaryTableItems } from '../helpers';
+import { SortConfig } from '../../../../../types';
 import { Props, SummaryTable } from '.';
 
 const defaultBytesFormat = '0,0.[0]b';
