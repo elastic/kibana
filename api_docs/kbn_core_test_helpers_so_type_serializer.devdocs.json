@@ -32,9 +32,9 @@
           "(soType: ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectsType",
+            "section": "def-server.SavedObjectsType",
             "text": "SavedObjectsType"
           },
           "<any>) => ",
@@ -60,9 +60,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectsType",
+                "section": "def-server.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
               "<any>"
@@ -87,9 +87,9 @@
           "(soType: ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectsType",
+            "section": "def-server.SavedObjectsType",
             "text": "SavedObjectsType"
           },
           "<any>) => string"
@@ -108,9 +108,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectsType",
+                "section": "def-server.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
               "<any>"

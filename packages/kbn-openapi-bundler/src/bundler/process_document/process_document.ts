@@ -7,7 +7,6 @@
  */
 
 import { dirname } from 'path';
-import { isPlainObject } from 'lodash';
 import { IRefResolver } from '../ref_resolver/ref_resolver';
 import { ResolvedDocument } from '../ref_resolver/resolved_document';
 import { parseRef } from '../../utils/parse_ref';
@@ -146,8 +145,8 @@ function isTraversableNode(maybeTraversableNode: unknown): boolean {
   return typeof maybeTraversableNode === 'object' && maybeTraversableNode !== null;
 }
 
-export function isRefNode(node: DocumentNode): node is { $ref: string } {
-  return isPlainObject(node) && '$ref' in node;
+export function isRefNode(node: unknown): node is { $ref: string } {
+  return isPlainObjectType(node) && '$ref' in node;
 }
 
 function applyEnterProcessors(

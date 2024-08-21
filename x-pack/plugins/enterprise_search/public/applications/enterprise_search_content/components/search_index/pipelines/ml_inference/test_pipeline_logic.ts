@@ -172,14 +172,18 @@ export const TestPipelineLogic = kea<MakeLogicType<TestPipelineValues, TestPipel
 
 ]`,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setPipelineSimulateBody: (_, { simulateBody }) => simulateBody,
       },
     ],
     simulatePipelineErrors: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setSimulatePipelineErrors: (_, { errors }) => errors,
+        // @ts-expect-error upgrade typescript v5.1.6
         simulateExistingPipelineApiError: (_, error) => getErrorsFromHttpResponse(error),
+        // @ts-expect-error upgrade typescript v5.1.6
         simulatePipelineApiError: (_, error) => getErrorsFromHttpResponse(error),
       },
     ],

@@ -24,7 +24,10 @@ In this simple example, the `books` index has two fields: `author` and `name`.
 Selecting a field adds it to the `fields` array in the query.
 
 [.screenshot]
-image::images/edit-query.png[View and modify queries]
+image::images/query-interface.png[View and modify queries]
+
+Certain fields in your documents may be hidden.
+Learn more about <<playground-hidden-fields, hidden fields>>.
 
 [float]
 [[playground-query-relevance]]
@@ -38,17 +41,13 @@ Refer to <<playground-context, Optimize context>> for more information.
 
 <<playground-troubleshooting, Troubleshooting>> provides tips on how to diagnose and fix relevance issues.
 
-[.screenshot]
-
-
-
 [NOTE]
 ====
 {x} uses the {ref}/retriever.html[`retriever`] syntax for {es} queries.
-Retrievers make it easier to compose and test different retrieval strategies in your search pipelines. 
-====
-// TODO: uncomment and add to note once following page is live
+Retrievers make it easier to compose and test different retrieval strategies in your search pipelines.
 Refer to {ref}/retrievers-overview.html[documentation] for a high level overview of retrievers.
+====
+
 [float]
 [[playground-hidden-fields]]
 === Hidden fields

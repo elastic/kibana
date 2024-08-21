@@ -431,12 +431,12 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.find('discoverDocTableFooter');
   }
 
-  public async isShowingDocViewer() {
-    return await this.testSubjects.exists('kbnDocViewer');
+  public isShowingDocViewer() {
+    return this.dataGrid.isShowingDocViewer();
   }
 
-  public async clickDocViewerTab(id: string) {
-    return await this.find.clickByCssSelector(`#kbn_doc_viewer_tab_${id}`);
+  public clickDocViewerTab(id: string) {
+    return this.dataGrid.clickDocViewerTab(id);
   }
 
   public async expectSourceViewerToExist() {
@@ -446,6 +446,19 @@ export class DiscoverPageObject extends FtrService {
   public async findFieldByNameInDocViewer(name: string) {
     const fieldSearch = await this.testSubjects.find('unifiedDocViewerFieldsSearchInput');
     await fieldSearch.type(name);
+  }
+
+  public async openFilterByFieldTypeInDocViewer() {
+    await this.testSubjects.click('unifiedDocViewerFieldsTableFieldTypeFilterToggle');
+    await this.testSubjects.existOrFail('unifiedDocViewerFieldsTableFieldTypeFilterOptions');
+  }
+
+  public async closeFilterByFieldTypeInDocViewer() {
+    await this.testSubjects.click('unifiedDocViewerFieldsTableFieldTypeFilterToggle');
+
+    await this.retry.waitFor('doc viewer filter closed', async () => {
+      return !(await this.testSubjects.exists('unifiedDocViewerFieldsTableFieldTypeFilterOptions'));
+    });
   }
 
   public async getMarks() {
@@ -571,9 +584,10 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async selectTextBaseLang() {
-    await this.testSubjects.click('discover-dataView-switch-link');
-    await this.testSubjects.click('select-text-based-language-panel');
-    await this.header.waitUntilLoadingHasFinished();
+    if (await this.testSubjects.exists('select-text-based-language-btn')) {
+      await this.testSubjects.click('select-text-based-language-btn');
+      await this.header.waitUntilLoadingHasFinished();
+    }
   }
 
   public async removeHeaderColumn(name: string) {

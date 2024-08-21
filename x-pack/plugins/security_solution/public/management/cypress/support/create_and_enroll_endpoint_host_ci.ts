@@ -10,13 +10,14 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test/src/kbn_client';
 import { kibanaPackageJson } from '@kbn/repo-info';
+import { isServerlessKibanaFlavor } from '../../../../common/endpoint/utils/kibana_status';
+import { fetchFleetLatestAvailableAgentVersion } from '../../../../common/endpoint/utils/fetch_fleet_version';
 import { isFleetServerRunning } from '../../../../scripts/endpoint/common/fleet_server/fleet_server_services';
 import type { HostVm } from '../../../../scripts/endpoint/common/types';
 import type { BaseVmCreateOptions } from '../../../../scripts/endpoint/common/vm_services';
 import { createVm } from '../../../../scripts/endpoint/common/vm_services';
 import {
   fetchAgentPolicyEnrollmentKey,
-  fetchFleetAvailableVersions,
   fetchFleetServerUrl,
   getAgentDownloadUrl,
   getAgentFileName,
@@ -38,12 +39,12 @@ export interface CreateAndEnrollEndpointHostCIOptions
   agentPolicyId: string;
   /** version of the Agent to install. Defaults to stack version */
   version?: string;
+  /** skip all checks and use provided version */
+  forceVersion?: boolean;
   /** The name for the host. Will also be the name of the VM */
   hostname?: string;
   /** If `version` should be exact, or if this is `true`, then the closest version will be used. Defaults to `false` */
   useClosestVersionMatch?: boolean;
-  /** If the environment is MKI */
-  isMkiEnvironment?: boolean;
 }
 
 export interface CreateAndEnrollEndpointHostCIResponse {
@@ -66,14 +67,16 @@ export const createAndEnrollEndpointHostCI = async ({
   hostname,
   version = kibanaPackageJson.version,
   useClosestVersionMatch = true,
-  isMkiEnvironment = false,
+  forceVersion = false,
 }: CreateAndEnrollEndpointHostCIOptions): Promise<CreateAndEnrollEndpointHostCIResponse> => {
-  let agentVersion = version;
   const vmName = hostname ?? `test-host-${Math.random().toString().substring(2, 6)}`;
+  let agentVersion = version;
 
-  if (isMkiEnvironment) {
-    // MKI env provides own fleet server. We must be sure that currently deployed FS is compatible with agent version we want to deploy.
-    agentVersion = await fetchFleetAvailableVersions(kbnClient);
+  if (!forceVersion) {
+    const isServerless = await isServerlessKibanaFlavor(kbnClient);
+    if (isServerless) {
+      agentVersion = await fetchFleetLatestAvailableAgentVersion(kbnClient);
+    }
   }
 
   const fileNameNoExtension = getAgentFileName(agentVersion);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { Pipeline, RawSamples } from '../model/common_attributes';
 import { CheckPipelineAPIResponse } from '../model/response_schemas';

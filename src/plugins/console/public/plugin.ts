@@ -26,6 +26,7 @@ import {
   EmbeddableConsoleInfo,
   createStorage,
   setStorage,
+  httpService,
 } from './services';
 
 export class ConsoleUIPlugin
@@ -52,6 +53,7 @@ export class ConsoleUIPlugin
       dev: { enableMonaco: isMonacoEnabled },
     } = this.ctx.config.get<ClientConfigType>();
 
+    httpService.setup(http);
     this.autocompleteInfo.setup(http);
     setAutocompleteInfo(this.autocompleteInfo);
 
@@ -99,6 +101,7 @@ export class ConsoleUIPlugin
             element,
             autocompleteInfo: this.autocompleteInfo,
             isMonacoEnabled,
+            isDevMode: this.ctx.env.mode.dev,
           });
         },
       });
@@ -125,6 +128,7 @@ export class ConsoleUIPlugin
       ui: { enabled: isConsoleUiEnabled, embeddedEnabled: isEmbeddedConsoleEnabled },
       dev: { enableMonaco: isMonacoEnabled },
     } = this.ctx.config.get<ClientConfigType>();
+    const isDevMode = this.ctx.env.mode.dev;
 
     const consoleStart: ConsolePluginStart = {};
     const embeddedConsoleUiSetting = core.uiSettings.get<boolean>(
@@ -146,6 +150,7 @@ export class ConsoleUIPlugin
           },
           alternateView: this._embeddableConsole.alternateView,
           isMonacoEnabled,
+          isDevMode,
           getConsoleHeight: this._embeddableConsole.getConsoleHeight.bind(this._embeddableConsole),
           setConsoleHeight: this._embeddableConsole.setConsoleHeight.bind(this._embeddableConsole),
         });
@@ -154,6 +159,8 @@ export class ConsoleUIPlugin
         this._embeddableConsole.isEmbeddedConsoleAvailable();
       consoleStart.openEmbeddedConsole = (content?: string) =>
         this._embeddableConsole.openEmbeddedConsole(content);
+      consoleStart.openEmbeddedConsoleAlternateView = () =>
+        this._embeddableConsole.openEmbeddedConsoleAlternateView();
       consoleStart.registerEmbeddedConsoleAlternateView = (view: EmbeddedConsoleView | null) => {
         this._embeddableConsole.registerAlternateView(view);
       };

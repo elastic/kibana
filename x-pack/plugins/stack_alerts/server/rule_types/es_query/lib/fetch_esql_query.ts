@@ -11,8 +11,12 @@ import { SharePluginStart } from '@kbn/share-plugin/server';
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { ecsFieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { OnlyEsqlQueryRuleParams } from '../types';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { Filter, Query } from '@kbn/es-query';
 import { EsqlTable, toEsQueryHits } from '../../../../common';
+import { OnlyEsqlQueryRuleParams } from '../types';
 
 export interface FetchEsqlQueryOpts {
   ruleId: string;
@@ -66,6 +70,7 @@ export async function fetchEsqlQuery({
 
   return {
     link,
+    query,
     numMatches: Number(response.values.length),
     parsedResults: parseAggregationResults({
       isCountAgg: true,
@@ -126,3 +131,31 @@ export const getSourceFields = (results: EsqlTable) => {
 
   return intersectionBy(resultFields, ecsFields, 'label');
 };
+
+export async function generateLink(
+  esqlQuery: Query,
+  discoverLocator: LocatorPublic<DiscoverAppLocatorParams>,
+  dataViews: DataViewsContract,
+  dataViewToUpdate: DataView,
+  dateStart: string,
+  dateEnd: string,
+  spacePrefix: string,
+  filterToExcludeHitsFromPreviousRun: Filter | null
+) {
+  const redirectUrlParams: DiscoverAppLocatorParams = {
+    filters: filterToExcludeHitsFromPreviousRun ? [filterToExcludeHitsFromPreviousRun] : [],
+    timeRange: { from: dateStart, to: dateEnd },
+    isAlertResults: true,
+    query: {
+      language: 'esql',
+      query: esqlQuery,
+    },
+  };
+
+  // use `lzCompress` flag for making the link readable during debugging/testing
+  // const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams, { lzCompress: false });
+  const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams);
+  const [start, end] = redirectUrl.split('/app');
+
+  return start + spacePrefix + '/app' + end;
+}

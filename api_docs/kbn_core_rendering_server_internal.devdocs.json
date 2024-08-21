@@ -10,18 +10,10 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/core-rendering-server-internal",
-        "id": "def-common.Fonts",
+        "id": "def-server.Fonts",
         "type": "Function",
         "tags": [],
         "label": "Fonts",
@@ -35,7 +27,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-rendering-server-internal",
-            "id": "def-common.Fonts.$1",
+            "id": "def-server.Fonts.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{ url }",
@@ -53,6 +45,14 @@
         "initialIsOpen": false
       }
     ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

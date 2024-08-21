@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import {
   PackId,
@@ -24,11 +24,6 @@ import {
   Shards,
   ObjectQueries,
 } from '../model/schema/common_attributes.gen';
-
-export type UpdatePacksRequestParams = z.infer<typeof UpdatePacksRequestParams>;
-export const UpdatePacksRequestParams = z.object({
-  id: PackId.optional(),
-});
 
 export type UpdatePacksRequestBody = z.infer<typeof UpdatePacksRequestBody>;
 export const UpdatePacksRequestBody = z.object({

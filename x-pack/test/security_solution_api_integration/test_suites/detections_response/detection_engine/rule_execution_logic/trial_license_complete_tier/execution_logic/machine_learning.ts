@@ -86,7 +86,8 @@ export default ({ getService }: FtrProviderContext) => {
     rule_id: 'ml-rule-id',
   };
 
-  describe('@ess @serverless @serverlessQA Machine learning type rules', () => {
+  // Note: This suite of tests can be a candidate for the Kibana QA quality gate once the tests are passing consistenly on the periodic pipeline.
+  describe('@ess @serverless Machine learning type rules', () => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start

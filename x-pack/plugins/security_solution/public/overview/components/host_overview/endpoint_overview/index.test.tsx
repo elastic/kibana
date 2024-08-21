@@ -24,7 +24,7 @@ const useGetAgentStatusMock = _useGetAgentStatus as jest.Mock;
 describe('EndpointOverview Component', () => {
   let endpointData: EndpointFields;
   let wrapper: ReturnType<typeof mount>;
-  let findData: ReturnType<typeof wrapper['find']>;
+  let findData: ReturnType<(typeof wrapper)['find']>;
   const render = (data: EndpointFields | null = endpointData) => {
     wrapper = mount(
       <TestProviders>

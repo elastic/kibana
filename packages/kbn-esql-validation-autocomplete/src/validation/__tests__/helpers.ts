@@ -31,7 +31,7 @@ export const setup = async () => {
     return await validateQuery(query, getAstAndSyntaxErrors, opts, cb);
   };
 
-  const assertErrors = (errors: unknown[], expectedErrors: string[]) => {
+  const assertErrors = (errors: unknown[], expectedErrors: string[], query?: string) => {
     const errorMessages: string[] = [];
     for (const error of errors) {
       if (error && typeof error === 'object') {
@@ -46,7 +46,16 @@ export const setup = async () => {
         errorMessages.push(String(error));
       }
     }
-    expect(errorMessages.sort()).toStrictEqual(expectedErrors.sort());
+
+    try {
+      expect(errorMessages.sort()).toStrictEqual(expectedErrors.sort());
+    } catch (error) {
+      throw Error(`${query}\n
+      Received:
+      '${errorMessages.sort()}'
+      Expected:
+      ${expectedErrors.sort()}`);
+    }
   };
 
   const expectErrors = async (
@@ -57,9 +66,9 @@ export const setup = async () => {
     cb: ESQLCallbacks = callbacks
   ) => {
     const { errors, warnings } = await validateQuery(query, getAstAndSyntaxErrors, opts, cb);
-    assertErrors(errors, expectedErrors);
+    assertErrors(errors, expectedErrors, query);
     if (expectedWarnings) {
-      assertErrors(warnings, expectedWarnings);
+      assertErrors(warnings, expectedWarnings, query);
     }
   };
 

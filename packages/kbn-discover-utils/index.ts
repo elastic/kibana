@@ -28,6 +28,7 @@ export {
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
   TRUNCATE_MAX_HEIGHT,
+  TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE,
   IgnoredReason,
   buildDataTableRecord,
   buildDataTableRecordList,
@@ -43,10 +44,12 @@ export {
   isNestedFieldParent,
   isLegacyTableEnabled,
   usePager,
+  calcFieldCounts,
   getLogLevelColor,
   getLogLevelCoalescedValue,
   getLogLevelCoalescedValueLabel,
   LogLevelCoalescedValue,
+  LogLevelBadge,
 } from './src';
 
 export type { LogsContextService } from './src';

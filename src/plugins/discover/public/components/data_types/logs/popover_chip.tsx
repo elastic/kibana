@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { ReactElement, useCallback, useState } from 'react';
 import {
   EuiBadge,
   type EuiBadgeProps,
@@ -18,7 +18,7 @@ import {
   EuiText,
   EuiButtonIcon,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { css, SerializedStyles } from '@emotion/react';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { closeCellActionPopoverText, openCellActionPopoverAriaText } from './translations';
 import { FilterInButton } from './filter_in_button';
@@ -41,9 +41,6 @@ interface ChipWithPopoverProps {
   dataTestSubj?: string;
   leftSideIcon?: React.ReactNode;
   rightSideIcon?: EuiBadgeProps['iconType'];
-  borderColor?: string | null;
-  style?: React.CSSProperties;
-  shouldRenderPopover?: boolean;
 }
 
 export function ChipWithPopover({
@@ -52,48 +49,71 @@ export function ChipWithPopover({
   dataTestSubj = `dataTablePopoverChip_${property}`,
   leftSideIcon,
   rightSideIcon,
-  borderColor,
-  style,
-  shouldRenderPopover = true,
 }: ChipWithPopoverProps) {
+  return (
+    <ChipPopover
+      property={property}
+      text={text}
+      renderChip={({ handleChipClick, handleChipClickAriaLabel, chipCss }) => (
+        <EuiBadge
+          color="hollow"
+          iconType={rightSideIcon}
+          iconSide="right"
+          data-test-subj={dataTestSubj}
+          onClick={handleChipClick}
+          onClickAriaLabel={handleChipClickAriaLabel}
+          css={chipCss}
+        >
+          <EuiFlexGroup gutterSize="xs">
+            {leftSideIcon && <EuiFlexItem>{leftSideIcon}</EuiFlexItem>}
+            <EuiFlexItem>{text}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiBadge>
+      )}
+    />
+  );
+}
+
+interface ChipPopoverProps {
+  /**
+   * ECS mapping for the key
+   */
+  property: string;
+  /**
+   * Value for the mapping, which will be displayed
+   */
+  text: string;
+  renderChip: (props: {
+    handleChipClick: () => void;
+    handleChipClickAriaLabel: string;
+    chipCss: SerializedStyles;
+  }) => ReactElement;
+}
+
+export function ChipPopover({ property, text, renderChip }: ChipPopoverProps) {
   const xsFontSize = useEuiFontSize('xs').fontSize;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const handleChipClick = useCallback(() => {
-    if (!shouldRenderPopover) return;
     setIsPopoverOpen(!isPopoverOpen);
-  }, [isPopoverOpen, shouldRenderPopover]);
+  }, [isPopoverOpen]);
 
   const closePopover = () => setIsPopoverOpen(false);
 
-  const chipContent = (
-    <EuiBadge
-      color="hollow"
-      iconType={rightSideIcon}
-      iconSide="right"
-      data-test-subj={dataTestSubj}
-      onClick={handleChipClick}
-      onClickAriaLabel={openCellActionPopoverAriaText}
-      css={css`
-        ${borderColor ? `border: 2px solid ${borderColor};` : ''}
-        font-size: ${xsFontSize};
-        display: flex;
-        justify-content: center;
-        ${shouldRenderPopover && `margin-right: 4px; margin-top: -3px;`}
-        cursor: pointer;
-      `}
-      style={style}
-    >
-      <EuiFlexGroup gutterSize="xs">
-        {leftSideIcon && <EuiFlexItem>{leftSideIcon}</EuiFlexItem>}
-        <EuiFlexItem>{text}</EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiBadge>
-  );
-
   return (
     <EuiPopover
-      button={chipContent}
+      button={renderChip({
+        handleChipClick,
+        handleChipClickAriaLabel: openCellActionPopoverAriaText,
+        chipCss: css`
+          font-size: ${xsFontSize};
+          display: flex;
+          justify-content: center;
+          margin-right: 4px;
+          margin-top: -3px;
+          cursor: pointer;
+        `,
+      })}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       anchorPosition="downCenter"

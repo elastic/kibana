@@ -21,4 +21,4 @@ export const healthCheckErrors = {
   API_KEYS_AND_ENCRYPTION_ERROR: 'apiKeysAndEncryptionError',
 } as const;
 
-export type HealthCheckErrors = typeof healthCheckErrors[keyof typeof healthCheckErrors];
+export type HealthCheckErrors = (typeof healthCheckErrors)[keyof typeof healthCheckErrors];

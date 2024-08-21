@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  Chart,
-  isMetricElementEvent,
-  LEGACY_DARK_THEME,
-  Metric,
-  MetricTrendShape,
-  Settings,
-} from '@elastic/charts';
+import { Chart, isMetricElementEvent, Metric, MetricTrendShape, Settings } from '@elastic/charts';
 import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -229,6 +222,7 @@ export function SloCardChart({
 }) {
   const {
     application: { navigateToUrl },
+    charts,
   } = useKibana().services;
 
   const { cardColor } = useSloCardColor(slo.summary.status);
@@ -238,8 +232,12 @@ export function SloCardChart({
   return (
     <Chart>
       <Settings
-        // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-        baseTheme={LEGACY_DARK_THEME}
+        baseTheme={charts.theme.useChartsBaseTheme()}
+        theme={{
+          metric: {
+            iconAlign: 'right',
+          },
+        }}
         onElementClick={([d]) => {
           if (onClick) {
             onClick();

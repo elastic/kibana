@@ -14,6 +14,7 @@ import type {
   GetSettingsResponse,
   GetEnrollmentSettingsRequest,
   GetEnrollmentSettingsResponse,
+  GetSpaceSettingsResponse,
 } from '../../types';
 
 import { API_VERSIONS } from '../../../common/constants';
@@ -39,6 +40,19 @@ export function useGetSettings() {
     method: 'get',
     path: settingsRoutesService.getInfoPath(),
     version: API_VERSIONS.public.v1,
+  });
+}
+
+export function useGetSpaceSettings({ enabled }: { enabled?: boolean }) {
+  return useQuery<GetSpaceSettingsResponse, RequestError>({
+    queryKey: ['space_settings'],
+    enabled,
+    queryFn: () =>
+      sendRequestForRq<GetSpaceSettingsResponse>({
+        method: 'get',
+        path: settingsRoutesService.getSpaceInfoPath(),
+        version: API_VERSIONS.public.v1,
+      }),
   });
 }
 

@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const find = getService('find');
   const dataGrid = getService('dataGrid');
   const log = getService('log');
   const retry = getService('retry');
@@ -96,10 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       log.debug(`expanded document id: ${expandDocId}`);
 
-      await dataGrid.clickRowToggle();
-      await find.clickByCssSelectorWhenNotDisabledWithoutRetry(
-        '#kbn_doc_viewer_tab_doc_view_source'
-      );
+      await dataGrid.clickRowToggle({ defaultTabId: 'doc_view_source' });
 
       await retry.waitForWithTimeout(
         'document id in flyout matching the expanded document id',
@@ -140,10 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       log.debug(`expanded document id: ${expandDocId}`);
 
-      await dataGrid.clickRowToggle();
-      await find.clickByCssSelectorWhenNotDisabledWithoutRetry(
-        '#kbn_doc_viewer_tab_doc_view_source'
-      );
+      await dataGrid.clickRowToggle({ defaultTabId: 'doc_view_source' });
 
       await retry.waitForWithTimeout(
         'document id in flyout matching the expanded document id',

@@ -20,8 +20,8 @@ import {
   useKibanaEnvironmentContextProvider,
 } from '../hooks/use_kibana';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
-import { HeaderActionMenuProvider } from '../utils/header_action_menu_provider';
-import { TriggersActionsProvider } from '../utils/triggers_actions_context';
+import { HeaderActionMenuProvider } from '../containers/header_action_menu_provider';
+import { TriggersActionsProvider } from '../containers/triggers_actions_context';
 import { useIsDarkMode } from '../hooks/use_is_dark_mode';
 
 export const CommonInfraProviders: FC<

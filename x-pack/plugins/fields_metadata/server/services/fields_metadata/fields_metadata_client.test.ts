@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FieldMetadata, TEcsFields } from '../../../common';
+import { FieldMetadata, TEcsFields, TMetadataFields } from '../../../common';
 import { loggerMock } from '@kbn/logging-mocks';
 import { FieldsMetadataClient } from './fields_metadata_client';
 import { EcsFieldsRepository } from './repositories/ecs_fields_repository';
 import { IntegrationFieldsRepository } from './repositories/integration_fields_repository';
+import { MetadataFieldsRepository } from './repositories/metadata_fields_repository';
 
 const ecsFields = {
   '@timestamp': {
@@ -25,6 +26,21 @@ const ecsFields = {
     type: 'date',
   },
 } as TEcsFields;
+
+const metadataFields = {
+  _index: {
+    dashed_name: 'index',
+    description:
+      'The index to which the document belongs. This metadata field specifies the exact index name in which the document is stored.',
+    example: 'index_1',
+    flat_name: '_index',
+    name: '_index',
+    short: 'The index to which the document belongs.',
+    type: 'keyword',
+    documentation_url:
+      'https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-index-field.html',
+  },
+} as TMetadataFields;
 
 const integrationFields = {
   '1password.item_usages': {
@@ -46,6 +62,7 @@ const integrationFields = {
 describe('FieldsMetadataClient class', () => {
   const logger = loggerMock.create();
   const ecsFieldsRepository = EcsFieldsRepository.create({ ecsFields });
+  const metadataFieldsRepository = MetadataFieldsRepository.create({ metadataFields });
   const integrationFieldsExtractor = jest.fn();
   integrationFieldsExtractor.mockImplementation(() => Promise.resolve(integrationFields));
 
@@ -60,12 +77,13 @@ describe('FieldsMetadataClient class', () => {
     fieldsMetadataClient = FieldsMetadataClient.create({
       ecsFieldsRepository,
       integrationFieldsRepository,
+      metadataFieldsRepository,
       logger,
     });
   });
 
   describe('#getByName', () => {
-    it('should resolve a single ECS FieldMetadata instance by default', async () => {
+    it('should resolve a single ECS/Metadata FieldMetadata instance by default', async () => {
       const timestampFieldInstance = await fieldsMetadataClient.getByName('@timestamp');
 
       expect(integrationFieldsExtractor).not.toHaveBeenCalled();
@@ -75,19 +93,19 @@ describe('FieldsMetadataClient class', () => {
 
       const timestampField = timestampFieldInstance.toPlain();
 
-      expect(timestampField.hasOwnProperty('dashed_name')).toBeTruthy();
-      expect(timestampField.hasOwnProperty('description')).toBeTruthy();
-      expect(timestampField.hasOwnProperty('example')).toBeTruthy();
-      expect(timestampField.hasOwnProperty('flat_name')).toBeTruthy();
-      expect(timestampField.hasOwnProperty('level')).toBeTruthy();
-      expect(timestampField.hasOwnProperty('name')).toBeTruthy();
-      expect(timestampField.hasOwnProperty('normalize')).toBeTruthy();
-      expect(timestampField.hasOwnProperty('required')).toBeTruthy();
-      expect(timestampField.hasOwnProperty('short')).toBeTruthy();
-      expect(timestampField.hasOwnProperty('type')).toBeTruthy();
+      expect(Object.hasOwn(timestampField, 'dashed_name')).toBeTruthy();
+      expect(Object.hasOwn(timestampField, 'description')).toBeTruthy();
+      expect(Object.hasOwn(timestampField, 'example')).toBeTruthy();
+      expect(Object.hasOwn(timestampField, 'flat_name')).toBeTruthy();
+      expect(Object.hasOwn(timestampField, 'level')).toBeTruthy();
+      expect(Object.hasOwn(timestampField, 'name')).toBeTruthy();
+      expect(Object.hasOwn(timestampField, 'normalize')).toBeTruthy();
+      expect(Object.hasOwn(timestampField, 'required')).toBeTruthy();
+      expect(Object.hasOwn(timestampField, 'short')).toBeTruthy();
+      expect(Object.hasOwn(timestampField, 'type')).toBeTruthy();
     });
 
-    it('should attempt resolving the field from an integration if it does not exist in ECS  and the integration and dataset params are provided', async () => {
+    it('should attempt resolving the field from an integration if it does not exist in ECS/Metadata and the integration and dataset params are provided', async () => {
       const onePasswordFieldInstance = await fieldsMetadataClient.getByName(
         'onepassword.client.platform_version',
         { integration: '1password', dataset: '1password.item_usages' }
@@ -100,14 +118,14 @@ describe('FieldsMetadataClient class', () => {
 
       const onePasswordField = onePasswordFieldInstance.toPlain();
 
-      expect(onePasswordField.hasOwnProperty('name')).toBeTruthy();
-      expect(onePasswordField.hasOwnProperty('type')).toBeTruthy();
-      expect(onePasswordField.hasOwnProperty('description')).toBeTruthy();
-      expect(onePasswordField.hasOwnProperty('flat_name')).toBeTruthy();
-      expect(onePasswordField.hasOwnProperty('source')).toBeTruthy();
-      expect(onePasswordField.hasOwnProperty('dashed_name')).toBeTruthy();
-      expect(onePasswordField.hasOwnProperty('normalize')).toBeTruthy();
-      expect(onePasswordField.hasOwnProperty('short')).toBeTruthy();
+      expect(Object.hasOwn(onePasswordField, 'name')).toBeTruthy();
+      expect(Object.hasOwn(onePasswordField, 'type')).toBeTruthy();
+      expect(Object.hasOwn(onePasswordField, 'description')).toBeTruthy();
+      expect(Object.hasOwn(onePasswordField, 'flat_name')).toBeTruthy();
+      expect(Object.hasOwn(onePasswordField, 'source')).toBeTruthy();
+      expect(Object.hasOwn(onePasswordField, 'dashed_name')).toBeTruthy();
+      expect(Object.hasOwn(onePasswordField, 'normalize')).toBeTruthy();
+      expect(Object.hasOwn(onePasswordField, 'short')).toBeTruthy();
     });
 
     it('should not resolve the field from an integration if the integration and dataset params are not provided', async () => {
@@ -130,7 +148,7 @@ describe('FieldsMetadataClient class', () => {
 
       const fields = fieldsDictionaryInstance.toPlain();
 
-      expect(fields.hasOwnProperty('@timestamp')).toBeTruthy();
+      expect(Object.hasOwn(fields, '@timestamp')).toBeTruthy();
     });
 
     it('should resolve a FieldsMetadataDictionary of matching fields, including integration fields when integration and dataset params are provided', async () => {
@@ -144,8 +162,8 @@ describe('FieldsMetadataClient class', () => {
 
       const fields = fieldsDictionaryInstance.toPlain();
 
-      expect(fields.hasOwnProperty('@timestamp')).toBeTruthy();
-      expect(fields.hasOwnProperty('onepassword.client.platform_version')).toBeTruthy();
+      expect(Object.hasOwn(fields, '@timestamp')).toBeTruthy();
+      expect(Object.hasOwn(fields, 'onepassword.client.platform_version')).toBeTruthy();
     });
 
     it('should resolve a FieldsMetadataDictionary of matching fields, skipping unmatched fields', async () => {
@@ -159,9 +177,9 @@ describe('FieldsMetadataClient class', () => {
 
       const fields = fieldsDictionaryInstance.toPlain();
 
-      expect(fields.hasOwnProperty('@timestamp')).toBeTruthy();
-      expect(fields.hasOwnProperty('onepassword.client.platform_version')).toBeTruthy();
-      expect(fields.hasOwnProperty('not-existing-field')).toBeFalsy();
+      expect(Object.hasOwn(fields, '@timestamp')).toBeTruthy();
+      expect(Object.hasOwn(fields, 'onepassword.client.platform_version')).toBeTruthy();
+      expect(Object.hasOwn(fields, 'not-existing-field')).toBeFalsy();
     });
   });
 });

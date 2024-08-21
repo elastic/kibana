@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useRef, memo, useCallback } from 'react';
+import React, { useState, useRef, memo, useCallback, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import {
@@ -14,12 +14,16 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
   EuiText,
+  EuiProgress,
 } from '@elastic/eui';
-import { selectOverviewStatus } from '../../../../state/overview_status';
+import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../embeddables/constants';
+import { AddToDashboard } from '../../../common/components/add_to_dashboard';
+import { useOverviewStatus } from '../../hooks/use_overview_status';
 import { useInfiniteScroll } from './use_infinite_scroll';
 import { GridItemsByGroup } from './grid_by_group/grid_items_by_group';
 import { GroupFields } from './grid_by_group/group_fields';
 import {
+  fetchMonitorOverviewAction,
   quietFetchOverviewAction,
   selectOverviewState,
   setFlyoutConfig,
@@ -33,12 +37,13 @@ import { NoMonitorsFound } from '../../common/no_monitors_found';
 import { MonitorDetailFlyout } from './monitor_detail_flyout';
 
 export const OverviewGrid = memo(() => {
-  const { status } = useSelector(selectOverviewStatus);
+  const { status } = useOverviewStatus({ scopeStatusByLocation: true });
 
   const {
     data: { monitors },
     flyoutConfig,
     loaded,
+    loading,
     pageState,
     groupBy: { field: groupField },
   } = useSelector(selectOverviewState);
@@ -48,6 +53,11 @@ export const OverviewGrid = memo(() => {
   const dispatch = useDispatch();
   const intersectionRef = useRef(null);
   const { monitorsSortedByStatus } = useMonitorsSortedByStatus();
+
+  // fetch overview for all other page state changes
+  useEffect(() => {
+    dispatch(fetchMonitorOverviewAction.get(pageState));
+  }, [dispatch, pageState]);
 
   const setFlyoutConfigCallback = useCallback(
     (params: FlyoutParamProps) => dispatch(setFlyoutConfig(params)),
@@ -70,7 +80,7 @@ export const OverviewGrid = memo(() => {
     <>
       <EuiFlexGroup
         justifyContent="spaceBetween"
-        alignItems="baseline"
+        alignItems="center"
         responsive={false}
         wrap={true}
       >
@@ -82,13 +92,19 @@ export const OverviewGrid = memo(() => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
+          <AddToDashboard type={SYNTHETICS_MONITORS_EMBEDDABLE} asButton />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
           <SortFields onSortChange={() => setPage(1)} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <GroupFields />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
+      {loading && <EuiProgress size="xs" color="accent" />}
+      <EuiSpacer size="s" />
       <>
         {groupField === 'none' ? (
           loaded && currentMonitors.length ? (

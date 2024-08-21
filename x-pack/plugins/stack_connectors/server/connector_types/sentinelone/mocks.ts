@@ -24,6 +24,7 @@ import {
   SentinelOneConfig,
   SentinelOneFetchAgentFilesResponse,
   SentinelOneGetAgentsResponse,
+  SentinelOneGetRemoteScriptResults,
   SentinelOneSecrets,
 } from '../../../common/sentinelone/types';
 
@@ -132,6 +133,18 @@ const createAgentDetailsMock = (
   return merge(details, overrides);
 };
 
+const createRemoteScriptResultsMock = (): SentinelOneGetRemoteScriptResults => {
+  return {
+    download_links: [
+      {
+        downloadUrl: 'https://remote/script/results/download',
+        fileName: 'some_file_name',
+        taskId: 'task-123',
+      },
+    ],
+  };
+};
+
 const createGetAgentsApiResponseMock = (): SentinelOneGetAgentsResponse => {
   return {
     pagination: {
@@ -163,6 +176,10 @@ class SentinelOneConnectorTestClass extends SentinelOneConnector {
       data: { success: true },
     } as SentinelOneFetchAgentFilesResponse,
     downloadAgentFileApiResponse: Readable.from(['test']),
+    getRemoteScriptResults: {
+      data: createRemoteScriptResultsMock(),
+    },
+    downloadRemoteScriptResults: Readable.from(['test']),
   };
 
   public requestSpy = jest.fn(async ({ url }: SubActionRequestParams<any>) => {
@@ -178,6 +195,14 @@ class SentinelOneConnectorTestClass extends SentinelOneConnector {
     } else if (/\/uploads\/.*$/.test(url)) {
       return sentinelOneConnectorMocks.createAxiosResponse(
         this.mockResponses.downloadAgentFileApiResponse
+      );
+    } else if (/remote-scripts\/fetch-files/.test(url)) {
+      return sentinelOneConnectorMocks.createAxiosResponse(
+        this.mockResponses.getRemoteScriptResults
+      );
+    } else if (/remote\/script\/results\/download/.test(url)) {
+      return sentinelOneConnectorMocks.createAxiosResponse(
+        this.mockResponses.downloadRemoteScriptResults
       );
     }
 
@@ -213,4 +238,5 @@ export const sentinelOneConnectorMocks = Object.freeze({
   createAxiosResponse: createAxiosResponseMock,
   createGetAgentsApiResponse: createGetAgentsApiResponseMock,
   createAgentDetails: createAgentDetailsMock,
+  createRemoteScriptResults: createRemoteScriptResultsMock,
 });

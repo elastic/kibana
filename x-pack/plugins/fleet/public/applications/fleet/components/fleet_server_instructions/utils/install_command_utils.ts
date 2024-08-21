@@ -35,9 +35,9 @@ function getArtifact(
     },
     mac: {
       downloadCommand: [
-        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz`,
-        `tar xzvf elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz`,
-        `cd elastic-agent-${kibanaVersion}-darwin-x86_64`,
+        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-darwin-aarch64.tar.gz`,
+        `tar xzvf elastic-agent-${kibanaVersion}-darwin-aarch64.tar.gz`,
+        `cd elastic-agent-${kibanaVersion}-darwin-aarch64`,
       ].join(`\n`),
     },
     windows: {

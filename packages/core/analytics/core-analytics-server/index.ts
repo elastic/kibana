@@ -48,4 +48,4 @@ export type {
   AllowedSchemaTypes,
   // Shippers
   IShipper,
-} from '@kbn/ebt/client';
+} from '@elastic/ebt/client';

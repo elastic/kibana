@@ -43,25 +43,25 @@
             "(breadcrumbs: ",
             {
               "pluginId": "@kbn/core-chrome-browser",
-              "scope": "common",
+              "scope": "public",
               "docId": "kibKbnCoreChromeBrowserPluginApi",
-              "section": "def-common.ChromeBreadcrumb",
+              "section": "def-public.ChromeBreadcrumb",
               "text": "ChromeBreadcrumb"
             },
             " | ",
             {
               "pluginId": "@kbn/core-chrome-browser",
-              "scope": "common",
+              "scope": "public",
               "docId": "kibKbnCoreChromeBrowserPluginApi",
-              "section": "def-common.ChromeBreadcrumb",
+              "section": "def-public.ChromeBreadcrumb",
               "text": "ChromeBreadcrumb"
             },
             "[], params?: Partial<",
             {
               "pluginId": "@kbn/core-chrome-browser",
-              "scope": "common",
+              "scope": "public",
               "docId": "kibKbnCoreChromeBrowserPluginApi",
-              "section": "def-common.ChromeSetProjectBreadcrumbsParams",
+              "section": "def-public.ChromeSetProjectBreadcrumbsParams",
               "text": "ChromeSetProjectBreadcrumbsParams"
             },
             "> | undefined) => void"
@@ -80,17 +80,17 @@
               "signature": [
                 {
                   "pluginId": "@kbn/core-chrome-browser",
-                  "scope": "common",
+                  "scope": "public",
                   "docId": "kibKbnCoreChromeBrowserPluginApi",
-                  "section": "def-common.ChromeBreadcrumb",
+                  "section": "def-public.ChromeBreadcrumb",
                   "text": "ChromeBreadcrumb"
                 },
                 " | ",
                 {
                   "pluginId": "@kbn/core-chrome-browser",
-                  "scope": "common",
+                  "scope": "public",
                   "docId": "kibKbnCoreChromeBrowserPluginApi",
-                  "section": "def-common.ChromeBreadcrumb",
+                  "section": "def-public.ChromeBreadcrumb",
                   "text": "ChromeBreadcrumb"
                 },
                 "[]"
@@ -111,9 +111,9 @@
                 "Partial<",
                 {
                   "pluginId": "@kbn/core-chrome-browser",
-                  "scope": "common",
+                  "scope": "public",
                   "docId": "kibKbnCoreChromeBrowserPluginApi",
-                  "section": "def-common.ChromeSetProjectBreadcrumbsParams",
+                  "section": "def-public.ChromeSetProjectBreadcrumbsParams",
                   "text": "ChromeSetProjectBreadcrumbsParams"
                 },
                 "> | undefined"
@@ -171,17 +171,17 @@
             "<",
             {
               "pluginId": "@kbn/core-chrome-browser",
-              "scope": "common",
+              "scope": "public",
               "docId": "kibKbnCoreChromeBrowserPluginApi",
-              "section": "def-common.NavigationTreeDefinition",
+              "section": "def-public.NavigationTreeDefinition",
               "text": "NavigationTreeDefinition"
             },
             "<",
             {
               "pluginId": "@kbn/core-chrome-browser",
-              "scope": "common",
+              "scope": "public",
               "docId": "kibKbnCoreChromeBrowserPluginApi",
-              "section": "def-common.AppDeepLinkId",
+              "section": "def-public.AppDeepLinkId",
               "text": "AppDeepLinkId"
             },
             ", string, string>>, config?: { dataTestSubj?: string | undefined; panelContentProvider?: ",
@@ -225,17 +225,17 @@
                 "<",
                 {
                   "pluginId": "@kbn/core-chrome-browser",
-                  "scope": "common",
+                  "scope": "public",
                   "docId": "kibKbnCoreChromeBrowserPluginApi",
-                  "section": "def-common.NavigationTreeDefinition",
+                  "section": "def-public.NavigationTreeDefinition",
                   "text": "NavigationTreeDefinition"
                 },
                 "<",
                 {
                   "pluginId": "@kbn/core-chrome-browser",
-                  "scope": "common",
+                  "scope": "public",
                   "docId": "kibKbnCoreChromeBrowserPluginApi",
-                  "section": "def-common.AppDeepLinkId",
+                  "section": "def-public.AppDeepLinkId",
                   "text": "AppDeepLinkId"
                 },
                 ", string, string>>"
@@ -309,9 +309,9 @@
             "(navigation: ",
             {
               "pluginId": "@kbn/core-chrome-browser",
-              "scope": "common",
+              "scope": "public",
               "docId": "kibKbnCoreChromeBrowserPluginApi",
-              "section": "def-common.SideNavComponent",
+              "section": "def-public.SideNavComponent",
               "text": "SideNavComponent"
             },
             ") => void"
@@ -331,9 +331,9 @@
               "signature": [
                 {
                   "pluginId": "@kbn/core-chrome-browser",
-                  "scope": "common",
+                  "scope": "public",
                   "docId": "kibKbnCoreChromeBrowserPluginApi",
-                  "section": "def-common.SideNavComponent",
+                  "section": "def-public.SideNavComponent",
                   "text": "SideNavComponent"
                 }
               ],

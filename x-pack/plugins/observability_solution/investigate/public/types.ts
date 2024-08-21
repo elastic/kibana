@@ -6,32 +6,19 @@
  */
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
-import type { FromSchema } from 'json-schema-to-ts';
+import type { AuthenticatedUser } from '@kbn/core/public';
 import type { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/public';
-import type { InvestigateWidget, WorkflowBlock } from '../common';
+import type { GetInvestigationResponse } from '@kbn/investigation-shared';
+import type { FromSchema } from 'json-schema-to-ts';
+import type { InvestigateWidget } from '../common';
 import type { GlobalWidgetParameters, InvestigateWidgetCreate } from '../common/types';
-
-export enum ChromeOption {
-  disabled = 'disabled',
-  static = 'static',
-  dynamic = 'dynamic',
-}
+import type { UseInvestigationApi } from './hooks/use_investigation';
 
 export type OnWidgetAdd = (create: InvestigateWidgetCreate) => Promise<void>;
 
-type UnregisterFunction = () => void;
-
-export interface WidgetRenderAPI {
-  onDelete: () => void;
-  onWidgetAdd: OnWidgetAdd;
-  blocks: {
-    publish: (blocks: WorkflowBlock[]) => UnregisterFunction;
-  };
-}
-
-type WidgetRenderOptions<TInvestigateWidget extends InvestigateWidget> = {
+interface WidgetRenderOptions<TInvestigateWidget extends InvestigateWidget> {
   widget: TInvestigateWidget;
-} & WidgetRenderAPI;
+}
 
 export interface WidgetDefinition {
   type: string;
@@ -42,7 +29,6 @@ export interface WidgetDefinition {
     signal: AbortSignal;
   }) => Promise<Record<string, any>>;
   render: (options: WidgetRenderOptions<InvestigateWidget>) => React.ReactNode;
-  chrome?: ChromeOption;
 }
 
 type RegisterWidgetOptions = Omit<WidgetDefinition, 'generate' | 'render'>;
@@ -76,9 +62,13 @@ export interface InvestigateSetupDependencies {}
 export interface InvestigateStartDependencies {}
 
 export interface InvestigatePublicSetup {
-  registerWidget: RegisterWidget;
+  register: (callback: (registerWidget: RegisterWidget) => Promise<void>) => void;
 }
 
 export interface InvestigatePublicStart {
   getWidgetDefinitions: () => WidgetDefinition[];
+  useInvestigation: ({}: {
+    user: AuthenticatedUser;
+    investigationData?: GetInvestigationResponse;
+  }) => UseInvestigationApi;
 }

@@ -55,7 +55,6 @@ describe('service map', () => {
     it.skip('shows nodes in service map', () => {
       cy.visitKibana(serviceMapHref);
       cy.wait('@serviceMap');
-      cy.getByTestSubj('apmServiceGroupsTourDismissButton').click();
 
       prepareCanvasForScreenshot();
 
@@ -90,7 +89,6 @@ describe('service map', () => {
       it('shows empty state', () => {
         cy.visitKibana(serviceMapHref);
         // we need to dismiss the service-group call out first
-        cy.getByTestSubj('apmServiceGroupsTourDismissButton').click();
         cy.getByTestSubj('apmUnifiedSearchBar').type('_id : foo{enter}');
         cy.contains('No services available');
         // search bar is still visible

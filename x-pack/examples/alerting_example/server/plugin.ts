@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 // import directly to support examples functional tests (@kbn-test/src/functional_tests/lib/babel_register_for_test_plugins.js)
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 import { ruleType as alwaysFiringRule } from './rule_types/always_firing';
 import { ruleType as peopleInSpaceRule } from './rule_types/astros';

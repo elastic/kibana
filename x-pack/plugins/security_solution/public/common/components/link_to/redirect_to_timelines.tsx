@@ -6,10 +6,10 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import type { TimelineTypeLiteral } from '../../../../common/api/timeline';
+import type { TimelineType } from '../../../../common/api/timeline';
 import { appendSearch } from './helpers';
 
-export const getTimelineTabsUrl = (tabName: TimelineTypeLiteral | 'notes', search?: string) =>
+export const getTimelineTabsUrl = (tabName: TimelineType | 'notes', search?: string) =>
   `/${tabName}${appendSearch(search)}`;
 
 export const getTimelineUrl = (id: string, graphEventId?: string) =>

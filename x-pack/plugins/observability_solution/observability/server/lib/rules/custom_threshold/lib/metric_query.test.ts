@@ -42,6 +42,11 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       query: '',
     },
   };
+  const esQueryConfig = {
+    allowLeadingWildcards: false,
+    queryStringOptions: {},
+    ignoreFilterIfFieldNotInIndex: false,
+  };
 
   const groupBy = 'host.doggoname';
   const timeFieldName = 'mockedTimeFieldName';
@@ -58,12 +63,13 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       100,
       true,
       searchConfiguration,
+      esQueryConfig,
       void 0,
       groupBy
     );
     test('includes a range filter', () => {
       expect(
-        searchBody.query.bool.filter.find((filter) => filter.hasOwnProperty('range'))
+        searchBody.query.bool.filter.find((filter) => Object.hasOwn(filter, 'range'))
       ).toBeTruthy();
     });
 
@@ -114,12 +120,13 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       100,
       true,
       currentSearchConfiguration,
+      esQueryConfig,
       void 0,
       groupBy
     );
     test('includes a range filter', () => {
       expect(
-        searchBody.query.bool.filter.find((filter) => filter.hasOwnProperty('range'))
+        searchBody.query.bool.filter.find((filter) => Object.hasOwn(filter, 'range'))
       ).toBeTruthy();
     });
 
@@ -225,12 +232,13 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       100,
       true,
       currentSearchConfiguration,
+      esQueryConfig,
       void 0,
       groupBy
     );
     test('includes a range filter', () => {
       expect(
-        searchBody.query.bool.filter.find((filter) => filter.hasOwnProperty('range'))
+        searchBody.query.bool.filter.find((filter) => Object.hasOwn(filter, 'range'))
       ).toBeTruthy();
     });
 

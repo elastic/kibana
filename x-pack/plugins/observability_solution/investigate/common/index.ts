@@ -5,10 +5,10 @@
  * 2.0.
  */
 export type {
-  InvestigateTimeline,
+  Investigation,
   InvestigateWidget,
   InvestigateWidgetCreate,
-  WorkflowBlock,
+  InvestigationNote,
 } from './types';
 
-export { InvestigateWidgetColumnSpan } from './types';
+export { mergePlainObjects } from './utils/merge_plain_objects';

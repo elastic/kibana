@@ -18,7 +18,7 @@ import {
 import type { ESQLRow } from '@kbn/es-types';
 import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
-import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -117,15 +117,13 @@ export function VisualizeESQL({
   ObservabilityAIAssistantMultipaneFlyoutContext,
   errorMessages,
 }: VisualizeESQLProps) {
-  // fetch the pattern from the query
-  const indexPattern = getIndexPatternFromESQLQuery(query);
   const lensHelpersAsync = useAsync(() => {
     return lens.stateHelperApi();
   }, [lens]);
 
   const dataViewAsync = useAsync(() => {
-    return getESQLAdHocDataview(indexPattern, dataViews);
-  }, [indexPattern, dataViews]);
+    return getESQLAdHocDataview(query, dataViews);
+  }, [query, dataViews]);
 
   const chatFlyoutSecondSlotHandler = useContext(ObservabilityAIAssistantMultipaneFlyoutContext);
 
@@ -355,6 +353,7 @@ export function VisualizeESQL({
                   query={{ esql: query }}
                   flyoutType="overlay"
                   isTableView
+                  initialRowHeight={0}
                 />
               ) : (
                 <lens.EmbeddableComponent
@@ -377,6 +376,7 @@ export function VisualizeESQL({
               dataView={dataViewAsync.value}
               query={{ esql: query }}
               flyoutType="overlay"
+              initialRowHeight={0}
             />
           </EuiFlexItem>
         )}

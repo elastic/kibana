@@ -14,7 +14,8 @@
       "discoverShared",
       "usageCollection",
       "observabilityShared",
-      "share"
+      "share",
+      "logsDataAccess"
     ],
     "optionalPlugins": [
       "observabilityAIAssistant",

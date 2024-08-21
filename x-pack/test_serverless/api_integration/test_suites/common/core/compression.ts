@@ -17,35 +17,31 @@ export default function ({ getService }: FtrProviderContext) {
 
   const compressionSuite = (url: string) => {
     it(`uses compression when there isn't a referer`, async () => {
-      await supertestWithoutAuth
+      const response = await supertestWithoutAuth
         .get(url)
         .set('accept-encoding', 'gzip')
         .set(svlCommonApi.getInternalRequestHeader())
-        .set(roleAuthc.apiKeyHeader)
-        .then((response) => {
-          expect(response.header).to.have.property('content-encoding', 'gzip');
-        });
+        .set(roleAuthc.apiKeyHeader);
+      expect(response.header).to.have.property('content-encoding', 'gzip');
     });
 
     it(`uses compression when there is a whitelisted referer`, async () => {
-      await supertestWithoutAuth
+      const response = await supertestWithoutAuth
         .get(url)
         .set('accept-encoding', 'gzip')
         .set(svlCommonApi.getInternalRequestHeader())
         .set('referer', 'https://some-host.com')
-        .set(roleAuthc.apiKeyHeader)
-        .then((response) => {
-          expect(response.header).to.have.property('content-encoding', 'gzip');
-        });
+        .set(roleAuthc.apiKeyHeader);
+      expect(response.header).to.have.property('content-encoding', 'gzip');
     });
   };
 
   describe('compression', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     describe('against an application page', () => {
       compressionSuite('/app/kibana');

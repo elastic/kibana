@@ -289,7 +289,7 @@ export function jobsProvider(
       if (
         auditMessage !== undefined &&
         job.create_time !== undefined &&
-        job.create_time <= auditMessage.msgTime
+        Number(job.create_time) <= auditMessage.msgTime
       ) {
         tempJob.auditMessage = {
           level: auditMessage.highestLevel,
@@ -454,7 +454,7 @@ export function jobsProvider(
 
       // de-duplicate calendars
       for (const cal in calendarsByJobId) {
-        if (calendarsByJobId.hasOwnProperty(cal)) {
+        if (Object.hasOwn(calendarsByJobId, cal)) {
           calendarsByJobId[cal] = uniq(calendarsByJobId[cal]);
         }
       }

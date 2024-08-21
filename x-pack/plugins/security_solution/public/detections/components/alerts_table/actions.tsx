@@ -52,7 +52,7 @@ import {
 } from '../../../../common/detection_engine/utils';
 import type { TimelineResult } from '../../../../common/api/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import type {
   SendAlertToTimelineActionProps,
   ThresholdAggregationData,
@@ -499,6 +499,7 @@ const createThresholdTimeline = async (
       notes: null,
       timeline: {
         ...timelineDefaults,
+        excludedRowRendererIds: [],
         columns: templateValues.columns ?? timelineDefaults.columns,
         description: `_id: ${alertDoc._id}`,
         filters: allFilters,
@@ -655,6 +656,7 @@ const createNewTermsTimeline = async (
       timeline: {
         ...timelineDefaults,
         columns: templateValues.columns ?? timelineDefaults.columns,
+        excludedRowRendererIds: [],
         description: `_id: ${alertDoc._id}`,
         filters: allFilters,
         dataProviders: templateValues.dataProviders ?? dataProviders,
@@ -824,6 +826,7 @@ const createSuppressedTimeline = async (
       notes: null,
       timeline: {
         ...timelineDefaults,
+        excludedRowRendererIds: [],
         columns: templateValues.columns ?? timelineDefaults.columns,
         description: `_id: ${alertDoc._id}`,
         filters: allFilters,
@@ -906,6 +909,7 @@ export const sendBulkEventsToTimelineAction = async (
     notes: null,
     timeline: {
       ...timelineDefaults,
+      excludedRowRendererIds: [],
       dataProviders,
       id: TimelineId.active,
       indexNames: [],
@@ -986,7 +990,7 @@ export const sendAlertToTimelineAction = async ({
         const { timeline, notes } = formatTimelineResultToModel(
           timelineTemplate,
           true,
-          timelineTemplate.timelineType ?? TimelineType.default
+          timelineTemplate.timelineType ?? TimelineTypeEnum.default
         );
         const query = replaceTemplateFieldFromQuery(
           timeline.kqlQuery?.filterQuery?.kuery?.expression ?? '',
@@ -1050,10 +1054,11 @@ export const sendAlertToTimelineAction = async ({
             from,
             timeline: {
               ...timeline,
+              excludedRowRendererIds: [],
               title: '',
-              timelineType: TimelineType.default,
+              timelineType: TimelineTypeEnum.default,
               templateTimelineId: null,
-              status: TimelineStatus.draft,
+              status: TimelineStatusEnum.draft,
               dataProviders,
               eventType: 'all',
               filters,
@@ -1080,7 +1085,9 @@ export const sendAlertToTimelineAction = async ({
           });
         }
       }
-    } catch {
+    } catch (error) {
+      /* eslint-disable-next-line no-console */
+      console.error(error);
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
       return createTimeline({
         from,
@@ -1126,6 +1133,7 @@ export const sendAlertToTimelineAction = async ({
       notes: null,
       timeline: {
         ...timelineDefaults,
+        excludedRowRendererIds: [],
         dataProviders,
         id: TimelineId.active,
         indexNames: [],

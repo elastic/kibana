@@ -8,17 +8,30 @@
 
 import type { ConfigDeprecationProvider } from '@kbn/core/server';
 
+const level = 'warning';
+
 export const configDeprecationProvider: ConfigDeprecationProvider = ({
   renameFromRoot,
   unusedFromRoot,
+  deprecateFromRoot,
 }) => [
   renameFromRoot('xpack.data_enhanced.search.sessions', 'data.search.sessions', {
-    level: 'warning',
+    level,
   }),
-  unusedFromRoot('data.search.sessions.pageSize', { level: 'warning' }),
-  unusedFromRoot('data.search.sessions.trackingInterval', { level: 'warning' }),
-  unusedFromRoot('data.search.sessions.cleanupInterval', { level: 'warning' }),
-  unusedFromRoot('data.search.sessions.expireInterval', { level: 'warning' }),
-  unusedFromRoot('data.search.sessions.monitoringTaskTimeout', { level: 'warning' }),
-  unusedFromRoot('data.search.sessions.notTouchedInProgressTimeout', { level: 'warning' }),
+  unusedFromRoot('data.search.sessions.pageSize', { level }),
+  unusedFromRoot('data.search.sessions.trackingInterval', { level }),
+  unusedFromRoot('data.search.sessions.cleanupInterval', { level }),
+  unusedFromRoot('data.search.sessions.expireInterval', { level }),
+  unusedFromRoot('data.search.sessions.monitoringTaskTimeout', { level }),
+  unusedFromRoot('data.search.sessions.notTouchedInProgressTimeout', { level }),
+
+  // Search sessions config deprecations
+  deprecateFromRoot('data.search.sessions.enabled', '9.0.0', { level }),
+  deprecateFromRoot('data.search.sessions.notTouchedTimeout', '9.0.0', { level }),
+  deprecateFromRoot('data.search.sessions.maxUpdateRetries', '9.0.0', { level }),
+  deprecateFromRoot('data.search.sessions.defaultExpiration', '9.0.0', { level }),
+  deprecateFromRoot('data.search.sessions.management.maxSessions', '9.0.0', { level }),
+  deprecateFromRoot('data.search.sessions.management.refreshInterval', '9.0.0', { level }),
+  deprecateFromRoot('data.search.sessions.management.refreshTimeout', '9.0.0', { level }),
+  deprecateFromRoot('data.search.sessions.management.expiresSoonWarning', '9.0.0', { level }),
 ];

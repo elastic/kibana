@@ -13,4 +13,4 @@ export const maintenanceWindowStatus = {
 } as const;
 
 export type MaintenanceWindowStatus =
-  typeof maintenanceWindowStatus[keyof typeof maintenanceWindowStatus];
+  (typeof maintenanceWindowStatus)[keyof typeof maintenanceWindowStatus];

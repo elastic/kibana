@@ -56,6 +56,14 @@ interface Props {
     | 'rightDown';
 }
 
+type V2MetricType = 'txV2' | 'rxV2' | 'cpuV2';
+
+const V2ToLegacyMapping: Record<V2MetricType, string> = {
+  txV2: 'tx',
+  rxV2: 'rx',
+  cpuV2: 'cpu',
+};
+
 const AGGREGATION_LABELS = {
   ['avg']: i18n.translate('xpack.infra.waffle.customMetrics.aggregationLables.avg', {
     defaultMessage: 'Average',
@@ -164,9 +172,25 @@ export const MetricExpression = ({
     [customMetric, debouncedOnChangeCustom]
   );
 
-  const availablefieldsOptions = metrics.map((m) => {
-    return { label: m.text, value: m.value };
-  }, []);
+  const metricsToRemove: string[] = metrics
+    .map((currentMetric) => {
+      return V2ToLegacyMapping[currentMetric.value as V2MetricType];
+    })
+    .filter((m): m is string => !!m);
+
+  const availableFieldsOptions = useMemo(
+    () =>
+      metrics
+        .filter(
+          (availableMetric) =>
+            metric?.value === availableMetric.value ||
+            !metricsToRemove.includes(availableMetric.value)
+        )
+        .map((m) => {
+          return { label: m.text, value: m.value };
+        }),
+    [metric?.value, metrics, metricsToRemove]
+  );
 
   return (
     <EuiPopover
@@ -180,6 +204,7 @@ export const MetricExpression = ({
             }
           )}
           value={expressionDisplayValue}
+          // @ts-expect-error upgrade typescript v5.1.6
           isActive={Boolean(popoverOpen || (errors.metric && errors.metric.length > 0))}
           onClick={() => {
             setPopoverOpen(true);
@@ -255,6 +280,7 @@ export const MetricExpression = ({
                     options={fieldOptions}
                     onChange={onFieldChange}
                     isClearable={false}
+                    // @ts-expect-error upgrade typescript v5.1.6
                     isInvalid={errors.metric.length > 0}
                   />
                 </EuiFlexItem>
@@ -291,13 +317,14 @@ export const MetricExpression = ({
                 <EuiComboBox
                   fullWidth
                   singleSelection={{ asPlainText: true }}
-                  data-test-subj="availablefieldsOptionsComboBox"
+                  data-test-subj="availableFieldsOptionsComboBox"
+                  // @ts-expect-error upgrade typescript v5.1.6
                   isInvalid={errors.metric.length > 0}
                   placeholder={firstFieldOption.text}
-                  options={availablefieldsOptions}
-                  noSuggestions={!availablefieldsOptions.length}
+                  options={availableFieldsOptions}
+                  noSuggestions={!availableFieldsOptions.length}
                   selectedOptions={
-                    metric ? availablefieldsOptions.filter((a) => a.value === metric.value) : []
+                    metric ? availableFieldsOptions.filter((a) => a.value === metric.value) : []
                   }
                   renderOption={(o: any) => o.label}
                   onChange={(selectedOptions) => {

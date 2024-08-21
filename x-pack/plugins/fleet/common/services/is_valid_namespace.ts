@@ -12,9 +12,43 @@ import { i18n } from '@kbn/i18n';
 // and implements a limit based on https://github.com/elastic/kibana/issues/75846
 export function isValidNamespace(
   namespace: string,
-  allowBlankNamespace?: boolean
+  allowBlankNamespace?: boolean,
+  allowedNamespacePrefixes?: string[]
 ): { valid: boolean; error?: string } {
-  return isValidEntity(namespace, 'Namespace', allowBlankNamespace);
+  if (!namespace.trim() && allowBlankNamespace) {
+    return { valid: true };
+  }
+
+  const { valid, error } = isValidEntity(namespace, 'Namespace', allowBlankNamespace);
+  if (!valid) {
+    return { valid, error };
+  }
+
+  for (const prefix of allowedNamespacePrefixes || []) {
+    if (!namespace.trim().startsWith(prefix)) {
+      return allowedNamespacePrefixes?.length === 1
+        ? {
+            valid: false,
+            error: i18n.translate('xpack.fleet.namespaceValidation.notAllowedPrefixError', {
+              defaultMessage: 'Namespace should start with {allowedNamespacePrefixes}',
+              values: {
+                allowedNamespacePrefixes: allowedNamespacePrefixes?.[0],
+              },
+            }),
+          }
+        : {
+            valid: false,
+            error: i18n.translate('xpack.fleet.namespaceValidation.notAllowedPrefixesError', {
+              defaultMessage:
+                'Namespace should start with one of these prefixes {allowedNamespacePrefixes}',
+              values: {
+                allowedNamespacePrefixes: allowedNamespacePrefixes?.join(', ') ?? '',
+              },
+            }),
+          };
+    }
+  }
+  return { valid: true };
 }
 
 export function isValidDataset(

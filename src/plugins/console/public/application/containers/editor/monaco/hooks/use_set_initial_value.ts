@@ -63,7 +63,7 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
           setValue(`${initialTextValue}\n\n${data}`);
         } else {
           toasts.addWarning(
-            i18n.translate('console.loadFromDataUnrecognizedUrlErrorMessage', {
+            i18n.translate('console.monaco.loadFromDataUnrecognizedUrlErrorMessage', {
               defaultMessage:
                 'Only URLs with the Elastic domain (www.elastic.co) can be loaded in Console.',
             })
@@ -79,7 +79,7 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
         // Show a toast if we have a failure
         if (data === null || data === '') {
           toasts.addWarning(
-            i18n.translate('console.loadFromDataUriErrorMessage', {
+            i18n.translate('console.monaco.loadFromDataUriErrorMessage', {
               defaultMessage: 'Unable to load data from the load_from query parameter in the URL',
             })
           );

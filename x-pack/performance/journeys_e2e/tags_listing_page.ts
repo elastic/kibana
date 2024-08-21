@@ -14,8 +14,6 @@ const TAG_DESCRIPTION = 'test description';
 export const journey = new Journey({
   esArchives: ['x-pack/performance/es_archives/sample_data_flights'],
   kbnArchives: ['x-pack/performance/kbn_archives/many_tags_and_visualizations'],
-  // FLAKY: https://github.com/elastic/kibana/issues/181546
-  skipped: true,
 })
   .step('Go to Tags Page', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get(`/app/management/kibana/tags`));

@@ -57,7 +57,7 @@ export const useDeployIntegration = ({
                 title: integrationSettings.dataStreamTitle ?? '',
                 description: integrationSettings.dataStreamDescription ?? '',
                 name: integrationSettings.dataStreamName ?? '',
-                inputTypes: integrationSettings.inputType ? [integrationSettings.inputType] : [],
+                inputTypes: integrationSettings.inputTypes ?? [],
                 rawSamples: integrationSettings.logsSampleParsed ?? [],
                 docs: result.docs ?? [],
                 pipeline: result.pipeline,

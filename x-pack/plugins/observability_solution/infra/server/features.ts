@@ -33,7 +33,7 @@ const metricRuleTypes = [
 export const METRICS_FEATURE = {
   id: METRICS_FEATURE_ID,
   name: i18n.translate('xpack.infra.featureRegistry.linkInfrastructureTitle', {
-    defaultMessage: 'Metrics',
+    defaultMessage: 'Infrastructure',
   }),
   order: 800,
   category: DEFAULT_APP_CATEGORIES.observability,

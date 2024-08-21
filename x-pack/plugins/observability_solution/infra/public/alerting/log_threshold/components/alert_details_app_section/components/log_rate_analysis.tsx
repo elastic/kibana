@@ -25,6 +25,7 @@ import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { pick, orderBy } from 'lodash';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { Color, colorTransformer } from '../../../../../../common/color_palette';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import {
@@ -33,7 +34,6 @@ import {
   PartialRuleParams,
   ruleParamsRT,
 } from '../../../../../../common/alerting/logs/log_threshold';
-import { decodeOrThrow } from '../../../../../../common/runtime_types';
 import { getESQueryForLogRateAnalysis } from '../log_rate_analysis_query';
 
 export interface AlertDetailsLogRateAnalysisSectionProps {

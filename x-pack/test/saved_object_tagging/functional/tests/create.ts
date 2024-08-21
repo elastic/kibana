@@ -16,7 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const tagManagementPage = PageObjects.tagManagement;
 
   describe('create tag', () => {
-    let tagModal: typeof tagManagementPage['tagModal'];
+    let tagModal: (typeof tagManagementPage)['tagModal'];
 
     before(async () => {
       tagModal = tagManagementPage.tagModal;

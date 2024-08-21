@@ -11,10 +11,10 @@
  *
  * info:
  *   title: Find Conversations API endpoint
- *   version: 1
+ *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { ArrayFromString } from '@kbn/zod-helpers';
 
 import { SortOrder } from '../common_attributes.gen';
@@ -58,45 +58,6 @@ export type FindConversationsRequestQueryInput = z.input<typeof FindConversation
 
 export type FindConversationsResponse = z.infer<typeof FindConversationsResponse>;
 export const FindConversationsResponse = z.object({
-  page: z.number().int(),
-  perPage: z.number().int(),
-  total: z.number().int(),
-  data: z.array(ConversationResponse),
-});
-export type FindCurrentUserConversationsRequestQuery = z.infer<
-  typeof FindCurrentUserConversationsRequestQuery
->;
-export const FindCurrentUserConversationsRequestQuery = z.object({
-  fields: ArrayFromString(z.string()).optional(),
-  /**
-   * Search query
-   */
-  filter: z.string().optional(),
-  /**
-   * Field to sort by
-   */
-  sort_field: FindConversationsSortField.optional(),
-  /**
-   * Sort order
-   */
-  sort_order: SortOrder.optional(),
-  /**
-   * Page number
-   */
-  page: z.coerce.number().int().min(1).optional().default(1),
-  /**
-   * Conversations per page
-   */
-  per_page: z.coerce.number().int().min(0).optional().default(20),
-});
-export type FindCurrentUserConversationsRequestQueryInput = z.input<
-  typeof FindCurrentUserConversationsRequestQuery
->;
-
-export type FindCurrentUserConversationsResponse = z.infer<
-  typeof FindCurrentUserConversationsResponse
->;
-export const FindCurrentUserConversationsResponse = z.object({
   page: z.number().int(),
   perPage: z.number().int(),
   total: z.number().int(),

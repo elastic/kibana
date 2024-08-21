@@ -112,6 +112,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
 
   const normalizedFields = fields.map((f) => ({
     normalizedType: f.type,
+    esTypes: f.esTypes,
     name: f.name,
   }));
 
@@ -311,6 +312,15 @@ export const aggregationType: { [key: string]: AggregationType } = {
     ),
     fieldRequired: false,
     value: Aggregators.RATE,
+    validNormalizedTypes: ['number'],
+  },
+  last_value: {
+    text: i18n.translate(
+      'xpack.observability..customThreshold.rule.alertFlyout.aggregationText.last_value',
+      { defaultMessage: 'Last value' }
+    ),
+    fieldRequired: false,
+    value: Aggregators.LAST_VALUE,
     validNormalizedTypes: ['number'],
   },
 };

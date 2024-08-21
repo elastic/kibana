@@ -76,6 +76,9 @@ const reported = {
       from: 'now-6m',
       id: 'rule-id',
       immutable: false,
+      rule_source: {
+        type: 'internal',
+      },
       index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
       investigation_fields: undefined,
       language: 'kuery',

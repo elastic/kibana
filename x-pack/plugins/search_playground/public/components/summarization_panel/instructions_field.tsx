@@ -56,6 +56,7 @@ export const InstructionsField: React.FC<InstructionsFieldProps> = ({ value, onC
       fullWidth
     >
       <EuiTextArea
+        data-test-subj="instructionsPrompt"
         placeholder={i18n.translate(
           'xpack.searchPlayground.sidebar.instructionsField.placeholder',
           {

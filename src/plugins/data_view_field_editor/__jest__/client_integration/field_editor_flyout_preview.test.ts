@@ -21,6 +21,7 @@ import {
   setSearchResponse,
   FieldEditorFlyoutContentTestBed,
 } from './field_editor_flyout_preview.helpers';
+import { spyGetFieldsForWildcard } from './helpers/setup_environment';
 import { mockDocuments, createPreviewError } from './helpers/mocks';
 
 describe('Field editor Preview panel', () => {
@@ -40,22 +41,23 @@ describe('Field editor Preview panel', () => {
 
   const indexPatternFields: Array<{ name: string; displayName: string }> = [
     {
-      name: 'title',
-      displayName: 'title',
+      name: 'description',
+      displayName: 'description',
     },
     {
       name: 'subTitle',
       displayName: 'subTitle',
     },
     {
-      name: 'description',
-      displayName: 'description',
+      name: 'title',
+      displayName: 'title',
     },
   ];
 
   beforeEach(async () => {
     httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['mockedScriptValue'] });
     setIndexPatternFields(indexPatternFields);
+    spyGetFieldsForWildcard.mockResolvedValue({ fields: indexPatternFields });
     setSearchResponse(mockDocuments);
     setSearchResponseLatency(0);
 
@@ -91,16 +93,16 @@ describe('Field editor Preview panel', () => {
 
     expect(getRenderedIndexPatternFields()).toEqual([
       {
-        key: 'title',
-        value: mockDocuments[0].fields.title,
+        key: 'description',
+        value: mockDocuments[0].fields.description,
       },
       {
         key: 'subTitle',
         value: mockDocuments[0].fields.subTitle,
       },
       {
-        key: 'description',
-        value: mockDocuments[0].fields.description,
+        key: 'title',
+        value: mockDocuments[0].fields.title,
       },
     ]);
   });
@@ -126,8 +128,8 @@ describe('Field editor Preview panel', () => {
     await setFilterFieldsValue('title');
     expect(exists('emptySearchResult')).toBe(false);
     expect(getRenderedIndexPatternFields()).toEqual([
-      { key: 'title', value: 'First doc - title' },
       { key: 'subTitle', value: 'First doc - subTitle' },
+      { key: 'title', value: 'First doc - title' },
     ]);
 
     // Should display an empty search result with a button to clear
@@ -140,16 +142,16 @@ describe('Field editor Preview panel', () => {
     component.update();
     expect(getRenderedIndexPatternFields()).toEqual([
       {
-        key: 'title',
-        value: mockDocuments[0].fields.title,
+        key: 'description',
+        value: mockDocuments[0].fields.description,
       },
       {
         key: 'subTitle',
         value: mockDocuments[0].fields.subTitle,
       },
       {
-        key: 'description',
-        value: mockDocuments[0].fields.description,
+        key: 'title',
+        value: mockDocuments[0].fields.title,
       },
     ]);
   });
@@ -174,7 +176,7 @@ describe('Field editor Preview panel', () => {
     expect(fieldsRendered).not.toBe(null);
     expect(fieldsRendered!.length).toBe(Object.keys(doc1.fields).length);
     // make sure that the last one if the "description" field
-    expect(fieldsRendered!.at(2).text()).toBe('descriptionFirst doc - description');
+    expect(fieldsRendered!.at(0).text()).toBe('descriptionFirst doc - description');
 
     // Click the third field in the list ("description")
     const descriptionField = fieldsRendered!.at(2);
@@ -182,8 +184,8 @@ describe('Field editor Preview panel', () => {
     component.update();
 
     expect(getRenderedIndexPatternFields()).toEqual([
-      { key: 'description', value: 'First doc - description' }, // Pinned!
       { key: 'title', value: 'First doc - title' },
+      { key: 'description', value: 'First doc - description' }, // Pinned!
       { key: 'subTitle', value: 'First doc - subTitle' },
     ]);
   });
@@ -548,39 +550,39 @@ describe('Field editor Preview panel', () => {
 
       await fields.updateName('myRuntimeField'); // Give a name to remove empty prompt
 
-      expect(getRenderedIndexPatternFields()[0]).toEqual({
+      expect(getRenderedIndexPatternFields()[2]).toEqual({
         key: 'title',
         value: doc1.fields.title,
       });
 
       await goToNextDocument();
-      expect(getRenderedIndexPatternFields()[0]).toEqual({
+      expect(getRenderedIndexPatternFields()[2]).toEqual({
         key: 'title',
         value: doc2.fields.title,
       });
 
       await goToNextDocument();
-      expect(getRenderedIndexPatternFields()[0]).toEqual({
+      expect(getRenderedIndexPatternFields()[2]).toEqual({
         key: 'title',
         value: doc3.fields.title,
       });
 
       // Going next we circle back to the first document of the list
       await goToNextDocument();
-      expect(getRenderedIndexPatternFields()[0]).toEqual({
+      expect(getRenderedIndexPatternFields()[2]).toEqual({
         key: 'title',
         value: doc1.fields.title,
       });
 
       // Let's go backward
       await goToPreviousDocument();
-      expect(getRenderedIndexPatternFields()[0]).toEqual({
+      expect(getRenderedIndexPatternFields()[2]).toEqual({
         key: 'title',
         value: doc3.fields.title,
       });
 
       await goToPreviousDocument();
-      expect(getRenderedIndexPatternFields()[0]).toEqual({
+      expect(getRenderedIndexPatternFields()[2]).toEqual({
         key: 'title',
         value: doc2.fields.title,
       });
@@ -618,7 +620,7 @@ describe('Field editor Preview panel', () => {
 
       // First make sure that we have the original cluster data is loaded
       // and the preview value rendered.
-      expect(getRenderedIndexPatternFields()[0]).toEqual({
+      expect(getRenderedIndexPatternFields()[2]).toEqual({
         key: 'title',
         value: doc1.fields.title,
       });
@@ -636,16 +638,16 @@ describe('Field editor Preview panel', () => {
 
       expect(getRenderedIndexPatternFields()).toEqual([
         {
-          key: 'title',
-          value: 'loaded doc - title',
+          key: 'description',
+          value: 'loaded doc - description',
         },
         {
           key: 'subTitle',
           value: 'loaded doc - subTitle',
         },
         {
-          key: 'description',
-          value: 'loaded doc - description',
+          key: 'title',
+          value: 'loaded doc - title',
         },
       ]);
 
@@ -734,8 +736,8 @@ describe('Field editor Preview panel', () => {
       expect(exists('documentsNav')).toBe(false);
       expect(exists('loadDocsFromClusterButton')).toBe(true);
       expect(getRenderedIndexPatternFields()[0]).toEqual({
-        key: 'title',
-        value: 'loaded doc - title',
+        key: 'description',
+        value: 'loaded doc - description',
       });
     });
 

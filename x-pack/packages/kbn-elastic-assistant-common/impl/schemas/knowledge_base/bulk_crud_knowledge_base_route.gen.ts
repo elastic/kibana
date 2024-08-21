@@ -11,10 +11,10 @@
  *
  * info:
  *   title: Bulk Knowledge Base Actions API endpoint
- *   version: 2023-10-31
+ *   version: 1
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import {
   KnowledgeBaseEntryCreateProps,

@@ -7,7 +7,7 @@
 
 import { last } from 'lodash';
 import { MetricsExplorerMetric } from '../../../../../../common/http_api/metrics_explorer';
-import { InfraFormatterType } from '../../../../../lib/lib';
+import { InfraFormatterType } from '../../../../../common/inventory/types';
 export const metricToFormat = (metric?: MetricsExplorerMetric) => {
   if (metric && metric.field) {
     const suffix = last(metric.field.split(/\./));

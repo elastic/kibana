@@ -143,16 +143,16 @@ export const OfExpression = ({
             <EuiFormRow
               id="ofField"
               fullWidth
-              isInvalid={errors.aggField.length > 0 && aggField !== undefined}
+              isInvalid={Number(errors.aggField.length) > 0 && aggField !== undefined}
               error={errors.aggField}
-              data-test-subj="availablefieldsOptionsFormRow"
+              data-test-subj="availableFieldsOptionsFormRow"
               helpText={helpText}
             >
               <EuiComboBox
                 fullWidth
                 singleSelection={{ asPlainText: true }}
-                data-test-subj="availablefieldsOptionsComboBox"
-                isInvalid={errors.aggField.length > 0 && aggField !== undefined}
+                data-test-subj="availableFieldsOptionsComboBox"
+                isInvalid={Number(errors.aggField.length) > 0 && aggField !== undefined}
                 placeholder={firstFieldOption.text}
                 options={availableFieldOptions}
                 noSuggestions={!availableFieldOptions.length}

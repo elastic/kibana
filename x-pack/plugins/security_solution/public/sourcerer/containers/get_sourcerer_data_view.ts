@@ -7,7 +7,7 @@
 
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { ensurePatternFormat } from '../../../common/utils/sourcerer';
-import type { SourcererDataView, RunTimeMappings } from '../store/model';
+import type { SourcererDataView } from '../store/model';
 import { getDataViewStateFromIndexFields } from '../../common/containers/source/use_data_view';
 
 export const getSourcererDataView = async (
@@ -24,12 +24,10 @@ export const getSourcererDataView = async (
     loading: false,
     id: dataViewData.id ?? '',
     title: dataView.getIndexPattern(),
-    indexFields: dataView.fields,
     fields: dataViewData.fields,
     patternList,
     dataView: dataViewData,
     browserFields: getDataViewStateFromIndexFields(dataViewData.id ?? '', dataViewData.fields)
       .browserFields,
-    runtimeMappings: dataViewData.runtimeFieldMap as RunTimeMappings,
   };
 };

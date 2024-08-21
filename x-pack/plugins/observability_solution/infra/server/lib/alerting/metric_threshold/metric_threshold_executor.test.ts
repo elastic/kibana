@@ -30,7 +30,8 @@ import {
   ALERT_REASON,
   ALERT_GROUP,
 } from '@kbn/rule-data-utils';
-import { Group } from '../../../../common/alerting/types';
+import { type Group } from '@kbn/observability-alerting-rule-utils';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
 
@@ -959,6 +960,7 @@ describe('The metric threshold rule type', () => {
         tags: ['host-01_tag1', 'host-01_tag2', 'ruleTag1', 'ruleTag2'],
         groupByKeys: { host: { name: alertIdA } },
         group: [{ field: 'host.name', value: alertIdA }],
+        ecsGroups: { 'host.name': alertIdA },
       });
       testAlertReported(2, {
         id: alertIdB,
@@ -971,6 +973,7 @@ describe('The metric threshold rule type', () => {
         tags: ['host-02_tag1', 'host-02_tag2', 'ruleTag1', 'ruleTag2'],
         groupByKeys: { host: { name: alertIdB } },
         group: [{ field: 'host.name', value: alertIdB }],
+        ecsGroups: { 'host.name': alertIdB },
       });
     });
   });
@@ -2333,6 +2336,7 @@ describe('The metric threshold rule type', () => {
       conditions,
       reason,
       tags,
+      ecsGroups,
     }: {
       id: string;
       actionGroup: string;
@@ -2348,6 +2352,7 @@ describe('The metric threshold rule type', () => {
       reason: string;
       tags?: string[];
       group?: Group[];
+      ecsGroups?: Record<string, string>;
     }
   ) {
     expect(services.alertsClient.report).toHaveBeenNthCalledWith(index, {
@@ -2416,6 +2421,7 @@ describe('The metric threshold rule type', () => {
           : {}),
         [ALERT_REASON]: reason,
         ...(tags ? { tags } : {}),
+        ...(ecsGroups ? ecsGroups : {}),
       },
     });
   }
@@ -2467,6 +2473,11 @@ const mockLibs: any = {
   basePath: {
     publicBaseUrl: 'http://localhost:5601',
     prepend: (path: string) => path,
+  },
+  plugins: {
+    share: {
+      setup: sharePluginMock.createSetupContract(),
+    },
   },
   logger,
 };

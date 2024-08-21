@@ -28,6 +28,7 @@ import {
   KibanaVersionContext,
   useFleetStatus,
 } from '../../hooks';
+import { SpaceSettingsContextProvider } from '../../hooks/use_space_settings_context';
 
 import { FleetServerFlyout } from '../fleet/components';
 
@@ -104,24 +105,26 @@ export const IntegrationsAppContext: React.FC<{
                     <ReactQueryDevtools initialIsOpen={false} />
                     <UIExtensionsContext.Provider value={extensions}>
                       <FleetStatusProvider defaultFleetStatus={fleetStatus}>
-                        <startServices.customIntegrations.ContextProvider>
-                          <CloudContext>
-                            <Router history={history}>
-                              <ReadOnlyContextProvider>
-                                <AgentPolicyContextProvider>
-                                  <PackageInstallProvider startServices={startServices}>
-                                    <FlyoutContextProvider>
-                                      <IntegrationsHeader
-                                        {...{ setHeaderActionMenu, startServices }}
-                                      />
-                                      {children}
-                                    </FlyoutContextProvider>
-                                  </PackageInstallProvider>
-                                </AgentPolicyContextProvider>
-                              </ReadOnlyContextProvider>
-                            </Router>
-                          </CloudContext>
-                        </startServices.customIntegrations.ContextProvider>
+                        <SpaceSettingsContextProvider>
+                          <startServices.customIntegrations.ContextProvider>
+                            <CloudContext>
+                              <Router history={history}>
+                                <ReadOnlyContextProvider>
+                                  <AgentPolicyContextProvider>
+                                    <PackageInstallProvider startServices={startServices}>
+                                      <FlyoutContextProvider>
+                                        <IntegrationsHeader
+                                          {...{ setHeaderActionMenu, startServices }}
+                                        />
+                                        {children}
+                                      </FlyoutContextProvider>
+                                    </PackageInstallProvider>
+                                  </AgentPolicyContextProvider>
+                                </ReadOnlyContextProvider>
+                              </Router>
+                            </CloudContext>
+                          </startServices.customIntegrations.ContextProvider>
+                        </SpaceSettingsContextProvider>
                       </FleetStatusProvider>
                     </UIExtensionsContext.Provider>
                   </QueryClientProvider>
@@ -166,7 +169,6 @@ export const AppRoutes = memo(() => {
           }}
         />
       </Routes>
-
       {flyoutContext.isEnrollmentFlyoutOpen && (
         <EuiPortal>
           <AgentEnrollmentFlyout
@@ -180,7 +182,6 @@ export const AppRoutes = memo(() => {
           />
         </EuiPortal>
       )}
-
       {flyoutContext.isFleetServerFlyoutOpen && (
         <EuiPortal>
           <FleetServerFlyout onClose={() => flyoutContext.closeFleetServerFlyout()} />

@@ -27,6 +27,7 @@ import {
   ClaimOwnershipResult,
   getTaskClaimer,
 } from '../task_claimers';
+import { TaskPartitioner } from '../lib/task_partitioner';
 
 export type { ClaimOwnershipResult } from '../task_claimers';
 export interface TaskClaimingOpts {
@@ -37,7 +38,8 @@ export interface TaskClaimingOpts {
   taskStore: TaskStore;
   maxAttempts: number;
   excludedTaskTypes: string[];
-  getCapacity: (taskType?: string) => number;
+  getAvailableCapacity: (taskType?: string) => number;
+  taskPartitioner: TaskPartitioner;
 }
 
 export interface OwnershipClaimingOpts {
@@ -85,13 +87,14 @@ export class TaskClaiming {
   private definitions: TaskTypeDictionary;
   private events$: Subject<TaskClaim>;
   private taskStore: TaskStore;
-  private getCapacity: (taskType?: string) => number;
+  private getAvailableCapacity: (taskType?: string) => number;
   private logger: Logger;
   private readonly taskClaimingBatchesByType: TaskClaimingBatches;
   private readonly taskMaxAttempts: Record<string, number>;
   private readonly excludedTaskTypes: string[];
   private readonly unusedTypes: string[];
   private readonly taskClaimer: TaskClaimerFn;
+  private readonly taskPartitioner: TaskPartitioner;
 
   /**
    * Constructs a new TaskStore.
@@ -103,7 +106,7 @@ export class TaskClaiming {
     this.definitions = opts.definitions;
     this.maxAttempts = opts.maxAttempts;
     this.taskStore = opts.taskStore;
-    this.getCapacity = opts.getCapacity;
+    this.getAvailableCapacity = opts.getAvailableCapacity;
     this.logger = opts.logger.get('taskClaiming');
     this.taskClaimingBatchesByType = this.partitionIntoClaimingBatches(this.definitions);
     this.taskMaxAttempts = Object.fromEntries(this.normalizeMaxAttempts(this.definitions));
@@ -111,6 +114,7 @@ export class TaskClaiming {
     this.unusedTypes = opts.unusedTypes;
     this.taskClaimer = getTaskClaimer(this.logger, opts.strategy);
     this.events$ = new Subject<TaskClaim>();
+    this.taskPartitioner = opts.taskPartitioner;
 
     this.logger.info(`using task claiming strategy: ${opts.strategy}`);
   }
@@ -166,18 +170,19 @@ export class TaskClaiming {
   public claimAvailableTasksIfCapacityIsAvailable(
     claimingOptions: Omit<OwnershipClaimingOpts, 'size' | 'taskTypes'>
   ): Observable<Result<ClaimOwnershipResult, FillPoolResult>> {
-    if (this.getCapacity()) {
+    if (this.getAvailableCapacity()) {
       const opts: TaskClaimerOpts = {
         batches: this.getClaimingBatches(),
         claimOwnershipUntil: claimingOptions.claimOwnershipUntil,
         taskStore: this.taskStore,
         events$: this.events$,
-        getCapacity: this.getCapacity,
+        getCapacity: this.getAvailableCapacity,
         unusedTypes: this.unusedTypes,
         definitions: this.definitions,
         taskMaxAttempts: this.taskMaxAttempts,
         excludedTaskTypes: this.excludedTaskTypes,
         logger: this.logger,
+        taskPartitioner: this.taskPartitioner,
       };
       return this.taskClaimer(opts).pipe(map((claimResult) => asOk(claimResult)));
     }
