@@ -48,7 +48,7 @@ export function getSelectorsAndResponsesFromYaml(configuration: string): {
   let responses: Response[] = [];
 
   try {
-    const result = yaml.safeLoad(configuration);
+    const result = yaml.load(configuration);
 
     if (result) {
       // iterate selector/response types
