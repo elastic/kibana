@@ -95,6 +95,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   const {
     services: {
       context: { isServerless },
+      config: { firehoseQuickStartCardVisible },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
   const customMargin = useCustomMargin();
@@ -144,7 +145,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
    * Serverless and it should replace the current Firehose
    * onboarding card in the search result.
    */
-  const searchExcludePackageIdList = isServerless ? ['epr:awsfirehose'] : [];
+  const searchExcludePackageIdList =
+    isServerless && firehoseQuickStartCardVisible ? ['epr:awsfirehose'] : [];
 
   let isSelectingCategoryWithKeyboard: boolean = false;
 

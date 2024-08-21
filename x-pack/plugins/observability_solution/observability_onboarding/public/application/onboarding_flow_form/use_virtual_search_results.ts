@@ -16,8 +16,10 @@ export function useVirtualSearchResults(): CustomCard[] {
     services: {
       application,
       context: { isServerless },
+      config: { firehoseQuickStartCardVisible },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
+
   const history = useHistory();
   const { href: firehoseUrl } = reactRouterNavigate(history, `/firehose/${location.search}`);
   const getUrlForApp = application?.getUrlForApp;
@@ -75,6 +77,6 @@ export function useVirtualSearchResults(): CustomCard[] {
       integration: '',
       isCollectionCard: false,
     },
-    ...(isServerless ? [firehoseQuickstartCard] : []),
+    ...(isServerless && firehoseQuickStartCardVisible ? [firehoseQuickstartCard] : []),
   ];
 }

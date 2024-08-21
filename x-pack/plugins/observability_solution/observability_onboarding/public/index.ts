@@ -27,6 +27,7 @@ export interface ConfigSchema {
   serverless: {
     enabled: boolean;
   };
+  firehoseQuickStartCardVisible: boolean;
 }
 
 export interface AppContext {
