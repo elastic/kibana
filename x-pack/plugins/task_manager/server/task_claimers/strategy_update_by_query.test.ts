@@ -1248,7 +1248,7 @@ if (doc['task.runAt'].size()!=0) {
 
       const taskClaiming = new TaskClaiming({
         logger: taskManagerLogger,
-        strategy: 'default',
+        strategy: 'update_by_query',
         definitions,
         excludedTaskTypes: [],
         unusedTypes: [],
