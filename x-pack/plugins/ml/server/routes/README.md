@@ -6,12 +6,12 @@ Each route handler requires `summary` and `description` properties for API docum
 
 To generate an OpenAPI spec file, make sure the OAS Kibana endpoint is enabled in `kibana.dev.yml`
 
-```
+```yaml
 server.oas.enabled: true
 ```
 
-And after starting Kibana, call the `oas` endpoint and output to a file, e.g. 
+And after starting Kibana `yarn start --no-base-path`, call the `oas` endpoint and output to a file, e.g. 
 
-```
-curl -s -uelastic:qaf_admin http://localhost:5601/api/oas\?pathStartsWith\=/internal/ml\&access\=internal -o ml_kibana_openapi.json
+```bash
+curl -s -u <USERNAME>:<PASSWORD> http://localhost:5601/api/oas\?pathStartsWith\=/internal/ml\&access\=internal -o ml_kibana_openapi.json
 ```
