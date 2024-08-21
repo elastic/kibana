@@ -33,6 +33,7 @@ import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE } from '../../../constants';
 import { createAppContextStartContractMock, type MockedFleetAppContext } from '../../../mocks';
 import { appContextService } from '../../app_context';
 import { agentPolicyService } from '../../agent_policy';
+import { isSpaceAwarenessEnabled } from '../../spaces/helpers';
 
 import { UninstallTokenService, type UninstallTokenServiceInterface } from '.';
 
@@ -200,7 +201,7 @@ describe('UninstallTokenService', () => {
     );
   }
 
-  function setupMocks(canEncrypt: boolean = true) {
+  function setupMocks(canEncrypt: boolean = true, scoppedInSpace?: string) {
     mockContext = createAppContextStartContractMock();
     mockContext.encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup({
       canEncrypt,
@@ -218,7 +219,14 @@ describe('UninstallTokenService', () => {
     getAgentPoliciesByIDsMock = jest.fn().mockResolvedValue([]);
     agentPolicyService.getByIDs = getAgentPoliciesByIDsMock;
 
-    uninstallTokenService = new UninstallTokenService(esoClientMock);
+    if (scoppedInSpace) {
+      soClientMock.getCurrentNamespace.mockReturnValue(scoppedInSpace);
+    }
+
+    uninstallTokenService = new UninstallTokenService(
+      esoClientMock,
+      scoppedInSpace ? soClientMock : undefined
+    );
     mockFind(canEncrypt);
     mockCreatePointInTimeFinder(canEncrypt);
     mockCreatePointInTimeFinderAsInternalUser();
@@ -248,11 +256,84 @@ describe('UninstallTokenService', () => {
 
     beforeEach(() => {
       setupMocks(canEncrypt);
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
     });
 
     describe('get uninstall tokens', () => {
       describe('getToken', () => {
         it('can correctly get one token', async () => {
+          const so = getDefaultSO(canEncrypt);
+          mockCreatePointInTimeFinderAsInternalUser([so]);
+          getAgentPoliciesByIDsMock.mockResolvedValue([
+            { id: so.attributes.policy_id, name: 'cheese' },
+          ] as Array<Partial<AgentPolicy>>);
+
+          const token = await uninstallTokenService.getToken(so.id);
+
+          const expectedItem: UninstallToken = {
+            id: so.id,
+            policy_id: so.attributes.policy_id,
+            policy_name: 'cheese',
+            token: getToken(so, canEncrypt),
+            created_at: so.created_at,
+          };
+
+          expect(token).toEqual(expectedItem);
+
+          expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledWith(
+            {
+              type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+              filter: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:${so.id}"`,
+              perPage: SO_SEARCH_LIMIT,
+            }
+          );
+          expect(getAgentPoliciesByIDsMock).toHaveBeenCalledWith(
+            soClientMock,
+            [so.attributes.policy_id],
+            { ignoreMissing: true }
+          );
+        });
+
+        it('filter namespace with scopped service and space awareneness enabled', async () => {
+          jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
+          setupMocks(canEncrypt, 'test');
+
+          const so = getDefaultSO(canEncrypt);
+          mockCreatePointInTimeFinderAsInternalUser([so]);
+          getAgentPoliciesByIDsMock.mockResolvedValue([
+            { id: so.attributes.policy_id, name: 'cheese' },
+          ] as Array<Partial<AgentPolicy>>);
+
+          const token = await uninstallTokenService.getToken(so.id);
+
+          const expectedItem: UninstallToken = {
+            id: so.id,
+            policy_id: so.attributes.policy_id,
+            policy_name: 'cheese',
+            token: getToken(so, canEncrypt),
+            created_at: so.created_at,
+          };
+
+          expect(token).toEqual(expectedItem);
+
+          expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledWith(
+            {
+              type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+              filter: `(${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:test) and (${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:${so.id}")`,
+              perPage: SO_SEARCH_LIMIT,
+            }
+          );
+          expect(getAgentPoliciesByIDsMock).toHaveBeenCalledWith(
+            soClientMock,
+            [so.attributes.policy_id],
+            { ignoreMissing: true }
+          );
+        });
+
+        it('do not filter namespace with scopped service and space awareneness disabled', async () => {
+          jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+          setupMocks(canEncrypt, 'test');
+
           const so = getDefaultSO(canEncrypt);
           mockCreatePointInTimeFinderAsInternalUser([so]);
           getAgentPoliciesByIDsMock.mockResolvedValue([
@@ -347,6 +428,72 @@ describe('UninstallTokenService', () => {
             },
           ];
           expect(actualItems).toEqual(expectedItems);
+        });
+
+        it('filter by namespace if service is scopped and space awareness is enabled', async () => {
+          setupMocks(canEncrypt, 'test');
+          jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
+          const so = getDefaultSO(canEncrypt);
+          const so2 = getDefaultSO2(canEncrypt);
+          getAgentPoliciesByIDsMock.mockResolvedValue([
+            { id: so2.attributes.policy_id, name: 'only I have a name' },
+          ] as Array<Partial<AgentPolicy>>);
+
+          const actualItems = (await uninstallTokenService.getTokenMetadata()).items;
+          const expectedItems: UninstallTokenMetadata[] = [
+            {
+              id: so.id,
+              policy_id: so.attributes.policy_id,
+              policy_name: null,
+              created_at: so.created_at,
+            },
+            {
+              id: so2.id,
+              policy_id: so2.attributes.policy_id,
+              policy_name: 'only I have a name',
+              created_at: so2.created_at,
+            },
+          ];
+          expect(actualItems).toEqual(expectedItems);
+
+          expect(soClientMock.createPointInTimeFinder).toHaveBeenCalledWith(
+            expect.objectContaining({
+              filter: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:test`,
+            })
+          );
+        });
+
+        it('do not filter by namespace if service is scopped and space awareness is disabled', async () => {
+          setupMocks(canEncrypt, 'test');
+          jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+          const so = getDefaultSO(canEncrypt);
+          const so2 = getDefaultSO2(canEncrypt);
+          getAgentPoliciesByIDsMock.mockResolvedValue([
+            { id: so2.attributes.policy_id, name: 'only I have a name' },
+          ] as Array<Partial<AgentPolicy>>);
+
+          const actualItems = (await uninstallTokenService.getTokenMetadata()).items;
+          const expectedItems: UninstallTokenMetadata[] = [
+            {
+              id: so.id,
+              policy_id: so.attributes.policy_id,
+              policy_name: null,
+              created_at: so.created_at,
+            },
+            {
+              id: so2.id,
+              policy_id: so2.attributes.policy_id,
+              policy_name: 'only I have a name',
+              created_at: so2.created_at,
+            },
+          ];
+          expect(actualItems).toEqual(expectedItems);
+
+          expect(soClientMock.createPointInTimeFinder).toHaveBeenCalledWith(
+            expect.objectContaining({
+              filter: undefined,
+            })
+          );
         });
 
         it('should throw error if created_at is missing', async () => {

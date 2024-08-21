@@ -386,9 +386,6 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
         {
           type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
           perPage: SO_SEARCH_LIMIT,
-          ...(this.isScoped
-            ? { namespaces: [this.soClient.getCurrentNamespace() || DEFAULT_SPACE_ID] }
-            : {}),
           ...options,
         }
       );
