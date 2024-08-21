@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import type { z } from 'zod';
+import type { z } from '@kbn/zod';
 
 import { KillOrSuspendActionSchema, SuccessResponse } from '../../../model/schema/common.gen';
 

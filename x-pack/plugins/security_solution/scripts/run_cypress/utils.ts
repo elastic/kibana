@@ -11,6 +11,7 @@ import * as parser from '@babel/parser';
 import generate from '@babel/generator';
 import type { ExpressionStatement, ObjectExpression, ObjectProperty } from '@babel/types';
 import { schema, type TypeOf } from '@kbn/config-schema';
+import chalk from 'chalk';
 
 /**
  * Retrieve test files using a glob pattern.
@@ -135,3 +136,23 @@ const TestFileFtrConfigSchema = schema.object(
 );
 
 export type SecuritySolutionDescribeBlockFtrConfig = TypeOf<typeof TestFileFtrConfigSchema>;
+
+export const getOnBeforeHook = (module: unknown, beforeSpecFilePath: string): Function => {
+  if (typeof module !== 'object' || module === null) {
+    throw new Error(
+      `${chalk.bold(
+        beforeSpecFilePath
+      )} expected to explicitly export function member named "onBeforeHook"`
+    );
+  }
+
+  if (!('onBeforeHook' in module) || typeof module.onBeforeHook !== 'function') {
+    throw new Error(
+      `${chalk.bold('onBeforeHook')} exported from ${chalk.bold(
+        beforeSpecFilePath
+      )} is not a function`
+    );
+  }
+
+  return module.onBeforeHook;
+};
