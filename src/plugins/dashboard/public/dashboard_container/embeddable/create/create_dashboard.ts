@@ -178,6 +178,7 @@ export const initializeDashboard = async ({
       query: queryService,
       search: { session },
     },
+    dashboardContentInsights,
   } = pluginServices.getServices();
   const {
     queryString,
@@ -633,6 +634,14 @@ export const initializeDashboard = async ({
         creationOptions?.searchSessionSettings
       );
     });
+  }
+
+  if (loadDashboardReturn.dashboardId && !incomingEmbeddable) {
+    // We count a new view every time a user opens a dashboard, both in view or edit mode
+    // We don't count views when a user is editing a dashboard and is returning from an editor after saving
+    // however, there is an edge case that we now count a new view when a user is editing a dashboard and is returning from an editor by canceling
+    // TODO: this should be revisited by making embeddable transfer support canceling logic https://github.com/elastic/kibana/issues/190485
+    dashboardContentInsights.trackDashboardView(loadDashboardReturn.dashboardId);
   }
 
   return { input: initialDashboardInput, searchSessionId: initialSearchSessionId };
