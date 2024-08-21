@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { test } from '@kbn/cloud-security-posture-common/constants';
+
 import {
   AwsCredentialsTypeFieldMap,
   GcpCredentialsTypeFieldMap,
   PostureTypes,
   VulnSeverity,
 } from './types_old';
+
+const a = test;
 
 export const CLOUD_SECURITY_INTERTAL_PREFIX_ROUTE_PATH = '/internal/cloud_security_posture/';
 export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
