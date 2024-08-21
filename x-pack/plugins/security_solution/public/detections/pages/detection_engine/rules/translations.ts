@@ -1379,6 +1379,13 @@ export const DETECTION_RULES_CONVERSATION_ID = i18n.translate(
   }
 );
 
+export const DETECTION_RULES_CREATE_FORM_CONVERSATION_ID = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagement.detectionRulesCreatEditFormConversationId',
+  {
+    defaultMessage: 'Detection Rules Create form',
+  }
+);
+
 export const RULE_MANAGEMENT_CONTEXT_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleManagement.ruleManagementContextTooltip',
   {

@@ -936,7 +936,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </RuleTypeEuiFormRow>
 
           {!isMlRule(ruleType) && !isQueryBarValid && (
-            <AiAssistant getFields={form.getFields} language={queryBar?.query?.language} />
+            <AiAssistant
+              getFields={form.getFields}
+              setFieldValue={form.setFieldValue}
+              language={queryBar?.query?.language}
+            />
           )}
 
           {isQueryRule(ruleType) && (

@@ -38,10 +38,15 @@ const retrieveErrorMessages = (errors: ValidationError[]): string =>
 
 interface AiAssistantProps {
   getFields: FormHook<DefineStepRule>['getFields'];
+  setFieldValue: FormHook<DefineStepRule>['setFieldValue'];
   language?: string | undefined;
 }
 
-const AiAssistantComponent: React.FC<AiAssistantProps> = ({ getFields, language }) => {
+const AiAssistantComponent: React.FC<AiAssistantProps> = ({
+  getFields,
+  setFieldValue,
+  language,
+}) => {
   const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
 
   const languageName = getLanguageName(language);
@@ -68,6 +73,21 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
     track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.OPEN_ASSISTANT_ON_RULE_QUERY_ERROR);
   }, []);
 
+  const handleOnExportCodeBlock = useCallback(
+    (codeBlock) => {
+      const queryField = getFields().queryBar;
+      const queryBar = queryField.value as DefineStepRule['queryBar'];
+
+      if (queryBar.query.query !== codeBlock) {
+        setFieldValue('queryBar', {
+          ...queryBar,
+          query: { ...queryBar.query, query: codeBlock },
+        });
+      }
+    },
+    [getFields, setFieldValue]
+  );
+
   if (!hasAssistantPrivilege) {
     return null;
   }
@@ -84,7 +104,7 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
             <NewChat
               asLink={true}
               category="detection-rules"
-              conversationId={i18nAssistant.DETECTION_RULES_CONVERSATION_ID}
+              conversationId={i18nAssistant.DETECTION_RULES_CREATE_FORM_CONVERSATION_ID}
               description={i18n.ASK_ASSISTANT_DESCRIPTION}
               getPromptContext={getPromptContext}
               suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT(languageName)}
@@ -92,6 +112,7 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
               iconType={null}
               onShowOverlay={onShowOverlay}
               isAssistantEnabled={isAssistantEnabled}
+              onExportCodeBlock={handleOnExportCodeBlock}
             >
               <AssistantAvatar size="xxs" /> {i18n.ASK_ASSISTANT_ERROR_BUTTON}
             </NewChat>

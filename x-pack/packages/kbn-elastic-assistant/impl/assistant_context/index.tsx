@@ -137,6 +137,8 @@ export interface UseAssistantContext {
   basePromptContexts: PromptContextTemplate[];
   unRegisterPromptContext: UnRegisterPromptContext;
   currentAppId: string;
+  codeBlock: string;
+  setCodeBlock: (code: string) => void;
 }
 
 const AssistantContext = React.createContext<UseAssistantContext | undefined>(undefined);
@@ -237,6 +239,11 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
    */
   const [selectedSettingsTab, setSelectedSettingsTab] = useState<SettingsTabs | null>(null);
 
+  /**
+   * Setting code block that can be send through callback to parent component
+   */
+  const [codeBlock, setCodeBlock] = useState<string | null>(null);
+
   const getLastConversationId = useCallback(
     // if a conversationId has been provided, use that
     // if not, check local storage
@@ -284,6 +291,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setLastConversationId: setLocalStorageLastConversationId,
       baseConversations,
       currentAppId,
+      codeBlock,
+      setCodeBlock,
     }),
     [
       actionTypeRegistry,
@@ -316,6 +325,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setLocalStorageLastConversationId,
       baseConversations,
       currentAppId,
+      codeBlock,
+      setCodeBlock,
     ]
   );
 
