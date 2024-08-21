@@ -1,0 +1,2567 @@
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "RP0HlUQkToBRTlZeGAItbyWMx1E=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T11:29:47.677Z",
+      "abusech": {
+        "malware": {
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T11:29:47.677Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T11:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "a7f997be65f62fdbe5ec076f0fe207f7",
+          "d86e656455f985357df3063dff6637f7f3b95bb27d1769a6b88c7adecaf7763f",
+          "6144:Eiu4rKJqctSMeWml5SBm5bT6rhnMqvTRrbx50Elf03jhBtGuYEs0gw4N1c5b8Onl:vuI6QWm+6bTShnMIRUEKThB1sn5hOnl",
+          "T15194232F21ACD2E5F4379415A97680C8DE041E08695B5F2AD73B237AC5EF2F682C57"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "a7f997be65f62fdbe5ec076f0fe207f7",
+              "sha256": "d86e656455f985357df3063dff6637f7f3b95bb27d1769a6b88c7adecaf7763f",
+              "ssdeep": "6144:Eiu4rKJqctSMeWml5SBm5bT6rhnMqvTRrbx50Elf03jhBtGuYEs0gw4N1c5b8Onl:vuI6QWm+6bTShnMIRUEKThB1sn5hOnl",
+              "tlsh": "T15194232F21ACD2E5F4379415A97680C8DE041E08695B5F2AD73B237AC5EF2F682C57"
+            },
+            "pe": {
+            },
+            "size": 441803,
+            "type": "zip"
+          },
+          "first_seen": "2022-06-02T11:29:44.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "C4ObxkoTZzcjmk1jFwGlRadzMnA=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T12:29:47.678Z",
+      "abusech": {
+        "malware": {
+          "virustotal": {
+            "link": "https://www.virustotal.com/gui/file/d3e2cf87eabf84ef929aaf8dad1431b3387f5a26de8ffb7a0c3c2a13f973c0ab/detection/f-d3e2cf8",
+            "percent": 41.94,
+            "result": "26 / 62"
+          }
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T12:29:47.678Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T12:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "cce28cbfb3cb7ecdae0f5969476f3f09",
+          "d3e2cf87eabf84ef929aaf8dad1431b3387f5a26de8ffb7a0c3c2a13f973c0ab",
+          "24576:WEnrkvPLK8Qtaw+sy0AdrIFeGvoPTM2oMkM0DqLpj5I9qe32L8rayvevBhIb7q:WEnrkRDDzCFeGvMTM2/gY9vxv7o7q",
+          "T1F95533F3C00FA54679E42E57649F8B2996112DFC8A9C412ECA743397E4D782C869BC"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "cce28cbfb3cb7ecdae0f5969476f3f09",
+              "sha256": "d3e2cf87eabf84ef929aaf8dad1431b3387f5a26de8ffb7a0c3c2a13f973c0ab",
+              "ssdeep": "24576:WEnrkvPLK8Qtaw+sy0AdrIFeGvoPTM2oMkM0DqLpj5I9qe32L8rayvevBhIb7q:WEnrkRDDzCFeGvMTM2/gY9vxv7o7q",
+              "tlsh": "T1F95533F3C00FA54679E42E57649F8B2996112DFC8A9C412ECA743397E4D782C869BC"
+            },
+            "pe": {
+            },
+            "size": 1361342,
+            "type": "zip"
+          },
+          "first_seen": "2022-06-02T12:29:40.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "5hGL0ETQsk+B0L7ryVcQVwsYhOk=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:29:47.678Z",
+      "abusech": {
+        "malware": {
+          "virustotal": {
+            "link": "https://www.virustotal.com/gui/file/4880faee7a174bf9701c7356137b2fed8681525527deb2d1c8a1c7a6d0e7eaaa/detection/f-4880fae",
+            "percent": 39.34,
+            "result": "24 / 61"
+          }
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:29:47.678Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T13:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "261b83754435cc988d8d37abe8b97f4c",
+          "4880faee7a174bf9701c7356137b2fed8681525527deb2d1c8a1c7a6d0e7eaaa",
+          "24576:O4nrkvPLK8Qtaw+sy0AdrIFeGvoPTM2oMkM0DqLpj5I9qe32L8rayvevBhIb7V:O4nrkRDDzCFeGvMTM2/gY9vxv7o7V",
+          "T19D5533F3C00FA51A79D03A4668AF875D95112DAC8A9C412ECA74339BD9C7C2CD697C"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "261b83754435cc988d8d37abe8b97f4c",
+              "sha256": "4880faee7a174bf9701c7356137b2fed8681525527deb2d1c8a1c7a6d0e7eaaa",
+              "ssdeep": "24576:O4nrkvPLK8Qtaw+sy0AdrIFeGvoPTM2oMkM0DqLpj5I9qe32L8rayvevBhIb7V:O4nrkRDDzCFeGvMTM2/gY9vxv7o7V",
+              "tlsh": "T19D5533F3C00FA51A79D03A4668AF875D95112DAC8A9C412ECA74339BD9C7C2CD697C"
+            },
+            "pe": {
+            },
+            "size": 1361341,
+            "type": "zip"
+          },
+          "first_seen": "2022-06-02T13:29:39.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "qq3AKvjp1c/FBtEoh10Vt+PsT14=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:29:47.678Z",
+      "abusech": {
+        "malware": {
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:29:47.678Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T13:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "354f8e74f6a070127fe6c5247c99b937",
+          "bcc53ec3c58f46b331550725ac1ea79070368c672584861027f13f08ff18402e",
+          "12:6ia5Wl1LCHBF5CRyPFJ+QIGZL5sR6Tl/WQPKlQHl2+ew5+qzL35BE3t5:i5WK4EFJzN5d14+ewN9C3n",
+          "T164017540AD6A9BF525086CF97D86390884AB61E850ABD19CFE4DDB44153E15083520"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "354f8e74f6a070127fe6c5247c99b937",
+              "sha256": "bcc53ec3c58f46b331550725ac1ea79070368c672584861027f13f08ff18402e",
+              "ssdeep": "12:6ia5Wl1LCHBF5CRyPFJ+QIGZL5sR6Tl/WQPKlQHl2+ew5+qzL35BE3t5:i5WK4EFJzN5d14+ewN9C3n",
+              "tlsh": "T164017540AD6A9BF525086CF97D86390884AB61E850ABD19CFE4DDB44153E15083520"
+            },
+            "pe": {
+            },
+            "size": 782,
+            "type": "unknown"
+          },
+          "first_seen": "2022-06-02T13:29:37.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "CNCiNUxTNHF5qyRWclltlrnxwhk=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:29:47.678Z",
+      "abusech": {
+        "malware": {
+          "virustotal": {
+            "link": "https://www.virustotal.com/gui/file/cce0876cfaf187e222cdfba3469ed75da67e2c43067750e36ac0bb3299964f6d/detection/f-cce0876",
+            "percent": 41.94,
+            "result": "26 / 62"
+          }
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:29:47.678Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T13:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "ef633ad733a6c18a008150c34e708b2a",
+          "cce0876cfaf187e222cdfba3469ed75da67e2c43067750e36ac0bb3299964f6d",
+          "24576:dkiaxnrkvPLK8Qtaw+sy0AdrIFeGvoPTM2oMkM0DqLpj5I9qe32L8rayvevBhIbZ:OiaxnrkRDDzCFeGvMTM2/gY9vxv7o7d",
+          "T1675533F7C00FA50675D06943689F8B6E96112EAC8B9C412DCA343397E9C792C92DBC"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "ef633ad733a6c18a008150c34e708b2a",
+              "sha256": "cce0876cfaf187e222cdfba3469ed75da67e2c43067750e36ac0bb3299964f6d",
+              "ssdeep": "24576:dkiaxnrkvPLK8Qtaw+sy0AdrIFeGvoPTM2oMkM0DqLpj5I9qe32L8rayvevBhIbZ:OiaxnrkRDDzCFeGvMTM2/gY9vxv7o7d",
+              "tlsh": "T1675533F7C00FA50675D06943689F8B6E96112EAC8B9C412DCA343397E9C792C92DBC"
+            },
+            "pe": {
+            },
+            "size": 1361341,
+            "type": "zip"
+          },
+          "first_seen": "2022-06-02T13:29:35.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "Rk80kuvgnMegEB+1jhGlgLO5h5Y=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:29:47.681Z",
+      "abusech": {
+        "malware": {
+          "virustotal": {
+            "link": "https://www.virustotal.com/gui/file/377d56f1683ee27d9147bc2bb2c417926686abfee7705de96a032f982c9f6364/detection/f-377d56f",
+            "percent": 42.62,
+            "result": "26 / 61"
+          }
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:29:47.681Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T13:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "24dda97b79673d8676c3cfc3c83e694c",
+          "377d56f1683ee27d9147bc2bb2c417926686abfee7705de96a032f982c9f6364",
+          "24576:CRnrkvPLK8Qtaw+sy0AdrIFeGvoPTM2oMkM0DqLpj5I9qe32L8rayvevBhIb7o:CnrkRDDzCFeGvMTM2/gY9vxv7o7o",
+          "T1C95533F3C00FA90679D06A57A09F872E96112DBC8B9C512ECA703357E5D7C2C9697C"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "24dda97b79673d8676c3cfc3c83e694c",
+              "sha256": "377d56f1683ee27d9147bc2bb2c417926686abfee7705de96a032f982c9f6364",
+              "ssdeep": "24576:CRnrkvPLK8Qtaw+sy0AdrIFeGvoPTM2oMkM0DqLpj5I9qe32L8rayvevBhIb7o:CnrkRDDzCFeGvMTM2/gY9vxv7o7o",
+              "tlsh": "T1C95533F3C00FA90679D06A57A09F872E96112DBC8B9C512ECA703357E5D7C2C9697C"
+            },
+            "pe": {
+            },
+            "size": 1361346,
+            "type": "zip"
+          },
+          "first_seen": "2022-06-02T13:29:30.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "oF2/6vlWcu7040SDtfZuBX4sXEo=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:29:47.681Z",
+      "abusech": {
+        "malware": {
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:29:47.681Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T13:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "375677c2333221471a9dbabb4cf100f8",
+          "7b8f4047dd83e8a9e9642a9ef1af05756ad29a15e45a2b7de0a1959976def4f6",
+          "48:Mfh7te/6TxaYWLcv2CfnQE2HVt51fo/Gjw:SJe/6Txa19CfnB2HVtTgD",
+          "T15731FAD01EDCA96960E677BB0635B53748ED382D4C031835F652CD7244B199C10293"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "375677c2333221471a9dbabb4cf100f8",
+              "sha256": "7b8f4047dd83e8a9e9642a9ef1af05756ad29a15e45a2b7de0a1959976def4f6",
+              "ssdeep": "48:Mfh7te/6TxaYWLcv2CfnQE2HVt51fo/Gjw:SJe/6Txa19CfnB2HVtTgD",
+              "tlsh": "T15731FAD01EDCA96960E677BB0635B53748ED382D4C031835F652CD7244B199C10293"
+            },
+            "pe": {
+            },
+            "size": 1666,
+            "type": "unknown"
+          },
+          "first_seen": "2022-06-02T13:29:30.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "mgUWSsWrUtqPZFUpBNhFU75TKyc=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:29:47.681Z",
+      "abusech": {
+        "malware": {
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:29:47.681Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T13:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "f086951b963255abf639d261ddc17d69",
+          "3c2a0cd048eccf7a3d61455db095d5900880fec9a06a3c8698a6f4ac0e30f9ea",
+          "12288:Q4n4CkVBDDYcoY7UDn8QUoMlZ6+syJsTXy8VAz6VerIFyZGvMPPQ457kWjfa2mQr:Q4nrkvPLK8Qtaw+sy0AdrIFeGvoPTM2z",
+          "T1ABF433E7C20ED45DB0A42A03FDB3C65E8A241CA41D0C412F96353282DDDBD2CA697C"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "f086951b963255abf639d261ddc17d69",
+              "sha256": "3c2a0cd048eccf7a3d61455db095d5900880fec9a06a3c8698a6f4ac0e30f9ea",
+              "ssdeep": "12288:Q4n4CkVBDDYcoY7UDn8QUoMlZ6+syJsTXy8VAz6VerIFyZGvMPPQ457kWjfa2mQr:Q4nrkvPLK8Qtaw+sy0AdrIFeGvoPTM2z",
+              "tlsh": "T1ABF433E7C20ED45DB0A42A03FDB3C65E8A241CA41D0C412F96353282DDDBD2CA697C"
+            },
+            "pe": {
+            },
+            "size": 767547,
+            "type": "zip"
+          },
+          "first_seen": "2022-06-02T13:29:30.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "auKnqhqoLKmnMsohKHQMvqvLSK4=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:29:47.681Z",
+      "abusech": {
+        "malware": {
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:29:47.681Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T13:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "c44b945dba0433b8c1ed8467ed109128",
+          "56e1313ad26fdf3f105959c76eb9b6ec1653285a2d2f900b6e8ca82d100ae666",
+          "12288:luVn4CkVBDDYcoY7UDn8QUoMlZ6+syJsTXy8VAz6VerIFyZGvMPPQv:luVnrkvPLK8Qtaw+sy0AdrIFeGvoPU",
+          "T1D9A423FBC40EA157F4D02E8A65EBCA9C053C2DAC0C594D249235308ACED953DBD96E"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "c44b945dba0433b8c1ed8467ed109128",
+              "sha256": "56e1313ad26fdf3f105959c76eb9b6ec1653285a2d2f900b6e8ca82d100ae666",
+              "ssdeep": "12288:luVn4CkVBDDYcoY7UDn8QUoMlZ6+syJsTXy8VAz6VerIFyZGvMPPQv:luVnrkvPLK8Qtaw+sy0AdrIFeGvoPU",
+              "tlsh": "T1D9A423FBC40EA157F4D02E8A65EBCA9C053C2DAC0C594D249235308ACED953DBD96E"
+            },
+            "pe": {
+            },
+            "size": 475136,
+            "type": "zip"
+          },
+          "first_seen": "2022-06-02T13:29:29.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "Llc8xZPNZbUM6j5sAHAFCeyu+po=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:29:47.681Z",
+      "abusech": {
+        "malware": {
+          "virustotal": {
+            "link": "https://www.virustotal.com/gui/file/e1d9c3d1ec47342b333cb3d82f28167585377e1c7ff4f5743ae085ba4e4f5cf7/detection/f-e1d9c3d",
+            "percent": 32.69,
+            "result": "17 / 52"
+          }
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:29:47.681Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T13:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "89c639a74da0b66661bcda4c632fc4b5",
+          "e1d9c3d1ec47342b333cb3d82f28167585377e1c7ff4f5743ae085ba4e4f5cf7",
+          "24576:TkiaxnrkvPLK8Qtaw+sy0AdrIFeGvoPTM2oMkM0DqLpj5I9qe32L8rayvevBhIbe:YiaxnrkRDDzCFeGvMTM2/gY9vxv7o7q",
+          "T18C5533F7C00FA50675D46947689F8B6E96112EAC8B9C412ECA343357E9C782C92DBC"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "89c639a74da0b66661bcda4c632fc4b5",
+              "sha256": "e1d9c3d1ec47342b333cb3d82f28167585377e1c7ff4f5743ae085ba4e4f5cf7",
+              "ssdeep": "24576:TkiaxnrkvPLK8Qtaw+sy0AdrIFeGvoPTM2oMkM0DqLpj5I9qe32L8rayvevBhIbe:YiaxnrkRDDzCFeGvMTM2/gY9vxv7o7q",
+              "tlsh": "T18C5533F7C00FA50675D46947689F8B6E96112EAC8B9C412ECA343357E9C782C92DBC"
+            },
+            "pe": {
+            },
+            "size": 1361347,
+            "type": "zip"
+          },
+          "first_seen": "2022-06-02T13:29:23.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "VbMLdKEoQI/Xli/LgjmvMOlGYZY=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:29:47.681Z",
+      "abusech": {
+        "malware": {
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:29:47.681Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T13:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "e8f9dc1ebc9c3836e630ea890f49062c",
+          "99b0048497cf99ac223f56fdc57e9c9da368474bfd3249333d20245617584a36",
+          "12288:ZrNSkSCzn4CawkkDYcjt2PwnnbziBHZy+syptTHysl8Zz6xW3rIBGrS35jhQgZUb:lNnSCznrawnPjt2PibziFI+syIZoSrI8",
+          "T1EAD423FBAD4FE145F4B63D56ACAC8B8C61147AF5070E8A20D82DB448454F66C29E7C"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "e8f9dc1ebc9c3836e630ea890f49062c",
+              "sha256": "99b0048497cf99ac223f56fdc57e9c9da368474bfd3249333d20245617584a36",
+              "ssdeep": "12288:ZrNSkSCzn4CawkkDYcjt2PwnnbziBHZy+syptTHysl8Zz6xW3rIBGrS35jhQgZUb:lNnSCznrawnPjt2PibziFI+syIZoSrI8",
+              "tlsh": "T1EAD423FBAD4FE145F4B63D56ACAC8B8C61147AF5070E8A20D82DB448454F66C29E7C"
+            },
+            "pe": {
+            },
+            "size": 607710,
+            "type": "zip"
+          },
+          "first_seen": "2022-06-02T13:29:21.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "/6DDSx9lUsUoJUF8QSZiQ/oMvmQ=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:29:47.681Z",
+      "abusech": {
+        "malware": {
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:29:47.681Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T13:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "96dd2f36a091a5ebb2fbc8a4521165ee",
+          "1e60c0e0b23ba3767698116522460ee55cc44c3f4dc9d295bf572bedd5ac0f65",
+          "1536:IN9xqKCppztoghURX5Ll1bYL1T+6XpcT9YpDFa+9:IN9xqfftLhoJbYE6XOT9R+9",
+          "T11D23D1FB616D7CF1772BEED66E013B1A97BEC1C6052D1118AA5D8B9E2444C284FD0B"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "96dd2f36a091a5ebb2fbc8a4521165ee",
+              "sha256": "1e60c0e0b23ba3767698116522460ee55cc44c3f4dc9d295bf572bedd5ac0f65",
+              "ssdeep": "1536:IN9xqKCppztoghURX5Ll1bYL1T+6XpcT9YpDFa+9:IN9xqfftLhoJbYE6XOT9R+9",
+              "tlsh": "T11D23D1FB616D7CF1772BEED66E013B1A97BEC1C6052D1118AA5D8B9E2444C284FD0B"
+            },
+            "pe": {
+            },
+            "size": 49326,
+            "type": "unknown"
+          },
+          "first_seen": "2022-06-02T13:29:20.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "d+KIrgaxYVhvb/sqhlb5AYOHQDo=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:29:47.682Z",
+      "abusech": {
+        "malware": {
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:29:47.682Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T13:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "b339f90894265cb97515daa470af07cf",
+          "d0bd2eb817f80077a36b975511e8229822e8c34977a6fcdf890c996e7ef824e7",
+          "96:CeAh/kdPbox9Xvn9jx77DWtozT1oImYAwjrTXTd4JBR4pxG+WP:CnMbox9/nXWtLImYAUTR4jRckP",
+          "T197916CFC910373F4642EF274EA4BEA722BE6E4F415EC1A43496A5250E23F2D1B2037"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "b339f90894265cb97515daa470af07cf",
+              "sha256": "d0bd2eb817f80077a36b975511e8229822e8c34977a6fcdf890c996e7ef824e7",
+              "ssdeep": "96:CeAh/kdPbox9Xvn9jx77DWtozT1oImYAwjrTXTd4JBR4pxG+WP:CnMbox9/nXWtLImYAUTR4jRckP",
+              "tlsh": "T197916CFC910373F4642EF274EA4BEA722BE6E4F415EC1A43496A5250E23F2D1B2037"
+            },
+            "pe": {
+            },
+            "size": 4240,
+            "type": "unknown"
+          },
+          "first_seen": "2022-06-02T13:29:20.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "bAPvrGKWj/ess46s3KwFqAJ8+tc=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:29:47.682Z",
+      "abusech": {
+        "malware": {
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:29:47.682Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T13:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "a977be9538079d04662cb855472280f0",
+          "b169429bc31d82019f106c1a4888bf0cb09cdd67223ab8ee11ad1cb22e5b33d8",
+          "48:JY1vl8uN9y+xhS/frD/yPkrceiEJ77ejwqu3GHmcjBMInNeAVOp4P1Y:JA8CyxvJiE17gwqcGGGmInNeAVOA1Y",
+          "T1E0514CE79E74FD4AD8E01B49383529032FD325EE050A405D7D77312856722B5D051B"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "a977be9538079d04662cb855472280f0",
+              "sha256": "b169429bc31d82019f106c1a4888bf0cb09cdd67223ab8ee11ad1cb22e5b33d8",
+              "ssdeep": "48:JY1vl8uN9y+xhS/frD/yPkrceiEJ77ejwqu3GHmcjBMInNeAVOp4P1Y:JA8CyxvJiE17gwqcGGGmInNeAVOA1Y",
+              "tlsh": "T1E0514CE79E74FD4AD8E01B49383529032FD325EE050A405D7D77312856722B5D051B"
+            },
+            "pe": {
+            },
+            "size": 2762,
+            "type": "unknown"
+          },
+          "first_seen": "2022-06-02T13:29:18.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "uM8A5Yr/gMJ4tPHb9XIABYC/mRk=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:29:47.682Z",
+      "abusech": {
+        "malware": {
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:29:47.682Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T13:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "ff8378ca6de4242367a38c559481b269",
+          "825c15ab9faf964fb5a904953dd2d37abbce9e140dbd4cc22e0cd37a3ea76ae4",
+          "24:d8sxTEAby02+ygbBSND09H6j/NljGCBm5fLrkHsu4MHlerNhBzGCt3Th9Nwn:dvT80FKDqHI/2P5fLrgJler1zGCt9Nw",
+          "T18F31D894CBF5B99B65302DBC0FA5AD508C641E5C3ABCC8348F6A905A69994D3814CD"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "ff8378ca6de4242367a38c559481b269",
+              "sha256": "825c15ab9faf964fb5a904953dd2d37abbce9e140dbd4cc22e0cd37a3ea76ae4",
+              "ssdeep": "24:d8sxTEAby02+ygbBSND09H6j/NljGCBm5fLrkHsu4MHlerNhBzGCt3Th9Nwn:dvT80FKDqHI/2P5fLrgJler1zGCt9Nw",
+              "tlsh": "T18F31D894CBF5B99B65302DBC0FA5AD508C641E5C3ABCC8348F6A905A69994D3814CD"
+            },
+            "pe": {
+            },
+            "size": 1665,
+            "type": "unknown"
+          },
+          "first_seen": "2022-06-02T13:29:16.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "YPTTIf8ctfvqnTo2W9OpoJD6n9Q=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:29:47.682Z",
+      "abusech": {
+        "malware": {
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:29:47.682Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T13:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "5dcb49bc49109e90f5c6b8e5597b80ca",
+          "51bbdb79175fe1a9bb2ba6055f80bdd35d8486781881fef5cfe8d28b86c5870d",
+          "48:dyin3B3LH5XfXaImL3esbl9HglyiqRuBrTgq:d53B9XfX8L1vgnqRW0q",
+          "T15431D836CB901B7FD26B160350A2A96527AF8C5B5B9F4C292816FC0AC354C634FA66"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "5dcb49bc49109e90f5c6b8e5597b80ca",
+              "sha256": "51bbdb79175fe1a9bb2ba6055f80bdd35d8486781881fef5cfe8d28b86c5870d",
+              "ssdeep": "48:dyin3B3LH5XfXaImL3esbl9HglyiqRuBrTgq:d53B9XfX8L1vgnqRW0q",
+              "tlsh": "T15431D836CB901B7FD26B160350A2A96527AF8C5B5B9F4C292816FC0AC354C634FA66"
+            },
+            "pe": {
+            },
+            "size": 1664,
+            "type": "unknown"
+          },
+          "first_seen": "2022-06-02T13:29:09.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "UJBUWYV6AtCidXCm1NBsWtAYWZI=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:29:47.682Z",
+      "abusech": {
+        "malware": {
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:29:47.682Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T13:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "72ec96611a0b5f493854a5dcdd1aa528",
+          "c5df0748e8b023886b12647c050a826a7b43374cdc9112124e55ed46a4f926d2",
+          "24:991g7c6kzftBeaOY3+1Zc0Iq3aGG9wpe8kZyLq39C7U:99evkbNv3iYXd5ILOCg",
+          "T1CA114437127EC8A9D93004342166AE26D1009941146099CBAB575D368C877C32F42B"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "72ec96611a0b5f493854a5dcdd1aa528",
+              "sha256": "c5df0748e8b023886b12647c050a826a7b43374cdc9112124e55ed46a4f926d2",
+              "ssdeep": "24:991g7c6kzftBeaOY3+1Zc0Iq3aGG9wpe8kZyLq39C7U:99evkbNv3iYXd5ILOCg",
+              "tlsh": "T1CA114437127EC8A9D93004342166AE26D1009941146099CBAB575D368C877C32F42B"
+            },
+            "pe": {
+            },
+            "size": 909,
+            "type": "zip"
+          },
+          "first_seen": "2022-06-02T13:29:07.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "e1yn2nAO9PlprMEaPBhcjgg9lwE=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:29:47.682Z",
+      "abusech": {
+        "malware": {
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:29:47.682Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T13:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "9707127fb08e7956151dda4f502cf707",
+          "71f5f598623fefd1d6bad450da4cb736b3b2cfb9a62c8d867da8516641df73b3",
+          "12288:gwnSE7CkFiurKQXYFZlIo1aMrIw8ZoOajbxYE/:gqSORnXmHsbl6V3L/",
+          "T1ECB4233A9AECEAE05B6F8DD075B9B641B05E32E145F9533CC869C0AF87170E602857"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "9707127fb08e7956151dda4f502cf707",
+              "sha256": "71f5f598623fefd1d6bad450da4cb736b3b2cfb9a62c8d867da8516641df73b3",
+              "ssdeep": "12288:gwnSE7CkFiurKQXYFZlIo1aMrIw8ZoOajbxYE/:gqSORnXmHsbl6V3L/",
+              "tlsh": "T1ECB4233A9AECEAE05B6F8DD075B9B641B05E32E145F9533CC869C0AF87170E602857"
+            },
+            "pe": {
+            },
+            "size": 507323,
+            "type": "zip"
+          },
+          "first_seen": "2022-06-02T13:28:27.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "e74l+UPbo6o0DotQc8Roo3OVcJQ=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:29:47.682Z",
+      "abusech": {
+        "malware": {
+          "virustotal": {
+            "link": "https://www.virustotal.com/gui/file/38262d6bbeb72bfe5a3baf36250ee80a6824c4d6e1079e4cfdc6869c065693df/detection/f-38262d6",
+            "percent": 27.42,
+            "result": "17 / 62"
+          }
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:29:47.682Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T13:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "f1650fc9608337179d7424c87f1ee737",
+          "38262d6bbeb72bfe5a3baf36250ee80a6824c4d6e1079e4cfdc6869c065693df",
+          "24576:1EnrkvPLK8Qtaw+sy0AdrIFeGvoPTM2oMkM0DqLpj5I9qe32L8rayvevBhIb7P:1EnrkRDDzCFeGvMTM2/gY9vxv7o7P",
+          "T11F5533F3C00FA54679E42E57649F8B2996112DFC8A9C412ECA743397E4D782C869BC"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "f1650fc9608337179d7424c87f1ee737",
+              "sha256": "38262d6bbeb72bfe5a3baf36250ee80a6824c4d6e1079e4cfdc6869c065693df",
+              "ssdeep": "24576:1EnrkvPLK8Qtaw+sy0AdrIFeGvoPTM2oMkM0DqLpj5I9qe32L8rayvevBhIb7P:1EnrkRDDzCFeGvMTM2/gY9vxv7o7P",
+              "tlsh": "T11F5533F3C00FA54679E42E57649F8B2996112DFC8A9C412ECA743397E4D782C869BC"
+            },
+            "pe": {
+            },
+            "size": 1361344,
+            "type": "zip"
+          },
+          "first_seen": "2022-06-02T13:27:51.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "XIDmYG67Bs5j3njl7xYKAyH1emM=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:29:47.682Z",
+      "abusech": {
+        "malware": {
+          "virustotal": {
+            "link": "https://www.virustotal.com/gui/file/cfb001ca42b62b1ade9220f44bd6479aff6eeaaa108aa98a4b0169ea1dec8e86/detection/f-cfb001c",
+            "percent": 38.1,
+            "result": "24 / 63"
+          }
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:29:47.682Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T13:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "970e0ba1981035359600b63b43b10bc0",
+          "cfb001ca42b62b1ade9220f44bd6479aff6eeaaa108aa98a4b0169ea1dec8e86",
+          "24576:MRnrkvPLK8Qtaw+sy0AdrIFeGvoPTM2oMkM0DqLpj5I9qe32L8rayvevBhIb7P:cnrkRDDzCFeGvMTM2/gY9vxv7o7P",
+          "T1025533F3C00FA90679D07A57A09F872E96112DB88B9C512ECA703357E5D7C2C9697C"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "970e0ba1981035359600b63b43b10bc0",
+              "sha256": "cfb001ca42b62b1ade9220f44bd6479aff6eeaaa108aa98a4b0169ea1dec8e86",
+              "ssdeep": "24576:MRnrkvPLK8Qtaw+sy0AdrIFeGvoPTM2oMkM0DqLpj5I9qe32L8rayvevBhIb7P:cnrkRDDzCFeGvMTM2/gY9vxv7o7P",
+              "tlsh": "T1025533F3C00FA90679D07A57A09F872E96112DB88B9C512ECA703357E5D7C2C9697C"
+            },
+            "pe": {
+            },
+            "size": 1361347,
+            "type": "zip"
+          },
+          "first_seen": "2022-06-02T13:27:50.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "TxxcH4E0aWG8D8rloVjU3cK+sy0=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:29:47.685Z",
+      "abusech": {
+        "malware": {
+          "virustotal": {
+            "link": "https://www.virustotal.com/gui/file/f1121e7b8419f84a7c8ad91acd9d4d804d78bb10a899cee1ab4f0b349097eb94/detection/f-f1121e7",
+            "percent": 43.55,
+            "result": "27 / 62"
+          }
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:29:47.685Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T13:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "d04039c9b1f2d6f13a17962c6131e573",
+          "f1121e7b8419f84a7c8ad91acd9d4d804d78bb10a899cee1ab4f0b349097eb94",
+          "24576:ikiaxnrkvPLK8Qtaw+sy0AdrIFeGvoPTM2oMkM0DqLpj5I9qe32L8rayvevBhIbS:HiaxnrkRDDzCFeGvMTM2/gY9vxv7o7m",
+          "T17D5533F7C00FA50679D46947689F8B6E96112EAC8B9C412ECA343357E5C782C92DBC"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "d04039c9b1f2d6f13a17962c6131e573",
+              "sha256": "f1121e7b8419f84a7c8ad91acd9d4d804d78bb10a899cee1ab4f0b349097eb94",
+              "ssdeep": "24576:ikiaxnrkvPLK8Qtaw+sy0AdrIFeGvoPTM2oMkM0DqLpj5I9qe32L8rayvevBhIbS:HiaxnrkRDDzCFeGvMTM2/gY9vxv7o7m",
+              "tlsh": "T17D5533F7C00FA50679D46947689F8B6E96112EAC8B9C412ECA343357E5C782C92DBC"
+            },
+            "pe": {
+            },
+            "size": 1361347,
+            "type": "zip"
+          },
+          "first_seen": "2022-06-02T13:27:46.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "0j+BQ8HFrDQYe5kbXMc9ANSCjBY=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:29:47.685Z",
+      "abusech": {
+        "malware": {
+          "virustotal": {
+            "link": "https://www.virustotal.com/gui/file/a2b6f823f7ce67a0b5ac0a0561139693e526f6c5b4a2ba05d20fd9e467e9dacc/detection/f-a2b6f82",
+            "percent": 41.67,
+            "result": "25 / 60"
+          }
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:29:47.685Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T13:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "2209a62733aa8fd802e60508ecce900a",
+          "a2b6f823f7ce67a0b5ac0a0561139693e526f6c5b4a2ba05d20fd9e467e9dacc",
+          "24576:hUQ2zgDnrawnPjt2PibziFI+syIZoSrI0r+xGgWdVnG45U3D9WHqyraYvb9mRhpt:CQm8nrawTGDIZoB0r+xkdciU5WHqgUjt",
+          "T19D5533FB4C4B9556B9F4AA43A88D8B3C9000E5EC574CA670D908C9FEE44B7B850DB8"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "2209a62733aa8fd802e60508ecce900a",
+              "sha256": "a2b6f823f7ce67a0b5ac0a0561139693e526f6c5b4a2ba05d20fd9e467e9dacc",
+              "ssdeep": "24576:hUQ2zgDnrawnPjt2PibziFI+syIZoSrI0r+xGgWdVnG45U3D9WHqyraYvb9mRhpt:CQm8nrawTGDIZoB0r+xkdciU5WHqgUjt",
+              "tlsh": "T19D5533FB4C4B9556B9F4AA43A88D8B3C9000E5EC574CA670D908C9FEE44B7B850DB8"
+            },
+            "pe": {
+            },
+            "size": 1361339,
+            "type": "zip"
+          },
+          "first_seen": "2022-06-02T13:27:40.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "0iMNuOxitDAkMEozdSjgX9jeA+g=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:29:47.686Z",
+      "abusech": {
+        "malware": {
+          "virustotal": {
+            "link": "https://www.virustotal.com/gui/file/7cbf47ef916aa02a1b39cad40dfe71ea121d8d5b36d5a13fdec5977a8dcb4550/detection/f-7cbf47e",
+            "percent": 41.67,
+            "result": "25 / 60"
+          }
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:29:47.686Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T13:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "03021a5d7811ffb12b28c3372af1e674",
+          "7cbf47ef916aa02a1b39cad40dfe71ea121d8d5b36d5a13fdec5977a8dcb4550",
+          "24576:LkiaxnrkvPLK8Qtaw+sy0AdrIFeGvoPTM2oMkM0DqLpj5I9qe32L8rayvevBhIbz:AiaxnrkRDDzCFeGvMTM2/gY9vxv7o7v",
+          "T1365533F7C00FA50679D46943689F876A96212DBC8B9C412ECA743397E5C782C929BC"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "03021a5d7811ffb12b28c3372af1e674",
+              "sha256": "7cbf47ef916aa02a1b39cad40dfe71ea121d8d5b36d5a13fdec5977a8dcb4550",
+              "ssdeep": "24576:LkiaxnrkvPLK8Qtaw+sy0AdrIFeGvoPTM2oMkM0DqLpj5I9qe32L8rayvevBhIbz:AiaxnrkRDDzCFeGvMTM2/gY9vxv7o7v",
+              "tlsh": "T1365533F7C00FA50679D46943689F876A96212DBC8B9C412ECA743397E5C782C929BC"
+            },
+            "pe": {
+            },
+            "size": 1361341,
+            "type": "zip"
+          },
+          "first_seen": "2022-06-02T13:27:38.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "/3dtJlkuhnqok29y8dY0+Q4ifHQ=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:29:47.686Z",
+      "abusech": {
+        "malware": {
+          "virustotal": {
+            "link": "https://www.virustotal.com/gui/file/d4ba36cfa7e4191199836b228f6d79bd74e86793bc183563b78591f508b066ed/detection/f-d4ba36c",
+            "percent": 41.94,
+            "result": "26 / 62"
+          }
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:29:47.686Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T13:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "27e0088dde23b9e6fe6b7711b653da96",
+          "d4ba36cfa7e4191199836b228f6d79bd74e86793bc183563b78591f508b066ed",
+          "24576:2RjAnrKbP2UmQn0+synQfr4cdGv9P8a2oMkM0DqLpj5I9qe32L8rayvevBhIb7i:OAnrKaODnQEcdGvh8a2/gY9vxv7o7i",
+          "T1565533F3C00AE9067AE43A16A85E871D92106DA88BDC516ECB643757F6D3C1CA2D7C"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "27e0088dde23b9e6fe6b7711b653da96",
+              "sha256": "d4ba36cfa7e4191199836b228f6d79bd74e86793bc183563b78591f508b066ed",
+              "ssdeep": "24576:2RjAnrKbP2UmQn0+synQfr4cdGv9P8a2oMkM0DqLpj5I9qe32L8rayvevBhIb7i:OAnrKaODnQEcdGvh8a2/gY9vxv7o7i",
+              "tlsh": "T1565533F3C00AE9067AE43A16A85E871D92106DA88BDC516ECB643757F6D3C1CA2D7C"
+            },
+            "pe": {
+            },
+            "size": 1361337,
+            "type": "zip"
+          },
+          "first_seen": "2022-06-02T13:27:38.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "j5JnUNNYnbyiFGlCGClPpRa72kc=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:29:47.686Z",
+      "abusech": {
+        "malware": {
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:29:47.686Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T13:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "70d1a2f0eb51b776885f945ebb26529e",
+          "1132eef3ff0d63e0895cfb727a78093396731bf381d6e6b5ece32769895cfc50",
+          "48:SA1Y/0a0Pcuj4Y/FXTMz9izueAvG5601Sn:SuY/KcujLXTMBeEG5Y",
+          "T181311AB0C227CD659FC6D2923B9AB450C45466911C38B1BE3AA1F20FC06002C56103"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "70d1a2f0eb51b776885f945ebb26529e",
+              "sha256": "1132eef3ff0d63e0895cfb727a78093396731bf381d6e6b5ece32769895cfc50",
+              "ssdeep": "48:SA1Y/0a0Pcuj4Y/FXTMz9izueAvG5601Sn:SuY/KcujLXTMBeEG5Y",
+              "tlsh": "T181311AB0C227CD659FC6D2923B9AB450C45466911C38B1BE3AA1F20FC06002C56103"
+            },
+            "pe": {
+            },
+            "size": 1665,
+            "type": "unknown"
+          },
+          "first_seen": "2022-06-02T13:27:32.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "kDF3gd3Mn0AOywia9xgchqGAuUE=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:29:47.686Z",
+      "abusech": {
+        "malware": {
+          "virustotal": {
+            "link": "https://www.virustotal.com/gui/file/882d547a8820864c217970a2cfa90e8ae0430139dee3dd51024570df01e3c233/detection/f-882d547",
+            "percent": 24.19,
+            "result": "15 / 62"
+          }
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:29:47.686Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T13:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "e43b16a442e7746df64df904688c821d",
+          "882d547a8820864c217970a2cfa90e8ae0430139dee3dd51024570df01e3c233",
+          "24576:5u+nrawnPjt2PibziFI+syIZoSrI0r+xGgWdVnG45U3D9WHqyraYvb9mRhpgtz:5BnrawTGDIZoB0r+xkdciU5WHqgUjc",
+          "T1075533FB4C4B9555F8F89E53AC9D8A2CD100A5EC574CE674DA08C4AEE80B37860DBC"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "e43b16a442e7746df64df904688c821d",
+              "sha256": "882d547a8820864c217970a2cfa90e8ae0430139dee3dd51024570df01e3c233",
+              "ssdeep": "24576:5u+nrawnPjt2PibziFI+syIZoSrI0r+xGgWdVnG45U3D9WHqyraYvb9mRhpgtz:5BnrawTGDIZoB0r+xkdciU5WHqgUjc",
+              "tlsh": "T1075533FB4C4B9555F8F89E53AC9D8A2CD100A5EC574CE674DA08C4AEE80B37860DBC"
+            },
+            "pe": {
+            },
+            "size": 1361342,
+            "type": "zip"
+          },
+          "first_seen": "2022-06-02T13:27:26.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.url-default",
+    "id": "PQGb8YxgAc57YSFEaYrO9A/YF5U=",
+    "index": ".ds-logs-ti_abusech.url-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:39:46.305Z",
+      "abusech": {
+        "url": {
+          "blacklists": {
+            "spamhaus_dbl": "not listed",
+            "surbl": "not listed"
+          },
+          "id": "2221794",
+          "larted": true,
+          "tags": [
+            "elf"
+          ],
+          "threat": "malware_download",
+          "url_status": "online"
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.url",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.0.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:39:46.305Z",
+        "dataset": "ti_abusech.url",
+        "ingested": "2022-06-02T13:39:46Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "tags": [
+        "forwarded",
+        "abusech-url"
+      ],
+      "threat": {
+        "indicator": {
+          "first_seen": "2022-06-02T13:22:04.000Z",
+          "ip": "149.57.201.137",
+          "provider": "tolisec",
+          "reference": "https://urlhaus.abuse.ch/url/2221794/",
+          "type": "url",
+          "url": {
+            "domain": "149.57.201.137",
+            "extension": "arm5",
+            "full": "http://149.57.201.137/razor/r4z0r.arm5",
+            "original": "http://149.57.201.137/razor/r4z0r.arm5",
+            "path": "/razor/r4z0r.arm5",
+            "scheme": "http"
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.url-default",
+    "id": "OSUKXqaqw3yp3MWwWGyb3qBB6jU=",
+    "index": ".ds-logs-ti_abusech.url-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:39:46.305Z",
+      "abusech": {
+        "url": {
+          "blacklists": {
+            "spamhaus_dbl": "not listed",
+            "surbl": "not listed"
+          },
+          "id": "2221795",
+          "larted": true,
+          "tags": [
+            "elf"
+          ],
+          "threat": "malware_download",
+          "url_status": "online"
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.url",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.0.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:39:46.305Z",
+        "dataset": "ti_abusech.url",
+        "ingested": "2022-06-02T13:39:46Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "tags": [
+        "forwarded",
+        "abusech-url"
+      ],
+      "threat": {
+        "indicator": {
+          "first_seen": "2022-06-02T13:22:04.000Z",
+          "ip": "149.57.201.137",
+          "provider": "tolisec",
+          "reference": "https://urlhaus.abuse.ch/url/2221795/",
+          "type": "url",
+          "url": {
+            "domain": "149.57.201.137",
+            "extension": "ppc",
+            "full": "http://149.57.201.137/razor/r4z0r.ppc",
+            "original": "http://149.57.201.137/razor/r4z0r.ppc",
+            "path": "/razor/r4z0r.ppc",
+            "scheme": "http"
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.url-default",
+    "id": "dX+wc559fHomjmPvAps1NIN+XaE=",
+    "index": ".ds-logs-ti_abusech.url-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:39:46.305Z",
+      "abusech": {
+        "url": {
+          "blacklists": {
+            "spamhaus_dbl": "not listed",
+            "surbl": "not listed"
+          },
+          "id": "2221796",
+          "larted": true,
+          "tags": [
+            "elf"
+          ],
+          "threat": "malware_download",
+          "url_status": "online"
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.url",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.0.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:39:46.305Z",
+        "dataset": "ti_abusech.url",
+        "ingested": "2022-06-02T13:39:46Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "tags": [
+        "forwarded",
+        "abusech-url"
+      ],
+      "threat": {
+        "indicator": {
+          "first_seen": "2022-06-02T13:22:04.000Z",
+          "ip": "149.57.201.137",
+          "provider": "tolisec",
+          "reference": "https://urlhaus.abuse.ch/url/2221796/",
+          "type": "url",
+          "url": {
+            "domain": "149.57.201.137",
+            "extension": "x86",
+            "full": "http://149.57.201.137/razor/r4z0r.x86",
+            "original": "http://149.57.201.137/razor/r4z0r.x86",
+            "path": "/razor/r4z0r.x86",
+            "scheme": "http"
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.url-default",
+    "id": "NwEdch4+R+FULfHDyBY42ZvKrnE=",
+    "index": ".ds-logs-ti_abusech.url-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:39:46.305Z",
+      "abusech": {
+        "url": {
+          "blacklists": {
+            "spamhaus_dbl": "not listed",
+            "surbl": "not listed"
+          },
+          "id": "2221797",
+          "larted": true,
+          "tags": [
+            "elf"
+          ],
+          "threat": "malware_download",
+          "url_status": "online"
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.url",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.0.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:39:46.305Z",
+        "dataset": "ti_abusech.url",
+        "ingested": "2022-06-02T13:39:46Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "tags": [
+        "forwarded",
+        "abusech-url"
+      ],
+      "threat": {
+        "indicator": {
+          "first_seen": "2022-06-02T13:22:04.000Z",
+          "ip": "149.57.201.137",
+          "provider": "tolisec",
+          "reference": "https://urlhaus.abuse.ch/url/2221797/",
+          "type": "url",
+          "url": {
+            "domain": "149.57.201.137",
+            "extension": "mpsl",
+            "full": "http://149.57.201.137/razor/r4z0r.mpsl",
+            "original": "http://149.57.201.137/razor/r4z0r.mpsl",
+            "path": "/razor/r4z0r.mpsl",
+            "scheme": "http"
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.url-default",
+    "id": "AauapLcuuEqfVg1eR7VkDAExl54=",
+    "index": ".ds-logs-ti_abusech.url-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:39:46.306Z",
+      "abusech": {
+        "url": {
+          "blacklists": {
+            "spamhaus_dbl": "not listed",
+            "surbl": "not listed"
+          },
+          "id": "2221798",
+          "larted": true,
+          "tags": [
+            "elf"
+          ],
+          "threat": "malware_download",
+          "url_status": "online"
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.url",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.0.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:39:46.306Z",
+        "dataset": "ti_abusech.url",
+        "ingested": "2022-06-02T13:39:46Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "tags": [
+        "forwarded",
+        "abusech-url"
+      ],
+      "threat": {
+        "indicator": {
+          "first_seen": "2022-06-02T13:22:04.000Z",
+          "ip": "149.57.201.137",
+          "provider": "tolisec",
+          "reference": "https://urlhaus.abuse.ch/url/2221798/",
+          "type": "url",
+          "url": {
+            "domain": "149.57.201.137",
+            "extension": "mips",
+            "full": "http://149.57.201.137/razor/r4z0r.mips",
+            "original": "http://149.57.201.137/razor/r4z0r.mips",
+            "path": "/razor/r4z0r.mips",
+            "scheme": "http"
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.url-default",
+    "id": "rcwqq/Te2Djx8sE4gX9HjeHDj1c=",
+    "index": ".ds-logs-ti_abusech.url-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:39:46.306Z",
+      "abusech": {
+        "url": {
+          "blacklists": {
+            "spamhaus_dbl": "not listed",
+            "surbl": "not listed"
+          },
+          "id": "2221799",
+          "larted": true,
+          "tags": [
+            "elf"
+          ],
+          "threat": "malware_download",
+          "url_status": "online"
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.url",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.0.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:39:46.306Z",
+        "dataset": "ti_abusech.url",
+        "ingested": "2022-06-02T13:39:46Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "tags": [
+        "forwarded",
+        "abusech-url"
+      ],
+      "threat": {
+        "indicator": {
+          "first_seen": "2022-06-02T13:22:04.000Z",
+          "ip": "149.57.201.137",
+          "provider": "tolisec",
+          "reference": "https://urlhaus.abuse.ch/url/2221799/",
+          "type": "url",
+          "url": {
+            "domain": "149.57.201.137",
+            "extension": "arm",
+            "full": "http://149.57.201.137/razor/r4z0r.arm",
+            "original": "http://149.57.201.137/razor/r4z0r.arm",
+            "path": "/razor/r4z0r.arm",
+            "scheme": "http"
+          }
+        }
+      }
+    }
+  }
+}
