@@ -23,7 +23,7 @@ import { ExecutionContextService } from '@kbn/core-execution-context-server-inte
 import { FeatureFlagsService } from '@kbn/core-feature-flags-server-internal';
 import { PrebootService } from '@kbn/core-preboot-server-internal';
 import { ContextService } from '@kbn/core-http-context-server-internal';
-import { HttpService } from '@kbn/core-http-server-internal';
+import { HttpService, httpModule } from '@kbn/core-http-server-internal';
 import { ElasticsearchService } from '@kbn/core-elasticsearch-server-internal';
 import { MetricsService } from '@kbn/core-metrics-server-internal';
 import { CapabilitiesService } from '@kbn/core-capabilities-server-internal';
@@ -400,6 +400,9 @@ export class Server {
       userProfile: userProfileSetup,
       injection: injectionSetup,
     };
+
+    const container = injectionSetup.getContainer();
+    container.load(httpModule);
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
     this.#pluginsInitialized = pluginsSetup.initialized;
