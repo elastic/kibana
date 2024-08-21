@@ -76,7 +76,7 @@ import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
 import {
   DISCOVER_CELL_ACTIONS_TRIGGER,
-  useCellActions,
+  useAdditionalCellActions,
   useProfileAccessor,
 } from '../../../../context_awareness';
 
@@ -277,7 +277,13 @@ function DiscoverDocumentsComponent({
     services.timefilter.getTime()
   );
 
-  const cellActionsMetadata = useCellActions({ dataSource, dataView, query, filters, timeRange });
+  const cellActionsMetadata = useAdditionalCellActions({
+    dataSource,
+    dataView,
+    query,
+    filters,
+    timeRange,
+  });
 
   const renderDocumentView = useCallback(
     (

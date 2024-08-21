@@ -13,6 +13,6 @@ export { ProfilesManager } from './profiles_manager';
 export {
   useProfileAccessor,
   useRootProfile,
-  useCellActions,
+  useAdditionalCellActions,
   DISCOVER_CELL_ACTIONS_TRIGGER,
 } from './hooks';

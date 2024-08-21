@@ -54,13 +54,13 @@ import { HistoryService } from './history_service';
 import type { ConfigSchema, ExperimentalFeatures } from '../server/config';
 import {
   DataSourceProfileService,
+  DISCOVER_CELL_ACTIONS_TRIGGER,
   DocumentProfileService,
   ProfilesManager,
   RootProfileService,
 } from './context_awareness';
 import { DiscoverSetup, DiscoverSetupPlugins, DiscoverStart, DiscoverStartPlugins } from './types';
 import { deserializeState } from './embeddable/utils/serialization_utils';
-import { DISCOVER_CELL_ACTIONS_TRIGGER } from './context_awareness/hooks/use_cell_actions';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana

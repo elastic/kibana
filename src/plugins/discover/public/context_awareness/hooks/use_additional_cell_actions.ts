@@ -23,7 +23,7 @@ export const DISCOVER_CELL_ACTIONS_TRIGGER: Trigger = { id: 'DISCOVER_CELL_ACTIO
 
 const DISCOVER_CELL_ACTION_TYPE = 'discover-cellAction-type';
 
-export const useCellActions = ({
+export const useAdditionalCellActions = ({
   dataSource,
   dataView,
   query,

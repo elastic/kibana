@@ -8,4 +8,7 @@
 
 export { useProfileAccessor } from './use_profile_accessor';
 export { useRootProfile } from './use_root_profile';
-export { useCellActions, DISCOVER_CELL_ACTIONS_TRIGGER } from './use_cell_actions';
+export {
+  useAdditionalCellActions,
+  DISCOVER_CELL_ACTIONS_TRIGGER,
+} from './use_additional_cell_actions';
