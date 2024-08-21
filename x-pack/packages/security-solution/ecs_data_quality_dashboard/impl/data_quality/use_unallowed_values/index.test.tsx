@@ -16,6 +16,7 @@ import { UnallowedValueRequestItem } from '../types';
 import { useUnallowedValues, UseUnallowedValues } from '.';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { EcsFlatTyped } from '../constants';
+import { Theme } from '@elastic/charts';
 
 const mockHttpFetch = jest.fn();
 const mockReportDataQualityIndexChecked = jest.fn();
@@ -32,6 +33,45 @@ const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
     telemetryEvents={mockTelemetryEvents}
     isILMAvailable={true}
     toasts={toasts}
+    addSuccessToast={jest.fn()}
+    canUserCreateAndReadCases={jest.fn(() => true)}
+    endDate={null}
+    formatBytes={jest.fn()}
+    formatNumber={jest.fn()}
+    isAssistantEnabled={true}
+    lastChecked={'2023-03-28T22:27:28.159Z'}
+    openCreateCaseFlyout={jest.fn()}
+    patterns={['auditbeat-*']}
+    setLastChecked={jest.fn()}
+    startDate={null}
+    theme={{
+      background: {
+        color: '#000',
+      },
+    }}
+    baseTheme={
+      {
+        background: {
+          color: '#000',
+        },
+      } as Theme
+    }
+    ilmPhases={['hot', 'warm', 'unmanaged']}
+    selectedIlmPhaseOptions={[
+      {
+        label: 'Hot',
+        value: 'hot',
+      },
+      {
+        label: 'Warm',
+        value: 'warm',
+      },
+      {
+        label: 'Unmanaged',
+        value: 'unmanaged',
+      },
+    ]}
+    setSelectedIlmPhaseOptions={jest.fn()}
   >
     {children}
   </DataQualityProvider>

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { FindInvestigationsResponse } from '@kbn/investigation-shared';
 import { useQuery } from '@tanstack/react-query';
-import { FindInvestigationsResponse } from '@kbn/investigate-plugin/common';
 import { useKibana } from '../../../utils/kibana_react';
 
 export interface InvestigationsByAlertParams {
