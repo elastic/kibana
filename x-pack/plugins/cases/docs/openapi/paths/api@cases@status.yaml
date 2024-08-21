@@ -1,11 +1,10 @@
 get:
-  summary: Returns the number of cases that are open, closed, and in progress in the default space.
+  summary: Get case status summary
   operationId: getCaseStatusDefaultSpace
   description: >
+    Returns the number of cases that are open, closed, and in progress.
     Deprecated in 8.1.0. This API is deprecated and will be removed in a future release; use the find cases API instead.
-    You must have `read` privileges for the **Cases** feature in the
-    **Management**, **Observability**, or **Security** section of the Kibana
-    feature privileges, depending on the owner of the cases you're seeking.
+    You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
   deprecated: true
   tags:
     - cases

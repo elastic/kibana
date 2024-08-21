@@ -184,12 +184,19 @@ describe('Stack Connectors Plugin', () => {
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         8,
         expect.objectContaining({
+          id: '.thehive',
+          name: 'TheHive',
+        })
+      );
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
+        9,
+        expect.objectContaining({
           id: '.sentinelone',
           name: 'Sentinel One',
         })
       );
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
-        9,
+        10,
         expect.objectContaining({
           id: '.crowdstrike',
           name: 'CrowdStrike',

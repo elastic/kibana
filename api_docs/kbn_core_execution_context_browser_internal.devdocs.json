@@ -1,26 +1,10 @@
 {
   "id": "@kbn/core-execution-context-browser-internal",
   "client": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-execution-context-browser-internal",
-        "id": "def-common.ExecutionContextContainer",
+        "id": "def-public.ExecutionContextContainer",
         "type": "Class",
         "tags": [],
         "label": "ExecutionContextContainer",
@@ -28,9 +12,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-execution-context-browser-internal",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreExecutionContextBrowserInternalPluginApi",
-            "section": "def-common.ExecutionContextContainer",
+            "section": "def-public.ExecutionContextContainer",
             "text": "ExecutionContextContainer"
           },
           " implements ",
@@ -42,7 +26,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-execution-context-browser-internal",
-            "id": "def-common.ExecutionContextContainer.context",
+            "id": "def-public.ExecutionContextContainer.context",
             "type": "Object",
             "tags": [],
             "label": "#context",
@@ -64,7 +48,7 @@
           },
           {
             "parentPluginId": "@kbn/core-execution-context-browser-internal",
-            "id": "def-common.ExecutionContextContainer.Unnamed",
+            "id": "def-public.ExecutionContextContainer.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -78,7 +62,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-execution-context-browser-internal",
-                "id": "def-common.ExecutionContextContainer.Unnamed.$1",
+                "id": "def-public.ExecutionContextContainer.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "context",
@@ -104,7 +88,7 @@
           },
           {
             "parentPluginId": "@kbn/core-execution-context-browser-internal",
-            "id": "def-common.ExecutionContextContainer.toHeader",
+            "id": "def-public.ExecutionContextContainer.toHeader",
             "type": "Function",
             "tags": [],
             "label": "toHeader",
@@ -120,7 +104,7 @@
           },
           {
             "parentPluginId": "@kbn/core-execution-context-browser-internal",
-            "id": "def-common.ExecutionContextContainer.toJSON",
+            "id": "def-public.ExecutionContextContainer.toJSON",
             "type": "Function",
             "tags": [],
             "label": "toJSON",
@@ -146,6 +130,22 @@
         "initialIsOpen": false
       }
     ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [],
     "interfaces": [],
     "enums": [],

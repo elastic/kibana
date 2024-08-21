@@ -30,7 +30,9 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
-export interface ConfigSchema {}
+export interface ConfigSchema {
+  enabled: boolean;
+}
 
 export interface InvestigateAppSetupDependencies {
   investigate: InvestigatePublicSetup;

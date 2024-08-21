@@ -107,6 +107,7 @@ export const previewRulesRoute = (
           const searchSourceClient = await data.search.searchSource.asScoped(request);
           const savedObjectsClient = coreContext.savedObjects.client;
           const siemClient = (await context.securitySolution).getAppClient();
+          const actionsClient = (await context.actions).getActionsClient();
 
           const timeframeEnd = request.body.timeframeEnd;
           let invocationCount = request.body.invocationCount;
@@ -120,7 +121,10 @@ export const previewRulesRoute = (
             });
           }
 
-          const internalRule = convertRuleResponseToAlertingRule(applyRuleDefaults(request.body));
+          const internalRule = convertRuleResponseToAlertingRule(
+            applyRuleDefaults(request.body),
+            actionsClient
+          );
           const previewRuleParams = internalRule.params;
 
           const mlAuthz = buildMlAuthz({
@@ -279,12 +283,13 @@ export const previewRulesRoute = (
                     abortController,
                     scopedClusterClient: coreContext.elasticsearch.client,
                   }),
-                  searchSourceClient: wrapSearchSourceClient({
-                    abortController,
-                    searchSourceClient,
-                  }),
+                  getSearchSourceClient: async () =>
+                    wrapSearchSourceClient({
+                      abortController,
+                      searchSourceClient,
+                    }),
                   uiSettingsClient: coreContext.uiSettings.client,
-                  dataViews: dataViewsService,
+                  getDataViews: async () => dataViewsService,
                   share,
                 },
                 spaceId,

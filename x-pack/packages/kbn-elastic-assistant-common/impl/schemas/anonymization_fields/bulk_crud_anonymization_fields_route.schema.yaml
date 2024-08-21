@@ -1,13 +1,13 @@
 openapi: 3.0.0
 info:
   title: Bulk Anonymization Fields Actions API endpoint
-  version: '1'
+  version: '2023-10-31'
 paths:
   /api/security_ai_assistant/anonymization_fields/_bulk_action:
     post:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
-      operationId: PerformBulkAction
+      operationId: PerformAnonymizationFieldsBulkAction
       summary: Applies a bulk action to multiple anonymization fields
       description: The bulk action is applied to all anonymization fields that match the filter or to the list of anonymization fields by their IDs.
       tags:
@@ -194,7 +194,6 @@ components:
             - summary
       required:
         - attributes
-
 
     BulkActionBase:
       x-inline: true

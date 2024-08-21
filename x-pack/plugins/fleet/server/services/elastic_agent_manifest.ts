@@ -70,7 +70,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-            # The following ELASTIC_NETINFO:false variable will disable the netinfo.enabled option of add-host-metadata processor. This will remove fields host.ip and host.mac.  
+            # The following ELASTIC_NETINFO:false variable will disable the netinfo.enabled option of add-host-metadata processor. This will remove fields host.ip and host.mac.
             # For more info: https://www.elastic.co/guide/en/beats/metricbeat/current/add-host-metadata.html
             - name: ELASTIC_NETINFO
               value: "false"
@@ -125,13 +125,10 @@ spec:
               mountPath: /sys/kernel/debug
             - name: elastic-agent-state
               mountPath: /usr/share/elastic-agent/state
-            # If you are using the Universal Profiling integration, please uncomment these lines before applying.
-            #- name: universal-profiling-cache
-            #  mountPath: /var/cache/Elastic
       volumes:
         - name: datastreams
           configMap:
-            defaultMode: 0640
+            defaultMode: 0644
             name: agent-node-datastreams
         - name: proc
           hostPath:
@@ -166,12 +163,6 @@ spec:
           hostPath:
             path: /var/lib/elastic-agent/kube-system/state
             type: DirectoryOrCreate
-        # Mount required for Universal Profiling.
-        # If you are using the Universal Profiling integration, please uncomment these lines before applying.
-        #- name: universal-profiling-cache
-        #  hostPath:
-        #    path: /var/cache/Elastic
-        #    type: DirectoryOrCreate
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -440,9 +431,6 @@ spec:
               mountPath: /sys/kernel/debug
             - name: elastic-agent-state
               mountPath: /usr/share/elastic-agent/state
-            # If you are using the Universal Profiling integration, please uncomment these lines before applying.
-            #- name: universal-profiling-cache
-            #  mountPath: /var/cache/Elastic
       volumes:
         - name: proc
           hostPath:
@@ -483,12 +471,6 @@ spec:
           hostPath:
             path: /var/lib/elastic-agent-managed/kube-system/state
             type: DirectoryOrCreate
-        # Mount required for Universal Profiling.
-        # If you are using the Universal Profiling integration, please uncomment these lines before applying.
-        #- name: universal-profiling-cache
-        #  hostPath:
-        #    path: /var/cache/Elastic
-        #    type: DirectoryOrCreate
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

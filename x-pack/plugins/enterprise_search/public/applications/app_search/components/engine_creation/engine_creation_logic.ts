@@ -89,6 +89,7 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
     ingestionMethod: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setIngestionMethod: (_, { method }) => method,
       },
     ],
@@ -102,24 +103,29 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
     language: [
       DEFAULT_LANGUAGE,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setLanguage: (_, { language }) => language,
       },
     ],
     rawName: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setRawName: (_, { rawName }) => rawName,
       },
     ],
     aliasRawName: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setAliasRawName: (_, { aliasRawName }) => aliasRawName,
+        // @ts-expect-error upgrade typescript v5.1.6
         setSelectedIndex: (_, { selectedIndexName }) => {
           return selectedIndexName.length === 0 || selectedIndexName.startsWith('search-')
             ? ''
             : `search-${selectedIndexName}-alias`;
         },
+        // @ts-expect-error upgrade typescript v5.1.6
         initializeWithESIndex: (_, { indexName }) =>
           indexName.length === 0 || indexName.startsWith('search-')
             ? ''
@@ -129,6 +135,7 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
     isAliasAllowed: [
       true,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setIsAliasAllowed: (_, { isAliasAllowed }) => isAliasAllowed,
       },
     ],
@@ -143,27 +150,33 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
     indices: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onLoadIndicesSuccess: (_, { indices }) => indices,
       },
     ],
     selectedIndex: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setSelectedIndex: (_, { selectedIndexName }) => selectedIndexName,
         onSubmitError: () => '',
+        // @ts-expect-error upgrade typescript v5.1.6
         initializeWithESIndex: (_, { indexName }) => indexName,
       },
     ],
     engineType: [
       'appSearch',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setEngineType: (_, { engineType }) => engineType,
+        // @ts-expect-error upgrade typescript v5.1.6
         initializeWithESIndex: () => 'elasticsearch',
       },
     ],
     currentEngineCreationStep: [
       EngineCreationSteps.SelectStep,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setCreationStep: (_, currentEngineCreationStep) => currentEngineCreationStep,
         initializeWithESIndex: () => EngineCreationSteps.ConfigureStep,
       },

@@ -466,7 +466,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     securitySolution: {
       artifactControl: `${SECURITY_SOLUTION_DOCS}artifact-control.html`,
-      avcResults: `${ELASTIC_WEBSITE_URL}blog/elastic-security-malware-protection-test-av-comparatives`,
+      avcResults: `${ELASTIC_WEBSITE_URL}blog/elastic-av-comparatives-business-security-test`,
       trustedApps: `${SECURITY_SOLUTION_DOCS}trusted-apps-ov.html`,
       eventFilters: `${SECURITY_SOLUTION_DOCS}event-filters.html`,
       blocklist: `${SECURITY_SOLUTION_DOCS}blocklist.html`,
@@ -496,6 +496,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         assetCriticality: `${SECURITY_SOLUTION_DOCS}asset-criticality.html`,
       },
       detectionEngineOverview: `${SECURITY_SOLUTION_DOCS}detection-engine-overview.html`,
+      aiAssistant: `${SECURITY_SOLUTION_DOCS}security-assistant.html`,
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -505,6 +506,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       percolate: `${ELASTICSEARCH_DOCS}query-dsl-percolate-query.html`,
       queryDsl: `${ELASTICSEARCH_DOCS}query-dsl.html`,
       queryESQL: `${ELASTICSEARCH_DOCS}esql.html`,
+      queryESQLExamples: `${ELASTICSEARCH_DOCS}esql-examples.html`,
     },
     search: {
       sessions: `${KIBANA_DOCS}search-sessions.html`,
@@ -618,6 +620,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       sloBurnRateRule: isServerless
         ? `${SERVERLESS_OBSERVABILITY_DOCS}create-slo-burn-rate-alert-rule`
         : `${OBSERVABILITY_DOCS}slo-burn-rate-alert.html`,
+      aiAssistant: `${OBSERVABILITY_DOCS}obs-ai-assistant.html`,
     },
     alerting: {
       guide: isServerless

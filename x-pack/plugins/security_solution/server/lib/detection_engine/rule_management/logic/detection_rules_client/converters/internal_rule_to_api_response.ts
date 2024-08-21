@@ -8,7 +8,10 @@
 import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RequiredOptional } from '@kbn/zod-helpers';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
-import { transformAlertToRuleAction } from '../../../../../../../common/detection_engine/transform_actions';
+import {
+  transformAlertToRuleAction,
+  transformAlertToRuleSystemAction,
+} from '../../../../../../../common/detection_engine/transform_actions';
 import { createRuleExecutionSummary } from '../../../../rule_monitoring';
 import type { RuleParams } from '../../../../rule_schema';
 import {
@@ -32,6 +35,10 @@ export const internalRuleToAPIResponse = (
   const alertActions = rule.actions.map(transformAlertToRuleAction);
   const throttle = transformFromAlertThrottle(rule);
   const actions = transformToActionFrequency(alertActions, throttle);
+  const systemActions = rule.systemActions?.map((action) => {
+    const transformedAction = transformAlertToRuleSystemAction(action);
+    return transformedAction;
+  });
   const normalizedRuleParams = normalizeRuleParams(rule.params);
 
   return {
@@ -56,7 +63,7 @@ export const internalRuleToAPIResponse = (
     ...typeSpecificCamelToSnake(rule.params),
     // Actions
     throttle: undefined,
-    actions,
+    actions: [...actions, ...(systemActions ?? [])],
     // Execution summary
     execution_summary: executionSummary ?? undefined,
   };

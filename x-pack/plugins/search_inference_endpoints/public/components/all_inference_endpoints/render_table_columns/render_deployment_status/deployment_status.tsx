@@ -15,7 +15,7 @@ interface DeploymentStatusProps {
 }
 
 export const DeploymentStatus: React.FC<DeploymentStatusProps> = ({ status }) => {
-  if (status === DeploymentStatusEnum.notApplicable) {
+  if (status === DeploymentStatusEnum.notApplicable || !status) {
     return null;
   }
 

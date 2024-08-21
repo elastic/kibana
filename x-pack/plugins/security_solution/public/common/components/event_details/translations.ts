@@ -7,46 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const INVESTIGATION_GUIDE = i18n.translate(
-  'xpack.securitySolution.alertDetails.overview.investigationGuide',
-  {
-    defaultMessage: 'Investigation guide',
-  }
-);
-
 export const TABLE = i18n.translate('xpack.securitySolution.eventDetails.table', {
   defaultMessage: 'Table',
-});
-
-export const OSQUERY_VIEW = i18n.translate('xpack.securitySolution.eventDetails.osqueryView', {
-  defaultMessage: 'Osquery Results',
-});
-
-export const RESPONSE_ACTIONS_VIEW = i18n.translate(
-  'xpack.securitySolution.eventDetails.responseActionsView',
-  {
-    defaultMessage: 'Response Results',
-  }
-);
-
-export const FIELD = i18n.translate('xpack.securitySolution.eventDetails.field', {
-  defaultMessage: 'Field',
-});
-
-export const VALUE = i18n.translate('xpack.securitySolution.eventDetails.value', {
-  defaultMessage: 'Value',
 });
 
 export const DESCRIPTION = i18n.translate('xpack.securitySolution.eventDetails.description', {
   defaultMessage: 'Description',
 });
-
-export const PLACEHOLDER = i18n.translate(
-  'xpack.securitySolution.eventDetails.filter.placeholder',
-  {
-    defaultMessage: 'Filter by Field, Value, or Description...',
-  }
-);
 
 export const AGENT_STATUS = i18n.translate('xpack.securitySolution.detections.alerts.agentStatus', {
   defaultMessage: 'Agent status',
@@ -62,20 +29,6 @@ export const QUARANTINED_FILE_PATH = i18n.translate(
 export const RULE_TYPE = i18n.translate('xpack.securitySolution.detections.alerts.ruleType', {
   defaultMessage: 'Rule type',
 });
-
-export const MULTI_FIELD_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.eventDetails.multiFieldTooltipContent',
-  {
-    defaultMessage: 'Multi-fields can have multiple values per field',
-  }
-);
-
-export const MULTI_FIELD_BADGE = i18n.translate(
-  'xpack.securitySolution.eventDetails.multiFieldBadge',
-  {
-    defaultMessage: 'multi-field',
-  }
-);
 
 export const ACTIONS = i18n.translate('xpack.securitySolution.eventDetails.table.actions', {
   defaultMessage: 'Actions',

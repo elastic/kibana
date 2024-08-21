@@ -7,11 +7,73 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import { Root } from '@kbn/core-root-server-internal';
-import { createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
+import type { Root } from '@kbn/core-root-server-internal';
+import {
+  createTestServers,
+  createRootWithCorePlugins,
+  type TestElasticsearchUtils,
+  request,
+} from '@kbn/core-test-helpers-kbn-server';
 import { PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';
 
-describe('checking migration metadata changes on all registered SO types', () => {
+describe('PUT /internal/core/_settings', () => {
+  let esServer: TestElasticsearchUtils;
+  let root: Root;
+
+  const loggerName = 'my-test-logger';
+
+  beforeAll(async () => {
+    const settings = {
+      coreApp: { allowDynamicConfigOverrides: true },
+      logging: {
+        loggers: [{ name: loggerName, level: 'error', appenders: ['console'] }],
+      },
+    };
+    const { startES, startKibana } = createTestServers({
+      adjustTimeout: (t: number) => jest.setTimeout(t),
+      settings: {
+        kbn: settings,
+      },
+    });
+
+    esServer = await startES();
+
+    const kbnUtils = await startKibana();
+    root = kbnUtils.root;
+
+    // eslint-disable-next-line dot-notation
+    root['server'].configService.addDynamicConfigPaths('logging', ['loggers']); // just for the sake of being able to change something easy to test
+  });
+
+  afterAll(async () => {
+    await root?.shutdown();
+    await esServer?.stop();
+  });
+
+  test('should update the log level', async () => {
+    const logger = root.logger.get(loggerName);
+    expect(logger.isLevelEnabled('info')).toBe(false);
+    await request
+      .put(root, '/internal/core/_settings')
+      .set('Elastic-Api-Version', '1')
+      .send({ 'logging.loggers': [{ name: loggerName, level: 'debug', appenders: ['console'] }] })
+      .expect(200);
+    expect(logger.isLevelEnabled('info')).toBe(true);
+  });
+
+  test('should remove the setting', async () => {
+    const logger = root.logger.get(loggerName);
+    expect(logger.isLevelEnabled('info')).toBe(true); // still true from the previous test
+    await request
+      .put(root, '/internal/core/_settings')
+      .set('Elastic-Api-Version', '1')
+      .send({ 'logging.loggers': null })
+      .expect(200);
+    expect(logger.isLevelEnabled('info')).toBe(false);
+  });
+});
+
+describe('checking all opted-in dynamic config settings', () => {
   let root: Root;
 
   beforeAll(async () => {

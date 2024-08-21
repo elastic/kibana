@@ -10,20 +10,25 @@ import type { Plugin, CoreStart, CoreSetup } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { setKibanaServices } from './kibana_services';
 
 interface ESQLDataGridPluginStart {
   data: DataPublicPluginStart;
   uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;
+  share?: SharePluginStart;
 }
 export class ESQLDataGridPlugin implements Plugin<{}, void> {
   public setup(_: CoreSetup, {}: {}) {
     return {};
   }
 
-  public start(core: CoreStart, { data, uiActions, fieldFormats }: ESQLDataGridPluginStart): void {
-    setKibanaServices(core, data, uiActions, fieldFormats);
+  public start(
+    core: CoreStart,
+    { data, uiActions, fieldFormats, share }: ESQLDataGridPluginStart
+  ): void {
+    setKibanaServices(core, data, uiActions, fieldFormats, share);
   }
 
   public stop() {}

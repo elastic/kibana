@@ -151,6 +151,7 @@ describe('options list queries', () => {
           size: 10,
           fieldName: 'coolTestField',
           allowExpensiveQueries: true,
+          fieldSpec: { type: 'string' } as FieldSpec,
         })
       ).toMatchInlineSnapshot(`
         Array [

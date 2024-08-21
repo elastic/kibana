@@ -769,7 +769,7 @@
         "signature": [
           "{ messages: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[]; }"
         ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen.ts",
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/append_message.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -784,7 +784,7 @@
         "signature": [
           "{ messages: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[]; }"
         ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen.ts",
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/append_message.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -799,7 +799,7 @@
         "signature": [
           "{ id: string; }"
         ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen.ts",
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/append_message.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -814,7 +814,7 @@
         "signature": [
           "{ id: string; }"
         ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen.ts",
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/append_message.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -829,7 +829,7 @@
         "signature": [
           "{ id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }"
         ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen.ts",
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/append_message.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1148,66 +1148,6 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.BulkActionSkipReason",
-        "type": "Type",
-        "tags": [],
-        "label": "BulkActionSkipReason",
-        "description": [],
-        "signature": [
-          "\"CONVERSATION_NOT_MODIFIED\""
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/bulk_crud_conversations_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.BulkActionSkipResult",
-        "type": "Type",
-        "tags": [],
-        "label": "BulkActionSkipResult",
-        "description": [],
-        "signature": [
-          "{ id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }"
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/bulk_crud_conversations_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.BulkCrudActionResponse",
-        "type": "Type",
-        "tags": [],
-        "label": "BulkCrudActionResponse",
-        "description": [],
-        "signature": [
-          "{ attributes: { results: { created: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; updated: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; skipped: { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }[]; deleted: string[]; }; summary: { total: number; succeeded: number; failed: number; skipped: number; }; errors?: { message: string; status_code: number; conversations: { id: string; name?: string | undefined; }[]; err_code?: string | undefined; }[] | undefined; }; message?: string | undefined; success?: boolean | undefined; status_code?: number | undefined; conversations_count?: number | undefined; }"
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/bulk_crud_conversations_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.BulkCrudActionResults",
-        "type": "Type",
-        "tags": [],
-        "label": "BulkCrudActionResults",
-        "description": [],
-        "signature": [
-          "{ created: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; updated: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; skipped: { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }[]; deleted: string[]; }"
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/bulk_crud_conversations_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.BulkCrudActionSummary",
         "type": "Type",
         "tags": [],
@@ -1441,6 +1381,66 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ConversationsBulkActionSkipReason",
+        "type": "Type",
+        "tags": [],
+        "label": "ConversationsBulkActionSkipReason",
+        "description": [],
+        "signature": [
+          "\"CONVERSATION_NOT_MODIFIED\""
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/bulk_crud_conversations_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ConversationsBulkActionSkipResult",
+        "type": "Type",
+        "tags": [],
+        "label": "ConversationsBulkActionSkipResult",
+        "description": [],
+        "signature": [
+          "{ id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/bulk_crud_conversations_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ConversationsBulkCrudActionResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "ConversationsBulkCrudActionResponse",
+        "description": [],
+        "signature": [
+          "{ attributes: { results: { created: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; updated: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; skipped: { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }[]; deleted: string[]; }; summary: { total: number; succeeded: number; failed: number; skipped: number; }; errors?: { message: string; status_code: number; conversations: { id: string; name?: string | undefined; }[]; err_code?: string | undefined; }[] | undefined; }; message?: string | undefined; success?: boolean | undefined; status_code?: number | undefined; conversations_count?: number | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/bulk_crud_conversations_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ConversationsBulkCrudActionResults",
+        "type": "Type",
+        "tags": [],
+        "label": "ConversationsBulkCrudActionResults",
+        "description": [],
+        "signature": [
+          "{ created: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; updated: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; skipped: { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }[]; deleted: string[]; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/bulk_crud_conversations_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.ConversationSummary",
         "type": "Type",
         "tags": [],
@@ -1606,36 +1606,6 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.Dataset",
-        "type": "Type",
-        "tags": [],
-        "label": "Dataset",
-        "description": [],
-        "signature": [
-          "{ input: string; reference: string; id?: string | undefined; tags?: string[] | undefined; prediction?: string | undefined; }[]"
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.DatasetItem",
-        "type": "Type",
-        "tags": [],
-        "label": "DatasetItem",
-        "description": [],
-        "signature": [
-          "{ input: string; reference: string; id?: string | undefined; tags?: string[] | undefined; prediction?: string | undefined; }"
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.DeleteConversationRequestParams",
         "type": "Type",
         "tags": [],
@@ -1776,6 +1746,9 @@
         "tags": [],
         "label": "ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL",
         "description": [],
+        "signature": [
+          "\"/api/security_ai_assistant/anonymization_fields\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1788,6 +1761,9 @@
         "tags": [],
         "label": "ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION",
         "description": [],
+        "signature": [
+          "\"/api/security_ai_assistant/anonymization_fields/_bulk_action\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1800,6 +1776,9 @@
         "tags": [],
         "label": "ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND",
         "description": [],
+        "signature": [
+          "\"/api/security_ai_assistant/anonymization_fields/_find\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1812,6 +1791,9 @@
         "tags": [],
         "label": "ELASTIC_AI_ASSISTANT_CHAT_COMPLETE_URL",
         "description": [],
+        "signature": [
+          "\"/api/security_ai_assistant/chat/complete\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1824,6 +1806,9 @@
         "tags": [],
         "label": "ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL",
         "description": [],
+        "signature": [
+          "\"/api/security_ai_assistant/current_user/conversations\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1836,6 +1821,9 @@
         "tags": [],
         "label": "ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION",
         "description": [],
+        "signature": [
+          "\"/internal/elastic_assistant/current_user/conversations/_bulk_action\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1848,6 +1836,9 @@
         "tags": [],
         "label": "ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID",
         "description": [],
+        "signature": [
+          "\"/api/security_ai_assistant/current_user/conversations/{id}\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1860,6 +1851,9 @@
         "tags": [],
         "label": "ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID_MESSAGES",
         "description": [],
+        "signature": [
+          "\"/internal/elastic_assistant/current_user/conversations/{id}/messages\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1872,6 +1866,24 @@
         "tags": [],
         "label": "ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND",
         "description": [],
+        "signature": [
+          "\"/api/security_ai_assistant/current_user/conversations/_find\""
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ELASTIC_AI_ASSISTANT_EVALUATE_URL",
+        "type": "string",
+        "tags": [],
+        "label": "ELASTIC_AI_ASSISTANT_EVALUATE_URL",
+        "description": [],
+        "signature": [
+          "\"/internal/elastic_assistant/evaluate\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1899,6 +1911,9 @@
         "tags": [],
         "label": "ELASTIC_AI_ASSISTANT_INTERNAL_CONVERSATIONS_URL",
         "description": [],
+        "signature": [
+          "\"/internal/elastic_assistant/current_user/conversations\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1926,6 +1941,9 @@
         "tags": [],
         "label": "ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL",
         "description": [],
+        "signature": [
+          "\"/internal/elastic_assistant/knowledge_base/entries\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1938,6 +1956,9 @@
         "tags": [],
         "label": "ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION",
         "description": [],
+        "signature": [
+          "\"/internal/elastic_assistant/knowledge_base/entries/_bulk_action\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1950,6 +1971,9 @@
         "tags": [],
         "label": "ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND",
         "description": [],
+        "signature": [
+          "\"/internal/elastic_assistant/knowledge_base/entries/_find\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1962,6 +1986,9 @@
         "tags": [],
         "label": "ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL",
         "description": [],
+        "signature": [
+          "\"/internal/elastic_assistant/knowledge_base/{resource?}\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1974,6 +2001,9 @@
         "tags": [],
         "label": "ELASTIC_AI_ASSISTANT_PROMPTS_URL",
         "description": [],
+        "signature": [
+          "\"/api/security_ai_assistant/prompts\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1986,6 +2016,9 @@
         "tags": [],
         "label": "ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION",
         "description": [],
+        "signature": [
+          "\"/api/security_ai_assistant/prompts/_bulk_action\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1998,6 +2031,9 @@
         "tags": [],
         "label": "ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND",
         "description": [],
+        "signature": [
+          "\"/api/security_ai_assistant/prompts/_find\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2177,51 +2213,6 @@
         "description": [],
         "signature": [
           "{ title: \"title\"; updated_at: \"updated_at\"; created_at: \"created_at\"; is_default: \"is_default\"; }"
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/find_conversations_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.FindCurrentUserConversationsRequestQuery",
-        "type": "Type",
-        "tags": [],
-        "label": "FindCurrentUserConversationsRequestQuery",
-        "description": [],
-        "signature": [
-          "{ per_page: number; page: number; sort_field?: \"title\" | \"created_at\" | \"updated_at\" | \"is_default\" | undefined; sort_order?: \"asc\" | \"desc\" | undefined; filter?: string | undefined; fields?: string[] | undefined; }"
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/find_conversations_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.FindCurrentUserConversationsRequestQueryInput",
-        "type": "Type",
-        "tags": [],
-        "label": "FindCurrentUserConversationsRequestQueryInput",
-        "description": [],
-        "signature": [
-          "{ per_page?: number | undefined; page?: number | undefined; sort_field?: \"title\" | \"created_at\" | \"updated_at\" | \"is_default\" | undefined; sort_order?: \"asc\" | \"desc\" | undefined; filter?: string | undefined; fields?: unknown; }"
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/find_conversations_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.FindCurrentUserConversationsResponse",
-        "type": "Type",
-        "tags": [],
-        "label": "FindCurrentUserConversationsResponse",
-        "description": [],
-        "signature": [
-          "{ page: number; perPage: number; total: number; data: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/find_conversations_route.gen.ts",
         "deprecated": false,
@@ -2418,7 +2409,7 @@
         "label": "GetEvaluateResponse",
         "description": [],
         "signature": [
-          "{ agentExecutors: string[]; }"
+          "{ datasets: string[]; graphs: string[]; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/get_evaluate_route.gen.ts",
         "deprecated": false,
@@ -2752,21 +2743,6 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.OutputIndex",
-        "type": "Type",
-        "tags": [],
-        "label": "OutputIndex",
-        "description": [],
-        "signature": [
-          "string"
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.PerformBulkActionRequestBody",
         "type": "Type",
         "tags": [],
@@ -2863,7 +2839,7 @@
         "label": "PostEvaluateBody",
         "description": [],
         "signature": [
-          "{ dataset?: { input: string; reference: string; id?: string | undefined; tags?: string[] | undefined; prediction?: string | undefined; }[] | undefined; evalPrompt?: string | undefined; }"
+          "{ size: number; alertsIndexPattern: string; replacements: {} & { [k: string]: string; }; graphs: string[]; datasetName: string; connectorIds: string[]; langSmithApiKey?: string | undefined; runName?: string | undefined; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
         "deprecated": false,
@@ -2878,7 +2854,7 @@
         "label": "PostEvaluateRequestBody",
         "description": [],
         "signature": [
-          "{ dataset?: { input: string; reference: string; id?: string | undefined; tags?: string[] | undefined; prediction?: string | undefined; }[] | undefined; evalPrompt?: string | undefined; }"
+          "{ size: number; alertsIndexPattern: string; replacements: {} & { [k: string]: string; }; graphs: string[]; datasetName: string; connectorIds: string[]; langSmithApiKey?: string | undefined; runName?: string | undefined; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
         "deprecated": false,
@@ -2893,37 +2869,7 @@
         "label": "PostEvaluateRequestBodyInput",
         "description": [],
         "signature": [
-          "{ dataset?: { input: string; reference: string; id?: string | undefined; tags?: string[] | undefined; prediction?: string | undefined; }[] | undefined; evalPrompt?: string | undefined; }"
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.PostEvaluateRequestQuery",
-        "type": "Type",
-        "tags": [],
-        "label": "PostEvaluateRequestQuery",
-        "description": [],
-        "signature": [
-          "{ agents: string; models: string; outputIndex: string; projectName?: string | undefined; datasetName?: string | undefined; evaluationType?: string | undefined; evalModel?: string | undefined; runName?: string | undefined; }"
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.PostEvaluateRequestQueryInput",
-        "type": "Type",
-        "tags": [],
-        "label": "PostEvaluateRequestQueryInput",
-        "description": [],
-        "signature": [
-          "{ agents: string; models: string; outputIndex: string; projectName?: string | undefined; datasetName?: string | undefined; evaluationType?: string | undefined; evalModel?: string | undefined; runName?: string | undefined; }"
+          "{ graphs: string[]; datasetName: string; connectorIds: string[]; size?: number | undefined; alertsIndexPattern?: string | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; langSmithApiKey?: string | undefined; runName?: string | undefined; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
         "deprecated": false,
@@ -3165,7 +3111,7 @@
         "label": "ReadKnowledgeBaseResponse",
         "description": [],
         "signature": [
-          "{ elser_exists?: boolean | undefined; esql_exists?: boolean | undefined; index_exists?: boolean | undefined; is_setup_in_progress?: boolean | undefined; pipeline_exists?: boolean | undefined; }"
+          "{ elser_exists?: boolean | undefined; esql_exists?: boolean | undefined; index_exists?: boolean | undefined; is_setup_available?: boolean | undefined; is_setup_in_progress?: boolean | undefined; pipeline_exists?: boolean | undefined; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
         "deprecated": false,
@@ -3461,59 +3407,12 @@
         "tags": [],
         "label": "API_VERSIONS",
         "description": [],
+        "signature": [
+          "{ readonly public: { readonly v1: \"2023-10-31\"; }; readonly internal: { readonly v1: \"1\"; }; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/index.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/elastic-assistant-common",
-            "id": "def-common.API_VERSIONS.public",
-            "type": "Object",
-            "tags": [],
-            "label": "public",
-            "description": [],
-            "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/elastic-assistant-common",
-                "id": "def-common.API_VERSIONS.public.v1",
-                "type": "string",
-                "tags": [],
-                "label": "v1",
-                "description": [],
-                "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/index.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "@kbn/elastic-assistant-common",
-            "id": "def-common.API_VERSIONS.internal",
-            "type": "Object",
-            "tags": [],
-            "label": "internal",
-            "description": [],
-            "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/elastic-assistant-common",
-                "id": "def-common.API_VERSIONS.internal.v1",
-                "type": "string",
-                "tags": [],
-                "label": "v1",
-                "description": [],
-                "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/index.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
         "initialIsOpen": false
       },
       {
@@ -3541,7 +3440,7 @@
         "signature": [
           "Zod.ZodObject<{ messages: Zod.ZodArray<Zod.ZodObject<{ content: Zod.ZodString; reader: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodUnknown, Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">, Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">>>; role: Zod.ZodEnum<[\"system\", \"user\", \"assistant\"]>; timestamp: Zod.ZodString; isError: Zod.ZodOptional<Zod.ZodBoolean>; traceData: Zod.ZodOptional<Zod.ZodObject<{ transactionId: Zod.ZodOptional<Zod.ZodString>; traceId: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { transactionId?: string | undefined; traceId?: string | undefined; }, { transactionId?: string | undefined; traceId?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }, { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { messages: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[]; }, { messages: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[]; }>"
         ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen.ts",
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/append_message.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3556,7 +3455,7 @@
         "signature": [
           "Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>"
         ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen.ts",
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/append_message.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3571,7 +3470,7 @@
         "signature": [
           "Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; category: Zod.ZodEnum<[\"assistant\", \"insights\"]>; summary: Zod.ZodOptional<Zod.ZodObject<{ content: Zod.ZodOptional<Zod.ZodString>; timestamp: Zod.ZodOptional<Zod.ZodString>; public: Zod.ZodOptional<Zod.ZodBoolean>; confidence: Zod.ZodOptional<Zod.ZodEnum<[\"low\", \"medium\", \"high\"]>>; }, \"strip\", Zod.ZodTypeAny, { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; }, { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; }>>; timestamp: Zod.ZodOptional<Zod.ZodString>; updatedAt: Zod.ZodOptional<Zod.ZodString>; createdAt: Zod.ZodString; replacements: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>; users: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id?: string | undefined; name?: string | undefined; }, { id?: string | undefined; name?: string | undefined; }>, \"many\">; messages: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ content: Zod.ZodString; reader: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodUnknown, Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">, Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">>>; role: Zod.ZodEnum<[\"system\", \"user\", \"assistant\"]>; timestamp: Zod.ZodString; isError: Zod.ZodOptional<Zod.ZodBoolean>; traceData: Zod.ZodOptional<Zod.ZodObject<{ transactionId: Zod.ZodOptional<Zod.ZodString>; traceId: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { transactionId?: string | undefined; traceId?: string | undefined; }, { transactionId?: string | undefined; traceId?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }, { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }>, \"many\">>; apiConfig: Zod.ZodOptional<Zod.ZodObject<{ connectorId: Zod.ZodString; actionTypeId: Zod.ZodString; defaultSystemPromptId: Zod.ZodOptional<Zod.ZodString>; provider: Zod.ZodOptional<Zod.ZodEnum<[\"OpenAI\", \"Azure OpenAI\"]>>; model: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; }, { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; }>>; isDefault: Zod.ZodOptional<Zod.ZodBoolean>; excludeFromLastConversationStorage: Zod.ZodOptional<Zod.ZodBoolean>; namespace: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }, { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }>"
         ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen.ts",
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/append_message.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3818,66 +3717,6 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.BulkActionSkipReason",
-        "type": "Object",
-        "tags": [],
-        "label": "BulkActionSkipReason",
-        "description": [],
-        "signature": [
-          "Zod.ZodLiteral<\"CONVERSATION_NOT_MODIFIED\">"
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/bulk_crud_conversations_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.BulkActionSkipResult",
-        "type": "Object",
-        "tags": [],
-        "label": "BulkActionSkipResult",
-        "description": [],
-        "signature": [
-          "Zod.ZodObject<{ id: Zod.ZodString; name: Zod.ZodOptional<Zod.ZodString>; skip_reason: Zod.ZodLiteral<\"CONVERSATION_NOT_MODIFIED\">; }, \"strip\", Zod.ZodTypeAny, { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }, { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }>"
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/bulk_crud_conversations_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.BulkCrudActionResponse",
-        "type": "Object",
-        "tags": [],
-        "label": "BulkCrudActionResponse",
-        "description": [],
-        "signature": [
-          "Zod.ZodObject<{ success: Zod.ZodOptional<Zod.ZodBoolean>; status_code: Zod.ZodOptional<Zod.ZodNumber>; message: Zod.ZodOptional<Zod.ZodString>; conversations_count: Zod.ZodOptional<Zod.ZodNumber>; attributes: Zod.ZodObject<{ results: Zod.ZodObject<{ updated: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; category: Zod.ZodEnum<[\"assistant\", \"insights\"]>; summary: Zod.ZodOptional<Zod.ZodObject<{ content: Zod.ZodOptional<Zod.ZodString>; timestamp: Zod.ZodOptional<Zod.ZodString>; public: Zod.ZodOptional<Zod.ZodBoolean>; confidence: Zod.ZodOptional<Zod.ZodEnum<[\"low\", \"medium\", \"high\"]>>; }, \"strip\", Zod.ZodTypeAny, { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; }, { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; }>>; timestamp: Zod.ZodOptional<Zod.ZodString>; updatedAt: Zod.ZodOptional<Zod.ZodString>; createdAt: Zod.ZodString; replacements: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>; users: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id?: string | undefined; name?: string | undefined; }, { id?: string | undefined; name?: string | undefined; }>, \"many\">; messages: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ content: Zod.ZodString; reader: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodUnknown, Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">, Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">>>; role: Zod.ZodEnum<[\"system\", \"user\", \"assistant\"]>; timestamp: Zod.ZodString; isError: Zod.ZodOptional<Zod.ZodBoolean>; traceData: Zod.ZodOptional<Zod.ZodObject<{ transactionId: Zod.ZodOptional<Zod.ZodString>; traceId: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { transactionId?: string | undefined; traceId?: string | undefined; }, { transactionId?: string | undefined; traceId?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }, { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }>, \"many\">>; apiConfig: Zod.ZodOptional<Zod.ZodObject<{ connectorId: Zod.ZodString; actionTypeId: Zod.ZodString; defaultSystemPromptId: Zod.ZodOptional<Zod.ZodString>; provider: Zod.ZodOptional<Zod.ZodEnum<[\"OpenAI\", \"Azure OpenAI\"]>>; model: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; }, { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; }>>; isDefault: Zod.ZodOptional<Zod.ZodBoolean>; excludeFromLastConversationStorage: Zod.ZodOptional<Zod.ZodBoolean>; namespace: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }, { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }>, \"many\">; created: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; category: Zod.ZodEnum<[\"assistant\", \"insights\"]>; summary: Zod.ZodOptional<Zod.ZodObject<{ content: Zod.ZodOptional<Zod.ZodString>; timestamp: Zod.ZodOptional<Zod.ZodString>; public: Zod.ZodOptional<Zod.ZodBoolean>; confidence: Zod.ZodOptional<Zod.ZodEnum<[\"low\", \"medium\", \"high\"]>>; }, \"strip\", Zod.ZodTypeAny, { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; }, { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; }>>; timestamp: Zod.ZodOptional<Zod.ZodString>; updatedAt: Zod.ZodOptional<Zod.ZodString>; createdAt: Zod.ZodString; replacements: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>; users: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id?: string | undefined; name?: string | undefined; }, { id?: string | undefined; name?: string | undefined; }>, \"many\">; messages: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ content: Zod.ZodString; reader: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodUnknown, Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">, Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">>>; role: Zod.ZodEnum<[\"system\", \"user\", \"assistant\"]>; timestamp: Zod.ZodString; isError: Zod.ZodOptional<Zod.ZodBoolean>; traceData: Zod.ZodOptional<Zod.ZodObject<{ transactionId: Zod.ZodOptional<Zod.ZodString>; traceId: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { transactionId?: string | undefined; traceId?: string | undefined; }, { transactionId?: string | undefined; traceId?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }, { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }>, \"many\">>; apiConfig: Zod.ZodOptional<Zod.ZodObject<{ connectorId: Zod.ZodString; actionTypeId: Zod.ZodString; defaultSystemPromptId: Zod.ZodOptional<Zod.ZodString>; provider: Zod.ZodOptional<Zod.ZodEnum<[\"OpenAI\", \"Azure OpenAI\"]>>; model: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; }, { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; }>>; isDefault: Zod.ZodOptional<Zod.ZodBoolean>; excludeFromLastConversationStorage: Zod.ZodOptional<Zod.ZodBoolean>; namespace: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }, { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }>, \"many\">; deleted: Zod.ZodArray<Zod.ZodString, \"many\">; skipped: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; name: Zod.ZodOptional<Zod.ZodString>; skip_reason: Zod.ZodLiteral<\"CONVERSATION_NOT_MODIFIED\">; }, \"strip\", Zod.ZodTypeAny, { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }, { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { created: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; updated: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; skipped: { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }[]; deleted: string[]; }, { created: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; updated: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; skipped: { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }[]; deleted: string[]; }>; summary: Zod.ZodObject<{ failed: Zod.ZodNumber; skipped: Zod.ZodNumber; succeeded: Zod.ZodNumber; total: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { total: number; succeeded: number; failed: number; skipped: number; }, { total: number; succeeded: number; failed: number; skipped: number; }>; errors: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ message: Zod.ZodString; status_code: Zod.ZodNumber; err_code: Zod.ZodOptional<Zod.ZodString>; conversations: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id: string; name?: string | undefined; }, { id: string; name?: string | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { message: string; status_code: number; conversations: { id: string; name?: string | undefined; }[]; err_code?: string | undefined; }, { message: string; status_code: number; conversations: { id: string; name?: string | undefined; }[]; err_code?: string | undefined; }>, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { results: { created: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; updated: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; skipped: { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }[]; deleted: string[]; }; summary: { total: number; succeeded: number; failed: number; skipped: number; }; errors?: { message: string; status_code: number; conversations: { id: string; name?: string | undefined; }[]; err_code?: string | undefined; }[] | undefined; }, { results: { created: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; updated: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; skipped: { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }[]; deleted: string[]; }; summary: { total: number; succeeded: number; failed: number; skipped: number; }; errors?: { message: string; status_code: number; conversations: { id: string; name?: string | undefined; }[]; err_code?: string | undefined; }[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { attributes: { results: { created: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; updated: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; skipped: { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }[]; deleted: string[]; }; summary: { total: number; succeeded: number; failed: number; skipped: number; }; errors?: { message: string; status_code: number; conversations: { id: string; name?: string | undefined; }[]; err_code?: string | undefined; }[] | undefined; }; message?: string | undefined; success?: boolean | undefined; status_code?: number | undefined; conversations_count?: number | undefined; }, { attributes: { results: { created: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; updated: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; skipped: { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }[]; deleted: string[]; }; summary: { total: number; succeeded: number; failed: number; skipped: number; }; errors?: { message: string; status_code: number; conversations: { id: string; name?: string | undefined; }[]; err_code?: string | undefined; }[] | undefined; }; message?: string | undefined; success?: boolean | undefined; status_code?: number | undefined; conversations_count?: number | undefined; }>"
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/bulk_crud_conversations_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.BulkCrudActionResults",
-        "type": "Object",
-        "tags": [],
-        "label": "BulkCrudActionResults",
-        "description": [],
-        "signature": [
-          "Zod.ZodObject<{ updated: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; category: Zod.ZodEnum<[\"assistant\", \"insights\"]>; summary: Zod.ZodOptional<Zod.ZodObject<{ content: Zod.ZodOptional<Zod.ZodString>; timestamp: Zod.ZodOptional<Zod.ZodString>; public: Zod.ZodOptional<Zod.ZodBoolean>; confidence: Zod.ZodOptional<Zod.ZodEnum<[\"low\", \"medium\", \"high\"]>>; }, \"strip\", Zod.ZodTypeAny, { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; }, { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; }>>; timestamp: Zod.ZodOptional<Zod.ZodString>; updatedAt: Zod.ZodOptional<Zod.ZodString>; createdAt: Zod.ZodString; replacements: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>; users: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id?: string | undefined; name?: string | undefined; }, { id?: string | undefined; name?: string | undefined; }>, \"many\">; messages: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ content: Zod.ZodString; reader: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodUnknown, Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">, Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">>>; role: Zod.ZodEnum<[\"system\", \"user\", \"assistant\"]>; timestamp: Zod.ZodString; isError: Zod.ZodOptional<Zod.ZodBoolean>; traceData: Zod.ZodOptional<Zod.ZodObject<{ transactionId: Zod.ZodOptional<Zod.ZodString>; traceId: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { transactionId?: string | undefined; traceId?: string | undefined; }, { transactionId?: string | undefined; traceId?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }, { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }>, \"many\">>; apiConfig: Zod.ZodOptional<Zod.ZodObject<{ connectorId: Zod.ZodString; actionTypeId: Zod.ZodString; defaultSystemPromptId: Zod.ZodOptional<Zod.ZodString>; provider: Zod.ZodOptional<Zod.ZodEnum<[\"OpenAI\", \"Azure OpenAI\"]>>; model: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; }, { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; }>>; isDefault: Zod.ZodOptional<Zod.ZodBoolean>; excludeFromLastConversationStorage: Zod.ZodOptional<Zod.ZodBoolean>; namespace: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }, { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }>, \"many\">; created: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; category: Zod.ZodEnum<[\"assistant\", \"insights\"]>; summary: Zod.ZodOptional<Zod.ZodObject<{ content: Zod.ZodOptional<Zod.ZodString>; timestamp: Zod.ZodOptional<Zod.ZodString>; public: Zod.ZodOptional<Zod.ZodBoolean>; confidence: Zod.ZodOptional<Zod.ZodEnum<[\"low\", \"medium\", \"high\"]>>; }, \"strip\", Zod.ZodTypeAny, { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; }, { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; }>>; timestamp: Zod.ZodOptional<Zod.ZodString>; updatedAt: Zod.ZodOptional<Zod.ZodString>; createdAt: Zod.ZodString; replacements: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>; users: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id?: string | undefined; name?: string | undefined; }, { id?: string | undefined; name?: string | undefined; }>, \"many\">; messages: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ content: Zod.ZodString; reader: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodUnknown, Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">, Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">>>; role: Zod.ZodEnum<[\"system\", \"user\", \"assistant\"]>; timestamp: Zod.ZodString; isError: Zod.ZodOptional<Zod.ZodBoolean>; traceData: Zod.ZodOptional<Zod.ZodObject<{ transactionId: Zod.ZodOptional<Zod.ZodString>; traceId: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { transactionId?: string | undefined; traceId?: string | undefined; }, { transactionId?: string | undefined; traceId?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }, { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }>, \"many\">>; apiConfig: Zod.ZodOptional<Zod.ZodObject<{ connectorId: Zod.ZodString; actionTypeId: Zod.ZodString; defaultSystemPromptId: Zod.ZodOptional<Zod.ZodString>; provider: Zod.ZodOptional<Zod.ZodEnum<[\"OpenAI\", \"Azure OpenAI\"]>>; model: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; }, { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; }>>; isDefault: Zod.ZodOptional<Zod.ZodBoolean>; excludeFromLastConversationStorage: Zod.ZodOptional<Zod.ZodBoolean>; namespace: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }, { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }>, \"many\">; deleted: Zod.ZodArray<Zod.ZodString, \"many\">; skipped: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; name: Zod.ZodOptional<Zod.ZodString>; skip_reason: Zod.ZodLiteral<\"CONVERSATION_NOT_MODIFIED\">; }, \"strip\", Zod.ZodTypeAny, { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }, { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { created: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; updated: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; skipped: { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }[]; deleted: string[]; }, { created: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; updated: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; skipped: { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }[]; deleted: string[]; }>"
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/bulk_crud_conversations_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.BulkCrudActionSummary",
         "type": "Object",
         "tags": [],
@@ -4088,6 +3927,66 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ConversationsBulkActionSkipReason",
+        "type": "Object",
+        "tags": [],
+        "label": "ConversationsBulkActionSkipReason",
+        "description": [],
+        "signature": [
+          "Zod.ZodLiteral<\"CONVERSATION_NOT_MODIFIED\">"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/bulk_crud_conversations_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ConversationsBulkActionSkipResult",
+        "type": "Object",
+        "tags": [],
+        "label": "ConversationsBulkActionSkipResult",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ id: Zod.ZodString; name: Zod.ZodOptional<Zod.ZodString>; skip_reason: Zod.ZodLiteral<\"CONVERSATION_NOT_MODIFIED\">; }, \"strip\", Zod.ZodTypeAny, { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }, { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/bulk_crud_conversations_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ConversationsBulkCrudActionResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "ConversationsBulkCrudActionResponse",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ success: Zod.ZodOptional<Zod.ZodBoolean>; status_code: Zod.ZodOptional<Zod.ZodNumber>; message: Zod.ZodOptional<Zod.ZodString>; conversations_count: Zod.ZodOptional<Zod.ZodNumber>; attributes: Zod.ZodObject<{ results: Zod.ZodObject<{ updated: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; category: Zod.ZodEnum<[\"assistant\", \"insights\"]>; summary: Zod.ZodOptional<Zod.ZodObject<{ content: Zod.ZodOptional<Zod.ZodString>; timestamp: Zod.ZodOptional<Zod.ZodString>; public: Zod.ZodOptional<Zod.ZodBoolean>; confidence: Zod.ZodOptional<Zod.ZodEnum<[\"low\", \"medium\", \"high\"]>>; }, \"strip\", Zod.ZodTypeAny, { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; }, { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; }>>; timestamp: Zod.ZodOptional<Zod.ZodString>; updatedAt: Zod.ZodOptional<Zod.ZodString>; createdAt: Zod.ZodString; replacements: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>; users: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id?: string | undefined; name?: string | undefined; }, { id?: string | undefined; name?: string | undefined; }>, \"many\">; messages: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ content: Zod.ZodString; reader: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodUnknown, Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">, Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">>>; role: Zod.ZodEnum<[\"system\", \"user\", \"assistant\"]>; timestamp: Zod.ZodString; isError: Zod.ZodOptional<Zod.ZodBoolean>; traceData: Zod.ZodOptional<Zod.ZodObject<{ transactionId: Zod.ZodOptional<Zod.ZodString>; traceId: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { transactionId?: string | undefined; traceId?: string | undefined; }, { transactionId?: string | undefined; traceId?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }, { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }>, \"many\">>; apiConfig: Zod.ZodOptional<Zod.ZodObject<{ connectorId: Zod.ZodString; actionTypeId: Zod.ZodString; defaultSystemPromptId: Zod.ZodOptional<Zod.ZodString>; provider: Zod.ZodOptional<Zod.ZodEnum<[\"OpenAI\", \"Azure OpenAI\"]>>; model: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; }, { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; }>>; isDefault: Zod.ZodOptional<Zod.ZodBoolean>; excludeFromLastConversationStorage: Zod.ZodOptional<Zod.ZodBoolean>; namespace: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }, { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }>, \"many\">; created: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; category: Zod.ZodEnum<[\"assistant\", \"insights\"]>; summary: Zod.ZodOptional<Zod.ZodObject<{ content: Zod.ZodOptional<Zod.ZodString>; timestamp: Zod.ZodOptional<Zod.ZodString>; public: Zod.ZodOptional<Zod.ZodBoolean>; confidence: Zod.ZodOptional<Zod.ZodEnum<[\"low\", \"medium\", \"high\"]>>; }, \"strip\", Zod.ZodTypeAny, { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; }, { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; }>>; timestamp: Zod.ZodOptional<Zod.ZodString>; updatedAt: Zod.ZodOptional<Zod.ZodString>; createdAt: Zod.ZodString; replacements: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>; users: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id?: string | undefined; name?: string | undefined; }, { id?: string | undefined; name?: string | undefined; }>, \"many\">; messages: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ content: Zod.ZodString; reader: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodUnknown, Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">, Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">>>; role: Zod.ZodEnum<[\"system\", \"user\", \"assistant\"]>; timestamp: Zod.ZodString; isError: Zod.ZodOptional<Zod.ZodBoolean>; traceData: Zod.ZodOptional<Zod.ZodObject<{ transactionId: Zod.ZodOptional<Zod.ZodString>; traceId: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { transactionId?: string | undefined; traceId?: string | undefined; }, { transactionId?: string | undefined; traceId?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }, { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }>, \"many\">>; apiConfig: Zod.ZodOptional<Zod.ZodObject<{ connectorId: Zod.ZodString; actionTypeId: Zod.ZodString; defaultSystemPromptId: Zod.ZodOptional<Zod.ZodString>; provider: Zod.ZodOptional<Zod.ZodEnum<[\"OpenAI\", \"Azure OpenAI\"]>>; model: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; }, { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; }>>; isDefault: Zod.ZodOptional<Zod.ZodBoolean>; excludeFromLastConversationStorage: Zod.ZodOptional<Zod.ZodBoolean>; namespace: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }, { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }>, \"many\">; deleted: Zod.ZodArray<Zod.ZodString, \"many\">; skipped: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; name: Zod.ZodOptional<Zod.ZodString>; skip_reason: Zod.ZodLiteral<\"CONVERSATION_NOT_MODIFIED\">; }, \"strip\", Zod.ZodTypeAny, { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }, { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { created: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; updated: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; skipped: { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }[]; deleted: string[]; }, { created: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; updated: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; skipped: { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }[]; deleted: string[]; }>; summary: Zod.ZodObject<{ failed: Zod.ZodNumber; skipped: Zod.ZodNumber; succeeded: Zod.ZodNumber; total: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { total: number; succeeded: number; failed: number; skipped: number; }, { total: number; succeeded: number; failed: number; skipped: number; }>; errors: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ message: Zod.ZodString; status_code: Zod.ZodNumber; err_code: Zod.ZodOptional<Zod.ZodString>; conversations: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id: string; name?: string | undefined; }, { id: string; name?: string | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { message: string; status_code: number; conversations: { id: string; name?: string | undefined; }[]; err_code?: string | undefined; }, { message: string; status_code: number; conversations: { id: string; name?: string | undefined; }[]; err_code?: string | undefined; }>, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { results: { created: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; updated: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; skipped: { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }[]; deleted: string[]; }; summary: { total: number; succeeded: number; failed: number; skipped: number; }; errors?: { message: string; status_code: number; conversations: { id: string; name?: string | undefined; }[]; err_code?: string | undefined; }[] | undefined; }, { results: { created: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; updated: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; skipped: { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }[]; deleted: string[]; }; summary: { total: number; succeeded: number; failed: number; skipped: number; }; errors?: { message: string; status_code: number; conversations: { id: string; name?: string | undefined; }[]; err_code?: string | undefined; }[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { attributes: { results: { created: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; updated: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; skipped: { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }[]; deleted: string[]; }; summary: { total: number; succeeded: number; failed: number; skipped: number; }; errors?: { message: string; status_code: number; conversations: { id: string; name?: string | undefined; }[]; err_code?: string | undefined; }[] | undefined; }; message?: string | undefined; success?: boolean | undefined; status_code?: number | undefined; conversations_count?: number | undefined; }, { attributes: { results: { created: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; updated: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; skipped: { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }[]; deleted: string[]; }; summary: { total: number; succeeded: number; failed: number; skipped: number; }; errors?: { message: string; status_code: number; conversations: { id: string; name?: string | undefined; }[]; err_code?: string | undefined; }[] | undefined; }; message?: string | undefined; success?: boolean | undefined; status_code?: number | undefined; conversations_count?: number | undefined; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/bulk_crud_conversations_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ConversationsBulkCrudActionResults",
+        "type": "Object",
+        "tags": [],
+        "label": "ConversationsBulkCrudActionResults",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ updated: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; category: Zod.ZodEnum<[\"assistant\", \"insights\"]>; summary: Zod.ZodOptional<Zod.ZodObject<{ content: Zod.ZodOptional<Zod.ZodString>; timestamp: Zod.ZodOptional<Zod.ZodString>; public: Zod.ZodOptional<Zod.ZodBoolean>; confidence: Zod.ZodOptional<Zod.ZodEnum<[\"low\", \"medium\", \"high\"]>>; }, \"strip\", Zod.ZodTypeAny, { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; }, { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; }>>; timestamp: Zod.ZodOptional<Zod.ZodString>; updatedAt: Zod.ZodOptional<Zod.ZodString>; createdAt: Zod.ZodString; replacements: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>; users: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id?: string | undefined; name?: string | undefined; }, { id?: string | undefined; name?: string | undefined; }>, \"many\">; messages: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ content: Zod.ZodString; reader: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodUnknown, Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">, Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">>>; role: Zod.ZodEnum<[\"system\", \"user\", \"assistant\"]>; timestamp: Zod.ZodString; isError: Zod.ZodOptional<Zod.ZodBoolean>; traceData: Zod.ZodOptional<Zod.ZodObject<{ transactionId: Zod.ZodOptional<Zod.ZodString>; traceId: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { transactionId?: string | undefined; traceId?: string | undefined; }, { transactionId?: string | undefined; traceId?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }, { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }>, \"many\">>; apiConfig: Zod.ZodOptional<Zod.ZodObject<{ connectorId: Zod.ZodString; actionTypeId: Zod.ZodString; defaultSystemPromptId: Zod.ZodOptional<Zod.ZodString>; provider: Zod.ZodOptional<Zod.ZodEnum<[\"OpenAI\", \"Azure OpenAI\"]>>; model: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; }, { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; }>>; isDefault: Zod.ZodOptional<Zod.ZodBoolean>; excludeFromLastConversationStorage: Zod.ZodOptional<Zod.ZodBoolean>; namespace: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }, { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }>, \"many\">; created: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; category: Zod.ZodEnum<[\"assistant\", \"insights\"]>; summary: Zod.ZodOptional<Zod.ZodObject<{ content: Zod.ZodOptional<Zod.ZodString>; timestamp: Zod.ZodOptional<Zod.ZodString>; public: Zod.ZodOptional<Zod.ZodBoolean>; confidence: Zod.ZodOptional<Zod.ZodEnum<[\"low\", \"medium\", \"high\"]>>; }, \"strip\", Zod.ZodTypeAny, { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; }, { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; }>>; timestamp: Zod.ZodOptional<Zod.ZodString>; updatedAt: Zod.ZodOptional<Zod.ZodString>; createdAt: Zod.ZodString; replacements: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>; users: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id?: string | undefined; name?: string | undefined; }, { id?: string | undefined; name?: string | undefined; }>, \"many\">; messages: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ content: Zod.ZodString; reader: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodUnknown, Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">, Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">>>; role: Zod.ZodEnum<[\"system\", \"user\", \"assistant\"]>; timestamp: Zod.ZodString; isError: Zod.ZodOptional<Zod.ZodBoolean>; traceData: Zod.ZodOptional<Zod.ZodObject<{ transactionId: Zod.ZodOptional<Zod.ZodString>; traceId: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { transactionId?: string | undefined; traceId?: string | undefined; }, { transactionId?: string | undefined; traceId?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }, { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }>, \"many\">>; apiConfig: Zod.ZodOptional<Zod.ZodObject<{ connectorId: Zod.ZodString; actionTypeId: Zod.ZodString; defaultSystemPromptId: Zod.ZodOptional<Zod.ZodString>; provider: Zod.ZodOptional<Zod.ZodEnum<[\"OpenAI\", \"Azure OpenAI\"]>>; model: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; }, { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; }>>; isDefault: Zod.ZodOptional<Zod.ZodBoolean>; excludeFromLastConversationStorage: Zod.ZodOptional<Zod.ZodBoolean>; namespace: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }, { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }>, \"many\">; deleted: Zod.ZodArray<Zod.ZodString, \"many\">; skipped: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; name: Zod.ZodOptional<Zod.ZodString>; skip_reason: Zod.ZodLiteral<\"CONVERSATION_NOT_MODIFIED\">; }, \"strip\", Zod.ZodTypeAny, { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }, { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { created: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; updated: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; skipped: { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }[]; deleted: string[]; }, { created: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; updated: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; skipped: { id: string; skip_reason: \"CONVERSATION_NOT_MODIFIED\"; name?: string | undefined; }[]; deleted: string[]; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/bulk_crud_conversations_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.ConversationSummary",
         "type": "Object",
         "tags": [],
@@ -4208,36 +4107,6 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.Dataset",
-        "type": "Object",
-        "tags": [],
-        "label": "Dataset",
-        "description": [],
-        "signature": [
-          "Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; input: Zod.ZodString; prediction: Zod.ZodOptional<Zod.ZodString>; reference: Zod.ZodString; tags: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { input: string; reference: string; id?: string | undefined; tags?: string[] | undefined; prediction?: string | undefined; }, { input: string; reference: string; id?: string | undefined; tags?: string[] | undefined; prediction?: string | undefined; }>, \"many\">>"
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.DatasetItem",
-        "type": "Object",
-        "tags": [],
-        "label": "DatasetItem",
-        "description": [],
-        "signature": [
-          "Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; input: Zod.ZodString; prediction: Zod.ZodOptional<Zod.ZodString>; reference: Zod.ZodString; tags: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { input: string; reference: string; id?: string | undefined; tags?: string[] | undefined; prediction?: string | undefined; }, { input: string; reference: string; id?: string | undefined; tags?: string[] | undefined; prediction?: string | undefined; }>"
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.defaultAssistantFeatures",
         "type": "Object",
         "tags": [],
@@ -4246,7 +4115,7 @@
           "\nDefault features available to the elastic assistant"
         ],
         "signature": [
-          "{ readonly assistantKnowledgeBaseByDefault: false; readonly assistantModelEvaluation: false; readonly assistantBedrockChat: false; }"
+          "{ readonly assistantKnowledgeBaseByDefault: false; readonly assistantModelEvaluation: false; readonly assistantBedrockChat: true; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/capabilities/index.ts",
         "deprecated": false,
@@ -4465,36 +4334,6 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.FindCurrentUserConversationsRequestQuery",
-        "type": "Object",
-        "tags": [],
-        "label": "FindCurrentUserConversationsRequestQuery",
-        "description": [],
-        "signature": [
-          "Zod.ZodObject<{ fields: Zod.ZodOptional<Zod.ZodEffects<Zod.ZodArray<Zod.ZodString, \"many\">, string[], unknown>>; filter: Zod.ZodOptional<Zod.ZodString>; sort_field: Zod.ZodOptional<Zod.ZodEnum<[\"created_at\", \"is_default\", \"title\", \"updated_at\"]>>; sort_order: Zod.ZodOptional<Zod.ZodEnum<[\"asc\", \"desc\"]>>; page: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; per_page: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; }, \"strip\", Zod.ZodTypeAny, { per_page: number; page: number; sort_field?: \"title\" | \"created_at\" | \"updated_at\" | \"is_default\" | undefined; sort_order?: \"asc\" | \"desc\" | undefined; filter?: string | undefined; fields?: string[] | undefined; }, { per_page?: number | undefined; page?: number | undefined; sort_field?: \"title\" | \"created_at\" | \"updated_at\" | \"is_default\" | undefined; sort_order?: \"asc\" | \"desc\" | undefined; filter?: string | undefined; fields?: unknown; }>"
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/find_conversations_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.FindCurrentUserConversationsResponse",
-        "type": "Object",
-        "tags": [],
-        "label": "FindCurrentUserConversationsResponse",
-        "description": [],
-        "signature": [
-          "Zod.ZodObject<{ page: Zod.ZodNumber; perPage: Zod.ZodNumber; total: Zod.ZodNumber; data: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; category: Zod.ZodEnum<[\"assistant\", \"insights\"]>; summary: Zod.ZodOptional<Zod.ZodObject<{ content: Zod.ZodOptional<Zod.ZodString>; timestamp: Zod.ZodOptional<Zod.ZodString>; public: Zod.ZodOptional<Zod.ZodBoolean>; confidence: Zod.ZodOptional<Zod.ZodEnum<[\"low\", \"medium\", \"high\"]>>; }, \"strip\", Zod.ZodTypeAny, { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; }, { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; }>>; timestamp: Zod.ZodOptional<Zod.ZodString>; updatedAt: Zod.ZodOptional<Zod.ZodString>; createdAt: Zod.ZodString; replacements: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>; users: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id?: string | undefined; name?: string | undefined; }, { id?: string | undefined; name?: string | undefined; }>, \"many\">; messages: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ content: Zod.ZodString; reader: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodUnknown, Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">, Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">>>; role: Zod.ZodEnum<[\"system\", \"user\", \"assistant\"]>; timestamp: Zod.ZodString; isError: Zod.ZodOptional<Zod.ZodBoolean>; traceData: Zod.ZodOptional<Zod.ZodObject<{ transactionId: Zod.ZodOptional<Zod.ZodString>; traceId: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { transactionId?: string | undefined; traceId?: string | undefined; }, { transactionId?: string | undefined; traceId?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }, { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }>, \"many\">>; apiConfig: Zod.ZodOptional<Zod.ZodObject<{ connectorId: Zod.ZodString; actionTypeId: Zod.ZodString; defaultSystemPromptId: Zod.ZodOptional<Zod.ZodString>; provider: Zod.ZodOptional<Zod.ZodEnum<[\"OpenAI\", \"Azure OpenAI\"]>>; model: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; }, { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; }>>; isDefault: Zod.ZodOptional<Zod.ZodBoolean>; excludeFromLastConversationStorage: Zod.ZodOptional<Zod.ZodBoolean>; namespace: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }, { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { page: number; perPage: number; total: number; data: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; }, { page: number; perPage: number; total: number; data: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; updatedAt?: string | undefined; summary?: { timestamp?: string | undefined; public?: boolean | undefined; content?: string | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; } | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; }>"
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/find_conversations_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.FindKnowledgeBaseEntriesRequestQuery",
         "type": "Object",
         "tags": [],
@@ -4651,7 +4490,7 @@
         "label": "GetEvaluateResponse",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ agentExecutors: Zod.ZodArray<Zod.ZodString, \"many\">; }, \"strip\", Zod.ZodTypeAny, { agentExecutors: string[]; }, { agentExecutors: string[]; }>"
+          "Zod.ZodObject<{ datasets: Zod.ZodArray<Zod.ZodString, \"many\">; graphs: Zod.ZodArray<Zod.ZodString, \"many\">; }, \"strip\", Zod.ZodTypeAny, { datasets: string[]; graphs: string[]; }, { datasets: string[]; graphs: string[]; }>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/get_evaluate_route.gen.ts",
         "deprecated": false,
@@ -4960,21 +4799,6 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.OutputIndex",
-        "type": "Object",
-        "tags": [],
-        "label": "OutputIndex",
-        "description": [],
-        "signature": [
-          "Zod.ZodString"
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.PerformBulkActionRequestBody",
         "type": "Object",
         "tags": [],
@@ -5041,7 +4865,7 @@
         "label": "PostEvaluateBody",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ dataset: Zod.ZodOptional<Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; input: Zod.ZodString; prediction: Zod.ZodOptional<Zod.ZodString>; reference: Zod.ZodString; tags: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { input: string; reference: string; id?: string | undefined; tags?: string[] | undefined; prediction?: string | undefined; }, { input: string; reference: string; id?: string | undefined; tags?: string[] | undefined; prediction?: string | undefined; }>, \"many\">>>; evalPrompt: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { dataset?: { input: string; reference: string; id?: string | undefined; tags?: string[] | undefined; prediction?: string | undefined; }[] | undefined; evalPrompt?: string | undefined; }, { dataset?: { input: string; reference: string; id?: string | undefined; tags?: string[] | undefined; prediction?: string | undefined; }[] | undefined; evalPrompt?: string | undefined; }>"
+          "Zod.ZodObject<{ graphs: Zod.ZodArray<Zod.ZodString, \"many\">; datasetName: Zod.ZodString; connectorIds: Zod.ZodArray<Zod.ZodString, \"many\">; runName: Zod.ZodOptional<Zod.ZodString>; alertsIndexPattern: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>; langSmithApiKey: Zod.ZodOptional<Zod.ZodString>; replacements: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>>; size: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; }, \"strip\", Zod.ZodTypeAny, { size: number; alertsIndexPattern: string; replacements: {} & { [k: string]: string; }; graphs: string[]; datasetName: string; connectorIds: string[]; langSmithApiKey?: string | undefined; runName?: string | undefined; }, { graphs: string[]; datasetName: string; connectorIds: string[]; size?: number | undefined; alertsIndexPattern?: string | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; langSmithApiKey?: string | undefined; runName?: string | undefined; }>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
         "deprecated": false,
@@ -5056,22 +4880,7 @@
         "label": "PostEvaluateRequestBody",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ dataset: Zod.ZodOptional<Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; input: Zod.ZodString; prediction: Zod.ZodOptional<Zod.ZodString>; reference: Zod.ZodString; tags: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { input: string; reference: string; id?: string | undefined; tags?: string[] | undefined; prediction?: string | undefined; }, { input: string; reference: string; id?: string | undefined; tags?: string[] | undefined; prediction?: string | undefined; }>, \"many\">>>; evalPrompt: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { dataset?: { input: string; reference: string; id?: string | undefined; tags?: string[] | undefined; prediction?: string | undefined; }[] | undefined; evalPrompt?: string | undefined; }, { dataset?: { input: string; reference: string; id?: string | undefined; tags?: string[] | undefined; prediction?: string | undefined; }[] | undefined; evalPrompt?: string | undefined; }>"
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.PostEvaluateRequestQuery",
-        "type": "Object",
-        "tags": [],
-        "label": "PostEvaluateRequestQuery",
-        "description": [],
-        "signature": [
-          "Zod.ZodObject<{ agents: Zod.ZodString; datasetName: Zod.ZodOptional<Zod.ZodString>; evaluationType: Zod.ZodOptional<Zod.ZodString>; evalModel: Zod.ZodOptional<Zod.ZodString>; models: Zod.ZodString; outputIndex: Zod.ZodString; projectName: Zod.ZodOptional<Zod.ZodString>; runName: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { agents: string; models: string; outputIndex: string; projectName?: string | undefined; datasetName?: string | undefined; evaluationType?: string | undefined; evalModel?: string | undefined; runName?: string | undefined; }, { agents: string; models: string; outputIndex: string; projectName?: string | undefined; datasetName?: string | undefined; evaluationType?: string | undefined; evalModel?: string | undefined; runName?: string | undefined; }>"
+          "Zod.ZodObject<{ graphs: Zod.ZodArray<Zod.ZodString, \"many\">; datasetName: Zod.ZodString; connectorIds: Zod.ZodArray<Zod.ZodString, \"many\">; runName: Zod.ZodOptional<Zod.ZodString>; alertsIndexPattern: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>; langSmithApiKey: Zod.ZodOptional<Zod.ZodString>; replacements: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>>; size: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; }, \"strip\", Zod.ZodTypeAny, { size: number; alertsIndexPattern: string; replacements: {} & { [k: string]: string; }; graphs: string[]; datasetName: string; connectorIds: string[]; langSmithApiKey?: string | undefined; runName?: string | undefined; }, { graphs: string[]; datasetName: string; connectorIds: string[]; size?: number | undefined; alertsIndexPattern?: string | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; langSmithApiKey?: string | undefined; runName?: string | undefined; }>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
         "deprecated": false,
@@ -5251,7 +5060,7 @@
         "label": "ReadKnowledgeBaseResponse",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ elser_exists: Zod.ZodOptional<Zod.ZodBoolean>; esql_exists: Zod.ZodOptional<Zod.ZodBoolean>; index_exists: Zod.ZodOptional<Zod.ZodBoolean>; is_setup_in_progress: Zod.ZodOptional<Zod.ZodBoolean>; pipeline_exists: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { elser_exists?: boolean | undefined; esql_exists?: boolean | undefined; index_exists?: boolean | undefined; is_setup_in_progress?: boolean | undefined; pipeline_exists?: boolean | undefined; }, { elser_exists?: boolean | undefined; esql_exists?: boolean | undefined; index_exists?: boolean | undefined; is_setup_in_progress?: boolean | undefined; pipeline_exists?: boolean | undefined; }>"
+          "Zod.ZodObject<{ elser_exists: Zod.ZodOptional<Zod.ZodBoolean>; esql_exists: Zod.ZodOptional<Zod.ZodBoolean>; index_exists: Zod.ZodOptional<Zod.ZodBoolean>; is_setup_available: Zod.ZodOptional<Zod.ZodBoolean>; is_setup_in_progress: Zod.ZodOptional<Zod.ZodBoolean>; pipeline_exists: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { elser_exists?: boolean | undefined; esql_exists?: boolean | undefined; index_exists?: boolean | undefined; is_setup_available?: boolean | undefined; is_setup_in_progress?: boolean | undefined; pipeline_exists?: boolean | undefined; }, { elser_exists?: boolean | undefined; esql_exists?: boolean | undefined; index_exists?: boolean | undefined; is_setup_available?: boolean | undefined; is_setup_in_progress?: boolean | undefined; pipeline_exists?: boolean | undefined; }>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
         "deprecated": false,

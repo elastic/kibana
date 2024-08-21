@@ -38,6 +38,7 @@ describe('Get Knowledge Base Status Route', () => {
         alias: 'knowledge-base-alias',
       },
       isModelInstalled: jest.fn().mockResolvedValue(true),
+      isSetupAvailable: jest.fn().mockResolvedValue(true),
     });
 
     getKnowledgeBaseStatusRoute(server.router, mockGetElser);

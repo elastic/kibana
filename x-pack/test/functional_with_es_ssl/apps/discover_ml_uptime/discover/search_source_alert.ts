@@ -13,7 +13,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const es = getService('es');
   const monacoEditor = getService('monacoEditor');
-  const PageObjects = getPageObjects(['settings', 'common', 'header', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'settings',
+    'common',
+    'header',
+    'discover',
+    'timePicker',
+    'unifiedFieldList',
+  ]);
   const deployment = getService('deployment');
   const dataGrid = getService('dataGrid');
   const browser = getService('browser');
@@ -196,6 +203,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const getResultsLink = async () => {
     // getting the link
     await dataGrid.clickRowToggle();
+    await testSubjects.click('toggleLongFieldValue-context_link');
     const contextMessageElement = await testSubjects.find('tableDocViewRow-context_link-value');
     const contextMessage = await contextMessageElement.getVisibleText();
 
@@ -525,7 +533,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.timePicker.setCommonlyUsedTime('Last_15 minutes');
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.addRuntimeField('runtime-message-field', `emit('mock-message')`);
+      await retry.try(async () => {
+        expect(await PageObjects.unifiedFieldList.getAllFieldNames()).to.contain(
+          'runtime-message-field'
+        );
+      });
 
       // create an alert
       await openDiscoverAlertFlyout();

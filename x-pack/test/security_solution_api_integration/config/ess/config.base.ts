@@ -18,6 +18,7 @@ interface CreateTestConfigOptions {
 
 // test.not-enabled is specifically not enabled
 const enabledActionTypes = [
+  '.cases',
   '.email',
   '.index',
   '.pagerduty',

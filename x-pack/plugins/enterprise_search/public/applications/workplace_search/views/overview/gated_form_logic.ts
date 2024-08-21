@@ -56,24 +56,28 @@ export const WorkplaceSearchGateLogic = kea<
     additionalFeedback: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setAdditionalFeedback: (_, { additionalFeedback }) => additionalFeedback ?? undefined,
       },
     ],
     feature: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setFeature: (_, { feature }) => feature,
       },
     ],
     featuresOther: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setFeaturesOther: (_, { featuresOther }) => featuresOther,
       },
     ],
     participateInUXLabs: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setParticipateInUXLabs: (_, { participateInUXLabs }) => participateInUXLabs,
       },
     ],

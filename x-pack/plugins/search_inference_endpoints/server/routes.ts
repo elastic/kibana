@@ -51,10 +51,9 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       } = (await context.core).elasticsearch;
 
       const { type, id } = request.params;
+      const result = await deleteInferenceEndpoint(asCurrentUser, type, id);
 
-      await deleteInferenceEndpoint(asCurrentUser, type, id);
-
-      return response.ok();
+      return response.ok({ body: result });
     })
   );
 }

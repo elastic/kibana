@@ -31,12 +31,12 @@ import { DeleteExceptionListRequestQueryInput } from '@kbn/securitysolution-exce
 import { DeleteExceptionListItemRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/delete_exception_list_item/delete_exception_list_item.gen';
 import { DuplicateExceptionListRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/duplicate_exception_list/duplicate_exception_list.gen';
 import { ExportExceptionListRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/export_exception_list/export_exception_list.gen';
-import { FindExceptionListItemsRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/find_exception_list_item/find_exception_list_item.gen';
-import { FindExceptionListsRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/find_exception_list/find_exception_list.gen';
-import { GetExceptionListRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/read_exception_list/read_exception_list.gen';
-import { GetExceptionListItemRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/read_exception_list_item/read_exception_list_item.gen';
-import { GetExceptionListSummaryRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/summary_exception_list/summary_exception_list.gen';
+import { FindExceptionListItemsRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/find_exception_list_items/find_exception_list_items.gen';
+import { FindExceptionListsRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/find_exception_lists/find_exception_lists.gen';
 import { ImportExceptionListRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/import_exceptions/import_exceptions.gen';
+import { ReadExceptionListRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/read_exception_list/read_exception_list.gen';
+import { ReadExceptionListItemRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/read_exception_list_item/read_exception_list_item.gen';
+import { ReadExceptionListSummaryRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/read_exception_list_summary/read_exception_list_summary.gen';
 import { UpdateExceptionListRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/update_exception_list/update_exception_list.gen';
 import { UpdateExceptionListItemRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/update_exception_list_item/update_exception_list_item.gen';
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -128,7 +128,18 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    getExceptionList(props: GetExceptionListProps) {
+    /**
+     * Imports an exception list and associated items
+     */
+    importExceptionList(props: ImportExceptionListProps) {
+      return supertest
+        .post('/api/exception_lists/_import')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
+    readExceptionList(props: ReadExceptionListProps) {
       return supertest
         .get('/api/exception_lists')
         .set('kbn-xsrf', 'true')
@@ -136,7 +147,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    getExceptionListItem(props: GetExceptionListItemProps) {
+    readExceptionListItem(props: ReadExceptionListItemProps) {
       return supertest
         .get('/api/exception_lists/items')
         .set('kbn-xsrf', 'true')
@@ -144,20 +155,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    getExceptionListSummary(props: GetExceptionListSummaryProps) {
+    readExceptionListSummary(props: ReadExceptionListSummaryProps) {
       return supertest
         .get('/api/exception_lists/summary')
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Imports an exception list and associated items
-     */
-    importExceptionList(props: ImportExceptionListProps) {
-      return supertest
-        .post('/api/exception_lists/_import')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -213,17 +213,17 @@ export interface FindExceptionListItemsProps {
 export interface FindExceptionListsProps {
   query: FindExceptionListsRequestQueryInput;
 }
-export interface GetExceptionListProps {
-  query: GetExceptionListRequestQueryInput;
-}
-export interface GetExceptionListItemProps {
-  query: GetExceptionListItemRequestQueryInput;
-}
-export interface GetExceptionListSummaryProps {
-  query: GetExceptionListSummaryRequestQueryInput;
-}
 export interface ImportExceptionListProps {
   query: ImportExceptionListRequestQueryInput;
+}
+export interface ReadExceptionListProps {
+  query: ReadExceptionListRequestQueryInput;
+}
+export interface ReadExceptionListItemProps {
+  query: ReadExceptionListItemRequestQueryInput;
+}
+export interface ReadExceptionListSummaryProps {
+  query: ReadExceptionListSummaryRequestQueryInput;
 }
 export interface UpdateExceptionListProps {
   body: UpdateExceptionListRequestBodyInput;

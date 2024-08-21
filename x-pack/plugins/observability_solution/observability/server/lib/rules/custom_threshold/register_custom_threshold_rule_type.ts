@@ -56,10 +56,10 @@ export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts<CustomThresholdAle
 export const searchConfigurationSchema = schema.object({
   index: schema.oneOf([schema.string(), dataViewSpecSchema]),
   query: schema.object({
-    language: schema.string({
+    language: schema.string(),
+    query: schema.string({
       validate: validateKQLStringFilter,
     }),
-    query: schema.string(),
   }),
   filter: schema.maybe(
     schema.arrayOf(

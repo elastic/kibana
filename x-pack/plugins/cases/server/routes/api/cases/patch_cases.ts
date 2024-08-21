@@ -16,7 +16,8 @@ export const patchCaseRoute = createCasesRoute({
   path: CASES_URL,
   routerOptions: {
     access: 'public',
-    summary: `Update cases`,
+    summary: 'Update cases',
+    tags: ['oas-tag:cases'],
   },
   handler: async ({ context, request, response }) => {
     try {

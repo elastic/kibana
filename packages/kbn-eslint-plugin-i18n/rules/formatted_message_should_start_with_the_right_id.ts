@@ -45,6 +45,7 @@ export const FormattedMessageShouldStartWithTheRightId: Rule.RuleModule = {
           idAttribute.value.value;
 
         const i18nAppId = getI18nIdentifierFromFilePath(filename, cwd);
+        // @ts-expect-error upgrade typescript v5.1.6
         const functionDeclaration = sourceCode.getScope(node as TSNode)
           .block as TSESTree.FunctionDeclaration;
         const functionName = getFunctionName(functionDeclaration);

@@ -70,6 +70,9 @@ export const InstallClientPanel: React.FC<InstallClientProps> = ({
         assetBasePath={assetBasePath}
         application={application}
         sharePlugin={sharePlugin}
+        consoleTitle={i18n.translate('searchApiPanels.welcomeBanner.installClient.title', {
+          defaultMessage: 'Install a client',
+        })}
       />
       <EuiSpacer />
       <Link language={language} assetBasePath={assetBasePath} />

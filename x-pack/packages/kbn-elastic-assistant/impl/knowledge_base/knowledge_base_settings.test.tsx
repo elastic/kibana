@@ -101,6 +101,7 @@ describe('Knowledge base settings', () => {
           esql_exists: false,
           index_exists: false,
           pipeline_exists: false,
+          is_setup_available: true,
         },
         isLoading: false,
         isFetching: false,

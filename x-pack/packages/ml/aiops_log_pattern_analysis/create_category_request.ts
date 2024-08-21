@@ -112,11 +112,11 @@ export function createCategoryRequest(
   return {
     params: {
       index,
-      size: 0,
       body: {
         query,
         aggs: wrap(aggs),
         ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+        size: 0,
       },
     },
   };

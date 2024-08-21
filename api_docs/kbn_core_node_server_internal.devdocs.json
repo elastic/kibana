@@ -11,18 +11,10 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-node-server-internal",
-        "id": "def-common.InternalNodeServiceStart",
+        "id": "def-server.InternalNodeServiceStart",
         "type": "Interface",
         "tags": [],
         "label": "InternalNodeServiceStart",
@@ -33,7 +25,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-node-server-internal",
-            "id": "def-common.InternalNodeServiceStart.roles",
+            "id": "def-server.InternalNodeServiceStart.roles",
             "type": "Object",
             "tags": [],
             "label": "roles",
@@ -43,9 +35,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-node-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreNodeServerPluginApi",
-                "section": "def-common.NodeRoles",
+                "section": "def-server.NodeRoles",
                 "text": "NodeRoles"
               }
             ],
@@ -58,7 +50,7 @@
       },
       {
         "parentPluginId": "@kbn/core-node-server-internal",
-        "id": "def-common.PrebootDeps",
+        "id": "def-server.PrebootDeps",
         "type": "Interface",
         "tags": [],
         "label": "PrebootDeps",
@@ -69,7 +61,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-node-server-internal",
-            "id": "def-common.PrebootDeps.loggingSystem",
+            "id": "def-server.PrebootDeps.loggingSystem",
             "type": "Object",
             "tags": [],
             "label": "loggingSystem",
@@ -85,6 +77,14 @@
         "initialIsOpen": false
       }
     ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []
