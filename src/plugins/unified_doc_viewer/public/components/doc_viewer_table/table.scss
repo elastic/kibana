@@ -80,8 +80,26 @@
     background-color: tintOrShade($euiColorLightShade, 50%, 0);
   }
 
-  & .euiDataGridRowCell--firstColumn .euiDataGridRowCell__content {
+  & [data-gridcell-column-id='name'] .euiDataGridRowCell__content {
     padding-top: 0;
     padding-bottom: 0;
+  }
+
+  & [data-gridcell-column-id='pin_field'] .euiDataGridRowCell__content {
+    padding: $euiSizeXS / 2 0 0 $euiSizeXS;
+  }
+
+  .kbnDocViewer__fieldsGrid__pinAction {
+    opacity: 0;
+  }
+
+  & [data-gridcell-column-id='pin_field']:focus-within {
+    .kbnDocViewer__fieldsGrid__pinAction {
+      opacity: 1;
+    }
+  }
+
+  .euiDataGridRow:hover .kbnDocViewer__fieldsGrid__pinAction {
+    opacity: 1;
   }
 }
