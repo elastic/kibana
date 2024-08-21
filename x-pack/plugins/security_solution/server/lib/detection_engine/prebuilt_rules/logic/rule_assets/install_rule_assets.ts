@@ -41,10 +41,10 @@ export const installExternalPrebuiltRuleAssets = async (
     };
   }
   const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
-  const latestPrebuiltRules = await ruleAssetsClient.fetchLatestAssets();
+  const installedAssetsVersionSpecifiers = await ruleAssetsClient.fetchAllAssetsVersionInfo();
 
   const { assetsToInstall, errors } = await fetchGithubRuleAssets(
-    latestPrebuiltRules,
+    installedAssetsVersionSpecifiers,
     externalPrebuiltRuleBlobs
   );
 
@@ -60,20 +60,8 @@ export const installExternalPrebuiltRuleAssets = async (
   });
   const installedRulesAssetIds = new Set(installationResults.map((result) => result.id));
 
-  // Filter out rules that haven't been properly installed and create a record of
-  // repositories updated against a list of installed rule_ids
-  // const updated = assetsToInstall
-  //   .filter(({ rule_id: ruleId, version }) => installedRulesAssetIds.has(`${ruleId}_${version}`))
-  //   .reduce<Record<string, string[]>>((acc, curr) => {
-  //     if (!curr.external_source) return acc;
-  //     if (!acc[curr.external_source]) {
-  //       acc[curr.external_source] = [curr.rule_id];
-  //       return acc;
-  //     }
-  //     acc[curr.external_source].push(curr.rule_id);
-  //     return acc;
-  //   }, {} as Record<string, string[]>);
-
+  // Filter out rules that haven't been properly installed and create a list of
+  // which rules have been installed from each repository
   const updated = Array.from<[RepositoryId, RuleIds]>(
     assetsToInstall
       .filter(({ rule_id: ruleId, version }) => installedRulesAssetIds.has(`${ruleId}_${version}`))

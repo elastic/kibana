@@ -23,6 +23,8 @@ export interface IPrebuiltRuleAssetsClient {
   fetchLatestVersions(): Promise<RuleVersionSpecifier[]>;
 
   fetchAssetsByVersion(versions: RuleVersionSpecifier[]): Promise<PrebuiltRuleAsset[]>;
+
+  fetchAllAssetsVersionInfo: () => Promise<RuleVersionSpecifier[]>;
 }
 
 export const createPrebuiltRuleAssetsClient = (
@@ -144,6 +146,21 @@ export const createPrebuiltRuleAssetsClient = (
 
         const ruleAssets = findResult.saved_objects.map((so) => so.attributes);
         return validatePrebuiltRuleAssets(ruleAssets);
+      });
+    },
+
+    fetchAllAssetsVersionInfo: () => {
+      return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchAllAssetsVersionInfo', async () => {
+        const findResult = await savedObjectsClient.find<PrebuiltRuleAsset>({
+          type: PREBUILT_RULE_ASSETS_SO_TYPE,
+          fields: ['rule_id', 'version'],
+          perPage: MAX_PREBUILT_RULES_COUNT,
+        });
+
+        return findResult.saved_objects.map((so) => ({
+          rule_id: so.attributes.rule_id,
+          version: so.attributes.version,
+        }));
       });
     },
   };

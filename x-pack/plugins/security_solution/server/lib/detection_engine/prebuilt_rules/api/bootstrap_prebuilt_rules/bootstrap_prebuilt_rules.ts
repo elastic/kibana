@@ -141,7 +141,7 @@ async function fetchPrebuiltRuleFilenames(
       .filter((item) => item.type === 'blob')
       .filter((item) => item.path && item.path.endsWith('.json'))
       .map((item) => ({
-        filename: `${repository.repository}-${item.path}`,
+        filename: item.path?.replace('.json', '') ?? '',
         sha: item.sha,
         repository,
       }));

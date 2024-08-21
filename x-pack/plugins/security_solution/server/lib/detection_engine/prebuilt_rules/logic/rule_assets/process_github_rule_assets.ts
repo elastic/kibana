@@ -6,23 +6,29 @@
  */
 
 import { Octokit } from 'octokit';
+import type { RuleVersionSpecifier } from '../../../../../../common/api/detection_engine';
 import type { ExternalRuleAssetBlob } from '../../api/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import { validatePrebuiltRuleAsset } from './prebuilt_rule_assets_validation';
 
 export const fetchGithubRuleAssets = async (
-  installedRuleAssets: PrebuiltRuleAsset[],
+  installedAssetsVersionSpecifiers: RuleVersionSpecifier[],
   externalPrebuiltRuleBlobs: ExternalRuleAssetBlob[]
 ) => {
   const ruleBlobsToInstall: ExternalRuleAssetBlob[] = [];
-  const installedRuleMap = new Map(installedRuleAssets.map((rule) => [rule.rule_id, rule]));
+  const installedRuleAssetsMap = new Map(
+    installedAssetsVersionSpecifiers.map((rule) => [`${rule.rule_id}_${rule.version}`, rule])
+  );
 
   for (const blob of externalPrebuiltRuleBlobs) {
-    const [ruleId, versionFromFilename] = blob.filename.split('_');
+    const { filename, repository } = blob;
+    const [ruleId, versionFromFilename] = filename.split('_');
 
     const version = parseInt(versionFromFilename, 10);
 
-    const installedRule = installedRuleMap.get(ruleId);
+    const fullRuleId = `${repository.id}_${ruleId}_${versionFromFilename}`;
+
+    const installedRule = installedRuleAssetsMap.get(fullRuleId);
 
     if (!installedRule || version > installedRule.version) {
       ruleBlobsToInstall.push(blob);
@@ -81,12 +87,23 @@ const fetchSingleRuleAsset = async (blob: ExternalRuleAssetBlob): Promise<FetchR
     const decodedContent = Buffer.from(response.data.content, 'base64').toString('utf-8');
     const rawAsset = JSON.parse(decodedContent);
 
+    if (rawAsset.rule_id !== blob.filename.split('_')[0]) {
+      return {
+        success: false,
+        error: `The rule_id in the file does not match the rule_id codified in the filename. rule_id: ${rawAsset.rule_id}, filename: ${blob.filename}`,
+        external_source: externalSource,
+        filename: blob.filename,
+      };
+    }
+
     const rawAssetWithExternalSource = {
       ...rawAsset,
-      rule_id: `${externalSource}_${rawAsset.rule_id}`,
+      rule_id: `${externalSource}_${rawAsset.rule_id}`, // append repositoryId before saving rule_id
       external_source: externalSource,
     };
+
     const asset = validatePrebuiltRuleAsset(rawAssetWithExternalSource);
+
     return { success: true, asset, external_source: externalSource };
   } catch (error) {
     return {
