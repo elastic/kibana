@@ -54,12 +54,18 @@ const fetchRuleAssetsToInstall = async (ruleBlobsToInstall: ExternalRuleAssetBlo
 };
 
 type FetchResult =
-  | { success: true; asset: PrebuiltRuleAsset }
-  | { success: false; error: string; filename?: string };
+  | { success: true; asset: PrebuiltRuleAsset; external_source: string }
+  | { success: false; error: string; external_source: string; filename?: string };
 
 const fetchSingleRuleAsset = async (blob: ExternalRuleAssetBlob): Promise<FetchResult> => {
+  const externalSource = `${blob.repository.id}`;
+
   if (!blob.sha) {
-    return { success: false, error: `No SHA found for ${blob.filename}` };
+    return {
+      success: false,
+      error: `No SHA found for ${blob.filename}`,
+      external_source: externalSource,
+    };
   }
 
   const octokit = new Octokit({ auth: blob.repository.token });
@@ -74,15 +80,20 @@ const fetchSingleRuleAsset = async (blob: ExternalRuleAssetBlob): Promise<FetchR
 
     const decodedContent = Buffer.from(response.data.content, 'base64').toString('utf-8');
     const rawAsset = JSON.parse(decodedContent);
-    const externalSource = `${blob.repository.id}`;
+
     const rawAssetWithExternalSource = {
       ...rawAsset,
       rule_id: `${externalSource}_${rawAsset.rule_id}`,
       external_source: externalSource,
     };
     const asset = validatePrebuiltRuleAsset(rawAssetWithExternalSource);
-    return { success: true, asset };
+    return { success: true, asset, external_source: externalSource };
   } catch (error) {
-    return { success: false, filename: blob.filename, error: error.message };
+    return {
+      success: false,
+      filename: blob.filename,
+      error: error.message,
+      external_source: externalSource,
+    };
   }
 };

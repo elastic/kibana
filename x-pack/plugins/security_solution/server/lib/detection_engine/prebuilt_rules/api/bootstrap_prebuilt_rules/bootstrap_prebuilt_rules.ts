@@ -6,7 +6,12 @@
  */
 
 import { Octokit } from 'octokit';
-import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type {
+  IKibanaResponse,
+  ISavedObjectsImporter,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { BOOTSTRAP_PREBUILT_RULES_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { BootstrapPrebuiltRulesResponse } from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
@@ -14,11 +19,11 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import {
   installEndpointPackage,
-  installPrebuiltRulesPackage,
+  // installPrebuiltRulesPackage,
 } from '../install_prebuilt_rules_and_timelines/install_prebuilt_rules_package';
 import { installExternalPrebuiltRuleAssets } from '../../logic/rule_assets/install_rule_assets';
 
-interface PrebuiltRuleRepository {
+export interface PrebuiltRuleRepository {
   repository: string;
   username: string;
   token: string;
@@ -57,17 +62,12 @@ export const bootstrapPrebuiltRulesRoute = (
             installEndpointPackage(config, securityContext),
           ]);
 
-          if (config.prebuiltRuleRepositories) {
-            const externalPrebuiltRuleBlobs = await fetchPrebuiltRuleFilenames(
-              config.prebuiltRuleRepositories
-            );
-            const res = await installExternalPrebuiltRuleAssets(
-              externalPrebuiltRuleBlobs,
-              savedObjectsClient,
-              savedObjectsImporter,
-              logger
-            );
-          }
+          const { updated, errors } = await getExternalPrebuiltRuleAssets(
+            config.prebuiltRuleRepositories as PrebuiltRuleRepository[],
+            savedObjectsClient,
+            savedObjectsImporter,
+            logger
+          );
 
           const responseBody: BootstrapPrebuiltRulesResponse = {
             packages: results.map((result) => ({
@@ -75,6 +75,10 @@ export const bootstrapPrebuiltRulesRoute = (
               version: result.package.version,
               status: result.status,
             })),
+            repositories: {
+              updated,
+              errors,
+            },
           };
 
           return response.ok({
@@ -91,6 +95,24 @@ export const bootstrapPrebuiltRulesRoute = (
     );
 };
 
+const getExternalPrebuiltRuleAssets = async (
+  prebuiltRuleRepositories: PrebuiltRuleRepository[],
+  savedObjectsClient: SavedObjectsClientContract,
+  savedObjectsImporter: ISavedObjectsImporter,
+  logger: Logger
+) => {
+  const externalPrebuiltRuleBlobs = await fetchPrebuiltRuleFilenames(prebuiltRuleRepositories);
+  const installResult = await installExternalPrebuiltRuleAssets(
+    prebuiltRuleRepositories,
+    externalPrebuiltRuleBlobs,
+    savedObjectsClient,
+    savedObjectsImporter,
+    logger
+  );
+
+  return installResult;
+};
+
 export interface ExternalRuleAssetBlob {
   filename: string;
   sha?: string;
@@ -104,7 +126,7 @@ async function fetchPrebuiltRuleFilenames(
 
   for (const repository of prebuiltRuleRepositories) {
     const octokit = new Octokit({ auth: repository.token });
-    debugger;
+
     const { data } = await octokit.request('GET /repos/{owner}/{repo}/git/trees/{tree_sha}', {
       owner: repository.username,
       repo: repository.repository,
