@@ -22,7 +22,8 @@ function hardenPrototypes() {
   Object.seal(Number.prototype);
   Object.seal(String.prototype);
   Object.seal(Function.prototype);
-  // Object.seal(Array.prototype); // This is commented out because it breaks core.js
+
+  // corejs currently manipulates Array.prototype, so we cannot seal it.
 }
 
 module.exports = hardenPrototypes;

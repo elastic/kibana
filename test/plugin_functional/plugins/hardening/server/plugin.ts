@@ -12,20 +12,64 @@ export class HardeningPlugin implements Plugin {
   public setup(core: CoreSetup, deps: {}) {
     core.http.createRouter().get(
       {
-        path: '/api/hardening/_pollute_object_prototype',
+        path: '/api/hardening/_pollute_prototypes',
         validate: false,
       },
       async (context, request, response) => {
-        let result;
-        let error;
+        const result: Record<string, { prototype?: Record<any, any>; error?: string }> = {
+          object: {},
+          number: {},
+          string: {},
+          fn: {},
+          array: {},
+        };
+        // Attempt to pollute Object.prototype
         try {
           (({}) as any).__proto__.polluted = true;
         } catch (e) {
-          error = e.message;
+          result.object.error = e.message;
         } finally {
-          result = response.ok({ body: { prototype: Object.getPrototypeOf({}), error } });
+          result.object.prototype = { ...Object.keys(Object.getPrototypeOf({})) };
         }
-        return result;
+
+        // Attempt to pollute String.prototype
+        try {
+          ('asdf' as any).__proto__.polluted = true;
+        } catch (e) {
+          result.string.error = e.message;
+        } finally {
+          result.string.prototype = { ...Object.keys(Object.getPrototypeOf('asf')) };
+        }
+
+        // Attempt to pollute Number.prototype
+        try {
+          (12 as any).__proto__.polluted = true;
+        } catch (e) {
+          result.number.error = e.message;
+        } finally {
+          result.number.prototype = { ...Object.keys(Object.getPrototypeOf(12)) };
+        }
+
+        // Attempt to pollute Function.prototype
+        const fn = function fn() {};
+        try {
+          (fn as any).__proto__.polluted = true;
+        } catch (e) {
+          result.fn.error = e.message;
+        } finally {
+          result.fn.prototype = { ...Object.keys(Object.getPrototypeOf(fn)) };
+        }
+
+        // Attempt to pollute Array.prototype
+        try {
+          ([] as any).__proto__.polluted = true;
+        } catch (e) {
+          result.array.error = e.message;
+        } finally {
+          result.array.prototype = { ...Object.keys(Object.getPrototypeOf([])) };
+        }
+
+        return response.ok({ body: result });
       }
     );
   }

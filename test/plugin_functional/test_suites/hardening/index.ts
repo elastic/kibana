@@ -10,6 +10,6 @@ import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
   describe('hardening', function () {
-    loadTestFile(require.resolve('./object_prototype'));
+    loadTestFile(require.resolve('./prototype'));
   });
 }
