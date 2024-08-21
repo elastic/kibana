@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-function hardenObjectPrototype() {
+function hardenPrototypes() {
   // @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/seal
   // > The Object.seal() static method seals an object.
   // > Sealing an object prevents extensions and makes existing properties non-configurable.
@@ -17,7 +17,12 @@ function hardenObjectPrototype() {
   // This is not currently feasible for Kibana, as this functionality is required for some of the libraries that we use, such as react-dom/server.
   // While Object.seal() is not a silver bullet, it does provide a good balance between security and compatibility.
   // The goal is to prevent a majority of prototype pollution vulnerabilities that can be exploited by an attacker.
+
   Object.seal(Object.prototype);
+  Object.seal(Number.prototype);
+  Object.seal(String.prototype);
+  Object.seal(Function.prototype);
+  // Object.seal(Array.prototype); // This is commented out because it breaks core.js
 }
 
-module.exports = hardenObjectPrototype;
+module.exports = hardenPrototypes;
