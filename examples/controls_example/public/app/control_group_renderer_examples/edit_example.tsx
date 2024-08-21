@@ -196,9 +196,9 @@ export const EditExample = () => {
                 ...initialState,
                 ...persistedState,
               },
-              viewMode: ViewMode.EDIT,
             };
           }}
+          viewMode={ViewMode.EDIT}
         />
       </EuiPanel>
     </>
