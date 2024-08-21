@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import * as z from 'zod';
+import * as z from '@kbn/zod';
 
 /**
  * This is a helper schema to convert a boolean string ("true" or "false") to a
