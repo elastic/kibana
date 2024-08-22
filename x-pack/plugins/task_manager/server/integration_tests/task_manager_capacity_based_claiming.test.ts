@@ -94,8 +94,7 @@ jest.mock('../queries/task_claiming', () => {
 
 const taskManagerStartSpy = jest.spyOn(TaskManagerPlugin.prototype, 'start');
 
-// Failing: See https://github.com/elastic/kibana/issues/191117
-describe.skip('capacity based claiming', () => {
+describe('capacity based claiming', () => {
   const taskIdsToRemove: string[] = [];
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
@@ -147,65 +146,67 @@ describe.skip('capacity based claiming', () => {
     }
   });
 
-  it('should claim tasks to full capacity', async () => {
-    const backgroundTaskLoads: number[] = [];
-    createMonitoringStatsOpts.taskPollingLifecycle?.events
-      .pipe(
-        filter(isTaskManagerWorkerUtilizationStatEvent),
-        map<TaskLifecycleEvent, number>((taskEvent: TaskLifecycleEvent) => {
-          return (taskEvent.event as unknown as Ok<number>).value;
-        })
-      )
-      .subscribe((load: number) => {
-        backgroundTaskLoads.push(load);
+  for (let i = 0; i < 100; i++) {
+    it(`should claim tasks to full capacity ${i}`, async () => {
+      const backgroundTaskLoads: number[] = [];
+      createMonitoringStatsOpts.taskPollingLifecycle?.events
+        .pipe(
+          filter(isTaskManagerWorkerUtilizationStatEvent),
+          map<TaskLifecycleEvent, number>((taskEvent: TaskLifecycleEvent) => {
+            return (taskEvent.event as unknown as Ok<number>).value;
+          })
+        )
+        .subscribe((load: number) => {
+          backgroundTaskLoads.push(load);
+        });
+      const taskRunAtDates: Date[] = [];
+      mockTaskTypeNormalCostRunFn.mockImplementation(() => {
+        taskRunAtDates.push(new Date());
+        return { state: { foo: 'test' } };
       });
-    const taskRunAtDates: Date[] = [];
-    mockTaskTypeNormalCostRunFn.mockImplementation(() => {
-      taskRunAtDates.push(new Date());
-      return { state: { foo: 'test' } };
-    });
 
-    // inject 10 normal cost tasks with the same runAt value
-    const ids: string[] = [];
-    times(10, () => ids.push(uuidV4()));
+      // inject 10 normal cost tasks with the same runAt value
+      const ids: string[] = [];
+      times(10, () => ids.push(uuidV4()));
 
-    const runAt = new Date();
-    for (const id of ids) {
-      await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
-        id,
-        taskType: '_normalCostType',
-        params: {},
-        state: { foo: 'test' },
-        stateVersion: 1,
-        runAt,
-        enabled: true,
-        scheduledAt: new Date(),
-        attempts: 0,
-        status: TaskStatus.Idle,
-        startedAt: null,
-        retryAt: null,
-        ownerId: null,
+      const runAt = new Date();
+      for (const id of ids) {
+        await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
+          id,
+          taskType: '_normalCostType',
+          params: {},
+          state: { foo: 'test' },
+          stateVersion: 1,
+          runAt,
+          enabled: true,
+          scheduledAt: new Date(),
+          attempts: 0,
+          status: TaskStatus.Idle,
+          startedAt: null,
+          retryAt: null,
+          ownerId: null,
+        });
+        taskIdsToRemove.push(id);
+      }
+
+      await retry(async () => {
+        expect(mockTaskTypeNormalCostRunFn).toHaveBeenCalledTimes(10);
       });
-      taskIdsToRemove.push(id);
-    }
 
-    await retry(async () => {
-      expect(mockTaskTypeNormalCostRunFn).toHaveBeenCalledTimes(10);
+      expect(taskRunAtDates.length).toBe(10);
+
+      // run at dates should be within a few seconds of each other
+      const firstRunAt = taskRunAtDates[0].getTime();
+      const lastRunAt = taskRunAtDates[taskRunAtDates.length - 1].getTime();
+
+      expect(lastRunAt - firstRunAt).toBeLessThanOrEqual(1000);
+
+      // background task load should be 0 or 100 since we're only running these tasks
+      for (const load of backgroundTaskLoads) {
+        expect(load === 0 || load === 100).toBe(true);
+      }
     });
-
-    expect(taskRunAtDates.length).toBe(10);
-
-    // run at dates should be within a few seconds of each other
-    const firstRunAt = taskRunAtDates[0].getTime();
-    const lastRunAt = taskRunAtDates[taskRunAtDates.length - 1].getTime();
-
-    expect(lastRunAt - firstRunAt).toBeLessThanOrEqual(1000);
-
-    // background task load should be 0 or 100 since we're only running these tasks
-    for (const load of backgroundTaskLoads) {
-      expect(load === 0 || load === 100).toBe(true);
-    }
-  });
+  }
 
   it('should claim tasks until the next task will exceed capacity', async () => {
     const backgroundTaskLoads: number[] = [];
