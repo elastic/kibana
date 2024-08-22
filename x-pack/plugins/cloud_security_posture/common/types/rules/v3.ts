@@ -7,11 +7,11 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { cspBenchmarkRuleMetadataSchema } from '@kbn/cloud-security-posture-common/schema/rules';
+import { cspBenchmarkRuleMetadataSchema } from '@kbn/cloud-security-posture-common';
 
-export type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common';
+// export type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common';
 
-export type { cspBenchmarkRuleMetadataSchema } from '@kbn/cloud-security-posture-common/schema/rules';
+// export type { cspBenchmarkRuleMetadataSchema } from '@kbn/cloud-security-posture-common';
 
 export const DEFAULT_BENCHMARK_RULES_PER_PAGE = 25;
 
