@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { ArrayFromString, z } from '@kbn/zod';
+import { z, ArrayFromString } from '@kbn/zod';
 
 import { SortOrder } from '../common_attributes.gen';
 import { ConversationResponse } from './common_attributes.gen';
