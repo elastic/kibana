@@ -8,7 +8,7 @@
 
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { omit } from 'lodash';
-import { ControlGroupRuntimeState, ControlGroupSerializedState } from './types';
+import { ControlGroupRuntimeState, ControlGroupSerializedState } from '../types';
 
 export const deserializeControlGroup = (
   state: SerializedPanelState<ControlGroupSerializedState>

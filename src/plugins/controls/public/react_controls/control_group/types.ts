@@ -30,7 +30,7 @@ import { Observable } from 'rxjs';
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { ParentIgnoreSettings } from '../..';
 import { ControlGroupChainingSystem } from '../../../common/control_group/types';
-import { ControlStyle } from '../../types';
+import { ControlStyle, ControlWidth } from '../../types';
 import { DefaultControlState } from '../controls/types';
 import { ControlFetchContext } from './control_fetch/control_fetch';
 import { FieldFilterPredicate } from '../../control_group/types';
@@ -41,10 +41,10 @@ import { FieldFilterPredicate } from '../../control_group/types';
  * ----------------------------------------------------------------
  */
 
-export type ControlInputTransform = (
-  newState: Partial<ControlGroupSerializedState>,
+export type ControlStateTransform<State extends DefaultControlState = DefaultControlState> = (
+  newState: Partial<State>,
   controlType: string
-) => Partial<ControlGroupSerializedState>;
+) => Partial<State>;
 
 export type ControlGroupUnsavedChanges = Omit<
   ControlGroupRuntimeState,
@@ -71,12 +71,17 @@ export type ControlGroupApi = PresentationContainer &
 
     asyncResetUnsavedChanges: () => Promise<void>;
     controlFetch$: (controlUuid: string) => Observable<ControlFetchContext>;
-    getEditorConfig: () => ControlGroupEditorConfig | undefined;
-    getLastSavedControlState: (controlUuid: string) => object;
     openAddDataControlFlyout: (settings?: {
-      controlInputTransform?: ControlInputTransform;
+      controlStateTransform?: ControlStateTransform;
     }) => void;
     untilInitialized: () => Promise<void>;
+
+    /** Public getters */
+    getEditorConfig: () => ControlGroupEditorConfig | undefined;
+    getLastSavedControlState: (controlUuid: string) => object;
+
+    /** Public setters */
+    setChainingSystem: (chainingSystem: ControlGroupChainingSystem) => void;
   };
 
 /**

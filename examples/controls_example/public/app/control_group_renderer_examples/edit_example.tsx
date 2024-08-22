@@ -26,7 +26,7 @@ import {
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
 } from '@kbn/controls-plugin/common';
-import { ControlInputTransform } from '@kbn/controls-plugin/common/types';
+import { ControlStateTransform } from '@kbn/controls-plugin/public';
 import {
   ACTION_DELETE_CONTROL,
   ACTION_EDIT_CONTROL,
@@ -101,7 +101,7 @@ export const EditExample = () => {
     return input;
   }
 
-  const controlInputTransform: ControlInputTransform = (newState, type) => {
+  const controlStateTransform: ControlStateTransform = (newState, type) => {
     if (type === OPTIONS_LIST_CONTROL && toggleIconIdToSelectedMapIcon[WITH_CUSTOM_PLACEHOLDER]) {
       return {
         ...newState,
@@ -137,7 +137,7 @@ export const EditExample = () => {
               isDisabled={controlGroupAPI === undefined}
               onClick={() => {
                 if (!controlGroupAPI) return;
-                controlGroupAPI!.openAddDataControlFlyout({ controlInputTransform });
+                controlGroupAPI!.openAddDataControlFlyout({ controlStateTransform });
               }}
             >
               Add control

@@ -121,11 +121,6 @@ export const getControlGroupEmbeddableFactory = (services: {
       const api = setApi({
         ...controlsManager.api,
         disabledActionIds: disabledActionIds$,
-        getEditorConfig: () => initialRuntimeState.editorConfig,
-        setDisabledActionIds: (ids) => disabledActionIds$.next(ids),
-        getLastSavedControlState: (controlUuid: string) => {
-          return lastSavedRuntimeState.initialChildControlState[controlUuid] ?? {};
-        },
         ...unsavedChanges.api,
         ...selectionsManager.api,
         controlFetch$: (controlUuid: string) =>
@@ -164,23 +159,16 @@ export const getControlGroupEmbeddableFactory = (services: {
           );
         },
         isEditingEnabled: () => true,
-        getTypeDisplayName: () =>
-          i18n.translate('controls.controlGroup.displayName', {
-            defaultMessage: 'Controls',
-          }),
         openAddDataControlFlyout: (settings) => {
-          const { controlInputTransform } = settings ?? {
-            controlInputTransform: (state) => state,
+          const { controlStateTransform } = settings ?? {
+            controlStateTransform: (state) => state,
           };
           openDataControlEditor({
             initialState: controlsManager.getNewControlState(),
             onSave: ({ type: controlType, state: initialState }) => {
               controlsManager.api.addNewPanel({
                 panelType: controlType,
-                initialState: controlInputTransform!(
-                  initialState as Partial<ControlGroupSerializedState>,
-                  controlType
-                ),
+                initialState: controlStateTransform!(initialState, controlType),
               });
             },
             controlGroupApi: api,
@@ -206,6 +194,20 @@ export const getControlGroupEmbeddableFactory = (services: {
           ? parentApi.saveNotification$
           : undefined,
         reload$: apiPublishesReload(parentApi) ? parentApi.reload$ : undefined,
+
+        /** Public getters */
+        getTypeDisplayName: () =>
+          i18n.translate('controls.controlGroup.displayName', {
+            defaultMessage: 'Controls',
+          }),
+        getEditorConfig: () => initialRuntimeState.editorConfig,
+        getLastSavedControlState: (controlUuid: string) => {
+          return lastSavedRuntimeState.initialChildControlState[controlUuid] ?? {};
+        },
+
+        /** Public setters */
+        setDisabledActionIds: (ids) => disabledActionIds$.next(ids),
+        setChainingSystem: (newChainingSystem) => chainingSystem$.next(newChainingSystem),
       });
 
       /** Subscribe to all children's output data views, combine them, and output them */

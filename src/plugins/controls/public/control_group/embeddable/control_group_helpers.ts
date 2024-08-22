@@ -12,9 +12,9 @@ import { getDataControlFieldRegistry } from '../editor/data_control_editor_tools
 import { type ControlGroupContainer } from './control_group_container';
 import { pluginServices } from '../../services';
 import { CONTROL_GROUP_TYPE } from '../types';
-import { ControlPanelsState } from '../../react_controls/control_group/types';
+import { ControlsPanels } from '../types';
 
-export const getNextPanelOrder = (panels?: ControlPanelsState) => {
+export const getNextPanelOrder = (panels?: ControlsPanels) => {
   let nextOrder = 0;
   if (Object.keys(panels ?? {}).length > 0) {
     nextOrder =

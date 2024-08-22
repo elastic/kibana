@@ -12,6 +12,8 @@ export type {
   ControlGroupApi,
   ControlGroupRuntimeState,
   ControlGroupSerializedState,
+  ControlStateTransform,
+  ControlPanelState,
 } from './react_controls/control_group/types';
 export type {
   DataControlApi,

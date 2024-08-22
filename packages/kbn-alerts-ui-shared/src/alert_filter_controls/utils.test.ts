@@ -7,7 +7,7 @@
  */
 
 import {
-  getFilterItemObjListFromControlInput,
+  getFilterItemObjListFromControlState,
   mergeControls,
   reorderControlsWithDefaultControls,
   getFilterControlsComparator,
@@ -67,7 +67,7 @@ const defaultControlsObj = defaultControls.reduce((prev, current) => {
 describe('utils', () => {
   describe('getFilterItemObjListFromControlOutput', () => {
     it('should return ordered filterItem where passed in order', () => {
-      const filterItemObjList = getFilterItemObjListFromControlInput(initialInputData);
+      const filterItemObjList = getFilterItemObjListFromControlState(initialInputData);
 
       filterItemObjList.forEach((item, idx) => {
         const panelObj =
@@ -92,7 +92,7 @@ describe('utils', () => {
           '1': initialInputData.initialChildControlState['0'],
         },
       };
-      const filterItemObjList = getFilterItemObjListFromControlInput(newInputData);
+      const filterItemObjList = getFilterItemObjListFromControlState(newInputData);
 
       let panelObj = newInputData.initialChildControlState['1'];
       expect(filterItemObjList[0]).toMatchObject({
