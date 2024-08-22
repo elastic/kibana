@@ -26,11 +26,6 @@ import { CanClearSelections, ControlWidth } from '../../types';
 
 import { ControlGroupApi } from '../control_group/types';
 
-export interface PublishesControlDisplaySettings {
-  grow: PublishingSubject<boolean | undefined>;
-  width: PublishingSubject<ControlWidth | undefined>;
-}
-
 export interface HasCustomPrepend {
   CustomPrependComponent: React.FC<{}>;
 }
@@ -38,7 +33,6 @@ export interface HasCustomPrepend {
 export type DefaultControlApi = PublishesDataLoading &
   PublishesBlockingError &
   PublishesUnsavedChanges &
-  PublishesControlDisplaySettings &
   Partial<PublishesPanelTitle & PublishesDisabledActionIds & HasCustomPrepend> &
   CanClearSelections &
   HasType &
@@ -51,6 +45,8 @@ export type DefaultControlApi = PublishesDataLoading &
     /** TODO: Make these non-public as part of https://github.com/elastic/kibana/issues/174961 */
     setDataLoading: (loading: boolean) => void;
     setBlockingError: (error: Error | undefined) => void;
+    grow: PublishingSubject<boolean | undefined>;
+    width: PublishingSubject<ControlWidth | undefined>;
   };
 
 export interface DefaultControlState {
