@@ -27,7 +27,7 @@ import {
   COLD,
   FROZEN,
   UNMANAGED,
-} from '../../../../../../ilm_phases_empty_prompt/translations';
+} from '../../../../../ilm_phases_empty_prompt/translations';
 import * as i18n from '../translations';
 import type {
   AllowedValue,

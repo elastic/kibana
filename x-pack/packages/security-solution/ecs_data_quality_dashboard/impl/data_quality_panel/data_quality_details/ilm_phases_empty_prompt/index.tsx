@@ -15,7 +15,7 @@ import {
   HOT_DESCRIPTION,
   UNMANAGED_DESCRIPTION,
   WARM_DESCRIPTION,
-} from '../translations';
+} from '../../translations';
 import * as i18n from './translations';
 
 const Ul = styled.ul`

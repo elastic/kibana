@@ -8,7 +8,7 @@
 import { EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { ErrorEmptyPrompt } from '../../../error_empty_prompt';
+import { ErrorEmptyPrompt } from './error_empty_prompt';
 import {
   defaultSort,
   getIlmExplainPhaseCounts,
@@ -25,7 +25,7 @@ import {
   getTotalPatternIndicesChecked,
   getTotalSizeInBytes,
 } from '../../../helpers';
-import { LoadingEmptyPrompt } from '../../../loading_empty_prompt';
+import { LoadingEmptyPrompt } from './loading_empty_prompt';
 import { PatternSummary } from './pattern_summary';
 import { RemoteClustersCallout } from './remote_clusters_callout';
 import { SummaryTable } from './summary_table';

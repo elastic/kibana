@@ -7,7 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 
-import { IlmPhasesEmptyPrompt } from '../ilm_phases_empty_prompt';
+import { IlmPhasesEmptyPrompt } from './ilm_phases_empty_prompt';
 import { IndicesDetails } from './indices_details';
 import { StorageDetails } from './storage_details';
 import { SelectedIndex } from '../types';
