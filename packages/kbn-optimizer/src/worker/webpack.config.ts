@@ -73,7 +73,10 @@ export function getWebpackConfig(
       },
     },
 
-    externals: UiSharedDepsSrc.externals,
+    externals: {
+      'node:crypto': 'commonjs crypto',
+      ...UiSharedDepsSrc.externals,
+    },
 
     plugins: [
       new NodePolyfillPlugin(),
