@@ -33,7 +33,7 @@ export const ViewSpaceEnabledFeatures: FC<Props> = ({ features, space, onChange 
   }
 
   return (
-    <SectionPanel data-test-subj="enabled-features-panel">
+    <SectionPanel dataTestSubj="enabled-features-panel">
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle size="xs">
