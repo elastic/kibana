@@ -106,7 +106,7 @@ export const RulesTableHeader = ({
 
   return (
     <EuiFlexGroup direction="column">
-      <EuiFlexGroup>
+      <EuiFlexGroup wrap={true}>
         <EuiFlexItem grow={1}>
           <SearchField isSearching={isSearching} searchValue={searchValue} search={search} />
         </EuiFlexItem>
