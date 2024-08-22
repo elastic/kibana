@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getTaskClaimer } from '.';
+import { getTaskClaimer, isTaskTypeExcluded } from '.';
 import { mockLogger } from '../test_utils';
 import { claimAvailableTasksUpdateByQuery } from './strategy_update_by_query';
 import { claimAvailableTasksMget } from './strategy_mget';
@@ -35,5 +35,17 @@ describe('task_claimers/index', () => {
         'Unknown task claiming strategy "not-supported", falling back to update_by_query'
       );
     });
+  });
+});
+
+describe('isTaskTypeExcluded', () => {
+  test('returns false when task type is not in the excluded list', () => {
+    expect(isTaskTypeExcluded(['otherTaskType'], 'taskType')).toBe(false);
+    expect(isTaskTypeExcluded(['otherTaskType*'], 'taskType')).toBe(false);
+  });
+
+  test('returns true when task type is in the excluded list', () => {
+    expect(isTaskTypeExcluded(['taskType'], 'taskType')).toBe(true);
+    expect(isTaskTypeExcluded(['task*'], 'taskType')).toBe(true);
   });
 });

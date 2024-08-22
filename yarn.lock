@@ -6215,6 +6215,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/search-assistant@link:x-pack/plugins/search_assistant":
+  version "0.0.0"
+  uid ""
+
 "@kbn/search-connectors-plugin@link:x-pack/plugins/search_connectors":
   version "0.0.0"
   uid ""
@@ -6271,6 +6275,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security-authorization-core@link:x-pack/packages/security/authorization_core":
+  version "0.0.0"
+  uid ""
+
 "@kbn/security-form-components@link:x-pack/packages/security/form_components":
   version "0.0.0"
   uid ""
@@ -6292,6 +6300,10 @@
   uid ""
 
 "@kbn/security-plugin@link:x-pack/plugins/security":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-role-management-model@link:x-pack/packages/security/role_management_model":
   version "0.0.0"
   uid ""
 
