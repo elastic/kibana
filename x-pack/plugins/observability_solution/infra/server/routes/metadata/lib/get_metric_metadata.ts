@@ -15,12 +15,14 @@ import {
 } from '../../../lib/adapters/framework';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InfraSourceConfiguration } from '../../../lib/sources';
-import { TIMESTAMP_FIELD } from '../../../../common/constants';
+import { HOST_NAME_FIELD, SYSTEM_INTEGRATION, TIMESTAMP_FIELD } from '../../../../common/constants';
+import { getFilterByIntegration } from '../../infra/lib/helpers/query';
 
 export interface InfraMetricsAdapterResponse {
   id: string;
   name?: string;
   buckets: InfraMetadataAggregationBucket[];
+  hasSystemIntegration: boolean;
 }
 
 export const getMetricMetadata = async (
@@ -70,6 +72,20 @@ export const getMetricMetadata = async (
             size: 1000,
           },
         },
+        monitoredHost: {
+          filter: getFilterByIntegration(SYSTEM_INTEGRATION),
+          aggs: {
+            name: {
+              terms: {
+                field: HOST_NAME_FIELD,
+                size: 1,
+                order: {
+                  _key: 'asc',
+                },
+              },
+            },
+          },
+        },
       },
     },
   };
@@ -79,6 +95,7 @@ export const getMetricMetadata = async (
     {
       metrics?: InfraMetadataAggregationResponse;
       nodeName?: InfraMetadataAggregationResponse;
+      monitoredHost?: { name: InfraMetadataAggregationResponse };
     }
   >(requestContext, 'search', metricQuery);
 
@@ -86,10 +103,17 @@ export const getMetricMetadata = async (
     response.aggregations && response.aggregations.metrics
       ? response.aggregations.metrics.buckets
       : [];
+  const hostWithSystemIntegration =
+    response.aggregations && (response.aggregations?.monitoredHost?.name?.buckets ?? []).length > 0
+      ? response.aggregations?.monitoredHost?.name.buckets[0]?.key
+      : null;
+
+  const hasSystemIntegration = hostWithSystemIntegration === nodeId;
 
   return {
     id: nodeId,
     name: get(response, ['aggregations', 'nodeName', 'buckets', 0, 'key'], nodeId),
+    hasSystemIntegration,
     buckets,
   };
 };

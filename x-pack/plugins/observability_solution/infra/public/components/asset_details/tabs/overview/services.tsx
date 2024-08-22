@@ -22,6 +22,7 @@ import { LinkToApmService } from '../../links/link_to_apm_service';
 import { useKibanaEnvironmentContext } from '../../../../hooks/use_kibana';
 import { useRequestObservable } from '../../hooks/use_request_observable';
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
+import { useMetadataStateContext } from '../../hooks/use_metadata_state';
 
 export const ServicesContent = ({
   hostName,
@@ -33,6 +34,7 @@ export const ServicesContent = ({
   const { isServerlessEnv } = useKibanaEnvironmentContext();
   const { request$ } = useRequestObservable();
   const { isActiveTab } = useTabSwitcherContext();
+  const { metadata, loading: metadataLoading } = useMetadataStateContext();
 
   const linkProps = useLinkProps({
     app: 'home',
@@ -92,7 +94,7 @@ export const ServicesContent = ({
             defaultMessage: 'An error occurred while fetching services.',
           })}
         </EuiCallOut>
-      ) : isPending(status) ? (
+      ) : isPending(status) || metadataLoading ? (
         <EuiLoadingSpinner size="m" />
       ) : hasServices ? (
         <EuiFlexGroup
@@ -111,7 +113,7 @@ export const ServicesContent = ({
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
-      ) : (
+      ) : metadata?.hasSystemIntegration ? (
         <p>
           <FormattedMessage
             id="xpack.infra.assetDetails.services.noServicesMsg"
@@ -129,7 +131,24 @@ export const ServicesContent = ({
                 </EuiLink>
               ),
             }}
-          />
+          />{' '}
+          <EuiLink
+            data-test-subj="assetDetailsAPMTroubleshootingLink"
+            href="https://ela.st/host-troubleshooting"
+            target="_blank"
+          >
+            <FormattedMessage
+              id="xpack.infra.assetDetails.table.services.noServices.troubleshootingLink"
+              defaultMessage="Troubleshooting"
+            />
+          </EuiLink>
+        </p>
+      ) : (
+        <p>
+          <FormattedMessage
+            id="xpack.infra.assetDetails.services.noServicesWithApmMessage"
+            defaultMessage="No services found on this host."
+          />{' '}
           <EuiLink
             data-test-subj="assetDetailsAPMTroubleshootingLink"
             href="https://ela.st/host-troubleshooting"

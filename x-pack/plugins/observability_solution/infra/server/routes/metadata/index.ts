@@ -53,6 +53,7 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
         timeRange
       );
       const metricFeatures = pickFeatureName(metricsMetadata.buckets).map(nameToFeature('metrics'));
+      const hasSystemIntegration = metricsMetadata.hasSystemIntegration;
 
       const info = await getNodeInfo(
         framework,
@@ -82,6 +83,7 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
         body: InfraMetadataRT.encode({
           id,
           name,
+          hasSystemIntegration,
           features: [...metricFeatures, ...cloudMetricsFeatures],
           info: {
             ...info,
