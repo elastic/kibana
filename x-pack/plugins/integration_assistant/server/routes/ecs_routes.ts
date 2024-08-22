@@ -13,11 +13,11 @@ import {
 } from '@kbn/langchain/server/language_models';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import { buildRouteValidationWithZod } from '@kbn/core-http-server';
 import { ECS_GRAPH_PATH, EcsMappingRequestBody, EcsMappingResponse } from '../../common';
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getEcsGraph } from '../graphs/ecs';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
-import { buildRouteValidationWithZod } from '@kbn/core-http-server';
 import { withAvailability } from './with_availability';
 
 export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {

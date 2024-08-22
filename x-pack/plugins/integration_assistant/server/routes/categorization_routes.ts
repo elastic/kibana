@@ -13,6 +13,7 @@ import {
 } from '@kbn/langchain/server/language_models';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import { buildRouteValidationWithZod } from '@kbn/core-http-server';
 import {
   CATEGORIZATION_GRAPH_PATH,
   CategorizationRequestBody,
@@ -21,7 +22,6 @@ import {
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getCategorizationGraph } from '../graphs/categorization';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
-import { buildRouteValidationWithZod } from '@kbn/core-http-server';
 import { withAvailability } from './with_availability';
 
 export function registerCategorizationRoutes(
