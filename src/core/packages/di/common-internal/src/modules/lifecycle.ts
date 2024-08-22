@@ -8,7 +8,7 @@
  */
 
 import { ContainerModule, type interfaces } from 'inversify';
-import { OnSetup, OnStart, Setup, Start } from '@kbn/core-di-common';
+import { OnSetup, OnStart, Setup, Start } from '@kbn/core-di';
 
 export const Contract = Symbol.for('Contract') as interfaces.ServiceIdentifier<unknown>;
 

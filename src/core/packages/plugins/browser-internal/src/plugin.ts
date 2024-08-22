@@ -16,8 +16,8 @@ import type {
   PluginInitializer,
   PluginInitializerContext,
 } from '@kbn/core-plugins-browser';
-import { Setup, Start } from '@kbn/core-di-common';
-import { Contract } from '@kbn/core-di-common-internal';
+import { Setup, Start } from '@kbn/core-di';
+import { Contract } from '@kbn/core-di-internal';
 import { type PluginDefinition, read } from './plugin_reader';
 import {
   createPluginInitializerModule,

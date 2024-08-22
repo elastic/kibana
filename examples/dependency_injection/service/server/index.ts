@@ -7,7 +7,7 @@
  */
 
 import { ContainerModule, type interfaces } from 'inversify';
-import { Global } from '@kbn/core-di-common';
+import { Global } from '@kbn/core-di';
 import { Echo } from './echo';
 
 export type { Echo };

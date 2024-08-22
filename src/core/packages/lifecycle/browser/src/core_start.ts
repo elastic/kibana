@@ -10,7 +10,7 @@
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import type { CoreDiServiceStart } from '@kbn/core-di-common';
+import type { CoreDiServiceStart } from '@kbn/core-di';
 import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';

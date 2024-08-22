@@ -17,7 +17,7 @@ import {
   RouterService,
 } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { DiService, Global, OnSetup } from '@kbn/core-di-common';
+import { DiService, Global, OnSetup } from '@kbn/core-di';
 
 export const httpModule = new ContainerModule(
   (bind, _unbind, _isBound, _rebind, _unbindAsync, onActivation) => {

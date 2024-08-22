@@ -9,7 +9,7 @@
 
 import { ContainerModule, type interfaces } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
-import { Global, OnSetup } from '@kbn/core-di-common';
+import { Global, OnSetup } from '@kbn/core-di';
 
 const Context = Symbol('Context') as interfaces.ServiceIdentifier<interfaces.Container>;
 const Id = Symbol('Id') as interfaces.ServiceIdentifier<PluginOpaqueId>;
