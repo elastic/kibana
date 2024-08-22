@@ -9,6 +9,7 @@
 import * as t from 'io-ts';
 
 const investigationEsqlItemSchema = t.type({
+  title: t.string,
   type: t.literal('esql'),
   params: t.type({
     esql: t.string,
@@ -22,9 +23,15 @@ type InvestigationItems = t.TypeOf<typeof investigationItemsSchema>;
 type InvestigationItemTypes = t.TypeOf<typeof investigationItemsSchema.props.type>;
 
 const investigationItemSchema = t.intersection([
-  t.type({ id: t.string, createdAt: t.number, createdBy: t.string, title: t.string }),
+  t.type({ id: t.string, createdAt: t.number, createdBy: t.string }),
   investigationItemsSchema,
 ]);
+type InvestigationItem = t.TypeOf<typeof investigationItemSchema>;
 
-export type { InvestigationItems, InvestigationItemTypes, InvestigationEsqlItem };
+export type {
+  InvestigationItem,
+  InvestigationItems,
+  InvestigationItemTypes,
+  InvestigationEsqlItem,
+};
 export { investigationItemSchema, investigationItemsSchema, investigationEsqlItemSchema };

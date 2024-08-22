@@ -212,7 +212,7 @@ export function registerEsqlItem({
 }: Options) {
   investigate.registerItemDefinition({
     type: 'esql',
-    render: async (option: { item: InvestigationEsqlItem; params: GlobalWidgetParameters }) => {
+    generate: async (option: { item: InvestigationEsqlItem; params: GlobalWidgetParameters }) => {
       const controller = new AbortController();
       const { esql: esqlQuery, suggestion: suggestionFromParameters } = option.item.params;
       const { timeRange } = option.params;
@@ -249,15 +249,23 @@ export function registerEsqlItem({
         timeRange,
       });
 
+      return {
+        mainResponse,
+        suggestion,
+        dateHistoResponse,
+      };
+    },
+    render: (option: { item: InvestigationEsqlItem; data: Record<string, any> }) => {
+      const { item, data = {} } = option;
       return (
         <EsqlWidget
-          dataView={mainResponse.meta.dataView}
-          columns={mainResponse.query.columns}
+          dataView={data.mainResponse.meta.dataView}
+          columns={data.mainResponse.query.columns}
           allColumns={undefined}
-          values={mainResponse.query.values}
-          suggestion={suggestion}
-          esqlQuery={esqlQuery}
-          dateHistogramResults={dateHistoResponse}
+          values={data.mainResponse.query.values}
+          suggestion={data.suggestion}
+          esqlQuery={item.params.esql}
+          dateHistogramResults={data.dateHistoResponse}
         />
       );
     },

@@ -8,12 +8,19 @@
 import { InvestigationItemTypes, InvestigationItems } from '@kbn/investigation-shared';
 import { GlobalWidgetParameters } from '../../common/types';
 
+type ItemDefinitionGenerateData = Record<string, any>;
+
+// type `data` somehow
 export interface ItemDefinition {
   type: InvestigationItemTypes;
-  render: (option: {
+  generate: (option: {
     item: InvestigationItems;
     params: GlobalWidgetParameters;
-  }) => Promise<React.ReactNode>;
+  }) => Promise<ItemDefinitionGenerateData>;
+  render: (option: {
+    data: ItemDefinitionGenerateData;
+    item: InvestigationItems;
+  }) => React.ReactNode;
 }
 
 export class ItemDefinitionRegistry {

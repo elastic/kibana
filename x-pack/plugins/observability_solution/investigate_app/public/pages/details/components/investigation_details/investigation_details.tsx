@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import datemath from '@elastic/datemath';
+
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { InvestigationItem } from '@kbn/investigation-shared';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
-import React, { useEffect, useState } from 'react';
-import { AddObservationUI } from '../../../../components/add_observation_ui';
+import { noop } from 'lodash';
+import React, { useEffect } from 'react';
 import { InvestigateSearchBar } from '../../../../components/investigate_search_bar';
 import { InvestigateWidgetGrid } from '../../../../components/investigate_widget_grid';
 import { useFetchInvestigation } from '../../../../hooks/use_fetch_investigation';
@@ -27,22 +29,66 @@ export function InvestigationDetails({
       start: { investigate },
     },
   } = useKibana();
-  const itemDefinitions = investigate.getItemDefinitions();
-  const { data: investigationData } = useFetchInvestigation({ id: investigationId });
+  const { data: investigation } = useFetchInvestigation({ id: investigationId });
 
-  const {
-    addItem,
-    copyItem,
-    deleteItem,
-    investigation,
-    setGlobalParameters,
-    renderableInvestigation,
-  } = investigate.useInvestigation({
-    user,
-    investigationData,
-  });
+  const [renderableItems, setRenderableItems] = React.useState<
+    Array<InvestigationItem & { loading: boolean; element: React.ReactNode }>
+  >([]);
 
-  if (!investigation || !renderableInvestigation || !investigationData) {
+  useEffect(() => {
+    async function renderItems(items: InvestigationItem[]) {
+      return await Promise.all(
+        items.map(async (item) => {
+          const itemDefinition = investigate.getItemDefinitionByType(item.type);
+          if (!itemDefinition) {
+            return Promise.resolve({
+              ...item,
+              loading: false,
+              element: (
+                <div>
+                  {i18n.translate('xpack.investigateApp.renderableItems.div.notFoundLabel', {
+                    defaultMessage: 'Not found for type {type}',
+                    values: { type: item.type },
+                  })}
+                </div>
+              ),
+            });
+          }
+
+          const data = await itemDefinition.generate({
+            item,
+            params: {
+              timeRange: {
+                from: investigation
+                  ? new Date(investigation.params.timeRange.from).toISOString()
+                  : new Date().toISOString(),
+                to: investigation
+                  ? new Date(investigation.params.timeRange.to).toISOString()
+                  : new Date().toISOString(),
+              },
+            },
+          });
+
+          return Promise.resolve({
+            ...item,
+            loading: false,
+            element: itemDefinition.render({
+              data,
+              item,
+            }),
+          });
+        })
+      );
+    }
+
+    if (investigation) {
+      renderItems(investigation.items).then((nextRenderableItems) =>
+        setRenderableItems(nextRenderableItems)
+      );
+    }
+  }, [investigation]);
+
+  if (!investigation || !renderableItems) {
     return <EuiLoadingSpinner />;
   }
 
@@ -54,47 +100,47 @@ export function InvestigationDetails({
             <EuiFlexItem>
               <InvestigateSearchBar
                 dateRangeFrom={
-                  investigationData
-                    ? new Date(investigationData.params.timeRange.from).toISOString()
+                  investigation
+                    ? new Date(investigation.params.timeRange.from).toISOString()
                     : undefined
                 }
                 dateRangeTo={
-                  investigationData
-                    ? new Date(investigationData.params.timeRange.to).toISOString()
+                  investigation
+                    ? new Date(investigation.params.timeRange.to).toISOString()
                     : undefined
                 }
                 onQuerySubmit={async ({ dateRange }) => {
-                  const nextDateRange = {
-                    from: datemath.parse(dateRange.from)!.toISOString(),
-                    to: datemath.parse(dateRange.to)!.toISOString(),
-                  };
-                  await setGlobalParameters({
-                    ...renderableInvestigation.parameters,
-                    timeRange: nextDateRange,
-                  });
+                  // const nextDateRange = {
+                  //   from: datemath.parse(dateRange.from)!.toISOString(),
+                  //   to: datemath.parse(dateRange.to)!.toISOString(),
+                  // };
+                  // await setGlobalParameters({
+                  //   ...renderableInvestigation.parameters,
+                  //   timeRange: nextDateRange,
+                  // });
                 }}
               />
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
               <InvestigateWidgetGrid
-                items={renderableInvestigation.items}
+                items={renderableItems}
                 onItemCopy={async (copiedItem) => {
-                  return copyItem(copiedItem.id);
+                  return noop(); // copyItem(copiedItem.id);
                 }}
                 onItemDelete={async (deletedItem) => {
-                  return deleteItem(deletedItem.id);
+                  return noop(); // deleteItem(deletedItem.id);
                 }}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
 
-          <AddObservationUI
-            timeRange={renderableInvestigation.parameters.timeRange}
+          {/* <AddObservationUI
+            timeRange={investigation.params.timeRange}
             onWidgetAdd={(widget) => {
               return addItem(widget);
             }}
-          />
+          /> */}
         </EuiFlexGroup>
       </EuiFlexItem>
 

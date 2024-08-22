@@ -5,18 +5,17 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { InvestigationItem } from '@kbn/investigation-shared';
 import React from 'react';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import { GridItem } from '../grid_item';
 import './styles.scss';
 
-export interface InvestigateWidgetGridItem {
-  id: string;
-  title: string;
-  element: React.ReactNode;
+export type InvestigateWidgetGridItem = InvestigationItem & {
   loading: boolean;
-}
+  element: React.ReactNode;
+};
 
 interface InvestigateWidgetGridProps {
   items: InvestigateWidgetGridItem[];
