@@ -214,7 +214,6 @@ export function AssignmentsConfig({
                 </EuiButton>,
                 <EuiButtonEmpty
                   data-test-subj="lns-colorMapping-assignmentsPromptAddAll"
-                  color="text"
                   size="xs"
                   onClick={onClickAddAllCurrentCategories}
                 >
