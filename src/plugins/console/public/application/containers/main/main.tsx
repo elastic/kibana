@@ -7,17 +7,17 @@
  */
 
 import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
   EuiPageTemplate,
   EuiSplitPanel,
-  EuiButtonIcon,
   EuiHorizontalRule,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { MAIN_PANEl_LABELS } from './i18n';
+import { NavIconButton } from './nav_icon_button';
 import { Editor } from '../editor';
 import { TopNavMenu, SomethingWentWrongCallout } from '../../components';
 import { useDataInit } from '../../hooks';
@@ -50,11 +50,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
       >
         <EuiFlexItem grow={false}>
           <EuiTitle className="euiScreenReaderOnly">
-            <h1>
-              {i18n.translate('console.pageHeading', {
-                defaultMessage: 'Console',
-              })}
-            </h1>
+            <h1>{MAIN_PANEl_LABELS.consolePageHeading}</h1>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -71,33 +67,30 @@ export function Main({ isEmbeddable = false }: MainProps) {
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
+                  <NavIconButton
                     iconType="save"
                     onClick={() => {}}
-                    aria-label={i18n.translate('console.importExportButtonAriaLabel', {
-                      defaultMessage: 'Import/Export',
-                    })}
-                    data-test-subj="consoleImportExportButton"
+                    ariaLabel={MAIN_PANEl_LABELS.importExportButton}
+                    dataTestSubj="consoleImportExportButton"
+                    toolTipContent={MAIN_PANEl_LABELS.importExportButton}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
+                  <NavIconButton
                     iconType="keyboard"
                     onClick={() => {}}
-                    aria-label={i18n.translate('console.shortcutsButtonAriaLabel', {
-                      defaultMessage: 'Keyboard shortcuts',
-                    })}
-                    data-test-subj="consoleShortcutsButton"
+                    ariaLabel={MAIN_PANEl_LABELS.shortcutsButton}
+                    dataTestSubj="consoleShortcutsButton"
+                    toolTipContent={MAIN_PANEl_LABELS.shortcutsButton}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
+                  <NavIconButton
                     iconType="questionInCircle"
                     onClick={() => {}}
-                    aria-label={i18n.translate('console.helpButtonAriaLabel', {
-                      defaultMessage: 'Help',
-                    })}
-                    data-test-subj="consoleHelpButton"
+                    ariaLabel={MAIN_PANEl_LABELS.helpButton}
+                    dataTestSubj="consoleHelpButton"
+                    toolTipContent={MAIN_PANEl_LABELS.helpButton}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -111,9 +104,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
             <EuiHorizontalRule margin="none" />
             <EuiSplitPanel.Inner paddingSize="xs" grow={false}>
               <EuiButtonEmpty onClick={() => {}} iconType="editorCodeBlock" size="xs" color="text">
-                {i18n.translate('console.variablesButton', {
-                  defaultMessage: 'Variables',
-                })}
+                {MAIN_PANEl_LABELS.variablesButton}
               </EuiButtonEmpty>
             </EuiSplitPanel.Inner>
           </EuiSplitPanel.Outer>
