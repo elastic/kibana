@@ -6068,6 +6068,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/screenshotting-server@link:packages/kbn-screenshotting-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/search-api-panels@link:packages/kbn-search-api-panels":
   version "0.0.0"
   uid ""
