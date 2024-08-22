@@ -13,8 +13,6 @@ import { PatternLabel } from './pattern_label';
 import { StatsRollup } from './stats_rollup';
 
 interface Props {
-  formatBytes: (value: number | undefined) => string;
-  formatNumber: (value: number | undefined) => string;
   ilmExplainPhaseCounts: IlmExplainPhaseCounts | undefined;
   incompatible: number | undefined;
   indices: number | undefined;
@@ -25,8 +23,6 @@ interface Props {
 }
 
 const PatternSummaryComponent: React.FC<Props> = ({
-  formatBytes,
-  formatNumber,
   ilmExplainPhaseCounts,
   incompatible,
   indices,
@@ -35,7 +31,7 @@ const PatternSummaryComponent: React.FC<Props> = ({
   patternDocsCount,
   patternSizeInBytes,
 }) => (
-  <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
+  <EuiFlexGroup wrap={true} alignItems="center" gutterSize="xs" justifyContent="spaceBetween">
     <EuiFlexItem grow={false}>
       <PatternLabel
         incompatible={incompatible}
@@ -49,8 +45,6 @@ const PatternSummaryComponent: React.FC<Props> = ({
     <EuiFlexItem grow={false}>
       <StatsRollup
         docsCount={patternDocsCount}
-        formatBytes={formatBytes}
-        formatNumber={formatNumber}
         incompatible={incompatible}
         indices={indices}
         indicesChecked={indicesChecked}

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SafeParseError, SafeParseReturnType } from 'zod';
+import type { SafeParseError, SafeParseReturnType } from '@kbn/zod';
 
 export function expectParseError<Input, Output>(
   result: SafeParseReturnType<Input, Output>
