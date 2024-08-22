@@ -7,7 +7,6 @@
 
 import { Ast } from '@kbn/interpreter';
 import { buildExpression } from '@kbn/expressions-plugin/public';
-import { getColorStops } from '@kbn/coloring';
 import { createMockDatasource, createMockFramePublicAPI, DatasourceMock } from '../../mocks';
 import { DatatableVisualizationState, getDatatableVisualization } from './visualization';
 import {
@@ -28,10 +27,11 @@ import {
   DatatableColumnFn,
   DatatableExpressionFunction,
 } from '../../../common/expressions';
+import { getColorStops } from '../../shared_components/coloring';
 
-jest.mock('@kbn/coloring', () => {
+jest.mock('../../shared_components/coloring', () => {
   return {
-    ...jest.requireActual('@kbn/coloring'),
+    ...jest.requireActual('../../shared_components/coloring'),
     getColorStops: jest.fn().mockReturnValue([]),
   };
 });
