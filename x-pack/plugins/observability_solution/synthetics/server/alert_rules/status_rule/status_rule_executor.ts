@@ -14,7 +14,6 @@ import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { queryFilterMonitors } from './queries/filter_monitors';
 import { periodToMs } from '../../routes/overview_status/overview_status';
-import { getMonitorToPing } from './utils';
 import { queryMonitorLastRun } from './queries/query_monitor_last_run';
 import { MonitorSummaryStatusRule, StatusRuleExecutorOptions } from './types';
 import {
@@ -24,12 +23,7 @@ import {
   getTimeUnitLabel,
   getViewInAppUrl,
 } from '../common';
-import {
-  DOWN_LABEL,
-  getMonitorAlertDocument,
-  getMonitorSummary,
-  PENDING_LABEL,
-} from './message_utils';
+import { DOWN_LABEL, getMonitorAlertDocument, getMonitorSummary } from './message_utils';
 import {
   AlertStatusMetaDataCodec,
   AlertStatusResponse,
@@ -49,7 +43,6 @@ import {
   ConfigKey,
   EncryptedSyntheticsMonitorAttributes,
   OverviewPendingStatusMetaData,
-  OverviewPing,
 } from '../../../common/runtime_types';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { monitorAttributes } from '../../../common/types/saved_objects';
@@ -333,55 +326,6 @@ export class StatusRuleExecutor {
       }
     );
     return baseSummary;
-  }
-
-  getPendingMonitorSummary({
-    pendingConfig,
-    lastRunPing,
-  }: {
-    pendingConfig: OverviewPendingStatusMetaData;
-    lastRunPing?: OverviewPing;
-  }) {
-    const { configId, locationId } = pendingConfig;
-    let ping = lastRunPing;
-    if (!ping) {
-      const monitor = this.monitors.find((m) => m.attributes.config_id === configId);
-      if (monitor) {
-        ping = getMonitorToPing(monitor.attributes, locationId);
-      }
-    }
-    if (ping) {
-      const baseSummary = getMonitorSummary(
-        ping,
-        PENDING_LABEL,
-        locationId,
-        configId,
-        this.dateFormat!,
-        this.tz!
-      );
-      baseSummary.reason = i18n.translate(
-        'xpack.synthetics.alertRules.monitorStatus.reasonMessage.pending',
-        {
-          defaultMessage: `Monitor "{name}" is pending from location "{location}".`,
-          values: {
-            name: baseSummary.monitorName,
-            location: baseSummary.locationName,
-          },
-        }
-      );
-      if (lastRunPing) {
-        baseSummary.pendingLastRunAt = i18n.translate(
-          'xpack.synthetics.alertRules.monitorStatus.pendingLastRunAt',
-          {
-            defaultMessage: ' It last ran at {time}.',
-            values: {
-              time: moment(lastRunPing['@timestamp']).tz(this.tz!).format(this.dateFormat!),
-            },
-          }
-        );
-      }
-      return baseSummary;
-    }
   }
 
   getUngroupedDownSummary({

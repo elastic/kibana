@@ -57,5 +57,4 @@ export interface MonitorSummaryStatusRule {
     down: number;
   };
   timestamp: string;
-  pendingLastRunAt?: string;
 }

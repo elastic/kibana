@@ -38,7 +38,6 @@ export const getMonitorAlertDocument = (monitorSummary: MonitorSummaryStatusRule
   configId: monitorSummary.configId,
   'kibana.alert.evaluation.threshold': monitorSummary.downThreshold,
   'kibana.alert.evaluation.value': monitorSummary.checks?.down ?? 1,
-  pendingLastRunAt: monitorSummary.pendingLastRunAt,
   'monitor.tags': monitorSummary.monitorTags ?? [],
 });
 

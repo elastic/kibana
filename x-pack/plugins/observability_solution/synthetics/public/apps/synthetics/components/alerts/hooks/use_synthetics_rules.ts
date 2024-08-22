@@ -21,7 +21,7 @@ import {
 import { SYNTHETICS_TLS_RULE } from '../../../../../../common/constants/synthetics_alerts';
 import {
   selectAlertFlyoutVisibility,
-  selectIsNewrule,
+  selectIsNewRule,
   selectMonitorListState,
   setAlertFlyoutVisible,
 } from '../../../state';
@@ -33,7 +33,7 @@ export const useSyntheticsRules = (isOpen: boolean) => {
   const defaultRules = useSelector(selectSyntheticsAlerts);
   const loading = useSelector(selectSyntheticsAlertsLoading);
   const alertFlyoutVisible = useSelector(selectAlertFlyoutVisibility);
-  const isNewRule = useSelector(selectIsNewrule);
+  const isNewRule = useSelector(selectIsNewRule);
   const { settings } = useSelector(selectDynamicSettings);
 
   const { canSave } = useSyntheticsSettingsContext();
@@ -80,7 +80,7 @@ export const useSyntheticsRules = (isOpen: boolean) => {
       hideInterval: true,
       initialRule,
     });
-  }, [defaultRules, isNewRule, triggersActionsUi, alertFlyoutVisible, dispatch]);
+  }, [defaultRules, triggersActionsUi, alertFlyoutVisible, dispatch]);
 
   const NewRuleFlyout = useMemo(() => {
     if (!isNewRule || !alertFlyoutVisible) {

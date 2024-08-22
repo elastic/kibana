@@ -18,7 +18,7 @@ export interface PopoverState {
 
 export const setAlertFlyoutVisible = createAction<{
   id: typeof SYNTHETICS_STATUS_RULE | typeof SYNTHETICS_TLS_RULE | null;
-  isNew: boolean;
+  isNotDefaultRule: boolean;
 } | null>('[UI] TOGGLE ALERT FLYOUT');
 
 export const setBasePath = createAction<string>('[UI] SET BASE PATH');
