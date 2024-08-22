@@ -14,65 +14,21 @@
  *   version: 1
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
-export type OutputIndex = z.infer<typeof OutputIndex>;
-export const OutputIndex = z.string().regex(/^.kibana-elastic-ai-assistant-/);
-
-export type DatasetItem = z.infer<typeof DatasetItem>;
-export const DatasetItem = z.object({
-  id: z.string().optional(),
-  input: z.string(),
-  prediction: z.string().optional(),
-  reference: z.string(),
-  tags: z.array(z.string()).optional(),
-});
-
-export type Dataset = z.infer<typeof Dataset>;
-export const Dataset = z.array(DatasetItem).default([]);
+import { Replacements } from '../conversations/common_attributes.gen';
 
 export type PostEvaluateBody = z.infer<typeof PostEvaluateBody>;
 export const PostEvaluateBody = z.object({
-  dataset: Dataset.optional(),
-  evalPrompt: z.string().optional(),
-});
-
-export type PostEvaluateRequestQuery = z.infer<typeof PostEvaluateRequestQuery>;
-export const PostEvaluateRequestQuery = z.object({
-  /**
-   * Agents parameter description
-   */
-  agents: z.string(),
-  /**
-   * Dataset Name parameter description
-   */
-  datasetName: z.string().optional(),
-  /**
-   * Evaluation Type parameter description
-   */
-  evaluationType: z.string().optional(),
-  /**
-   * Eval Model parameter description
-   */
-  evalModel: z.string().optional(),
-  /**
-   * Models parameter description
-   */
-  models: z.string(),
-  /**
-   * Output Index parameter description
-   */
-  outputIndex: OutputIndex,
-  /**
-   * Project Name parameter description
-   */
-  projectName: z.string().optional(),
-  /**
-   * Run Name parameter description
-   */
+  graphs: z.array(z.string()),
+  datasetName: z.string(),
+  connectorIds: z.array(z.string()),
   runName: z.string().optional(),
+  alertsIndexPattern: z.string().optional().default('.alerts-security.alerts-default'),
+  langSmithApiKey: z.string().optional(),
+  replacements: Replacements.optional().default({}),
+  size: z.number().optional().default(20),
 });
-export type PostEvaluateRequestQueryInput = z.input<typeof PostEvaluateRequestQuery>;
 
 export type PostEvaluateRequestBody = z.infer<typeof PostEvaluateRequestBody>;
 export const PostEvaluateRequestBody = PostEvaluateBody;
