@@ -18,7 +18,12 @@ import {
 import type { TimeRange } from '@kbn/es-query';
 import { mockedReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public/mocks';
 
-import { buildMockDashboard, getSampleDashboardInput, getSampleDashboardPanel } from '../../mocks';
+import {
+  buildMockDashboard,
+  getSampleDashboardInput,
+  getSampleDashboardPanel,
+  mockControlGroupApi,
+} from '../../mocks';
 import { pluginServices } from '../../services/plugin_services';
 import { DashboardContainer } from './dashboard_container';
 
@@ -170,6 +175,7 @@ test('searchSessionId propagates to children', async () => {
     undefined,
     { lastSavedInput: sampleInput }
   );
+  container?.setControlGroupApi(mockControlGroupApi);
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,

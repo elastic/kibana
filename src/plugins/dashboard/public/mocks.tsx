@@ -9,6 +9,8 @@
 import { EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/public';
 import { mockedReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public/mocks';
 
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
+import { BehaviorSubject } from 'rxjs';
 import { DashboardContainerInput, DashboardPanelState } from '../common';
 import { DashboardContainer } from './dashboard_container/embeddable/dashboard_container';
 import { DashboardStart } from './plugin';
@@ -72,6 +74,15 @@ export function setupIntersectionObserverMock({
   });
 }
 
+export const mockControlGroupApi = {
+  untilInitialized: async () => {},
+  filters$: new BehaviorSubject(undefined),
+  query$: new BehaviorSubject(undefined),
+  timeslice$: new BehaviorSubject(undefined),
+  dataViews: new BehaviorSubject(undefined),
+  unsavedChanges: new BehaviorSubject(undefined),
+} as unknown as ControlGroupApi;
+
 export function buildMockDashboard({
   overrides,
   savedObjectId,
@@ -89,6 +100,7 @@ export function buildMockDashboard({
     undefined,
     { lastSavedInput: initialInput, lastSavedId: savedObjectId }
   );
+  dashboardContainer?.setControlGroupApi(mockControlGroupApi);
   return dashboardContainer;
 }
 
