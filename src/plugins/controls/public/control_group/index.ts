@@ -14,6 +14,8 @@ export { ControlGroupContainerFactory } from './embeddable/control_group_contain
 
 export { ACTION_EDIT_CONTROL, ACTION_DELETE_CONTROL } from './actions';
 
+export { controlGroupInputBuilder } from './external_api/control_group_input_builder';
+
 export type { AwaitingControlGroupAPI } from './external_api';
 
 export {

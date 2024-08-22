@@ -7,7 +7,6 @@
  */
 
 import { ControlGroupInput } from '@kbn/controls-plugin/common';
-import { controlGroupInputBuilder } from '@kbn/controls-plugin/public';
 
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../../../mocks';
 import { DashboardEmbeddableService } from '../../embeddable/types';
