@@ -44,7 +44,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
         elasticsearch: {
           indices: [
             {
-              names: ['.slo-*'],
+              names: ['.slo-observability.*'],
               privileges: TOTAL_INDEX_PRIVILEGE_SET_EDITOR,
             },
           ],
