@@ -169,7 +169,7 @@ by the user. The final output of the expression pipeline can be rendered using
 one of the *renderers* registered in `expressions` plugin.
 
 All the arguments to expression functions need to be serializable, as well as input and output.
-Expression functions should try to stay 'pure'. This makes functions easy to reuse and also 
+Expression functions should try to stay 'pure'. This makes functions easy to reuse and also
 make it possible to serialize the whole chain as well as output at every step of execution.
 
 It is possible to add comments to expressions by starting them with a `//` sequence
@@ -796,7 +796,7 @@ It uses Chromium and Puppeteer underneath to run the browser in headless mode.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/search_assistant/README.md[searchAssistant]
-|Search specific AI assistant solution based on Observability AI Assistant solution.
+|This holds the Search AI Assistant which targets Search users and Serverless Elasticsearch.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/search_connectors/README.mdx[searchConnectors]

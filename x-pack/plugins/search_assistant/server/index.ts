@@ -6,6 +6,8 @@
  */
 import { SearchAssistantPlugin } from './plugin';
 
+export { config } from './config';
+
 export function plugin() {
   return new SearchAssistantPlugin();
 }

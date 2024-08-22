@@ -1,4 +1,3 @@
 # SearchAssistant
 
-Search specific AI assistant solution based on Observability AI Assistant solution.
-
+This holds the Search AI Assistant which targets Search users and Serverless Elasticsearch.
