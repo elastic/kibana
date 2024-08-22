@@ -72,7 +72,6 @@ export const importRules = async ({
     return importRuleResponse;
   }
 
-  // TODO only call this if prebuilt rules are being imported?
   prebuiltRulesImporter.setup();
 
   while (ruleChunks.length) {
