@@ -86,8 +86,7 @@ const fetchSingleRuleAsset = async (blob: ExternalRuleAssetBlob): Promise<FetchR
 
     const decodedContent = Buffer.from(response.data.content, 'base64').toString('utf-8');
     const rawAsset = JSON.parse(decodedContent);
-
-    if (rawAsset.rule_id !== blob.filename.split('_')[0]) {
+    if (`${rawAsset.rule_id}_${rawAsset.version}` !== `${repositoryId}_${blob.filename}`) {
       return {
         success: false,
         error: `The rule_id in the asset does not match the rule_id codified in the filename. rule_id: ${rawAsset.rule_id}, filename: ${blob.filename}`,
@@ -98,7 +97,7 @@ const fetchSingleRuleAsset = async (blob: ExternalRuleAssetBlob): Promise<FetchR
 
     const rawAssetWithRepositoryId = {
       ...rawAsset,
-      rule_id: `${repositoryId}_${rawAsset.rule_id}`, // append repositoryId before saving rule_id
+      // rule_id: `${repositoryId}_${rawAsset.rule_id}`, // append repositoryId before saving rule_id
       repository_id: repositoryId,
     };
 

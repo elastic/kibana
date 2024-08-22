@@ -28,9 +28,11 @@ export const useBootstrapPrebuiltRulesMutation = (
     mutationKey: BOOTSTRAP_PREBUILT_RULES_KEY,
     onSettled: (...args) => {
       const response = args[0];
+      const numberOfAssetsInstalledFromRepo = response?.repositories?.updated.length ?? 0;
       if (
         response?.packages.find((pkg) => pkg.name === PREBUILT_RULES_PACKAGE_NAME)?.status ===
-        'installed'
+          'installed' ||
+        numberOfAssetsInstalledFromRepo > 0
       ) {
         // Invalidate other pre-packaged rules related queries. We need to do
         // that only in case the prebuilt rules package was installed indicating
@@ -46,3 +48,5 @@ export const useBootstrapPrebuiltRulesMutation = (
     },
   });
 };
+
+Math.max(undefined ?? 3, 1);

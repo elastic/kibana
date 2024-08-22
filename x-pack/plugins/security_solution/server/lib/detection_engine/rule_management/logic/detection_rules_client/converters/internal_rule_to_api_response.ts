@@ -40,7 +40,7 @@ export const internalRuleToAPIResponse = (
     return transformedAction;
   });
   const normalizedRuleParams = normalizeRuleParams(rule.params);
-  debugger;
+
   return {
     // saved object properties
     outcome: isResolvedRule(rule) ? rule.outcome : undefined,

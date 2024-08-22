@@ -15,6 +15,7 @@ interface CommitRulesArgs {
     repository: string;
     username: string;
     token: string;
+    id: string;
   };
   rules: RuleResponse[];
   detectionRulesClient: IDetectionRulesClient;
@@ -51,7 +52,10 @@ export const commitRulesToRepository = async (args: CommitRulesArgs) => {
           version: rule.version + 1,
         },
       });
-      const prebuiltRuleAsset = PrebuiltRuleAsset.parse(updatedRule);
+      const prebuiltRuleAsset = {
+        ...PrebuiltRuleAsset.parse(updatedRule),
+        repository_id: repository.id,
+      };
       const blobData = await octoKitClient.rest.git.createBlob({
         owner,
         repo,
@@ -60,7 +64,8 @@ export const commitRulesToRepository = async (args: CommitRulesArgs) => {
       });
       return {
         sha: blobData.data.sha,
-        path: `${prebuiltRuleAsset.rule_id}_${prebuiltRuleAsset.version}.json`,
+        // Remove the repositoryId prefix from the rule id so it can be used as the filename
+        path: `${prebuiltRuleAsset.rule_id.split('_')[1]}_${prebuiltRuleAsset.version}.json`,
       };
     })
   );

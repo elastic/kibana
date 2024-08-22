@@ -96,7 +96,8 @@ export const installExternalPrebuiltRuleAssets = async ({
   // for each `{repoId}_{rule_id}` combination.
   const latestAssetSpecifiers = getLatestRuleAssetSpecifiers(installedRulesAssetIds);
 
-  // Update rulew which
+  // Mark installed rules as non-customized when they have been syccesfully
+  // published to the remote repository AND installed as security-rule assets
   await updateInstalledRulesToNonCustomized({
     latestAssetSpecifiers,
     detectionRulesClient,
