@@ -9,6 +9,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import React, { useCallback } from 'react';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import { PublishExternalRulesButton } from '../../../../detections/components/rules/pre_packaged_rules/publish_external_rules_button';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { SecurityPageName } from '../../../../app/types';
 import { ImportDataModal } from '../../../../common/components/import_data_modal';
@@ -124,6 +125,9 @@ const RulesPageComponent: React.FC = () => {
         <SecuritySolutionPageWrapper>
           <HeaderPage title={i18n.PAGE_TITLE}>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
+              <EuiFlexItem grow={false}>
+                <PublishExternalRulesButton isDisabled={!canUserCRUD || loading} />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <AddElasticRulesButton isDisabled={!canUserCRUD || loading} />
               </EuiFlexItem>

@@ -10,7 +10,7 @@ import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../common/consta
 import type { BulkExportResponse, QueryOrIds } from '../api';
 import { bulkExportRules } from '../api';
 
-export const BULK_ACTION_MUTATION_KEY = ['POST', DETECTION_ENGINE_RULES_BULK_ACTION];
+const BULK_ACTION_MUTATION_KEY = ['POST', DETECTION_ENGINE_RULES_BULK_ACTION];
 
 export const useBulkExportMutation = (
   options?: UseMutationOptions<BulkExportResponse, Error, QueryOrIds>

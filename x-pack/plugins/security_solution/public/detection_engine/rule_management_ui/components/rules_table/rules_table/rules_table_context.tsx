@@ -15,7 +15,12 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useFetchRulesSnoozeSettingsQuery } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings_query';
+import type { PublishableExternalRules } from '../../../../rule_management/api/hooks';
+import {
+  useFetchRulesSnoozeSettingsQuery,
+  useGetPublishableExternalRules,
+} from '../../../../rule_management/api/hooks';
+
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
@@ -60,6 +65,10 @@ export interface RulesTableState {
    * Rules to display (sorted and paginated in case of in-memory)
    */
   rules: Rule[];
+  /**
+   * External rules that can be published to connected repositories
+   */
+  publishableRules: PublishableExternalRules[];
   /**
    * Currently selected table filter
    */
@@ -304,6 +313,8 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     }
   );
 
+  const publishableRules = useGetPublishableExternalRules(rules);
+
   // Fetch rules snooze settings
   const {
     data: rulesSnoozeSettingsMap,
@@ -358,6 +369,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     return {
       state: {
         rules,
+        publishableRules,
         rulesSnoozeSettings: {
           data: rulesSnoozeSettingsMap ?? {},
           isLoading: isSnoozeSettingsLoading,
@@ -393,6 +405,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     };
   }, [
     rules,
+    publishableRules,
     rulesSnoozeSettingsMap,
     isSnoozeSettingsLoading,
     isSnoozeSettingsFetching,
