@@ -23,7 +23,8 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
       ...options,
       pipeline: logsPipeline(),
     });
-    this.dataStreams = ['logs-*-*', 'custom-logs-*-*'];
+    this.dataStreams = ['logs-*-*'];
+    this.indices = ['cloud-logs-synth.2-default', 'cloud-logs-synth.3-default'];
   }
 
   async createIndexTemplate(name: IndexTemplateName) {

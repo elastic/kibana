@@ -12,6 +12,7 @@ import {
   generateLongId,
   LONG_FIELD_NAME,
 } from '@kbn/apm-synthtrace-client';
+import moment from 'moment';
 import { Scenario } from '../cli/scenario';
 import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
 import { withClient } from '../lib/utils/with_client';
@@ -111,10 +112,10 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .deleteField('data_stream.type')
                 .defaults({
                   ...commonLongEntryFields,
-                  'data_stream.type': 'custom-logs',
+                  'data_stream.type': 'cloud-logs',
                   hostname: 'synth-host2',
                 })
-                .dataset('custom.synth.2')
+                .dataset('synth.2')
                 .timestamp(timestamp);
             });
         });
@@ -135,10 +136,10 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .defaults({
                   ...commonLongEntryFields,
                   hostname: 'synth-host3',
-                  'data_stream.type': 'custom-logs',
-                  date: timestamp,
+                  'data_stream.type': 'cloud-logs',
+                  date: moment(timestamp).toDate(),
                 })
-                .dataset('custom.synth.3');
+                .dataset('synth.3');
             });
         });
 
