@@ -6,6 +6,8 @@
 
 To share the dashboard with a larger audience, click *Share* in the toolbar. For detailed information about the sharing options, refer to <<reporting-getting-started,Reporting>>.
 
+TIP: When sharing a dashboard with a link while a panel is in maximized view, the generated link will also open the dashboard on the same maximized panel view.
+
 [float]
 //Seems like a wrong ID (import instead of export). Adding export one while checking that removing "import" doesn't break links
 [[import-dashboards]]

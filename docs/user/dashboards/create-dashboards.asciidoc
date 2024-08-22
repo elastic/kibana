@@ -143,3 +143,5 @@ Copy panels from one dashboard to another dashboard.
 == Import dashboards
 
 You can import dashboards from the **Saved Objects** page under **Stack Management**. Refer to <<managing-saved-objects,Manage saved objects>>.
+
+image:images/dashboard-import-saved-object.png[Import panel]
