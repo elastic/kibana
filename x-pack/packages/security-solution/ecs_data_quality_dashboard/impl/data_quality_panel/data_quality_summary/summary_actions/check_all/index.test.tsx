@@ -35,16 +35,19 @@ const mockFetchMappings = jest.fn(() =>
   )
 );
 
-jest.mock('../../../hooks/use_mappings/helpers', () => ({
-  fetchMappings: (_: { abortController: AbortController; patternOrIndexName: string }) =>
-    mockFetchMappings(),
-}));
+jest.mock('../../../utils/fetch_mappings', () => {
+  const original = jest.requireActual('../../../utils/fetch_mappings');
+  return {
+    ...original,
+    fetchMappings: (_: { abortController: AbortController; patternOrIndexName: string }) =>
+      mockFetchMappings(),
+  };
+});
 
 const mockFetchUnallowedValues = jest.fn(() => Promise.resolve(mockUnallowedValuesResponse));
 
-jest.mock('../../../hooks/use_unallowed_values/helpers', () => {
-  const original = jest.requireActual('../../../hooks/use_unallowed_values/helpers');
-
+jest.mock('../../../utils/fetch_unallowed_values', () => {
+  const original = jest.requireActual('../../../utils/fetch_unallowed_values');
   return {
     ...original,
     fetchUnallowedValues: (_: {

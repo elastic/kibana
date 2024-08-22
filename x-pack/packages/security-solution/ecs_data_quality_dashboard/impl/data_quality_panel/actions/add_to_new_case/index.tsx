@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { EuiIcon, EuiLink } from '@elastic/eui';
 
 import { useDataQualityContext } from '../../data_quality_context';
-import { useAddToNewCase } from '../../hooks/use_add_to_new_case';
+import { useAddToNewCase } from './hooks/use_add_to_new_case';
 import { StyledLinkText } from '../styles';
 import { ADD_TO_NEW_CASE } from '../../translations';
 

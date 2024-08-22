@@ -17,7 +17,7 @@ import * as useResultsRollup from './hooks/use_results_rollup';
 import * as useIndicesCheck from './hooks/use_indices_check';
 import { DataQualityPanel } from '.';
 
-jest.mock('./hooks/use_stats', () => ({
+jest.mock('./data_quality_details/indices_details/pattern/hooks/use_stats', () => ({
   useStats: jest.fn(() => ({
     stats: {},
     error: null,
@@ -25,7 +25,7 @@ jest.mock('./hooks/use_stats', () => ({
   })),
 }));
 
-jest.mock('./hooks/use_ilm_explain', () => ({
+jest.mock('./data_quality_details/indices_details/pattern/hooks/use_ilm_explain', () => ({
   useIlmExplain: jest.fn(() => ({
     error: null,
     ilmExplain: {},

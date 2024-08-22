@@ -14,8 +14,8 @@ import {
   UnallowedValueCount,
   UnallowedValueSearchResult,
 } from '../../types';
-import { MappingsError } from '../use_mappings/helpers';
-import { UnallowedValuesError } from '../use_unallowed_values/helpers';
+import { MappingsError } from '../../utils/fetch_mappings';
+import { UnallowedValuesError } from '../../utils/fetch_unallowed_values';
 import { CheckIndexProps } from '../../utils/check_index';
 
 export interface UseIndicesCheckCheckState {

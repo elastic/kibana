@@ -24,8 +24,8 @@ import type {
   UnallowedValueCount,
   UnallowedValueSearchResult,
 } from '../types';
-import { fetchMappings } from '../hooks/use_mappings/helpers';
-import { fetchUnallowedValues, getUnallowedValues } from '../hooks/use_unallowed_values/helpers';
+import { fetchMappings } from './fetch_mappings';
+import { fetchUnallowedValues, getUnallowedValues } from './fetch_unallowed_values';
 import { EcsFlatTyped } from '../constants';
 
 export const EMPTY_PARTITIONED_FIELD_METADATA: PartitionedFieldMetadata = {

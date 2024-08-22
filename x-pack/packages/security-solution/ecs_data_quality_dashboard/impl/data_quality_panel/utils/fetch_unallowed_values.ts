@@ -6,14 +6,14 @@
  */
 
 import type { HttpHandler } from '@kbn/core-http-browser';
-import { INTERNAL_API_VERSION } from '../../helpers';
-import * as i18n from '../../translations';
+import { INTERNAL_API_VERSION } from '../helpers';
+import * as i18n from '../translations';
 import type {
   Bucket,
   UnallowedValueCount,
   UnallowedValueRequestItem,
   UnallowedValueSearchResult,
-} from '../../types';
+} from '../types';
 
 const UNALLOWED_VALUES_API_ROUTE = '/internal/ecs_data_quality_dashboard/unallowed_field_values';
 

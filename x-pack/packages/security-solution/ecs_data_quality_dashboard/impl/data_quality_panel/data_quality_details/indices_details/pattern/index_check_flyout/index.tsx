@@ -29,7 +29,7 @@ import { useDataQualityContext } from '../../../../data_quality_context';
 import { IndexProperties } from './index_properties';
 import { getIlmPhase } from '../helpers';
 import { IndexResultBadge } from '../index_result_badge';
-import { useCurrentWindowWidth } from '../../../../hooks/use_current_window_width';
+import { useCurrentWindowWidth } from './hooks/use_current_window_width';
 import { CHECK_NOW } from './translations';
 
 export interface Props {

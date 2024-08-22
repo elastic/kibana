@@ -26,7 +26,7 @@ const defaultNumberFormat = '0,0.[000]';
 const formatNumber = (value: number | undefined) =>
   value != null ? numeral(value).format(defaultNumberFormat) : EMPTY_STAT;
 
-jest.mock('../../../hooks/use_stats', () => ({
+jest.mock('./hooks/use_stats', () => ({
   useStats: jest.fn(() => ({
     stats: {},
     error: null,
@@ -34,7 +34,7 @@ jest.mock('../../../hooks/use_stats', () => ({
   })),
 }));
 
-jest.mock('../../../hooks/use_ilm_explain', () => ({
+jest.mock('./hooks/use_ilm_explain', () => ({
   useIlmExplain: jest.fn(() => ({
     error: null,
     ilmExplain: {},
