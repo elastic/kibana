@@ -68,6 +68,18 @@ const formatMetric = (type: InfraAssetMetricType, value: number | undefined | nu
   return value || value === 0 ? createInventoryMetricFormatter({ type })(value) : 'N/A';
 };
 
+const buildMetricCell = (
+  value: number,
+  formatType: InfraAssetMetricType,
+  hasSystemMetrics?: boolean
+) => {
+  if (!hasSystemMetrics && value === 0) {
+    return <AddDataPopover />;
+  }
+
+  return formatMetric(formatType, value);
+};
+
 const buildItemsList = (nodes: InfraAssetMetricsItem[]): HostNodeRow[] => {
   return nodes.map(({ metrics, metadata, name, alertsCount, hasSystemMetrics }) => {
     const metadataKeyValue = metadata.reduce(
@@ -218,18 +230,6 @@ export const useHostsTable = () => {
   }, [items, pagination, sorting]);
 
   const metricColumnsWidth = displayAlerts ? '12%' : '16%';
-
-  const buildMetricCell = (
-    value: number,
-    formatType: InfraAssetMetricType,
-    hasSystemMetrics?: boolean
-  ) => {
-    if (!hasSystemMetrics && value === 0) {
-      return <AddDataPopover />;
-    }
-
-    return formatMetric(formatType, value);
-  };
 
   const columns: Array<EuiBasicTableColumn<HostNodeRow>> = useMemo(
     () => [
