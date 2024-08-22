@@ -20,55 +20,16 @@ import { outputService } from '../output';
 import { appContextService } from '../app_context';
 
 export const mapPackagePolicySavedObjectToPackagePolicy = ({
-  /* eslint-disable @typescript-eslint/naming-convention */
   id,
   version,
-  attributes: {
-    name,
-    description,
-    namespace,
-    enabled,
-    is_managed,
-    policy_id,
-    policy_ids,
-    output_id,
-    // `package` is a reserved keyword
-    package: packageInfo,
-    inputs,
-    vars,
-    elasticsearch,
-    agents,
-    revision,
-    secret_references,
-    updated_at,
-    updated_by,
-    created_at,
-    created_by,
-    /* eslint-enable @typescript-eslint/naming-convention */
-  },
+  attributes,
+  namespaces,
 }: SavedObject<PackagePolicySOAttributes>): PackagePolicy => {
   return {
     id,
-    name,
-    description,
-    namespace,
-    enabled,
-    is_managed,
-    policy_id,
-    policy_ids,
-    output_id,
-    package: packageInfo,
-    inputs,
-    vars,
-    elasticsearch,
     version,
-    agents,
-    revision,
-    secret_references,
-    updated_at,
-    updated_by,
-    created_at,
-    created_by,
+    spaceIds: namespaces,
+    ...attributes,
   };
 };
 

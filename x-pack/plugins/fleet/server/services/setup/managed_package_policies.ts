@@ -22,6 +22,7 @@ import type { Installation, PackagePolicy } from '../../types';
 import { appContextService } from '../app_context';
 import { getInstallation, getInstallations } from '../epm/packages';
 import { packagePolicyService } from '../package_policy';
+import { runWithCache } from '../epm/packages/cache';
 
 export interface UpgradeManagedPackagePoliciesResult {
   packagePolicyId: string;
@@ -46,7 +47,7 @@ export function registerUpgradeManagedPackagePoliciesTask(
             const esClient = appContextService.getInternalUserESClient();
             const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
-            await upgradeManagedPackagePolicies(soClient, esClient, pkgName);
+            await runWithCache(() => upgradeManagedPackagePolicies(soClient, esClient, pkgName));
           },
           async cancel() {},
         };
@@ -88,15 +89,20 @@ export const setupUpgradeManagedPackagePolicies = async (
   });
 
   for (const { attributes: installedPackage } of installedPackages.saved_objects) {
-    const packagePolicies = await getPackagePoliciesNotMatchingVersion(
+    const packagePoliciesFinder = await getPackagePoliciesNotMatchingVersion(
       soClient,
       installedPackage.name,
       installedPackage.version
     );
     let shouldRegisterTask = false;
-    for (const packagePolicy of packagePolicies) {
-      if (isPolicyVersionLtInstalledVersion(packagePolicy, installedPackage)) {
-        shouldRegisterTask = true;
+    for await (const packagePolicies of packagePoliciesFinder) {
+      for (const packagePolicy of packagePolicies) {
+        if (isPolicyVersionLtInstalledVersion(packagePolicy, installedPackage)) {
+          shouldRegisterTask = true;
+          break;
+        }
+      }
+      if (shouldRegisterTask) {
         break;
       }
     }
@@ -110,7 +116,6 @@ export const setupUpgradeManagedPackagePolicies = async (
         appContextService.getTaskManagerStart()!,
         installedPackage.name
       );
-      // TODO ensure scheduled
     }
   }
 };
@@ -143,15 +148,17 @@ export const upgradeManagedPackagePolicies = async (
     return [];
   }
 
-  const packagePolicies = await getPackagePoliciesNotMatchingVersion(
+  const packagePoliciesFinder = await getPackagePoliciesNotMatchingVersion(
     soClient,
     installedPackage.name,
     installedPackage.version
   );
 
-  for (const packagePolicy of packagePolicies) {
-    if (isPolicyVersionLtInstalledVersion(packagePolicy, installedPackage)) {
-      await upgradePackagePolicy(soClient, esClient, packagePolicy, installedPackage, results);
+  for await (const packagePolicies of packagePoliciesFinder) {
+    for (const packagePolicy of packagePolicies) {
+      if (isPolicyVersionLtInstalledVersion(packagePolicy, installedPackage)) {
+        await upgradePackagePolicy(soClient, esClient, packagePolicy, installedPackage, results);
+      }
     }
   }
   return results;
@@ -161,14 +168,11 @@ async function getPackagePoliciesNotMatchingVersion(
   soClient: SavedObjectsClientContract,
   pkgName: string,
   pkgVersion: string
-): Promise<PackagePolicy[]> {
-  return (
-    await packagePolicyService.list(soClient, {
-      page: 1,
-      perPage: 1000,
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName} AND NOT ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.version:${pkgVersion}`,
-    })
-  ).items;
+) {
+  return packagePolicyService.fetchAllItems(soClient, {
+    perPage: 50,
+    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName} AND NOT ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.version:${pkgVersion}`,
+  });
 }
 
 function isPolicyVersionLtInstalledVersion(

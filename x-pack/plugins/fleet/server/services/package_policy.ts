@@ -118,7 +118,6 @@ import {
   mapPackagePolicySavedObjectToPackagePolicy,
   preflightCheckPackagePolicy,
 } from './package_policies';
-import { updateDatastreamExperimentalFeatures } from './epm/packages/update';
 import type {
   PackagePolicyClient,
   PackagePolicyClientFetchAllItemsOptions,
@@ -1632,13 +1631,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     };
 
     await this.update(soClient, esClient, id, updatePackagePolicy, updateOptions);
-
-    // Persist any experimental feature opt-ins that come through the upgrade process to the Installation SO
-    await updateDatastreamExperimentalFeatures(
-      soClient,
-      packagePolicy.package!.name,
-      experimentalDataStreamFeatures
-    );
 
     result.push({
       id,

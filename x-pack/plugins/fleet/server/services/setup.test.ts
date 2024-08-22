@@ -8,6 +8,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 
+import { MessageSigningError } from '../../common/errors';
 import { createAppContextStartContractMock, xpackMocks } from '../mocks';
 
 import { ensurePreconfiguredPackagesAndPolicies } from '.';
@@ -16,7 +17,6 @@ import { appContextService } from './app_context';
 import { getInstallations } from './epm/packages';
 import { setupUpgradeManagedPackagePolicies } from './setup/managed_package_policies';
 import { setupFleet } from './setup';
-import { MessageSigningError } from '@kbn/fleet-plugin/common/errors';
 
 jest.mock('./preconfiguration');
 jest.mock('./preconfiguration/outputs');
