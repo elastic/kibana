@@ -9,7 +9,7 @@ import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import { EuiCode } from '@elastic/eui';
 import React from 'react';
 
-import { SameFamily } from '../../../../../../../../../same_family';
+import { SameFamily } from '../same_family';
 import { EcsAllowedValues } from '../ecs_allowed_values';
 import { getIsInSameFamily } from '../../../../../../../../../helpers';
 import { IndexInvalidValues } from '../index_invalid_values';

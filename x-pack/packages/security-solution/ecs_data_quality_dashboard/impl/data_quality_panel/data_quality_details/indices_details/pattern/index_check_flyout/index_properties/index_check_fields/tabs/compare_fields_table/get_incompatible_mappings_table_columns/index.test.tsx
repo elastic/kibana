@@ -9,7 +9,7 @@ import { render, screen } from '@testing-library/react';
 import { omit } from 'lodash/fp';
 import React from 'react';
 
-import { SAME_FAMILY } from '../../../../../../../../../same_family/translations';
+import { SAME_FAMILY } from '../same_family/translations';
 import { TestExternalProviders } from '../../../../../../../../../mock/test_providers/test_providers';
 import { eventCategory } from '../../../../../../../../../mock/enriched_field_metadata/mock_enriched_field_metadata';
 import { EcsBasedFieldMetadata } from '../../../../../../../../../types';

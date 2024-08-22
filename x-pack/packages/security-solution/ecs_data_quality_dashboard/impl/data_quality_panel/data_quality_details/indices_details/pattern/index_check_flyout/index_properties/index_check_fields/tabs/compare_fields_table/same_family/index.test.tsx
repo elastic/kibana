@@ -9,7 +9,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { SAME_FAMILY } from './translations';
-import { TestExternalProviders } from '../mock/test_providers/test_providers';
+import { TestExternalProviders } from '../../../../../../../../../mock/test_providers/test_providers';
 import { SameFamily } from '.';
 
 describe('SameFamily', () => {

@@ -58,7 +58,7 @@ import {
   auditbeatNoResults,
   auditbeatWithAllResults,
 } from '../../../../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
-import { SAME_FAMILY } from '../../../../../../same_family/translations';
+import { SAME_FAMILY } from '../index_check_fields/tabs/compare_fields_table/same_family/translations';
 import { INCOMPATIBLE_FIELD_MAPPINGS_TABLE_TITLE } from '../index_check_fields/tabs/incompatible_tab/translations';
 import {
   EcsBasedFieldMetadata,

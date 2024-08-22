@@ -9,7 +9,7 @@ import { render, screen } from '@testing-library/react';
 import { omit } from 'lodash/fp';
 import React from 'react';
 
-import { SAME_FAMILY } from '../../../../../../../../../same_family/translations';
+import { SAME_FAMILY } from '../same_family/translations';
 import {
   eventCategory,
   someField,

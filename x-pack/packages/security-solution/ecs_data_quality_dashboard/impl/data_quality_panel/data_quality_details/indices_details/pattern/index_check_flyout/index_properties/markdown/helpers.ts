@@ -20,7 +20,7 @@ import {
   getTotalPatternIncompatible,
   getTotalPatternIndicesChecked,
 } from '../../../../../../helpers';
-import { SAME_FAMILY } from '../../../../../../same_family/translations';
+import { SAME_FAMILY } from '../index_check_fields/tabs/compare_fields_table/same_family/translations';
 import {
   HOT,
   WARM,
