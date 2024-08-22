@@ -175,12 +175,7 @@ export function DashboardApp({
       isEmbeddedExternally: Boolean(embedSettings), // embed settings are only sent if the dashboard URL has `embed=true`
       getEmbeddableAppContext: (dashboardId) => ({
         currentAppId: DASHBOARD_APP_ID,
-        getCurrentPath: () =>
-          `#${createDashboardEditUrl(
-            dashboardId,
-            Boolean(dashboardAPI?.viewMode),
-            expandedPanelId
-          )}`,
+        getCurrentPath: () => `#${createDashboardEditUrl(dashboardId)}`,
       }),
     });
   }, [
@@ -192,8 +187,6 @@ export function DashboardApp({
     isScreenshotMode,
     getScreenshotContext,
     getStateTransfer,
-    dashboardAPI?.viewMode,
-    expandedPanelId,
   ]);
 
   /**
@@ -209,7 +202,7 @@ export function DashboardApp({
       const newUrl = getDashboardListItemLink(
         kbnUrlStateStorage,
         savedDashboardId!,
-        false,
+        dashboardAPI.viewMode.value === ViewMode.EDIT,
         dashboardAPI.expandedPanelId.value
       );
       kbnUrlStateStorage.kbnUrlControls.update(newUrl, true);
