@@ -77,9 +77,8 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   validation,
   disabled = false,
 }) => {
-  const useSpaceAwareness = ExperimentalFeaturesService.get()?.useSpaceAwareness ?? false;
   const { docLinks } = useStartServices();
-  const { spaceId } = useFleetStatus();
+  const { spaceId, isSpaceAwarenessEnabled } = useFleetStatus();
 
   const { getAbsolutePath } = useLink();
   const AgentTamperProtectionWrapper = useUIExtension(
@@ -263,7 +262,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
-      {useSpaceAwareness ? (
+      {isSpaceAwarenessEnabled ? (
         <EuiDescribedFormGroup
           fullWidth
           title={
@@ -312,6 +311,9 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                   : [spaceId || 'default']
               }
               onChange={(newValue) => {
+                if (newValue.length === 0) {
+                  return;
+                }
                 updateAgentPolicy({
                   space_ids: newValue,
                 });
