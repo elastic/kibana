@@ -23,7 +23,7 @@ import {
   PerformPromptsBulkActionRequestBody,
   PerformPromptsBulkActionResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
-import { buildRouteValidationWithZod } from '@kbn/zod';
+import { buildRouteValidationWithZod } from '@kbn/core-http-server';
 import { PROMPTS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod';
 import { type IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import {
   AttackDiscoveryGetResponse,
@@ -14,6 +13,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
+import { buildRouteValidationWithZod } from '@kbn/core-http-server';
 import { updateAttackDiscoveryLastViewedAt, getAttackDiscoveryStats } from './helpers';
 import { ATTACK_DISCOVERY_BY_CONNECTOR_ID } from '../../../common/constants';
 import { buildResponse } from '../../lib/build_response';

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod, z } from '@kbn/zod';
+import { z } from '@kbn/zod';
+import { buildRouteValidationWithZod } from '@kbn/core-http-server';
 import {
   Plugin,
   CoreSetup,

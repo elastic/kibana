@@ -11,7 +11,7 @@ import {
   DeleteConversationRequestParams,
   API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
-import { buildRouteValidationWithZod } from '@kbn/zod';
+import { buildRouteValidationWithZod } from '@kbn/core-http-server';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';

@@ -16,7 +16,7 @@ import {
   DeleteKnowledgeBaseRequestParams,
   DeleteKnowledgeBaseResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen';
-import { buildRouteValidationWithZod } from '@kbn/zod';
+import { buildRouteValidationWithZod } from '@kbn/core-http-server';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';

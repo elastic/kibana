@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod';
+import { buildRouteValidationWithZod } from '@kbn/core-http-server';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import type { RiskScoresCalculationResponse } from '../../../../../common/api/entity_analytics';
 import type { AfterKeys } from '../../../../../common/api/entity_analytics/common';

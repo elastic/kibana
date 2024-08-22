@@ -14,7 +14,7 @@ import {
   INTERNAL_API_ACCESS,
   GetEvaluateResponse,
 } from '@kbn/elastic-assistant-common';
-import { buildRouteValidationWithZod } from '@kbn/zod';
+import { buildRouteValidationWithZod } from '@kbn/core-http-server';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 import { performChecks } from '../helpers';

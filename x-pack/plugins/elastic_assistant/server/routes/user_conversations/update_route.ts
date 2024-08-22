@@ -16,7 +16,7 @@ import {
   ConversationUpdateProps,
 } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import { UpdateConversationRequestParams } from '@kbn/elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen';
-import { buildRouteValidationWithZod } from '@kbn/zod';
+import { buildRouteValidationWithZod } from '@kbn/core-http-server';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { performChecks } from '../helpers';

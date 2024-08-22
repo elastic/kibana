@@ -10,7 +10,7 @@ import {
   CreateEntityDefinitionQuery,
   createEntityDefinitionQuerySchema,
 } from '@kbn/entities-schema';
-import { buildRouteValidationWithZod } from '@kbn/zod';
+import { buildRouteValidationWithZod } from '@kbn/core-http-server';
 import { SetupRouteOptions } from '../types';
 import {
   canEnableEntityDiscovery,

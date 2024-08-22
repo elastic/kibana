@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { TypeOf, ZodType, stringifyZodError } from '@kbn/zod';
 import {
+  RouteValidationFunction,
+  RouteValidationResultFactory,
   RouteValidator,
   RouteValidatorFullConfigRequest,
   RouteValidatorFullConfigResponse,
@@ -51,4 +54,42 @@ export function getResponseValidation(
 ): undefined | RouteValidatorFullConfigResponse {
   if (typeof value === 'function') value = value();
   return isFullValidatorContainer(value) ? value.response : undefined;
+}
+
+/**
+ * Zod validation factory for Kibana route's request validation.
+ * It allows to pass a Zod schema for parameters, query and/or body validation.
+ *
+ * Example:
+ *
+ * ```ts
+ * router.versioned
+ *   .post({
+ *     access: 'public',
+ *     path: MY_URL,
+ *   })
+ *   .addVersion(
+ *     {
+ *       version: 'my-version',
+ *       validate: {
+ *         request: {
+ *           params: buildRouteValidationWithZod(MyRequestParamsZodSchema),
+ *           query: buildRouteValidationWithZod(MyRequestQueryZodSchema),
+ *           body: buildRouteValidationWithZod(MyRequestBodyZodSchema),
+ *         },
+ *       },
+ *     },
+ * ```
+ * @public
+ */
+export function buildRouteValidationWithZod<ZodSchema extends ZodType, Type = TypeOf<ZodSchema>>(
+  schema: ZodSchema
+): RouteValidationFunction<Type> {
+  return (inputValue: unknown, validationResult: RouteValidationResultFactory) => {
+    const decoded = schema.safeParse(inputValue);
+
+    return decoded.success
+      ? validationResult.ok(decoded.data)
+      : validationResult.badRequest(stringifyZodError(decoded.error));
+  };
 }

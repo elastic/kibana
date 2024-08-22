@@ -78,4 +78,9 @@ export type {
   LifecycleResponseFactory,
 } from './response_factory';
 export type { RawRequest, FakeRawRequest } from './raw_request';
-export { getRequestValidation, getResponseValidation, isFullValidatorContainer } from './utils';
+export {
+  buildRouteValidationWithZod,
+  getRequestValidation,
+  getResponseValidation,
+  isFullValidatorContainer,
+} from './utils';

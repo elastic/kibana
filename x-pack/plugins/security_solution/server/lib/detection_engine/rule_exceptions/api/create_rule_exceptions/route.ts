@@ -10,7 +10,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import { buildRouteValidationWithZod, stringifyZodError } from '@kbn/zod';
+import { stringifyZodError } from '@kbn/zod';
 import type {
   CreateRuleExceptionListItemProps,
   ExceptionList,
@@ -22,6 +22,7 @@ import {
   CreateRuleExceptionListItemsResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
 
+import { buildRouteValidationWithZod } from '@kbn/core-http-server';
 import { CREATE_RULE_EXCEPTIONS_URL } from '../../../../../../common/api/detection_engine/rule_exceptions';
 
 import { readRules } from '../../../rule_management/logic/detection_rules_client/read_rules';

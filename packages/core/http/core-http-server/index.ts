@@ -108,6 +108,7 @@ export type {
   RouteAccess,
 } from './src/router';
 export {
+  buildRouteValidationWithZod,
   validBodyOutput,
   RouteValidationError,
   getRequestValidation,
