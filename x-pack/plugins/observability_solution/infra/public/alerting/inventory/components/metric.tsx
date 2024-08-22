@@ -321,12 +321,12 @@ export const MetricExpression = ({
               {nodeType === 'host' && (
                 <EuiFlexItem>
                   <EuiLink
-                    data-test-subj="containerViewMetricsDocumentationLink"
+                    data-test-subj="alertFlyoutHostMetricsDocumentationLink"
                     href={HOST_METRICS_DOC_HREF}
                     target="_blank"
                   >
                     {i18n.translate(
-                      'xpack.infra.containerViewPage.tooltip.whatAreTheseMetricsLink',
+                      'xpack.infra.metrics.alertFlyout.expression.metric.whatAreTheseMetricsLink',
                       {
                         defaultMessage: 'What are these metrics?',
                       }
