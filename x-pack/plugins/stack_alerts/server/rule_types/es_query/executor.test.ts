@@ -429,6 +429,7 @@ describe('es_query executor', () => {
           latestTimestamp: undefined,
         },
         payload: {
+          'host.name': 'host-1',
           'kibana.alert.evaluation.conditions':
             'Number of matching documents for group "host-1" is greater than or equal to 200',
           'kibana.alert.evaluation.threshold': 200,
@@ -460,6 +461,7 @@ describe('es_query executor', () => {
           latestTimestamp: undefined,
         },
         payload: {
+          'host.name': 'host-2',
           'kibana.alert.evaluation.conditions':
             'Number of matching documents for group "host-2" is greater than or equal to 200',
           'kibana.alert.evaluation.threshold': 200,
@@ -491,6 +493,7 @@ describe('es_query executor', () => {
           latestTimestamp: undefined,
         },
         payload: {
+          'host.name': 'host-3',
           'kibana.alert.evaluation.conditions':
             'Number of matching documents for group "host-3" is greater than or equal to 200',
           'kibana.alert.evaluation.threshold': 200,
