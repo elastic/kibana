@@ -27,7 +27,7 @@ interface Props {
 
 export const TopNavMenu: FunctionComponent<Props> = ({ items, disabled, tourStepProps }) => {
   return (
-    <EuiTabs size="s">
+    <EuiTabs size="s" bottomBorder={false}>
       {items.map((item, idx) => {
         const tab = (
           <EuiTab

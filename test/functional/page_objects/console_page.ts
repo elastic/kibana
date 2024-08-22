@@ -808,4 +808,8 @@ export class ConsolePageObject extends FtrService {
       (window as any).autocomplete_trace = f;
     }, flag);
   }
+
+  public async isOutputPanelEmptyStateVisible() {
+    return await this.testSubjects.exists('consoleOutputPanelEmptyState');
+  }
 }
