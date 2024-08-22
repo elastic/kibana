@@ -91,9 +91,7 @@ const ScrollOnHover = ({ direction, hide }: { hide: boolean; direction: ScrollDi
 export const GridOverlay = ({
   interactionEvent,
   gridLayoutStateManager,
-  fixedContentTopOffset,
 }: {
-  fixedContentTopOffset: number;
   interactionEvent?: PanelInteractionEvent;
   gridLayoutStateManager: GridLayoutStateManager;
 }) => {
