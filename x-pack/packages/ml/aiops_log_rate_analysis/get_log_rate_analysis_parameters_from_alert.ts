@@ -11,7 +11,7 @@ export interface GetLogRateAnalysisParametersFromAlertArgs {
   alertStartedAt: string;
   alertEndedAt?: string;
   timeSize?: number;
-  timeUnit?: moment.unitOfTime.DurationConstructor;
+  timeUnit?: string;
 }
 
 export const getLogRateAnalysisParametersFromAlert = ({
@@ -24,7 +24,13 @@ export const getLogRateAnalysisParametersFromAlert = ({
   // The default time ranges for `initialAnalysisStart` are suitable for a `1m` lookback.
   // If an alert would have a `5m` lookback, this would result in a factor of `5`.
   const lookbackDuration =
-    timeSize && timeUnit ? moment.duration(timeSize, timeUnit) : moment.duration(1, 'm');
+    timeSize && timeUnit
+      ? moment.duration(
+          timeSize,
+          // workaround to cast the string based time unit to moment's format.
+          timeUnit as unknown as moment.unitOfTime.DurationConstructor | undefined
+        )
+      : moment.duration(1, 'm');
   const intervalFactor = Math.max(1, lookbackDuration.asSeconds() / 60);
 
   const alertStart = moment(alertStartedAt);

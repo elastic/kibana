@@ -61,7 +61,7 @@ export async function fetchLogRateAnalysisForAlert({
     alertStartedAt,
     alertEndedAt,
     timeSize: args.alertRuleParameterTimeSize,
-    timeUnit: args.alertRuleParameterTimeUnit as any,
+    timeUnit: args.alertRuleParameterTimeUnit,
   });
   const earliestMs = timeRange.min.valueOf();
   const latestMs = timeRange.max.valueOf();
