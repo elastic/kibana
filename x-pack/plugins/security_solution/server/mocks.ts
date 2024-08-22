@@ -18,6 +18,9 @@ const createAppClientMock = (): AppClientMock =>
     getAlertsIndex: jest.fn(),
     getSignalsIndex: jest.fn(),
     getSourcererDataViewId: jest.fn().mockReturnValue('security-solution'),
+    getKibanaVersion: jest.fn().mockReturnValue('8.0.0'),
+    getKibanaBranch: jest.fn().mockReturnValue('main'),
+    getBuildFlavor: jest.fn().mockReturnValue('traditional'),
   } as unknown as AppClientMock);
 
 export const siemMock = {

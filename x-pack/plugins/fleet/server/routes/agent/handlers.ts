@@ -44,10 +44,11 @@ import { defaultFleetErrorHandler, FleetNotFoundError } from '../../errors';
 import * as AgentService from '../../services/agents';
 import { fetchAndAssignAgentMetrics } from '../../services/agents/agent_metrics';
 import { getAgentStatusForAgentPolicy } from '../../services/agents';
-import { isAgentInNamespace } from '../../services/agents/namespace';
+import { isAgentInNamespace } from '../../services/spaces/agent_namespaces';
+import { getCurrentNamespace } from '../../services/spaces/get_current_namespace';
 
-function verifyNamespace(agent: Agent, namespace?: string) {
-  if (!isAgentInNamespace(agent, namespace)) {
+async function verifyNamespace(agent: Agent, namespace?: string) {
+  if (!(await isAgentInNamespace(agent, namespace))) {
     throw new FleetNotFoundError(`${agent.id} not found in namespace`);
   }
 }
@@ -61,7 +62,7 @@ export const getAgentHandler: FleetRequestHandler<
     const esClientCurrentUser = coreContext.elasticsearch.client.asCurrentUser;
 
     let agent = await fleetContext.agentClient.asCurrentUser.getAgent(request.params.agentId);
-    verifyNamespace(agent, coreContext.savedObjects.client.getCurrentNamespace());
+    await verifyNamespace(agent, getCurrentNamespace(coreContext.savedObjects.client));
 
     if (request.query.withMetrics) {
       agent = (await fetchAndAssignAgentMetrics(esClientCurrentUser, [agent]))[0];
@@ -91,7 +92,7 @@ export const deleteAgentHandler: FleetRequestHandler<
 
   try {
     const agent = await fleetContext.agentClient.asCurrentUser.getAgent(request.params.agentId);
-    verifyNamespace(agent, coreContext.savedObjects.client.getCurrentNamespace());
+    await verifyNamespace(agent, getCurrentNamespace(coreContext.savedObjects.client));
 
     await AgentService.deleteAgent(esClient, request.params.agentId);
 
@@ -131,7 +132,7 @@ export const updateAgentHandler: FleetRequestHandler<
 
   try {
     const agent = await fleetContext.agentClient.asCurrentUser.getAgent(request.params.agentId);
-    verifyNamespace(agent, coreContext.savedObjects.client.getCurrentNamespace());
+    await verifyNamespace(agent, getCurrentNamespace(soClient));
 
     await AgentService.updateAgent(esClient, request.params.agentId, partialAgent);
     const body = {
@@ -265,7 +266,7 @@ export const putAgentsReassignHandlerDeprecated: RequestHandler<
   }
 };
 
-export const postAgentsReassignHandler: RequestHandler<
+export const postAgentReassignHandler: RequestHandler<
   TypeOf<typeof PostAgentReassignRequestSchema.params>,
   undefined,
   TypeOf<typeof PostAgentReassignRequestSchema.body>
@@ -387,7 +388,11 @@ export const getActionStatusHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   try {
-    const actionStatuses = await AgentService.getActionStatuses(esClient, request.query);
+    const actionStatuses = await AgentService.getActionStatuses(
+      esClient,
+      request.query,
+      getCurrentNamespace(coreContext.savedObjects.client)
+    );
     const body: GetActionStatusResponse = { items: actionStatuses };
     return response.ok({ body });
   } catch (error) {

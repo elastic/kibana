@@ -35,7 +35,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('hides other panels', async () => {
-      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickExpandPanelToggle();
       await retry.try(async () => {
         const panelCount = await PageObjects.dashboard.getPanelCount();
@@ -46,9 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('shows other panels after being minimized', async () => {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       // Panels are all minimized on a fresh open of a dashboard, so we need to re-expand in order to then minimize.
-      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickExpandPanelToggle();
-      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickExpandPanelToggle();
 
       // Add a retry to fix https://github.com/elastic/kibana/issues/14574.  Perhaps the recent changes to this

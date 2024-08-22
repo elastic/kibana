@@ -14,6 +14,7 @@ import {
   LogDataViewReference,
   logDataViewReferenceRT,
   LogIndexReference,
+  logSourcesKibanaAdvancedSettingRT,
 } from '@kbn/logs-shared-plugin/common';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -27,6 +28,7 @@ import { FormElement, isFormElementForType } from './form_elements';
 import { IndexNamesConfigurationPanel } from './index_names_configuration_panel';
 import { IndexPatternConfigurationPanel } from './index_pattern_configuration_panel';
 import { FormValidationError } from './validation_errors';
+import { KibanaAdvancedSettingConfigurationPanel } from './kibana_advanced_setting_configuration_panel';
 
 export const IndicesConfigurationPanel = React.memo<{
   isLoading: boolean;
@@ -75,6 +77,17 @@ export const IndicesConfigurationPanel = React.memo<{
     });
   }, [indicesFormElement, trackChangeIndexSourceType]);
 
+  const changeToKibanaAdvancedSettingType = useCallback(() => {
+    // This is always a readonly value, synced with the setting, we just reset back to the correct type.
+    indicesFormElement.updateValue(() => ({
+      type: 'kibana_advanced_setting',
+    }));
+
+    trackChangeIndexSourceType({
+      metric: 'configuration_switch_to_kibana_advanced_setting_reference',
+    });
+  }, [indicesFormElement, trackChangeIndexSourceType]);
+
   useEffect(() => {
     const getNumberOfInfraRules = async () => {
       if (http) {
@@ -107,6 +120,34 @@ export const IndicesConfigurationPanel = React.memo<{
         ),
       }}
     >
+      {' '}
+      <EuiCheckableCard
+        id="kibanaAdvancedSetting"
+        label={
+          <EuiTitle size="xs">
+            <h2>
+              <FormattedMessage
+                id="xpack.infra.logSourceConfiguration.kibanaAdvancedSettingSectionTitle"
+                defaultMessage="Kibana log sources advanced setting"
+              />
+            </h2>
+          </EuiTitle>
+        }
+        name="kibanaAdvancedSetting"
+        value="kibanaAdvancedSetting"
+        checked={isKibanaAdvancedSettingFormElement(indicesFormElement)}
+        onChange={changeToKibanaAdvancedSettingType}
+        disabled={isReadOnly}
+      >
+        {isKibanaAdvancedSettingFormElement(indicesFormElement) && (
+          <KibanaAdvancedSettingConfigurationPanel
+            isLoading={isLoading}
+            isReadOnly={isReadOnly}
+            advancedSettingFormElement={indicesFormElement}
+          />
+        )}
+      </EuiCheckableCard>
+      <EuiSpacer size="m" />
       <EuiCheckableCard
         id="dataView"
         label={
@@ -114,7 +155,7 @@ export const IndicesConfigurationPanel = React.memo<{
             <h2>
               <FormattedMessage
                 id="xpack.infra.logSourceConfiguration.dataViewSectionTitle"
-                defaultMessage="Data view (recommended)"
+                defaultMessage="Data view (deprecated)"
               />
             </h2>
           </EuiTitle>
@@ -134,15 +175,14 @@ export const IndicesConfigurationPanel = React.memo<{
         )}
       </EuiCheckableCard>
       <EuiSpacer size="m" />
-
       <EuiCheckableCard
         id="indexNames"
         label={
           <EuiTitle size="xs">
             <h2>
               <FormattedMessage
-                id="xpack.infra.sourceConfiguration.indicesSectionTitle"
-                defaultMessage="Indices"
+                id="xpack.infra.sourceConfiguration.logsIndicesSectionTitle"
+                defaultMessage="Indices (deprecated)"
               />
             </h2>
           </EuiTitle>
@@ -152,6 +192,7 @@ export const IndicesConfigurationPanel = React.memo<{
         checked={isIndexNamesFormElement(indicesFormElement)}
         onChange={changeToIndexNameType}
         disabled={isReadOnly}
+        data-test-subj="logIndicesCheckableCard"
       >
         {isIndexNamesFormElement(indicesFormElement) && (
           <IndexNamesConfigurationPanel
@@ -201,3 +242,7 @@ const isDataViewFormElement = isFormElementForType(
 );
 
 const isIndexNamesFormElement = isFormElementForType(logIndexNameReferenceRT.is);
+
+const isKibanaAdvancedSettingFormElement = isFormElementForType(
+  logSourcesKibanaAdvancedSettingRT.is
+);

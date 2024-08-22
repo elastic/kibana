@@ -262,22 +262,5 @@ describe('<ContentEditorFlyoutContent />', () => {
         tags: ['id-3', 'id-4'], // New selection
       });
     });
-
-    test('should render activity view', async () => {
-      await act(async () => {
-        testBed = await setup({ showActivityView: true });
-      });
-      const { find, component } = testBed!;
-
-      expect(find('activityView').exists()).toBe(true);
-      expect(find('activityView.createdByCard').exists()).toBe(true);
-      expect(find('activityView.updatedByCard').exists()).toBe(false);
-
-      testBed.setProps({
-        item: { ...savedObjectItem, updatedAt: '2021-01-01T00:00:00Z' },
-      });
-      component.update();
-      expect(find('activityView.updatedByCard').exists()).toBe(true);
-    });
   });
 });

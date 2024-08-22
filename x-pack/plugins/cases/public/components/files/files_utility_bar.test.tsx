@@ -10,16 +10,27 @@ import { screen } from '@testing-library/react';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
+import { useCreateAttachments } from '../../containers/use_create_attachments';
 import userEvent from '@testing-library/user-event';
 import { FilesUtilityBar } from './files_utility_bar';
+
+jest.mock('../../containers/api');
+jest.mock('../../containers/use_create_attachments');
+jest.mock('../../common/lib/kibana');
+
+const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
+
+useCreateAttachmentsMock.mockReturnValue({
+  isLoading: false,
+  mutateAsync: jest.fn(),
+});
 
 const defaultProps = {
   caseId: 'foobar',
   onSearch: jest.fn(),
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/174571
-describe.skip('FilesUtilityBar', () => {
+describe('FilesUtilityBar', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
@@ -30,14 +41,14 @@ describe.skip('FilesUtilityBar', () => {
   it('renders correctly', async () => {
     appMockRender.render(<FilesUtilityBar {...defaultProps} />);
 
-    expect(await screen.findByTestId('cases-files-add')).toBeInTheDocument();
     expect(await screen.findByTestId('cases-files-search')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-files-add')).toBeInTheDocument();
   });
 
   it('search text passed correctly to callback', async () => {
     appMockRender.render(<FilesUtilityBar {...defaultProps} />);
 
-    await userEvent.type(screen.getByTestId('cases-files-search'), 'My search{enter}');
+    userEvent.type(await screen.findByTestId('cases-files-search'), 'My search{enter}');
     expect(defaultProps.onSearch).toBeCalledWith('My search');
   });
 });

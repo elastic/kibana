@@ -33,7 +33,7 @@ type Handler = (
   context: SecuritySolutionRequestHandlerContext,
   request: KibanaRequest<unknown, unknown, RiskScoresEntityCalculationRequest>,
   response: KibanaResponseFactory
-) => Promise<IKibanaResponse>;
+) => Promise<IKibanaResponse<RiskScoresCalculationResponse>>;
 
 const handler: (logger: Logger) => Handler = (logger) => async (context, request, response) => {
   const securityContext = await context.securitySolution;
@@ -101,7 +101,7 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
 
     const filter = isEmpty(userFilter) ? [identifierFilter] : [userFilter, identifierFilter];
 
-    const result: RiskScoresCalculationResponse = await riskScoreService.calculateAndPersistScores({
+    const result = await riskScoreService.calculateAndPersistScores({
       pageSize,
       identifierType,
       index,

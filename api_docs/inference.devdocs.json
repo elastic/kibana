@@ -1,0 +1,318 @@
+{
+  "id": "inference",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "inference",
+        "id": "def-public.httpResponseIntoObservable",
+        "type": "Function",
+        "tags": [],
+        "label": "httpResponseIntoObservable",
+        "description": [],
+        "signature": [
+          "() => ",
+          "OperatorFunction",
+          "<",
+          "StreamedHttpResponse",
+          ", T>"
+        ],
+        "path": "x-pack/plugins/inference/public/util/http_response_into_observable.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "inference",
+      "id": "def-public.InferencePublicSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "InferencePublicSetup",
+      "description": [],
+      "path": "x-pack/plugins/inference/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "inference",
+      "id": "def-public.InferencePublicStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "InferencePublicStart",
+      "description": [],
+      "path": "x-pack/plugins/inference/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "inference",
+          "id": "def-public.InferencePublicStart.chatComplete",
+          "type": "Function",
+          "tags": [],
+          "label": "chatComplete",
+          "description": [],
+          "signature": [
+            "(options: { connectorId: string; system?: string | undefined; messages: ",
+            "Message",
+            "[]; } & ",
+            "ToolOptions",
+            "<string>) => ",
+            "ChatCompletionResponse",
+            "<",
+            "ToolOptions",
+            "<string>>"
+          ],
+          "path": "x-pack/plugins/inference/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "inference",
+              "id": "def-public.InferencePublicStart.chatComplete.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "options",
+              "description": [],
+              "signature": [
+                "{ connectorId: string; system?: string | undefined; messages: ",
+                "Message",
+                "[]; } & TToolOptions"
+              ],
+              "path": "x-pack/plugins/inference/common/chat_complete/index.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "inference",
+          "id": "def-public.InferencePublicStart.output",
+          "type": "Function",
+          "tags": [],
+          "label": "output",
+          "description": [],
+          "signature": [
+            "<TId extends string = string, TOutputSchema extends ToolSchemaTypeObject | undefined = ToolSchemaTypeObject | undefined>(id: TId, options: { connectorId: string; system?: string | undefined; input: string; schema?: TOutputSchema | undefined; }) => ",
+            "Observable",
+            "<",
+            "OutputEvent",
+            "<TId, TOutputSchema extends ToolSchemaTypeObject ? ",
+            "FromToolSchema",
+            "<TOutputSchema> : undefined>>"
+          ],
+          "path": "x-pack/plugins/inference/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "inference",
+              "id": "def-public.InferencePublicStart.output.$1",
+              "type": "Uncategorized",
+              "tags": [],
+              "label": "id",
+              "description": [],
+              "signature": [
+                "TId"
+              ],
+              "path": "x-pack/plugins/inference/common/output/index.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            },
+            {
+              "parentPluginId": "inference",
+              "id": "def-public.InferencePublicStart.output.$2",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [],
+              "signature": [
+                "{ connectorId: string; system?: string | undefined; input: string; schema?: TOutputSchema | undefined; }"
+              ],
+              "path": "x-pack/plugins/inference/common/output/index.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "inference",
+          "id": "def-public.InferencePublicStart.getConnectors",
+          "type": "Function",
+          "tags": [],
+          "label": "getConnectors",
+          "description": [],
+          "signature": [
+            "() => Promise<",
+            "InferenceConnector",
+            "[]>"
+          ],
+          "path": "x-pack/plugins/inference/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "inference",
+        "id": "def-server.withoutChunkEvents",
+        "type": "Function",
+        "tags": [],
+        "label": "withoutChunkEvents",
+        "description": [],
+        "signature": [
+          "() => ",
+          "OperatorFunction",
+          "<T, Exclude<T, ",
+          "ChatCompletionChunkEvent",
+          ">>"
+        ],
+        "path": "x-pack/plugins/inference/common/chat_complete/without_chunk_events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inference",
+        "id": "def-server.withoutOutputUpdateEvents",
+        "type": "Function",
+        "tags": [],
+        "label": "withoutOutputUpdateEvents",
+        "description": [],
+        "signature": [
+          "() => ",
+          "OperatorFunction",
+          "<T, Exclude<T, ",
+          "OutputUpdateEvent",
+          "<string>>>"
+        ],
+        "path": "x-pack/plugins/inference/common/output/without_output_update_events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inference",
+        "id": "def-server.withoutTokenCountEvents",
+        "type": "Function",
+        "tags": [],
+        "label": "withoutTokenCountEvents",
+        "description": [],
+        "signature": [
+          "() => ",
+          "OperatorFunction",
+          "<T, Exclude<T, ",
+          "ChatCompletionTokenCountEvent",
+          ">>"
+        ],
+        "path": "x-pack/plugins/inference/common/chat_complete/without_token_count_events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "inference",
+      "id": "def-server.InferenceServerSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "InferenceServerSetup",
+      "description": [],
+      "path": "x-pack/plugins/inference/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "inference",
+      "id": "def-server.InferenceServerStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "InferenceServerStart",
+      "description": [],
+      "path": "x-pack/plugins/inference/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "inference",
+          "id": "def-server.InferenceServerStart.getClient",
+          "type": "Function",
+          "tags": [],
+          "label": "getClient",
+          "description": [
+            "\nCreates an inference client, scoped to a request.\n"
+          ],
+          "signature": [
+            "(options: InferenceClientCreateOptions) => ",
+            "InferenceClient"
+          ],
+          "path": "x-pack/plugins/inference/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "inference",
+              "id": "def-server.InferenceServerStart.getClient.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [
+                "{@link InferenceClientCreateOptions }"
+              ],
+              "signature": [
+                "InferenceClientCreateOptions"
+              ],
+              "path": "x-pack/plugins/inference/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

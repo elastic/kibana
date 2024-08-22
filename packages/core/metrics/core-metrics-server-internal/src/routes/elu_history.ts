@@ -9,6 +9,7 @@
 import type { IRouter } from '@kbn/core-http-server';
 import type { OpsMetrics } from '@kbn/core-metrics-server';
 import type { Observable } from 'rxjs';
+import apm from 'elastic-apm-node';
 import { HistoryWindow } from './history_window';
 
 interface ELUHistoryResponse {
@@ -42,9 +43,21 @@ export function registerEluHistoryRoute(router: IRouter, metrics$: Observable<Op
     eluHistoryWindow.addObservation(metrics.process.event_loop_utilization.utilization);
   });
 
+  // Report the same metrics to APM
+  apm.registerMetric('elu.history.short', () =>
+    eluHistoryWindow.getAverage(HISTORY_WINDOW_SIZE_SHORT)
+  );
+  apm.registerMetric('elu.history.medium', () =>
+    eluHistoryWindow.getAverage(HISTORY_WINDOW_SIZE_MED)
+  );
+  apm.registerMetric('elu.history.long', () =>
+    eluHistoryWindow.getAverage(HISTORY_WINDOW_SIZE_LONG)
+  );
+
   router.versioned
     .get({
-      access: 'public', // Public but needs to remain undocumented
+      access: 'internal',
+      enableQueryVersion: true,
       path: '/api/_elu_history',
       options: {
         authRequired: false,
@@ -52,7 +65,7 @@ export function registerEluHistoryRoute(router: IRouter, metrics$: Observable<Op
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: '1',
         validate: false,
       },
       async (ctx, req, res) => {

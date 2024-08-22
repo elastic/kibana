@@ -53,7 +53,8 @@
     "@kbn/search-types",
     "@kbn/alerting-comparators",
     "@kbn/task-manager-plugin",
-    "@kbn/core-logging-server-mocks"
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-saved-objects-server"
   ],
   "exclude": [
     "target/**/*",
