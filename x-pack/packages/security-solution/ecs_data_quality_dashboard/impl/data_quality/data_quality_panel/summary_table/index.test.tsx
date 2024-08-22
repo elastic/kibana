@@ -14,7 +14,10 @@ import { getSummaryTableColumns } from './helpers';
 import { mockIlmExplain } from '../../mock/ilm_explain/mock_ilm_explain';
 import { auditbeatWithAllResults } from '../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import { mockStats } from '../../mock/stats/mock_stats';
-import { TestProviders } from '../../mock/test_providers/test_providers';
+import {
+  TestDataQualityProviders,
+  TestExternalProviders,
+} from '../../mock/test_providers/test_providers';
 import { getSummaryTableItems } from '../pattern/helpers';
 import { SortConfig } from '../../types';
 import { Props, SummaryTable } from '.';
@@ -58,10 +61,7 @@ const items = getSummaryTableItems({
 });
 
 const defaultProps: Props = {
-  formatBytes,
-  formatNumber,
   getTableColumns: getSummaryTableColumns,
-  itemIdToExpandedRowMap: {},
   items,
   pageIndex: 0,
   pageSize: 10,
@@ -70,7 +70,27 @@ const defaultProps: Props = {
   setPageSize: jest.fn(),
   setSorting: jest.fn(),
   sorting: defaultSort,
-  toggleExpanded: jest.fn(),
+  onCheckNowAction: jest.fn(),
+  onExpandAction: jest.fn(),
+  checkState: Object.fromEntries(
+    indexNames.map((indexName) => [
+      indexName,
+      {
+        isChecking: false,
+        isLoadingMappings: false,
+        isLoadingUnallowedValues: false,
+        indexes: null,
+        mappingsProperties: null,
+        unallowedValues: null,
+        genericError: null,
+        mappingsError: null,
+        unallowedValuesError: null,
+        partitionedFieldMetadata: null,
+        isCheckComplete: false,
+        searchResults: null,
+      },
+    ])
+  ),
 };
 
 describe('SummaryTable', () => {
@@ -78,9 +98,11 @@ describe('SummaryTable', () => {
     jest.clearAllMocks();
 
     render(
-      <TestProviders>
-        <SummaryTable {...defaultProps} />
-      </TestProviders>
+      <TestExternalProviders>
+        <TestDataQualityProviders dataQualityContextProps={{ formatBytes, formatNumber }}>
+          <SummaryTable {...defaultProps} />
+        </TestDataQualityProviders>
+      </TestExternalProviders>
     );
   });
 

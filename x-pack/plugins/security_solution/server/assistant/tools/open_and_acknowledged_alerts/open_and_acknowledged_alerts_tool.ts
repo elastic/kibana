@@ -10,7 +10,7 @@ import type { Replacements } from '@kbn/elastic-assistant-common';
 import { getAnonymizedValue, transformRawData } from '@kbn/elastic-assistant-common';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { getOpenAndAcknowledgedAlertsQuery } from './get_open_and_acknowledged_alerts_query';
 import { getRawDataOrDefault, sizeIsOutOfRange } from './helpers';
