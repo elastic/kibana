@@ -18,7 +18,7 @@ const cellValueAction: LensCellValueAction = {
   iconType: 'test-icon',
   execute: () => {},
 };
-function sampleArgs() {
+function sampleArgs(): DatatableProps {
   const indexPatternId = 'indexPatternId';
   const data: Datatable = {
     type: 'datatable',
@@ -80,7 +80,7 @@ function sampleArgs() {
     sortingDirection: 'none',
   };
 
-  return { data, args };
+  return { data, args, syncColors: false };
 }
 
 describe('datatable_expression', () => {
