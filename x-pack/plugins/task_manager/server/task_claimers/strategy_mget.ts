@@ -126,6 +126,8 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     taskPartitioner,
   });
 
+  logger.info(`mget docs ${JSON.stringify(docs)}`);
+
   if (docs.length === 0)
     return {
       ...getEmptyClaimOwnershipResult(),
