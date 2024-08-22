@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { ArrayFromString, z } from '@kbn/zod';
+import { z, ArrayFromString } from '@kbn/zod';
 
 import {
   RuleExecutionEventType,
