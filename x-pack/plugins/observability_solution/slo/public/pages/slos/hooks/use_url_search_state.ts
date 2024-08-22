@@ -8,7 +8,6 @@
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import deepmerge from 'deepmerge';
 import { useHistory } from 'react-router-dom';
-import deepEqual from 'fast-deep-equal';
 import { Filter } from '@kbn/es-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { DEFAULT_SLO_PAGE_SIZE } from '../../../../common/constants';
@@ -89,12 +88,10 @@ export function useUrlSearchState(): {
   const onStateChange = useCallback(
     (newState: Partial<SearchState>) => {
       const updatedState = { ...state, page: 0, ...newState };
-      if (!deepEqual(updatedState, state)) {
-        setState((stateN) => updatedState);
-        urlStateStorage.current?.set(SLO_LIST_SEARCH_URL_STORAGE_KEY, updatedState, {
-          replace: true,
-        });
-      }
+      setState((stateN) => updatedState);
+      urlStateStorage.current?.set(SLO_LIST_SEARCH_URL_STORAGE_KEY, updatedState, {
+        replace: true,
+      });
     },
     [state]
   );

@@ -58,14 +58,17 @@ export const FilterGroupContextMenu = () => {
 
     for (let counter = 0; counter < initialControls.length; counter++) {
       const control = initialControls[counter];
-      controlGroupStateBuilder.addOptionsListControl(newInput, {
-        controlId: String(counter),
-        ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
-        // option List controls will handle an invalid dataview
-        // & display an appropriate message
-        dataViewId: dataViewId ?? '',
-        ...control,
-      });
+      controlGroupStateBuilder.addOptionsListControl(
+        newInput,
+        {
+          ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
+          // option List controls will handle an invalid dataview
+          // & display an appropriate message
+          dataViewId: dataViewId ?? '',
+          ...control,
+        },
+        String(counter)
+      );
       controlGroup?.updateInput(newInput);
     }
 

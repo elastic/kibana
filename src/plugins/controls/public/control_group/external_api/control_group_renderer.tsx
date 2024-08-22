@@ -145,7 +145,7 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
         ControlGroupRuntimeState,
         ControlGroupApi
       >
-        key={regenerateId} // forces unmount + mount when `updateInput` is called
+        key={regenerateId} // this key forces a re-mount when `updateInput` is called
         maybeId={id}
         type={CONTROL_GROUP_TYPE}
         getParentApi={() => ({
@@ -165,7 +165,7 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
             ...controlGroupApi,
             updateInput: (newInput) => {
               updateInput(newInput);
-              setRegenerateId(uuidv4());
+              setRegenerateId(uuidv4()); // force remount
             },
             getInput$: () => runtimeState$,
           });

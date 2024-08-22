@@ -42,7 +42,6 @@ export const ControlsContent: React.FC<Props> = ({
       const initialInput: Partial<ControlGroupRuntimeState> = {
         chainingSystem: 'HIERARCHICAL',
         labelPosition: 'oneLine',
-        defaultControlWidth: 'small',
         initialChildControlState: controlPanels,
       };
 
@@ -72,9 +71,9 @@ export const ControlsContent: React.FC<Props> = ({
       );
 
       subscriptions.current.add(
-        controlGroup.unsavedChanges.subscribe((changes?: Partial<ControlGroupRuntimeState>) => {
-          if (changes?.initialChildControlState) setControlPanels(changes.initialChildControlState);
-        })
+        controlGroup
+          .getInput$()
+          .subscribe(({ initialChildControlState }) => setControlPanels(initialChildControlState))
       );
     },
     [onFiltersChange, setControlPanels]

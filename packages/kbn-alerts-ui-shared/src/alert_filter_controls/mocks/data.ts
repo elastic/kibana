@@ -115,8 +115,6 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListControlState>
       exclude: false,
     },
   },
-  defaultControlWidth: 'small',
-  defaultControlGrow: true,
   labelPosition: 'oneLine',
   chainingSystem: 'HIERARCHICAL',
   autoApplySelections: true,
