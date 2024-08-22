@@ -58,18 +58,14 @@ export function ColorMappingByValues<T>({
           data-test-subj="lns-palettePanel-values"
           className="lnsPalettePanel__section lnsPalettePanel__section--shaded lnsIndexPatternDimensionEditor--padded"
         >
-          <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
-            <EuiFlexItem>
-              <CustomizablePalette
-                palettes={paletteService}
-                dataBounds={dataBounds}
-                activePalette={palette}
-                setPalette={(p) => {
-                  setPalette(p);
-                }}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <CustomizablePalette
+            palettes={paletteService}
+            dataBounds={dataBounds}
+            activePalette={palette}
+            setPalette={(p) => {
+              setPalette(p);
+            }}
+          />
         </div>
       </PalettePanelContainer>
     </EuiFormRow>
