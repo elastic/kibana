@@ -106,7 +106,7 @@ export const getDefaultAssistantGraph = ({
       },
       responseLanguage: {
         value: (x: string, y?: string) => y ?? x,
-        default: () => '',
+        default: () => 'English',
       },
     };
 
