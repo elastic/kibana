@@ -19,21 +19,27 @@ interface Props {
   reason?: string;
 }
 
+const StyledContainer = styled.div`
+  padding: ${({ theme }) => theme.eui.euiSizeM} 0;
+`;
+
 const NoDataComponent: React.FC<Props> = ({ reason }) => (
   <EuiFlexGroup alignItems="center" gutterSize="none">
     <EuiFlexItem grow>
-      <NoDataLabel color="subdued" data-test-subj="noDataLabel" size="xs">
-        {i18n.NO_DATA_LABEL}
-      </NoDataLabel>
+      <StyledContainer>
+        <NoDataLabel color="subdued" data-test-subj="noDataLabel" size="xs">
+          {i18n.NO_DATA_LABEL}
+        </NoDataLabel>
 
-      {reason != null && (
-        <>
-          <EuiSpacer size="s" />
-          <NoDataLabel color="subdued" data-test-subj="reasonLabel" size="xs">
-            {reason}
-          </NoDataLabel>
-        </>
-      )}
+        {reason != null && (
+          <>
+            <EuiSpacer size="s" />
+            <NoDataLabel color="subdued" data-test-subj="reasonLabel" size="xs">
+              {reason}
+            </NoDataLabel>
+          </>
+        )}
+      </StyledContainer>
     </EuiFlexItem>
   </EuiFlexGroup>
 );
