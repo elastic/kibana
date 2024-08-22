@@ -560,7 +560,7 @@
             "label": "query",
             "description": [],
             "signature": [
-              "{ readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuery: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; readonly queryESQL: string; }"
+              "{ readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuery: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; readonly queryESQL: string; readonly queryESQLExamples: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
