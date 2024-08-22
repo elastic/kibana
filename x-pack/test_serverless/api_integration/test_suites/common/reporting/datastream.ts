@@ -34,7 +34,6 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.load(archives.ecommerce.data);
       await kibanaServer.importExport.load(archives.ecommerce.savedObjects);
 
-      // for this test, we don't need to wait for the job to finish or verify the result
       await reportingAPI.createReportJobInternal(
         'csv_searchsource',
         {
@@ -54,6 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      // FIXME wait for job to finish before clean up
       await reportingAPI.deleteAllReports(roleAuthc, internalReqHeader);
       await esArchiver.unload(archives.ecommerce.data);
       await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);

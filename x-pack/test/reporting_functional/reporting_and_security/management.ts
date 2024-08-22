@@ -21,6 +21,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await reportingFunctional.initEcommerce();
     });
     after(async () => {
+      // FIXME: wait for the report job to finish before clean up
       await reportingFunctional.teardownEcommerce();
     });
 
@@ -47,7 +48,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await PageObjects.common.navigateToApp('reporting');
       await PageObjects.common.sleep(3000); // Wait an amount of time for auto-polling to refresh the jobs
 
-      // We do not need to wait for the report to finish generating
       await (await testSubjects.find('euiCollapsedItemActionsButton')).click();
       await (await testSubjects.find('reportOpenInKibanaApp')).click();
 

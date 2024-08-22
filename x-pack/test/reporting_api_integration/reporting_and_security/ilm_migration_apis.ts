@@ -72,6 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      // FIXME wait for reports to complete before teardown
       await reportingAPI.teardownLogs();
       await reportingAPI.makeAllReportingIndicesUnmanaged(); // ensure that a delete phase does not remove the index while future tests are running
     });

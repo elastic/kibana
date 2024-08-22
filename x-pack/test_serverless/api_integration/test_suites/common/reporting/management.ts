@@ -30,6 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
     after(async () => {
+      // FIXME wait for job to finish before invalidating user
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(adminUser);
     });
 
@@ -63,7 +64,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it(`user can delete a report they've created`, async () => {
-        // for this test, we don't need to wait for the job to finish or verify the result
         const response = await supertestWithoutAuth
           .delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${reportJob.id}`)
           .set(...API_HEADER)

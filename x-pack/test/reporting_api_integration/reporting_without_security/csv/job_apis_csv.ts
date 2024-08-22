@@ -55,6 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      // FIXME wait for reports to complete before teardown
       await reportingAPI.teardownLogs();
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
     });

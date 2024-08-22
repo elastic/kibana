@@ -36,6 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
+      // FIXME: wait for queued report to finish before clean up
       await reporting.teardownLogs();
       await deleteReportingUser();
     });

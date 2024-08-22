@@ -208,6 +208,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     return job?.output?.error_code;
   };
 
+  // FIXME: remove this and use the delete API for each report created during testing
   const deleteAllReports = async () => {
     log.debug('ReportingAPI.deleteAllReports');
 

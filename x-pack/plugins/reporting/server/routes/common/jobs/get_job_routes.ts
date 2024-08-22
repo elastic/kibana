@@ -108,6 +108,8 @@ export const commonJobsRouteHandlerFactory = (
       counters,
       { isInternal },
       async (doc) => {
+        // FIXME look for potential report job task in task manager and remove that too
+
         const docIndex = doc.index;
         const stream = await getContentStream(reporting, { id: docId, index: docIndex });
         const reportingSetup = reporting.getPluginSetupDeps();

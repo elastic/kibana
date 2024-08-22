@@ -103,7 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.selectIndexPattern('ecommerce');
       });
 
-      it('generates a report with single timefilter', async () => {
+      it('exposes a POST URL for a report with single timefilter', async () => {
         await PageObjects.discover.clickNewSearchButton();
         await PageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
         await PageObjects.discover.saveSearch('single-timefilter-search');
