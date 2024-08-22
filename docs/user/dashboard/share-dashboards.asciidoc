@@ -14,4 +14,4 @@ TIP: When sharing a dashboard with a link while a panel is in maximized view, th
 [[export-dashboards]]
 == Export dashboards
 
-To automate {kib}, you can export dashboards as NDJSON using the <<saved-objects-api-export, Export objects API>>. It is important to export dashboards with all necessary references.
+To automate {kib}, you can export dashboards as NDJSON using the {api-kibana}/group/endpoint-saved-objects[Export saved objects API]. It is important to export dashboards with all necessary references.
