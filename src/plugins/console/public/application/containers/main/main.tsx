@@ -19,7 +19,12 @@ import {
 import { MAIN_PANEL_LABELS } from './i18n';
 import { NavIconButton } from './nav_icon_button';
 import { Editor } from '../editor';
-import { TopNavMenu, SomethingWentWrongCallout } from '../../components';
+import {
+  TopNavMenu,
+  SomethingWentWrongCallout,
+  HelpPopover,
+  ShortcutsPopover,
+} from '../../components';
 import { useDataInit } from '../../hooks';
 import { getTopNavConfig } from './get_top_nav';
 import { SHELL_TAB_ID } from './tab_ids';
@@ -30,6 +35,8 @@ interface MainProps {
 
 export function Main({ isEmbeddable = false }: MainProps) {
   const [selectedTab, setSelectedTab] = useState(SHELL_TAB_ID);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   const { done, error, retry } = useDataInit();
 
@@ -40,6 +47,26 @@ export function Main({ isEmbeddable = false }: MainProps) {
       </EuiPageTemplate.EmptyPrompt>
     );
   }
+
+  const shortcutsButton = (
+    <NavIconButton
+      iconType="keyboard"
+      onClick={() => setIsShortcutsOpen(!isShortcutsOpen)}
+      ariaLabel={MAIN_PANEL_LABELS.shortcutsButton}
+      dataTestSubj="consoleShortcutsButton"
+      toolTipContent={MAIN_PANEL_LABELS.shortcutsButton}
+    />
+  );
+
+  const helpButton = (
+    <NavIconButton
+      iconType="questionInCircle"
+      onClick={() => setIsHelpOpen(!isHelpOpen)}
+      ariaLabel={MAIN_PANEL_LABELS.helpButton}
+      dataTestSubj="consoleHelpButton"
+      toolTipContent={MAIN_PANEL_LABELS.helpButton}
+    />
+  );
 
   return (
     <div id="consoleRoot">
@@ -76,21 +103,17 @@ export function Main({ isEmbeddable = false }: MainProps) {
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <NavIconButton
-                    iconType="keyboard"
-                    onClick={() => {}}
-                    ariaLabel={MAIN_PANEL_LABELS.shortcutsButton}
-                    dataTestSubj="consoleShortcutsButton"
-                    toolTipContent={MAIN_PANEL_LABELS.shortcutsButton}
+                  <ShortcutsPopover
+                    button={shortcutsButton}
+                    isOpen={isShortcutsOpen}
+                    closePopover={() => setIsShortcutsOpen(false)}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <NavIconButton
-                    iconType="questionInCircle"
-                    onClick={() => {}}
-                    ariaLabel={MAIN_PANEL_LABELS.helpButton}
-                    dataTestSubj="consoleHelpButton"
-                    toolTipContent={MAIN_PANEL_LABELS.helpButton}
+                  <HelpPopover
+                    button={helpButton}
+                    isOpen={isHelpOpen}
+                    closePopover={() => setIsHelpOpen(false)}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

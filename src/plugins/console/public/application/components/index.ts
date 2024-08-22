@@ -20,6 +20,8 @@ export { HelpPanel } from './help_panel';
 export { EditorContentSpinner } from './editor_content_spinner';
 export type { DevToolsVariable } from './variables';
 export { OutputPanelEmptyState } from './output_panel_empty_state';
+export { HelpPopover } from './help_popover';
+export { ShortcutsPopover } from './shortcuts_popover';
 
 /**
  * The Lazily-loaded `DevToolsSettingsModal` component.  Consumers should use `React.Suspense` or
