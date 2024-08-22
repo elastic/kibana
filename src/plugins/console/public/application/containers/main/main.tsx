@@ -58,6 +58,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
     return {
       ...step,
       onFinish: () => actions.finishTour(false),
+      subtitle: undefined, // Overwrite subtitle from initial tour config
       footerAction:
         // TODO: Fix the index after adding the tour step for files
         tourState.currentTourStep === tourStepProps.length - 1 ? (
