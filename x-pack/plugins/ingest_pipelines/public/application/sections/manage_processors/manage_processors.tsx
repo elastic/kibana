@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import React, { useEffect } from 'react';
 
-import { EuiPageHeader, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { GEOIP_ID, tabs } from './tabs';
 import { useKibana } from '../../../shared_imports';
 import { UIM_MANAGE_PROCESSORS } from '../../constants';
+import { GeoipList } from './geoip_list';
 
-export const ManageProcessors: React.FunctionComponent<RouteComponentProps> = () => {
+export const ManageProcessors: React.FunctionComponent = () => {
   const { services } = useKibana();
   // Track component loaded
   useEffect(() => {
@@ -23,26 +22,6 @@ export const ManageProcessors: React.FunctionComponent<RouteComponentProps> = ()
     services.breadcrumbs.setBreadcrumbs('manage_processors');
   }, [services.metric, services.breadcrumbs]);
 
-  const [selectedTabId, setSelectedTabId] = useState(GEOIP_ID);
-  const selectedTabContent = useMemo(() => {
-    return tabs.find((obj) => obj.id === selectedTabId)?.content;
-  }, [selectedTabId]);
-
-  const onSelectedTabChanged = (id: string) => {
-    setSelectedTabId(id);
-  };
-
-  const renderTabs = () => {
-    return tabs.map((tab, index) => (
-      <EuiTab
-        key={index}
-        onClick={() => onSelectedTabChanged(tab.id)}
-        isSelected={tab.id === selectedTabId}
-      >
-        {tab.name}
-      </EuiTab>
-    ));
-  };
   return (
     <>
       <EuiPageHeader
@@ -57,8 +36,7 @@ export const ManageProcessors: React.FunctionComponent<RouteComponentProps> = ()
 
       <EuiSpacer size="l" />
 
-      <EuiTabs>{renderTabs()}</EuiTabs>
-      {selectedTabContent}
+      <GeoipList />
     </>
   );
 };

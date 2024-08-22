@@ -22,3 +22,18 @@ export const deserializeGeoipDatabase = (geoipDatabase: GeoipDatabase) => {
     name: geoipDatabase.database.name,
   };
 };
+
+export const serializeGeoipDatabase = ({
+  databaseName,
+  maxmind,
+}: {
+  databaseName: string;
+  maxmind: string;
+}) => {
+  return {
+    name: databaseName,
+    maxmind: {
+      account_id: maxmind,
+    },
+  };
+};

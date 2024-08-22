@@ -7,13 +7,13 @@
 
 import React from 'react';
 
-import { EuiButton, EuiInMemoryTable, EuiInMemoryTableProps, EuiPageTemplate } from '@elastic/eui';
+import { EuiButton, EuiPageTemplate } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SectionLoading, useKibana } from '../../../shared_imports';
-import { GeoipDatabase } from './types';
+import { getErrorMessage } from './get_error_message';
+import { GeoipTable } from './geoip_table';
 
 export const GeoipList: React.FunctionComponent = () => {
   const { services } = useKibana();
@@ -31,7 +31,7 @@ export const GeoipList: React.FunctionComponent = () => {
             />
           </h2>
         }
-        body={<p>{error.message}</p>}
+        body={<p>{getErrorMessage(error)}</p>}
         actions={
           <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
             <FormattedMessage
@@ -59,17 +59,5 @@ export const GeoipList: React.FunctionComponent = () => {
     // TODO empty list for geoip databases
     return null;
   }
-  const tableProps: EuiInMemoryTableProps<GeoipDatabase> = {
-    columns: [
-      {
-        field: 'name',
-        name: i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.list.nameColumnTitle', {
-          defaultMessage: 'Database name',
-        }),
-        sortable: true,
-      },
-    ],
-    items: data ?? [],
-  };
-  return <EuiInMemoryTable {...tableProps} />;
+  return <GeoipTable items={data!} reloadDatabases={resendRequest} />;
 };

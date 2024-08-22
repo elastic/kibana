@@ -6,3 +6,4 @@
  */
 
 export { registerListGeoipRoute } from './list';
+export { registerCreateGeoipRoute } from './create';

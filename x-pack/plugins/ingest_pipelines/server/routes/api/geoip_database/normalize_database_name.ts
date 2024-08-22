@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { ManageProcessors } from './manage_processors';
+export const normalizeDatabaseName = (databaseName: string): string => {
+  return databaseName.replace(/\s+/g, '_').toLowerCase();
+};

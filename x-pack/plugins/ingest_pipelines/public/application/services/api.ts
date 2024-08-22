@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import { HttpSetup, ResponseErrorBody } from '@kbn/core/public';
 
 import { FieldCopyAction, Pipeline } from '../../../common/types';
 import { API_BASE_PATH } from '../../../common/constants';
@@ -143,9 +143,17 @@ export class ApiService {
   }
 
   public useLoadGeoipDatabases() {
-    return this.useRequest<GeoipDatabase[]>({
+    return this.useRequest<GeoipDatabase[], ResponseErrorBody>({
       path: `${API_BASE_PATH}/geoip_database`,
       method: 'get',
+    });
+  }
+
+  public async createGeoipDatabase(database: { maxmind: string; databaseName: string }) {
+    return this.sendRequest({
+      path: `${API_BASE_PATH}/geoip_database`,
+      method: 'post',
+      body: JSON.stringify(database),
     });
   }
 }
