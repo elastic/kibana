@@ -51,7 +51,7 @@ export async function getLogRateAnalysisForAlert({
     },
   };
 
-  return await fetchLogRateAnalysisForAlert({
+  return fetchLogRateAnalysisForAlert({
     esClient,
     arguments: {
       index,
