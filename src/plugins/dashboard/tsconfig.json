@@ -83,6 +83,8 @@
     "@kbn/lens-embeddable-utils",
     "@kbn/lens-plugin",
     "@kbn/recently-accessed",
+    "@kbn/content-management-content-insights-public",
+    "@kbn/content-management-content-insights-server",
     "@kbn/managed-content-badge",
     "@kbn/content-management-favorites-public",
     "@kbn/core-http-browser-mocks",

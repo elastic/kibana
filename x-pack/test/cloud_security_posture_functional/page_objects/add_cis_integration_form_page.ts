@@ -476,6 +476,10 @@ export function AddCisIntegrationFormPageProvider({
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
+  const showSuccessfulToast = async (testSubjectId: string) => {
+    return await testSubjects.exists(testSubjectId);
+  };
+
   const getFirstCspmIntegrationPageIntegration = async () => {
     const integration = await testSubjects.find('integrationNameLink');
     return await integration.getVisibleText();
@@ -539,5 +543,6 @@ export function AddCisIntegrationFormPageProvider({
     getFirstCspmIntegrationPageIntegration,
     getFirstCspmIntegrationPageAgent,
     getAgentBasedPolicyValue,
+    showSuccessfulToast,
   };
 }

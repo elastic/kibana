@@ -30,8 +30,8 @@ import { Observable } from 'rxjs';
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { ParentIgnoreSettings } from '../..';
 import { ControlGroupChainingSystem } from '../../../common/control_group/types';
-import { ControlStyle, ControlWidth } from '../../types';
-import { DefaultControlState, PublishesControlDisplaySettings } from '../controls/types';
+import { ControlStyle } from '../../types';
+import { DefaultControlState } from '../controls/types';
 import { ControlFetchContext } from './control_fetch/control_fetch';
 import { FieldFilterPredicate } from '../../control_group/types';
 
@@ -41,11 +41,6 @@ import { FieldFilterPredicate } from '../../control_group/types';
  * ----------------------------------------------------------------
  */
 
-/** The control display settings published by the control group are the "default" */
-type PublishesControlGroupDisplaySettings = PublishesControlDisplaySettings & {
-  labelPosition: PublishingSubject<ControlStyle>;
-};
-
 export type ControlInputTransform = (
   newState: Partial<ControlGroupSerializedState>,
   controlType: string
@@ -53,7 +48,7 @@ export type ControlInputTransform = (
 
 export type ControlGroupUnsavedChanges = Omit<
   ControlGroupRuntimeState,
-  'initialChildControlState' | 'defaultControlGrow' | 'defaultControlWidth'
+  'initialChildControlState'
 > & {
   filters: Filter[] | undefined;
 };
@@ -66,7 +61,6 @@ export type ControlGroupApi = PresentationContainer &
   HasEditCapabilities &
   PublishesDataLoading &
   Pick<PublishesUnsavedChanges<ControlGroupRuntimeState>, 'unsavedChanges'> &
-  PublishesControlGroupDisplaySettings &
   PublishesTimeslice &
   PublishesDisabledActionIds &
   Partial<HasParentApi<PublishesUnifiedSearch> & HasSaveNotification & PublishesReload> & {
@@ -74,6 +68,7 @@ export type ControlGroupApi = PresentationContainer &
     autoApplySelections$: PublishingSubject<boolean>;
     ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
     lastUsedDataViewId$: PublishingSubject<string | undefined>;
+    labelPosition: PublishingSubject<ControlStyle>;
 
     asyncResetUnsavedChanges: () => Promise<void>;
     controlFetch$: (controlUuid: string) => Observable<ControlFetchContext>;
@@ -100,8 +95,6 @@ export interface ControlGroupEditorConfig {
 
 export interface ControlGroupRuntimeState<State extends DefaultControlState = DefaultControlState> {
   chainingSystem: ControlGroupChainingSystem;
-  defaultControlGrow?: boolean;
-  defaultControlWidth?: ControlWidth;
   labelPosition: ControlStyle; // TODO: Rename this type to ControlLabelPosition
   autoApplySelections: boolean;
   ignoreParentSettings?: ParentIgnoreSettings;
@@ -116,10 +109,7 @@ export interface ControlGroupRuntimeState<State extends DefaultControlState = De
 }
 
 export interface ControlGroupSerializedState
-  extends Pick<
-    ControlGroupRuntimeState,
-    'chainingSystem' | 'defaultControlGrow' | 'defaultControlWidth' | 'editorConfig'
-  > {
+  extends Pick<ControlGroupRuntimeState, 'chainingSystem' | 'editorConfig'> {
   panelsJSON: string; // stringified version of ControlSerializedState
   ignoreParentSettingsJSON: string;
   // In runtime state, we refer to this property as `labelPosition`;
