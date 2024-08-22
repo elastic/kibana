@@ -218,6 +218,8 @@ components:
           properties:
             rule_id:
               $ref: './common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
+            respository_id:
+              $ref: './common_attributes.schema.yaml#/components/schemas/RepositoryId'
 
     SharedUpdateProps:
       x-inline: true

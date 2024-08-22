@@ -60,17 +60,17 @@ const fetchRuleAssetsToInstall = async (ruleBlobsToInstall: ExternalRuleAssetBlo
 };
 
 type FetchResult =
-  | { success: true; asset: PrebuiltRuleAsset; external_source: string }
-  | { success: false; error: string; external_source: string; filename?: string };
+  | { success: true; asset: PrebuiltRuleAsset; repository_id: string }
+  | { success: false; error: string; repository_id: string; filename?: string };
 
 const fetchSingleRuleAsset = async (blob: ExternalRuleAssetBlob): Promise<FetchResult> => {
-  const externalSource = `${blob.repository.id}`;
+  const repositoryId = `${blob.repository.id}`;
 
   if (!blob.sha) {
     return {
       success: false,
       error: `No SHA found for ${blob.filename}`,
-      external_source: externalSource,
+      repository_id: repositoryId,
     };
   }
 
@@ -90,27 +90,27 @@ const fetchSingleRuleAsset = async (blob: ExternalRuleAssetBlob): Promise<FetchR
     if (rawAsset.rule_id !== blob.filename.split('_')[0]) {
       return {
         success: false,
-        error: `The rule_id in the file does not match the rule_id codified in the filename. rule_id: ${rawAsset.rule_id}, filename: ${blob.filename}`,
-        external_source: externalSource,
+        error: `The rule_id in the asset does not match the rule_id codified in the filename. rule_id: ${rawAsset.rule_id}, filename: ${blob.filename}`,
+        repository_id: repositoryId,
         filename: blob.filename,
       };
     }
 
-    const rawAssetWithExternalSource = {
+    const rawAssetWithRepositoryId = {
       ...rawAsset,
-      rule_id: `${externalSource}_${rawAsset.rule_id}`, // append repositoryId before saving rule_id
-      external_source: externalSource,
+      rule_id: `${repositoryId}_${rawAsset.rule_id}`, // append repositoryId before saving rule_id
+      repository_id: repositoryId,
     };
 
-    const asset = validatePrebuiltRuleAsset(rawAssetWithExternalSource);
+    const asset = validatePrebuiltRuleAsset(rawAssetWithRepositoryId);
 
-    return { success: true, asset, external_source: externalSource };
+    return { success: true, asset, repository_id: repositoryId };
   } catch (error) {
     return {
       success: false,
       filename: blob.filename,
       error: error.message,
-      external_source: externalSource,
+      repository_id: repositoryId,
     };
   }
 };

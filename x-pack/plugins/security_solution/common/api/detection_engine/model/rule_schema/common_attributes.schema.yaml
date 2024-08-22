@@ -65,6 +65,10 @@ components:
       required:
         - type
 
+    RepositoryId:
+      type: string
+      description: The name of the repository where the rule is stored.
+
     ExternalRuleSource:
       description: Type of rule source for externally sourced rules, i.e. rules that have an external source, such as the Elastic Prebuilt rules repo.
       type: object
@@ -76,8 +80,7 @@ components:
         is_customized:
           $ref: '#/components/schemas/IsExternalRuleCustomized'
         repository_id:
-          type: string
-          description: The name of the repository where the rule is stored.
+           $ref: '#/components/schemas/RepositoryId'
       required:
         - type
         - is_customized

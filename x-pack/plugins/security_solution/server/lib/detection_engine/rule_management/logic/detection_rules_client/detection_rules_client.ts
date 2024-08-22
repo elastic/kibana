@@ -66,6 +66,7 @@ export const createDetectionRulesClient = ({
 
     async createPrebuiltRule(args: CreatePrebuiltRuleArgs): Promise<RuleResponse> {
       return withSecuritySpan('DetectionRulesClient.createPrebuiltRule', async () => {
+        debugger;
         return createRule({
           actionsClient,
           rulesClient,

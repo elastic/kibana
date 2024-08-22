@@ -22,6 +22,9 @@ import {
   // installPrebuiltRulesPackage,
 } from '../install_prebuilt_rules_and_timelines/install_prebuilt_rules_package';
 import { installExternalPrebuiltRuleAssets } from '../../logic/rule_assets/install_rule_assets';
+import type { IDetectionRulesClient } from '../../../rule_management/logic/detection_rules_client/detection_rules_client_interface';
+import type { IPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
+import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 
 export interface PrebuiltRuleRepository {
   repository: string;
@@ -51,10 +54,13 @@ export const bootstrapPrebuiltRulesRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const ctx = await context.resolve(['securitySolution', 'core']);
+          const ctx = await context.resolve(['securitySolution', 'core', 'alerting']);
           const savedObjectsClient = ctx.core.savedObjects.client;
           const savedObjectsImporter = ctx.core.savedObjects.getImporter(savedObjectsClient);
           const securityContext = ctx.securitySolution;
+          const rulesClient = ctx.alerting.getRulesClient();
+          const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
+          const detectionRulesClient = securityContext.getDetectionRulesClient();
           const config = securityContext.getConfig();
 
           const results = await Promise.all([
@@ -66,6 +72,8 @@ export const bootstrapPrebuiltRulesRoute = (
             config.prebuiltRuleRepositories as PrebuiltRuleRepository[],
             savedObjectsClient,
             savedObjectsImporter,
+            detectionRulesClient,
+            ruleObjectsClient,
             logger
           );
 
@@ -99,16 +107,20 @@ const getExternalPrebuiltRuleAssets = async (
   prebuiltRuleRepositories: PrebuiltRuleRepository[],
   savedObjectsClient: SavedObjectsClientContract,
   savedObjectsImporter: ISavedObjectsImporter,
+  detectionRulesClient: IDetectionRulesClient,
+  ruleObjectsClient: IPrebuiltRuleObjectsClient,
   logger: Logger
 ) => {
   const externalPrebuiltRuleBlobs = await fetchPrebuiltRuleFilenames(prebuiltRuleRepositories);
-  const installResult = await installExternalPrebuiltRuleAssets(
+  const installResult = await installExternalPrebuiltRuleAssets({
     prebuiltRuleRepositories,
     externalPrebuiltRuleBlobs,
     savedObjectsClient,
     savedObjectsImporter,
-    logger
-  );
+    detectionRulesClient,
+    ruleObjectsClient,
+    logger,
+  });
 
   return installResult;
 };

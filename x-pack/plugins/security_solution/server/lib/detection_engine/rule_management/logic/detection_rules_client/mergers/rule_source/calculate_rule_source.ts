@@ -36,6 +36,7 @@ export async function calculateRuleSource({
     const isCustomized = calculateIsCustomized(baseRule, rule);
 
     return {
+      ...rule.rule_source,
       type: 'external',
       is_customized: isCustomized,
     };

@@ -61,6 +61,7 @@ import {
   RuleSource,
   RuleRevision,
   RequiredFieldArray,
+  RepositoryId,
   RuleQuery,
   IndexPatternArray,
   DataViewId,
@@ -175,6 +176,7 @@ export type SharedCreateProps = z.infer<typeof SharedCreateProps>;
 export const SharedCreateProps = BaseCreateProps.merge(
   z.object({
     rule_id: RuleSignatureId.optional(),
+    respository_id: RepositoryId.optional(),
   })
 );
 

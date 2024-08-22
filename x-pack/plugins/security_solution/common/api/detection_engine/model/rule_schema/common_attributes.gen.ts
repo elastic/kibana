@@ -78,16 +78,19 @@ export const InternalRuleSource = z.object({
 });
 
 /**
+ * The name of the repository where the rule is stored.
+ */
+export type RepositoryId = z.infer<typeof RepositoryId>;
+export const RepositoryId = z.string();
+
+/**
  * Type of rule source for externally sourced rules, i.e. rules that have an external source, such as the Elastic Prebuilt rules repo.
  */
 export type ExternalRuleSource = z.infer<typeof ExternalRuleSource>;
 export const ExternalRuleSource = z.object({
   type: z.literal('external'),
   is_customized: IsExternalRuleCustomized,
-  /**
-   * The name of the repository where the rule is stored.
-   */
-  repository_id: z.string().optional(),
+  repository_id: RepositoryId.optional(),
 });
 
 /**
