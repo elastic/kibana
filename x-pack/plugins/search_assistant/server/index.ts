@@ -4,7 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { SearchAssistantPlugin } from './plugin';
 
-export type { PrivilegesService } from './privileges';
-export type { CasesSupportedOperations } from './feature_privilege_builder';
-export { privilegesFactory } from './privileges';
+export { config } from './config';
+
+export function plugin() {
+  return new SearchAssistantPlugin();
+}
+
+export type { SearchAssistantPluginSetup, SearchAssistantPluginStart } from './types';
