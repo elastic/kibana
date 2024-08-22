@@ -38,7 +38,7 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityControllerState = {
     canMonitor: true,
     canViewIntegrations: true,
   },
-  dataStreamStats: DEFAULT_DICTIONARY_TYPE,
+  dataStreamStats: [],
   degradedDocStats: DEFAULT_DICTIONARY_TYPE,
   filters: {
     inactive: true,
@@ -71,5 +71,5 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityControllerState = {
   },
   datasets: [],
   isSizeStatsAvailable: true,
-  nonAggregatableDatasets: DEFAULT_DICTIONARY_TYPE,
+  nonAggregatableDatasets: [],
 };

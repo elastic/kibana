@@ -25,7 +25,6 @@ import {
 import { FlyoutDataset } from '../state_machines/dataset_quality_controller';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { useDatasetQualityFilters } from './use_dataset_quality_filters';
-import { flattenStats } from '../utils/flatten_stats';
 import { TimeRangeConfig } from '../../common/types';
 
 export const useRedirectLinkTelemetry = ({
@@ -113,7 +112,7 @@ export const useDatasetTelemetry = () => {
           foundDataset,
           sort,
           appliedFilters,
-          flattenStats(nonAggregatableDatasets).flat(),
+          nonAggregatableDatasets,
           isIgnoredFilter,
           canUserViewIntegrations
         );

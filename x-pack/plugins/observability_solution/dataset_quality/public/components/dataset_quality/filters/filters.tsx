@@ -34,6 +34,10 @@ const typesNoneMatching = i18n.translate('xpack.datasetQuality.selector.types.no
   defaultMessage: 'No types found',
 });
 
+const typesNoneAvailable = i18n.translate('xpack.datasetQuality.selector.types.noneAvailable', {
+  defaultMessage: 'No types available',
+});
+
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function Filters() {
@@ -88,6 +92,7 @@ export default function Filters() {
           label={typesLabel}
           searchPlaceholder={typesSearchPlaceholder}
           noneMatchingMessage={typesNoneMatching}
+          noneAvailableMessage={typesNoneAvailable}
           options={types}
           onOptionsChange={onTypesChange}
         />

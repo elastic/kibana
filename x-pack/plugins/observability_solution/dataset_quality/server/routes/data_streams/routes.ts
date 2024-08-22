@@ -52,8 +52,7 @@ const statsRoute = createDatasetQualityServerRoute({
 
     const { items, datasetUserPrivileges } = await getDataStreams({
       esClient,
-      types: typesRt.encode(params.query.types),
-      datasetQuery: params.query.datasetQuery,
+      ...params.query,
       uncategorisedOnly: false,
     });
 
@@ -118,11 +117,35 @@ const nonAggregatableDatasetsRoute = createDatasetQualityServerRoute({
   params: t.type({
     query: t.intersection([
       rangeRt,
-      typeRt,
+      t.type({ types: typesRt }),
       t.partial({
         dataStream: t.string,
       }),
     ]),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<NonAggregatableDatasets> {
+    const { context, params } = resources;
+    const coreContext = await context.core;
+
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    return await getNonAggregatableDataStreams({
+      esClient,
+      ...params.query,
+    });
+  },
+});
+
+const nonAggregatableDatasetRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/data_streams/{dataStream}/non_aggregatable',
+  params: t.type({
+    path: t.type({
+      dataStream: t.string,
+    }),
+    query: t.intersection([rangeRt, typeRt]),
   }),
   options: {
     tags: [],
@@ -138,6 +161,7 @@ const nonAggregatableDatasetsRoute = createDatasetQualityServerRoute({
     return await getNonAggregatableDataStreams({
       esClient,
       ...params.query,
+      types: [params.query.type],
     });
   },
 });
@@ -232,6 +256,7 @@ export const dataStreamsRouteRepository = {
   ...statsRoute,
   ...degradedDocsRoute,
   ...nonAggregatableDatasetsRoute,
+  ...nonAggregatableDatasetRoute,
   ...degradedFieldsRoute,
   ...dataStreamDetailsRoute,
   ...dataStreamSettingsRoute,

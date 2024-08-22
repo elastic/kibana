@@ -22,7 +22,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       endpoint: 'GET /internal/dataset_quality/data_streams/stats',
       params: {
         query: {
-          type: 'logs',
+          types: ['logs'],
           datasetQuery: '-',
         },
       },

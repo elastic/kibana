@@ -14,13 +14,11 @@ import { DictionaryType } from '../state_machines/dataset_quality_controller/src
 import { flattenStats } from './flatten_stats';
 
 export function generateDatasets(
-  dataStreamStats: DictionaryType<DataStreamStatType>,
+  dataStreamStats: DataStreamStatType[] = [],
   degradedDocStats: DictionaryType<DegradedDocsStat>,
   integrations: Integration[]
 ): DataStreamStat[] {
-  const dataStreams = flattenStats(dataStreamStats);
-
-  if (!dataStreams.length && !integrations.length) {
+  if (!dataStreamStats.length && !integrations.length) {
     return [];
   }
 
@@ -54,7 +52,7 @@ export function generateDatasets(
 
   const degradedDocs = flattenStats(degradedDocStats);
 
-  if (!dataStreams.length) {
+  if (!dataStreamStats.length) {
     return degradedDocs.map((degradedDocStat) =>
       DataStreamStat.fromDegradedDocStat({ degradedDocStat, datasetIntegrationMap })
     );
@@ -81,7 +79,7 @@ export function generateDatasets(
     {}
   );
 
-  return dataStreams.map((dataStream) => {
+  return dataStreamStats?.map((dataStream) => {
     const dataset = DataStreamStat.create(dataStream);
 
     return {

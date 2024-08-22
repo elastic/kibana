@@ -23,7 +23,6 @@ import {
   DataStreamDetails,
   DataStreamStatServiceResponse,
   DataStreamDegradedDocsStatServiceResponse,
-  GetDataStreamsStatsQuery,
 } from '../../../../common/data_streams_stats';
 import { DataStreamType } from '../../../../common/types';
 import { dataStreamPartsToIndexName } from '../../../../common/utils';
@@ -100,14 +99,6 @@ export const createPureDatasetQualityControllerStateMachine = (
                 loaded: {},
               },
               on: {
-                SAVE_DATASTREAM_STATS: {
-                  target: 'datasets.loaded',
-                  actions: ['storeDataStreamStats', 'storeDatasets'],
-                },
-                NOTIFY_DATASTREAM_STATS_FAILED: {
-                  target: 'datasets.loaded',
-                  actions: ['notifyFetchDatasetStatsFailed'],
-                },
                 UPDATE_TIME_RANGE: {
                   target: 'datasets.fetching',
                   actions: ['storeTimeRange'],
@@ -156,28 +147,28 @@ export const createPureDatasetQualityControllerStateMachine = (
               initial: 'fetching',
               states: {
                 fetching: {
-                  ...generateInvokePerType({
+                  invoke: {
                     src: 'loadNonAggregatableDatasets',
-                  }),
+                    onDone: {
+                      target: 'loaded',
+                      actions: ['storeNonAggregatableDatasets'],
+                    },
+                    onError: [
+                      {
+                        target: 'unauthorized',
+                        cond: 'checkIfActionForbidden',
+                      },
+                      {
+                        target: 'loaded',
+                        actions: ['notifyFetchNonAggregatableDatasetsFailed'],
+                      },
+                    ],
+                  },
                 },
                 loaded: {},
                 unauthorized: { type: 'final' },
               },
               on: {
-                SAVE_NON_AGGREGATABLE_DATASETS: {
-                  target: 'nonAggregatableDatasets.loaded',
-                  actions: ['storeNonAggregatableDatasets'],
-                },
-                NOTIFY_NON_AGGREGATABLE_DATASETS_FAILED: [
-                  {
-                    target: 'nonAggregatableDatasets.unauthorized',
-                    cond: 'checkIfActionForbidden',
-                  },
-                  {
-                    target: 'nonAggregatableDatasets.loaded',
-                    actions: ['notifyFetchNonAggregatableDatasetsFailed'],
-                  },
-                ],
                 UPDATE_TIME_RANGE: {
                   target: 'nonAggregatableDatasets.fetching',
                 },
@@ -630,31 +621,18 @@ export const createPureDatasetQualityControllerStateMachine = (
         }),
         resetFlyoutOptions: assign(() => ({ flyout: DEFAULT_CONTEXT.flyout })),
         storeDataStreamStats: assign(
-          (context, event: DoneInvokeEvent<DataStreamStatServiceResponse>, meta) => {
-            const type = meta._event.origin as DataStreamType;
-
+          (_context, event: DoneInvokeEvent<DataStreamStatServiceResponse>) => {
             const dataStreamStats = event.data.dataStreamsStats as DataStreamStat[];
+            const datasetUserPrivileges = event.data.datasetUserPrivileges;
 
             // Check if any DataStreamStat has null; to check for serverless
             const isSizeStatsAvailable =
               !dataStreamStats.length || dataStreamStats.some((stat) => stat.totalDocs !== null);
 
             return {
-              dataStreamStats: {
-                ...context.dataStreamStats,
-                [type]: dataStreamStats,
-              },
+              dataStreamStats,
               isSizeStatsAvailable,
-              datasetUserPrivileges: {
-                canMonitor:
-                  context.datasetUserPrivileges.canMonitor &&
-                  event.data.datasetUserPrivileges.canMonitor,
-                canRead:
-                  context.datasetUserPrivileges.canRead && event.data.datasetUserPrivileges.canRead,
-                canViewIntegrations:
-                  context.datasetUserPrivileges.canViewIntegrations &&
-                  event.data.datasetUserPrivileges.canViewIntegrations,
-              },
+              datasetUserPrivileges,
             };
           }
         ),
@@ -682,16 +660,9 @@ export const createPureDatasetQualityControllerStateMachine = (
           };
         }),
         storeNonAggregatableDatasets: assign(
-          (context, event: DoneInvokeEvent<NonAggregatableDatasets>, meta) => {
-            const type = meta._event.origin as DataStreamType;
-
-            return {
-              nonAggregatableDatasets: {
-                ...context.nonAggregatableDatasets,
-                [type]: event.data.datasets,
-              },
-            };
-          }
+          (_context, event: DoneInvokeEvent<NonAggregatableDatasets>) => ({
+            nonAggregatableDatasets: event.data.datasets,
+          })
         ),
         storeDataStreamSettings: assign((context, event) => {
           return 'data' in event
@@ -832,7 +803,7 @@ export const createDatasetQualityControllerStateMachine = ({
     services: {
       loadDataStreamStats: (context, _event) =>
         dataStreamStatsClient.getDataStreamsStats({
-          types: context.filters.types as GetDataStreamsStatsQuery['types'],
+          types: context.filters.types as DataStreamType[],
           datasetQuery: context.filters.query,
         }),
       loadDegradedDocs:
@@ -861,34 +832,15 @@ export const createDatasetQualityControllerStateMachine = ({
             });
           }
         },
-      loadNonAggregatableDatasets:
-        (context, _event, { data: { type } }) =>
-        async (send) => {
-          try {
-            const { startDate: start, endDate: end } = getDateISORange(context.filters.timeRange);
+      loadNonAggregatableDatasets: (context) => {
+        const { startDate: start, endDate: end } = getDateISORange(context.filters.timeRange);
 
-            const nonAggregatableDatasets = await (isTypeSelected(type, context)
-              ? dataStreamStatsClient.getNonAggregatableDatasets({
-                  type,
-                  start,
-                  end,
-                })
-              : Promise.resolve({
-                  aggregatable: true,
-                  datasets: [],
-                }));
-
-            send({
-              type: 'SAVE_NON_AGGREGATABLE_DATASETS',
-              data: nonAggregatableDatasets,
-            });
-          } catch (e) {
-            send({
-              type: 'NOTIFY_NON_AGGREGATABLE_DATASETS_FAILED',
-              data: e,
-            });
-          }
-        },
+        return dataStreamStatsClient.getNonAggregatableDatasets({
+          types: context.filters.types as DataStreamType[],
+          start,
+          end,
+        });
+      },
       loadDegradedFieldsPerDataStream: (context) => {
         if (!context.flyout.dataset || !context.flyout.insightsTimeRange) {
           return Promise.resolve({});
@@ -981,7 +933,7 @@ export const createDatasetQualityControllerStateMachine = ({
         );
 
         return dataStreamStatsClient.getNonAggregatableDatasets({
-          type: type as DataStreamType,
+          types: [type as DataStreamType],
           start,
           end,
           dataStream: dataStreamPartsToIndexName({

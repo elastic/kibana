@@ -83,7 +83,7 @@ export type DictionaryType<T> = Record<DataStreamType, T[]>;
 
 export interface WithDataStreamStats {
   datasetUserPrivileges: DatasetUserPrivileges;
-  dataStreamStats: DictionaryType<DataStreamStatType>;
+  dataStreamStats: DataStreamStatType[];
 }
 
 export interface WithDegradedDocs {
@@ -91,7 +91,7 @@ export interface WithDegradedDocs {
 }
 
 export interface WithNonAggregatableDatasets {
-  nonAggregatableDatasets: DictionaryType<string[]>;
+  nonAggregatableDatasets: string[];
 }
 
 export interface WithDatasets {

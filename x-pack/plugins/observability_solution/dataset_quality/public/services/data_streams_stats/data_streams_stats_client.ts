@@ -39,7 +39,7 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
     const response = await this.http
       .get<GetDataStreamsStatsResponse>('/internal/dataset_quality/data_streams/stats', {
         query: {
-          datasetQuery: params.datasetQuery,
+          ...params,
           types: rison.encodeArray(types),
         },
       })
@@ -89,6 +89,7 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
       .get<NonAggregatableDatasets>('/internal/dataset_quality/data_streams/non_aggregatable', {
         query: {
           ...params,
+          types: rison.encodeArray(params.types),
         },
       })
       .catch((error) => {

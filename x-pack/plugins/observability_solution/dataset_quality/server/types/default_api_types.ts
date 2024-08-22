@@ -7,22 +7,22 @@
 
 import { isoToEpochRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import rison from '@kbn/rison';
 import { DataStreamType, dataStreamTypesRt } from '../../common/types';
 
-export const typeRt = t.partial({
+export const typeRt = t.type({
   type: dataStreamTypesRt,
 });
 
-export const typesRt = new t.Type<string, DataStreamType[], unknown>(
+export const typesRt = new t.Type<DataStreamType[], DataStreamType[], unknown>(
   'typesRt',
-  (input: unknown): input is string =>
-    typeof input === 'string' && input.split(',').every((value) => dataStreamTypesRt.is(value)),
+  (input: unknown): input is DataStreamType[] =>
+    (typeof input === 'string' && input.split(',').every((value) => dataStreamTypesRt.is(value))) ||
+    (Array.isArray(input) && input.every((value) => dataStreamTypesRt.is(value))),
   (input, context) =>
     typeof input === 'string' && input.split(',').every((value) => dataStreamTypesRt.is(value))
-      ? t.success(input)
+      ? t.success(input.split(',') as DataStreamType[])
       : t.failure(input, context),
-  (input) => rison.decodeArray(input) as DataStreamType[]
+  t.identity
 );
 
 export const rangeRt = t.type({
