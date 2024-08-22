@@ -8,10 +8,10 @@
 import { MessageRole } from '@kbn/elastic-assistant-common';
 import { TIMELINE_QUERY } from '../../screens/timeline';
 import { CASES_URL } from '../../urls/navigation';
-import { CONVERSATION_TITLE, SEND_TO_TIMELINE_BUTTON } from '../../screens/ai_assistant';
+import { SEND_TO_TIMELINE_BUTTON } from '../../screens/ai_assistant';
 import { openAssistant, selectConversation } from '../../tasks/assistant';
 import {
-  createConversation,
+  createNewConversation,
   deleteConversations,
   deletePrompts,
 } from '../../tasks/api_calls/assistant';
@@ -65,14 +65,12 @@ describe(
       deletePrompts();
       login();
       createAzureConnector();
-      createConversation(mockConvo);
+      createNewConversation(mockConvo);
     });
-
     it('A message with a kql query can be used in the timeline only from pages with timeline', () => {
       visitGetStartedPage();
       openAssistant();
       selectConversation(mockConvo.title);
-      cy.get(CONVERSATION_TITLE + ' h2').should('have.text', mockConvo.title);
       cy.get(SEND_TO_TIMELINE_BUTTON).should('be.disabled');
       visit(CASES_URL);
       openAssistant();

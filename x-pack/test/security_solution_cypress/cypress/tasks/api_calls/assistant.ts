@@ -23,7 +23,9 @@ export const getConversations = (spaceId?: string) =>
       : `api/security_ai_assistant/current_user/conversations/_find`,
   });
 
-export const createConversation = (body?: Partial<ConversationCreateProps>) =>
+const createConversation = (
+  body?: Partial<ConversationCreateProps>
+): Cypress.Chainable<Cypress.Response<ConversationResponse>> =>
   cy.currentSpace().then((spaceId) =>
     rootRequest<ConversationResponse>({
       method: 'POST',
@@ -32,6 +34,12 @@ export const createConversation = (body?: Partial<ConversationCreateProps>) =>
         : `api/security_ai_assistant/current_user/conversations`,
       body: getMockConversation(body),
     })
+  );
+
+export const createNewConversation = (body?: Partial<ConversationCreateProps>) =>
+  cy.waitUntil(
+    () => createConversation(body).then((response) => cy.wrap(response.status === 200)),
+    { interval: 5000, timeout: 15000 }
   );
 
 export const deleteConversations = () => {
