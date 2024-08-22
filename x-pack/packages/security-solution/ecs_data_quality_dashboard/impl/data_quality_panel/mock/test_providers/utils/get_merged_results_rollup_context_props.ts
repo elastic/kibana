@@ -6,7 +6,7 @@
  */
 
 import { UseResultsRollupReturnValue } from '../../../hooks/use_results_rollup/types';
-import { auditbeatWithAllResults } from '../../pattern_rollup/mock_auditbeat_pattern_rollup';
+import { mockUseResultsRollup } from '../../use_results_rollup/mock_use_results_rollup';
 
 export const getMergeResultsRollupContextProps = (
   resultsRollupContextProps?: Partial<UseResultsRollupReturnValue>
@@ -24,25 +24,7 @@ export const getMergeResultsRollupContextProps = (
     updatePatternIndexNames,
     updatePatternRollup,
   } = {
-    onCheckCompleted: jest.fn(),
-    patternIndexNames: {
-      'auditbeat-*': [
-        '.ds-auditbeat-8.6.1-2023.02.07-000001',
-        'auditbeat-custom-index-1',
-        'auditbeat-custom-empty-index-1',
-      ],
-    },
-    patternRollups: {
-      'auditbeat-*': auditbeatWithAllResults,
-    },
-    totalDocsCount: 19127,
-    totalIncompatible: 4,
-    totalIndices: 3,
-    totalIndicesChecked: 3,
-    totalSameFamily: 0,
-    totalSizeInBytes: 18820446,
-    updatePatternIndexNames: jest.fn(),
-    updatePatternRollup: jest.fn(),
+    ...mockUseResultsRollup,
     ...resultsRollupContextProps,
   };
 

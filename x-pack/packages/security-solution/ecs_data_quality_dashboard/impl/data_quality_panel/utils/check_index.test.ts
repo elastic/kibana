@@ -13,7 +13,7 @@ import { UnallowedValueRequestItem, UnallowedValueSearchResult } from '../types'
 import {
   getMappingsProperties,
   getSortedPartitionedFieldMetadata,
-} from '../body/data_quality_details/indices_details/pattern/index_check_flyout/index_properties/helpers';
+} from '../data_quality_details/indices_details/pattern/index_check_flyout/index_properties/helpers';
 import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 import { getUnallowedValues } from '../hooks/use_unallowed_values/helpers';
 import { getUnallowedValueRequestItems } from '../allowed_values/helpers';

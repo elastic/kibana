@@ -11,8 +11,7 @@ import type { PartialTheme, Theme } from '@elastic/charts';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import type { IToasts } from '@kbn/core-notifications-browser';
-import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { Body } from './body';
+import { EuiComboBoxOptionOption, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { DataQualityProvider } from './data_quality_context';
 import { EMPTY_STAT } from './helpers';
 import { ReportDataQualityCheckAllCompleted, ReportDataQualityIndexChecked } from './types';
@@ -21,6 +20,8 @@ import { IndicesCheckContext } from './contexts/indices_check_context';
 import { useIndicesCheck } from './hooks/use_indices_check';
 import { useResultsRollup } from './hooks/use_results_rollup';
 import { ilmPhaseOptionsStatic } from './constants';
+import { DataQualitySummary } from './data_quality_summary';
+import { DataQualityDetails } from './data_quality_details';
 
 interface Props {
   toasts: IToasts;
@@ -141,7 +142,16 @@ const DataQualityPanelComponent: React.FC<Props> = ({
     >
       <ResultsRollupContext.Provider value={resultsRollupHookReturnValue}>
         <IndicesCheckContext.Provider value={indicesCheckHookReturnValue}>
-          <Body />
+          <EuiFlexGroup data-test-subj="body" direction="column" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <DataQualitySummary />
+              <EuiSpacer size="l" />
+            </EuiFlexItem>
+
+            <EuiFlexItem>
+              <DataQualityDetails />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </IndicesCheckContext.Provider>
       </ResultsRollupContext.Provider>
     </DataQualityProvider>

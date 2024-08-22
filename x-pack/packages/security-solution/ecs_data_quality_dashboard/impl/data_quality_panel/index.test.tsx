@@ -7,16 +7,49 @@
 
 import { DARK_THEME } from '@elastic/charts';
 import { render, screen } from '@testing-library/react';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import React from 'react';
 
 import { TestExternalProviders } from './mock/test_providers/test_providers';
+import { mockUseResultsRollup } from './mock/use_results_rollup/mock_use_results_rollup';
+import { getCheckState } from './stub/get_check_state';
+import * as useResultsRollup from './hooks/use_results_rollup';
+import * as useIndicesCheck from './hooks/use_indices_check';
 import { DataQualityPanel } from '.';
-import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+
+jest.mock('./hooks/use_stats', () => ({
+  useStats: jest.fn(() => ({
+    stats: {},
+    error: null,
+    loading: false,
+  })),
+}));
+
+jest.mock('./hooks/use_ilm_explain', () => ({
+  useIlmExplain: jest.fn(() => ({
+    error: null,
+    ilmExplain: {},
+    loading: false,
+  })),
+}));
+
+jest.spyOn(useResultsRollup, 'useResultsRollup').mockImplementation(() => mockUseResultsRollup);
+
+jest.spyOn(useIndicesCheck, 'useIndicesCheck').mockImplementation(() => ({
+  checkIndex: jest.fn(),
+  checkState: {
+    ...getCheckState('auditbeat-*'),
+  },
+}));
 
 const { toasts } = notificationServiceMock.createSetupContract();
 
+const patterns = ['auditbeat-*'];
+
 describe('DataQualityPanel', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
+
     render(
       <TestExternalProviders>
         <DataQualityPanel
@@ -28,8 +61,9 @@ describe('DataQualityPanel', () => {
           isILMAvailable={true}
           lastChecked={''}
           openCreateCaseFlyout={jest.fn()}
-          patterns={[]}
+          patterns={patterns}
           reportDataQualityIndexChecked={jest.fn()}
+          reportDataQualityCheckAllCompleted={jest.fn()}
           setLastChecked={jest.fn()}
           baseTheme={DARK_THEME}
           toasts={toasts}
@@ -38,7 +72,13 @@ describe('DataQualityPanel', () => {
     );
   });
 
-  test('it renders the body', () => {
-    expect(screen.getByTestId('body')).toBeInTheDocument();
+  it('renders the data quality summary', () => {
+    expect(screen.getByTestId('dataQualitySummary')).toBeInTheDocument();
+  });
+
+  it(`renders the '${patterns.join(', ')}' patterns`, () => {
+    for (const pattern of patterns) {
+      expect(screen.getByTestId(`${pattern}PatternPanel`)).toBeInTheDocument();
+    }
   });
 });

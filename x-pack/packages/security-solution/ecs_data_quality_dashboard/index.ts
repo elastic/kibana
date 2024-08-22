@@ -20,4 +20,4 @@ export {
   DATA_QUALITY_DASHBOARD_CONVERSATION_ID,
 } from './impl/data_quality_panel/translations';
 
-export { ECS_REFERENCE_URL } from './impl/data_quality_panel/body/data_quality_details/indices_details/pattern/index_check_flyout/index_properties/markdown/helpers';
+export { ECS_REFERENCE_URL } from './impl/data_quality_panel/data_quality_details/indices_details/pattern/index_check_flyout/index_properties/markdown/helpers';

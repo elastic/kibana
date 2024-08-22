@@ -10,7 +10,7 @@ import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/
 import {
   getMappingsProperties,
   getSortedPartitionedFieldMetadata,
-} from '../../body/data_quality_details/indices_details/pattern/index_check_flyout/index_properties/helpers';
+} from '../../data_quality_details/indices_details/pattern/index_check_flyout/index_properties/helpers';
 import { mockMappingsResponse } from '../../mock/mappings_response/mock_mappings_response';
 import { UseIndicesCheckCheckState } from '../../hooks/use_indices_check/types';
 import { getUnallowedValues } from '../../hooks/use_unallowed_values/helpers';

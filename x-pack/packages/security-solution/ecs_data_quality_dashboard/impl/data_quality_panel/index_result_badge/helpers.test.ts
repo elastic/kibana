@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { FAILED, PASSED, THIS_INDEX_HAS_NOT_BEEN_CHECKED } from '../body/data_quality_details/indices_details/pattern/summary_table/translations';
+import {
+  FAILED,
+  PASSED,
+  THIS_INDEX_HAS_NOT_BEEN_CHECKED,
+} from '../data_quality_details/indices_details/pattern/summary_table/translations';
 import { getIndexResultBadgeColor, getIndexResultToolTip } from './helpers';
 
 describe('getIndexResultBadgeColor', () => {
