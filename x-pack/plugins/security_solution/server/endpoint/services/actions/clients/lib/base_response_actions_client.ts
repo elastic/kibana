@@ -420,6 +420,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       };
     }
 
+    console.log({ agentType: this.agentType });
     if (
       !isActionSupportedByAgentType(
         this.agentType,
@@ -427,6 +428,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         this.options.isAutomated ? 'automated' : 'manual'
       )
     ) {
+      console.log('here');
       return {
         isValid: false,
         error: new ResponseActionsNotSupportedError(actionRequest.command),
@@ -774,6 +776,13 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>> {
     throw new ResponseActionsNotSupportedError('scan');
+  }
+
+  public async init(
+    actionRequest: ScanActionRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>> {
+    throw new ResponseActionsNotSupportedError('init');
   }
 
   public async processPendingActions(_: ProcessPendingActionsMethodOptions): Promise<void> {

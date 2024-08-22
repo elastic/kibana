@@ -22,6 +22,7 @@ export const HistoryOutput = memo<OutputHistoryProps>((commonProps) => {
   const dispatch = useConsoleStateDispatch();
   const getTestId = useTestIdGenerator(useDataTestSubj());
 
+  console.log({ historyItems });
   const historyBody = useMemo(() => {
     return historyItems.map((historyItem) => {
       return (

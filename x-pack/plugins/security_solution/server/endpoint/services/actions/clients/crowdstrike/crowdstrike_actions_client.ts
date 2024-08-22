@@ -41,6 +41,12 @@ import type {
   NormalizedExternalConnectorClient,
   NormalizedExternalConnectorClientExecuteOptions,
 } from '../lib/normalized_external_connector_client';
+import { ExecuteActionRequestBody } from '../../../../../../common/api/endpoint';
+import {
+  ResponseActionExecuteOutputContent,
+  ResponseActionsExecuteParameters,
+} from '../../../../../../common/endpoint/types';
+import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../../../common/endpoint/service/response_actions/constants';
 
 export type CrowdstrikeActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
@@ -176,6 +182,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
         ),
       };
     }
+    console.log({ payload });
 
     return super.validateRequest(payload);
   }
@@ -315,6 +322,102 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     };
 
     await this.writeActionResponseToEndpointIndex(options);
+  }
+
+  async init(
+    actionRequest: ExecuteActionRequestBody,
+    options: CommonResponseActionMethodOptions = {}
+  ): Promise<ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>> {
+    try {
+      console.log({ actionRequest });
+      const response = (await this.sendAction(SUB_ACTION.INIT_RTR_SESSION, {
+        endpoint_ids: actionRequest.endpoint_ids,
+      })) as ActionTypeExecutorResult<CrowdstrikeBaseApiResponse>;
+      console.log({ response });
+    } catch (err) {
+      console.log({ err });
+    }
+    return {};
+  }
+
+  async execute(
+    actionRequest: ExecuteActionRequestBody,
+    options: CommonResponseActionMethodOptions = {}
+  ): Promise<ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>> {
+    let actionRequestWithDefaults = actionRequest;
+
+    console.log({ actionRequest, options });
+    // Default for `timeout` applied here if not defined on request
+    if (!actionRequestWithDefaults.parameters.timeout) {
+      actionRequestWithDefaults = {
+        ...actionRequest,
+        parameters: {
+          ...actionRequest.parameters,
+          timeout: DEFAULT_EXECUTE_ACTION_TIMEOUT,
+        },
+      };
+    }
+
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
+      ...actionRequest,
+      ...this.getMethodOptions(options),
+      command: 'execute',
+    };
+    let actionResponse: ActionTypeExecutorResult<CrowdstrikeBaseApiResponse> | undefined;
+    if (!reqIndexOptions.error) {
+      // let error = (await this.validateRequest(reqIndexOptions)).error;
+      // if (!error) {
+      // if (!reqIndexOptions.actionId) {
+      //   reqIndexOptions.actionId = uuidv4();
+      // }
+
+      try {
+        actionResponse = (await this.sendAction(SUB_ACTION.EXECUTE_RTR, {
+          endpoint_ids: actionRequest.endpoint_ids,
+          command: 'ls',
+        })) as ActionTypeExecutorResult<CrowdstrikeBaseApiResponse>;
+
+        console.log({ actionResponse });
+      } catch (err) {
+        console.log({ err });
+        // error = err;
+      }
+      // }
+
+      // reqIndexOptions.error = error?.message;
+
+      // if (!this.options.isAutomated && error) {
+      //   throw error;
+      // }
+    }
+
+    const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
+    console.log({ actionRequestDoc });
+    // // Ensure actionResponse is assigned before using it
+    if (actionResponse) {
+      await this.completeCrowdstrikeAction(actionResponse, actionRequestDoc);
+    }
+    //
+    // await this.updateCases({
+    //   command: reqIndexOptions.command,
+    //   caseIds: reqIndexOptions.case_ids,
+    //   alertIds: reqIndexOptions.alert_ids,
+    //   actionId: actionRequestDoc.EndpointActions.action_id,
+    //   hosts: actionRequest.endpoint_ids.map((agentId) => {
+    //     return {
+    //       hostId: agentId,
+    //       hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
+    //     };
+    //   }),
+    //   comment: reqIndexOptions.comment,
+    // });
+    //
+    return {
+      ...actionRequestDoc,
+      ...actionResponse,
+      // outputs: { [actionRequest.endpoint_ids[0]]: actionResponse?.stdout },
+    };
+    // return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
   }
 
   async processPendingActions({

@@ -30,6 +30,8 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
     return null;
   }
 
+  console.log('HeaderEndpointInfo');
+
   return (
     <HeaderAgentInfo
       platform={getHostPlatform(endpointDetails.metadata) as Platform}

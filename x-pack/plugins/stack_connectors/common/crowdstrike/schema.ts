@@ -230,6 +230,54 @@ export const CrowdstrikeHostActionsResponseSchema = schema.object(
   },
   { unknowns: 'allow' }
 );
+export const CrowdstrikeInitRTRResponseSchema = schema.any();
+// export const CrowdstrikeInitRTRResponseSchema = schema.object(
+//   {
+//     resources: schema.arrayOf(
+//       schema.object(
+//         {
+//           id: schema.maybe(schema.string()),
+//           path: schema.maybe(schema.string()),
+//         },
+//         { unknowns: 'allow' }
+//       )
+//     ),
+//     meta: schema.object(
+//       {
+//         query_time: schema.maybe(schema.number()),
+//         powered_by: schema.maybe(schema.string()),
+//         trace_id: schema.maybe(schema.string()),
+//       },
+//       { unknowns: 'allow' }
+//     ),
+//     errors: schema.nullable(schema.arrayOf(schema.any())),
+//   },
+//   { unknowns: 'allow' }
+// );
+export const CrowdstrikeExecuteRTRResponseSchema = schema.any();
+// export const CrowdstrikeExecuteRTRResponseSchema = schema.object(
+//   {
+//     resources: schema.arrayOf(
+//       schema.object(
+//         {
+//           id: schema.maybe(schema.string()),
+//           path: schema.maybe(schema.string()),
+//         },
+//         { unknowns: 'allow' }
+//       )
+//     ),
+//     meta: schema.object(
+//       {
+//         query_time: schema.maybe(schema.number()),
+//         powered_by: schema.maybe(schema.string()),
+//         trace_id: schema.maybe(schema.string()),
+//       },
+//       { unknowns: 'allow' }
+//     ),
+//     errors: schema.nullable(schema.arrayOf(schema.any())),
+//   },
+//   { unknowns: 'allow' }
+// );
 
 export const CrowdstrikeHostActionsParamsSchema = schema.object({
   command: schema.oneOf([schema.literal('contain'), schema.literal('lift_containment')]),
@@ -239,6 +287,13 @@ export const CrowdstrikeHostActionsParamsSchema = schema.object({
   comment: schema.maybe(schema.string()),
 });
 
+export const CrowdstrikeExecuteRTRParamsSchema = schema.any();
+// export const CrowdstrikeExecuteRTRParamsSchema = schema.object({
+//   endpoint_ids: schema.arrayOf(schema.string()),
+// });
+export const CrowdstrikeInitRTRParamsSchema = schema.object({
+  endpoint_ids: schema.arrayOf(schema.string()),
+});
 export const CrowdstrikeGetAgentsParamsSchema = schema.object({
   ids: schema.arrayOf(schema.string()),
 });

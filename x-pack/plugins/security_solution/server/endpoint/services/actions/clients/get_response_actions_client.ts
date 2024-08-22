@@ -30,6 +30,7 @@ export const getResponseActionsClient = (
   agentType: ResponseActionAgentType,
   constructorOptions: GetResponseActionsClientConstructorOptions
 ): ResponseActionsClient => {
+  console.log({ agentType });
   switch (agentType) {
     case 'endpoint':
       return new EndpointActionsClient(constructorOptions);

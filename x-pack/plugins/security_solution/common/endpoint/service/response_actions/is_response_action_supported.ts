@@ -63,7 +63,7 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
     manual: {
       endpoint: true,
       sentinel_one: true,
-      crowdstrike: false,
+      crowdstrike: true,
     },
   },
   'kill-process': {
@@ -87,7 +87,7 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
     manual: {
       endpoint: true,
       sentinel_one: false,
-      crowdstrike: false,
+      crowdstrike: true,
     },
   },
   'suspend-process': {
@@ -124,6 +124,18 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
       endpoint: true,
       sentinel_one: false,
       crowdstrike: false,
+    },
+  },
+  init: {
+    automated: {
+      endpoint: false,
+      sentinel_one: false,
+      crowdstrike: false,
+    },
+    manual: {
+      endpoint: false,
+      sentinel_one: false,
+      crowdstrike: true,
     },
   },
 };

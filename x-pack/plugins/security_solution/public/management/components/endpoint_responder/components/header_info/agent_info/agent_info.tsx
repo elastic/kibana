@@ -24,6 +24,7 @@ export const AgentInfo = memo<AgentInfoProps>(({ agentId, platform, hostName, ag
   const agentStatus = data?.[agentId];
   const lastCheckin = agentStatus ? agentStatus.lastSeen : '';
 
+  console.log({ agnetInfo: agentId });
   return (
     <HeaderAgentInfo
       platform={platform.toLowerCase() as Platform}

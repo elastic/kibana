@@ -26,6 +26,10 @@ import {
   CrowdstrikeGetTokenResponseSchema,
   CrowdstrikeHostActionsResponseSchema,
   RelaxedCrowdstrikeBaseApiResponseSchema,
+  CrowdstrikeExecuteRTRResponseSchema,
+  CrowdstrikeInitRTRResponseSchema,
+  CrowdstrikeInitRTRParamsSchema,
+  CrowdstrikeExecuteRTRParamsSchema,
 } from '../../../common/crowdstrike/schema';
 import { SUB_ACTION } from '../../../common/crowdstrike/constants';
 import { CrowdstrikeError } from './error';
@@ -49,6 +53,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
   CrowdstrikeSecrets
 > {
   private static token: string | null;
+  private static currentBatchId: string | null;
   private static tokenExpiryTimeout: NodeJS.Timeout;
   private static base64encodedToken: string;
   private urls: {
@@ -56,6 +61,8 @@ export class CrowdstrikeConnector extends SubActionConnector<
     agents: string;
     hostAction: string;
     agentStatus: string;
+    initRTRSession: string;
+    executeRTR: string;
   };
 
   constructor(params: ServiceParams<CrowdstrikeConfig, CrowdstrikeSecrets>) {
@@ -65,6 +72,8 @@ export class CrowdstrikeConnector extends SubActionConnector<
       hostAction: `${this.config.url}/devices/entities/devices-actions/v2`,
       agents: `${this.config.url}/devices/entities/devices/v2`,
       agentStatus: `${this.config.url}/devices/entities/online-state/v1`,
+      initRTRSession: `${this.config.url}/real-time-response/combined/batch-init-session/v1`,
+      executeRTR: `${this.config.url}/real-time-response/combined/batch-command/v1`,
     };
 
     if (!CrowdstrikeConnector.base64encodedToken) {
@@ -93,6 +102,16 @@ export class CrowdstrikeConnector extends SubActionConnector<
       name: SUB_ACTION.GET_AGENT_ONLINE_STATUS,
       method: 'getAgentOnlineStatus',
       schema: CrowdstrikeGetAgentsParamsSchema,
+    });
+    this.registerSubAction({
+      name: SUB_ACTION.INIT_RTR_SESSION,
+      method: 'initRTRSession',
+      schema: CrowdstrikeInitRTRParamsSchema,
+    });
+    this.registerSubAction({
+      name: SUB_ACTION.EXECUTE_RTR,
+      method: 'executeRTR',
+      schema: CrowdstrikeExecuteRTRParamsSchema,
     });
   }
 
@@ -197,6 +216,42 @@ export class CrowdstrikeConnector extends SubActionConnector<
 
       throw new CrowdstrikeError(error.message);
     }
+  }
+
+  public async initRTRSession({ alertIds, ...payload }: CrowdstrikeInitRTRParamsSchema) {
+    console.log({ payload });
+    const response = await this.crowdstrikeApiRequest({
+      url: this.urls.initRTRSession,
+      method: 'post',
+      data: {
+        host_ids: payload.endpoint_ids,
+      },
+      paramsSerializer,
+      responseSchema: CrowdstrikeInitRTRResponseSchema,
+    });
+
+    CrowdstrikeConnector.currentBatchId = response.batch_id;
+  }
+
+  public async executeRTR({ alertIds, ...payload }: CrowdstrikeExecuteRTRParamsSchema) {
+    console.log({ payload: JSON.stringify(payload, null, 2) });
+    console.log({ batch: CrowdstrikeConnector.currentBatchId });
+    const response = await this.crowdstrikeApiRequest({
+      url: this.urls.executeRTR,
+      method: 'post',
+      data: {
+        base_command: payload.command,
+        command_string: payload.command,
+        batch_id: CrowdstrikeConnector.currentBatchId,
+        hosts: ['f467660e26454df6a2de19dc3f4531a8'],
+        persist_all: false,
+      },
+      paramsSerializer,
+      responseSchema: CrowdstrikeExecuteRTRResponseSchema,
+    });
+
+    console.log({ response: JSON.stringify(response, null, 2) });
+    return response;
   }
 
   protected getResponseErrorMessage(

@@ -48,6 +48,7 @@ export const useEndpointActionItems = (
     canReadFleetAgents,
   } = useUserPrivileges().endpointPrivileges;
 
+  console.log('5555');
   return useMemo<ContextMenuItemNavByRouterProps[]>(() => {
     if (!endpointMetadata) {
       return [];

@@ -155,4 +155,14 @@ export interface ResponseActionsClient {
     actionRequest: OmitUnsupportedAttributes<ScanActionRequestBody>,
     options?: CommonResponseActionMethodOptions
   ) => Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>>;
+
+  /**
+   * Init CS RTR session
+   * @param actionRequest
+   * @param options
+   */
+  init: (
+    actionRequest: OmitUnsupportedAttributes<ScanActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ) => Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>>;
 }
