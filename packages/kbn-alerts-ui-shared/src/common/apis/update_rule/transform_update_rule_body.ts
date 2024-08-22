@@ -8,10 +8,25 @@
 
 import { RewriteResponseCase } from '@kbn/actions-types';
 import { UpdateRuleBody } from './types';
+import { Rule } from '../../types';
+
+const transformUpdateRuleFlapping = (flapping: Rule['flapping']) => {
+  if (!flapping) {
+    return flapping;
+  }
+
+  return {
+    flapping: {
+      look_back_window: flapping.lookBackWindow,
+      status_change_threshold: flapping.statusChangeThreshold,
+    },
+  };
+};
 
 export const transformUpdateRuleBody: RewriteResponseCase<UpdateRuleBody> = ({
   actions = [],
   alertDelay,
+  flapping,
   ...res
 }): any => ({
   ...res,
@@ -41,4 +56,5 @@ export const transformUpdateRuleBody: RewriteResponseCase<UpdateRuleBody> = ({
     };
   }),
   ...(alertDelay ? { alert_delay: alertDelay } : {}),
+  ...(flapping !== undefined ? transformUpdateRuleFlapping(flapping) : {}),
 });
