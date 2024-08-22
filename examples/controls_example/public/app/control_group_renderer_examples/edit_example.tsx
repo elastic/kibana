@@ -68,7 +68,7 @@ export const EditExample = () => {
     if (!controlGroupAPI) return;
 
     setIsSaving(true);
-    localStorage.setItem(INPUT_KEY, JSON.stringify(controlGroupAPI.serializeState()));
+    localStorage.setItem(INPUT_KEY, JSON.stringify(controlGroupAPI.snapshotRuntimeState()));
 
     // simulated async save await
     await new Promise((resolve) => setTimeout(resolve, 1000));
