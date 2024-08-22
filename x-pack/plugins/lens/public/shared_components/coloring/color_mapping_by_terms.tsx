@@ -25,12 +25,12 @@ import {
   PaletteOutput,
   PaletteRegistry,
   CustomPaletteParams,
-  getColorStops,
 } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { PalettePicker } from '../palette_picker';
 import { PalettePanelContainer } from './palette_panel_container';
+import { getColorStops } from './utils';
 
 interface ColorMappingByTermsProps {
   isDarkMode: boolean;

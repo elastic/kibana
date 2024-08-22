@@ -17,5 +17,4 @@ export {
   DEFAULT_OTHER_ASSIGNMENT_INDEX,
   getPaletteColors,
   getColorsFromMapping,
-  getColorStops,
 } from './config/default_color_mapping';

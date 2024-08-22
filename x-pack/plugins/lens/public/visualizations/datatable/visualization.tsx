@@ -8,7 +8,7 @@
 import React from 'react';
 import { Ast } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
-import { PaletteRegistry, CUSTOM_PALETTE, getColorStops } from '@kbn/coloring';
+import { PaletteRegistry, CUSTOM_PALETTE } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
@@ -42,7 +42,7 @@ import {
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
   DEFAULT_ROW_HEIGHT,
 } from './components/constants';
-import { shouldColorByTerms } from '../../shared_components';
+import { getColorStops, shouldColorByTerms } from '../../shared_components';
 export interface DatatableVisualizationState {
   columns: ColumnState[];
   layerId: string;

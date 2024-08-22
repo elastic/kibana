@@ -11,7 +11,6 @@ import { AVAILABLE_PALETTES, getPalette } from '../palettes';
 import { EUIAmsterdamColorBlindPalette } from '../palettes/eui_amsterdam';
 import { NeutralPalette } from '../palettes/neutral';
 import { getColor, getGradientColorScale } from '../color/color_handling';
-import { DEFAULT_FALLBACK_PALETTE, PaletteOutput, PaletteRegistry } from '../../../palettes';
 
 export const DEFAULT_NEUTRAL_PALETTE_INDEX = 1;
 export const DEFAULT_OTHER_ASSIGNMENT_INDEX = 0;
@@ -37,22 +36,6 @@ export const DEFAULT_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
     type: 'categorical',
   },
 };
-
-/**
- * Returns array of colors for provided colorMapping or palette
- */
-export function getColorStops<T>(
-  paletteService: PaletteRegistry,
-  isDarkMode: boolean,
-  palette?: PaletteOutput<T>,
-  colorMapping?: ColorMapping.Config
-): string[] {
-  return colorMapping
-    ? getColorsFromMapping(isDarkMode, colorMapping)
-    : paletteService
-        .get(palette?.name || DEFAULT_FALLBACK_PALETTE)
-        .getCategoricalColors(10, palette);
-}
 
 export function getPaletteColors(
   isDarkMode: boolean,

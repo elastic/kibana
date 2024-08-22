@@ -17,9 +17,30 @@ import {
   getPaletteStops,
   CUSTOM_PALETTE,
   enforceColorContrast,
+  ColorMapping,
+  getColorsFromMapping,
+  DEFAULT_FALLBACK_PALETTE,
 } from '@kbn/coloring';
 import { Datatable, DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { DataType } from '../../types';
+
+/**
+ * Returns array of colors for provided palette or colorMapping
+ */
+export function getColorStops(
+  paletteService: PaletteRegistry,
+  isDarkMode: boolean,
+  palette?: PaletteOutput<CustomPaletteParams>,
+  colorMapping?: ColorMapping.Config
+): string[] {
+  return colorMapping
+    ? getColorsFromMapping(isDarkMode, colorMapping)
+    : palette?.name === CUSTOM_PALETTE
+    ? palette?.params?.stops?.map(({ color }) => color) ?? []
+    : paletteService
+        .get(palette?.name || DEFAULT_FALLBACK_PALETTE)
+        .getCategoricalColors(10, palette);
+}
 
 /**
  * Bucketed numerical columns should be treated as categorical
