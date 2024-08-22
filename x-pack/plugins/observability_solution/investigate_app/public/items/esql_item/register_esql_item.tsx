@@ -11,7 +11,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
 import { i18n } from '@kbn/i18n';
 import { type GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
-import { InvestigationEsqlItem } from '@kbn/investigation-shared';
+import { EsqlItem } from '@kbn/investigation-shared';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
 import React, { useMemo } from 'react';
@@ -212,7 +212,7 @@ export function registerEsqlItem({
 }: Options) {
   investigate.registerItemDefinition({
     type: 'esql',
-    generate: async (option: { item: InvestigationEsqlItem; params: GlobalWidgetParameters }) => {
+    generate: async (option: { item: EsqlItem; params: GlobalWidgetParameters }) => {
       const controller = new AbortController();
       const { esql: esqlQuery, suggestion: suggestionFromParameters } = option.item.params;
       const { timeRange } = option.params;
@@ -255,7 +255,7 @@ export function registerEsqlItem({
         dateHistoResponse,
       };
     },
-    render: (option: { item: InvestigationEsqlItem; data: Record<string, any> }) => {
+    render: (option: { item: EsqlItem; data: Record<string, any> }) => {
       const { item, data = {} } = option;
       return (
         <EsqlWidget

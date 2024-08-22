@@ -17,13 +17,12 @@ import { useFetchInvestigation } from '../../../../hooks/use_fetch_investigation
 import { useKibana } from '../../../../hooks/use_kibana';
 import { InvestigationNotes } from '../investigation_notes/investigation_notes';
 
-export function InvestigationDetails({
-  user,
-  investigationId,
-}: {
+interface Props {
   user: AuthenticatedUser;
   investigationId: string;
-}) {
+}
+
+export function InvestigationDetails({ user, investigationId }: Props) {
   const {
     dependencies: {
       start: { investigate },

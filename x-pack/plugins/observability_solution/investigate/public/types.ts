@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 import type { AuthenticatedUser } from '@kbn/core/public';
-import type { GetInvestigationResponse, InvestigationItemTypes } from '@kbn/investigation-shared';
+import type { GetInvestigationResponse, InvestigationItemType } from '@kbn/investigation-shared';
 import type { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/public';
 import type { FromSchema } from 'json-schema-to-ts';
 import type { InvestigateWidget } from '../common';
@@ -72,7 +72,7 @@ export interface InvestigatePublicSetup {
 export interface InvestigatePublicStart {
   // new:
   getItemDefinitions: () => ItemDefinition[];
-  getItemDefinitionByType: (type: InvestigationItemTypes) => ItemDefinition | undefined;
+  getItemDefinitionByType: (type: InvestigationItemType) => ItemDefinition | undefined;
   // old:
   getWidgetDefinitions: () => WidgetDefinition[];
   useInvestigation: ({}: {

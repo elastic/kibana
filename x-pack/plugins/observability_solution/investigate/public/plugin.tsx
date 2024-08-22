@@ -11,7 +11,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { GetInvestigationResponse, InvestigationItemTypes } from '@kbn/investigation-shared';
+import { GetInvestigationResponse, InvestigationItemType } from '@kbn/investigation-shared';
 import type { Logger } from '@kbn/logging';
 import { useMemo } from 'react';
 import { createUseInvestigation } from './hooks/use_investigation';
@@ -71,7 +71,7 @@ export class InvestigatePlugin
     return {
       // new
       getItemDefinitions: () => this.itemDefinitionRegistry.getItemDefinitions(),
-      getItemDefinitionByType: (type: InvestigationItemTypes) =>
+      getItemDefinitionByType: (type: InvestigationItemType) =>
         this.itemDefinitionRegistry.getItemDefinitionByType(type),
       // old
       getWidgetDefinitions: this.widgetRegistry.getWidgetDefinitions,
