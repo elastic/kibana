@@ -55,14 +55,18 @@ const TeamsActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = (
           },
         }}
       />
-      <EuiSpacer size="m" />
-      <EuiCallOut
-        size="s"
-        color="warning"
-        iconType="warning"
-        data-test-subj={'microsoftTeamsWebhookDeprecationWarning'}
-        title={i18n.WEBHOOK_DEPRECATION_WARNING}
-      />
+      {isEdit && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            size="s"
+            color="warning"
+            iconType="warning"
+            data-test-subj={'microsoftTeamsWebhookDeprecationWarning'}
+            title={i18n.WEBHOOK_DEPRECATION_WARNING}
+          />
+        </>
+      )}
     </>
   );
 };
