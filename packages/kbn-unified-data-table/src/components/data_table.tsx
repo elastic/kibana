@@ -26,9 +26,10 @@ import {
   EuiDataGridInMemory,
   EuiDataGridControlColumn,
   EuiDataGridCustomBodyProps,
-  EuiDataGridToolBarVisibilityDisplaySelectorOptions,
   EuiDataGridStyle,
   EuiDataGridProps,
+  EuiHorizontalRule,
+  EuiDataGridToolBarVisibilityDisplaySelectorOptions,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -45,6 +46,7 @@ import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AdditionalFieldGroups } from '@kbn/unified-field-list';
+import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
 import {
   UnifiedDataTableSettings,
   ValueToStringConverter,
@@ -70,10 +72,11 @@ import { getSchemaDetectors } from './data_table_schema';
 import { DataTableDocumentToolbarBtn } from './data_table_document_selection';
 import { useRowHeightsOptions } from '../hooks/use_row_heights_options';
 import {
+  DATA_GRID_STYLE_DEFAULT,
   DEFAULT_ROWS_PER_PAGE,
-  GRID_STYLE,
   ROWS_HEIGHT_OPTIONS,
   toolbarVisibility as toolbarVisibilityDefaults,
+  DataGridDensity,
 } from '../constants';
 import { UnifiedDataTableFooter } from './data_table_footer';
 import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
@@ -161,9 +164,9 @@ export interface UnifiedDataTableProps {
    */
   onFilter?: DocViewFilterFn;
   /**
-   * Function triggered when a column is resized by the user
+   * Function triggered when a column is resized by the user, passes `undefined` for auto-width
    */
-  onResize?: (colSettings: { columnId: string; width: number }) => void;
+  onResize?: (colSettings: { columnId: string; width: number | undefined }) => void;
   /**
    * Function to set all columns
    */
@@ -232,6 +235,14 @@ export interface UnifiedDataTableProps {
    * Update row height state
    */
   onUpdateRowHeight?: (rowHeight: number) => void;
+  /**
+   * Density from state
+   */
+  dataGridDensityState?: DataGridDensity;
+  /**
+   * Callback when the data grid density configuration is modified
+   */
+  onUpdateDataGridDensity?: (dataGridDensity: DataGridDensity) => void;
   /**
    * Is text base lang mode enabled
    */
@@ -468,6 +479,8 @@ export const UnifiedDataTable = ({
   cellContext,
   renderCellPopover,
   getRowIndicator,
+  dataGridDensityState,
+  onUpdateDataGridDensity,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -480,7 +493,13 @@ export const UnifiedDataTable = ({
   const docMap = useMemo(() => new Map(rows?.map((row) => [row.id, row]) ?? []), [rows]);
   const getDocById = useCallback((id: string) => docMap.get(id), [docMap]);
   const selectedDocsState = useSelectedDocs(docMap);
-  const { isDocSelected, hasSelectedDocs, selectedDocIds, replaceSelectedDocs } = selectedDocsState;
+  const {
+    isDocSelected,
+    hasSelectedDocs,
+    selectedDocsCount,
+    replaceSelectedDocs,
+    docIdsInSelectionOrder,
+  } = selectedDocsState;
 
   useEffect(() => {
     if (!hasSelectedDocs && isFilterActive) {
@@ -604,6 +623,23 @@ export const UnifiedDataTable = ({
     return getShouldShowFieldHandler(dataViewFields, dataView, showMultiFields);
   }, [dataView, showMultiFields]);
 
+  const { dataGridDensity, onChangeDataGridDensity } = useDataGridDensity({
+    storage,
+    consumer,
+    dataGridDensityState,
+    onUpdateDataGridDensity,
+  });
+
+  const gridStyle = useMemo<EuiDataGridStyle>(
+    () => ({
+      ...DATA_GRID_STYLE_DEFAULT,
+      ...DATA_GRID_DENSITY_STYLE_MAP[dataGridDensity],
+      onChange: onChangeDataGridDensity,
+      ...gridStyleOverride,
+    }),
+    [dataGridDensity, onChangeDataGridDensity, gridStyleOverride]
+  );
+
   /**
    * Cell rendering
    */
@@ -619,6 +655,7 @@ export const UnifiedDataTable = ({
         maxEntries: maxDocFieldsDisplayed,
         externalCustomRenderers,
         isPlainRecord,
+        isCompressed: dataGridDensity === DataGridDensity.COMPACT,
       }),
     [
       dataView,
@@ -629,6 +666,7 @@ export const UnifiedDataTable = ({
       fieldFormats,
       externalCustomRenderers,
       isPlainRecord,
+      dataGridDensity,
     ]
   );
 
@@ -772,6 +810,7 @@ export const UnifiedDataTable = ({
         showColumnTokens,
         headerRowHeightLines,
         customGridColumnsConfiguration,
+        onResize,
       }),
     [
       columnsMeta,
@@ -786,6 +825,7 @@ export const UnifiedDataTable = ({
       isPlainRecord,
       isSortEnabled,
       onFilter,
+      onResize,
       settings,
       showColumnTokens,
       toastNotifications,
@@ -889,13 +929,13 @@ export const UnifiedDataTable = ({
   ]);
 
   const additionalControls = useMemo(() => {
-    if (!externalAdditionalControls && !selectedDocIds.length) {
+    if (!externalAdditionalControls && !selectedDocsCount) {
       return null;
     }
 
     return (
       <>
-        {Boolean(selectedDocIds.length) && (
+        {Boolean(selectedDocsCount) && (
           <DataTableDocumentToolbarBtn
             isPlainRecord={isPlainRecord}
             isFilterActive={isFilterActive}
@@ -907,13 +947,15 @@ export const UnifiedDataTable = ({
             fieldFormats={fieldFormats}
             pageIndex={unifiedDataTableContextValue.pageIndex}
             pageSize={unifiedDataTableContextValue.pageSize}
+            toastNotifications={toastNotifications}
+            columns={visibleColumns}
           />
         )}
         {externalAdditionalControls}
       </>
     );
   }, [
-    selectedDocIds,
+    selectedDocsCount,
     selectedDocsState,
     externalAdditionalControls,
     isPlainRecord,
@@ -924,6 +966,8 @@ export const UnifiedDataTable = ({
     fieldFormats,
     unifiedDataTableContextValue.pageIndex,
     unifiedDataTableContextValue.pageSize,
+    toastNotifications,
+    visibleColumns,
   ]);
 
   const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
@@ -940,34 +984,41 @@ export const UnifiedDataTable = ({
     [renderCustomToolbar, additionalControls]
   );
 
-  const showDisplaySelector = useMemo(() => {
-    const options: EuiDataGridToolBarVisibilityDisplaySelectorOptions = {};
-
-    if (onUpdateRowHeight) {
-      options.allowDensity = false;
+  const showDisplaySelector = useMemo(():
+    | EuiDataGridToolBarVisibilityDisplaySelectorOptions
+    | undefined => {
+    if (
+      !onUpdateDataGridDensity &&
+      !onUpdateRowHeight &&
+      !onUpdateHeaderRowHeight &&
+      !onUpdateSampleSize
+    ) {
+      return;
     }
 
-    if (onUpdateRowHeight || onUpdateHeaderRowHeight || onUpdateSampleSize) {
-      options.allowRowHeight = false;
-      options.allowResetButton = false;
-      options.additionalDisplaySettings = (
-        <UnifiedDataTableAdditionalDisplaySettings
-          rowHeight={rowHeight}
-          rowHeightLines={rowHeightLines}
-          onChangeRowHeight={onChangeRowHeight}
-          onChangeRowHeightLines={onChangeRowHeightLines}
-          headerRowHeight={headerRowHeight}
-          headerRowHeightLines={headerRowHeightLines}
-          onChangeHeaderRowHeight={onChangeHeaderRowHeight}
-          onChangeHeaderRowHeightLines={onChangeHeaderRowHeightLines}
-          maxAllowedSampleSize={maxAllowedSampleSize}
-          sampleSize={sampleSizeState}
-          onChangeSampleSize={onUpdateSampleSize}
-        />
-      );
-    }
-
-    return Object.keys(options).length ? options : undefined;
+    return {
+      allowDensity: Boolean(onUpdateDataGridDensity),
+      allowRowHeight: false,
+      allowResetButton: false,
+      additionalDisplaySettings: (
+        <>
+          {onUpdateDataGridDensity ? <EuiHorizontalRule margin="s" /> : null}
+          <UnifiedDataTableAdditionalDisplaySettings
+            rowHeight={rowHeight}
+            rowHeightLines={rowHeightLines}
+            onChangeRowHeight={onChangeRowHeight}
+            onChangeRowHeightLines={onChangeRowHeightLines}
+            headerRowHeight={headerRowHeight}
+            headerRowHeightLines={headerRowHeightLines}
+            onChangeHeaderRowHeight={onChangeHeaderRowHeight}
+            onChangeHeaderRowHeightLines={onChangeHeaderRowHeightLines}
+            maxAllowedSampleSize={maxAllowedSampleSize}
+            sampleSize={sampleSizeState}
+            onChangeSampleSize={onUpdateSampleSize}
+          />
+        </>
+      ),
+    };
   }, [
     headerRowHeight,
     headerRowHeightLines,
@@ -982,6 +1033,7 @@ export const UnifiedDataTable = ({
     rowHeight,
     rowHeightLines,
     sampleSizeState,
+    onUpdateDataGridDensity,
   ]);
 
   const inMemory = useMemo(() => {
@@ -1080,7 +1132,7 @@ export const UnifiedDataTable = ({
               isPlainRecord={isPlainRecord}
               selectedFieldNames={visibleColumns}
               additionalFieldGroups={additionalFieldGroups}
-              selectedDocIds={selectedDocIds}
+              selectedDocIds={docIdsInSelectionOrder}
               schemaDetectors={schemaDetectors}
               forceShowAllFields={defaultColumns}
               showFullScreenButton={showFullScreenButton}
@@ -1091,6 +1143,8 @@ export const UnifiedDataTable = ({
             />
           ) : (
             <EuiDataGridMemoized
+              // Using this as the `key` is a workaround for https://github.com/elastic/eui/issues/7962. This forces a re-render if the density is changed.
+              key={dataGridDensity}
               id={dataGridId}
               aria-describedby={randomId}
               aria-labelledby={ariaLabelledBy}
@@ -1108,7 +1162,7 @@ export const UnifiedDataTable = ({
               toolbarVisibility={toolbarVisibility}
               rowHeightsOptions={rowHeightsOptions}
               inMemory={inMemory}
-              gridStyle={gridStyleOverride ?? GRID_STYLE}
+              gridStyle={gridStyle}
               renderCustomGridBody={renderCustomGridBody}
               renderCustomToolbar={renderCustomToolbarFn}
               trailingControlColumns={trailingControlColumns}

@@ -14028,15 +14028,15 @@
               },
               {
                 "plugin": "@kbn/unified-field-list",
-                "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
-              },
-              {
-                "plugin": "@kbn/unified-field-list",
-                "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
-              },
-              {
-                "plugin": "@kbn/unified-field-list",
                 "path": "packages/kbn-unified-field-list/src/services/field_stats/load_field_stats.ts"
+              },
+              {
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
+              },
+              {
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
               {
                 "plugin": "lens",
@@ -14053,6 +14053,10 @@
               {
                 "plugin": "controls",
                 "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/react_controls/controls/data_controls/options_list_control/options_list_fetch_cache.ts"
               },
               {
                 "plugin": "@kbn/lens-embeddable-utils",

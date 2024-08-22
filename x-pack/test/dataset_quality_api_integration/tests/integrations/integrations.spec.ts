@@ -12,7 +12,6 @@ import {
   CustomIntegration,
   installCustomIntegration,
   installPackage,
-  IntegrationPackage,
   uninstallPackage,
 } from './package_utils';
 
@@ -21,23 +20,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const datasetQualityApiClient = getService('datasetQualityApiClient');
 
-  const integrationPackages: IntegrationPackage[] = [
-    {
-      // logs based integration
-      name: 'system',
-      version: '1.0.0',
-    },
-    {
-      // logs based integration
-      name: 'apm',
-      version: '8.0.0',
-    },
-    {
-      // non-logs based integration
-      name: 'synthetics',
-      version: '1.0.0',
-    },
-  ];
+  const integrationPackages = ['system', 'apm', 'endpoint', 'synthetics'];
 
   const customIntegrations: CustomIntegration[] = [
     {
@@ -67,9 +50,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when('Integration', { config: 'basic' }, () => {
     describe('gets the installed integrations', () => {
       before(async () => {
-        await Promise.all(
-          integrationPackages.map((pkg: IntegrationPackage) => installPackage({ supertest, pkg }))
-        );
+        await Promise.all(integrationPackages.map((pkg) => installPackage({ supertest, pkg })));
       });
 
       it('returns only log based integrations and its datasets map', async () => {
@@ -77,20 +58,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(resp.body.integrations.map((integration) => integration.name)).to.eql([
           'apm',
+          'endpoint',
           'system',
         ]);
 
         expect(resp.body.integrations[0].datasets).not.empty();
         expect(resp.body.integrations[1].datasets).not.empty();
+        expect(resp.body.integrations[2].datasets).not.empty();
       });
 
       after(
         async () =>
-          await Promise.all(
-            integrationPackages.map((pkg: IntegrationPackage) =>
-              uninstallPackage({ supertest, pkg })
-            )
-          )
+          await Promise.all(integrationPackages.map((pkg) => uninstallPackage({ supertest, pkg })))
       );
     });
 
@@ -121,7 +100,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             customIntegrations.map((customIntegration: CustomIntegration) =>
               uninstallPackage({
                 supertest,
-                pkg: { name: customIntegration.integrationName, version: '1.0.0' },
+                pkg: customIntegration.integrationName,
               })
             )
           )

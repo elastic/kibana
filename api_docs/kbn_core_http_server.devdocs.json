@@ -3699,6 +3699,10 @@
                 "path": "x-pack/plugins/actions/server/routes/legacy/list_action_types.ts"
               },
               {
+                "plugin": "@kbn/content-management-favorites-server",
+                "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts"
+              },
+              {
                 "plugin": "share",
                 "path": "src/plugins/share/server/url_service/http/short_urls/register_get_route.ts"
               },
@@ -6274,6 +6278,10 @@
               },
               {
                 "plugin": "security",
+                "path": "x-pack/plugins/security/server/routes/authorization/roles/post.ts"
+              },
+              {
+                "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/deprecations/kibana_user_role.ts"
               },
               {
@@ -6355,6 +6363,14 @@
               {
                 "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/get_global_execution_kpi.ts"
+              },
+              {
+                "plugin": "@kbn/content-management-favorites-server",
+                "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts"
+              },
+              {
+                "plugin": "@kbn/content-management-favorites-server",
+                "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts"
               },
               {
                 "plugin": "contentManagement",
@@ -6675,6 +6691,10 @@
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/app_search/adaptive_relevance.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/app_search_gated_form.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -7353,8 +7373,8 @@
                 "path": "src/plugins/console/server/routes/api/console/proxy/index.ts"
               },
               {
-                "plugin": "contentManagement",
-                "path": "src/plugins/content_management/server/plugin.test.ts"
+                "plugin": "console",
+                "path": "src/plugins/console/server/routes/api/console/convert_request_to_language/index.ts"
               },
               {
                 "plugin": "contentManagement",
@@ -8270,6 +8290,10 @@
               },
               {
                 "plugin": "security",
+                "path": "x-pack/plugins/security/server/routes/authorization/roles/post.test.ts"
+              },
+              {
+                "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/authentication/common.test.ts"
               },
               {
@@ -8585,6 +8609,10 @@
               {
                 "plugin": "observability",
                 "path": "x-pack/plugins/observability_solution/observability/server/lib/annotations/register_annotation_apis.ts"
+              },
+              {
+                "plugin": "logsShared",
+                "path": "x-pack/plugins/observability_solution/logs_shared/server/routes/deprecations/migrate_log_view_settings.ts"
               },
               {
                 "plugin": "enterpriseSearch",
