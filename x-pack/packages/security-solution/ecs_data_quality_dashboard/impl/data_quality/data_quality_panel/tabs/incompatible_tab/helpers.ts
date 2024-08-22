@@ -17,7 +17,6 @@ import {
   getTabCountsMarkdownComment,
   escape,
 } from '../../index_properties/markdown/helpers';
-import { getFillColor } from '../summary_tab/helpers';
 import * as i18n from '../../index_properties/translations';
 import type { EcsBasedFieldMetadata, IlmPhase, PartitionedFieldMetadata } from '../../../types';
 import {
@@ -46,10 +45,6 @@ ${i18n.MAPPINGS_THAT_CONFLICT_WITH_ECS}
 
 export const showInvalidCallout = (ecsBasedFieldMetadata: EcsBasedFieldMetadata[]): boolean =>
   ecsBasedFieldMetadata.length > 0;
-
-export const getIncompatibleColor = (): string => getFillColor('incompatible');
-
-export const getSameFamilyColor = (): string => getFillColor('same-family');
 
 export const getIncompatibleMappings = (
   ecsBasedFieldMetadata: EcsBasedFieldMetadata[]
