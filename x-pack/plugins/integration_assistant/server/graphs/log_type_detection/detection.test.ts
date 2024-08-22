@@ -24,6 +24,6 @@ describe('Testing log type detection handler', () => {
   it('handleLogFormatDetection()', async () => {
     const response = await handleLogFormatDetection(testState, mockLlm);
     expect(response.logFormat).toStrictEqual('structured');
-    expect(response.lastExecutedChain).toBe('LogFormatDetection');
+    expect(response.lastExecutedChain).toBe('logFormatDetection');
   });
 });

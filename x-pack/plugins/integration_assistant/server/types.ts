@@ -6,7 +6,7 @@
  */
 
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { LogFormat } from '../common';
+import { SamplesFormat } from '../common';
 
 export interface IntegrationAssistantPluginSetup {
   setIsAvailable: (isAvailable: boolean) => void;
@@ -81,7 +81,7 @@ export interface LogFormatDetectionState {
   rawSamples: string[];
   exAnswer: string;
   finalized: boolean;
-  logFormat: LogFormat;
+  samplesFormat: SamplesFormat;
   ecsVersion: string;
   results: object;
 }

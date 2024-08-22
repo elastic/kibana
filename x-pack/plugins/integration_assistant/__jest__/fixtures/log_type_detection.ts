@@ -14,7 +14,7 @@ export const logFormatDetectionTestState = {
   packageName: 'testPackage',
   dataStreamName: 'testDatastream',
   finalized: false,
-  samplesFormat: SamplesFormatName.Values.json,
+  samplesFormat: { name: SamplesFormatName.Values.json },
   ecsVersion: 'testVersion',
   results: { test1: 'test1' },
 };

@@ -9,7 +9,6 @@ import { parseNDJSON, parseJSONArray } from './parse';
 
 const simpleNDJSON = `{"message":"test message 1"}\n{"message":"test message 2"}`;
 const multilineNDJSON = `{"message":"test message 1"}\n\n{\n  "message":\n  "test message 2"\n}\n\n`;
-const splitNDJSON = simpleNDJSON.split('\n');
 const complexEventsJSON = `{"events":[\n{"message":"test message 1"},\n{"message":"test message 2"}\n]}`;
 const nonIdentifierLikeKeyInJSON = `{"1event":[\n{"message":"test message 1"},\n{"message":"test message 2"}\n]}`;
 

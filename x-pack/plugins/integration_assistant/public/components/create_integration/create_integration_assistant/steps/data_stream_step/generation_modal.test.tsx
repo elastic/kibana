@@ -17,9 +17,14 @@ import { TelemetryEventType } from '../../../../../services/telemetry/types';
 const integrationSettings = mockState.integrationSettings!;
 const connector = mockState.connector!;
 
+const mockAnalyseLogsResults = {
+  parsedSamples: [{ test: 'analyseLogsResponse' }],
+  sampleLogsFormat: { name: 'json' },
+};
 const mockEcsMappingResults = { pipeline: { test: 'ecsMappingResponse' }, docs: [] };
 const mockCategorizationResults = { pipeline: { test: 'categorizationResponse' }, docs: [] };
 const mockRelatedResults = { pipeline: { test: 'relatedResponse' }, docs: [] };
+const mockRunAnalyseLogsGraph = jest.fn((_: unknown) => ({ results: mockAnalyseLogsResults }));
 const mockRunEcsGraph = jest.fn((_: unknown) => ({ results: mockEcsMappingResults }));
 const mockRunCategorizationGraph = jest.fn((_: unknown) => ({
   results: mockCategorizationResults,
@@ -27,13 +32,12 @@ const mockRunCategorizationGraph = jest.fn((_: unknown) => ({
 const mockRunRelatedGraph = jest.fn((_: unknown) => ({ results: mockRelatedResults }));
 
 const defaultRequest = {
-  packageName: integrationSettings.name ?? '',
-  dataStreamName: integrationSettings.dataStreamName ?? '',
-  rawSamples: integrationSettings.logsSampleParsed ?? [],
   connectorId: connector.id,
+  LangSmithOptions: undefined,
 };
 
 jest.mock('../../../../../common/lib/api', () => ({
+  runAnalyseLogsGraph: (params: unknown) => mockRunAnalyseLogsGraph(params),
   runEcsGraph: (params: unknown) => mockRunEcsGraph(params),
   runCategorizationGraph: (params: unknown) => mockRunCategorizationGraph(params),
   runRelatedGraph: (params: unknown) => mockRunRelatedGraph(params),
@@ -74,14 +78,29 @@ describe('GenerationModal', () => {
       expect(result.queryByTestId('generationModal')).toBeInTheDocument();
     });
 
+    it('should call runAnalyseLogsGraph with correct parameters', () => {
+      expect(mockRunAnalyseLogsGraph).toHaveBeenCalledWith({
+        ...defaultRequest,
+        encodedRawSamples: integrationSettings.encodedLogSamples ?? [],
+      });
+    });
+
     it('should call runEcsGraph with correct parameters', () => {
-      expect(mockRunEcsGraph).toHaveBeenCalledWith(defaultRequest);
+      expect(mockRunEcsGraph).toHaveBeenCalledWith({
+        ...defaultRequest,
+        rawSamples: mockAnalyseLogsResults.parsedSamples,
+        packageName: integrationSettings.name ?? '',
+        dataStreamName: integrationSettings.dataStreamName ?? '',
+      });
     });
 
     it('should call runCategorizationGraph with correct parameters', () => {
       expect(mockRunCategorizationGraph).toHaveBeenCalledWith({
         ...defaultRequest,
         currentPipeline: mockEcsMappingResults.pipeline,
+        rawSamples: mockAnalyseLogsResults.parsedSamples,
+        packageName: integrationSettings.name ?? '',
+        dataStreamName: integrationSettings.dataStreamName ?? '',
       });
     });
 
@@ -89,6 +108,9 @@ describe('GenerationModal', () => {
       expect(mockRunRelatedGraph).toHaveBeenCalledWith({
         ...defaultRequest,
         currentPipeline: mockCategorizationResults.pipeline,
+        rawSamples: mockAnalyseLogsResults.parsedSamples,
+        packageName: integrationSettings.name ?? '',
+        dataStreamName: integrationSettings.dataStreamName ?? '',
       });
     });
 
