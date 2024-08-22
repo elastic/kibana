@@ -693,6 +693,7 @@
     "@kbn/screenshot-mode-plugin": "link:src/plugins/screenshot_mode",
     "@kbn/screenshotting-example-plugin": "link:x-pack/examples/screenshotting_example",
     "@kbn/screenshotting-plugin": "link:x-pack/plugins/screenshotting",
+    "@kbn/screenshotting-server": "link:packages/kbn-screenshotting-server",
     "@kbn/search-api-panels": "link:packages/kbn-search-api-panels",
     "@kbn/search-connectors": "link:packages/kbn-search-connectors",
     "@kbn/search-connectors-plugin": "link:x-pack/plugins/search_connectors",

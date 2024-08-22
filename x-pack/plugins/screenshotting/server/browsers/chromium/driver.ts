@@ -10,13 +10,13 @@ import {
   KBN_SCREENSHOT_MODE_HEADER,
   ScreenshotModePluginSetup,
 } from '@kbn/screenshot-mode-plugin/server';
+import { ConfigType } from '@kbn/screenshotting-server';
 import { truncate } from 'lodash';
 import open from 'opn';
-import { ElementHandle, Page, EvaluateFunc, HTTPResponse } from 'puppeteer';
+import { ElementHandle, EvaluateFunc, HTTPResponse, Page } from 'puppeteer';
 import { Subject } from 'rxjs';
 import { parse as parseUrl } from 'url';
 import { getDisallowedOutgoingUrlError } from '.';
-import { ConfigType } from '../../config';
 import { Layout } from '../../layouts';
 import { getPrintLayoutSelectors } from '../../layouts/print_layout';
 import { allowRequest } from '../network_policy';
