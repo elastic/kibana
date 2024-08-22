@@ -37,7 +37,7 @@ steps:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-standard-2
+      machineType: n2-highcpu-8
       preemptible: true
     key: quick_checks
     timeout_in_minutes: 60
@@ -589,6 +589,11 @@ steps:
       preemptible: true
     artifact_paths:
       "target/plugin_so_types_snapshot.json"
+    timeout_in_minutes: 30
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
 
   - wait: ~
     continue_on_failure: true

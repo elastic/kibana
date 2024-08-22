@@ -118,6 +118,7 @@ import type { PackagePolicyService } from './services/package_policy_service';
 import { PackagePolicyServiceImpl } from './services/package_policy';
 import { registerFleetUsageLogger, startFleetUsageLogger } from './services/fleet_usage_logger';
 import { CheckDeletedFilesTask } from './tasks/check_deleted_files_task';
+import { UnenrollInactiveAgentsTask } from './tasks/unenroll_inactive_agents_task';
 import {
   UninstallTokenService,
   type UninstallTokenServiceInterface,
@@ -178,6 +179,7 @@ export interface FleetAppContext {
   messageSigningService: MessageSigningServiceInterface;
   auditLogger?: AuditLogger;
   uninstallTokenService: UninstallTokenServiceInterface;
+  unenrollInactiveAgentsTask: UnenrollInactiveAgentsTask;
 }
 
 export type FleetSetupContract = void;
@@ -266,6 +268,7 @@ export class FleetPlugin
   private fleetUsageSender?: FleetUsageSender;
   private checkDeletedFilesTask?: CheckDeletedFilesTask;
   private fleetMetricsTask?: FleetMetricsTask;
+  private unenrollInactiveAgentsTask?: UnenrollInactiveAgentsTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -599,6 +602,11 @@ export class FleetPlugin
       taskManager: deps.taskManager,
       logFactory: this.initializerContext.logger,
     });
+    this.unenrollInactiveAgentsTask = new UnenrollInactiveAgentsTask({
+      core,
+      taskManager: deps.taskManager,
+      logFactory: this.initializerContext.logger,
+    });
 
     // Register fields metadata extractor
     registerIntegrationFieldsExtractor({ core, fieldsMetadata: deps.fieldsMetadata });
@@ -644,12 +652,14 @@ export class FleetPlugin
       bulkActionsResolver: this.bulkActionsResolver!,
       messageSigningService,
       uninstallTokenService,
+      unenrollInactiveAgentsTask: this.unenrollInactiveAgentsTask!,
     });
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});
     this.bulkActionsResolver?.start(plugins.taskManager).catch(() => {});
     this.fleetUsageSender?.start(plugins.taskManager).catch(() => {});
     this.checkDeletedFilesTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
+    this.unenrollInactiveAgentsTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
     startFleetUsageLogger(plugins.taskManager).catch(() => {});
     this.fleetMetricsTask
       ?.start(plugins.taskManager, core.elasticsearch.client.asInternalUser)
