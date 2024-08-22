@@ -11,6 +11,7 @@ const createPrebuiltRulesImporterMock = (): jest.Mocked<PrebuiltRulesImporter> =
   ({
     setup: jest.fn(),
     fetchPrebuiltRuleAssets: jest.fn(),
+    fetchInstalledRuleIds: jest.fn(),
   } as unknown as jest.Mocked<PrebuiltRulesImporter>);
 
 export const prebuiltRulesImporterMock = {

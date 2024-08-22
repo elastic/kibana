@@ -107,4 +107,60 @@ describe('PrebuiltRulesImporter', () => {
       ]);
     });
   });
+
+  describe('fetchInstalledRuleIds', () => {
+    it('returns an empty array if the importer is not enabled', async () => {
+      const importer = new PrebuiltRulesImporter({ config, context, savedObjectsClient });
+      importer.enabled = false;
+
+      const result = await importer.fetchInstalledRuleIds({ rules: [] });
+
+      expect(result).toEqual([]);
+    });
+
+    it('throws an error if the latest packages are not installed', async () => {
+      const importer = new PrebuiltRulesImporter({ config, context, savedObjectsClient });
+      importer.latestPackagesInstalled = false;
+
+      await expect(importer.fetchInstalledRuleIds({ rules: [] })).rejects.toThrow(
+        'Installed rule IDs cannot be fetched until the latest rules package is installed. Call setup() on this object first.'
+      );
+    });
+
+    it('fetches and return the rule IDs of installed prebuilt rules', async () => {
+      const importer = new PrebuiltRulesImporter({ config, context, savedObjectsClient });
+      importer.latestPackagesInstalled = true;
+      const rules = [
+        { rule_id: 'rule-1', version: 1 },
+        { rule_id: 'rule-2', version: 1 },
+        new Error('Invalid rule'),
+      ] as Array<RuleToImport | Error>;
+      const installedRuleAssets = [{ rule_id: 'rule-1' }, { rule_id: 'rule-2' }];
+
+      (mockPrebuiltRuleAssetsClient.fetchLatestAssetsByRuleId as jest.Mock).mockResolvedValue(
+        installedRuleAssets
+      );
+
+      const result = await importer.fetchInstalledRuleIds({ rules });
+
+      expect(mockPrebuiltRuleAssetsClient.fetchLatestAssetsByRuleId).toHaveBeenCalledWith([
+        'rule-1',
+        'rule-2',
+      ]);
+      expect(result).toEqual(['rule-1', 'rule-2']);
+    });
+
+    it('handles rules that are instances of Error', async () => {
+      const importer = new PrebuiltRulesImporter({ config, context, savedObjectsClient });
+      importer.latestPackagesInstalled = true;
+      const rules = [new Error('Invalid rule')];
+
+      (mockPrebuiltRuleAssetsClient.fetchLatestAssetsByRuleId as jest.Mock).mockResolvedValue([]);
+
+      const result = await importer.fetchInstalledRuleIds({ rules });
+
+      expect(mockPrebuiltRuleAssetsClient.fetchLatestAssetsByRuleId).toHaveBeenCalledWith([]);
+      expect(result).toEqual([]);
+    });
+  });
 });

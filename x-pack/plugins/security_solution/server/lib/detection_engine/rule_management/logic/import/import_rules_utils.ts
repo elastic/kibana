@@ -83,6 +83,9 @@ export const importRules = async ({
     const prebuiltRuleAssets = await prebuiltRulesImporter.fetchPrebuiltRuleAssets({
       rules: batchParseObjects,
     });
+    const installedRuleIds = await prebuiltRulesImporter.fetchInstalledRuleIds({
+      rules: batchParseObjects,
+    });
 
     const newImportRuleResponse = await Promise.all(
       batchParseObjects.reduce<Array<Promise<ImportRuleResponse>>>((accum, parsedRule) => {
@@ -140,7 +143,7 @@ export const importRules = async ({
               const ruleSource = calculateRuleSourceForImport({
                 rule: parsedRule,
                 prebuiltRuleAssets,
-                installedRuleIds: [], // TODO
+                installedRuleIds,
               });
 
               parsedRule.rule_source = ruleSource;

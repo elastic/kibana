@@ -93,4 +93,37 @@ export class PrebuiltRulesImporter implements IPrebuiltRulesImporter {
 
     return this.ruleAssetsClient.fetchAssetsByVersion(prebuiltRulesToImport);
   }
+
+  /**
+   * Retrieves the rule IDs (`rule_id`) of installed prebuilt rules matching those
+   * of the specified rules. Can be used to determine whether the rule being
+   * imported is a custom rule or a prebuilt rule.
+   *
+   * @param rules - A list of rules being imported.
+   *
+   * @returns A list of the rule IDs that are installed.
+   *
+   */
+  public async fetchInstalledRuleIds({ rules }: { rules: MaybeRule[] }): Promise<string[]> {
+    if (!this.enabled) {
+      return [];
+    }
+
+    if (!this.latestPackagesInstalled) {
+      throw new Error(
+        'Installed rule IDs cannot be fetched until the latest rules package is installed. Call setup() on this object first.'
+      );
+    }
+
+    const ruleIds = rules.flatMap((rule) => {
+      if (rule instanceof Error) {
+        return [];
+      }
+      return rule.rule_id;
+    });
+
+    const installedRuleAssets = await this.ruleAssetsClient.fetchLatestAssetsByRuleId(ruleIds);
+
+    return installedRuleAssets.map((asset) => asset.rule_id);
+  }
 }
