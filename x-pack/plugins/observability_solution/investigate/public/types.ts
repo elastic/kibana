@@ -7,12 +7,13 @@
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 import type { AuthenticatedUser } from '@kbn/core/public';
+import type { GetInvestigationResponse, InvestigationItemTypes } from '@kbn/investigation-shared';
 import type { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/public';
-import type { GetInvestigationResponse } from '@kbn/investigation-shared';
 import type { FromSchema } from 'json-schema-to-ts';
 import type { InvestigateWidget } from '../common';
 import type { GlobalWidgetParameters, InvestigateWidgetCreate } from '../common/types';
 import type { UseInvestigationApi } from './hooks/use_investigation';
+import { ItemDefinition } from './investigation/item_definition_registry';
 
 export type OnWidgetAdd = (create: InvestigateWidgetCreate) => Promise<void>;
 
@@ -62,10 +63,17 @@ export interface InvestigateSetupDependencies {}
 export interface InvestigateStartDependencies {}
 
 export interface InvestigatePublicSetup {
+  // new
+  registerItemDefinition: (itemDefinition: ItemDefinition) => void;
+  // old
   register: (callback: (registerWidget: RegisterWidget) => Promise<void>) => void;
 }
 
 export interface InvestigatePublicStart {
+  // new:
+  getItemDefinitions: () => ItemDefinition[];
+  getItemDefinitionByType: (type: InvestigationItemTypes) => ItemDefinition | undefined;
+  // old:
   getWidgetDefinitions: () => WidgetDefinition[];
   useInvestigation: ({}: {
     user: AuthenticatedUser;

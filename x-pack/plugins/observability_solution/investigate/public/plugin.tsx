@@ -11,10 +11,11 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { GetInvestigationResponse } from '@kbn/investigation-shared';
+import { GetInvestigationResponse, InvestigationItemTypes } from '@kbn/investigation-shared';
 import type { Logger } from '@kbn/logging';
 import { useMemo } from 'react';
 import { createUseInvestigation } from './hooks/use_investigation';
+import { ItemDefinition, ItemDefinitionRegistry } from './investigation/item_definition_registry';
 import type {
   ConfigSchema,
   InvestigatePublicSetup,
@@ -33,19 +34,23 @@ export class InvestigatePlugin
       InvestigateStartDependencies
     >
 {
-  logger: Logger;
-
-  widgetRegistry: WidgetRegistry = new WidgetRegistry();
-
-  registrationPromises: Array<Promise<void>> = [];
+  private logger: Logger;
+  private widgetRegistry: WidgetRegistry = new WidgetRegistry();
+  private itemDefinitionRegistry: ItemDefinitionRegistry = new ItemDefinitionRegistry();
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
   }
+
   setup(coreSetup: CoreSetup, pluginsSetup: InvestigateSetupDependencies): InvestigatePublicSetup {
     return {
+      // new
+      registerItemDefinition: (definition: ItemDefinition) => {
+        this.itemDefinitionRegistry.registerItem(definition);
+      },
+      // old
       register: (callback) => {
-        const registrationPromise = Promise.race([
+        Promise.race([
           callback(this.widgetRegistry.registerWidget),
           new Promise<void>((resolve, reject) => {
             setTimeout(() => {
@@ -58,14 +63,17 @@ export class InvestigatePlugin
           );
           return Promise.resolve();
         });
-
-        this.registrationPromises.push(registrationPromise);
       },
     };
   }
 
   start(coreStart: CoreStart, pluginsStart: InvestigateStartDependencies): InvestigatePublicStart {
     return {
+      // new
+      getItemDefinitions: () => this.itemDefinitionRegistry.getItemDefinitions(),
+      getItemDefinitionByType: (type: InvestigationItemTypes) =>
+        this.itemDefinitionRegistry.getItemDefinitionByType(type),
+      // old
       getWidgetDefinitions: this.widgetRegistry.getWidgetDefinitions,
       useInvestigation: ({
         user,

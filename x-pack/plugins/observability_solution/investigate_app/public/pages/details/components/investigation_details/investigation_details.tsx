@@ -7,7 +7,7 @@
 import datemath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { AddObservationUI } from '../../../../components/add_observation_ui';
 import { InvestigateSearchBar } from '../../../../components/investigate_search_bar';
 import { InvestigateWidgetGrid } from '../../../../components/investigate_widget_grid';
@@ -27,7 +27,7 @@ export function InvestigationDetails({
       start: { investigate },
     },
   } = useKibana();
-  // const widgetDefinitions = investigate.getWidgetDefinitions();
+  const itemDefinitions = investigate.getItemDefinitions();
   const { data: investigationData } = useFetchInvestigation({ id: investigationId });
 
   const {
