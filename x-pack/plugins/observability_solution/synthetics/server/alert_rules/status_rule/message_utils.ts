@@ -138,10 +138,6 @@ export const DOWN_LABEL = i18n.translate('xpack.synthetics.alerts.monitorStatus.
   defaultMessage: `down`,
 });
 
-export const PENDING_LABEL = i18n.translate('xpack.synthetics.alerts.monitorStatus.pendingLabel', {
-  defaultMessage: `pending`,
-});
-
 export const UNAVAILABLE_LABEL = i18n.translate(
   'xpack.synthetics.alertRules.monitorStatus.unavailableUrlLabel',
   {

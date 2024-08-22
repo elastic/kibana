@@ -9,8 +9,6 @@ import pMap from 'p-map';
 import times from 'lodash/times';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { cloneDeep, intersection } from 'lodash';
-import moment from 'moment';
-import { getIntervalFromTimespan } from '../utils';
 import { FINAL_SUMMARY_FILTER, getRangeFilter } from '../../../../common/constants/client_defaults';
 import { OverviewPendingStatusMetaData, OverviewPing } from '../../../../common/runtime_types';
 import { createEsParams, SyntheticsEsClient } from '../../../lib';
@@ -177,49 +175,35 @@ export async function queryMonitorStatusAlert(
             const configId = ping.config_id;
             const monitorQueryId = ping.monitor.id;
 
-            const interval = getIntervalFromTimespan(ping.monitor.timespan);
-            const hasMissedSchedule = moment(ping['@timestamp']).isBefore(
-              moment().subtract(interval, 'seconds').subtract(1, 'minute')
-            );
-            if (hasMissedSchedule) {
-              pendingConfigs[`${configId}-${monLocationId}`] = {
-                monitorQueryId,
-                configId,
-                locationId: monLocationId,
-                timestamp: ping['@timestamp'],
-                status: 'pending',
-                ping,
-              };
-            } else {
-              const meta: AlertStatusMetaDataCodec = {
-                ping,
-                configId,
-                monitorQueryId,
-                locationId: monLocationId,
-                timestamp: ping['@timestamp'],
-                checks: {
-                  total: numberOfChecks,
-                  down: downChecks.hits.hits.reduce(
-                    (acc, curr) => acc + ((curr._source.summary.down ?? 0) > 0 ? 1 : 0),
-                    0
-                  ),
-                },
-              };
+            const meta: AlertStatusMetaDataCodec = {
+              ping,
+              configId,
+              monitorQueryId,
+              locationId: monLocationId,
+              timestamp: ping['@timestamp'],
+              checks: {
+                total: numberOfChecks,
+                down: downChecks.hits.hits.reduce(
+                  (acc, curr) => acc + ((curr._source.summary.down ?? 0) > 0 ? 1 : 0),
+                  0
+                ),
+              },
+            };
 
-              if (downCount > 0) {
-                down += 1;
-                downConfigs[`${configId}-${monLocationId}`] = {
-                  ...meta,
-                  status: 'down',
-                };
-              } else if (upCount > 0) {
-                up += 1;
-                upConfigs[`${configId}-${monLocationId}`] = {
-                  ...meta,
-                  status: 'up',
-                };
-              }
+            if (downCount > 0) {
+              down += 1;
+              downConfigs[`${configId}-${monLocationId}`] = {
+                ...meta,
+                status: 'down',
+              };
+            } else if (upCount > 0) {
+              up += 1;
+              upConfigs[`${configId}-${monLocationId}`] = {
+                ...meta,
+                status: 'up',
+              };
             }
+
             const monitorsMissingData = monitorsWithoutData.get(monitorQueryId) || [];
             monitorsWithoutData.set(
               monitorQueryId,

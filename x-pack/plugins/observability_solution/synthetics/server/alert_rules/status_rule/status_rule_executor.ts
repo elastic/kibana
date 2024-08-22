@@ -13,8 +13,6 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { queryFilterMonitors } from './queries/filter_monitors';
-import { periodToMs } from '../../routes/overview_status/overview_status';
-import { queryMonitorLastRun } from './queries/query_monitor_last_run';
 import { MonitorSummaryStatusRule, StatusRuleExecutorOptions } from './types';
 import {
   getAlertDetailsUrl,
@@ -171,7 +169,6 @@ export class StatusRuleExecutor {
         ...currentStatus,
         staleDownConfigs,
         monitorLocationsMap: monitorLocationMap,
-        pendingConfigs: this.filterOutRecentlyCreatedMonitors(currentStatus.pendingConfigs),
       };
     }
     const staleDownConfigs = this.markDeletedConfigs(prevDownConfigs);
@@ -452,51 +449,6 @@ export class StatusRuleExecutor {
       payload,
       context,
     });
-  }
-
-  filterOutRecentlyCreatedMonitors(allPendingConfigs: PendingConfigs) {
-    const monitors = this.monitors;
-
-    // filter out newly created monitors
-    const pendingConfigs: PendingConfigs = {};
-    Object.entries(allPendingConfigs).filter(([_id, { configId }]) => {
-      const monitor = monitors.find((m) => m.attributes.config_id === configId);
-      if (monitor) {
-        const schedule = monitor?.attributes.schedule;
-        const interval = periodToMs(schedule);
-        const from = moment().subtract(interval, 'ms');
-        const monitorCreatedAt = moment(monitor.created_at ?? monitor.updated_at);
-        if (monitorCreatedAt.isBefore(from)) {
-          pendingConfigs[_id] = allPendingConfigs[_id];
-        }
-      }
-    });
-
-    return pendingConfigs;
-  }
-
-  async getLastRunForPendingMonitors(pendingConfigs: PendingConfigs) {
-    const pendingConfigsIds: string[] = [];
-    const pendingConfigsList: Array<{
-      configId: string;
-      locationId: string;
-      monitorQueryId: string;
-    }> = [];
-
-    Object.entries(pendingConfigs).forEach(([_id, { configId, locationId, monitorQueryId }]) => {
-      pendingConfigsList.push({ configId, locationId, monitorQueryId });
-      pendingConfigsIds.push(configId);
-    });
-
-    const earliestMonitorCreatedAt = this.findEarliestMonitorCreatedAt(pendingConfigsIds);
-
-    const { lastFoundRuns } = await queryMonitorLastRun(
-      this.esClient,
-      pendingConfigsList,
-      earliestMonitorCreatedAt
-    );
-
-    return { lastFoundRuns, pendingConfigs };
   }
 
   findEarliestMonitorCreatedAt(pendingConfigsIds: string[]) {
