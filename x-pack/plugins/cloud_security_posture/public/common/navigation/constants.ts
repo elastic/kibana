@@ -127,5 +127,8 @@ export const cspIntegrationDocsNavigation: Record<
   cspm: {
     overviewPath: `${ELASTIC_BASE_SHORT_URL}/${CSPM_POLICY_TEMPLATE}`,
     getStartedPath: `${ELASTIC_BASE_SHORT_URL}/${CSPM_POLICY_TEMPLATE}-get-started`,
+    awsGetStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started.html`,
+    gcpGetStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started-gcp.html`,
+    azureGetStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started-azure.html`,
   },
 };

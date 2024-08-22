@@ -39,4 +39,7 @@ export type CloudSecurityPosturePageId =
 export interface CspIntegrationDocNavigationItem {
   overviewPath: string;
   getStartedPath: string;
+  awsGetStartedPath: string;
+  gcpGetStartedPath: string;
+  azureGetStartedPath: string;
 }
