@@ -161,6 +161,10 @@ const OutputContent = memo<{
   }
 
   if (isExecuteAction(action)) {
+    console.log('jest execute');
+    // if (action.agentType === 'crowdstrike') {
+    //   return <>{OUTPUT_MESSAGES.submittedSuccessfully(command)}</>;
+    // }
     return (
       <EuiFlexGroup direction="column" data-test-subj={getTestId('executeDetails')}>
         {action.agents.map((agentId) => (
@@ -210,6 +214,7 @@ const OutputContent = memo<{
   }
 
   if (action.agentType === 'crowdstrike') {
+    console.log('submitted successfully');
     return <>{OUTPUT_MESSAGES.submittedSuccessfully(command)}</>;
   }
 

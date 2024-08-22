@@ -42,6 +42,7 @@ export const ExecuteActionHostResponse = memo<ExecuteActionHostResponseProps>(
       [action.outputs, agentId]
     );
 
+    console.log({ outputContent, actionOutput: action });
     return (
       <>
         <EuiFlexItem>

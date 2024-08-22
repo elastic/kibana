@@ -33,7 +33,7 @@ const COMMANDS_WITH_ACCESS_TO_FILES: CommandsWithFileAccess = deepFreeze<Command
   execute: {
     endpoint: true,
     sentinel_one: false,
-    crowdstrike: true,
+    crowdstrike: false,
   },
   'running-processes': {
     endpoint: false,

@@ -363,7 +363,6 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     }
 
     const agentType = command === 'execute' ? 'crowdstrike' : req.body.agent_type || 'endpoint';
-    console.log({ agentType });
     const coreContext = await context.core;
     const user = coreContext.security.authc.getCurrentUser();
     const esClient = coreContext.elasticsearch.client.asInternalUser;

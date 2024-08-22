@@ -119,7 +119,6 @@ export const Console = memo<ConsoleProps>(
     const getTestId = useTestIdGenerator(commonProps['data-test-subj']);
     const managedConsole = useWithManagedConsole(managedKey);
 
-    console.log({ managedConsole });
     const scrollToBottom = useCallback(() => {
       // We need the `setTimeout` here because in some cases, the command output
       // will take a bit of time to populate its content due to the use of Promises

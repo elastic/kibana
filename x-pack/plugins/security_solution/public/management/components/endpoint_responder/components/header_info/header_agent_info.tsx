@@ -28,7 +28,6 @@ export const HeaderAgentInfo = memo<HeaderAgentInfoProps>(
     const { euiTheme } = useEuiTheme();
     const testId = useTestIdGenerator(dataTestSubj);
 
-    console.log({ agentType111: agentType });
     return (
       <EuiFlexGroup
         gutterSize="s"

@@ -219,7 +219,6 @@ export class CrowdstrikeConnector extends SubActionConnector<
   }
 
   public async initRTRSession({ alertIds, ...payload }: CrowdstrikeInitRTRParamsSchema) {
-    console.log({ payload });
     const response = await this.crowdstrikeApiRequest({
       url: this.urls.initRTRSession,
       method: 'post',
@@ -234,8 +233,6 @@ export class CrowdstrikeConnector extends SubActionConnector<
   }
 
   public async executeRTR({ alertIds, ...payload }: CrowdstrikeExecuteRTRParamsSchema) {
-    console.log({ payload: JSON.stringify(payload, null, 2) });
-    console.log({ batch: CrowdstrikeConnector.currentBatchId });
     const response = await this.crowdstrikeApiRequest({
       url: this.urls.executeRTR,
       method: 'post',
@@ -250,7 +247,6 @@ export class CrowdstrikeConnector extends SubActionConnector<
       responseSchema: CrowdstrikeExecuteRTRResponseSchema,
     });
 
-    console.log({ response: JSON.stringify(response, null, 2) });
     return response;
   }
 

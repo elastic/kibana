@@ -98,6 +98,7 @@ interface ShellInfoContentProps {
   textSize?: 's' | 'xs';
   title: string;
 }
+
 const ShellInfoContent = memo<ShellInfoContentProps>(({ content, textSize, title }) => (
   <StyledEuiText size={textSize}>
     <strong>
@@ -214,6 +215,7 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
       [dataTestSubj, outputContent.cwd, outputContent.shell, outputContent.shell_code, textSize]
     );
 
+    console.log({ outputContent: JSON.stringify(outputContent, null, 2) });
     return (
       <>
         <EuiFlexItem>
@@ -225,11 +227,11 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          {outputContent.stderr.length > 0 && (
+          {outputContent.stderr?.length > 0 && (
             <>
               <EuiSpacer size="m" />
               <ExecutionActionOutputAccordion
-                content={outputContent.stderr.length ? outputContent.stderr : undefined}
+                content={outputContent.stderr?.length ? outputContent.stderr : undefined}
                 data-test-subj={`${dataTestSubj}-error`}
                 isTruncated={outputContent.stderr_truncated}
                 isFileTruncated={outputContent.output_file_stderr_truncated}
@@ -241,7 +243,7 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
           )}
           <EuiSpacer size="m" />
           <ExecutionActionOutputAccordion
-            content={outputContent.stdout.length ? outputContent.stdout : undefined}
+            content={outputContent.stdout?.length ? outputContent.stdout : undefined}
             data-test-subj={`${dataTestSubj}-output`}
             isTruncated={outputContent.stdout_truncated}
             isFileTruncated={outputContent.output_file_stdout_truncated}

@@ -57,7 +57,6 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
   return useCallback(
     (props: ResponderInfoProps) => {
       const { agentId, agentType, capabilities, hostName, platform } = props;
-      console.log({ agentId, agentType });
       const isExternalEdr =
         (isSentinelOneV1Enabled && agentType === 'sentinel_one') ||
         (responseActionsCrowdstrikeManualHostIsolationEnabled && agentType === 'crowdstrike');

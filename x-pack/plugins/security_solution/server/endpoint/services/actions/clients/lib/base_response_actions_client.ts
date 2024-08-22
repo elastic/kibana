@@ -420,7 +420,6 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       };
     }
 
-    console.log({ agentType: this.agentType });
     if (
       !isActionSupportedByAgentType(
         this.agentType,

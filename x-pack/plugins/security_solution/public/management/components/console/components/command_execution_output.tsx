@@ -27,6 +27,7 @@ const CommandOutputContainer = styled.div`
 export interface CommandExecutionOutputProps {
   item: CommandHistoryItem;
 }
+
 export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
   ({ item: { command, state, id, enteredAt, isValid } }) => {
     const dispatch = useConsoleStateDispatch();
