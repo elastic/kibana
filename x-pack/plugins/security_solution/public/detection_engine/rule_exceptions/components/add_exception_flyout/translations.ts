@@ -61,13 +61,10 @@ export const ADD_ENDPOINT_EXCEPTION_SUCCESS = i18n.translate(
 );
 
 export const ADD_EXCEPTION_SUCCESS_DETAILS = (listType: string, listNames: string) =>
-  i18n.translate(
-    'xpack.securitySolution.ruleExceptions.addExceptionFlyout.closeAlerts.successDetails',
-    {
-      values: { listNames, listType },
-      defaultMessage: '{listType} exception has been added to shared lists: {listNames}.',
-    }
-  );
+  i18n.translate('xpack.securitySolution.ruleExceptions.addExceptionFlyout.successDetails', {
+    values: { listNames, listType },
+    defaultMessage: '{listType} exception has been added to shared lists: {listNames}.',
+  });
 
 export const ADD_RULE_EXCEPTION_SUCCESS_TITLE = i18n.translate(
   'xpack.securitySolution.ruleExceptions.addExceptionFlyout.addRuleExceptionToastSuccessTitle',
