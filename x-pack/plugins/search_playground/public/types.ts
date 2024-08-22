@@ -62,9 +62,6 @@ export interface AppServicesContext {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection?: UsageCollectionStart;
   console?: ConsolePluginStart;
-  featureFlags: {
-    searchPlaygroundEnabled: boolean;
-  };
 }
 
 export enum ChatFormFields {

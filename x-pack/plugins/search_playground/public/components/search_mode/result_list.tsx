@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,13 +15,11 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
-
-import React, { useState } from 'react';
 
 const DEMO_DATA = [
   { id: '123321', name: 'John Doe', age: 25 },
