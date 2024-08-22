@@ -19,7 +19,8 @@
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/usage-collection-plugin",
-    "@kbn/observability-ai-assistant-plugin"
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/config-schema"
   ],
   "exclude": [
     "target/**/*",
