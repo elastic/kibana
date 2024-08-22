@@ -22,9 +22,7 @@ import type { OnLlmResponse, TraceOptions } from '../../executors/types';
 interface StreamGraphParams {
   apmTracer: APMTracer;
   assistantGraph: DefaultAssistantGraph;
-  bedrockChatEnabled: boolean;
   inputs: GraphInputs;
-  llmType: string | undefined;
   logger: Logger;
   onLlmResponse?: OnLlmResponse;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
@@ -44,8 +42,6 @@ interface StreamGraphParams {
  */
 export const streamGraph = async ({
   apmTracer,
-  llmType,
-  bedrockChatEnabled,
   assistantGraph,
   inputs,
   logger,
@@ -83,7 +79,10 @@ export const streamGraph = async ({
     streamingSpan?.end();
   };
 
-  if ((llmType === 'bedrock' || llmType === 'gemini') && bedrockChatEnabled) {
+  if (
+    (inputs?.llmType === 'bedrock' || inputs?.llmType === 'gemini') &&
+    inputs?.bedrockChatEnabled
+  ) {
     const stream = await assistantGraph.streamEvents(
       inputs,
       {
@@ -93,7 +92,7 @@ export const streamGraph = async ({
         version: 'v2',
         streamMode: 'values',
       },
-      llmType === 'bedrock' ? { includeNames: ['Summarizer'] } : undefined
+      inputs?.llmType === 'bedrock' ? { includeNames: ['Summarizer'] } : undefined
     );
 
     for await (const { event, data, tags } of stream) {
