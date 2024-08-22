@@ -11,6 +11,7 @@ import type {
   LensConfig,
 } from '@kbn/lens-embeddable-utils/config_builder';
 import * as rt from 'io-ts';
+import { estypes } from '@elastic/elasticsearch';
 
 export const ItemTypeRT = rt.keyof({
   host: null,
@@ -244,38 +245,6 @@ export const ESBasicMetricAggRT = rt.record(
   ])
 );
 
-export const ESPercentileAggRT = rt.type({
-  percentiles: rt.type({
-    field: rt.string,
-    percents: rt.array(rt.number),
-  }),
-});
-
-export const ESCaridnalityAggRT = rt.type({
-  cardinality: rt.partial({
-    field: rt.string,
-  }),
-});
-
-export const ESBucketScriptAggRT = rt.type({
-  bucket_script: rt.intersection([
-    rt.type({
-      buckets_path: rt.record(rt.string, rt.string),
-      script: rt.type({
-        source: rt.string,
-        lang: rt.keyof({ painless: null, expression: null }),
-      }),
-    }),
-    rt.partial({ gap_policy: rt.keyof({ skip: null, insert_zeros: null }) }),
-  ]),
-});
-
-export const ESCumulativeSumAggRT = rt.type({
-  cumulative_sum: rt.type({
-    buckets_path: rt.string,
-  }),
-});
-
 export const ESDerivativeAggRT = rt.type({
   derivative: rt.type({
     buckets_path: rt.string,
@@ -290,62 +259,12 @@ export const ESSumBucketAggRT = rt.type({
   }),
 });
 
-export const ESTopMetricsAggRT = rt.type({
-  top_metrics: rt.intersection([
-    rt.type({
-      metrics: rt.union([rt.array(rt.type({ field: rt.string })), rt.type({ field: rt.string })]),
-    }),
-    rt.partial({
-      size: rt.number,
-      sort: rt.record(rt.string, rt.union([rt.literal('desc'), rt.literal('asc')])),
-    }),
-  ]),
+export type MetricsUIAggregation = Record<string, estypes.AggregationsAggregate>;
+
+export const ESTermsWithAggregationRT = rt.type({
+  terms: rt.type({ field: rt.string }),
+  aggregations: rt.UnknownRecord,
 });
-
-export const ESMaxPeriodFilterExistsAggRT = rt.type({
-  filter: rt.type({
-    exists: rt.type({
-      field: rt.string,
-    }),
-  }),
-  aggs: rt.type({
-    period: rt.type({
-      max: rt.type({
-        field: rt.string,
-      }),
-    }),
-  }),
-});
-
-export interface SnapshotTermsWithAggregation {
-  terms: { field: string };
-  aggregations: MetricsUIAggregation;
-}
-
-export const ESTermsWithAggregationRT: rt.Type<SnapshotTermsWithAggregation> = rt.recursion(
-  'SnapshotModelRT',
-  () =>
-    rt.type({
-      terms: rt.type({ field: rt.string }),
-      aggregations: MetricsUIAggregationRT,
-    })
-);
-
-export const ESAggregationRT = rt.union([
-  ESBasicMetricAggRT,
-  ESPercentileAggRT,
-  ESBucketScriptAggRT,
-  ESCumulativeSumAggRT,
-  ESDerivativeAggRT,
-  ESSumBucketAggRT,
-  ESTermsWithAggregationRT,
-  ESCaridnalityAggRT,
-  ESTopMetricsAggRT,
-  ESMaxPeriodFilterExistsAggRT,
-]);
-
-export const MetricsUIAggregationRT = rt.record(rt.string, ESAggregationRT);
-export type MetricsUIAggregation = rt.TypeOf<typeof MetricsUIAggregationRT>;
 
 export const SnapshotMetricTypeKeys = {
   count: null,

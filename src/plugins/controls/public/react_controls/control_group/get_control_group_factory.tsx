@@ -27,11 +27,8 @@ import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetc
 import { ControlStyle, ParentIgnoreSettings } from '../..';
 import {
   ControlGroupChainingSystem,
-  ControlWidth,
   CONTROL_GROUP_TYPE,
-  DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_STYLE,
-  DEFAULT_CONTROL_WIDTH,
 } from '../../../common';
 import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
 import { initControlsManager } from './init_controls_manager';
@@ -66,8 +63,6 @@ export const getControlGroupEmbeddableFactory = (services: {
     ) => {
       const {
         initialChildControlState,
-        defaultControlGrow,
-        defaultControlWidth,
         labelPosition: initialLabelPosition,
         chainingSystem,
         autoApplySelections,
@@ -87,12 +82,6 @@ export const getControlGroupEmbeddableFactory = (services: {
       );
       const ignoreParentSettings$ = new BehaviorSubject<ParentIgnoreSettings | undefined>(
         ignoreParentSettings
-      );
-      const grow = new BehaviorSubject<boolean | undefined>(
-        defaultControlGrow === undefined ? DEFAULT_CONTROL_GROW : defaultControlGrow
-      );
-      const width = new BehaviorSubject<ControlWidth | undefined>(
-        defaultControlWidth ?? DEFAULT_CONTROL_WIDTH
       );
       const labelPosition$ = new BehaviorSubject<ControlStyle>( // TODO: Rename `ControlStyle`
         initialLabelPosition ?? DEFAULT_CONTROL_STYLE // TODO: Rename `DEFAULT_CONTROL_STYLE`
@@ -174,18 +163,15 @@ export const getControlGroupEmbeddableFactory = (services: {
           const parentDataViewId = apiPublishesDataViews(parentApi)
             ? parentApi.dataViews.value?.[0]?.id
             : undefined;
+          const newControlState = controlsManager.getNewControlState();
           openDataControlEditor({
             initialState: {
-              grow: api.grow.getValue(),
-              width: api.width.getValue(),
+              ...newControlState,
               dataViewId:
-                controlsManager.api.lastUsedDataViewId$.value ??
-                parentDataViewId ??
-                defaultDataViewId ??
-                undefined,
+                newControlState.dataViewId ?? parentDataViewId ?? defaultDataViewId ?? undefined,
             },
             onSave: ({ type: controlType, state: initialState }) => {
-              api.addNewPanel({
+              controlsManager.api.addNewPanel({
                 panelType: controlType,
                 initialState: options?.controlInputTransform
                   ? options.controlInputTransform(
@@ -213,8 +199,6 @@ export const getControlGroupEmbeddableFactory = (services: {
             references,
           };
         },
-        grow,
-        width,
         dataViews,
         labelPosition: labelPosition$,
         saveNotification$: apiHasSaveNotification(parentApi)
