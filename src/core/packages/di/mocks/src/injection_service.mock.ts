@@ -8,6 +8,7 @@
  */
 
 import { Container } from 'inversify';
+import { once } from 'lodash';
 import type { CoreDiServiceSetup, CoreDiServiceStart } from '@kbn/core-di';
 import type { InternalCoreDiServiceSetup, InternalCoreDiServiceStart } from '@kbn/core-di-internal';
 import { MethodKeysOf } from '@kbn/utility-types';
@@ -22,41 +23,30 @@ function createContainer() {
   return container as jest.Mocked<Container>;
 }
 
-function createSetupContract() {
-  const mock: jest.MockedObjectDeep<CoreDiServiceSetup> = {
-    load: jest.fn(),
+function createSetupContract(): jest.MockedObjectDeep<CoreDiServiceSetup> {
+  return {
+    getContainer: jest.fn().mockImplementation(once(createContainer)),
   };
-
-  return mock;
 }
 
-const createStartContract = () => {
-  const mock: jest.MockedObjectDeep<CoreDiServiceStart> = {
-    getContainer: jest.fn().mockImplementation(createContainer),
+function createStartContract(): jest.MockedObjectDeep<CoreDiServiceStart> {
+  const getContainer = once(createContainer);
+
+  return {
+    fork: jest.fn().mockImplementation(once(() => getContainer().createChild())),
+    getContainer: jest.fn().mockImplementation(getContainer),
   };
+}
 
-  return mock;
-};
+function createInternalSetupContract(): jest.MockedObjectDeep<InternalCoreDiServiceSetup> {
+  return createSetupContract();
+}
 
-const createInternalSetupContract = () => {
-  const mock: jest.Mocked<InternalCoreDiServiceSetup> = {
-    load: jest.fn(),
-  };
-
-  return mock;
-};
-
-const createInternalStartContract = () => {
-  const mock: jest.Mocked<InternalCoreDiServiceStart> = {
-    fork: jest.fn(createContainer),
-    getContainer: jest.fn().mockImplementation(createContainer),
-  };
-
-  return mock;
-};
+function createInternalStartContract(): jest.MockedObjectDeep<InternalCoreDiServiceStart> {
+  return createStartContract();
+}
 
 export const injectionServiceMock = {
-  createContainer,
   createSetupContract,
   createStartContract,
   createInternalSetupContract,
