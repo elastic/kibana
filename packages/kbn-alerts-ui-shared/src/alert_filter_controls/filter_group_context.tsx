@@ -17,7 +17,7 @@ export interface FilterGroupContextType {
   initialControls: FilterControlConfig[];
   dataViewId: string;
   controlGroup: ControlGroupRendererApi | undefined;
-  controlGroupInputUpdates: ControlGroupRuntimeState | undefined;
+  controlGroupStateUpdates: ControlGroupRuntimeState | undefined;
   isViewMode: boolean;
   hasPendingChanges: boolean;
   pendingChangesPopoverOpen: boolean;

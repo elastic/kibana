@@ -24,7 +24,7 @@ export const FilterGroupContextMenu = () => {
 
   const {
     isViewMode,
-    controlGroupInputUpdates,
+    controlGroupStateUpdates,
     controlGroup,
     switchToViewMode,
     switchToEditMode,
@@ -51,7 +51,7 @@ export const FilterGroupContextMenu = () => {
   );
 
   const resetSelection = useCallback(async () => {
-    if (!controlGroupInputUpdates) return;
+    if (!controlGroupStateUpdates) return;
     // remove existing embeddables
 
     const newInput = { initialChildControlState: {} };
@@ -72,7 +72,7 @@ export const FilterGroupContextMenu = () => {
     switchToViewMode();
     setShowFiltersChangedBanner(false);
   }, [
-    controlGroupInputUpdates,
+    controlGroupStateUpdates,
     controlGroup,
     initialControls,
     dataViewId,

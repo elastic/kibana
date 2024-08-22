@@ -7,7 +7,7 @@
  */
 
 import { pickBy } from 'lodash';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,12 +21,8 @@ import {
   EuiSkeletonRectangle,
 } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import {
-  ControlGroupInput,
-  OPTIONS_LIST_CONTROL,
-  RANGE_SLIDER_CONTROL,
-} from '@kbn/controls-plugin/common';
-import { ControlStateTransform } from '@kbn/controls-plugin/public';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
+import { ControlGroupRuntimeState, ControlStateTransform } from '@kbn/controls-plugin/public';
 import {
   ACTION_DELETE_CONTROL,
   ACTION_EDIT_CONTROL,
@@ -38,6 +34,8 @@ const INPUT_KEY = 'kbnControls:saveExample:input';
 
 const WITH_CUSTOM_PLACEHOLDER = 'Custom Placeholder';
 
+type StoredState = ControlGroupRuntimeState & { disabledActions: string[] };
+
 export const EditExample = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -46,29 +44,29 @@ export const EditExample = () => {
     [id: string]: boolean;
   }>({});
 
-  function onChangeIconsMultiIcons(optionId: string) {
-    const newToggleIconIdToSelectedMapIcon = {
-      ...toggleIconIdToSelectedMapIcon,
-      ...{
-        [optionId]: !toggleIconIdToSelectedMapIcon[optionId],
-      },
-    };
-
+  useEffect(() => {
     if (controlGroupAPI) {
       const disabledActions: string[] = Object.keys(
-        pickBy(newToggleIconIdToSelectedMapIcon, (value) => value)
+        pickBy(
+          toggleIconIdToSelectedMapIcon,
+          (value, key) => value && key !== WITH_CUSTOM_PLACEHOLDER
+        )
       );
       controlGroupAPI.setDisabledActionIds(disabledActions);
     }
-
-    setToggleIconIdToSelectedMapIcon(newToggleIconIdToSelectedMapIcon);
-  }
+  }, [controlGroupAPI, toggleIconIdToSelectedMapIcon]);
 
   async function onSave() {
     if (!controlGroupAPI) return;
 
     setIsSaving(true);
-    localStorage.setItem(INPUT_KEY, JSON.stringify(controlGroupAPI.snapshotRuntimeState()));
+    localStorage.setItem(
+      INPUT_KEY,
+      JSON.stringify({
+        ...controlGroupAPI.snapshotRuntimeState(),
+        disabledActions: controlGroupAPI.disabledActionIds.getValue(), // not part of runtime
+      })
+    );
 
     // simulated async save await
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -82,12 +80,12 @@ export const EditExample = () => {
     // simulated async load await
     await new Promise((resolve) => setTimeout(resolve, 6000));
 
-    let input: Partial<ControlGroupInput> = {};
+    let state: Partial<StoredState> = {};
+    let disabledActions = [];
     const inputAsString = localStorage.getItem(INPUT_KEY);
     if (inputAsString) {
       try {
-        input = JSON.parse(inputAsString);
-        const disabledActions = input.disabledActions ?? [];
+        ({ disabledActions, ...state } = JSON.parse(inputAsString));
         setToggleIconIdToSelectedMapIcon({
           [ACTION_EDIT_CONTROL]: disabledActions.includes(ACTION_EDIT_CONTROL),
           [ACTION_DELETE_CONTROL]: disabledActions.includes(ACTION_DELETE_CONTROL),
@@ -98,7 +96,7 @@ export const EditExample = () => {
       }
     }
     setIsLoading(false);
-    return input;
+    return state;
   }
 
   const controlStateTransform: ControlStateTransform = (newState, type) => {
@@ -166,7 +164,15 @@ export const EditExample = () => {
               ]}
               idToSelectedMap={toggleIconIdToSelectedMapIcon}
               type="multi"
-              onChange={(id: string) => onChangeIconsMultiIcons(id)}
+              onChange={(optionId: string) => {
+                const newToggleIconIdToSelectedMapIcon = {
+                  ...toggleIconIdToSelectedMapIcon,
+                  ...{
+                    [optionId]: !toggleIconIdToSelectedMapIcon[optionId],
+                  },
+                };
+                setToggleIconIdToSelectedMapIcon(newToggleIconIdToSelectedMapIcon);
+              }}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

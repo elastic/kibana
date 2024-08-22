@@ -30,7 +30,7 @@ import { Observable } from 'rxjs';
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { ParentIgnoreSettings } from '../..';
 import { ControlGroupChainingSystem } from '../../../common/control_group/types';
-import { ControlStyle, ControlWidth } from '../../types';
+import { ControlStyle } from '../../types';
 import { DefaultControlState } from '../controls/types';
 import { ControlFetchContext } from './control_fetch/control_fetch';
 import { FieldFilterPredicate } from '../../control_group/types';

@@ -198,9 +198,9 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       if (!Array.isArray(controlsUrlState)) {
         throw new Error(URL_PARAM_ARRAY_EXCEPTION_MSG);
       }
-      const storedControlGroupInput = getStoredControlState();
-      if (storedControlGroupInput) {
-        const panelsFormatted = getFilterItemObjListFromControlState(storedControlGroupInput);
+      const storedControlGroupState = getStoredControlState();
+      if (storedControlGroupState) {
+        const panelsFormatted = getFilterItemObjListFromControlState(storedControlGroupState);
         if (
           controlsUrlState.length &&
           !isEqualWith(
@@ -275,9 +275,9 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
      * */
 
     let controlsFromLocalStorage: FilterControlConfig[] = [];
-    const storedControlGroupInput = getStoredControlState();
-    if (storedControlGroupInput) {
-      controlsFromLocalStorage = getFilterItemObjListFromControlState(storedControlGroupInput);
+    const storedControlGroupState = getStoredControlState();
+    if (storedControlGroupState) {
+      controlsFromLocalStorage = getFilterItemObjListFromControlState(storedControlGroupState);
     }
     let overridingControls = mergeControls({
       controlsWithPriority: [controlsFromUrl, controlsFromLocalStorage],
@@ -432,7 +432,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
         initialControls: defaultControls,
         isViewMode,
         controlGroup,
-        controlGroupInputUpdates: controlGroupStateUpdates,
+        controlGroupStateUpdates,
         hasPendingChanges,
         pendingChangesPopoverOpen,
         setHasPendingChanges,
