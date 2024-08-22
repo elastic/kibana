@@ -30,12 +30,11 @@ export const GridPanel = ({
   setInteractionEvent: (interactionData?: Omit<PanelInteractionEvent, 'targetRowIndex'>) => void;
 }) => {
   const panelRef = useRef<HTMLDivElement>(null);
-  const ghostRef = useRef<HTMLDivElement>(null);
   const thisPanelActive = activePanelId === panelData.id;
 
   const interactionStart = useCallback(
     (type: 'drag' | 'resize', e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-      if (!panelRef.current || !ghostRef.current) return;
+      if (!panelRef.current) return;
       e.preventDefault();
       e.stopPropagation();
       const panelRect = panelRef.current.getBoundingClientRect();
@@ -82,19 +81,6 @@ export const GridPanel = ({
           }
         `}
       >
-        {/* Hidden dragging ghost */}
-        <div
-          css={css`
-            top: 0;
-            left: 0;
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            pointer-events: none;
-          `}
-          ref={ghostRef}
-        />
         {/* drag handle */}
         <div
           className="dragHandle"

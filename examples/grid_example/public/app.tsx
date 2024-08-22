@@ -15,9 +15,9 @@ import { EuiPageTemplate, EuiProvider } from '@elastic/eui';
 export const GridExample = () => {
   return (
     <EuiProvider>
-      <EuiPageTemplate offset={0} restrictWidth={false}>
+      <EuiPageTemplate grow={false} offset={0} restrictWidth={false}>
         <EuiPageTemplate.Header iconType={'dashboardApp'} pageTitle="Grid Layout Example" />
-        <EuiPageTemplate.Section>
+        <EuiPageTemplate.Section color="subdued">
           <GridLayout
             renderPanelContents={(id) => {
               return <div style={{ padding: 8 }}>{id}</div>;
@@ -39,14 +39,14 @@ export const GridExample = () => {
                   },
                 },
                 {
+                  title: 'Small section',
+                  isCollapsed: false,
+                  panels: { panel9: { column: 0, row: 0, width: 12, height: 16, id: 'panel9' } },
+                },
+                {
                   title: 'Another small section',
                   isCollapsed: false,
                   panels: { panel10: { column: 24, row: 0, width: 12, height: 6, id: 'panel10' } },
-                },
-                {
-                  title: 'Small section',
-                  isCollapsed: false,
-                  panels: { panel9: { column: 0, row: 0, width: 12, height: 6, id: 'panel9' } },
                 },
               ];
 
