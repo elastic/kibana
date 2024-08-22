@@ -47,7 +47,6 @@ components:
       enum:
         - ndjson
         - json
-        - multiline_json
         - csv
         - structured
         - unstructured

@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { Docs, Mapping, Pipeline, SamplesFormat } from './common_attributes';
 

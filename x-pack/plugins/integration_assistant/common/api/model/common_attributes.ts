@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { ESProcessorItem } from './processor_attributes';
 
@@ -58,7 +58,6 @@ export type SamplesFormatName = z.infer<typeof SamplesFormatName>;
 export const SamplesFormatName = z.enum([
   'ndjson',
   'json',
-  'multiline_json',
   'csv',
   'structured',
   'unstructured',
@@ -205,11 +204,11 @@ export const Integration = z.object({
 export type LangSmithOptions = z.infer<typeof LangSmithOptions>;
 export const LangSmithOptions = z.object({
   /**
-   * The project name to use with tracing.
+   * The project name.
    */
   projectName: z.string(),
   /**
-   * The api key for the project
+   * The apiKey to use for tracing.
    */
   apiKey: z.string(),
 });
