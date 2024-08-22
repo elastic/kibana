@@ -17,7 +17,7 @@ import { Section } from '../../components/section';
 import { ServicesSectionTitle } from './section_titles';
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
 import { LinkToApmServices } from '../../links';
-import { APM_HOST_FILTER_FIELD } from '../../constants';
+import { APM_HOST_FILTER_FIELD, APM_HOST_TROUBLESHOOTING_LINK } from '../../constants';
 import { LinkToApmService } from '../../links/link_to_apm_service';
 import { useKibanaEnvironmentContext } from '../../../../hooks/use_kibana';
 import { useRequestObservable } from '../../hooks/use_request_observable';
@@ -134,7 +134,7 @@ export const ServicesContent = ({
           />{' '}
           <EuiLink
             data-test-subj="assetDetailsAPMTroubleshootingLink"
-            href="https://ela.st/host-troubleshooting"
+            href={APM_HOST_TROUBLESHOOTING_LINK}
             target="_blank"
           >
             <FormattedMessage
@@ -150,8 +150,8 @@ export const ServicesContent = ({
             defaultMessage="No services found on this host."
           />{' '}
           <EuiLink
-            data-test-subj="assetDetailsAPMTroubleshootingLink"
-            href="https://ela.st/host-troubleshooting"
+            data-test-subj="assetDetailsAPMHostTroubleshootingLink"
+            href={APM_HOST_TROUBLESHOOTING_LINK}
             target="_blank"
           >
             <FormattedMessage
