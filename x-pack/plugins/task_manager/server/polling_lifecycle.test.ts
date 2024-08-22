@@ -134,7 +134,7 @@ describe('TaskPollingLifecycle', () => {
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
     });
 
-    test('provides TaskClaiming with the capacity available when strategy = CLAIM_STRATEGY_DEFAULT', () => {
+    test('provides TaskClaiming with the capacity available when strategy = CLAIM_STRATEGY_UPDATE_BY_QUERY', () => {
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
       const capacity$ = new Subject<number>();
 

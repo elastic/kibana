@@ -15,7 +15,7 @@ import {
   someField,
   eventCategoryWithUnallowedValues,
 } from '../../mock/enriched_field_metadata/mock_enriched_field_metadata';
-import { TestProviders } from '../../mock/test_providers/test_providers';
+import { TestExternalProviders } from '../../mock/test_providers/test_providers';
 import {
   DOCUMENT_VALUES_ACTUAL,
   ECS_DESCRIPTION,
@@ -30,7 +30,7 @@ import { EMPTY_PLACEHOLDER, getCommonTableColumns } from '.';
 describe('getCommonTableColumns', () => {
   test('it returns the expected column configuration', () => {
     expect(getCommonTableColumns().map((x) => omit('render', x))).toEqual([
-      { field: 'indexFieldName', name: FIELD, sortable: true, truncateText: false, width: '20%' },
+      { field: 'indexFieldName', name: FIELD, sortable: true, truncateText: false, width: '15%' },
       {
         field: 'type',
         name: ECS_MAPPING_TYPE_EXPECTED,
@@ -64,7 +64,7 @@ describe('getCommonTableColumns', () => {
         name: ECS_DESCRIPTION,
         sortable: false,
         truncateText: false,
-        width: '20%',
+        width: '25%',
       },
     ]);
   });
@@ -76,9 +76,9 @@ describe('getCommonTableColumns', () => {
       const expected = 'keyword';
 
       render(
-        <TestProviders>
+        <TestExternalProviders>
           {typeColumnRender != null && typeColumnRender(eventCategory.type, eventCategory)}
-        </TestProviders>
+        </TestExternalProviders>
       );
 
       expect(screen.getByTestId('codeSuccess')).toHaveTextContent(expected);
@@ -89,9 +89,9 @@ describe('getCommonTableColumns', () => {
       const typeColumnRender = columns[1].render;
 
       render(
-        <TestProviders>
+        <TestExternalProviders>
           {typeColumnRender != null && typeColumnRender(undefined, eventCategory)}
-        </TestProviders>
+        </TestExternalProviders>
       );
 
       expect(screen.getByTestId('codeSuccess')).toHaveTextContent(EMPTY_PLACEHOLDER);
@@ -113,13 +113,13 @@ describe('getCommonTableColumns', () => {
         };
 
         render(
-          <TestProviders>
+          <TestExternalProviders>
             {indexFieldTypeColumnRender != null &&
               indexFieldTypeColumnRender(
                 withTypeMismatchSameFamily.indexFieldType,
                 withTypeMismatchSameFamily
               )}
-          </TestProviders>
+          </TestExternalProviders>
         );
       });
 
@@ -146,13 +146,13 @@ describe('getCommonTableColumns', () => {
         };
 
         render(
-          <TestProviders>
+          <TestExternalProviders>
             {indexFieldTypeColumnRender != null &&
               indexFieldTypeColumnRender(
                 withTypeMismatchDifferentFamily.indexFieldType,
                 withTypeMismatchDifferentFamily
               )}
-          </TestProviders>
+          </TestExternalProviders>
         );
 
         expect(screen.getByTestId('codeDanger')).toHaveTextContent(indexFieldType);
@@ -165,10 +165,10 @@ describe('getCommonTableColumns', () => {
         const indexFieldTypeColumnRender = columns[2].render;
 
         render(
-          <TestProviders>
+          <TestExternalProviders>
             {indexFieldTypeColumnRender != null &&
               indexFieldTypeColumnRender(eventCategory.indexFieldType, eventCategory)}
-          </TestProviders>
+          </TestExternalProviders>
         );
 
         expect(screen.getByTestId('codeSuccess')).toHaveTextContent(eventCategory.indexFieldType);
@@ -187,10 +187,10 @@ describe('getCommonTableColumns', () => {
           : 'unexpected';
 
       render(
-        <TestProviders>
+        <TestExternalProviders>
           {allowedValuesolumnRender != null &&
             allowedValuesolumnRender(eventCategory.allowed_values, eventCategory)}
-        </TestProviders>
+        </TestExternalProviders>
       );
 
       expect(screen.getByTestId('ecsAllowedValues')).toHaveTextContent(expectedAllowedValuesNames);
@@ -206,10 +206,10 @@ describe('getCommonTableColumns', () => {
       };
 
       render(
-        <TestProviders>
+        <TestExternalProviders>
           {allowedValuesolumnRender != null &&
             allowedValuesolumnRender(undefined, withUndefinedAllowedValues)}
-        </TestProviders>
+        </TestExternalProviders>
       );
 
       expect(screen.getByTestId('ecsAllowedValuesEmpty')).toHaveTextContent(EMPTY_PLACEHOLDER);
@@ -222,13 +222,13 @@ describe('getCommonTableColumns', () => {
       const indexInvalidValuesRender = columns[4].render;
 
       render(
-        <TestProviders>
+        <TestExternalProviders>
           {indexInvalidValuesRender != null &&
             indexInvalidValuesRender(
               eventCategoryWithUnallowedValues.indexInvalidValues,
               eventCategoryWithUnallowedValues
             )}
-        </TestProviders>
+        </TestExternalProviders>
       );
 
       expect(screen.getByTestId('indexInvalidValues')).toHaveTextContent(
@@ -249,10 +249,10 @@ describe('getCommonTableColumns', () => {
       };
 
       render(
-        <TestProviders>
+        <TestExternalProviders>
           {descriptionolumnRender != null &&
             descriptionolumnRender(withDescription.description, withDescription)}
-        </TestProviders>
+        </TestExternalProviders>
       );
 
       expect(screen.getByTestId('description')).toHaveTextContent(expectedDescription);
@@ -263,9 +263,9 @@ describe('getCommonTableColumns', () => {
       const descriptionolumnRender = columns[5].render;
 
       render(
-        <TestProviders>
+        <TestExternalProviders>
           {descriptionolumnRender != null && descriptionolumnRender(undefined, someField)}
-        </TestProviders>
+        </TestExternalProviders>
       );
 
       expect(screen.getByTestId('emptyDescription')).toHaveTextContent(EMPTY_PLACEHOLDER);
