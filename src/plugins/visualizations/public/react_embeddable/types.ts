@@ -15,6 +15,7 @@ import {
   HasSupportedTriggers,
   PublishesDataLoading,
   PublishesDataViews,
+  PublishesTimeRange,
   SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
@@ -92,6 +93,7 @@ export type VisualizeApi = HasEditCapabilities &
   HasVisualizeConfig &
   HasInspectorAdapters &
   HasSupportedTriggers &
+  PublishesTimeRange &
   DefaultEmbeddableApi<VisualizeSerializedState, VisualizeRuntimeState> & {
     updateVis: (vis: DeepPartial<SerializedVis<VisParams>>) => void;
     openInspector: () => OverlayRef | undefined;

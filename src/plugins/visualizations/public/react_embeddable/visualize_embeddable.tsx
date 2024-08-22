@@ -75,6 +75,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
         })
       : (initialState as VisualizeRuntimeState);
 
+    // Initialize dynamic actions
     const dynamicActionsApi = embeddableEnhancedStart?.initializeReactEmbeddableDynamicActions(
       uuid,
       () => titlesApi.panelTitle.getValue(),
@@ -85,18 +86,21 @@ export const getVisualizeEmbeddableFactory: (deps: {
 
     const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
 
+    // Count renders; mostly used for testing.
     const renderCount$ = new BehaviorSubject<number>(0);
     const hasRendered$ = new BehaviorSubject<boolean>(false);
 
+    // Track vis data and initialize it into a vis instance
     const serializedVis$ = new BehaviorSubject<SerializedVis>(state.serializedVis);
     const initialVisInstance = await createVisInstance(state.serializedVis);
     const vis$ = new BehaviorSubject<Vis>(initialVisInstance);
 
+    // Track UI state
     const onUiStateChange = () => serializedVis$.next(vis$.getValue().serialize());
     initialVisInstance.uiState.on('change', onUiStateChange);
     vis$.subscribe((vis) => vis.uiState.on('change', onUiStateChange));
 
-    // when the serialized vis changes, update the vis instance
+    // When the serialized vis changes, update the vis instance
     serializedVis$.subscribe(async (serializedVis) => {
       const currentVis = vis$.getValue();
       if (currentVis) currentVis.uiState.off('change', onUiStateChange);
@@ -104,6 +108,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
       await updateExpressionParams();
     });
 
+    // Track visualizations linked to a saved object in the library
     const savedObjectId$ = new BehaviorSubject<string | undefined>(
       state.savedObjectId ?? state.serializedVis.id
     );
@@ -111,14 +116,22 @@ export const getVisualizeEmbeddableFactory: (deps: {
       undefined
     );
     const linkedToLibrary$ = new BehaviorSubject<boolean | undefined>(state.linkedToLibrary);
-    const visData$ = new BehaviorSubject<unknown>({});
 
-    const searchSessionId$ = new BehaviorSubject<string | undefined>('');
-    const timeRange = initializeTimeRange(state);
+    // Track the vis expression
     const expressionParams$ = new BehaviorSubject<ExpressionRendererParams>({
       expression: '',
     });
     const expressionAbortController$ = new BehaviorSubject<AbortController>(new AbortController());
+    let updateExpressionParams = async () => {};
+
+    const {
+      api: customTimeRangeApi,
+      serialize: serializeCustomTimeRange,
+      comparators: customTimeRangeComparators,
+    } = initializeTimeRange(state);
+
+    const searchSessionId$ = new BehaviorSubject<string | undefined>('');
+
     const viewMode$ = apiPublishesViewMode(parentApi)
       ? parentApi.viewMode
       : new BehaviorSubject('view');
@@ -126,15 +139,16 @@ export const getVisualizeEmbeddableFactory: (deps: {
     const executionContext = apiHasExecutionContext(parentApi)
       ? parentApi.executionContext
       : undefined;
+
     const disableTriggers = apiHasDisableTriggers(parentApi)
       ? parentApi.disableTriggers
       : undefined;
+
     const parentApiContext = apiHasAppContext(parentApi) ? parentApi.getAppContext() : undefined;
 
     const inspectorAdapters$ = new BehaviorSubject<Record<string, unknown>>({});
 
-    let updateExpressionParams = async () => {};
-
+    // Track data views
     let initialDataViews: DataView[] | undefined = [];
     if (initialVisInstance.data.indexPattern)
       initialDataViews = [initialVisInstance.data.indexPattern];
@@ -145,11 +159,12 @@ export const getVisualizeEmbeddableFactory: (deps: {
     }
 
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+
     const defaultPanelTitle = new BehaviorSubject<string | undefined>(initialVisInstance.title);
 
     const api = buildApi(
       {
-        ...timeRange.api,
+        ...customTimeRangeApi,
         ...titlesApi,
         ...(dynamicActionsApi?.dynamicActionsApi ?? {}),
         defaultPanelTitle,
@@ -173,7 +188,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
               apiIsOfType(parentApi, VISUALIZE_APP_NAME) ? false : linkedToLibrary$.getValue(),
             ...(savedObjectProperties ? { savedObjectProperties } : {}),
             ...(dynamicActionsApi?.serializeDynamicActions?.() ?? {}),
-            ...timeRange.serialize(),
+            ...serializeCustomTimeRange(),
           });
         },
         getVis: () => vis$.getValue(),
@@ -189,7 +204,8 @@ export const getVisualizeEmbeddableFactory: (deps: {
           const parentTimeRange = apiPublishesTimeRange(parentApi)
             ? parentApi.timeRange$.getValue()
             : {};
-          const customTimeRange = timeRange.api.timeRange$.getValue();
+          const customTimeRange = customTimeRangeApi.timeRange$.getValue();
+
           await stateTransferService.navigateToEditor('visualize', {
             path: editPath,
             state: {
@@ -249,7 +265,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
               }),
           });
         },
-        // library transforms
+        // Library transforms
         saveToLibrary: (newTitle: string) => {
           titlesApi.setPanelTitle(newTitle);
           const { rawState, references } = serializeState({
@@ -282,7 +298,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
       },
       {
         ...titleComparators,
-        ...timeRange.comparators,
+        ...customTimeRangeComparators,
         ...(dynamicActionsApi?.dynamicActionsComparator ?? {
           enhancements: getUnchangingComparator(),
         }),
@@ -364,7 +380,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
               ? parentApi.timeslice$.getValue()
               : undefined;
 
-            const customTimeRange = timeRange.api.timeRange$.getValue();
+            const customTimeRange = customTimeRangeApi.timeRange$.getValue();
             const parentTimeRange = apiPublishesTimeRange(parentApi) ? data.timeRange : undefined;
             const timesliceTimeRange = timeslice
               ? {
@@ -374,7 +390,10 @@ export const getVisualizeEmbeddableFactory: (deps: {
                 }
               : undefined;
 
-            // Precedence should be: custom time range from timeRange API > timeslice time range > parent API time range from e.g. unified search
+            // Precedence should be:
+            //  custom time range from state >
+            //  timeslice time range >
+            //  parent API time range from e.g. unified search
             const timeRangeToRender = customTimeRange ?? timesliceTimeRange ?? parentTimeRange;
 
             updateExpressionParams = async () => {
@@ -451,8 +470,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
                     await getUiActions().getTrigger(triggerId).exec(context);
                   }
                 },
-                onData: (newData, inspectorAdapters) => {
-                  visData$.next(newData);
+                onData: (_, inspectorAdapters) => {
                   inspectorAdapters$.next(
                     typeof inspectorAdapters === 'function'
                       ? inspectorAdapters()
