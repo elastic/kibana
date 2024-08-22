@@ -36,7 +36,7 @@ describe('request diagnostics handler', () => {
   let mockRequest: KibanaRequest<
     { agentId: string },
     undefined,
-    { additional_metrics: RequestDiagnosticsAdditionalMetrics[] },
+    { additional_metrics: RequestDiagnosticsAdditionalMetrics[]; exclude_events_log?: boolean },
     any
   >;
 
@@ -59,7 +59,7 @@ describe('request diagnostics handler', () => {
     } as unknown as RequestHandlerContext;
     mockRequest = httpServerMock.createKibanaRequest({
       params: { agentId: 'agent1' },
-      body: { additional_metrics: ['CPU'] },
+      body: { additional_metrics: ['CPU'], exclude_events_log: false },
     });
   });
 

@@ -133,24 +133,20 @@ export const AgentRequestDiagnosticsModal: React.FunctionComponent<Props> = ({
           defaultMessage="Diagnostics files are stored in Elasticsearch, and as such can incur storage costs. By default, files are periodically deleted via an ILM policy."
         />
       </p>
-      <p>
-        <EuiCheckbox
-          id="cpuMetricsCheckbox"
-          data-test-subj="cpuMetricsCheckbox"
-          label="Collect additional CPU metrics"
-          checked={cpuMetricsEnabled}
-          onChange={() => setCPUMetricsEnabled(!cpuMetricsEnabled)}
-        />
-      </p>
-      <p>
-        <EuiCheckbox
-          id="includeEventsLogCheckbox"
-          data-test-subj="includeEventsLogCheckbox"
-          label="Include Events Logs (might contain sensible information)"
-          checked={includeEventsLogEnabled}
-          onChange={() => setIncludeEventsLog(!includeEventsLogEnabled)}
-        />
-      </p>
+      <EuiCheckbox
+        id="cpuMetricsCheckbox"
+        data-test-subj="cpuMetricsCheckbox"
+        label="Collect additional CPU metrics"
+        checked={cpuMetricsEnabled}
+        onChange={() => setCPUMetricsEnabled(!cpuMetricsEnabled)}
+      />
+      <EuiCheckbox
+        id="includeEventsLogCheckbox"
+        data-test-subj="includeEventsLogCheckbox"
+        label="Include Events Logs (might contain sensible information)"
+        checked={includeEventsLogEnabled}
+        onChange={() => setIncludeEventsLog(!includeEventsLogEnabled)}
+      />
     </EuiConfirmModal>
   );
 };
