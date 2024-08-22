@@ -197,9 +197,9 @@ describe(' Filter Group Component ', () => {
       const returnValueWatcher = jest.fn();
       (controlGroupMock as unknown as ControlGroupRendererApi).openAddDataControlFlyout = jest
         .fn()
-        .mockImplementationOnce(({ controlInputTransform }) => {
-          if (controlInputTransform) {
-            const returnValue = controlInputTransform({}, 'NOT_OPTIONS_LIST_CONTROL');
+        .mockImplementationOnce(({ controlStateTransform }) => {
+          if (controlStateTransform) {
+            const returnValue = controlStateTransform({}, 'NOT_OPTIONS_LIST_CONTROL');
             returnValueWatcher(returnValue);
           }
         });
@@ -234,9 +234,9 @@ describe(' Filter Group Component ', () => {
       const returnValueWatcher = jest.fn();
       (controlGroupMock as unknown as ControlGroupRendererApi).openAddDataControlFlyout = jest
         .fn()
-        .mockImplementationOnce(({ controlInputTransform }) => {
-          if (controlInputTransform) {
-            const returnValue = controlInputTransform({}, OPTIONS_LIST_CONTROL);
+        .mockImplementationOnce(({ controlStateTransform }) => {
+          if (controlStateTransform) {
+            const returnValue = controlStateTransform({}, OPTIONS_LIST_CONTROL);
             returnValueWatcher(returnValue);
           }
         });
