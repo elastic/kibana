@@ -12,6 +12,7 @@ import {
   type EuiDataGridColumn,
   type EuiDataGridColumnCellAction,
   EuiScreenReaderOnly,
+  EuiListGroupItemProps,
 } from '@elastic/eui';
 import { type DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
@@ -30,6 +31,7 @@ import {
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
 import { buildEditFieldButton } from './build_edit_field_button';
 import { DataTableColumnHeader, DataTableTimeColumnHeader } from './data_table_column_header';
+import { UnifiedDataTableProps } from './data_table';
 
 export const getColumnDisplayName = (
   columnName: string,
@@ -105,6 +107,7 @@ function buildEuiGridColumn({
   headerRowHeight,
   customGridColumnsConfiguration,
   columnDisplay,
+  onResize,
 }: {
   numberOfColumns: number;
   columnName: string;
@@ -126,6 +129,7 @@ function buildEuiGridColumn({
   headerRowHeight?: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
   columnDisplay?: string;
+  onResize: UnifiedDataTableProps['onResize'];
 }) {
   const dataViewField = !isPlainRecord
     ? dataView.getFieldByName(columnName)
@@ -142,6 +146,26 @@ function buildEuiGridColumn({
     editField &&
     dataViewField &&
     buildEditFieldButton({ hasEditDataViewPermission, dataView, field: dataViewField, editField });
+  const resetWidthButton: EuiListGroupItemProps | undefined =
+    onResize && columnWidth > 0
+      ? {
+          // @ts-expect-error
+          // We need to force a key here because EuiListGroup uses the array index as a key by default,
+          // which causes re-render issues with conditional items like this one, and can result in
+          // incorrect attributes (e.g. title) on the HTML element as well as test failures
+          key: 'reset-width',
+          label: i18n.translate('unifiedDataTable.grid.resetColumnWidthButton', {
+            defaultMessage: 'Reset width',
+          }),
+          iconType: 'refresh',
+          size: 'xs',
+          iconProps: { size: 'm' },
+          onClick: () => {
+            onResize({ columnId: columnName, width: undefined });
+          },
+          'data-test-subj': 'unifiedDataTableResetColumnWidth',
+        }
+      : undefined;
 
   const columnDisplayName = getColumnDisplayName(
     columnName,
@@ -193,6 +217,7 @@ function buildEuiGridColumn({
       showMoveLeft: !defaultColumns,
       showMoveRight: !defaultColumns,
       additional: [
+        ...(resetWidthButton ? [resetWidthButton] : []),
         ...(columnName === '__source'
           ? []
           : [
@@ -268,6 +293,7 @@ export function getEuiGridColumns({
   showColumnTokens,
   headerRowHeightLines,
   customGridColumnsConfiguration,
+  onResize,
 }: {
   columns: string[];
   columnsCellActions?: EuiDataGridColumnCellAction[][];
@@ -290,6 +316,7 @@ export function getEuiGridColumns({
   showColumnTokens?: boolean;
   headerRowHeightLines: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
+  onResize: UnifiedDataTableProps['onResize'];
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
   const headerRowHeight = deserializeHeaderRowHeight(headerRowHeightLines);
@@ -317,6 +344,7 @@ export function getEuiGridColumns({
       headerRowHeight,
       customGridColumnsConfiguration,
       columnDisplay: settings?.columns?.[column]?.display,
+      onResize,
     })
   );
 }

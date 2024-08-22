@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type ReadInstallationStatusResponse = z.infer<typeof ReadInstallationStatusResponse>;
 export const ReadInstallationStatusResponse = z.object({});
