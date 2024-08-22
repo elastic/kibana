@@ -387,7 +387,6 @@ const EducationPanel: React.FC<{ featureContent: string }> = ({ featureContent }
             {feature.actionLink !== undefined && feature.actionLabel !== undefined && (
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  data-test-subj="enterpriseSearchEducationPanelButton"
                   href={feature.actionLink}
                   target="_blank"
                   iconType="sortRight"
@@ -400,11 +399,7 @@ const EducationPanel: React.FC<{ featureContent: string }> = ({ featureContent }
 
             {feature.learnMore !== undefined && (
               <EuiFlexItem grow={false}>
-                <EuiLink
-                  data-test-subj="enterpriseSearchEducationPanelLearnMoreLink"
-                  href={feature.learnMore}
-                  target="_blank"
-                >
+                <EuiLink href={feature.learnMore} target="_blank">
                   {i18n.translate(
                     'xpack.enterpriseSearch.appSearch.gateForm.educationalPanel.learnMore',
                     {
@@ -418,13 +413,7 @@ const EducationPanel: React.FC<{ featureContent: string }> = ({ featureContent }
             {feature.addOnLearnMoreLabel !== undefined &&
               feature.addOnLearnMoreUrl !== undefined && (
                 <EuiFlexItem grow={false}>
-                  <EuiLink
-                    data-test-subj="enterpriseSearchEducationPanelLink"
-                    type="button"
-                    href={feature.addOnLearnMoreUrl}
-                    target="_blank"
-                    external
-                  >
+                  <EuiLink type="button" href={feature.addOnLearnMoreUrl} target="_blank" external>
                     <EuiSpacer />
                     {feature.addOnLearnMoreLabel}
                   </EuiLink>
@@ -444,7 +433,6 @@ const EducationPanel: React.FC<{ featureContent: string }> = ({ featureContent }
           })}
         >
           <EuiTextArea
-            data-test-subj="enterpriseSearchEducationPanelTextArea"
             onChange={(e) => {
               setFeaturesOther(e.target.value);
             }}
@@ -505,7 +493,6 @@ export const AppSearchGate: React.FC = () => {
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
               <EuiTextArea
-                data-test-subj="enterpriseSearchAppSearchGateTextArea"
                 onChange={(e) => {
                   setAdditionalFeedback(e.target.value);
                 }}
@@ -520,10 +507,7 @@ export const AppSearchGate: React.FC = () => {
                       details or to opt-out at any time."
                   values={{
                     contact: (
-                      <EuiLink
-                        data-test-subj="enterpriseSearchAppSearchGateContactYouLink"
-                        href={docLinks.workplaceSearchGatedFormDataUse}
-                      >
+                      <EuiLink href={docLinks.workplaceSearchGatedFormDataUse}>
                         <FormattedMessage
                           id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.contact"
                           defaultMessage="contact you"
@@ -531,10 +515,7 @@ export const AppSearchGate: React.FC = () => {
                       </EuiLink>
                     ),
                     privacyStatementLink: (
-                      <EuiLink
-                        data-test-subj="enterpriseSearchAppSearchGateElasticsPrivacyStatementLink"
-                        href={docLinks.workplaceSearchGatedFormPrivacyStatement}
-                      >
+                      <EuiLink href={docLinks.workplaceSearchGatedFormPrivacyStatement}>
                         <FormattedMessage
                           id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.readDataPrivacyStatementLink"
                           defaultMessage="Elastic’s Privacy Statement"
@@ -542,10 +523,7 @@ export const AppSearchGate: React.FC = () => {
                       </EuiLink>
                     ),
                     termsOfService: (
-                      <EuiLink
-                        data-test-subj="enterpriseSearchAppSearchGateTermsOfServiceLink"
-                        href={docLinks.workplaceSearchGatedFormTermsOfService}
-                      >
+                      <EuiLink href={docLinks.workplaceSearchGatedFormTermsOfService}>
                         <FormattedMessage
                           id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.readTermsOfService"
                           defaultMessage="Terms of Service"
@@ -576,7 +554,6 @@ export const AppSearchGate: React.FC = () => {
           )}
         >
           <EuiSelect
-            data-test-subj="enterpriseSearchAppSearchGateSelect"
             hasNoInitialSelection
             options={[
               {
@@ -619,7 +596,6 @@ export const AppSearchGate: React.FC = () => {
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiButton
-              data-test-subj="enterpriseSearchAppSearchGateSubmitButton"
               isDisabled={!feature ?? false}
               type="submit"
               fill
