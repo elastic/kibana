@@ -10,7 +10,7 @@ import React, { useCallback, memo, useEffect, useState } from 'react';
 import { debounce } from 'lodash';
 import { EuiProgress } from '@elastic/eui';
 
-import { EditorContentSpinner } from '../../components';
+import { EditorContentSpinner, OutputPanelEmptyState } from '../../components';
 import { Panel, PanelsContainer } from '..';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
 import { getAutocompleteInfo, StorageKeys } from '../../../services';
@@ -33,7 +33,10 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
   } = useServicesContext();
 
   const { currentTextObject } = useEditorReadContext();
-  const { requestInFlight } = useRequestReadContext();
+  const {
+    lastResult: { data },
+    requestInFlight,
+  } = useRequestReadContext();
 
   const [fetchingMappings, setFetchingMappings] = useState(false);
 
@@ -86,12 +89,16 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
           style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
           initialWidth={secondPanelWidth}
         >
-          {loading ? (
+          {data ? (
+            isMonacoEnabled ? (
+              <MonacoEditorOutput />
+            ) : (
+              <EditorOutput />
+            )
+          ) : loading || requestInFlight ? (
             <EditorContentSpinner />
-          ) : isMonacoEnabled ? (
-            <MonacoEditorOutput />
           ) : (
-            <EditorOutput />
+            <OutputPanelEmptyState />
           )}
         </Panel>
       </PanelsContainer>
