@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { stringifyZodError } from '@kbn/zod-helpers';
+import { stringifyZodError } from '@kbn/zod';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 

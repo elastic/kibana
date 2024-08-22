@@ -6,7 +6,7 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   BulkUpdateRulesRequestBody,

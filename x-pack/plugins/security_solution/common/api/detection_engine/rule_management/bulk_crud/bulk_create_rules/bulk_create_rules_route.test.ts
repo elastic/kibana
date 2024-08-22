@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod';
 import { getCreateRulesSchemaMock } from '../../../model/rule_schema/mocks';
 import { BulkCreateRulesRequestBody } from './bulk_create_rules_route.gen';
 

@@ -16,7 +16,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { BooleanFromString } from '@kbn/zod-helpers';
+import { BooleanFromString } from '@kbn/zod';
 
 import { ListId } from '../model/list_common.gen';
 import { List } from '../model/list_schemas.gen';

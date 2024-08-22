@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod';
 import { BulkDeleteRulesRequestBody } from './bulk_delete_rules_route.gen';
 
 // only the basics of testing are here.

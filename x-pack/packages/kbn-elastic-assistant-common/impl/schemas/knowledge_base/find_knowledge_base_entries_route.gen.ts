@@ -15,7 +15,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { ArrayFromString } from '@kbn/zod-helpers';
+import { ArrayFromString } from '@kbn/zod';
 
 import { SortOrder } from '../common_attributes.gen';
 import { KnowledgeBaseEntryResponse } from './common_attributes.gen';

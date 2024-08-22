@@ -21,7 +21,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { SavedObject } from '@kbn/core-saved-objects-server';
-import { stringifyZodError } from '@kbn/zod-helpers';
+import { stringifyZodError } from '@kbn/zod';
 import type { RuleToImportInput } from '../../../../../../common/api/detection_engine/rule_management';
 import {
   RuleToImport,

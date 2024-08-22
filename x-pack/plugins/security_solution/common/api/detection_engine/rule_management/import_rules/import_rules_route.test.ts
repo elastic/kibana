@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod';
 import type { ErrorSchema } from '../../model/error_schema.gen';
 import { ImportRulesResponse } from './import_rules_route.gen';
 

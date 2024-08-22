@@ -44,7 +44,7 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
-import { requiredOptional } from '@kbn/zod-helpers';
+import { requiredOptional } from '@kbn/zod';
 
 import { createHash } from 'crypto';
 

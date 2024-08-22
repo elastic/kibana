@@ -16,7 +16,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { ArrayFromString } from '@kbn/zod-helpers';
+import { ArrayFromString } from '@kbn/zod';
 
 import { NonEmptyString } from '@kbn/openapi-common/schemas/primitives.gen';
 import {

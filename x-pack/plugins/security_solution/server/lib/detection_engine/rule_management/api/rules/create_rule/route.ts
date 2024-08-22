@@ -7,7 +7,7 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import type { CreateRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   CreateRuleRequestBody,

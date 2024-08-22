@@ -21,7 +21,7 @@ import type {
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { Filter } from '@kbn/es-query';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import { requiredOptional } from '@kbn/zod-helpers';
+import { requiredOptional } from '@kbn/zod';
 import type { ResponseAction } from '../../../../../common/api/detection_engine/model/rule_response_actions';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import { assertUnreachable } from '../../../../../common/utility_types';

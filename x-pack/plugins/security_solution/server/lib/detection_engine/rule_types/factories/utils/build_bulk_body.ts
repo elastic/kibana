@@ -7,7 +7,7 @@
 
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import { requiredOptional } from '@kbn/zod-helpers';
+import { requiredOptional } from '@kbn/zod';
 
 import type { BaseHit, SearchTypes } from '../../../../../../common/detection_engine/types';
 import type { ConfigType } from '../../../../../config';

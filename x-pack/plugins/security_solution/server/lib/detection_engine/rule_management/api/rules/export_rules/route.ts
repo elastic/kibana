@@ -7,7 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import {
   ExportRulesRequestBody,

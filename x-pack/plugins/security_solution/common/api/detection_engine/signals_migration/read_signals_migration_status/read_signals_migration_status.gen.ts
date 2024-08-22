@@ -15,7 +15,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { isValidDateMath } from '@kbn/zod-helpers';
+import { isValidDateMath } from '@kbn/zod';
 
 import { NonEmptyString } from '../../../model/primitives.gen';
 

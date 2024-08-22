@@ -6,7 +6,7 @@
  */
 
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import { stringifyZodError } from '@kbn/zod-helpers';
+import { stringifyZodError } from '@kbn/zod';
 import type {
   EqlRule,
   EqlRuleResponseFields,

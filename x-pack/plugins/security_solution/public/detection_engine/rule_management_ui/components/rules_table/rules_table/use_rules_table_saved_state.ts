@@ -6,7 +6,7 @@
  */
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { safeParseResult } from '@kbn/zod-helpers';
+import { safeParseResult } from '@kbn/zod';
 import { useGetInitialUrlParamValue } from '../../../../../common/utils/global_query_string/helpers';
 import { RULES_TABLE_MAX_PAGE_SIZE } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';

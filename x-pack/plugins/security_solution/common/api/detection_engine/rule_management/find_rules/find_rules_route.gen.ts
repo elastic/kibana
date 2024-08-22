@@ -15,7 +15,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { ArrayFromString } from '@kbn/zod-helpers';
+import { ArrayFromString } from '@kbn/zod';
 
 import { SortOrder } from '../../model/sorting.gen';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';

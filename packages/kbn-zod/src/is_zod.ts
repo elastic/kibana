@@ -6,13 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { expectAssignable } from 'tsd';
-import { ZodEsque } from './types';
-import { z } from '.';
+import { type ZodType, Schema } from 'zod';
 
-describe('ZodEsque', () => {
-  it('correctly extracts generic from Zod values', () => {
-    const s = z.object({ n: z.number() });
-    expectAssignable<ZodEsque<{ n: number }>>(s);
-  });
-});
+export function isZod(value: unknown): value is ZodType<any> {
+  return value instanceof Schema;
+}

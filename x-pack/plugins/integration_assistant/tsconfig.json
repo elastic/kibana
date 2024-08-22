@@ -29,7 +29,6 @@
     "@kbn/monaco",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/shared-ux-router",
-    "@kbn/zod-helpers",
     "@kbn/stack-connectors-plugin",
     "@kbn/core-analytics-browser",
     "@kbn/logging-mocks",

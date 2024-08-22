@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { z } from '.';
-import { isZod } from './util';
+import { z } from 'zod';
+import { isZod } from './is_zod';
 
 describe('isZod', () => {
   test.each([

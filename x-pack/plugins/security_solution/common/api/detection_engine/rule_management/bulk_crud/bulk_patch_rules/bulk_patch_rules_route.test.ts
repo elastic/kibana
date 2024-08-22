@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod';
 import type { PatchRuleRequestBody } from '../../crud/patch_rule/patch_rule_route.gen';
 import { BulkPatchRulesRequestBody } from './bulk_patch_rules_route.gen';
 

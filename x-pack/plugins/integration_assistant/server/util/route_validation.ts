@@ -6,7 +6,7 @@
  */
 
 import type { RouteValidationFunction, RouteValidationResultFactory } from '@kbn/core/server';
-import { stringifyZodError } from '@kbn/zod-helpers';
+import { stringifyZodError } from '@kbn/zod';
 import type { TypeOf, ZodType } from '@kbn/zod';
 
 export const buildRouteValidationWithZod =

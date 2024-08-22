@@ -6,8 +6,13 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-zod-helpers'],
-};
+import { expectAssignable } from 'tsd';
+import { z } from 'zod';
+import { ZodEsque } from './types';
+
+describe('ZodEsque', () => {
+  it('correctly extracts generic from Zod values', () => {
+    const s = z.object({ n: z.number() });
+    expectAssignable<ZodEsque<{ n: number }>>(s);
+  });
+});

@@ -9,7 +9,7 @@ import type { ErrorSchema, RuleResponse } from '../../model';
 import { getErrorSchemaMock } from '../../model/error_schema.mock';
 import { getRulesSchemaMock } from '../../model/rule_schema/mocks';
 
-import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod';
 import { BulkCrudRulesResponse } from './response_schema.gen';
 
 describe('Bulk CRUD rules response schema', () => {

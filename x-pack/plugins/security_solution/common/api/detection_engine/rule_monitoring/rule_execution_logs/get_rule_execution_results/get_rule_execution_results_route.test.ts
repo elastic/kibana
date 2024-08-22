@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod';
 import { RuleExecutionStatus } from '../../model';
 import { GetRuleExecutionResultsRequestQuery } from './get_rule_execution_results_route.gen';
 

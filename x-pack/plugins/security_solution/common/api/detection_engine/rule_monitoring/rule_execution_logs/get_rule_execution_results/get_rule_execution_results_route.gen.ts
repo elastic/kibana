@@ -15,7 +15,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { ArrayFromString } from '@kbn/zod-helpers';
+import { ArrayFromString } from '@kbn/zod';
 
 import { RuleExecutionStatus } from '../../model/execution_status.gen';
 import { RuleRunType } from '../../model/execution_run_type.gen';

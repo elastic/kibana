@@ -8,7 +8,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
-import { stringifyZodError } from '@kbn/zod-helpers';
+import { stringifyZodError } from '@kbn/zod';
 import { ZodError } from '@kbn/zod';
 import { BadRequestError } from '../bad_request_error';
 

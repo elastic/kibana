@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod';
 import { getListArrayMock } from '../../../../detection_engine/schemas/types/lists.mock';
 import type { RuleToImportInput } from './rule_to_import';
 import { RuleToImport } from './rule_to_import';

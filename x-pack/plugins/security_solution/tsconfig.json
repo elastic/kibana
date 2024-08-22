@@ -179,7 +179,6 @@
     "@kbn/dom-drag-drop",
     "@kbn/unified-field-list",
     "@kbn/resizable-layout",
-    "@kbn/zod-helpers",
     "@kbn/core-http-common",
     "@kbn/search-errors",
     "@kbn/stack-connectors-plugin",

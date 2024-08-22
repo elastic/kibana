@@ -16,7 +16,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { ArrayFromString } from '@kbn/zod-helpers';
+import { ArrayFromString } from '@kbn/zod';
 
 import { ExceptionNamespaceType, ExceptionList } from '../model/exception_list_common.gen';
 

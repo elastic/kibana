@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RequiredOptional } from '@kbn/zod-helpers';
+import type { RequiredOptional } from '@kbn/zod';
 import type { TypeSpecificResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import { transformAlertToRuleResponseAction } from '../../../../../../../common/detection_engine/transform_actions';
 import { assertUnreachable } from '../../../../../../../common/utility_types';

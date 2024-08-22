@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { IKibanaResponse } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import type { ExceptionList } from '@kbn/securitysolution-exceptions-common/api';
 import {
   CreateSharedExceptionListRequestBody,

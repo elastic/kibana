@@ -6,7 +6,7 @@
  */
 
 import { type Props, schema } from '@kbn/config-schema';
-import { stringifyZodError } from '@kbn/zod-helpers';
+import { stringifyZodError } from '@kbn/zod';
 
 import type { SettingsConfig, SettingsSection } from '../../../common/settings/types';
 import { AGENT_POLICY_ADVANCED_SETTINGS } from '../../../common/settings';

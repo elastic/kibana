@@ -16,7 +16,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { BooleanFromString } from '@kbn/zod-helpers';
+import { BooleanFromString } from '@kbn/zod';
 
 import {
   ExceptionListId,

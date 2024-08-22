@@ -15,7 +15,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { BooleanFromString } from '@kbn/zod-helpers';
+import { BooleanFromString } from '@kbn/zod';
 
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import {

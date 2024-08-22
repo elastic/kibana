@@ -7160,10 +7160,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/zod-helpers@link:packages/kbn-zod-helpers":
-  version "0.0.0"
-  uid ""
-
 "@kbn/zod@link:packages/kbn-zod":
   version "0.0.0"
   uid ""

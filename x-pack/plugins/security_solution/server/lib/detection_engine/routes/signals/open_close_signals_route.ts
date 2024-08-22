@@ -13,7 +13,7 @@ import {
   ALERT_WORKFLOW_USER,
 } from '@kbn/rule-data-utils';
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import { SetAlertsStatusRequestBody } from '../../../../../common/api/detection_engine/signals';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {

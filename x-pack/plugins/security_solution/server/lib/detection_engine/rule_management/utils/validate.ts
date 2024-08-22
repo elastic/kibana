@@ -8,7 +8,7 @@
 import type { PartialRule } from '@kbn/alerting-plugin/server';
 import type { Rule } from '@kbn/alerting-plugin/common';
 import { isEqual, xorWith } from 'lodash';
-import { stringifyZodError } from '@kbn/zod-helpers';
+import { stringifyZodError } from '@kbn/zod';
 import {
   type QueryRule,
   type ResponseAction,

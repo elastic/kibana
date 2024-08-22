@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectParseError, expectParseSuccess } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess } from '@kbn/zod';
 import {
   GetRuleExecutionEventsRequestParams,
   GetRuleExecutionEventsRequestQuery,

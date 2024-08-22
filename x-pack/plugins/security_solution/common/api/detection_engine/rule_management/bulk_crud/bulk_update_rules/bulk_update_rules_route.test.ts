@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod';
 import type { RuleUpdateProps } from '../../../model';
 import { getUpdateRulesSchemaMock } from '../../../model/rule_schema/mocks';
 import { BulkUpdateRulesRequestBody } from './bulk_update_rules_route.gen';

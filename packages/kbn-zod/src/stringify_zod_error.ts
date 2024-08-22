@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ZodError, ZodIssue } from '@kbn/zod';
+import { ZodError, ZodIssue } from 'zod';
 
 const MAX_ERRORS = 5;
 

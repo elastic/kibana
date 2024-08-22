@@ -15,7 +15,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { BooleanFromString } from '@kbn/zod-helpers';
+import { BooleanFromString } from '@kbn/zod';
 
 import { ErrorSchema } from '../../model/error_schema.gen';
 import { WarningSchema } from '../../model/warning_schema.gen';
