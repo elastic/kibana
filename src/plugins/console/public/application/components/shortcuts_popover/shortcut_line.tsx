@@ -1,0 +1,59 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+
+interface ShortcutLineFlexItemProps {
+  id: string;
+  description: string;
+  keys: string[];
+  alternativeKeys?: string[];
+}
+
+const renderKeys = (keys: string[]) => {
+  return keys.map((key, index) => (
+    <span key={index}>
+      {index > 0 && ' '}
+      <EuiCode>{key}</EuiCode>
+    </span>
+  ));
+};
+
+export const ShortcutLineFlexItem = ({
+  id,
+  description,
+  keys,
+  alternativeKeys,
+}: ShortcutLineFlexItemProps) => {
+  return (
+    <EuiFlexItem>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs">
+            {i18n.translate('console.shortcutDescription' + id, {
+              defaultMessage: description,
+            })}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs">
+            {renderKeys(keys)}
+            {alternativeKeys && (
+              <>
+                <strong> or </strong>
+                {renderKeys(keys)}
+              </>
+            )}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  );
+};
