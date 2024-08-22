@@ -205,8 +205,6 @@ export const createMetricThresholdExecutor =
           timestamp,
           value: null,
           viewInAppUrl: getMetricsViewInAppUrlWithSpaceId({
-            basePath: libs.basePath,
-            spaceId,
             timestamp,
             groupBy,
             assetDetailsLocator,
@@ -415,8 +413,6 @@ export const createMetricThresholdExecutor =
             }).currentValue;
           }),
           viewInAppUrl: getMetricsViewInAppUrlWithSpaceId({
-            basePath: libs.basePath,
-            spaceId,
             timestamp,
             groupBy,
             assetDetailsLocator,
@@ -475,8 +471,6 @@ export const createMetricThresholdExecutor =
         timestamp,
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
         viewInAppUrl: getMetricsViewInAppUrlWithSpaceId({
-          basePath: libs.basePath,
-          spaceId,
           timestamp: indexedStartedAt,
           groupBy,
           assetDetailsLocator,

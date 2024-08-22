@@ -8,9 +8,8 @@
 import { isEmpty, isError } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
-import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { ObservabilityConfig } from '@kbn/observability-plugin/server';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
 import {
   ParsedTechnicalFields,
@@ -131,19 +130,15 @@ export const getAlertDetailsPageEnabledForApp = (
 };
 
 export const getInventoryViewInAppUrlWithSpaceId = ({
-  basePath,
   criteria,
   nodeType,
-  spaceId,
   timestamp,
   hostName,
   assetDetailsLocator,
   inventoryLocator,
 }: {
-  basePath: IBasePath;
   criteria: InventoryMetricConditions[];
   nodeType: string;
-  spaceId: string;
   timestamp: string;
   hostName?: string;
   assetDetailsLocator?: LocatorPublic<AssetDetailsLocatorParams>;
@@ -161,27 +156,19 @@ export const getInventoryViewInAppUrlWithSpaceId = ({
     [HOST_NAME]: hostName,
   };
 
-  return addSpaceIdToPath(
-    basePath.publicBaseUrl,
-    spaceId,
-    getInventoryViewInAppUrl({
-      fields: parseTechnicalFields(fields, true),
-      assetDetailsLocator,
-      inventoryLocator,
-    })
-  );
+  return getInventoryViewInAppUrl({
+    fields: parseTechnicalFields(fields, true),
+    assetDetailsLocator,
+    inventoryLocator,
+  });
 };
 
 export const getMetricsViewInAppUrlWithSpaceId = ({
-  basePath,
-  spaceId,
   timestamp,
   groupBy,
   assetDetailsLocator,
   metricsExplorerLocator,
 }: {
-  basePath: IBasePath;
-  spaceId: string;
   timestamp: string;
   groupBy?: string[];
   assetDetailsLocator?: LocatorPublic<AssetDetailsLocatorParams>;
@@ -191,16 +178,12 @@ export const getMetricsViewInAppUrlWithSpaceId = ({
     [TIMESTAMP]: timestamp,
   };
 
-  return addSpaceIdToPath(
-    basePath.publicBaseUrl,
-    spaceId,
-    getMetricsViewInAppUrl({
-      fields: parseTechnicalFields(fields, true),
-      groupBy,
-      assetDetailsLocator,
-      metricsExplorerLocator,
-    })
-  );
+  return getMetricsViewInAppUrl({
+    fields: parseTechnicalFields(fields, true),
+    groupBy,
+    assetDetailsLocator,
+    metricsExplorerLocator,
+  });
 };
 
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';

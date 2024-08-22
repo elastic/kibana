@@ -49,7 +49,7 @@ export const getInventoryViewInAppUrl = ({
   inventoryLocator?: LocatorPublic<InventoryLocatorParams>;
 }): string => {
   if (!assetDetailsLocator || !inventoryLocator) {
-    return '';
+    throw new Error('Locators for Asset Details and Inventory are required');
   }
 
   /* Temporary Solution -> https://github.com/elastic/kibana/issues/137033

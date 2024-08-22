@@ -154,11 +154,9 @@ export const createInventoryMetricThresholdExecutor =
             timestamp: startedAt.toISOString(),
             value: null,
             viewInAppUrl: getInventoryViewInAppUrlWithSpaceId({
-              basePath: libs.basePath,
               criteria,
               nodeType,
               timestamp: indexedStartedAt,
-              spaceId,
               assetDetailsLocator,
               inventoryLocator,
             }),
@@ -311,11 +309,9 @@ export const createInventoryMetricThresholdExecutor =
             formatMetric(result[group].metric, result[group].currentValue)
           ),
           viewInAppUrl: getInventoryViewInAppUrlWithSpaceId({
-            basePath: libs.basePath,
             criteria,
             nodeType,
             timestamp: indexedStartedAt,
-            spaceId,
             hostName: additionalContext?.host?.name,
             assetDetailsLocator,
             inventoryLocator,
@@ -363,11 +359,9 @@ export const createInventoryMetricThresholdExecutor =
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
         timestamp: startedAt.toISOString(),
         viewInAppUrl: getInventoryViewInAppUrlWithSpaceId({
-          basePath: libs.basePath,
           criteria,
           nodeType,
           timestamp: indexedStartedAt,
-          spaceId,
           hostName: additionalContext?.host?.name,
           assetDetailsLocator,
           inventoryLocator,
