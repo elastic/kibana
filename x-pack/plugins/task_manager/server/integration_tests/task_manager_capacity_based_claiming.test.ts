@@ -146,7 +146,7 @@ describe('capacity based claiming', () => {
     }
   });
 
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 500; i++) {
     it(`should claim tasks to full capacity ${i}`, async () => {
       const backgroundTaskLoads: number[] = [];
       createMonitoringStatsOpts.taskPollingLifecycle?.events
