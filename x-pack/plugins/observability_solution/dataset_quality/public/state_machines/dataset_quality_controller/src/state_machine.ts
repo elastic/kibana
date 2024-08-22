@@ -23,6 +23,7 @@ import {
   DataStreamDetails,
   DataStreamStatServiceResponse,
   DataStreamDegradedDocsStatServiceResponse,
+  GetDataStreamsStatsQuery,
 } from '../../../../common/data_streams_stats';
 import { DataStreamType } from '../../../../common/types';
 import { dataStreamPartsToIndexName } from '../../../../common/utils';
@@ -84,9 +85,17 @@ export const createPureDatasetQualityControllerStateMachine = (
               initial: 'fetching',
               states: {
                 fetching: {
-                  ...generateInvokePerType({
+                  invoke: {
                     src: 'loadDataStreamStats',
-                  }),
+                    onDone: {
+                      target: 'loaded',
+                      actions: ['storeDataStreamStats', 'storeDatasets'],
+                    },
+                    onError: {
+                      target: 'loaded',
+                      actions: ['notifyFetchDatasetStatsFailed'],
+                    },
+                  },
                 },
                 loaded: {},
               },
@@ -821,35 +830,11 @@ export const createDatasetQualityControllerStateMachine = ({
         assertBreakdownFieldEcsFailedNotifier(toasts, event.data),
     },
     services: {
-      loadDataStreamStats:
-        (context, _event, { data: { type } }) =>
-        async (send) => {
-          try {
-            const dataStreamStats = await (isTypeSelected(type, context)
-              ? dataStreamStatsClient.getDataStreamsStats({
-                  type,
-                  datasetQuery: context.filters.query,
-                })
-              : Promise.resolve({
-                  dataStreamsStats: [],
-                  datasetUserPrivileges: {
-                    canMonitor: true,
-                    canRead: true,
-                    canViewIntegrations: true,
-                  },
-                }));
-
-            send({
-              type: 'SAVE_DATASTREAM_STATS',
-              data: dataStreamStats,
-            });
-          } catch (e) {
-            send({
-              type: 'NOTIFY_DATASTREAM_STATS_FAILED',
-              data: e,
-            });
-          }
-        },
+      loadDataStreamStats: (context, _event) =>
+        dataStreamStatsClient.getDataStreamsStats({
+          types: context.filters.types as GetDataStreamsStatsQuery['types'],
+          datasetQuery: context.filters.query,
+        }),
       loadDegradedDocs:
         (context, _event, { data: { type } }) =>
         async (send) => {

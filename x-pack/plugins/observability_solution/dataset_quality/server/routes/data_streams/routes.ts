@@ -16,7 +16,7 @@ import {
   DegradedFieldResponse,
   DatasetUserPrivileges,
 } from '../../../common/api_types';
-import { rangeRt, typeRt } from '../../types/default_api_types';
+import { rangeRt, typeRt, typesRt } from '../../types/default_api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
 import { datasetQualityPrivileges } from '../../services';
 import { getDataStreamDetails, getDataStreamSettings } from './get_data_stream_details';
@@ -30,7 +30,7 @@ const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
   params: t.type({
     query: t.intersection([
-      typeRt,
+      t.type({ types: typesRt }),
       t.partial({
         datasetQuery: t.string,
       }),
@@ -52,13 +52,15 @@ const statsRoute = createDatasetQualityServerRoute({
 
     const { items, datasetUserPrivileges } = await getDataStreams({
       esClient,
-      ...params.query,
+      types: typesRt.encode(params.query.types),
+      datasetQuery: params.query.datasetQuery,
       uncategorisedOnly: false,
     });
 
     const privilegedDataStreams = items.filter((stream) => {
       return stream.userPrivileges.canMonitor;
     });
+
     const dataStreamsStats = await getDataStreamsStats({
       esClient,
       dataStreams: privilegedDataStreams.map((stream) => stream.name),

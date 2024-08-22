@@ -7,6 +7,8 @@
 
 import { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
+import rison from '@kbn/rison';
+import { KNOWN_TYPES } from '../../../common/constants';
 import {
   getDataStreamsDegradedDocsStatsResponseRt,
   getDataStreamsStatsResponseRt,
@@ -15,7 +17,6 @@ import {
   IntegrationResponse,
   NonAggregatableDatasets,
 } from '../../../common/api_types';
-import { DEFAULT_DATASET_TYPE } from '../../../common/constants';
 import {
   DataStreamStatServiceResponse,
   GetDataStreamsDegradedDocsStatsQuery,
@@ -32,11 +33,15 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
   constructor(private readonly http: HttpStart) {}
 
   public async getDataStreamsStats(
-    params: GetDataStreamsStatsQuery = { type: DEFAULT_DATASET_TYPE }
+    params: GetDataStreamsStatsQuery
   ): Promise<DataStreamStatServiceResponse> {
+    const types = params.types.length === 0 ? KNOWN_TYPES : params.types;
     const response = await this.http
       .get<GetDataStreamsStatsResponse>('/internal/dataset_quality/data_streams/stats', {
-        query: params,
+        query: {
+          datasetQuery: params.datasetQuery,
+          types: rison.encodeArray(types),
+        },
       })
       .catch((error) => {
         throw new DatasetQualityError(`Failed to fetch data streams stats: ${error}`, error);
