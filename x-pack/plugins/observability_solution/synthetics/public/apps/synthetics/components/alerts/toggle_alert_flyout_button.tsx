@@ -26,7 +26,7 @@ import {
 import { ManageRulesLink } from '../common/links/manage_rules_link';
 import { ClientPluginsStart } from '../../../../plugin';
 import { ToggleFlyoutTranslations } from './hooks/translations';
-import { useSyntheticsAlert } from './hooks/use_synthetics_alert';
+import { useSyntheticsRules } from './hooks/use_synthetics_rules';
 import {
   selectAlertFlyoutVisibility,
   selectMonitorListState,
@@ -40,7 +40,7 @@ export const ToggleAlertFlyoutButton = () => {
   const { application } = useKibana<ClientPluginsStart>().services;
   const hasUptimeWrite = application?.capabilities.uptime?.save ?? false;
 
-  const { EditAlertFlyout, loading } = useSyntheticsAlert(isOpen);
+  const { EditAlertFlyout, loading } = useSyntheticsRules(isOpen);
 
   const { loaded, data: monitors } = useSelector(selectMonitorListState);
 
