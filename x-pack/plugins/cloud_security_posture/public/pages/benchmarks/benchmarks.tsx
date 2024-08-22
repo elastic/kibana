@@ -162,9 +162,13 @@ export const Benchmarks = () => {
   const getSetupStatus = useCspSetupStatusApi({
     refetchInterval: NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS,
   });
-  const showConfigurationInstallPrompt =
+  const areIntegrationsNotInstalled =
     getSetupStatus.data?.kspm?.status === 'not-installed' &&
     getSetupStatus.data?.cspm?.status === 'not-installed';
+  const isUserUnprivileged =
+    getSetupStatus.data?.kspm?.status === 'unprivileged' &&
+    getSetupStatus.data?.cspm?.status === 'unprivileged';
+  const showNoFindingsState = areIntegrationsNotInstalled || isUserUnprivileged;
 
   return (
     <CloudPosturePage>
@@ -181,7 +185,7 @@ export const Benchmarks = () => {
         bottomBorder
       />
       <EuiSpacer />
-      {showConfigurationInstallPrompt ? (
+      {showNoFindingsState ? (
         <NoFindingsStates postureType={'all'} />
       ) : (
         <>
