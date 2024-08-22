@@ -53,7 +53,7 @@ function chainRouter(state: EcsMappingState): string {
 }
 
 // This is added as a separate graph to be able to run these steps concurrently from handleCreateMappingChunks
-async function getEcsSubGraph(model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel) {
+export async function getEcsSubGraph(model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel) {
   const workflow = new StateGraph({
     channels: graphState,
   })
