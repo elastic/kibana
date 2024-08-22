@@ -24,7 +24,7 @@ export async function requestDiagnostics(
   esClient: ElasticsearchClient,
   agentId: string,
   additionalMetrics?: RequestDiagnosticsAdditionalMetrics[],
-  excludeEventsLog?: boolean,
+  excludeEventsLog?: boolean
 ): Promise<{ actionId: string }> {
   const response = await createAgentAction(esClient, {
     agents: [agentId],

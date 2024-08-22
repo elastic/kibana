@@ -9,10 +9,7 @@ import { schema } from '@kbn/config-schema';
 import moment from 'moment';
 import semverIsValid from 'semver/functions/valid';
 
-import {
-  RequestDiagnosticsAdditionalMetrics,
-  RequestDiagnosticExclude,
- } from '../../../common/types';
+import { RequestDiagnosticsAdditionalMetrics } from '../../../common/types';
 
 import { SO_SEARCH_LIMIT, AGENTS_PREFIX, AGENT_MAPPINGS } from '../../constants';
 

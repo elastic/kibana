@@ -42,7 +42,7 @@ export const requestDiagnosticsHandler: RequestHandler<
       esClient,
       request.params.agentId,
       request.body?.additional_metrics,
-      request.body?.exclude_events_log,
+      request.body?.exclude_events_log
     );
 
     return response.ok({ body: { actionId: result.actionId } });
