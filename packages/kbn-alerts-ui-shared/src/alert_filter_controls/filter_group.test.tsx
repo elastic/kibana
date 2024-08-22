@@ -14,7 +14,7 @@ import { ControlGroupRendererApi, ControlGroupRuntimeState } from '@kbn/controls
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
 import { ControlGroupOutput, initialInputData, sampleOutputData } from './mocks/data';
 import {
-  COMMON_OPTIONS_LIST_CONTROL_INPUTS,
+  // COMMON_OPTIONS_LIST_CONTROL_INPUTS,
   DEFAULT_CONTROLS,
   TEST_IDS,
   URL_PARAM_KEY,

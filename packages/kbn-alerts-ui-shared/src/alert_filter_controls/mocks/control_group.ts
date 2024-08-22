@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type {
-  ControlGroupRendererApi,
-  ControlGroupRuntimeState,
-} from '@kbn/controls-plugin/public';
+import type { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { BehaviorSubject } from 'rxjs';
 
