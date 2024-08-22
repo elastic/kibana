@@ -17,7 +17,11 @@ import {
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { EditorContentSpinner, OutputPanelEmptyState, NetworkRequestStatusBar } from '../../components';
+import {
+  EditorContentSpinner,
+  OutputPanelEmptyState,
+  NetworkRequestStatusBar
+} from '../../components';
 import { Panel, PanelsContainer } from '..';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
 import { getAutocompleteInfo, StorageKeys } from '../../../services';
