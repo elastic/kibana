@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { createAppContextStartContractMock as fleetCreateAppContextStartContractMock } from '@kbn/fleet-plugin/server/mocks';
+import { appContextService as fleetAppContextService } from '@kbn/fleet-plugin/server/services';
+
 import { getESQueryHostMetadataByID, buildUnitedIndexQuery } from './query_builders';
 import { metadataCurrentIndexPattern } from '../../../../common/endpoint/constants';
 import { get } from 'lodash';
@@ -50,6 +53,11 @@ describe('query builder', () => {
         per_page: 0,
         page: 0,
       });
+      fleetAppContextService.start(
+        fleetCreateAppContextStartContractMock({}, false, {
+          withoutSpaceExtensions: soClient,
+        })
+      );
     });
 
     it('correctly builds empty query', async () => {

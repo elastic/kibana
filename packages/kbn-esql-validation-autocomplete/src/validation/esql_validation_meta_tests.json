@@ -16334,21 +16334,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | where mv_count(dateNanosField) > 0",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = mv_count(dateNanosField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval mv_count(dateNanosField)",
-      "error": [],
-      "warning": []
-    },
-    {
       "query": "row var = mv_dedupe(true)",
       "error": [],
       "warning": []
@@ -17312,16 +17297,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = mv_first(dateNanosField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval mv_first(dateNanosField)",
-      "error": [],
-      "warning": []
-    },
-    {
       "query": "row var = mv_last(true)",
       "error": [],
       "warning": []
@@ -17811,16 +17786,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = mv_last(dateNanosField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval mv_last(dateNanosField)",
-      "error": [],
-      "warning": []
-    },
-    {
       "query": "row var = mv_max(true)",
       "error": [],
       "warning": []
@@ -18137,16 +18102,6 @@
     },
     {
       "query": "from a_index | eval mv_max(concat(\"20\", \"22\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = mv_max(dateNanosField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval mv_max(dateNanosField)",
       "error": [],
       "warning": []
     },
@@ -18617,16 +18572,6 @@
     },
     {
       "query": "from a_index | eval mv_min(concat(\"20\", \"22\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = mv_min(dateNanosField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval mv_min(dateNanosField)",
       "error": [],
       "warning": []
     },
@@ -31921,6 +31866,62 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats var = max(textField)",
+      "error": [
+        "Argument of [max] must be [double], found value [textField] type [text]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(textField)",
+      "error": [
+        "Argument of [max] must be [double], found value [textField] type [text]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where max(textField)",
+      "error": [
+        "WHERE does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where max(textField) > 0",
+      "error": [
+        "WHERE does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = max(textField)",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = max(textField) > 0",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval max(textField)",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval max(textField) > 0",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | stats var = min(doubleField)",
       "error": [],
       "warning": []
@@ -32501,6 +32502,62 @@
       "query": "from a_index | stats min(concat(\"20\", \"22\"))",
       "error": [
         "Argument of [min] must be [double], found value [concat(\"20\",\"22\")] type [keyword]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = min(textField)",
+      "error": [
+        "Argument of [min] must be [double], found value [textField] type [text]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(textField)",
+      "error": [
+        "Argument of [min] must be [double], found value [textField] type [text]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where min(textField)",
+      "error": [
+        "WHERE does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where min(textField) > 0",
+      "error": [
+        "WHERE does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = min(textField)",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = min(textField) > 0",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval min(textField)",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval min(textField) > 0",
+      "error": [
+        "EVAL does not support function min"
       ],
       "warning": []
     },
@@ -34934,6 +34991,42 @@
         "Argument of [bin] must be a constant, received [integerField]",
         "Argument of [bin] must be a constant, received [longField]",
         "Argument of [bin] must be a constant, received [longField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats by bucket(dateField, textField)",
+      "error": [
+        "Argument of [bucket] must be a constant, received [textField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats by bin(dateField, textField)",
+      "error": [
+        "Argument of [bin] must be a constant, received [textField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort bucket(dateField, textField)",
+      "error": [
+        "SORT does not support function bucket"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(\"2022\", textField)",
+      "error": [
+        "Argument of [bucket] must be a constant, received [textField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(concat(\"20\", \"22\"), textField)",
+      "error": [
+        "Argument of [bucket] must be [date], found value [concat(\"20\",\"22\")] type [keyword]",
+        "Argument of [bucket] must be a constant, received [textField]"
       ],
       "warning": []
     },
