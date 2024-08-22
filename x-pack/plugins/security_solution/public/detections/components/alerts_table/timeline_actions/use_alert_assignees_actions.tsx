@@ -50,6 +50,8 @@ export const useAlertAssigneesActions = ({
     ];
   }, [alertId, ecsRowData._index, ecsRowData?.kibana?.alert.workflow_assignee_ids]);
 
+  const currentAssignees = alertAssigneeData[0].data[0].value;
+
   const onAssigneesUpdate = useCallback(() => {
     closePopover();
     if (refetch) {
@@ -59,6 +61,7 @@ export const useAlertAssigneesActions = ({
 
   const { alertAssigneesItems, alertAssigneesPanels } = useBulkAlertAssigneesItems({
     onAssigneesUpdate,
+    currentAssignees,
   });
 
   const itemsToReturn: AlertTableContextMenuItem[] = useMemo(
