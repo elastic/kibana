@@ -22,7 +22,7 @@ export const createGetDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
   handler: async ({ savedObjectsClient }) => {
     const dynamicSettingsAttributes: DynamicSettingsAttributes =
       await savedObjectsAdapter.getSyntheticsDynamicSettings(savedObjectsClient);
-    return fromAttribute(dynamicSettingsAttributes);
+    return fromSettingsAttribute(dynamicSettingsAttributes);
   },
 });
 
@@ -42,11 +42,13 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory = () 
       ...newSettings,
     } as DynamicSettingsAttributes);
 
-    return fromAttribute(attr as DynamicSettingsAttributes);
+    return fromSettingsAttribute(attr as DynamicSettingsAttributes);
   },
 });
 
-const fromAttribute = (attr: DynamicSettingsAttributes): DynamicSettingsAttributes => {
+export const fromSettingsAttribute = (
+  attr: DynamicSettingsAttributes
+): DynamicSettingsAttributes => {
   return {
     certExpirationThreshold: attr.certExpirationThreshold,
     certAgeThreshold: attr.certAgeThreshold,
