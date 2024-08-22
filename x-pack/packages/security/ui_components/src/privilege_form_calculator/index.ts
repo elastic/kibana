@@ -6,4 +6,3 @@
  */
 
 export { PrivilegeFormCalculator } from './privilege_form_calculator';
-export * from './utils/privilege_utils';
