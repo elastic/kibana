@@ -63,6 +63,7 @@ export const esqlExecutor = async ({
   spaceId,
   experimentalFeatures,
   licensing,
+  isLoggingRequestsEnabled,
 }: {
   runOpts: RunOpts<EsqlRuleParams>;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
@@ -71,7 +72,10 @@ export const esqlExecutor = async ({
   version: string;
   experimentalFeatures: ExperimentalFeatures;
   licensing: LicensingPluginSetup;
+  isLoggingRequestsEnabled: boolean;
 }) => {
+  console.log('>>>>> isLoggingRequestsEnabled', isLoggingRequestsEnabled);
+  const requests: Array<{ request: string }> = [];
   const ruleParams = completeRule.ruleParams;
   /**
    * ES|QL returns results as a single page. max size of 10,000
@@ -79,7 +83,6 @@ export const esqlExecutor = async ({
    * we don't want to overload ES/Kibana with large responses
    */
   const ESQL_PAGE_SIZE_CIRCUIT_BREAKER = tuple.maxSignals * 3;
-
   return withSecuritySpan('esqlExecutor', async () => {
     const result = createSearchAfterReturnType();
     let size = tuple.maxSignals;
@@ -97,6 +100,14 @@ export const esqlExecutor = async ({
         secondaryTimestamp,
         exceptionFilter,
       });
+
+      if (isLoggingRequestsEnabled) {
+        requests.push({
+          request: `POST _query\n${JSON.stringify(esqlRequest, null, 2)}`,
+        });
+      }
+
+      //   console.log('>>>', requests);
 
       ruleExecutionLogger.debug(`ES|QL query request: ${JSON.stringify(esqlRequest)}`);
       const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
@@ -236,7 +247,7 @@ export const esqlExecutor = async ({
       // ES|QL does not support pagination so we need to increase size of response to be able to catch all events
       size += tuple.maxSignals;
     }
-
-    return { ...result, state };
+    console.log('>>> requests esql executor', requests);
+    return { ...result, state, requests };
   });
 };

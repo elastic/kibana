@@ -224,6 +224,7 @@ export const previewRulesRoute = (
             }
           ) => {
             let statePreview = runState as TState;
+            let requests = [];
 
             const abortController = new AbortController();
             setTimeout(() => {
@@ -268,7 +269,8 @@ export const previewRulesRoute = (
             while (invocationCount > 0 && !isAborted) {
               invocationStartTime = moment();
 
-              ({ state: statePreview } = (await executor({
+              ({ state: statePreview, requests } = (await executor({
+                isLoggingRequestsEnabled: true,
                 executionId: uuidv4(),
                 params,
                 previousStartedAt,
@@ -312,11 +314,13 @@ export const previewRulesRoute = (
                 .filter((item) => item.newStatus === RuleExecutionStatusEnum['partial failure'])
                 .map((item) => item.message ?? 'Unknown Warning');
 
+              console.log('PREVIEW route', requests);
               logs.push({
                 errors,
                 warnings,
                 startedAt: startedAt.toDate().toISOString(),
                 duration: moment().diff(invocationStartTime, 'milliseconds'),
+                requests,
               });
 
               loggedStatusChanges.length = 0;

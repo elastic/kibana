@@ -110,6 +110,8 @@ components:
           description: Execution duration in milliseconds
         startedAt:
           $ref: '../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        requests:
+          type: object  
       required:
         - errors
         - warnings

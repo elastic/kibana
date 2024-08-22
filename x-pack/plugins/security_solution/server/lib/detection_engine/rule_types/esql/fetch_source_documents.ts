@@ -57,6 +57,21 @@ export const fetchSourceDocuments = async ({
     ignore_unavailable: true,
   });
 
+  // console.log(
+  //   '>>>>',
+  //   JSON.stringify(
+  //     {
+  //       body: {
+  //         query: idsQuery.query,
+  //         _source: false,
+  //         fields: ['*'],
+  //       },
+  //     },
+  //     null,
+  //     2
+  //   )
+  // );
+
   return response.hits.hits.reduce<Record<string, { fields: estypes.SearchHit['fields'] }>>(
     (acc, hit) => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

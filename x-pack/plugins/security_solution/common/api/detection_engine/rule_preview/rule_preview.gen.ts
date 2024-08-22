@@ -43,6 +43,7 @@ export const RulePreviewLogs = z.object({
    */
   duration: z.number().int(),
   startedAt: NonEmptyString.optional(),
+  requests: z.object({}).optional(),
 });
 
 export type RulePreviewRequestBody = z.infer<typeof RulePreviewRequestBody>;

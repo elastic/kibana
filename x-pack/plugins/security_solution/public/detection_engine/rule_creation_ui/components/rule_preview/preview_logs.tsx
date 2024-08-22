@@ -7,7 +7,7 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { Fragment, useMemo } from 'react';
-import { EuiCallOut, EuiText, EuiSpacer, EuiAccordion } from '@elastic/eui';
+import { EuiCallOut, EuiText, EuiSpacer, EuiAccordion, EuiCode, EuiCodeBlock } from '@elastic/eui';
 import type { RulePreviewLogs } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
 
@@ -66,6 +66,8 @@ const PreviewLogsComponent: React.FC<PreviewLogsProps> = ({ logs, hasNoiseWarnin
       <LogAccordion logs={sortedLogs.warnings}>
         {isAborted ? <CustomWarning message={i18n.PREVIEW_TIMEOUT_WARNING} /> : null}
       </LogAccordion>
+
+      <RequestsAccordion logs={logs} />
     </>
   );
 };
@@ -105,6 +107,41 @@ const LogAccordion: FC<PropsWithChildren<LogAccordionProps>> = ({ logs, isError,
               duration={log.duration}
               isError={isError}
             />
+          ))}
+        </EuiAccordion>
+      ) : null}
+      <EuiSpacer size="m" />
+    </>
+  );
+};
+
+const RequestsAccordion: FC<{ logs: RulePreviewLogs[] }> = ({ logs }) => {
+  return (
+    <>
+      {logs.length > 0 ? (
+        <EuiAccordion
+          id={'previewLoggedRequestsAccordion'}
+          buttonContent={'Preview logged requests'}
+        >
+          <EuiSpacer size="m" />
+          {logs.map((log, key) => (
+            <>
+              <EuiAccordion
+                key={key}
+                buttonContent={`Rule execution started at ${log.startedAt}`}
+                id={`ruleExecution=${key}`}
+                css={`
+                  padding-left: 20px;
+                `}
+              >
+                {(log?.requests ?? []).map((request, key1) => (
+                  <EuiCodeBlock key={`${key}-${key1}`} language="json" isCopyable>
+                    {request.request}
+                  </EuiCodeBlock>
+                ))}
+              </EuiAccordion>
+              <EuiSpacer size="s" />
+            </>
           ))}
         </EuiAccordion>
       ) : null}
