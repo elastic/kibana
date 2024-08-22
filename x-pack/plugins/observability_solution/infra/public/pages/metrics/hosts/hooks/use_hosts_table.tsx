@@ -40,6 +40,7 @@ import { ColumnHeader } from '../components/table/column_header';
 import { TABLE_COLUMN_LABEL, TABLE_CONTENT_LABEL } from '../translations';
 import { METRICS_TOOLTIP } from '../../../../common/visualizations';
 import { buildCombinedAssetFilter } from '../../../../utils/filters/build';
+import { AddDataPopover } from '../components/table/add_data_popover';
 
 /**
  * Columns and items types
@@ -95,6 +96,7 @@ const buildItemsList = (nodes: InfraAssetMetricsItem[]): HostNodeRow[] => {
       ),
       hasSystemMetrics,
       alertsCount: alertsCount ?? 0,
+      hasSystemMetrics,
     };
   });
 };
@@ -216,6 +218,18 @@ export const useHostsTable = () => {
   }, [items, pagination, sorting]);
 
   const metricColumnsWidth = displayAlerts ? '12%' : '16%';
+
+  const buildMetricCell = (
+    value: number,
+    formatType: InfraAssetMetricType,
+    hasSystemMetrics?: boolean
+  ) => {
+    if (!hasSystemMetrics && value === 0) {
+      return <AddDataPopover />;
+    }
+
+    return formatMetric(formatType, value);
+  };
 
   const columns: Array<EuiBasicTableColumn<HostNodeRow>> = useMemo(
     () => [
@@ -358,7 +372,8 @@ export const useHostsTable = () => {
         field: 'cpuV2',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-cpuUsage',
-        render: (avg: number) => formatMetric('cpuV2', avg),
+        render: (avg: number, { hasSystemMetrics }: HostNodeRow) =>
+          buildMetricCell(avg, 'cpuV2', hasSystemMetrics),
         align: 'right',
       },
       {
@@ -373,7 +388,8 @@ export const useHostsTable = () => {
         field: 'normalizedLoad1m',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-normalizedLoad1m',
-        render: (avg: number) => formatMetric('normalizedLoad1m', avg),
+        render: (avg: number, { hasSystemMetrics }: HostNodeRow) =>
+          buildMetricCell(avg, 'normalizedLoad1m', hasSystemMetrics),
         align: 'right',
       },
       {
@@ -388,7 +404,8 @@ export const useHostsTable = () => {
         field: 'memory',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-memoryUsage',
-        render: (avg: number) => formatMetric('memory', avg),
+        render: (avg: number, { hasSystemMetrics }: HostNodeRow) =>
+          buildMetricCell(avg, 'memory', hasSystemMetrics),
         align: 'right',
       },
       {
@@ -403,7 +420,8 @@ export const useHostsTable = () => {
         field: 'memoryFree',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-memoryFree',
-        render: (avg: number) => formatMetric('memoryFree', avg),
+        render: (avg: number, { hasSystemMetrics }: HostNodeRow) =>
+          buildMetricCell(avg, 'memoryFree', hasSystemMetrics),
         align: 'right',
       },
       {
@@ -418,7 +436,8 @@ export const useHostsTable = () => {
         field: 'diskSpaceUsage',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-diskSpaceUsage',
-        render: (max: number) => formatMetric('diskSpaceUsage', max),
+        render: (max: number, { hasSystemMetrics }: HostNodeRow) =>
+          buildMetricCell(max, 'diskSpaceUsage', hasSystemMetrics),
         align: 'right',
       },
       {
@@ -433,7 +452,8 @@ export const useHostsTable = () => {
         field: 'rxV2',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-rx',
-        render: (avg: number) => formatMetric('rx', avg),
+        render: (avg: number, { hasSystemMetrics }: HostNodeRow) =>
+          buildMetricCell(avg, 'rx', hasSystemMetrics),
         align: 'right',
       },
       {
@@ -448,7 +468,8 @@ export const useHostsTable = () => {
         field: 'txV2',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-tx',
-        render: (avg: number) => formatMetric('tx', avg),
+        render: (avg: number, { hasSystemMetrics }: HostNodeRow) =>
+          buildMetricCell(avg, 'tx', hasSystemMetrics),
         align: 'right',
       },
     ],
