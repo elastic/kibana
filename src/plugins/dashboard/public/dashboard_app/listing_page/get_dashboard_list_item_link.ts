@@ -29,7 +29,7 @@ export const getDashboardListItemLink = (
   const useHash = uiSettings.get('state:storeInSessionStorage'); // use hash
 
   let url = getUrlForApp(DASHBOARD_APP_ID, {
-    path: `#${createDashboardEditUrl(id, expandedPanelId)}`,
+    path: `#${createDashboardEditUrl(id, false, expandedPanelId)}`,
   });
   const globalStateInUrl = kbnUrlStateStorage.get<QueryState>(GLOBAL_STATE_STORAGE_KEY) || {};
 

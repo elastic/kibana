@@ -69,7 +69,7 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
 
     const path =
       dashboardOption === 'existing' && selectedDashboard
-        ? `#${createDashboardEditUrl(selectedDashboard.id, undefined, true)}`
+        ? `#${createDashboardEditUrl(selectedDashboard.id, true, undefined)}`
         : `#${CREATE_NEW_DASHBOARD_URL}`;
 
     closeModal();

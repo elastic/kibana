@@ -22,11 +22,11 @@ export const PRINT_DASHBOARD_URL = '/print';
 export const getFullPath = (aliasId?: string, id?: string) =>
   `/app/dashboards#${createDashboardEditUrl(aliasId || id)}`;
 
-export const getFullEditPath = (id?: string, expandedPanelId?: string, editMode?: boolean) => {
-  return `/app/dashboards#${createDashboardEditUrl(id, expandedPanelId, editMode)}`;
+export const getFullEditPath = (id?: string, editMode?: boolean, expandedPanelId?: string) => {
+  return `/app/dashboards#${createDashboardEditUrl(id, editMode, expandedPanelId)}`;
 };
 
-export function createDashboardEditUrl(id?: string, expandedPanelId?: string, editMode?: boolean) {
+export function createDashboardEditUrl(id?: string, editMode?: boolean, expandedPanelId?: string) {
   if (!id) {
     return `${CREATE_NEW_DASHBOARD_URL}`;
   }
