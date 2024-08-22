@@ -14,5 +14,7 @@ steps:
     parallelism: 1
     retry:
       automatic:
+        - exit_status: "-1"
+          limit: 1
         - exit_status: '*'
           limit: 1
