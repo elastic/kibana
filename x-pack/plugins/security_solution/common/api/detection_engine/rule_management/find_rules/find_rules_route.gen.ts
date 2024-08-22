@@ -14,8 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
-import { ArrayFromString } from '@kbn/zod';
+import { ArrayFromString, z } from '@kbn/zod';
 
 import { SortOrder } from '../../model/sorting.gen';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { RequiredOptional } from '@kbn/zod';
-import { requiredOptional } from '@kbn/zod';
+import { requiredOptional, type RequiredOptional } from '@kbn/zod';
 import { DEFAULT_MAX_SIGNALS } from '../../../../../../../common/constants';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import type {

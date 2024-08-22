@@ -14,8 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
-import { ArrayFromString } from '@kbn/zod';
+import { ArrayFromString, z } from '@kbn/zod';
 
 import { SortOrder } from '../common_attributes.gen';
 import { AnonymizationFieldResponse } from './bulk_crud_anonymization_fields_route.gen';

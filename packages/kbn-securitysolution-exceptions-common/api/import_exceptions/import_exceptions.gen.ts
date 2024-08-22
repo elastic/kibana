@@ -15,8 +15,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
-import { BooleanFromString } from '@kbn/zod';
+import { BooleanFromString, z } from '@kbn/zod';
 
 import {
   ExceptionListId,

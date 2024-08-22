@@ -15,8 +15,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
-import { ArrayFromString } from '@kbn/zod';
+import { ArrayFromString, z } from '@kbn/zod';
 
 import { ExceptionNamespaceType, ExceptionList } from '../model/exception_list_common.gen';
 
