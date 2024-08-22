@@ -20,7 +20,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import {
   EditorContentSpinner,
   OutputPanelEmptyState,
-  NetworkRequestStatusBar
+  NetworkRequestStatusBar,
 } from '../../components';
 import { Panel, PanelsContainer } from '..';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
