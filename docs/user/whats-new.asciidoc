@@ -84,14 +84,6 @@ You can also see who last updated a dashboard by clicking the dashboard informat
 
 image::images/dashboard-last-editor.png[Dashboard details panel with the name of the last editor]
 
-
-[discrete]
-==== Array of values for Metrics
-
-The new **Metrics** now supports fields that show an array of values.
-
-image::images/array-in-metrics.png[A metric showing an array of values, width=35%]
-
 [discrete]
 === Discover
 
