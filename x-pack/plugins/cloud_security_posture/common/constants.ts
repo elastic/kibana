@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { test } from '@kbn/cloud-security-posture-common/constants';
+import { test } from '@kbn/cloud-security-posture-common';
 
 import {
   AwsCredentialsTypeFieldMap,
