@@ -142,7 +142,7 @@ module.exports = (_, argv) => {
         'scheduler/tracing': 'scheduler/tracing-profiling',
       },
       extensions: ['.js', '.ts'],
-      mainFields: ['browser', 'main'],
+      mainFields: ['browser', 'main', 'module'],
       conditionNames: ['require', 'default', 'node', 'module', 'import'],
       fallback: {
         child_process: false,
