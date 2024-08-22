@@ -11,7 +11,7 @@ import { alertOriginSchema } from '@kbn/investigation-shared';
 import { ALERT_RULE_CATEGORY } from '@kbn/rule-data-utils/src/default_alerts_as_data';
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useAsync } from 'react-use';
+import useAsync from 'react-use/lib/useAsync';
 import { paths } from '../../../common/paths';
 import { useFetchAlert } from '../../hooks/use_get_alert_details';
 import { useFetchInvestigation } from '../../hooks/use_get_investigation_details';
