@@ -312,7 +312,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
         this.emitEvent(
           map(
             result,
-            ({ timing, ...event }) => asTaskPollingCycleEvent<string>(asOk(event), timing),
+            ({ timing, ...event }) => {
+              return asTaskPollingCycleEvent<string>(asOk(event), timing);
+            },
             (event) => asTaskPollingCycleEvent<string>(asErr(event))
           )
         );

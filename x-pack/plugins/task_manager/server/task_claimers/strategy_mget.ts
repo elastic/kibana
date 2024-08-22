@@ -231,6 +231,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     }
   } catch (err) {
     logger.warn(`Error updating tasks during claim: ${err}`, logMeta);
+    // throw the error here
   }
 
   // perform an mget to get the full task instance for claiming
@@ -252,6 +253,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     }, []);
   } catch (err) {
     logger.warn(`Error getting full task documents during claim: ${err}`, logMeta);
+    // throw the error here
   }
 
   // separate update for removed tasks; shouldn't happen often, so unlikely
@@ -281,6 +283,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
         }
       }
     } catch (err) {
+      // swallow the error because this is unrelated to the claim cycle
       logger.warn(`Error updating tasks to mark as unrecognized during claim: ${err}`, logMeta);
     }
   }
@@ -296,6 +299,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       tasksConflicted: conflicts,
       tasksClaimed: fullTasksToRun.length,
       tasksLeftUnclaimed: leftOverTasks.length,
+      // tasksErrors: bulkErrors,
     },
     docs: fullTasksToRun,
     timing: stopTaskTimer(),
