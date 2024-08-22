@@ -125,3 +125,29 @@ export function LocationsField({ value, onChange, ...rest }: FieldProps) {
     </FieldPopoverExpression>
   );
 }
+
+export function ProjectsField({ value, onChange, ...rest }: FieldProps) {
+  const label = i18n.translate('xpack.synthetics.alerting.fields.project', {
+    defaultMessage: 'Projects',
+  });
+  return (
+    <FieldPopoverExpression
+      value={value?.join(', ') ?? allOptionText}
+      title={label}
+      fieldName="projects"
+      selectedField={rest.selectedField}
+      setSelectedField={rest.setSelectedField}
+    >
+      <FieldSelector
+        value={value}
+        onChange={onChange}
+        placeholder={i18n.translate('xpack.synthetics.projectSelectPlaceholder', {
+          defaultMessage: 'Select project',
+        })}
+        dataTestSubj="monitorProjectField"
+        fieldName="projects"
+        {...rest}
+      />
+    </FieldPopoverExpression>
+  );
+}

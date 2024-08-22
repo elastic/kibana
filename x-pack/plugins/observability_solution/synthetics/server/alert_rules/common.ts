@@ -17,7 +17,6 @@ import {
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { legacyExperimentalFieldMap, ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { PublicAlertsClient } from '@kbn/alerting-plugin/server/alerts_client/types';
 import { ALERT_REASON } from '@kbn/rule-data-utils';

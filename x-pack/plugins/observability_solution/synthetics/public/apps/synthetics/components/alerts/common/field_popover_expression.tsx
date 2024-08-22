@@ -47,7 +47,7 @@ export function FieldPopoverExpression({
       }
       repositionOnScroll
     >
-      {children}
+      <div style={{ width: 300 }}>{children}</div>
     </EuiPopover>
   );
 }

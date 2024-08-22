@@ -142,19 +142,10 @@ export class StatusRuleExecutor {
 
   async getDownChecks(prevDownConfigs: StatusConfigs = {}): Promise<AlertOverviewStatus> {
     await this.init();
-    const {
-      maxPeriod,
-      monitorLocationIds,
-      monitorLocationMap,
-      projectMonitorsCount,
-      monitorQueryIdToConfigIdMap,
-    } = processMonitors(this.monitors);
+    const { enabledMonitorQueryIds } = await this.getMonitors();
 
-    return {
-      enabledMonitorQueryIds,
-      monitorLocationMap,
-      monitorQueryIdToConfigIdMap,
-    } = await this.getMonitors();
+    const { maxPeriod, monitorLocationIds, monitorLocationMap, monitorQueryIdToConfigIdMap } =
+      processMonitors(this.monitors);
 
     this.monitorLocationsMap = monitorLocationMap;
 

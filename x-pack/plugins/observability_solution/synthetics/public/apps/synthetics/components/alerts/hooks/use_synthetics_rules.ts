@@ -41,7 +41,8 @@ export const useSyntheticsRules = (isOpen: boolean) => {
   const { loaded, data: monitors } = useSelector(selectMonitorListState);
 
   const hasMonitors = loaded && monitors.absoluteTotal && monitors.absoluteTotal > 0;
-  const defaultRulesEnabled = settings && (settings?.defaultRulesEnabled ?? true);
+  const defaultRulesEnabled =
+    settings && (settings?.defaultStatusRuleEnabled || settings?.defaultTLSRuleEnabled);
 
   const getOrCreateAlerts = useCallback(() => {
     if (canSave) {
