@@ -7,8 +7,17 @@
  */
 
 import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPageTemplate, EuiSplitPanel } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiPageTemplate,
+  EuiSplitPanel,
+  EuiHorizontalRule,
+  EuiButtonEmpty,
+} from '@elastic/eui';
+import { MAIN_PANEL_LABELS } from './i18n';
+import { NavIconButton } from './nav_icon_button';
 import { Editor } from '../editor';
 import { TopNavMenu, SomethingWentWrongCallout } from '../../components';
 import { useDataInit } from '../../hooks';
@@ -41,28 +50,62 @@ export function Main({ isEmbeddable = false }: MainProps) {
       >
         <EuiFlexItem grow={false}>
           <EuiTitle className="euiScreenReaderOnly">
-            <h1>
-              {i18n.translate('console.pageHeading', {
-                defaultMessage: 'Console',
-              })}
-            </h1>
+            <h1>{MAIN_PANEL_LABELS.consolePageHeading}</h1>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiSplitPanel.Outer grow={true} borderRadius={isEmbeddable ? 'none' : 'm'}>
             <EuiSplitPanel.Inner grow={false} className="consoleTabs">
-              <TopNavMenu
-                disabled={!done}
-                items={getTopNavConfig({
-                  selectedTab,
-                  setSelectedTab,
-                })}
-              />
+              <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+                <EuiFlexItem>
+                  <TopNavMenu
+                    disabled={!done}
+                    items={getTopNavConfig({
+                      selectedTab,
+                      setSelectedTab,
+                    })}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <NavIconButton
+                    iconType="save"
+                    onClick={() => {}}
+                    ariaLabel={MAIN_PANEL_LABELS.importExportButton}
+                    dataTestSubj="consoleImportExportButton"
+                    toolTipContent={MAIN_PANEL_LABELS.importExportButton}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <NavIconButton
+                    iconType="keyboard"
+                    onClick={() => {}}
+                    ariaLabel={MAIN_PANEL_LABELS.shortcutsButton}
+                    dataTestSubj="consoleShortcutsButton"
+                    toolTipContent={MAIN_PANEL_LABELS.shortcutsButton}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <NavIconButton
+                    iconType="questionInCircle"
+                    onClick={() => {}}
+                    ariaLabel={MAIN_PANEL_LABELS.helpButton}
+                    dataTestSubj="consoleHelpButton"
+                    toolTipContent={MAIN_PANEL_LABELS.helpButton}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiSplitPanel.Inner>
+            <EuiHorizontalRule margin="none" />
             <EuiSplitPanel.Inner paddingSize="none">
               {selectedTab === SHELL_TAB_ID && (
                 <Editor loading={!done} setEditorInstance={() => {}} />
               )}
+            </EuiSplitPanel.Inner>
+            <EuiHorizontalRule margin="none" />
+            <EuiSplitPanel.Inner paddingSize="xs" grow={false}>
+              <EuiButtonEmpty onClick={() => {}} iconType="editorCodeBlock" size="xs" color="text">
+                {MAIN_PANEL_LABELS.variablesButton}
+              </EuiButtonEmpty>
             </EuiSplitPanel.Inner>
           </EuiSplitPanel.Outer>
         </EuiFlexItem>
