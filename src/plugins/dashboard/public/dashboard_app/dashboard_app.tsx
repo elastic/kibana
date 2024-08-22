@@ -21,7 +21,6 @@ import {
   isDashboardAppInNoDataState,
 } from './no_data/dashboard_app_no_data';
 import {
-  getUrlForExpandedPanel,
   loadAndRemoveDashboardState,
   startSyncingDashboardUrlState,
 } from './url/sync_dashboard_url_state';
@@ -194,15 +193,6 @@ export function DashboardApp({
    */
   useEffect(() => {
     if (!dashboardAPI) return;
-    dashboardAPI.expandedPanelId.subscribe(() => {
-      const newUrl = getUrlForExpandedPanel(
-        kbnUrlStateStorage,
-        savedDashboardId!,
-        true,
-        dashboardAPI.expandedPanelId.value
-      );
-      kbnUrlStateStorage.kbnUrlControls.update(newUrl, true);
-    });
     const { stopWatchingAppStateInUrl } = startSyncingDashboardUrlState({
       kbnUrlStateStorage,
       dashboardAPI,
