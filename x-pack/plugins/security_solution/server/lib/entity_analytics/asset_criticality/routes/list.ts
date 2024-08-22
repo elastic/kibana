@@ -7,7 +7,7 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod';
+
 import {
   ASSET_CRITICALITY_PUBLIC_LIST_URL,
   APP_ID,
@@ -39,7 +39,7 @@ export const assetCriticalityPublicListRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(FindAssetCriticalityRecordsRequestQuery),
+            query: FindAssetCriticalityRecordsRequestQuery,
           },
         },
       },

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { type IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import {
   AttackDiscoveryCancelResponse,
@@ -35,11 +34,11 @@ export const cancelAttackDiscoveryRoute = (
         version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(AttackDiscoveryCancelRequestParams),
+            params: AttackDiscoveryCancelRequestParams,
           },
           response: {
             200: {
-              body: { custom: buildRouteValidationWithZod(AttackDiscoveryCancelResponse) },
+              body: { custom: AttackDiscoveryCancelResponse },
             },
           },
         },

@@ -7,7 +7,7 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod';
+
 import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../../../common/constants';
 import type { FindRulesResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
@@ -34,7 +34,7 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
         version: '2023-10-31',
         validate: {
           request: {
-            query: buildRouteValidationWithZod(FindRulesRequestQuery),
+            query: FindRulesRequestQuery,
           },
         },
       },

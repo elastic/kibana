@@ -11,7 +11,7 @@ import {
   CreateKnowledgeBaseResponse,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
 } from '@kbn/elastic-assistant-common';
-import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+
 import { IKibanaResponse, KibanaRequest } from '@kbn/core/server';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantPluginRouter, GetElser } from '../../types';
@@ -47,7 +47,7 @@ export const postKnowledgeBaseRoute = (
         version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(CreateKnowledgeBaseRequestParams),
+            params: CreateKnowledgeBaseRequestParams,
           },
         },
       },

@@ -7,7 +7,7 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod';
+
 import {
   CreateAssetCriticalityRecordRequestBody,
   type CreateAssetCriticalityRecordResponse,
@@ -41,7 +41,7 @@ export const assetCriticalityPublicUpsertRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(CreateAssetCriticalityRecordRequestBody),
+            body: CreateAssetCriticalityRecordRequestBody,
           },
         },
       },

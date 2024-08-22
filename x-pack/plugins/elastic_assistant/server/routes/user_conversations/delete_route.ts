@@ -11,7 +11,7 @@ import {
   DeleteConversationRequestParams,
   API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
-import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
@@ -30,7 +30,7 @@ export const deleteConversationRoute = (router: ElasticAssistantPluginRouter) =>
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(DeleteConversationRequestParams),
+            params: DeleteConversationRequestParams,
           },
         },
       },

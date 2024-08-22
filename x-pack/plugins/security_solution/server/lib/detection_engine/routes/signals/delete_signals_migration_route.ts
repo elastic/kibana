@@ -6,7 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod';
+
 import { AlertsMigrationCleanupRequestBody } from '../../../../../common/api/detection_engine/signals_migration';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
@@ -28,7 +28,7 @@ export const deleteSignalsMigrationRoute = (router: SecuritySolutionPluginRouter
       {
         version: '2023-10-31',
         validate: {
-          request: { body: buildRouteValidationWithZod(AlertsMigrationCleanupRequestBody) },
+          request: { body: AlertsMigrationCleanupRequestBody },
         },
       },
       async (context, request, response) => {

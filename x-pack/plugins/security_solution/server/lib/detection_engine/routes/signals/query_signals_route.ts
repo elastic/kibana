@@ -9,7 +9,7 @@ import type { MappingRuntimeFields, Sort } from '@elastic/elasticsearch/lib/api/
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
-import { buildRouteValidationWithZod } from '@kbn/zod';
+
 import { SearchAlertsRequestBody } from '../../../../../common/api/detection_engine/signals';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
@@ -32,7 +32,7 @@ export const querySignalsRoute = (
         version: '2023-10-31',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(SearchAlertsRequestBody),
+            body: SearchAlertsRequestBody,
           },
         },
       },

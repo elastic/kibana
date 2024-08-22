@@ -277,9 +277,9 @@ export const createEntityRoute = (router: Router): void => {
         version: '2023-10-31',
         validate: {
           request: {
-            params: buildRouteValidationWithZod(CreateEntityRequestParams),
-            query: buildRouteValidationWithZod(CreateEntityRequestQuery),
-            body: buildRouteValidationWithZod(CreateEntityRequestBody),
+            params: CreateEntityRequestParams,
+            query: CreateEntityRequestQuery,
+            body: CreateEntityRequestBody,
           },
         },
       },

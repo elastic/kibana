@@ -9,7 +9,6 @@ import type { IRouter } from '@kbn/core/server';
 import { BuildIntegrationRequestBody, INTEGRATION_BUILDER_PATH } from '../../common';
 import { buildPackage } from '../integration_builder';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
-import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 
 export function registerIntegrationBuilderRoutes(
@@ -25,7 +24,7 @@ export function registerIntegrationBuilderRoutes(
         version: '1',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(BuildIntegrationRequestBody),
+            body: BuildIntegrationRequestBody,
           },
         },
       },

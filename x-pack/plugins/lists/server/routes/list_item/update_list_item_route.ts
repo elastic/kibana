@@ -7,7 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
-import { buildRouteValidationWithZod } from '@kbn/zod';
+
 import {
   UpdateListItemRequestBody,
   UpdateListItemResponse,
@@ -30,7 +30,7 @@ export const updateListItemRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            body: buildRouteValidationWithZod(UpdateListItemRequestBody),
+            body: UpdateListItemRequestBody,
           },
         },
         version: '2023-10-31',

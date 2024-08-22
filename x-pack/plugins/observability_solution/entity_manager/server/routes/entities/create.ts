@@ -12,7 +12,7 @@ import {
   createEntityDefinitionQuerySchema,
   CreateEntityDefinitionQuery,
 } from '@kbn/entities-schema';
-import { buildRouteValidationWithZod } from '@kbn/zod';
+
 import { SetupRouteOptions } from '../types';
 import { EntityIdConflict } from '../../lib/entities/errors/entity_id_conflict_error';
 import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
@@ -62,8 +62,8 @@ export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
     {
       path: '/internal/entities/definition',
       validate: {
-        body: buildRouteValidationWithZod(entityDefinitionSchema.strict()),
-        query: buildRouteValidationWithZod(createEntityDefinitionQuerySchema),
+        body: entityDefinitionSchema.strict(),
+        query: createEntityDefinitionQuerySchema,
       },
     },
     async (context, req, res) => {

@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { IKibanaResponse } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod';
+
 import type { ExceptionList } from '@kbn/securitysolution-exceptions-common/api';
 import {
   CreateSharedExceptionListRequestBody,
@@ -32,7 +32,7 @@ export const createSharedExceptionListRoute = (router: SecuritySolutionPluginRou
         version: '2023-10-31',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(CreateSharedExceptionListRequestBody),
+            body: CreateSharedExceptionListRequestBody,
           },
         },
       },

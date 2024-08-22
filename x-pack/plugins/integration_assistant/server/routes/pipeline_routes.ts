@@ -10,7 +10,6 @@ import { CheckPipelineRequestBody, CheckPipelineResponse, CHECK_PIPELINE_PATH } 
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { testPipeline } from '../util/pipeline';
-import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 
 export function registerPipelineRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
@@ -29,7 +28,7 @@ export function registerPipelineRoutes(router: IRouter<IntegrationAssistantRoute
         version: '1',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(CheckPipelineRequestBody),
+            body: CheckPipelineRequestBody,
           },
         },
       },

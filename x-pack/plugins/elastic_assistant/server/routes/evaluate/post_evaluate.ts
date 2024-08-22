@@ -21,7 +21,7 @@ import {
   PostEvaluateBody,
   PostEvaluateResponse,
 } from '@kbn/elastic-assistant-common';
-import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+
 import { getDefaultArguments } from '@kbn/langchain/server';
 import { StructuredTool } from '@langchain/core/tools';
 import {
@@ -74,11 +74,11 @@ export const postEvaluateRoute = (
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(PostEvaluateBody),
+            body: PostEvaluateBody,
           },
           response: {
             200: {
-              body: { custom: buildRouteValidationWithZod(PostEvaluateResponse) },
+              body: { custom: PostEvaluateResponse },
             },
           },
         },

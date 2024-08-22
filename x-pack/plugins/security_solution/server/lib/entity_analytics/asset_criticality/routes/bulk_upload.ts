@@ -8,7 +8,7 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { Readable } from 'node:stream';
-import { buildRouteValidationWithZod } from '@kbn/zod';
+
 import {
   BulkUpsertAssetCriticalityRecordsRequestBody,
   type BulkUpsertAssetCriticalityRecordsResponse,
@@ -44,7 +44,7 @@ export const assetCriticalityPublicBulkUploadRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(BulkUpsertAssetCriticalityRecordsRequestBody),
+            body: BulkUpsertAssetCriticalityRecordsRequestBody,
           },
         },
       },

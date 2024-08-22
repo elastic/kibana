@@ -6,7 +6,7 @@
  */
 
 import { RequestHandlerContext } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod';
+
 import { getEntityDefinitionQuerySchema } from '@kbn/entities-schema';
 import { SetupRouteOptions } from '../types';
 import { findEntityDefinitions } from '../../lib/entities/find_entity_definition';
@@ -57,7 +57,7 @@ export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
     {
       path: '/internal/entities/definition',
       validate: {
-        query: buildRouteValidationWithZod(getEntityDefinitionQuerySchema.strict()),
+        query: getEntityDefinitionQuerySchema.strict(),
       },
     },
     async (context, req, res) => {

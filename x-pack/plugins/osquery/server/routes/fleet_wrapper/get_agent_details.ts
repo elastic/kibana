@@ -6,7 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod';
+
 import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -24,7 +24,7 @@ export const getAgentDetailsRoute = (router: IRouter, osqueryContext: OsqueryApp
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(GetAgentDetailsRequestParams),
+            params: GetAgentDetailsRequestParams,
           },
         },
       },

@@ -14,7 +14,7 @@ import {
   FindKnowledgeBaseEntriesRequestQuery,
   FindKnowledgeBaseEntriesResponse,
 } from '@kbn/elastic-assistant-common';
-import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+
 import { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
 
@@ -36,7 +36,7 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(FindKnowledgeBaseEntriesRequestQuery),
+            query: FindKnowledgeBaseEntriesRequestQuery,
           },
         },
       },

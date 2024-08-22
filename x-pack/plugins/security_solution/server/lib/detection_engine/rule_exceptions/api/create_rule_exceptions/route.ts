@@ -10,7 +10,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import { buildRouteValidationWithZod, stringifyZodError } from '@kbn/zod';
+import { stringifyZodError } from '@kbn/zod';
 import type {
   CreateRuleExceptionListItemProps,
   ExceptionList,
@@ -45,8 +45,8 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
         version: '2023-10-31',
         validate: {
           request: {
-            params: buildRouteValidationWithZod(CreateRuleExceptionListItemsRequestParams),
-            body: buildRouteValidationWithZod(CreateRuleExceptionListItemsRequestBody),
+            params: CreateRuleExceptionListItemsRequestParams,
+            body: CreateRuleExceptionListItemsRequestBody,
           },
         },
       },

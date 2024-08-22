@@ -7,7 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
-import { buildRouteValidationWithZod } from '@kbn/zod';
+
 import {
   DeleteListItemRequestQuery,
   DeleteListItemResponse,
@@ -30,7 +30,7 @@ export const deleteListItemRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            query: buildRouteValidationWithZod(DeleteListItemRequestQuery),
+            query: DeleteListItemRequestQuery,
           },
         },
         version: '2023-10-31',

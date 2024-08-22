@@ -9,7 +9,7 @@ import { Stream } from 'stream';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
-import { buildRouteValidationWithZod } from '@kbn/zod';
+
 import { ExportListItemsRequestQuery } from '@kbn/securitysolution-lists-common/api';
 
 import type { ListsPluginRouter } from '../../types';
@@ -29,7 +29,7 @@ export const exportListItemRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            query: buildRouteValidationWithZod(ExportListItemsRequestQuery),
+            query: ExportListItemsRequestQuery,
           },
         },
         version: '2023-10-31',

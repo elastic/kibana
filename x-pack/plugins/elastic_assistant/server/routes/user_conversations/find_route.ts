@@ -16,7 +16,7 @@ import {
   FindConversationsRequestQuery,
   FindConversationsResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/conversations/find_conversations_route.gen';
-import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { EsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
@@ -37,7 +37,7 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(FindConversationsRequestQuery),
+            query: FindConversationsRequestQuery,
           },
         },
       },

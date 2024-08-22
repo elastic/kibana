@@ -7,7 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { uniq } from 'lodash/fp';
-import { buildRouteValidationWithZod } from '@kbn/zod';
+
 import { SetAlertAssigneesRequestBody } from '../../../../../common/api/detection_engine/alert_assignees';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
@@ -31,7 +31,7 @@ export const setAlertAssigneesRoute = (router: SecuritySolutionPluginRouter) => 
         version: '2023-10-31',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(SetAlertAssigneesRequestBody),
+            body: SetAlertAssigneesRequestBody,
           },
         },
       },

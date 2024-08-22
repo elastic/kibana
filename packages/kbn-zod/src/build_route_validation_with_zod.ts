@@ -11,6 +11,8 @@ import type { RouteValidationFunction, RouteValidationResultFactory } from '@kbn
 import { stringifyZodError } from './stringify_zod_error';
 
 /**
+ * @deprecated It is now possible to directly pass a Zod schema to a route's request validation.
+ *
  * Zod validation factory for Kibana route's request validation.
  * It allows to pass a Zod schema for parameters, query and/or body validation.
  *

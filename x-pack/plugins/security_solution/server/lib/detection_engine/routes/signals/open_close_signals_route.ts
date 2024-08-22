@@ -13,7 +13,7 @@ import {
   ALERT_WORKFLOW_USER,
 } from '@kbn/rule-data-utils';
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod';
+
 import { SetAlertsStatusRequestBody } from '../../../../../common/api/detection_engine/signals';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
@@ -46,7 +46,7 @@ export const setSignalsStatusRoute = (
         version: '2023-10-31',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(SetAlertsStatusRequestBody),
+            body: SetAlertsStatusRequestBody,
           },
         },
       },

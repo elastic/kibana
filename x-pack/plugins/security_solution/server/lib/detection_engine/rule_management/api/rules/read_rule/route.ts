@@ -7,7 +7,7 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod';
+
 import type { ReadRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   ReadRuleRequestQuery,
@@ -33,7 +33,7 @@ export const readRuleRoute = (router: SecuritySolutionPluginRouter, logger: Logg
         version: '2023-10-31',
         validate: {
           request: {
-            query: buildRouteValidationWithZod(ReadRuleRequestQuery),
+            query: ReadRuleRequestQuery,
           },
         },
       },

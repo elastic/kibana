@@ -7,7 +7,7 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod';
+
 import type { DeleteAssetCriticalityRecordResponse } from '../../../../../common/api/entity_analytics';
 import { DeleteAssetCriticalityRecordRequestQuery } from '../../../../../common/api/entity_analytics';
 import {
@@ -39,7 +39,7 @@ export const assetCriticalityPublicDeleteRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(DeleteAssetCriticalityRecordRequestQuery),
+            query: DeleteAssetCriticalityRecordRequestQuery,
           },
         },
       },

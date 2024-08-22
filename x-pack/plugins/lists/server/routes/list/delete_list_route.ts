@@ -17,7 +17,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
-import { buildRouteValidationWithZod } from '@kbn/zod';
+
 import { DeleteListRequestQuery, DeleteListResponse } from '@kbn/securitysolution-lists-common/api';
 
 import type { ListsPluginRouter } from '../../types';
@@ -39,7 +39,7 @@ export const deleteListRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            query: buildRouteValidationWithZod(DeleteListRequestQuery),
+            query: DeleteListRequestQuery,
           },
         },
         version: '2023-10-31',

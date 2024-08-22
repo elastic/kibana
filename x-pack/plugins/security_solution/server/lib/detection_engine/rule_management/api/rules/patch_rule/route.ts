@@ -7,7 +7,7 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod';
+
 import type { PatchRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   PatchRuleRequestBody,
@@ -38,7 +38,7 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
             // Use non-exact validation because everything is optional in patch - since everything is optional,
             // io-ts can't find the right schema from the type specific union and the exact check breaks.
             // We do type specific validation after fetching the existing rule so we know the rule type.
-            body: buildRouteValidationWithZod(PatchRuleRequestBody),
+            body: PatchRuleRequestBody,
           },
         },
       },
