@@ -84,8 +84,8 @@ function endpointModelAtrributes(endpoint: InferenceAPIConfigResponse) {
       return mistralAttributes(endpoint);
     case ServiceProviderKeys.googleaistudio:
       return googleAIStudioAttributes(endpoint);
-      case ServiceProviderKeys.alibabaaisearch:
-        return alibabaAISearchAttributes(endpoint);      
+    case ServiceProviderKeys.alibabacloudaisearch:
+      return alibabaCloudAISearchAttributes(endpoint);      
     case ServiceProviderKeys.amazonbedrock:
       return amazonBedrockAttributes(endpoint);
     default:
@@ -169,7 +169,7 @@ function mistralAttributes(endpoint: InferenceAPIConfigResponse) {
     .join(', ');
 }
 
-function alibabaAISearchAttributes(endpoint: InferenceAPIConfigResponse) {
+function alibabaCloudAISearchAttributes(endpoint: InferenceAPIConfigResponse) {
   const serviceSettings = endpoint.service_settings;
 
   const rateLimit =

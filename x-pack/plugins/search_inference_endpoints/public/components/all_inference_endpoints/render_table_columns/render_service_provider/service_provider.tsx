@@ -16,7 +16,7 @@ import azureOpenAIIcon from '../../../../assets/images/providers/azure_open_ai.s
 import googleAIStudioIcon from '../../../../assets/images/providers/google_ai_studio.svg';
 import mistralIcon from '../../../../assets/images/providers/mistral.svg';
 import amazonBedrockIcon from '../../../../assets/images/providers/amazon_bedrock.svg';
-import alibabaAISearchIcon from '../../../../assets/images/providers/alibaba_ai_search.svg';
+import alibabaCloudAISearchIcon from '../../../../assets/images/providers/alibaba_cloud_ai_search.svg';
 import { ServiceProviderKeys } from '../../types';
 
 interface ServiceProviderProps {
@@ -29,9 +29,9 @@ interface ServiceProviderRecord {
 }
 
 export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecord> = {
-  [ServiceProviderKeys.alibabaaisearch]: {
-    icon: alibabaAISearchIcon,
-    name: 'Alibaba AI Search',
+  [ServiceProviderKeys.alibabacloudaisearch]: {
+    icon: alibabaCloudAISearchIcon,
+    name: 'AlibabaCloud AI Search',
   },  
   [ServiceProviderKeys.amazonbedrock]: {
     icon: amazonBedrockIcon,

@@ -272,6 +272,10 @@ export type InferenceServiceSettings =
         service_id: string;
         host: string;
         workspace: string;
+        http_schema: 'https' | 'http';
+        rate_limit: {
+          requests_per_minute: number;
+        };        
       };
     }
   | {
