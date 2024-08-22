@@ -241,6 +241,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
           >
             {!editorConfig?.hideDataViewSelector && (
               <EuiFormRow
+                data-test-subj="control-editor-data-view-picker"
                 label={DataControlEditorStrings.manageControl.dataSource.getDataViewTitle()}
               >
                 {dataViewListError ? (
@@ -358,6 +359,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
             </EuiFormRow>
             {!editorConfig?.hideWidthSettings && (
               <EuiFormRow
+                data-test-subj="control-editor-width-settings"
                 label={DataControlEditorStrings.manageControl.displaySettings.getWidthInputTitle()}
               >
                 <div>
