@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { EditorContentSpinner, NetworkRequestStatusBar } from '../../components';
+import { EditorContentSpinner, OutputPanelEmptyState, NetworkRequestStatusBar } from '../../components';
 import { Panel, PanelsContainer } from '..';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
 import { getAutocompleteInfo, StorageKeys } from '../../../services';
@@ -108,12 +108,16 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
         >
           <EuiSplitPanel.Outer grow borderRadius="none" hasShadow={false}>
             <EuiSplitPanel.Inner paddingSize="none">
-              {loading ? (
+              {data ? (
+                isMonacoEnabled ? (
+                  <MonacoEditorOutput />
+                ) : (
+                  <EditorOutput />
+                )
+              ) : loading || requestInFlight ? (
                 <EditorContentSpinner />
-              ) : isMonacoEnabled ? (
-                <MonacoEditorOutput />
               ) : (
-                <EditorOutput />
+                <OutputPanelEmptyState />
               )}
             </EuiSplitPanel.Inner>
             <EuiSplitPanel.Inner

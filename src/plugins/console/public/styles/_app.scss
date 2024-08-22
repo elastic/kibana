@@ -37,7 +37,13 @@
 
   &__spinner {
     width: 100%;
+    background-color: $euiFormBackgroundColor;
   }
+}
+
+.conApp__outputPanel__emptyState {
+  padding: 0 $euiSizeXS;
+  text-align: center;
 }
 
 .conApp__output, .conApp_example {
