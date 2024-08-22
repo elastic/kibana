@@ -8,7 +8,7 @@
 import { v4 as uuidV4 } from 'uuid';
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import { schema } from '@kbn/config-schema';
-import { flatMap, times } from 'lodash';
+import { times } from 'lodash';
 import { TaskCost, TaskStatus } from '../task';
 import type { TaskClaimingOpts } from '../queries/task_claiming';
 import { TaskManagerPlugin, type TaskManagerStartContract } from '../plugin';
@@ -93,7 +93,6 @@ jest.mock('../queries/task_claiming', () => {
 });
 
 const taskManagerStartSpy = jest.spyOn(TaskManagerPlugin.prototype, 'start');
-const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
 
 describe('capacity based claiming', () => {
   const taskIdsToRemove: string[] = [];
@@ -110,10 +109,7 @@ describe('capacity based claiming', () => {
           capacity: 10,
           poll_interval: POLLING_INTERVAL,
           unsafe: {
-            exclude_task_types: flatMap(alphabet, (letter) => [
-              `${letter}*`,
-              `${letter.toUpperCase()}*`,
-            ]),
+            exclude_task_types: ['[A-Za-z]*'],
           },
         },
       },

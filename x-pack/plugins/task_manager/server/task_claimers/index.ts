@@ -74,9 +74,9 @@ export function getEmptyClaimOwnershipResult(): ClaimOwnershipResult {
   };
 }
 
-export function isTaskTypeExcluded(excludedTaskTypes: string[], taskType: string) {
-  for (const excludedType of excludedTaskTypes) {
-    if (minimatch(taskType, excludedType)) {
+export function isTaskTypeExcluded(excludedTaskTypePatterns: string[], taskType: string) {
+  for (const excludedTypePattern of excludedTaskTypePatterns) {
+    if (minimatch(taskType, excludedTypePattern)) {
       return true;
     }
   }
