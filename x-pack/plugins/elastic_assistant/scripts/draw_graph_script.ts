@@ -46,7 +46,6 @@ async function getGraph(logger: Logger) {
     logger,
     createLlmInstance,
     tools: [],
-    responseLanguage: 'English',
     replacements: {},
   });
   return graph.getGraph();

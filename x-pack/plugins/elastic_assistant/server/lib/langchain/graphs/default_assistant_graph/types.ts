@@ -21,7 +21,7 @@ export interface GraphInputs {
   llmType?: string;
   isStream?: boolean;
   input: string;
-  responseLanguage: string;
+  responseLanguage?: string;
 }
 
 export interface AgentState extends AgentStateBase {
