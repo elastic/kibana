@@ -3680,6 +3680,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-content-insights-public@link:packages/content-management/content_insights/content_insights_public":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-management-content-insights-server@link:packages/content-management/content_insights/content_insights_server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-examples-plugin@link:examples/content_management_examples":
   version "0.0.0"
   uid ""
@@ -7251,25 +7259,25 @@
   dependencies:
     ncp "^2.0.0"
 
-"@launchdarkly/js-sdk-common@2.5.0":
-  version "2.5.0"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.5.0.tgz#d1dc595034bf6ee09b0313add5b8901fe9b82f26"
-  integrity sha512-sVwwUpXwAZsQowdbNN4ckprzR9DMEkurYWFuLjpyaaHtUmB6g7WnIz3lGGIXz/nE3QoUlwtC+eR8Nqb+XdonKw==
+"@launchdarkly/js-sdk-common@2.6.0":
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.6.0.tgz#3382051d282a413c8f30e10108eee25172fdbf22"
+  integrity sha512-3zbwXZ0JM9i9pktTbjp+CRFMSXf6tZPJPuW3QtqC/qUYbNS8/+JmanO4tfNgSZHar7HUXD9Vy0OTCBqSRw2LWg==
 
-"@launchdarkly/js-server-sdk-common@2.4.4":
-  version "2.4.4"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.4.4.tgz#709f193202aeadee8389526bdc816009ba084891"
-  integrity sha512-Y1l570HxRtGdeoaylRHWemmEIvFR33JMX3MyO8PE9TqBkFBJsLIXb+A5hdgGaT/XhTWwce6IWXmHVMotqv0zeA==
+"@launchdarkly/js-server-sdk-common@2.4.5":
+  version "2.4.5"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.4.5.tgz#28ebd7838e1d90274bd50136ded965c36753a5fb"
+  integrity sha512-v4/g6SBO6NDFD9UyP/YKUkbxXNJyBn3Suu/zvz7dHDVlucsryPpGw9TBFkJC6V6i3ACfMAyW14eNulRFP2gvNA==
   dependencies:
-    "@launchdarkly/js-sdk-common" "2.5.0"
+    "@launchdarkly/js-sdk-common" "2.6.0"
     semver "7.5.4"
 
-"@launchdarkly/node-server-sdk@^9.5.0":
-  version "9.5.0"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.5.0.tgz#171c235a16836611e3c6d8d95945afa24832fc10"
-  integrity sha512-nNH011mToDKEUz5Nrux3bdatgmHj+SQGUCCD1+R5wgzpdvwZxhi7w1W+9Wl6QrqB+LcpBfKp2+vMQH/4KLsDXg==
+"@launchdarkly/node-server-sdk@^9.5.1":
+  version "9.5.1"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.5.1.tgz#8c1dc68076c6d055ab39dfd0af55284149fb95db"
+  integrity sha512-EfxgCjtZk1wpiv/89pHG5WBeyRLhCFQIgBc2GMUwFTgE7otzrFM6te0YsRYYMJs1Xv2h9LVR6KXDbxL0R+g4VQ==
   dependencies:
-    "@launchdarkly/js-server-sdk-common" "2.4.4"
+    "@launchdarkly/js-server-sdk-common" "2.4.5"
     https-proxy-agent "^5.0.1"
     launchdarkly-eventsource "2.0.3"
 
@@ -12900,7 +12908,7 @@ axe-core@^4.2.0, axe-core@^4.6.2:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.7.2.tgz#040a7342b20765cb18bb50b628394c21bccc17a0"
   integrity sha512-zIURGIS1E1Q4pcrMjp+nnEh+16G56eG/MUllJH8yEvw7asDo7Ac9uhC9KIH5jzpITueEZolfYglnCGIuSBz39g==
 
-axios@^1.0.0, axios@^1.3.4, axios@^1.6.0, axios@^1.6.8, axios@^1.7.4:
+axios@^1.0.0, axios@^1.3.4, axios@^1.6.0, axios@^1.7.4:
   version "1.7.4"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.7.4.tgz#4c8ded1b43683c8dd362973c393f3ede24052aa2"
   integrity sha512-DukmaFRnY6AzAALSH4J2M3k6PkaC+MfaAGdEERRWcC9q3/TWQwLpHR8ZRLKTdQ3aBDL64EdluRDjJqKw+BPZEw==
@@ -14190,7 +14198,7 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^127.0.2:
+chromedriver@^127.0.3:
   version "127.0.3"
   resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-127.0.3.tgz#33abca5924eb809e0e6ef2dd30eaa8cf7dba58d4"
   integrity sha512-trUHkFt0n7jGzNOgkO1srOJfz50kKyAGJ016PyV0hrtyKNIGnOC9r3Jlssz19UoEjSzI/1g2shEiIFtDbBYVaw==

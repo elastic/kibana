@@ -12,28 +12,24 @@ import moment from 'moment';
 import { ErrorsPopover } from '../errors_popover';
 import * as i18n from '../../../translations';
 import type { ErrorSummary, IndexToCheck } from '../../../types';
+import { useDataQualityContext } from '../../data_quality_context';
 
 export const EMPTY_LAST_CHECKED_DATE = '--';
 
 interface Props {
-  addSuccessToast: (toast: { title: string }) => void;
   checkAllIndiciesChecked: number;
   checkAllTotalIndiciesToCheck: number;
   errorSummary: ErrorSummary[];
   indexToCheck: IndexToCheck | null;
-  lastChecked: string;
-  setLastChecked: (lastChecked: string) => void;
 }
 
 const CheckStatusComponent: React.FC<Props> = ({
-  addSuccessToast,
   checkAllIndiciesChecked,
   checkAllTotalIndiciesToCheck,
   errorSummary,
   indexToCheck,
-  lastChecked,
-  setLastChecked,
 }) => {
+  const { addSuccessToast, lastChecked, setLastChecked } = useDataQualityContext();
   const [formattedDate, setFormattedDate] = useState<string>(EMPTY_LAST_CHECKED_DATE);
 
   useEffect(() => {
