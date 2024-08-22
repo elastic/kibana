@@ -28,5 +28,6 @@
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/logging-mocks",
     "@kbn/licensing-plugin",
+    "@kbn/zod",
   ]
 }
