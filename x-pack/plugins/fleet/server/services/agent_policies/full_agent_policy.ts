@@ -140,6 +140,7 @@ export async function getFullAgentPolicy(
     enabled: false,
     logs: false,
     metrics: false,
+    traces: false,
   };
 
   let monitoring: FullAgentPolicyMonitoring = { ...defaultMonitoringConfig };
@@ -162,6 +163,7 @@ export async function getFullAgentPolicy(
       enabled: true,
       logs: false,
       metrics: false,
+      traces: false,
     };
   }
 
