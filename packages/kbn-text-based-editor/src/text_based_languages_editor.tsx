@@ -31,6 +31,7 @@ import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import { ESQLRealField } from '@kbn/esql-validation-autocomplete';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
+import { TRIGGER_SUGGESTION_COMMAND } from '@kbn/esql-validation-autocomplete/src/autocomplete/factories';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
@@ -192,6 +193,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     setIsHistoryOpen(status);
   }, []);
 
+  const showSuggestionsIfEmptyQuery = useCallback(() => {
+    if (editorModel.current?.getValueLength() === 0) {
+      setImmediate(() => {
+        editor1.current?.trigger(undefined, TRIGGER_SUGGESTION_COMMAND.id, {});
+      });
+    }
+  }, []);
+
   const openTimePickerPopover = useCallback(() => {
     const currentCursorPosition = editor1.current?.getPosition();
     const editorCoords = editor1.current?.getDomNode()!.getBoundingClientRect();
@@ -275,7 +284,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const onEditorFocus = useCallback(() => {
     setIsCodeEditorExpandedFocused(true);
-  }, []);
+    showSuggestionsIfEmptyQuery();
+  }, [showSuggestionsIfEmptyQuery]);
 
   const { cache: esqlFieldsCache, memoizedFieldsFromESQL } = useMemo(() => {
     // need to store the timing of the first request so we can atomically clear the cache per query
@@ -682,6 +692,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     editor.onDidLayoutChange((layoutInfoEvent) => {
                       onLayoutChangeRef.current(layoutInfoEvent);
                     });
+
+                    editor.onDidChangeModelContent(showSuggestionsIfEmptyQuery);
                   }}
                 />
               </div>
