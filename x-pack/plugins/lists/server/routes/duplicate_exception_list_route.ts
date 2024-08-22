@@ -7,7 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import {
   DuplicateExceptionListRequestQuery,
   DuplicateExceptionListResponse,
@@ -30,7 +30,7 @@ export const duplicateExceptionsRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            query: DuplicateExceptionListRequestQuery,
+            query: buildRouteValidationWithZod(DuplicateExceptionListRequestQuery),
           },
         },
         version: '2023-10-31',

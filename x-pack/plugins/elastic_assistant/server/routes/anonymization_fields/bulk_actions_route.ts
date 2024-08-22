@@ -23,6 +23,7 @@ import {
   PerformAnonymizationFieldsBulkActionRequestBody,
   PerformAnonymizationFieldsBulkActionResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ANONYMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
@@ -131,7 +132,7 @@ export const bulkActionAnonymizationFieldsRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: PerformAnonymizationFieldsBulkActionRequestBody,
+            body: buildRouteValidationWithZod(PerformAnonymizationFieldsBulkActionRequestBody),
           },
         },
       },

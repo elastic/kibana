@@ -7,7 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import {
   ReadExceptionListRequestQuery,
   ReadExceptionListResponse,
@@ -30,7 +30,7 @@ export const readExceptionListRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            query: ReadExceptionListRequestQuery,
+            query: buildRouteValidationWithZod(ReadExceptionListRequestQuery),
           },
         },
         version: '2023-10-31',

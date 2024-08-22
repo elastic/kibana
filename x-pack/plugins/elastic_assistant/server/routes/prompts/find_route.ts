@@ -13,7 +13,7 @@ import {
   FindPromptsRequestQuery,
   FindPromptsResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen';
-
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { EsPromptsSchema } from '../../ai_assistant_data_clients/prompts/types';
@@ -34,7 +34,7 @@ export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: FindPromptsRequestQuery,
+            query: buildRouteValidationWithZod(FindPromptsRequestQuery),
           },
         },
       },

@@ -8,7 +8,7 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../../../common/constants';
 import {
   BulkPatchRulesRequestBody,
@@ -43,7 +43,7 @@ export const bulkPatchRulesRoute = (router: SecuritySolutionPluginRouter, logger
         version: '2023-10-31',
         validate: {
           request: {
-            body: BulkPatchRulesRequestBody,
+            body: buildRouteValidationWithZod(BulkPatchRulesRequestBody),
           },
         },
       },

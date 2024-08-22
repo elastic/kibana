@@ -8,7 +8,7 @@
 import type { IKibanaResponse, StartServicesAccessor } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
@@ -32,7 +32,7 @@ export const suggestUserProfilesRoute = (
         version: '1',
         validate: {
           request: {
-            query: SuggestUserProfilesRequestQuery,
+            query: buildRouteValidationWithZod(SuggestUserProfilesRequestQuery),
           },
         },
       },

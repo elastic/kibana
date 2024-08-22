@@ -8,7 +8,7 @@
 import type { VersionedRouteConfig } from '@kbn/core-http-server';
 import type { IKibanaResponse, Logger, RequestHandler } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import type {
   BulkDeleteRulesPostResponse,
   BulkDeleteRulesResponse,
@@ -121,7 +121,7 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
       version: '2023-10-31',
       validate: {
         request: {
-          body: BulkDeleteRulesRequestBody,
+          body: buildRouteValidationWithZod(BulkDeleteRulesRequestBody),
         },
       },
     },
@@ -132,7 +132,7 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
       version: '2023-10-31',
       validate: {
         request: {
-          body: BulkDeleteRulesPostRequestBody,
+          body: buildRouteValidationWithZod(BulkDeleteRulesPostRequestBody),
         },
       },
     },

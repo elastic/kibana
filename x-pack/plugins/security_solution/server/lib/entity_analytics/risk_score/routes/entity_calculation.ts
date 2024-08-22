@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import type { RiskScoresCalculationResponse } from '../../../../../common/api/entity_analytics';
 import type { AfterKeys } from '../../../../../common/api/entity_analytics/common';
@@ -175,7 +175,7 @@ export const deprecatedRiskScoreEntityCalculationRoute = (
         version: '1',
         validate: {
           request: {
-            body: RiskScoresEntityCalculationRequest,
+            body: buildRouteValidationWithZod(RiskScoresEntityCalculationRequest),
           },
         },
       },
@@ -201,7 +201,7 @@ export const riskScoreEntityCalculationRoute = (
         version: '1',
         validate: {
           request: {
-            body: RiskScoresEntityCalculationRequest,
+            body: buildRouteValidationWithZod(RiskScoresEntityCalculationRequest),
           },
         },
       },

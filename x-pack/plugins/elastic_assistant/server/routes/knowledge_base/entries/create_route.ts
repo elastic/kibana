@@ -11,7 +11,7 @@ import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
 } from '@kbn/elastic-assistant-common';
-
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
@@ -37,7 +37,7 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            body: KnowledgeBaseEntryCreateProps,
+            body: buildRouteValidationWithZod(KnowledgeBaseEntryCreateProps),
           },
         },
       },

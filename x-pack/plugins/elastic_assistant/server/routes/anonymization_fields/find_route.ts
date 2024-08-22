@@ -17,6 +17,7 @@ import {
   FindAnonymizationFieldsRequestQuery,
   FindAnonymizationFieldsResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
@@ -40,7 +41,7 @@ export const findAnonymizationFieldsRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: FindAnonymizationFieldsRequestQuery,
+            query: buildRouteValidationWithZod(FindAnonymizationFieldsRequestQuery),
           },
         },
       },

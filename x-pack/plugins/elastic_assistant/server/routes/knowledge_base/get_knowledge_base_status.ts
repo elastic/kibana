@@ -13,7 +13,7 @@ import {
   ReadKnowledgeBaseRequestParams,
   ReadKnowledgeBaseResponse,
 } from '@kbn/elastic-assistant-common';
-
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { KibanaRequest } from '@kbn/core/server';
 import { getKbResource } from './get_kb_resource';
 import { buildResponse } from '../../lib/build_response';
@@ -44,7 +44,7 @@ export const getKnowledgeBaseStatusRoute = (
         version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
         validate: {
           request: {
-            params: ReadKnowledgeBaseRequestParams,
+            params: buildRouteValidationWithZod(ReadKnowledgeBaseRequestParams),
           },
         },
       },

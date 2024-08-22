@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ENDPOINT_LIST_ID, ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
-import { stringifyZodError } from '@kbn/zod';
+import { buildRouteValidationWithZod, stringifyZodError } from '@kbn/zod';
 import {
   CreateEndpointListItemRequestBody,
   CreateEndpointListItemResponse,
@@ -32,7 +32,7 @@ export const createEndpointListItemRoute = (router: ListsPluginRouter): void => 
       {
         validate: {
           request: {
-            body: CreateEndpointListItemRequestBody,
+            body: buildRouteValidationWithZod(CreateEndpointListItemRequestBody),
           },
         },
         version: '2023-10-31',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { type IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import {
   AttackDiscoveryGetResponse,
@@ -33,11 +33,11 @@ export const getAttackDiscoveryRoute = (router: IRouter<ElasticAssistantRequestH
         version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
         validate: {
           request: {
-            params: AttackDiscoveryGetRequestParams,
+            params: buildRouteValidationWithZod(AttackDiscoveryGetRequestParams),
           },
           response: {
             200: {
-              body: { custom: AttackDiscoveryGetResponse },
+              body: { custom: buildRouteValidationWithZod(AttackDiscoveryGetResponse) },
             },
           },
         },

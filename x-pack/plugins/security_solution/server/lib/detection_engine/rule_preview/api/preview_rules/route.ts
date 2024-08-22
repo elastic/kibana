@@ -19,7 +19,7 @@ import type {
 import { parseDuration, DISABLE_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import type { ExecutorType } from '@kbn/alerting-plugin/server/types';
 import type { Alert } from '@kbn/alerting-plugin/server';
-
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import {
   DEFAULT_PREVIEW_INDEX,
   DETECTION_ENGINE_RULES_PREVIEW,
@@ -92,7 +92,7 @@ export const previewRulesRoute = (
     .addVersion(
       {
         version: '2023-10-31',
-        validate: { request: { body: RulePreviewRequestBody } },
+        validate: { request: { body: buildRouteValidationWithZod(RulePreviewRequestBody) } },
       },
       async (context, request, response): Promise<IKibanaResponse<RulePreviewResponse>> => {
         const siemResponse = buildSiemResponse(response);

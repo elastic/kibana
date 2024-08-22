@@ -7,7 +7,7 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import type { DeleteRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   DeleteRuleRequestQuery,
@@ -33,7 +33,7 @@ export const deleteRuleRoute = (router: SecuritySolutionPluginRouter) => {
         version: '2023-10-31',
         validate: {
           request: {
-            query: DeleteRuleRequestQuery,
+            query: buildRouteValidationWithZod(DeleteRuleRequestQuery),
           },
         },
       },

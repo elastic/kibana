@@ -13,7 +13,7 @@ import {
   GetCapabilitiesResponse,
   INTERNAL_API_ACCESS,
 } from '@kbn/elastic-assistant-common';
-
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { CAPABILITIES } from '../../../common/constants';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 
@@ -40,7 +40,7 @@ export const getCapabilitiesRoute = (router: IRouter<ElasticAssistantRequestHand
         validate: {
           response: {
             200: {
-              body: { custom: GetCapabilitiesResponse },
+              body: { custom: buildRouteValidationWithZod(GetCapabilitiesResponse) },
             },
           },
         },

@@ -6,7 +6,7 @@
  */
 
 import { RequestHandlerContext } from '@kbn/core/server';
-
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import { resetEntityDefinitionParamsSchema } from '@kbn/entities-schema';
 import { SetupRouteOptions } from '../types';
 import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
@@ -43,7 +43,7 @@ export function resetEntityDefinitionRoute<T extends RequestHandlerContext>({
     {
       path: '/internal/entities/definition/{id}/_reset',
       validate: {
-        params: resetEntityDefinitionParamsSchema.strict(),
+        params: buildRouteValidationWithZod(resetEntityDefinitionParamsSchema.strict()),
       },
     },
     async (context, req, res) => {

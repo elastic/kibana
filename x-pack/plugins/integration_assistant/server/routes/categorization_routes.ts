@@ -21,6 +21,7 @@ import {
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getCategorizationGraph } from '../graphs/categorization';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
+import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 
 export function registerCategorizationRoutes(
@@ -41,7 +42,7 @@ export function registerCategorizationRoutes(
         version: '1',
         validate: {
           request: {
-            body: CategorizationRequestBody,
+            body: buildRouteValidationWithZod(CategorizationRequestBody),
           },
         },
       },

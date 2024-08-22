@@ -11,7 +11,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { createPromiseFromStreams } from '@kbn/utils';
 import { chunk } from 'lodash/fp';
 import { extname } from 'path';
-
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import {
   ImportRulesRequestQuery,
   ImportRulesResponse,
@@ -55,7 +55,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
         version: '2023-10-31',
         validate: {
           request: {
-            query: ImportRulesRequestQuery,
+            query: buildRouteValidationWithZod(ImportRulesRequestQuery),
             body: schema.any(), // validation on file object is accomplished later in the handler.
           },
         },

@@ -10,7 +10,7 @@ import { extname } from 'path';
 import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import {
   ImportExceptionListRequestQuery,
   ImportExceptionListResponse,
@@ -44,7 +44,7 @@ export const importExceptionsRoute = (router: ListsPluginRouter, config: ConfigT
         validate: {
           request: {
             body: schema.any(), // validation on file object is accomplished later in the handler.
-            query: ImportExceptionListRequestQuery,
+            query: buildRouteValidationWithZod(ImportExceptionListRequestQuery),
           },
         },
         version: '2023-10-31',

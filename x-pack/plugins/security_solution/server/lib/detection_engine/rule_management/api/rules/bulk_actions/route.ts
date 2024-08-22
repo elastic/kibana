@@ -8,7 +8,7 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import type { ConfigType } from '../../../../../../config';
 import type { PerformRulesBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
@@ -68,8 +68,8 @@ export const performBulkActionRoute = (
         version: '2023-10-31',
         validate: {
           request: {
-            body: PerformRulesBulkActionRequestBody,
-            query: PerformRulesBulkActionRequestQuery,
+            body: buildRouteValidationWithZod(PerformRulesBulkActionRequestBody),
+            query: buildRouteValidationWithZod(PerformRulesBulkActionRequestQuery),
           },
         },
       },

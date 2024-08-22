@@ -17,6 +17,7 @@ import { RELATED_GRAPH_PATH, RelatedRequestBody, RelatedResponse } from '../../c
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getRelatedGraph } from '../graphs/related';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
+import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 
 export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
@@ -35,7 +36,7 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
         version: '1',
         validate: {
           request: {
-            body: RelatedRequestBody,
+            body: buildRouteValidationWithZod(RelatedRequestBody),
           },
         },
       },

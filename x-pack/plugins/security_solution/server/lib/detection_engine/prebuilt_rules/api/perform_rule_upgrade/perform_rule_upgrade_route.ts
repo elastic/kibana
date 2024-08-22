@@ -6,7 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import {
   PERFORM_RULE_UPGRADE_URL,
   PerformRuleUpgradeRequestBody,
@@ -48,7 +48,7 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
         version: '1',
         validate: {
           request: {
-            body: PerformRuleUpgradeRequestBody,
+            body: buildRouteValidationWithZod(PerformRuleUpgradeRequestBody),
           },
         },
       },

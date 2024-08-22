@@ -10,7 +10,7 @@ import { extname } from 'path';
 import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
-
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import {
   ImportListItemsRequestQuery,
   ImportListItemsResponse,
@@ -46,7 +46,7 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
         validate: {
           request: {
             body: schema.buffer(),
-            query: ImportListItemsRequestQuery,
+            query: buildRouteValidationWithZod(ImportListItemsRequestQuery),
           },
         },
         version: '2023-10-31',

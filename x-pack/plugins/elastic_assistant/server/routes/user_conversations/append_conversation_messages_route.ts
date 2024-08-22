@@ -14,7 +14,7 @@ import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID_MESSAGES,
   API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
-
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { buildResponse } from '../utils';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
@@ -33,8 +33,8 @@ export const appendConversationMessageRoute = (router: ElasticAssistantPluginRou
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            body: AppendConversationMessageRequestBody,
-            params: AppendConversationMessageRequestParams,
+            body: buildRouteValidationWithZod(AppendConversationMessageRequestBody),
+            params: buildRouteValidationWithZod(AppendConversationMessageRequestParams),
           },
         },
       },

@@ -7,7 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
-
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import { CreateListRequestBody, CreateListResponse } from '@kbn/securitysolution-lists-common/api';
 
 import type { ListsPluginRouter } from '../../types';
@@ -27,7 +27,7 @@ export const createListRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            body: CreateListRequestBody,
+            body: buildRouteValidationWithZod(CreateListRequestBody),
           },
         },
         version: '2023-10-31',

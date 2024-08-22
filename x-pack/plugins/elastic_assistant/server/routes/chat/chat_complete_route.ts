@@ -17,7 +17,7 @@ import {
   getAnonymizedValue,
   ConversationResponse,
 } from '@kbn/elastic-assistant-common';
-
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../lib/telemetry/event_based_telemetry';
 import { ElasticAssistantPluginRouter, GetElser } from '../../types';
@@ -53,7 +53,7 @@ export const chatCompleteRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: ChatCompleteProps,
+            body: buildRouteValidationWithZod(ChatCompleteProps),
           },
         },
       },

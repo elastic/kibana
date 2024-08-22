@@ -7,7 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
-
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import {
   ReadEndpointListItemRequestQuery,
   ReadEndpointListItemResponse,
@@ -34,7 +34,7 @@ export const readEndpointListItemRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            query: ReadEndpointListItemRequestQuery,
+            query: buildRouteValidationWithZod(ReadEndpointListItemRequestQuery),
           },
         },
         version: '2023-10-31',

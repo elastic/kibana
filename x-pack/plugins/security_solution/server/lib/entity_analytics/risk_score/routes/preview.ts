@@ -8,7 +8,7 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import type { RiskScoresPreviewResponse } from '../../../../../common/api/entity_analytics';
 import { RiskScoresPreviewRequest } from '../../../../../common/api/entity_analytics';
 import {
@@ -38,7 +38,7 @@ export const riskScorePreviewRoute = (
       {
         version: '1',
         validate: {
-          request: { body: RiskScoresPreviewRequest },
+          request: { body: buildRouteValidationWithZod(RiskScoresPreviewRequest) },
         },
       },
       async (context, request, response): Promise<IKibanaResponse<RiskScoresPreviewResponse>> => {

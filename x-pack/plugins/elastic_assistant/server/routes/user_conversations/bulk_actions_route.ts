@@ -20,7 +20,7 @@ import {
   ConversationResponse,
   API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
-
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { CONVERSATIONS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
@@ -130,7 +130,7 @@ export const bulkActionConversationsRoute = (
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            body: PerformBulkActionRequestBody,
+            body: buildRouteValidationWithZod(PerformBulkActionRequestBody),
           },
         },
       },

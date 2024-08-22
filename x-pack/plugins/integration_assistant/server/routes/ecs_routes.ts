@@ -17,6 +17,7 @@ import { ECS_GRAPH_PATH, EcsMappingRequestBody, EcsMappingResponse } from '../..
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getEcsGraph } from '../graphs/ecs';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
+import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 
 export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
@@ -35,7 +36,7 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
         version: '1',
         validate: {
           request: {
-            body: EcsMappingRequestBody,
+            body: buildRouteValidationWithZod(EcsMappingRequestBody),
           },
         },
       },

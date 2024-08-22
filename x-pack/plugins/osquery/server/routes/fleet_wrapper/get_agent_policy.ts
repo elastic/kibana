@@ -6,7 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -25,7 +25,7 @@ export const getAgentPolicyRoute = (router: IRouter, osqueryContext: OsqueryAppC
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            params: GetAgentPolicyRequestParams,
+            params: buildRouteValidationWithZod(GetAgentPolicyRequestParams),
           },
         },
       },

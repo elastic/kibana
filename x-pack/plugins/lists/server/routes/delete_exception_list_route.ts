@@ -7,7 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import {
   DeleteExceptionListRequestQuery,
   DeleteExceptionListResponse,
@@ -30,7 +30,7 @@ export const deleteExceptionListRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            query: DeleteExceptionListRequestQuery,
+            query: buildRouteValidationWithZod(DeleteExceptionListRequestQuery),
           },
         },
         version: '2023-10-31',

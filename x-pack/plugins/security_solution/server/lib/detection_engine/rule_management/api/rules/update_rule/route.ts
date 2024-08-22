@@ -7,7 +7,7 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import type { UpdateRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   UpdateRuleRequestBody,
@@ -36,7 +36,7 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter) => {
         version: '2023-10-31',
         validate: {
           request: {
-            body: UpdateRuleRequestBody,
+            body: buildRouteValidationWithZod(UpdateRuleRequestBody),
           },
         },
       },

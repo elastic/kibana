@@ -7,7 +7,7 @@
 
 import { transformError, BadRequestError } from '@kbn/securitysolution-es-utils';
 import type { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
-
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import { FinalizeAlertsMigrationRequestBody } from '../../../../../common/api/detection_engine/signals_migration';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL } from '../../../../../common/constants';
@@ -33,7 +33,7 @@ export const finalizeSignalsMigrationRoute = (
       {
         version: '2023-10-31',
         validate: {
-          request: { body: FinalizeAlertsMigrationRequestBody },
+          request: { body: buildRouteValidationWithZod(FinalizeAlertsMigrationRequestBody) },
         },
       },
       async (context, request, response) => {
