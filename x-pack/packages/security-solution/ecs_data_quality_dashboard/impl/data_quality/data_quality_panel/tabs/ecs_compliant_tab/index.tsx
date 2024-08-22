@@ -34,13 +34,10 @@ const EcsCompliantTabComponent: React.FC<Props> = ({ indexName, partitionedField
   const title = useMemo(() => <EmptyPromptTitle title={i18n.ECS_COMPLIANT_EMPTY_TITLE} />, []);
 
   return (
-    <>
+    <div data-test-subj="ecsCompliantTabContent">
       {!showMissingTimestampCallout(partitionedFieldMetadata.ecsCompliant) ? (
         <>
-          <EuiCallOut
-            size="s"
-            title={i18n.ECS_COMPLIANT_CALLOUT_TITLE(partitionedFieldMetadata.ecsCompliant.length)}
-          >
+          <EuiCallOut size="s">
             <p>
               {i18n.ECS_COMPLIANT_CALLOUT({
                 fieldCount: partitionedFieldMetadata.ecsCompliant.length,
@@ -71,7 +68,7 @@ const EcsCompliantTabComponent: React.FC<Props> = ({ indexName, partitionedField
           />
         </EmptyPromptContainer>
       )}
-    </>
+    </div>
   );
 };
 

@@ -145,6 +145,12 @@ export class StatusRuleExecutor {
     const {
       maxPeriod,
       monitorLocationIds,
+      monitorLocationMap,
+      projectMonitorsCount,
+      monitorQueryIdToConfigIdMap,
+    } = processMonitors(this.monitors);
+
+    return {
       enabledMonitorQueryIds,
       monitorLocationMap,
       monitorQueryIdToConfigIdMap,

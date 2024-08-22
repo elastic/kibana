@@ -7,7 +7,6 @@
 import datemath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { noop } from 'lodash';
 import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { AddObservationUI } from '../../../../components/add_observation_ui';
@@ -81,9 +80,6 @@ function InvestigationDetailsWithUser({
             <EuiFlexItem grow={false}>
               <InvestigateWidgetGrid
                 items={renderableInvestigation.items}
-                onItemsChange={async (nextGridItems) => {
-                  noop();
-                }}
                 onItemCopy={async (copiedItem) => {
                   return copyItem(copiedItem.id);
                 }}
