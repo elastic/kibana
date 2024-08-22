@@ -19,7 +19,6 @@ import { handleMissingKeys } from './missing';
 import { handleValidateMappings } from './validate';
 import { graphState } from './state';
 
-
 const handleCreateMappingChunks = async (state: EcsMappingState) => {
   // Cherrypick a shallow copy of state to pass to subgraph
   const stateParams = {
