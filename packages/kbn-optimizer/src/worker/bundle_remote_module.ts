@@ -79,7 +79,7 @@ export class BundleRemoteModule extends Module {
 
     return {
       sources,
-      runtimeRequirements: new Set(['module',  '__webpack_exports__', '__webpack_require__']),
+      runtimeRequirements: new Set(['module', '__webpack_exports__', '__webpack_require__']),
       data,
     };
   }
