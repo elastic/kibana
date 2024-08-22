@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useCallback, type ComponentType } from 'react';
+import React, { useMemo, useCallback, type ComponentType, useState, useEffect } from 'react';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -27,12 +27,16 @@ import {
   useEuiTheme,
   useIsWithinMinBreakpoint,
   EuiFlyoutProps,
+  EuiScreenReaderOnly,
+  useGeneratedHtmlId,
+  EuiWindowEvent,
 } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import useUnmount from 'react-use/lib/useUnmount';
 import { UnifiedDocViewer } from '../lazy_doc_viewer';
 
 export interface UnifiedDocViewerFlyoutProps {
@@ -175,6 +179,16 @@ export function UnifiedDocViewerFlyout({
     [onRemoveColumn, services.toastNotifications]
   );
 
+  const closeOnEscape = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === keys.ESCAPE) {
+        event.preventDefault();
+        onClose();
+      }
+    },
+    [onClose]
+  );
+
   const renderDefaultContent = useCallback(
     () => (
       <UnifiedDocViewer
@@ -231,10 +245,28 @@ export function UnifiedDocViewerFlyout({
         defaultMessage: 'Document',
       });
   const currentFlyoutTitle = flyoutTitle ?? defaultFlyoutTitle;
+  const descriptionId = useGeneratedHtmlId();
+  const [triggerEl] = useState(document.activeElement);
+  const [flyoutEl, setFlyoutEl] = useState<HTMLElement>();
+
+  // Auto-focus push flyout on open or when switching to XL screen
+  useEffect(() => {
+    if (isXlScreen && flyoutEl && document.contains(flyoutEl)) {
+      setTimeout(() => flyoutEl.focus());
+    }
+  }, [flyoutEl, isXlScreen]);
+
+  // Return focus to the trigger element when the flyout is closed
+  useUnmount(() => {
+    if (triggerEl instanceof HTMLElement && document.contains(triggerEl)) {
+      triggerEl.focus();
+    }
+  });
 
   return (
     <EuiPortal>
       <EuiFlyoutResizable
+        ref={setFlyoutEl}
         className="DiscoverFlyout" // used to override the z-index of the flyout from SecuritySolution
         onClose={onClose}
         type={flyoutType ?? 'push'}
@@ -250,7 +282,23 @@ export function UnifiedDocViewerFlyout({
           maxWidth: `${isXlScreen ? `calc(100vw - ${DEFAULT_WIDTH}px)` : '90vw'} !important`,
         }}
         paddingSize="m"
+        role={isXlScreen ? 'dialog' : undefined}
+        tabIndex={isXlScreen ? 0 : undefined}
+        aria-describedby={isXlScreen ? descriptionId : undefined}
       >
+        {isXlScreen && (
+          <>
+            <EuiWindowEvent event="keydown" handler={closeOnEscape} />
+            <EuiScreenReaderOnly>
+              <p id={descriptionId}>
+                {i18n.translate('unifiedDocViewer.flyout.screenReaderDescription', {
+                  defaultMessage:
+                    'You are in a non-modal dialog. To close the dialog, press Escape.',
+                })}
+              </p>
+            </EuiScreenReaderOnly>
+          </>
+        )}
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup
             direction="row"
