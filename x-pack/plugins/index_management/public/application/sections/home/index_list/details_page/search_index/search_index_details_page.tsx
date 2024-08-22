@@ -15,46 +15,64 @@ import {
   EuiPageSection,
   EuiPopover,
   EuiSpacer,
+  EuiButton,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FunctionComponent } from 'react';
 import { RouteComponentProps } from 'react-router';
-import { Index } from '../../../../../../../common';
-import { loadIndex } from '../../../../../services';
-import { Error } from '../../../../../../shared_imports';
 import { i18n } from '@kbn/i18n';
+import { DetailsPageEmptyIndexNameError } from '../details_page_errors/error_empty_index_name';
+import { DetailsPageLoading } from '../details_page_index_loading';
+import { DetailsPageError } from '../details_page_errors/details_page_error';
+import { useIndexDetailsFunctions } from '../../../../../hooks/use_index_details_page_index_functions';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const SearchIndexDetailsPage: FunctionComponent<
   RouteComponentProps<{ indexName: string }>
 > = ({ location: { search }, history }) => {
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const indexName = queryParams.get('indexName') ?? '';
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-  const [index, setIndex] = useState<Index | null>();
+  const { isLoading, error, index, fetchIndexDetails, navigateToIndicesList } =
+    useIndexDetailsFunctions(indexName, search, history);
+
   const [showMoreOptionsPopover, setShowMoreOptionsPopover] = useState<boolean>(false);
-  const fetchIndexDetails = useCallback(async () => {
-    if (indexName) {
-      setIsLoading(true);
-      try {
-        const { data, error: loadingError } = await loadIndex(indexName);
-        setIsLoading(false);
-        setError(loadingError);
-        setIndex(data);
-      } catch (e) {
-        setIsLoading(false);
-        setError(e);
-      }
-    }
-  }, [indexName]);
+
   useEffect(() => {
     fetchIndexDetails();
   }, [fetchIndexDetails]);
 
   const pageTitle = <>{index?.name}</>;
+  if (!indexName) {
+    return <DetailsPageEmptyIndexNameError />;
+  }
+  if (isLoading && !index) {
+    return <DetailsPageLoading />;
+  }
+  if (error || !index) {
+    return (
+      <DetailsPageError
+        indexName={indexName}
+        resendRequest={fetchIndexDetails}
+        navigateToIndicesList={navigateToIndicesList}
+      />
+    );
+  }
   return (
     <>
-      <EuiPageSection paddingSize="none"></EuiPageSection>
+      <EuiPageSection paddingSize="none">
+        <EuiButton
+          data-test-subj="searchIndexDetailsBackToIndicesButton"
+          color="text"
+          iconType="arrowLeft"
+          onClick={navigateToIndicesList}
+        >
+          <FormattedMessage
+            id="xpack.idxMgmt.searchIndexDetails.backToIndicesButtonLabel"
+            defaultMessage="Back to indices"
+          />
+        </EuiButton>
+      </EuiPageSection>
+      <EuiSpacer size="l" />
       <EuiPageHeader
         data-test-subj="indexDetailsHeader"
         pageTitle={pageTitle}
@@ -69,14 +87,16 @@ export const SearchIndexDetailsPage: FunctionComponent<
                       button={
                         <EuiButtonIcon
                           data-test-subj="searchindexDetailsMoreOptionsButton"
-                          data-telemetry-id="idxMgmt-indexDetails-moreOptionsButton"
+                          data-telemetry-id="idxMgmt-searchIndexDetails-moreOptionsButton"
                           color="primary"
-                          display="fill"
                           size="m"
                           iconType="boxesVertical"
-                          aria-label={i18n.translate('xpack.idxMgmt.indexDetails.more.ariaLabel', {
-                            defaultMessage: 'More options',
-                          })}
+                          aria-label={i18n.translate(
+                            'xpack.idxMgmt.searchIndexDetails.more.ariaLabel',
+                            {
+                              defaultMessage: 'More options',
+                            }
+                          )}
                           onClick={() => setShowMoreOptionsPopover(!showMoreOptionsPopover)}
                         />
                       }
@@ -85,7 +105,7 @@ export const SearchIndexDetailsPage: FunctionComponent<
                         size="s"
                         items={[
                           <EuiContextMenuItem key="edit" icon="trash" onClick={() => {}}>
-                            {i18n.translate('xpack.idxMgmt.indexDetails.deleteIndexLabel', {
+                            {i18n.translate('xpack.idxMgmt.searchIndexDetails.deleteIndexLabel', {
                               defaultMessage: 'Delete Index',
                             })}
                           </EuiContextMenuItem>,
@@ -97,10 +117,10 @@ export const SearchIndexDetailsPage: FunctionComponent<
               ]
         }
       >
-        MY DESCRIPTION
+        This is your very first Elasticsearch index. It stores the data you’d like to search.
       </EuiPageHeader>
       <EuiSpacer size="l" />
-      <div data-test-subj={`indexDetailsContent`}></div>
+      <div data-test-subj={`searchIndexDetailsContent`}></div>
     </>
   );
 };
