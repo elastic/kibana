@@ -18,11 +18,13 @@ import {
   EuiBasicTable,
   EuiFieldText,
   useGeneratedHtmlId,
-  EuiForm,
   EuiFormRow,
   EuiButtonIcon,
   EuiSpacer,
   EuiText,
+  EuiPanel,
+  EuiForm,
+  EuiButtonEmpty,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 
@@ -40,6 +42,7 @@ export interface DevToolsVariable {
 }
 
 export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => {
+  const [isAddingVariable, setIsAddingVariable] = useState(false);
   const [variables, setVariables] = useState<DevToolsVariable[]>(props.variables);
   const formId = useGeneratedHtmlId({ prefix: '__console' });
 
@@ -158,17 +161,46 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
       </EuiText>
       <EuiSpacer size="l" />
 
-      <EuiForm id={formId} component="form" onSubmit={onSubmit}>
-        <EuiBasicTable items={variables} columns={columns} />
+      <EuiBasicTable items={variables} columns={columns} />
+      {isAddingVariable && (
+        <>
+          <EuiPanel paddingSize="l" hasShadow={false} borderRadius="none">
+            <EuiTitle size="xs">
+              <h2>
+                <FormattedMessage
+                  defaultMessage="Add a new variable"
+                  id="console.variablesPage.addNewVariableTitle"
+                />
+              </h2>
+            </EuiTitle>
+            <EuiSpacer size="l" />
+
+            <EuiForm id={formId} component="form" onSubmit={onSubmit}>
+              <EuiButtonEmpty
+                onClick={() => {}}
+              >
+                <FormattedMessage id="console.variablesPage.addNew.cancelButton" defaultMessage="Cancel" />
+              </EuiButtonEmpty>
+
+              <EuiButton fill type="submit" form={formId}>
+                <FormattedMessage id="console.variablesPage.addNew.submitButton" defaultMessage="Save changes" />
+              </EuiButton>
+            </EuiForm>
+          </EuiPanel>
+        </>
+      )}
+
+      <div>
         <EuiSpacer size="m" />
         <EuiButton
           data-test-subj="variablesAddButton"
           iconType="plusInCircle"
-          onClick={addNewVariable}
+          onClick={() => setIsAddingVariable(true)}
+          disabled={isAddingVariable}
         >
           <FormattedMessage id="console.variablesPage.addButtonLabel" defaultMessage="Add variable" />
         </EuiButton>
-      </EuiForm>
+      </div>
 
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
