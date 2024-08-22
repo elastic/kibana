@@ -13,7 +13,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { getMockConversation } from '../../objects/assistant';
 import { getSpaceUrl } from '../space';
-import { rootRequest } from './common';
+import { rootRequest, waitForRootRequest } from './common';
 
 export const getConversations = (spaceId?: string) =>
   rootRequest<FindConversationsResponse>({
@@ -36,11 +36,8 @@ const createConversation = (
     })
   );
 
-export const createNewConversation = (body?: Partial<ConversationCreateProps>) =>
-  cy.waitUntil(
-    () => createConversation(body).then((response) => cy.wrap(response.status === 200)),
-    { interval: 5000, timeout: 15000 }
-  );
+export const waitForConversation = (body?: Partial<ConversationCreateProps>) =>
+  waitForRootRequest<ConversationResponse>(createConversation(body));
 
 export const deleteConversations = () => {
   cy.currentSpace().then((spaceId) => {

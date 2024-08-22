@@ -11,9 +11,9 @@ import { CASES_URL } from '../../urls/navigation';
 import { SEND_TO_TIMELINE_BUTTON } from '../../screens/ai_assistant';
 import { openAssistant, selectConversation } from '../../tasks/assistant';
 import {
-  createNewConversation,
   deleteConversations,
   deletePrompts,
+  waitForConversation,
 } from '../../tasks/api_calls/assistant';
 import { createAzureConnector } from '../../tasks/api_calls/connectors';
 import { deleteConnectors } from '../../tasks/api_calls/common';
@@ -65,7 +65,7 @@ describe(
       deletePrompts();
       login();
       createAzureConnector();
-      createNewConversation(mockConvo);
+      waitForConversation(mockConvo);
     });
     it('A message with a kql query can be used in the timeline only from pages with timeline', () => {
       visitGetStartedPage();
