@@ -73,6 +73,7 @@
     "@kbn/core-pricing-browser-internal",
     "@kbn/core-pricing-browser-mocks",
     "@kbn/core-di-internal",
+    "@kbn/core-di-mocks",
   ],
   "exclude": [
     "target/**/*",
