@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import type { z } from 'zod';
+import type { z } from '@kbn/zod';
 
 import { RuleCreateProps, RuleResponse } from '../../../model/rule_schema/rule_schemas.gen';
 

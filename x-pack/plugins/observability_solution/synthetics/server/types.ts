@@ -17,6 +17,7 @@ import {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { PluginStartContract as AlertingPluginStart } from '@kbn/alerting-plugin/server';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -85,6 +86,7 @@ export interface SyntheticsPluginsStartDependencies {
   taskManager: TaskManagerStartContract;
   telemetry: TelemetryPluginStart;
   spaces?: SpacesPluginStart;
+  alerting: AlertingPluginStart;
 }
 
 export type UptimeRequestHandlerContext = CustomRequestHandlerContext<{

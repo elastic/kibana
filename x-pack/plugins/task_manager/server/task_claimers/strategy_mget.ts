@@ -19,7 +19,12 @@ import apm from 'elastic-apm-node';
 import { Subject, Observable } from 'rxjs';
 
 import { TaskTypeDictionary } from '../task_type_dictionary';
-import { TaskClaimerOpts, ClaimOwnershipResult, getEmptyClaimOwnershipResult } from '.';
+import {
+  TaskClaimerOpts,
+  ClaimOwnershipResult,
+  getEmptyClaimOwnershipResult,
+  getExcludedTaskTypes,
+} from '.';
 import { ConcreteTaskInstance, TaskStatus, ConcreteTaskInstanceVersion, TaskCost } from '../task';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import { TASK_MANAGER_MARK_AS_CLAIMED } from '../queries/task_claiming';
@@ -47,8 +52,8 @@ interface OwnershipClaimingOpts {
   size: number;
   taskTypes: Set<string>;
   removedTypes: Set<string>;
-  excludedTypes: Set<string>;
   getCapacity: (taskType?: string | undefined) => number;
+  excludedTaskTypePatterns: string[];
   taskStore: TaskStore;
   events$: Subject<TaskClaim>;
   definitions: TaskTypeDictionary;
@@ -101,13 +106,12 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const stopTaskTimer = startTaskTimer();
 
   const removedTypes = new Set(unusedTypes); // REMOVED_TYPES
-  const excludedTypes = new Set(excludedTaskTypes); // excluded via config
 
   // get a list of candidate tasks to claim, with their version info
   const { docs, versionMap } = await searchAvailableTasks({
     definitions,
     taskTypes: new Set(definitions.getAllTypes()),
-    excludedTypes,
+    excludedTaskTypePatterns: excludedTaskTypes,
     removedTypes,
     taskStore,
     events$,
@@ -316,15 +320,16 @@ async function searchAvailableTasks({
   definitions,
   taskTypes,
   removedTypes,
-  excludedTypes,
+  excludedTaskTypePatterns,
   taskStore,
   getCapacity,
   size,
   taskPartitioner,
 }: OwnershipClaimingOpts): Promise<SearchAvailableTasksResponse> {
+  const excludedTaskTypes = new Set(getExcludedTaskTypes(definitions, excludedTaskTypePatterns));
   const claimPartitions = buildClaimPartitions({
     types: taskTypes,
-    excludedTypes,
+    excludedTaskTypes,
     removedTypes,
     getCapacity,
     definitions,
@@ -397,7 +402,7 @@ interface ClaimPartitions {
 
 interface BuildClaimPartitionsOpts {
   types: Set<string>;
-  excludedTypes: Set<string>;
+  excludedTaskTypes: Set<string>;
   removedTypes: Set<string>;
   getCapacity: (taskType?: string) => number;
   definitions: TaskTypeDictionary;
@@ -410,12 +415,12 @@ function buildClaimPartitions(opts: BuildClaimPartitionsOpts): ClaimPartitions {
     limitedTypes: new Map(),
   };
 
-  const { types, excludedTypes, removedTypes, getCapacity, definitions } = opts;
+  const { types, excludedTaskTypes, removedTypes, getCapacity, definitions } = opts;
   for (const type of types) {
     const definition = definitions.get(type);
     if (definition == null) continue;
 
-    if (excludedTypes.has(type)) continue;
+    if (excludedTaskTypes.has(type)) continue;
 
     if (removedTypes.has(type)) {
       result.removedTypes.push(type);
