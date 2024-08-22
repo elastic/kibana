@@ -7,7 +7,7 @@
 
 import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
 import React from 'react';
-import { InvestigationDetails as Component } from '.';
+import { InvestigationDetails as Component } from './investigation_details';
 import { KibanaReactStorybookDecorator } from '../../../../../.storybook/storybook_decorator';
 
 const meta: ComponentMeta<typeof Component> = {

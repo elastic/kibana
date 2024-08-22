@@ -15,7 +15,7 @@ import { paths } from '../../../common/paths';
 import { useFetchAlert } from '../../hooks/use_get_alert_details';
 import { useFetchInvestigation } from '../../hooks/use_get_investigation_details';
 import { useKibana } from '../../hooks/use_kibana';
-import { InvestigationDetails } from './components/investigation_details';
+import { InvestigationDetails } from './components/investigation_details/investigation_details';
 import { InvestigationDetailsPathParams } from './types';
 
 export function InvestigationDetailsPage() {
