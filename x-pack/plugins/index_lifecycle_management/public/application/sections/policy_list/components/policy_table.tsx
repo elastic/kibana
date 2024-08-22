@@ -27,6 +27,7 @@ import { useHistory } from 'react-router-dom';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import { useStateWithLocalStorage } from '../../../lib/settings_local_storage';
 import { PolicyFromES } from '../../../../../common/types';
 import { useKibana } from '../../../../shared_imports';
@@ -89,6 +90,7 @@ interface Props {
 }
 
 const SHOW_MANAGED_POLICIES_BY_DEFAULT = 'ILM_SHOW_MANAGED_POLICIES_BY_DEFAULT';
+const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
   const [query, setQuery] = useState('');
@@ -102,6 +104,16 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
     false
   );
   const { setListAction } = usePolicyListContext();
+
+  const { pageSize, sorting, onTableChange } = useEuiTablePersist<PolicyFromES>({
+    tableId: 'ilmPolicies',
+    initialPageSize: 25,
+    initialSort: {
+      field: 'name',
+      direction: 'asc',
+    },
+    pageSizeOptions: PAGE_SIZE_OPTIONS,
+  });
 
   const handleOnChange: EuiSearchBarProps['onChange'] = ({ queryText, error }) => {
     if (!error) {
@@ -313,13 +325,12 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
           'The table below contains {count, plural, one {# Index Lifecycle policy} other {# Index Lifecycle policies}} .',
         values: { count: policies.length },
       })}
-      pagination={true}
-      sorting={{
-        sort: {
-          field: 'name',
-          direction: 'asc',
-        },
+      pagination={{
+        initialPageSize: pageSize,
+        pageSizeOptions: PAGE_SIZE_OPTIONS,
       }}
+      onTableChange={onTableChange}
+      sorting={sorting}
       search={searchOptions as EuiInMemoryTableProps<PolicyFromES>['search']}
       tableLayout="auto"
       items={filteredPolicies}
