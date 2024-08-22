@@ -108,7 +108,7 @@ If you used the *Incoming Webhook* app in Microsoft Teams to generate a webhook 
 
 *Workaround* +
 Use the *Workflows* app in Microsoft Teams to create a new webhook URL, as described in <<configuring-teams>>.
-Update your Microsoft Teams connectors to use the new URL before the end of December 2024.
+Update your Microsoft Teams connector to use the new URL before the end of December 2024.
 ====
 
 [float]
