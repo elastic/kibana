@@ -29,7 +29,7 @@ export const FilterOutButton = ({ property, value }: { property: string; value: 
     <EuiFlexItem key="removeFromFilterAction">
       <EuiButtonEmpty
         size="s"
-        iconType="minusInCircle"
+        iconType="filterExclude"
         aria-label={ariaFilterOutText}
         onClick={onFilterOutAction}
         data-test-subj={`dataTableCellAction_removeFromFilterAction_${property}`}
