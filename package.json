@@ -1727,6 +1727,7 @@
     "mutation-observer": "^1.0.3",
     "native-hdr-histogram": "^1.0.0",
     "nock": "12.0.3",
+    "node-polyfill-webpack-plugin": "^4.0.0",
     "nyc": "^15.1.0",
     "oboe": "^2.1.4",
     "openapi-types": "^10.0.0",

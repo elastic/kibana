@@ -14855,6 +14855,11 @@ console-browserify@^1.1.0:
   dependencies:
     date-now "^0.1.4"
 
+console-browserify@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/console-browserify/-/console-browserify-1.2.0.tgz#67063cef57ceb6cf4993a2ab3a55840ae8c49336"
+  integrity sha512-ZMkYO/LkF17QvCPqM0gxw8yUzigAOZOSWSHg91FH6orS7vcEj5dVZTidN2fQ14yBSdg97RqhSNwLUXInd52OTA==
+
 console-control-strings@^1.0.0, console-control-strings@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/console-control-strings/-/console-control-strings-1.1.0.tgz#3d7cf4464db6446ea644bf4b39507f9851008e8e"
@@ -15136,7 +15141,7 @@ crypt@0.0.2:
   resolved "https://registry.yarnpkg.com/crypt/-/crypt-0.0.2.tgz#88d7ff7ec0dfb86f713dc87bbb42d044d3e6c41b"
   integrity sha1-iNf/fsDfuG9xPch7u0LQRNPmxBs=
 
-crypto-browserify@^3.11.0:
+crypto-browserify@^3.11.0, crypto-browserify@^3.12.0:
   version "3.12.0"
   resolved "https://registry.yarnpkg.com/crypto-browserify/-/crypto-browserify-3.12.0.tgz#396cf9f3137f03e4b8e532c58f698254e00f80ec"
   integrity sha512-fz4spIh+znjO2VjL+IdhEpRJ3YN6sMzITSBijk6FK2UvTqruSQW+/cCZTSNsMiZNvUeq0CqurF+dAbyiGOY6Wg==
@@ -16500,6 +16505,11 @@ domain-browser@^1.1.1:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/domain-browser/-/domain-browser-1.2.0.tgz#3d31f50191a6749dd1375a7f522e823d42e54eda"
   integrity sha512-jnjyiM6eRyZl2H+W8Q/zLMA481hzi0eszAaBUzIVnmYVDBbnLxVNnfu1HgEBvCbL+71FrxMl3E6lpKH7Ge3OXA==
+
+domain-browser@^5.7.0:
+  version "5.7.0"
+  resolved "https://registry.yarnpkg.com/domain-browser/-/domain-browser-5.7.0.tgz#81b942459672e3c7ed8f721fe31135a5628f31cf"
+  integrity sha512-edTFu0M/7wO1pXY6GDxVNVW086uqwWYIHP98txhcPyV995X21JIH2DtYp33sQJOupYoXKe9RwTw2Ya2vWaquTQ==
 
 domelementtype@^2.0.1, domelementtype@^2.2.0, domelementtype@^2.3.0:
   version "2.3.0"
@@ -20225,7 +20235,7 @@ inflight@^1.0.4:
     once "^1.3.0"
     wrappy "1"
 
-inherits@2, inherits@2.0.4, inherits@^2.0.1, inherits@^2.0.3, inherits@^2.0.4, inherits@~2.0.1, inherits@~2.0.3:
+inherits@2, inherits@2.0.4, inherits@^2.0.1, inherits@^2.0.3, inherits@^2.0.4, inherits@~2.0.1, inherits@~2.0.3, inherits@~2.0.4:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.4.tgz#0fa2c64f932917c3433a0ded55363aae37416b7c"
   integrity sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==
@@ -24443,6 +24453,36 @@ node-libs-browser@^2.2.1:
     util "^0.11.0"
     vm-browserify "^1.0.1"
 
+node-polyfill-webpack-plugin@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/node-polyfill-webpack-plugin/-/node-polyfill-webpack-plugin-4.0.0.tgz#99c4e4a0b41073b65aa8c584b0d195798aed2c76"
+  integrity sha512-WLk77vLpbcpmTekRj6s6vYxk30XoyaY5MDZ4+9g8OaKoG3Ij+TjOqhpQjVUlfDZBPBgpNATDltaQkzuXSnnkwg==
+  dependencies:
+    assert "^2.1.0"
+    browserify-zlib "^0.2.0"
+    buffer "^6.0.3"
+    console-browserify "^1.2.0"
+    constants-browserify "^1.0.0"
+    crypto-browserify "^3.12.0"
+    domain-browser "^5.7.0"
+    events "^3.3.0"
+    https-browserify "^1.0.0"
+    os-browserify "^0.3.0"
+    path-browserify "^1.0.1"
+    process "^0.11.10"
+    punycode "^2.3.1"
+    querystring-es3 "^0.2.1"
+    readable-stream "^4.5.2"
+    stream-browserify "^3.0.0"
+    stream-http "^3.2.0"
+    string_decoder "^1.3.0"
+    timers-browserify "^2.0.12"
+    tty-browserify "^0.0.1"
+    type-fest "^4.18.2"
+    url "^0.11.3"
+    util "^0.12.5"
+    vm-browserify "^1.1.2"
+
 node-preload@^0.2.1:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/node-preload/-/node-preload-0.2.1.tgz#c03043bb327f417a18fee7ab7ee57b408a144301"
@@ -26651,6 +26691,11 @@ punycode@^2.1.0, punycode@^2.1.1:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.1.1.tgz#b58b010ac40c22c5657616c8d2c2c02c7bf479ec"
   integrity sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==
 
+punycode@^2.3.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.3.1.tgz#027422e2faec0b25e1549c3e1bd8309b9133b6e5"
+  integrity sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==
+
 pupa@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/pupa/-/pupa-3.1.0.tgz#f15610274376bbcc70c9a3aa8b505ea23f41c579"
@@ -26721,7 +26766,7 @@ query-string@^6.13.2:
     split-on-first "^1.0.0"
     strict-uri-encode "^2.0.0"
 
-querystring-es3@^0.2.0:
+querystring-es3@^0.2.0, querystring-es3@^0.2.1:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/querystring-es3/-/querystring-es3-0.2.1.tgz#9ec61f79049875707d69414596fd907a4d711e73"
   integrity sha1-nsYfeQSYdXB9aUFFlv2Qek1xHnM=
@@ -27534,7 +27579,7 @@ read-pkg@^5.2.0:
     string_decoder "~1.1.1"
     util-deprecate "~1.0.1"
 
-"readable-stream@2 || 3", readable-stream@3, readable-stream@^3.0.6, readable-stream@^3.1.1, readable-stream@^3.4.0, readable-stream@^3.6.0, readable-stream@^3.6.2:
+"readable-stream@2 || 3", readable-stream@3, readable-stream@^3.0.6, readable-stream@^3.1.1, readable-stream@^3.4.0, readable-stream@^3.5.0, readable-stream@^3.6.0, readable-stream@^3.6.2:
   version "3.6.2"
   resolved "https://registry.yarnpkg.com/readable-stream/-/readable-stream-3.6.2.tgz#56a9b36ea965c00c5a93ef31eb111a0f11056967"
   integrity sha512-9u/sniCrY3D5WdsERHzHE4G2YCXqoG5FTHUiCC4SIbr6XcLZBY05ya9EKjYek9O5xOAwjGq+1JdGBAS7Q9ScoA==
@@ -27562,6 +27607,17 @@ readable-stream@^4.0.0:
     buffer "^6.0.3"
     events "^3.3.0"
     process "^0.11.10"
+
+readable-stream@^4.5.2:
+  version "4.5.2"
+  resolved "https://registry.yarnpkg.com/readable-stream/-/readable-stream-4.5.2.tgz#9e7fc4c45099baeed934bff6eb97ba6cf2729e09"
+  integrity sha512-yjavECdqeZ3GLXNgRXgeQEdz9fvDDkNKyHnbHRFtOr7/LcfgBcmct7t/ET+HaCTqfh06OzoAxrkN/IfjJBVe+g==
+  dependencies:
+    abort-controller "^3.0.0"
+    buffer "^6.0.3"
+    events "^3.3.0"
+    process "^0.11.10"
+    string_decoder "^1.3.0"
 
 readable-stream@~2.0.0:
   version "2.0.6"
@@ -28458,7 +28514,7 @@ safe-buffer@5.1.2, safe-buffer@~5.1.0, safe-buffer@~5.1.1:
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.1.2.tgz#991ec69d296e0313747d59bdfd2b745c35f8828d"
   integrity sha512-Gd2UZBJDkXlY7GbJxfsE8/nvKkUEU1G38c1siN6QP6a9PT9MmHB8GnpscSmMJSoF8LOIrt8ud/wPtojys4G6+g==
 
-safe-buffer@5.2.1, safe-buffer@>=5.1.0, safe-buffer@^5.0.1, safe-buffer@^5.1.0, safe-buffer@^5.1.1, safe-buffer@^5.1.2, safe-buffer@^5.2.1:
+safe-buffer@5.2.1, safe-buffer@>=5.1.0, safe-buffer@^5.0.1, safe-buffer@^5.1.0, safe-buffer@^5.1.1, safe-buffer@^5.1.2, safe-buffer@^5.2.1, safe-buffer@~5.2.0:
   version "5.2.1"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.2.1.tgz#1eaf9fa9bdb1fdd4ec75f58f9cdb4e6b7827eec6"
   integrity sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ==
@@ -29831,6 +29887,14 @@ stream-browserify@^2.0.1:
     inherits "~2.0.1"
     readable-stream "^2.0.2"
 
+stream-browserify@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/stream-browserify/-/stream-browserify-3.0.0.tgz#22b0a2850cdf6503e73085da1fc7b7d0c2122f2f"
+  integrity sha512-H73RAHsVBapbim0tU2JwwOiXUj+fikfiaoYAKHF3VJfA0pe2BCzkhAHBlLG6REzE+2WNZcxOXjK7lkso+9euLA==
+  dependencies:
+    inherits "~2.0.4"
+    readable-stream "^3.5.0"
+
 stream-chopper@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/stream-chopper/-/stream-chopper-3.0.1.tgz#73791ae7bf954c297d6683aec178648efc61dd75"
@@ -29863,6 +29927,16 @@ stream-http@^2.7.2:
     readable-stream "^2.3.3"
     to-arraybuffer "^1.0.0"
     xtend "^4.0.0"
+
+stream-http@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/stream-http/-/stream-http-3.2.0.tgz#1872dfcf24cb15752677e40e5c3f9cc1926028b5"
+  integrity sha512-Oq1bLqisTyK3TSCXpPbT4sdeYNdmyZJv1LxpEm2vu1ZhK89kSE5YXwZc3cWk0MagGaKriBh9mCFbVGtO+vY29A==
+  dependencies:
+    builtin-status-codes "^3.0.0"
+    inherits "^2.0.4"
+    readable-stream "^3.6.0"
+    xtend "^4.0.2"
 
 stream-shift@^1.0.0:
   version "1.0.0"
@@ -30012,6 +30086,13 @@ string_decoder@^1.0.0, string_decoder@^1.1.1, string_decoder@~1.1.1:
   integrity sha512-n/ShnvDi6FHbbVfviro+WojiFzv+s8MPMHBczVePfUpDJLwoLT0ht1l4YwBCbi8pJAveEEdnkHyPyTP/mzRfwg==
   dependencies:
     safe-buffer "~5.1.0"
+
+string_decoder@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/string_decoder/-/string_decoder-1.3.0.tgz#42f114594a46cf1a8e30b0a84f56c78c3edac21e"
+  integrity sha512-hkRX8U1WjJFd8LsDJ2yQ/wWWxaopEsABU1XfkM8A+j0+85JAGppt16cr1Whg6KIbb4okU6Mql6BOj+uup/wKeA==
+  dependencies:
+    safe-buffer "~5.2.0"
 
 string_decoder@~0.10.x:
   version "0.10.31"
@@ -30803,6 +30884,13 @@ time-stamp@^1.0.0:
   resolved "https://registry.yarnpkg.com/time-stamp/-/time-stamp-1.1.0.tgz#764a5a11af50561921b133f3b44e618687e0f5c3"
   integrity sha1-dkpaEa9QVhkhsTPztE5hhofg9cM=
 
+timers-browserify@^2.0.12:
+  version "2.0.12"
+  resolved "https://registry.yarnpkg.com/timers-browserify/-/timers-browserify-2.0.12.tgz#44a45c11fbf407f34f97bccd1577c652361b00ee"
+  integrity sha512-9phl76Cqm6FhSX9Xe1ZUAMLtm1BLkKj2Qd5ApyWkXzsMRaA7dgr81kf4wJmQf/hAvg8EEyJxDo3du/0KlhPiKQ==
+  dependencies:
+    setimmediate "^1.0.4"
+
 timers-browserify@^2.0.4:
   version "2.0.6"
   resolved "https://registry.yarnpkg.com/timers-browserify/-/timers-browserify-2.0.6.tgz#241e76927d9ca05f4d959819022f5b3664b64bae"
@@ -31157,6 +31245,11 @@ tty-browserify@0.0.0:
   resolved "https://registry.yarnpkg.com/tty-browserify/-/tty-browserify-0.0.0.tgz#a157ba402da24e9bf957f9aa69d524eed42901a6"
   integrity sha1-oVe6QC2iTpv5V/mqadUk7tQpAaY=
 
+tty-browserify@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/tty-browserify/-/tty-browserify-0.0.1.tgz#3f05251ee17904dfd0677546670db9651682b811"
+  integrity sha512-C3TaO7K81YvjCgQH9Q1S3R3P3BtN3RIM8n+OvX4il1K1zgE8ZhI0op7kClgkxtutIE8hQrcrHBXvIheqKUUCxw==
+
 tunnel-agent@^0.6.0:
   version "0.6.0"
   resolved "https://registry.yarnpkg.com/tunnel-agent/-/tunnel-agent-0.6.0.tgz#27a5dea06b36b04a0a9966774b290868f0fc40fd"
@@ -31232,6 +31325,11 @@ type-fest@^4.15.0, type-fest@^4.17.0, type-fest@^4.9.0:
   version "4.18.3"
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-4.18.3.tgz#5249f96e7c2c3f0f1561625f54050e343f1c8f68"
   integrity sha512-Q08/0IrpvM+NMY9PA2rti9Jb+JejTddwmwmVQGskAlhtcrw1wsRzoR6ode6mR+OAabNa75w/dxedSUY2mlphaQ==
+
+type-fest@^4.18.2:
+  version "4.25.0"
+  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-4.25.0.tgz#b190374f969631866889bbdb01ece17ca424ee60"
+  integrity sha512-bRkIGlXsnGBRBQRAY56UXBm//9qH4bmJfFvq83gSz41N282df+fjy8ofcEgc1sM8geNt5cl6mC2g9Fht1cs8Aw==
 
 type-is@~1.6.18:
   version "1.6.18"
@@ -31729,7 +31827,7 @@ url@^0.11.0:
     punycode "1.3.2"
     querystring "0.2.0"
 
-url@^0.11.4:
+url@^0.11.3, url@^0.11.4:
   version "0.11.4"
   resolved "https://registry.yarnpkg.com/url/-/url-0.11.4.tgz#adca77b3562d56b72746e76b330b7f27b6721f3c"
   integrity sha512-oCwdVC7mTuWiPyjLUz/COz5TLk6wgp0RCsN+wHZ2Ekneac9w8uuV0njcbbie2ME+Vs+d6duwmYuR3HgQXs1fOg==
@@ -32402,7 +32500,7 @@ vinyl@^3.0.0:
     replace-ext "^2.0.0"
     teex "^1.0.1"
 
-vm-browserify@^1.0.1:
+vm-browserify@^1.0.1, vm-browserify@^1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/vm-browserify/-/vm-browserify-1.1.2.tgz#78641c488b8e6ca91a75f511e7a3b32a86e5dda0"
   integrity sha512-2ham8XPWTONajOR0ohOKOHXkm3+gaBmGut3SRuu75xLd/RRaY6vqgh8NBYYk7+RW3u5AtzPQZG8F10LHkl0lAQ==

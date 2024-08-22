@@ -78,6 +78,7 @@ webpack_cli(
     ":webpack.config.js",
 
     "@npm//webpack",
+    "@npm//node-polyfill-webpack-plugin",
     "@npm//clean-webpack-plugin",
     "@npm//mini-css-extract-plugin",
     "@npm//moment",

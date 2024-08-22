@@ -10,6 +10,7 @@ import Path from 'path';
 import Fs from 'fs';
 
 import webpack from 'webpack';
+import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
 import { merge as webpackMerge } from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
@@ -75,6 +76,7 @@ export function getWebpackConfig(
     externals: UiSharedDepsSrc.externals,
 
     plugins: [
+      new NodePolyfillPlugin(),
       new CleanWebpackPlugin(),
       new BundleRemotesPlugin(bundle, bundleRemotes),
       new PopulateBundleCachePlugin(worker, bundle, parseDllManifest(DLL_MANIFEST)),
@@ -295,7 +297,8 @@ export function getWebpackConfig(
         fs: false,
       },
       fallback: {
-        path: require.resolve('path-browserify'),
+        child_process: false,
+        fs: false,
       },
     },
 
