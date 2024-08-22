@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { dump, load } from 'js-yaml';
+import { safeDump, safeLoad } from 'js-yaml';
 
 export const generateCustomLogsYml = ({
   datasetName = '',
@@ -26,7 +26,7 @@ export const generateCustomLogsYml = ({
   esHost: string[];
   logfileId: string;
 }) => {
-  const customConfigYaml = load(customConfigurations ?? '');
+  const customConfigYaml = safeLoad(customConfigurations ?? '');
   const processors = [
     {
       add_fields: {
@@ -38,7 +38,7 @@ export const generateCustomLogsYml = ({
     },
   ];
 
-  return dump({
+  return safeDump({
     ...{
       outputs: {
         default: {

@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react';
 import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
 import { fetchUnallowedValues, getUnallowedValues } from './helpers';
 import type { UnallowedValueCount, UnallowedValueRequestItem } from '../types';
+import { useIsMounted } from '../use_is_mounted';
 
 export interface UseUnallowedValues {
   unallowedValues: Record<string, UnallowedValueCount[]> | null;
@@ -25,6 +26,7 @@ export const useUnallowedValues = ({
   indexName: string;
   requestItems: UnallowedValueRequestItem[];
 }): UseUnallowedValues => {
+  const { isMountedRef } = useIsMounted();
   const [unallowedValues, setUnallowedValues] = useState<Record<
     string,
     UnallowedValueCount[]
@@ -57,17 +59,23 @@ export const useUnallowedValues = ({
         });
 
         if (!abortController.signal.aborted) {
-          setUnallowedValues(unallowedValuesMap);
+          if (isMountedRef.current) {
+            setUnallowedValues(unallowedValuesMap);
+          }
         }
       } catch (e) {
         if (!abortController.signal.aborted) {
-          setError(e.message);
-          setRequestTime(Date.now() - startTime);
+          if (isMountedRef.current) {
+            setError(e.message);
+            setRequestTime(Date.now() - startTime);
+          }
         }
       } finally {
         if (!abortController.signal.aborted) {
-          setLoading(false);
-          setRequestTime(Date.now() - startTime);
+          if (isMountedRef.current) {
+            setLoading(false);
+            setRequestTime(Date.now() - startTime);
+          }
         }
       }
     }
@@ -77,7 +85,7 @@ export const useUnallowedValues = ({
     return () => {
       abortController.abort();
     };
-  }, [httpFetch, indexName, requestItems, setError]);
+  }, [httpFetch, indexName, isMountedRef, requestItems, setError]);
 
   return { unallowedValues, error, loading, requestTime };
 };

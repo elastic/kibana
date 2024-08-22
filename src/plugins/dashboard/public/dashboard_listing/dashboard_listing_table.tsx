@@ -47,6 +47,7 @@ export const DashboardListingTable = ({
     coreContext: { executionContext },
     chrome: { theme },
     userProfile,
+    dashboardContentInsights: { contentInsightsClient },
   } = pluginServices.getServices();
 
   useExecutionContext(executionContext, {
@@ -98,6 +99,7 @@ export const DashboardListingTable = ({
         core={core}
         savedObjectsTagging={savedObjectsTaggingFakePlugin}
         FormattedRelative={FormattedRelative}
+        contentInsightsClient={contentInsightsClient}
       >
         <>
           <DashboardUnsavedListing
