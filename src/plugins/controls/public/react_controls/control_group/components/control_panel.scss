@@ -12,6 +12,7 @@
 
   &--labelWrapper {
     max-width: 40%;
+    height: $euiFormControlCompressedHeight;
 
     .controlPanel--label {
       @include euiTextTruncate;

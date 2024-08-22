@@ -35,6 +35,7 @@ export function TimeSliderSlidingWindowRange(props: Props) {
       step={props.stepSize}
       ticks={props.ticks}
       isDraggable
+      compressed
     />
   );
 }

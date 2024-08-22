@@ -39,6 +39,7 @@ export function TimeSliderAnchoredRange(props: Props) {
       max={props.timeRangeMax}
       step={props.stepSize}
       ticks={props.ticks}
+      compressed
     />
   );
 }
