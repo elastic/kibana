@@ -35,12 +35,12 @@ export async function getGlobalDiagnosis(
     index: [
       {
         names: '.slo-*',
-        privileges: ['write', 'read', 'view_index_metadata', 'manage', 'auto_configure'],
+        privileges: MINIMUM_INDEX_PRIVILEGE_SET_EDITOR,
       },
     ],
   });
   const userReadPrivileges = await esClient.security.hasPrivileges({
-    index: [{ names: '.slo-*', privileges: ['read'] }],
+    index: [{ names: '.slo-*', privileges: MINIMUM_INDEX_PRIVILEGE_SET_VIEWER }],
   });
 
   return {
