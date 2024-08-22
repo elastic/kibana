@@ -64,14 +64,15 @@ export const useSyntheticsRules = (isOpen: boolean) => {
   const { triggersActionsUi } = useKibana<ClientPluginsStart>().services;
 
   const EditAlertFlyout = useMemo(() => {
-    if (!defaultRules) {
+    const initialRule =
+      alertFlyoutVisible === SYNTHETICS_TLS_RULE ? defaultRules?.tlsRule : defaultRules?.statusRule;
+    if (!initialRule) {
       return null;
     }
     return triggersActionsUi.getEditRuleFlyout({
       onClose: () => dispatch(setAlertFlyoutVisible(null)),
       hideInterval: true,
-      initialRule:
-        alertFlyoutVisible === SYNTHETICS_TLS_RULE ? defaultRules.tlsRule : defaultRules.statusRule,
+      initialRule,
     });
   }, [defaultRules, dispatch, triggersActionsUi, alertFlyoutVisible]);
 

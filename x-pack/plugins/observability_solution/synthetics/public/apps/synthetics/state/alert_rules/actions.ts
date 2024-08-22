@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { DEFAULT_ALERT_RESPONSE } from '../../../../../common/types/default_alerts';
 import { createAsyncAction } from '../utils/actions';
 
@@ -21,6 +20,6 @@ export const enableDefaultAlertingSilentlyAction = createAsyncAction<void, DEFAU
   'enableDefaultAlertingSilentlyAction'
 );
 
-export const updateDefaultAlertingAction = createAsyncAction<void, Rule>(
+export const updateDefaultAlertingAction = createAsyncAction<void, DEFAULT_ALERT_RESPONSE>(
   'updateDefaultAlertingAction'
 );
