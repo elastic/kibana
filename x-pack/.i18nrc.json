@@ -105,6 +105,7 @@
     "xpack.searchNotebooks": "plugins/search_notebooks",
     "xpack.searchPlayground": "plugins/search_playground",
     "xpack.searchInferenceEndpoints": "plugins/search_inference_endpoints",
+    "xpack.searchAssistant": "plugins/search_assistant",
     "xpack.searchProfiler": "plugins/searchprofiler",
     "xpack.security": ["plugins/security", "packages/security"],
     "xpack.server": "legacy/server",
