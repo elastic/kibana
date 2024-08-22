@@ -47,8 +47,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(sections).to.eql(['insightsAndAlerting', 'kibana']);
         });
       });
-
-
     });
 
     describe('global dashboard read with ingest_pipelines_user', () => {

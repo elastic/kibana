@@ -25,7 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    describe('global all privileges (aka kibana_admin)', function() {
+    describe('global all privileges (aka kibana_admin)', function () {
       before(async () => {
         await security.testUser.setRoles(['kibana_admin']);
       });
@@ -38,9 +38,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(links.map((link) => link.text)).to.contain('Stack Management');
       });
 
-      describe('"Ingest section"', function() {
+      describe('"Ingest section"', function () {
         this.tags('skipFIPS');
-        it('should not render', async function() {
+        it('should not render', async function () {
           await PageObjects.common.navigateToApp('management');
           const sections = (await managementMenu.getSections()).map((section) => section.sectionId);
           expect(sections).to.eql(['insightsAndAlerting', 'kibana']);

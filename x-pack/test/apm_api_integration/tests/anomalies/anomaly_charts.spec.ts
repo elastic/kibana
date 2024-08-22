@@ -72,7 +72,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when(
     'fetching service anomalies with a basic license',
     { config: 'basic', archives: [] },
-    function() {
+    function () {
       this.tags('skipFIPS');
       it('returns a 501', async function () {
         const status = await statusOf(

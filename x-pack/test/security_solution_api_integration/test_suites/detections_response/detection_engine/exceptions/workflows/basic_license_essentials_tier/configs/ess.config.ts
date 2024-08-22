@@ -16,7 +16,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('..')],
     suiteTags: {
-      exclude: ['skipFIPS']
+      exclude: ['skipFIPS'],
     },
     junit: {
       reportName:

@@ -38,7 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(links.map((link) => link.text)).to.contain('Stack Management');
       });
 
-      describe('"Stack" section', function() {
+      describe('"Stack" section', function () {
         this.tags('skipFIPS');
         it('should not render', async () => {
           await PageObjects.common.navigateToApp('management');
@@ -46,7 +46,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(sections).to.eql(['insightsAndAlerting', 'kibana']);
         });
       });
-
     });
 
     describe('global dashboard read with license_management_user', () => {

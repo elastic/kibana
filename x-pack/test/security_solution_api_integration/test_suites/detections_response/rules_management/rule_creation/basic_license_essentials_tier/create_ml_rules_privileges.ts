@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
   const auditbeatPath = dataPathBuilder.getPath('auditbeat/hosts');
 
   describe('create_ml_rules', () => {
-    describe('Creating Machine Learning rules', function() {
+    describe('Creating Machine Learning rules', function () {
       before(async () => {
         await esArchiver.load(auditbeatPath);
       });
@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllRules(supertest, log);
       });
 
-      describe('@ess', function(){
+      describe('@ess', function () {
         this.tags('skipFIPS');
         it('should give a 403 when trying to create a single Machine Learning rule since the license is basic', async function () {
           const { body } = await supertest
@@ -67,7 +67,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('@serverless', function(){
+      describe('@serverless', function () {
         it('@serverless should give a 200 when trying to create a single Machine Learning rule since the license is essentials', async () => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
