@@ -93,7 +93,7 @@ export const getConnectingTime = (connect?: number, ssl?: number) => {
   }
 };
 
-export const getQueryMatcher = (query?: string): ItemMatcher => {
+export const getQueryMatcher = (query?: string): ItemMatcher | undefined => {
   if (!query) {
     return (item: NetworkEvent) => true;
   }
