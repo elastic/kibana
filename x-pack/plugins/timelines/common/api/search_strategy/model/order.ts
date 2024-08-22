@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { Direction } from '../../../search_strategy';
 
 export const order = z.enum([Direction.asc, Direction.desc]);
