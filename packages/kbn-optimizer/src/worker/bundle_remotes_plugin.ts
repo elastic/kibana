@@ -40,6 +40,34 @@ export class BundleRemotesPlugin {
       // hook into the creation of NormalModule instances in webpack, if the import
       // statement leading to the creation of the module is pointing to a bundleRef
       // entry then create a BundleRefModule instead of a NormalModule.
+      // compilationParams.normalModuleFactory.hooks.factorize.tap(
+      //   'BundleRefsPlugin/normalModuleFactory/factorize',
+      //   (data: RequestData) => {
+      //     const { request } = data.dependencies[0];
+      //
+      //     const cached = moduleCache.get(request);
+      //     if (cached === null) {
+      //       return;
+      //     }
+      //     if (cached !== undefined) {
+      //       return cached;
+      //     }
+      //
+      //     this.resolve(request, (error, result) => {
+      //       if (error || result === undefined) {
+      //         throw error;
+      //       }
+      //
+      //       moduleCache.set(request, result);
+      //
+      //       if (result === null) {
+      //         return;
+      //       }
+      //
+      //       return result;
+      //     });
+      //   }
+      // );
       compilationParams.normalModuleFactory.hooks.factorize.tapAsync(
         'BundleRefsPlugin/normalModuleFactory/factorize',
         (data: RequestData, callback: Callback<BundleRemoteModule>) => {
