@@ -25,7 +25,7 @@ import { useSetAlertAssignees } from './use_set_alert_assignees';
 
 export interface UseBulkAlertAssigneesItemsProps {
   onAssigneesUpdate?: () => void;
-  alertAssignments: string[];
+  alertAssignments?: string[];
 }
 
 export interface UseBulkAlertAssigneesPanel {
@@ -101,7 +101,7 @@ export const useBulkAlertAssigneesItems = ({
               label: i18n.REMOVE_ALERT_ASSIGNEES_CONTEXT_MENU_TITLE,
               disableOnQuery: true,
               onClick: onRemoveAllAssignees,
-              disable: isEmpty(alertAssignments),
+              disable: alertAssignments ? isEmpty(alertAssignments) : false,
             },
           ]
         : [],
