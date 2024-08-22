@@ -16,25 +16,22 @@ let entityAnalyticsManagementPage: EntityAnalyticsManagementPage;
 test.beforeAll(async ({ esArchiver }) => {
   await esArchiver.loadIfNeeded('auditbeat_single');
 });
-test.afterAll(async ({ esArchiver }) => {
-  await esArchiver.unload('auditbeat_single');
-});
 
 test.describe('Enable risk scores from dashboard', { tag: ['@serverless', '@ess'] }, () => {
   test.use({ storageState: '.auth/user.json' });
   test.beforeEach(async ({ page }) => {
     entityAnalyticsPage = await PageFactory.createEntityAnalyticsPage(page);
-    entityAnalyticsPage.navigates();
+    await entityAnalyticsPage.navigates();
   });
   test('host risk enable button should redirect to entity management page', async () => {
     await entityAnalyticsPage.waitForEnableHostRiskScoreToBePresent();
     entityAnalyticsManagementPage = await entityAnalyticsPage.enableHostRisk();
-    entityAnalyticsManagementPage.entityAnalyticsManagementPageTitleShouldBeDisplayed();
+    await entityAnalyticsManagementPage.entityAnalyticsManagementPageTitleShouldBeDisplayed();
   });
 
   test('user risk enable button should redirect to entity management page', async () => {
     await entityAnalyticsPage.waitForEnableUserRiskScoreToBePresent();
     entityAnalyticsManagementPage = await entityAnalyticsPage.enableUserRisk();
-    entityAnalyticsManagementPage.entityAnalyticsManagementPageTitleShouldBeDisplayed();
+    await entityAnalyticsManagementPage.entityAnalyticsManagementPageTitleShouldBeDisplayed();
   });
 });

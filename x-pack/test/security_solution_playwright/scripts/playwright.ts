@@ -134,15 +134,11 @@ ${JSON.stringify(playwrightConfigFile, null, 2)}
         _.pull(fleetServerPorts, fleetServerPort);
       };
 
-      const failedSpecFilePaths: string[] = [];
-
       const runSpecs = async (filePaths: string[]) =>
         pMap(
           filePaths,
           async (filePath) => {
             let result;
-            failedSpecFilePaths.push(filePath);
-
             await withProcRunner(log, async (procs) => {
               const abortCtrl = new AbortController();
 
@@ -282,6 +278,7 @@ ${JSON.stringify(playwrightConfigFile, null, 2)}
                 `);
 
                 const project = playwrightCustomEnv.IS_SERVERLESS ? 'serverless' : 'ess';
+
                 if (isOpen) {
                   await execa.command(
                     `npx playwright test --config ${playwrightConfigFilePath} --ui --project ${project}`,

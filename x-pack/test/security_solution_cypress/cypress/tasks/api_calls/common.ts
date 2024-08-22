@@ -11,7 +11,6 @@ import { AllConnectorsResponse } from '@kbn/actions-plugin/common/routes/connect
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '@kbn/security-solution-plugin/common/constants';
 import { ELASTICSEARCH_PASSWORD, ELASTICSEARCH_USERNAME } from '../../env_var_names_constants';
 import { deleteAllDocuments } from './elasticsearch';
-import { DEFAULT_ALERTS_INDEX_PATTERN } from './alerts';
 import { getSpaceUrl } from '../space';
 
 export const API_AUTH = Object.freeze({
@@ -59,7 +58,7 @@ export const deleteAlertsAndRules = () => {
       timeout: 300000,
     });
 
-    deleteAllDocuments(`.lists-*,.items-*,${DEFAULT_ALERTS_INDEX_PATTERN}`);
+    deleteAllDocuments(`.lists-*,.items-*,.alerts-security.alerts-*'`);
   });
 };
 

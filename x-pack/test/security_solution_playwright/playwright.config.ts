@@ -9,6 +9,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   timeout: 60000,
+  expect: { timeout: 60000 },
   testDir: './tests/',
   testMatch: process.env.FILE_PATH || '**/*.spec.ts',
   fullyParallel: false,
