@@ -20,7 +20,7 @@ import {
   ConversationResponse,
   API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
-import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import { CONVERSATIONS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';

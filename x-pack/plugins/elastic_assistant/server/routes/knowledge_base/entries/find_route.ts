@@ -14,7 +14,7 @@ import {
   FindKnowledgeBaseEntriesRequestQuery,
   FindKnowledgeBaseEntriesResponse,
 } from '@kbn/elastic-assistant-common';
-import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
 

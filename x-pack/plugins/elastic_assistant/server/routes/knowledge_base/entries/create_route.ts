@@ -11,7 +11,7 @@ import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
 } from '@kbn/elastic-assistant-common';
-import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,

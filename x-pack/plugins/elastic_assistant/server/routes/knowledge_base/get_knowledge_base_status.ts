@@ -13,7 +13,7 @@ import {
   ReadKnowledgeBaseRequestParams,
   ReadKnowledgeBaseResponse,
 } from '@kbn/elastic-assistant-common';
-import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import { KibanaRequest } from '@kbn/core/server';
 import { getKbResource } from './get_kb_resource';
 import { buildResponse } from '../../lib/build_response';

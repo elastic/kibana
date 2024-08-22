@@ -13,7 +13,7 @@ import {
   GetCapabilitiesResponse,
   INTERNAL_API_ACCESS,
 } from '@kbn/elastic-assistant-common';
-import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import { CAPABILITIES } from '../../../common/constants';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 

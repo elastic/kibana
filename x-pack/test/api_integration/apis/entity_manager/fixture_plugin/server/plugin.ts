@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { buildRouteValidationWithZod, z } from '@kbn/zod';
 import {
   Plugin,
   CoreSetup,
@@ -15,7 +15,6 @@ import {
   Logger,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod';
 import { upgradeBuiltInEntityDefinitions } from '@kbn/entityManager-plugin/server/lib/entities/upgrade_entity_definition';
 import { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';

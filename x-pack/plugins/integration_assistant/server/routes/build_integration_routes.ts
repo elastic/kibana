@@ -6,10 +6,10 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import { BuildIntegrationRequestBody, INTEGRATION_BUILDER_PATH } from '../../common';
 import { buildPackage } from '../integration_builder';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
-import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 
 export function registerIntegrationBuilderRoutes(

@@ -21,7 +21,7 @@ import {
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getCategorizationGraph } from '../graphs/categorization';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
-import { buildRouteValidationWithZod } from '../util/route_validation';
+import { buildRouteValidationWithZod } from '@kbn/zod';
 import { withAvailability } from './with_availability';
 
 export function registerCategorizationRoutes(
