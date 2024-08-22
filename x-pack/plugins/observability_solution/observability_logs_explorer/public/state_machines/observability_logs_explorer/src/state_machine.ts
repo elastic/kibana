@@ -12,7 +12,6 @@ import { actions, createMachine, InterpreterFrom } from 'xstate';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
-import { AllDatasetSelection } from '@kbn/logs-explorer-plugin/common';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
   ObservabilityLogsExplorerContext,
@@ -27,6 +26,7 @@ import {
 } from './controller_service';
 import { initializeFromTimeFilterService } from './time_filter_service';
 import { createDataReceivedTelemetryEventEmitter } from './telemetry_events';
+import { initializeAllSelection } from './all_selection_service';
 
 export const createPureObservabilityLogsExplorerStateMachine = (
   initialContext: ObservabilityLogsExplorerContext
@@ -53,6 +53,7 @@ export const createPureObservabilityLogsExplorerStateMachine = (
               target: 'initializingFromTimeFilterService',
               actions: ['storeAllSelection'],
             },
+            onError: 'initializingFromTimeFilterService',
           },
         },
         initializingFromTimeFilterService: {
@@ -201,11 +202,7 @@ export const createObservabilityLogsExplorerStateMachine = ({
       createController: createController({ createLogsExplorerController }),
       initializeFromTimeFilterService: initializeFromTimeFilterService({ timeFilterService }),
       initializeFromUrl: initializeFromUrl({ urlStateStorageContainer, toastsService: toasts }),
-      initializeAllSelection: async (context) => {
-        const logSources = await logSourcesService.getLogSources();
-        const indices = logSources.map((logSource) => logSource.indexPattern).join(',');
-        return AllDatasetSelection.create({ indices });
-      },
+      initializeAllSelection: initializeAllSelection({ logSourcesService }),
       subscribeToLogsExplorerState,
       subscribeToLogsExplorerPublicEvents,
     },
