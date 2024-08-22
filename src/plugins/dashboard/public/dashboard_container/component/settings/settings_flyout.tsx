@@ -272,7 +272,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
               <EuiFormRow>
                 <EuiSwitch
                   label={
-                    <EuiText size="xs">
+                    <EuiText size="s">
                       {i18n.translate(
                         'dashboard.embeddableApi.showSettings.flyout.form.syncColorsBetweenPanelsSwitchLabel',
                         {
