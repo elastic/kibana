@@ -14,24 +14,16 @@ import {
   hostNameKeyword,
   someField,
 } from '../../../../mock/enriched_field_metadata/mock_enriched_field_metadata';
-import { TestProviders } from '../../../../mock/test_providers/test_providers';
+import { TestExternalProviders } from '../../../../mock/test_providers/test_providers';
 import { CustomCallout } from '.';
-
-const content = 'you are reviewing a pull request';
 
 describe('CustomCallout', () => {
   beforeEach(() => {
     render(
-      <TestProviders>
-        <CustomCallout customFieldMetadata={[hostNameKeyword, someField]}>
-          <div data-test-subj="children">{content}</div>
-        </CustomCallout>
-      </TestProviders>
+      <TestExternalProviders>
+        <CustomCallout customFieldMetadata={[hostNameKeyword, someField]} />
+      </TestExternalProviders>
     );
-  });
-
-  test('it renders a title with the expected count of custom field mappings', () => {
-    expect(screen.getByTestId('title')).toHaveTextContent('2 Custom field mappings');
   });
 
   test('it includes the ECS version in the main content', () => {
@@ -42,9 +34,5 @@ describe('CustomCallout', () => {
 
   test('it notes ECS is a permissive schema', () => {
     expect(screen.getByTestId('ecsIsPermissive')).toHaveTextContent(ECS_IS_A_PERMISSIVE_SCHEMA);
-  });
-
-  test('it renders the children', () => {
-    expect(screen.getByTestId('children')).toHaveTextContent(content);
   });
 });

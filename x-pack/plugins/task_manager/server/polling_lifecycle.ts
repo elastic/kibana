@@ -14,7 +14,7 @@ import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 
 import { Result, asErr, mapErr, asOk, map, mapOk } from './lib/result_type';
 import { ManagedConfiguration } from './lib/create_managed_configuration';
-import { TaskManagerConfig, CLAIM_STRATEGY_DEFAULT } from './config';
+import { TaskManagerConfig, CLAIM_STRATEGY_UPDATE_BY_QUERY } from './config';
 
 import {
   TaskMarkRunning,
@@ -155,7 +155,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     const { poll_interval: pollInterval, claim_strategy: claimStrategy } = config;
 
     let pollIntervalDelay$: Observable<number> | undefined;
-    if (claimStrategy === CLAIM_STRATEGY_DEFAULT) {
+    if (claimStrategy === CLAIM_STRATEGY_UPDATE_BY_QUERY) {
       pollIntervalDelay$ = delayOnClaimConflicts(
         capacityConfiguration$,
         pollIntervalConfiguration$,
