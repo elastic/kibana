@@ -183,6 +183,15 @@ export const getAlertDetailsContextHandler = (
         },
       });
 
+      if (significantItems.length === 0) {
+        return {
+          key: 'logRateAnalysis',
+          description:
+            'Log rate analysis did not identify any significant metadata or log patterns during the alert period.',
+          data: [],
+        };
+      }
+
       return {
         key: 'logRateAnalysis',
         description: `Statistically significant log metadata and log patterns that happened ${
