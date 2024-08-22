@@ -119,7 +119,7 @@ export const ServicesContent = ({
             values={{
               apmTutorialLink: (
                 <EuiLink
-                  data-test-subj="assetDetailsTooltiAPMTutorialLink"
+                  data-test-subj="assetDetailsTooltipAPMTutorialLink"
                   href={isServerlessEnv ? serverlessLinkProps.href : linkProps.href}
                 >
                   <FormattedMessage
@@ -130,6 +130,16 @@ export const ServicesContent = ({
               ),
             }}
           />
+          <EuiLink
+            data-test-subj="assetDetailsAPMTroubleshootingLink"
+            href="https://ela.st/host-troubleshooting"
+            target="_blank"
+          >
+            <FormattedMessage
+              id="xpack.infra.assetDetails.table.services.noServices.troubleshootingLink"
+              defaultMessage="Troubleshooting"
+            />
+          </EuiLink>
         </p>
       )}
     </Section>
