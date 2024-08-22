@@ -27,7 +27,6 @@ export const VisualizeConstants = {
   CREATE_PATH: '/create',
   EDIT_PATH: '/edit',
   EDIT_BY_VALUE_PATH: '/edit_by_value',
-  LEGACY_EDIT_PATH: '/edit/legacy',
   APP_ID: 'visualize',
 };
 
