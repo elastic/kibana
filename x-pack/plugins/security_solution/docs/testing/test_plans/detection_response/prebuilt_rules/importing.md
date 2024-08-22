@@ -1,38 +1,58 @@
-#### **Scenario: User imports unmodified prebuilt rules
+Feature: Importing Prebuilt Rules
 
-```Gherkin
-Given an NDJSON file representing unmodified prebuilt rules
-When a user opens the Rule Management page
-And uploads the file via the Import Rules Modal
-Then the rules should be created
-And the rules should have a `rule_source.type` of "external"
-And the rules should have a `rule_source.is_customized` of "false"
-And the rules should have a `rule_source.source_updated_at` equal to the `updated_at` field of the published rule/version
-```
+  Scenario: Importing an unmodified prebuilt rule with a matching rule_id and version
+    Given the import payload contains a prebuilt rule with a matching rule_id and version
+    When the user imports the rule
+    Then the rule should be created or updated
+    And the ruleSource type should be "external"
+    And isCustomized should be  false
 
-#### **Scenario: User imports modified prebuilt rules
+  Scenario: Importing a prebuilt rule with a matching rule_id but no matching version
+    Given the import payload contains a prebuilt rule with a matching rule_id but no matching version
+    When the user imports the rule
+    Then the rule should be created or updated
+    And the ruleSource type should be "external"
+    And isCustomized should be false
 
-```Gherkin
-Given an NDJSON file representing modified prebuilt rules
-When a user opens the Rule Management page
-And uploads the file via the Import Rules Modal
-Then the rules should be created
-And the rules should have a `rule_source.type` of "external"
-And the rules should have a `rule_source.is_customized` of "true"
-And the rules should have a `rule_source.source_updated_at` equal to the `updated_at` field of the published rule/version
-```
+  Scenario: Importing a prebuilt rule with a non-existent rule_id
+    Given the import payload contains a prebuilt rule with a non-existent rule_id
+    When the user imports the rule
+    Then the rule should be created
+    And the ruleSource type should be "internal"
 
-#### **Scenario: User imports unknown prebuilt rules
+  Scenario: Importing a prebuilt rule without a rule_id field
+    Given the import payload contains a prebuilt rule without a rule_id field
+    When the user imports the rule
+    Then the import should be rejected with a message "rule_id field is required"
 
-```Gherkin
-Given an NDJSON file representing unknown prebuilt rules
-When a user opens the Rule Management page
-And uploads the file via the Import Rules Modal
-Then the rules should be created
-And the rules should have a `rule_source.type` of "external"
-And the rules should have a `rule_source.is_customized` of "false"
-```
+  Scenario: Importing a prebuilt rule without a version field
+    Given the import payload contains a prebuilt rule without a version field
+    When the user imports the rule
+    Then the import should be rejected with a message "version field is required"
 
-#### TODO Scenarios
-#### **Scenario: User imports rules without rule_id (rejected)
-#### **Scenario: User imports rules without version (rejected)
+  Scenario: Importing a customized prebuilt rule with a matching rule_id and version
+    Given the import payload contains a customized prebuilt rule with a matching rule_id and version
+    When the user imports the rule
+    Then the rule should be created or updated
+    And the ruleSource type should be "external"
+    And isCustomized should be true
+
+  Scenario: Importing a customized prebuilt rule with a matching rule_id but no matching version
+    Given the import payload contains a customized prebuilt rule with a matching rule_id but no matching version
+    When the user imports the rule
+    Then the rule should be created or updated
+    And the ruleSource type should be "external"
+    And isCustomized should be false
+
+  Scenario: Importing a rule with overwrite flag set to true
+    Given the import payload contains a rule with an existing rule_id
+    And the overwrite flag is set to true
+    When the user imports the rule
+    Then the rule should be overwritten
+    And the ruleSource type should be calculated based on the rule_id and version
+
+  Scenario: Importing a rule with overwrite flag set to false
+    Given the import payload contains a rule with an existing rule_id
+    And the overwrite flag is set to false
+    When the user imports the rule
+    Then the import should be rejected with a message "rule_id already exists"
