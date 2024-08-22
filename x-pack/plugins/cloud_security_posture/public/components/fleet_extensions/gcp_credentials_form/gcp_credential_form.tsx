@@ -70,25 +70,41 @@ export const GCPSetupInfoContent = ({ isAgentless }: { isAgentless: boolean }) =
       </h2>
     </EuiTitle>
     <EuiSpacer size="l" />
-    <EuiText color="subdued" size="s">
-      <FormattedMessage
-        id="xpack.csp.gcpIntegration.setupInfoContent"
-        defaultMessage={
-          isAgentless
-            ? 'The integration will need elevated access to run some CIS benchmark rules. You can follow these step-by-step instructions to generate the necessary credentials. Refer to our {gettingStartedLink} guide for details.'
-            : 'The integration will need elevated access to run some CIS benchmark rules. Select your preferred method of providing the GCP credentials this integration will use. You can follow these step-by-step instructions to generate the necessary credentials. Refer to our {gettingStartedLink} guide for details.'
-        }
-        values={{
-          gettingStartedLink: (
-            <EuiLink href={cspIntegrationDocsNavigation.cspm.gcpGetStartedPath} target="_blank">
-              <FormattedMessage
-                id="xpack.csp.azureIntegration.gettingStarted.setupInfoContentLink"
-                defaultMessage="Getting Started"
-              />
-            </EuiLink>
-          ),
-        }}
-      />
+    <EuiText color={'subdued'} size="s">
+      {isAgentless ? (
+        <FormattedMessage
+          id="xpack.csp.gcpIntegration.agentlessSetupInfoContent"
+          defaultMessage="The integration will need elevated access to run some CIS benchmark rules.You can follow these
+    step-by-step instructions to generate the necessary credentials. Refer to our {gettingStartedLink} guide for details."
+          values={{
+            gettingStartedLink: (
+              <EuiLink href={cspIntegrationDocsNavigation.cspm.gcpGetStartedPath} target="_blank">
+                <FormattedMessage
+                  id="xpack.csp.azureIntegration.gettingStarted.agentlessSetupInfoContentLink"
+                  defaultMessage="Getting Started"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      ) : (
+        <FormattedMessage
+          id="xpack.csp.gcpIntegration.setupInfoContent"
+          defaultMessage="The integration will need elevated access to run some CIS benchmark rules. Select your preferred
+method of providing the GCP credentials this integration will use. You can follow these
+step-by-step instructions to generate the necessary credentials. Refer to our {gettingStartedLink} guide for details."
+          values={{
+            gettingStartedLink: (
+              <EuiLink href={cspIntegrationDocsNavigation.cspm.gcpGetStartedPath} target="_blank">
+                <FormattedMessage
+                  id="xpack.csp.azureIntegration.gettingStarted.setupInfoContentLink"
+                  defaultMessage="Getting Started"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      )}
     </EuiText>
   </>
 );
