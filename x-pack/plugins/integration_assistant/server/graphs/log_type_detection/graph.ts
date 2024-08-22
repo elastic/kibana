@@ -14,7 +14,7 @@ import { END, START, StateGraph } from '@langchain/langgraph';
 import type { LogFormatDetectionState } from '../../types';
 import { EX_ANSWER_LOG_TYPE } from './constants';
 import { handleLogFormatDetection } from './detection';
-import { LogFormat } from '../../../common';
+import { SamplesFormat } from '../../../common';
 
 const graphState: StateGraphArgs<LogFormatDetectionState>['channels'] = {
   lastExecutedChain: {
@@ -33,9 +33,9 @@ const graphState: StateGraphArgs<LogFormatDetectionState>['channels'] = {
     value: (x: boolean, y?: boolean) => y ?? x,
     default: () => false,
   },
-  logFormat: {
-    value: (x: LogFormat, y?: LogFormat) => y ?? x,
-    default: () => 'json',
+  samplesFormat: {
+    value: (x: SamplesFormat, y?: SamplesFormat) => y ?? x,
+    default: () => ({ name: 'json' }),
   },
   ecsVersion: {
     value: (x: string, y?: string) => y ?? x,
@@ -60,7 +60,7 @@ function modelOutput(state: LogFormatDetectionState): Partial<LogFormatDetection
     finalized: true,
     lastExecutedChain: 'modelOutput',
     results: {
-      logFormat: state.logFormat,
+      samplesFormat: state.samplesFormat,
       parsedSamples: state.rawSamples, // TODO: Add parsed samples
     },
   };

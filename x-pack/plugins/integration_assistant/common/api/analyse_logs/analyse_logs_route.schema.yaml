@@ -5,7 +5,7 @@ info:
 paths:
   /api/integration_assistant/analyselogs:
     post:
-      summary: Analyses log sampeles and processes them.
+      summary: Analyses log samples and processes them.
       operationId: AnalyseLogs
       x-codegen-enabled: false
       description: Analyse log samples and processes them
