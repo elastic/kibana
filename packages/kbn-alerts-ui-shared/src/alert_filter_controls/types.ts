@@ -9,9 +9,9 @@
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type {
   ControlGroupRenderer,
-  ControlGroupApi,
   OptionsListControlState,
   ControlGroupRuntimeState,
+  ControlGroupRendererApi,
 } from '@kbn/controls-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
@@ -36,7 +36,7 @@ export type FilterControlConfig = Omit<OptionsListControlState, 'dataViewId'> & 
   persist?: boolean;
 };
 
-export type FilterGroupHandler = ControlGroupApi;
+export type FilterGroupHandler = ControlGroupRendererApi;
 
 export interface FilterGroupProps extends Pick<ControlGroupRuntimeState, 'chainingSystem'> {
   query?: Query;
