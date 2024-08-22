@@ -82,7 +82,7 @@ export const graphState: StateGraphArgs<EcsMappingState>['channels'] = {
     value: (x: object, y?: object) => y ?? x,
     default: () => ({}),
   },
-  logFormat: {
+  samplesFormat: {
     value: (x: string, y?: string) => y ?? x,
     default: () => 'json',
   },
