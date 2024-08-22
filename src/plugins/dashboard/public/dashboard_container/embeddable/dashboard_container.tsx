@@ -440,7 +440,6 @@ export class DashboardContainer
   // ------------------------------------------------------------------------------------------------------
   // Dashboard API
   // ------------------------------------------------------------------------------------------------------
-
   public runInteractiveSave = runInteractiveSave;
   public runQuickSave = runQuickSave;
 
