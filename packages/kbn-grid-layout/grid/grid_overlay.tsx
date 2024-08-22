@@ -7,20 +7,20 @@
  */
 
 import { EuiPortal, EuiText, transparentize } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useRef, useState } from 'react';
 import { GridLayoutStateManager, PanelInteractionEvent } from './types';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { css } from '@emotion/react';
 
 type ScrollDirection = 'up' | 'down';
 
 const scrollOnInterval = (direction: ScrollDirection) => {
   const interval = setInterval(() => {
     window.scroll({
-      top: window.scrollY + (direction === 'down' ? 100 : -100),
+      top: window.scrollY + (direction === 'down' ? 50 : -50),
       behavior: 'smooth',
     });
-  }, 250);
+  }, 100);
   return interval;
 };
 
@@ -95,8 +95,6 @@ export const GridOverlay = ({
   interactionEvent?: PanelInteractionEvent;
   gridLayoutStateManager: GridLayoutStateManager;
 }) => {
-  const isDraggingEvent = interactionEvent && interactionEvent.type === 'drag';
-
   return (
     <EuiPortal>
       <div
@@ -108,11 +106,11 @@ export const GridOverlay = ({
           position: fixed;
           overflow: hidden;
           z-index: ${euiThemeVars.euiZModal};
-          pointer-events: ${isDraggingEvent ? 'unset' : 'none'};
+          pointer-events: ${interactionEvent ? 'unset' : 'none'};
         `}
       >
-        <ScrollOnHover hide={!isDraggingEvent} direction="up" />
-        <ScrollOnHover hide={!isDraggingEvent} direction="down" />
+        <ScrollOnHover hide={!interactionEvent} direction="up" />
+        <ScrollOnHover hide={!interactionEvent} direction="down" />
         <div
           ref={gridLayoutStateManager.dragPreviewRef}
           css={css`

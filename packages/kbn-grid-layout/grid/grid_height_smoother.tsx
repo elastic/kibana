@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { PropsWithChildren, useEffect, useRef } from 'react';
-import { GridLayoutStateManager } from './types';
-import { auditTime } from 'rxjs';
-import React from 'react';
 import { css } from '@emotion/react';
+import React, { PropsWithChildren, useEffect, useRef } from 'react';
+import { combineLatest } from 'rxjs';
+import { GridLayoutStateManager } from './types';
 
 export const GridHeightSmoother = ({
   children,
@@ -19,16 +18,26 @@ export const GridHeightSmoother = ({
   // set the parent div size directly to smooth out height changes.
   const smoothHeightRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    // audit height changes to avoid fast scrolling when the user resizes a panel at the bottom of the scroll context.
-    const subscription = gridLayoutStateManager.gridDimensions$
-      .pipe(auditTime(500))
-      .subscribe((dimensions) => {
-        if (!smoothHeightRef.current) {
-          // do not resize page when the user is resizing a panel.
-          return;
-        }
+    const subscription = combineLatest([
+      gridLayoutStateManager.gridDimensions$,
+      gridLayoutStateManager.interactionEvent$,
+    ]).subscribe(([dimensions, interactionEvent]) => {
+      if (!smoothHeightRef.current) return;
+      if (!interactionEvent) {
         smoothHeightRef.current.style.height = `${dimensions.height}px`;
-      });
+        return;
+      }
+
+      /**
+       * When the user is interacting with an element, the page can grow, but it cannot
+       * shrink. This is to stop a behaviour where the page would scroll up automatically
+       * making the panel shrink or grow unpredictably.
+       */
+      smoothHeightRef.current.style.height = `${Math.max(
+        dimensions.height ?? 0,
+        smoothHeightRef.current.getBoundingClientRect().height
+      )}px`;
+    });
     return () => subscription.unsubscribe();
   }, []);
 
@@ -36,9 +45,7 @@ export const GridHeightSmoother = ({
     <div
       ref={smoothHeightRef}
       css={css`
-        overflow: clip;
         overflow-anchor: none;
-        overflow-clip-margin: 100px;
         transition: height 500ms linear;
       `}
     >
