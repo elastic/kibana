@@ -93,6 +93,7 @@ export const AppSearchUnconfigured: React.FC = () => {
 
 export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) => {
   const {
+    showGateForm,
     myRole: {
       canManageEngines,
       canManageMetaEngines,
@@ -107,7 +108,7 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
     renderHeaderActions(KibanaHeaderActions);
   }, []);
 
-  return (
+  return !showGateForm ? (
     <Routes>
       {process.env.NODE_ENV === 'development' && (
         <Route path={LIBRARY_PATH}>
@@ -148,6 +149,18 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
           <RoleMappings />
         </Route>
       )}
+      <Route>
+        <NotFound />
+      </Route>
+    </Routes>
+  ) : (
+    <Routes>
+      <Route exact path={ROOT_PATH}>
+        <Redirect to={ENGINES_PATH} />
+      </Route>
+      <Route exact path={ENGINES_PATH}>
+        <EnginesOverview />
+      </Route>
       <Route>
         <NotFound />
       </Route>
