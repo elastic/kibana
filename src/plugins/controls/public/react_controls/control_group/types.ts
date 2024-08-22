@@ -67,7 +67,6 @@ export type ControlGroupApi = PresentationContainer &
     allowExpensiveQueries$: PublishingSubject<boolean>;
     autoApplySelections$: PublishingSubject<boolean>;
     ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
-    lastUsedDataViewId$: PublishingSubject<string | undefined>;
     labelPosition: PublishingSubject<ControlStyle>;
 
     asyncResetUnsavedChanges: () => Promise<void>;

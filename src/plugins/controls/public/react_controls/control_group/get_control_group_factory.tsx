@@ -143,8 +143,6 @@ export const getControlGroupEmbeddableFactory = (services: {
         allowExpensiveQueries$,
         snapshotRuntimeState: () => {
           return {
-            defaultControlGrow: grow.getValue(),
-            defaultControlWidth: width.getValue(),
             chainingSystem: chainingSystem$.getValue(),
             labelPosition: labelPosition$.getValue(),
             autoApplySelections: autoApplySelections$.getValue(),

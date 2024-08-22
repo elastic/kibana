@@ -6,17 +6,11 @@
  * Side Public License, v 1.
  */
 
-import {
-  DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROL_STYLE,
-  DEFAULT_CONTROL_WIDTH,
-} from '../../../../common';
+import { DEFAULT_CONTROL_STYLE } from '../../../../common';
 import { ControlGroupRuntimeState } from '../types';
 
 export const getDefaultControlGroupRuntimeState = (): ControlGroupRuntimeState => ({
   initialChildControlState: {},
-  defaultControlWidth: DEFAULT_CONTROL_WIDTH,
-  defaultControlGrow: DEFAULT_CONTROL_GROW,
   labelPosition: DEFAULT_CONTROL_STYLE,
   chainingSystem: 'HIERARCHICAL',
   autoApplySelections: true,
