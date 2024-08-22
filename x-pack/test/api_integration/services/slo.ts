@@ -76,9 +76,10 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
 
       return response;
     },
-    async getDefinitions() {
+    async getDefinitions({ search }: { search?: string } = {}) {
+      const url = `/api/observability/slos/_definitions${search ? `?search=${search}` : ''}`;
       const response = await supertest
-        .get(`/api/observability/slos/_definitions`)
+        .get(url)
         .set('kbn-xsrf', 'true')
         .auth('slo_editor', 'changeme')
         .send()

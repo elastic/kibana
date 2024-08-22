@@ -97,21 +97,8 @@ export interface SelectedDataView {
   indicesExist: boolean;
   /** is an update being made to the data view */
   loading: boolean;
-  /**
-   * @deprecated use sourcererDataView.title or sourcererDataView.matchedIndices
-   * all active & inactive patterns from SourcererDataView['title']
-   */
-  patternList: string[];
-  /**
-   * @deprecated use sourcererDataView.title or sourcererDataView.matchedIndices
-   * all selected patterns from SourcererScope['selectedPatterns'] */
+  /* all selected patterns from SourcererScope['selectedPatterns'] */
   selectedPatterns: SourcererScope['selectedPatterns'];
-  /**
-   * @deprecated use sourcererDataView.title or sourcererDataView.matchedIndices
-   * active patterns when dataViewId == null
-   */
-  activePatterns?: string[];
-
   /**
    * Easier to add this additional data rather than
    * try to extend the SelectedDataView type from DataView.

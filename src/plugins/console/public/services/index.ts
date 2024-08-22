@@ -17,3 +17,6 @@ export {
   ENTITIES,
 } from './autocomplete';
 export { EmbeddableConsoleInfo } from './embeddable_console';
+export { httpService } from './http';
+
+export { convertRequestToLanguage } from './api';
