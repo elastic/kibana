@@ -6,7 +6,6 @@
  */
 import { useSelector } from '@xstate/react';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
-import { flattenStats } from '../utils/flatten_stats';
 
 export function useDatasetQualityWarnings() {
   const { service } = useDatasetQualityContext();
@@ -22,6 +21,6 @@ export function useDatasetQualityWarnings() {
 
   return {
     loading: isNonAggregatableDatasetsLoading,
-    nonAggregatableDatasets: flattenStats(nonAggregatableDatasets).flat(),
+    nonAggregatableDatasets,
   };
 }

@@ -40,7 +40,7 @@ describe('getDataStreams', () => {
     const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     const result = await getDataStreams({
       esClient: esClientMock,
-      type: 'logs',
+      types: ['logs'],
       datasetQuery: 'nginx',
       uncategorisedOnly: true,
     });
@@ -57,7 +57,7 @@ describe('getDataStreams', () => {
       const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
       const results = await getDataStreams({
         esClient: esClientMock,
-        type: 'logs',
+        types: ['logs'],
         datasetQuery: 'nginx',
         uncategorisedOnly: true,
       });
@@ -67,7 +67,7 @@ describe('getDataStreams', () => {
       const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
       const results = await getDataStreams({
         esClient: esClientMock,
-        type: 'logs',
+        types: ['logs'],
         datasetQuery: 'nginx',
         uncategorisedOnly: false,
       });
