@@ -18,7 +18,6 @@ import {
   UserAvatar,
 } from '../../assistant_context';
 import { Assistant, CONVERSATION_SIDE_PANEL_WIDTH } from '..';
-import { WELCOME_CONVERSATION_TITLE } from '../use_conversation/translations';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -38,9 +37,8 @@ export const UnifiedTimelineGlobalStyles = createGlobalStyle`
 
 export const AssistantOverlay = React.memo<Props>(({ currentUserAvatar }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [conversationTitle, setConversationTitle] = useState<string | undefined>(
-    WELCOME_CONVERSATION_TITLE
-  );
+  // Why is this named Title and not Id?
+  const [conversationTitle, setConversationTitle] = useState<string | undefined>(undefined);
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
   const { assistantTelemetry, setShowAssistantOverlay, getLastConversationId } =
     useAssistantContext();
@@ -55,16 +53,12 @@ export const AssistantOverlay = React.memo<Props>(({ currentUserAvatar }) => {
         promptContextId: pid,
         conversationTitle: cTitle,
       }: ShowAssistantOverlayProps) => {
-        const newConversationTitle = getLastConversationId(cTitle);
-        if (so)
-          assistantTelemetry?.reportAssistantInvoked({
-            conversationId: newConversationTitle,
-            invokedBy: 'click',
-          });
+        const conversationId = getLastConversationId(cTitle);
+        if (so) assistantTelemetry?.reportAssistantInvoked({ conversationId, invokedBy: 'click' });
 
         setIsModalVisible(so);
         setPromptContextId(pid);
-        setConversationTitle(newConversationTitle);
+        setConversationTitle(conversationId);
       },
     [assistantTelemetry, getLastConversationId]
   );
