@@ -557,6 +557,7 @@ describe('handleInstallPackageFailure', () => {
   beforeEach(() => {
     mockedLogger.error.mockClear();
     jest.mocked(install._installPackage).mockClear();
+    jest.mocked(installStateMachine._stateMachineInstallPackage).mockClear();
     mockGetBundledPackageByPkgKey.mockReset();
 
     jest.mocked(install._installPackage).mockResolvedValue({} as any);
@@ -643,8 +644,8 @@ describe('handleInstallPackageFailure', () => {
     expect(mockedLogger.error).toBeCalledWith(
       'rolling back to test_package-1.0.0 after error installing test_package-2.0.0'
     );
-    expect(install._installPackage).toBeCalledTimes(1);
-    expect(install._installPackage).toBeCalledWith(
+    expect(installStateMachine._stateMachineInstallPackage).toBeCalledTimes(1);
+    expect(installStateMachine._stateMachineInstallPackage).toBeCalledWith(
       expect.objectContaining({
         packageInstallContext: expect.objectContaining({
           packageInfo: expect.objectContaining({ name: pkgName, version: '1.0.0' }),
@@ -655,7 +656,9 @@ describe('handleInstallPackageFailure', () => {
   });
 
   it('Should update the installation status to: install_failed on rollback error', async () => {
-    jest.mocked(install._installPackage).mockRejectedValue(new Error('test error'));
+    jest
+      .mocked(installStateMachine._stateMachineInstallPackage)
+      .mockRejectedValue(new Error('test error'));
 
     const installedPkg: SavedObject<Installation> = {
       id: 'test-package',
@@ -689,8 +692,8 @@ describe('handleInstallPackageFailure', () => {
     expect(mockedLogger.error).toBeCalledWith(
       expect.stringMatching(/failed to uninstall or rollback package after installation error/)
     );
-    expect(install._installPackage).toBeCalledTimes(1);
-    expect(install._installPackage).toBeCalledWith(
+    expect(installStateMachine._stateMachineInstallPackage).toBeCalledTimes(1);
+    expect(installStateMachine._stateMachineInstallPackage).toBeCalledWith(
       expect.objectContaining({
         packageInstallContext: expect.objectContaining({
           packageInfo: expect.objectContaining({ name: pkgName, version: '1.0.0' }),
