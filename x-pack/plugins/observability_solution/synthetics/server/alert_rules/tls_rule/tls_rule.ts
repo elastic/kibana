@@ -146,6 +146,7 @@ export const registerSyntheticsTLSCheckRule = (
             alertsLocator,
             basePath.publicBaseUrl
           ),
+          ...summary,
         };
 
         alertsClient.setAlertData({
