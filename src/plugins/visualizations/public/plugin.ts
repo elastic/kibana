@@ -85,7 +85,7 @@ import { xyDimension as xyDimensionExpressionFunction } from '../common/expressi
 import { visDimension as visDimensionExpressionFunction } from '../common/expression_functions/vis_dimension';
 import { range as rangeExpressionFunction } from '../common/expression_functions/range';
 import { TypesService } from './vis_types/types_service';
-import { createVisEmbeddableFromObject, VISUALIZE_EMBEDDABLE_TYPE } from './embeddable';
+import { createVisEmbeddableFromObject } from './embeddable';
 import {
   setUISettings,
   setTypes,
@@ -117,7 +117,7 @@ import {
   setInspector,
   getTypes,
 } from './services';
-import { VisualizeConstants } from '../common/constants';
+import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '../common/constants';
 import { EditInLensAction } from './actions/edit_in_lens_action';
 import { ListingViewRegistry } from './types';
 import {

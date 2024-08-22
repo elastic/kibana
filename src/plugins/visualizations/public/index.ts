@@ -19,7 +19,6 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export { TypesService } from './vis_types/types_service';
 export {
   apiHasVisualizeConfig,
-  VISUALIZE_EMBEDDABLE_TYPE,
   VIS_EVENT_TO_TRIGGER,
   COMMON_VISUALIZATION_GROUPING,
 } from './embeddable';
@@ -64,6 +63,7 @@ export {
   LegendSize,
   LegendSizeToPixels,
   DEFAULT_LEGEND_SIZE,
+  VISUALIZE_EMBEDDABLE_TYPE,
 } from '../common/constants';
 export type { SavedVisState, VisParams, Dimension } from '../common';
 export { prepareLogTable, XYCurveTypes } from '../common';
