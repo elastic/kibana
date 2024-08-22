@@ -16,7 +16,6 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Reset SLOs', function () {
     this.tags('skipCloud');
 
-    const supertestAPI = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
     const esClient = getService('es');
     const logger = getService('log');
