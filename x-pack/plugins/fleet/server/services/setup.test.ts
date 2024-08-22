@@ -14,7 +14,7 @@ import { ensurePreconfiguredPackagesAndPolicies } from '.';
 
 import { appContextService } from './app_context';
 import { getInstallations } from './epm/packages';
-import { upgradeManagedPackagePolicies } from './managed_package_policies';
+import { upgradeManagedPackagePolicies } from './setup/managed_package_policies';
 import { setupFleet } from './setup';
 
 jest.mock('./preconfiguration');

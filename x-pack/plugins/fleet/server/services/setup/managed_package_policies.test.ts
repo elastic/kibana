@@ -7,15 +7,16 @@
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { upgradeManagedPackagePolicies } from './managed_package_policies';
-import { packagePolicyService } from './package_policy';
-import { getInstallations } from './epm/packages';
+import { packagePolicyService } from '../package_policy';
+import { getInstallation, getInstallations } from '../epm/packages';
 
-jest.mock('./package_policy');
-jest.mock('./epm/packages');
-jest.mock('./app_context', () => {
+import { upgradeManagedPackagePolicies } from './managed_package_policies';
+
+jest.mock('../package_policy');
+jest.mock('../epm/packages');
+jest.mock('../app_context', () => {
   return {
-    ...jest.requireActual('./app_context'),
+    ...jest.requireActual('../app_context'),
     appContextService: {
       getLogger: jest.fn(() => {
         return { error: jest.fn(), debug: jest.fn() };
@@ -34,11 +35,11 @@ describe('upgradeManagedPackagePolicies', () => {
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     const soClient = savedObjectsClientMock.create();
 
-    (getInstallations as jest.Mock).mockResolvedValueOnce({
+    (getInstallation as jest.Mock).mockResolvedValueOnce({
       saved_objects: [],
     });
 
-    await upgradeManagedPackagePolicies(soClient, esClient);
+    await upgradeManagedPackagePolicies(soClient, esClient, 'testpkg');
 
     expect(packagePolicyService.upgrade).not.toBeCalled();
   });
