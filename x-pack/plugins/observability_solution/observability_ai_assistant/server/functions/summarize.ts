@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 } from 'uuid';
 import { KnowledgeBaseType } from '../../common/types';
 import type { FunctionRegistrationParameters } from '.';
 import { KnowledgeBaseEntryRole } from '../../common';
@@ -31,7 +32,7 @@ export function registerSummarizationFunction({
           id: {
             type: 'string',
             description:
-              'An id for the document. This should be a short human-readable keyword field with only alphabetic characters and underscores, that allow you to update it later.',
+              'A lookup id for the document. This should be a short human-readable keyword field with only alphabetic characters and underscores, that allow you to find and update it later.',
           },
           text: {
             type: 'string',
@@ -62,13 +63,18 @@ export function registerSummarizationFunction({
         ],
       },
     },
-    (
+    async (
       { arguments: { id: docId, text, is_correction: isCorrection, confidence, public: isPublic } },
       signal
     ) => {
+      // The LLM should be able to update an existing entry by providing the same doc_id
+      // if no id is provided, we generate a new one
+      const id = await client.getUuidFromDocId(docId);
+
       return client
         .addKnowledgeBaseEntry({
           entry: {
+            id: id ?? v4(),
             doc_id: docId,
             role: KnowledgeBaseEntryRole.AssistantSummarization,
             text,

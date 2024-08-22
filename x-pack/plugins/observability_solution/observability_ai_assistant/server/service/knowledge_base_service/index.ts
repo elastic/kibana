@@ -14,7 +14,6 @@ import pRetry from 'p-retry';
 import { map, orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
 import { MlTrainedModelDeploymentNodesStats } from '@elastic/elasticsearch/lib/api/types';
-import { v4 } from 'uuid';
 import {
   INDEX_QUEUED_DOCUMENTS_TASK_ID,
   INDEX_QUEUED_DOCUMENTS_TASK_TYPE,
@@ -39,7 +38,7 @@ interface Dependencies {
 
 export interface RecalledEntry {
   id: string;
-  doc_id: string;
+  doc_id?: string;
   text: string;
   score: number | null;
   is_correction?: boolean;
@@ -229,27 +228,39 @@ export class KnowledgeBaseService {
 
   private async processOperation(operation: KnowledgeBaseEntryOperation) {
     if (operation.type === KnowledgeBaseEntryOperationType.Delete) {
-      await this.dependencies.esClient.asInternalUser.deleteByQuery({
-        index: resourceNames.aliases.kb,
-        query: {
-          bool: {
-            filter: [
-              ...(operation.doc_id ? [{ term: { _id: operation.doc_id } }] : []),
-              ...(operation.labels
-                ? map(operation.labels, (value, key) => {
-                    return { term: { [key]: value } };
-                  })
-                : []),
-            ],
+      try {
+        await this.dependencies.esClient.asInternalUser.deleteByQuery({
+          index: resourceNames.aliases.kb,
+          query: {
+            bool: {
+              filter: [
+                ...(operation.doc_id ? [{ term: { _id: operation.doc_id } }] : []),
+                ...(operation.labels
+                  ? map(operation.labels, (value, key) => {
+                      return { term: { [key]: value } };
+                    })
+                  : []),
+              ],
+            },
           },
-        },
-      });
-      return;
+        });
+        return;
+      } catch (error) {
+        this.dependencies.logger.error(
+          `Failed to delete document "${operation?.doc_id}" due to ${error.message}`
+        );
+        this.dependencies.logger.debug(() => JSON.stringify(operation));
+        throw error;
+      }
     }
 
-    await this.addEntry({
-      entry: operation.document,
-    });
+    try {
+      await this.addEntry({ entry: operation.document });
+    } catch (error) {
+      this.dependencies.logger.error(`Failed to index document due to ${error.message}`);
+      this.dependencies.logger.debug(() => JSON.stringify(operation.document));
+      throw error;
+    }
   }
 
   async processQueue() {
@@ -492,11 +503,11 @@ export class KnowledgeBaseService {
           },
         },
         size: 500,
-        _source: ['doc_id', 'text', 'public'],
+        _source: ['id', 'text', 'public'],
       });
 
       return response.hits.hits.map((hit) => ({
-        doc_id: hit._source?.doc_id ?? '',
+        id: hit._id!,
         text: hit._source?.text ?? '',
         public: hit._source?.public,
       }));
@@ -541,6 +552,7 @@ export class KnowledgeBaseService {
         size: 500,
         _source: {
           includes: [
+            'title',
             'doc_id',
             'text',
             'is_correction',
@@ -571,7 +583,7 @@ export class KnowledgeBaseService {
     }
   };
 
-  getExistingUserInstructionId = async ({
+  getPersonalUserInstructionId = async ({
     isPublic,
     user,
     namespace,
@@ -594,13 +606,13 @@ export class KnowledgeBaseService {
         },
       },
       size: 1,
-      _source: ['doc_id'],
+      _source: false,
     });
 
-    return res.hits.hits[0]?._source?.doc_id;
+    return res.hits.hits[0]?._id;
   };
 
-  getUuidFromHumanReadableId = async ({
+  getUuidFromDocId = async ({
     docId,
     user,
     namespace,
@@ -630,47 +642,25 @@ export class KnowledgeBaseService {
       _source: false,
     });
 
-    const id = response.hits.hits[0]?._id ?? v4();
-
-    return id;
+    return response.hits.hits[0]?._id;
   };
 
   addEntry = async ({
-    entry,
+    entry: { id, ...doc },
     user,
     namespace,
   }: {
-    entry: Omit<KnowledgeBaseEntry, '@timestamp' | 'id'>;
+    entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
     user?: { name: string; id?: string };
     namespace?: string;
   }): Promise<void> => {
-    let id = '';
-
-    // for now we want to limit the number of user instructions to 1 per user
-    if (entry.type === KnowledgeBaseType.UserInstruction) {
-      const existingId = await this.getExistingUserInstructionId({
-        isPublic: entry.public,
-        user,
-        namespace,
-      });
-
-      if (existingId) {
-        id = existingId;
-        entry.doc_id = existingId;
-      }
-
-      // override previous id if it exists
-    } else {
-      id = await this.getUuidFromHumanReadableId({ docId: entry.doc_id, user, namespace });
-    }
-
     try {
       await this.dependencies.esClient.asInternalUser.index({
         index: resourceNames.aliases.kb,
         id,
         document: {
           '@timestamp': new Date().toISOString(),
-          ...entry,
+          ...doc,
           user,
           namespace,
         },
@@ -685,7 +675,7 @@ export class KnowledgeBaseService {
     }
   };
 
-  addEntries = async ({
+  importEntries = async ({
     operations,
   }: {
     operations: KnowledgeBaseEntryOperation[];

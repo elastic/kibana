@@ -35,6 +35,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('when managing a single entry', () => {
       const knowledgeBaseEntry = {
         id: 'my-doc-id-1',
+        title: 'My title',
         text: 'My content',
       };
       it('returns 200 on create', async () => {
@@ -56,6 +57,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
         const entry = res.body.entries[0];
         expect(entry.id).to.equal(knowledgeBaseEntry.id);
+        expect(entry.title).to.equal(knowledgeBaseEntry.title);
         expect(entry.text).to.equal(knowledgeBaseEntry.text);
       });
 
@@ -74,6 +76,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .expect(200);
         const entry = res.body.entries[0];
         expect(entry.id).to.equal(knowledgeBaseEntry.id);
+        expect(entry.title).to.equal(knowledgeBaseEntry.title);
         expect(entry.text).to.equal(knowledgeBaseEntry.text);
       });
 
@@ -126,15 +129,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
       const knowledgeBaseEntries = [
         {
-          id: 'my_doc_a',
+          doc_id: 'my_doc_a',
           text: 'My content a',
         },
         {
-          id: 'my_doc_b',
+          doc_id: 'my_doc_b',
           text: 'My content b',
         },
         {
-          id: 'my_doc_c',
+          doc_id: 'my_doc_c',
           text: 'My content c',
         },
       ];

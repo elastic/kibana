@@ -30,8 +30,8 @@ export function useCreateKnowledgeBaseEntry() {
     {
       entry: Omit<
         KnowledgeBaseEntry,
-        '@timestamp' | 'confidence' | 'is_correction' | 'role' | 'doc_id'
-      >;
+        '@timestamp' | 'confidence' | 'is_correction' | 'role' | 'title'
+      > & { title: string };
     }
   >(
     [REACT_QUERY_KEYS.CREATE_KB_ENTRIES],

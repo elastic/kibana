@@ -12,6 +12,7 @@ import type {
 import { notImplemented } from '@hapi/boom';
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
+import { v4 } from 'uuid';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import {
   Instruction,
@@ -107,9 +108,9 @@ const saveKnowledgeBaseUserInstruction = createObservabilityAIAssistantServerRou
     }
 
     const { id, text, public: isPublic } = resources.params.body;
-    return client.addKnowledgeBaseEntry({
+    return client.addUserInstruction({
       entry: {
-        doc_id: id,
+        id,
         text,
         public: isPublic,
         confidence: 'high',
@@ -157,9 +158,11 @@ const saveKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
     body: t.intersection([
       t.type({
         id: t.string,
+        title: t.string,
         text: nonEmptyStringRt,
       }),
       t.partial({
+        doc_id: t.string,
         confidence: t.union([t.literal('low'), t.literal('medium'), t.literal('high')]),
         is_correction: toBooleanRt,
         public: toBooleanRt,
@@ -184,6 +187,8 @@ const saveKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
 
     const {
       id,
+      doc_id: docId,
+      title,
       text,
       public: isPublic,
       confidence,
@@ -195,7 +200,9 @@ const saveKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
     return client.addKnowledgeBaseEntry({
       entry: {
         text,
-        doc_id: id,
+        id,
+        doc_id: docId,
+        title,
         confidence: confidence ?? 'high',
         is_correction: isCorrection ?? false,
         type: 'contextual',
@@ -234,7 +241,7 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
     body: t.type({
       entries: t.array(
         t.type({
-          id: t.string,
+          doc_id: t.string,
           text: nonEmptyStringRt,
         })
       ),
@@ -251,7 +258,7 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
     }
 
     const entries = resources.params.body.entries.map((entry) => ({
-      doc_id: entry.id,
+      id: v4(),
       confidence: 'high' as KnowledgeBaseEntry['confidence'],
       is_correction: false,
       type: 'contextual' as const,

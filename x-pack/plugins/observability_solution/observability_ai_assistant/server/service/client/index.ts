@@ -731,10 +731,44 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.setup();
   };
 
+  getUuidFromDocId = async (docId: string) => {
+    return this.dependencies.knowledgeBaseService.getUuidFromDocId({
+      namespace: this.dependencies.namespace,
+      user: this.dependencies.user,
+      docId,
+    });
+  };
+
+  addUserInstruction = async ({
+    entry,
+  }: {
+    entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
+  }): Promise<void> => {
+    // for now we want to limit the number of user instructions to 1 per user
+    // if a user instruction already exists for the user, we get the id and update it
+    this.dependencies.logger.debug('Adding user instruction entry');
+    const existingId = await this.dependencies.knowledgeBaseService.getPersonalUserInstructionId({
+      isPublic: entry.public,
+      namespace: this.dependencies.namespace,
+      user: this.dependencies.user,
+    });
+
+    if (existingId) {
+      entry.id = existingId;
+      this.dependencies.logger.debug(`Updating user instruction with id "${existingId}"`);
+    }
+
+    return this.dependencies.knowledgeBaseService.addEntry({
+      namespace: this.dependencies.namespace,
+      user: this.dependencies.user,
+      entry,
+    });
+  };
+
   addKnowledgeBaseEntry = async ({
     entry,
   }: {
-    entry: Omit<KnowledgeBaseEntry, '@timestamp' | 'id'>;
+    entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
   }): Promise<void> => {
     return this.dependencies.knowledgeBaseService.addEntry({
       namespace: this.dependencies.namespace,
@@ -753,7 +787,7 @@ export class ObservabilityAIAssistantClient {
       document: { ...entry, '@timestamp': new Date().toISOString() },
     }));
 
-    await this.dependencies.knowledgeBaseService.addEntries({ operations });
+    await this.dependencies.knowledgeBaseService.importEntries({ operations });
   };
 
   getKnowledgeBaseEntries = async ({

@@ -330,8 +330,8 @@ export class ObservabilityAIAssistantService {
           entries.flatMap((entry) => {
             const entryWithSystemProperties = {
               ...entry,
-              '@timestamp': new Date().toISOString(),
               doc_id: entry.id,
+              '@timestamp': new Date().toISOString(),
               public: true,
               confidence: 'high' as const,
               type: 'contextual' as const,

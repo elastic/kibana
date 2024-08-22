@@ -183,7 +183,7 @@ export function KnowledgeBaseTab() {
   const [isNewEntryPopoverOpen, setIsNewEntryPopoverOpen] = useState(false);
   const [isEditUserInstructionFlyoutOpen, setIsEditUserInstructionFlyoutOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [sortBy, setSortBy] = useState<'doc_id' | '@timestamp'>('doc_id');
+  const [sortBy, setSortBy] = useState<'title' | '@timestamp'>('title');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const {
@@ -202,7 +202,7 @@ export function KnowledgeBaseTab() {
         setSortBy(field);
       }
       if (field === 'categoryName') {
-        setSortBy('doc_id');
+        setSortBy('title');
       }
       setSortDirection(direction);
     }
@@ -329,7 +329,7 @@ export function KnowledgeBaseTab() {
             loading={isLoading}
             sorting={{
               sort: {
-                field: sortBy === 'doc_id' ? 'categoryName' : sortBy,
+                field: sortBy === 'title' ? 'categoryName' : sortBy,
                 direction: sortDirection,
               },
             }}

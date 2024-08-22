@@ -22,7 +22,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 } from 'uuid';
 import { useGetUserInstructions } from '../../hooks/use_get_user_instructions';
 import { useCreateKnowledgeBaseUserInstruction } from '../../hooks/use_create_knowledge_base_user_instruction';
 
@@ -30,19 +30,17 @@ export function KnowledgeBaseEditUserInstructionFlyout({ onClose }: { onClose: (
   const { userInstructions, isLoading: isFetching } = useGetUserInstructions();
   const { mutateAsync: createEntry, isLoading: isSaving } = useCreateKnowledgeBaseUserInstruction();
   const [newEntryText, setNewEntryText] = useState('');
-  const [newEntryDocId, setNewEntryDocId] = useState<string>();
   const isSubmitDisabled = newEntryText.trim() === '';
 
   useEffect(() => {
     const userInstruction = userInstructions?.find((entry) => !entry.public);
-    setNewEntryDocId(userInstruction?.doc_id);
     setNewEntryText(userInstruction?.text ?? '');
   }, [userInstructions]);
 
   const handleSubmit = async () => {
     await createEntry({
       entry: {
-        doc_id: newEntryDocId ?? uuidv4(),
+        id: v4(),
         text: newEntryText,
         public: false, // limit user instructions to private (for now)
       },

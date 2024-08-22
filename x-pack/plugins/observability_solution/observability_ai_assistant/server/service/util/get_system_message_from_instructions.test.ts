@@ -41,10 +41,10 @@ describe('getSystemMessageFromInstructions', () => {
     expect(
       getSystemMessageFromInstructions({
         applicationInstructions: ['first'],
-        userInstructions: [{ doc_id: 'second', text: 'second from kb' }],
+        userInstructions: [{ id: 'second', text: 'second from kb' }],
         adHocInstructions: [
           {
-            doc_id: 'second',
+            id: 'second',
             text: 'second from adhoc instruction',
             instruction_type: 'user_instruction',
           },
@@ -58,7 +58,7 @@ describe('getSystemMessageFromInstructions', () => {
     expect(
       getSystemMessageFromInstructions({
         applicationInstructions: ['first'],
-        userInstructions: [{ doc_id: 'second', text: 'second_kb' }],
+        userInstructions: [{ id: 'second', text: 'second_kb' }],
         adHocInstructions: [],
         availableFunctionNames: [],
       })

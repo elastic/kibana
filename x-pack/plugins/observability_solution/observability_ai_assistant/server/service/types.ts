@@ -13,11 +13,7 @@ import type {
   FunctionDefinition,
   FunctionResponse,
 } from '../../common/functions/types';
-import type {
-  Message,
-  ObservabilityAIAssistantScreenContextRequest,
-  InstructionOrPlainText,
-} from '../../common/types';
+import type { Message, ObservabilityAIAssistantScreenContextRequest } from '../../common/types';
 import type { ObservabilityAIAssistantRouteHandlerResources } from '../routes/types';
 import { ChatFunctionClient } from './chat_function_client';
 import type { ObservabilityAIAssistantClient } from './client';
@@ -63,13 +59,13 @@ export interface FunctionHandler {
   respond: RespondFunction<any, FunctionResponse>;
 }
 
-export type InstructionOrCallback = InstructionOrPlainText | RegisterInstructionCallback;
+export type InstructionOrCallback = string | RegisterInstructionCallback;
 
 type RegisterInstructionCallback = ({
   availableFunctionNames,
 }: {
   availableFunctionNames: string[];
-}) => InstructionOrPlainText | InstructionOrPlainText[] | undefined;
+}) => string | string[] | undefined;
 
 export type RegisterInstruction = (...instructions: InstructionOrCallback[]) => void;
 

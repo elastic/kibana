@@ -12,13 +12,9 @@ import type { Message } from '../../../common';
 import type { ObservabilityAIAssistantClient } from '../../service/client';
 import type { FunctionCallChatFunction } from '../../service/types';
 import { RecallRanking, recallRankingEventType } from '../../analytics/recall_ranking';
+import { RecalledEntry } from '../../service/knowledge_base_service';
 
-export interface RecalledSuggestion {
-  id: string;
-  docId: string;
-  text: string;
-  score: number | null;
-}
+export type RecalledSuggestion = Pick<RecalledEntry, 'id' | 'doc_id' | 'text' | 'score'>;
 
 export async function recallAndScore({
   recall,
@@ -50,12 +46,7 @@ export async function recallAndScore({
 
   const { entries: recalledEntries } = await recall({ queries });
   const suggestions: RecalledSuggestion[] = recalledEntries.map(
-    ({ id, doc_id: docId, text, score }) => ({
-      id,
-      docId,
-      text,
-      score,
-    })
+    ({ id, doc_id: docId, text, score }) => ({ id, doc_id: docId, text, score })
   );
 
   if (!suggestions.length) {

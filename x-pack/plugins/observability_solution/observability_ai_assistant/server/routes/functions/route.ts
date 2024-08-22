@@ -108,6 +108,7 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
   params: t.type({
     body: t.type({
       id: t.string,
+      doc_id: t.string,
       text: nonEmptyStringRt,
       confidence: t.union([t.literal('low'), t.literal('medium'), t.literal('high')]),
       is_correction: toBooleanRt,
@@ -127,8 +128,9 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
     }
 
     const {
-      confidence,
       id,
+      doc_id: docId,
+      confidence,
       is_correction: isCorrection,
       type,
       text,
@@ -139,7 +141,8 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
     return client.addKnowledgeBaseEntry({
       entry: {
         confidence,
-        doc_id: id,
+        id,
+        doc_id: docId,
         is_correction: isCorrection,
         type,
         text,
