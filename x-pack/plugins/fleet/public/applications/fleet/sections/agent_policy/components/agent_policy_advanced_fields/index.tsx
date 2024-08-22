@@ -270,14 +270,14 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
             <h3>
               <FormattedMessage
                 id="xpack.fleet.agentPolicyForm.spaceFieldLabel"
-                defaultMessage="Space"
+                defaultMessage="Spaces"
               />
             </h3>
           }
           description={
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.spaceDescription"
-              defaultMessage="Select a space for this policy or create a new one. {link}"
+              defaultMessage="Select one or more spaces for this policy or create a new one. {link}"
               values={{
                 link: (
                   <EuiLink
