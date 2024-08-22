@@ -505,6 +505,7 @@ export class TaskStore {
     }
   }
 
+  // like search(), only runs multiple searches in parallel returning the combined results
   async msearch(opts: SearchOpts[] = []): Promise<FetchResult> {
     const queries = opts.map((opt) => ensureQueryOnlyReturnsTaskObjects(opt));
     const body = queries.flatMap((query) => [{}, query]);
@@ -521,7 +522,9 @@ export class TaskStore {
 
     for (const response of responses) {
       if (response.status !== 200) {
-        throw new Error(`Unexpected status code: ${response.status}`);
+        const err = new Error(`Unexpected status code from taskStore::msearch: ${response.status}`);
+        this.errors$.next(err);
+        throw err;
       }
 
       const { hits } = response as estypes.MsearchMultiSearchItem<SavedObjectsRawDoc['_source']>;

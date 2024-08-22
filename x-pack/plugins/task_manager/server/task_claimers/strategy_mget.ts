@@ -362,7 +362,7 @@ async function searchAvailableTasks({
     );
     searches.push({
       query: queryUnlimitedTasks,
-      sort,
+      sort, // note: we could optimize this to not sort on priority, for this case
       size,
       seq_no_primary_term: true,
     });
@@ -382,7 +382,11 @@ async function searchAvailableTasks({
       RecognizedTask
     );
 
-    const query = matchesClauses(queryForLimitedTasks, filterDownBy(InactiveTasks));
+    const query = matchesClauses(
+      queryForLimitedTasks,
+      filterDownBy(InactiveTasks),
+      tasksWithPartitions(partitions)
+    );
     searches.push({
       query,
       sort,
@@ -432,8 +436,10 @@ function buildClaimPartitions(opts: BuildClaimPartitionsOpts): ClaimPartitions {
       continue;
     }
 
-    const capacity = getCapacity(definition.type);
-    result.limitedTypes.set(definition.type, capacity);
+    const capacity = getCapacity(definition.type) / definition.cost;
+    if (capacity !== 0) {
+      result.limitedTypes.set(definition.type, capacity);
+    }
   }
 
   return result;
