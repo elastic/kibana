@@ -26,10 +26,10 @@ interface HostDocument extends Fields {
 }
 
 class Host extends Entity<HostDocument> {
-  cpu(cpuValue?: number) {
+  cpu({ cpuTotalValue }: { cpuTotalValue?: number } = {}) {
     return new HostMetrics({
       ...this.fields,
-      'system.cpu.total.norm.pct': cpuValue ?? 0.98,
+      'system.cpu.total.norm.pct': cpuTotalValue ?? 0.98,
       'system.cpu.user.pct': 0.805,
       'system.cpu.system.pct': 0.704,
       'system.cpu.cores': 16,

@@ -72,7 +72,7 @@ export class InfraSynthtraceKibanaClient {
   }
 
   async uninstallSystemPackage(packageVersion: string) {
-    this.logger.debug(`Installing System package ${packageVersion}`);
+    this.logger.debug(`Uninstalling System package ${packageVersion}`);
 
     const url = join(this.target, `/api/fleet/epm/packages/system/${packageVersion}`);
     const response = await pRetry(() => {
