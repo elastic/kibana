@@ -34,9 +34,7 @@ import {
 import { type Group } from '@kbn/observability-alerting-rule-utils';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import {
-  AssetDetailsLocator,
   AssetDetailsLocatorParams,
-  MetricsExplorerLocator,
   MetricsExplorerLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
 import { InfraLocators } from '../../infra_types';
@@ -61,19 +59,12 @@ const mockNow = new Date('2023-09-20T15:11:04.105Z');
 const STARTED_AT_MOCK_DATE = new Date();
 
 const mockAssetDetailsLocator = {
-  getRedirectUrl: jest
-    .fn()
-    .mockImplementation(
-      ({ assetId, assetType, assetDetails }: AssetDetailsLocatorParams) =>
-        `/node-mock/${assetType}/${assetId}?receivedParams=${rison.encodeUnknown(assetDetails)}`
-    ),
-} as unknown as jest.Mocked<AssetDetailsLocator>;
+  getRedirectUrl: jest.fn(),
+};
 
 const mockMetricsExplorerLocator = {
-  getRedirectUrl: jest
-    .fn()
-    .mockImplementation(({}: MetricsExplorerLocatorParams) => `/metrics-mock`),
-} as unknown as jest.Mocked<MetricsExplorerLocator>;
+  getRedirectUrl: jest.fn(),
+};
 
 const mockOptions = {
   executionId: '',
@@ -124,6 +115,15 @@ describe('The metric threshold rule type', () => {
   });
   beforeEach(() => {
     jest.resetAllMocks();
+
+    mockAssetDetailsLocator.getRedirectUrl.mockImplementation(
+      ({ assetId, assetType, assetDetails }: AssetDetailsLocatorParams) =>
+        `/node-mock/${assetType}/${assetId}?receivedParams=${rison.encodeUnknown(assetDetails)}`
+    );
+
+    mockMetricsExplorerLocator.getRedirectUrl.mockImplementation(
+      ({}: MetricsExplorerLocatorParams) => `/metrics-mock`
+    );
 
     services.alertsClient.report.mockImplementation(({ id }: { id: string }) => ({
       uuid: `uuid-${id}`,
@@ -2389,7 +2389,7 @@ describe('The metric threshold rule type', () => {
         group: id,
         reason,
         timestamp: mockNow.toISOString(),
-        viewInAppUrl: undefined,
+        viewInAppUrl: '/metrics-mock',
         metric: conditions.reduce((acc, curr, ndx) => {
           set(acc, `condition${ndx}`, curr.metric);
           return acc;

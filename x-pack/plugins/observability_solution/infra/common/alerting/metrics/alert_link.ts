@@ -156,6 +156,12 @@ export const getMetricsViewInAppUrl = ({
 
   if (supportedAssetType) {
     const assetId = fields[findInventoryModel(supportedAssetType).fields.id];
+
+    // Pathological case found within tests. If no assetId, just redirect.
+    if (!assetId) {
+      return metricsExplorerLocator.getRedirectUrl({});
+    }
+
     const timestamp = fields[TIMESTAMP];
 
     return getLinkToAssetDetails({
