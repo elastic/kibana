@@ -49,14 +49,12 @@ export async function executeTools({
         return {
           action,
           observation: JSON.stringify(`Error: ${err}`, null, 2),
-          lastNode: NodeType.TOOLS,
         };
       }
 
       return {
         action,
         observation: JSON.stringify(out, null, 2),
-        lastNode: NodeType.TOOLS,
       };
     })
   );
