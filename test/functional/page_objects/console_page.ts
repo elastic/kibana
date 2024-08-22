@@ -206,6 +206,18 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('sendRequestButton');
   }
 
+  public async clickCopyOutput() {
+    await this.testSubjects.click('copyOutputButton');
+  }
+
+  public async clickClearOutput() {
+    const hasClearButton = await this.testSubjects.exists('clearConsoleOutput');
+
+    if (hasClearButton) {
+      await this.testSubjects.click('clearConsoleOutput');
+    }
+  }
+
   public async clickSkipTour() {
     await this.testSubjects.click('consoleSkipTourButton');
   }
