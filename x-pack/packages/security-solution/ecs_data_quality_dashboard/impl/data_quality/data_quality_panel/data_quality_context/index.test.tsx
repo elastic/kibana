@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Theme } from '@elastic/charts';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { renderHook } from '@testing-library/react-hooks';
 import React, { FC, PropsWithChildren } from 'react';
@@ -25,6 +26,45 @@ const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
     telemetryEvents={mockTelemetryEvents}
     isILMAvailable={true}
     toasts={toasts}
+    addSuccessToast={jest.fn()}
+    canUserCreateAndReadCases={jest.fn(() => true)}
+    endDate={null}
+    formatBytes={jest.fn()}
+    formatNumber={jest.fn()}
+    isAssistantEnabled={true}
+    lastChecked={'2023-03-28T22:27:28.159Z'}
+    openCreateCaseFlyout={jest.fn()}
+    patterns={['auditbeat-*']}
+    setLastChecked={jest.fn()}
+    startDate={null}
+    theme={{
+      background: {
+        color: '#000',
+      },
+    }}
+    baseTheme={
+      {
+        background: {
+          color: '#000',
+        },
+      } as Theme
+    }
+    ilmPhases={['hot', 'warm', 'unmanaged']}
+    selectedIlmPhaseOptions={[
+      {
+        label: 'Hot',
+        value: 'hot',
+      },
+      {
+        label: 'Warm',
+        value: 'warm',
+      },
+      {
+        label: 'Unmanaged',
+        value: 'unmanaged',
+      },
+    ]}
+    setSelectedIlmPhaseOptions={jest.fn()}
   >
     {children}
   </DataQualityProvider>
@@ -43,9 +83,9 @@ describe('DataQualityContext', () => {
     );
   });
 
-  test('it should return the httpFetch function', async () => {
+  test('it should return the httpFetch function', () => {
     const { result } = renderHook(useDataQualityContext, { wrapper: ContextWrapper });
-    const httpFetch = await result.current.httpFetch;
+    const httpFetch = result.current.httpFetch;
 
     const path = '/path/to/resource';
     httpFetch(path);
@@ -53,16 +93,16 @@ describe('DataQualityContext', () => {
     expect(mockHttpFetch).toBeCalledWith(path);
   });
 
-  test('it should return the telemetry events', async () => {
+  test('it should return the telemetry events', () => {
     const { result } = renderHook(useDataQualityContext, { wrapper: ContextWrapper });
-    const telemetryEvents = await result.current.telemetryEvents;
+    const telemetryEvents = result.current.telemetryEvents;
 
     expect(telemetryEvents).toEqual(mockTelemetryEvents);
   });
 
   test('it should return the isILMAvailable param', async () => {
     const { result } = renderHook(useDataQualityContext, { wrapper: ContextWrapper });
-    const isILMAvailable = await result.current.isILMAvailable;
+    const isILMAvailable = result.current.isILMAvailable;
 
     expect(isILMAvailable).toEqual(true);
   });

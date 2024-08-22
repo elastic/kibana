@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import { copyToClipboard, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import React, { useMemo } from 'react';
 
 import { SameFamilyCallout } from '../callouts/same_family_callout';
 import { CompareFieldsTable } from '../../../compare_fields_table';
 import { getIncompatibleMappingsTableColumns } from '../../../compare_fields_table/get_incompatible_mappings_table_columns';
 import { useDataQualityContext } from '../../data_quality_context';
 import { getAllSameFamilyMarkdownComments, getSameFamilyMappings } from './helpers';
-import * as i18n from '../../index_properties/translations';
 import { SAME_FAMILY_FIELD_MAPPINGS_TABLE_TITLE } from './translations';
-import { COPIED_RESULTS_TOAST_TITLE } from '../../../translations';
 import type { IlmPhase, PartitionedFieldMetadata } from '../../../types';
+import { StickyActions } from '../sticky_actions';
 
 interface Props {
-  addSuccessToast: (toast: { title: string }) => void;
   docsCount: number;
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
@@ -31,7 +29,6 @@ interface Props {
 }
 
 const SameFamilyTabComponent: React.FC<Props> = ({
-  addSuccessToast,
   docsCount,
   formatBytes,
   formatNumber,
@@ -47,7 +44,7 @@ const SameFamilyTabComponent: React.FC<Props> = ({
   );
 
   const { isILMAvailable } = useDataQualityContext();
-  const markdownComments: string[] = useMemo(
+  const markdownComment: string = useMemo(
     () =>
       getAllSameFamilyMarkdownComments({
         docsCount,
@@ -59,7 +56,7 @@ const SameFamilyTabComponent: React.FC<Props> = ({
         partitionedFieldMetadata,
         patternDocsCount,
         sizeInBytes,
-      }),
+      }).join('\n'),
     [
       docsCount,
       formatBytes,
@@ -73,21 +70,9 @@ const SameFamilyTabComponent: React.FC<Props> = ({
     ]
   );
 
-  const onCopy = useCallback(() => {
-    copyToClipboard(markdownComments.join('\n'));
-
-    addSuccessToast({
-      title: COPIED_RESULTS_TOAST_TITLE,
-    });
-  }, [addSuccessToast, markdownComments]);
-
   return (
-    <div data-test-subj="sameFamilyTab">
-      <SameFamilyCallout ecsBasedFieldMetadata={partitionedFieldMetadata.sameFamily}>
-        <EuiButtonEmpty aria-label={i18n.COPY_TO_CLIPBOARD} flush="both" onClick={onCopy}>
-          {i18n.COPY_TO_CLIPBOARD}
-        </EuiButtonEmpty>
-      </SameFamilyCallout>
+    <div data-test-subj="sameFamilyTabContent">
+      <SameFamilyCallout ecsBasedFieldMetadata={partitionedFieldMetadata.sameFamily} />
 
       <>
         {sameFamilyMappings.length > 0 && (
@@ -102,6 +87,9 @@ const SameFamilyTabComponent: React.FC<Props> = ({
           </>
         )}
       </>
+
+      <EuiSpacer size={sameFamilyMappings.length > 0 ? 'm' : 'l'} />
+      <StickyActions markdownComment={markdownComment} showCopyToClipboardAction={true} />
     </div>
   );
 };
