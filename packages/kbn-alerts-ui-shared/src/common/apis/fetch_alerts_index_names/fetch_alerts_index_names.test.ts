@@ -21,7 +21,7 @@ describe('fetchAlertsIndexNames', () => {
       index_name: indexNames,
     });
     const result = await fetchAlertsIndexNames({ http, featureIds });
-    expect(result).toEqual(indexNames);
+    expect(result.indexName).toEqual(indexNames);
     expect(http.get).toHaveBeenLastCalledWith(`${BASE_RAC_ALERTS_API_PATH}/index`, {
       query: { features: featureIds.join(',') },
     });

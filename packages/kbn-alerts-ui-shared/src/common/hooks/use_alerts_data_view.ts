@@ -35,7 +35,13 @@ export interface UseAlertsDataViewParams {
 
 export interface UseAlertsDataViewResult {
   isLoading: boolean;
-  dataView?: Omit<DataViewBase, 'fields'> & { fields: FieldSpec[] };
+  dataView?: Omit<DataViewBase, 'fields'> & {
+    fields: FieldSpec[];
+    /**
+     * Indicates if the end user has read access to the index, besides the alerting authorization
+     */
+    hasReadIndexPrivilege?: boolean;
+  };
 }
 
 /**
@@ -48,28 +54,35 @@ const resolveDataView = ({
   fields,
   indexNames,
   virtualDataView,
+  isFetching,
+  hasReadIndexPrivilege,
 }: {
+  isFetching: boolean;
   isError: boolean;
   virtualDataView?: DataView;
   indexNames?: string[];
   fields?: { fields: FieldSpec[] };
+  hasReadIndexPrivilege: boolean;
 }) => {
-  if (isError) {
+  if (isError || isFetching) {
     return;
   }
   // When the only feature id is Security Solution, use an in-memory data view:
   // their alerting authorization is based on end-user privileges, which allows us to create
   // an actual data view
   if (virtualDataView) {
+    (virtualDataView as NonNullable<UseAlertsDataViewResult['dataView']>).hasReadIndexPrivilege =
+      hasReadIndexPrivilege;
     return virtualDataView;
   }
   // For all other feature id combinations, compute the data view from the fetched index names and
   // fields since the Kibana-user-based authorization wouldn't allow us to create a data view
-  if (indexNames) {
+  if (indexNames && fields) {
     return {
       title: indexNames.join(','),
       fieldFormatMap: {},
-      fields: (fields?.fields ?? []).map((field) => {
+      hasReadIndexPrivilege,
+      fields: (fields.fields ?? []).map((field) => {
         return {
           ...field,
           ...(field.esTypes && field.esTypes.includes('flattened') ? { type: 'string' } : {}),
@@ -99,22 +112,24 @@ export const useAlertsDataView = ({
   const hasMixedFeatureIds = featureIds.length > 1 && includesSecurity;
 
   const {
-    data: indexNames,
+    data,
     isError: isIndexNamesError,
     isLoading: isLoadingIndexNames,
+    isFetching: isFetchingIndexNames,
     isInitialLoading: isInitialLoadingIndexNames,
   } = useFetchAlertsIndexNamesQuery(
     { http, featureIds },
     {
-      // Don't fetch index names when featureIds includes both Security Solution and other features
-      enabled: !!featureIds.length && (isOnlySecurity || !includesSecurity),
+      enabled: !!featureIds.length,
     }
   );
+  const { indexName, hasReadIndexPrivilege = false } = data ?? {};
 
   const {
     data: fields,
     isError: isFieldsError,
     isLoading: isLoadingFields,
+    isFetching: isFetchingFields,
     isInitialLoading: isInitialLoadingFields,
   } = useFetchAlertsFieldsQuery(
     { http, featureIds },
@@ -124,14 +139,19 @@ export const useAlertsDataView = ({
     }
   );
 
-  const { data: virtualDataView, isError: isVirtualDataViewError } = useVirtualDataViewQuery(
+  const {
+    data: virtualDataView,
+    isLoading: isLoadingVirtualDataView,
+    isFetching: isFetchingVirtualDataView,
+    isError: isVirtualDataViewError,
+  } = useVirtualDataViewQuery(
     {
       dataViewsService,
-      indexNames,
+      indexNames: indexName,
     },
     {
       // Create data view only when featureIds = ['siem'] and indexNames have been fetched
-      enabled: isOnlySecurity && !!indexNames?.length,
+      enabled: isOnlySecurity && !!indexName?.length,
     }
   );
 
@@ -148,14 +168,20 @@ export const useAlertsDataView = ({
   const dataView = useMemo(
     () =>
       resolveDataView({
+        isFetching: isFetchingIndexNames || isFetchingFields || isFetchingVirtualDataView,
         isError: isIndexNamesError || isFieldsError || isVirtualDataViewError,
         fields,
-        indexNames,
+        indexNames: indexName,
         virtualDataView: !isOnlySecurity ? undefined : virtualDataView,
+        hasReadIndexPrivilege,
       }),
     [
       fields,
-      indexNames,
+      hasReadIndexPrivilege,
+      indexName,
+      isFetchingFields,
+      isFetchingIndexNames,
+      isFetchingVirtualDataView,
       isFieldsError,
       isIndexNamesError,
       isOnlySecurity,

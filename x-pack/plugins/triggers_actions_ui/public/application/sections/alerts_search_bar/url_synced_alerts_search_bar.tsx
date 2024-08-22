@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { useAlertsDataView } from '@kbn/alerts-ui-shared';
 import { AlertsFeatureIdsFilter } from '../../lib/search_filters';
 import { useKibana } from '../../..';
 import { useAlertSearchBarStateContainer } from './use_alert_search_bar_state_container';
@@ -76,6 +77,12 @@ export const UrlSyncedAlertsSearchBar = ({
     setSavedQuery,
     clearSavedQuery,
   } = useAlertSearchBarStateContainer(ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY);
+  const { dataView } = useAlertsDataView({
+    featureIds: rest.featureIds,
+    http,
+    dataViewsService: dataViews,
+    toasts,
+  });
 
   useEffect(() => {
     if (spaces) {
@@ -145,11 +152,11 @@ export const UrlSyncedAlertsSearchBar = ({
         onClearSavedQuery={clearSavedQuery}
         {...rest}
       />
-      {showFilterControls && (
+      {showFilterControls && dataView && dataView.hasReadIndexPrivilege && (
         <AlertFilterControls
           dataViewSpec={{
-            id: 'unified-alerts-dv',
-            title: '.alerts-*',
+            id: 'alerts-filter-controls-data-view',
+            title: dataView.title,
           }}
           spaceId={spaceId}
           chainingSystem="HIERARCHICAL"
