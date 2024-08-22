@@ -34,6 +34,7 @@ export function createInferenceClient({
         throw createInferenceRequestError(`No connector found for id ${id}`, 400);
       }
 
+      // TODO: is that really correct?
       const actionTypeId = connector.id;
 
       if (!isSupportedConnectorType(actionTypeId)) {

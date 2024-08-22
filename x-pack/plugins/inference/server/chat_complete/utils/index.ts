@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export { createChatCompleteApi } from './api';
+export {
+  createInferenceExecutor,
+  type InferenceInvokeOptions,
+  type InferenceInvokeResult,
+  type InferenceExecutor,
+} from './inference_executor';
+export { chunksIntoMessage } from './chunks_into_message';

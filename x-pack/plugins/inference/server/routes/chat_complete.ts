@@ -7,7 +7,6 @@
 
 import { schema, Type } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, RequestHandlerContext } from '@kbn/core/server';
-import { isObservable } from 'rxjs';
 import { MessageRole } from '../../common/chat_complete';
 import type { ChatCompleteRequestBody } from '../../common/chat_complete/request';
 import { ToolCall, ToolChoiceType } from '../../common/chat_complete/tools';
@@ -97,7 +96,7 @@ export function registerChatCompleteRoute({
 
       const { connectorId, messages, system, toolChoice, tools } = request.body;
 
-      const chatCompleteResponse = await client.chatComplete({
+      const chatCompleteResponse = client.chatComplete({
         connectorId,
         messages,
         system,
@@ -105,13 +104,9 @@ export function registerChatCompleteRoute({
         tools,
       });
 
-      if (isObservable(chatCompleteResponse)) {
-        return response.ok({
-          body: observableIntoEventSourceStream(chatCompleteResponse),
-        });
-      }
-
-      return response.ok({ body: chatCompleteResponse });
+      return response.ok({
+        body: observableIntoEventSourceStream(chatCompleteResponse),
+      });
     }
   );
 }

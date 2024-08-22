@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { createChatCompleteApi } from './api';
+export { getInferenceAdapter } from './get_inference_adapter';

@@ -23,11 +23,11 @@ import {
 } from '../../../../common/chat_complete';
 import { createTokenLimitReachedError } from '../../../../common/chat_complete/errors';
 import { createInferenceInternalError } from '../../../../common/errors';
+import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import { InferenceConnectorAdapter } from '../../types';
-import { eventSourceStreamIntoObservable } from '../event_source_stream_into_observable';
 
 export const openAIAdapter: InferenceConnectorAdapter = {
-  chatComplete: ({ connector, actionsClient, system, messages, toolChoice, tools }) => {
+  chatComplete: ({ executor, system, messages, toolChoice, tools }) => {
     const openAIMessages = messagesToOpenAI({ system, messages });
 
     const toolChoiceForOpenAI =
@@ -67,14 +67,11 @@ export const openAIAdapter: InferenceConnectorAdapter = {
     };
 
     return from(
-      actionsClient.execute({
-        actionId: connector.id,
-        params: {
-          subAction: 'stream',
-          subActionParams: {
-            body: JSON.stringify(request),
-            stream,
-          },
+      executor.invoke({
+        subAction: 'stream',
+        subActionParams: {
+          body: JSON.stringify(request),
+          stream,
         },
       })
     ).pipe(
