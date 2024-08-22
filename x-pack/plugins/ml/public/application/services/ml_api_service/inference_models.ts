@@ -23,7 +23,7 @@ export function inferenceModelsApiProvider(httpService: HttpService) {
       taskType: InferenceTaskType,
       modelConfig: ModelConfig
     ) {
-      const result = await httpService.http<estypes.InferencePutModelResponse>({
+      const result = await httpService.http<estypes.InferencePutResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/_inference/${taskType}/${inferenceId}`,
         method: 'PUT',
         body: JSON.stringify(modelConfig),
@@ -35,9 +35,7 @@ export function inferenceModelsApiProvider(httpService: HttpService) {
      * Gets all inference endpoints
      */
     async getAllInferenceEndpoints() {
-      const result = await httpService.http<{
-        endpoints: estypes.InferenceModelConfigContainer[];
-      }>({
+      const result = await httpService.http<estypes.InferenceGetResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/_inference/all`,
         method: 'GET',
         version: '1',
