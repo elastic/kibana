@@ -109,7 +109,6 @@ const saveKnowledgeBaseUserInstruction = createObservabilityAIAssistantServerRou
     const { id, text, public: isPublic } = resources.params.body;
     return client.addKnowledgeBaseEntry({
       entry: {
-        id,
         doc_id: id,
         text,
         public: isPublic,
@@ -195,7 +194,6 @@ const saveKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
 
     return client.addKnowledgeBaseEntry({
       entry: {
-        id,
         text,
         doc_id: id,
         confidence: confidence ?? 'high',

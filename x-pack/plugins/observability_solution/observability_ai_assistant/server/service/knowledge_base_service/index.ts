@@ -14,6 +14,7 @@ import pRetry from 'p-retry';
 import { map, orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
 import { MlTrainedModelDeploymentNodesStats } from '@elastic/elasticsearch/lib/api/types';
+import { v4 } from 'uuid';
 import {
   INDEX_QUEUED_DOCUMENTS_TASK_ID,
   INDEX_QUEUED_DOCUMENTS_TASK_TYPE,
@@ -38,6 +39,7 @@ interface Dependencies {
 
 export interface RecalledEntry {
   id: string;
+  doc_id: string;
   text: string;
   score: number | null;
   is_correction?: boolean;
@@ -368,13 +370,13 @@ export class KnowledgeBaseService {
     };
 
     const response = await this.dependencies.esClient.asInternalUser.search<
-      Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels'>
+      Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels' | 'doc_id'>
     >({
       index: [resourceNames.aliases.kb],
       query: esQuery,
       size: 20,
       _source: {
-        includes: ['text', 'is_correction', 'labels'],
+        includes: ['text', 'is_correction', 'labels', 'doc_id'],
       },
     });
 
@@ -598,27 +600,68 @@ export class KnowledgeBaseService {
     return res.hits.hits[0]?._source?.doc_id;
   };
 
-  addEntry = async ({
-    entry: { id, ...document },
+  getUuidFromHumanReadableId = async ({
+    docId,
     user,
     namespace,
   }: {
-    entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
+    docId: string;
+    user?: { name: string; id?: string };
+    namespace?: string;
+  }) => {
+    const query = {
+      bool: {
+        filter: [
+          { term: { doc_id: docId } },
+
+          // exclude user instructions
+          { bool: { must_not: { term: { type: KnowledgeBaseType.UserInstruction } } } },
+
+          // restrict access to user's own entries
+          ...getAccessQuery({ user, namespace }),
+        ],
+      },
+    };
+
+    const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
+      size: 1,
+      index: resourceNames.aliases.kb,
+      query,
+      _source: false,
+    });
+
+    const id = response.hits.hits[0]?._id ?? v4();
+
+    return id;
+  };
+
+  addEntry = async ({
+    entry,
+    user,
+    namespace,
+  }: {
+    entry: Omit<KnowledgeBaseEntry, '@timestamp' | 'id'>;
     user?: { name: string; id?: string };
     namespace?: string;
   }): Promise<void> => {
+    let id = '';
+
     // for now we want to limit the number of user instructions to 1 per user
-    if (document.type === KnowledgeBaseType.UserInstruction) {
+    if (entry.type === KnowledgeBaseType.UserInstruction) {
       const existingId = await this.getExistingUserInstructionId({
-        isPublic: document.public,
+        isPublic: entry.public,
         user,
         namespace,
       });
 
       if (existingId) {
         id = existingId;
-        document.doc_id = existingId;
+        entry.doc_id = existingId;
       }
+
+      // override previous id if it exists
+    } else {
+      id = await this.getUuidFromHumanReadableId({ docId: entry.doc_id, user, namespace });
     }
 
     try {
@@ -627,7 +670,7 @@ export class KnowledgeBaseService {
         id,
         document: {
           '@timestamp': new Date().toISOString(),
-          ...document,
+          ...entry,
           user,
           namespace,
         },

@@ -734,7 +734,7 @@ export class ObservabilityAIAssistantClient {
   addKnowledgeBaseEntry = async ({
     entry,
   }: {
-    entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
+    entry: Omit<KnowledgeBaseEntry, '@timestamp' | 'id'>;
   }): Promise<void> => {
     return this.dependencies.knowledgeBaseService.addEntry({
       namespace: this.dependencies.namespace,

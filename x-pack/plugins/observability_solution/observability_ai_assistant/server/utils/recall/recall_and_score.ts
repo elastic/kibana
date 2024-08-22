@@ -7,13 +7,18 @@
 
 import type { Logger } from '@kbn/logging';
 import { AnalyticsServiceStart } from '@kbn/core/server';
+import { scoreSuggestions } from './score_suggestions';
 import type { Message } from '../../../common';
 import type { ObservabilityAIAssistantClient } from '../../service/client';
 import type { FunctionCallChatFunction } from '../../service/types';
-import { retrieveSuggestions } from './retrieve_suggestions';
-import { scoreSuggestions } from './score_suggestions';
-import type { RetrievedSuggestion } from './types';
-import { RecallRanking, RecallRankingEventType } from '../../analytics/recall_ranking';
+import { RecallRanking, recallRankingEventType } from '../../analytics/recall_ranking';
+
+export interface RecalledSuggestion {
+  id: string;
+  docId: string;
+  text: string;
+  score: number | null;
+}
 
 export async function recallAndScore({
   recall,
@@ -34,19 +39,24 @@ export async function recallAndScore({
   logger: Logger;
   signal: AbortSignal;
 }): Promise<{
-  relevantDocuments?: RetrievedSuggestion[];
+  relevantDocuments?: RecalledSuggestion[];
   scores?: Array<{ id: string; score: number }>;
-  suggestions: RetrievedSuggestion[];
+  suggestions: RecalledSuggestion[];
 }> {
   const queries = [
     { text: userPrompt, boost: 3 },
     { text: context, boost: 1 },
   ].filter((query) => query.text.trim());
 
-  const suggestions = await retrieveSuggestions({
-    recall,
-    queries,
-  });
+  const { entries: recalledEntries } = await recall({ queries });
+  const suggestions: RecalledSuggestion[] = recalledEntries.map(
+    ({ id, doc_id: docId, text, score }) => ({
+      id,
+      docId,
+      text,
+      score,
+    })
+  );
 
   if (!suggestions.length) {
     return {
@@ -67,7 +77,7 @@ export async function recallAndScore({
       chat,
     });
 
-    analytics.reportEvent<RecallRanking>(RecallRankingEventType, {
+    analytics.reportEvent<RecallRanking>(recallRankingEventType, {
       prompt: queries.map((query) => query.text).join('\n\n'),
       scoredDocuments: suggestions.map((suggestion) => {
         const llmScore = scores.find((score) => score.id === suggestion.id);

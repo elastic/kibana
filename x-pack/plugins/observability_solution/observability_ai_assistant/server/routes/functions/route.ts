@@ -139,7 +139,6 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
     return client.addKnowledgeBaseEntry({
       entry: {
         confidence,
-        id,
         doc_id: id,
         is_correction: isCorrection,
         type,

@@ -5,16 +5,14 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { omit } from 'lodash';
 import { Logger } from '@kbn/logging';
 import dedent from 'dedent';
 import { lastValueFrom } from 'rxjs';
 import { decodeOrThrow, jsonRt } from '@kbn/io-ts-utils';
 import { concatenateChatCompletionChunks, Message, MessageRole } from '../../../common';
 import type { FunctionCallChatFunction } from '../../service/types';
-import type { RetrievedSuggestion } from './types';
 import { parseSuggestionScores } from './parse_suggestion_scores';
-import { ShortIdTable } from '../../../common/utils/short_id_table';
+import { RecalledSuggestion } from './recall_and_score';
 
 const scoreFunctionRequestRt = t.type({
   message: t.type({
@@ -38,7 +36,7 @@ export async function scoreSuggestions({
   signal,
   logger,
 }: {
-  suggestions: RetrievedSuggestion[];
+  suggestions: RecalledSuggestion[];
   messages: Message[];
   userPrompt: string;
   context: string;
@@ -46,17 +44,9 @@ export async function scoreSuggestions({
   signal: AbortSignal;
   logger: Logger;
 }): Promise<{
-  relevantDocuments: RetrievedSuggestion[];
+  relevantDocuments: RecalledSuggestion[];
   scores: Array<{ id: string; score: number }>;
 }> {
-  const shortIdTable = new ShortIdTable();
-
-  const suggestionsWithShortId = suggestions.map((suggestion) => ({
-    ...omit(suggestion, 'score', 'id'), // To not bias the LLM
-    originalId: suggestion.id,
-    shortId: shortIdTable.take(suggestion.id),
-  }));
-
   const newUserMessageContent =
     dedent(`Given the following question, score the documents that are relevant to the question. on a scale from 0 to 7,
     0 being completely irrelevant, and 7 being extremely relevant. Information is relevant to the question if it helps in
@@ -76,10 +66,7 @@ export async function scoreSuggestions({
 
     Documents:
     ${JSON.stringify(
-      suggestionsWithShortId.map((suggestion) => ({
-        id: suggestion.shortId,
-        content: suggestion.text,
-      })),
+      suggestions.map(({ id, docId: title, text }) => ({ id, title, text })),
       null,
       2
     )}`);
@@ -127,15 +114,7 @@ export async function scoreSuggestions({
     scoreFunctionRequest.message.function_call.arguments
   );
 
-  const scores = parseSuggestionScores(scoresAsString).map(({ id, score }) => {
-    const originalSuggestion = suggestionsWithShortId.find(
-      (suggestion) => suggestion.shortId === id
-    );
-    return {
-      originalId: originalSuggestion?.originalId,
-      score,
-    };
-  });
+  const scores = parseSuggestionScores(scoresAsString);
 
   if (scores.length === 0) {
     // seemingly invalid or no scores, return all
@@ -145,11 +124,11 @@ export async function scoreSuggestions({
   const suggestionIds = suggestions.map((document) => document.id);
 
   const relevantDocumentIds = scores
-    .filter((document) => suggestionIds.includes(document.originalId ?? '')) // Remove hallucinated documents
+    .filter((document) => suggestionIds.includes(document.id ?? '')) // Remove hallucinated documents
     .filter((document) => document.score > 4)
     .sort((a, b) => b.score - a.score)
     .slice(0, 5)
-    .map((document) => document.originalId);
+    .map((document) => document.id);
 
   const relevantDocuments = suggestions.filter((suggestion) =>
     relevantDocumentIds.includes(suggestion.id)
@@ -159,6 +138,6 @@ export async function scoreSuggestions({
 
   return {
     relevantDocuments,
-    scores: scores.map((score) => ({ id: score.originalId!, score: score.score })),
+    scores: scores.map((score) => ({ id: score.id, score: score.score })),
   };
 }

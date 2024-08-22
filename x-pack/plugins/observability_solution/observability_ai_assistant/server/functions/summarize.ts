@@ -63,15 +63,14 @@ export function registerSummarizationFunction({
       },
     },
     (
-      { arguments: { id, text, is_correction: isCorrection, confidence, public: isPublic } },
+      { arguments: { id: docId, text, is_correction: isCorrection, confidence, public: isPublic } },
       signal
     ) => {
       return client
         .addKnowledgeBaseEntry({
           entry: {
-            doc_id: id,
+            doc_id: docId,
             role: KnowledgeBaseEntryRole.AssistantSummarization,
-            id,
             text,
             is_correction: isCorrection,
             type: KnowledgeBaseType.Contextual,
