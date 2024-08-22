@@ -172,8 +172,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     return streamGraph({
       apmTracer,
       assistantGraph,
-      llmType,
-      bedrockChatEnabled,
       inputs,
       logger,
       onLlmResponse,
