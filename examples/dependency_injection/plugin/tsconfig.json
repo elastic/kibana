@@ -13,7 +13,7 @@
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core-application-browser",
-    "@kbn/core-di-common",
+    "@kbn/core-di",
     "@kbn/core-http-browser",
     "@kbn/core-http-server",
     "@kbn/dependency-injection-example-service",

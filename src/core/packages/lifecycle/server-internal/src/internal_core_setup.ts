@@ -30,7 +30,7 @@ import type { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-s
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
 import type { InternalUserProfileServiceSetup } from '@kbn/core-user-profile-server-internal';
 import type { InternalFeatureFlagsSetup } from '@kbn/core-feature-flags-server-internal';
-import type { InternalCoreDiServiceSetup } from '@kbn/core-di-common-internal';
+import type { InternalCoreDiServiceSetup } from '@kbn/core-di-internal';
 
 /** @internal */
 export interface InternalCoreSetup {

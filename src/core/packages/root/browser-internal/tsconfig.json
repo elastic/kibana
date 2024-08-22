@@ -69,7 +69,7 @@
     "@kbn/core-injected-metadata-common-internal",
     "@kbn/core-feature-flags-browser-internal",
     "@kbn/react-mute-legacy-root-warning",
-    "@kbn/core-di-common-internal",
+    "@kbn/core-di-internal",
   ],
   "exclude": [
     "target/**/*",

@@ -79,7 +79,7 @@
     "@kbn/core-feature-flags-server-internal",
     "@kbn/core-http-rate-limiter-internal",
     "@kbn/projects-solutions-groups",
-    "@kbn/core-di-common-internal",
+    "@kbn/core-di-internal",
   ],
   "exclude": [
     "target/**/*",

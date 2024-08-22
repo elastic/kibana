@@ -32,7 +32,7 @@
     "@kbn/core-user-profile-browser",
     "@kbn/core-feature-flags-browser",
     "@kbn/core-rendering-browser",
-    "@kbn/core-di-common",
+    "@kbn/core-di",
   ],
   "exclude": [
     "target/**/*",

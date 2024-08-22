@@ -22,7 +22,7 @@ import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mock
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
-import { injectionServiceMock } from '@kbn/core-di-server-mocks';
+import { injectionServiceMock } from '@kbn/core-di-mocks';
 
 export function createInternalCoreStartMock() {
   const startDeps = {

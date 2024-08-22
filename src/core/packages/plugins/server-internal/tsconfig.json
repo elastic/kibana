@@ -41,8 +41,8 @@
     "@kbn/utility-types",
     "@kbn/core-plugins-contracts-server",
     "@kbn/projects-solutions-groups",
-    "@kbn/core-di-common",
-    "@kbn/core-di-common-internal",
+    "@kbn/core-di",
+    "@kbn/core-di-internal",
   ],
   "exclude": [
     "target/**/*",
