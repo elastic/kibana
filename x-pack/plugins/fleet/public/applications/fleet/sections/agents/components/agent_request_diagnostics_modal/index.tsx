@@ -19,7 +19,6 @@ import {
   useStartServices,
   useLink,
 } from '../../../../hooks';
-import { RequestDiagnosticExclude } from '../../../../../../../common/types/rest_spec/agent';
 
 interface Props {
   onClose: () => void;
