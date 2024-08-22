@@ -6,19 +6,33 @@
  */
 
 import type { KibanaFeature } from '@kbn/features-plugin/public';
-import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { type FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import {
+  featurePrivilegeIterator,
+  subFeaturePrivilegeIterator,
+} from '@kbn/features-plugin/server/feature_privilege_iterator';
 import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type { SecurityLicenseFeatures } from '@kbn/security-plugin-types-common';
+import { Actions, privilegesFactory } from '@kbn/security-authorization-core';
+import { KibanaPrivileges } from '../kibana_privileges';
 
-import type { SecurityLicenseFeatures } from '../../../../common';
-import { Actions } from '../../../../server/authorization';
-import { privilegesFactory } from '../../../../server/authorization/privileges';
-import { KibanaPrivileges } from '../model';
+const featuresPluginService = (): jest.Mocked<FeaturesPluginSetup> => {
+  return {
+    getKibanaFeatures: jest.fn(),
+    getElasticsearchFeatures: jest.fn(),
+    registerKibanaFeature: jest.fn(),
+    registerElasticsearchFeature: jest.fn(),
+    enableReportingUiCapabilities: jest.fn(),
+    featurePrivilegeIterator: jest.fn().mockImplementation(featurePrivilegeIterator),
+    subFeaturePrivilegeIterator: jest.fn().mockImplementation(subFeaturePrivilegeIterator),
+  };
+};
 
 export const createRawKibanaPrivileges = (
   features: KibanaFeature[],
   { allowSubFeaturePrivileges = true } = {}
 ) => {
-  const featuresService = featuresPluginMock.createSetup();
+  const featuresService = featuresPluginService();
   featuresService.getKibanaFeatures.mockReturnValue(features);
 
   const licensingService = {

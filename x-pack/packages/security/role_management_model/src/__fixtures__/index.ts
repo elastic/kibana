@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export type { PrivilegesService } from './privileges';
-export type { CasesSupportedOperations } from './feature_privilege_builder';
-export { privilegesFactory } from './privileges';
+export { createFeature, kibanaFeatures } from './kibana_features';
+export { createKibanaPrivileges, createRawKibanaPrivileges } from './kibana_privileges';
