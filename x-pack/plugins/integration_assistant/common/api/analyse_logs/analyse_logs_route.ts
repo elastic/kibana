@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { EncodedRawSamples, Connector, LangSmithOptions } from '../model/common_attributes';
 import { AnalyseLogsAPIResponse } from '../model/response_schemas';
