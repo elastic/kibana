@@ -178,7 +178,7 @@ export type LogsExplorerControllerEvent =
     }
   | {
       type: 'INITIALIZE_CONTROL_GROUP_API';
-      controlGroupAPI: ControlGroupApi | undefined;
+      controlGroupAPI: ControlGroupRendererApi | undefined;
     }
   | {
       type: 'UPDATE_CONTROL_PANELS';

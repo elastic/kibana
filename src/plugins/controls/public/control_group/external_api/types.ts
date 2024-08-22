@@ -14,6 +14,8 @@ import {
 } from '../../react_controls/control_group/types';
 
 export type ControlGroupRendererApi = ControlGroupApi & {
+  reload: () => void;
+
   /**
    * @deprecated
    * Calling `updateInput` will cause the entire control group to be re-initialized.

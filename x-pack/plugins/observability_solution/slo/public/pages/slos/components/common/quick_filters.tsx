@@ -55,30 +55,36 @@ export function QuickFilters({
     <Container>
       <ControlGroupRenderer
         getCreationOptions={async (initialState, builder) => {
-          builder.addOptionsListControl(initialState, {
-            dataViewId: dataView.id!,
-            fieldName: 'status',
-            width: 'small',
-            grow: true,
-            title: STATUS_LABEL,
-            controlId: 'slo-status-filter',
-            exclude: statusFilter?.meta?.negate,
-            selectedOptions: getSelectedOptions(statusFilter),
-            existsSelected: Boolean(statusFilter?.query?.exists?.field === 'status'),
-            placeholder: ALL_LABEL,
-          });
-          builder.addOptionsListControl(initialState, {
-            dataViewId: dataView.id!,
-            title: TAGS_LABEL,
-            fieldName: 'slo.tags',
-            width: 'small',
-            grow: false,
-            controlId: 'slo-tags-filter',
-            selectedOptions: getSelectedOptions(tagsFilter),
-            exclude: statusFilter?.meta?.negate,
-            existsSelected: Boolean(tagsFilter?.query?.exists?.field === 'slo.tags'),
-            placeholder: ALL_LABEL,
-          });
+          builder.addOptionsListControl(
+            initialState,
+            {
+              dataViewId: dataView.id!,
+              fieldName: 'status',
+              width: 'small',
+              grow: true,
+              title: STATUS_LABEL,
+              exclude: statusFilter?.meta?.negate,
+              selectedOptions: getSelectedOptions(statusFilter),
+              existsSelected: Boolean(statusFilter?.query?.exists?.field === 'status'),
+              placeholder: ALL_LABEL,
+            },
+            'slo-status-filter'
+          );
+          builder.addOptionsListControl(
+            initialState,
+            {
+              dataViewId: dataView.id!,
+              title: TAGS_LABEL,
+              fieldName: 'slo.tags',
+              width: 'small',
+              grow: false,
+              selectedOptions: getSelectedOptions(tagsFilter),
+              exclude: statusFilter?.meta?.negate,
+              existsSelected: Boolean(tagsFilter?.query?.exists?.field === 'slo.tags'),
+              placeholder: ALL_LABEL,
+            },
+            'slo-tags-filter'
+          );
           return {
             initialState,
           };

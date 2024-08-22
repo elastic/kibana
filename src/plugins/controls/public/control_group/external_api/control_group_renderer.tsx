@@ -74,6 +74,8 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
       if (viewMode) viewMode$.next(viewMode);
     }, [viewMode, viewMode$]);
 
+    const reload$ = useMemo(() => new BehaviorSubject<void>(undefined), []);
+
     const runtimeState$ = useMemo(
       () => new BehaviorSubject<ControlGroupRuntimeState>(getDefaultControlGroupRuntimeState()),
       []
@@ -149,6 +151,7 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
         maybeId={id}
         type={CONTROL_GROUP_TYPE}
         getParentApi={() => ({
+          reload$,
           viewMode: viewMode$,
           query$: searchApi.query$,
           timeRange$: searchApi.timeRange$,
@@ -163,6 +166,7 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
         onApiAvailable={(controlGroupApi) => {
           setControlGroup({
             ...controlGroupApi,
+            reload: () => reload$.next(),
             updateInput: (newInput) => {
               updateInput(newInput);
               setRegenerateId(uuidv4()); // force remount
