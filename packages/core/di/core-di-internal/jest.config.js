@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../..',
-  roots: ['<rootDir>/packages/core/di/core-di-common-internal'],
+  roots: ['<rootDir>/packages/core/di/core-di-internal'],
 };

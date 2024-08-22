@@ -7,7 +7,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/test/jest_node',
   rootDir: '../../../..',
-  roots: ['<rootDir>/packages/core/di/core-di-common'],
+  roots: ['<rootDir>/packages/core/di/core-di-mocks'],
 };

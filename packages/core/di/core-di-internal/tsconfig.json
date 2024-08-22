@@ -4,16 +4,19 @@
     "outDir": "target/types",
     "types": [
       "jest",
-      "node"
+      "node",
+      "react"
     ]
   },
   "include": [
     "**/*.ts",
+    "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/core-di-common",
+    "@kbn/core-base-common",
+    "@kbn/core-di",
   ]
 }
