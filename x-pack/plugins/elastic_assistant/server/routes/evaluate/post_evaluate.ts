@@ -183,7 +183,11 @@ export const postEvaluateRoute = (
           // Fetch any tools registered to the security assistant
           const assistantTools = assistantContext.getRegisteredTools(DEFAULT_PLUGIN_NAME);
 
-          const graphs: Array<{ name: string; graph: DefaultAssistantGraph }> = await Promise.all(
+          const graphs: Array<{
+            name: string;
+            graph: DefaultAssistantGraph;
+            llmType: string | undefined;
+          }> = await Promise.all(
             connectors.map(async (connector) => {
               const llmType = getLlmType(connector.actionTypeId);
               const isOpenAI = llmType === 'openai';
@@ -286,31 +290,34 @@ export const postEvaluateRoute = (
 
               return {
                 name: `${runName} - ${connector.name}`,
+                llmType,
                 graph: getDefaultAssistantGraph({
                   agentRunnable,
-                  conversationId: undefined,
                   dataClients,
                   createLlmInstance,
                   logger,
                   tools,
-                  responseLanguage: 'English',
                   replacements: {},
-                  llmType,
-                  bedrockChatEnabled: true,
-                  isStreaming: false,
                 }),
               };
             })
           );
 
           // Run an evaluation for each graph so they show up separately (resulting in each dataset run grouped by connector)
-          await asyncForEach(graphs, async ({ name, graph }) => {
+          await asyncForEach(graphs, async ({ name, graph, llmType }) => {
             // Wrapper function for invoking the graph (to parse different input/output formats)
             const predict = async (input: { input: string }) => {
               logger.debug(`input:\n ${JSON.stringify(input, null, 2)}`);
 
               const r = await graph.invoke(
-                { input: input.input }, // TODO: Update to use the correct input format per dataset type
+                {
+                  input: input.input,
+                  conversationId: undefined,
+                  responseLanguage: 'English',
+                  llmType,
+                  bedrockChatEnabled: true,
+                  isStreaming: false,
+                }, // TODO: Update to use the correct input format per dataset type
                 {
                   runName,
                   tags: ['evaluation'],
