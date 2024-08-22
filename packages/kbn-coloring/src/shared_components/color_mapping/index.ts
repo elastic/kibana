@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { CategoricalColorMapping, type ColorMappingProps } from './categorical_color_mapping';
+export {
+  CategoricalColorMapping,
+  type ColorMappingProps,
+  type ColorMappingInputCategoricalData,
+  type ColorMappingInputContinuousData,
+} from './categorical_color_mapping';
 export type { ColorMappingInputData } from './categorical_color_mapping';
 export type { ColorMapping } from './config';
 export * from './palettes';

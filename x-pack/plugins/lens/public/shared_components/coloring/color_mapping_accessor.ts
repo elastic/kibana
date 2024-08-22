@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { AVAILABLE_PALETTES, getColorFactory, getPalette, NeutralPalette } from '@kbn/coloring';
-import { ColorMappingInputCategoricalData } from '@kbn/coloring/src/shared_components/color_mapping/categorical_color_mapping';
+import {
+  AVAILABLE_PALETTES,
+  getColorFactory,
+  getPalette,
+  NeutralPalette,
+  ColorMappingInputCategoricalData,
+} from '@kbn/coloring';
 import { CellColorFn } from './get_cell_color_fn';
 
 /**

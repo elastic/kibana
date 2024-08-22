@@ -74,7 +74,7 @@ export function getColorFactory(
         })
       : [];
 
-  // find all categories that doesn't match with an assignment
+  // find all categories that don't match with an assignment
   const notAssignedCategories =
     data.type === 'categories'
       ? data.categories.filter((category) => {

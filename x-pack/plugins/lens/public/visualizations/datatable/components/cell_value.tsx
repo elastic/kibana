@@ -16,8 +16,17 @@ import type { DataContextType } from './types';
 import { getContrastColor } from '../../../shared_components/coloring/utils';
 import { CellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 
-const getParsedValue = (v: unknown) =>
-  typeof v === 'number' ? v : v === null || v === undefined ? v : String(v);
+import { isLensRange } from '../../../utils';
+
+const getParsedValue = (v: unknown) => {
+  return typeof v === 'number'
+    ? v
+    : isLensRange(v)
+    ? v.toString()
+    : v === null || v === undefined
+    ? v
+    : String(v);
+};
 
 export const createGridCell = (
   formatters: Record<string, ReturnType<FormatFactory>>,
@@ -33,7 +42,8 @@ export const createGridCell = (
 ) => {
   return ({ rowIndex, columnId, setCellProps, isExpanded }: EuiDataGridCellValueElementProps) => {
     const { table, alignments, handleFilterClick } = useContext(DataContext);
-    const rowValue = getParsedValue(table?.rows[rowIndex]?.[columnId]);
+    const rawRowValue = table?.rows[rowIndex]?.[columnId];
+    const rowValue = getParsedValue(rawRowValue);
     const colIndex = columnConfig.columns.findIndex(({ columnId: id }) => id === columnId);
     const {
       oneClickFilter,
@@ -42,7 +52,7 @@ export const createGridCell = (
       colorMapping,
     } = columnConfig.columns[colIndex] ?? {};
     const filterOnClick = oneClickFilter && handleFilterClick;
-    const content = formatters[columnId]?.convert(rowValue, filterOnClick ? 'text' : 'html');
+    const content = formatters[columnId]?.convert(rawRowValue, filterOnClick ? 'text' : 'html');
     const currentAlignment = alignments && alignments[columnId];
 
     useEffect(() => {
@@ -85,7 +95,7 @@ export const createGridCell = (
         >
           <EuiLink
             onClick={() => {
-              handleFilterClick?.(columnId, rowValue, colIndex, rowIndex);
+              handleFilterClick?.(columnId, rawRowValue, colIndex, rowIndex);
             }}
           >
             {content}
