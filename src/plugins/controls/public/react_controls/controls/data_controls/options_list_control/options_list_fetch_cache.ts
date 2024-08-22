@@ -119,4 +119,8 @@ export class OptionsListFetchCache {
       return result;
     }
   }
+
+  public clearCache = () => {
+    this.cache.reset();
+  };
 }

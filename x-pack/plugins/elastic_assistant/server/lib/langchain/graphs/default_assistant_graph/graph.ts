@@ -37,7 +37,7 @@ import { RESPOND_NODE, respond } from './nodes/respond';
 
 export const DEFAULT_ASSISTANT_GRAPH_ID = 'Default Security Assistant Graph';
 
-interface GetDefaultAssistantGraphParams {
+export interface GetDefaultAssistantGraphParams {
   agentRunnable: AgentRunnableSequence;
   dataClients?: AssistantDataClients;
   conversationId?: string;
@@ -129,6 +129,7 @@ export const getDefaultAssistantGraph = ({
       generateChatTitle({
         ...nodeParams,
         model: createLlmInstance(),
+        llmType,
         state,
         responseLanguage,
       });
