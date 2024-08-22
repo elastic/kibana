@@ -16,6 +16,26 @@ import {
   removeExceptionsList,
 } from '../../tasks/artifacts';
 
+const {
+  deleteBlocklistItem,
+  validateSuccessPopup,
+  submitBlocklist,
+  selectOperator,
+  validateRenderedCondition,
+  fillOutBlocklistFlyout,
+  setSingleValue,
+  setMultiValue,
+  openBlocklist,
+  selectPathField,
+  selectSignatureField,
+  expectSingleOperator,
+  expectMultiOperator,
+  validateSingleValue,
+  validateMultiValue,
+  selectHashField,
+  selectOs,
+} = blocklistFormSelectors;
+
 describe(
   'Blocklist',
   {
@@ -62,14 +82,9 @@ describe(
         os_types: ['windows'],
       };
     };
-    const { openBlocklist, selectSignatureField } = blocklistFormSelectors;
 
     describe('Renders blocklist fields', () => {
-      const { selectPathField, expectSingleOperator, expectMultiOperator } = blocklistFormSelectors;
-
       it('Correctly renders all blocklist fields for different OSs', () => {
-        const { selectHashField, selectOs } = blocklistFormSelectors;
-
         openBlocklist({ create: true });
 
         selectOs('windows');
@@ -97,9 +112,6 @@ describe(
       });
 
       it('Correctly modifies value format based on field selection', () => {
-        const { selectOperator, setMultiValue, validateMultiValue, validateSingleValue } =
-          blocklistFormSelectors;
-
         openBlocklist({ create: true });
         // Start with default is one of operator
         selectSignatureField();
@@ -116,18 +128,8 @@ describe(
         validateMultiValue();
       });
     });
-    describe('Handles CRUD with operator field', () => {
-      const {
-        deleteBlocklistItem,
-        validateSuccessPopup,
-        submitBlocklist,
-        selectOperator,
-        validateRenderedCondition,
-        fillOutBlocklistFlyout,
-        setSingleValue,
-        setMultiValue,
-      } = blocklistFormSelectors;
 
+    describe('Handles CRUD with operator field', () => {
       const IS_EXPECTED_CONDITION = /AND\s*file.Ext.code_signature\s*IS\s*Elastic,\s*Inc./;
       const IS_ONE_OF_EXPECTED_CONDITION =
         /AND\s*file.Ext.code_signature\s*is\s*one\s*of\s*Elastic\s*Inc./;
@@ -160,6 +162,7 @@ describe(
 
       describe('Updates and deletes blocklist match_any item', () => {
         let itemId: string;
+
         beforeEach(() => {
           createArtifactList(ENDPOINT_ARTIFACT_LISTS.blocklists.id);
           createPerPolicyArtifact('Test Blocklist', createArtifactBodyRequest('match_any')).then(
@@ -186,6 +189,7 @@ describe(
 
       describe('Updates and deletes blocklist match item', () => {
         let itemId: string;
+
         beforeEach(() => {
           createArtifactList(ENDPOINT_ARTIFACT_LISTS.blocklists.id);
           createPerPolicyArtifact('Test Blocklist', createArtifactBodyRequest('match')).then(

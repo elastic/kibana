@@ -72,7 +72,7 @@ export const VALUE_LABEL_HELPER = i18n.translate(
 export const SINGLE_VALUE_LABEL_HELPER = i18n.translate(
   'xpack.securitySolution.blocklist.single_value.label.helper',
   {
-    defaultMessage: 'Type or copy & paste one value',
+    defaultMessage: 'Type or copy & paste a value',
   }
 );
 
