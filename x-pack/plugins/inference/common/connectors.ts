@@ -11,11 +11,7 @@ export enum InferenceConnectorType {
   Gemini = '.gemini',
 }
 
-export const allSupportedConnectorTypes: InferenceConnectorType[] = [
-  InferenceConnectorType.OpenAI,
-  InferenceConnectorType.Gemini,
-  InferenceConnectorType.Bedrock,
-];
+export const allSupportedConnectorTypes = Object.values(InferenceConnectorType);
 
 export interface InferenceConnector {
   type: InferenceConnectorType;
