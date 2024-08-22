@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SHELL_TAB_ID, HISTORY_TAB_ID, CONFIG_TAB_ID } from './tab_ids';
+import { SHELL_TAB_ID, HISTORY_TAB_ID, CONFIG_TAB_ID } from './constants';
 
 interface Props {
   selectedTab: string;

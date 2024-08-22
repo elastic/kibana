@@ -6,57 +6,83 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiText } from '@elastic/eui';
-import { EuiStatelessTourSteps } from '@elastic/eui/src/components/tour/useEuiTour';
 import { i18n } from '@kbn/i18n';
+import { EuiStatelessTourSteps } from '@elastic/eui';
+
+const commonProps = {
+  stepsTotal: 5,
+  maxWidth: 400,
+};
 
 export function getTourSteps() {
   return [
     {
       step: 1,
-      title: 'Welcome to the Console',
-      content: i18n.translate('console.tour.shellTabStep', {
+      title: i18n.translate('console.tour.shellStepTitle', {
+        defaultMessage: 'Welcome to the Console',
+      }),
+      content: i18n.translate('console.tour.shellStepContent', {
         defaultMessage:
           'This is our UI for interacting with Elasticsearch clusters using QueryDSL. Easily run queries, manage settings, and view search results.',
       }),
-      stepsTotal: 5,
+      anchorPosition: 'upLeft',
+      ...commonProps,
     },
     {
       step: 2,
-      title: 'Get started querying',
-      content: i18n.translate('console.tour.shellTabStep', {
+      title: i18n.translate('console.tour.editorStepTitle', {
+        defaultMessage: 'Get started querying',
+      }),
+      content: i18n.translate('console.tour.editorStepContent', {
         defaultMessage:
           'Enter a request in this input pane, and the response will be shown in the neighboring output pane. For more details, visit our QueryDSL documentation.',
       }),
-      stepsTotal: 5,
+      anchorPosition: 'leftUp',
+      css: {
+        position: 'absolute',
+        top: '40%',
+        left: '15%',
+        transform: 'translateY(10px)',
+      },
+      ...commonProps,
     },
     {
       step: 3,
-      title: 'Step 3',
-      content: i18n.translate('console.tour.shellTabStep', {
+      title: i18n.translate('console.tour.historyStepTitle', {
+        defaultMessage: 'Revisit past queries',
+      }),
+      content: i18n.translate('console.tour.historyStepContent', {
         defaultMessage:
           'Enter a request in this input pane, and the response will be shown in the neighboring output pane. For more details, visit our QueryDSL documentation.',
       }),
-      stepsTotal: 5,
+      anchorPosition: 'leftUp',
+      offset: 15,
+      ...commonProps,
     },
     {
       step: 4,
-      title: 'Revisit past queries',
-      content: i18n.translate('console.tour.shellTabStep', {
+      title: i18n.translate('console.tour.configStepTitle', {
+        defaultMessage: 'Tailor your toolbox',
+      }),
+      content: i18n.translate('console.tour.configStepContent', {
         defaultMessage:
           'The history panel keeps track of your past queries, making it easy to review and rerun them. ',
       }),
-      stepsTotal: 5,
+      anchorPosition: 'leftUp',
+      offset: 15,
+      ...commonProps,
     },
     {
       step: 5,
-      title: 'Tailor your toolbox',
-      content: i18n.translate('console.tour.shellTabStep', {
+      title: i18n.translate('console.tour.filesStepTitle', {
+        defaultMessage: 'Manage Console files',
+      }),
+      content: i18n.translate('console.tour.filesStepContent', {
         defaultMessage:
           'Fine-tune your Console’s settings and manage variables to personalize your workflow to suit your work style.',
       }),
-      stepsTotal: 5,
+      anchorPosition: 'upRight',
+      ...commonProps,
     },
   ] as EuiStatelessTourSteps;
 }

@@ -43,22 +43,7 @@ export const TopNavMenu: FunctionComponent<Props> = ({ items, disabled, tourStep
         );
 
         if (item.tourStep) {
-          const tourProps = tourStepProps[item.tourStep - 1];
-          const { step, isStepOpen, onFinish, title, content, stepsTotal, footerAction } = tourProps;
-
-          return (
-            <EuiTourStep
-              step={step}
-              isStepOpen={isStepOpen}
-              title={title}
-              content={content}
-              stepsTotal={stepsTotal}
-              onFinish={() => onFinish()}
-              footerAction={footerAction}
-            >
-              {tab}
-            </EuiTourStep>
-          );
+          return <EuiTourStep {...tourStepProps[item.tourStep - 1]}>{tab}</EuiTourStep>;
         }
 
         return tab;

@@ -17,68 +17,71 @@ import {
   useEuiTour,
   EuiButton,
   EuiButtonEmpty,
+  EuiTourStep,
+  EuiTourStepProps,
 } from '@elastic/eui';
-import { EuiTourState } from '@elastic/eui/src/components/tour/types';
 import { Editor } from '../editor';
 import { TopNavMenu, SomethingWentWrongCallout } from '../../components';
 import { useDataInit } from '../../hooks';
 import { getTopNavConfig } from './get_top_nav';
 import { getTourSteps } from './get_tour_steps';
-import { SHELL_TAB_ID } from './tab_ids';
+import {
+  SHELL_TAB_ID,
+  SHELL_TOUR_STEP_INDEX,
+  EDITOR_TOUR_STEP_INDEX,
+  TOUR_STORAGE_KEY,
+  INITIAL_TOUR_CONFIG,
+} from './constants';
 
 interface MainProps {
   isEmbeddable?: boolean;
 }
 
-const STORAGE_KEY = 'consoleTour';
-
-const initialTourConfig: EuiTourState = {
-  currentTourStep: 1,
-  isTourActive: true,
-  tourPopoverWidth: 360,
-  tourSubtitle: 'Demo tour',
-};
-
 export function Main({ isEmbeddable = false }: MainProps) {
   const [selectedTab, setSelectedTab] = useState(SHELL_TAB_ID);
 
-  const storageState = localStorage.getItem(STORAGE_KEY);
-  const state = storageState ? (JSON.parse(storageState) as EuiTourState) : initialTourConfig;
-
-  const [tourStepProps, actions, reducerState] = useEuiTour(getTourSteps(), state);
+  const storageTourState = localStorage.getItem(TOUR_STORAGE_KEY);
+  const initialTourState = storageTourState ? JSON.parse(storageTourState) : INITIAL_TOUR_CONFIG;
+  const [tourStepProps, actions, tourState] = useEuiTour(getTourSteps(), initialTourState);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(reducerState));
-  }, [reducerState]);
+    localStorage.setItem(TOUR_STORAGE_KEY, JSON.stringify(tourState));
+  }, [tourState]);
 
   const nextTourStep = () => {
-    if (reducerState.currentTourStep < 5) {
+    if (tourState.currentTourStep < 5) {
       actions.incrementStep();
     }
   };
 
-  const fullTourStepProps = tourStepProps.map((step) => {
+  const fullTourStepProps = tourStepProps.map((step: EuiTourStepProps) => {
     return {
       ...step,
-      onFinish: () => actions.finishTour(),
-      isStepOpen: step.step === reducerState.currentTourStep,
+      onFinish: () => actions.finishTour(false),
       footerAction:
-        reducerState.currentTourStep === tourStepProps.length - 1 ? (
+        // TODO: Fix the index after adding the tour step for files
+        tourState.currentTourStep === tourStepProps.length - 1 ? (
           <EuiButton color="success" size="s" onClick={() => actions.finishTour()}>
-            Finish tour
+            {i18n.translate('console.tour.finishTourButton', {
+              defaultMessage: 'Finish tour',
+            })}
           </EuiButton>
         ) : (
           [
             <EuiButtonEmpty size="s" color="text" onClick={() => actions.finishTour()}>
-              Close tour
+              {i18n.translate('console.tour.closeTourButton', {
+                defaultMessage: 'Close tour',
+              })}
             </EuiButtonEmpty>,
             <EuiButton color="success" size="s" onClick={nextTourStep}>
-              Next
+              {i18n.translate('console.tour.nextStepButton', {
+                defaultMessage: 'Next',
+              })}
             </EuiButton>,
           ]
         ),
     };
-  });
+  }) as EuiTourStepProps[];
 
   const { done, error, retry } = useDataInit();
 
@@ -123,13 +126,21 @@ export function Main({ isEmbeddable = false }: MainProps) {
                 <Editor
                   loading={!done}
                   setEditorInstance={() => {}}
-                  tourStepProps={fullTourStepProps[1]}
+                  tourStepProps={fullTourStepProps[SHELL_TOUR_STEP_INDEX]}
                 />
               )}
             </EuiSplitPanel.Inner>
           </EuiSplitPanel.Outer>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      {/* Fixed Position Container for Tour Step */}
+      <div className="tourStepFixedContainer">
+        <EuiTourStep
+          {...fullTourStepProps[EDITOR_TOUR_STEP_INDEX]}
+          anchor=".tourStepFixedContainer"
+        />
+      </div>
     </div>
   );
 }
