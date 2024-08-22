@@ -400,8 +400,7 @@ export function useOnSubmit({
         setSavedPackagePolicy(data!.item);
 
         const promptForAgentEnrollment =
-          agentPolicies.length > 0 &&
-          !agentCount &&
+          (createdPolicy || (agentPolicies.length > 0 && !agentCount)) &&
           !isAgentlessConfigured &&
           hasFleetAddAgentsPrivileges;
 
