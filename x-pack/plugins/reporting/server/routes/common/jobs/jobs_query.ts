@@ -40,13 +40,12 @@ export type ReportContent = Pick<ReportSource, 'status' | 'jobtype' | 'output'> 
 
 export interface JobsQueryFactory {
   list(
-    jobTypes: string[],
     user: ReportingUser,
     page: number,
     size: number,
     jobIds: string[] | null
   ): Promise<ReportApiJSON[]>;
-  count(jobTypes: string[], user: ReportingUser): Promise<number>;
+  count(user: ReportingUser): Promise<number>;
   get(user: ReportingUser, id: string): Promise<ReportApiJSON | void>;
   getError(id: string): Promise<string>;
   getDocumentPayload(doc: ReportApiJSON): Promise<Payload>;
@@ -74,7 +73,7 @@ export function jobsQueryFactory(
   }
 
   return {
-    async list(_jobTypes, user, page = 0, size = defaultSize, jobIds) {
+    async list(user, page = 0, size = defaultSize, jobIds) {
       const username = getUsername(user);
       const body = getSearchBody({
         size,
@@ -110,7 +109,7 @@ export function jobsQueryFactory(
       );
     },
 
-    async count(_jobTypes, user) {
+    async count(user) {
       const username = getUsername(user);
       const body = {
         query: {
