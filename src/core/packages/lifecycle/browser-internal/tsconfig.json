@@ -19,7 +19,7 @@
     "@kbn/core-security-browser-internal",
     "@kbn/core-user-profile-browser-internal",
     "@kbn/core-feature-flags-browser",
-    "@kbn/core-di-common-internal",
+    "@kbn/core-di-internal",
   ],
   "exclude": [
     "target/**/*",

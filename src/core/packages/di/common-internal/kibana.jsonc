@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/core-di-common-internal",
+  "id": "@kbn/core-di-internal",
   "owner": "@elastic/kibana-core",
   "group": "platform",
   "visibility": "private"

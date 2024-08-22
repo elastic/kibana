@@ -18,7 +18,7 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core-plugins-browser';
 import { ApplicationService } from '@kbn/core-application-browser';
-import { DiService } from '@kbn/core-di-common';
+import { DiService } from '@kbn/core-di';
 
 export function createPluginInitializerModule(
   context: PluginInitializerContext

@@ -4648,15 +4648,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-di-common-internal@link:src/core/packages/di/common-internal":
+"@kbn/core-di-internal@link:src/core/packages/di/common-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-di-common@link:src/core/packages/di/common":
+"@kbn/core-di-mocks@link:src/core/packages/di/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-di-server-mocks@link:src/core/packages/di/server-mocks":
+"@kbn/core-di@link:src/core/packages/di/common":
   version "0.0.0"
   uid ""
 

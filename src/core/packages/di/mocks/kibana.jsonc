@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/core-di-server-mocks",
+  "id": "@kbn/core-di-mocks",
   "owner": "@elastic/kibana-core",
   "group": "platform",
   "visibility": "shared",

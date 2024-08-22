@@ -15,7 +15,7 @@ import {
   AppMountParametersToken,
   IAppMount,
 } from '@kbn/core-application-browser';
-import { DiService, Global, OnSetup } from '@kbn/core-di-common';
+import { DiService, Global, OnSetup } from '@kbn/core-di';
 
 export const applicationModule = new ContainerModule(
   (bind, _unbind, _isBound, _rebind, _unbindAsync, onActivation) => {

@@ -24,8 +24,8 @@ import type {
   PrebootPlugin,
 } from '@kbn/core-plugins-server';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
-import { Setup, Start } from '@kbn/core-di-common';
-import { Contract } from '@kbn/core-di-common-internal';
+import { Setup, Start } from '@kbn/core-di';
+import { Contract } from '@kbn/core-di-internal';
 import {
   createPluginInitializerModule,
   createPluginSetupModule,
