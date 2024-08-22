@@ -16,7 +16,7 @@ import {
 } from '../data_quality_details/indices_details/pattern/index_check_flyout/index_properties/helpers';
 import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 import { getUnallowedValues } from './fetch_unallowed_values';
-import { getUnallowedValueRequestItems } from '../allowed_values/helpers';
+import { getUnallowedValueRequestItems } from './get_unallowed_value_request_items';
 import { EcsFlatTyped } from '../constants';
 
 let mockFetchMappings = jest.fn(

@@ -12,7 +12,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { v4 as uuidv4 } from 'uuid';
 
-import { getUnallowedValueRequestItems } from '../allowed_values/helpers';
+import { getUnallowedValueRequestItems } from './get_unallowed_value_request_items';
 import {
   getMappingsProperties,
   getSortedPartitionedFieldMetadata,
