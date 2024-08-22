@@ -51,7 +51,7 @@ export class BundleRemoteModule extends Module {
       exportsType: undefined,
     };
     this.buildInfo = {
-      strict: true,
+      strict: false,
       topLevelDeclarations: new Set(),
       module: __.outputOptions.module,
       exportsArgument: '__webpack_exports__',
@@ -79,7 +79,7 @@ export class BundleRemoteModule extends Module {
 
     return {
       sources,
-      runtimeRequirements: new Set([]),
+      runtimeRequirements: new Set(['module',  '__webpack_exports__', '__webpack_require__']),
       data,
     };
   }
