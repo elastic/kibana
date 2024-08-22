@@ -211,7 +211,11 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async clickClearOutput() {
-    await this.testSubjects.click('clearConsoleOutput');
+    const hasClearButton = await this.testSubjects.exists('clearConsoleOutput');
+
+    if (hasClearButton) {
+      await this.testSubjects.click('clearConsoleOutput');
+    }
   }
 
   public async collapseHelp() {

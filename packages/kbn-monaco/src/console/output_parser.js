@@ -26,28 +26,28 @@ export const createOutputParser = () => {
     addError = function (text) {
       errors.push({ text: text, offset: at });
     },
-    requests,
-    requestStartOffset,
-    requestEndOffset,
-    getLastRequest = function() {
-      return requests.length > 0 ? requests.pop() : {};
+    responses,
+    responseStartOffset,
+    responseEndOffset,
+    getLastResponse = function() {
+      return responses.length > 0 ? responses.pop() : {};
     },
-    addRequestStart = function() {
-      requestStartOffset = at - 1;
-      requests.push({ startOffset: requestStartOffset });
+    addResponseStart = function() {
+      responseStartOffset = at - 1;
+      responses.push({ startOffset: responseStartOffset });
     },
-    addRequestData = function(data) {
-      const lastRequest = getLastRequest();
-      const dataArray = lastRequest.data || [];
+    addResponseData = function(data) {
+      const lastResponse = getLastResponse();
+      const dataArray = lastResponse.data || [];
       dataArray.push(data);
-      lastRequest.data = dataArray;
-      requests.push(lastRequest);
-      requestEndOffset = at - 1;
+      lastResponse.data = dataArray;
+      responses.push(lastResponse);
+      responseEndOffset = at - 1;
     },
-    addRequestEnd = function() {
-      const lastRequest = getLastRequest();
-      lastRequest.endOffset = requestEndOffset;
-      requests.push(lastRequest);
+    addResponseEnd = function() {
+      const lastResponse = getLastResponse();
+      lastResponse.endOffset = responseEndOffset;
+      responses.push(lastResponse);
     },
     error = function (m) {
       throw {
@@ -293,17 +293,17 @@ export const createOutputParser = () => {
     }
   };
 
-  let request = function () {
+  let response = function () {
       white();
-      addRequestStart();
+      addResponseStart();
       if (ch == '{') {
         const parsedObject = object();
-        addRequestData(parsedObject);
+        addResponseData(parsedObject);
       } else if (ch == '[') {
         const parsedArray = array();
         parsedArray.forEach(item => {
           if (typeof item === 'object') {
-            addRequestData(item);
+            addResponseData(item);
           } else {
             error('Array elements must be objects');
           }
@@ -311,19 +311,19 @@ export const createOutputParser = () => {
       } else {
         error('Invalid input');
       }
-      // multi doc request
+      // multi doc response
       strictWhite(); // advance to one new line
       newLine();
       strictWhite();
       while (ch == '{') {
         // another object
         const parsedObject = object();
-        addRequestData(parsedObject);
+        addResponseData(parsedObject);
         strictWhite();
         newLine();
         strictWhite();
       }
-      addRequestEnd();
+      addResponseEnd();
     },
     comment = function () {
       while (ch == '#') {
@@ -333,7 +333,7 @@ export const createOutputParser = () => {
         white();
       }
     },
-    multi_request = function () {
+    multi_response = function () {
       while (ch && ch != '') {
         white();
         if (!ch) {
@@ -345,7 +345,7 @@ export const createOutputParser = () => {
           if (!ch) {
             continue;
           }
-          request();
+          response();
           white();
         } catch (e) {
           addError(e.message);
@@ -364,15 +364,15 @@ export const createOutputParser = () => {
     text = source;
     at = 0;
     errors = [];
-    requests = [];
+    responses = [];
     next();
-    multi_request();
+    multi_response();
     white();
     if (ch) {
       addError('Syntax error');
     }
 
-    result = { errors, requests };
+    result = { errors, responses };
 
     return typeof reviver === 'function'
       ? (function walk(holder, key) {

@@ -80,6 +80,7 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
   );
 
   const data = getResponseWithMostSevereStatusCode(requestData) ?? requestError;
+  const isLoading = loading || requestInFlight;
 
   if (!currentTextObject) return null;
 
@@ -118,48 +119,56 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
                 ) : (
                   <EditorOutput />
                 )
-              ) : loading || requestInFlight ? (
+              ) : isLoading ? (
                 <EditorContentSpinner />
               ) : (
                 <OutputPanelEmptyState />
               )}
             </EuiSplitPanel.Inner>
-            <EuiSplitPanel.Inner
-              grow={false}
-              paddingSize="m"
-              css={{
-                backgroundColor: euiThemeVars.euiFormBackgroundColor,
-              }}
-            >
-              <EuiFlexGroup gutterSize="none">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    size="xs"
-                    color="primary"
-                    data-test-subj="clearConsoleOutput"
-                    onClick={() => dispatch({ type: 'cleanRequest', payload: undefined })}
-                  >
-                    Clear this output
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <NetworkRequestStatusBar
-                    requestInProgress={requestInFlight}
-                    requestResult={
-                      data
-                        ? {
-                            method: data.request.method.toUpperCase(),
-                            endpoint: data.request.path,
-                            statusCode: data.response.statusCode,
-                            statusText: data.response.statusText,
-                            timeElapsedMs: data.response.timeMs,
-                          }
-                        : undefined
-                    }
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiSplitPanel.Inner>
+
+            {(data || isLoading) && (
+              <EuiSplitPanel.Inner
+                grow={false}
+                paddingSize="m"
+                css={{
+                  backgroundColor: euiThemeVars.euiFormBackgroundColor,
+                }}
+              >
+                <EuiFlexGroup gutterSize="none">
+                  {data ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        size="xs"
+                        color="primary"
+                        data-test-subj="clearConsoleOutput"
+                        onClick={() => dispatch({ type: 'cleanRequest', payload: undefined })}
+                      >
+                        Clear this output
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  ) : (
+                    <EuiFlexItem grow={false} />
+                  )}
+
+                  <EuiFlexItem>
+                    <NetworkRequestStatusBar
+                      requestInProgress={requestInFlight}
+                      requestResult={
+                        data
+                          ? {
+                              method: data.request.method.toUpperCase(),
+                              endpoint: data.request.path,
+                              statusCode: data.response.statusCode,
+                              statusText: data.response.statusText,
+                              timeElapsedMs: data.response.timeMs,
+                            }
+                          : undefined
+                      }
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiSplitPanel.Inner>
+            )}
           </EuiSplitPanel.Outer>
         </Panel>
       </PanelsContainer>

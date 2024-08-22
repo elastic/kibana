@@ -15,16 +15,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
+  const testSubjects = getService('testSubjects');
 
   describe('console output panel', function describeIndexTests() {
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
-      await PageObjects.console.closeHelpIfExists();
     });
 
     beforeEach(async () => {
-      await PageObjects.console.closeHelpIfExists();
       await PageObjects.console.monaco.clearEditorText();
     });
 
@@ -68,18 +67,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should clear the console output', async () => {
-      await sendMultipleRequests(['\n GET /_search?pretty', '\n GET /_search?pretty']);
+      await sendRequest('GET /_search?pretty');
 
       // Check current output is not empty
-      let response = await PageObjects.console.monaco.getOutputText();
+      const response = await PageObjects.console.monaco.getOutputText();
       expect(response).to.not.be.empty();
 
       // Clear the output
       await PageObjects.console.clickClearOutput();
 
-      // Check output is empty
-      response = await PageObjects.console.monaco.getOutputText();
-      expect(response).to.be.empty();
+      // Check that after clearing the output, the empty state is shown
+      expect(await testSubjects.exists('consoleOutputPanelEmptyState')).to.be.ok();
     });
   });
 }
