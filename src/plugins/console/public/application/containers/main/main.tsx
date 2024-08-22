@@ -61,19 +61,34 @@ export function Main({ isEmbeddable = false }: MainProps) {
       footerAction:
         // TODO: Fix the index after adding the tour step for files
         tourState.currentTourStep === tourStepProps.length - 1 ? (
-          <EuiButton color="success" size="s" onClick={() => actions.finishTour()}>
-            {i18n.translate('console.tour.finishTourButton', {
-              defaultMessage: 'Finish tour',
+          <EuiButton
+            color="success"
+            size="s"
+            onClick={() => actions.finishTour()}
+            data-test-subj="consoleCompleteTourButton"
+          >
+            {i18n.translate('console.tour.completeTourButton', {
+              defaultMessage: 'Complete',
             })}
           </EuiButton>
         ) : (
           [
-            <EuiButtonEmpty size="s" color="text" onClick={() => actions.finishTour()}>
-              {i18n.translate('console.tour.closeTourButton', {
-                defaultMessage: 'Close tour',
+            <EuiButtonEmpty
+              size="s"
+              color="text"
+              onClick={() => actions.finishTour()}
+              data-test-subj="consoleSkipTourButton"
+            >
+              {i18n.translate('console.tour.skipTourButton', {
+                defaultMessage: 'Skip tour',
               })}
             </EuiButtonEmpty>,
-            <EuiButton color="success" size="s" onClick={nextTourStep}>
+            <EuiButton
+              color="success"
+              size="s"
+              onClick={nextTourStep}
+              data-test-subj="consoleNextTourStepButton"
+            >
               {i18n.translate('console.tour.nextStepButton', {
                 defaultMessage: 'Next',
               })}

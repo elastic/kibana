@@ -26,6 +26,7 @@ export function getTourSteps() {
           'This is our UI for interacting with Elasticsearch clusters using QueryDSL. Easily run queries, manage settings, and view search results.',
       }),
       anchorPosition: 'upLeft',
+      'data-test-subj': 'shellTourStep',
       ...commonProps,
     },
     {
@@ -38,6 +39,7 @@ export function getTourSteps() {
           'Enter a request in this input pane, and the response will be shown in the neighboring output pane. For more details, visit our QueryDSL documentation.',
       }),
       anchorPosition: 'leftUp',
+      'data-test-subj': 'editorTourStep',
       css: {
         position: 'absolute',
         top: '40%',
@@ -56,6 +58,7 @@ export function getTourSteps() {
           'Enter a request in this input pane, and the response will be shown in the neighboring output pane. For more details, visit our QueryDSL documentation.',
       }),
       anchorPosition: 'leftUp',
+      'data-test-subj': 'historyTourStep',
       offset: 15,
       ...commonProps,
     },
@@ -69,6 +72,7 @@ export function getTourSteps() {
           'The history panel keeps track of your past queries, making it easy to review and rerun them. ',
       }),
       anchorPosition: 'leftUp',
+      'data-test-subj': 'configTourStep',
       offset: 15,
       ...commonProps,
     },
@@ -82,6 +86,7 @@ export function getTourSteps() {
           'Fine-tune your Console’s settings and manage variables to personalize your workflow to suit your work style.',
       }),
       anchorPosition: 'upRight',
+      'data-test-subj': 'filesTourStep',
       ...commonProps,
     },
   ] as EuiStatelessTourSteps;

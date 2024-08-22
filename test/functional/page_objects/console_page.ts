@@ -206,6 +206,18 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('sendRequestButton');
   }
 
+  public async clickSkipTour() {
+    await this.testSubjects.click('consoleSkipTourButton');
+  }
+
+  public async clickNextTourStep() {
+    await this.testSubjects.click('consoleNextTourStepButton');
+  }
+
+  public async clickCompleteTour() {
+    await this.testSubjects.click('consoleCompleteTourButton');
+  }
+
   public async collapseHelp() {
     await this.testSubjects.click('help-close-button');
   }
