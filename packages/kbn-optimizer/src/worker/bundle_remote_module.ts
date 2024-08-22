@@ -47,7 +47,7 @@ export class BundleRemoteModule extends Module {
   build(_: any, __: any, ___: any, ____: any, callback: () => void) {
     // this.built = true;
     this.buildMeta = {
-      async: true,
+      async: false,
       exportsType: undefined,
     };
     this.buildInfo = {
