@@ -16,7 +16,7 @@ import {
   EuiHorizontalRule,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { MAIN_PANEl_LABELS } from './i18n';
+import { MAIN_PANEL_LABELS } from './i18n';
 import { NavIconButton } from './nav_icon_button';
 import { Editor } from '../editor';
 import { TopNavMenu, SomethingWentWrongCallout } from '../../components';
@@ -50,7 +50,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
       >
         <EuiFlexItem grow={false}>
           <EuiTitle className="euiScreenReaderOnly">
-            <h1>{MAIN_PANEl_LABELS.consolePageHeading}</h1>
+            <h1>{MAIN_PANEL_LABELS.consolePageHeading}</h1>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -70,27 +70,27 @@ export function Main({ isEmbeddable = false }: MainProps) {
                   <NavIconButton
                     iconType="save"
                     onClick={() => {}}
-                    ariaLabel={MAIN_PANEl_LABELS.importExportButton}
+                    ariaLabel={MAIN_PANEL_LABELS.importExportButton}
                     dataTestSubj="consoleImportExportButton"
-                    toolTipContent={MAIN_PANEl_LABELS.importExportButton}
+                    toolTipContent={MAIN_PANEL_LABELS.importExportButton}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <NavIconButton
                     iconType="keyboard"
                     onClick={() => {}}
-                    ariaLabel={MAIN_PANEl_LABELS.shortcutsButton}
+                    ariaLabel={MAIN_PANEL_LABELS.shortcutsButton}
                     dataTestSubj="consoleShortcutsButton"
-                    toolTipContent={MAIN_PANEl_LABELS.shortcutsButton}
+                    toolTipContent={MAIN_PANEL_LABELS.shortcutsButton}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <NavIconButton
                     iconType="questionInCircle"
                     onClick={() => {}}
-                    ariaLabel={MAIN_PANEl_LABELS.helpButton}
+                    ariaLabel={MAIN_PANEL_LABELS.helpButton}
                     dataTestSubj="consoleHelpButton"
-                    toolTipContent={MAIN_PANEl_LABELS.helpButton}
+                    toolTipContent={MAIN_PANEL_LABELS.helpButton}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -104,7 +104,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
             <EuiHorizontalRule margin="none" />
             <EuiSplitPanel.Inner paddingSize="xs" grow={false}>
               <EuiButtonEmpty onClick={() => {}} iconType="editorCodeBlock" size="xs" color="text">
-                {MAIN_PANEl_LABELS.variablesButton}
+                {MAIN_PANEL_LABELS.variablesButton}
               </EuiButtonEmpty>
             </EuiSplitPanel.Inner>
           </EuiSplitPanel.Outer>

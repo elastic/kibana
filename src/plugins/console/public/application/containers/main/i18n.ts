@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const MAIN_PANEl_LABELS = {
+export const MAIN_PANEL_LABELS = {
   consolePageHeading: i18n.translate('console.pageHeading', {
     defaultMessage: 'Console',
   }),
