@@ -15,3 +15,20 @@ export { sendRequest, collapseLiteralStrings, expandLiteralStrings };
 export { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
 export { toMountPoint } from '@kbn/react-kibana-mount';
+
+export {
+  useForm,
+  Form,
+  UseField,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+
+export type {
+  FieldConfig,
+  FormConfig,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+
+export { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+
+export {
+  TextField,
+} from '@kbn/es-ui-shared-plugin/static/forms/components';

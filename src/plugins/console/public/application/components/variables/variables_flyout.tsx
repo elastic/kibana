@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useCallback, ChangeEvent, FormEvent } from 'react';
+import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { v4 as uuidv4 } from 'uuid';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -17,16 +18,24 @@ import {
   EuiButton,
   EuiBasicTable,
   EuiFieldText,
-  useGeneratedHtmlId,
   EuiFormRow,
   EuiButtonIcon,
   EuiSpacer,
   EuiText,
   EuiPanel,
-  EuiForm,
   EuiButtonEmpty,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
+
+import {
+  useForm,
+  Form,
+  UseField,
+  TextField,
+  FieldConfig,
+  fieldValidators,
+  FormConfig,
+} from '../../../shared_imports';
 
 import * as utils from './utils';
 
@@ -41,14 +50,40 @@ export interface DevToolsVariable {
   value: string;
 }
 
+const fieldsConfig: Record<string, FieldConfig>  = {
+  variableName: {
+    label: i18n.translate('console.variablesPage.form.variableNameFieldLabel', {
+      defaultMessage: 'Variable name',
+    }),
+    validations: [
+      {
+        validator: fieldValidators.emptyField(
+          i18n.translate('console.variablesPage.form.variableNameRequiredLabel', {
+            defaultMessage: 'Variable name is required',
+          })
+        ),
+      },
+    ],
+  },
+  value: {
+    label: i18n.translate('console.variablesPage.form.valueFieldLabel', {
+      defaultMessage: 'Value',
+    }),
+    validations: [
+      {
+        validator: fieldValidators.emptyField(
+          i18n.translate('console.variablesPage.form.valueRequiredLabel', {
+            defaultMessage: 'Value is required',
+          })
+        ),
+      },
+    ],
+  },
+};
+
 export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => {
   const [isAddingVariable, setIsAddingVariable] = useState(false);
   const [variables, setVariables] = useState<DevToolsVariable[]>(props.variables);
-  const formId = useGeneratedHtmlId({ prefix: '__console' });
-
-  const addNewVariable = useCallback(() => {
-    setVariables((v) => [...v, utils.generateEmptyVariableField()]);
-  }, []);
 
   const deleteVariable = useCallback(
     (id: string) => {
@@ -58,22 +93,19 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
     [variables]
   );
 
-  const onSubmit = useCallback(
-    (e: FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      props.onSaveVariables(variables.filter(({ name, value }) => name.trim() && value));
-    },
-    [props, variables]
-  );
+  const onSubmit: FormConfig['onSubmit'] = async (data, isValid) => {
+    if (isValid) {
+      setVariables((v: DevToolsVariable[]) => [...v, {
+        ...data,
+        id: uuidv4(),
+      } as DevToolsVariable]);
 
-  const onChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>, id: string) => {
-      const { name, value } = event.target;
-      const editedVariables = utils.editVariable(name, value, id, variables);
-      setVariables(editedVariables);
-    },
-    [variables]
-  );
+      setIsAddingVariable(false);
+    }
+  };
+
+  const { form } = useForm({ onSubmit });
+
 
   const columns: Array<EuiBasicTableColumn<DevToolsVariable>> = [
     {
@@ -99,7 +131,7 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
               data-test-subj="variablesNameInput"
               name="name"
               value={name}
-              onChange={(e) => onChange(e, id)}
+              onChange={(e) => console.log({ e, id })}
               isInvalid={isInvalid}
               fullWidth={true}
               aria-label={i18n.translate(
@@ -122,7 +154,7 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
         <EuiFieldText
           data-test-subj="variablesValueInput"
           name="value"
-          onChange={(e) => onChange(e, id)}
+          onChange={(e) => console.log({ e, id })}
           value={value}
           aria-label={i18n.translate('console.variablesPage.variablesTable.valueInput.ariaLabel', {
             defaultMessage: 'Variable value',
@@ -164,7 +196,7 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
       <EuiBasicTable items={variables} columns={columns} />
       {isAddingVariable && (
         <>
-          <EuiPanel paddingSize="l" hasShadow={false} borderRadius="none">
+          <EuiPanel paddingSize="l" hasShadow={false} borderRadius="none" grow={false}>
             <EuiTitle size="xs">
               <h2>
                 <FormattedMessage
@@ -175,17 +207,54 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
             </EuiTitle>
             <EuiSpacer size="l" />
 
-            <EuiForm id={formId} component="form" onSubmit={onSubmit}>
-              <EuiButtonEmpty
-                onClick={() => {}}
-              >
-                <FormattedMessage id="console.variablesPage.addNew.cancelButton" defaultMessage="Cancel" />
-              </EuiButtonEmpty>
 
-              <EuiButton fill type="submit" form={formId}>
-                <FormattedMessage id="console.variablesPage.addNew.submitButton" defaultMessage="Save changes" />
-              </EuiButton>
-            </EuiForm>
+            <Form form={form}>
+              <UseField
+                config={fieldsConfig.variableName}
+                path="name"
+                component={TextField}
+                componentProps={{
+                  euiFieldProps: {
+                    placeholder: i18n.translate('console.variablesPage.form.namePlaceholderLabel', {
+                      defaultMessage: 'exampleName',
+                    }),
+                    prepend: '${',
+                    append: '}',
+                  }
+                }}
+              />
+
+              <UseField
+                config={fieldsConfig.variableName}
+                path="value"
+                component={TextField}
+                componentProps={{
+                  euiFieldProps: {
+                    placeholder: i18n.translate('console.variablesPage.form.valuePlaceholderLabel', {
+                      defaultMessage: 'exampleValue',
+                    }),
+                  }
+                }}
+              />
+
+              <EuiSpacer size="l" />
+
+              <EuiFlexGroup justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    onClick={() => setIsAddingVariable(false)}
+                  >
+                    <FormattedMessage id="console.variablesPage.addNew.cancelButton" defaultMessage="Cancel" />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <EuiButton fill iconType="save" onClick={form.submit}>
+                    <FormattedMessage id="console.variablesPage.addNew.submitButton" defaultMessage="Save changes" />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </Form>
           </EuiPanel>
         </>
       )}
@@ -201,14 +270,6 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
           <FormattedMessage id="console.variablesPage.addButtonLabel" defaultMessage="Add variable" />
         </EuiButton>
       </div>
-
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiButton fill data-test-subj="variablesSaveButton" type="submit" form={formId}>
-            <FormattedMessage id="console.variablesPage.saveButtonLabel" defaultMessage="Save" />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
     </>
   );
 };
