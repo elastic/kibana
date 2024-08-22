@@ -22,6 +22,17 @@ import { getSampleDashboardPanel } from '../../../mocks';
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardCreationOptions } from '../dashboard_container_factory';
 import { DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
+import { BehaviorSubject } from 'rxjs';
+
+const mockControlGroupApi = {
+  untilInitialized: async () => {},
+  filters$: new BehaviorSubject(undefined),
+  query$: new BehaviorSubject(undefined),
+  timeslice$: new BehaviorSubject(undefined),
+  dataViews: new BehaviorSubject(undefined),
+  unsavedChanges: new BehaviorSubject(undefined),
+} as unknown as ControlGroupApi;
 
 test("doesn't throw error when no data views are available", async () => {
   pluginServices.getServices().data.dataViews.defaultDataViewExists = jest
@@ -409,6 +420,7 @@ test('creates new embeddable with incoming embeddable if id does not match exist
       },
     }),
   });
+  dashboard?.setControlGroupApi(mockControlGroupApi);
 
   // flush promises
   await new Promise((r) => setTimeout(r, 1));
@@ -469,6 +481,7 @@ test('creates new embeddable with specified size if size is provided', async () 
       },
     }),
   });
+  dashboard?.setControlGroupApi(mockControlGroupApi);
 
   // flush promises
   await new Promise((r) => setTimeout(r, 1));
@@ -524,6 +537,7 @@ test('searchSessionId is updated prior to child embeddable parent subscription e
       createSessionRestorationDataProvider: () => {},
     } as unknown as DashboardCreationOptions['searchSessionSettings'],
   });
+  dashboard?.setControlGroupApi(mockControlGroupApi);
   expect(dashboard).toBeDefined();
   const embeddable = await dashboard!.addNewEmbeddable<
     ContactCardEmbeddableInput,

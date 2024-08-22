@@ -82,6 +82,9 @@ export abstract class Container<
     const init$ = this.getInput$().pipe(
       take(1),
       mergeMap(async (currentInput) => {
+        if (settings?.untilContainerInitialized) {
+          await settings.untilContainerInitialized();
+        }
         const initPromise = this.initializeChildEmbeddables(currentInput, settings);
         if (awaitingInitialize) await initPromise;
       })
@@ -93,14 +96,7 @@ export abstract class Container<
       .pipe(pairwise());
 
     this.subscription = init$
-      .pipe(
-        switchMap(async () => {
-          if (settings?.untilContainerInitialized) {
-            await settings.untilContainerInitialized();
-          }
-        }),
-        combineLatestWith(update$)
-      )
+      .pipe(combineLatestWith(update$))
       .subscribe(([_, [{ panels: prevPanels }, { panels: currentPanels }]]) => {
         this.maybeUpdateChildren(currentPanels, prevPanels);
       });
@@ -463,9 +459,6 @@ export abstract class Container<
     initialInput: TContainerInput,
     initializeSettings?: EmbeddableContainerSettings
   ) {
-    if (initializeSettings?.untilContainerInitialized) {
-      await initializeSettings.untilContainerInitialized();
-    }
     let initializeOrder = Object.keys(initialInput.panels);
     if (initializeSettings?.childIdInitializeOrder) {
       const initializeOrderSet = new Set<string>();

@@ -113,6 +113,7 @@ export function InternalDashboardTopNav({
   const query = dashboard.select((state) => state.explicitInput.query);
   const title = dashboard.select((state) => state.explicitInput.title);
 
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const allDataViews = useStateFromPublishingSubject(dashboard.dataViews);
 
   const dashboardTitle = useMemo(() => {
@@ -382,6 +383,7 @@ export function InternalDashboardTopNav({
     hasRunMigrations,
     showWriteControls,
     managed,
+    isPopoverOpen,
     dashboard,
     maybeRedirect,
   ]);
