@@ -55,7 +55,8 @@
     "@kbn/server-route-repository-utils",
     "@kbn/core-analytics-browser",
     "@kbn/core-lifecycle-browser",
-    "@kbn/core-notifications-browser"
+    "@kbn/core-notifications-browser",
+    "@kbn/rison"
   ],
   "exclude": [
     "target/**/*"
