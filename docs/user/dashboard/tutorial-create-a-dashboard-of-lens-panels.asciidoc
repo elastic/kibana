@@ -292,7 +292,7 @@ Add a panel title:
 
 . Open the *Visualization type* dropdown, then select *Treemap*.
 
-. From the *Available fields* list, drag *Records* to the *Size by* field in the layer pane. 
+. From the *Available fields* list, drag *Records* to the *Metric* field in the layer pane. 
 
 . In the layer pane, click *Add or drag-and-drop a field* for *Group by*.
 
