@@ -72,7 +72,7 @@
     "@kbn/react-mute-legacy-root-warning",
     "@kbn/core-pricing-browser-internal",
     "@kbn/core-pricing-browser-mocks",
-    "@kbn/core-di-common-internal",
+    "@kbn/core-di-internal",
   ],
   "exclude": [
     "target/**/*",

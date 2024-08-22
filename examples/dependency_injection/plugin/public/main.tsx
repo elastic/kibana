@@ -17,7 +17,7 @@ import {
   AppMountParametersToken,
   AppUnmount,
 } from '@kbn/core-application-browser';
-import { DiService, type CoreDiServiceStart } from '@kbn/core-di-common';
+import { DiService, type CoreDiServiceStart } from '@kbn/core-di';
 import { App } from './app';
 
 @injectable()

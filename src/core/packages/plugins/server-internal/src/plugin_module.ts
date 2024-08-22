@@ -18,7 +18,7 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core-plugins-server';
 import { RouterService } from '@kbn/core-http-server';
-import { DiService } from '@kbn/core-di-common';
+import { DiService } from '@kbn/core-di';
 
 export function createCoreModule() {
   return new ContainerModule(() => {});
