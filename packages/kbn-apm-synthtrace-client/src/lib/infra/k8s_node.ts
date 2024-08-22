@@ -46,7 +46,7 @@ export interface K8sNodeMetricsDocument extends K8sNodeDocument {
 
 class K8sNodeMetrics extends Serializable<K8sNodeMetricsDocument> {}
 
-export function k8sNode(name: string, podUid: string): K8sNode {
+export function k8sNode(name: string, podUid: string) {
   return new K8sNode({
     'kubernetes.node.name': name,
     'kubernetes.pod.uid': podUid,

@@ -202,8 +202,8 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     async getMetadataAppliedFilter() {
       const filter = await testSubjects.find(
         `filter-badge-${stringHash(
-          'host.hostname: host-1'
-        )} filter filter-enabled filter-key-host.hostname filter-value-host-1 filter-unpinned filter-id-0`
+          'host.name: host-1'
+        )} filter filter-enabled filter-key-host.name filter-value-host-1 filter-unpinned filter-id-0`
       );
       return filter.getVisibleText();
     },

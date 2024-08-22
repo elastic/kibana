@@ -489,7 +489,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               await pageObjects.header.waitUntilLoadingHasFinished();
 
               const addedFilter = await pageObjects.assetDetails.getMetadataAppliedFilter();
-              expect(addedFilter).to.contain('host.hostname: host-1');
+              expect(addedFilter).to.contain('host.name: host-1');
               const removeFilterExists =
                 await pageObjects.assetDetails.metadataRemoveFilterExists();
               expect(removeFilterExists).to.be(true);
