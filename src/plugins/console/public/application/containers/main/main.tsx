@@ -21,7 +21,7 @@ interface MainProps {
 }
 
 export function Main({ isEmbeddable = false }: MainProps) {
-  const [selectedTab, setSelectedTab] = useState(SHELL_TAB_ID);
+  const [selectedTab, setSelectedTab] = useState(CONFIG_TAB_ID);
 
   const { done, error, retry } = useDataInit();
 

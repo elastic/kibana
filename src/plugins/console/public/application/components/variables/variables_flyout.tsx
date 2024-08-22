@@ -17,13 +17,14 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiBasicTable,
-  EuiFieldText,
-  EuiFormRow,
   EuiButtonIcon,
   EuiSpacer,
   EuiText,
   EuiPanel,
   EuiButtonEmpty,
+  EuiCode,
+  useGeneratedHtmlId,
+  EuiConfirmModal,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 
@@ -55,6 +56,8 @@ const fieldsConfig: Record<string, FieldConfig>  = {
     label: i18n.translate('console.variablesPage.form.variableNameFieldLabel', {
       defaultMessage: 'Variable name',
     }),
+    // TODO: Only letters, numbers and underscores should be allowed
+    // const isInvalid = !utils.isValidVariableName(name);
     validations: [
       {
         validator: fieldValidators.emptyField(
@@ -83,14 +86,17 @@ const fieldsConfig: Record<string, FieldConfig>  = {
 
 export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => {
   const [isAddingVariable, setIsAddingVariable] = useState(false);
+  const [deleteModalForVariable, setDeleteModalForVariable] = useState<string | null>(null);
   const [variables, setVariables] = useState<DevToolsVariable[]>(props.variables);
+  const deleteModalTitleId = useGeneratedHtmlId();
 
   const deleteVariable = useCallback(
     (id: string) => {
       const updatedVariables = utils.deleteVariable(variables, id);
       setVariables(updatedVariables);
+      setDeleteModalForVariable(null);
     },
-    [variables]
+    [variables, setDeleteModalForVariable]
   );
 
   const onSubmit: FormConfig['onSubmit'] = async (data, isValid) => {
@@ -106,42 +112,15 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
 
   const { form } = useForm({ onSubmit });
 
-
   const columns: Array<EuiBasicTableColumn<DevToolsVariable>> = [
     {
       field: 'name',
       name: i18n.translate('console.variablesPage.variablesTable.columns.variableHeader', {
         defaultMessage: 'Variable name',
       }),
-      render: (name, { id }) => {
-        const isInvalid = !utils.isValidVariableName(name);
+      render: (name: string) => {
         return (
-          <EuiFormRow
-            isInvalid={isInvalid}
-            error={[
-              <FormattedMessage
-                id="console.variablesPage.variablesTable.variableInputError.validCharactersText"
-                defaultMessage="Only letters, numbers and underscores are allowed"
-              />,
-            ]}
-            fullWidth={true}
-            css={{ flexGrow: 1 }}
-          >
-            <EuiFieldText
-              data-test-subj="variablesNameInput"
-              name="name"
-              value={name}
-              onChange={(e) => console.log({ e, id })}
-              isInvalid={isInvalid}
-              fullWidth={true}
-              aria-label={i18n.translate(
-                'console.variablesPage.variablesTable.variableInput.ariaLabel',
-                {
-                  defaultMessage: 'Variable name',
-                }
-              )}
-            />
-          </EuiFormRow>
+          <EuiCode>{`\$\{${name}\}`}</EuiCode>
         );
       },
     },
@@ -150,30 +129,36 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
       name: i18n.translate('console.variablesPage.variablesTable.columns.valueHeader', {
         defaultMessage: 'Value',
       }),
-      render: (value, { id }) => (
-        <EuiFieldText
-          data-test-subj="variablesValueInput"
-          name="value"
-          onChange={(e) => console.log({ e, id })}
-          value={value}
-          aria-label={i18n.translate('console.variablesPage.variablesTable.valueInput.ariaLabel', {
-            defaultMessage: 'Variable value',
-          })}
-        />
+      render: (value: string) => (
+        <EuiCode>{value}</EuiCode>
       ),
     },
     {
       field: 'id',
       name: '',
-      width: '5%',
+      width: '80px',
       render: (id: string) => (
-        <EuiButtonIcon
-          iconType="trash"
-          aria-label="Delete"
-          color="danger"
-          onClick={() => deleteVariable(id)}
-          data-test-subj="variablesRemoveButton"
-        />
+        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="pencil"
+              aria-label="Edit"
+              color="primary"
+              onClick={() => {}}
+              data-test-subj="variableEditButton"
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="trash"
+              aria-label="Delete"
+              color="danger"
+              onClick={() => setDeleteModalForVariable(id)}
+              data-test-subj="variablesRemoveButton"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ),
     },
   ];
@@ -193,7 +178,14 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
       </EuiText>
       <EuiSpacer size="l" />
 
-      <EuiBasicTable items={variables} columns={columns} />
+      <EuiBasicTable
+        items={variables}
+        columns={columns}
+        noItemsMessage={i18n.translate('console.variablesPage.table.noItemsMessage', {
+          defaultMessage: 'No variables have been added yet',
+        })}
+      />
+
       {isAddingVariable && (
         <>
           <EuiPanel paddingSize="l" hasShadow={false} borderRadius="none" grow={false}>
@@ -259,8 +251,9 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
         </>
       )}
 
+      <EuiSpacer size="m" />
+
       <div>
-        <EuiSpacer size="m" />
         <EuiButton
           data-test-subj="variablesAddButton"
           iconType="plusInCircle"
@@ -270,6 +263,24 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
           <FormattedMessage id="console.variablesPage.addButtonLabel" defaultMessage="Add variable" />
         </EuiButton>
       </div>
+
+      {deleteModalForVariable && (
+        <EuiConfirmModal
+          aria-labelledby={deleteModalTitleId}
+          title={i18n.translate('console.variablesPage.deleteModal.title', {
+            defaultMessage: 'Are you sure?',
+          })}
+          onCancel={() => setDeleteModalForVariable(null)}
+          onConfirm={() => deleteVariable(deleteModalForVariable)}
+          cancelButtonText="Cancel"
+          confirmButtonText="Delete variable"
+          buttonColor="danger"
+        >
+          <p>
+            <FormattedMessage id="console.variablesPage.deleteModal.description" defaultMessage="Deleting a variable cannot be reverted." />
+          </p>
+        </EuiConfirmModal>
+      )}
     </>
   );
 };
