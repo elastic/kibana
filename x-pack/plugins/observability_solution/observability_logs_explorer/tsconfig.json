@@ -49,6 +49,7 @@
     "@kbn/es-query",
     "@kbn/core-analytics-browser",
     "@kbn/react-hooks",
+    "@kbn/logs-data-access-plugin",
   ],
   "exclude": [
     "target/**/*"

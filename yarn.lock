@@ -3680,6 +3680,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-content-insights-public@link:packages/content-management/content_insights/content_insights_public":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-management-content-insights-server@link:packages/content-management/content_insights/content_insights_server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-examples-plugin@link:examples/content_management_examples":
   version "0.0.0"
   uid ""
@@ -6208,6 +6216,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/search-assistant@link:x-pack/plugins/search_assistant":
+  version "0.0.0"
+  uid ""
+
 "@kbn/search-connectors-plugin@link:x-pack/plugins/search_connectors":
   version "0.0.0"
   uid ""
@@ -6264,6 +6276,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security-authorization-core@link:x-pack/packages/security/authorization_core":
+  version "0.0.0"
+  uid ""
+
 "@kbn/security-form-components@link:x-pack/packages/security/form_components":
   version "0.0.0"
   uid ""
@@ -6285,6 +6301,10 @@
   uid ""
 
 "@kbn/security-plugin@link:x-pack/plugins/security":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-role-management-model@link:x-pack/packages/security/role_management_model":
   version "0.0.0"
   uid ""
 
@@ -14190,7 +14210,7 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^127.0.2:
+chromedriver@^127.0.3:
   version "127.0.3"
   resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-127.0.3.tgz#33abca5924eb809e0e6ef2dd30eaa8cf7dba58d4"
   integrity sha512-trUHkFt0n7jGzNOgkO1srOJfz50kKyAGJ016PyV0hrtyKNIGnOC9r3Jlssz19UoEjSzI/1g2shEiIFtDbBYVaw==
