@@ -131,7 +131,9 @@ module.exports = {
   },
 
   plugins: [
-    new NodePolyfillPlugin(),
+    new NodePolyfillPlugin({
+      additionalAliases: ['process'],
+    }),
     new MiniCssExtractPlugin({
       filename: '[name].css',
     }),

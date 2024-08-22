@@ -47,6 +47,8 @@ export function getWebpackConfig(
     devtool: worker.dist ? false : 'cheap-source-map',
     profile: worker.profileWebpack,
 
+    target: 'web',
+
     output: {
       hashFunction: 'sha1',
       path: bundle.outputDir,
@@ -79,7 +81,9 @@ export function getWebpackConfig(
     },
 
     plugins: [
-      new NodePolyfillPlugin(),
+      new NodePolyfillPlugin({
+        additionalAliases: ['process'],
+      }),
       new CleanWebpackPlugin(),
       new BundleRemotesPlugin(bundle, bundleRemotes),
       new PopulateBundleCachePlugin(worker, bundle, parseDllManifest(DLL_MANIFEST)),
