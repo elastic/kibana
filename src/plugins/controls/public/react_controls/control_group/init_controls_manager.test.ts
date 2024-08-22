@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { DefaultDataControlState } from '../controls/data_controls/types';
 import { DefaultControlApi } from '../controls/types';
 import { initControlsManager, getLastUsedDataViewId } from './init_controls_manager';
+import { ControlPanelState } from './types';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('delta'),
@@ -185,5 +187,53 @@ describe('getLastUsedDataViewId', () => {
       alpha: { type: 'testControl', order: 0 },
     });
     expect(dataViewId).toBeUndefined();
+  });
+});
+
+describe('getNewControlState', () => {
+  test('should contain defaults when there are no existing controls', () => {
+    const controlsManager = initControlsManager({}, DEFAULT_DATA_VIEW_ID);
+    expect(controlsManager.getNewControlState()).toEqual({
+      grow: true,
+      width: 'medium',
+      dataViewId: DEFAULT_DATA_VIEW_ID,
+    });
+  });
+
+  test('should start with defaults if there are existing controls', () => {
+    const controlsManager = initControlsManager(
+      {
+        alpha: {
+          type: 'testControl',
+          order: 1,
+          dataViewId: 'myOtherDataViewId',
+          width: 'small',
+          grow: false,
+        } as ControlPanelState & Pick<DefaultDataControlState, 'dataViewId'>,
+      },
+      DEFAULT_DATA_VIEW_ID
+    );
+    expect(controlsManager.getNewControlState()).toEqual({
+      grow: true,
+      width: 'medium',
+      dataViewId: 'myOtherDataViewId',
+    });
+  });
+
+  test('should contain values of last added control', () => {
+    const controlsManager = initControlsManager({}, DEFAULT_DATA_VIEW_ID);
+    controlsManager.api.addNewPanel({
+      panelType: 'testControl',
+      initialState: {
+        grow: false,
+        width: 'small',
+        dataViewId: 'myOtherDataViewId',
+      },
+    });
+    expect(controlsManager.getNewControlState()).toEqual({
+      grow: false,
+      width: 'small',
+      dataViewId: 'myOtherDataViewId',
+    });
   });
 });
