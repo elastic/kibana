@@ -11,6 +11,7 @@ import { alertOriginSchema } from '@kbn/investigation-shared';
 import { ALERT_RULE_CATEGORY } from '@kbn/rule-data-utils/src/default_alerts_as_data';
 import React from 'react';
 import { useParams } from 'react-router-dom';
+import { useAsync } from 'react-use';
 import { paths } from '../../../common/paths';
 import { useFetchAlert } from '../../hooks/use_get_alert_details';
 import { useFetchInvestigation } from '../../hooks/use_get_investigation_details';
@@ -22,11 +23,16 @@ export function InvestigationDetailsPage() {
   const {
     core: {
       http: { basePath },
+      security,
     },
     dependencies: {
       start: { observabilityShared },
     },
   } = useKibana();
+
+  const user = useAsync(() => {
+    return security.authc.getCurrentUser();
+  }, [security]);
 
   const { investigationId } = useParams<InvestigationDetailsPathParams>();
 
@@ -43,6 +49,10 @@ export function InvestigationDetailsPage() {
     : undefined;
 
   const { data: alertDetails } = useFetchAlert({ id: alertId });
+
+  if (!user.value) {
+    return null;
+  }
 
   if (isFetchInvestigationLoading) {
     return (
@@ -106,7 +116,7 @@ export function InvestigationDetailsPage() {
         ],
       }}
     >
-      <InvestigationDetails investigationId={investigationId} />
+      <InvestigationDetails user={user.value} investigationId={investigationId} />
     </ObservabilityPageTemplate>
   );
 }

@@ -8,7 +8,6 @@ import datemath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import React from 'react';
-import useAsync from 'react-use/lib/useAsync';
 import { AddObservationUI } from '../../../../components/add_observation_ui';
 import { InvestigateSearchBar } from '../../../../components/investigate_search_bar';
 import { InvestigateWidgetGrid } from '../../../../components/investigate_widget_grid';
@@ -16,7 +15,7 @@ import { useFetchInvestigation } from '../../../../hooks/use_fetch_investigation
 import { useKibana } from '../../../../hooks/use_kibana';
 import { InvestigationNotes } from '../investigation_notes/investigation_notes';
 
-function InvestigationDetailsWithUser({
+export function InvestigationDetails({
   user,
   investigationId,
 }: {
@@ -104,18 +103,4 @@ function InvestigationDetailsWithUser({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-}
-
-export function InvestigationDetails({ investigationId }: { investigationId: string }) {
-  const {
-    core: { security },
-  } = useKibana();
-
-  const user = useAsync(() => {
-    return security.authc.getCurrentUser();
-  }, [security]);
-
-  return user.value ? (
-    <InvestigationDetailsWithUser user={user.value} investigationId={investigationId} />
-  ) : null;
 }
