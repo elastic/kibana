@@ -222,9 +222,17 @@ export class MonacoEditorActionsProvider {
     const { toasts } = notifications;
     try {
       const allRequests = await this.getRequests();
-      // if any request doesnt have a method then we gonna treat it as a non-valid
-      // request
-      const requests = allRequests.filter((request) => request.method);
+      const selectedRequests = await this.getSelectedParsedRequests();
+
+      const requests = allRequests
+        // if any request doesnt have a method then we gonna treat it as a non-valid
+        // request
+        .filter((request) => request.method)
+        // map the requests to the original line number
+        .map((request, index) => ({
+          ...request,
+          lineNumber: selectedRequests[index].startLineNumber,
+        }));
 
       // If we do have requests but none have methods we are not sending the request
       if (allRequests.length > 0 && !requests.length) {
