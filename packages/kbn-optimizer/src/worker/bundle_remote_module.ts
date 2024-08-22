@@ -84,13 +84,13 @@ export class BundleRemoteModule extends Module {
     };
   }
 
-  // source() {
-  //   return `
-  //     __webpack_require__.r(__webpack_exports__);
-  //     var ns = __kbnBundles__.get('${this.remote.bundleType}/${this.remote.bundleId}/${this.req.target}');
-  //     Object.defineProperties(__webpack_exports__, Object.getOwnPropertyDescriptors(ns))
-  //   `;
-  // }
+  source() {
+    return `
+      __webpack_require__.r(__webpack_exports__);
+      var ns = __kbnBundles__.get('${this.remote.bundleType}/${this.remote.bundleId}/${this.req.target}');
+      Object.defineProperties(__webpack_exports__, Object.getOwnPropertyDescriptors(ns))
+    `;
+  }
 
   size() {
     return 42;
