@@ -32,7 +32,6 @@ import {
 } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import {
   LazyDataViewPicker,
   LazyFieldPicker,
@@ -145,10 +144,6 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   /** TODO: These should not be props */
   services: { dataViews: dataViewService },
 }: ControlEditorProps<State>) => {
-  const [defaultGrow, defaultWidth] = useBatchedPublishingSubjects(
-    controlGroupApi.grow,
-    controlGroupApi.width
-  );
   const [editorState, setEditorState] = useState<Partial<State>>(initialState);
   const [defaultPanelTitle, setDefaultPanelTitle] = useState<string>(
     initialDefaultPanelTitle ?? initialState.fieldName ?? ''
@@ -368,7 +363,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                   color="primary"
                   legend={DataControlEditorStrings.management.controlWidth.getWidthSwitchLegend()}
                   options={CONTROL_WIDTH_OPTIONS}
-                  idSelected={editorState.width ?? defaultWidth ?? DEFAULT_CONTROL_WIDTH}
+                  idSelected={editorState.width ?? DEFAULT_CONTROL_WIDTH}
                   onChange={(newWidth: string) =>
                     setEditorState({ ...editorState, width: newWidth as ControlWidth })
                   }
@@ -377,10 +372,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                 <EuiSwitch
                   label={DataControlEditorStrings.manageControl.displaySettings.getGrowSwitchTitle()}
                   color="primary"
-                  checked={
-                    (editorState.grow === undefined ? defaultGrow : editorState.grow) ??
-                    DEFAULT_CONTROL_GROW
-                  }
+                  checked={editorState.grow ?? DEFAULT_CONTROL_GROW}
                   onChange={() => setEditorState({ ...editorState, grow: !editorState.grow })}
                   data-test-subj="control-editor-grow-switch"
                 />

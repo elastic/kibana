@@ -29,7 +29,7 @@ import { NodeType } from './constants';
 
 export const DEFAULT_ASSISTANT_GRAPH_ID = 'Default Security Assistant Graph';
 
-interface GetDefaultAssistantGraphParams {
+export interface GetDefaultAssistantGraphParams {
   agentRunnable: AgentRunnableSequence;
   dataClients?: AssistantDataClients;
   createLlmInstance: () => BaseChatModel;
