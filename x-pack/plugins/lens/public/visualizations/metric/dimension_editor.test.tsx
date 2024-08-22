@@ -136,7 +136,7 @@ describe('dimension editor', () => {
         />
       );
 
-      const colorModeGroup = screen.queryByRole('group', { name: /color mode/i });
+      const colorModeGroup = screen.queryByRole('group', { name: /Color by value/i });
       const staticColorPicker = screen.queryByTestId(SELECTORS.COLOR_PICKER);
 
       const typeColor = (color: string) => {
@@ -170,6 +170,7 @@ describe('dimension editor', () => {
       expect(screen.queryByTestId(SELECTORS.MAX_EDITOR)).not.toBeInTheDocument();
       expect(screen.queryByTestId(SELECTORS.BREAKDOWN_EDITOR)).not.toBeInTheDocument();
     });
+
     it('Color mode switch is shown when the primary metric is numeric', () => {
       const { colorModeGroup } = renderPrimaryMetricEditor();
       expect(colorModeGroup).toBeInTheDocument();

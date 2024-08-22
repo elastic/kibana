@@ -86,7 +86,7 @@ function sampleArgs(): DatatableProps {
 describe('datatable_expression', () => {
   describe('datatable renders', () => {
     test('it renders with the specified data and args', async () => {
-      const { data, args } = sampleArgs();
+      const { data, args, ...rest } = sampleArgs();
       const result = await getDatatable(() => Promise.resolve((() => {}) as FormatFactory)).fn(
         data,
         args,
@@ -96,7 +96,7 @@ describe('datatable_expression', () => {
       expect(result).toEqual({
         type: 'render',
         as: 'lens_datatable_renderer',
-        value: { data, args },
+        value: { data, args, ...rest },
       });
     });
   });
